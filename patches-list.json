@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.9.0-dev.9",
+  "version": "3.9.0",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -19,7 +19,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -119,7 +119,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -148,7 +148,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -176,7 +176,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -205,7 +205,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -261,7 +261,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -321,7 +321,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -398,7 +398,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -462,7 +462,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -491,7 +491,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -520,7 +520,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -552,7 +552,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -611,7 +611,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -639,7 +639,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -728,7 +728,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -757,7 +757,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -785,7 +785,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -813,7 +813,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -841,7 +841,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -869,7 +869,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -897,7 +897,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -925,7 +925,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -953,7 +953,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -981,7 +981,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1009,7 +1009,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1127,7 +1127,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1156,7 +1156,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1556,6 +1556,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1598,7 +1599,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1655,7 +1656,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1683,7 +1684,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1711,7 +1712,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1740,7 +1741,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1769,7 +1770,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1795,7 +1796,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1889,7 +1890,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1949,7 +1950,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2003,7 +2004,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2032,7 +2033,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2060,7 +2061,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2089,7 +2090,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2117,7 +2118,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2145,7 +2146,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2173,7 +2174,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2202,7 +2203,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2230,7 +2231,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2258,7 +2259,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2316,7 +2317,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2345,7 +2346,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2434,7 +2435,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2462,7 +2463,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2491,7 +2492,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2520,7 +2521,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2641,7 +2642,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2671,7 +2672,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2730,7 +2731,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2788,7 +2789,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2912,7 +2913,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3011,7 +3012,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3044,7 +3045,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3076,7 +3077,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3104,7 +3105,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3162,7 +3163,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3223,7 +3224,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3311,7 +3312,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3339,7 +3340,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3368,7 +3369,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3397,7 +3398,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3525,7 +3526,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3557,7 +3558,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3585,7 +3586,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3613,7 +3614,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3641,7 +3642,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3670,7 +3671,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3731,7 +3732,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,

@@ -38,9 +38,9 @@
     <string name="piko_title_native_downloader_toggle">Activer le téléchargeur natif</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">Télécharger automatiquement la résolution vidéo la plus élevée</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Ignorer la boîte de dialogue de sélection et télécharger immédiatement la meilleure résolution disponible pour les vidéos individuelles.</string>
-    <string name="piko_pref_native_downloader_show_download_icon">Afficher l’icône de téléchargement</string>
-    <string name="piko_pref_native_downloader_show_copy_icon">Afficher l’icône de copie</string>
-    <string name="piko_pref_native_downloader_show_variants_icon">Afficher l’icône des variantes</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Afficher l\'icône de téléchargement</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Afficher l\'icône de copie</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Afficher l\'icône des variantes</string>
     <string name="piko_pref_native_downloader_inline_button">Afficher le bouton de téléchargement en ligne</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Ajoute un bouton de téléchargement directement à la barre d\'action de publication</string>
     <string name="piko_pref_native_downloader_alert_title">Télécharger le média</string>
@@ -140,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">Masque la suggestion de recherche dans la section Explorer</string>
     <string name="piko_legacy_share_link">Liens de partage hérités</string>
     <string name="piko_block_redirecting_to_x_lite">Bloquer la redirection vers X Lite</string>
+    <string name="piko_pref_block_update_screen">Bloquer l\'écran de mise à jour</string>
+    <string name="piko_pref_block_update_screen_desc">Bloque l\'affichage de l\'écran de mise à jour \'Cette application n\'est plus à jour\' au lancement</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Drapeaux de fonctionnalités</string>
     <string name="piko_pref_feature_flags">Ajouter des feature flags</string>
@@ -181,9 +183,9 @@
     <string name="piko_pref_hide_badge_nav_bar">Masquer les badges de la barre de navigation</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">Masque les notifications et compteurs des icônes de la barre de navigation</string>
     <string name="piko_pref_hide_post_inline_metrics">Masquer les métriques de la vue intégrée de la publication</string>
-    <string name="piko_pref_hide_post_inline_metrics_desc">Masque les compteurs de J\'aime, republications, etc. dans la vue intégrée</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Masque les j\'aime, les republications, etc dans la vue intégrée</string>
     <string name="piko_pref_hide_post_detailed_metrics">Masquer les métriques de la vue détaillée de la publication</string>
-    <string name="piko_pref_hide_post_detailed_metrics_desc">Masque les compteurs de J\'aime, republications, etc. dans la vue détaillée</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Masque les j\'aime, les republications, etc dans la vue détaillée</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Personnalisation</string>
     <string name="piko_pref_customisation_profiletabs">Onglets du profil à masquer</string>
@@ -374,21 +376,22 @@
 
 AVERTISSEMENT : les jetons exportés sont des informations hautement confidentielles.
 Ne les partagez jamais avec qui que ce soit !
-Si quelqu’un obtient ce jeton, il peut accéder librement à votre compte jusqu’à ce que vous vous déconnectiez de la session.
+Si quelqu'un obtient ce jeton, il peut accéder librement à votre compte jusqu'à ce que vous vous déconnectiez de la session.
 
 Pour plus de détails, veuillez consulter cette page :
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-Il est recommandé de la lire avant d’utiliser cette fonctionnalité. Elle contient des informations importantes, notamment sur la manière d’importer des jetons."</string>
+
+Il est recommandé de la lire avant d'utiliser cette fonctionnalité. Elle contient des informations importantes, notamment sur la manière d'importer des jetons."</string>
     <string name="piko_login_token_select_account">Sélectionnez un compte:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Copier dans le presse-papiers</string>
     <string name="piko_login_token_export_save_to_file">Enregistrer dans un fichier</string>
-    <string name="piko_login_token_export_no_accounts_message">Info : Vous n’êtes connecté à aucun compte. Pour exporter des jetons, veuillez d’abord vous connecter à un compte.</string>
+    <string name="piko_login_token_export_no_accounts_message">Info : Vous n\'êtes connecté à aucun compte. Pour exporter des jetons, veuillez d\'abord vous connecter à un compte.</string>
     <string name="piko_login_token_import_token_button_text">Connexion via jeton JSON</string>
     <string name="piko_login_token_import_from_text">Importer à partir du texte</string>
     <string name="piko_login_token_import_from_file">Importer à partir d\'un fichier</string>
     <string name="piko_login_token_import_about">À propos de cette fonctionnalité (Ouvrir le site web)</string>
     <string name="piko_login_token_import_success_reopen_required">Rouvrez l\'application</string>
-    <string name="piko_login_token_import_failed_missing_info">Erreur : \"nom d’utilisateur\", \"jeton\" ou \"secret\" est manquant</string>
+    <string name="piko_login_token_import_failed_missing_info">Erreur : \"nom d\'utilisateur\", \"jeton\" ou \"secret\" est manquant</string>
     <string name="piko_login_token_import_failed_already_exist">Impossible d\'ajouter le compte (il existe peut-être déjà)</string>
     <string name="piko_ok">OK</string>
     <string name="piko_cancel">Annuler</string>

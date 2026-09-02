@@ -140,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">Menyembunyikan saran pencarian di bagian jelajahi</string>
     <string name="piko_legacy_share_link">Tautan berbagi versi lama</string>
     <string name="piko_block_redirecting_to_x_lite">Blokir pengalihan ke X Lite</string>
+    <string name="piko_pref_block_update_screen">Blokir halaman pembaruan</string>
+    <string name="piko_pref_block_update_screen_desc">Memblokir tampilan halaman pembaruan \'Aplikasi ini sudah kedaluwarsa\' saat aplikasi dibuka</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Fitur flag</string>
     <string name="piko_pref_feature_flags">Tambahkan fitur flag</string>

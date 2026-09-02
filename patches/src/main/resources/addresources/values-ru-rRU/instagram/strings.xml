@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Открывать ссылки во внешнем браузере</string>
     <string name="piko_open_links_externally_desc">Открывать ссылки во внешнем браузере вместо встроенного браузера приложения</string>
     <string name="piko_sanitize_share_links">Очищать ссылки при отправке</string>
+    <string name="piko_custom_sharing_domain">Пользовательский домен для обмена</string>
+    <string name="piko_custom_sharing_domain_desc">Домен, используемый при отправке ссылок</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Режим невидимки</string>
     <string name="piko_view_stories_anonymously">Смотреть истории анонимно</string>
@@ -84,12 +86,14 @@
     <string name="piko_vsm_no_mentions">В этой истории нет упоминаний</string>
     <string name="piko_disable_story_flipping">Отключить перелистывание историй</string>
     <string name="piko_disable_story_flipping_desc">Отключает автоматическое перелистывание к следующей истории</string>
+    <string name="piko_loop_story">Зацикливать историю</string>
+    <string name="piko_loop_story_desc">Повторно воспроизводит текущую историю после её завершения</string>
     <string name="piko_disable_video_autoplay">Отключить автозапуск видео</string>
     <string name="piko_stories_audio_autoplay">Автозапуск звука в историях</string>
     <string name="piko_customise_story_timestamp">Настроить отметку времени истории</string>
     <string name="piko_customise_story_timestamp_desc">Настроить отображение времени публикации истории</string>
     <string name="piko_improve_image_viewing">Улучшить качество отображения контента</string>
-    <string name="piko_improve_image_viewing_desc">Загружает контент в максимальном качестве с сервера</string>
+    <string name="piko_improve_image_viewing_desc">Загружает изображения в максимальном разрешении с сервера. Может снизить производительность, увеличить размер данных приложения или привести к переключению на старый интерфейс</string>
     <string name="piko_hide_reshare_button">Скрыть кнопку «Репост»</string>
     <string name="piko_copy_comment">Скопировать комментарий</string>
     <string name="piko_copy_comment_desc">Добавляет кнопку для копирования комментариев в публикациях и Reels</string>
@@ -171,6 +175,10 @@
     <string name="piko_category_about">Информация</string>
     <string name="piko_export_pref">Экспорт настроек Piko</string>
     <string name="piko_import_pref">Импорт настроек Piko</string>
+    <string name="piko_reset_pref">Сбросить настройки Piko</string>
+    <string name="piko_reset_pref_confirm">Сбросить настройки Piko?</string>
+    <string name="piko_reset_pref_success">Настройки Piko сброшены</string>
+    <string name="piko_reset_pref_failed">Не удалось сбросить настройки Piko</string>
     <string name="piko_app_version">Версия приложения: %s</string>
     <string name="piko_patch_version">Версия патча: %s</string>
     <string name="piko_patch_info_title">Информация о патчах</string>
@@ -292,4 +300,40 @@
     <string name="piko_filter_story_maximum_item_count">Макс. количество элементов в истории</string>
     <string name="piko_filter_story_maximum_item_count_desc">Истории с более чем X элементами будут скрыты (по умолч. 9999)</string>
     <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Открыть в Instagram</string>
+    <string name="piko_open_voice_with_player">Открыть в аудиоплеере</string>
+    <string name="piko_save_deleted_messages">Сохранять удалённые сообщения</string>
+    <string name="piko_save_deleted_messages_desc">Локально сохраняет входящие сообщения при их поступлении с сервера. Отмечает сообщения как удалённые при их отмене, чтобы вы могли просмотреть их даже после удаления отправителем.</string>
+    <string name="piko_view_deleted_messages">Просмотреть удалённые сообщения</string>
+    <string name="piko_deleted_in_chat">Удалено в этом чате</string>
+    <string name="piko_all_deleted_messages">Все удалённые сообщения</string>
+    <string name="piko_clear">Очистить</string>
+    <string name="piko_clear_chat_confirm">Очистить удалённые сообщения для этого чата?</string>
+    <string name="piko_clear_all_confirm">Очистить ВСЕ сохранённые удалённые сообщения?</string>
+    <string name="piko_no_deleted_messages">Удалённые сообщения пока не перехвачены.\nВключите функцию, и сообщения будут сохраняться по мере поступления.</string>
+    <string name="piko_delete_saved_confirm">Удалить это сохранённое сообщение?</string>
+    <string name="piko_delete">Удалить</string>
+    <string name="piko_unknown">Неизвестно</string>
+    <string name="piko_tap_to_view">нажмите, чтобы просмотреть</string>
+    <string name="piko_media_expired">срок действия ссылки истёк</string>
+    <string name="piko_media_not_available">медиафайлы недоступны</string>
+    <string name="piko_deleted_a_message">%s удалил(а) сообщение</string>
+    <string name="piko_someone">Кто-то</string>
+    <string name="piko_deleted_messages_channel">Удалённые сообщения</string>
+    <string name="piko_deleted_messages_channel_desc">Уведомляет, когда полученное сообщение отменяется</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s удалено]</string>
+    <string name="piko_media_deleted_generic">[удалено]</string>
+    <string name="piko_media_unknown">медиа</string>
+    <string name="piko_media_photo">фото</string>
+    <string name="piko_media_disappearing_photo">исчезающее фото</string>
+    <string name="piko_media_video">видео</string>
+    <string name="piko_media_voice">голосовое сообщение</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">история</string>
+    <string name="piko_media_post">публикация</string>
+    <string name="piko_media_like">лайк</string>
+    <string name="piko_media_link">ссылка</string>
+    <string name="piko_media_activity">активность</string>
 </resources>

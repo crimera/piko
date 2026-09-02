@@ -93,7 +93,6 @@
     <string name="piko_customise_story_timestamp">Sesuaikan stempel waktu cerita</string>
     <string name="piko_customise_story_timestamp_desc">Sesuaikan stempel waktu yang menunjukkan kapan cerita diposting</string>
     <string name="piko_improve_image_viewing">Tingkatkan tampilan gambar</string>
-    <string name="piko_improve_image_viewing_desc">Mengambil gambar resolusi maksimum dari server</string>
     <string name="piko_hide_reshare_button">Sembunyikan tombol bagikan ulang</string>
     <string name="piko_copy_comment">Salin komentar</string>
     <string name="piko_copy_comment_desc">Menambahkan tombol untuk menyalin komentar pada postingan dan reel</string>
@@ -310,7 +309,7 @@
     <string name="piko_clear">Bersihkan</string>
     <string name="piko_clear_chat_confirm">Bersihkan pesan yang telah dihapus dari obrolan ini?</string>
     <string name="piko_clear_all_confirm">Bersihkan SEMUA pesan yang telah dihapus dan disimpan?</string>
-    <string name="piko_no_deleted_messages">Belum ada pesan yang dihapus yang terrsimpan.\nAktifkan fitur ini dan pesan akan disimpan begitu diterima.</string>
+    <string name="piko_no_deleted_messages">Belum ada pesan yang dihapus yang tersimpan.\nAktifkan fitur ini dan pesan akan disimpan begitu diterima.</string>
     <string name="piko_delete_saved_confirm">Hapus pesan yang tersimpan ini?</string>
     <string name="piko_delete">Hapus</string>
     <string name="piko_unknown">Tak diketahui</string>

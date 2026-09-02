@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Apri collegamenti esternamente</string>
     <string name="piko_open_links_externally_desc">Apri link nel browser esterno invece che nel browser in-app</string>
     <string name="piko_sanitize_share_links">Ripulisci il link di condivisione</string>
+    <string name="piko_custom_sharing_domain">Dominio di condivisione personalizzato</string>
+    <string name="piko_custom_sharing_domain_desc">Il dominio da usare quando condividi i link</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Fantasma</string>
     <string name="piko_view_stories_anonymously">Vedi le storie anonimamente</string>
@@ -49,6 +51,9 @@
     <string name="piko_limit_following_feed">Limita il feed ai profili seguiti</string>
     <string name="piko_limit_following_feed_desc">Filtra la home per visualizzare solo il contenuto dai profili che segui.</string>
     <string name="piko_disable_reels_scrolling">Disabilita Scorrimento Reels</string>
+    <string name="piko_disable_reels_scrolling_desc">Disabilita il comportamento di scroll infinito nei Reel di Instagram, impedendo lo scorrimento verso il Reel successivo. Nota: su un\'installazione pulita, l\'animazione \'Suggerimento\' può apparire ma si fermerà da sola dopo pochi secondi.</string>
+    <string name="piko_disable_swipe_to_create">Disabilita lo scorrimento per creare</string>
+    <string name="piko_disable_swipe_to_create_desc">Impedisce di aprire la schermata di creazione scorrendo a destra sulla scheda Home.</string>
     <string name="piko_hide_stories_tray">Nascondi il riquadro delle storie</string>
     <string name="piko_hide_stories_tray_desc">Nascondi il riquadro delle storie dal feed principale</string>
     <string name="piko_hide_notes_tray">Nascondi il riquadro delle note</string>
@@ -61,11 +66,15 @@
     <string name="piko_disable_double_tap_to_like">Disabilita il doppio tocco per mettere like</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Varie</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disabilita analytics</string>
     <string name="piko_delete_analytics_cache">Elimina la cache analytics</string>
+    <string name="piko_disable_analytics_desc">Blocca gli analytics che vengono inviati ai server Instagram/Facebook.</string>
     <string name="piko_disable_discover_people">Disabilita scopri le persone</string>
     <string name="piko_disable_discover_people_desc">Disabilita la sezione scopri le persone sul profilo utente</string>
     <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>
+    <string name="piko_follow_back_indicator_desc">Aggiunge un indicatore di follow a vicenda nella pagina di profilo e mostra uno stato dettagliato di stato di amicizia al click</string>
     <string name="piko_fbi_color_indicator">Abilita indicatore di stato dell\'amicizia colorato</string>
     <string name="piko_fbi_color_indicator_desc">L\'indicatore dello stato di amicizia deve essere abilitato</string>
     <string name="piko_fbi_follows_you">Ti segue</string>
@@ -77,12 +86,14 @@
     <string name="piko_vsm_no_mentions">Nessuna menzione in questa storia</string>
     <string name="piko_disable_story_flipping">Disabilita scorrimento delle storie</string>
     <string name="piko_disable_story_flipping_desc">Disabilita scorrimento automatico alla storia successiva</string>
+    <string name="piko_loop_story">Storia in loop</string>
+    <string name="piko_loop_story_desc">Riproduci la storia corrente quando finisce</string>
     <string name="piko_disable_video_autoplay">Disabilita la riproduzione automatica dei video</string>
     <string name="piko_stories_audio_autoplay">Riproduzione automatica audio nelle storie</string>
     <string name="piko_customise_story_timestamp">Personalizza timestamp della storia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizza il timestamp che mostra quando la storia è stata pubblicata</string>
     <string name="piko_improve_image_viewing">Migliora la visualizzazione delle immagini</string>
-    <string name="piko_improve_image_viewing_desc">Recupera immagini alla massima risoluzione dal server</string>
+    <string name="piko_improve_image_viewing_desc">Recupera le immagini di massima risoluzione dal server. Può ridurre le prestazioni, aumentare la dimensione dei dati delle app o far passare l\'applicazione a un layout più vecchio</string>
     <string name="piko_hide_reshare_button">Nascondi pulsante di ricondivisione</string>
     <string name="piko_copy_comment">Copia commento</string>
     <string name="piko_copy_comment_desc">Aggiunge un pulsante per copiare i commenti sui post e sui reels</string>
@@ -94,6 +105,11 @@
     <string name="piko_copy_full_name">Copia il nome completo</string>
     <string name="piko_copy_user_id">Copia id utente</string>
     <string name="piko_copy_bio">Copia la bio</string>
+    <string name="piko_view_profile_picture">Vedi immagine del profilo</string>
+    <string name="piko_copy_profile_link">Copia link profilo</string>
+    <string name="piko_share_this_profile">Condividi questo profilo</string>
+    <string name="piko_copy_links_from_bio">Copia link dalla bio</string>
+    <string name="piko_no_links_in_bio">Nessun link in questa bio</string>
     <string name="piko_download_profile_picture">Scarica immagine del profilo</string>
     <string name="piko_copied">Copiato</string>
     <string name="piko_more_profile_options">Altre opzioni del profilo</string>
@@ -103,7 +119,11 @@
     <string name="piko_customise_story_ring_size">Personalizza dimensione cerchio delle storie</string>
     <string name="piko_customise_story_ring_size_desc">Cambia la dimensione del cerchio delle storie in percentuale (Predefinito: 100)</string>
     <!-- DM Section -->
+    <string name="piko_category_dm">DM</string>
+    <string name="piko_unlimited_replays">Rendi permanenti i contenuti temporanei</string>
     <string name="piko_unlimited_replays_desc">Cambia la visualizzazione non scaduta una volta, visualizza due volte i media per la visualizzazione permanente</string>
+    <string name="piko_enable_mark_chat_as_read">Abilita l\'opzione per contrassegnare la chat come letta</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Ottieni l\'opzione, premendo a lungo la chat, di contrassegnarla come letta</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Scarica file multimediali</string>
     <string name="piko_enable_download">Abilita download</string>
@@ -128,6 +148,9 @@
     <string name="piko_download_set_path_success">Cartella di download aggiornata!</string>
     <string name="piko_download_set_path_failed">Impossibile salvare la cartella di download</string>
     <string name="piko_download_choose_folder">Scegli una cartella di download per continuare</string>
+    <string name="piko_download_choose_folder_failed">Impossibile aprire il selettore della cartella</string>
+    <string name="piko_download_grant_permission">Scegli una cartella di download per continuare</string>
+    <string name="piko_download_grant_permission_failed">Impossibile ottenere autorizzazioni per il selettore della cartella</string>
     <string name="piko_download_with_external_downloader">Scarica con downloader esterno</string>
     <string name="piko_external_downloader_package_name">Nome del pacchetto del downloader esterno</string>
     <string name="piko_external_downloader_package_name_not_found">Nome del pacchetto del downloader esterno non trovato</string>
@@ -152,6 +175,10 @@
     <string name="piko_category_about">Informazioni</string>
     <string name="piko_export_pref">Esporta preferenze Piko</string>
     <string name="piko_import_pref">Importa preferenze Piko</string>
+    <string name="piko_reset_pref">Ripristina impostazioni Piko</string>
+    <string name="piko_reset_pref_confirm">Ripristinare impostazioni Piko?</string>
+    <string name="piko_reset_pref_success">Ripristino impostazioni Piko</string>
+    <string name="piko_reset_pref_failed">Impossibile ripristinare le impostazioni Piko</string>
     <string name="piko_app_version">Versione dell\'app: %s</string>
     <string name="piko_patch_version">Versione patch: %s</string>
     <string name="piko_patch_info_title">Informazioni patch</string>
@@ -186,6 +213,8 @@
     <string name="piko_array_detailed_timestamp">Timestamp dettagliato (giorno/mese/data/ora/minuto/secondo)</string>
     <string name="piko_array_post_time">Ora del post (ora/minuto/secondo)</string>
     <string name="piko_array_time_left">Tempo rimanente (ora/minuto/secondo a sinistra)</string>
+    <string name="piko_array_recmd_flag_state_enable">Abilita</string>
+    <string name="piko_array_recmd_flag_state_disable">Disabilita</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Benvenuto su Piko</string>
     <string name="piko_welcome_message">Per migliorare la tua esperienza con Piko, consulta le impostazioni Piko e modifica le tue preferenze</string>
@@ -196,11 +225,37 @@
     <string name="piko_category_action_bar">Personalizzazione barra di azione</string>
     <string name="piko_action_bar_button_settings_icon">Icona Impostazioni</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Icona modalità fantasma</string>
+    <string name="piko_action_bar_button_profile_info_icon">Icona informazioni profilo</string>
     <string name="piko_settings_on_action_bar">Impostazioni Piko sulla barra delle azioni</string>
     <string name="piko_settings_on_action_bar_desc">Sposta l\'apertura delle impostazioni Piko nella barra delle azioni principale del feed</string>
     <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Opzioni consigliate</string>
+    <string name="piko_category_rec_flags_desc">Opzioni per sviluppatori suggerite dalla comunità</string>
+    <string name="piko_rec_flags_read_error">Impossibile leggere il file di cache delle opzioni</string>
+    <string name="piko_rec_flags_no_file">File delle opzioni consigliate non trovato</string>
+    <string name="piko_rec_flags_refresh_file">Aggiorna le opzioni</string>
+    <string name="piko_rec_flags_last_modified_at">Ultima modifica: %s</string>
     <!-- Story filters -->
+    <string name="piko_category_filter_content">Filtra contenuto</string>
+    <string name="piko_filter_story">Filtra Storia</string>
+    <string name="piko_filter_story_types_to_hide">Tipi di storie da nascondere</string>
+    <string name="piko_reel_type_ads_reel">Reel pubblicitari</string>
+    <string name="piko_reel_type_ar_effect_preview">Anteprima effetto Ar</string>
+    <string name="piko_reel_type_archive_friend_reel">Archivia reel amici</string>
+    <string name="piko_reel_type_election_reel">Reel elettorali</string>
+    <string name="piko_reel_type_end_of_year">Fine dell\'anno</string>
+    <string name="piko_reel_type_group_mention">Menzioni di gruppo</string>
+    <string name="piko_reel_type_group_reel">Reel di gruppo</string>
+    <string name="piko_reel_type_highlight_reel">Evidenzia reel</string>
+    <string name="piko_reel_type_media_reshare">Ricondivisione media</string>
+    <string name="piko_reel_type_memory_reel">Reel ricordi</string>
+    <string name="piko_reel_type_my_week_reel">Reel della mia settimana</string>
     <string name="piko_reel_type_private_story">Storia privata</string>
+    <string name="piko_reel_type_suggested_creator_reel">Reel creator suggerito</string>
+    <string name="piko_reel_type_suggested_user">Utente suggerito</string>
+    <string name="piko_reel_type_suggested_user_reel">Reel utente suggerito</string>
+    <string name="piko_reel_type_user_reel">Reel degli utenti</string>
+    <string name="piko_filter_story_user_types_to_hide">Tipi di utenti da nascondere</string>
     <string name="piko_user_type_unverified">Utenti non verificati</string>
     <string name="piko_user_type_verified">Utenti verificati</string>
     <string name="piko_filter_story_minimum_item_count">Oggetti minimi della storia</string>
@@ -208,4 +263,40 @@
     <string name="piko_filter_story_maximum_item_count">Oggetti minimi della storia</string>
     <string name="piko_filter_story_maximum_item_count_desc">Le storie che hanno più di x elementi saranno nascoste (predefinito 9999)</string>
     <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Apri su Instagram</string>
+    <string name="piko_open_voice_with_player">Apri con il lettore musicale</string>
+    <string name="piko_save_deleted_messages">Salva messaggi eliminati</string>
+    <string name="piko_save_deleted_messages_desc">Cattura i DM in arrivo localmente mentre arrivano dal server. Contrassegna i messaggi come eliminati quando cancellati, in modo da poterli visualizzare anche dopo che il mittente li elimina.</string>
+    <string name="piko_view_deleted_messages">Vedi messaggi eliminati</string>
+    <string name="piko_deleted_in_chat">Eliminato in questa chat</string>
+    <string name="piko_all_deleted_messages">Tutti i messaggi eliminati</string>
+    <string name="piko_clear">Cancella</string>
+    <string name="piko_clear_chat_confirm">Cancellare i messaggi eliminati per questa chat?</string>
+    <string name="piko_clear_all_confirm">Eliminare tutti i messaggi eliminati salvati?</string>
+    <string name="piko_no_deleted_messages">Nessun messaggio ancora eliminato.\nAbilita la funzione e i messaggi verranno salvati al loro arrivo.</string>
+    <string name="piko_delete_saved_confirm">Eliminare questo messaggio salvato?</string>
+    <string name="piko_delete">Elimina</string>
+    <string name="piko_unknown">Sconosciuto</string>
+    <string name="piko_tap_to_view">tocca per visualizzare</string>
+    <string name="piko_media_expired">link scaduto</string>
+    <string name="piko_media_not_available">media non disponibile</string>
+    <string name="piko_deleted_a_message">%s ha eliminato un messaggio</string>
+    <string name="piko_someone">Qualcuno</string>
+    <string name="piko_deleted_messages_channel">Messaggi eliminati</string>
+    <string name="piko_deleted_messages_channel_desc">Notifica quando un messaggio ricevuto viene eliminato</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s eliminato]</string>
+    <string name="piko_media_deleted_generic">[eliminato]</string>
+    <string name="piko_media_unknown">media</string>
+    <string name="piko_media_photo">foto</string>
+    <string name="piko_media_disappearing_photo">foto a scomparsa</string>
+    <string name="piko_media_video">video</string>
+    <string name="piko_media_voice">messaggio vocale</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">storia</string>
+    <string name="piko_media_post">post</string>
+    <string name="piko_media_like">like</string>
+    <string name="piko_media_link">link</string>
+    <string name="piko_media_activity">attività</string>
 </resources>

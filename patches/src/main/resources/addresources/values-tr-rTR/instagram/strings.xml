@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Bağlantıları harici olarak aç</string>
     <string name="piko_open_links_externally_desc">Bağlantıları uygulama içi tarayıcı yerine harici tarayıcıda açar</string>
     <string name="piko_sanitize_share_links">Paylaşım bağlantılarını temizle</string>
+    <string name="piko_custom_sharing_domain">Özel paylaşım alanı adı</string>
+    <string name="piko_custom_sharing_domain_desc">Bağlantıları paylaşırken kullanılacak alanı adı</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Görünmez mod</string>
     <string name="piko_view_stories_anonymously">Hikayeleri anonim olarak görüntüle</string>
@@ -84,12 +86,14 @@
     <string name="piko_vsm_no_mentions">Bu hikayede bahsetme yok</string>
     <string name="piko_disable_story_flipping">Hikaye geçişini kapat</string>
     <string name="piko_disable_story_flipping_desc">Sonraki hikayeye otomatik geçişi devre dışı bırakır</string>
+    <string name="piko_loop_story">Hikayeyi döngüye al</string>
+    <string name="piko_loop_story_desc">Mevcut hikaye bittiğinde yeniden oynatır</string>
     <string name="piko_disable_video_autoplay">Video otomatik oynatmayı kapat</string>
     <string name="piko_stories_audio_autoplay">Hikaye sesini otomatik oynat</string>
     <string name="piko_customise_story_timestamp">Hikaye zaman damgasını özelleştir</string>
     <string name="piko_customise_story_timestamp_desc">Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştir</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
-    <string name="piko_improve_image_viewing_desc">Sunucudan maksimum çözünürlüklü görüntüleri çeker</string>
+    <string name="piko_improve_image_viewing_desc">Sunucudan en yüksek çözünürlüklü görselleri çeker. Performansı düşürebilir, uygulama veri boyutunu artırabilir veya uygulamanın eski bir düzene geçmesine neden olabilir</string>
     <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
     <string name="piko_copy_comment">Yorumu kopyala</string>
     <string name="piko_copy_comment_desc">Gönderi ve Reels videolarındaki yorumları kopyalamak için bir buton ekler</string>
@@ -171,6 +175,10 @@
     <string name="piko_category_about">Hakkında</string>
     <string name="piko_export_pref">Piko tercihlerini dışa aktar</string>
     <string name="piko_import_pref">Piko tercihlerini içe aktar</string>
+    <string name="piko_reset_pref">Piko ayarlarını sıfırla</string>
+    <string name="piko_reset_pref_confirm">Piko ayarları sıfırlansın mı?</string>
+    <string name="piko_reset_pref_success">Piko ayarları sıfırlandı</string>
+    <string name="piko_reset_pref_failed">Piko ayarları sıfırlanamadı</string>
     <string name="piko_app_version">Uygulama sürümü: %s</string>
     <string name="piko_patch_version">Yama sürümü: %s</string>
     <string name="piko_patch_info_title">Yama bilgisi</string>
@@ -292,4 +300,40 @@
     <string name="piko_filter_story_maximum_item_count">Maksimum hikaye öğesi sayısı</string>
     <string name="piko_filter_story_maximum_item_count_desc">x\'ten fazla öğe içeren hikayeler gizlenecektir (varsayılan 9999).</string>
     <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Instagram\'da aç</string>
+    <string name="piko_open_voice_with_player">Müzik çalar ile aç</string>
+    <string name="piko_save_deleted_messages">Silinen mesajları kaydet</string>
+    <string name="piko_save_deleted_messages_desc">Gelen DM\'leri sunucudan ulaştığı anda yerel olarak kaydeder. Gönderen kişi silese bile görebilmeniz için mesajları geri çekildiğinde silindi olarak işaretler.</string>
+    <string name="piko_view_deleted_messages">Silinen mesajları görüntüle</string>
+    <string name="piko_deleted_in_chat">Bu sohbettekiler silindi</string>
+    <string name="piko_all_deleted_messages">Tüm silinen mesajlar</string>
+    <string name="piko_clear">Temizle</string>
+    <string name="piko_clear_chat_confirm">Bu sohbetin silinen mesajları temizlensin mi?</string>
+    <string name="piko_clear_all_confirm">Kaydedilen TÜM silinen mesajlar temizlensin mi?</string>
+    <string name="piko_no_deleted_messages">Henüz silinen bir mesaj yakalanmadı.\nÖzelliği etkinleştirdiğinizde mesajlar geldikçe kaydedilecektir.</string>
+    <string name="piko_delete_saved_confirm">Bu kaydedilen mesaj silinsin mi?</string>
+    <string name="piko_delete">Sil</string>
+    <string name="piko_unknown">Bilinmiyor</string>
+    <string name="piko_tap_to_view">görüntülemek için dokun</string>
+    <string name="piko_media_expired">bağlantının süresi doldu</string>
+    <string name="piko_media_not_available">medya kullanılamıyor</string>
+    <string name="piko_deleted_a_message">%s bir mesaj sildi</string>
+    <string name="piko_someone">Biri</string>
+    <string name="piko_deleted_messages_channel">Silinen mesajlar</string>
+    <string name="piko_deleted_messages_channel_desc">Alınan bir mesaj geri çekildiğinde bildirim gönderir</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s silindi]</string>
+    <string name="piko_media_deleted_generic">[silindi]</string>
+    <string name="piko_media_unknown">medya</string>
+    <string name="piko_media_photo">fotoğraf</string>
+    <string name="piko_media_disappearing_photo">kaybolan fotoğraf</string>
+    <string name="piko_media_video">video</string>
+    <string name="piko_media_voice">sesli mesaj</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">hikaye</string>
+    <string name="piko_media_post">gönderi</string>
+    <string name="piko_media_like">beğeni</string>
+    <string name="piko_media_link">bağlantı</string>
+    <string name="piko_media_activity">aktivite</string>
 </resources>

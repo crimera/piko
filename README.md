@@ -1,16 +1,14 @@
 <div align="center">
 
-<p align="center">
-    <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
-</p>
+<img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
 
-<h1 align="center">
+<h1>
     Morphe patches focused on Twitter/X & Instagram<br>
     <a href="https://t.me/pikopatches">
-        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"/>
     </a>
     <a href="https://crowdin.com/project/piko">
-        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white" alt="Crowdin"/>
     </a>
 </h1>
 
@@ -18,39 +16,36 @@
 
 ## 🕹️ Usage
 
-> Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
+Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
 
-**Morphe Manager**
+### Morphe Manager
 
-<details>
-<summary>Show steps</summary>
+Tap the link to add Piko as a patch source in Morphe Manager:
 
-Use the deep link to add Piko as a patch source in Morphe Manager:
-
-[➕ Add Piko to Morphe](https://morphe.software/add-source?github=crimera/piko)
+[**➕ Add Piko to Morphe**](https://morphe.software/add-source?github=crimera/piko)
 
 Then patch Twitter/X or Instagram:
 1. Tap X or Instagram app icon in Morphe
 2. Download original APKM file from ApkMirror. Do _not_ unspilt or modify the file, Morphe patches APKM directly
 3. Wait for patching to complete, install
 
-
-
-</details>
-
-**Morphe CLI**
+### Morphe CLI
 
 ```sh
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
-
-**X-Shim**
+### X-Shim
 
 Starting `12.5.0-release.0` **you need not** apply X-Shim along with Piko patches. X login and XChat will work fine without X-Shim patches.
 
+<details>
+
+<summary>Open old information</summary>
+
 <del>
-To patch with Twitter/X version 11.88 and above, you must include patches from another repo/project called [Piko-Shim](https://gitlab.com/inotia00/piko-shim/) developed by [@inotia00](https://github.com/inotia00)
+
+To patch with Twitter/X version 11.88 to 12.4, you must include patches from another repo/project called [X-Shim](https://gitlab.com/inotia00/x-shim) developed by [@inotia00](https://github.com/inotia00)
 
 [➕ Add X-Shim to Morphe](https://morphe.software/add-source?gitlab=inotia00/x-shim)
 
@@ -69,17 +64,19 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 
 </del>
 
+</details>
+
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.9.0-dev.9](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.9)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;133 patches total
+> **[v3.9.0](https://github.com/crimera/piko/releases/tag/v3.9.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;133 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 12.17.0-release.0 |
+| 12.19.1-release.0 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |

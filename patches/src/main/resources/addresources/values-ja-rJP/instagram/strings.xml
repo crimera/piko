@@ -92,8 +92,8 @@
     <string name="piko_stories_audio_autoplay">ストーリーズの音声を自動で再生</string>
     <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
     <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
-    <string name="piko_improve_image_viewing">画像表示を改善</string>
-    <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します</string>
+    <string name="piko_improve_image_viewing">画像を高画質で表示</string>
+    <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します。動作が遅くなったり、アプリデータの容量が増えたり、古いレイアウトに切り替わったりする場合があります</string>
     <string name="piko_hide_reshare_button">リシェアボタンを非表示</string>
     <string name="piko_copy_comment">コメントをコピー</string>
     <string name="piko_copy_comment_desc">投稿やリールのコメントをコピーするボタンを追加します</string>
