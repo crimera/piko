@@ -20,6 +20,10 @@ import app.morphe.extension.shared.MarkChatAsReadScope;
 public class Pref {
     private static final int MAX_IMAGE_SIZE = 4096;
 
+    private static String removeLineBreaks(String value) {
+        return value.replace("\r", "").replace("\n", "");
+    }
+
     public static boolean clearAllPreferences() {
         return SharedPref.clearAll();
     }
@@ -60,7 +64,7 @@ public class Pref {
     }
 
     public static String customSharingDomain() {
-        return SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+        return removeLineBreaks(SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN));
     }
 
     public static boolean getTurnOnAllGhostModes() {
@@ -301,7 +305,7 @@ public class Pref {
     }
 
     public static String externalDownloaderPackageName() {
-        return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+        return removeLineBreaks(SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME));
     }
 
     public static Set<String> mainFeedActionBarButtons() {
