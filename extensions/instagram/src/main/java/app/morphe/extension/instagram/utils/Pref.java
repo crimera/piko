@@ -120,10 +120,6 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
     }
 
-    public static boolean storiesAudioAutoplay() {
-        return SharedPref.getBooleanPref(Settings.STORIES_AUDIO_AUTOPLAY);
-    }
-
     public
     static boolean disableStories() {
         return SharedPref.getBooleanPref(Settings.DISABLE_STORIES);
