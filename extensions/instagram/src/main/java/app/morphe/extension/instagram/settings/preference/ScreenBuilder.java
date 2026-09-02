@@ -537,15 +537,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.storiesAudioAutoplay) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_stories_audio_autoplay"),
-                            "",
-                            Settings.STORIES_AUDIO_AUTOPLAY
-                    )
-            );
-        }
         if (SettingsStatus.disableDiscoverPeople) {
             addPreference(
                     helper.switchPreference(

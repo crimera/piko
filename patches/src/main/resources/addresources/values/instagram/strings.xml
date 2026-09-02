@@ -95,7 +95,6 @@
     <string name="piko_loop_story">Loop story</string>
     <string name="piko_loop_story_desc">Replay the current story when it ends</string>
     <string name="piko_disable_video_autoplay">Disable video autoplay</string>
-    <string name="piko_stories_audio_autoplay">Stories audio autoplay</string>
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
     <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
