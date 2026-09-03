@@ -14,7 +14,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import app.morphe.extension.shared.Logger;
 import app.morphe.extension.newx.utils.NewXUtils;
 
 /** Loads small media previews without blocking the UI thread. */
@@ -24,8 +26,10 @@ public final class MediaThumbnailLoader {
     private static final int TARGET_SIZE_PX = 256;
     private static final int CONNECT_TIMEOUT_MILLIS = 6_000;
     private static final int READ_TIMEOUT_MILLIS = 8_000;
+    private static final String LOG_PREFIX = "[PikoNewX][Thumbnail] ";
 
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(3);
+    private static final AtomicInteger NEXT_REQUEST_ID = new AtomicInteger();
     private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
     private static final LruCache<String, Bitmap> CACHE = new LruCache<>(MAX_CACHE_KILOBYTES) {
         @Override
@@ -51,33 +55,96 @@ public final class MediaThumbnailLoader {
             String networkUrl,
             Callback callback
     ) {
-        if (!NewXUtils.isHttpUrl(networkUrl) || callback == null) return;
-
-        Bitmap cached = CACHE.get(networkUrl);
-        if (cached != null) {
-            MAIN_HANDLER.post(() -> callback.onLoaded(cached));
+        if (callback == null) return;
+        if (!NewXUtils.isHttpUrl(networkUrl)) {
+            logInfo("ignored request with invalid network URL: " + describeUrl(networkUrl));
             return;
         }
 
-        EXECUTOR.execute(() -> {
-            Bitmap bitmap = findCachedThumbnail(context, cacheUrl);
-            if (bitmap == null) bitmap = fetch(networkUrl);
-            if (bitmap == null) return;
+        int requestId = NEXT_REQUEST_ID.incrementAndGet();
+        logInfo(
+                "request #" + requestId + " queued network=" + describeUrl(networkUrl) +
+                        " cache=" + describeUrl(cacheUrl) +
+                        " context=" + (context == null ? "none" : context.getClass().getName())
+        );
 
+        Bitmap cached = CACHE.get(networkUrl);
+        if (cached != null && !cached.isRecycled()) {
+            logInfo(
+                    "request #" + requestId + " hit extension memory cache size=" +
+                            dimensions(cached) + " usage=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
+            );
+            MAIN_HANDLER.post(() -> {
+                logInfo("request #" + requestId + " delivered from extension memory cache");
+                callback.onLoaded(cached);
+            });
+            return;
+        }
+        if (cached != null) {
+            CACHE.remove(networkUrl);
+            logInfo("request #" + requestId + " removed recycled extension-cache bitmap");
+        }
+
+        EXECUTOR.execute(() -> {
+            Bitmap bitmap = findCachedThumbnail(context, cacheUrl, requestId);
+            boolean coilCacheHit = bitmap != null;
+            if (bitmap == null) {
+                logInfo("request #" + requestId + " Coil miss; falling back to network");
+                bitmap = fetch(networkUrl, requestId);
+            }
+            if (bitmap == null) {
+                logInfo("request #" + requestId + " failed; no thumbnail available");
+                return;
+            }
+
+            String source = coilCacheHit ? "Coil memory cache" : "network";
             CACHE.put(networkUrl, bitmap);
             Bitmap loaded = bitmap;
-            MAIN_HANDLER.post(() -> callback.onLoaded(loaded));
+            logInfo(
+                    "request #" + requestId + " completed source=" + source +
+                            " size=" + dimensions(loaded) +
+                            " extensionCache=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
+            );
+            MAIN_HANDLER.post(() -> {
+                logInfo("request #" + requestId + " delivered to picker source=" + source);
+                callback.onLoaded(loaded);
+            });
         });
     }
 
-    private static Bitmap findCachedThumbnail(Context context, String cacheUrl) {
-        if (context == null || !NewXUtils.isHttpUrl(cacheUrl)) return null;
+    private static Bitmap findCachedThumbnail(
+            Context context,
+            String cacheUrl,
+            int requestId
+    ) {
+        if (context == null || !NewXUtils.isHttpUrl(cacheUrl)) {
+            logInfo("request #" + requestId + " skipped Coil lookup: no valid cache URL/context");
+            return null;
+        }
 
+        logInfo("request #" + requestId + " Coil lookup start key=" + describeUrl(cacheUrl));
         try {
             Object cached = getCachedThumbnail(context, cacheUrl);
-            if (!(cached instanceof Bitmap bitmap) || bitmap.isRecycled()) return null;
-            return fitToTarget(bitmap);
-        } catch (RuntimeException ignored) {
+            if (!(cached instanceof Bitmap bitmap)) {
+                logInfo(
+                        "request #" + requestId + " Coil lookup miss result=" +
+                                (cached == null ? "null" : cached.getClass().getName())
+                );
+                return null;
+            }
+            if (bitmap.isRecycled()) {
+                logInfo("request #" + requestId + " Coil lookup returned recycled bitmap");
+                return null;
+            }
+
+            Bitmap thumbnail = fitToTarget(bitmap);
+            logInfo(
+                    "request #" + requestId + " Coil lookup hit sourceSize=" + dimensions(bitmap) +
+                            " pickerSize=" + dimensions(thumbnail)
+            );
+            return thumbnail;
+        } catch (RuntimeException | LinkageError exception) {
+            logException("request #" + requestId + " Coil lookup failed; using network fallback", exception);
             return null;
         }
     }
@@ -87,8 +154,9 @@ public final class MediaThumbnailLoader {
         return null;
     }
 
-    private static Bitmap fetch(String url) {
+    private static Bitmap fetch(String url, int requestId) {
         HttpURLConnection connection = null;
+        logInfo("request #" + requestId + " network fetch start url=" + describeUrl(url));
         try {
             connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
@@ -100,17 +168,42 @@ public final class MediaThumbnailLoader {
             int responseCode = connection.getResponseCode();
             if (responseCode < HttpURLConnection.HTTP_OK ||
                     responseCode >= HttpURLConnection.HTTP_MULT_CHOICE) {
+                logInfo("request #" + requestId + " network rejected HTTP " + responseCode);
                 return null;
             }
 
             int contentLength = connection.getContentLength();
-            if (contentLength > MAX_DOWNLOAD_BYTES) return null;
+            if (contentLength > MAX_DOWNLOAD_BYTES) {
+                logInfo(
+                        "request #" + requestId + " network response too large bytes=" +
+                                contentLength
+                );
+                return null;
+            }
 
             try (InputStream input = connection.getInputStream()) {
                 byte[] data = readAtMost(input, contentLength);
-                return data == null ? null : decode(data);
+                if (data == null) {
+                    logInfo("request #" + requestId + " network response could not be read");
+                    return null;
+                }
+
+                Bitmap bitmap = decode(data);
+                if (bitmap == null) {
+                    logInfo(
+                            "request #" + requestId + " network response failed to decode bytes=" +
+                                    data.length
+                    );
+                    return null;
+                }
+                logInfo(
+                        "request #" + requestId + " network decode success bytes=" + data.length +
+                                " size=" + dimensions(bitmap)
+                );
+                return bitmap;
             }
-        } catch (IOException | RuntimeException ignored) {
+        } catch (IOException | RuntimeException exception) {
+            logException("request #" + requestId + " network fetch failed", exception);
             return null;
         } finally {
             if (connection != null) connection.disconnect();
@@ -164,5 +257,23 @@ public final class MediaThumbnailLoader {
             sample *= 2;
         }
         return sample;
+    }
+
+    static String describeUrl(String url) {
+        if (url == null) return "<none>";
+        if (url.length() <= 180) return url;
+        return url.substring(0, 177) + "...";
+    }
+
+    private static String dimensions(Bitmap bitmap) {
+        return bitmap.getWidth() + "x" + bitmap.getHeight();
+    }
+
+    private static void logInfo(String message) {
+        Logger.printInfo(() -> LOG_PREFIX + message);
+    }
+
+    private static void logException(String message, Throwable throwable) {
+        Logger.printException(() -> LOG_PREFIX + message, throwable);
     }
 }
