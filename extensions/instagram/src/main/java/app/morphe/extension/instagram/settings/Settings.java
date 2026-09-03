@@ -74,6 +74,7 @@ public class Settings {
     public static final BooleanSetting ENABLE_DOWNLOAD = new BooleanSetting("enable_download", true);
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false);
+    public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false);
     // Should be kept empty by default as its handled in `StorageUtils.java`
     public static final StringSetting CUSTOM_DOWNLOAD_PATH = new StringSetting("custom_download_path", "");
     public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");

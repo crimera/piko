@@ -241,6 +241,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
+    public static boolean embedDownloadMetadata() {
+        return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
     public static boolean hideNavigationFeed() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_FEED);
     }

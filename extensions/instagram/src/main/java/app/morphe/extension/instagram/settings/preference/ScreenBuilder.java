@@ -687,6 +687,13 @@ public class ScreenBuilder {
         );
 
         addPreference(
+                helper.switchPreference(
+                        str("piko_embed_download_metadata"),
+                        str("piko_embed_download_metadata_desc"),
+                        Settings.EMBED_DOWNLOAD_METADATA
+                )
+        );
+        addPreference(
                 helper.buttonPreference(
                         str("piko_download_set_path"),
                         StorageUtils.getCustomPathForDisplay(),
