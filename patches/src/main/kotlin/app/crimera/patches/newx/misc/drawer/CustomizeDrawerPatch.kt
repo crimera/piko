@@ -103,6 +103,22 @@ private object NewXDrawerSettingsFooterItemFingerprint : Fingerprint(
         ),
 )
 
+/**
+ * GROK PATH: dedicated "Get Grok / Open Grok" button rendered without a title parameter.
+ * Title is resolved inside from drawer_get_grok / drawer_open_grok, so filter by stable ID.
+ */
+private object NewXDrawerGrokButtonFingerprint : Fingerprint(
+    classFingerprint = NewXDrawerContentClassFingerprint,
+    returnType = "V",
+    parameters =
+        listOf(
+            "L",
+            "Lkotlin/jvm/functions/Function1;",
+            "Landroidx/compose/runtime/Composer;",
+            "I",
+        ),
+)
+
 // ALPHA/LEGACY PATH: title-based filtering for rows that still expose localized titles.
 // TODO: Remove this path only when no supported release uses title-based drawer rows.
 private fun MutableMethod.injectDrawerItemGuard(hiddenItems: MultiChoiceSettingDefinition) {
@@ -212,6 +228,7 @@ val customizeNewXDrawerPatch =
                         choice("CREATOR_STUDIO", "piko_newx_drawer_creator_studio"),
                         choice("ANALYTICS", "piko_newx_drawer_analytics"),
                         choice("SWITCH_TO_X", "piko_newx_drawer_switch_to_x"),
+                        choice("GROK", "piko_newx_drawer_grok"),
                         choice("SETTINGS", "piko_newx_drawer_settings"),
                         choice("HELP_CENTER", "piko_newx_drawer_help_center"),
                         choice("FEEDBACK", "piko_newx_drawer_feedback"),
@@ -268,5 +285,15 @@ val customizeNewXDrawerPatch =
                 // ALPHA PATH: read the localized title from the legacy footer signature.
                 footerMatch.method.injectDrawerItemGuard(hiddenItems)
             }
+
+            // GROK PATH: dedicated Get/Open Grok button; skip when the release has no Grok row.
+            val grokMatches = NewXDrawerGrokButtonFingerprint.scopedMatchAllOrNull().orEmpty()
+            if (grokMatches.size > 1) {
+                throw PatchException(
+                    "Expected at most one NewX drawer Grok button, found ${grokMatches.size}: " +
+                        grokMatches.joinToString { it.originalMethod.toString() },
+                )
+            }
+            grokMatches.singleOrNull()?.method?.injectFixedDrawerItemGuard(hiddenItems, "GROK")
         }
     }

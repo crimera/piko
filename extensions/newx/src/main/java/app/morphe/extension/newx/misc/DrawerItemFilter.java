@@ -70,6 +70,7 @@ public final class DrawerItemFilter {
                     "subscriptions_drawer_menu_group_analytics"
             );
             case "SWITCH_TO_X" -> matchesResource(title, "switch_back_to_x_drawer_item_title");
+            case "GROK" -> matchesResource(title, "drawer_get_grok", "drawer_open_grok");
             case "SETTINGS" -> matchesResource(title, "drawer_settings_title");
             case "HELP_CENTER" -> matchesResource(title, "x_lite_help_center", "help_center");
             case "FEEDBACK" -> matchesResource(title, "drawer_feedback_and_issues");

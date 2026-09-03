@@ -132,6 +132,7 @@
     <string name="piko_newx_drawer_creator_studio">Creator Studio</string>
     <string name="piko_newx_drawer_analytics">Analytics</string>
     <string name="piko_newx_drawer_switch_to_x">Switch back to X</string>
+    <string name="piko_newx_drawer_grok">Grok</string>
     <string name="piko_newx_drawer_settings">Settings and privacy</string>
     <string name="piko_newx_drawer_help_center">Help Center</string>
     <string name="piko_newx_drawer_feedback">Feedback and issues</string>
