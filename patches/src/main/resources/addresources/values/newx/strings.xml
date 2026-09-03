@@ -87,8 +87,6 @@
     <string name="piko_newx_browse_tweet_object_title">Browse tweet object</string>
     <string name="piko_newx_browse_tweet_object_summary">Adds a debug option to inspect the tweet object in post menus</string>
 
-    <string name="piko_newx_group_inline_actions_title">Inline actions</string>
-    <string name="piko_newx_group_inline_actions_summary">Customize post actions and media download controls</string>
     <string name="piko_newx_group_inline_download_title">Inline download</string>
     <string name="piko_newx_group_inline_download_summary">Customize the inline media download picker</string>
     <string name="piko_newx_inline_download_button_title">Show inline download button</string>

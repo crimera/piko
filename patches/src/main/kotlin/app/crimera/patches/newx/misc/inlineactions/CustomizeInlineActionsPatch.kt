@@ -7,7 +7,6 @@ import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionBarModelResolutionPatch
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
 import app.crimera.patches.newx.settings.choice
 import app.crimera.patches.newx.settings.group
@@ -43,23 +42,21 @@ val customizeNewXInlineActionsPatch =
         val hiddenInlineActions =
             newXSettings {
                 category(Categories.POST_ACTIONS_MEDIA) {
-                    group(Groups.INLINE_ACTIONS) {
-                        multiChoice(
-                            id = "newx.content.hidden_inline_actions",
-                            strings = settingStrings("piko_newx_inline_actions"),
-                            order = 100,
-                            defaultValue = emptySet(),
-                            options =
-                                listOf(
-                                    choice("Reply", "piko_newx_inline_action_reply"),
-                                    choice("Retweet", "piko_newx_inline_action_repost"),
-                                    choice("Favorite", "piko_newx_inline_action_like"),
-                                    choice("ViewCount", "piko_newx_inline_action_view_count"),
-                                    choice("AddRemoveBookmarks", "piko_newx_inline_action_bookmark"),
-                                    choice("TwitterShare", "piko_newx_inline_action_share"),
-                                ),
-                        )
-                    }
+                    multiChoice(
+                        id = "newx.content.hidden_inline_actions",
+                        strings = settingStrings("piko_newx_inline_actions"),
+                        order = 100,
+                        defaultValue = emptySet(),
+                        options =
+                            listOf(
+                                choice("Reply", "piko_newx_inline_action_reply"),
+                                choice("Retweet", "piko_newx_inline_action_repost"),
+                                choice("Favorite", "piko_newx_inline_action_like"),
+                                choice("ViewCount", "piko_newx_inline_action_view_count"),
+                                choice("AddRemoveBookmarks", "piko_newx_inline_action_bookmark"),
+                                choice("TwitterShare", "piko_newx_inline_action_share"),
+                            ),
+                    )
                 }
             }
 

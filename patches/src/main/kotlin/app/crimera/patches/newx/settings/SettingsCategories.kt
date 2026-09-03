@@ -100,21 +100,12 @@ internal object Groups {
             order = 100,
         )
 
-    val INLINE_ACTIONS =
-        SettingsGroupMetadata(
-            id = "newx.post_actions_media.inline_actions",
-            titleResourceName = "piko_newx_group_inline_actions_title",
-            summaryResourceName = "piko_newx_group_inline_actions_summary",
-            iconResourceName = "ic_vector_more",
-            order = 200,
-        )
-
     val INLINE_DOWNLOAD =
         SettingsGroupMetadata(
             id = "newx.post_actions_media.inline_download",
             titleResourceName = "piko_newx_group_inline_download_title",
             summaryResourceName = "piko_newx_group_inline_download_summary",
-            iconResourceName = null,
+            iconResourceName = "ic_vector_arrow_down_circle_stroke",
             order = 250,
         )
 

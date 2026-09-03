@@ -22,8 +22,8 @@ class SettingsDefinitionsTest {
     private val invalidToggleId = "content.missing_namespace"
 
     @Test
-    fun `inline actions and reply sorting use distinct APK icons`() {
-        assertEquals("ic_vector_more", Groups.INLINE_ACTIONS.iconResourceName)
+    fun `inline download and reply sorting use distinct APK icons`() {
+        assertEquals("ic_vector_arrow_down_circle_stroke", Groups.INLINE_DOWNLOAD.iconResourceName)
         assertEquals("ic_vector_sort_arrows", Groups.REPLY_SORTING.iconResourceName)
     }
 
