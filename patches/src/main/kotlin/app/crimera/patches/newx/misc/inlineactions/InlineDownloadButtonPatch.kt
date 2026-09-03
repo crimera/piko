@@ -115,6 +115,12 @@ val newXInlineDownloadButtonPatch =
                         order = 300,
                         defaultValue = true,
                     )
+                    toggle(
+                        id = "newx.content.media_picker_thumbnails",
+                        strings = settingStrings("piko_newx_media_picker_thumbnails"),
+                        order = 350,
+                        defaultValue = true,
+                    )
                     singleChoice(
                         id = "newx.content.inline_download_conflict",
                         strings = settingStrings("piko_newx_inline_download_conflict"),

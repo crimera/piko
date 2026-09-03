@@ -33,6 +33,7 @@ import app.morphe.extension.newx.utils.NewXUtils;
  */
 public final class MediaPickerDialog {
     private static final String COPY_LINK_SETTING_ID = "newx.content.media_picker_copy_link";
+    private static final String THUMBNAILS_SETTING_ID = "newx.content.media_picker_thumbnails";
 
     public interface OnMediaSelectedListener {
         void onDownloadItem(int index);
@@ -231,19 +232,21 @@ public final class MediaPickerDialog {
             listContainer.addView(itemRow);
         }
 
-        for (int i = 0; i < downloads.size(); i++) {
-            String thumbnailUrl = downloads.get(i).thumbnailUrl;
-            if (thumbnailUrl == null) continue;
+        if (thumbnailsEnabled()) {
+            for (int i = 0; i < downloads.size(); i++) {
+                String thumbnailUrl = downloads.get(i).thumbnailUrl;
+                if (thumbnailUrl == null) continue;
 
-            int itemIndex = i;
-            MediaThumbnailLoader.load(thumbnailUrl, bitmap -> {
-                loadedThumbnails.set(itemIndex, bitmap);
-                boolean isSelected = selectedIndices.contains(itemIndex);
-                int badgeBg = isSelectionMode[0] && isSelected
-                        ? themeSettings.primaryContainer(current)
-                        : themeSettings.surfaceVariant(current);
-                listItems.get(itemIndex).setLeadingImage(bitmap, badgeBg);
-            });
+                int itemIndex = i;
+                MediaThumbnailLoader.load(thumbnailUrl, bitmap -> {
+                    loadedThumbnails.set(itemIndex, bitmap);
+                    boolean isSelected = selectedIndices.contains(itemIndex);
+                    int badgeBg = isSelectionMode[0] && isSelected
+                            ? themeSettings.primaryContainer(current)
+                            : themeSettings.surfaceVariant(current);
+                    listItems.get(itemIndex).setLeadingImage(bitmap, badgeBg);
+                });
+            }
         }
 
         downloadButton.setOnClickListener(v -> {
@@ -269,6 +272,10 @@ public final class MediaPickerDialog {
 
     private static boolean showCopyLinkButton() {
         return SettingsRegistry.getBooleanOrDefault(COPY_LINK_SETTING_ID, true);
+    }
+
+    private static boolean thumbnailsEnabled() {
+        return SettingsRegistry.getBooleanOrDefault(THUMBNAILS_SETTING_ID, true);
     }
 
     private static IconView.IconType resolveIconType(InlineDownloadButton.DownloadItem item) {

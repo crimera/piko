@@ -91,6 +91,8 @@
     <string name="piko_newx_inline_download_button_summary">Adds a download button directly below NewX posts</string>
     <string name="piko_newx_media_picker_copy_link_title">Show copy-link button</string>
     <string name="piko_newx_media_picker_copy_link_summary">Shows a button for copying media URLs in the download media picker</string>
+    <string name="piko_newx_media_picker_thumbnails_title">Load media thumbnails</string>
+    <string name="piko_newx_media_picker_thumbnails_summary">Loads image previews in the download media picker instead of media type icons</string>
     <string name="piko_newx_inline_download_conflict_title">When media already exists</string>
     <string name="piko_newx_inline_download_conflict_summary">How re-downloading a post that already has saved media is handled</string>
     <string name="piko_newx_inline_download_conflict_overwrite">Overwrite the existing file</string>
