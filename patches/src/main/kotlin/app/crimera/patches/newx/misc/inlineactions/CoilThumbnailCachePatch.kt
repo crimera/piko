@@ -95,13 +95,8 @@ private data class CoilThumbnailRuntime(
     val converter: String,
 )
 
-@Suppress("unused")
-val newXCoilThumbnailCachePatch =
-    bytecodePatch(
-        name = "NewX: Coil thumbnail cache bridge",
-        description = "Connects media thumbnail loading to NewX's in-memory Coil image cache.",
-        default = false,
-    ) {
+internal val newXCoilThumbnailCachePatch =
+    bytecodePatch(default = false) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 
