@@ -1,5 +1,6 @@
 package app.morphe.extension.newx.misc;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -41,21 +42,49 @@ public final class MediaThumbnailLoader {
     }
 
     public static void load(String url, Callback callback) {
-        if (!NewXUtils.isHttpUrl(url) || callback == null) return;
+        load(null, null, url, callback);
+    }
 
-        Bitmap cached = CACHE.get(url);
+    public static void load(
+            Context context,
+            String cacheUrl,
+            String networkUrl,
+            Callback callback
+    ) {
+        if (!NewXUtils.isHttpUrl(networkUrl) || callback == null) return;
+
+        Bitmap cached = CACHE.get(networkUrl);
         if (cached != null) {
             MAIN_HANDLER.post(() -> callback.onLoaded(cached));
             return;
         }
 
         EXECUTOR.execute(() -> {
-            Bitmap bitmap = fetch(url);
+            Bitmap bitmap = findCachedThumbnail(context, cacheUrl);
+            if (bitmap == null) bitmap = fetch(networkUrl);
             if (bitmap == null) return;
 
-            CACHE.put(url, bitmap);
-            MAIN_HANDLER.post(() -> callback.onLoaded(bitmap));
+            CACHE.put(networkUrl, bitmap);
+            Bitmap loaded = bitmap;
+            MAIN_HANDLER.post(() -> callback.onLoaded(loaded));
         });
+    }
+
+    private static Bitmap findCachedThumbnail(Context context, String cacheUrl) {
+        if (context == null || !NewXUtils.isHttpUrl(cacheUrl)) return null;
+
+        try {
+            Object cached = getCachedThumbnail(context, cacheUrl);
+            if (!(cached instanceof Bitmap bitmap) || bitmap.isRecycled()) return null;
+            return fitToTarget(bitmap);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    // Replaced with a direct Coil memory-cache lookup at patch time.
+    private static Object getCachedThumbnail(Object context, String url) {
+        return null;
     }
 
     private static Bitmap fetch(String url) {
@@ -113,7 +142,20 @@ public final class MediaThumbnailLoader {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight);
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        return bitmap == null ? null : fitToTarget(bitmap);
+    }
+
+    private static Bitmap fitToTarget(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int largestDimension = Math.max(width, height);
+        if (width <= 0 || height <= 0 || largestDimension <= TARGET_SIZE_PX) return bitmap;
+
+        float scale = (float) TARGET_SIZE_PX / largestDimension;
+        int targetWidth = Math.max(1, Math.round(width * scale));
+        int targetHeight = Math.max(1, Math.round(height * scale));
+        return Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true);
     }
 
     private static int sampleSize(int width, int height) {

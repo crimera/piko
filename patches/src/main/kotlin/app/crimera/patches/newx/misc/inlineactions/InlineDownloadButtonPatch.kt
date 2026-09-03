@@ -58,6 +58,13 @@ private const val POST_MEDIA_HELPER = "getPostMedia"
 private const val REPOSTED_POST_HELPER = "getRepostedPost"
 private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
 private const val CREATE_ACTION_HELPER = "createDownloadAction"
+private const val CACHED_THUMBNAIL_HELPER = "getCachedThumbnail"
+private const val THUMBNAIL_LOADER_EXTENSION =
+    "Lapp/morphe/extension/newx/misc/MediaThumbnailLoader;"
+private const val COIL_MEMORY_CACHE_DESCRIPTOR = "Lcoil3/memory/d;"
+private const val COIL_MEMORY_KEY_DESCRIPTOR = "Lcoil3/memory/a;"
+private const val COIL_MEMORY_VALUE_DESCRIPTOR = "Lcoil3/memory/b;"
+private const val COIL_MEMORY_IMAGE_DESCRIPTOR = "Lcoil3/k;"
 
 private fun requireSingle(
     label: String,
@@ -149,6 +156,7 @@ val newXInlineDownloadButtonPatch =
                 mediaModels,
                 downloadModels,
             )
+            patchCoilThumbnailBridge()
             newXInitHook.fingerprint.method.addInstruction(
                 0,
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
@@ -455,6 +463,264 @@ private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.requireHelpe
             method.parameterTypes.map { it.toString() } == parameters &&
             method.returnType == "Ljava/lang/Object;"
     } ?: throw PatchException("NewX inline helper $name was not found")
+
+private data class CoilThumbnailRuntime(
+    val provider: String,
+    val loader: String,
+    val loaderDescriptor: String,
+    val cacheKeys: String,
+    val memoryLookup: String,
+    val strongCacheField: String,
+    val weakCacheField: String,
+    val mapBackingField: String,
+    val keyStringField: String,
+    val imageField: String,
+    val converter: String,
+)
+
+private data class CoilThumbnailCandidate(
+    val providerOwner: String,
+    val providerReturnType: String,
+    val loaderDescriptor: String,
+    val converterOwner: String,
+)
+
+context(context: BytecodePatchContext)
+private fun patchCoilThumbnailBridge() {
+    val runtime = resolveCoilThumbnailRuntime()
+    val extensionClass = context.mutableClassDefBy(THUMBNAIL_LOADER_EXTENSION)
+    val placeholder = extensionClass.requireHelper(
+        CACHED_THUMBNAIL_HELPER,
+        listOf("Ljava/lang/Object;", "Ljava/lang/String;"),
+    )
+    val registerCount = placeholder.implementation?.registerCount ?: 0
+    val helper =
+        if (registerCount >= 5) {
+            placeholder
+        } else {
+            placeholder.cloneMutable(additionalRegisters = 5 - registerCount).also { expanded ->
+                extensionClass.methods.remove(placeholder)
+                extensionClass.methods.add(expanded)
+            }
+        }
+
+    helper.addInstructions(
+        0,
+        """
+            if-eqz p0, :piko_newx_cached_thumbnail_none
+            if-eqz p1, :piko_newx_cached_thumbnail_none
+            check-cast p0, Landroid/content/Context;
+            invoke-static {p0}, ${runtime.provider}
+            move-result-object v0
+            check-cast v0, ${runtime.loaderDescriptor}
+            invoke-virtual {v0}, ${runtime.loader}
+            move-result-object v0
+            if-eqz v0, :piko_newx_cached_thumbnail_none
+
+            iget-object v1, v0, ${runtime.strongCacheField}
+            invoke-interface {v1}, ${runtime.cacheKeys}
+            move-result-object v1
+            new-instance v2, Ljava/util/LinkedHashSet;
+            invoke-direct {v2, v1}, Ljava/util/LinkedHashSet;-><init>(Ljava/util/Collection;)V
+            iget-object v1, v0, ${runtime.weakCacheField}
+            iget-object v1, v1, ${runtime.mapBackingField}
+            check-cast v1, Ljava/util/LinkedHashMap;
+            invoke-virtual {v1}, Ljava/util/LinkedHashMap;->keySet()Ljava/util/Set;
+            move-result-object v1
+            invoke-interface {v2, v1}, Ljava/util/Set;->addAll(Ljava/util/Collection;)Z
+            move-result v4
+            invoke-interface {v2}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
+            move-result-object v1
+
+            :piko_newx_cached_thumbnail_loop
+            invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+            move-result v2
+            if-eqz v2, :piko_newx_cached_thumbnail_none
+            invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+            move-result-object v2
+            check-cast v2, ${COIL_MEMORY_KEY_DESCRIPTOR}
+            iget-object v3, v2, ${runtime.keyStringField}
+            invoke-virtual {v3, p1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+            move-result v3
+            if-eqz v3, :piko_newx_cached_thumbnail_loop
+            invoke-virtual {v0, v2}, ${runtime.memoryLookup}
+            move-result-object v2
+            if-eqz v2, :piko_newx_cached_thumbnail_loop
+            iget-object v2, v2, ${runtime.imageField}
+            if-eqz v2, :piko_newx_cached_thumbnail_loop
+            invoke-static {v2}, ${runtime.converter}
+            move-result-object v2
+            if-eqz v2, :piko_newx_cached_thumbnail_none
+            return-object v2
+
+            :piko_newx_cached_thumbnail_none
+            const/4 v0, 0x0
+            return-object v0
+        """.trimIndent(),
+    )
+}
+
+context(context: BytecodePatchContext)
+private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
+    val candidates = listOf(
+        CoilThumbnailCandidate(
+            providerOwner = "Lcoil3/w;",
+            providerReturnType = "Lcoil3/m;",
+            loaderDescriptor = "Lcoil3/s;",
+            converterOwner = "Lcoil3/n;",
+        ),
+        CoilThumbnailCandidate(
+            providerOwner = "Lcoil3/x;",
+            providerReturnType = "Lcoil3/n;",
+            loaderDescriptor = "Lcoil3/t;",
+            converterOwner = "Lcoil3/o;",
+        ),
+    )
+    val matches = candidates.mapNotNull { candidate ->
+        val provider = context.findMethodReferenceOrNull(
+            ownerDescriptor = candidate.providerOwner,
+            name = "a",
+            parameters = listOf("Landroid/content/Context;"),
+            returnType = candidate.providerReturnType,
+            isStatic = true,
+        ) ?: return@mapNotNull null
+        val loader = context.findMethodReferenceOrNull(
+            ownerDescriptor = candidate.loaderDescriptor,
+            name = "d",
+            parameters = emptyList(),
+            returnType = COIL_MEMORY_CACHE_DESCRIPTOR,
+            isStatic = false,
+        ) ?: return@mapNotNull null
+        val converter = context.findMethodReferenceOrNull(
+            ownerDescriptor = candidate.converterOwner,
+            name = "i",
+            parameters = listOf(COIL_MEMORY_IMAGE_DESCRIPTOR),
+            returnType = "Landroid/graphics/Bitmap;",
+            isStatic = true,
+        ) ?: return@mapNotNull null
+        CoilThumbnailRuntime(
+            provider = provider,
+            loader = loader,
+            loaderDescriptor = candidate.loaderDescriptor,
+            cacheKeys = "",
+            memoryLookup = "",
+            strongCacheField = "",
+            weakCacheField = "",
+            mapBackingField = "",
+            keyStringField = "",
+            imageField = "",
+            converter = converter,
+        )
+    }
+    if (matches.size != 1) {
+        throw PatchException(
+            "Expected one NewX Coil thumbnail runtime, found ${matches.size}: " +
+                matches.joinToString(),
+        )
+    }
+
+    val base = matches.single()
+    val cacheKeys = context.requireMethodReference(
+        ownerDescriptor = "Lcoil3/memory/g;",
+        name = "getKeys",
+        parameters = emptyList(),
+        returnType = "Ljava/util/Set;",
+        isStatic = false,
+        label = "Coil memory-cache key accessor",
+    )
+    val memoryLookup = context.requireMethodReference(
+        ownerDescriptor = COIL_MEMORY_CACHE_DESCRIPTOR,
+        name = "b",
+        parameters = listOf(COIL_MEMORY_KEY_DESCRIPTOR),
+        returnType = COIL_MEMORY_VALUE_DESCRIPTOR,
+        isStatic = false,
+        label = "Coil memory-cache lookup",
+    )
+
+    return base.copy(
+        cacheKeys = cacheKeys,
+        memoryLookup = memoryLookup,
+        strongCacheField = context.requireFieldReference(
+            ownerDescriptor = COIL_MEMORY_CACHE_DESCRIPTOR,
+            type = "Lcoil3/memory/g;",
+            label = "Coil strong memory-cache field",
+        ),
+        weakCacheField = context.requireFieldReference(
+            ownerDescriptor = COIL_MEMORY_CACHE_DESCRIPTOR,
+            type = "Landroidx/compose/runtime/external/kotlinx/collections/immutable/implementations/immutableMap/m;",
+            label = "Coil weak memory-cache field",
+        ),
+        mapBackingField = context.requireFieldReference(
+            ownerDescriptor = "Landroidx/compose/runtime/external/kotlinx/collections/immutable/implementations/immutableMap/m;",
+            type = "Ljava/lang/Object;",
+            label = "Coil weak memory-cache backing map field",
+        ),
+        keyStringField = context.requireFieldReference(
+            ownerDescriptor = COIL_MEMORY_KEY_DESCRIPTOR,
+            type = "Ljava/lang/String;",
+            label = "Coil memory-cache key string field",
+        ),
+        imageField = context.requireFieldReference(
+            ownerDescriptor = COIL_MEMORY_VALUE_DESCRIPTOR,
+            type = COIL_MEMORY_IMAGE_DESCRIPTOR,
+            label = "Coil memory-cache image field",
+        ),
+    )
+}
+
+private fun BytecodePatchContext.findMethodReferenceOrNull(
+    ownerDescriptor: String,
+    name: String,
+    parameters: List<String>,
+    returnType: String,
+    isStatic: Boolean,
+): String? {
+    val owner = this.classDefByOrNull(ownerDescriptor) ?: return null
+    val matches = owner.methods.filter { method ->
+        method.name == name &&
+            method.parameterTypes.map(CharSequence::toString) == parameters &&
+            method.returnType == returnType &&
+            AccessFlags.STATIC.isSet(method.accessFlags) == isStatic
+    }
+    if (matches.size > 1) {
+        throw PatchException(
+            "Expected at most one $ownerDescriptor->$name method, found " +
+                "${matches.size}: ${matches.joinToString()}",
+        )
+    }
+    return matches.singleOrNull()?.toString()
+}
+
+private fun BytecodePatchContext.requireMethodReference(
+    ownerDescriptor: String,
+    name: String,
+    parameters: List<String>,
+    returnType: String,
+    isStatic: Boolean,
+    label: String,
+): String =
+    findMethodReferenceOrNull(ownerDescriptor, name, parameters, returnType, isStatic)
+        ?: throw PatchException(
+            "Expected one $label in $ownerDescriptor with shape " +
+                "$name(${parameters.joinToString("")})$returnType",
+        )
+
+private fun BytecodePatchContext.requireFieldReference(
+    ownerDescriptor: String,
+    type: String,
+    label: String,
+): String {
+    val owner = this.classDefByOrNull(ownerDescriptor)
+        ?: throw PatchException("$label owner was not found: $ownerDescriptor")
+    val matches = owner.fields.filter { field -> field.type.toString() == type }
+    if (matches.size != 1) {
+        throw PatchException(
+            "Expected one $label in $ownerDescriptor, found " +
+                "${matches.size}: ${matches.joinToString()}",
+        )
+    }
+    return matches.single().toString()
+}
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String): FieldReference {

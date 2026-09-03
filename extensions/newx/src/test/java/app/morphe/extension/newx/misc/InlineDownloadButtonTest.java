@@ -44,6 +44,14 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void thumbnailCacheUrlKeepsOriginalMediaUrl() {
+        String sourceUrl = "https://pbs.twimg.com/media/example.jpg?format=jpg&name=orig";
+        String media = "MediaContentImage(imageUrl=" + sourceUrl + ")";
+
+        assertEquals(sourceUrl, InlineDownloadButton.thumbnailCacheUrlForMedia(media));
+    }
+
+    @Test
     public void temporarySuffixPrecedesExtension() {
         assertEquals(
                 "jack_123456789_tmp.jpg",

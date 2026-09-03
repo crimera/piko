@@ -234,18 +234,24 @@ public final class MediaPickerDialog {
 
         if (thumbnailsEnabled()) {
             for (int i = 0; i < downloads.size(); i++) {
-                String thumbnailUrl = downloads.get(i).thumbnailUrl;
+                InlineDownloadButton.DownloadItem item = downloads.get(i);
+                String thumbnailUrl = item.thumbnailUrl;
                 if (thumbnailUrl == null) continue;
 
                 int itemIndex = i;
-                MediaThumbnailLoader.load(thumbnailUrl, bitmap -> {
-                    loadedThumbnails.set(itemIndex, bitmap);
-                    boolean isSelected = selectedIndices.contains(itemIndex);
-                    int badgeBg = isSelectionMode[0] && isSelected
-                            ? themeSettings.primaryContainer(current)
-                            : themeSettings.surfaceVariant(current);
-                    listItems.get(itemIndex).setLeadingImage(bitmap, badgeBg);
-                });
+                MediaThumbnailLoader.load(
+                        current,
+                        item.thumbnailCacheUrl,
+                        thumbnailUrl,
+                        bitmap -> {
+                            loadedThumbnails.set(itemIndex, bitmap);
+                            boolean isSelected = selectedIndices.contains(itemIndex);
+                            int badgeBg = isSelectionMode[0] && isSelected
+                                    ? themeSettings.primaryContainer(current)
+                                    : themeSettings.surfaceVariant(current);
+                            listItems.get(itemIndex).setLeadingImage(bitmap, badgeBg);
+                        }
+                );
             }
         }
 

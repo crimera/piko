@@ -454,7 +454,8 @@ public final class InlineDownloadButton {
 
     private static DownloadItem downloadItem(Object media) {
         String value = media.toString();
-        String thumbnailUrl = thumbnailUrlForMedia(value);
+        String thumbnailCacheUrl = thumbnailCacheUrlForMedia(value);
+        String thumbnailUrl = thumbnailUrlForImage(thumbnailCacheUrl);
         if (value.startsWith("MediaContentImage(")) {
             String url = ToStringParser.fieldValue(value, "imageUrl");
             if (!NewXUtils.isHttpUrl(url)) return null;
@@ -463,7 +464,8 @@ public final class InlineDownloadButton {
                     "jpg",
                     "image/jpeg",
                     "Image",
-                    thumbnailUrl
+                    thumbnailUrl,
+                    thumbnailCacheUrl
             );
         }
 
@@ -471,23 +473,34 @@ public final class InlineDownloadButton {
         if (bestVariant == null) return null;
 
         String label = value.startsWith("MediaContentGif(") ? "GIF" : "Video";
-        return new DownloadItem(bestVariant.url, "mp4", "video/mp4", label, thumbnailUrl);
+        return new DownloadItem(
+                bestVariant.url,
+                "mp4",
+                "video/mp4",
+                label,
+                thumbnailUrl,
+                thumbnailCacheUrl
+        );
     }
 
     static String thumbnailUrlForMedia(String mediaText) {
+        return thumbnailUrlForImage(thumbnailCacheUrlForMedia(mediaText));
+    }
+
+    static String thumbnailCacheUrlForMedia(String mediaText) {
         if (mediaText == null) return null;
 
         if (mediaText.startsWith("MediaContentImage(")) {
-            return thumbnailUrlForImage(ToStringParser.fieldValue(mediaText, "imageUrl"));
+            return ToStringParser.fieldValue(mediaText, "imageUrl");
         }
 
         if (mediaText.startsWith("MediaContentVideo(")) {
             String previewImage = ToStringParser.fieldValue(mediaText, "previewImage");
-            return thumbnailUrlForImage(ToStringParser.fieldValue(previewImage, "imageUrl"));
+            return ToStringParser.fieldValue(previewImage, "imageUrl");
         }
 
         if (mediaText.startsWith("MediaContentGif(")) {
-            return thumbnailUrlForImage(ToStringParser.fieldValue(mediaText, "previewUrl"));
+            return ToStringParser.fieldValue(mediaText, "previewUrl");
         }
 
         return null;
@@ -1186,9 +1199,10 @@ public final class InlineDownloadButton {
         final String mimeType;
         final String label;
         final String thumbnailUrl;
+        final String thumbnailCacheUrl;
 
         DownloadItem(String url, String extension, String mimeType, String label) {
-            this(url, extension, mimeType, label, null);
+            this(url, extension, mimeType, label, null, null);
         }
 
         DownloadItem(
@@ -1198,11 +1212,23 @@ public final class InlineDownloadButton {
                 String label,
                 String thumbnailUrl
         ) {
+            this(url, extension, mimeType, label, thumbnailUrl, thumbnailUrl);
+        }
+
+        DownloadItem(
+                String url,
+                String extension,
+                String mimeType,
+                String label,
+                String thumbnailUrl,
+                String thumbnailCacheUrl
+        ) {
             this.url = url;
             this.extension = extension;
             this.mimeType = mimeType;
             this.label = label;
             this.thumbnailUrl = thumbnailUrl;
+            this.thumbnailCacheUrl = thumbnailCacheUrl;
         }
     }
 
