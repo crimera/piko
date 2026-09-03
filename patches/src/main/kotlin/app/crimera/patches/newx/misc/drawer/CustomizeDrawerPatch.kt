@@ -52,8 +52,8 @@ private object NewXDrawerMenuItemFingerprint : Fingerprint(
         ),
 )
 
-// ALPHA PATH: legacy drawer rows pass their localized title to the renderer.
-// TODO: Remove this fingerprint and injectDrawerItemGuard when alpha is deprecated.
+// FOOTER ROWS: settings/help/feedback/media/imprint/debug pass their localized title.
+// (Also matches the legacy alpha footer shape, hence the loose object-typed slots.)
 private object NewXDrawerFooterItemFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
@@ -69,10 +69,13 @@ private object NewXDrawerFooterItemFingerprint : Fingerprint(
 )
 
 /**
- * BETA PATH: renders the settings footer without passing its title as a parameter.
- * Keep this path as the source for future drawer updates.
+ * THEME PATH: sun/moon IconButton pinned to the drawer bottom (content-desc
+ * drawer_display_settings, opens theme settings). Takes no title, so filter by stable ID.
+ * Shares its parameter shape with the under-review badge renderer; the material3
+ * IconButton call below is what distinguishes it. The material3 owner/param slots use
+ * prefix/wildcard types because the IconButton class shifts between releases.
  */
-private object NewXDrawerSettingsFooterItemFingerprint : Fingerprint(
+private object NewXDrawerThemeToggleFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
     parameters =
@@ -119,7 +122,7 @@ private object NewXDrawerGrokButtonFingerprint : Fingerprint(
         ),
 )
 
-// ALPHA/LEGACY PATH: title-based filtering for rows that still expose localized titles.
+// Title-based filtering for rows that expose localized titles.
 // TODO: Remove this path only when no supported release uses title-based drawer rows.
 private fun MutableMethod.injectDrawerItemGuard(hiddenItems: MultiChoiceSettingDefinition) {
     val stringParamIndex =
@@ -143,7 +146,7 @@ private fun MutableMethod.injectDrawerItemGuard(hiddenItems: MultiChoiceSettingD
     )
 }
 
-// BETA PATH: ID-based filtering for the title-less settings footer.
+// ID-based filtering for title-less buttons (Grok, theme toggle).
 private fun MutableMethod.injectFixedDrawerItemGuard(
     hiddenItems: MultiChoiceSettingDefinition,
     itemId: String,
@@ -234,6 +237,7 @@ val customizeNewXDrawerPatch =
                         choice("FEEDBACK", "piko_newx_drawer_feedback"),
                         choice("MEDIA_TRANSPARENCY", "piko_newx_drawer_media_transparency"),
                         choice("IMPRINT", "piko_newx_drawer_imprint"),
+                        choice("THEME_TOGGLE", "piko_newx_drawer_theme_toggle"),
                     ),
             )
 
@@ -255,36 +259,25 @@ val customizeNewXDrawerPatch =
             }
             menuMatches.single().method.injectDrawerItemGuard(hiddenItems)
 
-            // ALPHA PATH: prefer the legacy title-based footer whenever it exists.
-            val legacyFooterMatches =
-                NewXDrawerFooterItemFingerprint.scopedMatchAllOrNull().orEmpty()
-            // BETA PATH: use the title-less settings footer only when the alpha shape is absent.
-            val settingsFooterMatches =
-                NewXDrawerSettingsFooterItemFingerprint.scopedMatchAllOrNull().orEmpty()
-            val footerMatches =
-                if (legacyFooterMatches.isNotEmpty()) {
-                    // ALPHA PATH: select the legacy title-based footer.
-                    legacyFooterMatches
-                } else {
-                    // BETA PATH: select the title-less settings footer.
-                    settingsFooterMatches
-                }
+            // FOOTER ROWS: settings/help/feedback/media/imprint/debug render with a title.
+            val footerMatches = NewXDrawerFooterItemFingerprint.scopedMatchAllOrNull().orEmpty()
             if (footerMatches.size != 1) {
                 throw PatchException(
-                    "Expected one NewX drawer footer renderer across known shapes, found " +
+                    "Expected one NewX drawer footer row renderer, found " +
                         "${footerMatches.size}: ${footerMatches.joinToString { it.originalMethod.toString() }}",
                 )
             }
-            val footerMatch = footerMatches.single()
-            // BETA PATH: pass the stable SETTINGS ID instead of reading a title.
-            if (footerMatch.originalMethod.toString() in
-                settingsFooterMatches.map { it.originalMethod.toString() }
-            ) {
-                footerMatch.method.injectFixedDrawerItemGuard(hiddenItems, "SETTINGS")
-            } else {
-                // ALPHA PATH: read the localized title from the legacy footer signature.
-                footerMatch.method.injectDrawerItemGuard(hiddenItems)
+            footerMatches.single().method.injectDrawerItemGuard(hiddenItems)
+
+            // THEME PATH: sun/moon toggle button; skip when the release has no theme toggle.
+            val themeMatches = NewXDrawerThemeToggleFingerprint.scopedMatchAllOrNull().orEmpty()
+            if (themeMatches.size > 1) {
+                throw PatchException(
+                    "Expected at most one NewX drawer theme toggle, found ${themeMatches.size}: " +
+                        themeMatches.joinToString { it.originalMethod.toString() },
+                )
             }
+            themeMatches.singleOrNull()?.method?.injectFixedDrawerItemGuard(hiddenItems, "THEME_TOGGLE")
 
             // GROK PATH: dedicated Get/Open Grok button; skip when the release has no Grok row.
             val grokMatches = NewXDrawerGrokButtonFingerprint.scopedMatchAllOrNull().orEmpty()

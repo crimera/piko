@@ -138,6 +138,7 @@
     <string name="piko_newx_drawer_feedback">Feedback and issues</string>
     <string name="piko_newx_drawer_media_transparency">Media transparency</string>
     <string name="piko_newx_drawer_imprint">Imprint</string>
+    <string name="piko_newx_drawer_theme_toggle">Theme toggle</string>
 
     <string name="piko_newx_post_filtering_title">Post filtering</string>
     <string name="piko_newx_post_filtering_summary">Hide posts containing user-defined words and phrases</string>
