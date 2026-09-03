@@ -122,6 +122,10 @@ public class MediaData extends Entity {
         return (String) super.getMethod("methodName");
     }
 
+    public Long getTakenAtSeconds() throws Exception {
+        return (Long) super.getMethod(this.getExtendedData(), "taken_at");
+    }
+
     public boolean isVideo() throws Exception {
         return (boolean) super.getMethod(this.obj, "methodName");
     }

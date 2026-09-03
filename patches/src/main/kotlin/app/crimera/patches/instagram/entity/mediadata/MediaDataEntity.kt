@@ -124,6 +124,25 @@ val mediaDataEntity =
                 GetMediaPkIdExtensionFingerprint.changeFirstString(mediaPkIdMethodName)
             }
 
+            val takenAtCandidates =
+                mutableClassDefBy { it.type == mediaModelClass }
+                    .methods
+                    .filter { method ->
+                        method.parameters.isEmpty() &&
+                            method.returnType == "Ljava/lang/Long;" &&
+                            method.instructions.any { instruction ->
+                                (instruction.opcode == Opcode.CONST_STRING ||
+                                    instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                    instruction.getReference<StringReference>()?.string == "taken_at"
+                            }
+                    }
+            if (takenAtCandidates.size != 1) {
+                throw PatchException(
+                    "Expected exactly one taken_at getter in $mediaModelClass, found ${takenAtCandidates.size}",
+                )
+            }
+            GetTakenAtSecondsExtensionFingerprint.changeFirstString(takenAtCandidates.single().name)
+
             // Extraction of user data used in extended media class.
             GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(LiveTreeMediaDictGetUserFingerprint.method.name)
 

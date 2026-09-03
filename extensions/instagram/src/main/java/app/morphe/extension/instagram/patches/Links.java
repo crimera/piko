@@ -234,8 +234,10 @@ public class Links {
     }
 
     public static String generatePostLink(Object mediaObject, int position) throws Exception {
-        MediaData mediaData = new MediaData(mediaObject);
+        return generatePostLink(new MediaData(mediaObject), position);
+    }
 
+    public static String generatePostLink(MediaData mediaData, int position) throws Exception {
         String postShortCode = mediaData.getShortcode();
         PostType postType = mediaData.getPostType();
 
