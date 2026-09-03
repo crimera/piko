@@ -102,23 +102,23 @@ val newXInlineDownloadButtonPatch =
 
         newXSettings {
             category(Categories.POST_ACTIONS_MEDIA) {
-                group(Groups.INLINE_ACTIONS) {
+                group(Groups.INLINE_DOWNLOAD) {
                     toggle(
                         id = "newx.content.inline_download_button",
                         strings = settingStrings("piko_newx_inline_download_button"),
-                        order = 200,
+                        order = 100,
                         defaultValue = true,
                     )
                     toggle(
                         id = "newx.content.media_picker_copy_link",
                         strings = settingStrings("piko_newx_media_picker_copy_link"),
-                        order = 300,
+                        order = 200,
                         defaultValue = true,
                     )
                     toggle(
                         id = "newx.content.media_picker_thumbnails",
                         strings = settingStrings("piko_newx_media_picker_thumbnails"),
-                        order = 350,
+                        order = 300,
                         defaultValue = true,
                     )
                     singleChoice(

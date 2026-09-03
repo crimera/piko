@@ -109,6 +109,15 @@ internal object Groups {
             order = 200,
         )
 
+    val INLINE_DOWNLOAD =
+        SettingsGroupMetadata(
+            id = "newx.post_actions_media.inline_download",
+            titleResourceName = "piko_newx_group_inline_download_title",
+            summaryResourceName = "piko_newx_group_inline_download_summary",
+            iconResourceName = null,
+            order = 250,
+        )
+
     val REPLY_SORTING =
         SettingsGroupMetadata(
             id = "newx.post_actions_media.reply_sorting",
