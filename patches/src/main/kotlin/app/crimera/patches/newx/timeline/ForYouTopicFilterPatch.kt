@@ -75,7 +75,7 @@ val newXForYouTopicFilterPatch =
                 customScreen(
                     id = "newx.content.topic_filtering.manage",
                     strings = settingStrings("piko_newx_topic_filtering"),
-                    order = 100,
+                    order = 50,
                     iconResourceName = "ic_vector_filter",
                     fragmentClassDescriptor = FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR,
                 )

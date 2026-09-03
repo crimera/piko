@@ -130,9 +130,9 @@ val newXDisableVideoScrollingPatch =
         val disableVideoScrolling =
             newXToggle(
                 id = "newx.post_actions_media.disable_video_scrolling",
-                category = Categories.POST_ACTIONS_MEDIA,
+                category = Categories.TIMELINE,
                 strings = settingStrings("piko_newx_disable_video_scrolling"),
-                order = 200,
+                order = 101,
                 defaultValue = false,
             )
 
