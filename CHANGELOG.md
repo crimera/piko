@@ -1,3 +1,15 @@
+## [3.10.0-dev.1](https://github.com/crimera/piko/compare/v3.9.0...v3.10.0-dev.1) (2026-09-03)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Prevent newlines in text preferences ([#1811](https://github.com/crimera/piko/issues/1811)) ([2cb1faa](https://github.com/crimera/piko/commit/2cb1faa3e18a7e99a5271957803cc5e6c278692e))
+* **Instagram:** Recover settings after crash ([#1822](https://github.com/crimera/piko/issues/1822)) ([8391a5b](https://github.com/crimera/piko/commit/8391a5b6817289307eb2fef96837c2055eebea99))
+* **Twitter:** guard null ShareTarget in modern share sheet link hook ([5066035](https://github.com/crimera/piko/commit/5066035bc43b7c27f7e13248f0edec5afa7be85a))
+
+### ✨ New Features
+
+* **Instagram:** Integrate `Disable onboarding permission prompts` patch into `Disable analytics` ([#1771](https://github.com/crimera/piko/issues/1771)) ([a7974cd](https://github.com/crimera/piko/commit/a7974cd4c66dff557c2905ea92ad73741b46fa44))
+
 ## [3.9.0](https://github.com/crimera/piko/compare/v3.8.0...v3.9.0) (2026-08-31)
 
 ### 🐛 Bug Fixes
