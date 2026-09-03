@@ -2,6 +2,7 @@ package app.morphe.extension.newx.misc;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -72,6 +73,10 @@ public final class MediaPickerDialog {
         final Set<Integer> selectedIndices = new LinkedHashSet<>();
         final boolean[] isSelectionMode = new boolean[]{false};
         final List<ListItem> listItems = new ArrayList<>(downloads.size());
+        final List<Bitmap> loadedThumbnails = new ArrayList<>(downloads.size());
+        for (int i = 0; i < downloads.size(); i++) {
+            loadedThumbnails.add(null);
+        }
 
         // Create download action button
         final ButtonView downloadButton = new ButtonView(
@@ -125,7 +130,12 @@ public final class MediaPickerDialog {
                 int badgeBg = (isSelectionMode[0] && isSelected)
                         ? themeSettings.primaryContainer(current)
                         : themeSettings.surfaceVariant(current);
-                itemRow.setLeadingIcon(iconType, primaryAccent, badgeBg);
+                Bitmap thumbnail = loadedThumbnails.get(i);
+                if (thumbnail != null) {
+                    itemRow.setLeadingImage(thumbnail, badgeBg);
+                } else {
+                    itemRow.setLeadingIcon(iconType, primaryAccent, badgeBg);
+                }
 
                 final int itemIndex = i;
                 if (isSelectionMode[0]) {
@@ -219,6 +229,21 @@ public final class MediaPickerDialog {
 
             listItems.add(itemRow);
             listContainer.addView(itemRow);
+        }
+
+        for (int i = 0; i < downloads.size(); i++) {
+            String thumbnailUrl = downloads.get(i).thumbnailUrl;
+            if (thumbnailUrl == null) continue;
+
+            int itemIndex = i;
+            MediaThumbnailLoader.load(thumbnailUrl, bitmap -> {
+                loadedThumbnails.set(itemIndex, bitmap);
+                boolean isSelected = selectedIndices.contains(itemIndex);
+                int badgeBg = isSelectionMode[0] && isSelected
+                        ? themeSettings.primaryContainer(current)
+                        : themeSettings.surfaceVariant(current);
+                listItems.get(itemIndex).setLeadingImage(bitmap, badgeBg);
+            });
         }
 
         downloadButton.setOnClickListener(v -> {

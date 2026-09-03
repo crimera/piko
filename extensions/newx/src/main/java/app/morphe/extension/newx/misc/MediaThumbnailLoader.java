@@ -1,0 +1,126 @@
+package app.morphe.extension.newx.misc;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.LruCache;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import app.morphe.extension.newx.utils.NewXUtils;
+
+/** Loads small media previews without blocking the UI thread. */
+public final class MediaThumbnailLoader {
+    private static final int MAX_CACHE_KILOBYTES = 4 * 1024;
+    private static final int MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024;
+    private static final int TARGET_SIZE_PX = 256;
+    private static final int CONNECT_TIMEOUT_MILLIS = 6_000;
+    private static final int READ_TIMEOUT_MILLIS = 8_000;
+
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(3);
+    private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
+    private static final LruCache<String, Bitmap> CACHE = new LruCache<>(MAX_CACHE_KILOBYTES) {
+        @Override
+        protected int sizeOf(String key, Bitmap bitmap) {
+            return Math.max(1, bitmap.getByteCount() / 1024);
+        }
+    };
+
+    public interface Callback {
+        void onLoaded(Bitmap bitmap);
+    }
+
+    private MediaThumbnailLoader() {
+    }
+
+    public static void load(String url, Callback callback) {
+        if (!NewXUtils.isHttpUrl(url) || callback == null) return;
+
+        Bitmap cached = CACHE.get(url);
+        if (cached != null) {
+            MAIN_HANDLER.post(() -> callback.onLoaded(cached));
+            return;
+        }
+
+        EXECUTOR.execute(() -> {
+            Bitmap bitmap = fetch(url);
+            if (bitmap == null) return;
+
+            CACHE.put(url, bitmap);
+            MAIN_HANDLER.post(() -> callback.onLoaded(bitmap));
+        });
+    }
+
+    private static Bitmap fetch(String url) {
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
+            connection.setReadTimeout(READ_TIMEOUT_MILLIS);
+            connection.setInstanceFollowRedirects(true);
+            connection.setRequestProperty("Accept", "image/*");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode < HttpURLConnection.HTTP_OK ||
+                    responseCode >= HttpURLConnection.HTTP_MULT_CHOICE) {
+                return null;
+            }
+
+            int contentLength = connection.getContentLength();
+            if (contentLength > MAX_DOWNLOAD_BYTES) return null;
+
+            try (InputStream input = connection.getInputStream()) {
+                byte[] data = readAtMost(input, contentLength);
+                return data == null ? null : decode(data);
+            }
+        } catch (IOException | RuntimeException ignored) {
+            return null;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    private static byte[] readAtMost(InputStream input, int contentLength) throws IOException {
+        int initialSize = contentLength > 0
+                ? Math.min(contentLength, 64 * 1024)
+                : 16 * 1024;
+        ByteArrayOutputStream output = new ByteArrayOutputStream(initialSize);
+        byte[] buffer = new byte[16 * 1024];
+        int total = 0;
+        int read;
+        while ((read = input.read(buffer)) != -1) {
+            if (total > MAX_DOWNLOAD_BYTES - read) return null;
+            output.write(buffer, 0, read);
+            total += read;
+        }
+        return output.toByteArray();
+    }
+
+    private static Bitmap decode(byte[] data) {
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(data, 0, data.length, bounds);
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null;
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight);
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+    }
+
+    private static int sampleSize(int width, int height) {
+        int sample = 1;
+        while (width / sample > TARGET_SIZE_PX && height / sample > TARGET_SIZE_PX) {
+            sample *= 2;
+        }
+        return sample;
+    }
+}

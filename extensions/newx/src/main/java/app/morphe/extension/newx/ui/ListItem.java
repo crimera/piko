@@ -2,6 +2,7 @@ package app.morphe.extension.newx.ui;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -11,6 +12,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,6 +30,7 @@ public class ListItem extends LinearLayout {
     private final Theme.SettingsSnapshot themeSettings;
     private FrameLayout leadingContainer;
     private IconView leadingIconView;
+    private ImageView leadingImageView;
     private LinearLayout textContainer;
     private TextView titleView;
     private TextView subtitleView;
@@ -79,12 +82,21 @@ public class ListItem extends LinearLayout {
         badgeBg.setCornerRadius(Theme.dpToPx(context, 12f));
         badgeBg.setColor(themeSettings.surfaceVariant(context));
         leadingContainer.setBackground(badgeBg);
+        leadingContainer.setClipToOutline(true);
 
         leadingIconView = new IconView(context);
         int iconSize = Theme.dpToPx(context, 24f);
         FrameLayout.LayoutParams iconParams = new FrameLayout.LayoutParams(iconSize, iconSize);
         iconParams.gravity = Gravity.CENTER;
         leadingContainer.addView(leadingIconView, iconParams);
+
+        leadingImageView = new ImageView(context);
+        leadingImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        leadingImageView.setVisibility(View.GONE);
+        leadingContainer.addView(leadingImageView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
         addView(leadingContainer);
 
         // 2. Text Container (Title + Subtitle)
@@ -144,15 +156,34 @@ public class ListItem extends LinearLayout {
     }
 
     public void setLeadingIcon(IconView.IconType iconType, int iconColor, @Nullable Integer containerBgColor) {
+        leadingImageView.setImageDrawable(null);
+        leadingImageView.setVisibility(View.GONE);
+        leadingIconView.setVisibility(View.VISIBLE);
         leadingIconView.setIconType(iconType);
         leadingIconView.setIconColor(iconColor);
+        setLeadingContainerBackground(containerBgColor);
+    }
 
+    public void setLeadingImage(@Nullable Bitmap image) {
+        setLeadingImage(image, null);
+    }
+
+    public void setLeadingImage(@Nullable Bitmap image, @Nullable Integer containerBgColor) {
+        if (image == null) return;
+        if (containerBgColor != null) setLeadingContainerBackground(containerBgColor);
+        leadingImageView.setImageBitmap(image);
+        leadingImageView.setVisibility(View.VISIBLE);
+        leadingIconView.setVisibility(View.GONE);
+    }
+
+    private void setLeadingContainerBackground(@Nullable Integer containerBgColor) {
         GradientDrawable badgeBg = new GradientDrawable();
         badgeBg.setCornerRadius(Theme.dpToPx(getContext(), 12f));
         badgeBg.setColor(containerBgColor != null
                 ? containerBgColor
                 : themeSettings.surfaceVariant(getContext()));
         leadingContainer.setBackground(badgeBg);
+        leadingContainer.setClipToOutline(true);
     }
 
     public void setTrailingView(@Nullable View view) {

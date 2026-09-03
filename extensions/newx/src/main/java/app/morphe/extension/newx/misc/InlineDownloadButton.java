@@ -454,17 +454,60 @@ public final class InlineDownloadButton {
 
     private static DownloadItem downloadItem(Object media) {
         String value = media.toString();
+        String thumbnailUrl = thumbnailUrlForMedia(value);
         if (value.startsWith("MediaContentImage(")) {
             String url = ToStringParser.fieldValue(value, "imageUrl");
             if (!NewXUtils.isHttpUrl(url)) return null;
-            return new DownloadItem(originalImageUrl(url), "jpg", "image/jpeg", "Image");
+            return new DownloadItem(
+                    originalImageUrl(url),
+                    "jpg",
+                    "image/jpeg",
+                    "Image",
+                    thumbnailUrl
+            );
         }
 
         Variant bestVariant = bestMp4Variant(value);
         if (bestVariant == null) return null;
 
         String label = value.startsWith("MediaContentGif(") ? "GIF" : "Video";
-        return new DownloadItem(bestVariant.url, "mp4", "video/mp4", label);
+        return new DownloadItem(bestVariant.url, "mp4", "video/mp4", label, thumbnailUrl);
+    }
+
+    static String thumbnailUrlForMedia(String mediaText) {
+        if (mediaText == null) return null;
+
+        if (mediaText.startsWith("MediaContentImage(")) {
+            return thumbnailUrlForImage(ToStringParser.fieldValue(mediaText, "imageUrl"));
+        }
+
+        if (mediaText.startsWith("MediaContentVideo(")) {
+            String previewImage = ToStringParser.fieldValue(mediaText, "previewImage");
+            return thumbnailUrlForImage(ToStringParser.fieldValue(previewImage, "imageUrl"));
+        }
+
+        if (mediaText.startsWith("MediaContentGif(")) {
+            return thumbnailUrlForImage(ToStringParser.fieldValue(mediaText, "previewUrl"));
+        }
+
+        return null;
+    }
+
+    private static String thumbnailUrlForImage(String url) {
+        if (!NewXUtils.isHttpUrl(url)) return null;
+
+        Uri uri = Uri.parse(url);
+        String host = uri.getHost();
+        if (host == null || !(host.equals("twimg.com") || host.endsWith(".twimg.com"))) {
+            return url;
+        }
+
+        return uri.buildUpon()
+                .clearQuery()
+                .appendQueryParameter("format", "jpg")
+                .appendQueryParameter("name", "small")
+                .build()
+                .toString();
     }
 
     private static Variant bestMp4Variant(String value) {
@@ -1142,12 +1185,24 @@ public final class InlineDownloadButton {
         final String extension;
         final String mimeType;
         final String label;
+        final String thumbnailUrl;
 
         DownloadItem(String url, String extension, String mimeType, String label) {
+            this(url, extension, mimeType, label, null);
+        }
+
+        DownloadItem(
+                String url,
+                String extension,
+                String mimeType,
+                String label,
+                String thumbnailUrl
+        ) {
             this.url = url;
             this.extension = extension;
             this.mimeType = mimeType;
             this.label = label;
+            this.thumbnailUrl = thumbnailUrl;
         }
     }
 
