@@ -65,6 +65,7 @@ private const val COIL_MEMORY_CACHE_DESCRIPTOR = "Lcoil3/memory/d;"
 private const val COIL_MEMORY_KEY_DESCRIPTOR = "Lcoil3/memory/a;"
 private const val COIL_MEMORY_VALUE_DESCRIPTOR = "Lcoil3/memory/b;"
 private const val COIL_MEMORY_IMAGE_DESCRIPTOR = "Lcoil3/k;"
+private const val CACHED_THUMBNAIL_BRIDGE_REGISTER_COUNT = 7
 
 private fun requireSingle(
     label: String,
@@ -495,10 +496,12 @@ private fun patchCoilThumbnailBridge() {
     )
     val registerCount = placeholder.implementation?.registerCount ?: 0
     val helper =
-        if (registerCount >= 5) {
+        if (registerCount >= CACHED_THUMBNAIL_BRIDGE_REGISTER_COUNT) {
             placeholder
         } else {
-            placeholder.cloneMutable(additionalRegisters = 5 - registerCount).also { expanded ->
+            placeholder.cloneMutable(
+                additionalRegisters = CACHED_THUMBNAIL_BRIDGE_REGISTER_COUNT - registerCount,
+            ).also { expanded ->
                 extensionClass.methods.remove(placeholder)
                 extensionClass.methods.add(expanded)
             }
