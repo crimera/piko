@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import kotlin.jvm.functions.Function0;
 
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 
@@ -43,7 +42,7 @@ public final class ComposeSettingsHook {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to open NewX settings", exception);
+            NewXLogger.printException(() -> "Failed to open NewX settings", exception);
             Utils.showToastShort(ResourceUtils.getStringOrThrow("piko_newx_settings_open_failed"));
         }
     }

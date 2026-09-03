@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 
 public final class NavBarFilter {
     private NavBarFilter() {
@@ -27,7 +27,7 @@ public final class NavBarFilter {
             }
             return changed ? filtered : tabData;
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to customize NewX navigation bar", exception);
+            NewXLogger.printException(() -> "Failed to customize NewX navigation bar", exception);
             return tabData;
         }
     }

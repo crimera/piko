@@ -26,6 +26,12 @@ val newXBrowseObjectPatch =
             category(Categories.ADVANCED) {
                 group(Groups.DEBUG_TOOLS) {
                     toggle(
+                        id = "newx.advanced.debug_tools.logging",
+                        strings = settingStrings("piko_newx_logging"),
+                        order = 50,
+                        defaultValue = false,
+                    )
+                    toggle(
                         id = "newx.content.browse_tweet_object",
                         strings = settingStrings("piko_newx_browse_tweet_object"),
                         order = 100,

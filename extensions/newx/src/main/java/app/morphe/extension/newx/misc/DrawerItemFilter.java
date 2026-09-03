@@ -5,7 +5,7 @@ import android.content.res.Resources;
 
 import java.util.Set;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 
 public final class DrawerItemFilter {
@@ -22,7 +22,7 @@ public final class DrawerItemFilter {
                 if (hiddenItemId != null && matches(title, hiddenItemId)) return true;
             }
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to customize NewX drawer", exception);
+            NewXLogger.printException(() -> "Failed to customize NewX drawer", exception);
         }
         return false;
     }

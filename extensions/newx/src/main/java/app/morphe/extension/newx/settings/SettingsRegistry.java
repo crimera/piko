@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
@@ -269,7 +268,7 @@ public final class SettingsRegistry {
             BuiltInSettings.register();
             freeze();
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to initialize NewX settings", exception);
+            NewXLogger.printException(() -> "Failed to initialize NewX settings", exception);
             throw exception;
         }
     }
@@ -656,7 +655,7 @@ public final class SettingsRegistry {
     }
 
     private static IllegalStateException failure(String message) {
-        Logger.printException(() -> message);
+        NewXLogger.printException(() -> message);
         return new IllegalStateException(message);
     }
 

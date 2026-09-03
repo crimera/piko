@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 import app.morphe.extension.newx.ui.BottomSheetView;
@@ -53,7 +53,7 @@ public final class MediaPickerDialog {
             OnMediaSelectedListener listener
     ) {
         if (context == null || downloads == null || downloads.isEmpty() || listener == null) {
-            Logger.printInfo(() ->
+            NewXLogger.printInfo(() ->
                     LOG_PREFIX + "show skipped invalid arguments context=" + (context != null) +
                             " items=" + (downloads == null ? "null" : downloads.size()) +
                             " listener=" + (listener != null)
@@ -64,7 +64,7 @@ public final class MediaPickerDialog {
         Activity activity = NewXUtils.findActivity(context);
         Activity current = activity != null ? activity : InlineDownloadButton.currentActivity();
         if (current == null || current.isFinishing() || current.isDestroyed()) {
-            Logger.printInfo(() ->
+            NewXLogger.printInfo(() ->
                     LOG_PREFIX + "show skipped unavailable activity resolved=" + (current != null) +
                             " finishing=" + (current != null && current.isFinishing()) +
                             " destroyed=" + (current != null && current.isDestroyed())
@@ -87,7 +87,7 @@ public final class MediaPickerDialog {
         boolean showCopyLinkButton = showCopyLinkButton();
         boolean loadThumbnails = thumbnailsEnabled();
         Theme.SettingsSnapshot themeSettings = Theme.snapshot();
-        Logger.printInfo(() ->
+        NewXLogger.printInfo(() ->
                 LOG_PREFIX + "showing picker items=" + downloads.size() +
                         " thumbnailsEnabled=" + loadThumbnails +
                         " copyLinkEnabled=" + showCopyLinkButton
@@ -116,7 +116,7 @@ public final class MediaPickerDialog {
         final Runnable[] updateUiHolder = new Runnable[1];
         updateUiHolder[0] = () -> {
             int selectedCount = selectedIndices.size();
-            Logger.printInfo(() ->
+            NewXLogger.printInfo(() ->
                     LOG_PREFIX + "selection state mode=" + isSelectionMode[0] +
                             " selected=" + selectedIndices
             );
@@ -225,7 +225,7 @@ public final class MediaPickerDialog {
 
             // Normal tap
             itemRow.setOnClickListener(v -> {
-                Logger.printInfo(() ->
+                NewXLogger.printInfo(() ->
                         LOG_PREFIX + "item[" + selectedIndex + "] tapped selectionMode=" +
                                 isSelectionMode[0]
                 );
@@ -244,7 +244,7 @@ public final class MediaPickerDialog {
 
             // Long-press / Hold to enter selection mode
             itemRow.setOnLongClickListener(v -> {
-                Logger.printInfo(() ->
+                NewXLogger.printInfo(() ->
                         LOG_PREFIX + "item[" + selectedIndex + "] long-pressed selectionMode=" +
                                 isSelectionMode[0]
                 );
@@ -272,14 +272,14 @@ public final class MediaPickerDialog {
                 String thumbnailUrl = item.thumbnailUrl;
                 int itemIndex = i;
                 if (thumbnailUrl == null) {
-                    Logger.printInfo(() ->
+                    NewXLogger.printInfo(() ->
                             LOG_PREFIX + "item[" + itemIndex + "] label=" + item.label +
                                     " skipped: no thumbnail URL"
                     );
                     continue;
                 }
 
-                Logger.printInfo(() ->
+                NewXLogger.printInfo(() ->
                         LOG_PREFIX + "item[" + itemIndex + "] label=" + item.label +
                                 " thumbnail queued network=" + MediaThumbnailLoader.describeUrl(thumbnailUrl) +
                                 " cache=" + MediaThumbnailLoader.describeUrl(item.thumbnailCacheUrl)
@@ -295,7 +295,7 @@ public final class MediaPickerDialog {
                                     ? themeSettings.primaryContainer(current)
                                     : themeSettings.surfaceVariant(current);
                             listItems.get(itemIndex).setLeadingImage(bitmap, badgeBg);
-                            Logger.printInfo(() ->
+                            NewXLogger.printInfo(() ->
                                     LOG_PREFIX + "item[" + itemIndex + "] label=" + item.label +
                                             " thumbnail applied size=" + bitmap.getWidth() + "x" + bitmap.getHeight() +
                                             " network=" + MediaThumbnailLoader.describeUrl(thumbnailUrl)
@@ -304,11 +304,11 @@ public final class MediaPickerDialog {
                 );
             }
         } else {
-            Logger.printInfo(() -> LOG_PREFIX + "thumbnail loading disabled; using media-type icons");
+            NewXLogger.printInfo(() -> LOG_PREFIX + "thumbnail loading disabled; using media-type icons");
         }
 
         downloadButton.setOnClickListener(v -> {
-            Logger.printInfo(() ->
+            NewXLogger.printInfo(() ->
                     LOG_PREFIX + "download button tapped selectionMode=" + isSelectionMode[0] +
                             " selected=" + selectedIndices
             );
@@ -330,7 +330,7 @@ public final class MediaPickerDialog {
 
         dialog.setScrollableBodyView(listContainer);
         dialog.show();
-        Logger.printInfo(() -> LOG_PREFIX + "picker shown");
+        NewXLogger.printInfo(() -> LOG_PREFIX + "picker shown");
     }
 
     private static boolean showCopyLinkButton() {

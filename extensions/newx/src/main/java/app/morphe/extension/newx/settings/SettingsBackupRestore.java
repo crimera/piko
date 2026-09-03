@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.newx.featureswitches.FeatureSwitchStore;
@@ -104,7 +103,7 @@ public final class SettingsBackupRestore {
             output.write(exportValidJson(activity).getBytes(StandardCharsets.UTF_8));
             Utils.showToastShort(str("piko_newx_backup_success"));
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to back up NewX settings", exception);
+            NewXLogger.printException(() -> "Failed to back up NewX settings", exception);
             Utils.showToastShort(str("piko_newx_backup_failed"));
         }
     }
@@ -116,7 +115,7 @@ public final class SettingsBackupRestore {
             new JSONObject(json);
             Setting.importFromJSON(activity, json);
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to restore NewX settings", exception);
+            NewXLogger.printException(() -> "Failed to restore NewX settings", exception);
             Utils.showToastShort(str("piko_newx_restore_failed"));
         }
     }

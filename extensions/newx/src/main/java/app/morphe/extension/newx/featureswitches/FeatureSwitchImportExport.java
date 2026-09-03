@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.newx.settings.SettingsActionHandler;
 
@@ -82,7 +82,7 @@ public final class FeatureSwitchImportExport {
             FeatureSwitchStore.shared().importOverrides(readUtf8(input));
             Utils.showToastShort(str("piko_newx_feature_switch_import_success"));
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to import NewX feature switches", exception);
+            NewXLogger.printException(() -> "Failed to import NewX feature switches", exception);
             Utils.showToastShort(str("piko_newx_feature_switch_import_failed"));
         }
     }
@@ -96,7 +96,7 @@ public final class FeatureSwitchImportExport {
             output.write(serialized.getBytes(StandardCharsets.UTF_8));
             Utils.showToastShort(str("piko_newx_feature_switch_export_success"));
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to export NewX feature switches", exception);
+            NewXLogger.printException(() -> "Failed to export NewX feature switches", exception);
             Utils.showToastShort(str("piko_newx_feature_switch_export_failed"));
         }
     }

@@ -56,6 +56,8 @@
     <string name="piko_newx_group_reply_sorting_summary">Customize how replies are sorted in post detail</string>
     <string name="piko_newx_group_debug_tools_title">Developer tools</string>
     <string name="piko_newx_group_debug_tools_summary">Inspect internal NewX data from post menus</string>
+    <string name="piko_newx_logging_title">Enable logging</string>
+    <string name="piko_newx_logging_summary">Writes diagnostic NewX messages to the app log</string>
     <string name="piko_newx_reply_sort_relevance">Relevant replies</string>
     <string name="piko_newx_reply_sort_recency">Recent replies</string>
     <string name="piko_newx_reply_sort_likes">Most liked replies</string>

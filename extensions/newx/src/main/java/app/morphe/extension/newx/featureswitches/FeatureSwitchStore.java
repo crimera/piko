@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.settings.StringSetting;
 
 public final class FeatureSwitchStore {
@@ -247,7 +247,7 @@ public final class FeatureSwitchStore {
                 try {
                     overrides.putAll(deserialize(serialized));
                 } catch (JSONException | IllegalArgumentException exception) {
-                    Logger.printException(
+                    NewXLogger.printException(
                             () -> "Failed to read NewX feature switch overrides",
                             exception
                     );

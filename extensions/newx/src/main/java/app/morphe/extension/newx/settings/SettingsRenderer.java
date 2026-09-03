@@ -18,7 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
@@ -342,7 +341,7 @@ public final class SettingsRenderer {
             if (errorMessage == null) return true;
             Utils.showToastShort(errorMessage);
         } catch (Exception exception) {
-            Logger.printException(
+            NewXLogger.printException(
                     () -> "NewX text input validation failed: " + item.id,
                     exception
             );
@@ -491,7 +490,7 @@ public final class SettingsRenderer {
             try {
                 instantiateAction(activity, item.handlerClassDescriptor).run(activity);
             } catch (Exception exception) {
-                Logger.printException(() -> "NewX settings action failed: " + item.id, exception);
+                NewXLogger.printException(() -> "NewX settings action failed: " + item.id, exception);
                 Utils.showToastShort(StringRef.str("piko_newx_action_failed"));
             }
             return true;

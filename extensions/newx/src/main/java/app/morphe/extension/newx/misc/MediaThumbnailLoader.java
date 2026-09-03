@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.utils.NewXUtils;
 
 /** Loads small media previews without blocking the UI thread. */
@@ -270,10 +270,10 @@ public final class MediaThumbnailLoader {
     }
 
     private static void logInfo(String message) {
-        Logger.printInfo(() -> LOG_PREFIX + message);
+        NewXLogger.printInfo(() -> LOG_PREFIX + message);
     }
 
     private static void logException(String message, Throwable throwable) {
-        Logger.printException(() -> LOG_PREFIX + message, throwable);
+        NewXLogger.printException(() -> LOG_PREFIX + message, throwable);
     }
 }

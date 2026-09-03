@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 
 public final class InlineActionFilter {
     private static final ThreadLocal<Set<String>> HIDDEN_ACTION_IDS = new ThreadLocal<>();
@@ -53,7 +53,7 @@ public final class InlineActionFilter {
             }
             return filtered.size() == actions.size() ? actions : filtered;
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to customize NewX inline actions", exception);
+            NewXLogger.printException(() -> "Failed to customize NewX inline actions", exception);
             return actions;
         }
     }

@@ -10,7 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 
@@ -48,7 +48,7 @@ public final class TimelineScrollPositionStore {
                     preferences.getInt(key + OFFSET_SUFFIX, 0),
             };
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to restore NewX timeline position", exception);
+            NewXLogger.printException(() -> "Failed to restore NewX timeline position", exception);
             return null;
         }
     }
@@ -98,7 +98,7 @@ public final class TimelineScrollPositionStore {
                     .putInt(key + OFFSET_SUFFIX, offset)
                     .apply();
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to save NewX timeline position", exception);
+            NewXLogger.printException(() -> "Failed to save NewX timeline position", exception);
         }
     }
 

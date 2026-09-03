@@ -2,7 +2,7 @@ package app.morphe.extension.newx.misc;
 
 import androidx.annotation.Nullable;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 
@@ -26,7 +26,7 @@ public final class ReplySortingResolver {
 
     public static Object getEnumDefault(Class<?> enumClass) {
         if (enumClass == null || !enumClass.isEnum()) {
-            Logger.printException(
+            NewXLogger.printException(
                     () -> "Failed to resolve NewX reply sorting enum: target is not an enum",
                     new IllegalArgumentException("Expected an enum class: " + enumClass)
             );
@@ -51,7 +51,7 @@ public final class ReplySortingResolver {
                     "Enum " + enumClass.getName() + " has no reply sorting mode: " + mode
             );
         } catch (Throwable t) {
-            Logger.printException(() -> "Failed to resolve NewX reply sorting enum", t);
+            NewXLogger.printException(() -> "Failed to resolve NewX reply sorting enum", t);
             return null;
         }
     }
@@ -69,7 +69,7 @@ public final class ReplySortingResolver {
             if (isValidMode(configured)) return configured;
             return DEFAULT_FALLBACK;
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to read NewX default reply sorting", exception);
+            NewXLogger.printException(() -> "Failed to read NewX default reply sorting", exception);
             return DEFAULT_FALLBACK;
         }
     }
@@ -83,7 +83,7 @@ public final class ReplySortingResolver {
     public static void remember(Object enumObject) {
         if (enumObject == null) return;
         if (!(enumObject instanceof Enum<?> enumValue)) {
-            Logger.printException(
+            NewXLogger.printException(
                     () -> "Ignoring non-enum NewX reply sorting value",
                     new IllegalArgumentException("Expected an enum value: " + enumObject.getClass().getName())
             );
@@ -97,7 +97,7 @@ public final class ReplySortingResolver {
 
             preferences().saveString(LAST_KEY, name);
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to save NewX last reply sorting", exception);
+            NewXLogger.printException(() -> "Failed to save NewX last reply sorting", exception);
         }
     }
 

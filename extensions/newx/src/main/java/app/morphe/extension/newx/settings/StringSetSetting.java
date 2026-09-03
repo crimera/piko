@@ -11,7 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.settings.Setting;
 
 public final class StringSetSetting extends Setting<Set<String>> {
@@ -25,7 +24,7 @@ public final class StringSetSetting extends Setting<Set<String>> {
             Set<String> stored = preferences.preferences.getStringSet(key, defaultValue);
             value = immutableCopy(stored == null ? defaultValue : stored);
         } catch (ClassCastException exception) {
-            Logger.printInfo(() -> "Removing conflicting string-set preference: " + key, exception);
+            NewXLogger.printInfo(() -> "Removing conflicting string-set preference: " + key, exception);
             preferences.removeKey(key);
             value = defaultValue;
         }

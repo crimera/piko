@@ -45,7 +45,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 import app.morphe.extension.newx.utils.ToStringParser;
 
@@ -118,7 +118,7 @@ public final class InlineDownloadButton {
             result.add(downloadAction);
             return result;
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to add the NewX inline download action", exception);
+            NewXLogger.printException(() -> "Failed to add the NewX inline download action", exception);
             return actions;
         }
     }
@@ -176,7 +176,7 @@ public final class InlineDownloadButton {
             }
             return true;
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to process inline download action", exception);
+            NewXLogger.printException(() -> "Failed to process inline download action", exception);
             Utils.showToastShort("Could not download post media");
             return true;
         }
@@ -192,7 +192,7 @@ public final class InlineDownloadButton {
         try {
             return !mediaFor(post).isEmpty();
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to check NewX post media", exception);
+            NewXLogger.printException(() -> "Failed to check NewX post media", exception);
             return false;
         }
     }
@@ -249,7 +249,7 @@ public final class InlineDownloadButton {
                 if (isDownloadAction(value)) return value;
             }
         } catch (IllegalAccessException | RuntimeException exception) {
-            Logger.printException(() -> "Failed to read the NewX inline action event", exception);
+            NewXLogger.printException(() -> "Failed to read the NewX inline action event", exception);
         }
         return null;
     }
@@ -446,7 +446,7 @@ public final class InlineDownloadButton {
                 DownloadItem download = downloadItem(item);
                 if (download != null) downloads.add(download);
             } catch (RuntimeException exception) {
-                Logger.printException(() -> "Failed to read NewX media", exception);
+                NewXLogger.printException(() -> "Failed to read NewX media", exception);
             }
         }
         return downloads;
@@ -667,7 +667,7 @@ public final class InlineDownloadButton {
         try {
             fileName = resolveTargetFileName(context, baseFileName, behavior, download.mimeType);
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to resolve NewX download target", exception);
+            NewXLogger.printException(() -> "Failed to resolve NewX download target", exception);
             return EnqueueState.FAILED;
         }
         if (fileName == null) return EnqueueState.SKIPPED;
@@ -732,7 +732,7 @@ public final class InlineDownloadButton {
             finishPendingDownloadAsync(context, manager, downloadId);
             return EnqueueState.QUEUED;
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to enqueue NewX media download", exception);
+            NewXLogger.printException(() -> "Failed to enqueue NewX media download", exception);
             return EnqueueState.FAILED;
         }
     }
@@ -858,7 +858,7 @@ public final class InlineDownloadButton {
             removePendingDownload(context, manager, downloadId);
             Utils.showToastShort("Downloaded: " + pending.fileName);
         } catch (IOException | RuntimeException exception) {
-            Logger.printException(() -> "Failed to finalize NewX media download", exception);
+            NewXLogger.printException(() -> "Failed to finalize NewX media download", exception);
             Utils.showToastShort("Could not finalize download: " + pending.fileName);
         }
     }
@@ -957,7 +957,7 @@ public final class InlineDownloadButton {
                     existingMediaSelectionArgs(fileName, relativePath, destinationId)
             );
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to replace existing NewX media", exception);
+            NewXLogger.printException(() -> "Failed to replace existing NewX media", exception);
         }
     }
 
@@ -1165,7 +1165,7 @@ public final class InlineDownloadButton {
                 )) {
                     if (cursor != null && cursor.moveToFirst()) return true;
                 } catch (RuntimeException exception) {
-                    Logger.printException(() -> "Failed to query NewX media existence", exception);
+                    NewXLogger.printException(() -> "Failed to query NewX media existence", exception);
                 }
             }
             return false;

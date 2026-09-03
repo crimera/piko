@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 
 /** Shared reflection support for custom NewX post-menu options. */
 public final class NewXPostOptions {
@@ -27,7 +27,7 @@ public final class NewXPostOptions {
             copy.add(group);
             return copy;
         } catch (ReflectiveOperationException | RuntimeException exception) {
-            Logger.printException(() -> "Failed to add NewX post-menu option " + optionName, exception);
+            NewXLogger.printException(() -> "Failed to add NewX post-menu option " + optionName, exception);
             return groups;
         }
     }

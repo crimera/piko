@@ -1,6 +1,6 @@
 package app.morphe.extension.newx.misc;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 
 /**
@@ -40,7 +40,7 @@ public final class MediaTabResolver {
             // a RuntimeException and therefore handled below.
             return Enum.valueOf(currentEnum.getDeclaringClass(), "Photos");
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to resolve NewX media tab default", exception);
+            NewXLogger.printException(() -> "Failed to resolve NewX media tab default", exception);
         }
         return current;
     }

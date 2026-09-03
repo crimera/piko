@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.postfilter.PostFilterMatcher;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
 
@@ -842,12 +842,12 @@ public final class NewXTimelineFilter {
     private static void logFailure(String operation, Exception exception, String... context) {
         String details = context.length == 0 ? "" : " [" + String.join(", ", context) + "]";
         // Keep the toast as a visible repro signal while detailed context remains in the log.
-        Logger.printException(() -> DEBUG_LOG_PREFIX + "Failed NewX " + operation + details, exception);
+        NewXLogger.printException(() -> DEBUG_LOG_PREFIX + "Failed NewX " + operation + details, exception);
     }
 
     private static void logDiagnostic(String operation, Exception exception, String... context) {
         String details = context.length == 0 ? "" : " [" + String.join(", ", context) + "]";
-        Logger.printInfo(() -> DEBUG_LOG_PREFIX + "Failed NewX " + operation + details, exception);
+        NewXLogger.printInfo(() -> DEBUG_LOG_PREFIX + "Failed NewX " + operation + details, exception);
     }
 
     private static final class FilterResult {

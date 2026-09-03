@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.settings.BooleanSetting;
 import app.morphe.extension.shared.settings.StringSetting;
 
@@ -228,7 +228,7 @@ public final class PostFilterRuleStore {
             try {
                 return new Snapshot(deserialize(structured));
             } catch (JSONException | IllegalArgumentException exception) {
-                Logger.printException(() -> "Failed to read NewX post-filter rules", exception);
+                NewXLogger.printException(() -> "Failed to read NewX post-filter rules", exception);
                 return Snapshot.EMPTY;
             }
         }

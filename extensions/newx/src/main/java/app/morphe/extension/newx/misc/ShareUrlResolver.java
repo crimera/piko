@@ -3,7 +3,7 @@ package app.morphe.extension.newx.misc;
 import java.net.URI;
 import java.net.URL;
 
-import app.morphe.extension.shared.Logger;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 
 /**
@@ -46,7 +46,7 @@ public final class ShareUrlResolver {
                 return new URL(url.getProtocol(), customDomain, url.getPort(), url.getFile()).toString();
             }
         } catch (Exception exception) {
-            Logger.printException(() -> "Failed to rewrite NewX sharing domain", exception);
+            NewXLogger.printException(() -> "Failed to rewrite NewX sharing domain", exception);
             return urlString;
         }
         return urlString;

@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsActionHandler;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 import app.morphe.extension.newx.ui.ButtonView;
@@ -72,7 +73,7 @@ public class UpdateFont {
     public static void loadFont(String fontName, boolean isEmojiFont) {
         File fontFile = new File(context.getFilesDir(), fontName);
         if (!fontFile.exists()) {
-            PikoUtils.logger("Font not found: " + fontFile.getAbsolutePath());
+            NewXLogger.logger("Font not found: " + fontFile.getAbsolutePath());
         } else {
             Typeface typeface = createTypeface(fontFile, isEmojiFont);
             if (isEmojiFont) {
@@ -80,7 +81,7 @@ public class UpdateFont {
             } else {
                 textTypeface = typeface;
             }
-            PikoUtils.logger("Font loaded: " + fontFile.getAbsolutePath());
+            NewXLogger.logger("Font loaded: " + fontFile.getAbsolutePath());
         }
     }
 
@@ -211,7 +212,7 @@ public class UpdateFont {
                     .setSystemFallback("sans-serif")
                     .build();
         } catch (IOException | RuntimeException exception) {
-            PikoUtils.logger(exception);
+            NewXLogger.logger(exception);
             return Typeface.createFromFile(fontFile);
         }
     }
@@ -375,7 +376,7 @@ public class UpdateFont {
                 return true;
             }
         } catch (Exception e) {
-            PikoUtils.logger(e);
+            NewXLogger.logger(e);
         }
         return false;
     }
@@ -393,7 +394,7 @@ public class UpdateFont {
             }
             return true;
         } catch (Exception e) {
-            PikoUtils.logger(e);
+            NewXLogger.logger(e);
         }
         return false;
     }

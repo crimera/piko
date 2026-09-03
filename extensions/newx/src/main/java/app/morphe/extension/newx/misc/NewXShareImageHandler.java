@@ -23,7 +23,6 @@ import android.provider.MediaStore;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 import android.view.PixelCopy;
 import android.view.View;
 import android.widget.Toast;
@@ -35,6 +34,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 import kotlin.jvm.functions.Function1;
 
@@ -98,7 +98,9 @@ public final class NewXShareImageHandler {
 
         Activity activity = NewXUtils.findUsableActivity(context);
         if (activity == null) {
-            Log.e(DEBUG_TAG, "No activity for context " + context.getClass().getName());
+            NewXLogger.printException(
+                    () -> DEBUG_TAG + ": No activity for context " + context.getClass().getName()
+            );
             Utils.showToastShort("Could not capture the rendered post");
             return;
         }
@@ -137,11 +139,14 @@ public final class NewXShareImageHandler {
 
         Rect bounds = renderedBounds(postId);
         if (bounds == null) {
-            Log.e(DEBUG_TAG, "No resolved bounds for post " + postId);
+            NewXLogger.printException(() -> DEBUG_TAG + ": No resolved bounds for post " + postId);
             Utils.showToastShort("Post is no longer rendered");
             return;
         }
-        Log.d(DEBUG_TAG, "Requesting post " + postId + " bounds=" + bounds + " window=" + decorView.getWidth() + "x" + decorView.getHeight());
+        NewXLogger.printInfo(
+                () -> DEBUG_TAG + ": Requesting post " + postId + " bounds=" + bounds
+                        + " window=" + decorView.getWidth() + "x" + decorView.getHeight()
+        );
         if (bounds.left < 0 || bounds.top < 0 || bounds.right > decorView.getWidth() || bounds.bottom > decorView.getHeight()) {
             Utils.showToastShort("Make the entire post visible before sharing");
             return;
@@ -170,7 +175,7 @@ public final class NewXShareImageHandler {
                     MAIN_HANDLER
             );
         } catch (RuntimeException exception) {
-            Log.e(DEBUG_TAG, "PixelCopy request failed", exception);
+            NewXLogger.printException(() -> DEBUG_TAG + ": PixelCopy request failed", exception);
             bitmap.recycle();
             Utils.showToastShort("Could not capture the rendered post");
         }
@@ -178,7 +183,9 @@ public final class NewXShareImageHandler {
 
     private static void finishCapture(Context context, Bitmap bitmap, String postId, int result) {
         if (result != PixelCopy.SUCCESS) {
-            Log.e(DEBUG_TAG, "PixelCopy result=" + result + " for post " + postId);
+            NewXLogger.printException(
+                    () -> DEBUG_TAG + ": PixelCopy result=" + result + " for post " + postId
+            );
             bitmap.recycle();
             Utils.showToastShort("Could not capture the rendered post");
             return;
@@ -242,7 +249,10 @@ public final class NewXShareImageHandler {
                     result = candidate;
                 }
             } catch (ReflectiveOperationException | RuntimeException exception) {
-                Log.d(DEBUG_TAG, "Ignoring non-rectangle bounds candidate", exception);
+                NewXLogger.printInfo(
+                        () -> DEBUG_TAG + ": Ignoring non-rectangle bounds candidate",
+                        exception
+                );
             }
         }
         return result;
