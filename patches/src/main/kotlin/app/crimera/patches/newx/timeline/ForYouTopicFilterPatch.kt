@@ -265,8 +265,8 @@ private fun Method.parameterIndexForField(
 ): Int? {
     val implementation = implementation ?: return null
     val instructions = implementation.instructions.toList()
-    val parameterRegisterCount = parameterTypes.sumOf { type -> type.toString().registerWidth() }
-    val thisRegister = implementation.registerCount - parameterRegisterCount - 1
+    val thisRegister = implementation.registerCount -
+        parameterTypes.sumOf { type -> type.toString().registerWidth() } - 1
     val writes =
         instructions.withIndex().filter { (_, instruction) ->
             instruction.opcode == Opcode.IPUT_OBJECT &&
@@ -275,16 +275,36 @@ private fun Method.parameterIndexForField(
     if (writes.size != 1) return null
 
     val write = writes.single().value as? TwoRegisterInstruction ?: return null
-    if (write.registerB != thisRegister) return null
-    val sourceRegister = instructions.resolveObjectOriginRegister(writes.single().index, write.registerA)
-    val parameterIndex = sourceRegister - thisRegister - 1
-    if (parameterIndex !in parameterTypes.indices) return null
-    if (expectedParameterTypes.isNotEmpty() &&
-        parameterTypes[parameterIndex].toString() !in expectedParameterTypes
-    ) {
-        return null
+    val sourceRegisters = if (write.registerB == thisRegister) {
+        listOf(
+            write.registerA,
+            instructions.resolveObjectOriginRegister(writes.single().index, write.registerA),
+        )
+    } else {
+        listOf(instructions.resolveObjectOriginRegister(writes.single().index, write.registerA))
     }
-    return parameterIndex
+    return sourceRegisters.asSequence()
+        .mapNotNull { sourceRegister ->
+            parameterTypes.indexOfRegister(sourceRegister, thisRegister)
+        }
+        .distinct()
+        .firstOrNull { parameterIndex ->
+            expectedParameterTypes.isEmpty() ||
+                parameterTypes[parameterIndex].toString() in expectedParameterTypes
+        }
+}
+
+private fun List<CharSequence>.indexOfRegister(
+    register: Int,
+    receiverRegister: Int,
+): Int? {
+    var parameterRegister = receiverRegister + 1
+    val parameterIndex = indexOfFirst { parameterType ->
+        val matches = parameterRegister == register
+        parameterRegister += parameterType.toString().registerWidth()
+        matches
+    }
+    return parameterIndex.takeIf { it >= 0 }
 }
 
 private val MOVE_OBJECT_OPCODES =
