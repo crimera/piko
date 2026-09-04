@@ -70,7 +70,6 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disabilita analytics</string>
     <string name="piko_delete_analytics_cache">Elimina la cache analytics</string>
-    <string name="piko_disable_analytics_desc">Blocca gli analytics che vengono inviati ai server Instagram/Facebook.</string>
     <string name="piko_disable_discover_people">Disabilita scopri le persone</string>
     <string name="piko_disable_discover_people_desc">Disabilita la sezione scopri le persone sul profilo utente</string>
     <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>
@@ -89,7 +88,6 @@
     <string name="piko_loop_story">Storia in loop</string>
     <string name="piko_loop_story_desc">Riproduci la storia corrente quando finisce</string>
     <string name="piko_disable_video_autoplay">Disabilita la riproduzione automatica dei video</string>
-    <string name="piko_stories_audio_autoplay">Riproduzione automatica audio nelle storie</string>
     <string name="piko_customise_story_timestamp">Personalizza timestamp della storia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizza il timestamp che mostra quando la storia è stata pubblicata</string>
     <string name="piko_improve_image_viewing">Migliora la visualizzazione delle immagini</string>
@@ -123,7 +121,6 @@
     <string name="piko_unlimited_replays">Rendi permanenti i contenuti temporanei</string>
     <string name="piko_unlimited_replays_desc">Cambia la visualizzazione non scaduta una volta, visualizza due volte i media per la visualizzazione permanente</string>
     <string name="piko_enable_mark_chat_as_read">Abilita l\'opzione per contrassegnare la chat come letta</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Ottieni l\'opzione, premendo a lungo la chat, di contrassegnarla come letta</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Scarica file multimediali</string>
     <string name="piko_enable_download">Abilita download</string>
@@ -268,13 +265,8 @@
     <string name="piko_save_deleted_messages">Salva messaggi eliminati</string>
     <string name="piko_save_deleted_messages_desc">Cattura i DM in arrivo localmente mentre arrivano dal server. Contrassegna i messaggi come eliminati quando cancellati, in modo da poterli visualizzare anche dopo che il mittente li elimina.</string>
     <string name="piko_view_deleted_messages">Vedi messaggi eliminati</string>
-    <string name="piko_deleted_in_chat">Eliminato in questa chat</string>
     <string name="piko_all_deleted_messages">Tutti i messaggi eliminati</string>
-    <string name="piko_clear">Cancella</string>
-    <string name="piko_clear_chat_confirm">Cancellare i messaggi eliminati per questa chat?</string>
-    <string name="piko_clear_all_confirm">Eliminare tutti i messaggi eliminati salvati?</string>
     <string name="piko_no_deleted_messages">Nessun messaggio ancora eliminato.\nAbilita la funzione e i messaggi verranno salvati al loro arrivo.</string>
-    <string name="piko_delete_saved_confirm">Eliminare questo messaggio salvato?</string>
     <string name="piko_delete">Elimina</string>
     <string name="piko_unknown">Sconosciuto</string>
     <string name="piko_tap_to_view">tocca per visualizzare</string>

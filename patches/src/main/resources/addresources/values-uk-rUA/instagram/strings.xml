@@ -37,9 +37,10 @@
     <string name="piko_disable_typing_status">Приховати статус набору тексту</string>
     <string name="piko_disable_screenshot_detection">Вимкнути виявлення знімків екрана</string>
     <string name="piko_view_dm_anonymously">Читати приватні повідомлення анонімно</string>
+    <string name="piko_view_dm_anonymously_desc">Якщо ввімкнено, інші не бачитимуть, коли ви прочитали їхні повідомлення. Якщо вимкнено і цей параметр, і «Увімкнути всі режими невидимки», використовуватиметься стандартний параметр Instagram «Показувати сповіщення про прочитання»</string>
     <string name="piko_turn_on_all_ghost_modes">Увімкнути всі режими невидимки</string>
     <string name="piko_ghost_modes_on">Режим невидимки: УВІМКНЕНО</string>
-    <string name="piko_ghost_modes_default">Режим невидимки: ЗА ЗАМОВЧУВАННЯМ</string>
+    <string name="piko_ghost_modes_default">Режим невидимки: ВИМКНЕНО</string>
     <string name="piko_ghost_modes_quick_toggle">Увімкнути швидкий перемикач режимів невидимки</string>
     <string name="piko_ghost_modes_quick_toggle_desc">Додає перемикач на панель дій чату для швидкого керування режимами невидимки</string>
     <!-- Distraction-Free Section -->
@@ -70,7 +71,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Вимкнути аналітику</string>
     <string name="piko_delete_analytics_cache">Очистити кеш аналітики</string>
-    <string name="piko_disable_analytics_desc">Блокувати надсилання аналітичних даних на сервери Instagram/Facebook.</string>
+    <string name="piko_disable_analytics_desc">Блокувати надсилання аналітики на сервери Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Вимкнути розділ «Можливі знайомі»</string>
     <string name="piko_disable_discover_people_desc">Вимикає розділ рекомендацій людей у профілі користувача</string>
     <string name="piko_follow_back_indicator">Увімкнути індикатор взаємної підписки</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">Зациклювати історію</string>
     <string name="piko_loop_story_desc">Повторювати поточну історію після її завершення</string>
     <string name="piko_disable_video_autoplay">Вимкнути автовідтворення відео</string>
-    <string name="piko_stories_audio_autoplay">Автовідтворення звуку в історіях</string>
     <string name="piko_customise_story_timestamp">Налаштувати час публікації історій</string>
     <string name="piko_customise_story_timestamp_desc">Налаштувати формат часу, коли була опублікована історія</string>
     <string name="piko_improve_image_viewing">Покращити якість перегляду зображень</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">Робить медіа з одноразовим переглядом доступними постійно</string>
     <string name="piko_unlimited_replays_desc">Змінює разові медіафайли на постійні для необмеженого перегляду</string>
     <string name="piko_enable_mark_chat_as_read">Увімкнути опцію «Позначити як прочитане»</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Додає можливість позначити чат як прочитаний довгим натисканням на нього</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Додати опцію позначення чату як прочитаного за довгим натисканням на нього. Коли ви позначаєте чат як прочитаний, інші бачитимуть, що ви прочитали їхні повідомлення, навіть якщо параметр «Переглядати особисті повідомлення анонімно» ввімкнено</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Завантаження медіа</string>
     <string name="piko_enable_download">Увімкнути завантаження</string>
@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">Завантажує відкрите медіа без додаткових запитів</string>
     <string name="piko_download_username_folder">Розділяти медіа за іменем користувача</string>
     <string name="piko_download_username_folder_desc">Створює підпапки на основі імені користувача</string>
+    <string name="piko_embed_download_metadata">Вбудовувати метадані відео</string>
+    <string name="piko_embed_download_metadata_desc">Додає підпис, посилання на допис, автора та дату вивантаження до завантажених файлів MP4</string>
     <string name="piko_download_current_media">Завантажити поточне медіа</string>
     <string name="piko_download_as_image">Завантажити як зображення</string>
     <string name="piko_video_variants">Варіанти відео</string>
@@ -229,7 +231,7 @@
     <string name="piko_action_bar_chat_desc">Піктограми на панелі дій усередині особистих повідомлень (DM)</string>
     <string name="piko_action_bar_inbox">Піктограми панелі дій вхідних повідомлень</string>
     <string name="piko_action_bar_button_settings_icon">Піктограма налаштувань</string>
-    <string name="piko_action_bar_button_ghost_mode_icon">Значок режиму «привида»</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Піктограма режиму «невидимки»</string>
     <string name="piko_action_bar_button_profile_info_icon">Піктограма інформації профілю</string>
     <string name="piko_settings_on_action_bar">Налаштування Piko на панелі дій</string>
     <string name="piko_settings_on_action_bar_desc">Перемістити кнопку налаштувань Piko на панель дій головної стрічки</string>
@@ -242,7 +244,7 @@
     <string name="piko_rec_flags_last_modified_at">Останні зміни: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Фільтрація контенту</string>
-    <string name="piko_filter_story">Фільтрація історий</string>
+    <string name="piko_filter_story">Фільтрація історій</string>
     <string name="piko_filter_story_types_to_hide">Типи історій для приховування</string>
     <string name="piko_reel_type_ads_reel">Рекламні Reels</string>
     <string name="piko_reel_type_ar_effect_preview">Попередній перегляд AR-ефектів</string>
@@ -274,7 +276,7 @@
     <string name="piko_reel_type_media_reshare">Репост медіа</string>
     <string name="piko_reel_type_memory_reel">Спогади «Reels»</string>
     <string name="piko_reel_type_my_week_reel">Reels «Мій тиждень»</string>
-    <string name="piko_reel_type_netego_reel">Reels «Net ego» (самолюбства)</string>
+    <string name="piko_reel_type_netego_reel">Reels «Net ego» (самомилування)</string>
     <string name="piko_reel_type_nux_reel">Reels для нових користувачів (Nux)</string>
     <string name="piko_reel_type_private_story">Приватна історія</string>
     <string name="piko_reel_type_prompt_sticker_reel">Reels з інтерактивними наліпками</string>
@@ -305,13 +307,11 @@
     <string name="piko_save_deleted_messages">Зберігати видалені повідомлення</string>
     <string name="piko_save_deleted_messages_desc">Зберігає вхідні повідомлення локально під час отримання із сервера. Позначає їх як видалені, якщо відправник скасовує надсилання, щоб ви могли переглянути їх навіть після видалення.</string>
     <string name="piko_view_deleted_messages">Переглянути видалені повідомлення</string>
-    <string name="piko_deleted_in_chat">Видалено в цьому чаті</string>
     <string name="piko_all_deleted_messages">Усі видалені повідомлення</string>
-    <string name="piko_clear">Очистити</string>
-    <string name="piko_clear_chat_confirm">Очистити видалені повідомлення для цього чату?</string>
-    <string name="piko_clear_all_confirm">Очистити ВСІ збережені видалені повідомлення?</string>
     <string name="piko_no_deleted_messages">Жодних видалених повідомлень ще не збережено.\nУвімкніть функцію, і повідомлення зберігатимуться в міру їх надходження.</string>
-    <string name="piko_delete_saved_confirm">Видалити це збережене повідомлення?</string>
+    <string name="piko_all">Усі</string>
+    <string name="piko_selected_count">Вибрано: %d</string>
+    <string name="piko_delete_selected_confirm">Видалити вибрані повідомлення (%d)?</string>
     <string name="piko_delete">Видалити</string>
     <string name="piko_unknown">Невідомо</string>
     <string name="piko_tap_to_view">натисніть для перегляду</string>

@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">Отключить статус набора текста</string>
     <string name="piko_disable_screenshot_detection">Отключить определение снимков экрана</string>
     <string name="piko_view_dm_anonymously">Читать сообщения анонимно</string>
+    <string name="piko_view_dm_anonymously_desc">Если включено, другие не увидят, что вы прочитали их сообщения. Если эта настройка и «Включить режим невидимки для всего» выключены, используется настройка Instagram показывать прочтения</string>
     <string name="piko_turn_on_all_ghost_modes">Включить все режимы невидимки</string>
     <string name="piko_ghost_modes_on">Режим невидимки: Вкл</string>
     <string name="piko_ghost_modes_default">Режим невидимки: По умолчанию</string>
@@ -70,7 +71,7 @@
     <string name="piko_amoled_title">Amoled</string>
     <string name="piko_disable_analytics">Отключить аналитику</string>
     <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
-    <string name="piko_disable_analytics_desc">Блокирует аналитику, отправляемую на серверы Instagram/Facebook.</string>
+    <string name="piko_disable_analytics_desc">Блокирует аналитику, отправляемую на сервера Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Отключить раздел «Возможные знакомые»</string>
     <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">Зацикливать историю</string>
     <string name="piko_loop_story_desc">Повторно воспроизводит текущую историю после её завершения</string>
     <string name="piko_disable_video_autoplay">Отключить автозапуск видео</string>
-    <string name="piko_stories_audio_autoplay">Автозапуск звука в историях</string>
     <string name="piko_customise_story_timestamp">Настроить отметку времени истории</string>
     <string name="piko_customise_story_timestamp_desc">Настроить отображение времени публикации истории</string>
     <string name="piko_improve_image_viewing">Улучшить качество отображения контента</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">Сделать исчезающие медиа постоянными</string>
     <string name="piko_unlimited_replays_desc">Делает медиа с однократным или двукратным просмотром постоянным</string>
     <string name="piko_enable_mark_chat_as_read">Включить опцию «отметить чат как прочитанный»</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Добавить опцию отметки чата как прочитанного при долгом нажатии</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Добавляет возможность отметить чат как прочитанный при долгом нажатии. Когда вы отмечаете чат прочитанным, другие увидят это, даже если включена «Невидимка в личных сообщениях»</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Скачивание медиа</string>
     <string name="piko_enable_download">Включить скачивание</string>
@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">Скачивает текущий просматриваемый медиафайл без запроса вариантов</string>
     <string name="piko_download_username_folder">Разделять медиа по имени пользователя</string>
     <string name="piko_download_username_folder_desc">Создаёт подпапки по имени пользователя</string>
+    <string name="piko_embed_download_metadata">Встраивать метаданные видео</string>
+    <string name="piko_embed_download_metadata_desc">Добавляет подпись, ссылку на публикацию, автора и дату загрузки в скачанные файлы MP4</string>
     <string name="piko_download_current_media">Скачать текущее медиа</string>
     <string name="piko_download_as_image">Скачать как изображение</string>
     <string name="piko_video_variants">Варианты видео</string>
@@ -305,13 +307,11 @@
     <string name="piko_save_deleted_messages">Сохранять удалённые сообщения</string>
     <string name="piko_save_deleted_messages_desc">Локально сохраняет входящие сообщения при их поступлении с сервера. Отмечает сообщения как удалённые при их отмене, чтобы вы могли просмотреть их даже после удаления отправителем.</string>
     <string name="piko_view_deleted_messages">Просмотреть удалённые сообщения</string>
-    <string name="piko_deleted_in_chat">Удалено в этом чате</string>
     <string name="piko_all_deleted_messages">Все удалённые сообщения</string>
-    <string name="piko_clear">Очистить</string>
-    <string name="piko_clear_chat_confirm">Очистить удалённые сообщения для этого чата?</string>
-    <string name="piko_clear_all_confirm">Очистить ВСЕ сохранённые удалённые сообщения?</string>
     <string name="piko_no_deleted_messages">Удалённые сообщения пока не перехвачены.\nВключите функцию, и сообщения будут сохраняться по мере поступления.</string>
-    <string name="piko_delete_saved_confirm">Удалить это сохранённое сообщение?</string>
+    <string name="piko_all">Все</string>
+    <string name="piko_selected_count">Выбрано: %d</string>
+    <string name="piko_delete_selected_confirm">Удалить выбранные сообщения (%d)?</string>
     <string name="piko_delete">Удалить</string>
     <string name="piko_unknown">Неизвестно</string>
     <string name="piko_tap_to_view">нажмите, чтобы просмотреть</string>

@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">Wyłącz status pisania</string>
     <string name="piko_disable_screenshot_detection">Wyłącz wykrywanie zrzutów ekranu</string>
     <string name="piko_view_dm_anonymously">Czytaj wiadomości anonimowo</string>
+    <string name="piko_view_dm_anonymously_desc">Gdy ta opcja jest włączona, inni nie widzą, kiedy odczytasz ich wiadomości. Jeśli zarówno to ustawienie, jak i \"Włącz wszystkie tryby ducha\" są wyłączone, zastosowane zostanie ustawienie Instagrama \"Pokaż potwierdzenia odczytu\"</string>
     <string name="piko_turn_on_all_ghost_modes">Włącz wszystkie tryby ducha</string>
     <string name="piko_ghost_modes_on">Tryb ducha: WŁĄCZONY</string>
     <string name="piko_ghost_modes_default">Tryb ducha: DOMYŚLNY</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">Zapętl relację</string>
     <string name="piko_loop_story_desc">Odtwarzaj ponownie bieżącą relację po jej zakończeniu</string>
     <string name="piko_disable_video_autoplay">Wyłącz autoodtwarzanie filmu</string>
-    <string name="piko_stories_audio_autoplay">Autoodtwarzanie dźwięku w relacjach</string>
     <string name="piko_customise_story_timestamp">Dostosuj format czasu relacji</string>
     <string name="piko_customise_story_timestamp_desc">Zmienia format wyświetlania czasu publikacji relacji</string>
     <string name="piko_improve_image_viewing">Popraw jakość obrazów</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">Zablokuj znikanie multimediów</string>
     <string name="piko_unlimited_replays_desc">Zmienia znikające zdjęcia i filmy na widoczne na stałe</string>
     <string name="piko_enable_mark_chat_as_read">Włącz opcję oznaczania czatu jako przeczytanego</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Dodaje opcję oznaczenia czatu jako przeczytanego po przytrzymaniu konwersacji</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Dodaje opcję oznaczenia czatu jako przeczytanego po jego przytrzymaniu. Gdy oznaczysz czat jako przeczytany, inni zobaczą, że ich wiadomości zostały odczytane, nawet jeśli włączono \"Czytaj wiadomości anonimowo\"</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Pobieranie multimediów</string>
     <string name="piko_enable_download">Włącz pobieranie</string>
@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">Pobiera przeglądane multimedia od razu bez wyświetlania okna opcji</string>
     <string name="piko_download_username_folder">Grupuj pobrania według nazwy użytkownika</string>
     <string name="piko_download_username_folder_desc">Tworzy osobne podfoldery dla każdego twórcy</string>
+    <string name="piko_embed_download_metadata">Osadź metadane filmu</string>
+    <string name="piko_embed_download_metadata_desc">Dodaje opis, link do posta, twórcę i datę przesłania do pobranych plików MP4</string>
     <string name="piko_download_current_media">Pobierz aktualny plik</string>
     <string name="piko_download_as_image">Pobierz jako obraz</string>
     <string name="piko_video_variants">Warianty filmu</string>
@@ -305,13 +307,11 @@
     <string name="piko_save_deleted_messages">Zapisuj usunięte wiadomości</string>
     <string name="piko_save_deleted_messages_desc">Przechwytuje przychodzące wiadomości prywatne lokalnie, gdy docierają z serwera. Oznacza wiadomości jako usunięte w przypadku cofnięcia ich wysłania, dzięki czemu możesz je odczytać nawet po usunięciu przez nadawcę.</string>
     <string name="piko_view_deleted_messages">Wyświetl usunięte wiadomości</string>
-    <string name="piko_deleted_in_chat">Usunięte w tym czacie</string>
     <string name="piko_all_deleted_messages">Wszystkie usunięte wiadomości</string>
-    <string name="piko_clear">Wyczyść</string>
-    <string name="piko_clear_chat_confirm">Wyczyścić usunięte wiadomości w tym czacie?</string>
-    <string name="piko_clear_all_confirm">Wyczyścić WSZYSTKIE zapisane usunięte wiadomości?</string>
     <string name="piko_no_deleted_messages">Nie przechwycono jeszcze żadnych usuniętych wiadomości.\nWłącz tę funkcję, a wiadomości będą zapisywane w momencie ich nadejścia.</string>
-    <string name="piko_delete_saved_confirm">Usunąć tę zapisaną wiadomość?</string>
+    <string name="piko_all">Wszystkie</string>
+    <string name="piko_selected_count">%d wybranych</string>
+    <string name="piko_delete_selected_confirm">Usunąć %d wybranych wiadomości?</string>
     <string name="piko_delete">Usuń</string>
     <string name="piko_unknown">Nieznane</string>
     <string name="piko_tap_to_view">dotknij, aby wyświetlić</string>

@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">入力状態を非表示</string>
     <string name="piko_disable_screenshot_detection">スクリーンショットの検出を無効化</string>
     <string name="piko_view_dm_anonymously">DMを匿名で閲覧</string>
+    <string name="piko_view_dm_anonymously_desc">有効にすると、メッセージを読んだことが相手に表示されません。この設定と「すべての匿名モードを有効化」の両方が無効の場合は、Instagramの「開封証明を表示」設定に従います</string>
     <string name="piko_turn_on_all_ghost_modes">すべての匿名モードを有効化</string>
     <string name="piko_ghost_modes_on">匿名モード：有効</string>
     <string name="piko_ghost_modes_default">匿名モード：無効</string>
@@ -57,7 +58,7 @@
     <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
     <string name="piko_hide_stories_tray_desc">メインフィードからストーリーズ欄を非表示にします</string>
     <string name="piko_hide_notes_tray">ノート欄を非表示</string>
-    <string name="piko_hide_notes_tray_desc">DMセクションのノート欄を非表示にします</string>
+    <string name="piko_hide_notes_tray_desc">DMのノート欄を非表示にします</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">シェアシートのグループ作成ボタンを非表示</string>
     <string name="piko_disable_double_tap_like_post">投稿をダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_reel">リールをダブルタップして「いいね！」を無効化</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">ストーリーをループ再生</string>
     <string name="piko_loop_story_desc">終了時に現在のストーリーを再生します</string>
     <string name="piko_disable_video_autoplay">動画を自動で再生しない</string>
-    <string name="piko_stories_audio_autoplay">ストーリーズの音声を自動で再生</string>
     <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
     <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
     <string name="piko_improve_image_viewing">画像を高画質で表示</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">一時的なメディアを永続的にする</string>
     <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
     <string name="piko_enable_mark_chat_as_read">チャットを既読にするオプションを有効化</string>
-    <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にできるオプションを追加します</string>
+    <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にするオプションを追加します。「DMを匿名で閲覧」が有効でも、手動で既読にすると相手に既読が表示されます</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">メディアのダウンロード</string>
     <string name="piko_enable_download">ダウンロードを有効化</string>
@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
     <string name="piko_download_username_folder">ユーザーネームごとにメディアを分ける</string>
     <string name="piko_download_username_folder_desc">ユーザーネームごとにサブフォルダを作成します</string>
+    <string name="piko_embed_download_metadata">メタデータを埋め込む</string>
+    <string name="piko_embed_download_metadata_desc">ダウンロードしたMP4ファイルに、キャプション、投稿リンク、作成者、アップロード日を追加します</string>
     <string name="piko_download_current_media">現在のメディアをダウンロード</string>
     <string name="piko_download_as_image">画像としてダウンロード</string>
     <string name="piko_video_variants">動画の解像度</string>
@@ -305,13 +307,11 @@
     <string name="piko_save_deleted_messages">削除したメッセージを保存</string>
     <string name="piko_save_deleted_messages_desc">サーバーから届いたDMを受信時にローカルへ保存します。送信を取り消したメッセージには削除済みのマークを付けるため、送信者が削除した後でも確認できます。</string>
     <string name="piko_view_deleted_messages">削除したメッセージを表示</string>
-    <string name="piko_deleted_in_chat">このチャットで削除</string>
     <string name="piko_all_deleted_messages">すべての削除したメッセージ</string>
-    <string name="piko_clear">削除</string>
-    <string name="piko_clear_chat_confirm">このチャットの削除したメッセージを削除しますか？</string>
-    <string name="piko_clear_all_confirm">削除したメッセージをすべて削除しますか？</string>
     <string name="piko_no_deleted_messages">削除したメッセージはありません。\nこの機能を有効にすると、メッセージを受信時に保存されます。</string>
-    <string name="piko_delete_saved_confirm">この保存したメッセージを削除しますか？</string>
+    <string name="piko_all">すべて</string>
+    <string name="piko_selected_count">%d件選択中</string>
+    <string name="piko_delete_selected_confirm">%d件のメッセージを削除しますか？</string>
     <string name="piko_delete">削除</string>
     <string name="piko_unknown">不明</string>
     <string name="piko_tap_to_view">タップして表示</string>
