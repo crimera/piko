@@ -1,3 +1,14 @@
+## [3.10.0-dev.2](https://github.com/crimera/piko/compare/v3.10.0-dev.1...v3.10.0-dev.2) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* **github:** use existing enhancement label and add missing twitter label ([6337845](https://github.com/crimera/piko/commit/63378453c020ce89f490e802356418816be6820a))
+* **twitter - `Bring Back Twitter`:** support to new versions ([ff97563](https://github.com/crimera/piko/commit/ff975634c0e30b87fbb06cdcae556ff00f351a7a))
+
+### ✨ New Features
+
+* **Instagram:** Embed metadata in downloaded videos ([#1828](https://github.com/crimera/piko/issues/1828)) ([9493252](https://github.com/crimera/piko/commit/949325266af15c51477101be81ad8692bb439557))
+
 ## [3.10.0-dev.1](https://github.com/crimera/piko/compare/v3.9.0...v3.10.0-dev.1) (2026-09-03)
 
 ### 🐛 Bug Fixes
