@@ -1,3 +1,9 @@
+## [3.10.0-dev.3](https://github.com/crimera/piko/compare/v3.10.0-dev.2...v3.10.0-dev.3) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* Revert "fix(twitter - `Bring Back Twitter`): support to new versions" ([df9b407](https://github.com/crimera/piko/commit/df9b4079d33aea17dcda5e4ebacd7bc4307421b9))
+
 ## [3.10.0-dev.2](https://github.com/crimera/piko/compare/v3.10.0-dev.1...v3.10.0-dev.2) (2026-09-04)
 
 ### 🐛 Bug Fixes

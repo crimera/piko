@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.10.0-dev.2",
+  "version": "3.10.0-dev.3",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -177,34 +177,6 @@
           "targets": [
             {
               "version": "12.19.1-release.0",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.20.5-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.21.1-prod.05",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.22.0-beta.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.22.0-prod.01",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
