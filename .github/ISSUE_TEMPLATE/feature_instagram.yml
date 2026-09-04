@@ -1,7 +1,7 @@
 name: "⭐ Instagram feature"
 description: Request an Instagram feature.
 title: "feature(Instagram): "
-labels: ["feature", "instagram"]
+labels: ["enhancement", "instagram"]
 body:
   - type: markdown
     attributes:
