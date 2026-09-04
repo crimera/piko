@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-04T04:48:22",
-  "description": "## [3.10.0-dev.3](https://github.com/crimera/piko/compare/v3.10.0-dev.2...v3.10.0-dev.3) (2026-09-04)\n\n### 🐛 Bug Fixes\n\n* Revert \"fix(twitter - `Bring Back Twitter`): support to new versions\" ([df9b407](https://github.com/crimera/piko/commit/df9b4079d33aea17dcda5e4ebacd7bc4307421b9))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.3/patches-3.10.0-dev.3.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.3/patches-3.10.0-dev.3.mpp.asc",
-  "version": "3.10.0-dev.3"
+  "created_at": "2026-09-04T22:11:43",
+  "description": "## [3.10.0-dev.4](https://github.com/crimera/piko/compare/v3.10.0-dev.3...v3.10.0-dev.4) (2026-09-04)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Add missing entity dependencies ([#1833](https://github.com/crimera/piko/issues/1833)) ([a19b255](https://github.com/crimera/piko/commit/a19b255eccd3b2fed5474bc481ab7f3ae6640be9))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.4/patches-3.10.0-dev.4.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.4/patches-3.10.0-dev.4.mpp.asc",
+  "version": "3.10.0-dev.4"
 }
