@@ -15,10 +15,12 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
@@ -30,6 +32,8 @@ private const val CUSTOM_DOMAIN_VALIDATOR_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/CustomSharingDomainValidator;"
 private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesheet/"
 private const val SHARE_IMPL_DESCRIPTOR_PREFIX = "Lcom/x/share/impl/"
+private const val MOVED_SHARE_HELPER_DESCRIPTOR_PREFIX =
+    "Lcom/google/android/gms/internal/mlkit_vision_common/"
 private const val LEGACY_SHARE_COPY_DESCRIPTOR_PREFIX = "Lcom/x/reactwithvideo/"
 private const val NAVIGATION_DESCRIPTOR_PREFIX = "Lcom/x/navigation/"
 private const val SHARE_STATUS_URL_PREFIX = "https://x.com/i/status/"
@@ -37,6 +41,11 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val INTENT_DESCRIPTOR = "Landroid/content/Intent;"
 private const val SEND_ACTION = "android.intent.action.SEND"
 private const val EXTRA_TEXT = "android.intent.extra.TEXT"
+
+private data class ShareIntentCallSite(
+    val instructionIndex: Int,
+    val urlRegister: Int,
+)
 
 /**
  * Share-sheet constructor that owns the final URL field. The status URL is a stable semantic
@@ -67,6 +76,14 @@ internal object LegacyShareSheetCopyFingerprint : Fingerprint(
 /** Shared Intent builder used by both the system chooser and direct-app share actions. */
 internal object ShareIntentBuilderFingerprint : Fingerprint(
     definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
+    parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
+    returnType = INTENT_DESCRIPTOR,
+    filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
+)
+
+/** Share Intent helper moved out of the share implementation package in 12.23. */
+internal object MovedShareIntentBuilderFingerprint : Fingerprint(
+    definingClass = MOVED_SHARE_HELPER_DESCRIPTOR_PREFIX,
     parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
     returnType = INTENT_DESCRIPTOR,
     filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
@@ -175,16 +192,66 @@ private fun hookShareSheetCopyCallbacks() {
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareIntentBuilder() {
-    ShareIntentBuilderFingerprint
-        .requireSingleMatch("NewX share Intent builder")
-        .method
-        .addInstructions(
+    val currentMatches = ShareIntentBuilderFingerprint.scopedMatchAllOrNull().orEmpty()
+    val movedMatches = MovedShareIntentBuilderFingerprint.scopedMatchAllOrNull().orEmpty()
+    if (currentMatches.size + movedMatches.size != 1) {
+        throw PatchException(
+            "Expected one NewX share Intent builder variant, found " +
+                (currentMatches.size + movedMatches.size),
+        )
+    }
+
+    if (currentMatches.size == 1) {
+        currentMatches.single().method.addInstructions(
             0,
             """
             invoke-static {p0}, $CHANGE_DOMAIN_METHOD
             move-result-object p0
             """.trimIndent(),
         )
+        return
+    }
+
+    hookMovedShareIntentCalls(movedMatches.single().method)
+}
+
+context(context: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookMovedShareIntentCalls(helperMethod: MutableMethod) {
+    val copyMatch = ShareSheetCopyCallbackFingerprint.requireSingleMatch("NewX share-sheet copy callback")
+    val shareClass = context.classDefByOrNull(copyMatch.method.definingClass)
+        ?: throw PatchException(
+            "NewX share implementation class is missing: ${copyMatch.method.definingClass}",
+        )
+    val methodsWithCalls = buildList {
+        shareClass.methods.forEach { method ->
+            val callSites = method.implementation?.instructions?.mapIndexedNotNull { index, instruction ->
+                if (instruction.opcode != Opcode.INVOKE_STATIC &&
+                    instruction.opcode != Opcode.INVOKE_STATIC_RANGE
+                ) {
+                    return@mapIndexedNotNull null
+                }
+                val reference = instruction.getReference<MethodReference>()
+                    ?: return@mapIndexedNotNull null
+                if (!reference.matches(helperMethod)) return@mapIndexedNotNull null
+                val urlRegister = instruction.registersUsed.firstOrNull()
+                    ?: throw PatchException("NewX share Intent call has no URL argument: $method")
+                ShareIntentCallSite(index, urlRegister)
+            }.orEmpty()
+            if (callSites.isEmpty()) return@forEach
+            val mutableMethod = method as? MutableMethod
+                ?: throw PatchException("NewX share Intent call method is not mutable: $method")
+            add(mutableMethod to callSites)
+        }
+    }
+    if (methodsWithCalls.isEmpty()) {
+        throw PatchException("NewX moved share Intent helper has no share implementation call sites")
+    }
+
+    methodsWithCalls.forEach { (method, callSites) ->
+        callSites.asReversed().forEach { callSite ->
+            method.addDomainRewrite(callSite.instructionIndex, callSite.urlRegister)
+        }
+    }
 }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
@@ -277,6 +344,12 @@ private fun MutableMethod.findStatusUrlResultIndices(): List<Int> =
         }
         resultIndex
     }
+
+private fun MethodReference.matches(method: MutableMethod): Boolean =
+    definingClass == method.definingClass &&
+        name == method.name &&
+        returnType == method.returnType &&
+        parameterTypes.map(CharSequence::toString) == method.parameterTypes.map(CharSequence::toString)
 
 private fun MutableMethod.addDomainRewrite(instructionIndex: Int, register: Int) {
     val invokeOpcode = if (register <= 15) "invoke-static" else "invoke-static/range"
