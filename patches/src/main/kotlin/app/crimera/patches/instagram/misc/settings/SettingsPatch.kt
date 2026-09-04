@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEntity
+import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
@@ -48,6 +49,7 @@ val settingsPatch =
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
             profileInfoEntity,
+            instagramDialogBoxEntity,
             instagramButtonEntity,
             developerOptionsEntity,
             addResourcesPatch,
