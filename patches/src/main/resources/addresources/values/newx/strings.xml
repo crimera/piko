@@ -95,6 +95,8 @@
     <string name="piko_newx_media_picker_copy_link_summary">Shows a button for copying media URLs in the download media picker</string>
     <string name="piko_newx_media_picker_thumbnails_title">Load media thumbnails</string>
     <string name="piko_newx_media_picker_thumbnails_summary">Loads image previews in the download media picker instead of media type icons</string>
+    <string name="piko_newx_media_picker_merge_button_title">Show merge button</string>
+    <string name="piko_newx_media_picker_merge_button_summary">Shows a button to download and merge split artwork images in the media picker</string>
     <string name="piko_newx_inline_download_conflict_title">When media already exists</string>
     <string name="piko_newx_inline_download_conflict_summary">How re-downloading a post that already has saved media is handled</string>
     <string name="piko_newx_inline_download_conflict_overwrite">Overwrite the existing file</string>

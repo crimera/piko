@@ -35,6 +35,7 @@ import app.morphe.extension.newx.utils.NewXUtils;
 public final class MediaPickerDialog {
     private static final String COPY_LINK_SETTING_ID = "newx.content.media_picker_copy_link";
     private static final String THUMBNAILS_SETTING_ID = "newx.content.media_picker_thumbnails";
+    private static final String MERGE_BUTTON_SETTING_ID = "newx.content.media_picker_merge_button";
     private static final String LOG_PREFIX = "[PikoNewX][MediaPicker] ";
 
     public interface OnMediaSelectedListener {
@@ -102,22 +103,25 @@ public final class MediaPickerDialog {
             loadedThumbnails.add(null);
         }
 
+        boolean mergeEnabled = mergeButtonEnabled();
         int imageCount = 0;
         for (InlineDownloadButton.DownloadItem item : downloads) {
             if (isImage(item)) imageCount++;
         }
-        final boolean canMerge = imageCount >= 2;
+        final boolean canMerge = mergeEnabled && imageCount >= 2;
 
         // Create merge action button (placed to the left of download button)
-        final ButtonView mergeButton = new ButtonView(
-                current,
-                ButtonView.ButtonStyle.TONAL,
-                "Download & Merge"
-        );
-        if (!canMerge) {
-            mergeButton.setVisibility(View.GONE);
+        final ButtonView mergeButton;
+        if (canMerge) {
+            mergeButton = new ButtonView(
+                    current,
+                    ButtonView.ButtonStyle.TONAL,
+                    "Download & Merge"
+            );
+            dialog.addButton(mergeButton);
+        } else {
+            mergeButton = null;
         }
-        dialog.addButton(mergeButton);
 
         // Create download action button
         final ButtonView downloadButton = new ButtonView(
@@ -163,12 +167,14 @@ public final class MediaPickerDialog {
                 }
                 downloadButton.setVisibility(View.VISIBLE);
 
-                if (selectedImageCount >= 2) {
-                    mergeButton.setText("Merge (" + selectedImageCount + ")");
-                    mergeButton.setVisibility(View.VISIBLE);
-                    mergeButton.setEnabled(true);
-                } else {
-                    mergeButton.setVisibility(View.GONE);
+                if (mergeButton != null) {
+                    if (selectedImageCount >= 2) {
+                        mergeButton.setText("Merge (" + selectedImageCount + ")");
+                        mergeButton.setVisibility(View.VISIBLE);
+                        mergeButton.setEnabled(true);
+                    } else {
+                        mergeButton.setVisibility(View.GONE);
+                    }
                 }
             } else {
                 dialog.setTitle("Download media");
@@ -181,12 +187,21 @@ public final class MediaPickerDialog {
                     downloadButton.setVisibility(View.GONE);
                 }
 
-                if (canMerge) {
+                if (mergeButton != null) {
                     mergeButton.setText("Download & Merge");
                     mergeButton.setVisibility(View.VISIBLE);
                     mergeButton.setEnabled(true);
-                } else {
-                    mergeButton.setVisibility(View.GONE);
+                }
+            }
+
+            if (mergeButton != null) {
+                LinearLayout.LayoutParams dlParams = (LinearLayout.LayoutParams) downloadButton.getLayoutParams();
+                if (dlParams != null) {
+                    int marginStart = mergeButton.getVisibility() == View.VISIBLE ? Theme.dpToPx(current, 10f) : 0;
+                    if (dlParams.getMarginStart() != marginStart) {
+                        dlParams.setMarginStart(marginStart);
+                        downloadButton.setLayoutParams(dlParams);
+                    }
                 }
             }
 
@@ -350,30 +365,32 @@ public final class MediaPickerDialog {
             NewXLogger.printInfo(() -> LOG_PREFIX + "thumbnail loading disabled; using media-type icons");
         }
 
-        mergeButton.setOnClickListener(v -> {
-            NewXLogger.printInfo(() ->
-                    LOG_PREFIX + "merge button tapped selectionMode=" + isSelectionMode[0] +
-                            " selected=" + selectedIndices
-            );
-            List<InlineDownloadButton.DownloadItem> toMerge = new ArrayList<>();
-            if (isSelectionMode[0]) {
-                for (int idx : selectedIndices) {
-                    InlineDownloadButton.DownloadItem item = downloads.get(idx);
-                    if (isImage(item)) {
-                        toMerge.add(item);
+        if (mergeButton != null) {
+            mergeButton.setOnClickListener(v -> {
+                NewXLogger.printInfo(() ->
+                        LOG_PREFIX + "merge button tapped selectionMode=" + isSelectionMode[0] +
+                                " selected=" + selectedIndices
+                );
+                List<InlineDownloadButton.DownloadItem> toMerge = new ArrayList<>();
+                if (isSelectionMode[0]) {
+                    for (int idx : selectedIndices) {
+                        InlineDownloadButton.DownloadItem item = downloads.get(idx);
+                        if (isImage(item)) {
+                            toMerge.add(item);
+                        }
+                    }
+                } else {
+                    for (InlineDownloadButton.DownloadItem item : downloads) {
+                        if (isImage(item)) {
+                            toMerge.add(item);
+                        }
                     }
                 }
-            } else {
-                for (InlineDownloadButton.DownloadItem item : downloads) {
-                    if (isImage(item)) {
-                        toMerge.add(item);
-                    }
-                }
-            }
-            if (toMerge.size() < 2) return;
-            dialog.dismiss();
-            listener.onDownloadAndMerge(toMerge);
-        });
+                if (toMerge.size() < 2) return;
+                dialog.dismiss();
+                listener.onDownloadAndMerge(toMerge);
+            });
+        }
 
         downloadButton.setOnClickListener(v -> {
             NewXLogger.printInfo(() ->
@@ -418,6 +435,10 @@ public final class MediaPickerDialog {
 
     private static boolean thumbnailsEnabled() {
         return SettingsRegistry.getBooleanOrDefault(THUMBNAILS_SETTING_ID, true);
+    }
+
+    private static boolean mergeButtonEnabled() {
+        return SettingsRegistry.getBooleanOrDefault(MERGE_BUTTON_SETTING_ID, true);
     }
 
     private static IconView.IconType resolveIconType(InlineDownloadButton.DownloadItem item) {
