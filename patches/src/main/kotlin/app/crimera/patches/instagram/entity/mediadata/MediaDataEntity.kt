@@ -10,6 +10,10 @@ import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMedia
 import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.MEDIAEXT_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
+import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
+import app.crimera.patches.instagram.entity.videoData.videoDataEntity
 import app.crimera.patches.instagram.utils.Constants.MUSIC_INFO_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
@@ -36,7 +40,7 @@ val mediaDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the media data",
     ) {
-        dependsOn(decoderEntity)
+        dependsOn(decoderEntity, userDataEntity, videoDataEntity, originalSoundDataIntfEntity, trackDataIntfEntity)
         execute {
             // Pin the getter class before any fingerprint resolves.
             mediaModelClass =
