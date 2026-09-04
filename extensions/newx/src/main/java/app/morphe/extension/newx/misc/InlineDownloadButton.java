@@ -591,6 +591,11 @@ public final class InlineDownloadButton {
                     public void onDownloadAll() {
                         enqueueAllDownloads(context, downloads, username, postId);
                     }
+
+                    @Override
+                    public void onDownloadAndMerge(List<DownloadItem> items) {
+                        MediaMerger.downloadAndMerge(context, items, username, postId);
+                    }
                 }
         );
     }
@@ -940,7 +945,7 @@ public final class InlineDownloadButton {
         return true;
     }
 
-    private static void deleteExistingMedia(
+    static void deleteExistingMedia(
             ContentResolver resolver,
             Uri collection,
             String fileName,
@@ -1037,7 +1042,7 @@ public final class InlineDownloadButton {
         return baseName + suffix + "." + safeFileSegment(extension, "bin");
     }
 
-    private static String safeFileSegment(String value, String fallback) {
+    static String safeFileSegment(String value, String fallback) {
         if (value == null) return fallback;
 
         String sanitized = value.trim().replaceFirst("^@", "")
@@ -1072,7 +1077,7 @@ public final class InlineDownloadButton {
         Utils.showToastShort(String.join(", ", parts));
     }
 
-    private static ConflictBehavior conflictBehavior() {
+    static ConflictBehavior conflictBehavior() {
         String value = SettingsRegistry.getStringOrDefault(
                 CONFLICT_SETTING,
                 DEFAULT_CONFLICT_BEHAVIOR.name()
@@ -1084,7 +1089,7 @@ public final class InlineDownloadButton {
     }
 
     @androidx.annotation.Nullable
-    private static String resolveTargetFileName(
+    static String resolveTargetFileName(
             Context context,
             String baseFileName,
             ConflictBehavior behavior,

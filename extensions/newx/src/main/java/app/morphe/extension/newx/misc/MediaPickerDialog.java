@@ -40,6 +40,7 @@ public final class MediaPickerDialog {
     public interface OnMediaSelectedListener {
         void onDownloadItem(int index);
         void onDownloadAll();
+        void onDownloadAndMerge(List<InlineDownloadButton.DownloadItem> items);
     }
 
     private MediaPickerDialog() {
@@ -101,6 +102,23 @@ public final class MediaPickerDialog {
             loadedThumbnails.add(null);
         }
 
+        int imageCount = 0;
+        for (InlineDownloadButton.DownloadItem item : downloads) {
+            if (isImage(item)) imageCount++;
+        }
+        final boolean canMerge = imageCount >= 2;
+
+        // Create merge action button (placed to the left of download button)
+        final ButtonView mergeButton = new ButtonView(
+                current,
+                ButtonView.ButtonStyle.TONAL,
+                "Download & Merge"
+        );
+        if (!canMerge) {
+            mergeButton.setVisibility(View.GONE);
+        }
+        dialog.addButton(mergeButton);
+
         // Create download action button
         final ButtonView downloadButton = new ButtonView(
                 current,
@@ -125,6 +143,15 @@ public final class MediaPickerDialog {
                 isSelectionMode[0] = false;
             }
 
+            int selectedImageCount = 0;
+            if (isSelectionMode[0]) {
+                for (int idx : selectedIndices) {
+                    if (isImage(downloads.get(idx))) {
+                        selectedImageCount++;
+                    }
+                }
+            }
+
             if (isSelectionMode[0]) {
                 dialog.setTitle("Select media");
                 dialog.setSubtitle(selectedCount + " of " + downloads.size() + " selected");
@@ -135,6 +162,14 @@ public final class MediaPickerDialog {
                     downloadButton.setText("Download (" + selectedCount + ")");
                 }
                 downloadButton.setVisibility(View.VISIBLE);
+
+                if (selectedImageCount >= 2) {
+                    mergeButton.setText("Merge (" + selectedImageCount + ")");
+                    mergeButton.setVisibility(View.VISIBLE);
+                    mergeButton.setEnabled(true);
+                } else {
+                    mergeButton.setVisibility(View.GONE);
+                }
             } else {
                 dialog.setTitle("Download media");
                 dialog.setSubtitle(defaultSubtitle);
@@ -144,6 +179,14 @@ public final class MediaPickerDialog {
                     downloadButton.setVisibility(View.VISIBLE);
                 } else {
                     downloadButton.setVisibility(View.GONE);
+                }
+
+                if (canMerge) {
+                    mergeButton.setText("Download & Merge");
+                    mergeButton.setVisibility(View.VISIBLE);
+                    mergeButton.setEnabled(true);
+                } else {
+                    mergeButton.setVisibility(View.GONE);
                 }
             }
 
@@ -307,6 +350,31 @@ public final class MediaPickerDialog {
             NewXLogger.printInfo(() -> LOG_PREFIX + "thumbnail loading disabled; using media-type icons");
         }
 
+        mergeButton.setOnClickListener(v -> {
+            NewXLogger.printInfo(() ->
+                    LOG_PREFIX + "merge button tapped selectionMode=" + isSelectionMode[0] +
+                            " selected=" + selectedIndices
+            );
+            List<InlineDownloadButton.DownloadItem> toMerge = new ArrayList<>();
+            if (isSelectionMode[0]) {
+                for (int idx : selectedIndices) {
+                    InlineDownloadButton.DownloadItem item = downloads.get(idx);
+                    if (isImage(item)) {
+                        toMerge.add(item);
+                    }
+                }
+            } else {
+                for (InlineDownloadButton.DownloadItem item : downloads) {
+                    if (isImage(item)) {
+                        toMerge.add(item);
+                    }
+                }
+            }
+            if (toMerge.size() < 2) return;
+            dialog.dismiss();
+            listener.onDownloadAndMerge(toMerge);
+        });
+
         downloadButton.setOnClickListener(v -> {
             NewXLogger.printInfo(() ->
                     LOG_PREFIX + "download button tapped selectionMode=" + isSelectionMode[0] +
@@ -331,6 +399,17 @@ public final class MediaPickerDialog {
         dialog.setScrollableBodyView(listContainer);
         dialog.show();
         NewXLogger.printInfo(() -> LOG_PREFIX + "picker shown");
+    }
+
+    static boolean isImage(InlineDownloadButton.DownloadItem item) {
+        if (item == null) return false;
+        if (item.mimeType != null && item.mimeType.startsWith("image/")) return true;
+        if (item.label != null && item.label.equalsIgnoreCase("image")) return true;
+        if (item.extension != null) {
+            String ext = item.extension.toLowerCase();
+            return ext.equals("jpg") || ext.equals("jpeg") || ext.equals("png") || ext.equals("webp");
+        }
+        return false;
     }
 
     private static boolean showCopyLinkButton() {
