@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Settings Search -->
-    <string name="piko_settings_search_hint">البحث في إعدادات Piko</string>
+    <string name="piko_settings_search_hint">استيراد إعدادات Piko</string>
     <string name="piko_settings_search_clear">مسح الإدخال</string>
     <string name="piko_settings_search_no_results">لا توجد نتائج لـ \"%s\"</string>
     <!-- Premium Settings -->

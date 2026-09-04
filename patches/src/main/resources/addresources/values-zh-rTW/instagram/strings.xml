@@ -81,7 +81,6 @@
     <string name="piko_disable_story_flipping">停用自動切換限時動態</string>
     <string name="piko_disable_story_flipping_desc">停用自動切換/移動至下一個限時動態</string>
     <string name="piko_disable_video_autoplay">停用影片自動播放</string>
-    <string name="piko_stories_audio_autoplay">限時動態音訊自動播放</string>
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
@@ -109,7 +108,6 @@
     <string name="piko_unlimited_replays">使限時媒體變為永久</string>
     <string name="piko_unlimited_replays_desc">將未過期的單次或雙次檢視媒體變更為永久檢視</string>
     <string name="piko_enable_mark_chat_as_read">啟用標記聊天為已讀選項</string>
-    <string name="piko_enable_mark_chat_as_read_desc">長按聊天時獲得將其標記為已讀的選項</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">下載媒體</string>
     <string name="piko_enable_download">啟用下載</string>

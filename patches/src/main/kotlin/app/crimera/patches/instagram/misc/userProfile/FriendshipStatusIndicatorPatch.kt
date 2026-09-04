@@ -6,9 +6,10 @@
 
 package app.crimera.patches.instagram.misc.userProfile
 
+import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
-import app.crimera.patches.instagram.entity.userfriendshipstatus.userFriendshipStatusEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -39,7 +40,7 @@ val friendshipStatusIndicatorPatch =
                 "shows a detailed friendship status breakdown on click",
     ) {
 
-        dependsOn(settingsPatch, userFriendshipStatusEntity, profileInfoEntity)
+        dependsOn(settingsPatch, userDataEntity, profileInfoEntity, instagramDialogBoxEntity)
 
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 

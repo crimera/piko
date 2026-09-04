@@ -148,10 +148,6 @@ public class SettingsStatus {
     public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() { disableAnalytics = true; }
-    public static boolean disableOnboardingPermissionPrompts = false;
-    public static void disableOnboardingPermissionPrompts() {
-        disableOnboardingPermissionPrompts = true;
-    }
     public static boolean disableDiscoverPeople = false;
     public static void disableDiscoverPeople() {
         disableDiscoverPeople = true;
@@ -196,20 +192,18 @@ public class SettingsStatus {
     }
     public static boolean disableVideoAutoplay = false;
     public static void disableVideoAutoplay() { disableVideoAutoplay = true; }
-    public static boolean storiesAudioAutoplay = false;
-    public static void storiesAudioAutoplay() { storiesAudioAutoplay = true; }
     public static boolean moreOptionsOnPost = false;
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton);}
+    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton);}
 
     //DM section
     public static boolean unlimitedReplaysOnEphemeralMedia = false;
     public static void unlimitedReplaysOnEphemeralMedia() {unlimitedReplaysOnEphemeralMedia = true;}
     public static boolean markChatAsRead = false;
     public static void markChatAsRead() { markChatAsRead = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || disableTypingStatus || viewDmAnonymously || saveDeletedMessages ;}
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages ;}
 
     //Download section.
     public static boolean downloadMedia = false;
@@ -240,8 +234,6 @@ public class SettingsStatus {
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
         FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
-        FLAGS.put(str("piko_stories_audio_autoplay"),SettingsStatus.storiesAudioAutoplay);
-
         FLAGS.put(str("piko_disable_video_autoplay"),SettingsStatus.disableVideoAutoplay);
         FLAGS.put(str("piko_remove_empty_bottom_space"),SettingsStatus.removeEmptyBottomSpace);
         FLAGS.put(str("piko_save_media_comment"),SettingsStatus.saveMediaCommentButton);
@@ -287,16 +279,12 @@ public class SettingsStatus {
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
         FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
-        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.storiesAudioAutoplay);
-
         FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
         FLAGS.put(str("piko_category_download_media"),SettingsStatus.downloadMedia);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
         FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
-        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.storiesAudioAutoplay);
-
         FLAGS.put(str("piko_enable_dev_options"),SettingsStatus.enableDeveloperOptions);
         FLAGS.put(str("piko_remove_build_expire_popup"),SettingsStatus.removeBuildExpirePopup);
         FLAGS.put(str("piko_enable_emp_options"),SettingsStatus.unlockEmployeeOptions);

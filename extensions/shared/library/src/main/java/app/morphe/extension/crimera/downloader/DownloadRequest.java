@@ -11,10 +11,21 @@ public class DownloadRequest {
     public String url;
     public String subFolder; 
     public String fileName;
+    public DownloadMetadata metadata;
 
     public DownloadRequest(String url, String subFolder, String fileName) {
+        this(url, subFolder, fileName, null);
+    }
+
+    public DownloadRequest(
+            String url,
+            String subFolder,
+            String fileName,
+            DownloadMetadata metadata
+    ) {
         this.url = url;
         this.subFolder = subFolder;
         this.fileName = fileName;
+        this.metadata = metadata;
     }
 }

@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">Désactiver l\'indicateur de saisie</string>
     <string name="piko_disable_screenshot_detection">Désactiver la détection des captures d\'écran</string>
     <string name="piko_view_dm_anonymously">Voir les messages directs anonymement</string>
+    <string name="piko_view_dm_anonymously_desc">Lorsque activée, les autres ne peuvent pas voir quand vous avez lu leurs messages. Lorsque ce paramètre et l\'option \'Activer tous les modes fantôme\' sont désactivés, c\'est le paramètre \'Afficher les accusés de réception\' d\'Instagram qui est utilisé</string>
     <string name="piko_turn_on_all_ghost_modes">Activer tous les modes fantôme</string>
     <string name="piko_ghost_modes_on">Mode fantôme : ACTIVÉ</string>
     <string name="piko_ghost_modes_default">Mode fantôme : DÉFAUT</string>
@@ -70,7 +71,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Désactiver les analyses</string>
     <string name="piko_delete_analytics_cache">Supprimer le cache des analyses</string>
-    <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs d\'Instagram/Facebook.</string>
+    <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs d\'Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Désactiver “Découvrir des personnes”</string>
     <string name="piko_disable_discover_people_desc">Désactive la section “Découvrir des personnes” sur le profil utilisateur</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">Story en boucle</string>
     <string name="piko_loop_story_desc">Rejouer la story actuelle lorsqu\'elle se termine</string>
     <string name="piko_disable_video_autoplay">Désactiver la lecture automatique des vidéos</string>
-    <string name="piko_stories_audio_autoplay">Lecture automatique de l\'audio des stories</string>
     <string name="piko_customise_story_timestamp">Personnaliser l\'horodatage de story</string>
     <string name="piko_customise_story_timestamp_desc">Personnaliser l\'horodatage qui indique quand la story a été publiée</string>
     <string name="piko_improve_image_viewing">Améliorer la visualisation des images</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">Rendre les médias éphémères permanents</string>
     <string name="piko_unlimited_replays_desc">Modifie les contenus à vue unique ou à double vue non expirés en vue permanente</string>
     <string name="piko_enable_mark_chat_as_read">Activer l\'option marquer la discussion comme lue</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Ajouter une option, lors d\'un appui long sur une discussion, permettant de la marquer comme lue</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Obtenez une option, en appuyant longuement sur la discussion, pour la marquer comme lue. Lorsque vous marquez une discussion comme lue, les autres utilisateurs peuvent voir que vous avez lu leurs messages, même lorsque l\'option \'Voir les messages directs anonymement\' est activée</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Télécharger le média</string>
     <string name="piko_enable_download">Activer le téléchargement</string>
@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">Télécharge le média actuellement affiché sans demander d\'options</string>
     <string name="piko_download_username_folder">Séparer les médias par nom d\'utilisateur</string>
     <string name="piko_download_username_folder_desc">Crée des sous-dossiers en fonction du nom d\'utilisateur</string>
+    <string name="piko_embed_download_metadata">Intégrer les métadonnées de la vidéo</string>
+    <string name="piko_embed_download_metadata_desc">Ajoute les sous-titres, le lien de la publication, le créateur et la date de mise en ligne aux fichiers MP4 téléchargés.</string>
     <string name="piko_download_current_media">Télécharger le média actuel</string>
     <string name="piko_download_as_image">Télécharger en tant qu\'image</string>
     <string name="piko_video_variants">Variantes vidéo</string>
@@ -305,13 +307,11 @@
     <string name="piko_save_deleted_messages">Enregistrer les messages supprimés</string>
     <string name="piko_save_deleted_messages_desc">Capture localement les messages privés entrants dès qu\'ils arrivent du serveur. Marque les messages comme supprimés lorsqu\'ils sont retirés, afin que vous puissiez encore les consulter même après que l\'expéditeur les supprime.</string>
     <string name="piko_view_deleted_messages">Voir les messages supprimés</string>
-    <string name="piko_deleted_in_chat">Supprimé dans cette discussion</string>
     <string name="piko_all_deleted_messages">Tous les messages supprimés</string>
-    <string name="piko_clear">Effacer</string>
-    <string name="piko_clear_chat_confirm">Effacer les messages supprimés de cette discussion ?</string>
-    <string name="piko_clear_all_confirm">Effacer TOUS les messages supprimés enregistrés ?</string>
     <string name="piko_no_deleted_messages">Aucun message supprimé n\'a encore été enregistré.\nActivez la fonctionnalité et les messages seront enregistrés dès leur réception.</string>
-    <string name="piko_delete_saved_confirm">Supprimer ce message enregistré ?</string>
+    <string name="piko_all">Tout</string>
+    <string name="piko_selected_count">%d sélectionné</string>
+    <string name="piko_delete_selected_confirm">Supprimer %d messages sélectionnés ?</string>
     <string name="piko_delete">Supprimer</string>
     <string name="piko_unknown">Inconnu</string>
     <string name="piko_tap_to_view">appuyer pour afficher</string>

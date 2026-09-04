@@ -40,6 +40,7 @@
     <string name="piko_disable_typing_status">Disable typing status</string>
     <string name="piko_disable_screenshot_detection">Disable screenshot detection</string>
     <string name="piko_view_dm_anonymously">View direct messages anonymously</string>
+    <string name="piko_view_dm_anonymously_desc">When enabled, others can\'t see when you\'ve read their messages. When both this setting and Turn on all ghost modes are disabled, Instagram\'s Show read receipts setting is used</string>
     <string name="piko_turn_on_all_ghost_modes">Turn on all ghost modes</string>
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
@@ -75,7 +76,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytic cache</string>
-    <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers.</string>
+    <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers</string>
     <string name="piko_disable_discover_people">Disable discover people</string>
     <string name="piko_disable_discover_people_desc">Disables discover people section on user profile</string>
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
@@ -94,7 +95,6 @@
     <string name="piko_loop_story">Loop story</string>
     <string name="piko_loop_story_desc">Replay the current story when it ends</string>
     <string name="piko_disable_video_autoplay">Disable video autoplay</string>
-    <string name="piko_stories_audio_autoplay">Stories audio autoplay</string>
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
     <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
@@ -129,7 +129,7 @@
     <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
@@ -138,6 +138,8 @@
     <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
     <string name="piko_download_username_folder">Split media by username</string>
     <string name="piko_download_username_folder_desc">Creates subfolders based on username</string>
+    <string name="piko_embed_download_metadata">Embed video metadata</string>
+    <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
     <string name="piko_download_current_media">Download current media</string>
     <string name="piko_download_as_image">Download as image</string>
     <string name="piko_video_variants">Video variants</string>
@@ -332,13 +334,11 @@
     <string name="piko_save_deleted_messages">Save deleted messages</string>
     <string name="piko_save_deleted_messages_desc">Captures incoming DMs locally as they arrive from the server. Marks messages as deleted when unsent, so you can view them even after the sender deletes them.</string>
     <string name="piko_view_deleted_messages">View deleted messages</string>
-    <string name="piko_deleted_in_chat">Deleted in this chat</string>
     <string name="piko_all_deleted_messages">All deleted messages</string>
-    <string name="piko_clear">Clear</string>
-    <string name="piko_clear_chat_confirm">Clear deleted messages for this chat?</string>
-    <string name="piko_clear_all_confirm">Clear ALL saved deleted messages?</string>
     <string name="piko_no_deleted_messages">No deleted messages captured yet.\nEnable the feature and messages will be saved as they arrive.</string>
-    <string name="piko_delete_saved_confirm">Delete this saved message?</string>
+    <string name="piko_all">All</string>
+    <string name="piko_selected_count">%d selected</string>
+    <string name="piko_delete_selected_confirm">Delete %d selected messages?</string>
     <string name="piko_delete">Delete</string>
     <string name="piko_unknown">Unknown</string>
     <string name="piko_tap_to_view">tap to view</string>

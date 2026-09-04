@@ -14,16 +14,14 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
+import app.morphe.extension.shared.MarkChatAsReadScope;
 
 @SuppressWarnings("unused")
 public class Pref {
     private static final int MAX_IMAGE_SIZE = 4096;
-    public static boolean SHOULD_MARK_CHAT_AS_READ;
-    static {
-        SHOULD_MARK_CHAT_AS_READ = false;
-    }
-    public static void setMarkChatAsReadIndicator(boolean bool) {
-        SHOULD_MARK_CHAT_AS_READ = bool;
+
+    private static String removeLineBreaks(String value) {
+        return value.replace("\r", "").replace("\n", "");
     }
 
     public static boolean clearAllPreferences() {
@@ -66,7 +64,7 @@ public class Pref {
     }
 
     public static String customSharingDomain() {
-        return SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+        return removeLineBreaks(SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN));
     }
 
     public static boolean getTurnOnAllGhostModes() {
@@ -104,18 +102,26 @@ public class Pref {
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
-        if(enableMarkChatAsReadOption() && SHOULD_MARK_CHAT_AS_READ){
+        return shouldBlockDmSeen(
+                SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
+                Pref.getTurnOnAllGhostModes(),
+                enableMarkChatAsReadOption()
+        );
+    }
+
+    static boolean shouldBlockDmSeen(
+            boolean viewDmAnonymously,
+            boolean allGhostModes,
+            boolean manualReadOptionEnabled
+    ) {
+        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
-        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
+        return viewDmAnonymously || allGhostModes;
     }
 
     public static boolean disableVideoAutoplay() {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
-    }
-
-    public static boolean storiesAudioAutoplay() {
-        return SharedPref.getBooleanPref(Settings.STORIES_AUDIO_AUTOPLAY);
     }
 
     public
@@ -235,6 +241,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
+    public static boolean embedDownloadMetadata() {
+        return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
     public static boolean hideNavigationFeed() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_FEED);
     }
@@ -299,7 +309,7 @@ public class Pref {
     }
 
     public static String externalDownloaderPackageName() {
-        return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+        return removeLineBreaks(SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME));
     }
 
     public static Set<String> mainFeedActionBarButtons() {

@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">Yazıyor durumunu devre dışı bırak</string>
     <string name="piko_disable_screenshot_detection">Ekran görüntüsü tespitini devre dışı bırak</string>
     <string name="piko_view_dm_anonymously">Mesajları anonim olarak görüntüle</string>
+    <string name="piko_view_dm_anonymously_desc">Etkinleştirildiğinde, mesajlarını okuduğunuzu başkaları göremez. Hem bu ayar hem de \"Tüm hayalet modlarını aç\" ayarı devre dışı bırakıldığında, Instagram\'ın okundu bilgilerini göster ayarı kullanılır</string>
     <string name="piko_turn_on_all_ghost_modes">Tüm görünmez modları etkinleştir</string>
     <string name="piko_ghost_modes_on">Görünmez mod: Açık</string>
     <string name="piko_ghost_modes_default">Görünmez mod: Varsayılan</string>
@@ -70,7 +71,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Analizleri devre dışı bırak</string>
     <string name="piko_delete_analytics_cache">Analiz önbelleğini sil</string>
-    <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analitikleri engeller.</string>
+    <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analitikleri engeller</string>
     <string name="piko_disable_discover_people">Kişileri keşfetmeyi kapat</string>
     <string name="piko_disable_discover_people_desc">Kullanıcı profilindeki Kişileri keşfet bölümünü devre dışı bırak</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">Hikayeyi döngüye al</string>
     <string name="piko_loop_story_desc">Mevcut hikaye bittiğinde yeniden oynatır</string>
     <string name="piko_disable_video_autoplay">Video otomatik oynatmayı kapat</string>
-    <string name="piko_stories_audio_autoplay">Hikaye sesini otomatik oynat</string>
     <string name="piko_customise_story_timestamp">Hikaye zaman damgasını özelleştir</string>
     <string name="piko_customise_story_timestamp_desc">Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştir</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">Kaybolan medyaları kalıcı yap</string>
     <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
     <string name="piko_enable_mark_chat_as_read">Sohbeti okundu olarak işaretle seçeneğini etkinleştir</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine basılı tutunca okundu olarak işaretleme seçeneği ekle</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine uzun basıldığında okundu olarak işaretleme seçeneği sunar. Bir sohbeti okundu olarak işaretlediğinizde, \"Mesajlar için hayalet modu\" etkin olsa bile başkaları mesajlarını okuduğunuzu görebilir</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Medya indirme</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>
@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">Mevcut görüntülenen medyayı seçenek sormadan indirir</string>
     <string name="piko_download_username_folder">Medyayı kullanıcı adına göre ayır</string>
     <string name="piko_download_username_folder_desc">Kullanıcı adına göre alt klasörler oluşturur</string>
+    <string name="piko_embed_download_metadata">Video meta verilerini göm</string>
+    <string name="piko_embed_download_metadata_desc">İndirilen MP4 dosyalarına açıklamayı, gönderi bağlantısını, oluşturucuyu ve yükleme tarihini ekler</string>
     <string name="piko_download_current_media">Mevcut medyayı indir</string>
     <string name="piko_download_as_image">Resim olarak indir</string>
     <string name="piko_video_variants">Video varyantları</string>
@@ -305,13 +307,11 @@
     <string name="piko_save_deleted_messages">Silinen mesajları kaydet</string>
     <string name="piko_save_deleted_messages_desc">Gelen DM\'leri sunucudan ulaştığı anda yerel olarak kaydeder. Gönderen kişi silese bile görebilmeniz için mesajları geri çekildiğinde silindi olarak işaretler.</string>
     <string name="piko_view_deleted_messages">Silinen mesajları görüntüle</string>
-    <string name="piko_deleted_in_chat">Bu sohbettekiler silindi</string>
     <string name="piko_all_deleted_messages">Tüm silinen mesajlar</string>
-    <string name="piko_clear">Temizle</string>
-    <string name="piko_clear_chat_confirm">Bu sohbetin silinen mesajları temizlensin mi?</string>
-    <string name="piko_clear_all_confirm">Kaydedilen TÜM silinen mesajlar temizlensin mi?</string>
     <string name="piko_no_deleted_messages">Henüz silinen bir mesaj yakalanmadı.\nÖzelliği etkinleştirdiğinizde mesajlar geldikçe kaydedilecektir.</string>
-    <string name="piko_delete_saved_confirm">Bu kaydedilen mesaj silinsin mi?</string>
+    <string name="piko_all">Tümü</string>
+    <string name="piko_selected_count">%d seçildi</string>
+    <string name="piko_delete_selected_confirm">Seçilen %d mesaj silinsin mi?</string>
     <string name="piko_delete">Sil</string>
     <string name="piko_unknown">Bilinmiyor</string>
     <string name="piko_tap_to_view">görüntülemek için dokun</string>

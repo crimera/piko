@@ -42,7 +42,16 @@ public class DirectItem extends Entity {
 
     public String getItemId() {
         try {
-            Object v = this.readBaseField("fieldName");
+            Object v = this.readBaseField("itemIdField");
+            return v instanceof String ? (String) v : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public String getClientContext() {
+        try {
+            Object v = this.readBaseField("clientContextField");
             return v instanceof String ? (String) v : null;
         } catch (Exception e) {
             return null;

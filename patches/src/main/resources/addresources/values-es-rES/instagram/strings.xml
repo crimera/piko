@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">Desactivar el estado de escribiendo</string>
     <string name="piko_disable_screenshot_detection">Desactivar la detección de capturas de pantalla</string>
     <string name="piko_view_dm_anonymously">Ver mensajes directos de forma anónima</string>
+    <string name="piko_view_dm_anonymously_desc">Cuando está habilitado, otros no pueden ver cuándo has leído sus mensajes. Cuando tanto esta configuración como Activar todos los modos fantasma están deshabilitados, se utiliza la configuración Mostrar recibos leídos de Instagram</string>
     <string name="piko_turn_on_all_ghost_modes">Activa todos los recursos del Modo Fantasma</string>
     <string name="piko_ghost_modes_on">Modo Fantasma: Activado</string>
     <string name="piko_ghost_modes_default">Modo Fantasma: Predeterminado</string>
@@ -70,7 +71,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Desactivar analíticas</string>
     <string name="piko_delete_analytics_cache">Eliminar caché de analíticas</string>
-    <string name="piko_disable_analytics_desc">Bloquee los análisis que se envían a los servidores de Instagram/Facebook.</string>
+    <string name="piko_disable_analytics_desc">Bloquee los análisis que se envían a los servidores de Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Desactivar descubrir personas</string>
     <string name="piko_disable_discover_people_desc">Desactiva la sección de descubrir personas en el perfil de usuario</string>
     <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">Historia en bucle</string>
     <string name="piko_loop_story_desc">Repite la historia actual cuando termine</string>
     <string name="piko_disable_video_autoplay">Desactivar reproducción automática de videos</string>
-    <string name="piko_stories_audio_autoplay">Reproducción automática de audio en historias</string>
     <string name="piko_customise_story_timestamp">Personalizar horario de la historia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizar el horario mostrado de cuando se publicó la historia</string>
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">Convertir los medios efímeros en permanentes</string>
     <string name="piko_unlimited_replays_desc">Transforma medios de visualización única o doble en visualización permanente</string>
     <string name="piko_enable_mark_chat_as_read">Habilitar la opción de marcar el chat como leído</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Al mantener pulsado el chat, aparecerá una opción para marcarlo como leído</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Obtenga una opción, al presionar prolongadamente el chat, para marcarlo como leído. Cuando marcas un chat como leído, otros pueden ver que has leído sus mensajes, incluso cuando Ver mensajes directos de forma anónima está habilitado</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Descargar medios</string>
     <string name="piko_enable_download">Activar descarga</string>
@@ -305,13 +305,11 @@
     <string name="piko_save_deleted_messages">Guardar mensajes eliminados</string>
     <string name="piko_save_deleted_messages_desc">Captura los DM entrantes localmente a medida que llegan desde el servidor. Marca los mensajes como eliminados cuando no se envían, para que puedas verlos incluso después de que el remitente los elimine.</string>
     <string name="piko_view_deleted_messages">Ver mensajes eliminados</string>
-    <string name="piko_deleted_in_chat">Eliminado en este chat</string>
     <string name="piko_all_deleted_messages">Todos los mensajes eliminados</string>
-    <string name="piko_clear">Limpio</string>
-    <string name="piko_clear_chat_confirm">¿Borrar mensajes eliminados de este chat?</string>
-    <string name="piko_clear_all_confirm">¿Borrar TODOS los mensajes eliminados guardados?</string>
     <string name="piko_no_deleted_messages">Aún no se han capturado mensajes eliminados.\nHabilite la función y los mensajes se guardarán a medida que lleguen.</string>
-    <string name="piko_delete_saved_confirm">¿Eliminar este mensaje guardado?</string>
+    <string name="piko_all">Todo</string>
+    <string name="piko_selected_count">%d seleccionado</string>
+    <string name="piko_delete_selected_confirm">¿Eliminar %d mensajes seleccionados?</string>
     <string name="piko_delete">Eliminar</string>
     <string name="piko_unknown">Desconocido</string>
     <string name="piko_tap_to_view">toque para ver</string>

@@ -21,11 +21,6 @@ public class HookFlags {
     private static Map<String, Boolean> BOOL_FLAGS = new HashMap<>();
     private static DeveloperOptions developerOptions = new DeveloperOptions();
 
-    private static void onboardingPermissionPromptFlags() {
-        BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
-        BOOL_FLAGS.put("77866", false); //ig4a_d0_retention
-    }
-
     private static void simpleOverflowMenuFlags() {
         BOOL_FLAGS.put("104772", false); //ig_ini
         BOOL_FLAGS.put("117613::0", true); //ig_overflow_menu_icon::use_more_lines_icon

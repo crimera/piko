@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">Desativar o status de digitação</string>
     <string name="piko_disable_screenshot_detection">Desativar a detecção de captura de tela</string>
     <string name="piko_view_dm_anonymously">Visualizar mensagens no direct anonimamente</string>
+    <string name="piko_view_dm_anonymously_desc">Quando ativada, essa opção impede que outras pessoas vejam quando você leu as mensagens delas. Quando essa configuração e a opção \"Ativar todos os modos fantasmas\" estão desativadas, a configuração \"Mostrar confirmações de leitura\" do Instagram é utilizada</string>
     <string name="piko_turn_on_all_ghost_modes">Ativar todos os recursos do modo fantasma</string>
     <string name="piko_ghost_modes_on">Modo Fantasma: ATIVADO</string>
     <string name="piko_ghost_modes_default">Modo fantasma: PADRÃO</string>
@@ -51,7 +52,7 @@
     <string name="piko_limit_following_feed">Limitar feed aos perfis seguidos</string>
     <string name="piko_limit_following_feed_desc">Filtra o feed inicial para mostrar apenas conteúdo dos perfis que você segue.</string>
     <string name="piko_disable_reels_scrolling">Desativar a rolagem do Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">Desativa a rolagem infinita nos Reels do Instagram, impedindo que você deslize para o próximo Reel. Observação: em uma instalação limpa, a animação de \"Dica\" pode aparecer, mas parará sozinha após alguns segundos.</string>
+    <string name="piko_disable_reels_scrolling_desc">Desativa a rolagem infinita nos Reels do Instagram, impedindo que você deslize para o próximo Reels. Observação: em uma instalação limpa, a animação de \"Dica\" pode aparecer, mas parará sozinha após alguns segundos.</string>
     <string name="piko_disable_swipe_to_create">Desative o gesto de deslizar para criar</string>
     <string name="piko_disable_swipe_to_create_desc">Impede que a tela de criação seja aberta ao deslizar para a direita na aba inicial.</string>
     <string name="piko_hide_stories_tray">Ocultar a barra de stories</string>
@@ -70,7 +71,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Desativar análises</string>
     <string name="piko_delete_analytics_cache">Apagar cache de análises</string>
-    <string name="piko_disable_analytics_desc">Bloquear as análises enviadas aos servidores do Instagram/Facebook.</string>
+    <string name="piko_disable_analytics_desc">Bloqueie análises enviadas para os servidores do Instagram/Facebook.</string>
     <string name="piko_disable_discover_people">Desativar descobrir pessoas.</string>
     <string name="piko_disable_discover_people_desc">Desativar a seção de descobrir pessoas no perfil.</string>
     <string name="piko_follow_back_indicator">Ativar indicador de status de amizade</string>
@@ -89,7 +90,6 @@
     <string name="piko_loop_story">Stories em loop</string>
     <string name="piko_loop_story_desc">Repetir o stories em loop</string>
     <string name="piko_disable_video_autoplay">Desativar a reprodução automática de vídeo</string>
-    <string name="piko_stories_audio_autoplay">Reprodução automática de áudio nos stories</string>
     <string name="piko_customise_story_timestamp">Personalizar o formato do horário nos stories</string>
     <string name="piko_customise_story_timestamp_desc">Personalize o formato do horário mostrado de quando o stories foi postado.</string>
     <string name="piko_improve_image_viewing">Melhorar qualidade de imagens</string>
@@ -123,7 +123,7 @@
     <string name="piko_unlimited_replays">Tornar permanentes as mídias efêmeras</string>
     <string name="piko_unlimited_replays_desc">Transforma mídias de visualização única ou dupla em visualização permanente.</string>
     <string name="piko_enable_mark_chat_as_read">Ativar a opção marcar chat como lido</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Ao pressionar e segurar a mensagem, você terá a opção de marcá-la como lida</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Você terá a opção de marcar uma conversa como lida ao pressionar e segurar o chat. Quando você marca uma conversa como lida, outras pessoas podem ver que você leu as mensagens delas, mesmo quando a opção \"Visualizar mensagens diretas anonimamente\" estiver ativada</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download</string>
     <string name="piko_enable_download">Ativar download de postagens de imagens e vídeos</string>
@@ -305,13 +305,11 @@
     <string name="piko_save_deleted_messages">Salvar mensagens excluídas</string>
     <string name="piko_save_deleted_messages_desc">Captura as DMs recebidas localmente à medida que elas chegam do servidor. Marca as mensagens como excluídas quando não enviadas, assim você pode visualizá-las mesmo depois que o remetente as exclua.</string>
     <string name="piko_view_deleted_messages">Ver mensagens excluídas</string>
-    <string name="piko_deleted_in_chat">Excluído neste bate-papo</string>
     <string name="piko_all_deleted_messages">Ver mensagens excluídas</string>
-    <string name="piko_clear">Limpar</string>
-    <string name="piko_clear_chat_confirm">Limpar mensagens excluídas desta conversa?</string>
-    <string name="piko_clear_all_confirm">Limpar TODAS as mensagens excluídas excluídas?</string>
     <string name="piko_no_deleted_messages">Nenhuma mensagem excluída foi capturada ainda. \nAtive o recurso e as mensagens serão salvas quando chegarem.</string>
-    <string name="piko_delete_saved_confirm">Excluir esta mensagem salva?</string>
+    <string name="piko_all">Tudo</string>
+    <string name="piko_selected_count">%d selecionados</string>
+    <string name="piko_delete_selected_confirm">Excluir %d mensagens selecionadas?</string>
     <string name="piko_delete">Apagar</string>
     <string name="piko_unknown">Desconhecido</string>
     <string name="piko_tap_to_view">toque para ver</string>

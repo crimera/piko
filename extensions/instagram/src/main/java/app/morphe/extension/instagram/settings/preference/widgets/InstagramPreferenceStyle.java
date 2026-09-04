@@ -14,6 +14,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.preference.Preference;
 import android.text.TextUtils;
 import android.util.TypedValue;
@@ -68,6 +69,42 @@ public final class InstagramPreferenceStyle {
         );
     }
 
+    public static void applyToolbarLayout(
+            Context context,
+            LinearLayout toolbar,
+            ImageView back,
+            TextView title,
+            boolean isRootSettings
+    ) {
+        toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setGravity(Gravity.CENTER_VERTICAL);
+        toolbar.setPadding(dp(context, 15), dp(context, 10),
+                dp(context, 15), dp(context, 8));
+        toolbar.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(context, 70)));
+
+        back.setScaleType(ImageView.ScaleType.CENTER);
+        back.setPaddingRelative(0, 0, dp(context, 16), 0);
+        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(
+                dp(context, 44), dp(context, 44));
+        backParams.gravity = Gravity.CENTER_VERTICAL;
+        back.setLayoutParams(backParams);
+
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, isRootSettings ? 25 : 20);
+        title.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        title.setIncludeFontPadding(false);
+        title.setMaxLines(1);
+        if (!isRootSettings) {
+            title.setAutoSizeTextTypeUniformWithConfiguration(
+                    18, 20, 1, TypedValue.COMPLEX_UNIT_SP);
+        }
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        titleParams.gravity = Gravity.CENTER_VERTICAL;
+        titleParams.leftMargin = dp(context, 7);
+        title.setLayoutParams(titleParams);
+    }
+
     /** Matches platform preference dialogs to Instagram's resolved theme. */
     public static Context dialogContext(Context context) {
         int themeRes = UI.isDarkMode()
@@ -99,6 +136,10 @@ public final class InstagramPreferenceStyle {
 
     public static int disabledTextColor() {
         return UI.getThemedColour("igds_color_separator");
+    }
+
+    public static int selectionColor() {
+        return ResourceUtils.getColor("igds_primary_button", 0xff0095f6);
     }
 
     public static void applySystemBarStyle(Activity activity) {

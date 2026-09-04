@@ -61,7 +61,6 @@ public class Settings {
     public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", false);
     public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", false);
     public static final BooleanSetting DISABLE_VIDEO_AUTOPLAY = new BooleanSetting("disable_video_autoplay", false);
-    public static final BooleanSetting STORIES_AUDIO_AUTOPLAY = new BooleanSetting("stories_audio_autoplay", false);
     public static final BooleanSetting UNLOCK_PLUS_BENEFITS = new BooleanSetting("unlock_plus_benefits", false);
     public static final StringSetting CHANGE_LIKE_ANIMATION = new StringSetting("change_like_animation", "ARES_LIKE_ACTIVATION");
     public static final StringSetting CUSTOMISE_STORY_RING_SIZE = new StringSetting("customise_story_ring_size", "100");
@@ -75,6 +74,7 @@ public class Settings {
     public static final BooleanSetting ENABLE_DOWNLOAD = new BooleanSetting("enable_download", true);
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false);
+    public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false);
     // Should be kept empty by default as its handled in `StorageUtils.java`
     public static final StringSetting CUSTOM_DOWNLOAD_PATH = new StringSetting("custom_download_path", "");
     public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");
