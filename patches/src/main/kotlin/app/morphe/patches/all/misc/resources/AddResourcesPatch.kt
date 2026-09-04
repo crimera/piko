@@ -255,7 +255,7 @@ internal val addResourcesPatch = resourcePatch(
                             val defaultResourceKey = Triple(appId, srcNode.tagName, resourceName)
                             val existingNode = existingNodes[resourceKey]
 
-                            if (replaceExisting && isDefaultLocale && existingNode == null && resourceType == BundledResourceType.STRINGS) {
+                            if (replaceExisting && isDefaultLocale && existingNode == null) {
                                 // Bring-back resources are overrides, not new app resources.
                                 // Skip keys that do not exist in the target version so renamed
                                 // resources can coexist across multiple supported app versions.

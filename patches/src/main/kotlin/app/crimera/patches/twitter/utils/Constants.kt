@@ -19,22 +19,6 @@ object Constants {
                 ),
         )
 
-    val COMPATIBILITY_BRING_BACK_TWITTER =
-        Compatibility(
-            name = "Twitter",
-            packageName = "com.twitter.android",
-            apkFileType = ApkFileType.APKM,
-            appIconColor = 0x000000,
-            targets =
-                listOf(
-                    AppTarget(version = "12.19.1-release.0"),
-                    AppTarget(version = "12.20.5-prod.01"),
-                    AppTarget(version = "12.21.1-prod.05"),
-                    AppTarget(version = "12.22.0-beta.01"),
-                    AppTarget(version = "12.22.0-prod.01"),
-                ),
-        )
-
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
     const val STRING_REF_DESCRIPTOR = "Lapp/morphe/extension/shared/StringRef"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
