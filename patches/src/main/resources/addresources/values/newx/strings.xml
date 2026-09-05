@@ -58,6 +58,12 @@
     <string name="piko_newx_group_debug_tools_summary">Inspect internal NewX data from post menus</string>
     <string name="piko_newx_logging_title">Enable logging</string>
     <string name="piko_newx_logging_summary">Writes diagnostic NewX messages to the app log</string>
+    <string name="piko_newx_server_logging_title">Capture server errors</string>
+    <string name="piko_newx_server_logging_summary">Keeps parsed NewX server errors in memory until they are exported</string>
+    <string name="piko_newx_save_server_logs_title">Save server logs</string>
+    <string name="piko_newx_save_server_logs_summary">Exports captured server errors to Download/piko-server-logs.txt</string>
+    <string name="piko_newx_server_logs_saved">Server logs saved to Download/piko-server-logs.txt</string>
+    <string name="piko_newx_server_logs_save_failed">Could not save NewX server logs</string>
     <string name="piko_newx_reply_sort_relevance">Relevant replies</string>
     <string name="piko_newx_reply_sort_recency">Recent replies</string>
     <string name="piko_newx_reply_sort_likes">Most liked replies</string>

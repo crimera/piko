@@ -30,7 +30,7 @@ for arg in "$@"; do
     --install|--fastdeploy)
       INSTALL=true
       ;;
-    *.apk)
+    *.apk|*.apkm|*.apks)
       APK="$arg"
       ;;
     *)
@@ -51,6 +51,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Hide new posts pill" \
   -e "NewX: Customize navigation bar items" \
   -e "NewX: Hide premium upsell" \
+  -e "NewX: Unlock color customization" \
   -e "NewX: Hide compose button" \
   -e "NewX: Customize drawer items" \
   -e "NewX: Hide Spaces bar" \
@@ -65,6 +66,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Inline download button" \
   -e "NewX: Dynamic color" \
   -e "NewX: Customize default reply sorting" \
+  -e "NewX: Server error logging" \
   -e "NewX: Filter posts by keyword" \
   -e "NewX: Force highest video/audio quality" \
   -e "NewX: Filter For You by topic" \
