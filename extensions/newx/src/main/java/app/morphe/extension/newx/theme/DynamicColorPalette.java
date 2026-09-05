@@ -100,6 +100,31 @@ public final class DynamicColorPalette {
         return dynamicColor(isDarkTheme(), LIGHT_PRIMARY, DARK_PRIMARY);
     }
 
+    /**
+     * Uses Material 3 on-surface for tab labels, icons, and selected indicators (XDS foreground
+     * roles). Tab slots encode selection emphasis in alpha, so the incoming alpha is kept.
+     */
+    public static long tabTint(long originalColor) {
+        if (!isEnabled()) return originalColor;
+        return tabRole(isDarkTheme(), LIGHT_ON_SURFACE, DARK_ON_SURFACE, originalColor);
+    }
+
+    /** Lower-emphasis tab slots (XDS secondary) map to on-surface-variant with alpha kept. */
+    public static long tabSecondaryTint(long originalColor) {
+        if (!isEnabled()) return originalColor;
+        return tabRole(
+                isDarkTheme(),
+                LIGHT_ON_SURFACE_VARIANT,
+                DARK_ON_SURFACE_VARIANT,
+                originalColor
+        );
+    }
+
+    private static long tabRole(boolean dark, String lightName, String darkName, long originalColor) {
+        int alpha = (int) (originalColor >>> 56) << 24;
+        return pack((requiredColor(dark ? darkName : lightName) & 0x00FFFFFF) | alpha);
+    }
+
     /** Lottie heart assets embed red fills and cannot inherit Compose's dynamic content color. */
     public static boolean inlineLikeAnimation(boolean originalValue) {
         return !isLikeThemingEnabled() && originalValue;

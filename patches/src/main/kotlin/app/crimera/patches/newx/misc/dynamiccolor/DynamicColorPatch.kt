@@ -11,6 +11,7 @@ import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
@@ -24,9 +25,11 @@ import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderSwitchElement
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -35,6 +38,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val PALETTE_CONSTRUCTOR_PARAMETERS = "ZJJJJJJJJJJJJJJJJJ"
@@ -160,6 +164,7 @@ val dynamicColorPatch =
 
             patchDynamicAccentPalettes()
             patchInlineActionTints()
+            patchTabTints(paletteDescriptor)
         }
     }
 
@@ -723,6 +728,261 @@ private fun patchInlineActionTints() {
     )
     val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteIndex)
     patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
+}
+
+private const val TAB_TINT_METHOD = "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->tabTint(J)J"
+private const val TAB_SECONDARY_TINT_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->tabSecondaryTint(J)J"
+private const val TAB_RENDERER_SCOPE = "Lcom/x/ui/common/tabs/"
+private const val PROFILE_INDICATOR_SCOPE = "Landroidx/compose/foundation/text/"
+private const val INDICATOR_COLOR_LABEL = "indicatorColor"
+private const val COMPOSE_MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
+private const val COMPOSE_FOUNDATION_SCOPE = "Landroidx/compose/foundation/"
+
+/**
+ * Wide color reads grouped by owner. Owners are never named: R8 reassigns app classes (the tab
+ * provider already moved across namespaces) and Compose renames single-letter helpers between
+ * releases. Framework slot-table, density, and color-unpack reads are noise and excluded, as
+ * are the resolved Horizon reads. Callers pass the resolved Horizon descriptor.
+ */
+private val FRAMEWORK_OWNER_PREFIXES = listOf(
+    "Landroidx/",
+    "Lkotlin/",
+    "Lkotlinx/",
+    "Ljava/",
+    "Ljavax/",
+    "Ldalvik/",
+)
+
+private fun wideReadsByOwner(
+    method: Method,
+    horizon: String,
+): Map<String, List<IndexedValue<Instruction>>> =
+    method.implementation?.instructions?.toList().orEmpty().withIndex()
+        .filter { (_, instruction) ->
+            instruction.opcode == Opcode.IGET_WIDE &&
+                instruction.getReference<FieldReference>()?.definingClass?.let { owner ->
+                    owner != horizon && FRAMEWORK_OWNER_PREFIXES.none(owner::startsWith)
+                } == true
+        }
+        .groupBy { (_, instruction) ->
+            instruction.getReference<FieldReference>()?.definingClass.orEmpty()
+        }
+
+/**
+ * Tab slot colors enter through exactly two reads from one non-Horizon owner (primary first,
+ * secondary second in every observed target) that flow into a String-consuming tabs-scope
+ * callee rendering the labels. Hooking the source tints labels and icons together while the
+ * slot's alpha-driven selection emphasis flows through untouched.
+ */
+private fun isTabSlotColors(method: Method, horizon: String): Boolean {
+    val reads = wideReadsByOwner(method, horizon)
+    if (reads.size != 1 || reads.values.single().size != 2) return false
+    return method.implementation?.instructions?.toList().orEmpty().any { instruction ->
+        instruction.getReference<MethodReference>()?.let { reference ->
+            reference.definingClass.startsWith(TAB_RENDERER_SCOPE) &&
+                "Ljava/lang/String;" in reference.parameterTypes &&
+                "J" in reference.parameterTypes
+        } == true
+    } == true
+}
+
+
+private fun hasFoundationBackground(instructions: List<Instruction>): Boolean =
+    instructions.any { instruction ->
+        instruction.getReference<MethodReference>()?.let { reference ->
+            reference.definingClass.startsWith(COMPOSE_FOUNDATION_SCOPE) &&
+                reference.parameterTypes.getOrNull(0) == COMPOSE_MODIFIER_DESCRIPTOR &&
+                "J" in reference.parameterTypes &&
+                reference.returnType == COMPOSE_MODIFIER_DESCRIPTOR
+        } == true
+    }
+
+private fun isTabIndicatorRenderer(method: Method): Boolean {
+    if ("J" !in method.parameterTypes) return false
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    return instructions.any { instruction ->
+        instruction.opcode == Opcode.CONST_STRING &&
+            instruction.getReference<StringReference>()?.string == INDICATOR_COLOR_LABEL
+    } && hasFoundationBackground(instructions)
+}
+
+private fun isProfileTabIndicator(method: Method, horizon: String): Boolean {
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    return instructions.any { instruction ->
+        instruction.opcode == Opcode.SGET &&
+            instruction.getReference<FieldReference>()?.let { field ->
+                field.definingClass.startsWith(TAB_RENDERER_SCOPE) && field.type == "F"
+            } == true
+    } && wideReadsByOwner(method, horizon).size == 1 &&
+        wideReadsByOwner(method, horizon).values.single().size == 1 &&
+        hasFoundationBackground(instructions)
+}
+
+private fun tabSlotColorsFingerprint(horizon: String) = Fingerprint(
+    definingClass = TAB_RENDERER_SCOPE,
+    custom = { method, _ -> isTabSlotColors(method, horizon) },
+)
+
+private object NewXTabIndicatorRendererFingerprint : Fingerprint(
+    definingClass = TAB_RENDERER_SCOPE,
+    custom = { method, _ -> isTabIndicatorRenderer(method) },
+)
+
+private fun profileTabIndicatorFingerprint(horizon: String) = Fingerprint(
+    definingClass = PROFILE_INDICATOR_SCOPE,
+    returnType = "Ljava/lang/Object;",
+    custom = { method, _ -> isProfileTabIndicator(method, horizon) },
+)
+
+private fun horizonTabsFingerprint(horizon: String) = Fingerprint(
+    definingClass = TAB_RENDERER_SCOPE,
+    custom = { method, _ -> isHorizonTabColorRead(method, horizon) },
+)
+
+
+context(context: BytecodePatchContext)
+private fun patchTabTints(horizon: String) {
+    val slots = tabSlotColorsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
+    val indicatorMatches = NewXTabIndicatorRendererFingerprint.scopedMatchAllOrNull().orEmpty()
+    val profileMatches = profileTabIndicatorFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
+    // Releases without a dedicated profile painter share the container indicator for timeline
+    // and profile tabs; that sharing is proven by profile code calling the tabs container.
+    val sharedIndicator = profileMatches.isEmpty() && profileSharesContainerIndicator()
+    if (
+        slots.size == 1 &&
+            indicatorMatches.size == 1 &&
+            (profileMatches.size == 1 || sharedIndicator)
+    ) {
+        slots.single().method.injectTabSlotTints(horizon)
+        indicatorMatches.single().method.injectTabIndicatorTint()
+        profileMatches.singleOrNull()?.method?.injectProfileTabIndicatorTint(horizon)
+        return
+    }
+    val horizonReads = horizonTabsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
+    // A proven Horizon tab shape with no slot colors needs no hook: the dynamic palette
+    // factories already replace the colors it reads.
+    if (
+        slots.isEmpty() &&
+            profileMatches.isEmpty() &&
+            horizonReads.isNotEmpty()
+    ) {
+        return
+    }
+    throw PatchException(
+        "NewX tab tint shapes are unmapped: slots=${slots.size}, " +
+            "indicator=${indicatorMatches.size}, profile=${profileMatches.size}, " +
+            "horizonReads=${horizonReads.size} for $horizon: " +
+            (slots + indicatorMatches + profileMatches).joinToString(),
+    )
+}
+
+context(context: BytecodePatchContext)
+private fun profileSharesContainerIndicator(): Boolean =
+    Fingerprint(
+        definingClass = "Lcom/x/profile/",
+        custom = { method, _ ->
+            method.implementation?.instructions?.toList().orEmpty().any { instruction ->
+                instruction.getReference<MethodReference>()?.let { reference ->
+                    reference.definingClass.startsWith(TAB_RENDERER_SCOPE) &&
+                        "Ljava/util/List;" in reference.parameterTypes
+                } == true
+            }
+        },
+    ).scopedMatchAllOrNull().orEmpty().isNotEmpty()
+/**
+ * Pre-separate-palette tab implementations read the tab color straight from the Horizon palette,
+ * which the dynamic palette factories already replace. The descriptor is resolved, never named.
+ */
+private fun isHorizonTabColorRead(method: Method, horizon: String): Boolean {
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    return instructions.any { instruction ->
+        instruction.getReference<MethodReference>()?.returnType == horizon
+    } && instructions.any { instruction ->
+        instruction.opcode == Opcode.IGET_WIDE &&
+            instruction.getReference<FieldReference>()?.definingClass == horizon
+    } && instructions.any { instruction ->
+        instruction.getReference<MethodReference>()?.let { reference ->
+            reference.definingClass.startsWith(TAB_RENDERER_SCOPE) &&
+                "J" in reference.parameterTypes
+        } == true
+    }
+}
+
+private fun MutableMethod.injectTabSlotTints(horizon: String) {
+    val reads = wideReadsByOwner(this, horizon).values.singleOrNull()
+        ?: throw PatchException("NewX tab slot colors have an unexpected shape: $this")
+    if (reads.size != 2) {
+        throw PatchException("NewX tab slot colors have an unexpected shape: $this")
+    }
+    // Source order is primary-then-secondary in every observed target; the tint methods keep
+    // incoming alpha, so the slot's selection emphasis survives regardless.
+    val ordered = reads.sortedBy { (index, _) -> index }
+    val methods = listOf(TAB_TINT_METHOD, TAB_SECONDARY_TINT_METHOD)
+    ordered.zip(methods).sortedByDescending { (read, _) -> read.index }.forEach {
+        (read, tintMethod) ->
+        val colorRegister =
+            (read.value as? OneRegisterInstruction)?.registerA
+                ?: throw PatchException("NewX tab slot color has no register: $this")
+        addInstructions(
+            read.index + 1,
+            """
+            invoke-static/range {v$colorRegister .. v${colorRegister + 1}}, $tintMethod
+            move-result-wide v$colorRegister
+            """.trimIndent(),
+        )
+    }
+}
+
+private fun MutableMethod.injectTabIndicatorTint() {
+    if (parameterTypes.count { it == "J" } != 1) {
+        throw PatchException("NewX tab indicator color parameter is ambiguous: $this")
+    }
+    val colorParam = parameterTypes.indexOf("J")
+    var colorRegister = 0
+    parameterTypes.take(colorParam).forEach { parameter ->
+        colorRegister += if (parameter == "J" || parameter == "D") 2 else 1
+    }
+    addInstructionsAtControlFlowLabel(
+        0,
+        """
+        invoke-static/range {p$colorRegister .. p${colorRegister + 1}}, $TAB_TINT_METHOD
+        move-result-wide p$colorRegister
+        """.trimIndent(),
+    )
+}
+
+private fun MutableMethod.injectProfileTabIndicatorTint(horizon: String) {
+    val reads = wideReadsByOwner(this, horizon)
+    val brandReads = reads.values.flatten()
+    val brandSites =
+        brandReads.filter { (index, _) ->
+            instructions.drop(index + 1).take(4).any { instruction ->
+                instruction.getReference<MethodReference>()?.let { reference ->
+                    reference.definingClass.startsWith(COMPOSE_FOUNDATION_SCOPE) &&
+                        reference.parameterTypes.getOrNull(0) == COMPOSE_MODIFIER_DESCRIPTOR &&
+                        "J" in reference.parameterTypes &&
+                        reference.returnType == COMPOSE_MODIFIER_DESCRIPTOR
+                } == true
+            }
+        }
+    if (brandSites.size != 1) {
+        throw PatchException(
+            "Expected one NewX profile tab indicator tint site, found " +
+                "${brandSites.size} of ${brandReads.size}: $this",
+        )
+    }
+    val brandSite = brandSites.single()
+    val colorRegister =
+        (brandSite.value as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException("NewX profile tab indicator has no color register: $this")
+    addInstructions(
+        brandSite.index + 1,
+        """
+        invoke-static/range {v$colorRegister .. v${colorRegister + 1}}, $TAB_TINT_METHOD
+        move-result-wide v$colorRegister
+        """.trimIndent(),
+    )
 }
 
 context(context: BytecodePatchContext)
