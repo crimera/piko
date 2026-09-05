@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">Baixar foto/vídeo de uma conversa no direct.</string>
     <string name="piko_download_username_folder">Separar mídia por nome de usuário</string>
     <string name="piko_download_username_folder_desc">Cria subpastas com base no nome de usuário.</string>
+    <string name="piko_embed_download_metadata">Incorporar metadados do vídeo</string>
+    <string name="piko_embed_download_metadata_desc">Adiciona a legenda, o link da publicação, o autor e a data de envio aos arquivos MP4 baixados</string>
     <string name="piko_download_current_media">Baixar a mídia atual</string>
     <string name="piko_download_as_image">Baixar como imagem</string>
     <string name="piko_video_variants">Variantes de vídeo</string>

@@ -131,6 +131,8 @@
     <string name="piko_enable_direct_download_desc">Descarga el medio actual sin pedir opciones</string>
     <string name="piko_download_username_folder">Separar medios por nombre de usuario</string>
     <string name="piko_download_username_folder_desc">Crea subcarpetas basadas en el nombre de usuario</string>
+    <string name="piko_embed_download_metadata">Incruste metadatos de video</string>
+    <string name="piko_embed_download_metadata_desc">Agrega el título, el enlace de la publicación, el creador y la fecha de carga a los archivos MP4 descargados</string>
     <string name="piko_download_current_media">Descargar este medio</string>
     <string name="piko_download_as_image">Descargar como imagen</string>
     <string name="piko_video_variants">Variantes de vídeo</string>

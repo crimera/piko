@@ -94,7 +94,7 @@
     <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
     <string name="piko_improve_image_viewing">画像を高画質で表示</string>
     <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します。動作が遅くなったり、アプリデータの容量が増えたり、古いレイアウトに切り替わったりする場合があります</string>
-    <string name="piko_hide_reshare_button">リシェアボタンを非表示</string>
+    <string name="piko_hide_reshare_button">再投稿ボタンを非表示</string>
     <string name="piko_copy_comment">コメントをコピー</string>
     <string name="piko_copy_comment_desc">投稿やリールのコメントをコピーするボタンを追加します</string>
     <string name="piko_comment_copied_success">コメントをコピーしました</string>
@@ -273,7 +273,7 @@
     <string name="piko_reel_type_highlight_rewind_reel">過去のハイライト</string>
     <string name="piko_reel_type_inactive_hallpass_reel">無効なHall Passストーリー</string>
     <string name="piko_reel_type_mas_reel">複数ユーザーのまとめストーリー</string>
-    <string name="piko_reel_type_media_reshare">メディアのリシェア</string>
+    <string name="piko_reel_type_media_reshare">メディアの再投稿</string>
     <string name="piko_reel_type_memory_reel">思い出のストーリー</string>
     <string name="piko_reel_type_my_week_reel">今週のまとめ</string>
     <string name="piko_reel_type_netego_reel">おすすめのストーリー</string>
