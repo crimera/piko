@@ -48,4 +48,20 @@ public final class TwitterThemeTest {
                 TwitterTheme.resolve("1", "unknown", true)
         );
     }
+
+    @Test
+    public void knownAccentValuesResolve() {
+        assertEquals(TwitterTheme.Accent.BLUE, TwitterTheme.resolveAccent("blue"));
+        assertEquals(TwitterTheme.Accent.YELLOW, TwitterTheme.resolveAccent("yellow"));
+        assertEquals(TwitterTheme.Accent.PINK, TwitterTheme.resolveAccent("pink"));
+        assertEquals(TwitterTheme.Accent.PURPLE, TwitterTheme.resolveAccent("purple"));
+        assertEquals(TwitterTheme.Accent.ORANGE, TwitterTheme.resolveAccent("orange"));
+        assertEquals(TwitterTheme.Accent.GREEN, TwitterTheme.resolveAccent("green"));
+    }
+
+    @Test
+    public void unknownAccentFallsBackToBlue() {
+        assertEquals(TwitterTheme.Accent.BLUE, TwitterTheme.resolveAccent("unknown"));
+        assertEquals(TwitterTheme.Accent.BLUE, TwitterTheme.resolveAccent(null));
+    }
 }

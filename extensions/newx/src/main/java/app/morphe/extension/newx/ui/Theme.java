@@ -9,7 +9,8 @@ import app.morphe.extension.newx.settings.SettingsRegistry;
 import app.morphe.extension.newx.theme.TwitterTheme;
 
 /**
- * Material design system color tokens and metrics for NewX UI components.
+ * Material design system color tokens and metrics for NewX UI components. Accent roles follow the
+ * host's selected Twitter accent; dynamic accent colors remain limited to the patched Blue palette.
  */
 public final class Theme {
     private static final String DYNAMIC_COLOR_SETTING = "newx.theme.dynamic_color";
@@ -84,21 +85,19 @@ public final class Theme {
     }
 
     public static int primaryAccent(Context context) {
-        return dynamicColor(context, "primary", Color.rgb(29, 155, 240));
+        return primaryAccent(context, usesDynamicColors());
     }
 
     public static int onPrimaryAccent(Context context) {
-        return dynamicColor(context, "on_primary", Color.WHITE);
+        return onPrimaryAccent(context, usesDynamicColors());
     }
 
     public static int primaryContainer(Context context) {
-        int fallback = isDark(context) ? Color.rgb(26, 75, 110) : Color.rgb(218, 238, 255);
-        return dynamicColor(context, "primary_container", fallback);
+        return primaryContainer(context, usesDynamicColors());
     }
 
     public static int onPrimaryContainer(Context context) {
-        int fallback = isDark(context) ? Color.rgb(205, 232, 255) : Color.rgb(0, 45, 80);
-        return dynamicColor(context, "on_primary_container", fallback);
+        return onPrimaryContainer(context, usesDynamicColors());
     }
 
     public static int dividerColor(Context context) {
@@ -112,15 +111,20 @@ public final class Theme {
     }
 
     public static int checkboxChecked(Context context) {
-        if (usesDynamicColors()) {
-            int base = isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
-            return blend(base, primaryAccent(context), 0.35f);
-        }
-        return isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
+        return checkboxChecked(context, usesDynamicColors());
     }
 
     private static int dynamicColor(Context context, String role, int fallback) {
-        if (!usesDynamicColors()) return fallback;
+        return dynamicColor(context, role, fallback, usesDynamicColors());
+    }
+
+    private static int dynamicColor(
+            Context context,
+            String role,
+            int fallback,
+            boolean enabled
+    ) {
+        if (!enabled) return fallback;
         if (context == null) return fallback;
 
         String brightness = isDark(context) ? "dark" : "light";
@@ -134,6 +138,78 @@ public final class Theme {
         return context.getResources().getColor(resourceId, context.getTheme());
     }
 
+    private static boolean usesDynamicAccent(
+            boolean dynamicColors,
+            TwitterTheme.Accent accent
+    ) {
+        return dynamicColors && accent == TwitterTheme.Accent.BLUE;
+    }
+
+    private static int primaryAccent(Context context, boolean dynamicColors) {
+        TwitterTheme.Accent accent = TwitterTheme.accent(context);
+        if (usesDynamicAccent(dynamicColors, accent)) {
+            return dynamicColor(context, "primary", accent.primaryColor(), dynamicColors);
+        }
+        return accent.primaryColor();
+    }
+
+    private static int onPrimaryAccent(Context context, boolean dynamicColors) {
+        TwitterTheme.Accent accent = TwitterTheme.accent(context);
+        if (usesDynamicAccent(dynamicColors, accent)) {
+            return dynamicColor(context, "on_primary", accent.onPrimaryColor(), dynamicColors);
+        }
+        return accent.onPrimaryColor();
+    }
+
+    private static int primaryContainer(Context context, boolean dynamicColors) {
+        TwitterTheme.Accent accent = TwitterTheme.accent(context);
+        int fallback = primaryContainerFallback(context, accent);
+        if (usesDynamicAccent(dynamicColors, accent)) {
+            return dynamicColor(context, "primary_container", fallback, dynamicColors);
+        }
+        return fallback;
+    }
+
+    private static int onPrimaryContainer(Context context, boolean dynamicColors) {
+        TwitterTheme.Accent accent = TwitterTheme.accent(context);
+        int fallback = onPrimaryContainerFallback(context, accent);
+        if (usesDynamicAccent(dynamicColors, accent)) {
+            return dynamicColor(context, "on_primary_container", fallback, dynamicColors);
+        }
+        return fallback;
+    }
+
+    private static int primaryContainerFallback(
+            Context context,
+            TwitterTheme.Accent accent
+    ) {
+        if (accent == TwitterTheme.Accent.BLUE) {
+            return isDark(context) ? Color.rgb(26, 75, 110) : Color.rgb(218, 238, 255);
+        }
+
+        int primary = accent.primaryColor();
+        return isDark(context)
+                ? blend(Color.BLACK, primary, 0.35f)
+                : blend(Color.WHITE, primary, 0.16f);
+    }
+
+    private static int onPrimaryContainerFallback(
+            Context context,
+            TwitterTheme.Accent accent
+    ) {
+        if (accent == TwitterTheme.Accent.BLUE) {
+            return isDark(context) ? Color.rgb(205, 232, 255) : Color.rgb(0, 45, 80);
+        }
+        return contrastingText(primaryContainerFallback(context, accent));
+    }
+
+    private static int contrastingText(int color) {
+        int luminance = 299 * Color.red(color)
+                + 587 * Color.green(color)
+                + 114 * Color.blue(color);
+        return luminance > 127500 ? Color.BLACK : Color.WHITE;
+    }
+
     public static boolean usesDynamicColors() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                 && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
@@ -143,6 +219,18 @@ public final class Theme {
         return usesDynamicColors()
                 && isDark(context)
                 && SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
+    }
+
+    private static int checkboxChecked(Context context, boolean dynamicColors) {
+        TwitterTheme.Accent accent = TwitterTheme.accent(context);
+        if (usesDynamicAccent(dynamicColors, accent)) {
+            int base = isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
+            return blend(base, primaryAccent(context, dynamicColors), 0.35f);
+        }
+        if (accent == TwitterTheme.Accent.BLUE) {
+            return isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
+        }
+        return accent.primaryColor();
     }
 
     public static final class SettingsSnapshot {
@@ -159,11 +247,7 @@ public final class Theme {
         }
 
         public int checkboxChecked(Context context) {
-            if (dynamicColors) {
-                int base = Theme.isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
-                return Theme.blend(base, primaryAccent(context), 0.35f);
-            }
-            return Theme.isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
+            return Theme.checkboxChecked(context, dynamicColors);
         }
 
         public int surface(Context context) {
@@ -209,25 +293,19 @@ public final class Theme {
         }
 
         public int primaryAccent(Context context) {
-            return dynamicColor(context, "primary", Color.rgb(29, 155, 240));
+            return Theme.primaryAccent(context, dynamicColors);
         }
 
         public int onPrimaryAccent(Context context) {
-            return dynamicColor(context, "on_primary", Color.WHITE);
+            return Theme.onPrimaryAccent(context, dynamicColors);
         }
 
         public int primaryContainer(Context context) {
-            int fallback = Theme.isDark(context)
-                    ? Color.rgb(26, 75, 110)
-                    : Color.rgb(218, 238, 255);
-            return dynamicColor(context, "primary_container", fallback);
+            return Theme.primaryContainer(context, dynamicColors);
         }
 
         public int onPrimaryContainer(Context context) {
-            int fallback = Theme.isDark(context)
-                    ? Color.rgb(205, 232, 255)
-                    : Color.rgb(0, 45, 80);
-            return dynamicColor(context, "on_primary_container", fallback);
+            return Theme.onPrimaryContainer(context, dynamicColors);
         }
 
         public int dividerColor(Context context) {
