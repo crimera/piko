@@ -879,7 +879,9 @@ public class ScreenBuilder {
         }
     }
 
-    public void aboutSection(TreeMap<String, Boolean> flags) {
+    public void aboutSection() {
+        // Re-derive entries so toggles changed since startup are reflected.
+        TreeMap<String, Boolean> flags = SettingsStatus.loadStatusMap();
 
         String appVersionText = String.format(str("piko_app_version"), Utils.getAppVersionName());
         String patchVersionText = String.format(str("piko_patch_version"), Utils.getPatchesReleaseVersion());
