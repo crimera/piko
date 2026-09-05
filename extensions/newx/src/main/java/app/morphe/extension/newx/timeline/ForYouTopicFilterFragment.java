@@ -1,7 +1,6 @@
 package app.morphe.extension.newx.timeline;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,10 +19,11 @@ import java.util.Set;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
+import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
 import app.morphe.extension.newx.ui.Theme;
 
 @SuppressWarnings("deprecation")
-public final class ForYouTopicFilterFragment extends Fragment {
+public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
     private final Runnable topicCatalogListener = this::onTopicCatalogChanged;
     private LinearLayout topicsContainer;
     private NewXSettingsUi.SwitchRow masterSwitch;

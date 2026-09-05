@@ -90,6 +90,14 @@ internal object Groups {
             iconResourceName = "ic_vector_filter",
             order = 100,
         )
+    val VERIFIED_ACCOUNT_FILTERING =
+        SettingsGroupMetadata(
+            id = "newx.content.verified_account_filtering",
+            titleResourceName = "piko_newx_group_verified_account_filtering_title",
+            summaryResourceName = "piko_newx_group_verified_account_filtering_summary",
+            iconResourceName = "ic_vector_filter",
+            order = 200,
+        )
 
     val DYNAMIC_COLORS =
         SettingsGroupMetadata(

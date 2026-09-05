@@ -1,7 +1,6 @@
 package app.morphe.extension.newx.postfilter;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -25,9 +24,10 @@ import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.ButtonView;
 import app.morphe.extension.newx.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
+import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
 
 @SuppressWarnings("deprecation")
-public final class PostFilterFragment extends Fragment implements PostFilterRuleAdapter.Listener {
+public final class PostFilterFragment extends NewXCustomScreenFragment implements PostFilterRuleAdapter.Listener {
     private final PostFilterRuleStore store = PostFilterRuleStore.shared();
     private PostFilterRuleAdapter adapter;
     private TextView emptyState;

@@ -60,6 +60,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Hide Discover more" \
   -e "NewX: Hide who to follow" \
   -e "NewX: Hide AI-generated posts" \
+  -e "NewX: Hide posts by verified account type" \
   -e "NewX: Customize default media tab" \
   -e "NewX: Custom font" \
   -e "NewX: Custom sharing domain" \

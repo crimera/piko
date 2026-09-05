@@ -310,6 +310,64 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
+    public void hidesSelectedVerificationTypeFromDirectPostAndReplyAuthors() {
+        FakePost bluePost = verifiedPost("blue post", VerifiedType.User, "blue-id", "blue");
+        FakePost blueReply = verifiedPost("blue reply", VerifiedType.User, "blue-id", "blue");
+        blueReply.reply = true;
+        FakePost replyToBlue = verifiedPost("reply to blue", VerifiedType.NotVerified, "other-id", "other");
+        replyToBlue.reply = true;
+        FakePost businessPost = verifiedPost("business", VerifiedType.Business, "business-id", "business");
+
+        Object filtered = filterByVerifiedType(
+                items(bluePost, blueReply, replyToBlue, businessPost),
+                Set.of("User"),
+                Set.of()
+        );
+
+        assertEquals(List.of(replyToBlue, businessPost), filtered);
+    }
+
+    @Test
+    public void whitelistedAuthorBypassesVerificationTypeFilterByIdOrHandle() {
+        FakePost whitelistedById = verifiedPost("keep by id", VerifiedType.User, "favorite-id", "favorite");
+        FakePost whitelistedByHandle = verifiedPost("keep by handle", VerifiedType.User, "other-id", "favorite-handle");
+        FakePost hidden = verifiedPost("hide", VerifiedType.User, "hidden-id", "hidden");
+
+        Object filtered = filterByVerifiedType(
+                items(whitelistedById, whitelistedByHandle, hidden),
+                Set.of("User"),
+                Set.of("favorite-id", "favorite-handle")
+        );
+
+        assertEquals(List.of(whitelistedById, whitelistedByHandle), filtered);
+    }
+
+    @Test
+    public void filtersNestedVerificationAuthorsAndRepairsConversationIds() {
+        FakePost hidden = verifiedPost("hidden", VerifiedType.User, "hidden-id", "hidden");
+        FakePost kept = verifiedPost("kept", VerifiedType.NotVerified, "kept-id", "kept");
+        hidden.id = "hidden-id";
+        kept.id = "kept-id";
+        FakeModule conversation = module("conversationthread-1", item(hidden), item(kept));
+        conversation.displayType = new FakeVerticalConversation(List.of("hidden-id", "kept-id"));
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                items(conversation),
+                Set.of("User"),
+                Set.of()
+        );
+
+        FakeModule filteredConversation = (FakeModule) filtered.get(0);
+        assertEquals(1, filteredConversation.children.size());
+        assertSame(kept, filteredConversation.children.get(0).item);
+        assertEquals(
+                List.of("kept-id"),
+                ((FakeVerticalConversation) filteredConversation.displayType).postIds
+        );
+    }
+
+    @Test
     public void preservesMalformedAndUnknownItems() {
         Object unknown = new Object();
         FakeModule mixed = module(
@@ -501,6 +559,18 @@ public class NewXTimelineFilterTest {
     private static FakePost post(String text) {
         return new FakePost(text);
     }
+    private static FakePost verifiedPost(
+            String text,
+            VerifiedType verifiedType,
+            String authorId,
+            String authorScreenName
+    ) {
+        FakePost post = new FakePost(text);
+        post.authorVerifiedType = verifiedType;
+        post.authorId = authorId;
+        post.authorScreenName = authorScreenName;
+        return post;
+    }
 
     private static FakePost reply(String text, String authorScreenName, String... mentionScreenNames) {
         FakePost post = new FakePost(text);
@@ -539,6 +609,25 @@ public class NewXTimelineFilterTest {
                 MODELS
         );
     }
+    private static Object filterByVerifiedType(
+            List<Object> input,
+            Set<String> typesToHide,
+            Set<String> whitelist
+    ) {
+        return NewXTimelineFilter.filterPostsByVerifiedType(
+                input,
+                typesToHide,
+                whitelist,
+                MODELS
+        );
+    }
+    private enum VerifiedType {
+        Business,
+        Government,
+        User,
+        Unknown,
+        NotVerified
+    }
 
     private static FakeModuleItem item(Object value) {
         return new FakeModuleItem(value, false);
@@ -561,6 +650,9 @@ public class NewXTimelineFilterTest {
         private Object clientEventInfo;
         private FakeDisclosure disclosure;
         private String authorScreenName;
+        private String authorId;
+        private VerifiedType authorVerifiedType;
+        private boolean reply;
         private List<FakeMention> mentions;
 
         private FakePost(String text) {
@@ -692,6 +784,12 @@ public class NewXTimelineFilterTest {
         }
         @Override String getPostAuthorScreenName(Object post) {
             return ((FakePost) post).authorScreenName;
+        }
+        @Override Object getPostAuthorVerifiedType(Object post) {
+            return ((FakePost) post).authorVerifiedType;
+        }
+        @Override String getPostAuthorId(Object post) {
+            return ((FakePost) post).authorId;
         }
         @Override Object getContentDisclosure(Object post) { return ((FakePost) post).disclosure; }
         @Override boolean hasAiGeneratedDisclosure(Object disclosure) {

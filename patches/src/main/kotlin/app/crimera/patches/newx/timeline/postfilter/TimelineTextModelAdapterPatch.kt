@@ -87,6 +87,8 @@ private data class ResolvedPostTextModels(
     val mentionScreenNameField: FieldReference,
     val authorField: FieldReference,
     val authorScreenNameGetter: MethodReference,
+    val authorVerifiedTypeGetter: MethodReference,
+    val authorIdGetter: MethodReference,
 )
 
 internal val newXTimelineTextModelAdapterPatch =
@@ -165,7 +167,27 @@ private fun resolvePostTextModels(
 
     val minimalUserMatch = MinimalUserModelFingerprint.requireSingle("minimal-user model")
     val authorScreenNameGetter =
-        resolveAuthorScreenNameGetter(authorField.type, minimalUserMatch)
+        resolveAuthorFieldGetter(
+            authorDescriptor = authorField.type,
+            minimalUserMatch = minimalUserMatch,
+            fieldLabel = ", screenName=",
+            expectedType = STRING_DESCRIPTOR,
+            semanticName = "screen-name",
+        )
+    val authorVerifiedTypeGetter =
+        resolveAuthorFieldGetter(
+            authorDescriptor = authorField.type,
+            minimalUserMatch = minimalUserMatch,
+            fieldLabel = ", verifiedType=",
+            expectedType = null,
+            semanticName = "verified-type",
+        )
+    val authorIdGetter =
+        resolveAuthorMethodGetter(
+            authorDescriptor = authorField.type,
+            name = "getId",
+            semanticName = "author ID",
+        )
 
     return ResolvedPostTextModels(
         postResultField = postResultField,
@@ -180,24 +202,32 @@ private fun resolvePostTextModels(
         mentionScreenNameField = mentionScreenNameField,
         authorField = authorField,
         authorScreenNameGetter = authorScreenNameGetter,
+        authorVerifiedTypeGetter = authorVerifiedTypeGetter,
+        authorIdGetter = authorIdGetter,
     )
 }
 
 context(context: BytecodePatchContext)
-private fun resolveAuthorScreenNameGetter(
+private fun resolveAuthorFieldGetter(
     authorDescriptor: String,
     minimalUserMatch: app.morphe.patcher.Match,
+    fieldLabel: String,
+    expectedType: String?,
+    semanticName: String,
 ): MethodReference {
-    val screenNameField =
-        minimalUserMatch.originalMethod.fieldForHelperToStringValue(", screenName=")
-    screenNameField.requireType(STRING_DESCRIPTOR, "minimal-user screen name")
+    val field = minimalUserMatch.originalMethod.fieldForHelperToStringValue(fieldLabel)
+    if (expectedType != null) {
+        field.requireType(expectedType, "minimal-user $semanticName")
+    } else if (!field.type.startsWith("L") || !field.type.endsWith(";")) {
+        throw PatchException("Expected NewX minimal-user $semanticName field to be an object: $field")
+    }
     val userClass = context.mutableClassDefBy(minimalUserMatch.originalClassDef.type)
     val getterMatches = userClass.methods.filter { method ->
-        method.isDirectFieldGetter(screenNameField)
+        method.isDirectFieldGetter(field)
     }
     if (getterMatches.size != 1) {
         throw PatchException(
-            "Expected one NewX minimal-user screen-name accessor in $userClass, found " +
+            "Expected one NewX minimal-user $semanticName accessor in $userClass, found " +
                 "${getterMatches.size}: ${getterMatches.joinToString()}",
         )
     }
@@ -208,9 +238,68 @@ private fun resolveAuthorScreenNameGetter(
         parameterTypes = getter.parameterTypes.map(CharSequence::toString),
         returnType = getter.returnType,
     ) ?: throw PatchException(
-        "NewX author type $authorDescriptor does not expose the minimal-user screen-name accessor " +
+        "NewX author type $authorDescriptor does not expose the minimal-user $semanticName accessor " +
             "${getter.name}()",
     )
+}
+
+context(context: BytecodePatchContext)
+private fun resolveAuthorMethodGetter(
+    authorDescriptor: String,
+    name: String,
+    semanticName: String,
+): MethodReference {
+    val getter =
+        resolveInterfaceMethodByName(
+            descriptor = authorDescriptor,
+            name = name,
+            parameterTypes = emptyList(),
+        ) ?: throw PatchException(
+            "NewX author type $authorDescriptor does not expose the $semanticName accessor $name()",
+        )
+    if (!getter.returnType.startsWith("L") || !getter.returnType.endsWith(";")) {
+        throw PatchException("NewX $semanticName accessor must return an object: $getter")
+    }
+    return getter
+}
+
+context(context: BytecodePatchContext)
+private fun resolveInterfaceMethodByName(
+    descriptor: String,
+    name: String,
+    parameterTypes: List<String>,
+    visited: MutableSet<String> = mutableSetOf(),
+): MethodReference? {
+    if (!visited.add(descriptor)) return null
+    val classDef = context.classDefByOrNull(descriptor) ?: return null
+    val matches = classDef.methods.filter { method ->
+        method.name == name &&
+            method.parameterTypes.map(CharSequence::toString) == parameterTypes
+    }
+    if (matches.size > 1) {
+        throw PatchException(
+            "Expected one NewX author $name declaration in $classDef, found " +
+                "${matches.size}: ${matches.joinToString()}",
+        )
+    }
+    if (matches.size == 1) {
+        val method = matches.single()
+        return ImmutableMethodReference(
+            descriptor,
+            name,
+            parameterTypes,
+            method.returnType,
+        )
+    }
+    for (interfaceDescriptor in classDef.interfaces) {
+        resolveInterfaceMethodByName(
+            descriptor = interfaceDescriptor.toString(),
+            name = name,
+            parameterTypes = parameterTypes,
+            visited = visited,
+        )?.let { return it }
+    }
+    return null
 }
 
 context(context: BytecodePatchContext)
@@ -267,18 +356,33 @@ private fun Method.fieldForHelperToStringValue(label: String): FieldReference {
         } ?: throw PatchException("NewX model label '$label' has no helper consumer in $this")
     val arguments = helper.value.argumentRegisters()
     val labelArgumentIndex = arguments.indexOf(labelRegister)
-    if (labelArgumentIndex < 0 || labelArgumentIndex + 1 >= arguments.size) {
-        throw PatchException("NewX model label '$label' has no helper value in $this")
+    if (labelArgumentIndex < 0) {
+        throw PatchException("NewX model label '$label' has an unsupported helper layout in $this")
     }
-    val valueRegister = arguments[labelArgumentIndex + 1]
-    return instructions.take(helper.index).asReversed().firstNotNullOfOrNull { instruction ->
-        if (instruction.opcode != Opcode.IGET_OBJECT) return@firstNotNullOfOrNull null
-        val field = instruction.getReference<FieldReference>() ?: return@firstNotNullOfOrNull null
-        val read = instruction as? TwoRegisterInstruction ?: return@firstNotNullOfOrNull null
-        field.takeIf {
-            read.registerA == valueRegister && field.definingClass == definingClass
-        }
-    } ?: throw PatchException("NewX model field for '$label' was not found in $this")
+    val valueRegister = arguments.getOrNull(labelArgumentIndex + 1)
+    if (valueRegister != null) {
+        instructions.take(helper.index).asReversed().firstNotNullOfOrNull { instruction ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@firstNotNullOfOrNull null
+            val field = instruction.getReference<FieldReference>() ?: return@firstNotNullOfOrNull null
+            val read = instruction as? TwoRegisterInstruction ?: return@firstNotNullOfOrNull null
+            field.takeIf {
+                read.registerA == valueRegister && field.definingClass == definingClass
+            }
+        }?.let { return it }
+    }
+    instructions.withIndex()
+        .drop(labelIndex + 1)
+        .firstNotNullOfOrNull { (index, instruction) ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@firstNotNullOfOrNull null
+            val field = instruction.getReference<FieldReference>() ?: return@firstNotNullOfOrNull null
+            if (field.definingClass != definingClass) return@firstNotNullOfOrNull null
+            val read = instruction as? TwoRegisterInstruction ?: return@firstNotNullOfOrNull null
+            instructions.drop(index + 1).firstOrNull { consumer ->
+                consumer.getReference<MethodReference>()?.name == "append" &&
+                    consumer.argumentRegisters().contains(read.registerA)
+            }?.let { field }
+        }?.let { return it }
+    throw PatchException("NewX model field for '$label' was not found in $this")
 }
 
 private fun Instruction.argumentRegisters(): List<Int> {
@@ -403,6 +507,59 @@ private fun patchPostTextBridges(
                 return-object v0
                 :piko_newx_post_author_no_contextual_result
                 :piko_newx_post_author_null
+                const/4 v0, 0x0
+                return-object v0
+            """.trimIndent(),
+    )
+    filterClass.replaceContextualPostBridge(
+        name = "getPostAuthorVerifiedType",
+        returnType = OBJECT_DESCRIPTOR,
+        instructions =
+            """
+                move-object/from16 v0, p0
+                check-cast v0, $postDescriptor
+                iget-object v0, v0, ${postTextModels.postResultField}
+                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
+                if-eqz v1, :piko_newx_post_author_verified_type_no_contextual_result
+                check-cast v0, ${postTextModels.contextualPostDescriptor}
+                ${postTextModels.contextualCanonicalPostRead}
+                check-cast v0, ${postTextModels.canonicalPostDescriptor}
+                iget-object v0, v0, ${postTextModels.authorField}
+                if-eqz v0, :piko_newx_post_author_verified_type_null
+                check-cast v0, ${postTextModels.authorField.type}
+                invoke-interface {v0}, ${postTextModels.authorVerifiedTypeGetter.smaliReference()}
+                move-result-object v0
+                return-object v0
+                :piko_newx_post_author_verified_type_no_contextual_result
+                :piko_newx_post_author_verified_type_null
+                const/4 v0, 0x0
+                return-object v0
+            """.trimIndent(),
+    )
+    filterClass.replaceContextualPostBridge(
+        name = "getPostAuthorId",
+        returnType = STRING_DESCRIPTOR,
+        instructions =
+            """
+                move-object/from16 v0, p0
+                check-cast v0, $postDescriptor
+                iget-object v0, v0, ${postTextModels.postResultField}
+                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
+                if-eqz v1, :piko_newx_post_author_id_no_contextual_result
+                check-cast v0, ${postTextModels.contextualPostDescriptor}
+                ${postTextModels.contextualCanonicalPostRead}
+                check-cast v0, ${postTextModels.canonicalPostDescriptor}
+                iget-object v0, v0, ${postTextModels.authorField}
+                if-eqz v0, :piko_newx_post_author_id_null
+                check-cast v0, ${postTextModels.authorField.type}
+                invoke-interface {v0}, ${postTextModels.authorIdGetter.smaliReference()}
+                move-result-object v0
+                if-eqz v0, :piko_newx_post_author_id_null
+                invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
+                move-result-object v0
+                return-object v0
+                :piko_newx_post_author_id_no_contextual_result
+                :piko_newx_post_author_id_null
                 const/4 v0, 0x0
                 return-object v0
             """.trimIndent(),

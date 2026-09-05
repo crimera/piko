@@ -10,6 +10,7 @@ import java.util.Set;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.postfilter.PostFilterMatcher;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
+import app.morphe.extension.newx.postfilter.VerifiedAccountWhitelistStore;
 
 public final class NewXTimelineFilter {
 
@@ -17,6 +18,10 @@ public final class NewXTimelineFilter {
     private static final String AI_SOURCE_USER_MARKED = "UserMarked";
     private static final String AI_SOURCE_AUTO_DETECTED = "AutoDetected";
     private static final String AI_SOURCE_NOT_IDENTIFIED = "SourceNotIdentified";
+    private static final String VERIFIED_TYPE_BUSINESS = "Business";
+    private static final String VERIFIED_TYPE_GOVERNMENT = "Government";
+    private static final String VERIFIED_TYPE_USER = "User";
+    private static final String VERIFIED_TYPE_UNKNOWN = "Unknown";
     private static final String DISCOVER_MORE_ENTRY_ID = "tweetdetailrelatedtweets";
     private static final TimelineModelAccess PRODUCTION_MODEL_ACCESS = new TimelineModelAccess() {
         @Override boolean isModuleItem(Object value) { return isTimelineModuleItem(value); }
@@ -88,6 +93,12 @@ public final class NewXTimelineFilter {
         }
         @Override String getPostAuthorScreenName(Object post) {
             return NewXTimelineFilter.getPostAuthorScreenName(post);
+        }
+        @Override Object getPostAuthorVerifiedType(Object post) {
+            return NewXTimelineFilter.getPostAuthorVerifiedType(post);
+        }
+        @Override String getPostAuthorId(Object post) {
+            return NewXTimelineFilter.getPostAuthorId(post);
         }
         @Override Object getContentDisclosure(Object post) { return NewXTimelineFilter.getContentDisclosure(post); }
         @Override boolean hasAiGeneratedDisclosure(Object disclosure) {
@@ -164,6 +175,58 @@ public final class NewXTimelineFilter {
         return filterTimelineItems(timelineItems, false, false, snapshot, Collections.emptySet(), false, modelAccess);
     }
 
+    public static Object filterPostsByVerifiedType(Object timelineItems, Set<String> typesToHide) {
+        try {
+            Set<String> types = parseVerifiedTypes(typesToHide);
+            if (types.isEmpty()) return timelineItems;
+            return filterPostsByVerifiedType(
+                    timelineItems,
+                    types,
+                    VerifiedAccountWhitelistStore.shared().snapshot(),
+                    PRODUCTION_MODEL_ACCESS
+            );
+        } catch (RuntimeException exception) {
+            logFailure("verified-account filter loading", exception);
+            return timelineItems;
+        }
+    }
+
+    static Object filterPostsByVerifiedType(
+            Object timelineItems,
+            Set<String> typesToHide,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
+        Set<String> types = parseVerifiedTypes(typesToHide);
+        if (types.isEmpty()) return timelineItems;
+        return filterTimelineItems(
+                timelineItems,
+                false,
+                false,
+                null,
+                Collections.emptySet(),
+                false,
+                types,
+                whitelist == null ? Collections.emptySet() : whitelist,
+                modelAccess
+        );
+    }
+
+    private static Set<String> parseVerifiedTypes(Set<String> typesToHide) {
+        if (typesToHide == null || typesToHide.isEmpty()) return Collections.emptySet();
+        Set<String> types = new HashSet<>();
+        for (String type : typesToHide) {
+            if (isSupportedVerifiedType(type)) types.add(type);
+        }
+        return types;
+    }
+
+    private static boolean isSupportedVerifiedType(String type) {
+        return VERIFIED_TYPE_BUSINESS.equals(type)
+                || VERIFIED_TYPE_GOVERNMENT.equals(type)
+                || VERIFIED_TYPE_USER.equals(type)
+                || VERIFIED_TYPE_UNKNOWN.equals(type);
+    }
     public static Object filterAiGeneratedPosts(Object timelineItems, Set<String> sourcesToHide) {
         return filterAiGeneratedPosts(timelineItems, sourcesToHide, PRODUCTION_MODEL_ACCESS);
     }
@@ -211,7 +274,7 @@ public final class NewXTimelineFilter {
         );
     }
 
-    private static Object filterTimelineItems(
+private static Object filterTimelineItems(
             Object timelineItems,
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
@@ -220,11 +283,36 @@ public final class NewXTimelineFilter {
             boolean hideDiscoverMore,
             TimelineModelAccess modelAccess
     ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                Collections.emptySet(),
+                Collections.emptySet(),
+                modelAccess
+        );
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
         if (timelineItems == null) return null;
         if (!filterPromotedItems
                 && !hideWhoToFollow
                 && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())
                 && (aiSourcesToHide == null || aiSourcesToHide.isEmpty())
+                && (verifiedTypesToHide == null || verifiedTypesToHide.isEmpty())
                 && !hideDiscoverMore) {
             return timelineItems;
         }
@@ -243,6 +331,8 @@ public final class NewXTimelineFilter {
                         ruleSnapshot,
                         aiSourcesToHide,
                         hideDiscoverMore,
+                        verifiedTypesToHide,
+                        whitelist,
                         modelAccess
                 );
                 boolean changed = result.remove || result.item != original;
@@ -283,6 +373,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
             TimelineModelAccess modelAccess
     ) {
         if (original == null) return FilterResult.keep(null);
@@ -295,6 +387,8 @@ public final class NewXTimelineFilter {
                         ruleSnapshot,
                         aiSourcesToHide,
                         hideDiscoverMore,
+                        verifiedTypesToHide,
+                        whitelist,
                         modelAccess
                 );
             }
@@ -305,6 +399,8 @@ public final class NewXTimelineFilter {
                     ruleSnapshot,
                     aiSourcesToHide,
                     hideDiscoverMore,
+                    verifiedTypesToHide,
+                    whitelist,
                     modelAccess
             );
         } catch (RuntimeException exception) {
@@ -320,6 +416,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
             TimelineModelAccess modelAccess
     ) {
         Object originalItem = modelAccess.getModuleItem(wrapper);
@@ -330,6 +428,8 @@ public final class NewXTimelineFilter {
                 ruleSnapshot,
                 aiSourcesToHide,
                 hideDiscoverMore,
+                verifiedTypesToHide,
+                whitelist,
                 modelAccess
         );
         if (result.remove) return result;
@@ -348,6 +448,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
             TimelineModelAccess modelAccess
     ) {
         if (item == null) return FilterResult.keep(null);
@@ -363,6 +465,9 @@ public final class NewXTimelineFilter {
             try {
                 String textForFilter = modelAccess.getPostTextForFilter(item);
                 String authorScreenName = modelAccess.getPostAuthorScreenName(item);
+                if (isVerifiedAuthorToHide(item, verifiedTypesToHide, whitelist, modelAccess)) {
+                    return FilterResult.remove();
+                }
                 if (PostFilterMatcher.findMatchReason(textForFilter, authorScreenName, ruleSnapshot) != null) {
                     return FilterResult.remove();
                 }
@@ -380,10 +485,29 @@ public final class NewXTimelineFilter {
                     ruleSnapshot,
                     aiSourcesToHide,
                     hideDiscoverMore,
+                    verifiedTypesToHide,
+                    whitelist,
                     modelAccess
             );
         }
         return FilterResult.keep(item);
+    }
+
+    private static boolean isVerifiedAuthorToHide(
+            Object post,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
+        if (verifiedTypesToHide == null || verifiedTypesToHide.isEmpty()) return false;
+        Object verifiedType = modelAccess.getPostAuthorVerifiedType(post);
+        if (!(verifiedType instanceof Enum<?> enumType)) return false;
+        if (!verifiedTypesToHide.contains(enumType.name())) return false;
+        return !VerifiedAccountWhitelistStore.matches(
+                whitelist,
+                modelAccess.getPostAuthorId(post),
+                modelAccess.getPostAuthorScreenName(post)
+        );
     }
 
     private static boolean isAiGenerated(
@@ -437,6 +561,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
             TimelineModelAccess modelAccess
     ) {
         String entryId = modelAccess.getModuleEntryId(module);
@@ -473,6 +599,8 @@ public final class NewXTimelineFilter {
                         ruleSnapshot,
                         aiSourcesToHide,
                         hideDiscoverMore,
+                        verifiedTypesToHide,
+                        whitelist,
                         modelAccess
                 );
             } catch (RuntimeException exception) {
@@ -778,6 +906,13 @@ public final class NewXTimelineFilter {
     }
 
     private static String getPostAuthorScreenName(Object post) {
+        return null;
+    }
+    private static Object getPostAuthorVerifiedType(Object post) {
+        return null;
+    }
+
+    private static String getPostAuthorId(Object post) {
         return null;
     }
 

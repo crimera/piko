@@ -4129,6 +4129,63 @@
       "options": []
     },
     {
+      "name": "NewX: Hide posts by verified account type",
+      "description": "Hides posts and replies authored by selected timeline-reported verification types.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "NewX",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.20.5-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.21.1-prod.05",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.22.0-beta.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.22.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.23.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "NewX: Hide premium upsell",
       "description": "Hides the premium upsell chip from the NewX home top bar.",
       "default": true,
@@ -4648,6 +4705,60 @@
         "BytecodePatch",
         "BytecodePatch"
       ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "NewX",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.20.5-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.21.1-prod.05",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.22.0-beta.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.22.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.23.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "NewX: Unlock color customization",
+      "description": "Unlocks the built-in app color selector for non-Premium users.",
+      "default": true,
+      "dependencies": [],
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",

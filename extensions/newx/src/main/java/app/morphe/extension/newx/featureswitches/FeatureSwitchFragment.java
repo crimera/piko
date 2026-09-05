@@ -1,7 +1,6 @@
 package app.morphe.extension.newx.featureswitches;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -34,9 +33,10 @@ import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.ButtonView;
 import app.morphe.extension.newx.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
+import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
 
 @SuppressWarnings("deprecation")
-public final class FeatureSwitchFragment extends Fragment implements FeatureSwitchAdapter.Listener {
+public final class FeatureSwitchFragment extends NewXCustomScreenFragment implements FeatureSwitchAdapter.Listener {
     private final FeatureSwitchStore store = FeatureSwitchStore.shared();
     private FeatureSwitchAdapter adapter;
     private EditText search;

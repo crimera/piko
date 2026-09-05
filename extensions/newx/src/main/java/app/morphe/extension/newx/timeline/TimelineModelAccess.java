@@ -145,6 +145,14 @@ abstract class TimelineModelAccess {
         return null;
     }
 
+    Object getPostAuthorVerifiedType(Object post) {
+        return null;
+    }
+
+    String getPostAuthorId(Object post) {
+        return null;
+    }
+
     String getPostTextForFilter(Object post) {
         String text = getPostText(post);
         if (text == null || text.isEmpty()) return text;
