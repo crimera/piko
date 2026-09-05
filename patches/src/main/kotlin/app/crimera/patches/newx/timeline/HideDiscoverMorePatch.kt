@@ -2,9 +2,7 @@ package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.models.newXTimelineModelAdapterPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
-import app.crimera.patches.newx.settings.group
 import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
@@ -27,14 +25,12 @@ val newXHideDiscoverMorePatch =
         val hideDiscoverMore =
             newXSettings {
                 category(Categories.CONTENT) {
-                    group(Groups.CONTENT_FILTERING) {
-                        toggle(
-                            id = "newx.content.hide_discover_more",
-                            strings = settingStrings("piko_newx_hide_discover_more"),
-                            order = 250,
-                            defaultValue = false,
-                        )
-                    }
+                    toggle(
+                        id = "newx.content.hide_discover_more",
+                        strings = settingStrings("piko_newx_hide_discover_more"),
+                        order = 250,
+                        defaultValue = false,
+                    )
                 }
             }
 

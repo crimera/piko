@@ -82,20 +82,12 @@ internal object Groups {
             order = 100,
         )
 
-    val CONTENT_FILTERING =
-        SettingsGroupMetadata(
-            id = "newx.content.filtering",
-            titleResourceName = "piko_newx_group_content_filtering_title",
-            summaryResourceName = "piko_newx_group_content_filtering_summary",
-            iconResourceName = "ic_vector_filter",
-            order = 100,
-        )
     val VERIFIED_ACCOUNT_FILTERING =
         SettingsGroupMetadata(
             id = "newx.content.verified_account_filtering",
             titleResourceName = "piko_newx_group_verified_account_filtering_title",
             summaryResourceName = "piko_newx_group_verified_account_filtering_summary",
-            iconResourceName = "ic_vector_filter",
+            iconResourceName = "ic_vector_verified_blue",
             order = 200,
         )
 

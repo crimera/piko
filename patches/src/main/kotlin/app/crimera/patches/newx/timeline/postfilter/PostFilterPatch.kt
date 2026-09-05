@@ -1,9 +1,7 @@
 package app.crimera.patches.newx.timeline.postfilter
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.customScreen
-import app.crimera.patches.newx.settings.group
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.timeline.NewXTimelineSuccessFingerprint
@@ -24,15 +22,14 @@ val postFilterPatch =
 
         newXSettings {
             category(Categories.CONTENT) {
-                group(Groups.CONTENT_FILTERING) {
-                    customScreen(
-                        id = "newx.content.post_filtering",
-                        strings = settingStrings("piko_newx_post_filtering"),
-                        order = 400,
-                        fragmentClassDescriptor =
-                            "Lapp/morphe/extension/newx/postfilter/PostFilterFragment;",
-                    )
-                }
+                customScreen(
+                    id = "newx.content.post_filtering",
+                    strings = settingStrings("piko_newx_post_filtering"),
+                    order = 400,
+                    fragmentClassDescriptor =
+                        "Lapp/morphe/extension/newx/postfilter/PostFilterFragment;",
+                    iconResourceName = "ic_vector_filter",
+                )
             }
         }
 

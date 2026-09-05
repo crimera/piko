@@ -1,9 +1,7 @@
 package app.crimera.patches.newx.ads
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
-import app.crimera.patches.newx.settings.group
 import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
@@ -27,14 +25,12 @@ val newXHideAdsPatch =
         val filterPromotedPosts =
             newXSettings {
                 category(Categories.CONTENT) {
-                    group(Groups.CONTENT_FILTERING) {
-                        toggle(
-                            id = "newx.content.filter_promoted_posts",
-                            strings = settingStrings("piko_newx_filter_promoted_posts"),
-                            order = 100,
-                            defaultValue = true,
-                        )
-                    }
+                    toggle(
+                        id = "newx.content.filter_promoted_posts",
+                        strings = settingStrings("piko_newx_filter_promoted_posts"),
+                        order = 100,
+                        defaultValue = true,
+                    )
                 }
             }
 

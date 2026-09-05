@@ -45,8 +45,6 @@
     <string name="piko_newx_show_sensitive_media_summary">Shows sensitive media without requiring confirmation</string>
     <string name="piko_newx_default_reply_sorting_title">Default reply sorting</string>
     <string name="piko_newx_default_reply_sorting_summary">Default reply-sort order for tweet detail (Relevance, Recency, or Likes)</string>
-    <string name="piko_newx_group_content_filtering_title">Content filtering</string>
-    <string name="piko_newx_group_content_filtering_summary">Control promotions, recommendations, AI-generated posts, and keyword filters</string>
     <string name="piko_newx_group_verified_account_filtering_title">Verified account filtering</string>
     <string name="piko_newx_group_verified_account_filtering_summary">Filter posts by timeline-reported account verification type</string>
     <string name="piko_newx_topic_filtering_title">For You topic filter</string>

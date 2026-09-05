@@ -1,10 +1,8 @@
 package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
 import app.crimera.patches.newx.settings.choice
-import app.crimera.patches.newx.settings.group
 import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.multiChoice
 import app.crimera.patches.newx.models.readBoolean
@@ -46,20 +44,18 @@ val newXHideAiGeneratedPostsPatch =
         val aiSourcesToHide =
             newXSettings {
                 category(Categories.CONTENT) {
-                    group(Groups.CONTENT_FILTERING) {
-                        multiChoice(
-                            id = "newx.content.hide_ai_generated_posts",
-                            strings = settingStrings("piko_newx_hide_ai_generated_posts"),
-                            order = 300,
-                            defaultValue = emptySet(),
-                            options =
-                                listOf(
-                                    choice("UserMarked", "piko_newx_hide_ai_generated_posts_user_marked"),
-                                    choice("AutoDetected", "piko_newx_hide_ai_generated_posts_auto_detected"),
-                                    choice("SourceNotIdentified", "piko_newx_hide_ai_generated_posts_source_not_identified"),
-                                ),
-                        )
-                    }
+                    multiChoice(
+                        id = "newx.content.hide_ai_generated_posts",
+                        strings = settingStrings("piko_newx_hide_ai_generated_posts"),
+                        order = 300,
+                        defaultValue = emptySet(),
+                        options =
+                            listOf(
+                                choice("UserMarked", "piko_newx_hide_ai_generated_posts_user_marked"),
+                                choice("AutoDetected", "piko_newx_hide_ai_generated_posts_auto_detected"),
+                                choice("SourceNotIdentified", "piko_newx_hide_ai_generated_posts_source_not_identified"),
+                            ),
+                    )
                 }
             }
 
