@@ -113,6 +113,12 @@ val newXInlineDownloadButtonPatch =
                         defaultValue = true,
                     )
                     toggle(
+                        id = "newx.content.inline_download_hide_no_media",
+                        strings = settingStrings("piko_newx_inline_download_hide_no_media"),
+                        order = 150,
+                        defaultValue = true,
+                    )
+                    toggle(
                         id = "newx.content.media_picker_copy_link",
                         strings = settingStrings("piko_newx_media_picker_copy_link"),
                         order = 200,

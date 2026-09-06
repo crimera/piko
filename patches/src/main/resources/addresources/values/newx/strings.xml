@@ -101,6 +101,8 @@
     <string name="piko_newx_group_inline_download_summary">Customize the inline media download picker</string>
     <string name="piko_newx_inline_download_button_title">Show inline download button</string>
     <string name="piko_newx_inline_download_button_summary">Adds a download button directly below NewX posts</string>
+    <string name="piko_newx_inline_download_hide_no_media_title">Hide button when no media</string>
+    <string name="piko_newx_inline_download_hide_no_media_summary">Only shows the inline download button on posts with downloadable media</string>
     <string name="piko_newx_media_picker_copy_link_title">Show copy-link button</string>
     <string name="piko_newx_media_picker_copy_link_summary">Shows a button for copying media URLs in the download media picker</string>
     <string name="piko_newx_media_picker_thumbnails_title">Load media thumbnails</string>

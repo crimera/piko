@@ -52,6 +52,7 @@ import app.morphe.extension.newx.utils.ToStringParser;
 @SuppressWarnings("unused")
 public final class InlineDownloadButton {
     private static final String SETTING_ID = "newx.content.inline_download_button";
+    private static final String HIDE_NO_MEDIA_SETTING = "newx.content.inline_download_hide_no_media";
     private static final String DOWNLOAD_DIRECTORY = "Twitter";
     // Primary public directories. These literal values match Environment.DIRECTORY_PICTURES /
     // DIRECTORY_MOVIES and are exactly the strings MediaStore accepts as RELATIVE_PATH primary
@@ -107,7 +108,7 @@ public final class InlineDownloadButton {
         if (!patchApplied || !isEnabled() || actions == null) return actions;
 
         try {
-            if (!hasMedia(postFor(presenter))) return actions;
+            if (hideWhenNoMedia() && !hasMedia(postFor(presenter))) return actions;
             if (containsDownloadAction(actions)) return actions;
 
             Object downloadAction = createDownloadAction();
@@ -184,6 +185,10 @@ public final class InlineDownloadButton {
 
     private static boolean isEnabled() {
         return SettingsRegistry.getBooleanOrDefault(SETTING_ID, false);
+    }
+
+    private static boolean hideWhenNoMedia() {
+        return SettingsRegistry.getBooleanOrDefault(HIDE_NO_MEDIA_SETTING, true);
     }
 
     static boolean hasMedia(Object post) {
