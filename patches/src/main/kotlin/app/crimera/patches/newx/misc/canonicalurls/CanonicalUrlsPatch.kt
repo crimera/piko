@@ -10,11 +10,13 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.instanceOf
 import app.morphe.patcher.methodCall
@@ -25,6 +27,7 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
+import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -339,23 +342,31 @@ private fun replaceUrlEntityFieldRead(
         ?: throw PatchException(
             "URL-entity field read at instruction $fieldReadIndex has no continuation",
         )
-    val settingRead =
-        setting.injectRead(
-            method = method,
-            index = fieldReadIndex,
-            excludedRegisters = listOf(fieldRead.registerA, fieldRead.registerB),
-            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
-        )
+    val settingRegister =
+        method.getFreeRegisterProvider(
+            fieldReadIndex,
+            1,
+            fieldRead.registerA,
+            fieldRead.registerB,
+        ).getFreeRegister4Bit()
     val originalLabel = "piko_canonical_url_original_$fieldReadIndex"
     val continuationLabel = "piko_canonical_url_continue_$fieldReadIndex"
+    // Replace the entry instruction itself so existing branch labels land on the setting check.
+    method.replaceInstruction(
+        fieldReadIndex,
+        "const-string v$settingRegister, \"${setting.id}\"",
+    )
     method.addInstructionsWithLabels(
-        settingRead.nextIndex,
+        fieldReadIndex + 1,
         """
-            if-eqz v${settingRead.register}, :$originalLabel
+            invoke-static {v$settingRegister}, $SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault(Ljava/lang/String;)Z
+            move-result v$settingRegister
+            if-eqz v$settingRegister, :$originalLabel
             iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $replacement
             goto :$continuationLabel
+            :$originalLabel
+            iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $originalField
         """.trimIndent(),
-        ExternalLabel(originalLabel, fieldRead),
         ExternalLabel(continuationLabel, continuation),
     )
 }
