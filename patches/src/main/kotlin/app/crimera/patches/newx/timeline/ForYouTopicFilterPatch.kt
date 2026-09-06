@@ -59,6 +59,8 @@ private const val FLOW_PREFIX = "Lkotlinx/coroutines/flow/"
 private const val INTRINSICS_DESCRIPTOR = "Lkotlin/jvm/internal/Intrinsics;"
 private const val OBJECT_LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val INTEGER_DESCRIPTOR = "I"
+private const val CLEAR_AND_REFRESH_TIMELINE = "ClearAndRefreshTimeline"
+private const val REQUEST_SCROLL_TO_TOP = "RequestScrollToTop"
 private const val FOR_YOU_REFRESH_TARGET_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/ForYouTopicFilter\$RefreshTarget;"
 private const val FOR_YOU_REFRESH_BRIDGE_NAME = "pikoRefreshForYouTopicFilter"
@@ -89,6 +91,21 @@ private data class ResolvedForYouTabHook(
     val method: MutableMethod,
     val insertionIndex: Int,
     val refreshMethod: Method,
+)
+
+private data class ResolvedForYouRefreshBridge(
+    val stateField: FieldReference,
+    val stateGetter: MethodReference,
+    val pagesType: String,
+    val pagesListField: FieldReference,
+    val pagesIndexField: FieldReference,
+    val pageLookup: MethodReference,
+    val componentType: String,
+    val componentGetter: MethodReference,
+    val homeComponentType: String,
+    val forYouComponentType: String,
+    val forYouControllerField: FieldReference,
+    val refreshDispatch: MethodReference,
 )
 
 @Suppress("unused")
@@ -336,26 +353,319 @@ private fun installForYouRefreshBridge(tabHook: ResolvedForYouTabHook) {
         )
     }
 
-    val refreshReference = tabHook.refreshMethod.smaliReference()
-    val implementation = MethodImplementationBuilder(1).apply {
-        addInstruction("invoke-virtual {v0}, $refreshReference".toInstruction())
+    val clearAndRefreshField = resolveSingletonTimelineEventField(CLEAR_AND_REFRESH_TIMELINE)
+    val scrollToTopField = resolveSingletonTimelineEventField(REQUEST_SCROLL_TO_TOP)
+    val bridge = tabHook.refreshMethod.resolveForYouRefreshBridge()
+    val implementation = MethodImplementationBuilder(4).apply {
         addInstruction("return-void".toInstruction())
     }.methodImplementation
-    classDef.methods.add(
-        MutableMethod(
-            ImmutableMethod(
-                classDef.type,
-                FOR_YOU_REFRESH_BRIDGE_NAME,
-                emptyList(),
-                "V",
-                AccessFlags.PUBLIC.value,
-                emptySet(),
-                emptySet(),
-                implementation,
-            ),
+    val bridgeMethod = MutableMethod(
+        ImmutableMethod(
+            classDef.type,
+            FOR_YOU_REFRESH_BRIDGE_NAME,
+            emptyList(),
+            "V",
+            AccessFlags.PUBLIC.value,
+            emptySet(),
+            emptySet(),
+            implementation,
         ),
     )
+    classDef.methods.add(bridgeMethod)
+
+    bridgeMethod.addInstructionsWithLabels(
+        0,
+        bridge.toSmali(clearAndRefreshField, scrollToTopField),
+    )
 }
+
+context(context: BytecodePatchContext)
+private fun resolveSingletonTimelineEventField(eventLabel: String): FieldReference {
+    val eventClasses = mutableListOf<com.android.tools.smali.dexlib2.iface.ClassDef>()
+    context.classDefForEach { classDef ->
+        val matchingToStringMethods = classDef.methods.filter { method ->
+            method.name == "toString" &&
+                method.returnType == STRING_DESCRIPTOR &&
+                method.parameterTypes.isEmpty() &&
+                method.containsStringFragment(eventLabel)
+        }
+        if (matchingToStringMethods.size == 1) eventClasses += classDef
+    }
+    if (eventClasses.size != 1) {
+        throw PatchException(
+            "Expected one NewX $eventLabel event class, found " +
+                "${eventClasses.size}: ${eventClasses.joinToString { it.type }}",
+        )
+    }
+
+    val eventClass = eventClasses.single()
+    val fields = eventClass.fields.filter { field ->
+        AccessFlags.STATIC.isSet(field.accessFlags) &&
+            field.name == "a" &&
+            field.type == eventClass.type
+    }
+    if (fields.size != 1) {
+        throw PatchException(
+            "Expected one NewX $eventLabel singleton field in ${eventClass.type}, " +
+                "found ${fields.size}: ${fields.joinToString()}",
+        )
+    }
+    return fields.single()
+}
+
+private fun Method.resolveForYouRefreshBridge(): ResolvedForYouRefreshBridge {
+    val instructions = implementation?.instructions?.toList()
+        ?: throw PatchException("NewX For You refresh method has no implementation: $this")
+
+    fun fieldAt(index: Int): FieldReference =
+        instructions[index].getReference<FieldReference>()
+            ?: throw PatchException("NewX For You refresh field reference is missing at $index: $this")
+
+    fun typeAt(index: Int): String =
+        instructions[index].getReference<TypeReference>()?.type
+            ?: throw PatchException("NewX For You refresh type reference is missing at $index: $this")
+
+    val stateFieldCandidates = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
+        .map { (index, _) -> fieldAt(index) }
+        .filter { field ->
+            field.definingClass == definingClass &&
+                instructions.any { instruction ->
+                    if (instruction.opcode != Opcode.INVOKE_VIRTUAL) return@any false
+                    val reference = instruction.getReference<MethodReference>() ?: return@any false
+                    reference.definingClass == field.type &&
+                        reference.name == "a" &&
+                        reference.returnType == OBJECT_DESCRIPTOR &&
+                        reference.parameterTypes.isEmpty()
+                }
+        }
+        .distinctBy(FieldReference::toString)
+    if (stateFieldCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh state field in $this, found " +
+                "${stateFieldCandidates.size}: ${stateFieldCandidates.joinToString()}",
+        )
+    }
+    val stateField = stateFieldCandidates.single()
+
+    val stateGetterCandidates = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
+        .mapNotNull { (index, _) ->
+            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
+            reference.takeIf {
+                it.definingClass == stateField.type &&
+                    it.name == "a" &&
+                    it.returnType == OBJECT_DESCRIPTOR &&
+                    it.parameterTypes.isEmpty()
+            }
+        }
+        .distinctBy(MethodReference::toString)
+    if (stateGetterCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh state getter in $this, found " +
+                "${stateGetterCandidates.size}: ${stateGetterCandidates.joinToString()}",
+        )
+    }
+    val stateGetter = stateGetterCandidates.single()
+
+    val pagesType = instructions.withIndex()
+        .firstOrNull { (index, instruction) ->
+            instruction.opcode == Opcode.CHECK_CAST &&
+                index > 1 &&
+                instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
+                instructions[index - 2].getReference<MethodReference>()?.matches(stateGetter) == true
+        }?.let { (index, _) -> typeAt(index) }
+        ?: throw PatchException("NewX For You refresh pages cast is missing in $this")
+
+    val pagesListFields = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
+        .map { (index, _) -> fieldAt(index) }
+        .filter { field -> field.definingClass == pagesType && field.type == OBJECT_LIST_DESCRIPTOR }
+        .distinctBy(FieldReference::toString)
+    if (pagesListFields.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh pages list field in $this, found " +
+                "${pagesListFields.size}: ${pagesListFields.joinToString()}",
+        )
+    }
+    val pagesListField = pagesListFields.single()
+
+    val pagesIndexFields = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET }
+        .map { (index, _) -> fieldAt(index) }
+        .filter { field -> field.definingClass == pagesType && field.type == INTEGER_DESCRIPTOR }
+        .distinctBy(FieldReference::toString)
+    if (pagesIndexFields.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh pages index field in $this, found " +
+                "${pagesIndexFields.size}: ${pagesIndexFields.joinToString()}",
+        )
+    }
+    val pagesIndexField = pagesIndexFields.single()
+
+    val pageLookupCandidates = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_STATIC }
+        .mapNotNull { (index, _) ->
+            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
+            reference.takeIf {
+                it.name == "getOrNull" &&
+                    it.returnType == OBJECT_DESCRIPTOR &&
+                    it.parameterTypes.map(CharSequence::toString) ==
+                        listOf(OBJECT_LIST_DESCRIPTOR, INTEGER_DESCRIPTOR)
+            }
+        }
+        .distinctBy(MethodReference::toString)
+    if (pageLookupCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh page lookup in $this, found " +
+                "${pageLookupCandidates.size}: ${pageLookupCandidates.joinToString()}",
+        )
+    }
+    val pageLookup = pageLookupCandidates.single()
+
+    val componentType = instructions.withIndex()
+        .firstOrNull { (index, instruction) ->
+            instruction.opcode == Opcode.CHECK_CAST &&
+                index > 1 &&
+                instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
+                instructions[index - 2].getReference<MethodReference>()?.matches(pageLookup) == true
+        }?.let { (index, _) -> typeAt(index) }
+        ?: throw PatchException("NewX For You refresh page component cast is missing in $this")
+
+    val componentGetterCandidates = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
+        .mapNotNull { (index, _) ->
+            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
+            reference.takeIf {
+                it.definingClass == componentType &&
+                    it.returnType == OBJECT_DESCRIPTOR &&
+                    it.parameterTypes.isEmpty()
+            }
+        }
+        .distinctBy(MethodReference::toString)
+    if (componentGetterCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh page component getter in $this, found " +
+                "${componentGetterCandidates.size}: ${componentGetterCandidates.joinToString()}",
+        )
+    }
+    val componentGetter = componentGetterCandidates.single()
+
+    val homeComponentType = instructions.withIndex()
+        .firstOrNull { (index, instruction) ->
+            instruction.opcode == Opcode.CHECK_CAST &&
+                index > 1 &&
+                instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
+                instructions[index - 2].getReference<MethodReference>()?.matches(componentGetter) == true
+        }?.let { (index, _) -> typeAt(index) }
+        ?: throw PatchException("NewX For You refresh home component cast is missing in $this")
+
+    val forYouTypeCandidates = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.INSTANCE_OF }
+        .map { (index, _) -> typeAt(index) }
+        .distinct()
+    if (forYouTypeCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh For You component type in $this, found " +
+                "${forYouTypeCandidates.size}: ${forYouTypeCandidates.joinToString()}",
+        )
+    }
+    val forYouComponentType = forYouTypeCandidates.single()
+
+    val forYouControllerFields = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
+        .map { (index, _) -> fieldAt(index) }
+        .filter { field ->
+            field.definingClass == forYouComponentType &&
+                field.type.startsWith("Lcom/x/urt/")
+        }
+        .distinctBy(FieldReference::toString)
+    if (forYouControllerFields.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh controller field in $this, found " +
+                "${forYouControllerFields.size}: ${forYouControllerFields.joinToString()}",
+        )
+    }
+    val forYouControllerField = forYouControllerFields.single()
+
+    val refreshDispatchCandidates = instructions.withIndex()
+        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_INTERFACE }
+        .mapNotNull { (index, _) ->
+            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
+            reference.takeIf {
+                it.definingClass == forYouControllerField.type &&
+                    it.name == "i" &&
+                    it.returnType == "V" &&
+                    it.parameterTypes.size == 1 &&
+                    it.parameterTypes.single().toString().startsWith("Lcom/x/urt/")
+            }
+        }
+        .distinctBy(MethodReference::toString)
+    if (refreshDispatchCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh dispatch method in $this, found " +
+                "${refreshDispatchCandidates.size}: ${refreshDispatchCandidates.joinToString()}",
+        )
+    }
+    val refreshDispatch = refreshDispatchCandidates.single()
+
+    return ResolvedForYouRefreshBridge(
+        stateField = stateField,
+        stateGetter = stateGetter,
+        pagesType = pagesType,
+        pagesListField = pagesListField,
+        pagesIndexField = pagesIndexField,
+        pageLookup = pageLookup,
+        componentType = componentType,
+        componentGetter = componentGetter,
+        homeComponentType = homeComponentType,
+        forYouComponentType = forYouComponentType,
+        forYouControllerField = forYouControllerField,
+        refreshDispatch = refreshDispatch,
+    )
+}
+
+private fun ResolvedForYouRefreshBridge.toSmali(
+    clearAndRefreshField: FieldReference,
+    scrollToTopField: FieldReference,
+): String =
+    """
+        iget-object v0, p0, ${stateField.smaliReference()}
+        invoke-virtual {v0}, ${stateGetter.smaliReference()}
+        move-result-object v1
+        check-cast v1, $pagesType
+        iget-object v1, v1, ${pagesListField.smaliReference()}
+        invoke-virtual {v0}, ${stateGetter.smaliReference()}
+        move-result-object v0
+        check-cast v0, $pagesType
+        iget v0, v0, ${pagesIndexField.smaliReference()}
+        invoke-static {v1, v0}, ${pageLookup.smaliReference()}
+        move-result-object v0
+        check-cast v0, $componentType
+        const/4 v1, 0x0
+        if-eqz v0, :piko_for_you_refresh_no_component
+        invoke-virtual {v0}, ${componentGetter.smaliReference()}
+        move-result-object v0
+        check-cast v0, $homeComponentType
+        goto :piko_for_you_refresh_component_ready
+
+        :piko_for_you_refresh_no_component
+        move-object v0, v1
+
+        :piko_for_you_refresh_component_ready
+        instance-of v2, v0, $forYouComponentType
+        if-eqz v2, :piko_for_you_refresh_done
+        check-cast v0, $forYouComponentType
+        iget-object v1, v0, ${forYouControllerField.smaliReference()}
+        if-eqz v1, :piko_for_you_refresh_done
+        sget-object v0, ${clearAndRefreshField.smaliReference()}
+        invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
+        sget-object v0, ${scrollToTopField.smaliReference()}
+        invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
+
+        :piko_for_you_refresh_done
+        return-void
+    """.trimIndent()
 
 context(context: BytecodePatchContext)
 private fun patchHomeFilterGroupConstructor() {
@@ -638,5 +948,17 @@ private fun MethodReference.matches(method: Method): Boolean =
         returnType == method.returnType &&
         parameterTypes.map(CharSequence::toString) == method.parameterTypes.map(CharSequence::toString)
 
+private fun MethodReference.matches(reference: MethodReference): Boolean =
+    definingClass == reference.definingClass &&
+        name == reference.name &&
+        returnType == reference.returnType &&
+        parameterTypes.map(CharSequence::toString) == reference.parameterTypes.map(CharSequence::toString)
+
 private fun Method.smaliReference(): String =
     "$definingClass->$name(${parameterTypes.joinToString(separator = "") { it.toString() }})$returnType"
+
+private fun MethodReference.smaliReference(): String =
+    "$definingClass->$name(${parameterTypes.joinToString(separator = "") { it.toString() }})$returnType"
+
+private fun FieldReference.smaliReference(): String =
+    "$definingClass->$name:$type"

@@ -96,17 +96,6 @@ final class ForYouTopicFilterSheet {
 
             sheet.setScrollableBodyView(body);
 
-            sheet.getDialog().setOnDismissListener(ignored -> {
-                try {
-                    refreshTarget.pikoRefreshForYouTopicFilter();
-                } catch (RuntimeException exception) {
-                    NewXLogger.printException(
-                            () -> "Failed to refresh For You after topic selection",
-                            exception
-                    );
-                }
-            });
-
             updateActionButton(actionButton, selected.size());
             actionButton.setOnClickListener(ignored -> {
                 if (selected.isEmpty()) {
@@ -116,6 +105,14 @@ final class ForYouTopicFilterSheet {
                     }
                 }
                 saveSelection(selected);
+                try {
+                    refreshTarget.pikoRefreshForYouTopicFilter();
+                } catch (RuntimeException exception) {
+                    NewXLogger.printException(
+                            () -> "Failed to refresh For You after topic selection",
+                            exception
+                    );
+                }
                 sheet.dismiss();
             });
             sheet.addButton(actionButton);
