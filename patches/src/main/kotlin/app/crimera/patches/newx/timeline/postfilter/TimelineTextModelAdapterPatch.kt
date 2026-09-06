@@ -40,6 +40,7 @@ private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val INTEGER_DESCRIPTOR = "I"
+private const val LONG_OBJECT_DESCRIPTOR = "Ljava/lang/Long;"
 
 private object CanonicalPostModelFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/",
@@ -79,6 +80,7 @@ private data class ResolvedPostTextModels(
     val contextualPostDescriptor: String,
     val contextualCanonicalPostRead: String,
     val canonicalPostDescriptor: String,
+    val repliedPostIdField: FieldReference,
     val entityListField: FieldReference,
     val mentionsField: FieldReference,
     val mentionDescriptor: String,
@@ -136,8 +138,10 @@ private fun resolvePostTextModels(
     }
     val entityListField = canonicalPostMatch.fieldForToStringLabel(", entityList=")
     val authorField = canonicalPostMatch.fieldForToStringLabel(", author=")
+    val repliedPostIdField = canonicalPostMatch.fieldForToStringLabel(", repliedPostId=")
+    repliedPostIdField.requireType(LONG_OBJECT_DESCRIPTOR, "canonical-post replied-post ID")
     val canonicalPostClass = context.mutableClassDefBy(canonicalPostDescriptor)
-    canonicalPostClass.requirePublicFields(listOf(entityListField, authorField))
+    canonicalPostClass.requirePublicFields(listOf(entityListField, authorField, repliedPostIdField))
 
     val entityListMatch =
         PostEntityListModelFingerprint.requireSingle("post-entity-list model")
@@ -194,6 +198,7 @@ private fun resolvePostTextModels(
         contextualPostDescriptor = postModels.contextualPostDescriptor,
         contextualCanonicalPostRead = contextualCanonicalPostAccessor.readObject("v0"),
         canonicalPostDescriptor = canonicalPostDescriptor,
+        repliedPostIdField = repliedPostIdField,
         entityListField = entityListField,
         mentionsField = mentionsField,
         mentionDescriptor = mentionDescriptor,
@@ -431,6 +436,26 @@ private fun patchPostTextBridges(
             move-result-object p0
             return-object p0
         """.trimIndent(),
+    )
+    filterClass.replaceContextualPostBridge(
+        name = "getPostRepliedPostId",
+        returnType = OBJECT_DESCRIPTOR,
+        instructions =
+            """
+                move-object/from16 v0, p0
+                check-cast v0, $postDescriptor
+                iget-object v0, v0, ${postTextModels.postResultField}
+                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
+                if-eqz v1, :piko_newx_post_replied_id_no_contextual_result
+                check-cast v0, ${postTextModels.contextualPostDescriptor}
+                ${postTextModels.contextualCanonicalPostRead}
+                check-cast v0, ${postTextModels.canonicalPostDescriptor}
+                iget-object v0, v0, ${postTextModels.repliedPostIdField}
+                return-object v0
+                :piko_newx_post_replied_id_no_contextual_result
+                const/4 v0, 0x0
+                return-object v0
+            """.trimIndent(),
     )
     filterClass.replaceContextualPostBridge(
         name = "getPostMentions",

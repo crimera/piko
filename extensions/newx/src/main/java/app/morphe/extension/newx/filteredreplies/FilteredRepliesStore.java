@@ -89,8 +89,8 @@ public final class FilteredRepliesStore {
                 }
             };
 
-    // Secondary LRU index mapping replyPostId -> rootPostId
-    private final LinkedHashMap<String, String> replyToRoot =
+    // Secondary LRU index mapping any post in a conversation -> rootPostId.
+    private final LinkedHashMap<String, String> postToRoot =
             new LinkedHashMap<>(MAX_INDEXED_REPLIES, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
@@ -110,8 +110,10 @@ public final class FilteredRepliesStore {
     public synchronized void record(String rootPostId, FilteredReply reply) {
         if (rootPostId == null || rootPostId.isEmpty() || reply == null) return;
 
+        String resolvedRootId = resolveRoot(rootPostId);
+
         LinkedHashMap<String, FilteredReply> replies =
-                threads.computeIfAbsent(rootPostId, k -> new LinkedHashMap<>());
+                threads.computeIfAbsent(resolvedRootId, k -> new LinkedHashMap<>());
 
         String replyId = reply.getPostId();
         if (replies.size() < MAX_REPLIES_PER_THREAD || replies.containsKey(replyId)) {
@@ -119,27 +121,99 @@ public final class FilteredRepliesStore {
         }
 
         if (!replyId.isEmpty()) {
-            replyToRoot.put(replyId, rootPostId);
+            postToRoot.put(replyId, resolvedRootId);
         }
+    }
+
+    /**
+     * Associates a visible post from a conversation module with that module's root.
+     *
+     * The post-options presenter supplies the selected post ID, which can be different
+     * from the root ID used by the conversation module. Keeping this alias lets the menu
+     * resolve the same buffered replies regardless of which post in the conversation was
+     * used to open it.
+     */
+    public synchronized void associatePostWithRoot(String rootPostId, String postId) {
+        if (rootPostId == null || rootPostId.isEmpty() || postId == null || postId.isEmpty()) return;
+
+        String resolvedRoot = resolveRoot(rootPostId);
+        String existingRoot = resolveRoot(postId);
+        if (!resolvedRoot.equals(existingRoot)) {
+            if (postToRoot.containsKey(postId)) {
+                mergeRoots(existingRoot, resolvedRoot);
+                resolvedRoot = existingRoot;
+            } else {
+                mergeRoots(resolvedRoot, existingRoot);
+            }
+        }
+        postToRoot.put(postId, resolvedRoot);
+    }
+
+    /**
+     * Connects a post to its immediate replied-to post, merging any reply buffers already
+     * discovered for either side. Parent links can arrive over several incremental timeline
+     * updates, so merging must also migrate replies captured before the full chain was known.
+     */
+    public synchronized void associatePostWithParent(String postId, String parentPostId) {
+        if (postId == null || postId.isEmpty()
+                || parentPostId == null || parentPostId.isEmpty()
+                || postId.equals(parentPostId)) {
+            return;
+        }
+
+        String parentRoot = resolveRoot(parentPostId);
+        String postRoot = resolveRoot(postId);
+        if (!parentRoot.equals(postRoot)) {
+            mergeRoots(parentRoot, postRoot);
+        }
+        postToRoot.put(postId, parentRoot);
     }
 
     public synchronized List<FilteredReply> getReplies(String postId) {
         if (postId == null || postId.isEmpty()) return Collections.emptyList();
 
-        LinkedHashMap<String, FilteredReply> map = threads.get(postId);
+        String rootId = resolveRoot(postId);
+        LinkedHashMap<String, FilteredReply> map = threads.get(rootId);
         if (map != null && !map.isEmpty()) {
             return new ArrayList<>(map.values());
         }
 
-        String rootId = replyToRoot.get(postId);
-        if (rootId != null) {
-            map = threads.get(rootId);
-            if (map != null && !map.isEmpty()) {
-                return new ArrayList<>(map.values());
+        return Collections.emptyList();
+    }
+
+    private String resolveRoot(String postId) {
+        String current = postId;
+        for (int depth = 0; depth < MAX_INDEXED_REPLIES; depth++) {
+            String next = postToRoot.get(current);
+            if (next == null || next.isEmpty() || next.equals(current)) return current;
+            current = next;
+        }
+        return postId;
+    }
+
+    private void mergeRoots(String preferredRoot, String mergedRoot) {
+        if (preferredRoot.equals(mergedRoot)) return;
+
+        LinkedHashMap<String, FilteredReply> mergedReplies = threads.remove(mergedRoot);
+        if (mergedReplies != null && !mergedReplies.isEmpty()) {
+            LinkedHashMap<String, FilteredReply> preferredReplies =
+                    threads.computeIfAbsent(preferredRoot, ignored -> new LinkedHashMap<>());
+            for (Map.Entry<String, FilteredReply> entry : mergedReplies.entrySet()) {
+                if (preferredReplies.size() >= MAX_REPLIES_PER_THREAD
+                        && !preferredReplies.containsKey(entry.getKey())) {
+                    continue;
+                }
+                preferredReplies.put(entry.getKey(), entry.getValue());
             }
         }
 
-        return Collections.emptyList();
+        List<String> aliases = new ArrayList<>(postToRoot.keySet());
+        for (String alias : aliases) {
+            if (mergedRoot.equals(postToRoot.get(alias))) {
+                postToRoot.put(alias, preferredRoot);
+            }
+        }
+        postToRoot.put(mergedRoot, preferredRoot);
     }
 
     public synchronized boolean hasReplies(String postId) {
@@ -152,6 +226,6 @@ public final class FilteredRepliesStore {
 
     public synchronized void clear() {
         threads.clear();
-        replyToRoot.clear();
+        postToRoot.clear();
     }
 }

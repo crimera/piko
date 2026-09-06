@@ -48,6 +48,10 @@ abstract class TimelineModelAccess {
         return null;
     }
 
+    Object getPostRepliedPostId(Object post) {
+        return null;
+    }
+
     boolean isVerticalConversation(Object displayType) {
         return false;
     }

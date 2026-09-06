@@ -74,6 +74,43 @@ public final class FilteredRepliesStoreTest {
     }
 
     @Test
+    public void retrievesRepliesByAnyPostInTheConversation() {
+        FilteredRepliesStore.FilteredReply reply = new FilteredRepliesStore.FilteredReply(
+                "reply-42",
+                "author_a",
+                "uid-1",
+                "User",
+                "Replying here",
+                5000L
+        );
+
+        store.associatePostWithRoot("root-thread-99", "visible-post-7");
+        store.record("root-thread-99", reply);
+
+        List<FilteredRepliesStore.FilteredReply> fromVisiblePost =
+                store.getReplies("visible-post-7");
+        assertEquals(1, fromVisiblePost.size());
+        assertEquals("reply-42", fromVisiblePost.get(0).getPostId());
+    }
+
+    @Test
+    public void mergesPreviouslyCapturedRepliesAlongIncrementalParentChain() {
+        FilteredRepliesStore.FilteredReply reply = new FilteredRepliesStore.FilteredReply(
+                "hidden-child", "blue", "blue-id", "User", "hidden", 5000L
+        );
+
+        store.record("module-root", reply);
+        store.associatePostWithRoot("module-root", "hidden-child");
+        store.associatePostWithParent("hidden-child", "visible-parent");
+        store.associatePostWithParent("visible-parent", "focal-post");
+
+        assertEquals(1, store.getCount("focal-post"));
+        assertEquals("hidden-child", store.getReplies("focal-post").get(0).getPostId());
+        assertEquals(1, store.getCount("visible-parent"));
+        assertEquals(1, store.getCount("module-root"));
+    }
+
+    @Test
     public void deduplicatesByPostId() {
         FilteredRepliesStore.FilteredReply reply = new FilteredRepliesStore.FilteredReply(
                 "reply-1",

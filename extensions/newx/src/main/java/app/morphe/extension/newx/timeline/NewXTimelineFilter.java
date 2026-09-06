@@ -52,6 +52,9 @@ public final class NewXTimelineFilter {
             );
         }
         @Override Object getPostId(Object post) { return NewXTimelineFilter.getPostId(post); }
+        @Override Object getPostRepliedPostId(Object post) {
+            return NewXTimelineFilter.getPostRepliedPostId(post);
+        }
         @Override boolean isVerticalConversation(Object displayType) {
             return NewXTimelineFilter.isVerticalConversation(displayType);
         }
@@ -710,6 +713,10 @@ private static Object filterTimelineItems(
                 continue;
             }
 
+            if (modelAccess.isPost(originalItem)) {
+                associatePostWithConversation(conversationRootId, originalItem, modelAccess);
+            }
+
             if (result.remove) {
                 if (filteredChildren == null) {
                     filteredChildren = copyChildrenPrefix(originalChildren, childIndex);
@@ -778,6 +785,29 @@ private static Object filterTimelineItems(
         }
     }
 
+    private static void associatePostWithConversation(
+            String conversationRootId,
+            Object post,
+            TimelineModelAccess modelAccess
+    ) {
+        if (conversationRootId == null || post == null) return;
+        try {
+            String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+            if (postId != null && !postId.isEmpty()) {
+                FilteredRepliesStore store = FilteredRepliesStore.shared();
+                store.associatePostWithRoot(conversationRootId, postId);
+                String parentPostId = NewXUtils.identifierToString(
+                        modelAccess.getPostRepliedPostId(post)
+                );
+                if (parentPostId != null && !parentPostId.isEmpty()) {
+                    store.associatePostWithParent(postId, parentPostId);
+                }
+            }
+        } catch (RuntimeException exception) {
+            logFailure("associating post with conversation", exception);
+        }
+    }
+
     private static List<Object> copyChildrenPrefix(List<?> children, int endExclusive) {
         List<Object> prefix = new ArrayList<>(children.size());
         for (int index = 0; index < endExclusive; index++) {
@@ -811,6 +841,8 @@ private static Object filterTimelineItems(
             prefix = "conversationthread-";
         } else if (entryId.startsWith("conversation-")) {
             prefix = "conversation-";
+        } else if (entryId.startsWith("home-conversation-")) {
+            prefix = "home-conversation-";
         }
         if (prefix == null) return null;
 
@@ -1005,6 +1037,10 @@ private static Object filterTimelineItems(
     }
 
     private static Object getPostId(Object post) {
+        return null;
+    }
+
+    private static Object getPostRepliedPostId(Object post) {
         return null;
     }
 

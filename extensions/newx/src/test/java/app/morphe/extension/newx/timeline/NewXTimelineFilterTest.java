@@ -394,6 +394,94 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
+    public void filtersHomeConversationModulesInThreadScope() {
+        FakePost hidden = verifiedPost("hidden", VerifiedType.User, "hidden-id", "hidden");
+        FakePost visible = verifiedPost("visible", VerifiedType.NotVerified, "visible-id", "visible");
+        hidden.id = "hidden-id";
+        visible.id = "visible-id";
+        FakeModule conversation = module("home-conversation-1", item(hidden), item(visible));
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                items(conversation),
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        FakeModule filteredConversation = (FakeModule) filtered.get(0);
+        assertEquals(1, filteredConversation.children.size());
+        assertSame(visible, filteredConversation.children.get(0).item);
+        assertEquals(1, FilteredRepliesStore.shared().getCount("visible-id"));
+        assertEquals("hidden-id", FilteredRepliesStore.shared().getReplies("visible-id").get(0).getPostId());
+    }
+
+    @Test
+    public void groupsFlatDetailRepliesUnderTheFocalPostThroughParentIds() {
+        FakePost focal = verifiedPost("focal", VerifiedType.NotVerified, "focal-author", "focal");
+        focal.id = "focal-id";
+        focal.entryId = "focal-id";
+
+        FakePost visibleParent = verifiedPost(
+                "visible parent",
+                VerifiedType.NotVerified,
+                "parent-author",
+                "parent"
+        );
+        visibleParent.id = "parent-id";
+        visibleParent.repliedPostId = "focal-id";
+
+        FakePost hiddenChild = verifiedPost(
+                "hidden child",
+                VerifiedType.User,
+                "hidden-author",
+                "hidden"
+        );
+        hiddenChild.id = "hidden-id";
+        hiddenChild.repliedPostId = "parent-id";
+
+        filterByVerifiedType(items(focal), Set.of("User"), Set.of(), false, true);
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                items(module("conversationthread-parent-id", item(visibleParent), item(hiddenChild))),
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        FakeModule filteredConversation = (FakeModule) filtered.get(0);
+        assertEquals(1, filteredConversation.children.size());
+        assertSame(visibleParent, filteredConversation.children.get(0).item);
+        assertEquals(1, FilteredRepliesStore.shared().getCount("focal-id"));
+        assertEquals(
+                "hidden-id",
+                FilteredRepliesStore.shared().getReplies("focal-id").get(0).getPostId()
+        );
+    }
+
+    @Test
+    public void associatesEveryConversationPostWithRootForMenuLookup() {
+        FakePost hidden = verifiedPost("hidden", VerifiedType.User, "hidden-id", "hidden");
+        FakePost visible = verifiedPost("visible", VerifiedType.NotVerified, "visible-id", "visible");
+        hidden.id = "hidden-id";
+        visible.id = "visible-id";
+        FakeModule conversation = module("conversationthread-1", item(hidden), item(visible));
+
+        filterByVerifiedType(
+                items(conversation),
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        assertEquals(1, FilteredRepliesStore.shared().getCount("visible-id"));
+        assertEquals("hidden-id", FilteredRepliesStore.shared().getReplies("visible-id").get(0).getPostId());
+    }
+
+    @Test
     public void whitelistedAuthorBypassesVerificationTypeFilterByIdOrHandle() {
         FakePost whitelistedById = verifiedPost("keep by id", VerifiedType.User, "favorite-id", "favorite");
         FakePost whitelistedByHandle = verifiedPost("keep by handle", VerifiedType.User, "other-id", "favorite-handle");
@@ -732,6 +820,7 @@ public class NewXTimelineFilterTest {
         private final String text;
         private String id = "post-id";
         private String entryId = "post-1";
+        private String repliedPostId;
         private Object promotedMetadata;
         private Object clientEventInfo;
         private FakeDisclosure disclosure;
@@ -844,6 +933,9 @@ public class NewXTimelineFilterTest {
             return copy;
         }
         @Override Object getPostId(Object post) { return ((FakePost) post).id; }
+        @Override Object getPostRepliedPostId(Object post) {
+            return ((FakePost) post).repliedPostId;
+        }
         @Override boolean isVerticalConversation(Object displayType) {
             return displayType instanceof FakeVerticalConversation;
         }
