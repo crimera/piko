@@ -49,6 +49,11 @@
     <string name="piko_newx_group_verified_account_filtering_summary">Filter posts by timeline-reported account verification type</string>
     <string name="piko_newx_group_for_you_filtering_title">For You filtering</string>
     <string name="piko_newx_group_for_you_filtering_summary">Customize topic filtering and the For You tab selector</string>
+    <string name="piko_newx_timeline_tabs_title">Timeline tabs to hide</string>
+    <string name="piko_newx_timeline_tabs_summary">Choose which home timeline tab is hidden</string>
+    <string name="piko_newx_timeline_tabs_show_both">Show both</string>
+    <string name="piko_newx_timeline_tabs_hide_for_you">Hide For You</string>
+    <string name="piko_newx_timeline_tabs_hide_following">Hide Following</string>
     <string name="piko_newx_for_you_tab_hook_title">Use custom For You topic selector</string>
     <string name="piko_newx_for_you_tab_hook_summary">Opens the custom topic selector from the For You tab instead of the native snooze sheet</string>
     <string name="piko_newx_topic_filtering_title">For You topic filter</string>

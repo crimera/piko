@@ -27,6 +27,7 @@ internal object Constants {
     const val COMPOSE_SETTINGS_HOOK_DESCRIPTOR = "$SETTINGS_PACKAGE/ComposeSettingsHook;"
     const val TIMELINE_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/NewXTimelineFilter;"
     const val FOR_YOU_TOPIC_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/ForYouTopicFilter;"
+    const val TIMELINE_TAB_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/TimelineTabFilter;"
     const val FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/ForYouTopicFilterFragment;"
     const val INLINE_ACTION_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/InlineActionFilter;"
     const val MEDIA_THUMBNAIL_LOADER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/MediaThumbnailLoader;"
