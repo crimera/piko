@@ -268,6 +268,8 @@
     <string name="piko_newx_custom_sharing_domain_title">Custom sharing domain</string>
     <string name="piko_newx_custom_sharing_domain_summary">Replace x.com with a custom domain (like fxtwitter.com) when sharing posts</string>
     <string name="piko_newx_custom_sharing_domain_invalid">Malformed custom sharing domain</string>
+    <string name="piko_newx_canonical_urls_title">Use canonical URLs</string>
+    <string name="piko_newx_canonical_urls_summary">Shows expanded URL names in posts and profiles and opens them instead of shortened t.co URLs</string>
 
     <string name="piko_newx_restart_title">Restart X?</string>
     <string name="piko_newx_restart_summary">Restart the app now to apply this change.</string>

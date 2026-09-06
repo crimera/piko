@@ -3,14 +3,18 @@ package app.crimera.patches.newx.misc.canonicalurls
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.newXPostModelResolutionPatch
+import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
+import app.crimera.patches.newx.settings.ToggleSettingDefinition
+import app.crimera.patches.newx.settings.injectRead
+import app.crimera.patches.newx.settings.newXToggle
+import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.instanceOf
 import app.morphe.patcher.methodCall
@@ -21,6 +25,7 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -93,6 +98,15 @@ val newXCanonicalUrlsPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXPostModelResolutionPatch, newXExtensionPatch)
 
+        val useCanonicalUrls =
+            newXToggle(
+                id = "newx.content.use_canonical_urls",
+                category = Categories.CONTENT,
+                strings = settingStrings("piko_newx_canonical_urls"),
+                order = 400,
+                defaultValue = true,
+            )
+
         execute {
             val postModels = resolvedNewXPostModels()
             val urlEntityFields = resolveUrlEntityFields(
@@ -103,18 +117,24 @@ val newXCanonicalUrlsPatch =
                 matches.postLinkClick,
                 POST_URL_FIELD_FILTER_INDEX,
                 matches.expandedUrlField,
+                useCanonicalUrls,
             )
             replaceUrlEntityFieldRead(
                 matches.textEntityNavigation,
                 TEXT_ENTITY_URL_FIELD_FILTER_INDEX,
                 matches.expandedUrlField,
+                useCanonicalUrls,
             )
-            preferExpandedUrlInUrlPicker(matches.urlPicker)
-            patchProfileLinkValues(urlEntityFields)
-            patchRichTextUrlDisplay(urlEntityFields)
+            preferExpandedUrlInUrlPicker(matches.urlPicker, useCanonicalUrls)
+            patchProfileLinkValues(urlEntityFields, useCanonicalUrls)
+            patchRichTextUrlDisplay(urlEntityFields, useCanonicalUrls)
 
             val cardUrlActionType = resolveCardUrlActionType()
-            patchCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
+            patchCardNavigation(
+                cardUrlActionType,
+                postModels.contextualPostDescriptor,
+                useCanonicalUrls,
+            )
         }
     }
 
@@ -291,6 +311,7 @@ private fun replaceUrlEntityFieldRead(
     match: Match,
     filterIndex: Int,
     replacement: FieldReference,
+    setting: ToggleSettingDefinition,
 ) {
     val method = match.method
     val fieldReadIndex = match.instructionMatches[filterIndex].index
@@ -305,29 +326,71 @@ private fun replaceUrlEntityFieldRead(
         )
     }
 
-    method.replaceInstruction(
-        fieldReadIndex,
-        "iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $replacement",
+    val originalField = fieldRead.getReference<FieldReference>()
+        ?: throw PatchException(
+            "URL-entity field read at instruction $fieldReadIndex has no field reference",
+        )
+    if (originalField == replacement) {
+        throw PatchException(
+            "URL-entity field read at instruction $fieldReadIndex already uses the replacement field",
+        )
+    }
+    val continuation = method.instructions.getOrNull(fieldReadIndex + 1)
+        ?: throw PatchException(
+            "URL-entity field read at instruction $fieldReadIndex has no continuation",
+        )
+    val settingRead =
+        setting.injectRead(
+            method = method,
+            index = fieldReadIndex,
+            excludedRegisters = listOf(fieldRead.registerA, fieldRead.registerB),
+            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+        )
+    val originalLabel = "piko_canonical_url_original_$fieldReadIndex"
+    val continuationLabel = "piko_canonical_url_continue_$fieldReadIndex"
+    method.addInstructionsWithLabels(
+        settingRead.nextIndex,
+        """
+            if-eqz v${settingRead.register}, :$originalLabel
+            iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $replacement
+            goto :$continuationLabel
+        """.trimIndent(),
+        ExternalLabel(originalLabel, fieldRead),
+        ExternalLabel(continuationLabel, continuation),
     )
 }
 
-private fun preferExpandedUrlInUrlPicker(match: Match) {
+private fun preferExpandedUrlInUrlPicker(
+    match: Match,
+    setting: ToggleSettingDefinition,
+) {
     val method = match.method
 
     // `f(url, expanded)`: use the expanded URL whenever it is available.
     val firstInstruction = method.instructions.first()
+    val settingRead =
+        setting.injectRead(
+            method = method,
+            index = 0,
+            excludedRegisters = listOf(method.p0Register, method.p0Register + 1),
+            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+        )
     method.addInstructionsWithLabels(
-        0,
+        settingRead.nextIndex,
         """
-        if-eqz p1, :piko_canonical_url_fallback
+        if-eqz v${settingRead.register}, :piko_canonical_url_picker_original
+        if-eqz p1, :piko_canonical_url_picker_original
         return-object p1
         """.trimIndent(),
-        ExternalLabel("piko_canonical_url_fallback", firstInstruction),
+        ExternalLabel("piko_canonical_url_picker_original", firstInstruction),
     )
 }
 
 context(_: BytecodePatchContext)
-private fun patchProfileLinkValues(urlEntityFields: UrlEntityFields) {
+private fun patchProfileLinkValues(
+    urlEntityFields: UrlEntityFields,
+    setting: ToggleSettingDefinition,
+) {
     val match =
         Fingerprint(
             definingClass = "Lcom/x/media/imageloader/telemetry/",
@@ -343,20 +406,27 @@ private fun patchProfileLinkValues(urlEntityFields: UrlEntityFields) {
             ),
         ).requireSingleMatch("profile link values")
 
-    replaceUrlEntityFieldRead(
-        match,
-        PROFILE_LINK_DISPLAY_URL_FIELD_FILTER_INDEX,
-        urlEntityFields.expandedUrl,
-    )
+    // The injected branch widens each matched read; patch the later read first so the earlier
+    // match index remains valid.
     replaceUrlEntityFieldRead(
         match,
         PROFILE_LINK_OPEN_URL_FIELD_FILTER_INDEX,
         urlEntityFields.expandedUrl,
+        setting,
+    )
+    replaceUrlEntityFieldRead(
+        match,
+        PROFILE_LINK_DISPLAY_URL_FIELD_FILTER_INDEX,
+        urlEntityFields.expandedUrl,
+        setting,
     )
 }
 
 context(_: BytecodePatchContext)
-private fun patchRichTextUrlDisplay(urlEntityFields: UrlEntityFields) {
+private fun patchRichTextUrlDisplay(
+    urlEntityFields: UrlEntityFields,
+    setting: ToggleSettingDefinition,
+) {
     val match =
         Fingerprint(
             definingClass = "Lcom/x/ui/common/text/",
@@ -375,6 +445,7 @@ private fun patchRichTextUrlDisplay(urlEntityFields: UrlEntityFields) {
         match,
         RICH_TEXT_DISPLAY_URL_FIELD_FILTER_INDEX,
         urlEntityFields.expandedUrl,
+        setting,
     )
 }
 
@@ -388,6 +459,7 @@ private fun patchCardUrl(
     insertionIndex: Int,
     postRegister: Int,
     urlRegister: Int,
+    setting: ToggleSettingDefinition,
 ) {
     if (postRegister !in 0..15 || urlRegister !in 0..15) {
         throw PatchException(
@@ -396,17 +468,33 @@ private fun patchCardUrl(
         )
     }
 
-    match.method.addInstructions(
-        insertionIndex,
+    val method = match.method
+    val continuation = method.instructions.getOrNull(insertionIndex)
+        ?: throw PatchException("Card URL resolver has no continuation instruction")
+    val settingRead =
+        setting.injectRead(
+            method = method,
+            index = insertionIndex,
+            excludedRegisters = listOf(postRegister, urlRegister),
+            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+        )
+    method.addInstructionsWithLabels(
+        settingRead.nextIndex,
         """
+        if-eqz v${settingRead.register}, :piko_canonical_card_url_continue
         invoke-static {v$postRegister, v$urlRegister}, $CANONICAL_URL_RESOLVE_METHOD
         move-result-object v$urlRegister
         """.trimIndent(),
+        ExternalLabel("piko_canonical_card_url_continue", continuation),
     )
 }
 
 context(context: BytecodePatchContext)
-private fun patchCardNavigation(cardUrlActionType: String, contextualPostType: String) {
+private fun patchCardNavigation(
+    cardUrlActionType: String,
+    contextualPostType: String,
+    setting: ToggleSettingDefinition,
+) {
     val match =
         Fingerprint(
             definingClass = "Landroidx/compose/animation/core/",
@@ -451,7 +539,13 @@ private fun patchCardNavigation(cardUrlActionType: String, contextualPostType: S
     }
 
     val postRegister = resolveContextualPostRegister(match.method, urlGetterIndex, contextualPostType)
-    patchCardUrl(match, urlResultIndex + 1, postRegister, urlResult.registerA)
+    patchCardUrl(
+        match,
+        urlResultIndex + 1,
+        postRegister,
+        urlResult.registerA,
+        setting,
+    )
 }
 
 private fun resolveContextualPostRegister(
