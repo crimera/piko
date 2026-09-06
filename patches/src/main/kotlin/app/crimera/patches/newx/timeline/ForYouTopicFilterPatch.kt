@@ -23,6 +23,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -93,6 +94,11 @@ private data class ResolvedForYouTabHook(
     val refreshMethod: Method,
 )
 
+private data class ResolvedTimelineEvent(
+    val field: FieldReference,
+    val dispatchParameterTypes: Set<String>,
+)
+
 private data class ResolvedForYouRefreshBridge(
     val stateField: FieldReference,
     val stateGetter: MethodReference,
@@ -141,6 +147,11 @@ val newXForYouTopicFilterPatch =
             }
 
         execute {
+            val clearAndRefreshEvent = resolveSingletonTimelineEvent(CLEAR_AND_REFRESH_TIMELINE)
+            val scrollToTopEvent = resolveSingletonTimelineEvent(REQUEST_SCROLL_TO_TOP)
+            val tabHook = resolveForYouTabHook(scrollToTopEvent)
+            val requestTarget = resolveForYouRequestTarget()
+
             newXInitHook.fingerprint.method.addInstruction(
                 0,
                 "invoke-static/range {p0 .. p0}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->initialize(Landroid/content/Context;)V",
@@ -148,8 +159,7 @@ val newXForYouTopicFilterPatch =
 
             patchHomeFilterGroupConstructor()
 
-            val tabHook = resolveForYouTabHook()
-            installForYouRefreshBridge(tabHook)
+            installForYouRefreshBridge(tabHook, clearAndRefreshEvent, scrollToTopEvent)
             val continuation = tabHook.method.instructions[tabHook.insertionIndex]
             val hookEnabledRead =
                 forYouTabHookEnabled.injectRead(
@@ -176,8 +186,7 @@ val newXForYouTopicFilterPatch =
                 ExternalLabel("piko_newx_for_you_topic_sheet_continue", continuation),
             )
 
-            val target = resolveForYouRequestTarget()
-            val matches = target.requestFingerprint.scopedMatchAll()
+            val matches = requestTarget.requestFingerprint.scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one NewX For You topic request builder, found ${matches.size}: " +
@@ -194,15 +203,15 @@ val newXForYouTopicFilterPatch =
                     ?: throw PatchException(
                         "NewX For You topic request constructor reference is missing in $method",
                     )
-            if (!constructorReference.matches(target.queryConstructor)) {
+            if (!constructorReference.matches(requestTarget.queryConstructor)) {
                 throw PatchException(
                     "NewX For You topic request constructor changed: $constructorReference",
                 )
             }
 
             val topicRegister = constructorInstruction.topicArgumentRegister(
-                target.queryConstructor,
-                target.topicParameterIndex,
+                requestTarget.queryConstructor,
+                requestTarget.topicParameterIndex,
             )
             method.addInstructions(
                 constructorIndex,
@@ -215,7 +224,9 @@ val newXForYouTopicFilterPatch =
     }
 
 context(context: BytecodePatchContext)
-private fun resolveForYouTabHook(): ResolvedForYouTabHook {
+private fun resolveForYouTabHook(
+    currentPageRefreshEvent: ResolvedTimelineEvent,
+): ResolvedForYouTabHook {
     val candidates = mutableListOf<ResolvedForYouTabHook>()
     context.classDefForEach { classDef ->
         classDef.methods.forEach { originalMethod ->
@@ -293,7 +304,7 @@ private fun resolveForYouTabHook(): ResolvedForYouTabHook {
                 method.name != "<init>" &&
                     method.returnType == "V" &&
                     method.parameterTypes.isEmpty() &&
-                    method.isCurrentTimelineRefreshMethod()
+                    method.isCurrentTimelineRefreshMethod(currentPageRefreshEvent)
             }
             if (refreshMethods.size != 1) return@forEach
             candidates += ResolvedForYouTabHook(mutableMethod, hookIndex, refreshMethods.single())
@@ -308,7 +319,9 @@ private fun resolveForYouTabHook(): ResolvedForYouTabHook {
     return candidates.single()
 }
 
-private fun Method.isCurrentTimelineRefreshMethod(): Boolean {
+private fun Method.isCurrentTimelineRefreshMethod(
+    currentPageRefreshEvent: ResolvedTimelineEvent,
+): Boolean {
     val implementation = implementation ?: return false
     val instructions = implementation.instructions.toList()
     val hasCurrentPageLookup = instructions.any { instruction ->
@@ -322,23 +335,25 @@ private fun Method.isCurrentTimelineRefreshMethod(): Boolean {
     val hasTimelineRefreshEvent = instructions.any { instruction ->
         if (instruction.opcode != Opcode.SGET_OBJECT) return@any false
         val reference = instruction.getReference<FieldReference>() ?: return@any false
-        reference.name == "a" &&
-            reference.definingClass.startsWith("Lcom/x/urt/") &&
-            reference.type.startsWith("Lcom/x/urt/")
+        reference.matches(currentPageRefreshEvent.field)
     }
     val hasTimelineRefreshDispatch = instructions.any { instruction ->
         if (instruction.opcode != Opcode.INVOKE_INTERFACE) return@any false
         val reference = instruction.getReference<MethodReference>() ?: return@any false
-        reference.name == "i" &&
-            reference.returnType == "V" &&
+        reference.returnType == "V" &&
             reference.parameterTypes.size == 1 &&
-            reference.parameterTypes.single().toString().startsWith("Lcom/x/urt/")
+            reference.parameterTypes.single().toString() in
+                currentPageRefreshEvent.dispatchParameterTypes
     }
     return hasCurrentPageLookup && hasTimelineRefreshEvent && hasTimelineRefreshDispatch
 }
 
 context(context: BytecodePatchContext)
-private fun installForYouRefreshBridge(tabHook: ResolvedForYouTabHook) {
+private fun installForYouRefreshBridge(
+    tabHook: ResolvedForYouTabHook,
+    clearAndRefreshEvent: ResolvedTimelineEvent,
+    scrollToTopEvent: ResolvedTimelineEvent,
+) {
     val classDef = context.mutableClassDefBy(tabHook.method.definingClass)
     if (!classDef.interfaces.contains(FOR_YOU_REFRESH_TARGET_DESCRIPTOR)) {
         classDef.interfaces.add(FOR_YOU_REFRESH_TARGET_DESCRIPTOR)
@@ -353,9 +368,7 @@ private fun installForYouRefreshBridge(tabHook: ResolvedForYouTabHook) {
         )
     }
 
-    val clearAndRefreshField = resolveSingletonTimelineEventField(CLEAR_AND_REFRESH_TIMELINE)
-    val scrollToTopField = resolveSingletonTimelineEventField(REQUEST_SCROLL_TO_TOP)
-    val bridge = tabHook.refreshMethod.resolveForYouRefreshBridge()
+    val bridge = tabHook.refreshMethod.resolveForYouRefreshBridge(clearAndRefreshEvent)
     val implementation = MethodImplementationBuilder(4).apply {
         addInstruction("return-void".toInstruction())
     }.methodImplementation
@@ -373,14 +386,17 @@ private fun installForYouRefreshBridge(tabHook: ResolvedForYouTabHook) {
     )
     classDef.methods.add(bridgeMethod)
 
+    val placeholderImplementation = bridgeMethod.implementation
+        ?: throw PatchException("NewX For You refresh bridge has no implementation")
+    placeholderImplementation.removeInstruction(placeholderImplementation.instructions.lastIndex)
     bridgeMethod.addInstructionsWithLabels(
         0,
-        bridge.toSmali(clearAndRefreshField, scrollToTopField),
+        bridge.toSmali(clearAndRefreshEvent.field, scrollToTopEvent.field),
     )
 }
 
 context(context: BytecodePatchContext)
-private fun resolveSingletonTimelineEventField(eventLabel: String): FieldReference {
+private fun resolveSingletonTimelineEvent(eventLabel: String): ResolvedTimelineEvent {
     val eventClasses = mutableListOf<com.android.tools.smali.dexlib2.iface.ClassDef>()
     context.classDefForEach { classDef ->
         val matchingToStringMethods = classDef.methods.filter { method ->
@@ -401,7 +417,6 @@ private fun resolveSingletonTimelineEventField(eventLabel: String): FieldReferen
     val eventClass = eventClasses.single()
     val fields = eventClass.fields.filter { field ->
         AccessFlags.STATIC.isSet(field.accessFlags) &&
-            field.name == "a" &&
             field.type == eventClass.type
     }
     if (fields.size != 1) {
@@ -410,10 +425,18 @@ private fun resolveSingletonTimelineEventField(eventLabel: String): FieldReferen
                 "found ${fields.size}: ${fields.joinToString()}",
         )
     }
-    return fields.single()
+    val dispatchParameterTypes = eventClass.interfaces.map(CharSequence::toString).toSet()
+    if (dispatchParameterTypes.isEmpty()) {
+        throw PatchException(
+            "NewX $eventLabel event class ${eventClass.type} has no dispatch interface",
+        )
+    }
+    return ResolvedTimelineEvent(fields.single(), dispatchParameterTypes)
 }
 
-private fun Method.resolveForYouRefreshBridge(): ResolvedForYouRefreshBridge {
+private fun Method.resolveForYouRefreshBridge(
+    clearAndRefreshEvent: ResolvedTimelineEvent,
+): ResolvedForYouRefreshBridge {
     val instructions = implementation?.instructions?.toList()
         ?: throw PatchException("NewX For You refresh method has no implementation: $this")
 
@@ -434,7 +457,6 @@ private fun Method.resolveForYouRefreshBridge(): ResolvedForYouRefreshBridge {
                     if (instruction.opcode != Opcode.INVOKE_VIRTUAL) return@any false
                     val reference = instruction.getReference<MethodReference>() ?: return@any false
                     reference.definingClass == field.type &&
-                        reference.name == "a" &&
                         reference.returnType == OBJECT_DESCRIPTOR &&
                         reference.parameterTypes.isEmpty()
                 }
@@ -454,7 +476,6 @@ private fun Method.resolveForYouRefreshBridge(): ResolvedForYouRefreshBridge {
             val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
             reference.takeIf {
                 it.definingClass == stateField.type &&
-                    it.name == "a" &&
                     it.returnType == OBJECT_DESCRIPTOR &&
                     it.parameterTypes.isEmpty()
             }
@@ -576,28 +597,20 @@ private fun Method.resolveForYouRefreshBridge(): ResolvedForYouRefreshBridge {
         .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
         .map { (index, _) -> fieldAt(index) }
         .filter { field ->
-            field.definingClass == forYouComponentType &&
-                field.type.startsWith("Lcom/x/urt/")
+            field.definingClass == forYouComponentType
         }
         .distinctBy(FieldReference::toString)
-    if (forYouControllerFields.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh controller field in $this, found " +
-                "${forYouControllerFields.size}: ${forYouControllerFields.joinToString()}",
-        )
-    }
-    val forYouControllerField = forYouControllerFields.single()
 
     val refreshDispatchCandidates = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_INTERFACE }
         .mapNotNull { (index, _) ->
             val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
             reference.takeIf {
-                it.definingClass == forYouControllerField.type &&
-                    it.name == "i" &&
-                    it.returnType == "V" &&
+                it.returnType == "V" &&
                     it.parameterTypes.size == 1 &&
-                    it.parameterTypes.single().toString().startsWith("Lcom/x/urt/")
+                    it.parameterTypes.single().toString() in
+                        clearAndRefreshEvent.dispatchParameterTypes &&
+                    forYouControllerFields.any { field -> field.type == it.definingClass }
             }
         }
         .distinctBy(MethodReference::toString)
@@ -608,6 +621,17 @@ private fun Method.resolveForYouRefreshBridge(): ResolvedForYouRefreshBridge {
         )
     }
     val refreshDispatch = refreshDispatchCandidates.single()
+    val forYouControllerFieldsForDispatch = forYouControllerFields.filter {
+        it.type == refreshDispatch.definingClass
+    }
+    if (forYouControllerFieldsForDispatch.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh controller field for " +
+                "${refreshDispatch.definingClass}, found " +
+                "${forYouControllerFieldsForDispatch.size}: ${forYouControllerFieldsForDispatch.joinToString()}",
+        )
+    }
+    val forYouControllerField = forYouControllerFieldsForDispatch.single()
 
     return ResolvedForYouRefreshBridge(
         stateField = stateField,
@@ -953,6 +977,11 @@ private fun MethodReference.matches(reference: MethodReference): Boolean =
         name == reference.name &&
         returnType == reference.returnType &&
         parameterTypes.map(CharSequence::toString) == reference.parameterTypes.map(CharSequence::toString)
+
+private fun FieldReference.matches(reference: FieldReference): Boolean =
+    definingClass == reference.definingClass &&
+        name == reference.name &&
+        type == reference.type
 
 private fun Method.smaliReference(): String =
     "$definingClass->$name(${parameterTypes.joinToString(separator = "") { it.toString() }})$returnType"

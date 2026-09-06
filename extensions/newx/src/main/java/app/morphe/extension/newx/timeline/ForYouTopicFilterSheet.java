@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Looper;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -16,7 +15,6 @@ import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.ui.BottomSheetView;
 import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.newx.utils.NewXUtils;
 import app.morphe.extension.shared.Utils;
 
@@ -26,26 +24,33 @@ final class ForYouTopicFilterSheet {
     }
 
     static boolean show(ForYouTopicFilter.RefreshTarget refreshTarget) {
+        if (refreshTarget == null) return false;
+
         Context context = Utils.getContext();
         Activity activity = NewXUtils.findUsableActivity(context);
         if (activity == null) return false;
 
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            activity.runOnUiThread(() -> show(activity, refreshTarget));
-        } else {
-            show(activity, refreshTarget);
-        }
-        return true;
+        // The tab handler must know synchronously whether it may suppress the
+        // native sheet. Posting here would return true before the custom sheet
+        // exists, so a later UI failure could leave the user with no sheet.
+        if (Looper.myLooper() != Looper.getMainLooper()) return false;
+
+        return show(activity, refreshTarget);
     }
 
-    private static void show(
+    private static boolean show(
             Activity activity,
             ForYouTopicFilter.RefreshTarget refreshTarget
     ) {
-        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return;
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return false;
 
         try {
             List<ForYouTopicFilter.Topic> topics = ForYouTopicFilter.topicOptions();
+            // An empty catalog means the extension cannot reproduce the native
+            // operation yet. Let the native handler continue instead of
+            // suppressing it with an unusable custom sheet.
+            if (topics.isEmpty()) return false;
+
             Set<String> storedSelection = ForYouTopicFilter.parseTopicIds(
                     ForYouTopicFilter.shared().selectedTopicIds.get()
             );
@@ -73,7 +78,6 @@ final class ForYouTopicFilterSheet {
                     } else {
                         selected.remove(topic.getId());
                     }
-                    saveSelection(selected);
                     updateActionButton(actionButton, selected.size());
                 });
                 body.addView(row, new LinearLayout.LayoutParams(
@@ -83,42 +87,34 @@ final class ForYouTopicFilterSheet {
                 rows.add(row);
             }
 
-            if (topics.isEmpty()) {
-                TextView empty = NewXSettingsUi.summaryText(activity);
-                empty.setText("Topic choices are not available yet. Try again after the For You timeline loads.");
-                int padding = Theme.dpToPx(activity, 20f);
-                empty.setPadding(padding, padding, padding, padding);
-                body.addView(empty, new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                ));
-            }
-
             sheet.setScrollableBodyView(body);
 
             updateActionButton(actionButton, selected.size());
             actionButton.setOnClickListener(ignored -> {
-                if (selected.isEmpty()) {
-                    selected.clear();
-                    for (NewXSettingsUi.SwitchRow row : rows) {
-                        if (row.isChecked()) row.setChecked(false, true);
-                    }
-                }
-                saveSelection(selected);
                 try {
+                    if (selected.isEmpty()) {
+                        selected.clear();
+                        for (NewXSettingsUi.SwitchRow row : rows) {
+                            if (row.isChecked()) row.setChecked(false, true);
+                        }
+                    }
+                    saveSelection(selected);
                     refreshTarget.pikoRefreshForYouTopicFilter();
-                } catch (RuntimeException exception) {
+                } catch (Throwable exception) {
                     NewXLogger.printException(
-                            () -> "Failed to refresh For You after topic selection",
+                            () -> "Failed to apply For You topic selection",
                             exception
                     );
+                } finally {
+                    sheet.dismiss();
                 }
-                sheet.dismiss();
             });
             sheet.addButton(actionButton);
             sheet.show();
-        } catch (RuntimeException exception) {
+            return sheet.isShowing();
+        } catch (Throwable exception) {
             NewXLogger.printException(() -> "Failed to open For You topic selector", exception);
+            return false;
         }
     }
 
