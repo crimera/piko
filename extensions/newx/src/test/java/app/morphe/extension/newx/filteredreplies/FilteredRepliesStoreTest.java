@@ -2,6 +2,7 @@ package app.morphe.extension.newx.filteredreplies;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
@@ -108,6 +109,20 @@ public final class FilteredRepliesStoreTest {
         assertEquals("hidden-child", store.getReplies("focal-post").get(0).getPostId());
         assertEquals(1, store.getCount("visible-parent"));
         assertEquals(1, store.getCount("module-root"));
+    }
+
+    @Test
+    public void tracksAuthorshipAndParentEdges() {
+        store.notePostAuthorship("post-1", "author-a", "post-0");
+        store.notePostAuthorship("post-0", "author-a", null);
+        store.notePostAuthorship("self-loop", "author-b", "self-loop");
+        store.notePostAuthorship(null, "author-c", "post-0");
+
+        assertEquals("author-a", store.authorIdFor("post-1"));
+        assertEquals("post-0", store.parentIdFor("post-1"));
+        assertNull(store.parentIdFor("post-0"));
+        assertNull(store.parentIdFor("self-loop"));
+        assertNull(store.authorIdFor("unknown"));
     }
 
     @Test

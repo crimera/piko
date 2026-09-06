@@ -98,6 +98,24 @@ public final class FilteredRepliesStore {
                 }
             };
 
+    // Bounded authorship facts for the own-thread-reply exemption walk.
+    private final LinkedHashMap<String, String> postToAuthor =
+            new LinkedHashMap<>(MAX_INDEXED_REPLIES, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                    return size() > MAX_INDEXED_REPLIES;
+                }
+            };
+
+    // Bounded replied-to edges for the own-thread-reply exemption walk.
+    private final LinkedHashMap<String, String> postToParent =
+            new LinkedHashMap<>(MAX_INDEXED_REPLIES, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                    return size() > MAX_INDEXED_REPLIES;
+                }
+            };
+
     private static final FilteredRepliesStore INSTANCE = new FilteredRepliesStore();
 
     public static FilteredRepliesStore shared() {
@@ -169,6 +187,32 @@ public final class FilteredRepliesStore {
         postToRoot.put(postId, parentRoot);
     }
 
+    /**
+     * Records authorship facts for a visible post. Parent edges are factual reply
+     * relations used only by the own-thread-reply exemption walk; they never merge
+     * reply buffers, so unrelated timelines cannot join conversations through them.
+     */
+    public synchronized void notePostAuthorship(
+            String postId, String authorId, String parentPostId) {
+        if (postId == null || postId.isEmpty()) return;
+        if (authorId != null && !authorId.isEmpty()) {
+            postToAuthor.put(postId, authorId);
+        }
+        if (parentPostId != null && !parentPostId.isEmpty() && !parentPostId.equals(postId)) {
+            postToParent.put(postId, parentPostId);
+        }
+    }
+
+    public synchronized String authorIdFor(String postId) {
+        if (postId == null || postId.isEmpty()) return null;
+        return postToAuthor.get(postId);
+    }
+
+    public synchronized String parentIdFor(String postId) {
+        if (postId == null || postId.isEmpty()) return null;
+        return postToParent.get(postId);
+    }
+
     public synchronized List<FilteredReply> getReplies(String postId) {
         if (postId == null || postId.isEmpty()) return Collections.emptyList();
 
@@ -227,5 +271,7 @@ public final class FilteredRepliesStore {
     public synchronized void clear() {
         threads.clear();
         postToRoot.clear();
+        postToAuthor.clear();
+        postToParent.clear();
     }
 }

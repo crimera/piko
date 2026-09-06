@@ -25,6 +25,7 @@ public final class NewXTimelineFilter {
     private static final String VERIFIED_TYPE_USER = "User";
     private static final String VERIFIED_TYPE_UNKNOWN = "Unknown";
     private static final String DISCOVER_MORE_ENTRY_ID = "tweetdetailrelatedtweets";
+    private static final int MAX_PARENT_HOPS = 32;
     private static final TimelineModelAccess PRODUCTION_MODEL_ACCESS = new TimelineModelAccess() {
         @Override boolean isModuleItem(Object value) { return isTimelineModuleItem(value); }
         @Override boolean isPost(Object value) { return isTimelinePost(value); }
@@ -543,6 +544,10 @@ private static Object filterTimelineItems(
             }
         }
         if (modelAccess.isPost(item)) {
+            if (verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty()
+                    && (filterTimeline || filterThread)) {
+                notePostAuthorship(item, modelAccess);
+            }
             try {
                 String textForFilter = modelAccess.getPostTextForFilter(item);
                 String authorScreenName = modelAccess.getPostAuthorScreenName(item);
@@ -586,11 +591,39 @@ private static Object filterTimelineItems(
         Object verifiedType = modelAccess.getPostAuthorVerifiedType(post);
         if (!(verifiedType instanceof Enum<?> enumType)) return false;
         if (!verifiedTypesToHide.contains(enumType.name())) return false;
-        return !VerifiedAccountWhitelistStore.matches(
+        if (VerifiedAccountWhitelistStore.matches(
                 whitelist,
                 modelAccess.getPostAuthorId(post),
-                modelAccess.getPostAuthorScreenName(post)
-        );
+                modelAccess.getPostAuthorScreenName(post))) {
+            return false;
+        }
+        return !isOwnThreadReply(post, modelAccess);
+    }
+
+    /**
+     * True when the post is its thread owner's own reply: walking replied-to links
+     * reaches a head post by the same author. A missing parent link fails closed to
+     * hidden; the reply still lands in Filtered Replies.
+     */
+    private static boolean isOwnThreadReply(Object post, TimelineModelAccess modelAccess) {
+        String authorId = modelAccess.getPostAuthorId(post);
+        if (authorId == null || authorId.isEmpty()) return false;
+        String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+        String parentId = NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post));
+        if (parentId == null || parentId.isEmpty() || parentId.equals(postId)) return false;
+
+        FilteredRepliesStore store = FilteredRepliesStore.shared();
+        String current = parentId;
+        for (int hop = 0; hop < MAX_PARENT_HOPS; hop++) {
+            String currentAuthor = store.authorIdFor(current);
+            if (currentAuthor == null || currentAuthor.isEmpty()) return false;
+            String grandparent = store.parentIdFor(current);
+            if (grandparent == null || grandparent.isEmpty() || grandparent.equals(current)) {
+                return authorId.equals(currentAuthor);
+            }
+            current = grandparent;
+        }
+        return false;
     }
 
     private static boolean isAiGenerated(
@@ -664,6 +697,11 @@ private static Object filterTimelineItems(
         List<?> originalChildren = modelAccess.getModuleChildren(module);
         if (originalChildren == null || originalChildren.isEmpty()) {
             return FilterResult.keep(module);
+        }
+
+        if (conversationRootId != null && filterVerified
+                && verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty()) {
+            noteModuleAuthorship(originalChildren, modelAccess);
         }
 
         List<Object> filteredChildren = null;
@@ -786,6 +824,38 @@ private static Object filterTimelineItems(
         } catch (RuntimeException exception) {
             logFailure("timeline module reconstruction", exception);
             return FilterResult.keep(module);
+        }
+    }
+
+    /**
+     * Records authorship for every child before any filter decision, so the
+     * own-thread-reply walk sees siblings regardless of child order. Per-child
+     * failures only degrade the exemption back to hiding; they never throw.
+     */
+    private static void noteModuleAuthorship(List<?> children, TimelineModelAccess modelAccess) {
+        for (Object child : children) {
+            try {
+                if (child == null) continue;
+                Object item = modelAccess.getModuleItem(child);
+                if (modelAccess.isPost(item)) notePostAuthorship(item, modelAccess);
+            } catch (RuntimeException exception) {
+                logFailure("recording conversation authorship", exception);
+            }
+        }
+    }
+
+    private static void notePostAuthorship(Object post, TimelineModelAccess modelAccess) {
+        if (post == null) return;
+        try {
+            String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+            if (postId == null || postId.isEmpty()) return;
+            FilteredRepliesStore.shared().notePostAuthorship(
+                    postId,
+                    modelAccess.getPostAuthorId(post),
+                    NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post))
+            );
+        } catch (RuntimeException exception) {
+            logFailure("recording post authorship", exception);
         }
     }
 

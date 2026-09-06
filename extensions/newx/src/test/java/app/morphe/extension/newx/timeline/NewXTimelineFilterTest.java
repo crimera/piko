@@ -482,6 +482,115 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
+    public void keepsThreadOwnerFollowupThroughParentChain() {
+        FakePost focal = verifiedPost("focal", VerifiedType.User, "op-id", "op");
+        focal.id = "focal-id";
+        focal.entryId = "focal-id";
+
+        FakePost replier = verifiedPost("reply", VerifiedType.NotVerified, "other-id", "other");
+        replier.id = "reply-id";
+        replier.repliedPostId = "focal-id";
+
+        FakePost ownerFollowup = verifiedPost("op followup", VerifiedType.User, "op-id", "op");
+        ownerFollowup.id = "op-reply-id";
+        ownerFollowup.repliedPostId = "reply-id";
+
+        // Timeline scope off mirrors the reported state: the owner's post stays visible.
+        filterByVerifiedType(items(focal), Set.of("User"), Set.of(), false, true);
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                items(module("conversationthread-reply-id", item(replier), item(ownerFollowup))),
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        FakeModule filteredConversation = (FakeModule) filtered.get(0);
+        assertEquals(2, filteredConversation.children.size());
+        assertSame(replier, filteredConversation.children.get(0).item);
+        assertSame(ownerFollowup, filteredConversation.children.get(1).item);
+        assertTrue(FilteredRepliesStore.shared().getReplies("focal-id").isEmpty());
+    }
+
+    @Test
+    public void hidesStrangerReplyInOwnerThread() {
+        FakePost focal = verifiedPost("focal", VerifiedType.User, "op-id", "op");
+        focal.id = "focal-id";
+        focal.entryId = "focal-id";
+
+        FakePost stranger = verifiedPost("stranger reply", VerifiedType.User, "stranger-id", "stranger");
+        stranger.id = "stranger-id";
+        stranger.repliedPostId = "focal-id";
+
+        filterByVerifiedType(items(focal), Set.of("User"), Set.of(), false, true);
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                items(module("conversationthread-focal-id", item(stranger))),
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        assertTrue(((List<?>) filtered).isEmpty());
+        assertEquals(1, FilteredRepliesStore.shared().getCount("focal-id"));
+        assertEquals(
+                "stranger-id",
+                FilteredRepliesStore.shared().getReplies("focal-id").get(0).getPostId()
+        );
+    }
+
+    @Test
+    public void hidesOwnReplyWhenParentAuthorUnknown() {
+        FakePost orphan = verifiedPost("orphan", VerifiedType.User, "op-id", "op");
+        orphan.id = "orphan-id";
+        orphan.repliedPostId = "ghost-id";
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                items(module("conversationthread-ghost-id", item(orphan))),
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        assertTrue(((List<?>) filtered).isEmpty());
+    }
+
+    @Test
+    public void hidesNestedSelfReplyInAnotherAuthorsThread() {
+        FakePost focal = verifiedPost("focal", VerifiedType.NotVerified, "op-id", "op");
+        focal.id = "focal-id";
+        focal.entryId = "focal-id";
+
+        FakePost first = verifiedPost("first", VerifiedType.User, "replier-id", "replier");
+        first.id = "first-id";
+        first.repliedPostId = "focal-id";
+
+        FakePost nested = verifiedPost("nested", VerifiedType.User, "replier-id", "replier");
+        nested.id = "nested-id";
+        nested.repliedPostId = "first-id";
+
+        filterByVerifiedType(items(focal), Set.of("User"), Set.of(), false, true);
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                items(module("conversationthread-first-id", item(first), item(nested))),
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        assertTrue(((List<?>) filtered).isEmpty());
+        assertEquals(2, FilteredRepliesStore.shared().getCount("focal-id"));
+    }
+
+    @Test
     public void whitelistedAuthorBypassesVerificationTypeFilterByIdOrHandle() {
         FakePost whitelistedById = verifiedPost("keep by id", VerifiedType.User, "favorite-id", "favorite");
         FakePost whitelistedByHandle = verifiedPost("keep by handle", VerifiedType.User, "other-id", "favorite-handle");
