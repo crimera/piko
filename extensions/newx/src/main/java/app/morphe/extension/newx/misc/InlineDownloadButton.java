@@ -718,14 +718,25 @@ public final class InlineDownloadButton {
                     .setAllowedOverRoaming(true)
                     .setNotificationVisibility(
                             DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                    )
-                    .setDestinationInExternalPublicDir(
-                            primaryDirectoryForMime(mimeType),
-                            DOWNLOAD_DIRECTORY + "/" + temporaryFileName
                     );
-            // setDestinationInExternalPublicDir accepts any public-directory name; the literal
-            // "Pictures"/"Movies" values equal Environment.DIRECTORY_* and route the staged file
-            // to the matching volume root so the later MediaStore publish lands in the same place.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Scoped storage: stage in the app-private external files dir so the
+                // temporary file is never media-scanned. It is published to MediaStore
+                // once via publishDownload(); manager.remove() then drops the stage.
+                // Staging in a public dir (the old path) left
+                // "<stem>_tmp_<uuid>.<ext>" orphans next to the final file when
+                // remove() didn't reclaim the public copy (seen on Android 16 / OnePlus).
+                request.setDestinationInExternalFilesDir(
+                        context,
+                        primaryDirectoryForMime(mimeType),
+                        DOWNLOAD_DIRECTORY + "/" + temporaryFileName
+                );
+            } else {
+                request.setDestinationInExternalPublicDir(
+                        primaryDirectoryForMime(mimeType),
+                        DOWNLOAD_DIRECTORY + "/" + temporaryFileName
+                );
+            }
 
             long downloadId = manager.enqueue(request);
             try {
