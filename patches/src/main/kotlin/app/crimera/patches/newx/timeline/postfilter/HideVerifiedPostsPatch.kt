@@ -59,6 +59,12 @@ val newXHideVerifiedPostsPatch =
                                 order = 200,
                                 defaultValue = false,
                             )
+                        toggle(
+                            id = "newx.content.verified_account_filtering.filtered_replies_menu",
+                            strings = settingStrings("piko_newx_verified_account_filtered_replies_menu"),
+                            order = 250,
+                            defaultValue = true,
+                        )
                         val verifiedTypesToHide =
                             multiChoice(
                                 id = "newx.content.hide_verified_account_types",

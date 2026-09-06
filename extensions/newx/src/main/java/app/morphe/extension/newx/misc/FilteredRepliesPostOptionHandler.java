@@ -18,6 +18,8 @@ public final class FilteredRepliesPostOptionHandler {
     private static final String OPTION_NAME = NewXPostOptionActions.FILTERED_REPLIES_ACTION;
     private static final String THREAD_FILTER_SETTING_ID =
             "newx.content.verified_account_filtering.thread";
+    private static final String FILTERED_REPLIES_MENU_SETTING_ID =
+            "newx.content.verified_account_filtering.filtered_replies_menu";
     private static final String URT_POST_CLASS = "com.x.models.timelines.items.UrtTimelinePost";
     private static final String OPTION_LABEL = "Filtered replies";
 
@@ -71,7 +73,8 @@ public final class FilteredRepliesPostOptionHandler {
     }
 
     private static boolean isEnabled() {
-        return SettingsRegistry.getBooleanOrDefault(THREAD_FILTER_SETTING_ID, false);
+        return SettingsRegistry.getBooleanOrDefault(THREAD_FILTER_SETTING_ID, false)
+                && SettingsRegistry.getBooleanOrDefault(FILTERED_REPLIES_MENU_SETTING_ID, true);
     }
 
     private static boolean isFilteredRepliesAction(Object action) {

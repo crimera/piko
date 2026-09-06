@@ -180,6 +180,8 @@
     <string name="piko_newx_verified_account_timeline_filter_summary">Hides selected verified account types from regular timelines</string>
     <string name="piko_newx_verified_account_thread_filter_title">Enable thread filtering</string>
     <string name="piko_newx_verified_account_thread_filter_summary">Hides selected verified account types from conversation threads</string>
+    <string name="piko_newx_verified_account_filtered_replies_menu_title">Show Filtered replies menu</string>
+    <string name="piko_newx_verified_account_filtered_replies_menu_summary">Adds a Filtered replies option to the post menu when thread filtering is on</string>
     <string name="piko_newx_hide_verified_account_types_title">Hide posts by verified account type</string>
     <string name="piko_newx_hide_verified_account_types_summary">Hide posts and replies whose timeline data reports a selected verification type</string>
     <string name="piko_newx_hide_verified_account_types_business">Business</string>
