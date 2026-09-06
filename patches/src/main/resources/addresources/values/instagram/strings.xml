@@ -46,6 +46,8 @@
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
     <string name="piko_ghost_modes_quick_toggle">Enable quick toggle for ghost modes</string>
     <string name="piko_ghost_modes_quick_toggle_desc">Adds a quick toggle in chat action bar to control ghost modes</string>
+    <string name="piko_long_press_inbox_toggle_ghost_mode">Long press inbox to toggle ghost mode</string>
+    <string name="piko_long_press_inbox_toggle_ghost_mode_desc">Long press the inbox button in main feed or navigation bar to quickly toggle all ghost modes</string>
 
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Distraction free</string>

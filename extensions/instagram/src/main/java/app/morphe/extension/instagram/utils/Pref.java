@@ -75,6 +75,10 @@ public class Pref {
         return SharedPref.setBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES.key,bool);
     }
 
+    public static boolean longPressInboxToggleGhostMode() {
+        return SharedPref.getBooleanPref(Settings.LONG_PRESS_INBOX_TOGGLE_GHOST_MODE);
+    }
+
     public static boolean isMoreOptionsOnProfilePatched(){
         return SettingsStatus.moreOptionsOnProfile;
     }

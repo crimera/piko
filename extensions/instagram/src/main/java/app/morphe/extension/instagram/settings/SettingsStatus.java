@@ -87,8 +87,12 @@ public class SettingsStatus {
     public static void saveDeletedMessages() {
         saveDeletedMessages = true;
     }
+    public static boolean longPressInboxGhostMode = false;
+    public static void longPressInboxGhostMode() {
+        longPressInboxGhostMode = true;
+    }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously || longPressInboxGhostMode);
     }
 
     public static boolean disableStories = false;
@@ -271,6 +275,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.viewLiveAnonymously);
         FLAGS.put(str("piko_view_stories_anonymously"),SettingsStatus.viewStoriesAnonymously);
+        FLAGS.put(str("piko_long_press_inbox_toggle_ghost_mode"),SettingsStatus.longPressInboxGhostMode);
 
         FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
         FLAGS.put(str("piko_custom_sharing_domain"),SettingsStatus.customSharingDomain);

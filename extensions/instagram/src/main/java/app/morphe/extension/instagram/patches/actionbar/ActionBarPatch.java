@@ -10,6 +10,7 @@ package app.morphe.extension.instagram.patches.actionbar;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -42,6 +43,38 @@ public class ActionBarPatch {
         }
     }
 
+    public static void toggleGhostMode() {
+        try {
+            boolean ghostModeToggle = !Pref.getTurnOnAllGhostModes();
+            Pref.setTurnOnAllGhostModes(ghostModeToggle);
+            updateGhostModeIcons(ghostModeToggle);
+
+            String toastStr = ghostModeToggle ? str("piko_ghost_modes_on") : str("piko_ghost_modes_default");
+            Utils.showToastShort(toastStr);
+        } catch (Exception ex) {
+            Logger.printException(() -> "toggleGhostMode failed: ", ex);
+        }
+    }
+
+    public static void hookInboxButton(View view) {
+        if (view == null) return;
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (!Pref.longPressInboxToggleGhostMode()) {
+                    return false;
+                }
+                if (v != null) {
+                    try {
+                        v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    } catch (Throwable ignored) {}
+                }
+                toggleGhostMode();
+                return true;
+            }
+        });
+    }
+
     private static void ghostModeToggle(ViewGroup viewGroup) throws Exception {
         if(SettingsStatus.ghostSection()){
             boolean ghostModeToggle = Pref.getTurnOnAllGhostModes();
@@ -52,20 +85,10 @@ public class ActionBarPatch {
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        boolean ghostModeToggle= !Pref.getTurnOnAllGhostModes();
-                        Pref.setTurnOnAllGhostModes(ghostModeToggle);
-                        updateGhostModeIcons(ghostModeToggle);
-
-                        String toastStr = ghostModeToggle ? str("piko_ghost_modes_on") : str("piko_ghost_modes_default");
-                        Utils.showToastShort(toastStr);
-                    } catch (Exception ex) {
-                        Logger.printException(() -> "ghost icon click failed: ", ex);
-                    }
+                    toggleGhostMode();
                 }
             });
         }
-
     }
 
     public static void mainFeedActionBarButton(ViewGroup viewGroup) {

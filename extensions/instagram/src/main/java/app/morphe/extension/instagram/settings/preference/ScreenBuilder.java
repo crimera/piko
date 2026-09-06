@@ -296,6 +296,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.longPressInboxGhostMode) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_long_press_inbox_toggle_ghost_mode"),
+                            str("piko_long_press_inbox_toggle_ghost_mode_desc"),
+                            Settings.LONG_PRESS_INBOX_TOGGLE_GHOST_MODE
+                    )
+            );
+        }
 
     }
 
