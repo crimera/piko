@@ -35,6 +35,10 @@ public final class ForYouTopicFilter {
     private static final CopyOnWriteArrayList<Runnable> TOPIC_LISTENERS = new CopyOnWriteArrayList<>();
     private static boolean topicCatalogLoaded;
 
+    public interface RefreshTarget {
+        void pikoRefreshForYouTopicFilter();
+    }
+
     public static final class Settings {
         public final BooleanSetting enabled = new BooleanSetting(ENABLED_KEY, false);
         public final StringSetting selectedTopicIds =
@@ -47,6 +51,16 @@ public final class ForYouTopicFilter {
     }
 
     private ForYouTopicFilter() {
+    }
+
+    /** Initializes the activity tracker before the first timeline screen is created. */
+    public static void initialize(android.content.Context context) {
+        app.morphe.extension.newx.utils.NewXUtils.initialize(context);
+    }
+
+    /** Opens the custom selector and reports whether the native selector should be skipped. */
+    public static boolean showForYouTopicSheet(RefreshTarget refreshTarget) {
+        return ForYouTopicFilterSheet.show(refreshTarget);
     }
 
     public static Settings shared() {

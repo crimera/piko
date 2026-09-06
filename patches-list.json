@@ -3765,6 +3765,7 @@
       "description": "Restricts the NewX For You timeline to selected topics.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
