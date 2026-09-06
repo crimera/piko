@@ -713,7 +713,11 @@ private static Object filterTimelineItems(
                 continue;
             }
 
-            if (modelAccess.isPost(originalItem)) {
+            if (conversationRootId != null
+                    && filterVerified
+                    && verifiedTypesToHide != null
+                    && !verifiedTypesToHide.isEmpty()
+                    && modelAccess.isPost(originalItem)) {
                 associatePostWithConversation(conversationRootId, originalItem, modelAccess);
             }
 
