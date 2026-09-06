@@ -6,9 +6,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import app.morphe.extension.newx.filteredreplies.FilteredRepliesStore;
 import app.morphe.extension.newx.postfilter.PostFilterRule;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -22,6 +24,11 @@ public class NewXTimelineFilterTest {
     private static final ThrowingModelAccess THROWING_MODELS = new ThrowingModelAccess();
     private static final UnsupportedDisclosureModelAccess UNSUPPORTED_DISCLOSURE_MODELS =
             new UnsupportedDisclosureModelAccess();
+
+    @Before
+    public void setUp() {
+        FilteredRepliesStore.shared().clear();
+    }
 
     @Test
     public void disabledFilterReturnsOriginalList() {
@@ -328,6 +335,65 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
+    public void keepsVerifiedPostsWhenBothScopeFiltersAreDisabled() {
+        FakePost timelinePost = verifiedPost("timeline", VerifiedType.User, "timeline-id", "timeline");
+        FakePost threadPost = verifiedPost("thread", VerifiedType.User, "thread-id", "thread");
+        FakeModule conversation = module("conversationthread-1", item(threadPost));
+        List<Object> input = items(timelinePost, conversation);
+
+        Object filtered = filterByVerifiedType(input, Set.of("User"), Set.of(), false, false);
+
+        assertSame(input, filtered);
+    }
+
+    @Test
+    public void timelineScopeDoesNotFilterConversationThreads() {
+        FakePost timelinePost = verifiedPost("timeline", VerifiedType.User, "timeline-id", "timeline");
+        FakePost threadPost = verifiedPost("thread", VerifiedType.User, "thread-id", "thread");
+        FakeModule conversation = module("conversationthread-1", item(threadPost));
+        List<Object> input = items(timelinePost, conversation);
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                input,
+                Set.of("User"),
+                Set.of(),
+                true,
+                false
+        );
+
+        assertEquals(List.of(conversation), filtered);
+        assertSame(threadPost, conversation.children.get(0).item);
+        assertTrue(FilteredRepliesStore.shared().getReplies("1").isEmpty());
+    }
+
+    @Test
+    public void threadScopeDoesNotFilterOrdinaryTimelinePosts() {
+        FakePost timelinePost = verifiedPost("timeline", VerifiedType.User, "timeline-id", "timeline");
+        FakePost threadPost = verifiedPost("thread", VerifiedType.User, "thread-id", "thread");
+        threadPost.id = "thread-id";
+        FakePost keptThreadPost = verifiedPost("kept", VerifiedType.NotVerified, "kept-id", "kept");
+        FakeModule conversation = module("conversationthread-1", item(threadPost), item(keptThreadPost));
+        List<Object> input = items(timelinePost, conversation);
+
+        @SuppressWarnings("unchecked")
+        List<Object> filtered = (List<Object>) filterByVerifiedType(
+                input,
+                Set.of("User"),
+                Set.of(),
+                false,
+                true
+        );
+
+        assertSame(timelinePost, filtered.get(0));
+        FakeModule filteredConversation = (FakeModule) filtered.get(1);
+        assertEquals(1, filteredConversation.children.size());
+        assertSame(keptThreadPost, filteredConversation.children.get(0).item);
+        assertEquals(1, FilteredRepliesStore.shared().getCount("1"));
+        assertEquals("thread-id", FilteredRepliesStore.shared().getReplies("1").get(0).getPostId());
+    }
+
+    @Test
     public void whitelistedAuthorBypassesVerificationTypeFilterByIdOrHandle() {
         FakePost whitelistedById = verifiedPost("keep by id", VerifiedType.User, "favorite-id", "favorite");
         FakePost whitelistedByHandle = verifiedPost("keep by handle", VerifiedType.User, "other-id", "favorite-handle");
@@ -365,6 +431,14 @@ public class NewXTimelineFilterTest {
                 List.of("kept-id"),
                 ((FakeVerticalConversation) filteredConversation.displayType).postIds
         );
+
+        FilteredRepliesStore store = FilteredRepliesStore.shared();
+        assertTrue(store.hasReplies("1"));
+        assertEquals(1, store.getCount("1"));
+        FilteredRepliesStore.FilteredReply reply = store.getReplies("1").get(0);
+        assertEquals("hidden-id", reply.getPostId());
+        assertEquals("hidden", reply.getAuthorScreenName());
+        assertEquals("hidden", reply.getPostText());
     }
 
     @Test
@@ -614,9 +688,21 @@ public class NewXTimelineFilterTest {
             Set<String> typesToHide,
             Set<String> whitelist
     ) {
+        return filterByVerifiedType(input, typesToHide, whitelist, true, true);
+    }
+
+    private static Object filterByVerifiedType(
+            List<Object> input,
+            Set<String> typesToHide,
+            Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread
+    ) {
         return NewXTimelineFilter.filterPostsByVerifiedType(
                 input,
                 typesToHide,
+                filterTimeline,
+                filterThread,
                 whitelist,
                 MODELS
         );

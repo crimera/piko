@@ -173,4 +173,34 @@ public final class NewXUtils {
         }
         new Handler(Looper.getMainLooper()).post(runnable);
     }
+
+    public static String identifierToString(Object identifier) {
+        if (identifier == null) return null;
+        if (identifier instanceof String string) {
+            string = string.trim();
+            return string.isEmpty() ? null : string;
+        }
+        if (identifier instanceof Number number) {
+            return number.longValue() > 0 ? String.valueOf(number) : null;
+        }
+        try {
+            Object value = invokeIfPresent(identifier, "getValue");
+            String string = value == null ? null : String.valueOf(value).trim();
+            if (string != null && !string.isEmpty()) return string;
+
+            value = invokeIfPresent(identifier, "getStr");
+            string = value == null ? null : String.valueOf(value).trim();
+            if (string != null && !string.isEmpty()) return string;
+
+            value = invokeIfPresent(identifier, "a");
+            string = value == null ? null : String.valueOf(value).trim();
+            if (string != null && !string.isEmpty()) return string;
+        } catch (Exception ignored) {
+        }
+        String string = String.valueOf(identifier).trim();
+        if (!string.isEmpty() && !string.startsWith(identifier.getClass().getName())) {
+            return string;
+        }
+        return null;
+    }
 }

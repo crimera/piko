@@ -40,6 +40,7 @@ private const val NEWX_UTILS = "Lapp/morphe/extension/newx/utils/NewXUtils;"
 
 internal const val BROWSE_OBJECT_ACTION = "None"
 internal const val SHARE_IMAGE_ACTION = "ViewDebugDialog"
+internal const val FILTERED_REPLIES_ACTION = "ServerFeedbackAction"
 
 /** NewX icon resource initialization emits the field assignment within this small block. */
 private const val ICON_FIELD_INITIALIZATION_WINDOW = 4

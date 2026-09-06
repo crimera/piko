@@ -47,6 +47,7 @@ public final class NewXPostOptionsTest {
     public void identifiesOnlyConfiguredSentinel() {
         assertTrue(NewXPostOptions.isAction(Action.None, NewXPostOptionActions.BROWSE_OBJECT_ACTION));
         assertTrue(NewXPostOptions.isAction(Action.ViewDebugDialog, NewXPostOptionActions.SHARE_IMAGE_ACTION));
+        assertTrue(NewXPostOptions.isAction(Action.ServerFeedbackAction, NewXPostOptionActions.FILTERED_REPLIES_ACTION));
         assertFalse(NewXPostOptions.isAction(Action.Native, NewXPostOptionActions.BROWSE_OBJECT_ACTION));
         assertFalse(NewXPostOptions.isAction(null, NewXPostOptionActions.BROWSE_OBJECT_ACTION));
     }
@@ -65,6 +66,7 @@ public final class NewXPostOptionsTest {
         Native,
         None,
         ViewDebugDialog,
+        ServerFeedbackAction,
     }
 
     private static final class Group {

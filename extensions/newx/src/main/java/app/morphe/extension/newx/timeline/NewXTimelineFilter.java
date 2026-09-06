@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import app.morphe.extension.newx.filteredreplies.FilteredRepliesStore;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.postfilter.PostFilterMatcher;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
 import app.morphe.extension.newx.postfilter.VerifiedAccountWhitelistStore;
+import app.morphe.extension.newx.utils.NewXUtils;
 
 public final class NewXTimelineFilter {
 
@@ -176,12 +178,23 @@ public final class NewXTimelineFilter {
     }
 
     public static Object filterPostsByVerifiedType(Object timelineItems, Set<String> typesToHide) {
+        return filterPostsByVerifiedType(timelineItems, typesToHide, true, true);
+    }
+
+    public static Object filterPostsByVerifiedType(
+            Object timelineItems,
+            Set<String> typesToHide,
+            boolean filterTimeline,
+            boolean filterThread
+    ) {
         try {
             Set<String> types = parseVerifiedTypes(typesToHide);
-            if (types.isEmpty()) return timelineItems;
+            if (types.isEmpty() || (!filterTimeline && !filterThread)) return timelineItems;
             return filterPostsByVerifiedType(
                     timelineItems,
                     types,
+                    filterTimeline,
+                    filterThread,
                     VerifiedAccountWhitelistStore.shared().snapshot(),
                     PRODUCTION_MODEL_ACCESS
             );
@@ -197,8 +210,26 @@ public final class NewXTimelineFilter {
             Set<String> whitelist,
             TimelineModelAccess modelAccess
     ) {
+        return filterPostsByVerifiedType(
+                timelineItems,
+                typesToHide,
+                true,
+                true,
+                whitelist,
+                modelAccess
+        );
+    }
+
+    static Object filterPostsByVerifiedType(
+            Object timelineItems,
+            Set<String> typesToHide,
+            boolean filterTimeline,
+            boolean filterThread,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
         Set<String> types = parseVerifiedTypes(typesToHide);
-        if (types.isEmpty()) return timelineItems;
+        if (types.isEmpty() || (!filterTimeline && !filterThread)) return timelineItems;
         return filterTimelineItems(
                 timelineItems,
                 false,
@@ -208,6 +239,8 @@ public final class NewXTimelineFilter {
                 false,
                 types,
                 whitelist == null ? Collections.emptySet() : whitelist,
+                filterTimeline,
+                filterThread,
                 modelAccess
         );
     }
@@ -307,12 +340,40 @@ private static Object filterTimelineItems(
             Set<String> whitelist,
             TimelineModelAccess modelAccess
     ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                verifiedTypesToHide,
+                whitelist,
+                false,
+                false,
+                modelAccess
+        );
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
+            TimelineModelAccess modelAccess
+    ) {
         if (timelineItems == null) return null;
         if (!filterPromotedItems
                 && !hideWhoToFollow
                 && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())
                 && (aiSourcesToHide == null || aiSourcesToHide.isEmpty())
-                && (verifiedTypesToHide == null || verifiedTypesToHide.isEmpty())
+                && (!filterTimeline && !filterThread || verifiedTypesToHide == null || verifiedTypesToHide.isEmpty())
                 && !hideDiscoverMore) {
             return timelineItems;
         }
@@ -333,6 +394,8 @@ private static Object filterTimelineItems(
                         hideDiscoverMore,
                         verifiedTypesToHide,
                         whitelist,
+                        filterTimeline,
+                        filterThread,
                         modelAccess
                 );
                 boolean changed = result.remove || result.item != original;
@@ -375,6 +438,8 @@ private static Object filterTimelineItems(
             boolean hideDiscoverMore,
             Set<String> verifiedTypesToHide,
             Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
             TimelineModelAccess modelAccess
     ) {
         if (original == null) return FilterResult.keep(null);
@@ -389,6 +454,8 @@ private static Object filterTimelineItems(
                         hideDiscoverMore,
                         verifiedTypesToHide,
                         whitelist,
+                        filterTimeline,
+                        filterThread,
                         modelAccess
                 );
             }
@@ -401,6 +468,9 @@ private static Object filterTimelineItems(
                     hideDiscoverMore,
                     verifiedTypesToHide,
                     whitelist,
+                    filterTimeline,
+                    filterTimeline,
+                    filterThread,
                     modelAccess
             );
         } catch (RuntimeException exception) {
@@ -418,6 +488,8 @@ private static Object filterTimelineItems(
             boolean hideDiscoverMore,
             Set<String> verifiedTypesToHide,
             Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
             TimelineModelAccess modelAccess
     ) {
         Object originalItem = modelAccess.getModuleItem(wrapper);
@@ -430,6 +502,9 @@ private static Object filterTimelineItems(
                 hideDiscoverMore,
                 verifiedTypesToHide,
                 whitelist,
+                filterTimeline,
+                filterTimeline,
+                filterThread,
                 modelAccess
         );
         if (result.remove) return result;
@@ -450,6 +525,9 @@ private static Object filterTimelineItems(
             boolean hideDiscoverMore,
             Set<String> verifiedTypesToHide,
             Set<String> whitelist,
+            boolean filterVerified,
+            boolean filterTimeline,
+            boolean filterThread,
             TimelineModelAccess modelAccess
     ) {
         if (item == null) return FilterResult.keep(null);
@@ -465,8 +543,8 @@ private static Object filterTimelineItems(
             try {
                 String textForFilter = modelAccess.getPostTextForFilter(item);
                 String authorScreenName = modelAccess.getPostAuthorScreenName(item);
-                if (isVerifiedAuthorToHide(item, verifiedTypesToHide, whitelist, modelAccess)) {
-                    return FilterResult.remove();
+                if (filterVerified && isVerifiedAuthorToHide(item, verifiedTypesToHide, whitelist, modelAccess)) {
+                    return FilterResult.removeVerified();
                 }
                 if (PostFilterMatcher.findMatchReason(textForFilter, authorScreenName, ruleSnapshot) != null) {
                     return FilterResult.remove();
@@ -487,6 +565,8 @@ private static Object filterTimelineItems(
                     hideDiscoverMore,
                     verifiedTypesToHide,
                     whitelist,
+                    filterTimeline,
+                    filterThread,
                     modelAccess
             );
         }
@@ -563,6 +643,8 @@ private static Object filterTimelineItems(
             boolean hideDiscoverMore,
             Set<String> verifiedTypesToHide,
             Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
             TimelineModelAccess modelAccess
     ) {
         String entryId = modelAccess.getModuleEntryId(module);
@@ -572,6 +654,9 @@ private static Object filterTimelineItems(
         if (hideDiscoverMore && isDiscoverMoreEntryId(entryId)) {
             return FilterResult.remove();
         }
+
+        String conversationRootId = extractConversationRootPostId(entryId);
+        boolean filterVerified = conversationRootId != null ? filterThread : filterTimeline;
 
         List<?> originalChildren = modelAccess.getModuleChildren(module);
         if (originalChildren == null || originalChildren.isEmpty()) {
@@ -601,6 +686,9 @@ private static Object filterTimelineItems(
                         hideDiscoverMore,
                         verifiedTypesToHide,
                         whitelist,
+                        filterVerified,
+                        filterTimeline,
+                        filterThread,
                         modelAccess
                 );
             } catch (RuntimeException exception) {
@@ -632,6 +720,9 @@ private static Object filterTimelineItems(
                     if (postId != null) {
                         if (removedPostIds == null) removedPostIds = new HashSet<>();
                         removedPostIds.add(postId);
+                    }
+                    if (result.verifiedAuthorFiltered && conversationRootId != null) {
+                        recordFilteredReply(conversationRootId, originalItem, modelAccess);
                     }
                 }
                 continue;
@@ -711,6 +802,50 @@ private static Object filterTimelineItems(
         }
         if (filteredIds.size() == originalIds.size()) return displayType;
         return modelAccess.copyVerticalConversation(displayType, filteredIds);
+    }
+
+    static String extractConversationRootPostId(String entryId) {
+        if (entryId == null) return null;
+        String prefix = null;
+        if (entryId.startsWith("conversationthread-")) {
+            prefix = "conversationthread-";
+        } else if (entryId.startsWith("conversation-")) {
+            prefix = "conversation-";
+        }
+        if (prefix == null) return null;
+
+        String rest = entryId.substring(prefix.length());
+        int dash = rest.indexOf('-');
+        String rootId = dash >= 0 ? rest.substring(0, dash) : rest;
+        return rootId.trim().isEmpty() ? null : rootId.trim();
+    }
+
+    private static void recordFilteredReply(
+            String conversationRootId,
+            Object post,
+            TimelineModelAccess modelAccess
+    ) {
+        try {
+            String replyId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+            String screenName = modelAccess.getPostAuthorScreenName(post);
+            String authorId = modelAccess.getPostAuthorId(post);
+            Object verifiedTypeObj = modelAccess.getPostAuthorVerifiedType(post);
+            String verifiedType = verifiedTypeObj != null ? verifiedTypeObj.toString() : "";
+            String text = modelAccess.getPostText(post);
+            FilteredRepliesStore.shared().record(
+                    conversationRootId,
+                    new FilteredRepliesStore.FilteredReply(
+                            replyId != null ? replyId : "",
+                            screenName != null ? screenName : "",
+                            authorId != null ? authorId : "",
+                            verifiedType,
+                            text != null ? text : "",
+                            System.currentTimeMillis()
+                    )
+            );
+        } catch (RuntimeException exception) {
+            logFailure("recording filtered reply", exception);
+        }
     }
 
     private static boolean isWhoToFollowEntryId(String entryId) {
@@ -988,22 +1123,28 @@ private static Object filterTimelineItems(
     private static final class FilterResult {
         private final Object item;
         private final boolean remove;
+        private final boolean verifiedAuthorFiltered;
 
-        private FilterResult(Object item, boolean remove) {
+        private FilterResult(Object item, boolean remove, boolean verifiedAuthorFiltered) {
             this.item = item;
             this.remove = remove;
+            this.verifiedAuthorFiltered = verifiedAuthorFiltered;
         }
 
         private static FilterResult keep(Object item) {
-            return new FilterResult(item, false);
+            return new FilterResult(item, false, false);
         }
 
         private static FilterResult replace(Object item) {
-            return new FilterResult(item, false);
+            return new FilterResult(item, false, false);
         }
 
         private static FilterResult remove() {
-            return new FilterResult(null, true);
+            return new FilterResult(null, true, false);
+        }
+
+        private static FilterResult removeVerified() {
+            return new FilterResult(null, true, true);
         }
     }
 }
