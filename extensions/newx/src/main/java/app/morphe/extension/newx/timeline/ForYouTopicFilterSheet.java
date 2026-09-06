@@ -59,6 +59,7 @@ final class ForYouTopicFilterSheet {
             body.setOrientation(LinearLayout.VERTICAL);
 
             List<NewXSettingsUi.SwitchRow> rows = new ArrayList<>();
+            ButtonView actionButton = new ButtonView(activity);
             for (ForYouTopicFilter.Topic topic : topics) {
                 NewXSettingsUi.SwitchRow row = NewXSettingsUi.switchRow(
                         activity,
@@ -73,6 +74,7 @@ final class ForYouTopicFilterSheet {
                         selected.remove(topic.getId());
                     }
                     saveSelection(selected);
+                    updateActionButton(actionButton, selected.size());
                 });
                 body.addView(row, new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -105,20 +107,33 @@ final class ForYouTopicFilterSheet {
                 }
             });
 
-            ButtonView reset = new ButtonView(activity);
-            reset.setText("Reset");
-            reset.setButtonStyle(ButtonView.ButtonStyle.TONAL);
-            reset.setOnClickListener(ignored -> {
-                selected.clear();
-                saveSelection(selected);
-                for (NewXSettingsUi.SwitchRow row : rows) {
-                    if (row.isChecked()) row.setChecked(false, true);
+            updateActionButton(actionButton, selected.size());
+            actionButton.setOnClickListener(ignored -> {
+                if (selected.isEmpty()) {
+                    selected.clear();
+                    for (NewXSettingsUi.SwitchRow row : rows) {
+                        if (row.isChecked()) row.setChecked(false, true);
+                    }
                 }
+                saveSelection(selected);
+                sheet.dismiss();
             });
-            sheet.addButton(reset);
+            sheet.addButton(actionButton);
             sheet.show();
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to open For You topic selector", exception);
+        }
+    }
+
+    private static void updateActionButton(ButtonView button, int selectedCount) {
+        if (selectedCount > 0) {
+            button.setText(selectedCount == 1
+                    ? "Snooze 1 topic"
+                    : "Snooze " + selectedCount + " topics");
+            button.setButtonStyle(ButtonView.ButtonStyle.FILLED);
+        } else {
+            button.setText("Reset");
+            button.setButtonStyle(ButtonView.ButtonStyle.TONAL);
         }
     }
 
