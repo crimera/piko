@@ -3,10 +3,14 @@ package app.crimera.patches.newx.timeline
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.Groups
+import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
 import app.crimera.patches.newx.settings.customScreen
 import app.crimera.patches.newx.settings.group
+import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
+import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.FOR_YOU_TOPIC_FILTER_DESCRIPTOR
@@ -96,17 +100,28 @@ val newXForYouTopicFilterPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 
-        newXSettings {
-            category(Categories.TIMELINE) {
-                customScreen(
-                    id = "newx.content.topic_filtering.manage",
-                    strings = settingStrings("piko_newx_topic_filtering"),
-                    order = 50,
-                    iconResourceName = "ic_vector_filter",
-                    fragmentClassDescriptor = FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR,
-                )
+        val forYouTabHookEnabled =
+            newXSettings {
+                category(Categories.TIMELINE) {
+                    group(Groups.FOR_YOU_FILTERING) {
+                        val setting =
+                            toggle(
+                                id = "newx.timeline.for_you_filtering.tab_hook",
+                                strings = settingStrings("piko_newx_for_you_tab_hook"),
+                                order = 100,
+                                defaultValue = true,
+                            )
+                        customScreen(
+                            id = "newx.content.topic_filtering.manage",
+                            strings = settingStrings("piko_newx_topic_filtering"),
+                            order = 200,
+                            iconResourceName = "ic_vector_filter",
+                            fragmentClassDescriptor = FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR,
+                        )
+                        setting
+                    }
+                }
             }
-        }
 
         execute {
             newXInitHook.fingerprint.method.addInstruction(
@@ -119,11 +134,23 @@ val newXForYouTopicFilterPatch =
             val tabHook = resolveForYouTabHook()
             installForYouRefreshBridge(tabHook)
             val continuation = tabHook.method.instructions[tabHook.insertionIndex]
+            val hookEnabledRead =
+                forYouTabHookEnabled.injectRead(
+                    method = tabHook.method,
+                    index = tabHook.insertionIndex,
+                    registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+                )
             val sheetResultRegister =
-                tabHook.method.getFreeRegisterProvider(tabHook.insertionIndex, 1).getFreeRegister4Bit()
+                tabHook.method
+                    .getFreeRegisterProvider(
+                        hookEnabledRead.nextIndex,
+                        1,
+                        hookEnabledRead.register,
+                    ).getFreeRegister4Bit()
             tabHook.method.addInstructionsWithLabels(
-                tabHook.insertionIndex,
+                hookEnabledRead.nextIndex,
                 """
+                    if-eqz v${hookEnabledRead.register}, :piko_newx_for_you_topic_sheet_continue
                     invoke-static/range {p0 .. p0}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->showForYouTopicSheet($FOR_YOU_REFRESH_TARGET_DESCRIPTOR)Z
                     move-result v$sheetResultRegister
                     if-eqz v$sheetResultRegister, :piko_newx_for_you_topic_sheet_continue

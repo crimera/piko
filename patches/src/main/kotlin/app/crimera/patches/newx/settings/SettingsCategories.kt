@@ -73,6 +73,15 @@ internal object Categories {
 }
 
 internal object Groups {
+    val FOR_YOU_FILTERING =
+        SettingsGroupMetadata(
+            id = "newx.timeline.for_you_filtering",
+            titleResourceName = "piko_newx_group_for_you_filtering_title",
+            summaryResourceName = "piko_newx_group_for_you_filtering_summary",
+            iconResourceName = "ic_vector_filter",
+            order = 200,
+        )
+
     val FEATURE_SWITCHES =
         SettingsGroupMetadata(
             id = "newx.advanced.feature_switches",
