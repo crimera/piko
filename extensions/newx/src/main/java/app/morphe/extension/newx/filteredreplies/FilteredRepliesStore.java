@@ -188,7 +188,7 @@ public final class FilteredRepliesStore {
             if (next == null || next.isEmpty() || next.equals(current)) return current;
             current = next;
         }
-        return postId;
+        return current;
     }
 
     private void mergeRoots(String preferredRoot, String mergedRoot) {
