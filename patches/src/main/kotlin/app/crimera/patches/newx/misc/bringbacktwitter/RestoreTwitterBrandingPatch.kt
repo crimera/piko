@@ -83,6 +83,19 @@ val bringBackTwitterPatch =
                     copyResources("twitter/bringbacktwitter", it)
                 }
 
+            // Notification icons reuse the white bird vector under different names.
+            // (copyResources is name-matched, so this copy happens in res directly.)
+            val drawableDir = get("res").resolve("drawable")
+            val whiteBird = drawableDir.resolve("ic_vector_twitter_white.xml")
+            whiteBird.copyTo(drawableDir.resolve("ic_stat_x.xml"), overwrite = true)
+            whiteBird.copyTo(drawableDir.resolve("ic_logo_x.xml"), overwrite = true)
+            document("res/drawable/ic_logo_x.xml").use { doc ->
+                doc.getElementsByTagName("vector").item(0)?.let { vector ->
+                    (vector as Element).setAttribute("android:height", "96.0dp")
+                    (vector as Element).setAttribute("android:width", "96.0dp")
+                }
+            }
+
             // endregion
 
             listOf("mipmap-anydpi", "mipmap-anydpi-v26").forEach { dir ->
