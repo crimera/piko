@@ -45,6 +45,8 @@
     <string name="piko_newx_hide_ai_generated_posts_source_not_identified">AI source not identified</string>
     <string name="piko_newx_show_sensitive_media_title">Show sensitive media</string>
     <string name="piko_newx_show_sensitive_media_summary">Shows sensitive media without requiring confirmation</string>
+    <string name="piko_newx_show_poll_results_title">Show poll results without voting</string>
+    <string name="piko_newx_show_poll_results_summary">Shows poll percentages before you vote when results are available</string>
     <string name="piko_newx_default_reply_sorting_title">Default reply sorting</string>
     <string name="piko_newx_default_reply_sorting_summary">Default reply-sort order for tweet detail (Relevance, Recency, or Likes)</string>
     <string name="piko_newx_group_verified_account_filtering_title">Verified account filtering</string>
