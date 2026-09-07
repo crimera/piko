@@ -69,6 +69,11 @@ public class Pref {
     public static boolean showSourceLabel() {
         return Utils.getBooleanPref(Settings.TIMELINE_SHOW_SOURCE_LABEL);
     }
+
+    public static boolean disableAutoTimelineScroll() {
+        return Utils.getBooleanPref(Settings.TIMELINE_DISABLE_AUTO_SCROLL);
+    }
+
     public static boolean hideCommBadge() {
         return Utils.getBooleanPref(Settings.TIMELINE_HIDE_COMM_BADGE);
     }
