@@ -1163,38 +1163,108 @@ public final class InlineDownloadButton {
             ContentResolver resolver = context.getContentResolver();
             String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
                     MediaStore.MediaColumns.RELATIVE_PATH + "=?";
-            // Each MediaStore collection permits only specific primary directories: the Images
-            // collection accepts Pictures, the Video collection accepts Movies. Query each with
-            // its own relative path so videos are found under Movies/Twitter and images under
-            // Pictures/Twitter.
-            Uri[] collections = {
-                    MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
-                    MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
-            };
-            String[] relativePaths = {
-                    PICTURES_DIRECTORY + "/" + DOWNLOAD_DIRECTORY + "/",
-                    MOVIES_DIRECTORY + "/" + DOWNLOAD_DIRECTORY + "/",
-            };
-            for (int index = 0; index < collections.length; index++) {
-                String[] selectionArgs = new String[]{fileName, relativePaths[index]};
-                try (Cursor cursor = resolver.query(
-                        collections[index],
-                        new String[]{MediaStore.MediaColumns._ID},
-                        selection,
-                        selectionArgs,
-                        null
-                )) {
-                    if (cursor != null && cursor.moveToFirst()) return true;
-                } catch (RuntimeException exception) {
-                    NewXLogger.printException(() -> "Failed to query NewX media existence", exception);
-                }
+            Uri collection = mediaCollectionForMime(mimeType);
+            String relativePath = relativeDownloadPath(mimeType);
+            try (Cursor cursor = resolver.query(
+                    collection,
+                    new String[]{MediaStore.MediaColumns._ID},
+                    selection,
+                    new String[]{fileName, relativePath},
+                    null
+            )) {
+                if (cursor != null && cursor.moveToFirst()) return true;
+            } catch (RuntimeException exception) {
+                // Android 13+ hides media owned by other apps when the user has not granted
+                // READ_MEDIA_* permission. The fallback below still detects the collision.
+                NewXLogger.printException(() -> "Failed to query NewX media existence", exception);
             }
-            return false;
+
+            // Old inline downloads were indexed with no owner package. On AOSP Android 16 they
+            // are invisible to this app because READ_MEDIA_* is normally denied, so a normal
+            // query reports "missing" even though MediaStore will rename a colliding insert to
+            // "file (1).jpg". Probe the provider's own name allocation to detect that case
+            // without requesting broad media access from the user.
+            return mediaStoreNameIsOccupied(
+                    resolver,
+                    collection,
+                    relativePath,
+                    fileName,
+                    mimeType
+            );
         }
 
         File primary = Environment.getExternalStoragePublicDirectory(primaryDirectoryForMime(mimeType));
         File directory = new File(primary, DOWNLOAD_DIRECTORY);
         return new File(directory, fileName).isFile();
+    }
+
+    private static Uri mediaCollectionForMime(String mimeType) {
+        return mimeType != null && mimeType.startsWith("video/")
+                ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+    }
+
+    private static boolean mediaStoreNameIsOccupied(
+            ContentResolver resolver,
+            Uri collection,
+            String relativePath,
+            String fileName,
+            String mimeType
+    ) {
+        ContentValues probeValues = new ContentValues();
+        probeValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+        probeValues.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+        probeValues.put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath);
+        probeValues.put(MediaStore.MediaColumns.IS_PENDING, 1);
+
+        Uri probe = resolver.insert(collection, probeValues);
+        if (probe == null) {
+            throw new IllegalStateException("Could not probe NewX media name availability");
+        }
+
+        try {
+            try (OutputStream output = resolver.openOutputStream(probe, "w")) {
+                if (output == null) {
+                    throw new IllegalStateException("Could not open NewX media name probe");
+                }
+                // MediaProvider allocates the final unique filesystem name lazily when the
+                // pending URI is opened. An insert/update-only probe can therefore miss an
+                // existing file on AOSP even though the real download is renamed on write.
+                output.write(0);
+            }
+
+            ContentValues publishValues = new ContentValues();
+            publishValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
+            resolver.update(probe, publishValues, null, null);
+
+            String allocatedName = mediaStoreDisplayName(resolver, probe);
+            if (allocatedName == null) {
+                throw new IllegalStateException("MediaStore probe returned no display name");
+            }
+            return mediaStoreAllocatedNameDiffers(fileName, allocatedName);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not write NewX media name probe", exception);
+        } finally {
+            resolver.delete(probe, null, null);
+        }
+    }
+
+    static boolean mediaStoreAllocatedNameDiffers(String requestedName, String allocatedName) {
+        return !requestedName.equals(allocatedName);
+    }
+
+    private static String mediaStoreDisplayName(ContentResolver resolver, Uri media) {
+        try (Cursor cursor = resolver.query(
+                media,
+                new String[]{MediaStore.MediaColumns.DISPLAY_NAME},
+                null,
+                null,
+                null
+        )) {
+            if (cursor == null || !cursor.moveToFirst()) return null;
+            int displayNameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
+            return displayNameIndex < 0 ? null : cursor.getString(displayNameIndex);
+        }
     }
 
     static Activity currentActivity() {

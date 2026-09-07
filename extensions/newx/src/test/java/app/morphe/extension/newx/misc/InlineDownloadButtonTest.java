@@ -75,6 +75,18 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void mediaStoreRenamedAllocationIsTreatedAsOccupied() {
+        assertTrue(InlineDownloadButton.mediaStoreAllocatedNameDiffers(
+                "jack_123456789.jpg",
+                "jack_123456789 (1).jpg"
+        ));
+        assertFalse(InlineDownloadButton.mediaStoreAllocatedNameDiffers(
+                "jack_123456789.jpg",
+                "jack_123456789.jpg"
+        ));
+    }
+
+    @Test
     public void renameSkipsOccupiedTargets() {
         String target = "jack_123456789.jpg";
 
