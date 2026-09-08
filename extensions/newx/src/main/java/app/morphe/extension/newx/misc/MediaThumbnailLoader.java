@@ -1,11 +1,14 @@
 package app.morphe.extension.newx.misc;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.LruCache;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,6 +30,10 @@ public final class MediaThumbnailLoader {
     private static final int CONNECT_TIMEOUT_MILLIS = 6_000;
     private static final int READ_TIMEOUT_MILLIS = 8_000;
     private static final String LOG_PREFIX = "[PikoNewX][Thumbnail] ";
+    private static final String COIL_DIAGNOSTIC_LOG_PREFIX =
+            "[PikoNewX][Thumbnail][CoilDiag] ";
+    private static final String GLIDE_DIAGNOSTIC_LOG_PREFIX =
+            "[PikoNewX][Thumbnail][GlideDiag] ";
 
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(3);
     private static final AtomicInteger NEXT_REQUEST_ID = new AtomicInteger();
@@ -87,9 +94,9 @@ public final class MediaThumbnailLoader {
 
         EXECUTOR.execute(() -> {
             Bitmap bitmap = findCachedThumbnail(context, cacheUrl, requestId);
-            boolean coilCacheHit = bitmap != null;
+            boolean memoryCacheHit = bitmap != null;
             if (bitmap == null) {
-                logInfo("request #" + requestId + " Coil miss; falling back to network");
+                logInfo("request #" + requestId + " Glide miss; falling back to network");
                 bitmap = fetch(networkUrl, requestId);
             }
             if (bitmap == null) {
@@ -97,7 +104,7 @@ public final class MediaThumbnailLoader {
                 return;
             }
 
-            String source = coilCacheHit ? "Coil memory cache" : "network";
+            String source = memoryCacheHit ? "Glide memory cache" : "network";
             CACHE.put(networkUrl, bitmap);
             Bitmap loaded = bitmap;
             logInfo(
@@ -118,38 +125,98 @@ public final class MediaThumbnailLoader {
             int requestId
     ) {
         if (context == null || !NewXUtils.isHttpUrl(cacheUrl)) {
-            logInfo("request #" + requestId + " skipped Coil lookup: no valid cache URL/context");
+            logInfo("request #" + requestId + " skipped Glide lookup: no valid cache URL/context");
             return null;
         }
 
-        logInfo("request #" + requestId + " Coil lookup start key=" + describeUrl(cacheUrl));
+        logInfo("request #" + requestId + " Glide lookup start key=" + describeUrl(cacheUrl));
         try {
             Object cached = getCachedThumbnail(context, cacheUrl);
             if (!(cached instanceof Bitmap bitmap)) {
                 logInfo(
-                        "request #" + requestId + " Coil lookup miss result=" +
+                        "request #" + requestId + " Glide lookup miss result=" +
                                 (cached == null ? "null" : cached.getClass().getName())
                 );
                 return null;
             }
             if (bitmap.isRecycled()) {
-                logInfo("request #" + requestId + " Coil lookup returned recycled bitmap");
+                logInfo("request #" + requestId + " Glide lookup returned recycled bitmap");
                 return null;
             }
 
             Bitmap thumbnail = fitToTarget(bitmap);
             logInfo(
-                    "request #" + requestId + " Coil lookup hit sourceSize=" + dimensions(bitmap) +
+                    "request #" + requestId + " Glide lookup hit sourceSize=" + dimensions(bitmap) +
                             " pickerSize=" + dimensions(thumbnail)
             );
             return thumbnail;
         } catch (RuntimeException | LinkageError exception) {
-            logException("request #" + requestId + " Coil lookup failed; using network fallback", exception);
+            logException("request #" + requestId + " Glide lookup failed; using network fallback", exception);
             return null;
         }
     }
 
-    // Replaced with a direct Coil memory-cache lookup at patch time.
+    /**
+     * Receives counters from the patch-time Coil bridge so a null result can be diagnosed.
+     * The counters describe the key set examined by that lookup, not the whole loader lifetime.
+     */
+    private static void logCoilLookupDiagnostics(
+            String cacheUrl,
+            int keyCount,
+            int matchingKeyCount,
+            int memoryValueCount,
+            int imageCount,
+            int bitmapCount
+    ) {
+        NewXLogger.printInfo(() ->
+                COIL_DIAGNOSTIC_LOG_PREFIX +
+                        "key=" + describeUrl(cacheUrl) +
+                        " keys=" + keyCount +
+                        " matches=" + matchingKeyCount +
+                        " memoryValues=" + memoryValueCount +
+                        " images=" + imageCount +
+                        " bitmaps=" + bitmapCount
+        );
+    }
+
+    /** Receives counters from the patch-time Glide bridge for cache-path diagnostics. */
+    private static void logGlideLookupDiagnostics(
+            String cacheUrl,
+            int memoryKeyCount,
+            int activeKeyCount,
+            int matchingKeyCount,
+            int resourceCount,
+            int bitmapCount
+    ) {
+        NewXLogger.printInfo(() ->
+                GLIDE_DIAGNOSTIC_LOG_PREFIX +
+                        "key=" + describeUrl(cacheUrl) +
+                        " memoryKeys=" + memoryKeyCount +
+                        " activeKeys=" + activeKeyCount +
+                        " matches=" + matchingKeyCount +
+                        " resources=" + resourceCount +
+                        " bitmaps=" + bitmapCount
+        );
+    }
+
+    /** Converts a cached Glide resource (normally a BitmapDrawable) into a bitmap. */
+    private static Bitmap bitmapFromGlideResource(Object value) {
+        if (value instanceof Bitmap bitmap) return bitmap;
+        if (value instanceof BitmapDrawable bitmapDrawable) return bitmapDrawable.getBitmap();
+        if (!(value instanceof Drawable drawable)) return null;
+
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        if (width <= 0) width = TARGET_SIZE_PX;
+        if (height <= 0) height = TARGET_SIZE_PX;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        drawable.setBounds(0, 0, width, height);
+        drawable.draw(new Canvas(bitmap));
+        return bitmap;
+    }
+
+    // Replaced with a direct Glide memory-cache lookup at patch time.
     private static Object getCachedThumbnail(Object context, String url) {
         return null;
     }

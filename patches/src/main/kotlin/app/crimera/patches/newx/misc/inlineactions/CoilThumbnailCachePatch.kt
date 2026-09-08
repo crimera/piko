@@ -31,7 +31,8 @@ private const val BITMAP_DESCRIPTOR = "Landroid/graphics/Bitmap;"
 private const val ATOMIC_REFERENCE_DESCRIPTOR =
     "Ljava/util/concurrent/atomic/AtomicReference;"
 private const val CACHED_THUMBNAIL_HELPER = "getCachedThumbnail"
-private const val CACHED_THUMBNAIL_LOCAL_REGISTER_COUNT = 4
+private const val CACHED_THUMBNAIL_DIAGNOSTICS_HELPER = "logCoilLookupDiagnostics"
+private const val CACHED_THUMBNAIL_LOCAL_REGISTER_COUNT = 10
 
 /** Finds Coil's process-wide image-loader factory without naming an obfuscated Coil class. */
 private object CoilImageLoaderProviderFingerprint : Fingerprint(
@@ -131,6 +132,11 @@ private fun patchCoilThumbnailBridge(runtime: CoilThumbnailRuntime) {
     helper.addInstructions(
         0,
         """
+            const/4 v5, 0x0
+            const/4 v6, 0x0
+            const/4 v7, 0x0
+            const/4 v8, 0x0
+            const/4 v9, 0x0
             if-eqz p0, :piko_newx_cached_thumbnail_none
             if-eqz p1, :piko_newx_cached_thumbnail_none
             check-cast p0, Landroid/content/Context;
@@ -152,6 +158,12 @@ private fun patchCoilThumbnailBridge(runtime: CoilThumbnailRuntime) {
             invoke-virtual {v1}, Ljava/util/LinkedHashMap;->keySet()Ljava/util/Set;
             move-result-object v1
             invoke-interface {v2, v1}, Ljava/util/Set;->addAll(Ljava/util/Collection;)Z
+            invoke-interface {v2}, Ljava/util/Set;->size()I
+            move-result v5
+            const/4 v6, 0x0
+            const/4 v7, 0x0
+            const/4 v8, 0x0
+            const/4 v9, 0x0
             invoke-interface {v2}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
             move-result-object v1
 
@@ -166,17 +178,25 @@ private fun patchCoilThumbnailBridge(runtime: CoilThumbnailRuntime) {
             invoke-virtual {v3, p1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
             move-result v3
             if-eqz v3, :piko_newx_cached_thumbnail_loop
+            add-int/lit8 v6, v6, 1
             invoke-virtual {v0, v2}, ${runtime.memoryLookup}
             move-result-object v2
             if-eqz v2, :piko_newx_cached_thumbnail_loop
+            add-int/lit8 v7, v7, 1
             iget-object v2, v2, ${runtime.imageField}
             if-eqz v2, :piko_newx_cached_thumbnail_loop
+            add-int/lit8 v8, v8, 1
             invoke-static {v2}, ${runtime.converter}
             move-result-object v2
             if-eqz v2, :piko_newx_cached_thumbnail_none
+            add-int/lit8 v9, v9, 1
+            move-object v4, p1
+            invoke-static/range {v4 .. v9}, ${MEDIA_THUMBNAIL_LOADER_DESCRIPTOR}->${CACHED_THUMBNAIL_DIAGNOSTICS_HELPER}(Ljava/lang/String;IIIII)V
             return-object v2
 
             :piko_newx_cached_thumbnail_none
+            move-object v4, p1
+            invoke-static/range {v4 .. v9}, ${MEDIA_THUMBNAIL_LOADER_DESCRIPTOR}->${CACHED_THUMBNAIL_DIAGNOSTICS_HELPER}(Ljava/lang/String;IIIII)V
             const/4 v0, 0x0
             return-object v0
         """.trimIndent(),
