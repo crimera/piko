@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Switch;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -27,6 +28,17 @@ public class FeatureFlagAdapter extends BaseAdapter {
 
     OnItemClickListener itemClickListener;
     OnItemCheckedChangeListener itemCheckedChangeListener;
+    private OnItemClickListener itemLongClickListener;
+    private FeatureFlagSelection selection;
+
+    void setSelection(FeatureFlagSelection selection) {
+        this.selection = selection;
+        notifyDataSetChanged();
+    }
+
+    void setItemLongClickListener(OnItemClickListener listener) {
+        itemLongClickListener = listener;
+    }
 
     FeatureFlagAdapter(Context context, ArrayList<FeatureFlag> list) {
         inflater = LayoutInflater.from(context);
@@ -37,6 +49,7 @@ public class FeatureFlagAdapter extends BaseAdapter {
     private static class ViewHolder {
         TextView textView;
         Switch enabled;
+        CheckBox selected;
     }
 
     public void setItemClickListener(OnItemClickListener itemClickListener) {
@@ -67,10 +80,11 @@ public class FeatureFlagAdapter extends BaseAdapter {
         final ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "item_row"), null);
+            convertView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "item_row"), parent, false);
 
             holder.textView = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "textView"));
             holder.enabled = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "enabled"));
+            holder.selected = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "flag_selected"));
 
             convertView.setTag(holder);
         } else {
@@ -81,7 +95,21 @@ public class FeatureFlagAdapter extends BaseAdapter {
         holder.textView.setOnClickListener(view -> {
             itemClickListener.onClick(position);
         });
+        convertView.setOnClickListener(view -> itemClickListener.onClick(position));
+        View.OnLongClickListener longClick = view -> {
+            if (itemLongClickListener == null) return false;
+            itemLongClickListener.onClick(position);
+            return true;
+        };
+        convertView.setOnLongClickListener(longClick);
+        holder.textView.setOnLongClickListener(longClick);
+        holder.enabled.setVisibility(selection == null ? View.VISIBLE : View.GONE);
+        holder.selected.setVisibility(selection == null ? View.GONE : View.VISIBLE);
+        holder.selected.setChecked(selection != null && selection.contains(position));
+        holder.selected.setContentDescription(list.get(position).getName());
+        holder.selected.setOnClickListener(view -> itemClickListener.onClick(position));
 
+        holder.enabled.setOnCheckedChangeListener(null);
         holder.enabled.setChecked(list.get(position).getEnabled());
         holder.enabled.setOnCheckedChangeListener((compoundButton, b) -> {
             if (itemCheckedChangeListener!=null) itemCheckedChangeListener.onCheck(b, position);
