@@ -13,14 +13,18 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -46,7 +50,9 @@ private object AudioTrackOverrideFingerprint : Fingerprint(
 )
 
 private object MediaBitrateLimiterFingerprint : Fingerprint(
-    definingClass = "Lcom/x/media/imageloader/telemetry/g;",
+    // The telemetry owner is an obfuscated class and changes independently of
+    // the package. Keep the stable package scope and the coroutine method name.
+    definingClass = "Lcom/x/media/imageloader/telemetry/",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
     filters = listOf(
@@ -67,6 +73,21 @@ private object MediaBitrateLimiterFingerprint : Fingerprint(
                 }
             } == true
     },
+)
+
+/**
+ * Newer builds removed the telemetry coroutine that clamped the bitrate. The
+ * playback policy now returns Integer.MAX_VALUE directly, so the requested
+ * behavior is already present and there is no value to override.
+ */
+private object MaxBitratePolicyFingerprint : Fingerprint(
+    definingClass = "Lcom/x/media/playback/",
+    returnType = "I",
+    parameters = listOf("J"),
+    filters = listOf(
+        literal(MAXIMUM_VIDEO_BITRATE),
+        opcode(Opcode.RETURN, MatchAfterImmediately()),
+    ),
 )
 
 @Suppress("unused")
@@ -97,16 +118,31 @@ val newXForceHighestVideoQualityPatch =
             }
             patchAudioTrackOverride(audioTrackMatches.single(), forceHighestQualitySetting)
 
-            val bitrateLimiterMatches = MediaBitrateLimiterFingerprint.scopedMatchAll()
-            if (bitrateLimiterMatches.size != 1) {
-                throw PatchException(
-                    "Expected exactly one MediaBitrateLimiter match, found ${bitrateLimiterMatches.size}: " +
-                        bitrateLimiterMatches.joinToString { it.originalMethod.toString() },
-                )
+            val bitrateLimiterMatches = MediaBitrateLimiterFingerprint.scopedMatchAllOrNull().orEmpty()
+            when {
+                bitrateLimiterMatches.size == 1 ->
+                    patchBitrateLimiter(bitrateLimiterMatches.single(), forceHighestQualitySetting)
+                bitrateLimiterMatches.size > 1 ->
+                    throw PatchException(
+                        "Expected at most one MediaBitrateLimiter match, found ${bitrateLimiterMatches.size}: " +
+                            bitrateLimiterMatches.joinToString { it.originalMethod.toString() },
+                    )
+                else -> {
+                    // Older targets also contain this already-unlimited policy
+                    // alongside the telemetry limiter, so only use it as a
+                    // fallback after the telemetry shape is absent.
+                    val maxBitratePolicyMatches = MaxBitratePolicyFingerprint.scopedMatchAllOrNull().orEmpty()
+                    if (maxBitratePolicyMatches.size != 1) {
+                        throw PatchException(
+                            "Expected one media bitrate capability across telemetry or max-policy shapes, " +
+                                "found telemetry=0, maxPolicy=${maxBitratePolicyMatches.size}: " +
+                                maxBitratePolicyMatches.joinToString { it.originalMethod.toString() },
+                        )
+                    }
             }
-            patchBitrateLimiter(bitrateLimiterMatches.single(), forceHighestQualitySetting)
         }
     }
+}
 
 private fun isBitrateFlowRead(instruction: Instruction?): Boolean {
     if (instruction?.opcode != Opcode.IGET_OBJECT) return false
