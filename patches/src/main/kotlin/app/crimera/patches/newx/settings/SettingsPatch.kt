@@ -153,7 +153,7 @@ private fun prepareSettingsRegistryLoad() {
 }
 
 context(_: BytecodePatchContext)
-private fun resolveSettingsIconField(iconType: String): FieldReference {
+internal fun resolveSettingsIconField(iconType: String): FieldReference {
     val drawableId = getResourceId(ResourceType.DRAWABLE, "ic_vector_settings_stroke")
     val fingerprint =
         Fingerprint(

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_newx_settings_title">Piko NewX settings</string>
+    <string name="piko_newx_settings_title">Piko Settings</string>
     <string name="piko_newx_settings_ok">OK</string>
     <string name="piko_newx_settings_cancel">Cancel</string>
     <string name="piko_newx_patch_version" translatable="false">Piko %s</string>
@@ -148,6 +148,8 @@
 
     <string name="piko_newx_drawer_title">Drawer items to hide</string>
     <string name="piko_newx_drawer_summary">Choose which items are hidden from the NewX navigation drawer</string>
+    <string name="piko_newx_show_piko_settings_in_drawer_title">Show Piko Settings in the drawer footer</string>
+    <string name="piko_newx_show_piko_settings_in_drawer_summary">Adds a shortcut to Piko Settings to the NewX drawer footer</string>
     <string name="piko_newx_drawer_profile">Profile</string>
     <string name="piko_newx_drawer_premium">Premium</string>
     <string name="piko_newx_drawer_money">Money</string>
