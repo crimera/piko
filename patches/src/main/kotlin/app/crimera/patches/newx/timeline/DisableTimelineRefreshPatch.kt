@@ -148,6 +148,8 @@ val disableTimelineRefreshPatch =
                 "$repoDescriptor->${timelineGetter.name}()$timelineEnumDescriptor"
             val repositoryAutoRefreshFieldReference =
                 "$requestTypeDescriptor->AUTO_REFRESH:$requestTypeDescriptor"
+            val repositoryViewportAwareAutoRefreshFieldReference =
+                "$requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor"
             urtRepoMatch.method.apply {
                 val originalFirstInstruction = instructions.first()
                 val read =
@@ -163,13 +165,14 @@ val disableTimelineRefreshPatch =
                         1,
                         settingRegister,
                     ).getFreeRegister4Bit()
-                // AUTO_REFRESH is the foreground/background refresh request. A null cursor
-                // does not make it an initial load: the foreground path also uses null while
-                // the restored timeline has not exposed its top cursor yet. Stop both forms.
+                // A null cursor is also used by the first request on a fresh install. Keep that
+                // request alive, but use the viewport-aware request type so it cannot jump an
+                // already-restored timeline. Non-null cursor requests retain the native path.
                 addInstructionsWithLabels(
                     read.nextIndex,
                     """
                         if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
+                        if-nez p2, :piko_newx_refresh_urt_continue
                         sget-object v$settingRegister, $repositoryAutoRefreshFieldReference
                         if-ne p1, v$settingRegister, :piko_newx_refresh_urt_continue
                         invoke-virtual {p0}, $repositoryTimelineGetterReference
@@ -182,7 +185,7 @@ val disableTimelineRefreshPatch =
                         if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_suppress
                         goto :piko_newx_refresh_urt_continue
                         :piko_newx_refresh_urt_suppress
-                        return-void
+                        sget-object p1, $repositoryViewportAwareAutoRefreshFieldReference
                     """.trimIndent(),
                     ExternalLabel(
                         "piko_newx_refresh_urt_continue",
