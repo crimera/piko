@@ -96,7 +96,7 @@ public final class MediaThumbnailLoader {
             Bitmap bitmap = findCachedThumbnail(context, cacheUrl, requestId);
             boolean memoryCacheHit = bitmap != null;
             if (bitmap == null) {
-                logInfo("request #" + requestId + " Glide miss; falling back to network");
+                logInfo("request #" + requestId + " thumbnail cache miss; falling back to network");
                 bitmap = fetch(networkUrl, requestId);
             }
             if (bitmap == null) {
@@ -104,7 +104,7 @@ public final class MediaThumbnailLoader {
                 return;
             }
 
-            String source = memoryCacheHit ? "Glide memory cache" : "network";
+            String source = memoryCacheHit ? "image-loader memory cache" : "network";
             CACHE.put(networkUrl, bitmap);
             Bitmap loaded = bitmap;
             logInfo(
@@ -125,33 +125,33 @@ public final class MediaThumbnailLoader {
             int requestId
     ) {
         if (context == null || !NewXUtils.isHttpUrl(cacheUrl)) {
-            logInfo("request #" + requestId + " skipped Glide lookup: no valid cache URL/context");
+            logInfo("request #" + requestId + " skipped thumbnail cache lookup: no valid cache URL/context");
             return null;
         }
 
-        logInfo("request #" + requestId + " Glide lookup start key=" + describeUrl(cacheUrl));
+        logInfo("request #" + requestId + " thumbnail cache lookup start key=" + describeUrl(cacheUrl));
         try {
             Object cached = getCachedThumbnail(context, cacheUrl);
             if (!(cached instanceof Bitmap bitmap)) {
                 logInfo(
-                        "request #" + requestId + " Glide lookup miss result=" +
+                        "request #" + requestId + " thumbnail cache lookup miss result=" +
                                 (cached == null ? "null" : cached.getClass().getName())
                 );
                 return null;
             }
             if (bitmap.isRecycled()) {
-                logInfo("request #" + requestId + " Glide lookup returned recycled bitmap");
+                logInfo("request #" + requestId + " thumbnail cache lookup returned recycled bitmap");
                 return null;
             }
 
             Bitmap thumbnail = fitToTarget(bitmap);
             logInfo(
-                    "request #" + requestId + " Glide lookup hit sourceSize=" + dimensions(bitmap) +
+                    "request #" + requestId + " thumbnail cache lookup hit sourceSize=" + dimensions(bitmap) +
                             " pickerSize=" + dimensions(thumbnail)
             );
             return thumbnail;
         } catch (RuntimeException | LinkageError exception) {
-            logException("request #" + requestId + " Glide lookup failed; using network fallback", exception);
+            logException("request #" + requestId + " thumbnail cache lookup failed; using network fallback", exception);
             return null;
         }
     }
@@ -216,7 +216,7 @@ public final class MediaThumbnailLoader {
         return bitmap;
     }
 
-    // Replaced with a direct Glide memory-cache lookup at patch time.
+    // Replaced with a direct image-loader cache lookup at patch time.
     private static Object getCachedThumbnail(Object context, String url) {
         return null;
     }

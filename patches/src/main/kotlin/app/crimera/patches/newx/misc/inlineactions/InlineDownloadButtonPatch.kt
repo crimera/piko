@@ -99,7 +99,7 @@ val newXInlineDownloadButtonPatch =
             customizeNewXInlineActionsPatch,
             newXPostMediaModelResolutionPatch,
             newXInlineDownloadModelResolutionPatch,
-            newXGlideThumbnailCachePatch,
+            newXThumbnailCachePatch,
             newXExtensionPatch,
         )
 

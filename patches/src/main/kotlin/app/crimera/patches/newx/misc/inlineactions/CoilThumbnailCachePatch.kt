@@ -1,7 +1,5 @@
 package app.crimera.patches.newx.misc.inlineactions
 
-import app.crimera.patches.newx.misc.extension.newXExtensionPatch
-import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.MEDIA_THUMBNAIL_LOADER_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -10,7 +8,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.cloneMutable
 import app.morphe.util.numberOfParameterRegisters
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -96,15 +93,10 @@ private data class CoilThumbnailRuntime(
     val converter: String,
 )
 
-internal val newXCoilThumbnailCachePatch =
-    bytecodePatch(default = false) {
-        compatibleWith(COMPATIBILITY_NEW_X)
-        dependsOn(newXExtensionPatch)
-
-        execute {
-            patchCoilThumbnailBridge(resolveCoilThumbnailRuntime())
-        }
-    }
+context(context: BytecodePatchContext)
+internal fun applyCoilThumbnailCachePatch() {
+    patchCoilThumbnailBridge(resolveCoilThumbnailRuntime())
+}
 
 context(context: BytecodePatchContext)
 private fun patchCoilThumbnailBridge(runtime: CoilThumbnailRuntime) {

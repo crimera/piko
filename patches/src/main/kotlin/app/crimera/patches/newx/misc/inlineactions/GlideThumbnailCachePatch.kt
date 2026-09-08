@@ -1,7 +1,5 @@
 package app.crimera.patches.newx.misc.inlineactions
 
-import app.crimera.patches.newx.misc.extension.newXExtensionPatch
-import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.MEDIA_THUMBNAIL_LOADER_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -9,7 +7,6 @@ import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
@@ -70,15 +67,10 @@ private data class GlideThumbnailRuntime(
     val resourceInterfaceDescriptor: String,
 )
 
-internal val newXGlideThumbnailCachePatch =
-    bytecodePatch(default = false) {
-        compatibleWith(COMPATIBILITY_NEW_X)
-        dependsOn(newXExtensionPatch)
-
-        execute {
-            patchGlideThumbnailBridge(resolveGlideThumbnailRuntime())
-        }
-    }
+context(context: BytecodePatchContext)
+internal fun applyGlideThumbnailCachePatch() {
+    patchGlideThumbnailBridge(resolveGlideThumbnailRuntime())
+}
 
 context(context: BytecodePatchContext)
 private fun patchGlideThumbnailBridge(runtime: GlideThumbnailRuntime) {
