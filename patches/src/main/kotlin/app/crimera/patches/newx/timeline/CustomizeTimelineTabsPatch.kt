@@ -25,7 +25,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val HOME_TABBED_SCOPE = "Lcom/x/home/tabbed/"
-private const val HOME_TAB_ARRAY_DESCRIPTOR = "[Lcom/x/home/v0;"
 private const val OBJECT_ARRAY_DESCRIPTOR = "[Ljava/lang/Object;"
 private const val IMMUTABLE_LIST_DESCRIPTOR = "Lkotlinx/collections/immutable/e;"
 private const val TOPIC_FILTER_FLAG = "co_timeline_topic_filter_enabled"
@@ -136,7 +135,11 @@ private fun List<Instruction>.isHomeTabRouteArray(index: Int): Boolean {
         return false
     }
     if ((instruction as? VariableRegisterInstruction)?.registerCount != 2) return false
-    return instruction.getReference<TypeReference>()?.type == HOME_TAB_ARRAY_DESCRIPTOR
+    val arrayType = instruction.getReference<TypeReference>()?.type ?: return false
+    // The route element descriptor changes between declared releases. The
+    // following immutable-list factory is the semantic discriminator, so do
+    // not make that obfuscated descriptor part of the fingerprint.
+    return arrayType.startsWith("[L") && arrayType.endsWith(';')
 }
 
 private fun List<Instruction>.hasHomeTabListFactory(arrayIndex: Int): Boolean {
