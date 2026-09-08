@@ -102,6 +102,8 @@
     <string name="piko_newx_dynamic_color_amoled_summary">Uses pure black backgrounds in lights-out mode.</string>
     <string name="piko_newx_dynamic_color_like_title">Theme liked-post icon</string>
     <string name="piko_newx_dynamic_color_like_summary">Uses the dynamic accent for liked posts. Warning: This disables the heart Lottie animation.</string>
+    <string name="piko_newx_disable_blur_title">Disable Compose blur</string>
+    <string name="piko_newx_disable_blur_summary">Removes blur from NewX Compose UI while keeping configured background tint and scrim effects</string>
 
     <string name="piko_newx_share_image_title">Share post as image</string>
     <string name="piko_newx_share_image_summary">Adds a rendered-image share action to post menus</string>

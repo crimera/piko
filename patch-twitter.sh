@@ -52,6 +52,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Customize navigation bar items" \
   -e "NewX: Hide premium upsell" \
   -e "NewX: Unlock color customization" \
+  -e "NewX: Disable blur effects" \
   -e "NewX: Hide compose button" \
   -e "NewX: Customize drawer items" \
   -e "NewX: Hide Spaces bar" \
