@@ -72,12 +72,15 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Filter posts by keyword" \
   -e "NewX: Force highest video/audio quality" \
   -e "NewX: Filter For You by topic" \
+  -e "NewX: Hide timeline tabs bar" \
   -e "NewX: Customize timeline tabs" \
   -e "NewX: Disable video player scrolling" \
   -e "NewX: Disable automatic timeline refresh" \
   -e "NewX: Restore timeline position" \
   -e "NewX: Open canonical URLs" \
   -e "NewX: Restore Twitter branding" \
+  -e "NewX: Hide post reply bar" \
+  -e "NewX: Show poll results" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \
