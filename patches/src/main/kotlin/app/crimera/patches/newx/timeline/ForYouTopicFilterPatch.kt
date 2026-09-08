@@ -68,6 +68,8 @@ private const val REQUEST_SCROLL_TO_TOP = "RequestScrollToTop"
 private const val FOR_YOU_REFRESH_TARGET_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/ForYouTopicFilter\$RefreshTarget;"
 private const val FOR_YOU_REFRESH_BRIDGE_NAME = "pikoRefreshForYouTopicFilter"
+private const val TIMELINE_REFRESH_GATE_DESCRIPTOR =
+    "Lapp/morphe/extension/newx/timeline/TimelineRefreshGate;"
 
 private object HomeFilterGroupFingerprint : Fingerprint(
     definingClass = HOME_MODELS_PACKAGE,
@@ -1172,6 +1174,7 @@ private fun ResolvedForYouCurrentPageRefreshBridge.toSmali(
         check-cast v0, $forYouComponentType
         iget-object v1, v0, ${forYouControllerField.smaliReference()}
         if-eqz v1, :piko_for_you_refresh_current_page_done
+        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markForYouFilterRefresh()V
         sget-object v0, ${clearAndRefreshField.smaliReference()}
         invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
         sget-object v0, ${scrollToTopField.smaliReference()}
@@ -1214,6 +1217,7 @@ private fun ResolvedForYouRefreshBridge.toSmali(
         check-cast v0, $forYouComponentType
         iget-object v1, v0, ${forYouControllerField.smaliReference()}
         if-eqz v1, :piko_for_you_refresh_done
+        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markForYouFilterRefresh()V
         sget-object v0, ${clearAndRefreshField.smaliReference()}
         invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
         sget-object v0, ${scrollToTopField.smaliReference()}

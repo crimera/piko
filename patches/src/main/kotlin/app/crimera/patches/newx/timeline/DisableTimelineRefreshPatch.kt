@@ -288,6 +288,9 @@ val disableTimelineRefreshPatch =
                         invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->consumePostDeepLink()Z
                         move-result v$settingRegister
                         if-nez v$settingRegister, :piko_newx_refresh_urt_continue
+                        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->consumeForYouFilterRefresh()Z
+                        move-result v$settingRegister
+                        if-nez v$settingRegister, :piko_newx_refresh_urt_continue
                         invoke-virtual {p0}, $repositoryTimelineDataGetterReference
                         move-result-object v$settingRegister
                         invoke-interface {v$settingRegister}, $timelineDataFlowListGetterReference
@@ -436,6 +439,9 @@ val disableTimelineRefreshPatch =
                 """
                     if-eqz v${settingRead.register}, :piko_newx_refresh_event_continue
                     invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isPostDeepLinkPending()Z
+                    move-result v${settingRead.register}
+                    if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
+                    invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isForYouFilterRefreshPending()Z
                     move-result v${settingRead.register}
                     if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
                     invoke-interface {v$repositoryReceiverRegister}, $eventTimelineDataGetterReference
