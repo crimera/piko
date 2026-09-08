@@ -48,7 +48,7 @@ public class Links {
     private static final ShareLinkSanitizer SHARE_LINK_SANITIZER = new ShareLinkSanitizer(
             "instagram.com",
             Arrays.asList("comment_id", "img_index", "open_comments", "story_media_id"),
-            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si")
+            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si", "stkn")
     );
 
     static {
