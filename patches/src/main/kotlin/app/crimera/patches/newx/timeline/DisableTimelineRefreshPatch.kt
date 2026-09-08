@@ -9,6 +9,7 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
@@ -28,6 +29,22 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
 private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineScrollPositionStore;"
+private const val TIMELINE_REFRESH_GATE_DESCRIPTOR =
+    "Lapp/morphe/extension/newx/timeline/TimelineRefreshGate;"
+
+private object NewXMainActivityOnCreateFingerprint : Fingerprint(
+    definingClass = "Lcom/x/android/main/MainActivity;",
+    name = "onCreate",
+    parameters = listOf("Landroid/os/Bundle;"),
+    returnType = "V",
+)
+
+private object NewXMainActivityOnNewIntentFingerprint : Fingerprint(
+    definingClass = "Lcom/x/android/main/MainActivity;",
+    name = "onNewIntent",
+    parameters = listOf("Landroid/content/Intent;"),
+    returnType = "V",
+)
 
 private object NewXHomeReselectFingerprint : Fingerprint(
     definingClass = "Lcom/x/home/tabbed/",
@@ -92,6 +109,39 @@ val disableTimelineRefreshPatch =
             )
 
         execute {
+            val mainActivityOnCreateMatches = NewXMainActivityOnCreateFingerprint.scopedMatchAll()
+            if (mainActivityOnCreateMatches.size != 1) {
+                throw PatchException(
+                    "Expected one NewX MainActivity onCreate method, found " +
+                        "${mainActivityOnCreateMatches.size}: " +
+                        mainActivityOnCreateMatches.joinToString { it.originalMethod.toString() },
+                )
+            }
+            mainActivityOnCreateMatches.single().method.apply {
+                val intentRegister = getFreeRegisterProvider(0, 1).getFreeRegister4Bit()
+                addInstructions(
+                    0,
+                    """
+                        invoke-virtual {p0}, Landroid/app/Activity;->getIntent()Landroid/content/Intent;
+                        move-result-object v$intentRegister
+                        invoke-static {v$intentRegister}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markPostDeepLink(Landroid/content/Intent;)V
+                    """.trimIndent(),
+                )
+            }
+
+            val mainActivityOnNewIntentMatches = NewXMainActivityOnNewIntentFingerprint.scopedMatchAll()
+            if (mainActivityOnNewIntentMatches.size != 1) {
+                throw PatchException(
+                    "Expected one NewX MainActivity onNewIntent method, found " +
+                        "${mainActivityOnNewIntentMatches.size}: " +
+                        mainActivityOnNewIntentMatches.joinToString { it.originalMethod.toString() },
+                )
+            }
+            mainActivityOnNewIntentMatches.single().method.addInstructions(
+                0,
+                "invoke-static {p1}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markPostDeepLink(Landroid/content/Intent;)V",
+            )
+
             val homeMatches = NewXHomeReselectFingerprint.scopedMatchAll()
             if (homeMatches.size != 1) {
                 throw PatchException(
@@ -191,11 +241,15 @@ val disableTimelineRefreshPatch =
             val (timelineDataGetter, _, timelineDataFlowListGetter) =
                 flowGetterCandidates.single()
             val timelineDataFlowDescriptor = timelineDataGetter.returnType.toString()
+            val repositoryTimelineDataGetterReference =
+                "$repoDescriptor->${timelineDataGetter.name}()$timelineDataFlowDescriptor"
             val timelineDataFlowListGetterReference =
                 "$timelineDataFlowDescriptor->${timelineDataFlowListGetter.name}()Ljava/util/List;"
             val timelineListIsEmptyReference = "Ljava/util/List;->isEmpty()Z"
             val repositoryAutoRefreshFieldReference =
                 "$requestTypeDescriptor->AUTO_REFRESH:$requestTypeDescriptor"
+            val repositoryViewportAwareAutoRefreshFieldReference =
+                "$requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor"
             urtRepoMatch.method.apply {
                 val originalFirstInstruction = instructions.first()
                 val read =
@@ -211,9 +265,9 @@ val disableTimelineRefreshPatch =
                         1,
                         settingRegister,
                     ).getFreeRegister4Bit()
-                // A null cursor is also used by the first request on a fresh install. Keep that
-                // request alive when no persisted position exists. Once a position has been
-                // saved for the target timeline, stop the automatic request before it launches.
+                // A null cursor is also used by the first request on a fresh install. Suppress
+                // populated-timeline refreshes, but keep an empty initial load alive. A saved
+                // position changes that load to viewport-aware refresh so it cannot jump to top.
                 addInstructionsWithLabels(
                     read.nextIndex,
                     """
@@ -231,10 +285,23 @@ val disableTimelineRefreshPatch =
                         if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_suppress
                         goto :piko_newx_refresh_urt_continue
                         :piko_newx_refresh_urt_suppress
+                        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->consumePostDeepLink()Z
+                        move-result v$settingRegister
+                        if-nez v$settingRegister, :piko_newx_refresh_urt_continue
+                        invoke-virtual {p0}, $repositoryTimelineDataGetterReference
+                        move-result-object v$settingRegister
+                        invoke-interface {v$settingRegister}, $timelineDataFlowListGetterReference
+                        move-result-object v$settingRegister
+                        invoke-interface {v$settingRegister}, $timelineListIsEmptyReference
+                        move-result v$settingRegister
+                        if-nez v$settingRegister, :piko_newx_refresh_urt_check_position
+                        return-void
+                        :piko_newx_refresh_urt_check_position
                         invoke-static {v$timelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I
                         move-result-object v$settingRegister
                         if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
-                        return-void
+                        sget-object p1, $repositoryViewportAwareAutoRefreshFieldReference
+                        goto :piko_newx_refresh_urt_continue
                     """.trimIndent(),
                     ExternalLabel(
                         "piko_newx_refresh_urt_continue",
@@ -368,6 +435,9 @@ val disableTimelineRefreshPatch =
                 shiftedAutoRefreshFieldIndex + 1,
                 """
                     if-eqz v${settingRead.register}, :piko_newx_refresh_event_continue
+                    invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isPostDeepLinkPending()Z
+                    move-result v${settingRead.register}
+                    if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
                     invoke-interface {v$repositoryReceiverRegister}, $eventTimelineDataGetterReference
                     move-result-object v${settingRead.register}
                     invoke-interface {v${settingRead.register}}, $timelineDataFlowListGetterReference
