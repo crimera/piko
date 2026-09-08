@@ -1,6 +1,8 @@
 package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
+import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
@@ -9,6 +11,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
@@ -26,6 +30,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val CONCURRENT_HASH_MAP_DESCRIPTOR = "Ljava/util/concurrent/ConcurrentHashMap;"
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
@@ -33,6 +38,7 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineScrollPositionStore;"
 private const val RESTORE_TEMPORARY_REGISTER_COUNT = 2
+private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 3
 
 private object NewXScrollPositionHolderFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/",
@@ -103,14 +109,15 @@ val restoreTimelinePositionPatch =
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
-        newXToggle(
-            id = "newx.timeline.restore_position",
-            category = Categories.TIMELINE,
-            strings = settingStrings("piko_newx_restore_timeline_position"),
-            order = 150,
-            defaultValue = true,
-            rebootApp = true,
-        )
+        val restoreTimelinePosition =
+            newXToggle(
+                id = "newx.timeline.restore_position",
+                category = Categories.TIMELINE,
+                strings = settingStrings("piko_newx_restore_timeline_position"),
+                order = 150,
+                defaultValue = true,
+                rebootApp = true,
+            )
 
         execute {
             val holderMatches = NewXScrollPositionHolderFingerprint.scopedMatchAll()
@@ -150,7 +157,9 @@ val restoreTimelinePositionPatch =
             val expandedMethod =
                 getterMethod.cloneMutable(
                     additionalRegisters =
-                        RESTORE_TEMPORARY_REGISTER_COUNT + getterMethod.numberOfParameterRegisters,
+                        RESTORE_TEMPORARY_REGISTER_COUNT +
+                            FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT +
+                            getterMethod.numberOfParameterRegisters,
                 )
             getterMatch.classDef.methods.remove(getterMethod)
             getterMatch.classDef.methods.add(expandedMethod)
@@ -256,6 +265,16 @@ val restoreTimelinePositionPatch =
             val timelineGetterReference =
                 timelineGetterInstruction.getReference<MethodReference>()
                     ?: throw PatchException("NewX timeline-type getter call has no method reference")
+            val repositoryField =
+                getterMethod.instructions.mapNotNull { instruction ->
+                    if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+                    val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+                    field.takeIf {
+                        it.definingClass.toString() == componentDescriptor &&
+                            it.type.toString() == timelineGetterReference.definingClass.toString()
+                    }
+                }.singleOrNull()
+                    ?: throw PatchException("NewX timeline repository field was not found uniquely")
             val timelineGetterInvoke =
                 timelineGetterInstruction as? FiveRegisterInstruction
                     ?: throw PatchException("NewX timeline-type getter call has an unsupported register layout")
@@ -317,6 +336,80 @@ val restoreTimelinePositionPatch =
                 ExternalLabel("piko_newx_restore_position_continue", originalContinuation),
             )
 
+            val fallbackHolderCandidates =
+                getterMethod.instructions.withIndex().filter { indexedInstruction ->
+                    indexedInstruction.value.opcode == Opcode.NEW_INSTANCE &&
+                        indexedInstruction.value.getReference<TypeReference>()?.type == holderDescriptor
+                }
+            val fallbackHolderCandidate =
+                fallbackHolderCandidates.lastOrNull()
+                    ?: throw PatchException("NewX zero-position fallback holder allocation was not found")
+            val fallbackHolderRegister =
+                (fallbackHolderCandidate.value as? OneRegisterInstruction)?.registerA
+                    ?: throw PatchException("NewX zero-position fallback holder allocation has no register layout")
+            val fallbackRead =
+                restoreTimelinePosition.injectRead(
+                    method = getterMethod,
+                    index = fallbackHolderCandidate.index,
+                    excludedRegisters = listOf(fallbackHolderRegister),
+                    registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+                )
+            val settingReadInstructionCount = fallbackRead.nextIndex - fallbackHolderCandidate.index
+            getterMethod.removeInstructions(fallbackHolderCandidate.index, settingReadInstructionCount)
+            val fallbackRegisters =
+                try {
+                    getterMethod
+                        .getFreeRegisterProvider(
+                            fallbackHolderCandidate.index + 1,
+                            FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT,
+                            fallbackRead.register,
+                            fallbackHolderRegister,
+                        ).let { provider ->
+                            List(FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT) {
+                                provider.getFreeRegister4Bit()
+                            }
+                        }
+                } catch (exception: RuntimeException) {
+                    throw PatchException(
+                        "Could not allocate NewX fallback timeline-position restore registers",
+                        exception,
+                    )
+                }
+            val fallbackRepositoryRegister = fallbackRegisters[0]
+            val fallbackTimelineRegister = fallbackRegisters[1]
+            val fallbackPositionsRegister = fallbackRegisters[2]
+            getterMethod.replaceInstruction(
+                fallbackHolderCandidate.index,
+                "const-string v${fallbackRead.register}, \"newx.timeline.restore_position\"",
+            )
+            getterMethod.addInstruction(
+                fallbackHolderCandidate.index + 1,
+                "new-instance v$fallbackHolderRegister, $holderDescriptor",
+            )
+            val nativeFallbackInstruction = getterMethod.instructions[fallbackHolderCandidate.index + 1]
+            getterMethod.addInstructionsWithLabels(
+                fallbackHolderCandidate.index + 1,
+                """
+                    invoke-static {v${fallbackRead.register}}, Lapp/morphe/extension/newx/settings/SettingsRegistry;->getBooleanOrDefault(Ljava/lang/String;)Z
+                    move-result v${fallbackRead.register}
+                    if-eqz v${fallbackRead.register}, :piko_newx_restore_position_fallback
+                    iget-object v$fallbackRepositoryRegister, p0, $repositoryField
+                    invoke-interface {v$fallbackRepositoryRegister}, $timelineGetterReference
+                    move-result-object v$fallbackTimelineRegister
+                    invoke-static {v$fallbackTimelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I
+                    move-result-object v$fallbackPositionsRegister
+                    if-eqz v$fallbackPositionsRegister, :piko_newx_restore_position_fallback
+                    const/4 v${fallbackRead.register}, 0x0
+                    aget v${fallbackRead.register}, v$fallbackPositionsRegister, v${fallbackRead.register}
+                    const/4 v$fallbackTimelineRegister, 0x1
+                    aget v$fallbackTimelineRegister, v$fallbackPositionsRegister, v$fallbackTimelineRegister
+                    new-instance v$fallbackRepositoryRegister, $holderDescriptor
+                    invoke-direct {v$fallbackRepositoryRegister, v${fallbackRead.register}, v$fallbackTimelineRegister}, $holderConstructorReference
+                    return-object v$fallbackRepositoryRegister
+                """.trimIndent(),
+                ExternalLabel("piko_newx_restore_position_fallback", nativeFallbackInstruction),
+            )
+
             val saveMatches =
                 saveScrollPositionFingerprint(componentDescriptor, holderDescriptor).scopedMatchAll()
             if (saveMatches.size != 1) {
@@ -360,6 +453,30 @@ val restoreTimelinePositionPatch =
                         "v$saveTimelineRegister, v$saveHolderRegister",
                 )
             }
+
+            // Ranked Following uses the same shared save method as Latest Following, but
+            // its Compose scroll policy has `a == false`. The original method branches
+            // around the map write in that case, so the persistent store hook below never
+            // receives a position. The policy class is R8-renamed between releases; keep
+            // the semantic layout-package/boolean/branch shape as the release anchor.
+            val layoutPolicyGateCandidates =
+                saveMethod.instructions.withIndex().filter { indexedInstruction ->
+                    if (indexedInstruction.value.opcode != Opcode.IGET_BOOLEAN) return@filter false
+                    val field = indexedInstruction.value.getReference<FieldReference>() ?: return@filter false
+                    field.type.toString() == "Z" &&
+                        field.definingClass.toString().startsWith("Landroidx/compose/foundation/layout/") &&
+                        saveMethod.instructions.getOrNull(indexedInstruction.index + 1)?.opcode == Opcode.IF_EQZ
+                }
+            if (layoutPolicyGateCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one NewX Ranked Following save-policy gate, found " +
+                        "${layoutPolicyGateCandidates.size}: ${layoutPolicyGateCandidates.joinToString()}",
+                )
+            }
+            saveMethod.replaceInstruction(
+                layoutPolicyGateCandidates.single().index + 1,
+                "nop",
+            )
             saveMethod.addInstruction(
                 mapPutIndex,
                 "invoke-static {v$saveTimelineRegister, v$saveHolderRegister}, " +
