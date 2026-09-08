@@ -26,6 +26,8 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
+private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
+    "Lapp/morphe/extension/newx/timeline/TimelineScrollPositionStore;"
 
 private object NewXHomeReselectFingerprint : Fingerprint(
     definingClass = "Lcom/x/home/tabbed/",
@@ -191,8 +193,6 @@ val disableTimelineRefreshPatch =
             val timelineDataFlowDescriptor = timelineDataGetter.returnType.toString()
             val timelineDataFlowListGetterReference =
                 "$timelineDataFlowDescriptor->${timelineDataFlowListGetter.name}()Ljava/util/List;"
-            val repositoryTimelineDataGetterReference =
-                "$repoDescriptor->${timelineDataGetter.name}()$timelineDataFlowDescriptor"
             val timelineListIsEmptyReference = "Ljava/util/List;->isEmpty()Z"
             val repositoryAutoRefreshFieldReference =
                 "$requestTypeDescriptor->AUTO_REFRESH:$requestTypeDescriptor"
@@ -212,8 +212,8 @@ val disableTimelineRefreshPatch =
                         settingRegister,
                     ).getFreeRegister4Bit()
                 // A null cursor is also used by the first request on a fresh install. Keep that
-                // request alive while the timeline data flow is empty. Once the target timeline
-                // has content, stop the automatic request instead of merely preserving scroll.
+                // request alive when no persisted position exists. Once a position has been
+                // saved for the target timeline, stop the automatic request before it launches.
                 addInstructionsWithLabels(
                     read.nextIndex,
                     """
@@ -231,12 +231,8 @@ val disableTimelineRefreshPatch =
                         if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_suppress
                         goto :piko_newx_refresh_urt_continue
                         :piko_newx_refresh_urt_suppress
-                        invoke-virtual {p0}, $repositoryTimelineDataGetterReference
+                        invoke-static {v$timelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I
                         move-result-object v$settingRegister
-                        invoke-interface {v$settingRegister}, $timelineDataFlowListGetterReference
-                        move-result-object v$settingRegister
-                        invoke-interface {v$settingRegister}, $timelineListIsEmptyReference
-                        move-result v$settingRegister
                         if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
                         return-void
                     """.trimIndent(),
