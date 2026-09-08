@@ -146,10 +146,56 @@ val disableTimelineRefreshPatch =
             val timelineEnumDescriptor = timelineGetter.returnType.toString()
             val repositoryTimelineGetterReference =
                 "$repoDescriptor->${timelineGetter.name}()$timelineEnumDescriptor"
+            val flowGetterCandidates =
+                repositoryClass.methods.mapNotNull { method ->
+                    val flowDescriptor = method.returnType.toString()
+                    if (method.parameterTypes.isNotEmpty() ||
+                        !flowDescriptor.startsWith("Lkotlinx/coroutines/flow/")
+                    ) {
+                        return@mapNotNull null
+                    }
+                    val fieldReads =
+                        method.instructions.mapNotNull { instruction ->
+                            if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+                            instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
+                                ?.takeIf { it.definingClass.toString() == repoDescriptor }
+                        }.distinctBy { "${it.definingClass}->${it.name}:${it.type}" }
+                    if (fieldReads.size != 1) return@mapNotNull null
+                    val dataField = fieldReads.single()
+                    val dataFieldClass = runCatching { mutableClassDefBy(dataField.type.toString()) }.getOrNull()
+                        ?: return@mapNotNull null
+                    if (flowDescriptor !in dataFieldClass.interfaces.map(CharSequence::toString)) {
+                        return@mapNotNull null
+                    }
+                    val flowClass = runCatching { mutableClassDefBy(flowDescriptor) }.getOrNull()
+                        ?: return@mapNotNull null
+                    val listGetters =
+                        flowClass.methods.filter { candidate ->
+                            candidate.parameterTypes.isEmpty() &&
+                                candidate.returnType.toString() == "Ljava/util/List;"
+                        }
+                    if (listGetters.size != 1) return@mapNotNull null
+                    Triple(method, dataField, listGetters.single())
+                }
+            if (flowGetterCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one NewX URT timeline data flow getter on $repoDescriptor, " +
+                        "found ${flowGetterCandidates.size}: " +
+                        flowGetterCandidates.joinToString { (method, field, _) ->
+                            "${method.name}()${method.returnType} via $field"
+                        },
+                )
+            }
+            val (timelineDataGetter, _, timelineDataFlowListGetter) =
+                flowGetterCandidates.single()
+            val timelineDataFlowDescriptor = timelineDataGetter.returnType.toString()
+            val timelineDataFlowListGetterReference =
+                "$timelineDataFlowDescriptor->${timelineDataFlowListGetter.name}()Ljava/util/List;"
+            val repositoryTimelineDataGetterReference =
+                "$repoDescriptor->${timelineDataGetter.name}()$timelineDataFlowDescriptor"
+            val timelineListIsEmptyReference = "Ljava/util/List;->isEmpty()Z"
             val repositoryAutoRefreshFieldReference =
                 "$requestTypeDescriptor->AUTO_REFRESH:$requestTypeDescriptor"
-            val repositoryViewportAwareAutoRefreshFieldReference =
-                "$requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor"
             urtRepoMatch.method.apply {
                 val originalFirstInstruction = instructions.first()
                 val read =
@@ -166,8 +212,8 @@ val disableTimelineRefreshPatch =
                         settingRegister,
                     ).getFreeRegister4Bit()
                 // A null cursor is also used by the first request on a fresh install. Keep that
-                // request alive, but use the viewport-aware request type so it cannot jump an
-                // already-restored timeline. Non-null cursor requests retain the native path.
+                // request alive while the timeline data flow is empty. Once the target timeline
+                // has content, stop the automatic request instead of merely preserving scroll.
                 addInstructionsWithLabels(
                     read.nextIndex,
                     """
@@ -185,7 +231,14 @@ val disableTimelineRefreshPatch =
                         if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_suppress
                         goto :piko_newx_refresh_urt_continue
                         :piko_newx_refresh_urt_suppress
-                        sget-object p1, $repositoryViewportAwareAutoRefreshFieldReference
+                        invoke-virtual {p0}, $repositoryTimelineDataGetterReference
+                        move-result-object v$settingRegister
+                        invoke-interface {v$settingRegister}, $timelineDataFlowListGetterReference
+                        move-result-object v$settingRegister
+                        invoke-interface {v$settingRegister}, $timelineListIsEmptyReference
+                        move-result v$settingRegister
+                        if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
+                        return-void
                     """.trimIndent(),
                     ExternalLabel(
                         "piko_newx_refresh_urt_continue",
@@ -264,31 +317,22 @@ val disableTimelineRefreshPatch =
             }
 
             val eventRepositoryClass = mutableClassDefBy(requestCallReference.definingClass.toString())
-            val eventTimelineGetterMatches =
+            val eventTimelineDataGetterMatches =
                 eventRepositoryClass.methods.filter { method ->
-                    val returnType = method.returnType.toString()
-                    method.parameterTypes.isEmpty() &&
-                        returnType.startsWith("L") &&
-                        runCatching { mutableClassDefBy(returnType).superclass == ENUM_DESCRIPTOR }.getOrDefault(false)
+                    method.name == timelineDataGetter.name &&
+                        method.parameterTypes.isEmpty() &&
+                        method.returnType.toString() == timelineDataFlowDescriptor
                 }
-            if (eventTimelineGetterMatches.size != 1) {
+            if (eventTimelineDataGetterMatches.size != 1) {
                 throw PatchException(
-                    "Expected one NewX URT timeline getter on ${requestCallReference.definingClass}, " +
-                        "found ${eventTimelineGetterMatches.size}: ${eventTimelineGetterMatches.joinToString()}",
+                    "Expected one NewX URT event timeline data flow getter on " +
+                        "${requestCallReference.definingClass}, found ${eventTimelineDataGetterMatches.size}: " +
+                        eventTimelineDataGetterMatches.joinToString(),
                 )
             }
-            val eventTimelineGetter = eventTimelineGetterMatches.single()
-            val eventTimelineEnumDescriptor = eventTimelineGetter.returnType.toString()
-            val timelineGetterReference =
-                "${requestCallReference.definingClass}->${eventTimelineGetter.name}()$eventTimelineEnumDescriptor"
-            val viewportAwareAutoRefreshFieldReferenceSmali =
-                "${autoRefreshFieldReference.definingClass}->VIEWPORT_AWARE_AUTO_REFRESH:$autoRefreshTypeDescriptor"
-            val eventForYouFieldReference =
-                "$eventTimelineEnumDescriptor->FOR_YOU:$eventTimelineEnumDescriptor"
-            val eventFollowingFieldReference =
-                "$eventTimelineEnumDescriptor->FOLLOWING:$eventTimelineEnumDescriptor"
-            val eventRankedFollowingFieldReference =
-                "$eventTimelineEnumDescriptor->RANKED_FOLLOWING:$eventTimelineEnumDescriptor"
+            val eventTimelineDataGetter = eventTimelineDataGetterMatches.single()
+            val eventTimelineDataGetterReference =
+                "${requestCallReference.definingClass}->${eventTimelineDataGetter.name}()$timelineDataFlowDescriptor"
 
             val settingRead =
                 disableTimelineRefresh.injectRead(
@@ -324,38 +368,18 @@ val disableTimelineRefreshPatch =
             val originalRequestCall =
                 autoRefreshEventMethod.instructions.getOrNull(shiftedAutoRefreshFieldIndex + 1)
                     ?: throw PatchException("NewX URT automatic-refresh request call continuation was not found")
-            val timelineRegister =
-                try {
-                    autoRefreshEventMethod
-                        .getFreeRegisterProvider(
-                            shiftedAutoRefreshFieldIndex + 1,
-                            1,
-                            settingRead.register,
-                            0,
-                            autoRefreshRegister,
-                            repositoryReceiverRegister,
-                        ).getFreeRegister4Bit()
-                } catch (exception: RuntimeException) {
-                    throw PatchException(
-                        "Could not allocate NewX URT automatic-refresh timeline register",
-                        exception,
-                    )
-                }
             autoRefreshEventMethod.addInstructionsWithLabels(
                 shiftedAutoRefreshFieldIndex + 1,
                 """
                     if-eqz v${settingRead.register}, :piko_newx_refresh_event_continue
-                    invoke-interface {v$repositoryReceiverRegister}, $timelineGetterReference
-                    move-result-object v$timelineRegister
-                    sget-object v${settingRead.register}, $eventForYouFieldReference
-                    if-eq v$timelineRegister, v${settingRead.register}, :piko_newx_refresh_event_convert
-                    sget-object v${settingRead.register}, $eventFollowingFieldReference
-                    if-eq v$timelineRegister, v${settingRead.register}, :piko_newx_refresh_event_convert
-                    sget-object v${settingRead.register}, $eventRankedFollowingFieldReference
-                    if-eq v$timelineRegister, v${settingRead.register}, :piko_newx_refresh_event_convert
-                    goto :piko_newx_refresh_event_continue
-                    :piko_newx_refresh_event_convert
-                    sget-object v$autoRefreshRegister, $viewportAwareAutoRefreshFieldReferenceSmali
+                    invoke-interface {v$repositoryReceiverRegister}, $eventTimelineDataGetterReference
+                    move-result-object v${settingRead.register}
+                    invoke-interface {v${settingRead.register}}, $timelineDataFlowListGetterReference
+                    move-result-object v${settingRead.register}
+                    invoke-interface {v${settingRead.register}}, $timelineListIsEmptyReference
+                    move-result v${settingRead.register}
+                    if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
+                    return-void
                 """.trimIndent(),
                 ExternalLabel(
                     "piko_newx_refresh_event_continue",
