@@ -413,6 +413,9 @@ public final class SettingsSearchUIController {
     }
 
     public static boolean handleBackPressed(Activity activity) {
+        if (app.morphe.extension.twitter.settings.featureflags.FeatureFlagsFragment.handleBackPressed(activity)) {
+            return true;
+        }
         Activity owner = settingsSearchStateOwner.current();
         if (!settingsSearchSession.isActive() || owner == null || (activity != null && activity != owner)) {
             return false;
