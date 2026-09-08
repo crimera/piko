@@ -404,7 +404,10 @@ private fun patchProfileLinkValues(
 ) {
     val match =
         Fingerprint(
-            definingClass = "Lcom/x/media/imageloader/telemetry/",
+            // The profile-link builder moved from `telemetry` to `lifecycle` in
+            // newer builds. Keep the semantic field-pair anchor and only scope
+            // it to the stable image-loader package.
+            definingClass = "Lcom/x/media/imageloader/",
             filters = listOf(
                 fieldAccess(
                     opcode = Opcode.IGET_OBJECT,
