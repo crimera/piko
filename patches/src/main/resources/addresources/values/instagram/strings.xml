@@ -185,8 +185,8 @@
 
     <!-- Information Section -->
     <string name="piko_category_about">About</string>
-    <string name="piko_export_pref">Export Piko preferences</string>
-    <string name="piko_import_pref">Import Piko preferences</string>
+    <string name="piko_export_pref">Export Piko settings</string>
+    <string name="piko_import_pref">Import Piko settings</string>
     <string name="piko_reset_pref">Reset Piko settings</string>
     <string name="piko_reset_pref_confirm">Reset Piko settings?</string>
     <string name="piko_reset_pref_success">Piko settings reset</string>
