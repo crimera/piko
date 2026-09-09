@@ -2,6 +2,7 @@ package app.crimera.patches.newx.misc.shareimage
 
 import app.crimera.patches.newx.misc.postoptions.SHARE_IMAGE_ACTION
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
+import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
@@ -22,7 +23,6 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-private const val POST_IDENTIFIER = "Lcom/x/models/PostIdentifier;"
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION1 = "Lkotlin/jvm/functions/Function1;"
@@ -79,9 +79,7 @@ val newXShareImagePatch =
                 ).single()
             val timelinePostStateType = timelinePostStateMatch.originalClassDef.type
             val postIdentifierField =
-                timelinePostStateMatch.originalClassDef.fields.singleOrNull { it.type == POST_IDENTIFIER }
-                    ?: timelinePostStateMatch.originalClassDef.fields.firstOrNull { it.name == "b" && it.type.startsWith("Lcom/x/models/") }
-                    ?: throw PatchException("NewX timeline-post state has no unique PostIdentifier field")
+                timelinePostStateMatch.fieldForToStringLabel(", postId=")
             val renderedPostMethod =
                 requireMatches(
                     "NewX individual post renderer",
