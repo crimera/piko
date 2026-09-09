@@ -16,17 +16,21 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.VariableRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val HOME_TABBED_SCOPE = "Lcom/x/home/tabbed/"
 private const val OBJECT_ARRAY_DESCRIPTOR = "[Ljava/lang/Object;"
-private const val IMMUTABLE_LIST_DESCRIPTOR = "Lkotlinx/collections/immutable/e;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val TOPIC_FILTER_FLAG = "co_timeline_topic_filter_enabled"
 
 private object HomeTabbedComponentFingerprint : Fingerprint(
@@ -41,6 +45,12 @@ private object HomeTabbedComponentFingerprint : Fingerprint(
 private data class HomeTabRouteCreation(
     val arrayIndex: Int,
     val arrayResultRegister: Int,
+)
+
+private data class HomeTabListFactory(
+    val returnType: String,
+    val arrayRegister: Int,
+    val resultRegister: Int,
 )
 
 @Suppress("unused")
@@ -100,13 +110,15 @@ val customizeNewXTimelineTabsPatch =
 private fun Method.hasHomeTabRouteCreation(): Boolean {
     val methodInstructions = implementation?.instructions?.toList() ?: return false
     return methodInstructions.indices.any { index ->
-        methodInstructions.isHomeTabRouteArray(index) && methodInstructions.hasHomeTabListFactory(index)
+        methodInstructions.isHomeTabRouteArray(index) &&
+            methodInstructions.hasHomeTabListFactory(index, p0Register)
     }
 }
 private fun MutableMethod.resolveHomeTabRouteCreation(): HomeTabRouteCreation {
     val candidates =
         instructions.indices.filter { index ->
-            instructions.isHomeTabRouteArray(index) && instructions.hasHomeTabListFactory(index)
+            instructions.isHomeTabRouteArray(index) &&
+                instructions.hasHomeTabListFactory(index, p0Register)
         }
 
     if (candidates.size != 1) {
@@ -142,20 +154,105 @@ private fun List<Instruction>.isHomeTabRouteArray(index: Int): Boolean {
     return arrayType.startsWith("[L") && arrayType.endsWith(';')
 }
 
-private fun List<Instruction>.hasHomeTabListFactory(arrayIndex: Int): Boolean {
-    val result = getOrNull(arrayIndex + 1) ?: return false
-    if (result.opcode != Opcode.MOVE_RESULT_OBJECT) return false
+private fun List<Instruction>.hasHomeTabListFactory(
+    arrayIndex: Int,
+    receiverRegister: Int,
+): Boolean {
+    return resolveHomeTabListFactory(arrayIndex, receiverRegister) != null
+}
 
-    val factory = getOrNull(arrayIndex + 2) ?: return false
+private fun List<Instruction>.resolveHomeTabListFactory(
+    arrayIndex: Int,
+    receiverRegister: Int,
+): HomeTabListFactory? {
+    val arrayResult = getOrNull(arrayIndex + 1) ?: return null
+    if (arrayResult.opcode != Opcode.MOVE_RESULT_OBJECT) return null
+    val arrayRegister = (arrayResult as? OneRegisterInstruction)?.registerA ?: return null
+
+    val factory = getOrNull(arrayIndex + 2) ?: return null
     if (factory.opcode != Opcode.INVOKE_STATIC &&
         factory.opcode != Opcode.INVOKE_STATIC_RANGE
     ) {
-        return false
+        return null
     }
-    val reference = factory.getReference<MethodReference>() ?: return false
+    val reference = factory.getReference<MethodReference>() ?: return null
     if (reference.parameterTypes.map(CharSequence::toString) != listOf(OBJECT_ARRAY_DESCRIPTOR)) {
-        return false
+        return null
     }
-    if (reference.returnType.toString() != IMMUTABLE_LIST_DESCRIPTOR) return false
-    return getOrNull(arrayIndex + 3)?.opcode == Opcode.MOVE_RESULT_OBJECT
+    if (factory.registersUsed != listOf(arrayRegister)) return null
+    val returnType = reference.returnType.toString()
+    if (!returnType.startsWith("L") || !returnType.endsWith(';') || returnType == OBJECT_DESCRIPTOR) {
+        return null
+    }
+    val resultInstruction = getOrNull(arrayIndex + 3)
+    if (resultInstruction?.opcode != Opcode.MOVE_RESULT_OBJECT) return null
+    val resultRegister = (resultInstruction as? OneRegisterInstruction)?.registerA ?: return null
+
+    if (!hasSingleHomeTabFieldConsumer(
+        startIndex = arrayIndex + 4,
+        resultRegister = resultRegister,
+        returnType = returnType,
+        receiverRegister = receiverRegister,
+    )) return null
+    return HomeTabListFactory(returnType, arrayRegister, resultRegister)
+}
+
+private fun List<Instruction>.hasSingleHomeTabFieldConsumer(
+    startIndex: Int,
+    resultRegister: Int,
+    returnType: String,
+    receiverRegister: Int,
+): Boolean {
+    val valueRegisters = linkedSetOf(resultRegister)
+    var consumerCount = 0
+    for (index in startIndex until size) {
+        val instruction = this[index]
+
+        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: return false
+            if (move.registerB in valueRegisters) {
+                valueRegisters += move.registerA
+            } else {
+                valueRegisters -= move.registerA
+            }
+            continue
+        }
+
+        if (instruction.opcode == Opcode.IPUT_OBJECT) {
+            val field = instruction.getReference<FieldReference>() ?: return false
+            val store = instruction as? TwoRegisterInstruction ?: return false
+            if (store.registerA in valueRegisters) {
+                if (
+                    field.type != returnType ||
+                        store.registerB !in receiverAliasesAt(index, receiverRegister)
+                ) {
+                    return false
+                }
+                consumerCount++
+                valueRegisters -= store.registerA
+            }
+            continue
+        }
+
+        if (instruction.registersUsed.any { it in valueRegisters }) return false
+    }
+
+    return consumerCount == 1
+}
+
+private val OBJECT_MOVE_OPCODES =
+    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
+
+private fun List<Instruction>.receiverAliasesAt(index: Int, receiverRegister: Int): Set<Int> {
+    val aliases = linkedSetOf(receiverRegister)
+    for (instruction in take(index)) {
+        if (instruction.opcode !in OBJECT_MOVE_OPCODES) continue
+        val move = instruction as? TwoRegisterInstruction ?: continue
+        if (move.registerB in aliases) {
+            aliases += move.registerA
+        } else {
+            aliases -= move.registerA
+        }
+    }
+    return aliases
 }
