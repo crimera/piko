@@ -19,6 +19,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -30,12 +31,10 @@ private const val ERROR_PACKAGE = "Lcom/x/repositories/errors/"
 private const val COMPOSER_WORK_SCOPE = "Lcom/x/composer/work/"
 private const val EXCEPTION_DESCRIPTOR = "Ljava/lang/Exception;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
-private const val WORK_INPUT_DESCRIPTOR = "Landroidx/work/j;"
 private const val FUNCTION_1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION_2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 private const val CONTINUATION_DESCRIPTOR =
     "Lkotlin/coroutines/jvm/internal/ContinuationImpl;"
-private const val RESULT_FAILURE_DESCRIPTOR = "Lcom/x/result/b;"
 private const val POST_FAILURE_FIELD_NAME = "POST_FAILURE"
 private const val POST_SUCCESS_FIELD_NAME = "POST_SUCCESS"
 private const val POST_OPERATION_FIELD_NAME = "Post"
@@ -54,29 +53,43 @@ private object SubmitWorkHandlerFingerprint : Fingerprint(
     custom = { method, _ ->
         val parameterTypes = method.parameterTypes.map { type -> type.toString() }
         val instructions = method.implementation?.instructions?.toList().orEmpty()
+        val postFailureFields = instructions.mapNotNull { instruction ->
+            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+            field.takeIf {
+                instruction.opcode == Opcode.SGET_OBJECT &&
+                    field.name == POST_FAILURE_FIELD_NAME
+            }
+        }
+        val throwableFields = instructions.mapNotNull { instruction ->
+            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+            field.takeIf {
+                instruction.opcode == Opcode.IGET_OBJECT &&
+                    field.type.toString() == THROWABLE_DESCRIPTOR
+            }
+        }
         parameterTypes.size == 8 &&
-            parameterTypes[0] == WORK_INPUT_DESCRIPTOR &&
+            parameterTypes[0].isObjectDescriptor() &&
             parameterTypes[2] == FUNCTION_2_DESCRIPTOR &&
             parameterTypes[3] == FUNCTION_2_DESCRIPTOR &&
             parameterTypes[4] == FUNCTION_1_DESCRIPTOR &&
             parameterTypes[5] == "Z" &&
             parameterTypes[6] == "I" &&
             parameterTypes[7] == CONTINUATION_DESCRIPTOR &&
-            instructions.any { instruction ->
-                instruction.getReference<FieldReference>()?.name == POST_FAILURE_FIELD_NAME
-            } &&
-            instructions.any { instruction ->
-                val field = instruction.getReference<FieldReference>() ?: return@any false
-                instruction.opcode == Opcode.IGET_OBJECT &&
-                    field.definingClass.toString() == RESULT_FAILURE_DESCRIPTOR &&
-                    field.type.toString() == THROWABLE_DESCRIPTOR
-            }
+            postFailureFields.isNotEmpty() &&
+            throwableFields.size == 1
     },
 )
 
 private data class RegisterLocation(
     val index: Int,
     val register: Int,
+    val branchTargetIndex: Int,
+)
+
+private data class ThrowableRead(
+    val index: Int,
+    val register: Int,
+    val field: FieldReference,
 )
 
 private data class ServerErrorConstructor(
@@ -218,14 +231,13 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
     val throwableReads = instructions.mapIndexedNotNull { index, instruction ->
         val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
         if (instruction.opcode != Opcode.IGET_OBJECT ||
-            field.definingClass.toString() != RESULT_FAILURE_DESCRIPTOR ||
             field.type.toString() != THROWABLE_DESCRIPTOR
         ) {
             return@mapIndexedNotNull null
         }
         val oneRegisterInstruction = instruction as? OneRegisterInstruction
             ?: throw PatchException("NewX submit failure throwable read has no destination: $method")
-        RegisterLocation(index, oneRegisterInstruction.registerA)
+        ThrowableRead(index, oneRegisterInstruction.registerA, field)
     }
     if (throwableReads.size != 1) {
         throw PatchException(
@@ -234,28 +246,46 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
         )
     }
 
-    val failureEventIndices = findEventIndices(instructions, POST_FAILURE_FIELD_NAME)
+    val failureEventFields = findEventFields(instructions, POST_FAILURE_FIELD_NAME)
     val throwableRead = throwableReads.single()
-    val failureEventCandidates = failureEventIndices.filter { index ->
-        index > throwableRead.index
+    val resultFailureField = throwableRead.field
+    if (!resultFailureField.definingClass.toString().isObjectDescriptor()) {
+        throw PatchException(
+            "NewX submit failure result owner is not an object descriptor: $resultFailureField",
+        )
+    }
+    val failureEventCandidates = failureEventFields.filter { event ->
+        event.index > throwableRead.index
     }
     if (failureEventCandidates.size != 1) {
         throw PatchException(
-            "Expected one final NewX POST_FAILURE event after throwable read, found " +
-                "${failureEventCandidates.size}: all=$failureEventIndices, " +
+                "Expected one final NewX POST_FAILURE event after throwable read, found " +
+                "${failureEventCandidates.size}: all=$failureEventFields, " +
                 "throwableRead=${throwableRead.index}",
         )
     }
-    val successEventIndices = findEventIndices(instructions, POST_SUCCESS_FIELD_NAME)
-    if (successEventIndices.size != 1) {
+    val failureEvent = failureEventCandidates.single()
+    val successEventFields = findEventFields(instructions, POST_SUCCESS_FIELD_NAME)
+    if (successEventFields.size != 1) {
         throw PatchException(
             "Expected one NewX POST_SUCCESS event, found " +
-                "${successEventIndices.size}: ${successEventIndices.joinToString()}",
+                "${successEventFields.size}: ${successEventFields.joinToString()}",
         )
     }
 
-    val failureEventIndex = failureEventCandidates.single()
-    val successEventIndex = successEventIndices.single()
+    val successEvent = successEventFields.single()
+    if (
+        failureEvent.field.definingClass.toString() != successEvent.field.definingClass.toString() ||
+            failureEvent.field.type.toString() != successEvent.field.type.toString()
+    ) {
+        throw PatchException(
+            "NewX submit events use different enum types: " +
+                "POST_FAILURE=${failureEvent.field}, POST_SUCCESS=${successEvent.field}",
+        )
+    }
+
+    val failureEventIndex = failureEvent.index
+    val successEventIndex = successEvent.index
     if (failureEventIndex >= successEventIndex) {
         throw PatchException(
             "NewX submit event order is invalid: " +
@@ -267,34 +297,19 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
         findPostOperationRegister(instructions, index, instruction)
     }
     val failureOperationCandidates = operationCandidates.filter { candidate ->
-        candidate.index > failureEventIndex
+        candidate.index > failureEventIndex &&
+            candidate.index < successEventIndex &&
+            candidate.branchTargetIndex < successEventIndex
     }
-    if (failureOperationCandidates.isEmpty()) {
+    if (failureOperationCandidates.size != 1) {
         throw PatchException(
-            "Expected a NewX failure operation register after POST_FAILURE: " +
-                "all=$operationCandidates, POST_FAILURE@$failureEventIndex",
-        )
-    }
-    val firstFailureOperationIndex = failureOperationCandidates.minOf { candidate ->
-        candidate.index
-    }
-    val firstFailureOperations = failureOperationCandidates.filter { candidate ->
-        candidate.index == firstFailureOperationIndex
-    }
-    if (firstFailureOperations.size != 1) {
-        throw PatchException(
-            "Expected one earliest NewX failure operation register, found " +
-                "${firstFailureOperations.size}: all=$operationCandidates",
-        )
-    }
-    if (firstFailureOperationIndex >= successEventIndex) {
-        throw PatchException(
-            "NewX failure operation is after POST_SUCCESS: " +
-                "operation@$firstFailureOperationIndex, POST_SUCCESS@$successEventIndex",
+            "Expected one NewX failure operation register between POST_FAILURE and POST_SUCCESS, " +
+                "found ${failureOperationCandidates.size}: all=$operationCandidates, " +
+                "POST_FAILURE@$failureEventIndex, POST_SUCCESS@$successEventIndex",
         )
     }
 
-    val operationRegister = firstFailureOperations.single().register
+    val operationRegister = failureOperationCandidates.single().register
     if (throwableRead.register !in 0..15 || operationRegister !in 0..15) {
         throw PatchException(
             "NewX submit failure registers do not fit invoke: " +
@@ -314,12 +329,18 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
     )
 }
 
-private fun findEventIndices(
+private data class EventField(
+    val index: Int,
+    val field: FieldReference,
+)
+
+private fun findEventFields(
     instructions: List<Instruction>,
     eventName: String,
-): List<Int> = instructions.mapIndexedNotNull { index, instruction ->
+): List<EventField> = instructions.mapIndexedNotNull { index, instruction ->
+    if (instruction.opcode != Opcode.SGET_OBJECT) return@mapIndexedNotNull null
     val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
-    index.takeIf { field.name == eventName }
+    EventField(index, field).takeIf { field.name == eventName }
 }
 
 private fun findPostOperationRegister(
@@ -330,6 +351,7 @@ private fun findPostOperationRegister(
     if (instruction.opcode != Opcode.SGET_OBJECT) return null
     val field = instruction.getReference<FieldReference>() ?: return null
     if (field.name != POST_OPERATION_FIELD_NAME) return null
+    if (field.type.toString() != field.definingClass.toString()) return null
 
     val sget = instruction as? OneRegisterInstruction
         ?: throw PatchException("NewX submit operation read has no destination at $index")
@@ -342,5 +364,10 @@ private fun findPostOperationRegister(
         ifInstruction.registerB -> ifInstruction.registerA
         else -> return null
     }
-    return RegisterLocation(index, operationRegister)
+    val branchTargetIndex =
+        (comparison as? BuilderOffsetInstruction)?.target?.location?.index
+            ?: throw PatchException("NewX submit operation comparison has no branch target at $index")
+    return RegisterLocation(index, operationRegister, branchTargetIndex)
 }
+
+private fun String.isObjectDescriptor(): Boolean = startsWith("L") && endsWith(';')
