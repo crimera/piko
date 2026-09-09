@@ -175,8 +175,8 @@
     <string name="piko_hide_navigation_create">만들기 버튼 숨기기</string>
     <!-- Information Section -->
     <string name="piko_category_about">정보</string>
-    <string name="piko_export_pref">Piko 환경설정 내보내기</string>
-    <string name="piko_import_pref">Piko 환경설정 가져오기</string>
+    <string name="piko_export_pref">Piko 설정 내보내기</string>
+    <string name="piko_import_pref">Piko 설정 가져오기</string>
     <string name="piko_reset_pref">Piko 설정 초기화</string>
     <string name="piko_reset_pref_confirm">Piko 설정를 초기화하시겠습니까?</string>
     <string name="piko_reset_pref_success">Piko 설정을 초기화하였습니다</string>

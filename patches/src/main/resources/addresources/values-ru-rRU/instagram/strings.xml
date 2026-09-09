@@ -175,8 +175,6 @@
     <string name="piko_hide_navigation_create">Скрыть кнопку «Создать»</string>
     <!-- Information Section -->
     <string name="piko_category_about">Информация</string>
-    <string name="piko_export_pref">Экспорт настроек Piko</string>
-    <string name="piko_import_pref">Импорт настроек Piko</string>
     <string name="piko_reset_pref">Сбросить настройки Piko</string>
     <string name="piko_reset_pref_confirm">Сбросить настройки Piko?</string>
     <string name="piko_reset_pref_success">Настройки Piko сброшены</string>

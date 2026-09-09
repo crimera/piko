@@ -157,8 +157,6 @@
     <string name="piko_hide_navigation_create">隱藏創作按鈕</string>
     <!-- Information Section -->
     <string name="piko_category_about">關於</string>
-    <string name="piko_export_pref">匯出 Piko 偏好設定</string>
-    <string name="piko_import_pref">匯入 Piko 偏好設定</string>
     <string name="piko_app_version">應用程式版本：%s</string>
     <string name="piko_patch_version">補丁版本：%s</string>
     <string name="piko_patch_info_title">補丁資訊</string>

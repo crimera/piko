@@ -175,8 +175,6 @@
     <string name="piko_hide_navigation_create">Ocultar botão Criar (+)</string>
     <!-- Information Section -->
     <string name="piko_category_about">Sobre</string>
-    <string name="piko_export_pref">Exportar preferências do Piko</string>
-    <string name="piko_import_pref">Importar preferências do Piko</string>
     <string name="piko_reset_pref">Redefinir configurações do Piko</string>
     <string name="piko_reset_pref_confirm">Redefinir configurações do Piko?</string>
     <string name="piko_reset_pref_success">Configurações do Piko redefinidas</string>

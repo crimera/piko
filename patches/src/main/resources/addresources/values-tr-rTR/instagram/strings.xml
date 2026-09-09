@@ -175,8 +175,8 @@
     <string name="piko_hide_navigation_create">Oluştur butonunu gizle</string>
     <!-- Information Section -->
     <string name="piko_category_about">Hakkında</string>
-    <string name="piko_export_pref">Piko tercihlerini dışa aktar</string>
-    <string name="piko_import_pref">Piko tercihlerini içe aktar</string>
+    <string name="piko_export_pref">Piko ayarlarını dışa aktar</string>
+    <string name="piko_import_pref">Piko ayarlarını içe aktar</string>
     <string name="piko_reset_pref">Piko ayarlarını sıfırla</string>
     <string name="piko_reset_pref_confirm">Piko ayarları sıfırlansın mı?</string>
     <string name="piko_reset_pref_success">Piko ayarları sıfırlandı</string>

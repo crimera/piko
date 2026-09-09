@@ -170,8 +170,6 @@
     <string name="piko_hide_navigation_create">Nascondi il pulsante Crea</string>
     <!-- Information Section -->
     <string name="piko_category_about">Informazioni</string>
-    <string name="piko_export_pref">Esporta preferenze Piko</string>
-    <string name="piko_import_pref">Importa preferenze Piko</string>
     <string name="piko_reset_pref">Ripristina impostazioni Piko</string>
     <string name="piko_reset_pref_confirm">Ripristinare impostazioni Piko?</string>
     <string name="piko_reset_pref_success">Ripristino impostazioni Piko</string>

@@ -175,8 +175,8 @@
     <string name="piko_hide_navigation_create">Masquer le bouton \"Créer\"</string>
     <!-- Information Section -->
     <string name="piko_category_about">À propos</string>
-    <string name="piko_export_pref">Exporter les préférences de Piko</string>
-    <string name="piko_import_pref">Importer les préférences de Piko</string>
+    <string name="piko_export_pref">Exporter les paramètres Piko</string>
+    <string name="piko_import_pref">Importer les paramètres Piko</string>
     <string name="piko_reset_pref">Réinitialiser les paramètres de Piko</string>
     <string name="piko_reset_pref_confirm">Réinitialiser les paramètres de Piko ?</string>
     <string name="piko_reset_pref_success">Réinitialisation des paramètres de Piko</string>
