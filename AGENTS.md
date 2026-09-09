@@ -10,14 +10,6 @@
 - Exclude generated, decompiled, build, and vendor trees unless one is the explicit analysis target.
 - Do not launch multiple broad searches in parallel.
 
-## X-Lite ports
-
-- Load `.agents/skills/xlite-alpha-porting/SKILL.md` before porting or repairing an X-Lite patch.
-
-## Patch performance
-
-- Load `.agents/skills/morphe-patch-performance/SKILL.md` before optimizing or reviewing fingerprint and patch execution performance.
-
 ## NewX patch philosophy and methodology
 
 NewX is an obfuscated app under active refactoring. A patch must survive ordinary R8 churn where possible, but must never guess when the app's behavior or contract has changed.
