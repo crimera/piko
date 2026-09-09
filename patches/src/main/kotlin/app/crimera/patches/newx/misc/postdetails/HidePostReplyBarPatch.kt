@@ -17,6 +17,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -37,8 +38,8 @@ private const val HAZE_SCOPE = "Ldev/chrisbanes/haze/"
 private const val FOUNDATION_LAYOUT_SCOPE = "Landroidx/compose/foundation/layout/"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
-private const val COMPOSABLE_LAMBDA_DESCRIPTOR = "Landroidx/compose/runtime/internal/f;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
 private val CONDITIONAL_BRANCH_OPCODES =
     setOf(
@@ -86,8 +87,8 @@ private object NewXPostDetailReplyBarFingerprint : Fingerprint(
  */
 private object NewXMainNavigationRootFingerprint : Fingerprint(
     definingClass = "Lcom/x/android/main/MainActivity;",
-    parameters = listOf("Z", COMPOSABLE_LAMBDA_DESCRIPTOR, COMPOSER_DESCRIPTOR, "I"),
     returnType = "V",
+    custom = { method, _ -> method.isMainNavigationRootRenderer() },
 )
 
 /**
@@ -127,6 +128,46 @@ private fun Method.isPostDetailReplyBarRenderer(): Boolean {
     return parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
         parameters.count { it == "Ljava/lang/String;" } == 1 &&
         parameters.any { it.startsWith(HAZE_SCOPE) }
+}
+
+private fun Method.isMainNavigationRootRenderer(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    if (
+        parameters.size != 4 ||
+            parameters[0] != "Z" ||
+            !parameters[1].isObjectDescriptor() ||
+            parameters[2] != COMPOSER_DESCRIPTOR ||
+            parameters[3] != "I"
+    ) {
+        return false
+    }
+
+    val lambdaType = parameters[1]
+    val lambdaRegister = p0Register + 2
+    val lambdaCalls = implementation?.instructions?.mapIndexedNotNull { index, instruction ->
+        if (
+            instruction.opcode !in
+                setOf(
+                    Opcode.INVOKE_INTERFACE,
+                    Opcode.INVOKE_INTERFACE_RANGE,
+                    Opcode.INVOKE_VIRTUAL,
+                    Opcode.INVOKE_VIRTUAL_RANGE,
+                )
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        val arguments = instruction.registersUsed
+        index.takeIf {
+            reference.definingClass == lambdaType &&
+                reference.name == "invoke" &&
+                reference.parameterTypes.map(CharSequence::toString) ==
+                    listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR) &&
+                reference.returnType == OBJECT_DESCRIPTOR &&
+                arguments.firstOrNull() == lambdaRegister
+        }
+    }.orEmpty()
+    return lambdaCalls.size == 1
 }
 
 private fun Method.isPhotoViewerControlsRenderer(): Boolean {
@@ -282,6 +323,8 @@ private fun Method.isPostDetailReplyBarContainer(): Boolean {
         parameters.any { it.startsWith(HAZE_SCOPE) } &&
         parameters.any { it.startsWith(POST_DETAIL_SHEET_SCOPE) }
 }
+
+private fun String.isObjectDescriptor(): Boolean = startsWith("L") && endsWith(';')
 
 private fun Method.callSiteIndices(target: Method): List<Int> =
     implementation?.instructions?.mapIndexedNotNull { index, instruction ->
