@@ -151,9 +151,16 @@ val newXDefaultReplySortingPatch =
 
             val match = matches.single()
             val method = match.method
-            val targetSgetIndex =
-                match.instructionMatches.firstOrNull()?.index
-                    ?: throw PatchException("Missing reply sorting initializer fingerprint instruction")
+            val targetSgetCandidates = match.instructionMatches.filter { matchedInstruction ->
+                isRelevanceSget(matchedInstruction.instruction)
+            }
+            if (targetSgetCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one reply sorting initializer Relevance sget-object, found " +
+                        "${targetSgetCandidates.size}: ${targetSgetCandidates.joinToString()}",
+                )
+            }
+            val targetSgetIndex = targetSgetCandidates.single().index
             val sgetInstruction = method.getInstruction<OneRegisterInstruction>(targetSgetIndex)
             if (!isRelevanceSget(sgetInstruction)) {
                 throw PatchException("Reply sorting initializer did not match Relevance sget-object")
@@ -189,9 +196,17 @@ val newXDefaultReplySortingPatch =
             val selectionImplementation =
                 selectionMethod.implementation
                     ?: throw PatchException("Reply sorting selection handler has no implementation")
-            val defaultUrtIndex =
-                selectionMatch.instructionMatches.firstOrNull()?.index
-                    ?: throw PatchException("Missing selection handler semantic anchor")
+            val defaultUrtCandidates = selectionMatch.instructionMatches.filter { matchedInstruction ->
+                matchedInstruction.instruction.getReference<StringReference>()?.string ==
+                    "defaultUrtTimelineComponent"
+            }
+            if (defaultUrtCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one selection handler defaultUrtTimelineComponent anchor, found " +
+                        "${defaultUrtCandidates.size}: ${defaultUrtCandidates.joinToString()}",
+                )
+            }
+            val defaultUrtIndex = defaultUrtCandidates.single().index
             if (selectionMethod.parameterTypes.singleOrNull() != "Ljava/lang/Object;") {
                 throw PatchException(
                     "Unexpected reply sorting selection handler parameters: " +
@@ -242,10 +257,20 @@ val newXDefaultReplySortingPatch =
                 )
             }
 
-            // The semantic anchor bounds the branch. The last parameter-derived cast in that
-            // branch is the selected TimelineRankingMode cast; receiver casts are excluded.
-            val checkCastIndex = parameterCheckCastIndices.maxOrNull()
-                ?: throw PatchException("Missing selection-parameter check-cast")
+            val rankingModeCheckCastIndices = parameterCheckCastIndices.filter { index ->
+                selectionInstructions[index]
+                    .getReference<TypeReference>()
+                    ?.type == enumClass
+            }
+            if (rankingModeCheckCastIndices.size != 1) {
+                throw PatchException(
+                    "Expected one selection-parameter TimelineRankingMode cast before the " +
+                        "defaultUrtTimelineComponent anchor, found " +
+                        "${rankingModeCheckCastIndices.size}: " +
+                        "${rankingModeCheckCastIndices.joinToString { "${it}:${selectionInstructions[it]}" }}",
+                )
+            }
+            val checkCastIndex = rankingModeCheckCastIndices.single()
             val checkCastInstruction =
                 selectionInstructions.getOrNull(checkCastIndex) as? OneRegisterInstruction
                     ?: throw PatchException("Reply sorting selection check-cast has no register")
@@ -277,9 +302,16 @@ val newXDefaultReplySortingPatch =
 
             val uiStateMatch = uiStateMatches.single()
             val uiStateMethod = uiStateMatch.method
-            val uiStateIndex =
-                uiStateMatch.instructionMatches.firstOrNull()?.index
-                    ?: throw PatchException("Missing reply sorting UI state fingerprint instruction")
+            val uiStateCandidates = uiStateMatch.instructionMatches.filter { matchedInstruction ->
+                isRelevanceSget(matchedInstruction.instruction)
+            }
+            if (uiStateCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one reply sorting UI state Relevance sget-object, found " +
+                        "${uiStateCandidates.size}: ${uiStateCandidates.joinToString()}",
+                )
+            }
+            val uiStateIndex = uiStateCandidates.single().index
             val uiStateInstruction = uiStateMethod.getInstruction<OneRegisterInstruction>(uiStateIndex)
             if (!isRelevanceSget(uiStateInstruction)) {
                 throw PatchException("Reply sorting UI state did not match Relevance sget-object")
