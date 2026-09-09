@@ -18,7 +18,9 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -29,11 +31,41 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val COMPOSER_MINIMAL_SCOPE = "Lcom/x/composer/minimal/"
 private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
+private const val MEDIA_SCOPE = "Lcom/x/media/"
+private const val INLINE_ACTION_BAR_SCOPE = "Lcom/x/inlineactionbar/"
 private const val HAZE_SCOPE = "Ldev/chrisbanes/haze/"
 private const val FOUNDATION_LAYOUT_SCOPE = "Landroidx/compose/foundation/layout/"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSABLE_LAMBDA_DESCRIPTOR = "Landroidx/compose/runtime/internal/f;"
+private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
+
+private val CONDITIONAL_BRANCH_OPCODES =
+    setOf(
+        Opcode.IF_EQ,
+        Opcode.IF_NE,
+        Opcode.IF_LT,
+        Opcode.IF_GE,
+        Opcode.IF_GT,
+        Opcode.IF_LE,
+        Opcode.IF_EQZ,
+        Opcode.IF_NEZ,
+        Opcode.IF_LTZ,
+        Opcode.IF_GEZ,
+        Opcode.IF_GTZ,
+        Opcode.IF_LEZ,
+    )
+
+/**
+ * The full-screen photo/media renderer owns both the inline action bar and the reply composer. Its
+ * native no-composer branch appends a navigation-bar spacer after the action bar. When the reply
+ * composer is hidden by this patch, that existing branch must be selected as well.
+ */
+private object NewXPhotoViewerControlsFingerprint : Fingerprint(
+    definingClass = MEDIA_SCOPE,
+    returnType = "V",
+    custom = { method, _ -> method.isPhotoViewerControlsRenderer() },
+)
 
 /**
  * The inline post-detail composer marks its text field with this stable Compose test tag. The
@@ -84,12 +116,54 @@ private data class NavigationInsetsHook(
     val continuation: Instruction,
 )
 
+private data class PhotoViewerNavigationFallbackHook(
+    val method: MutableMethod,
+    val gateIndex: Int,
+    val fallback: Instruction,
+)
+
 private fun Method.isPostDetailReplyBarRenderer(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
     return parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
         parameters.count { it == "Ljava/lang/String;" } == 1 &&
         parameters.any { it.startsWith(HAZE_SCOPE) }
 }
+
+private fun Method.isPhotoViewerControlsRenderer(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return AccessFlags.STATIC.isSet(accessFlags) &&
+        returnType == "V" &&
+        parameters.size == 10 &&
+        parameters.count { it.startsWith(INLINE_ACTION_BAR_SCOPE) } == 1 &&
+        parameters.count { it == "Z" } == 1 &&
+        parameters.count { it.startsWith(COMPOSER_MINIMAL_SCOPE) } == 1 &&
+        parameters.count { it.startsWith(HAZE_SCOPE) } == 1 &&
+        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
+        parameters.count { it == "Ljava/lang/String;" } == 2 &&
+        parameters.count { it == FUNCTION1_DESCRIPTOR } == 1 &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        parameters.count { it == "I" } == 1 &&
+        inlineActionBarRenderCallIndices().size == 1 &&
+        navigationInsetsCallIndices().size == 1
+}
+
+private fun Method.inlineActionBarRenderCallIndices(): List<Int> =
+    implementation?.instructions?.mapIndexedNotNull { index, instruction ->
+        if (!instruction.isStaticInvocation()) return@mapIndexedNotNull null
+
+        val reference = instruction.getReference<MethodReference>()
+            ?: return@mapIndexedNotNull null
+        val parameters = reference.parameterTypes.map(CharSequence::toString)
+        val isInlineActionBarRender =
+            reference.definingClass.startsWith(INLINE_ACTION_BAR_SCOPE) &&
+                reference.returnType == "V" &&
+                parameters.getOrNull(1) == MODIFIER_DESCRIPTOR &&
+                parameters.any { it.startsWith(FOUNDATION_LAYOUT_SCOPE) } &&
+                parameters.any { it.startsWith(HAZE_SCOPE) } &&
+                parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+                parameters.count { it == "I" } >= 3
+        index.takeIf { isInlineActionBarRender }
+    }.orEmpty()
 
 private fun Method.hasString(value: String): Boolean =
     implementation?.instructions?.any { instruction ->
@@ -386,6 +460,77 @@ private fun resolvePostDetailNavigationInsetsHook(
     return requireNavigationInsetsHook(postDetailContainer, "NewX post-detail")
 }
 
+/**
+ * The photo viewer chooses between the reply composer and a native navigation-bar spacer after
+ * rendering its action bar. Resolve the existing no-composer branch from call order and control
+ * flow so the hide setting can select it without recreating Compose inset behavior.
+ */
+context(context: BytecodePatchContext)
+private fun resolvePhotoViewerNavigationFallbackHook(
+    minimalContainer: MutableMethod,
+): PhotoViewerNavigationFallbackHook {
+    val matches = NewXPhotoViewerControlsFingerprint.scopedMatchAllOrNull().orEmpty()
+    if (matches.size != 1) {
+        throw PatchException(
+            "Expected one NewX photo-viewer controls renderer, found ${matches.size}: " +
+                matches.joinToString { it.originalMethod.toString() },
+        )
+    }
+
+    val method = matches.single().method
+    val instructions = method.instructions.toList()
+    val actionBarCalls = method.inlineActionBarRenderCallIndices()
+    val minimalComposerCalls = method.callSiteIndices(minimalContainer)
+    val navigationInsetCalls = method.navigationInsetsCallIndices()
+    if (actionBarCalls.size != 1 || minimalComposerCalls.size != 1 || navigationInsetCalls.size != 1) {
+        throw PatchException(
+            "Expected one action-bar call, reply-composer call, and navigation-inset call in " +
+                "$method; found ${actionBarCalls.size}, ${minimalComposerCalls.size}, and " +
+                "${navigationInsetCalls.size}",
+        )
+    }
+
+    val actionBarCall = actionBarCalls.single()
+    val minimalComposerCall = minimalComposerCalls.single()
+    val navigationInsetCall = navigationInsetCalls.single()
+    if (!(actionBarCall < minimalComposerCall && minimalComposerCall < navigationInsetCall)) {
+        throw PatchException(
+            "Unexpected photo-viewer control-flow order in $method: action bar at $actionBarCall, " +
+                "reply composer at $minimalComposerCall, navigation inset at $navigationInsetCall",
+        )
+    }
+
+    val fallbackBranches =
+        (actionBarCall + 1 until minimalComposerCall).mapNotNull { index ->
+            val instruction = instructions[index]
+            if (instruction.opcode !in CONDITIONAL_BRANCH_OPCODES) return@mapNotNull null
+            val branch = instruction as? BuilderOffsetInstruction
+                ?: throw PatchException(
+                    "Photo-viewer conditional branch is not mutable at $index in $method: " +
+                        instruction,
+                )
+            val target = branch.target.location.instruction ?: return@mapNotNull null
+            val targetIndex = branch.target.location.index
+            Triple(index, targetIndex, target).takeIf {
+                targetIndex in (minimalComposerCall + 1)..navigationInsetCall
+            }
+        }
+    val fallbackTargets = fallbackBranches.distinctBy { (_, targetIndex, _) -> targetIndex }
+    if (fallbackBranches.isEmpty() || fallbackTargets.size != 1) {
+        throw PatchException(
+            "Expected photo-viewer reply gates to share one navigation fallback in $method, " +
+                "found ${fallbackBranches.size} branches and ${fallbackTargets.size} targets: " +
+                fallbackBranches.joinToString { (index, targetIndex, _) -> "$index->$targetIndex" },
+        )
+    }
+
+    return PhotoViewerNavigationFallbackHook(
+        method = method,
+        gateIndex = fallbackBranches.minOf { (index, _, _) -> index },
+        fallback = fallbackTargets.single().third,
+    )
+}
+
 @Suppress("unused")
 val newXHidePostReplyBarPatch =
     bytecodePatch(
@@ -416,6 +561,8 @@ val newXHidePostReplyBarPatch =
             val navigationInsetsHook = resolveMainNavigationInsetsHook()
             val postDetailNavigationInsetsHook =
                 resolvePostDetailNavigationInsetsHook(postDetailSheetContainer)
+            val photoViewerNavigationFallbackHook =
+                resolvePhotoViewerNavigationFallbackHook(minimalContainer)
 
             hidePostReplyBar.returnVoidIfEnabled(renderer.method, 0)
             hidePostReplyBar.returnVoidIfEnabled(minimalContainer, 0)
@@ -424,6 +571,9 @@ val newXHidePostReplyBarPatch =
             }
             postDetailNavigationInsetsHook?.let { hook ->
                 hidePostReplyBar.branchIfEnabled(hook.method, hook.callIndex, hook.continuation)
+            }
+            photoViewerNavigationFallbackHook.let { hook ->
+                hidePostReplyBar.branchIfEnabled(hook.method, hook.gateIndex, hook.fallback)
             }
             hidePostReplyBar.returnVoidIfEnabled(postDetailSheetContainer, 0)
         }
