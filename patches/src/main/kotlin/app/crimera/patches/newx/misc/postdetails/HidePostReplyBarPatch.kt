@@ -14,14 +14,26 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.string
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
+
+private const val COMPOSER_MINIMAL_SCOPE = "Lcom/x/composer/minimal/"
+private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
+private const val HAZE_SCOPE = "Ldev/chrisbanes/haze/"
+private const val FOUNDATION_LAYOUT_SCOPE = "Landroidx/compose/foundation/layout/"
+private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
+private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
+private const val COMPOSABLE_LAMBDA_DESCRIPTOR = "Landroidx/compose/runtime/internal/f;"
 
 /**
  * The inline post-detail composer marks its text field with this stable Compose test tag. The
@@ -29,31 +41,41 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
  * its caller, so returning from this renderer hides only the persistent reply bar.
  */
 private object NewXPostDetailReplyBarFingerprint : Fingerprint(
-    definingClass = "Lcom/x/composer/minimal/",
+    definingClass = COMPOSER_MINIMAL_SCOPE,
     returnType = "V",
     filters = listOf(string("post-detail-reply-text-field")),
+    custom = { method, _ -> method.isPostDetailReplyBarRenderer() },
 )
 
-private const val COMPOSER_MINIMAL_SCOPE = "Lcom/x/composer/minimal/"
-private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
-private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
-private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
-private const val COMPOSABLE_LAMBDA_DESCRIPTOR = "Landroidx/compose/runtime/internal/f;"
-private const val WINDOW_INSETS_DESCRIPTOR = "Landroidx/compose/foundation/layout/c;"
-private const val WINDOW_INSETS_STATE_DESCRIPTOR = "Landroidx/compose/foundation/layout/e4;"
-private const val WINDOW_INSETS_PROVIDER_DESCRIPTOR = "Landroidx/compose/foundation/layout/c4;"
-private const val WINDOW_INSETS_MODIFIER_DESCRIPTOR = "Landroidx/compose/foundation/layout/d4;"
-
-private object NewXMainNavigationInsetsFingerprint : Fingerprint(
+/**
+ * The root Compose renderer keeps this stable signature across targets. Older targets do not
+ * contain the navigation-insets call; the resolver explicitly validates that legacy shape instead
+ * of treating a missing fingerprint as a successful optional patch.
+ */
+private object NewXMainNavigationRootFingerprint : Fingerprint(
     definingClass = "Lcom/x/android/main/MainActivity;",
     parameters = listOf("Z", COMPOSABLE_LAMBDA_DESCRIPTOR, COMPOSER_DESCRIPTOR, "I"),
     returnType = "V",
-    custom = { method, _ -> method.hasNavigationBarPaddingCall() },
 )
 
+/**
+ * The post-detail host owns the local inset modifier. Only its semantic data flow is fingerprinted;
+ * Compose/R8 method and owner names are intentionally not part of the match.
+ */
 private object NewXPostDetailNavigationInsetsFingerprint : Fingerprint(
     definingClass = POST_DETAIL_SHEET_SCOPE,
-    custom = { method, _ -> method.hasPostDetailNavigationInsetsCall() },
+    returnType = "V",
+    custom = { method, _ ->
+        val parameters = method.parameterTypes.map(CharSequence::toString)
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+            parameters.any { it.startsWith(HAZE_SCOPE) } &&
+            parameters.any { it.startsWith(POST_DETAIL_SHEET_SCOPE) } &&
+            method.hasNavigationInsetsCall()
+    },
+)
+
+private data class NavigationInsetsRead(
+    val destinationRegister: Int,
 )
 
 private data class NavigationInsetsHook(
@@ -62,9 +84,153 @@ private data class NavigationInsetsHook(
     val continuation: Instruction,
 )
 
+private fun Method.isPostDetailReplyBarRenderer(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        parameters.count { it == "Ljava/lang/String;" } == 1 &&
+        parameters.any { it.startsWith(HAZE_SCOPE) }
+}
+
+private fun Method.hasString(value: String): Boolean =
+    implementation?.instructions?.any { instruction ->
+        instruction.getReference<StringReference>()?.string == value
+    } == true
+
+private fun Method.hasStrings(vararg values: String): Boolean = values.all(::hasString)
+
+/**
+ * The Compose compiler and R8 rename the framework bridge methods used for window insets. The
+ * surrounding data flow is stable: a framework state singleton is touched, a Composer getter
+ * returns the state, one of its inset fields is read, and a Modifier transformation consumes it.
+ */
+private fun Method.hasNavigationInsetsCall(): Boolean =
+    navigationInsetsCallIndices().isNotEmpty()
+
+private fun Method.navigationInsetsCallIndices(): List<Int> =
+    implementation?.instructions?.toList()?.navigationInsetsCallIndices().orEmpty()
+
+private fun List<Instruction>.navigationInsetsCallIndices(): List<Int> =
+    indices.filter { index -> isNavigationInsetsCall(index) }
+
+private fun List<Instruction>.isNavigationInsetsCall(index: Int): Boolean {
+    val callInstruction = getOrNull(index) ?: return false
+    if (!callInstruction.isStaticInvocation()) return false
+
+    val call = callInstruction.getReference<MethodReference>() ?: return false
+    val parameters = call.parameterTypes.map(CharSequence::toString)
+    if (
+        !call.definingClass.startsWith(FOUNDATION_LAYOUT_SCOPE) ||
+            call.returnType != MODIFIER_DESCRIPTOR ||
+            parameters.size != 2 ||
+            parameters[0] != MODIFIER_DESCRIPTOR ||
+            !parameters[1].startsWith(FOUNDATION_LAYOUT_SCOPE)
+    ) {
+        return false
+    }
+
+    val insetRead = navigationInsetsReadsBefore(index).singleOrNull { read ->
+        callInstruction.registersUsed.contains(read.destinationRegister)
+    }
+    return insetRead != null
+}
+
+private fun List<Instruction>.navigationInsetsReadsBefore(callIndex: Int): List<NavigationInsetsRead> =
+    (0 until callIndex).flatMap { providerIndex ->
+        val providerInstruction = getOrNull(providerIndex) ?: return@flatMap emptyList()
+        if (!providerInstruction.isStaticInvocation()) return@flatMap emptyList()
+
+        val provider = providerInstruction.getReference<MethodReference>()
+            ?: return@flatMap emptyList()
+        if (
+            provider.returnType == MODIFIER_DESCRIPTOR ||
+                !provider.returnType.startsWith(FOUNDATION_LAYOUT_SCOPE) ||
+                provider.parameterTypes.map(CharSequence::toString) != listOf(COMPOSER_DESCRIPTOR)
+        ) {
+            return@flatMap emptyList()
+        }
+
+        val stateMarker = getOrNull(providerIndex - 1)
+        if (stateMarker?.opcode != Opcode.SGET_OBJECT) return@flatMap emptyList()
+        val stateField = stateMarker.getReference<FieldReference>()
+            ?: return@flatMap emptyList()
+        if (stateField.definingClass != provider.returnType) return@flatMap emptyList()
+
+        val stateResult = getOrNull(providerIndex + 1)
+        if (stateResult?.opcode != Opcode.MOVE_RESULT_OBJECT) return@flatMap emptyList()
+        val stateRegister = (stateResult as? OneRegisterInstruction)?.registerA
+            ?: return@flatMap emptyList()
+
+        (providerIndex + 2 until callIndex).mapNotNull { readIndex ->
+            val readInstruction = getOrNull(readIndex) ?: return@mapNotNull null
+            if (readInstruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+
+            val registers = readInstruction as? TwoRegisterInstruction
+                ?: return@mapNotNull null
+            if (registers.registerB != stateRegister) return@mapNotNull null
+
+            val field = readInstruction.getReference<FieldReference>()
+                ?: return@mapNotNull null
+            if (
+                field.definingClass != provider.returnType ||
+                    !field.type.toString().startsWith(FOUNDATION_LAYOUT_SCOPE)
+            ) {
+                return@mapNotNull null
+            }
+            NavigationInsetsRead(registers.registerA)
+        }
+    }
+
+private fun Instruction.isStaticInvocation(): Boolean =
+    opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE
+
+private fun Method.isMinimalComposerRendererCaller(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return returnType == "V" &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
+        parameters.any { it.startsWith(HAZE_SCOPE) }
+}
+
+private fun Method.isMinimalComposerContainerCaller(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return returnType == "V" &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
+        parameters.any { it.startsWith(COMPOSER_MINIMAL_SCOPE) } &&
+        parameters.any { it.startsWith(HAZE_SCOPE) } &&
+        hasStrings("inlineComposer", "hazeState")
+}
+
+private fun Method.isPostDetailReplyBarContainer(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return returnType == "V" &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        parameters.any { it.startsWith(HAZE_SCOPE) } &&
+        parameters.any { it.startsWith(POST_DETAIL_SHEET_SCOPE) }
+}
+
+private fun Method.callSiteIndices(target: Method): List<Int> =
+    implementation?.instructions?.mapIndexedNotNull { index, instruction ->
+        if (!instruction.isStaticInvocation()) return@mapIndexedNotNull null
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        index.takeIf { reference.matches(target) }
+    }.orEmpty()
+
+private fun MethodReference.matches(target: Method): Boolean =
+    definingClass == target.definingClass &&
+        name == target.name &&
+        returnType == target.returnType &&
+        parameterTypes.map(CharSequence::toString) == target.parameterTypes.map(CharSequence::toString)
+
+private fun MutableMethod.matches(target: Method): Boolean =
+    definingClass == target.definingClass &&
+        name == target.name &&
+        returnType == target.returnType &&
+        parameterTypes.map(CharSequence::toString) == target.parameterTypes.map(CharSequence::toString)
+
 /**
  * The renderer is called through minimal-composer helpers before the post-detail sheet adds the
- * navigation-bar inset. Resolving that call chain keeps the second hook independent of the
+ * navigation-bar inset. Resolving that call chain keeps the container hooks independent of the
  * obfuscated minimal-composer and post-detail-sheet owners/method names.
  */
 context(context: BytecodePatchContext)
@@ -121,187 +287,103 @@ private fun findUniqueCaller(
 ): Method {
     val candidates = buildList {
         context.classDefForEach { classDef ->
-            if (classDef.type.startsWith(scope)) {
-                classDef.methods.forEach { method ->
-                    if (method.isCallerOf(target) && predicate(method)) add(method)
-                }
+            if (!classDef.type.startsWith(scope)) return@classDefForEach
+            classDef.methods.forEach { method ->
+                if (!predicate(method)) return@forEach
+                val callSites = method.callSiteIndices(target)
+                if (callSites.isNotEmpty()) add(method to callSites.size)
             }
         }
+    }
+    val invalidCallCounts = candidates.filter { (_, callCount) -> callCount != 1 }
+    if (invalidCallCounts.isNotEmpty()) {
+        throw PatchException(
+            "Expected one call to $target in $label candidates, found: " +
+                invalidCallCounts.joinToString { (method, callCount) -> "$method ($callCount)" },
+        )
     }
     if (candidates.size != 1) {
         throw PatchException(
             "Expected one $label, found ${candidates.size}: " +
-                candidates.joinToString { it.toString() },
+                candidates.joinToString { (method, _) -> method.toString() },
         )
     }
-    return candidates.single()
+    return candidates.single().first
 }
 
-private fun Method.isMinimalComposerRendererCaller(): Boolean =
-    returnType == "V" &&
-        parameterTypes.map(CharSequence::toString).contains(MODIFIER_DESCRIPTOR)
-
-private fun Method.isMinimalComposerContainerCaller(): Boolean {
-    val parameters = parameterTypes.map(CharSequence::toString)
-    return returnType == "V" &&
-        parameters.firstOrNull()?.startsWith(COMPOSER_MINIMAL_SCOPE) == true &&
-        parameters.getOrNull(1)?.startsWith("Ldev/chrisbanes/haze/") == true &&
-        parameters.getOrNull(2) == MODIFIER_DESCRIPTOR &&
-        parameters.getOrNull(3) == "Z" &&
-        parameters.contains(COMPOSER_DESCRIPTOR)
-}
-
-private fun Method.isPostDetailReplyBarContainer(): Boolean {
-    val parameters = parameterTypes.map(CharSequence::toString)
-    return returnType == "V" && COMPOSER_DESCRIPTOR in parameters
-}
-
-private fun Method.isCallerOf(target: Method): Boolean =
-    implementation?.instructions?.any { instruction ->
-        if (instruction.opcode != Opcode.INVOKE_STATIC &&
-            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
-        ) {
-            return@any false
-        }
-        val reference = instruction.getReference<MethodReference>() ?: return@any false
-        reference.matches(target)
-    } == true
-
-private fun MethodReference.matches(target: Method): Boolean =
-    definingClass == target.definingClass &&
-        name == target.name &&
-        returnType == target.returnType &&
-        parameterTypes.map(CharSequence::toString) == target.parameterTypes.map(CharSequence::toString)
-
-private fun MutableMethod.matches(target: Method): Boolean =
-    definingClass == target.definingClass &&
-        name == target.name &&
-        returnType == target.returnType &&
-        parameterTypes.map(CharSequence::toString) == target.parameterTypes.map(CharSequence::toString)
-
-private fun Method.hasNavigationBarPaddingCall(): Boolean =
-    implementation?.instructions?.count { instruction ->
-        instruction.isNavigationBarPaddingCall()
-    } == 1
-
-private fun Method.hasPostDetailNavigationInsetsCall(): Boolean {
-    val instructions = implementation?.instructions?.toList() ?: return false
-    return instructions.indices.count { index ->
-        instructions.isPostDetailNavigationInsetsCall(index)
-    } == 1
-}
-
-private fun Instruction.isNavigationBarPaddingCall(): Boolean {
-    val reference = getReference<MethodReference>() ?: return false
-    return reference.definingClass.startsWith("Landroidx/compose/foundation/layout/") &&
-        reference.name == "P" &&
-        reference.returnType == MODIFIER_DESCRIPTOR &&
-        reference.parameterTypes.map(CharSequence::toString) ==
-            listOf(MODIFIER_DESCRIPTOR, WINDOW_INSETS_DESCRIPTOR)
-}
-
-private fun List<Instruction>.isPostDetailNavigationInsetsCall(index: Int): Boolean {
-    val call = getOrNull(index)?.getReference<MethodReference>() ?: return false
-    if (
-        call.definingClass != "Landroidx/compose/foundation/layout/f;" ||
-        call.name != "s" ||
-        call.returnType != MODIFIER_DESCRIPTOR ||
-        call.parameterTypes.map(CharSequence::toString) !=
-            listOf(MODIFIER_DESCRIPTOR, WINDOW_INSETS_MODIFIER_DESCRIPTOR)
-    ) {
-        return false
+private fun requireNavigationInsetsHook(
+    method: MutableMethod,
+    label: String,
+): NavigationInsetsHook {
+    val instructions = method.instructions.toList()
+    val callIndices = instructions.navigationInsetsCallIndices()
+    if (callIndices.size != 1) {
+        throw PatchException(
+            "Expected one $label navigation-insets call in $method, found " +
+                callIndices.size,
+        )
     }
 
-    if (getOrNull(index - 2)?.opcode != Opcode.MOVE_RESULT_OBJECT) return false
-    val insetField = getOrNull(index - 1)?.getReference<FieldReference>() ?: return false
-    if (
-        insetField.definingClass != WINDOW_INSETS_STATE_DESCRIPTOR ||
-        insetField.name != "e" ||
-        insetField.type != WINDOW_INSETS_DESCRIPTOR
-    ) {
-        return false
+    val callIndex = callIndices.single()
+    if (instructions.getOrNull(callIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+        throw PatchException(
+            "$label navigation-insets call is not followed by move-result-object in $method",
+        )
     }
-
-    val provider = getOrNull(index - 3)?.getReference<MethodReference>() ?: return false
-    if (
-        provider.definingClass != WINDOW_INSETS_PROVIDER_DESCRIPTOR ||
-        provider.name != "e" ||
-        provider.returnType != WINDOW_INSETS_STATE_DESCRIPTOR ||
-        provider.parameterTypes.map(CharSequence::toString) != listOf(COMPOSER_DESCRIPTOR)
-    ) {
-        return false
-    }
-
-    val stateField = getOrNull(index - 4)?.getReference<FieldReference>() ?: return false
-    return stateField.definingClass == WINDOW_INSETS_STATE_DESCRIPTOR &&
-        stateField.name == "w"
+    val continuation =
+        instructions.getOrNull(callIndex + 2)
+            ?: throw PatchException(
+                "$label navigation-insets call has no continuation in $method",
+            )
+    return NavigationInsetsHook(method, callIndex, continuation)
 }
 
 context(context: BytecodePatchContext)
 private fun resolveMainNavigationInsetsHook(): NavigationInsetsHook? {
-    val matches = NewXMainNavigationInsetsFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (matches.size > 1) {
+    val matches = NewXMainNavigationRootFingerprint.scopedMatchAllOrNull().orEmpty()
+    if (matches.size != 1) {
         throw PatchException(
-            "Expected at most one NewX main navigation inset renderer, found ${matches.size}: " +
+            "Expected one NewX main navigation root renderer, found ${matches.size}: " +
                 matches.joinToString { it.originalMethod.toString() },
         )
     }
-    val match = matches.singleOrNull() ?: return null
-    val callIndices =
-        match.method.instructions.mapIndexedNotNull { index, instruction ->
-            index.takeIf { instruction.isNavigationBarPaddingCall() }
-        }
-    if (callIndices.size != 1) {
-        throw PatchException(
-            "Expected one NewX main navigation-bar padding call in ${match.method}, found " +
-                callIndices.size,
-        )
-    }
-
-    val callIndex = callIndices.single()
-    if (match.method.instructions.getOrNull(callIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
-        throw PatchException(
-            "NewX main navigation-bar padding call is not followed by move-result-object in " +
-                match.method,
-        )
-    }
-    val continuation =
-        match.method.instructions.getOrNull(callIndex + 2)
-            ?: throw PatchException(
-                "NewX main navigation-bar padding call has no continuation in ${match.method}",
+    val method = matches.single().method
+    val callCount = method.navigationInsetsCallIndices().size
+    if (callCount == 0) {
+        if (method.hasString("insets")) {
+            throw PatchException(
+                "NewX main navigation root has the inset marker but no semantic inset call: $method",
             )
-    return NavigationInsetsHook(match.method, callIndex, continuation)
+        }
+        return null
+    }
+    if (callCount != 1) {
+        throw PatchException(
+            "Expected one NewX main navigation-insets call in $method, found $callCount",
+        )
+    }
+    return requireNavigationInsetsHook(method, "NewX main")
 }
 
 context(context: BytecodePatchContext)
-private fun resolvePostDetailNavigationInsetsHook(): NavigationInsetsHook? {
+private fun resolvePostDetailNavigationInsetsHook(
+    postDetailContainer: MutableMethod,
+): NavigationInsetsHook {
     val matches = NewXPostDetailNavigationInsetsFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (matches.size > 1) {
+    if (matches.size != 1) {
         throw PatchException(
-            "Expected at most one NewX post-detail navigation inset renderer, found ${matches.size}: " +
+            "Expected one NewX post-detail navigation inset renderer, found ${matches.size}: " +
                 matches.joinToString { it.originalMethod.toString() },
         )
     }
-    val match = matches.singleOrNull() ?: return null
-    val instructions = match.method.instructions.toList()
-    val callIndices =
-        instructions.mapIndexedNotNull { index, _ ->
-            index.takeIf { instructions.isPostDetailNavigationInsetsCall(index) }
-        }
-    if (callIndices.size != 1) {
+    val match = matches.single()
+    if (!postDetailContainer.matches(match.originalMethod)) {
         throw PatchException(
-            "Expected one NewX post-detail navigation inset call in ${match.method}, found " +
-                callIndices.size,
+            "NewX post-detail navigation inset renderer is not the reply-bar container: " +
+                "${match.originalMethod} vs $postDetailContainer",
         )
     }
-
-    val callIndex = callIndices.single()
-    val continuation =
-        match.method.instructions.getOrNull(callIndex + 1)
-            ?: throw PatchException(
-                "NewX post-detail navigation inset call has no continuation in ${match.method}",
-            )
-    return NavigationInsetsHook(match.method, callIndex, continuation)
+    return requireNavigationInsetsHook(postDetailContainer, "NewX post-detail")
 }
 
 @Suppress("unused")
@@ -332,7 +414,9 @@ val newXHidePostReplyBarPatch =
             val renderer = matches.single()
             val (minimalContainer, postDetailSheetContainer) = resolvePostDetailReplyBarContainers(renderer)
             val navigationInsetsHook = resolveMainNavigationInsetsHook()
-            val postDetailNavigationInsetsHook = resolvePostDetailNavigationInsetsHook()
+            val postDetailNavigationInsetsHook =
+                resolvePostDetailNavigationInsetsHook(postDetailSheetContainer)
+
             hidePostReplyBar.returnVoidIfEnabled(renderer.method, 0)
             hidePostReplyBar.returnVoidIfEnabled(minimalContainer, 0)
             navigationInsetsHook?.let { hook ->

@@ -13,6 +13,7 @@ The exact stored smali for every declared NewX target contains the Compose test 
 - `12.22.0-prod.01`
 - `12.23.0-prod.01`
 - `12.23.1-prod.01`
+- `12.25.0-alpha.01`
 
 That renderer builds the persistent inline post-detail reply bar. The floating new-post compose
 action is rendered by the surrounding post-detail UI, so the renderer is the narrowest shared
@@ -33,17 +34,29 @@ guards both the minimal-composer container (`minimal/h`) and the post-detail she
 scrim, blur box, and empty inset space.
 
 Newer targets also apply the navigation-bar inset to the shared `MainActivity` content root. The
-patch resolves that `Modifier`/navigation-insets call and skips only it while the same toggle is
-enabled, which covers timeline content as well. Older targets without that root call retain their
-original layout. Post-detail sheets in the newer targets have a second, local navigation-insets
-call; that call is resolved from the `e4.e` inset field and guarded by the same toggle.
+patch resolves that call from the stable state-singleton -> Composer getter -> inset-field ->
+`Modifier` data flow, not from obfuscated Compose owner or method names. Older targets without that
+root call are accepted only after the stable root method is found and verified to have no `insets`
+marker. Post-detail sheets have a second, local navigation-insets call; its host is resolved from
+the renderer call chain and the same data flow, so Compose owner/method renames do not silently
+skip it.
+
+Every required match is cardinality-checked before mutation: one tagged renderer, one caller at
+each call-chain edge, one mutable container per resolved owner, and one post-detail inset call.
+The root inset hook allows only the explicitly validated legacy zero-call shape or one call. A
+navigation call must be followed by `move-result-object`, and the setting branch targets the
+instruction after that result, preventing invalid bytecode when the inset is skipped.
+
+Validated root/post-detail inset cardinalities are `0/1` for `12.20.5-prod.01` and
+`12.21.1-prod.05`, and `1/1` for `12.22.0-beta.01`, `12.22.0-prod.01`, `12.23.0-prod.01`,
+`12.23.1-prod.01`, and `12.25.0-alpha.01`.
 
 ## Validation
 
 The MPP built successfully with `./gradlew :patches:build --no-daemon`. Exclusive patch runs
-rebuilt and signed all six target artifacts with `NewX: Hide post reply bar` applied and no failed
-patches. The optional SDK verifier reported only pre-existing missing Stripe/Amazon optional
-classes, so the successful validation runs used the normal non-verifying rebuild path.
+rebuilt and signed all seven target artifacts with `NewX: Hide post reply bar` applied and no
+failed patches. The optional SDK verifier reported only pre-existing missing Stripe/Amazon
+optional classes, so the successful validation runs used the normal non-verifying rebuild path.
 
 The same patch also applied to the declared `12.25.0-alpha.01` target. Runtime installation was
 not performed during this change.
