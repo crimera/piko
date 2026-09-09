@@ -121,20 +121,38 @@ private object NewXHomeNavUpsellComposableFingerprint : Fingerprint(
 )
 
 private fun MutableMethod.disabledUpsellField(startIndex: Int): FieldReference {
-    val directSingletonReturn =
+    val candidates =
         instructions
             .drop(startIndex)
             .zipWithNext()
-            .firstOrNull { (loadInstruction, returnInstruction) ->
-                if (loadInstruction.opcode != Opcode.SGET_OBJECT) return@firstOrNull false
-                if (returnInstruction.opcode != Opcode.RETURN_OBJECT) return@firstOrNull false
+            .mapIndexedNotNull { offset, (loadInstruction, returnInstruction) ->
+                if (loadInstruction.opcode != Opcode.SGET_OBJECT ||
+                    returnInstruction.opcode != Opcode.RETURN_OBJECT
+                ) {
+                    return@mapIndexedNotNull null
+                }
                 val loadRegister = (loadInstruction as? OneRegisterInstruction)?.registerA
                 val returnRegister = (returnInstruction as? OneRegisterInstruction)?.registerA
-                loadRegister != null && loadRegister == returnRegister
-            } ?: throw PatchException("NewX disabled home-nav upsell return was not found")
+                if (loadRegister == null || loadRegister != returnRegister) {
+                    return@mapIndexedNotNull null
+                }
+                val field = loadInstruction.getReference<FieldReference>()
+                    ?: return@mapIndexedNotNull null
+                field to (startIndex + offset)
+            }
+    val fields = candidates.map { it.first }.distinctBy(FieldReference::toString)
+    if (fields.size != 1) {
+        val descriptions =
+            candidates
+                .joinToString { (field, index) -> "$field at instruction $index" }
+                .ifEmpty { "<none>" }
+        throw PatchException(
+            "Expected exactly one NewX disabled home-nav upsell field after instruction $startIndex, " +
+                "found ${fields.size}: $descriptions",
+        )
+    }
 
-    return directSingletonReturn.first.getReference<FieldReference>()
-        ?: throw PatchException("NewX disabled home-nav upsell field was not found")
+    return fields.single()
 }
 
 @Suppress("unused")
