@@ -17,6 +17,8 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -92,11 +94,122 @@ internal object MovedShareIntentBuilderFingerprint : Fingerprint(
 /** URL getter used by post-detail navigation and quote/interactor links. */
 internal object PostNavigationUrlFingerprint : Fingerprint(
     definingClass = NAVIGATION_DESCRIPTOR_PREFIX,
-    name = "l",
     parameters = emptyList(),
     returnType = STRING_DESCRIPTOR,
     filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
+    custom = { method, _ -> method.hasStatusUrlReturnFlow() },
 )
+
+/** Proves that the status URL marker contributes to the value returned by this getter. */
+private fun Method.hasStatusUrlReturnFlow(): Boolean {
+    val methodInstructions = implementation?.instructions?.toList() ?: return false
+    val markerIndices = methodInstructions.mapIndexedNotNull { index, instruction ->
+        val reference = instruction.getReference<StringReference>() ?: return@mapIndexedNotNull null
+        index.takeIf {
+            (instruction.opcode == Opcode.CONST_STRING ||
+                instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
+                reference.string == SHARE_STATUS_URL_PREFIX
+        }
+    }
+    val returnIndices = methodInstructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
+    }
+    if (markerIndices.size != 1 || returnIndices.size != 1) return false
+
+    val markerIndex = markerIndices.single()
+    val markerRegister =
+        (methodInstructions[markerIndex] as? OneRegisterInstruction)?.registerA
+            ?: return false
+    val returnIndex = returnIndices.single()
+
+    val directResults = methodInstructions.mapIndexedNotNull { index, instruction ->
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (index <= markerIndex || reference.returnType != STRING_DESCRIPTOR) {
+            return@mapIndexedNotNull null
+        }
+        if (markerRegister !in instruction.registersUsed ||
+            methodInstructions.getOrNull(index + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val resultRegister =
+            (methodInstructions[index + 1] as? OneRegisterInstruction)?.registerA
+                ?: return@mapIndexedNotNull null
+        index.takeIf {
+            methodInstructions.valueReachesReturn(
+                resultIndex = index + 1,
+                resultRegister = resultRegister,
+                returnIndex = returnIndex,
+            )
+        }
+    }
+
+    val builderResults = methodInstructions.mapIndexedNotNull { index, instruction ->
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        val arguments = instruction.registersUsed
+        if (
+            index <= markerIndex ||
+                reference.definingClass != "Ljava/lang/StringBuilder;" ||
+                reference.name != "<init>" ||
+                reference.parameterTypes.map(CharSequence::toString) != listOf(STRING_DESCRIPTOR) ||
+                arguments.size != 2 ||
+                arguments[1] != markerRegister
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val builderRegister = arguments.first()
+        val toStringResults = methodInstructions.mapIndexedNotNull { toStringIndex, toStringInstruction ->
+            if (toStringIndex <= index) return@mapIndexedNotNull null
+            val toStringReference = toStringInstruction.getReference<MethodReference>()
+                ?: return@mapIndexedNotNull null
+            if (
+                toStringReference.definingClass != "Ljava/lang/StringBuilder;" ||
+                    toStringReference.name != "toString" ||
+                    toStringReference.parameterTypes.isNotEmpty() ||
+                    toStringReference.returnType != STRING_DESCRIPTOR ||
+                    toStringInstruction.registersUsed != listOf(builderRegister) ||
+                    methodInstructions.getOrNull(toStringIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT
+            ) {
+                return@mapIndexedNotNull null
+            }
+            val resultRegister =
+                (methodInstructions[toStringIndex + 1] as? OneRegisterInstruction)?.registerA
+                    ?: return@mapIndexedNotNull null
+            toStringIndex.takeIf {
+                methodInstructions.valueReachesReturn(
+                    resultIndex = toStringIndex + 1,
+                    resultRegister = resultRegister,
+                    returnIndex = returnIndex,
+                )
+            }
+        }
+        if (toStringResults.size != 1) return@mapIndexedNotNull null
+        index
+    }
+
+    return directResults.size + builderResults.size == 1
+}
+
+private fun List<Instruction>.valueReachesReturn(
+    resultIndex: Int,
+    resultRegister: Int,
+    returnIndex: Int,
+): Boolean {
+    if (resultIndex >= returnIndex) return false
+    var register = resultRegister
+    for (index in resultIndex + 1 until returnIndex) {
+        val instruction = this[index]
+        if (instruction.opcode == Opcode.MOVE_OBJECT || instruction.opcode == Opcode.MOVE) {
+            val move = instruction as? TwoRegisterInstruction ?: return false
+            if (move.registerA == register) register = move.registerB
+            continue
+        }
+        val destination = (instruction as? OneRegisterInstruction)?.registerA
+        if (destination == register) return false
+    }
+    val returnInstruction = this[returnIndex] as? OneRegisterInstruction ?: return false
+    return returnInstruction.registerA == register
+}
 
 @Suppress("unused")
 val newXCustomSharingDomainPatch =
