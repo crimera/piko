@@ -13,6 +13,7 @@ import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -24,7 +25,9 @@ import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
@@ -36,6 +39,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -72,6 +76,23 @@ private data class ResolvedFactory(
 private data class ExpandedAccentConstructor(
     val method: MutableMethod,
     val scratchRegisterStart: Int,
+)
+
+private data class PaletteAllocation(
+    val index: Int,
+    val branchEndIndex: Int,
+)
+
+private data class FactoryAllocation(
+    val index: Int,
+    val descriptor: String,
+    val selector: Int,
+)
+
+private data class ResolvedLottieRenderer(
+    val index: Int,
+    val instruction: Instruction,
+    val method: MutableMethod,
 )
 
 @Suppress("unused")
@@ -128,11 +149,13 @@ val dynamicColorPatch =
 
             val constructorReference = resolvePaletteConstructorReference(paletteDescriptor)
             val cacheFieldsByKind = provider.resolvePaletteCacheFields(paletteDescriptor)
+            val cacheFieldDescriptors = cacheFieldsByKind.values.map(FieldReference::toString).toSet()
             val factories =
                 PaletteKind.values().map { kind ->
                     resolveFactory(
                         kind,
                         cacheFieldsByKind.getValue(kind),
+                        cacheFieldDescriptors,
                         paletteDescriptor,
                         constructorReference,
                     )
@@ -168,12 +191,20 @@ val dynamicColorPatch =
         }
     }
 
-private fun <T> requireExactlyOne(
+internal fun <T> requireExactlyOne(
     target: String,
     matches: List<T>,
 ) {
     if (matches.size == 1) return
     throw PatchException("Expected one $target, found ${matches.size}: ${matches.joinToString()}")
+}
+
+private fun <T> requireAtMostOne(
+    target: String,
+    matches: List<T>,
+) {
+    if (matches.size <= 1) return
+    throw PatchException("Expected at most one $target, found ${matches.size}: ${matches.joinToString()}")
 }
 
 context(context: BytecodePatchContext)
@@ -262,22 +293,89 @@ private fun resolveThemeVariantSelectors(
             "NewX theme-variant mapping holder has no class initializer: " +
                 mappingArrayField.definingClass,
         )
-    return PaletteKind.values().associateWith { kind ->
-        val enumReadIndex =
-            initializer.instructions.withIndex().singleOrNull { (_, instruction) ->
-                instruction.opcode == Opcode.SGET_OBJECT &&
-                    instruction.getReference<FieldReference>()?.name == kind.themeVariantFieldName
-            }?.index ?: throw PatchException(
-                "Expected one NewX ${kind.name} theme-variant enum read: $initializer",
+    val instructions = initializer.instructions.toList()
+    val mappingStores = instructions.withIndex().filter { indexed ->
+        indexed.value.opcode == Opcode.SPUT_OBJECT &&
+            indexed.value.getReference<FieldReference>()?.toString() == mappingArrayField.toString()
+    }
+    requireExactlyOne("NewX theme-variant mapping-array store", mappingStores)
+    val mappingArrayRegister =
+        (mappingStores.single().value as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException(
+                "NewX theme-variant mapping-array store has no source register: " +
+                    mappingStores.single(),
             )
-        val arrayStore =
-            initializer.instructions.withIndex().drop(enumReadIndex + 1)
-                .firstOrNull { (_, instruction) -> instruction.opcode == Opcode.APUT }
-                ?: throw PatchException("NewX ${kind.name} selector store was not found: $initializer")
-        val valueRegister = (arrayStore.value as? ThreeRegisterInstruction)?.registerA
-            ?: throw PatchException("NewX ${kind.name} selector store has no value register")
-        initializer.instructions.resolveLatestLiteral(arrayStore.index, valueRegister)
-            ?: throw PatchException("NewX ${kind.name} selector literal was not found: $initializer")
+    val themeVariantFieldNames = PaletteKind.values().map(PaletteKind::themeVariantFieldName).toSet()
+
+    return PaletteKind.values().associateWith { kind ->
+        val enumReads = instructions.withIndex().filter { indexed ->
+            indexed.value.opcode == Opcode.SGET_OBJECT &&
+                indexed.value.getReference<FieldReference>()?.name == kind.themeVariantFieldName
+        }
+        requireExactlyOne("NewX ${kind.name} theme-variant enum read", enumReads)
+        val enumRead = enumReads.single()
+        val enumRegister =
+            (enumRead.value as? OneRegisterInstruction)?.registerA
+                ?: throw PatchException("NewX ${kind.name} enum read has no destination register: $enumRead")
+        val blockEnd = instructions.withIndex()
+            .firstOrNull { indexed ->
+                indexed.index > enumRead.index &&
+                    indexed.value.opcode == Opcode.SGET_OBJECT &&
+                    indexed.value.getReference<FieldReference>()?.name in themeVariantFieldNames
+            }?.index ?: mappingStores.single().index
+        if (blockEnd <= enumRead.index) {
+            throw PatchException("NewX ${kind.name} enum read has no bounded mapping block: $initializer")
+        }
+
+        val ordinalCandidates = instructions.withIndex().filter { indexed ->
+            indexed.index in (enumRead.index + 1) until blockEnd &&
+                indexed.value.opcode == Opcode.INVOKE_VIRTUAL &&
+                indexed.value.getReference<MethodReference>()?.let { reference ->
+                    reference.definingClass == "Ljava/lang/Enum;" &&
+                        reference.name == "ordinal" &&
+                        reference.parameterTypes.isEmpty() &&
+                        reference.returnType == "I"
+                } == true &&
+                indexed.value.registersUsed == listOf(enumRegister) &&
+                instructions.getOrNull(indexed.index + 1)?.opcode == Opcode.MOVE_RESULT
+        }
+        requireExactlyOne("NewX ${kind.name} enum ordinal read", ordinalCandidates)
+        val ordinal = ordinalCandidates.single()
+        val ordinalResultRegister =
+            (instructions[ordinal.index + 1] as? OneRegisterInstruction)?.registerA
+                ?: throw PatchException(
+                    "NewX ${kind.name} enum ordinal has no result register: $ordinal",
+                )
+
+        val arrayStoreCandidates = instructions.withIndex().filter { indexed ->
+            indexed.index in (ordinal.index + 2) until blockEnd &&
+                indexed.value.opcode == Opcode.APUT &&
+                (indexed.value as? ThreeRegisterInstruction)?.let { store ->
+                    store.registerB == mappingArrayRegister &&
+                        store.registerC == ordinalResultRegister
+                } == true
+        }
+        requireExactlyOne("NewX ${kind.name} selector store", arrayStoreCandidates)
+        val arrayStore = arrayStoreCandidates.single()
+        val valueRegister =
+            (arrayStore.value as? ThreeRegisterInstruction)?.registerA
+                ?: throw PatchException("NewX ${kind.name} selector store has no value register")
+        val selectorLiterals = instructions.withIndex().filter { indexed ->
+            val instruction = indexed.value
+            val oneRegister = instruction as? OneRegisterInstruction
+            val literal = instruction as? NarrowLiteralInstruction
+            indexed.index in (ordinal.index + 2) until arrayStore.index &&
+                oneRegister != null &&
+                literal != null &&
+                oneRegister.registerA == valueRegister
+        }
+        requireExactlyOne("NewX ${kind.name} selector literal", selectorLiterals)
+        (selectorLiterals.single().value as NarrowLiteralInstruction).narrowLiteral
+    }.also { selectorsByKind ->
+        val selectors = selectorsByKind.values
+        if (selectors.size != PaletteKind.values().size || selectors.toSet().size != selectors.size) {
+            throw PatchException("NewX theme-variant selectors are not distinct: $selectorsByKind")
+        }
     }
 }
 
@@ -314,6 +412,7 @@ context(context: BytecodePatchContext)
 private fun resolveFactory(
     kind: PaletteKind,
     cacheField: FieldReference,
+    cacheFieldDescriptors: Set<String>,
     paletteDescriptor: String,
     constructorReference: String,
 ): ResolvedFactory {
@@ -334,25 +433,83 @@ private fun resolveFactory(
     }
 
     val storeIndex = stores.single().index
-    val factoryAllocation =
-        initializer.instructions
-            .take(storeIndex)
-            .withIndex()
-            .lastOrNull { indexed -> indexed.value.opcode == Opcode.NEW_INSTANCE }
-            ?: throw PatchException("No Function0 allocation found for NewX $kind palette cache")
-    val factoryDescriptor =
-        factoryAllocation.value.getReference<TypeReference>()?.type
-            ?: throw PatchException("NewX $kind palette factory allocation has no type")
-    val factorySelector = initializer.resolveFactorySelector(
-        allocationIndex = factoryAllocation.index,
-        storeIndex = storeIndex,
-        factoryDescriptor = factoryDescriptor,
-    )
+    val instructions = initializer.instructions.toList()
+    val cacheStores = instructions.withIndex().filter { indexed ->
+        indexed.value.opcode == Opcode.SPUT_OBJECT &&
+            indexed.value.getReference<FieldReference>()?.toString() in cacheFieldDescriptors
+    }
+    if (cacheStores.size != EXPECTED_FACTORY_COUNT) {
+        throw PatchException(
+            "Expected $EXPECTED_FACTORY_COUNT NewX palette cache stores, found " +
+                "${cacheStores.size}: ${cacheStores.joinToString()}",
+        )
+    }
+    val previousStoreIndex = cacheStores.map { it.index }.filter { it < storeIndex }.maxOrNull() ?: -1
+    val storeRegister =
+        (stores.single().value as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException("NewX $kind palette cache store has no source register: ${stores.single()}")
+    val factoryCandidates = instructions.withIndex().mapNotNull { allocation ->
+        if (allocation.index !in (previousStoreIndex + 1) until storeIndex ||
+            allocation.value.opcode != Opcode.NEW_INSTANCE
+        ) {
+            return@mapNotNull null
+        }
+        val factoryDescriptor = allocation.value.getReference<TypeReference>()?.type
+            ?: return@mapNotNull null
+        val factoryClass = context.classDefByOrNull(factoryDescriptor) ?: return@mapNotNull null
+        if (FUNCTION0_DESCRIPTOR !in factoryClass.interfaces) return@mapNotNull null
+        val invokes = factoryClass.methods.filter { method ->
+            method.name == "invoke" &&
+                method.parameterTypes.isEmpty() &&
+                method.returnType == "Ljava/lang/Object;"
+        }
+        if (invokes.size != 1) return@mapNotNull null
+        val allocationRegister = (allocation.value as? OneRegisterInstruction)?.registerA
+            ?: return@mapNotNull null
+        val factoryConstructorReference = "$factoryDescriptor-><init>(I)V"
+        val constructors = instructions.withIndex().filter { constructor ->
+            constructor.index > allocation.index &&
+                constructor.index < storeIndex &&
+                constructor.value.getReference<MethodReference>()?.toString() ==
+                    factoryConstructorReference &&
+                constructor.value.receiverRegister() == allocationRegister
+        }
+        if (constructors.size != 1) return@mapNotNull null
+        val constructor = constructors.single()
+        val constructorInstruction = constructor.value as? FiveRegisterInstruction
+            ?: return@mapNotNull null
+        if (constructorInstruction.registerCount != 2) return@mapNotNull null
+        val selectorLiterals = instructions.withIndex().filter { literal ->
+            val instruction = literal.value
+            val oneRegister = instruction as? OneRegisterInstruction
+            val narrowLiteral = instruction as? NarrowLiteralInstruction
+            literal.index in (allocation.index + 1) until constructor.index &&
+                oneRegister != null &&
+                narrowLiteral != null &&
+                oneRegister.registerA == constructorInstruction.registerD
+        }
+        if (selectorLiterals.size != 1) return@mapNotNull null
+        if (!initializer.factoryResultFeedsStore(
+                constructorIndex = constructor.index,
+                storeIndex = storeIndex,
+                storeRegister = storeRegister,
+                allocationRegister = allocationRegister,
+            )
+        ) {
+            return@mapNotNull null
+        }
+        FactoryAllocation(
+            index = allocation.index,
+            descriptor = factoryDescriptor,
+            selector = (selectorLiterals.single().value as NarrowLiteralInstruction).narrowLiteral,
+        )
+    }
+    requireExactlyOne("NewX $kind Function0 cache allocation", factoryCandidates)
+    val factoryAllocation = factoryCandidates.single()
+    val factoryDescriptor = factoryAllocation.descriptor
+    val factorySelector = factoryAllocation.selector
 
     val factoryClass = context.mutableClassDefBy(factoryDescriptor)
-    if (FUNCTION0_DESCRIPTOR !in factoryClass.interfaces) {
-        throw PatchException("NewX $kind palette cache factory is not a Function0: $factoryDescriptor")
-    }
     val invokes =
         factoryClass.methods.filter { method ->
             method.name == "invoke" &&
@@ -367,53 +524,59 @@ private fun resolveFactory(
     }
 
     val invoke = invokes.single()
-    val paletteAllocationIndex = invoke.resolvePaletteAllocationIndex(
+    val paletteAllocation = invoke.resolvePaletteAllocationIndex(
         factorySelector = factorySelector,
         paletteDescriptor = paletteDescriptor,
         kind = kind,
+        constructorReference = constructorReference,
     )
-    val isLight = invoke.resolvePaletteIsLight(paletteAllocationIndex, constructorReference)
+    val isLight = invoke.resolvePaletteIsLight(paletteAllocation, constructorReference)
     if (isLight != kind.isLight) {
         throw PatchException(
             "NewX ${kind.name} palette branch has unexpected isLight=$isLight: $invoke",
         )
     }
-    return ResolvedFactory(kind, invoke, paletteAllocationIndex)
+    return ResolvedFactory(kind, invoke, paletteAllocation.index)
 }
 
-private fun MutableMethod.resolveFactorySelector(
-    allocationIndex: Int,
-    storeIndex: Int,
-    factoryDescriptor: String,
-): Int {
-    val allocationRegister =
-        (instructions.getOrNull(allocationIndex) as? OneRegisterInstruction)?.registerA
-            ?: throw PatchException("NewX palette factory allocation has no destination register: $this")
-    val constructorReference = "$factoryDescriptor-><init>(I)V"
-    val constructor =
-        instructions.withIndex().singleOrNull { indexed ->
-            indexed.index > allocationIndex &&
-                indexed.index < storeIndex &&
-                indexed.value.getReference<MethodReference>()?.toString() == constructorReference
-        } ?: throw PatchException(
-            "NewX palette factory constructor was not found between allocation and cache store: $this",
-        )
-    val constructorInstruction = constructor.value as? FiveRegisterInstruction
-        ?: throw PatchException("NewX palette factory constructor is not a five-register invoke: $this")
-    if (constructorInstruction.registerCount != 2 ||
-        constructorInstruction.registerC != allocationRegister
-    ) {
-        throw PatchException("NewX palette factory constructor has an unexpected register shape: $this")
+private fun Instruction.receiverRegister(): Int? =
+    when (this) {
+        is FiveRegisterInstruction -> registerC.takeIf { registerCount > 0 }
+        is RegisterRangeInstruction -> startRegister.takeIf { registerCount > 0 }
+        else -> null
     }
-    return instructions.resolveLatestLiteral(constructor.index, constructorInstruction.registerD)
-        ?: throw PatchException("NewX palette factory selector literal was not found: $this")
+
+private fun MutableMethod.factoryResultFeedsStore(
+    constructorIndex: Int,
+    storeIndex: Int,
+    storeRegister: Int,
+    allocationRegister: Int,
+): Boolean {
+    val consumers = instructions.withIndex().filter { indexed ->
+        indexed.index > constructorIndex &&
+            indexed.index < storeIndex &&
+            (indexed.value.opcode == Opcode.INVOKE_STATIC ||
+                indexed.value.opcode == Opcode.INVOKE_STATIC_RANGE) &&
+            indexed.value.getReference<MethodReference>()?.let { reference ->
+                val functionParameter = reference.parameterTypes.indexOf(FUNCTION0_DESCRIPTOR)
+                functionParameter >= 0 &&
+                    reference.returnType.startsWith("L") &&
+                    indexed.value.registersUsed.getOrNull(functionParameter) == allocationRegister
+            } == true &&
+            instructions.getOrNull(indexed.index + 1)?.let { result ->
+                result.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                    (result as? OneRegisterInstruction)?.registerA == storeRegister
+            } == true
+    }
+    return consumers.size == 1
 }
 
 private fun MutableMethod.resolvePaletteAllocationIndex(
     factorySelector: Int,
     paletteDescriptor: String,
     kind: PaletteKind,
-): Int {
+    constructorReference: String,
+): PaletteAllocation {
     val switchInstructions = instructions.withIndex().filter { indexed ->
         indexed.value.opcode == Opcode.PACKED_SWITCH
     }
@@ -431,13 +594,25 @@ private fun MutableMethod.resolvePaletteAllocationIndex(
         element as? BuilderSwitchElement
             ?: throw PatchException("NewX palette factory switch case is not mutable: $this")
     }
-    val caseStart =
-        switchElements.singleOrNull { element -> element.key == factorySelector }
-            ?.target?.location?.index
-            ?: (switchInstruction.location.index + 1)
+    val explicitCase = switchElements.singleOrNull { element -> element.key == factorySelector }
+    val defaultStart = switchInstruction.location.index + 1
+    val caseStart = explicitCase?.target?.location?.index ?: defaultStart
     val caseEnd = switchElements
         .mapNotNull { element -> element.target.location.index.takeIf { index -> index > caseStart } }
         .minOrNull() ?: instructions.size
+    if (explicitCase == null &&
+        !isProvenDefaultPaletteBranch(
+            branchStart = defaultStart,
+            branchEnd = caseEnd,
+            paletteDescriptor = paletteDescriptor,
+            constructorReference = constructorReference,
+        )
+    ) {
+        throw PatchException(
+            "NewX ${kind.name} selector $factorySelector has no explicit palette case and " +
+                "its default branch is not proven to return the palette: $this",
+        )
+    }
     val paletteAllocations = instructions.withIndex().filter { indexed ->
         indexed.index in caseStart until caseEnd &&
             indexed.value.opcode == Opcode.NEW_INSTANCE &&
@@ -453,21 +628,64 @@ private fun MutableMethod.resolvePaletteAllocationIndex(
                 "${paletteAllocations.size} of $totalAllocations: $this",
         )
     }
-    return paletteAllocations.single().index
+    return PaletteAllocation(
+        index = paletteAllocations.single().index,
+        branchEndIndex = caseEnd,
+    )
+}
+
+private fun MutableMethod.isProvenDefaultPaletteBranch(
+    branchStart: Int,
+    branchEnd: Int,
+    paletteDescriptor: String,
+    constructorReference: String,
+): Boolean {
+    if (branchStart >= branchEnd || branchEnd > instructions.size) return false
+    val allocations = instructions.withIndex().filter { indexed ->
+        indexed.index in branchStart until branchEnd &&
+            indexed.value.opcode == Opcode.NEW_INSTANCE &&
+            indexed.value.getReference<TypeReference>()?.type == paletteDescriptor
+    }
+    if (allocations.size != 1) return false
+    val allocation = allocations.single()
+    val allocationRegister =
+        (allocation.value as? OneRegisterInstruction)?.registerA ?: return false
+    val constructors = instructions.withIndex().filter { indexed ->
+        indexed.index > allocation.index &&
+            indexed.index < branchEnd &&
+            indexed.value.getReference<MethodReference>()?.toString() == constructorReference &&
+            indexed.value.receiverRegister() == allocationRegister
+    }
+    if (constructors.size != 1) return false
+    val returns = instructions.withIndex().filter { indexed ->
+        indexed.index > constructors.single().index &&
+            indexed.index < branchEnd &&
+            indexed.value.opcode == Opcode.RETURN_OBJECT &&
+            (indexed.value as? OneRegisterInstruction)?.registerA == allocationRegister
+    }
+    return returns.size == 1
 }
 
 private fun MutableMethod.resolvePaletteIsLight(
-    allocationIndex: Int,
+    allocation: PaletteAllocation,
     constructorReference: String,
 ): Boolean {
-    val constructor =
-        instructions.withIndex().drop(allocationIndex + 1).firstOrNull { (_, instruction) ->
-            instruction.getReference<MethodReference>()?.toString() == constructorReference
-        } ?: throw PatchException("NewX palette allocation has no matching constructor call: $this")
+    val constructorCandidates = instructions.withIndex().filter { indexed ->
+        indexed.index > allocation.index &&
+            indexed.index < allocation.branchEndIndex &&
+            indexed.value.getReference<MethodReference>()?.toString() == constructorReference &&
+            indexed.value.receiverRegister() ==
+                (instructions[allocation.index] as? OneRegisterInstruction)?.registerA
+    }
+    requireExactlyOne(
+        "NewX palette constructor in selected allocation branch",
+        constructorCandidates,
+    )
+    val constructor = constructorCandidates.single()
     val range = constructor.value as? RegisterRangeInstruction
         ?: throw PatchException("NewX palette constructor is not an invoke-range: $this")
     val allocationRegister =
-        (instructions[allocationIndex] as? OneRegisterInstruction)?.registerA
+        (instructions[allocation.index] as? OneRegisterInstruction)?.registerA
             ?: throw PatchException("NewX palette allocation has no destination register: $this")
     if (allocationRegister != range.startRegister) {
         throw PatchException(
@@ -477,15 +695,18 @@ private fun MutableMethod.resolvePaletteIsLight(
     }
 
     val isLightRegister = range.startRegister + 1
-    val isLightLiteral =
-        instructions.subList(allocationIndex + 1, constructor.index).asReversed()
-            .firstOrNull { instruction ->
-                instruction is OneRegisterInstruction &&
-                    instruction is NarrowLiteralInstruction &&
-                    instruction.registerA == isLightRegister &&
-                    instruction.narrowLiteral in 0..1
-            } as? NarrowLiteralInstruction
-            ?: throw PatchException("NewX palette isLight literal not found: $this")
+    val isLightLiterals = instructions.withIndex().filter { indexed ->
+        val instruction = indexed.value
+        val oneRegister = instruction as? OneRegisterInstruction
+        val narrowLiteral = instruction as? NarrowLiteralInstruction
+        indexed.index in (allocation.index + 1) until constructor.index &&
+            oneRegister != null &&
+            narrowLiteral != null &&
+            oneRegister.registerA == isLightRegister &&
+            narrowLiteral.narrowLiteral in 0..1
+    }
+    requireExactlyOne("NewX palette isLight literal in selected branch", isLightLiterals)
+    val isLightLiteral = isLightLiterals.single().value as NarrowLiteralInstruction
     return isLightLiteral.narrowLiteral == 1
 }
 
@@ -675,22 +896,20 @@ private fun patchInlineActionTints() {
                 return@mapNotNull null
             }
             instruction.getReference<MethodReference>()
-        }.singleOrNull { reference ->
+    }.singleOrNull { reference ->
             reference.parameterTypes.firstOrNull() == actionTypeDescriptor &&
                 reference.returnType == "V"
         } ?: throw PatchException("NewX inline action tint renderer call not found: $entryMethod")
     val tintMethod = tintReference.resolveMutableMethod("NewX inline action tint renderer")
-    val unfavoriteIndex =
-        tintMethod.instructions.indexOfFirst { instruction ->
-            instruction.getReference<FieldReference>()?.let { field ->
+    val unfavoriteReads = tintMethod.instructions.withIndex().filter { indexed ->
+        indexed.value.opcode == Opcode.SGET_OBJECT &&
+            indexed.value.getReference<FieldReference>()?.let { field ->
                 field.definingClass == actionTypeDescriptor && field.name == "Unfavorite"
             } == true
-        }
-    if (unfavoriteIndex < 0) {
-        throw PatchException("NewX activated-like branch not found: $tintMethod")
     }
+    requireExactlyOne("NewX Unfavorite enum read", unfavoriteReads)
     val likeComposableConstructors =
-        tintMethod.instructions.drop(unfavoriteIndex + 1)
+        tintMethod.instructions.drop(unfavoriteReads.single().index + 1)
             .mapNotNull { instruction -> instruction.getReference<MethodReference>() }
             .filter { reference ->
                 reference.name == "<init>" &&
@@ -726,7 +945,7 @@ private fun patchInlineActionTints() {
         move-result-wide p2
         """.trimIndent(),
     )
-    val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteIndex)
+    val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteReads.single().index)
     patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
 }
 
@@ -737,6 +956,8 @@ private const val TAB_RENDERER_SCOPE = "Lcom/x/ui/common/tabs/"
 private const val PROFILE_INDICATOR_SCOPE = "Landroidx/compose/foundation/text/"
 private const val INDICATOR_COLOR_LABEL = "indicatorColor"
 private const val COMPOSE_MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
+private const val COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
+private const val JAVA_LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val COMPOSE_FOUNDATION_SCOPE = "Landroidx/compose/foundation/"
 
 /**
@@ -846,9 +1067,20 @@ private fun patchTabTints(horizon: String) {
     val slots = tabSlotColorsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
     val indicatorMatches = NewXTabIndicatorRendererFingerprint.scopedMatchAllOrNull().orEmpty()
     val profileMatches = profileTabIndicatorFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
+    requireAtMostOne("NewX tab slot renderer", slots)
+    requireAtMostOne("NewX tab indicator renderer", indicatorMatches)
+    requireAtMostOne("NewX profile tab indicator", profileMatches)
+    val containerReference = slots.singleOrNull()?.method?.resolveTabContainerReference(horizon)
     // Releases without a dedicated profile painter share the container indicator for timeline
     // and profile tabs; that sharing is proven by profile code calling the tabs container.
-    val sharedIndicator = profileMatches.isEmpty() && profileSharesContainerIndicator()
+    val sharingProof =
+        if (profileMatches.isEmpty() && containerReference != null) {
+            profileSharesContainerIndicator(containerReference)
+        } else {
+            emptyList()
+        }
+    requireAtMostOne("NewX profile/container indicator sharing proof", sharingProof)
+    val sharedIndicator = profileMatches.isEmpty() && sharingProof.size == 1
     if (
         slots.size == 1 &&
             indicatorMatches.size == 1 &&
@@ -860,12 +1092,14 @@ private fun patchTabTints(horizon: String) {
         return
     }
     val horizonReads = horizonTabsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
+    requireAtMostOne("NewX Horizon tab color fallback", horizonReads)
     // A proven Horizon tab shape with no slot colors needs no hook: the dynamic palette
     // factories already replace the colors it reads.
     if (
         slots.isEmpty() &&
+            indicatorMatches.isEmpty() &&
             profileMatches.isEmpty() &&
-            horizonReads.isNotEmpty()
+            horizonReads.size == 1
     ) {
         return
     }
@@ -877,19 +1111,295 @@ private fun patchTabTints(horizon: String) {
     )
 }
 
+private fun MethodReference.isTabContainerRenderer(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return definingClass.startsWith(TAB_RENDERER_SCOPE) &&
+        returnType == "V" &&
+        COMPOSE_MODIFIER_DESCRIPTOR in parameters &&
+        COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR in parameters &&
+        "J" in parameters &&
+        (
+            parameters.firstOrNull() == JAVA_LIST_DESCRIPTOR ||
+                (
+                    parameters.size == 7 &&
+                        parameters.firstOrNull()?.startsWith(TAB_RENDERER_SCOPE) == true &&
+                        parameters.count { parameter -> parameter == "Ljava/lang/String;" } == 1 &&
+                        parameters.count { parameter -> parameter == "J" } == 1 &&
+                        parameters.count { parameter -> parameter == FUNCTION0_DESCRIPTOR } == 1 &&
+                        parameters.count { parameter -> parameter == "I" } == 1
+                    )
+            )
+}
+
+private fun Instruction.firstStaticArgumentRegister(): Int? =
+    if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) {
+        registersUsed.firstOrNull()
+    } else {
+        null
+    }
+
+private fun MutableMethod.resolveTabContainerReference(horizon: String): MethodReference {
+    val calls = instructions.withIndex().filter { indexed ->
+        val instruction = indexed.value
+        (instruction.opcode == Opcode.INVOKE_STATIC ||
+            instruction.opcode == Opcode.INVOKE_STATIC_RANGE) &&
+            instruction.getReference<MethodReference>()?.let { reference ->
+                reference.isTabContainerRenderer() &&
+                    hasTabContainerArgumentFlow(indexed.index, reference, horizon)
+            } == true
+    }
+    if (calls.size != 1) {
+        val candidates = instructions.withIndex().mapNotNull { indexed ->
+            val instruction = indexed.value
+            if (instruction.opcode != Opcode.INVOKE_STATIC &&
+                instruction.opcode != Opcode.INVOKE_STATIC_RANGE
+            ) {
+                return@mapNotNull null
+            }
+            val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+            val parameters = reference.parameterTypes.map(CharSequence::toString)
+            "${indexed.index}:$reference(size=${parameters.size},scope=${reference.definingClass.startsWith(TAB_RENDERER_SCOPE)}," +
+                "v=${reference.returnType == "V"},first=${parameters.firstOrNull()},string=${parameters.count { it == "Ljava/lang/String;" }}," +
+                "wide=${parameters.count { it == "J" }},fn=${parameters.count { it == FUNCTION0_DESCRIPTOR }}," +
+                "modifier=${COMPOSE_MODIFIER_DESCRIPTOR in parameters},composer=${COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR in parameters}," +
+                "int=${parameters.count { it == "I" }})"
+        }
+        throw PatchException(
+            "Expected one NewX tabs container call in slot renderer, found ${calls.size}; " +
+                "static candidates=${candidates.joinToString()}: $this",
+        )
+    }
+    return calls.single().value.getReference<MethodReference>()
+        ?: throw PatchException("NewX tabs container call reference is missing: $this")
+}
+
+private val OBJECT_MOVE_OPCODES =
+    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
+
+private fun Instruction.objectDestinationRegister(): Int? =
+    when {
+        opcode in OBJECT_MOVE_OPCODES -> (this as? TwoRegisterInstruction)?.registerA
+        opcode == Opcode.IGET_OBJECT -> (this as? TwoRegisterInstruction)?.registerA
+        opcode == Opcode.AGET_OBJECT -> (this as? ThreeRegisterInstruction)?.registerA
+        opcode == Opcode.NEW_INSTANCE ||
+            opcode == Opcode.MOVE_RESULT_OBJECT ||
+            opcode == Opcode.SGET_OBJECT ||
+            opcode == Opcode.CHECK_CAST ||
+            opcode == Opcode.MOVE_EXCEPTION ||
+            opcode == Opcode.CONST_STRING ||
+            opcode == Opcode.CONST_STRING_JUMBO ||
+            opcode == Opcode.CONST_CLASS -> (this as? OneRegisterInstruction)?.registerA
+        else -> null
+    }
+
+private val TAB_WIDE_MOVE_OPCODES =
+    setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
+
+private fun Instruction.wideDestinationRegister(): Int? =
+    when {
+        opcode in TAB_WIDE_MOVE_OPCODES ||
+            opcode == Opcode.IGET_WIDE ->
+            (this as? TwoRegisterInstruction)?.registerA
+        opcode == Opcode.SGET_WIDE ||
+            opcode == Opcode.MOVE_RESULT_WIDE ->
+            (this as? OneRegisterInstruction)?.registerA
+        else -> null
+    }
+
+private fun Instruction.wideSourceRegister(): Int? =
+    if (opcode in TAB_WIDE_MOVE_OPCODES) {
+        (this as? TwoRegisterInstruction)?.registerB
+    } else {
+        null
+    }
+
+private fun List<Instruction>.invokeArgumentRegister(
+    callIndex: Int,
+    reference: MethodReference,
+    parameterIndex: Int,
+): Int? {
+    val wordOffset =
+        reference.parameterTypes
+            .take(parameterIndex)
+            .sumOf { parameter -> if (parameter == "J" || parameter == "D") 2 else 1 }
+    return getOrNull(callIndex)?.registersUsed?.getOrNull(wordOffset)
+}
+
+private fun List<Instruction>.wideArgumentFlowsFromPalette(
+    callIndex: Int,
+    argumentRegister: Int,
+    horizon: String,
+): Boolean {
+    val pending = mutableListOf(callIndex to argumentRegister)
+    val visited = mutableSetOf<Pair<Int, Int>>()
+    while (pending.isNotEmpty()) {
+        val (searchEnd, register) = pending.removeLast()
+        if (!visited.add(searchEnd to register)) continue
+        val definitionIndex =
+            (searchEnd - 1 downTo 0).firstOrNull { index ->
+                this[index].wideDestinationRegister() == register
+            } ?: continue
+        val definition = this[definitionIndex]
+        when (definition.opcode) {
+            in TAB_WIDE_MOVE_OPCODES -> {
+                val sourceRegister = definition.wideSourceRegister() ?: continue
+                pending += definitionIndex to sourceRegister
+            }
+            Opcode.IGET_WIDE,
+            Opcode.SGET_WIDE,
+            -> {
+                val field = definition.getReference<FieldReference>() ?: continue
+                if (
+                    field.type == "J" &&
+                        field.definingClass != horizon &&
+                        FRAMEWORK_OWNER_PREFIXES.none(field.definingClass::startsWith)
+                ) {
+                    return true
+                }
+            }
+            else -> continue
+        }
+    }
+    return false
+}
+
+private fun List<Instruction>.objectArgumentFlowsFromDescriptor(
+    callIndex: Int,
+    argumentRegister: Int,
+    descriptor: String,
+    parameterRegister: Int? = null,
+): Boolean {
+    val pending = mutableListOf(callIndex to argumentRegister)
+    val visited = mutableSetOf<Pair<Int, Int>>()
+    while (pending.isNotEmpty()) {
+        val (searchEnd, register) = pending.removeLast()
+        if (!visited.add(searchEnd to register)) continue
+            val definitionIndex =
+            (searchEnd - 1 downTo 0).firstOrNull { index ->
+                this[index].objectDestinationRegister() == register
+            } ?: return parameterRegister == register
+        val definition = this[definitionIndex]
+        if (definition.opcode in OBJECT_MOVE_OPCODES) {
+            val move = definition as? TwoRegisterInstruction ?: continue
+            pending += definitionIndex to move.registerB
+            continue
+        }
+        val producedDescriptor =
+            when (definition.opcode) {
+                Opcode.NEW_INSTANCE,
+                Opcode.CHECK_CAST,
+                -> definition.getReference<TypeReference>()?.type
+                Opcode.SGET_OBJECT,
+                Opcode.IGET_OBJECT,
+                -> definition.getReference<FieldReference>()?.type
+                Opcode.MOVE_RESULT_OBJECT ->
+                    this.getOrNull(definitionIndex - 1)
+                        ?.getReference<MethodReference>()
+                        ?.returnType
+                else -> null
+            }
+        if (producedDescriptor == descriptor) return true
+    }
+    return false
+}
+
+private fun MutableMethod.hasTabContainerArgumentFlow(
+    callIndex: Int,
+    reference: MethodReference,
+    horizon: String,
+): Boolean {
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    val firstArgumentRegister =
+        instructions.invokeArgumentRegister(callIndex, reference, 0) ?: return false
+    if (parameters.firstOrNull() == JAVA_LIST_DESCRIPTOR) {
+        return instructions.objectArgumentFlowsFromList(callIndex, firstArgumentRegister) ||
+            (
+                parameterTypes.firstOrNull()?.toString()?.isListDescriptor() == true &&
+                    instructions.objectArgumentFlowsFromDescriptor(
+                        callIndex,
+                        firstArgumentRegister,
+                        parameterTypes.first().toString(),
+                        implementation?.registerCount?.minus(numberOfParameterRegisters),
+                    )
+                )
+    }
+    val wideParameterIndex = parameters.indexOfFirst { parameter -> parameter == "J" }
+    val wideArgumentRegister =
+        instructions.invokeArgumentRegister(callIndex, reference, wideParameterIndex)
+            ?: return false
+    return instructions.objectArgumentFlowsFromDescriptor(
+        callIndex,
+        firstArgumentRegister,
+        parameters.firstOrNull() ?: return false,
+    ) && instructions.wideArgumentFlowsFromPalette(callIndex, wideArgumentRegister, horizon)
+}
+
+private fun String.isListDescriptor(): Boolean =
+    this == JAVA_LIST_DESCRIPTOR ||
+        this == "Ljava/util/Collection;" ||
+        this == "Ljava/util/ArrayList;" ||
+        (startsWith("Ljava/util/") &&
+            (endsWith("List;") || endsWith("Collection;")))
+
+private fun List<Instruction>.listSourceDescriptor(
+    index: Int,
+): String? {
+    val instruction = this[index]
+    return when (instruction.opcode) {
+        Opcode.NEW_INSTANCE,
+        Opcode.CHECK_CAST,
+        -> instruction.getReference<TypeReference>()?.type
+        Opcode.SGET_OBJECT,
+        Opcode.IGET_OBJECT,
+        -> instruction.getReference<FieldReference>()?.type
+        Opcode.MOVE_RESULT_OBJECT ->
+            getOrNull(index - 1)?.getReference<MethodReference>()?.returnType
+        else -> null
+    }
+}
+
+private fun List<Instruction>.objectArgumentFlowsFromList(
+    callIndex: Int,
+    argumentRegister: Int,
+): Boolean {
+    val pending = mutableListOf(callIndex to argumentRegister)
+    val visited = mutableSetOf<Pair<Int, Int>>()
+    while (pending.isNotEmpty()) {
+        val (searchEnd, register) = pending.removeLast()
+        if (!visited.add(searchEnd to register)) continue
+        val definitionIndex = (searchEnd - 1 downTo 0).firstOrNull { index ->
+            this[index].objectDestinationRegister() == register
+        } ?: continue
+        val definition = this[definitionIndex]
+        if (definition.opcode in OBJECT_MOVE_OPCODES) {
+            val move = definition as? TwoRegisterInstruction ?: continue
+            pending += definitionIndex to move.registerB
+            continue
+        }
+        if (listSourceDescriptor(definitionIndex)?.isListDescriptor() == true) return true
+    }
+    return false
+}
+
 context(context: BytecodePatchContext)
-private fun profileSharesContainerIndicator(): Boolean =
+private fun profileSharesContainerIndicator(containerReference: MethodReference): List<Match> =
     Fingerprint(
         definingClass = "Lcom/x/profile/",
         custom = { method, _ ->
-            method.implementation?.instructions?.toList().orEmpty().any { instruction ->
-                instruction.getReference<MethodReference>()?.let { reference ->
-                    reference.definingClass.startsWith(TAB_RENDERER_SCOPE) &&
-                        "Ljava/util/List;" in reference.parameterTypes
-                } == true
+            val instructions = method.implementation?.instructions?.toList().orEmpty()
+            val calls = instructions.withIndex().filter { indexed ->
+                val instruction = indexed.value
+                (instruction.opcode == Opcode.INVOKE_STATIC ||
+                    instruction.opcode == Opcode.INVOKE_STATIC_RANGE) &&
+                    instruction.getReference<MethodReference>()?.toString() ==
+                        containerReference.toString()
             }
+            calls.size == 1 &&
+                calls.single().value.firstStaticArgumentRegister()?.let { argumentRegister ->
+                    instructions.objectArgumentFlowsFromList(calls.single().index, argumentRegister)
+                } == true
         },
-    ).scopedMatchAllOrNull().orEmpty().isNotEmpty()
+    ).scopedMatchAllOrNull().orEmpty()
 /**
  * Pre-separate-palette tab implementations read the tab color straight from the Horizon palette,
  * which the dynamic palette factories already replace. The descriptor is resolved, never named.
@@ -1002,13 +1512,146 @@ private fun MethodReference.resolveMutableMethod(label: String): MutableMethod =
                 method.returnType == returnType
         } ?: throw PatchException("$label not found: $this")
 
+private val WIDE_MOVE_OPCODES =
+    setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
+
+private val BOOLEAN_NORMALIZATION_OPCODES =
+    setOf(
+        Opcode.MOVE,
+        Opcode.MOVE_FROM16,
+        Opcode.MOVE_16,
+        Opcode.CONST_4,
+        Opcode.CONST_16,
+        Opcode.CONST,
+    )
+
+private fun Instruction.wideArgumentStarts(reference: MethodReference): List<Int> {
+    val registers = registersUsed
+    var registerIndex =
+        if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) 0 else 1
+    return reference.parameterTypes.mapNotNull { parameter ->
+        val startRegister = registers.getOrNull(registerIndex)
+        val type = parameter.toString()
+        registerIndex += if (type == "J" || type == "D") 2 else 1
+        startRegister.takeIf { type == "J" }
+    }
+}
+
+private fun Instruction.isComposeRendererCall(): Boolean {
+    val reference = getReference<MethodReference>() ?: return false
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    return reference.returnType == "V" &&
+        reference.definingClass.startsWith("Lcom/") &&
+        "Ljava/lang/String;" in parameters &&
+        COMPOSE_MODIFIER_DESCRIPTOR in parameters &&
+        "J" in parameters
+}
+
+private fun MutableMethod.wideColorFeedsComposeRenderer(
+    loadIndex: Int,
+    loadRegister: Int,
+): Boolean {
+    val aliases = mutableSetOf(loadRegister)
+    val methodInstructions = instructions.toList()
+    for (indexed in methodInstructions.withIndex().drop(loadIndex + 1)) {
+        val instruction = indexed.value
+        if (instruction.opcode in WIDE_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction
+            if (move != null && move.registerB in aliases) {
+                aliases += move.registerA
+            }
+        }
+        if (instruction.isComposeRendererCall()) {
+            val reference = instruction.getReference<MethodReference>() ?: continue
+            if (instruction.wideArgumentStarts(reference).any { it in aliases }) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
 private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldReference {
-    val colorLoad =
-        instructions.withIndex()
-            .drop(unfavoriteIndex + 1)
-            .take(20)
-            .firstOrNull { (_, instruction) -> instruction.opcode == Opcode.SGET_WIDE }
-            ?: throw PatchException("NewX activated-like tint load not found: $this")
+    val methodInstructions = instructions.toList()
+    val unfavoriteRead = methodInstructions.getOrNull(unfavoriteIndex)
+        ?: throw PatchException("NewX Unfavorite enum read is out of bounds: $this")
+    val unfavoriteRegister = (unfavoriteRead as? OneRegisterInstruction)?.registerA
+        ?: throw PatchException("NewX Unfavorite enum read has no destination register: $this")
+
+    val comparisons = methodInstructions.withIndex().mapNotNull { indexed ->
+        if (indexed.value.opcode != Opcode.IF_EQ && indexed.value.opcode != Opcode.IF_NE) {
+            return@mapNotNull null
+        }
+        if (unfavoriteRegister !in indexed.value.registersUsed) return@mapNotNull null
+        val branch = indexed.value as? BuilderOffsetInstruction
+            ?: throw PatchException("NewX Unfavorite comparison is not mutable: ${indexed.value}")
+        val targetIndex = branch.target.location.index
+        if (targetIndex <= indexed.index) return@mapNotNull null
+        indexed.index to targetIndex
+    }
+
+    val colorCandidates = comparisons.flatMap { (comparisonIndex, comparisonTarget) ->
+        methodInstructions.withIndex().flatMap { unary ->
+            if (unary.index <= comparisonTarget || unary.value.opcode != Opcode.IF_EQZ) {
+                return@flatMap emptyList()
+            }
+            val unaryBranch = unary.value as? BuilderOffsetInstruction
+                ?: throw PatchException("NewX activated-like unary branch is not mutable: ${unary.value}")
+            val activeEnd = unaryBranch.target.location.index
+            if (activeEnd <= unary.index) return@flatMap emptyList()
+            val booleanRegister = unary.value.registersUsed.singleOrNull()
+                ?: return@flatMap emptyList()
+
+            val mergeGotos = methodInstructions.withIndex().filter { indexed ->
+                indexed.index in (comparisonIndex + 1) until unary.index &&
+                    indexed.value.opcode in setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32) &&
+                    (indexed.value as? BuilderOffsetInstruction)?.target?.location?.index == unary.index
+            }
+            if (mergeGotos.size != 1) return@flatMap emptyList()
+            val mergeGotoIndex = mergeGotos.single().index
+            val fallthroughEnd = minOf(comparisonTarget, mergeGotoIndex)
+            val targetEnd =
+                if (comparisonTarget < mergeGotoIndex) mergeGotoIndex else unary.index
+            if (fallthroughEnd <= comparisonIndex + 1 || targetEnd <= comparisonTarget) {
+                return@flatMap emptyList()
+            }
+
+            val fallthroughWrites = methodInstructions.withIndex()
+                .filter { indexed ->
+                    indexed.index in (comparisonIndex + 1) until fallthroughEnd &&
+                        indexed.value.opcode in BOOLEAN_NORMALIZATION_OPCODES &&
+                        (indexed.value as? OneRegisterInstruction)?.registerA == booleanRegister
+                }
+            val targetWrites = methodInstructions.withIndex()
+                .filter { indexed ->
+                    indexed.index in comparisonTarget until targetEnd &&
+                        indexed.value.opcode in BOOLEAN_NORMALIZATION_OPCODES &&
+                        (indexed.value as? OneRegisterInstruction)?.registerA == booleanRegister
+                }
+            if (fallthroughWrites.size != 1 || targetWrites.size != 1) return@flatMap emptyList()
+
+            val comparison = methodInstructions[comparisonIndex]
+            val equalWrites =
+                if (comparison.opcode == Opcode.IF_NE) fallthroughWrites else targetWrites
+            val nonEqualWrites =
+                if (comparison.opcode == Opcode.IF_NE) targetWrites else fallthroughWrites
+            val equalValue = methodInstructions.resolveBooleanNormalizationValue(equalWrites.single())
+            val nonEqualValue = methodInstructions.resolveBooleanNormalizationValue(nonEqualWrites.single())
+            if (equalValue != 1 || nonEqualValue != 0) return@flatMap emptyList()
+
+            methodInstructions.withIndex().filter { indexed ->
+                indexed.index in (unary.index + 1) until activeEnd &&
+                    indexed.value.opcode == Opcode.SGET_WIDE &&
+                    indexed.value.getReference<FieldReference>()?.type == "J"
+            }.filter { indexed ->
+                val colorRegister = (indexed.value as? OneRegisterInstruction)?.registerA
+                    ?: return@filter false
+                wideColorFeedsComposeRenderer(indexed.index, colorRegister)
+            }
+        }
+    }
+    requireExactlyOne("NewX activated-like tint load in the active branch", colorCandidates)
+    val colorLoad = colorCandidates.single()
     val activeLikeField = colorLoad.value.getReference<FieldReference>()
         ?: throw PatchException("NewX activated-like tint field is missing: $this")
     val colorRegister = (colorLoad.value as? OneRegisterInstruction)?.registerA
@@ -1023,6 +1666,47 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldRe
     return activeLikeField
 }
 
+private fun List<Instruction>.resolveBooleanNormalizationValue(
+    write: IndexedValue<Instruction>,
+): Int? {
+    val instruction = write.value
+    val literal = instruction as? NarrowLiteralInstruction
+    if (literal != null && instruction is OneRegisterInstruction) {
+        return literal.narrowLiteral
+    }
+    val move = instruction as? TwoRegisterInstruction ?: return null
+    if (instruction.opcode !in setOf(Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16)) {
+        return null
+    }
+    return resolveLatestLiteral(write.index, move.registerB)
+}
+
+context(context: BytecodePatchContext)
+private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
+    val candidates = instructions.withIndex().filter { indexed ->
+        val reference = indexed.value.getReference<MethodReference>() ?: return@filter false
+        if (reference.parameterTypes.size !in 8..9 || reference.returnType != "V") return@filter false
+        val parameters = reference.parameterTypes
+        parameters[0] == "Z" &&
+            parameters[2] == "Z" &&
+            parameters[3] == FUNCTION0_DESCRIPTOR &&
+            parameters[4] == COMPOSE_MODIFIER_DESCRIPTOR &&
+            parameters[5] == "Ljava/lang/String;" &&
+            parameters[6] == "Landroidx/compose/runtime/Composer;" &&
+            parameters[7] == "I" &&
+            (parameters.size == 8 || parameters[8] == "I")
+    }
+    requireExactlyOne("NewX like Lottie renderer call", candidates)
+    val candidate = candidates.single()
+    val reference = candidate.value.getReference<MethodReference>()
+        ?: throw PatchException("NewX like Lottie renderer reference is missing: $this")
+    return ResolvedLottieRenderer(
+        index = candidate.index,
+        instruction = candidate.value,
+        method = reference.resolveMutableMethod("NewX Lottie renderer"),
+    )
+}
+
 context(context: BytecodePatchContext)
 private fun patchLikeIconComposable(
     descriptor: String,
@@ -1034,48 +1718,19 @@ private fun patchLikeIconComposable(
                 method.parameterTypes == listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
                 method.returnType == "Ljava/lang/Object;"
         } ?: throw PatchException("NewX like icon composable invoke method not found: $descriptor")
-    val lottieCall =
-        composable.instructions.withIndex().singleOrNull { (_, instruction) ->
-            val reference = instruction.getReference<MethodReference>() ?: return@singleOrNull false
-            reference.parameterTypes.let { parameters ->
-                when (parameters.size) {
-                    8 ->
-                        parameters[0] == "Z" &&
-                            parameters[2] == "Z" &&
-                            parameters[3] == "Lkotlin/jvm/functions/Function0;" &&
-                            parameters[4] == "Landroidx/compose/ui/Modifier;" &&
-                            parameters[5] == "Ljava/lang/String;" &&
-                            parameters[6] == "Landroidx/compose/runtime/Composer;" &&
-                            parameters[7] == "I"
-                    9 ->
-                        parameters[0] == "Z" &&
-                            parameters[2] == "Z" &&
-                            parameters[3] == "Lkotlin/jvm/functions/Function0;" &&
-                            parameters[4] == "Landroidx/compose/ui/Modifier;" &&
-                            parameters[5] == "Ljava/lang/String;" &&
-                            parameters[6] == "Landroidx/compose/runtime/Composer;" &&
-                            parameters[7] == "I" &&
-                            parameters[8] == "I"
-                    else -> false
-                }
-            } &&
-                reference.returnType == "V"
-        } ?: throw PatchException("NewX like Lottie renderer call not found: $composable")
-    val rangeInstruction = lottieCall.value as? RegisterRangeInstruction
+    val lottieRenderer = composable.resolveLottieRenderer()
+    val rangeInstruction = lottieRenderer.instruction as? RegisterRangeInstruction
         ?: throw PatchException("NewX like Lottie renderer is not an invoke-range: $composable")
     val animationRegister = rangeInstruction.startRegister + 2
-    val lottieReference = lottieCall.value.getReference<MethodReference>()
-        ?: throw PatchException("NewX like Lottie renderer reference not found: $composable")
 
     composable.addInstructions(
-        lottieCall.index,
+        lottieRenderer.index,
         """
         invoke-static/range {v$animationRegister .. v$animationRegister}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineLikeAnimation(Z)Z
         move-result v$animationRegister
         """.trimIndent(),
     )
-    lottieReference.resolveMutableMethod("NewX Lottie renderer")
-        .injectLottieFallbackTint(activeLikeField)
+    lottieRenderer.method.injectLottieFallbackTint(activeLikeField)
 }
 
 private fun MutableMethod.injectLottieFallbackTint(activeLikeField: FieldReference) {
@@ -1114,7 +1769,20 @@ private fun MutableMethod.injectDynamicAccentTones(
         }
     if (toneLoads.size != ACCENT_TONE_COUNT) {
         throw PatchException(
-            "Expected $ACCENT_TONE_COUNT NewX accent loads in $this, found ${toneLoads.size}",
+            "Expected $ACCENT_TONE_COUNT NewX accent loads in $this, found ${toneLoads.size}; " +
+                "tones=${toneLoads.map { (_, _, tone) -> tone }}, " +
+                "fields=${toneLoads.map { (_, instruction, _) -> instruction.getReference<FieldReference>() }}",
+        )
+    }
+    val observedTones = toneLoads.map { (_, _, tone) -> tone }
+    val observedFields = toneLoads.map { (_, instruction, _) ->
+        instruction.getReference<FieldReference>()?.toString().orEmpty()
+    }
+    val expectedTones = (0 until ACCENT_TONE_COUNT).toList()
+    if (observedTones.sorted() != expectedTones || observedFields.toSet().size != ACCENT_TONE_COUNT) {
+        throw PatchException(
+            "NewX accent tone coverage is ambiguous in $this: " +
+                "tones=$observedTones, fields=$observedFields",
         )
     }
 
