@@ -338,12 +338,27 @@ val restoreTimelinePositionPatch =
 
             val fallbackHolderCandidates =
                 getterMethod.instructions.withIndex().filter { indexedInstruction ->
-                    indexedInstruction.value.opcode == Opcode.NEW_INSTANCE &&
-                        indexedInstruction.value.getReference<TypeReference>()?.type == holderDescriptor
+                    if (indexedInstruction.value.opcode != Opcode.NEW_INSTANCE) return@filter false
+                    if (indexedInstruction.value.getReference<TypeReference>()?.type != holderDescriptor) {
+                        return@filter false
+                    }
+                    val holderRegister =
+                        (indexedInstruction.value as? OneRegisterInstruction)?.registerA
+                        ?: return@filter false
+                    val constructor = getterMethod.instructions.getOrNull(indexedInstruction.index + 1)
+                    val returnedHolder = getterMethod.instructions.getOrNull(indexedInstruction.index + 2)
+                    constructor?.opcode == Opcode.INVOKE_DIRECT &&
+                        constructor.getReference<MethodReference>()?.toString() == holderConstructorReference &&
+                        returnedHolder?.opcode == Opcode.RETURN_OBJECT &&
+                        (returnedHolder as? OneRegisterInstruction)?.registerA == holderRegister
                 }
-            val fallbackHolderCandidate =
-                fallbackHolderCandidates.lastOrNull()
-                    ?: throw PatchException("NewX zero-position fallback holder allocation was not found")
+            if (fallbackHolderCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one NewX zero-position fallback holder allocation, found " +
+                        "${fallbackHolderCandidates.size}: ${fallbackHolderCandidates.joinToString()}",
+                )
+            }
+            val fallbackHolderCandidate = fallbackHolderCandidates.single()
             val fallbackHolderRegister =
                 (fallbackHolderCandidate.value as? OneRegisterInstruction)?.registerA
                     ?: throw PatchException("NewX zero-position fallback holder allocation has no register layout")
