@@ -322,67 +322,78 @@ private fun resolveForYouTabHook(
         classDef.methods.toList().forEach { originalMethod ->
             if (originalMethod.returnType != "V" || originalMethod.parameterTypes.size != 1) return@forEach
             val implementation = originalMethod.implementation ?: return@forEach
-            val legacyHookIndex = originalMethod.resolveLegacyForYouTabHook()
-            if (legacyHookIndex != null) {
+            val modernHookCandidate = reselectedEventType?.let { eventType ->
+                originalMethod.resolveModernForYouTabHook(forYouPageTarget, eventType)
+            }
+            if (modernHookCandidate != null) {
                 val mutableClass = context.mutableClassDefBy(classDef.type)
                 val mutableMethod = mutableClass.methods.singleOrNull { method ->
                     method.name == originalMethod.name &&
                         method.returnType == originalMethod.returnType &&
                         method.parameterTypes == originalMethod.parameterTypes
-                } as? MutableMethod ?: return@forEach
-                val refreshMethods = mutableClass.methods.filter { method ->
-                    method.name != "<init>" &&
-                        method.returnType == "V" &&
-                        method.parameterTypes.isEmpty() &&
-                        method.isCurrentTimelineRefreshMethod(currentPageRefreshEvent)
-                }
-                if (refreshMethods.size == 1) {
-                    candidates += ResolvedForYouTabHook(
-                        method = mutableMethod,
-                        insertionIndex = legacyHookIndex,
-                        refreshBridge = refreshMethods.single().resolveForYouRefreshBridge(
-                            currentPageRefreshEvent,
-                        ),
-                        forYouPageRegister = null,
-                        forYouSingletonField = null,
-                        reservedRegisterBase = null,
+                } as? MutableMethod ?: throw PatchException(
+                    "NewX modern For You tab event hook is not mutable: $originalMethod",
+                )
+                val refreshBridges = mutableClass.methods.mapNotNull { method ->
+                    method.tryResolveForYouCurrentPageRefreshBridge(currentPageRefreshEvent)
+                }.distinctBy { bridge -> bridge.toString() }
+                if (refreshBridges.size != 1) {
+                    throw PatchException(
+                        "Expected one NewX modern For You refresh bridge for $originalMethod, " +
+                            "found ${refreshBridges.size}: ${refreshBridges.joinToString()}",
                     )
-                    return@forEach
                 }
+                val originalRegisterCount = mutableMethod.implementation?.registerCount
+                    ?: throw PatchException("NewX For You tab event hook has no implementation: $mutableMethod")
+                val additionalRegisters = mutableMethod.numberOfParameterRegisters + 4
+                val method = mutableMethod.cloneMutable(
+                    additionalRegisters = additionalRegisters,
+                ).also { expandedMethod ->
+                    mutableClass.methods.remove(mutableMethod)
+                    mutableClass.methods.add(expandedMethod)
+                }
+                candidates += ResolvedForYouTabHook(
+                    method = method,
+                    insertionIndex = modernHookCandidate.insertionIndex +
+                        mutableMethod.numberOfParameterRegistersLogical,
+                    refreshBridge = refreshBridges.single(),
+                    forYouPageRegister = modernHookCandidate.pageRegister,
+                    forYouSingletonField = forYouPageTarget.singletonField,
+                    reservedRegisterBase = originalRegisterCount,
+                )
+                return@forEach
             }
 
-            val modernHook = reselectedEventType?.let { eventType ->
-                originalMethod.resolveModernForYouTabHook(forYouPageTarget, eventType)
-            }
-                ?: return@forEach
+            val legacyHookIndex = originalMethod.resolveLegacyForYouTabHook(forYouPageTarget) ?: return@forEach
             val mutableClass = context.mutableClassDefBy(classDef.type)
             val mutableMethod = mutableClass.methods.singleOrNull { method ->
                 method.name == originalMethod.name &&
                     method.returnType == originalMethod.returnType &&
                     method.parameterTypes == originalMethod.parameterTypes
-            } as? MutableMethod ?: return@forEach
-            val refreshBridges = mutableClass.methods.mapNotNull { method ->
-                method.tryResolveForYouCurrentPageRefreshBridge(currentPageRefreshEvent)
-            }.distinctBy { bridge -> bridge.toString() }
-            if (refreshBridges.size != 1) {
-                return@forEach
+            } as? MutableMethod ?: throw PatchException(
+                "NewX legacy For You tab event hook is not mutable: $originalMethod",
+            )
+            val refreshMethods = mutableClass.methods.filter { method ->
+                method.name != "<init>" &&
+                    method.returnType == "V" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.isCurrentTimelineRefreshMethod(currentPageRefreshEvent)
             }
-            val originalRegisterCount = mutableMethod.implementation?.registerCount
-                ?: throw PatchException("NewX For You tab event hook has no implementation: $mutableMethod")
-            val additionalRegisters = mutableMethod.numberOfParameterRegisters + 4
-            val method = mutableMethod.cloneMutable(
-                additionalRegisters = additionalRegisters,
-            ).also { expandedMethod ->
-                mutableClass.methods.remove(mutableMethod)
-                mutableClass.methods.add(expandedMethod)
+            if (refreshMethods.size != 1) {
+                throw PatchException(
+                    "Expected one NewX legacy For You refresh method for $originalMethod, " +
+                        "found ${refreshMethods.size}: ${refreshMethods.joinToString()}",
+                )
             }
             candidates += ResolvedForYouTabHook(
-                method = method,
-                insertionIndex = modernHook.insertionIndex + mutableMethod.numberOfParameterRegistersLogical,
-                refreshBridge = refreshBridges.single(),
-                forYouPageRegister = modernHook.pageRegister,
-                forYouSingletonField = forYouPageTarget.singletonField,
-                reservedRegisterBase = originalRegisterCount,
+                method = mutableMethod,
+                insertionIndex = legacyHookIndex,
+                refreshBridge = refreshMethods.single().resolveForYouRefreshBridge(
+                    currentPageRefreshEvent,
+                ),
+                forYouPageRegister = null,
+                forYouSingletonField = null,
+                reservedRegisterBase = null,
             )
         }
     }
@@ -417,22 +428,34 @@ private fun resolveForYouReselectedEventType(): String? {
     return candidates.singleOrNull()
 }
 
-private fun Method.resolveLegacyForYouTabHook(): Int? {
+private fun Method.resolveLegacyForYouTabHook(
+    forYouPageTarget: ResolvedForYouPageTarget,
+): Int? {
     val instructions = implementation?.instructions?.toList() ?: return null
-    val pageLookupIndex = instructions.indexOfFirst { instruction ->
-        val reference = instruction.getReference<MethodReference>() ?: return@indexOfFirst false
-        reference.name == "getOrNull" &&
+    val pageLookupCandidates = instructions.withIndex().filter { (_, instruction) ->
+        val reference = instruction.getReference<MethodReference>() ?: return@filter false
+        instruction.opcode == Opcode.INVOKE_STATIC &&
+            reference.name == "getOrNull" &&
             reference.returnType == OBJECT_DESCRIPTOR &&
             reference.parameterTypes.map(CharSequence::toString) ==
                 listOf(OBJECT_LIST_DESCRIPTOR, INTEGER_DESCRIPTOR)
     }
-    if (pageLookupIndex < 0) return null
-
-    val pageEqualityBranch = instructions.withIndex()
-        .drop(pageLookupIndex + 1)
-        .firstNotNullOfOrNull { (index, instruction) ->
+    if (pageLookupCandidates.isEmpty()) return null
+    val hasForYouSingletonRead = instructions.any { instruction ->
+        if (instruction.opcode != Opcode.SGET_OBJECT) return@any false
+        instruction.getReference<FieldReference>()?.matches(forYouPageTarget.singletonField) == true
+    }
+    if (!hasForYouSingletonRead) return null
+    if (pageLookupCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX legacy For You page lookup in $this, found " +
+                "${pageLookupCandidates.size}: ${pageLookupCandidates.joinToString()}",
+        )
+    }
+    val pageEqualityBranches = instructions.withIndex()
+        .mapNotNull { (index, instruction) ->
             val reference = instruction.getReference<MethodReference>()
-                ?: return@firstNotNullOfOrNull null
+                ?: return@mapNotNull null
             if (instruction.opcode != Opcode.INVOKE_STATIC ||
                 reference.definingClass != INTRINSICS_DESCRIPTOR ||
                 reference.name != "areEqual" ||
@@ -440,7 +463,7 @@ private fun Method.resolveLegacyForYouTabHook(): Int? {
                 reference.parameterTypes.map(CharSequence::toString) !=
                     listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
             ) {
-                return@firstNotNullOfOrNull null
+                return@mapNotNull null
             }
             val resultIndex = index + 1
             val branchIndex = resultIndex + 1
@@ -448,21 +471,51 @@ private fun Method.resolveLegacyForYouTabHook(): Int? {
                 instructions[resultIndex].opcode != Opcode.MOVE_RESULT ||
                 instructions[branchIndex].opcode != Opcode.IF_EQZ
             ) {
-                return@firstNotNullOfOrNull null
+                return@mapNotNull null
             }
+            val pageLookupIndex = pageLookupCandidates
+                .lastOrNull { (candidateIndex, _) -> candidateIndex < index }
+                ?.index
+                ?: return@mapNotNull null
+            val equalityRegisters = instruction.registersUsed
+            val hasForYouSingletonOperand = instructions.withIndex()
+                .drop(maxOf(pageLookupIndex + 1, index - 8))
+                .takeWhile { (candidateIndex, _) -> candidateIndex < index }
+                .any { (_, candidateInstruction) ->
+                    if (candidateInstruction.opcode != Opcode.SGET_OBJECT) return@any false
+                    val singletonRegister =
+                        (candidateInstruction as? OneRegisterInstruction)?.registerA
+                        ?: return@any false
+                    singletonRegister in equalityRegisters &&
+                        candidateInstruction.getReference<FieldReference>()
+                            ?.matches(forYouPageTarget.singletonField) == true
+                }
+            if (!hasForYouSingletonOperand) return@mapNotNull null
             branchIndex
-        } ?: return null
+        }
+    if (pageEqualityBranches.isEmpty()) {
+        throw PatchException(
+            "Expected one NewX legacy For You page equality branch in $this, found none",
+        )
+    }
+    if (pageEqualityBranches.size != 1) {
+        throw PatchException(
+            "Expected one NewX legacy For You page equality branch, found " +
+                "${pageEqualityBranches.size} in $this: ${pageEqualityBranches.joinToString()}",
+        )
+    }
+    val pageEqualityBranch = pageEqualityBranches.single()
 
-    return instructions.withIndex()
+    val hookCandidates = instructions.withIndex()
         .drop(pageEqualityBranch + 1)
-        .firstNotNullOfOrNull { (castIndex, castInstruction) ->
-            if (castInstruction.opcode != Opcode.CHECK_CAST) return@firstNotNullOfOrNull null
+        .mapNotNull { (castIndex, castInstruction) ->
+            if (castInstruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
             val castRegister =
                 (castInstruction as? OneRegisterInstruction)?.registerA
-                    ?: return@firstNotNullOfOrNull null
+                    ?: return@mapNotNull null
             val castType =
                 castInstruction.getReference<TypeReference>()?.type
-                    ?: return@firstNotNullOfOrNull null
+                    ?: return@mapNotNull null
             val guardIndex = castIndex + 1
             val fieldIndex = guardIndex + 1
             if (fieldIndex >= instructions.size ||
@@ -470,18 +523,25 @@ private fun Method.resolveLegacyForYouTabHook(): Int? {
                 (instructions[guardIndex] as? OneRegisterInstruction)?.registerA != castRegister ||
                 instructions[fieldIndex].opcode != Opcode.IGET_OBJECT
             ) {
-                return@firstNotNullOfOrNull null
+                return@mapNotNull null
             }
             val fieldInstruction = instructions[fieldIndex] as? TwoRegisterInstruction
-                ?: return@firstNotNullOfOrNull null
-            if (fieldInstruction.registerB != castRegister) return@firstNotNullOfOrNull null
+                ?: return@mapNotNull null
+            if (fieldInstruction.registerB != castRegister) return@mapNotNull null
             val field = fieldInstruction.getReference<FieldReference>()
-                ?: return@firstNotNullOfOrNull null
+                ?: return@mapNotNull null
             if (field.definingClass != castType || !field.type.startsWith(FLOW_PREFIX)) {
-                return@firstNotNullOfOrNull null
+                return@mapNotNull null
             }
             guardIndex + 1
         }
+    if (hookCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX legacy For You topic hook after the page equality branch, found " +
+                "${hookCandidates.size} in $this: ${hookCandidates.joinToString()}",
+        )
+    }
+    return hookCandidates.single()
 }
 
 context(context: BytecodePatchContext)
@@ -530,43 +590,65 @@ private fun Method.resolveModernForYouTabHook(
     reselectedEventType: String,
 ): ResolvedModernForYouTabHook? {
     val instructions = implementation?.instructions?.toList() ?: return null
-    val currentPageLookupIndex = instructions.indexOfFirst { instruction ->
-        val reference = instruction.getReference<MethodReference>() ?: return@indexOfFirst false
-        reference.name == "getOrNull" &&
+    val pageLookupCandidates = instructions.withIndex().filter { (_, instruction) ->
+        val reference = instruction.getReference<MethodReference>() ?: return@filter false
+        instruction.opcode == Opcode.INVOKE_STATIC &&
+            reference.name == "getOrNull" &&
             reference.returnType == OBJECT_DESCRIPTOR &&
             reference.parameterTypes.map(CharSequence::toString) ==
                 listOf(OBJECT_LIST_DESCRIPTOR, INTEGER_DESCRIPTOR)
     }
-    if (currentPageLookupIndex < 0) return null
 
-    val eventBranch = instructions.withIndex()
-        .drop(currentPageLookupIndex + 1)
-        .firstNotNullOfOrNull { (instanceOfIndex, instanceOfInstruction) ->
+    val eventBranches = instructions.withIndex()
+        .mapNotNull { (instanceOfIndex, instanceOfInstruction) ->
             if (instanceOfInstruction.opcode != Opcode.INSTANCE_OF) {
-                return@firstNotNullOfOrNull null
+                return@mapNotNull null
             }
             val instanceOf = instanceOfInstruction as? TwoRegisterInstruction
-                ?: return@firstNotNullOfOrNull null
+                ?: return@mapNotNull null
             val eventType = instanceOfInstruction.getReference<TypeReference>()?.type
-                ?: return@firstNotNullOfOrNull null
-            if (eventType != reselectedEventType) return@firstNotNullOfOrNull null
-            val branchIndex = instructions.withIndex()
-                .drop(instanceOfIndex + 1)
-                .firstOrNull { (index, instruction) ->
-                    instruction.opcode == Opcode.IF_EQZ &&
-                        (instruction as? OneRegisterInstruction)?.registerA == instanceOf.registerA
-                }?.index ?: return@firstNotNullOfOrNull null
-            val eventCastIndex = instructions.withIndex()
-                .drop(branchIndex + 1)
-                .firstOrNull { (index, instruction) ->
-                    instruction.opcode == Opcode.CHECK_CAST &&
-                        instruction.getReference<TypeReference>()?.type == eventType
-                }?.index ?: return@firstNotNullOfOrNull null
-            branchIndex to eventCastIndex
-        } ?: return null
+                ?: return@mapNotNull null
+            if (eventType != reselectedEventType) return@mapNotNull null
+            val branchInstruction = instructions.getOrNull(instanceOfIndex + 1)
+                ?: return@mapNotNull null
+            if (branchInstruction.opcode != Opcode.IF_EQZ ||
+                (branchInstruction as? OneRegisterInstruction)?.registerA != instanceOf.registerA
+            ) {
+                return@mapNotNull null
+            }
+            val branchIndex = instanceOfIndex + 1
+            val eventCastInstruction = instructions.getOrNull(branchIndex + 1)
+                ?: return@mapNotNull null
+            if (eventCastInstruction.opcode != Opcode.CHECK_CAST ||
+                eventCastInstruction.getReference<TypeReference>()?.type != eventType
+            ) {
+                return@mapNotNull null
+            }
+            val eventCastIndex = branchIndex + 1
+            Triple(instanceOfIndex, branchIndex, eventCastIndex)
+        }
+    if (eventBranches.isEmpty()) return null
+    if (eventBranches.size != 1) {
+        throw PatchException(
+            "Expected one NewX modern For You reselection event branch, found " +
+                "${eventBranches.size}: ${eventBranches.joinToString()}",
+        )
+    }
+    val eventBranch = eventBranches.single()
+    val currentPageLookupCandidates = pageLookupCandidates.filter { (index, _) ->
+        index < eventBranch.first
+    }
+    if (currentPageLookupCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX modern For You current-page lookup before the reselection event, " +
+                "found ${currentPageLookupCandidates.size}: " +
+                "${currentPageLookupCandidates.joinToString()}",
+        )
+    }
 
+    val hookCandidates = mutableListOf<ResolvedModernForYouTabHook>()
     for ((pageLookupIndex, pageLookupInstruction) in instructions.withIndex()
-        .drop(eventBranch.second + 1)) {
+        .drop(eventBranch.third + 1)) {
         val pageLookup = pageLookupInstruction.getReference<MethodReference>()
             ?: continue
         if (pageLookupInstruction.opcode != Opcode.INVOKE_STATIC ||
@@ -636,13 +718,19 @@ private fun Method.resolveModernForYouTabHook(
                 continue
             }
 
-            return ResolvedModernForYouTabHook(
+            hookCandidates += ResolvedModernForYouTabHook(
                 insertionIndex = modelFieldIndex + 1,
                 pageRegister = modelFieldInstruction.registerA,
             )
         }
     }
-    return null
+    if (hookCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX modern For You tab hook after the reselection event, found " +
+                "${hookCandidates.size}: ${hookCandidates.joinToString()}",
+        )
+    }
+    return hookCandidates.single()
 }
 
 private fun Method.isCurrentTimelineRefreshMethod(
@@ -824,14 +912,24 @@ private fun Method.resolveForYouRefreshBridge(
     }
     val stateGetter = stateGetterCandidates.single()
 
-    val pagesType = instructions.withIndex()
-        .firstOrNull { (index, instruction) ->
+    val pagesTypeCandidates = instructions.withIndex()
+        .filter { (index, instruction) ->
             instruction.opcode == Opcode.CHECK_CAST &&
                 index > 1 &&
                 instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
-                instructions[index - 2].getReference<MethodReference>()?.matches(stateGetter) == true
-        }?.let { (index, _) -> typeAt(index) }
-        ?: throw PatchException("NewX For You refresh pages cast is missing in $this")
+                instructions[index - 2].getReference<MethodReference>()?.matches(stateGetter) == true &&
+                instructions.getOrNull(index + 1)?.opcode == Opcode.IGET_OBJECT &&
+                instructions[index + 1].getReference<FieldReference>()?.let { field ->
+                    field.definingClass == typeAt(index) && field.type == OBJECT_LIST_DESCRIPTOR
+                } == true
+        }.mapNotNull { (index, _) -> typeAt(index) }.distinct()
+    if (pagesTypeCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh pages cast in $this, found " +
+                "${pagesTypeCandidates.size}: ${pagesTypeCandidates.joinToString()}",
+        )
+    }
+    val pagesType = pagesTypeCandidates.single()
 
     val pagesListFields = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
@@ -879,14 +977,20 @@ private fun Method.resolveForYouRefreshBridge(
     }
     val pageLookup = pageLookupCandidates.single()
 
-    val componentType = instructions.withIndex()
-        .firstOrNull { (index, instruction) ->
+    val componentTypeCandidates = instructions.withIndex()
+        .filter { (index, instruction) ->
             instruction.opcode == Opcode.CHECK_CAST &&
                 index > 1 &&
                 instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
                 instructions[index - 2].getReference<MethodReference>()?.matches(pageLookup) == true
-        }?.let { (index, _) -> typeAt(index) }
-        ?: throw PatchException("NewX For You refresh page component cast is missing in $this")
+        }.mapNotNull { (index, _) -> typeAt(index) }.distinct()
+    if (componentTypeCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh page component cast in $this, found " +
+                "${componentTypeCandidates.size}: ${componentTypeCandidates.joinToString()}",
+        )
+    }
+    val componentType = componentTypeCandidates.single()
 
     val componentGetterCandidates = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
@@ -907,14 +1011,20 @@ private fun Method.resolveForYouRefreshBridge(
     }
     val componentGetter = componentGetterCandidates.single()
 
-    val homeComponentType = instructions.withIndex()
-        .firstOrNull { (index, instruction) ->
+    val homeComponentTypeCandidates = instructions.withIndex()
+        .filter { (index, instruction) ->
             instruction.opcode == Opcode.CHECK_CAST &&
                 index > 1 &&
                 instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
                 instructions[index - 2].getReference<MethodReference>()?.matches(componentGetter) == true
-        }?.let { (index, _) -> typeAt(index) }
-        ?: throw PatchException("NewX For You refresh home component cast is missing in $this")
+        }.mapNotNull { (index, _) -> typeAt(index) }.distinct()
+    if (homeComponentTypeCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX For You refresh home component cast in $this, found " +
+                "${homeComponentTypeCandidates.size}: ${homeComponentTypeCandidates.joinToString()}",
+        )
+    }
+    val homeComponentType = homeComponentTypeCandidates.single()
 
     val forYouTypeCandidates = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INSTANCE_OF }
@@ -1026,13 +1136,19 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
     if (stateGetters.size != 1) return null
     val stateGetter = stateGetters.single()
 
-    val pagesCastIndex = instructions.withIndex()
-        .firstOrNull { (index, instruction) ->
+    val pagesCastCandidates = instructions.withIndex()
+        .filter { (index, instruction) ->
             instruction.opcode == Opcode.CHECK_CAST &&
                 index > 1 &&
                 instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
-                instructions[index - 2].getReference<MethodReference>()?.matches(stateGetter) == true
-        }?.index ?: return null
+                instructions[index - 2].getReference<MethodReference>()?.matches(stateGetter) == true &&
+                instructions.getOrNull(index + 1)?.opcode == Opcode.IGET_OBJECT &&
+                instructions[index + 1].getReference<FieldReference>()?.let { field ->
+                    field.definingClass == typeAt(index) && field.type == OBJECT_LIST_DESCRIPTOR
+                } == true
+        }
+    if (pagesCastCandidates.size != 1) return null
+    val pagesCastIndex = pagesCastCandidates.single().index
     val pagesType = typeAt(pagesCastIndex) ?: return null
 
     val pagesListFields = instructions.withIndex()
@@ -1051,10 +1167,13 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
     if (pagesIndexFields.size != 1) return null
     val pagesIndexField = pagesIndexFields.single()
 
-    val pagesListRegister = instructions.withIndex()
-        .firstOrNull { (_, instruction) ->
+    val pagesListRegisterCandidates = instructions.withIndex()
+        .filter { (_, instruction) ->
             instruction.getReference<FieldReference>()?.toString() == pagesListField.toString()
-        }?.value as? TwoRegisterInstruction ?: return null
+        }
+        .mapNotNull { (_, instruction) -> instruction as? TwoRegisterInstruction }
+    if (pagesListRegisterCandidates.size != 1) return null
+    val pagesListRegister = pagesListRegisterCandidates.single()
     val pageLookupCandidates = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_INTERFACE }
         .mapNotNull { (index, instruction) ->
@@ -1064,7 +1183,7 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
                 reference.returnType != OBJECT_DESCRIPTOR ||
                 reference.parameterTypes.map(CharSequence::toString) != listOf(INTEGER_DESCRIPTOR) ||
                 instruction.registersUsed.size != 2 ||
-                instruction.registersUsed.first() != pagesListRegister.registerA
+                instruction.registersUsed.getOrNull(0) != pagesListRegister.registerA
             ) {
                 return@mapNotNull null
             }
@@ -1272,13 +1391,18 @@ private fun patchHomeFilterGroupConstructor() {
         )
     }
 
-    val superIndex = constructor.instructions.withIndex().firstOrNull { (_, instruction) ->
-        if (instruction.opcode != Opcode.INVOKE_DIRECT) return@firstOrNull false
-        val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
+    val superCandidates = constructor.instructions.withIndex().filter { (_, instruction) ->
+        if (instruction.opcode != Opcode.INVOKE_DIRECT) return@filter false
+        val reference = instruction.getReference<MethodReference>() ?: return@filter false
         reference.name == "<init>" && reference.definingClass != constructor.definingClass
-    }?.index ?: throw PatchException(
-        "NewX HomeTimelineFilters group constructor has no super call: $constructor",
-    )
+    }
+    if (superCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX HomeTimelineFilters group super call, found " +
+                "${superCandidates.size}: ${superCandidates.joinToString()}",
+        )
+    }
+    val superIndex = superCandidates.single().index
 
     constructor.addInstructions(
         superIndex + 1,
@@ -1387,15 +1511,17 @@ private fun Method.parameterIndexForField(
     } else {
         listOf(instructions.resolveObjectOriginRegister(writes.single().index, write.registerA))
     }
-    return sourceRegisters.asSequence()
+    val parameterCandidates = sourceRegisters.asSequence()
         .mapNotNull { sourceRegister ->
             parameterTypes.indexOfRegister(sourceRegister, thisRegister)
         }
         .distinct()
-        .firstOrNull { parameterIndex ->
+        .filter { parameterIndex ->
             expectedParameterTypes.isEmpty() ||
                 parameterTypes[parameterIndex].toString() in expectedParameterTypes
         }
+        .toList()
+    return parameterCandidates.singleOrNull()
 }
 
 private fun List<CharSequence>.indexOfRegister(
