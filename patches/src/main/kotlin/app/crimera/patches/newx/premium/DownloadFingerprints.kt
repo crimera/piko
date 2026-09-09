@@ -1,6 +1,8 @@
 package app.crimera.patches.newx.premium
 
+import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -84,32 +86,53 @@ internal object SubscriptionsFeaturesOfflineVideoEnabledFingerprint : Fingerprin
 
 private const val DOWNLOADABLE_TEXT = ", isDownloadable="
 
-// ALPHA fallback only: the model accessor is obfuscated, so derive its field from toString().
-private fun downloadableField(classDef: ClassDef): FieldReference? {
-    val toStringMethod =
-        classDef.methods.singleOrNull { method ->
+// ALPHA fallback only: the model accessor is obfuscated, so derive its field from the
+// semantic toString label. The shared resolver handles both direct and helper-based
+// StringBuilder layouts and fails on an absent or ambiguous field.
+private fun downloadableField(classDef: ClassDef): FieldReference {
+    val toStringMethods =
+        classDef.methods.filter { method ->
             method.name == "toString" &&
                 method.parameterTypes.isEmpty() &&
                 method.returnType == "Ljava/lang/String;"
-        } ?: return null
-    val instructions = toStringMethod.implementation?.instructions ?: return null
-    val markerIndex = instructions.indexOfFirst { instruction ->
-        instruction.getReference<StringReference>()?.string == DOWNLOADABLE_TEXT
+        }
+    if (toStringMethods.size != 1) {
+        throw PatchException(
+            "Expected exactly one NewX media-content toString() while resolving '$DOWNLOADABLE_TEXT' " +
+                "in ${classDef.type}, found ${toStringMethods.size}: " +
+                toStringMethods.joinToString { it.toString() }.ifEmpty { "<none>" },
+        )
     }
-    if (markerIndex < 0) return null
 
-    return instructions
-        .drop(markerIndex + 1)
-        .take(4)
-        .firstOrNull { instruction -> instruction.opcode == Opcode.IGET_BOOLEAN }
-        ?.getReference<FieldReference>()
+    val field = toStringMethods.single().fieldForToStringLabel(DOWNLOADABLE_TEXT)
+    if (field.definingClass != classDef.type || field.type != "Z") {
+        throw PatchException(
+            "NewX '$DOWNLOADABLE_TEXT' resolved to an unexpected field in ${classDef.type}; " +
+                "expected local boolean, found $field",
+        )
+    }
+    return field
 }
 
-private fun Method.readsField(field: FieldReference): Boolean =
+private fun Method.booleanFieldsRead(): List<FieldReference> =
+    implementation?.instructions
+        ?.filter { instruction -> instruction.opcode == Opcode.IGET_BOOLEAN }
+        ?.mapNotNull { instruction -> instruction.getReference<FieldReference>() }
+        ?.distinctBy(FieldReference::toString)
+        .orEmpty()
+
+private fun Method.writesField(field: FieldReference): Boolean =
     implementation?.instructions?.any { instruction ->
-        instruction.opcode == Opcode.IGET_BOOLEAN &&
+        instruction.opcode == Opcode.IPUT_BOOLEAN &&
             instruction.getReference<FieldReference>()?.toString() == field.toString()
     } == true
+
+private fun ClassDef.hasNamedDownloadableAccessor(): Boolean =
+    methods.any { method ->
+        method.name == "isDownloadable" &&
+            method.parameterTypes.isEmpty() &&
+            method.returnType == "Z"
+    }
 
 /**
  * Alpha keeps the semantic downloadable property as an obfuscated override. The only
@@ -121,14 +144,38 @@ private fun isLegacyDownloadableAccessor(
     classDef: ClassDef,
 ): Boolean {
     if (!AccessFlags.FINAL.isSet(method.accessFlags)) return false
-    val field = downloadableField(classDef) ?: return false
+    // A preserved semantic accessor is already the preferred shape. Do not reinterpret a
+    // generated component reader as a second legacy accessor in that shape.
+    if (classDef.hasNamedDownloadableAccessor()) return false
+    val methodFields = method.booleanFieldsRead()
+    if (methodFields.size != 1) return false
+
+    val field = downloadableField(classDef)
+    if (methodFields.single().toString() != field.toString()) return false
+
     val accessors =
         classDef.methods.filter { candidate ->
             candidate.returnType == "Z" &&
                 candidate.parameterTypes.isEmpty() &&
-                candidate.readsField(field)
+                candidate.booleanFieldsRead().singleOrNull()?.toString() == field.toString()
         }
-    return accessors.size == 1 && accessors.single().toString() == method.toString()
+    if (accessors.size != 1) {
+        throw PatchException(
+            "Expected exactly one NewX legacy downloadable accessor for $field in ${classDef.type}, " +
+                "found ${accessors.size}: " +
+                accessors.joinToString { it.toString() }.ifEmpty { "<none>" },
+        )
+    }
+
+    val constructors = classDef.methods.filter { it.name == "<init>" }
+    if (constructors.none { it.writesField(field) }) {
+        throw PatchException(
+            "NewX legacy downloadable field $field is not initialized by any constructor in ${classDef.type}; " +
+                "constructors: " +
+                constructors.joinToString { it.toString() }.ifEmpty { "<none>" },
+        )
+    }
+    return accessors.single().toString() == method.toString()
 }
 
 private object MediaContentVideoClassFingerprint : Fingerprint(
