@@ -26,6 +26,7 @@ import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -44,6 +45,9 @@ internal const val FILTERED_REPLIES_ACTION = "ServerFeedbackAction"
 
 /** NewX icon resource initialization emits the field assignment within this small block. */
 private const val ICON_FIELD_INITIALIZATION_WINDOW = 4
+
+private val OBJECT_MOVE_OPCODES =
+    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
 
 private data class PostOptionContribution(
     val handlerDescriptor: String,
@@ -260,25 +264,47 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         ?: throw PatchException("NewX post-options Map.get has no action register")
     requireFourBitRegisters("label", actionRegister, labelResult.registerA)
 
-    val iconAssignmentInstruction =
-        renderer.method.instructions.withIndex().lastOrNull { (index, instruction) ->
-            instruction.opcode in setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16) &&
+    val iconAssignmentCandidates =
+        renderer.method.instructions.withIndex().filter { (index, instruction) ->
+            instruction.opcode in OBJECT_MOVE_OPCODES &&
                 index < renderer.instructionMatches[1].index &&
                 renderer.method.instructions.getOrNull(index + 1)?.opcode in
                 setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
-        }?.value ?: throw PatchException("NewX post-options icon assignment was not found")
-    val iconAssignment = iconAssignmentInstruction as? TwoRegisterInstruction
-        ?: throw PatchException("NewX post-options icon assignment has no registers")
-    val iconResultRegister = iconAssignment.registerA
-
-    val iconType =
-        renderer.method.instructions
-            .take(renderer.instructionMatches[1].index)
-            .asReversed()
-            .firstNotNullOfOrNull { instruction ->
-                if (instruction.opcode != Opcode.SGET_OBJECT) return@firstNotNullOfOrNull null
-                instruction.getReference<FieldReference>()?.type
-            } ?: throw PatchException("NewX post-options icon type was not found")
+        }
+    if (iconAssignmentCandidates.isEmpty()) {
+        throw PatchException(
+            "Expected NewX post-options icon assignments, found none",
+        )
+    }
+    val iconAssignments = iconAssignmentCandidates.map { candidate ->
+        candidate.value as? TwoRegisterInstruction
+            ?: throw PatchException(
+                "NewX post-options icon assignment has no registers at instruction ${candidate.index}",
+            )
+    }
+    val iconResultRegisters = iconAssignments.map { assignment -> assignment.registerA }.distinct()
+    if (iconResultRegisters.size != 1) {
+        throw PatchException(
+            "Expected one NewX post-options icon result register, found " +
+                "${iconResultRegisters.size}: ${iconResultRegisters.joinToString()}",
+        )
+    }
+    val iconAssignmentFields = iconAssignmentCandidates.map { candidate ->
+        val assignment = candidate.value as TwoRegisterInstruction
+        renderer.method.instructions.resolveFieldRead(
+            register = assignment.registerB,
+            untilIndex = candidate.index,
+        )
+    }
+    val iconTypes = iconAssignmentFields.map { field -> field.type }.distinct()
+    if (iconTypes.size != 1) {
+        throw PatchException(
+            "Expected one NewX post-options icon type across icon assignments, found " +
+                "${iconTypes.size}: ${iconAssignmentFields.joinToString()}",
+        )
+    }
+    val iconResultRegister = iconResultRegisters.single()
+    val iconType = iconTypes.single()
 
     // Compose keeps the lambda receiver/state in low registers; a Boolean result must not
     // overwrite a live object register such as v0.
@@ -357,17 +383,24 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
         eventHandler.originalClassDef.fields.singleOrNull { it.type == presenter.originalClassDef.type }
             ?: throw PatchException("NewX post-options event handler has no unique presenter field")
 
-    val ordinalIndex = eventHandler.method.instructions.indexOfFirst { instruction ->
-        val methodRef = instruction.getReference<MethodReference>() ?: return@indexOfFirst false
+    val ordinalCandidates = eventHandler.method.instructions.withIndex().filter { (_, instruction) ->
+        val methodRef = instruction.getReference<MethodReference>() ?: return@filter false
         instruction.opcode == Opcode.INVOKE_VIRTUAL &&
             methodRef.definingClass == "Ljava/lang/Enum;" &&
-            methodRef.name == "ordinal"
+            methodRef.name == "ordinal" &&
+            methodRef.parameterTypes.isEmpty() &&
+            methodRef.returnType == "I" &&
+            instruction.registersUsed.size == 1
     }
-    if (ordinalIndex == -1) {
-        throw PatchException("NewX confirmed post-option action extraction was not found (no Enum.ordinal)")
+    if (ordinalCandidates.size != 1) {
+        throw PatchException(
+            "Expected one NewX confirmed post-option Enum.ordinal, found " +
+                "${ordinalCandidates.size}: ${ordinalCandidates.joinToString()}",
+        )
     }
+    val ordinalIndex = ordinalCandidates.single().index
     val ordinalInstruction = eventHandler.method.instructions[ordinalIndex]
-    val clickActionRegister = ordinalInstruction.registersUsed.firstOrNull()
+    val clickActionRegister = ordinalInstruction.registersUsed.singleOrNull()
         ?: throw PatchException("NewX confirmed post-option action has no register")
 
     // The action result is Boolean, so choose a register that is dead at this insertion point.
@@ -417,18 +450,63 @@ private fun resolveIconField(resourceName: String, iconType: String): FieldRefer
             filters = listOf(literal(drawableId)),
         ).matchAll().mapNotNull { match ->
             val literalIndex = match.instructionMatches.single().index
-            match.method.instructions
+            val fieldCandidates = match.method.instructions
                 .drop(literalIndex + 1)
                 .take(ICON_FIELD_INITIALIZATION_WINDOW)
-                .firstOrNull { instruction ->
-                    instruction.opcode == Opcode.SPUT_OBJECT &&
-                        instruction.getReference<FieldReference>()?.type == iconType
-                }?.getReference<FieldReference>()
+                .mapNotNull { instruction ->
+                    if (instruction.opcode != Opcode.SPUT_OBJECT) return@mapNotNull null
+                    instruction.getReference<FieldReference>()?.takeIf { field -> field.type == iconType }
+                }
+            if (fieldCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one $resourceName icon field after resource literal, found " +
+                        "${fieldCandidates.size}: ${fieldCandidates.joinToString()}",
+                )
+            }
+            fieldCandidates.single()
         }.distinctBy(FieldReference::toString)
     if (fields.size == 1) return fields.single()
 
     throw PatchException(
         "Expected one NewX $resourceName icon field, found ${fields.size}: ${fields.joinToString()}",
+    )
+}
+
+private fun List<Instruction>.resolveFieldRead(
+    register: Int,
+    untilIndex: Int,
+): FieldReference {
+    var trackedRegister = register
+    for (index in untilIndex - 1 downTo 0) {
+        val instruction = this[index]
+        val field = instruction.getReference<FieldReference>()
+        val destination = when (instruction.opcode) {
+            Opcode.SGET_OBJECT -> (instruction as? OneRegisterInstruction)?.registerA
+            Opcode.IGET_OBJECT -> (instruction as? TwoRegisterInstruction)?.registerA
+            else -> null
+        }
+        if (destination == trackedRegister && field != null) return field
+
+        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction
+                ?: throw PatchException("NewX post-options icon move has no registers at instruction $index")
+            if (move.registerA == trackedRegister) {
+                trackedRegister = move.registerB
+                continue
+            }
+        }
+        val writesTrackedRegister = when (instruction.opcode) {
+            Opcode.SGET_OBJECT -> (instruction as? OneRegisterInstruction)?.registerA == trackedRegister
+            Opcode.IGET_OBJECT,
+            Opcode.MOVE_RESULT_OBJECT,
+            -> (instruction as? OneRegisterInstruction)?.registerA == trackedRegister ||
+                (instruction as? TwoRegisterInstruction)?.registerA == trackedRegister
+            else -> false
+        }
+        if (writesTrackedRegister) break
+    }
+    throw PatchException(
+        "NewX post-options icon assignment has no reaching field for v$register before instruction $untilIndex",
     )
 }
 
