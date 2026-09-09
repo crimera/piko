@@ -34,6 +34,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -271,22 +272,28 @@ private fun Method.fieldWrittenFromNamedParameter(
 
 private fun Method.findNamedParameterRegister(label: String): Int? {
     val instructions = implementation?.instructions?.toList().orEmpty()
-    instructions.forEachIndexed { index, instruction ->
-        val stringInstruction = instruction as? OneRegisterInstruction ?: return@forEachIndexed
-        val reference = instruction.getReference<StringReference>() ?: return@forEachIndexed
-        if (reference.string != label) return@forEachIndexed
-        val invoke = instructions.getOrNull(index + 1) ?: return@forEachIndexed
-        val methodReference = invoke.getReference<MethodReference>() ?: return@forEachIndexed
+    val candidates = instructions.mapIndexedNotNull { index, instruction ->
+        val stringInstruction = instruction as? OneRegisterInstruction ?: return@mapIndexedNotNull null
+        val reference = instruction.getReference<StringReference>() ?: return@mapIndexedNotNull null
+        if (reference.string != label) return@mapIndexedNotNull null
+        val invoke = instructions.getOrNull(index + 1) ?: return@mapIndexedNotNull null
+        val methodReference = invoke.getReference<MethodReference>() ?: return@mapIndexedNotNull null
         if (
             methodReference.parameterTypes.map(CharSequence::toString) !=
                 listOf("Ljava/lang/Object;", STRING_DESCRIPTOR) ||
             methodReference.returnType != "V"
-        ) return@forEachIndexed
-        val arguments = invoke.argumentRegistersOrNull() ?: return@forEachIndexed
-        if (arguments.getOrNull(1) != stringInstruction.registerA) return@forEachIndexed
-        return arguments.firstOrNull()
+        ) return@mapIndexedNotNull null
+        val arguments = invoke.argumentRegistersOrNull() ?: return@mapIndexedNotNull null
+        if (arguments.getOrNull(1) != stringInstruction.registerA) return@mapIndexedNotNull null
+        arguments.firstOrNull()
     }
-    return null
+    if (candidates.size > 1) {
+        throw PatchException(
+            "Expected at most one NewX named URL-entity parameter '$label' in $this, found " +
+                candidates.size,
+        )
+    }
+    return candidates.singleOrNull()
 }
 
 private fun Instruction.argumentRegistersOrNull(): List<Int>? =
@@ -444,8 +451,6 @@ private fun patchRichTextUrlDisplay(
     val match =
         Fingerprint(
             definingClass = "Lcom/x/ui/common/text/",
-            name = "g",
-            returnType = "Landroidx/compose/ui/text/g;",
             filters = listOf(
                 instanceOf(urlEntityFields.type),
                 fieldAccess(
@@ -453,6 +458,7 @@ private fun patchRichTextUrlDisplay(
                     reference = urlEntityFields.displayUrl,
                 ),
             ),
+            custom = { method, _ -> method.hasUrlEntityDisplayFlow(urlEntityFields) },
         ).requireSingleMatch("rich-text URL display")
 
     replaceUrlEntityFieldRead(
@@ -461,6 +467,88 @@ private fun patchRichTextUrlDisplay(
         urlEntityFields.expandedUrl,
         setting,
     )
+}
+
+/**
+ * Proves that the display-url read belongs to the URL-entity branch, rather than merely sharing
+ * a method with an unrelated URL field. Compose's text return type and the renderer's name are
+ * release details, so the URL entity cast/read data flow is the semantic anchor.
+ */
+private fun Method.hasUrlEntityDisplayFlow(fields: UrlEntityFields): Boolean {
+    val methodInstructions = implementation?.instructions?.toList() ?: return false
+    val offsets = IntArray(methodInstructions.size)
+    val indexByOffset = mutableMapOf<Int, Int>()
+    var codeOffset = 0
+    methodInstructions.forEachIndexed { index, instruction ->
+        offsets[index] = codeOffset
+        indexByOffset[codeOffset] = index
+        codeOffset += instruction.codeUnits
+    }
+    fun branchTargetIndex(index: Int): Int? {
+        val branch = methodInstructions[index] as? OffsetInstruction ?: return null
+        return indexByOffset[offsets[index] + branch.codeOffset]
+    }
+
+    val displayReads = methodInstructions.mapIndexedNotNull { index, instruction ->
+        val registers = instruction as? TwoRegisterInstruction ?: return@mapIndexedNotNull null
+        val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
+        index.takeIf {
+            instruction.opcode == Opcode.IGET_OBJECT &&
+                field == fields.displayUrl &&
+                field.type == STRING_DESCRIPTOR
+        }?.let { it to registers }
+    }
+    if (displayReads.size != 1) return false
+
+    val (displayReadIndex, displayRead) = displayReads.single()
+    val receiverRegister = displayRead.registerB
+    val castIndices = (0 until displayReadIndex).filter { index ->
+        val instruction = methodInstructions[index]
+        instruction.opcode == Opcode.CHECK_CAST &&
+            (instruction as? OneRegisterInstruction)?.registerA == receiverRegister &&
+            instruction.getReference<TypeReference>()?.type == fields.type
+    }
+    if (castIndices.size != 1) return false
+    val castIndex = castIndices.single()
+    val entityInputRegister =
+        methodInstructions.getOrNull(castIndex - 1)
+            ?.takeIf { it.opcode == Opcode.MOVE_OBJECT || it.opcode == Opcode.MOVE }
+            ?.let { it as? TwoRegisterInstruction }
+            ?.takeIf { it.registerA == receiverRegister }
+            ?.registerB
+            ?: receiverRegister
+
+    val instanceChecks = (0 until castIndex).mapNotNull { index ->
+        val instruction = methodInstructions[index]
+        if (instruction.opcode != Opcode.INSTANCE_OF) return@mapNotNull null
+        val instanceOf = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
+        if (instanceOf.registerB != entityInputRegister ||
+            instruction.getReference<TypeReference>()?.type != fields.type
+        ) {
+            return@mapNotNull null
+        }
+
+        val branchIndex = index + 1
+        val branch = methodInstructions.getOrNull(branchIndex)
+            ?: return@mapNotNull null
+        if (branch.opcode != Opcode.IF_EQZ && branch.opcode != Opcode.IF_NEZ) {
+            return@mapNotNull null
+        }
+        val branchRegister = (branch as? OneRegisterInstruction)?.registerA
+            ?: return@mapNotNull null
+        if (branchRegister != instanceOf.registerA) return@mapNotNull null
+        val targetIndex = branchTargetIndex(branchIndex) ?: return@mapNotNull null
+        val castIsOnSelectedBranch =
+            when (branch.opcode) {
+                // False skips the URL-entity path; the fall-through path reaches the cast.
+                Opcode.IF_EQZ -> targetIndex > castIndex
+                // True selects the URL-entity path; the branch target must reach the cast.
+                Opcode.IF_NEZ -> targetIndex <= castIndex
+                else -> false
+            }
+        index.takeIf { castIsOnSelectedBranch }
+    }
+    return instanceChecks.size == 1
 }
 
 context(context: BytecodePatchContext)
