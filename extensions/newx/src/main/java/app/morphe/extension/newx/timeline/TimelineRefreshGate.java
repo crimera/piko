@@ -4,13 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.SystemClock;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class TimelineRefreshGate {
-    private static final String INTERNAL_DEEPLINK_EXTRA =
-            "com.x.deeplink.EXTRA_INTERNAL_DEEPLINK";
-    private static final String NOTIFICATION_DEEPLINK_EXTRA =
-            "com.x.deeplink.EXTRA_NOTIFICATION_DEEPLINK";
     private static final long PENDING_REFRESH_TIMEOUT_MILLIS = 15_000L;
 
     private static final AtomicLong pendingPostDeepLinkDeadline = new AtomicLong();
@@ -49,12 +46,20 @@ public final class TimelineRefreshGate {
         return consume(pendingForYouFilterRefreshDeadline);
     }
 
+    public static boolean isTimelineDataEmpty(List<?> pages) {
+        if (pages == null || pages.isEmpty()) return true;
+
+        // URT exposes timeline data as pages; an empty page is still an empty initial load.
+        for (Object page : pages) {
+            if (page == null) continue;
+            if (!(page instanceof List<?>)) return false;
+            if (!((List<?>) page).isEmpty()) return false;
+        }
+        return true;
+    }
+
     private static boolean isPostDeepLink(Intent intent) {
         if (intent == null) return false;
-        if (!intent.getBooleanExtra(INTERNAL_DEEPLINK_EXTRA, false) &&
-                !intent.getBooleanExtra(NOTIFICATION_DEEPLINK_EXTRA, false)) {
-            return false;
-        }
 
         Uri data = intent.getData();
         String path = data == null ? null : data.getPath();

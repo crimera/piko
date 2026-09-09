@@ -245,7 +245,6 @@ val disableTimelineRefreshPatch =
                 "$repoDescriptor->${timelineDataGetter.name}()$timelineDataFlowDescriptor"
             val timelineDataFlowListGetterReference =
                 "$timelineDataFlowDescriptor->${timelineDataFlowListGetter.name}()Ljava/util/List;"
-            val timelineListIsEmptyReference = "Ljava/util/List;->isEmpty()Z"
             val repositoryAutoRefreshFieldReference =
                 "$requestTypeDescriptor->AUTO_REFRESH:$requestTypeDescriptor"
             val repositoryViewportAwareAutoRefreshFieldReference =
@@ -295,7 +294,7 @@ val disableTimelineRefreshPatch =
                         move-result-object v$settingRegister
                         invoke-interface {v$settingRegister}, $timelineDataFlowListGetterReference
                         move-result-object v$settingRegister
-                        invoke-interface {v$settingRegister}, $timelineListIsEmptyReference
+                        invoke-static {v$settingRegister}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty(Ljava/util/List;)Z
                         move-result v$settingRegister
                         if-nez v$settingRegister, :piko_newx_refresh_urt_check_position
                         return-void
@@ -448,7 +447,7 @@ val disableTimelineRefreshPatch =
                     move-result-object v${settingRead.register}
                     invoke-interface {v${settingRead.register}}, $timelineDataFlowListGetterReference
                     move-result-object v${settingRead.register}
-                    invoke-interface {v${settingRead.register}}, $timelineListIsEmptyReference
+                    invoke-static {v${settingRead.register}}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty(Ljava/util/List;)Z
                     move-result v${settingRead.register}
                     if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
                     return-void
