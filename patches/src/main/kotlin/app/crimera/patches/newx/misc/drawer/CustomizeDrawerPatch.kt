@@ -30,6 +30,9 @@ import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -245,9 +248,9 @@ private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Bo
         parameters[3] == "I"
 }
 
-private fun MutableMethod.findDrawerFooterCall(
+private fun MutableMethod.findDrawerFooterCalls(
     renderer: MethodReference,
-): IndexedValue<Instruction3rc>? {
+): List<IndexedValue<Instruction3rc>>? {
     val methodInstructions = instructions.toList()
     val dividerIndices =
         methodInstructions.indices.filter { index ->
@@ -258,20 +261,76 @@ private fun MutableMethod.findDrawerFooterCall(
     if (dividerIndices.size != 1) return null
 
     val dividerIndex = dividerIndices.single()
-    val footerCallIndex =
-        methodInstructions.indices.firstOrNull { index ->
-            if (index <= dividerIndex) return@firstOrNull false
+    val footerCallIndices =
+        methodInstructions.indices.filter { index ->
+            if (index <= dividerIndex) return@filter false
             val instruction = methodInstructions[index]
-            if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@firstOrNull false
-            instruction.getReference<MethodReference>()?.matches(renderer) == true
-        } ?: return null
-    val footerCall = methodInstructions[footerCallIndex] as? Instruction3rc ?: return null
-    if (footerCall.registerCount != renderer.parameterTypes.size) return null
-    return IndexedValue(footerCallIndex, footerCall)
+            instruction.opcode == Opcode.INVOKE_STATIC_RANGE &&
+                instruction.getReference<MethodReference>()?.matches(renderer) == true
+        }
+    if (footerCallIndices.isEmpty()) return null
+    if (footerCallIndices.any { methodInstructions[it] !is Instruction3rc }) return null
+    val footerCalls =
+        footerCallIndices.map { index ->
+            IndexedValue(index, methodInstructions[index] as Instruction3rc)
+        }
+    if (footerCalls.any { it.value.registerCount != renderer.parameterTypes.size }) return null
+    return footerCalls
+}
+
+private val OBJECT_MOVE_OPCODES =
+    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
+
+private fun Instruction.writesObjectRegister(register: Int): Boolean {
+    if (opcode in OBJECT_MOVE_OPCODES) {
+        return (this as? TwoRegisterInstruction)?.registerA == register
+    }
+    if (opcode == Opcode.SGET_OBJECT) {
+        return (this as? OneRegisterInstruction)?.registerA == register
+    }
+    return false
+}
+
+/** Proves which footer call receives the resolved settings icon, without relying on call order. */
+private fun List<Instruction>.hasFieldArgument(
+    callIndex: Int,
+    call: Instruction3rc,
+    renderer: MethodReference,
+    parameterIndex: Int,
+    field: FieldReference,
+    lowerBound: Int,
+): Boolean {
+    val argumentRegister =
+        call.startRegister +
+            renderer.parameterTypes.take(parameterIndex).sumOf { type ->
+                if (type.toString() == "J" || type.toString() == "D") 2 else 1
+            }
+    var register = argumentRegister
+    for (index in callIndex - 1 downTo lowerBound) {
+        val instruction = this[index]
+        if (instruction.opcode == Opcode.SGET_OBJECT) {
+            val destination = (instruction as? OneRegisterInstruction)?.registerA
+            if (destination != register) continue
+            val reference = instruction.getReference<FieldReference>() ?: return false
+            return reference.toString() == field.toString()
+        }
+        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: return false
+            if (move.registerA == register) {
+                register = move.registerB
+                continue
+            }
+        }
+        if (instruction.writesObjectRegister(register)) return false
+    }
+    return false
 }
 
 context(context: BytecodePatchContext)
-private fun resolveDrawerFooterTarget(renderer: MethodReference): DrawerFooterTarget {
+private fun resolveDrawerFooterTarget(
+    renderer: MethodReference,
+    settingsIconField: FieldReference,
+): DrawerFooterTarget {
     val candidates = buildList {
         context.classDefForEach { classDef ->
             if (!classDef.type.startsWith(DRAWER_SCOPE)) return@classDefForEach
@@ -287,8 +346,46 @@ private fun resolveDrawerFooterTarget(renderer: MethodReference): DrawerFooterTa
                         method.parameterTypes.map(CharSequence::toString) ==
                             List(3) { OBJECT_DESCRIPTOR }
                 }.forEach { method ->
-                    method.findDrawerFooterCall(renderer)?.let { (callIndex, call) ->
-                        add(DrawerFooterTarget(method, callIndex, call))
+                    method.findDrawerFooterCalls(renderer)?.let { calls ->
+                        val dividerIndex =
+                            method.instructions.indices.firstOrNull { index ->
+                                method.instructions[index]
+                                    .getReference<MethodReference>()
+                                    ?.isDrawerFooterDivider(renderer) == true
+                            } ?: throw PatchException(
+                                "NewX drawer footer candidate lost its divider: $method",
+                            )
+                        val iconParameterIndex = renderer.parameterTypes.indexOfFirst { type ->
+                            type.toString().startsWith("Lcom/x/icons/")
+                        }
+                        if (iconParameterIndex < 0) {
+                            throw PatchException("NewX drawer footer renderer has no icon parameter: $renderer")
+                        }
+                        val settingsCalls = calls.filter { (callIndex, call) ->
+                            method.instructions.hasFieldArgument(
+                                callIndex = callIndex,
+                                call = call,
+                                renderer = renderer,
+                                parameterIndex = iconParameterIndex,
+                                field = settingsIconField,
+                                lowerBound = dividerIndex + 1,
+                            )
+                        }
+                        if (settingsCalls.size != 1) {
+                            throw PatchException(
+                                "Expected exactly one NewX drawer settings-icon footer call in candidate $method, " +
+                                    "found ${settingsCalls.size}; all footer calls: " +
+                                    calls.joinToString { "${it.index}:${it.value}" },
+                            )
+                        }
+                        val footerCall = settingsCalls.single()
+                        add(
+                            DrawerFooterTarget(
+                                method = method,
+                                callIndex = footerCall.index,
+                                call = footerCall.value,
+                            ),
+                        )
                     }
                 }
         }
@@ -469,7 +566,7 @@ val customizeNewXDrawerPatch =
             }
             val settingsIconType = settingsIconTypes.single()
             val settingsIconField = resolveSettingsIconField(settingsIconType)
-            resolveDrawerFooterTarget(footerRenderer).let { target ->
+            resolveDrawerFooterTarget(footerRenderer, settingsIconField).let { target ->
                 target.method.injectPikoSettingsDrawerItem(
                     target = target,
                     renderer = footerRenderer,
