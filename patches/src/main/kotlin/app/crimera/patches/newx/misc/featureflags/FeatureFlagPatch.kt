@@ -18,13 +18,19 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.cloneParameters
+import app.morphe.util.getReference
 import app.morphe.util.p0Register
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val STRING_TYPE = "Ljava/lang/String;"
 private const val LIST_TYPE = "Ljava/util/List;"
+private const val OBJECT_TYPE = "Ljava/lang/Object;"
 private const val FEATURE_SWITCH_STORE_DESCRIPTOR =
     "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchStore;"
 private const val FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR =
@@ -47,8 +53,17 @@ private object NewXFeatureSwitchRepositoryFingerprint : Fingerprint(
         AccessFlags.PUBLIC.isSet(method.accessFlags) &&
             !AccessFlags.STATIC.isSet(method.accessFlags) &&
             !AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
-            !AccessFlags.ABSTRACT.isSet(classDef.accessFlags)
+            !AccessFlags.ABSTRACT.isSet(classDef.accessFlags) &&
+            classDef.methods.privateServerLookupMethods().singleOrNull()?.let { lookup ->
+                method.hasFeatureSwitchLookup(expectedMode = true, lookupMethod = lookup)
+            } == true
     },
+)
+
+private data class FeatureSwitchRepositoryResolution(
+    val descriptor: String,
+    val accessors: List<FeatureSwitchAccessor>,
+    val lookupMethod: Method?,
 )
 
 private data class FeatureSwitchAccessor(
@@ -57,6 +72,8 @@ private data class FeatureSwitchAccessor(
     val returnType: String,
     val extensionMethod: String,
     val methodNames: List<String> = listOf("get$typeName", "peek$typeName"),
+    /** `true` selects the server-backed accessor; null keeps the legacy named path. */
+    val lookupMode: Boolean? = null,
 ) {
     val returnOpcode =
         when {
@@ -103,19 +120,62 @@ private val FEATURE_SWITCH_ACCESSORS =
 // BETA PATH: obfuscated repository accessors from 12.18.0-beta.0 and later.
 private val BETA_FEATURE_SWITCH_ACCESSORS =
     listOf(
-        FeatureSwitchAccessor("Boolean", listOf(STRING_TYPE, "Z"), "Z", "resolveBoolean", listOf("getBoolean")),
-        FeatureSwitchAccessor("Float", listOf(STRING_TYPE, "F"), "F", "resolveFloat", listOf("getFloat")),
-        FeatureSwitchAccessor("Int", listOf(STRING_TYPE, "I"), "I", "resolveInt", listOf("getInt")),
-        FeatureSwitchAccessor("Long", listOf(STRING_TYPE, "J"), "J", "resolveLong", listOf("getLong")),
-        FeatureSwitchAccessor("Double", listOf(STRING_TYPE, "D"), "D", "resolveDouble", listOf("a")),
+        FeatureSwitchAccessor(
+            "Boolean",
+            listOf(STRING_TYPE, "Z"),
+            "Z",
+            "resolveBoolean",
+            methodNames = emptyList(),
+            lookupMode = true,
+        ),
+        FeatureSwitchAccessor(
+            "Float",
+            listOf(STRING_TYPE, "F"),
+            "F",
+            "resolveFloat",
+            methodNames = emptyList(),
+            lookupMode = true,
+        ),
+        FeatureSwitchAccessor(
+            "Int",
+            listOf(STRING_TYPE, "I"),
+            "I",
+            "resolveInt",
+            methodNames = emptyList(),
+            lookupMode = true,
+        ),
+        FeatureSwitchAccessor(
+            "Long",
+            listOf(STRING_TYPE, "J"),
+            "J",
+            "resolveLong",
+            methodNames = emptyList(),
+            lookupMode = true,
+        ),
+        FeatureSwitchAccessor(
+            "Double",
+            listOf(STRING_TYPE, "D"),
+            "D",
+            "resolveDouble",
+            methodNames = emptyList(),
+            lookupMode = true,
+        ),
         FeatureSwitchAccessor(
             "String",
             listOf(STRING_TYPE, STRING_TYPE),
             STRING_TYPE,
             "resolveString",
-            listOf("getString"),
+            methodNames = emptyList(),
+            lookupMode = true,
         ),
-        FeatureSwitchAccessor("List", listOf(STRING_TYPE), LIST_TYPE, "resolveList", listOf("d")),
+        FeatureSwitchAccessor(
+            "List",
+            listOf(STRING_TYPE),
+            LIST_TYPE,
+            "resolveList",
+            methodNames = emptyList(),
+            lookupMode = true,
+        ),
     )
 
 @Suppress("unused")
@@ -156,9 +216,13 @@ val featureFlagPatch =
 
         execute {
             val isAlpha = classDefByOrNull(FEATURE_SWITCH_REPOSITORY_DESCRIPTOR) != null
-            val (repositoryDescriptor, accessors) =
+            val repositoryResolution =
                 if (isAlpha) {
-                    FEATURE_SWITCH_REPOSITORY_DESCRIPTOR to FEATURE_SWITCH_ACCESSORS
+                    FeatureSwitchRepositoryResolution(
+                        descriptor = FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
+                        accessors = FEATURE_SWITCH_ACCESSORS,
+                        lookupMethod = null,
+                    )
                 } else {
                     val matches =
                         NewXFeatureSwitchRepositoryFingerprint.scopedMatchAllOrNull().orEmpty()
@@ -168,11 +232,28 @@ val featureFlagPatch =
                                 matches.joinToString { it.originalClassDef.type },
                         )
                     }
-                    matches.single().originalClassDef.type to BETA_FEATURE_SWITCH_ACCESSORS
+                    val repositoryClass = matches.single().originalClassDef
+                    val lookupMethods = repositoryClass.methods.privateServerLookupMethods()
+                    if (lookupMethods.size != 1) {
+                        throw PatchException(
+                            "Expected one private NewX server-backed feature-switch lookup in " +
+                                "${repositoryClass.type}, found ${lookupMethods.size}: " +
+                                lookupMethods.joinToString(),
+                        )
+                    }
+                    FeatureSwitchRepositoryResolution(
+                        descriptor = repositoryClass.type,
+                        accessors = BETA_FEATURE_SWITCH_ACCESSORS,
+                        lookupMethod = lookupMethods.single(),
+                    )
                 }
-            val repository = mutableClassDefBy(repositoryDescriptor)
-            accessors.forEach { accessor ->
-                val matches = repository.methods.matching(accessor)
+            val repository = mutableClassDefBy(repositoryResolution.descriptor)
+            repositoryResolution.accessors.forEach { accessor ->
+                val matches = repository.methods.matching(
+                    accessor,
+                    semantic = !isAlpha,
+                    lookupMethod = repositoryResolution.lookupMethod,
+                )
                 requireAccessorMatches(accessor, matches)
                 matches.forEach { it.cloneParameters(repository).hookReturns(accessor) }
             }
@@ -181,12 +262,15 @@ val featureFlagPatch =
 
 private fun Collection<MutableMethod>.matching(
     accessor: FeatureSwitchAccessor,
+    semantic: Boolean,
+    lookupMethod: Method?,
 ) = filter { method ->
     AccessFlags.PUBLIC.isSet(method.accessFlags) &&
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
-        method.name in accessor.methodNames &&
         method.parameterTypes.map(CharSequence::toString) == accessor.parameterTypes &&
-        method.returnType == accessor.returnType
+        method.returnType == accessor.returnType &&
+        (accessor.methodNames.isEmpty() || method.name in accessor.methodNames) &&
+        (!semantic || method.hasFeatureSwitchLookup(accessor.lookupMode, lookupMethod))
 }
 
 private fun requireAccessorMatches(
@@ -194,13 +278,92 @@ private fun requireAccessorMatches(
     methods: List<MutableMethod>,
 ) {
     val actualNames = methods.map(MutableMethod::getName).toSet()
-    if (methods.size == accessor.methodNames.size && actualNames == accessor.methodNames.toSet()) return
+    if (
+        accessor.methodNames.isNotEmpty() &&
+            methods.size == accessor.methodNames.size &&
+            actualNames == accessor.methodNames.toSet()
+    ) return
+    if (accessor.methodNames.isEmpty() && methods.size == 1) return
 
     throw PatchException(
         "Expected NewX ${accessor.typeName.lowercase()} accessors " +
-            "${accessor.methodNames.joinToString()} exactly once, found ${methods.joinToString()}",
+            if (accessor.methodNames.isEmpty()) {
+                "one semantic server-backed accessor exactly once"
+            } else {
+                "${accessor.methodNames.joinToString()} exactly once"
+            } + ", found ${methods.joinToString()}",
     )
 }
+
+/**
+ * BETA repository accessors have unstable names, but retain the typed call to the repository's
+ * private feature-value lookup. The literal immediately before the call distinguishes the
+ * server-backed path (`1`) from the local peek path (`0`).
+ */
+private fun Method.hasFeatureSwitchLookup(
+    expectedMode: Boolean?,
+    lookupMethod: Method?,
+): Boolean {
+    val methodInstructions = implementation?.instructions?.toList().orEmpty()
+    val lookupCalls = methodInstructions.mapIndexedNotNull { index, instruction ->
+        if (
+            instruction.opcode !in
+                setOf(
+                    Opcode.INVOKE_DIRECT,
+                    Opcode.INVOKE_DIRECT_RANGE,
+                    Opcode.INVOKE_VIRTUAL,
+                    Opcode.INVOKE_VIRTUAL_RANGE,
+                )
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (reference.parameterTypes.map(CharSequence::toString) != listOf(STRING_TYPE, "Z") ||
+            reference.returnType != OBJECT_TYPE ||
+            (lookupMethod != null && !reference.matches(lookupMethod))
+        ) {
+            return@mapIndexedNotNull null
+        }
+
+        val arguments = instruction.registersUsed
+        if (arguments.size != 3 ||
+            arguments[0] != p0Register ||
+            arguments[1] != p0Register + 1
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val modeRegister = arguments[2]
+        val modeInstruction = methodInstructions.getOrNull(index - 1)
+            as? OneRegisterInstruction
+            ?: return@mapIndexedNotNull null
+        if (modeInstruction.registerA != modeRegister || modeInstruction !is NarrowLiteralInstruction) {
+            return@mapIndexedNotNull null
+        }
+        val mode = modeInstruction.narrowLiteral
+        if (mode !in 0..1 || expectedMode != null && mode != if (expectedMode) 1 else 0) {
+            return@mapIndexedNotNull null
+        }
+        if (methodInstructions.getOrNull(index + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+            return@mapIndexedNotNull null
+        }
+        reference
+    }
+    return lookupCalls.size == 1
+}
+
+private fun Iterable<Method>.privateServerLookupMethods(): List<Method> = filter { method ->
+    AccessFlags.PRIVATE.isSet(method.accessFlags) &&
+        !AccessFlags.STATIC.isSet(method.accessFlags) &&
+        method.parameterTypes.map(CharSequence::toString) == listOf(STRING_TYPE, "Z") &&
+        method.returnType == OBJECT_TYPE &&
+        method.implementation != null
+}
+
+private fun MethodReference.matches(method: Method): Boolean =
+    definingClass == method.definingClass &&
+        name == method.name &&
+        returnType == method.returnType &&
+        parameterTypes.map(CharSequence::toString) == method.parameterTypes.map(CharSequence::toString)
 
 private fun MutableMethod.hookReturns(accessor: FeatureSwitchAccessor) {
     val returnIndices =
