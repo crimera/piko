@@ -9,23 +9,27 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
+import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import java.util.WeakHashMap
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
-private const val IMMUTABLE_LIST_DESCRIPTOR = "Lkotlinx/collections/immutable/b;"
 private const val X_PACKAGE_SCOPE = "Lcom/x/"
 
 private object TimelineItemsImmutableListConverterFingerprint : Fingerprint(
     definingClass = X_PACKAGE_SCOPE,
     parameters = listOf(ITERABLE_DESCRIPTOR),
-    custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
-    returnType = IMMUTABLE_LIST_DESCRIPTOR,
+    custom = { method, _ ->
+        AccessFlags.STATIC.isSet(method.accessFlags) &&
+            method.returnType.startsWith("Lkotlinx/collections/immutable/")
+    },
 )
 
 private object TimelinePostModelFingerprint : Fingerprint(
@@ -266,13 +270,37 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
     // ALPHA PATH uses public model fields; BETA PATH uses private-model getters.
     // The shared bridges keep the extension API stable while this compatibility split remains.
     val immutableListMatches = TimelineItemsImmutableListConverterFingerprint.scopedMatchAll()
-    if (immutableListMatches.size != 1) {
+    val immutableListConverterCandidates = immutableListMatches.mapNotNull { match ->
+        val method = match.originalMethod
+        val instructions = method.implementation?.instructions?.toList() ?: return@mapNotNull null
+        if (!isJavaListType(method.returnType) ||
+            instructions.count { instruction ->
+                instruction.opcode == Opcode.INSTANCE_OF &&
+                    instruction.getReference<TypeReference>()?.type == method.returnType
+            } != 1
+        ) {
+            return@mapNotNull null
+        }
+        val fallbackCalls = instructions.mapNotNull { instruction ->
+            val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+            reference.takeIf {
+                instruction.opcode == Opcode.INVOKE_STATIC &&
+                    it.definingClass == method.definingClass &&
+                    it.parameterTypes.map(CharSequence::toString) == listOf(ITERABLE_DESCRIPTOR) &&
+                    isJavaListType(it.returnType.toString())
+            }
+        }
+        if (fallbackCalls.size != 1) return@mapNotNull null
+        method
+    }
+    if (immutableListConverterCandidates.size != 1) {
         throw PatchException(
             "Expected one NewX timeline immutable-list converter, found " +
-                "${immutableListMatches.size}: ${immutableListMatches.joinToString { it.originalMethod.toString() }}",
+                "${immutableListConverterCandidates.size}: " +
+                immutableListConverterCandidates.joinToString(),
         )
     }
-    val immutableListConverter = immutableListMatches.single().originalMethod
+    val immutableListConverter = immutableListConverterCandidates.single()
     if (!AccessFlags.STATIC.isSet(immutableListConverter.accessFlags)) {
         throw PatchException("NewX timeline immutable-list converter is not static: $immutableListConverter")
     }
@@ -494,4 +522,27 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
             return-object p0
         """.trimIndent(),
     )
+}
+
+context(context: BytecodePatchContext)
+private fun isJavaListType(type: String): Boolean {
+    if (type == LIST_DESCRIPTOR) return true
+    if (!type.startsWith("L")) return false
+    return isJavaListType(type, mutableSetOf())
+}
+
+context(context: BytecodePatchContext)
+private fun isJavaListType(type: String, visitedTypes: MutableSet<String>): Boolean {
+    if (type == LIST_DESCRIPTOR) return true
+    if (!visitedTypes.add(type)) return false
+    val definition = runCatching { context.mutableClassDefBy(type) }.getOrNull() ?: return false
+    if (definition.interfaces.any { interfaceType ->
+            isJavaListType(interfaceType.toString(), visitedTypes)
+        }
+    ) {
+        return true
+    }
+    return definition.superclass?.let { superclass ->
+        isJavaListType(superclass, visitedTypes)
+    } == true
 }
