@@ -30,13 +30,29 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val MAXIMUM_VIDEO_BITRATE = 0x7fffffff
+private const val REGEX_DESCRIPTOR = "Lkotlin/text/Regex;"
+private const val INTEGER_DESCRIPTOR = "I"
+
+private data class AudioBitrateCandidate(
+    val fieldIndex: Int,
+    val field: FieldReference,
+    val branchIndex: Int,
+)
+
+private data class RegexAllocationCandidate(
+    val allocationIndex: Int,
+    val patternIndex: Int,
+)
 
 private object AudioTrackOverrideFingerprint : Fingerprint(
     definingClass = "Lcom/x/media/playback/",
@@ -151,6 +167,33 @@ private fun isBitrateFlowRead(instruction: Instruction?): Boolean {
     return reference.type.startsWith("Lkotlinx/coroutines/flow/")
 }
 
+private fun isStringConstant(instruction: Instruction?, value: String): Boolean {
+    if (instruction?.opcode != Opcode.CONST_STRING &&
+        instruction?.opcode != Opcode.CONST_STRING_JUMBO
+    ) {
+        return false
+    }
+    return instruction.getReference<StringReference>()?.string == value
+}
+
+private fun isRegexConstructor(
+    instruction: Instruction?,
+    regexRegister: Int,
+    patternRegister: Int,
+): Boolean {
+    if (instruction?.opcode != Opcode.INVOKE_DIRECT &&
+        instruction?.opcode != Opcode.INVOKE_DIRECT_RANGE
+    ) {
+        return false
+    }
+    val reference = instruction.getReference<MethodReference>() ?: return false
+    return reference.definingClass == REGEX_DESCRIPTOR &&
+        reference.name == "<init>" &&
+        reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/String;") &&
+        reference.returnType == "V" &&
+        instruction.registersUsed == listOf(regexRegister, patternRegister)
+}
+
 private fun isIntegerMathMin(instruction: Instruction): Boolean {
     if (instruction.opcode != Opcode.INVOKE_STATIC &&
         instruction.opcode != Opcode.INVOKE_STATIC_RANGE
@@ -180,47 +223,125 @@ private fun patchAudioTrackOverride(
     ownerClass.methods.add(method)
 
     val instructionsList = method.instructions.toList()
-    val skipOverrideStringIndex = instructionsList.indexOfFirst { instruction ->
-        instruction.opcode in listOf(Opcode.CONST_STRING, Opcode.CONST_STRING_JUMBO) &&
-            instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.StringReference>()?.string ==
-            "Audio bitrates are known, skipping override"
+    val skipOverrideStringCandidates =
+        instructionsList.withIndex().filter { (_, instruction) ->
+            isStringConstant(instruction, "Audio bitrates are known, skipping override")
+        }
+    if (skipOverrideStringCandidates.size != 1) {
+        throw PatchException(
+            "Expected one skip-override marker in onTracksChanged, found " +
+                "${skipOverrideStringCandidates.size}: " +
+                "${skipOverrideStringCandidates.joinToString { "${it.index}:${it.value}" }}",
+        )
     }
-    if (skipOverrideStringIndex == -1) {
-        throw PatchException("Could not find skip override string in onTracksChanged")
-    }
+    val skipOverrideStringIndex = skipOverrideStringCandidates.single().index
 
-    val regexStringIndex = instructionsList.indexOfFirst { instruction ->
-        instruction.opcode in listOf(Opcode.CONST_STRING, Opcode.CONST_STRING_JUMBO) &&
-            instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.StringReference>()?.string ==
-            "audio-(\\d+)"
+    val regexStringCandidates =
+        instructionsList.withIndex().filter { (_, instruction) ->
+            isStringConstant(instruction, "audio-(\\d+)")
+        }
+    if (regexStringCandidates.size != 1) {
+        throw PatchException(
+            "Expected one audio bitrate Regex marker in onTracksChanged, found " +
+                "${regexStringCandidates.size}: " +
+                "${regexStringCandidates.joinToString { "${it.index}:${it.value}" }}",
+        )
     }
-    if (regexStringIndex == -1) {
-        throw PatchException("Could not find audio-(\\d+) string in onTracksChanged")
-    }
+    val regexStringIndex = regexStringCandidates.single().index
 
-    val bitrateFieldReadIndex = instructionsList.take(skipOverrideStringIndex).indexOfLast { instruction ->
-        instruction.opcode == Opcode.IGET &&
-            instruction.getReference<FieldReference>()?.type == "I"
-    }
-    if (bitrateFieldReadIndex == -1) {
-        throw PatchException("Could not resolve the Format.bitrate field read in onTracksChanged")
-    }
+    val bitrateFieldCandidates =
+        instructionsList.withIndex().mapNotNull { (index, instruction) ->
+            if (index >= skipOverrideStringIndex || instruction.opcode != Opcode.IGET) {
+                return@mapNotNull null
+            }
+            val fieldInstruction = instruction as? TwoRegisterInstruction
+                ?: return@mapNotNull null
+            val field = instruction.getReference<FieldReference>()
+                ?: return@mapNotNull null
+            if (field.type.toString() != INTEGER_DESCRIPTOR) return@mapNotNull null
 
-    val branchInstructionIndex = (bitrateFieldReadIndex + 1 until skipOverrideStringIndex)
-        .firstOrNull { index ->
-            instructionsList[index].opcode in listOf(
-                Opcode.IF_NE,
-                Opcode.IF_EQ,
-                Opcode.IF_NEZ,
-                Opcode.IF_EQZ,
-            )
-        } ?: throw PatchException("Could not find branch instruction guarding audio bitrates override")
+            val resultInstruction =
+                instructionsList.getOrNull(index - 1) as? OneRegisterInstruction
+                    ?: return@mapNotNull null
+            val getterInstruction = instructionsList.getOrNull(index - 2)
+                ?: return@mapNotNull null
+            val getter = getterInstruction.getReference<MethodReference>()
+                ?: return@mapNotNull null
+            val branchInstruction = instructionsList.getOrNull(index + 1)
+                ?: return@mapNotNull null
+            if (getterInstruction.opcode != Opcode.INVOKE_VIRTUAL ||
+                resultInstruction.opcode != Opcode.MOVE_RESULT_OBJECT ||
+                resultInstruction.registerA != fieldInstruction.registerB ||
+                getter.returnType.toString() != field.definingClass.toString() ||
+                getter.parameterTypes.map(CharSequence::toString) != listOf(INTEGER_DESCRIPTOR) ||
+                branchInstruction.opcode !in setOf(
+                    Opcode.IF_NE,
+                    Opcode.IF_EQ,
+                    Opcode.IF_NEZ,
+                    Opcode.IF_EQZ,
+                ) ||
+                fieldInstruction.registerA !in branchInstruction.registersUsed
+            ) {
+                return@mapNotNull null
+            }
+            AudioBitrateCandidate(index, field, index + 1)
+        }
+    if (bitrateFieldCandidates.size != 1) {
+        throw PatchException(
+            "Expected one semantic Format.bitrate read before the skip-override marker, found " +
+                "${bitrateFieldCandidates.size}: " +
+                "${bitrateFieldCandidates.joinToString { "${it.fieldIndex}:${it.field}" }}",
+        )
+    }
+    val bitrateFieldCandidate = bitrateFieldCandidates.single()
+    val bitrateFieldReadIndex = bitrateFieldCandidate.fieldIndex
 
-    val newInstanceRegexIndex = (0 until regexStringIndex).lastOrNull { index ->
-        instructionsList[index].opcode == Opcode.NEW_INSTANCE &&
-            instructionsList[index].getReference<com.android.tools.smali.dexlib2.iface.reference.TypeReference>()?.type ==
-            "Lkotlin/text/Regex;"
-    } ?: (regexStringIndex - 1)
+    val branchInstructionIndex = bitrateFieldCandidate.branchIndex
+
+    val regexAllocationCandidates =
+        instructionsList.withIndex().mapNotNull { (index, instruction) ->
+            if (index >= regexStringIndex || instruction.opcode != Opcode.NEW_INSTANCE) {
+                return@mapNotNull null
+            }
+            val allocationRegister =
+                (instruction as? OneRegisterInstruction)?.registerA
+                    ?: return@mapNotNull null
+            val type = instruction
+                .getReference<com.android.tools.smali.dexlib2.iface.reference.TypeReference>()
+                ?.type
+                ?: return@mapNotNull null
+            if (type != REGEX_DESCRIPTOR) return@mapNotNull null
+            val patternInstruction =
+                instructionsList.getOrNull(index + 1) as? OneRegisterInstruction
+                    ?: return@mapNotNull null
+            if (!isStringConstant(instructionsList.getOrNull(index + 1), "audio-(\\d+)")) {
+                return@mapNotNull null
+            }
+            if (!isRegexConstructor(
+                    instructionsList.getOrNull(index + 2),
+                    allocationRegister,
+                    patternInstruction.registerA,
+                )
+            ) {
+                return@mapNotNull null
+            }
+            RegexAllocationCandidate(index, index + 1)
+        }
+    if (regexAllocationCandidates.size != 1) {
+        throw PatchException(
+            "Expected one audio bitrate Regex allocation for marker @${regexStringIndex}, found " +
+                "${regexAllocationCandidates.size}: " +
+                "${regexAllocationCandidates.joinToString { "${it.allocationIndex}:${it.patternIndex}" }}",
+        )
+    }
+    val regexAllocationCandidate = regexAllocationCandidates.single()
+    if (regexAllocationCandidate.patternIndex != regexStringIndex) {
+        throw PatchException(
+            "Audio bitrate Regex allocation does not consume the unique marker at " +
+                "${regexStringIndex}: ${regexAllocationCandidate}",
+        )
+    }
+    val newInstanceRegexIndex = regexAllocationCandidate.allocationIndex
 
     val regexInstruction = instructionsList[newInstanceRegexIndex]
     val settingRegister = originalRegisterCount
@@ -259,18 +380,25 @@ private fun patchBitrateLimiter(
     ownerClass.methods.add(method)
 
     val instructionsList = method.instructions.toList()
-    val mathMinIndex =
-        instructionsList.indices.firstOrNull { index ->
-            isIntegerMathMin(instructionsList[index]) &&
+    val mathMinCandidates =
+        instructionsList.withIndex().filter { (index, instruction) ->
+            isIntegerMathMin(instruction) &&
                 isBitrateFlowRead(instructionsList.getOrNull(index - 1))
-        } ?: -1
-    if (mathMinIndex == -1) {
-        throw PatchException("Could not find Math.min call updating the media bitrate limit")
+        }
+    if (mathMinCandidates.size != 1) {
+        throw PatchException(
+            "Expected one Math.min call updating the media bitrate limit, found " +
+                "${mathMinCandidates.size}: ${mathMinCandidates.joinToString { "${it.index}:${it.value}" }}",
+        )
     }
+    val mathMinIndex = mathMinCandidates.single().index
 
     val moveResultIndex = mathMinIndex + 1
     val moveResult = instructionsList.getOrNull(moveResultIndex) as? OneRegisterInstruction
         ?: throw PatchException("Math.min is not followed by move-result")
+    if (moveResult.opcode != Opcode.MOVE_RESULT) {
+        throw PatchException("Math.min is not followed by move-result: ${instructionsList[moveResultIndex]}")
+    }
 
     val resultRegister = moveResult.registerA
     val settingRegister = originalRegisterCount
