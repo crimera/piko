@@ -8,14 +8,25 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import java.util.WeakHashMap
 
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val INLINE_ACTION_BAR_SCOPE = "Lcom/x/inlineactionbar/"
+private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
+private const val ITERATOR_DESCRIPTOR = "Ljava/util/Iterator;"
+private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
 
 /**
  * Base post models: labels that are present whether or not the release keeps media or
@@ -351,6 +362,7 @@ private fun resolveInlineActionBarModels(
     postModels: ResolvedNewXPostModels,
 ): ResolvedNewXInlineActionBarModels {
     val anchors = resolvedNewXPostModelAnchors()
+    val inlineActionModels = resolvedNewXInlineActionModels()
     val canonicalPostClass = context.classDefByOrNull(postModels.canonicalPostDescriptor)
         ?: throw PatchException(
             "NewX canonical-post class was not found: ${postModels.canonicalPostDescriptor}",
@@ -360,6 +372,15 @@ private fun resolveInlineActionBarModels(
             "Expected one NewX canonical-post interface in $canonicalPostClass: " +
                 canonicalPostClass.interfaces.joinToString(),
         )
+    val canonicalPostInlineActionEntryField = anchors.canonicalPostToStringMethod
+        .resolveCurrentMethod("canonical post toString")
+        .fieldForToStringLabel(", inlineActionEntry=")
+    if (!canonicalPostInlineActionEntryField.type.startsWith("L")) {
+        throw PatchException(
+            "NewX canonical-post inline-action field is not an object collection: " +
+                canonicalPostInlineActionEntryField,
+        )
+    }
     val inlineActionBarMatches =
         listOf(
             Fingerprint(
@@ -369,22 +390,35 @@ private fun resolveInlineActionBarModels(
                     methodCall(
                         definingClass = canonicalPostInterfaceDescriptor,
                         parameters = emptyList(),
-                        returnType = "L",
+                        returnType = canonicalPostInlineActionEntryField.type,
                     ),
                     methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
                 ),
+                custom = { method, _ ->
+                    method.hasInlineActionCollectionResultFlow(
+                        definingClass = canonicalPostInterfaceDescriptor,
+                        collectionType = canonicalPostInlineActionEntryField.type,
+                        elementType = inlineActionModels.inlineActionEntryDescriptor,
+                    )
+                },
             ).scopedMatchAllOrNull().orEmpty(),
             Fingerprint(
                 definingClass = INLINE_ACTION_BAR_SCOPE,
                 parameters = listOf(COMPOSER_DESCRIPTOR),
                 filters = listOf(
                     methodCall(
-                        smali =
-                            "Lcom/x/models/ContextualPost;->getInlineActionEntry()" +
-                                "Lkotlinx/collections/immutable/c;",
+                        definingClass = anchors.contextualPostDescriptor,
+                        parameters = emptyList(),
+                        returnType = inlineActionModels.inlineActionEntryDescriptor,
                     ),
                     methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
                 ),
+                custom = { method, _ ->
+                    method.hasInlineActionResultFlow(
+                        definingClass = anchors.contextualPostDescriptor,
+                        returnType = inlineActionModels.inlineActionEntryDescriptor,
+                    )
+                },
             ).scopedMatchAllOrNull().orEmpty(),
         ).flatten()
             .distinctBy { it.originalMethod.toString() }
@@ -398,12 +432,220 @@ private fun resolveInlineActionBarModels(
 
     return ResolvedNewXInlineActionBarModels(
         canonicalPostInterfaceDescriptor = canonicalPostInterfaceDescriptor,
-        canonicalPostInlineActionEntryField = anchors.canonicalPostToStringMethod
-            .resolveCurrentMethod("canonical post toString")
-            .fieldForToStringLabel(", inlineActionEntry="),
+        canonicalPostInlineActionEntryField = canonicalPostInlineActionEntryField,
         inlineActionBarDescriptor = inlineActionBarMatch.originalClassDef.type,
         inlineActionStateBuilder = inlineActionBarMatch.originalMethod,
     )
+}
+
+private fun Method.hasInlineActionResultFlow(
+    definingClass: String,
+    returnType: String,
+): Boolean {
+    val methodInstructions = implementation?.instructions?.toList() ?: return false
+    val accessorCalls = methodInstructions.mapIndexedNotNull { index, instruction ->
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (
+            reference.definingClass != definingClass ||
+                reference.parameterTypes.isNotEmpty() ||
+                reference.returnType != returnType ||
+                methodInstructions.getOrNull(index + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val resultRegister =
+            (methodInstructions[index + 1] as? OneRegisterInstruction)?.registerA
+            ?: return@mapIndexedNotNull null
+        index to resultRegister
+    }
+    if (accessorCalls.size != 1) return false
+
+    val (accessorIndex, resultRegister) = accessorCalls.single()
+    val valueRegisters = linkedSetOf(resultRegister)
+    val consumerIndices = methodInstructions.mapIndexedNotNull { index, instruction ->
+        if (index <= accessorIndex + 1) return@mapIndexedNotNull null
+        val reference = instruction.getReference<MethodReference>()
+            ?: return@mapIndexedNotNull null
+        val arguments = instruction.registersUsed
+        if (
+            reference.definingClass == "Ljava/util/ArrayList;" &&
+                reference.name == "add" &&
+                reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
+                reference.returnType == "Z" &&
+                arguments.size == 2 &&
+                arguments[1] in valueRegisters
+        ) {
+            return@mapIndexedNotNull index
+        }
+        if (instruction.opcode == Opcode.MOVE_OBJECT || instruction.opcode == Opcode.MOVE) {
+            val move = instruction as? TwoRegisterInstruction ?: return@mapIndexedNotNull null
+            if (move.registerB in valueRegisters) valueRegisters += move.registerA
+        }
+        null
+    }
+    return consumerIndices.size == 1
+}
+
+/**
+ * BETA PATH: the canonical-post accessor returns the collection of inline-action entries. The
+ * presenter iterates that collection, casts each element to the resolved model, optionally maps
+ * it through a copy/factory method, and adds the resulting entry to an ArrayList. Keep this
+ * separate from the direct-entry path above because the collection descriptor is not the model
+ * descriptor (for example, immutable `b` versus `k4` in unified 12.22).
+ */
+private fun Method.hasInlineActionCollectionResultFlow(
+    definingClass: String,
+    collectionType: String,
+    elementType: String,
+): Boolean {
+    val methodInstructions = implementation?.instructions?.toList() ?: return false
+
+    fun moveResultObjectRegister(index: Int): Int? {
+        val moveResult = methodInstructions.getOrNull(index + 1)
+            ?: return null
+        if (moveResult.opcode != Opcode.MOVE_RESULT_OBJECT) return null
+        return (moveResult as? OneRegisterInstruction)?.registerA
+    }
+
+    val accessorCalls = methodInstructions.mapIndexedNotNull { index, instruction ->
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (
+            reference.definingClass != definingClass ||
+                reference.parameterTypes.isNotEmpty() ||
+                reference.returnType != collectionType
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val resultRegister = moveResultObjectRegister(index)
+            ?: return@mapIndexedNotNull null
+        index to resultRegister
+    }
+    if (accessorCalls.size != 1) return false
+
+    val (accessorIndex, collectionResultRegister) = accessorCalls.single()
+    val collectionRegisters = linkedSetOf(collectionResultRegister)
+    val iteratorCalls = mutableListOf<Pair<Int, Int>>()
+    for (index in accessorIndex + 2 until methodInstructions.size) {
+        val instruction = methodInstructions[index]
+        val reference = instruction.getReference<MethodReference>()
+        if (
+            reference != null &&
+                reference.definingClass == ITERABLE_DESCRIPTOR &&
+                reference.name == "iterator" &&
+                reference.parameterTypes.isEmpty() &&
+                reference.returnType == ITERATOR_DESCRIPTOR &&
+                instruction.registersUsed.firstOrNull() in collectionRegisters
+        ) {
+            moveResultObjectRegister(index)?.let { iteratorResultRegister ->
+                iteratorCalls += index to iteratorResultRegister
+            }
+        }
+        updateObjectAliases(instruction, collectionRegisters)
+    }
+    if (iteratorCalls.size != 1) return false
+
+    val (iteratorIndex, iteratorResultRegister) = iteratorCalls.single()
+    val iteratorRegisters = linkedSetOf(iteratorResultRegister)
+    val nextCalls = mutableListOf<Pair<Int, Int>>()
+    for (index in iteratorIndex + 2 until methodInstructions.size) {
+        val instruction = methodInstructions[index]
+        val reference = instruction.getReference<MethodReference>()
+        if (
+            reference != null &&
+                reference.definingClass == ITERATOR_DESCRIPTOR &&
+                reference.name == "next" &&
+                reference.parameterTypes.isEmpty() &&
+                reference.returnType == "Ljava/lang/Object;" &&
+                instruction.registersUsed.firstOrNull() in iteratorRegisters
+        ) {
+            moveResultObjectRegister(index)?.let { nextResultRegister ->
+                nextCalls += index to nextResultRegister
+            }
+        }
+        updateObjectAliases(instruction, iteratorRegisters)
+    }
+    if (nextCalls.size != 1) return false
+
+    val (nextIndex, nextResultRegister) = nextCalls.single()
+    val elementRegisters = linkedSetOf(nextResultRegister)
+    val elementCastIndices = mutableListOf<Pair<Int, Int>>()
+    for (index in nextIndex + 2 until methodInstructions.size) {
+        val instruction = methodInstructions[index]
+        if (instruction.opcode == Opcode.CHECK_CAST) {
+            val castRegister = (instruction as? OneRegisterInstruction)?.registerA
+            val castType = instruction.getReference<TypeReference>()?.type
+            if (castRegister in elementRegisters && castType == elementType) {
+                castRegister?.let { elementCastIndices += index to it }
+            }
+        }
+        updateObjectAliases(instruction, elementRegisters)
+    }
+    if (elementCastIndices.size != 1) return false
+
+    val (elementCastIndex, elementRegister) = elementCastIndices.single()
+    val valueRegisters = linkedSetOf(elementRegister)
+    val pendingEntryResults = mutableMapOf<Int, Int>()
+    val consumerIndices = mutableListOf<Int>()
+    for (index in elementCastIndex + 1 until methodInstructions.size) {
+        val instruction = methodInstructions[index]
+        val reference = instruction.getReference<MethodReference>()
+        val arguments = instruction.registersUsed
+
+        if (
+            reference != null &&
+                reference.definingClass == ARRAY_LIST_DESCRIPTOR &&
+                reference.name == "add" &&
+                reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
+                reference.returnType == "Z" &&
+                arguments.size == 2 &&
+                arguments[1] in valueRegisters
+        ) {
+            consumerIndices += index
+        }
+
+        if (
+            reference != null &&
+                reference.returnType == elementType &&
+                arguments.any { it in valueRegisters }
+        ) {
+            moveResultObjectRegister(index)?.let { resultRegister ->
+                pendingEntryResults[index + 1] = resultRegister
+            }
+        }
+
+        if (instruction.opcode == Opcode.MOVE_RESULT_OBJECT) {
+            val resultRegister = (instruction as? OneRegisterInstruction)?.registerA
+            if (resultRegister != null) {
+                valueRegisters.remove(resultRegister)
+                if (pendingEntryResults.remove(index) == resultRegister) {
+                    valueRegisters += resultRegister
+                }
+            }
+        } else {
+            updateObjectAliases(instruction, valueRegisters)
+        }
+    }
+    return consumerIndices.size == 1
+}
+
+private fun updateObjectAliases(
+    instruction: Instruction,
+    registers: MutableSet<Int>,
+) {
+    when (instruction.opcode) {
+        Opcode.MOVE_OBJECT,
+        Opcode.MOVE_OBJECT_FROM16,
+        Opcode.MOVE_OBJECT_16,
+        -> {
+            val move = instruction as? TwoRegisterInstruction ?: return
+            registers.remove(move.registerA)
+            if (move.registerB in registers) registers += move.registerA
+        }
+        Opcode.MOVE_RESULT_OBJECT -> {
+            (instruction as? OneRegisterInstruction)?.registerA?.let(registers::remove)
+        }
+        else -> Unit
+    }
 }
 
 context(context: BytecodePatchContext)
