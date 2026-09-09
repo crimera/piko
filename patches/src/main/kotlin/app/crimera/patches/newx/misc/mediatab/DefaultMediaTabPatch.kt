@@ -162,22 +162,44 @@ val newXDefaultMediaTabPatch =
             val methodInstructions = method.instructions
             val seedInvokeIndex =
                 if (isLegacyShape) {
-                    val pairArrayIndex =
-                        methodInstructions.indexOfFirst { isPairArray(it, tabTypeDescriptor) }
-                    if (pairArrayIndex == -1) {
-                        throw PatchException("Missing combined profile tab array in the NewX media tab seed")
+                    val pairArrayCandidates =
+                        methodInstructions.withIndex()
+                            .filter { (_, instruction) -> isPairArray(instruction, tabTypeDescriptor) }
+                    if (pairArrayCandidates.size != 1) {
+                        throw PatchException(
+                            "Expected one combined profile tab array in the NewX media tab seed, found " +
+                                "${pairArrayCandidates.size}: ${pairArrayCandidates.joinToString { "${it.index}:${it.value}" }}",
+                        )
                     }
-                    (pairArrayIndex + 1 until methodInstructions.size).firstOrNull {
-                        isFlowSeed(methodInstructions[it])
-                    } ?: -1
+                    val pairArrayIndex = pairArrayCandidates.single().index
+                    val seedCandidates =
+                        (pairArrayIndex + 1 until methodInstructions.size)
+                            .filter { isFlowSeed(methodInstructions[it]) }
+                    if (seedCandidates.size != 1) {
+                        throw PatchException(
+                            "Expected one MutableStateFlow seed after the combined profile tab array, found " +
+                                "${seedCandidates.size}: ${seedCandidates.joinToString { index -> "${index}:${methodInstructions[index]}" }}",
+                        )
+                    }
+                    seedCandidates.single()
                 } else {
                     val implementation = method.implementation
                         ?: throw PatchException("Refactored combined profile timeline component has no implementation")
                     val firstParameterRegister = implementation.registerCount - method.parameterTypes.size
                     val initialSubTabRegister = firstParameterRegister + 1
-                    methodInstructions.indexOfFirst {
-                        isFlowSeed(it) && singleArgumentRegister(it) == initialSubTabRegister
+                    val seedCandidates =
+                        methodInstructions.withIndex()
+                            .filter { (_, instruction) ->
+                                isFlowSeed(instruction) &&
+                                    singleArgumentRegister(instruction) == initialSubTabRegister
+                            }
+                    if (seedCandidates.size != 1) {
+                        throw PatchException(
+                            "Expected one MutableStateFlow seed for the refactored initial sub-tab, found " +
+                                "${seedCandidates.size}: ${seedCandidates.joinToString { "${it.index}:${it.value}" }}",
+                        )
                     }
+                    seedCandidates.single().index
                 }
             if (seedInvokeIndex == -1) {
                 throw PatchException("Missing MutableStateFlow seed in the NewX combined profile timeline component")
