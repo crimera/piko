@@ -62,13 +62,13 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Hide who to follow" \
   -e "NewX: Hide AI-generated posts" \
   -e "NewX: Hide posts by verified account type" \
-  -e "NewX: Customize default media tab" \
-  -e "NewX: Customize default profile post sorting" \
+  -e "NewX: Set default media tab" \
+  -e "NewX: Set default profile post sorting" \
   -e "NewX: Custom font" \
   -e "NewX: Custom sharing domain" \
   -e "NewX: Inline download button" \
   -e "NewX: Dynamic color" \
-  -e "NewX: Customize default reply sorting" \
+  -e "NewX: Set default reply sorting" \
   -e "NewX: Server error logging" \
   -e "NewX: Filter posts by keyword" \
   -e "NewX: Force highest video/audio quality" \

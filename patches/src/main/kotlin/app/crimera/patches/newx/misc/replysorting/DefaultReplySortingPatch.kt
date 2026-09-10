@@ -108,7 +108,7 @@ private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
 @Suppress("unused")
 val newXDefaultReplySortingPatch =
     bytecodePatch(
-        name = "NewX: Customize default reply sorting",
+        name = "NewX: Set default reply sorting",
         description = "Lets you choose the default reply sorting order for NewX post detail.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)

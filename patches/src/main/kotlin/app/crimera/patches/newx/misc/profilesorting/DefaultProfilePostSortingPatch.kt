@@ -68,7 +68,7 @@ private object NewXProfilePostSortingStateFingerprint : Fingerprint(
 @Suppress("unused")
 val newXDefaultProfilePostSortingPatch =
     bytecodePatch(
-        name = "NewX: Customize default profile post sorting",
+        name = "NewX: Set default profile post sorting",
         description = "Lets you choose whether profile posts open sorted by the most recent or popular posts.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)

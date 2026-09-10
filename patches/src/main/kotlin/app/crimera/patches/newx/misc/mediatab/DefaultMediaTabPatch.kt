@@ -123,7 +123,7 @@ private object NewXCombinedProfileTimelineInitialSubTabFingerprint : Fingerprint
 @Suppress("unused")
 val newXDefaultMediaTabPatch =
     bytecodePatch(
-        name = "NewX: Customize default media tab",
+        name = "NewX: Set default media tab",
         description = "Lets you choose the default sub-tab (Photos or Videos) for the NewX profile media tab.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
