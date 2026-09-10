@@ -48,6 +48,15 @@ They fail with `PatchException` containing the label, cardinality, and candidate
 
 - Omit the optional `describe` argument unless the candidate's default `toString()` is not useful. Keep resolver call sites concise while retaining a semantic `label`.
 
+### NewX resolver linter experiment process
+
+- Treat `NewXResolverLinterTest.kt` as the executable fixture corpus. Every real false positive, false negative, or resolver failure discovered during an agent session must become a focused regression fixture with an explicit expected finding or non-finding.
+- Keep benchmark history in `docs/newx-resolver-linter-benchmark.md`, not in this file. Record the linter commit, fixture-corpus revision, total findings, findings by rule, known unsafe cases, detected unsafe cases, false positives, false negatives, runtime, and validation commands.
+- When changing the linter or cardinality helpers, run the full NewX test suite and `:patches:lintNewxResolvers`; compare the candidate against the previous committed baseline on the same fixture corpus.
+- Preserve separate safe and unsafe fixture sets. A lower finding count is not automatically better: improvements require increased unsafe-case detection without new false positives or changed optional-fallback behavior.
+- For behavior changes, validate representative old, production, and alpha APKs. Record patch success/failure, applied patch names, output artifact path, and any runtime/control-path result. Do not use stale APKs, extensions, or MPPs; record the exact source commit and artifact provenance.
+- Generated benchmark reports belong under `build/reports/` and should not be committed unless they are deliberately promoted to a versioned artifact. The committed benchmark document should summarize reproducible results and link to the fixture/test locations.
+
 ### Method
 
 1. **Freeze the target.** Record the exact package, version, APK, MPP, and output. Reuse stored decompilations and keep analysis scoped to the relevant package/file.
