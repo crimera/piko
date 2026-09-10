@@ -7,6 +7,7 @@ import app.crimera.patches.newx.settings.injectReadWithDefault
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -97,7 +98,13 @@ val newXShowSensitiveMediaPatch =
             }
 
             mediaWrites.groupBy(MediaVisibilityWrite::match).values.forEach { writes ->
-                val originalMethod = writes.first().match.method
+                val match =
+                    requireExactlyOne(
+                        label = "NewX media-visibility write group",
+                        candidates = writes.map(MediaVisibilityWrite::match).distinct(),
+                        describe = { candidate -> candidate.originalMethod.toString() },
+                    )
+                val originalMethod = match.method
                 val originalRegisterCount =
                     originalMethod.implementation?.registerCount
                         ?: throw PatchException("NewX media-visibility constructor has no implementation")
@@ -107,8 +114,8 @@ val newXShowSensitiveMediaPatch =
                     originalMethod.cloneMutable(
                         additionalRegisters = parameterRegisterCount + writes.size * 2,
                     ).also { expandedMethod ->
-                        writes.first().match.classDef.methods.remove(originalMethod)
-                        writes.first().match.classDef.methods.add(expandedMethod)
+                        match.classDef.methods.remove(originalMethod)
+                        match.classDef.methods.add(expandedMethod)
                     }
                 writes.sortedByDescending(MediaVisibilityWrite::index).forEachIndexed { ordinal, write ->
                     val writeIndex = write.index + indexShift
