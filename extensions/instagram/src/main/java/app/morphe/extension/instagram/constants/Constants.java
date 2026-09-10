@@ -10,6 +10,8 @@ package app.morphe.extension.instagram.constants;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
+import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.instagram.settings.ActivityHook;
 
 public class Constants {
     public static final String PIKO = "piko";
@@ -49,6 +51,7 @@ public class Constants {
     public static final String PIKO_FRAGMENT_REC_FLAGS = "piko_frag_rec_flags";
 
     public static void load() {
+        StorageUtils.setStorageAccessLauncher(ctx -> ActivityHook.launchFragment(ctx, "piko_download_set_path"));
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);
         ExtensionStrings.setDownloadOngoing(str("piko_downloading_media"));
         ExtensionStrings.setDownloadCompleted(str("piko_downloaded_media"));

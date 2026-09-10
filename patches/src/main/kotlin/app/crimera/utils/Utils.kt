@@ -33,7 +33,6 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
-import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle
 import org.w3c.dom.Element
 
 fun ResourcePatchContext.replaceXmlResources(

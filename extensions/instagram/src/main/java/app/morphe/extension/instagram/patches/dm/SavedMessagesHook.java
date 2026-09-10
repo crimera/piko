@@ -20,6 +20,7 @@ import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.entity.DirectItem;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.utils.Pref;
 
 /** Runtime hooks for "Save deleted messages". Fields are resolved at patch time. */
@@ -34,14 +35,11 @@ public class SavedMessagesHook {
         android.util.Log.e("piko", message);
     }
 
-    /** Opens the all-chat history from Piko settings. */
     public static void openDeletedMessages(Context context) {
         try {
             if (context == null) context = PikoUtils.getContext();
             if (context == null) return;
-            Intent intent = new Intent(context, DeletedMessagesActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            ActivityHook.startDeletedMessagesActivity(context);
         } catch (Exception e) {
             piko("SavedMessagesHook.openDeletedMessages: " + e);
         }
@@ -273,7 +271,7 @@ public class SavedMessagesHook {
                     ? content
                     : !isBlank(type) ? "[" + type + "]" : str("piko_media_deleted_generic");
 
-            Intent intent = new Intent(context, DeletedMessagesActivity.class);
+            Intent intent = ActivityHook.createDeletedMessagesIntent(context);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             int pendingIntentFlags = android.app.PendingIntent.FLAG_UPDATE_CURRENT
                     | (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M

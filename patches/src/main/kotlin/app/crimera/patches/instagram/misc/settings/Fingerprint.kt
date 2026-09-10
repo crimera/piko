@@ -30,3 +30,20 @@ internal object IgFragmentActivityOnCreate : Fingerprint(
     name = "onCreate",
     definingClass = "Lcom/instagram/base/activity/IgFragmentActivity;",
 )
+
+internal object ModalActivityOnCreate : Fingerprint(
+    name = "onCreate",
+    definingClass = "Lcom/instagram/modal/ModalActivity;",
+    strings = listOf("ModalActivity.onCreate"),
+)
+
+internal object ModalActivityOnPostCreate : Fingerprint(
+    name = "onPostCreate",
+    definingClass = "Lcom/instagram/modal/ModalActivity;",
+)
+
+internal object ModalActivityInitStartingFragment : Fingerprint(
+    definingClass = "Lcom/instagram/modal/ModalActivity;",
+    strings = listOf("ModalActivity.initializeStartingFragment"),
+)
+

@@ -180,9 +180,30 @@ public class StorageUtils {
         return null;
     }
 
+    public interface StorageAccessLauncher {
+        void launchStorageAccess(Context context);
+    }
+
+    private static StorageAccessLauncher storageAccessLauncher;
+
+    public static void setStorageAccessLauncher(StorageAccessLauncher launcher) {
+        storageAccessLauncher = launcher;
+    }
+
     public static void allowStorageAccess() {
         try {
             Context context = PikoUtils.getContext();
+            if (storageAccessLauncher == null) {
+                try {
+                    Class.forName("app.morphe.extension.instagram.settings.ActivityHook");
+                } catch (Throwable ignored) {
+                }
+            }
+            if (storageAccessLauncher != null) {
+                storageAccessLauncher.launchStorageAccess(context);
+                PikoUtils.toast(ExtensionStrings.DOWNLOAD_GRANT_PERMISSION);
+                return;
+            }
             Intent intent = new Intent(context, FolderPickerActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
