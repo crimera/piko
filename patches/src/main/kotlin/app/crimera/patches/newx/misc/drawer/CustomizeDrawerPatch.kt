@@ -14,6 +14,7 @@ import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -303,11 +304,12 @@ private fun MutableMethod.findDrawerFooterCalls(
         )
     }
     if (footerCalls.isEmpty()) return null
-    val rendererCandidates = footerCalls.map { call ->
-        call.renderer.toSmaliDescriptor()
-    }.distinct()
-    if (rendererCandidates.size != 1) return null
-    val footerRenderer = footerCalls.first().renderer
+    val footerRenderer =
+        requireExactlyOne(
+            label = "NewX drawer footer renderer",
+            candidates = footerCalls.distinctBy { call -> call.renderer.toSmaliDescriptor() },
+            describe = { call -> call.renderer.toSmaliDescriptor() },
+        ).renderer
     return ResolvedDrawerFooterCalls(
         dividerIndex = dividerIndex,
         renderer = footerRenderer,
