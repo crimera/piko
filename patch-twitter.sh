@@ -63,6 +63,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Hide AI-generated posts" \
   -e "NewX: Hide posts by verified account type" \
   -e "NewX: Customize default media tab" \
+  -e "NewX: Customize default profile post sorting" \
   -e "NewX: Custom font" \
   -e "NewX: Custom sharing domain" \
   -e "NewX: Inline download button" \

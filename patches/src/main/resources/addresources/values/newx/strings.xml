@@ -86,6 +86,10 @@
     <string name="piko_newx_remember_reply_sorting_summary">Uses your last selected reply-sort order instead of the default</string>
     <string name="piko_newx_media_tab_default_title">Default media tab</string>
     <string name="piko_newx_media_tab_default_summary">Default sub-tab shown when opening a profile media tab</string>
+    <string name="piko_newx_profile_post_sort_default_title">Default profile post sorting</string>
+    <string name="piko_newx_profile_post_sort_default_summary">Default order shown when opening profile posts (Most recent or Popular)</string>
+    <string name="piko_newx_profile_post_sort_latest">Most recent</string>
+    <string name="piko_newx_profile_post_sort_popular">Popular</string>
     <string name="piko_newx_force_highest_video_quality_title">Force highest video and audio quality</string>
     <string name="piko_newx_force_highest_video_quality_summary">Plays videos and audio at the highest available stream quality without adaptive quality downscaling or network bitrate caps</string>
     <string name="piko_newx_disable_video_scrolling_title">Disable video player scrolling</string>
