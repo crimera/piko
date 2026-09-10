@@ -838,9 +838,33 @@ public class ScreenBuilder {
 
         addPreference(
                 helper.switchPreference(
+                        str("piko_hide_navigation_profile"),
+                        "",
+                        Settings.HIDE_NAVIGATION_PROFILE
+                )
+        );
+
+        addPreference(
+                helper.switchPreference(
                         str("piko_hide_navigation_create"),
                         "",
                         Settings.HIDE_NAVIGATION_CREATE
+                )
+        );
+        
+        addPreference(
+                helper.switchPreference(
+                        str("piko_hide_navigation_news"),
+                        "",
+                        Settings.HIDE_NAVIGATION_NEWS
+                )
+        );
+
+        addPreference(
+                helper.buttonPreference(
+                        str("piko_reorder_navigation_buttons_title"),
+                        str("piko_reorder_navigation_buttons_desc"),
+                        "piko_reorder_navigation_buttons"
                 )
         );
     }
