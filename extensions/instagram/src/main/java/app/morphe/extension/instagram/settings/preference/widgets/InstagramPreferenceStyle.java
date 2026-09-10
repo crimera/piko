@@ -163,7 +163,9 @@ public final class InstagramPreferenceStyle {
 
     public static View createPreferenceView(Context context, int trailingType, String iconResName) {
         PreferenceRow row = new PreferenceRow(context, trailingType);
-        row.setOrientation(trailingType == TRAILING_SWITCH ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+        // row stays HORIZONTAL so the icon sits left of the text (was VERTICAL,
+        // which stacked the icon above the title instead).
+        row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setMinimumHeight(dp(context, 78));
         row.setPadding(dp(context, 17), dp(context, 10), dp(context, 17), dp(context, 10));
@@ -177,11 +179,28 @@ public final class InstagramPreferenceStyle {
             row.setIcon(iconResName);
         }
 
+        // title/switch/summary now nest in this vertical column instead of
+        // going directly into `row`, which is horizontal (icon | column).
+        LinearLayout contentColumn = new LinearLayout(context);
+        contentColumn.setOrientation(LinearLayout.VERTICAL);
+        contentColumn.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams contentParams = new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+        );
+        if (trailingType != TRAILING_SWITCH) {
+            // TRAILING_CHEVRON has a sibling trailing icon after contentColumn;
+            // TRAILING_SWITCH's switch lives inside titleRow, no sibling needed.
+            contentParams.rightMargin = dp(context, 14);
+        }
+        row.addView(contentColumn, contentParams);
+
         if (trailingType == TRAILING_SWITCH) {
             LinearLayout titleRow = new LinearLayout(context);
             titleRow.setOrientation(LinearLayout.HORIZONTAL);
             titleRow.setGravity(Gravity.CENTER_VERTICAL);
-            row.addView(titleRow, new LinearLayout.LayoutParams(
+            contentColumn.addView(titleRow, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             ));
@@ -214,7 +233,7 @@ public final class InstagramPreferenceStyle {
             summary.setTextColor(secondaryTextColor());
             summary.setLineSpacing(dp(context, 1), 1.0f);
             summary.setPadding(0, dp(context, 10), 0, 0);
-            row.addView(summary, new LinearLayout.LayoutParams(
+            contentColumn.addView(summary, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             ));
@@ -222,25 +241,13 @@ public final class InstagramPreferenceStyle {
             return row;
         }
 
-        LinearLayout textColumn = new LinearLayout(context);
-        textColumn.setOrientation(LinearLayout.VERTICAL);
-        textColumn.setGravity(Gravity.CENTER_VERTICAL);
-
-        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-        );
-        textParams.rightMargin = dp(context, 14);
-        row.addView(textColumn, textParams);
-
         TextView title = new TextView(context);
         title.setTag(TAG_TITLE);
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         title.setTextColor(primaryTextColor());
         title.setIncludeFontPadding(true);
         title.setSingleLine(false);
-        textColumn.addView(title, new LinearLayout.LayoutParams(
+        contentColumn.addView(title, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
@@ -251,7 +258,7 @@ public final class InstagramPreferenceStyle {
         summary.setTextColor(secondaryTextColor());
         summary.setLineSpacing(dp(context, 1), 1.0f);
         summary.setPadding(0, dp(context, 10), 0, 0);
-        textColumn.addView(summary, new LinearLayout.LayoutParams(
+        contentColumn.addView(summary, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
@@ -565,18 +572,26 @@ public final class InstagramPreferenceStyle {
             return allowed;
         }
 
+        // titleRow nests inside contentColumn now, not a direct child of `row` —
+        // getTop()/getBottom() alone would be wrong; walk the tree instead.
+        private final Rect highlightRect = new Rect();
+
         private int highlightTop() {
             if (highlightView == null) {
                 return 0;
             }
-            return Math.max(0, highlightView.getTop() - dp(getContext(), 10));
+            highlightRect.set(0, 0, highlightView.getWidth(), highlightView.getHeight());
+            offsetDescendantRectToMyCoords(highlightView, highlightRect);
+            return Math.max(0, highlightRect.top - dp(getContext(), 10));
         }
 
         private int highlightBottom() {
             if (highlightView == null) {
                 return getHeight();
             }
-            return Math.min(getHeight(), highlightView.getBottom() + dp(getContext(), 10));
+            highlightRect.set(0, 0, highlightView.getWidth(), highlightView.getHeight());
+            offsetDescendantRectToMyCoords(highlightView, highlightRect);
+            return Math.min(getHeight(), highlightRect.bottom + dp(getContext(), 10));
         }
 
         private void setDrawPressedHighlight(boolean drawPressedHighlight) {
