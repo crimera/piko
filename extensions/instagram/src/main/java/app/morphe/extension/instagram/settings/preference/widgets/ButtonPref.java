@@ -27,6 +27,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
+import app.morphe.extension.instagram.patches.hide.navigation.NavigationButtonsOrderDialog;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -92,6 +93,9 @@ public class ButtonPref extends Preference {
                         RecommendedFlags.downloadRecommendedFlagsFile(
                                 recreateActivityOnComplete(context)
                         );
+
+                    } else if (key.equals("piko_reorder_navigation_buttons")) {
+                        NavigationButtonsOrderDialog.show(context);
                     }
                 } catch (Exception e) {
                     Utils.showToastShort(e.getMessage());
@@ -151,7 +155,8 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")
                 || key.equals("piko_rec_flags_refresh_file")
-                || key.equals("view_deleted_messages")));
+                || key.equals("view_deleted_messages")
+                || key.equals("piko_reorder_navigation_buttons")));
     }
 
     private static boolean hasPressedHighlight(String key) {
@@ -203,5 +208,3 @@ public class ButtonPref extends Preference {
     }
 
 }
-
-
