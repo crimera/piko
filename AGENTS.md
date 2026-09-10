@@ -56,6 +56,8 @@ They fail with `PatchException` containing the label, cardinality, and candidate
 - Preserve separate safe and unsafe fixture sets. A lower finding count is not automatically better: improvements require increased unsafe-case detection without new false positives or changed optional-fallback behavior.
 - For behavior changes, validate representative old, production, and alpha APKs. Record patch success/failure, applied patch names, output artifact path, and any runtime/control-path result. Do not use stale APKs, extensions, or MPPs; record the exact source commit and artifact provenance.
 - Generated benchmark reports belong under `build/reports/` and should not be committed unless they are deliberately promoted to a versioned artifact. The committed benchmark document should summarize reproducible results and link to the fixture/test locations.
+- Log every real APK patch failure or reported NewX bug in `docs/newx-resolver-linter/`. Record the exact APK package/version/build type, source commit, MPP and extension provenance, command, complete error, failing patch, and whether the cause was linter behavior, cardinality-helper behavior, resolver logic, APK contract drift, tooling/artifact setup, or runtime behavior.
+- Do not attribute a failure to the linter or helpers from timing alone. Reproduce it with the linter/helper change reverted or isolated, then record the comparison and confidence level. If a bug is reported in a later session, search the incident log before changing resolver code.
 
 ### Method
 
