@@ -1117,10 +1117,8 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
                 }
         }
         .distinctBy(FieldReference::toString)
-    val stateField = requireAtMostOne(
-        label = "NewX For You refresh state field in $this",
-        candidates = stateFields,
-    ) ?: return null
+    if (stateFields.size != 1) return null
+    val stateField = stateFields[0]
 
     val stateGetters = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
@@ -1133,10 +1131,8 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
             }
         }
         .distinctBy(MethodReference::toString)
-    val stateGetter = requireAtMostOne(
-        label = "NewX For You refresh state getter in $this",
-        candidates = stateGetters,
-    ) ?: return null
+    if (stateGetters.size != 1) return null
+    val stateGetter = stateGetters[0]
 
     val pagesCastCandidates = instructions.withIndex()
         .filter { (index, instruction) ->
@@ -1149,10 +1145,8 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
                     field.definingClass == typeAt(index) && field.type == OBJECT_LIST_DESCRIPTOR
                 } == true
         }
-    val pagesCastIndex = requireAtMostOne(
-        label = "NewX For You refresh pages cast in $this",
-        candidates = pagesCastCandidates,
-    )?.index ?: return null
+    if (pagesCastCandidates.size != 1) return null
+    val pagesCastIndex = pagesCastCandidates[0].index
     val pagesType = typeAt(pagesCastIndex) ?: return null
 
     val pagesListFields = instructions.withIndex()
@@ -1160,30 +1154,24 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
         .mapNotNull { (index, _) -> fieldAt(index) }
         .filter { field -> field.definingClass == pagesType && field.type == OBJECT_LIST_DESCRIPTOR }
         .distinctBy(FieldReference::toString)
-    val pagesListField = requireAtMostOne(
-        label = "NewX For You refresh pages list field in $this",
-        candidates = pagesListFields,
-    ) ?: return null
+    if (pagesListFields.size != 1) return null
+    val pagesListField = pagesListFields[0]
 
     val pagesIndexFields = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.IGET }
         .mapNotNull { (index, _) -> fieldAt(index) }
         .filter { field -> field.definingClass == pagesType && field.type == INTEGER_DESCRIPTOR }
         .distinctBy(FieldReference::toString)
-    val pagesIndexField = requireAtMostOne(
-        label = "NewX For You refresh pages index field in $this",
-        candidates = pagesIndexFields,
-    ) ?: return null
+    if (pagesIndexFields.size != 1) return null
+    val pagesIndexField = pagesIndexFields[0]
 
     val pagesListRegisterCandidates = instructions.withIndex()
         .filter { (_, instruction) ->
             instruction.getReference<FieldReference>()?.toString() == pagesListField.toString()
         }
         .mapNotNull { (_, instruction) -> instruction as? TwoRegisterInstruction }
-    val pagesListRegister = requireAtMostOne(
-        label = "NewX For You refresh pages list register in $this",
-        candidates = pagesListRegisterCandidates,
-    ) ?: return null
+    if (pagesListRegisterCandidates.size != 1) return null
+    val pagesListRegister = pagesListRegisterCandidates[0]
     val pageLookupCandidates = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_INTERFACE }
         .mapNotNull { (index, instruction) ->
@@ -1199,10 +1187,8 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
             }
             index to reference
         }
-    val (pageLookupIndex, pageLookup) = requireAtMostOne(
-        label = "NewX For You refresh page lookup in $this",
-        candidates = pageLookupCandidates,
-    ) ?: return null
+    if (pageLookupCandidates.size != 1) return null
+    val (pageLookupIndex, pageLookup) = pageLookupCandidates[0]
 
     val componentCastIndex = pageLookupIndex + 2
     if (componentCastIndex >= instructions.size ||
@@ -1247,10 +1233,8 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
         .mapNotNull { (index, _) -> fieldAt(index) }
         .filter { field -> field.definingClass == forYouComponentType }
         .distinctBy(FieldReference::toString)
-    val forYouControllerField = requireAtMostOne(
-        label = "NewX For You refresh controller field in $this",
-        candidates = forYouControllerFields,
-    ) ?: return null
+    if (forYouControllerFields.size != 1) return null
+    val forYouControllerField = forYouControllerFields[0]
 
     val refreshDispatches = instructions.withIndex()
         .drop(forYouInstanceOfIndex + 1)
