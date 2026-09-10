@@ -28,6 +28,7 @@ private const val BITMAP_DESCRIPTOR = "Landroid/graphics/Bitmap;"
 private const val ATOMIC_REFERENCE_DESCRIPTOR =
     "Ljava/util/concurrent/atomic/AtomicReference;"
 private const val CACHED_THUMBNAIL_HELPER = "getCachedThumbnail"
+internal const val COIL_CACHED_THUMBNAIL_HELPER = "getCachedThumbnailCoil"
 private const val CACHED_THUMBNAIL_DIAGNOSTICS_HELPER = "logCoilLookupDiagnostics"
 private const val CACHED_THUMBNAIL_LOCAL_REGISTER_COUNT = 10
 
@@ -94,15 +95,20 @@ private data class CoilThumbnailRuntime(
 )
 
 context(context: BytecodePatchContext)
-internal fun applyCoilThumbnailCachePatch() {
-    patchCoilThumbnailBridge(resolveCoilThumbnailRuntime())
+internal fun applyCoilThumbnailCachePatch(
+    helperName: String = CACHED_THUMBNAIL_HELPER,
+) {
+    patchCoilThumbnailBridge(resolveCoilThumbnailRuntime(), helperName)
 }
 
 context(context: BytecodePatchContext)
-private fun patchCoilThumbnailBridge(runtime: CoilThumbnailRuntime) {
+private fun patchCoilThumbnailBridge(
+    runtime: CoilThumbnailRuntime,
+    helperName: String,
+) {
     val extensionClass = context.mutableClassDefBy(MEDIA_THUMBNAIL_LOADER_DESCRIPTOR)
     val placeholder = extensionClass.requireHelper(
-        CACHED_THUMBNAIL_HELPER,
+        helperName,
         listOf(OBJECT_DESCRIPTOR, STRING_DESCRIPTOR),
     )
     val currentRegisterCount = placeholder.implementation?.registerCount

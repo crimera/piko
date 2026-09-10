@@ -1,6 +1,8 @@
 package app.crimera.patches.newx.misc.inlineactions
 
 import app.crimera.patches.newx.utils.Constants.MEDIA_THUMBNAIL_LOADER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -51,7 +53,7 @@ private object GlideProviderFingerprint : Fingerprint(
     },
 )
 
-private data class GlideThumbnailRuntime(
+internal data class GlideThumbnailRuntime(
     val provider: String,
     val engineField: String,
     val memoryCacheField: String,
@@ -69,7 +71,57 @@ private data class GlideThumbnailRuntime(
 
 context(context: BytecodePatchContext)
 internal fun applyGlideThumbnailCachePatch() {
-    patchGlideThumbnailBridge(resolveGlideThumbnailRuntime())
+    applyGlideThumbnailCachePatch(resolveGlideThumbnailRuntime())
+}
+
+context(context: BytecodePatchContext)
+internal fun applyGlideThumbnailCachePatch(runtime: GlideThumbnailRuntime) {
+    patchGlideThumbnailBridge(runtime)
+}
+
+/**
+ * Older targets package Glide for other surfaces but do not expose the cache
+ * layout used by the media renderer. Use Coil alone when that optional shape
+ * is absent; once the shape is present, the full resolver remains strict.
+ */
+context(context: BytecodePatchContext)
+internal fun resolveGlideThumbnailRuntimeOrNull(): GlideThumbnailRuntime? {
+    val providerMatches = GlideProviderFingerprint.scopedMatchAllOrNull().orEmpty()
+    if (providerMatches.isEmpty()) return null
+
+    val providerMatch = requireExactlyOne("Glide singleton provider", providerMatches)
+    val glideClass = context.mutableClassDefBy(providerMatch.originalMethod.definingClass.toString())
+    val engineField = requireAtMostOne(
+        "Glide engine capability field",
+        glideClass.fields.filter { field ->
+            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                field.type.toString().startsWith(GLIDE_ENGINE_SCOPE) &&
+                context.hasGlideEngineShape(field.type.toString())
+        },
+    ) ?: return null
+    val engineClass = context.mutableClassDefBy(engineField.type.toString())
+    requireAtMostOne(
+        "Glide engine cache capability lookup",
+        engineClass.methods.filter { method ->
+            !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                method.parameterTypes.size == 3 &&
+                method.parameterTypes[0].toString().startsWith(GLIDE_ENGINE_SCOPE) &&
+                method.parameterTypes[1].toString() == BOOLEAN_DESCRIPTOR &&
+                method.parameterTypes[2].toString() == LONG_DESCRIPTOR &&
+                method.returnType.toString().startsWith(GLIDE_ENGINE_SCOPE)
+        },
+    ) ?: return null
+    requireAtMostOne(
+        "Glide memory-cache capability field",
+        engineClass.fields.filter { field ->
+            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                context.hasGlideMemoryCacheShape(field.type.toString())
+        },
+    ) ?: return null
+
+    // Keep the established resolver as the single source of the remaining
+    // resource, active-entry, and field relationship checks.
+    return resolveGlideThumbnailRuntime()
 }
 
 context(context: BytecodePatchContext)
@@ -211,7 +263,8 @@ private fun patchGlideThumbnailBridge(runtime: GlideThumbnailRuntime) {
             :piko_newx_glide_cached_thumbnail_none
             move-object v4, p1
             invoke-static/range {v4 .. v9}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$GLIDE_DIAGNOSTICS_HELPER($STRING_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR)V
-            const/4 v0, 0x0
+            invoke-static {p0, p1}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$COIL_CACHED_THUMBNAIL_HELPER($OBJECT_DESCRIPTOR$STRING_DESCRIPTOR)$OBJECT_DESCRIPTOR
+            move-result-object v0
             return-object v0
         """.trimIndent(),
     )

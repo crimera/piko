@@ -221,6 +221,12 @@ public final class MediaThumbnailLoader {
         return null;
     }
 
+    // Kept as a separate patch point so Glide can fall back to Coil when the
+    // server-side renderer switch changes at runtime.
+    private static Object getCachedThumbnailCoil(Object context, String url) {
+        return null;
+    }
+
     private static Bitmap fetch(String url, int requestId) {
         HttpURLConnection connection = null;
         logInfo("request #" + requestId + " network fetch start url=" + describeUrl(url));
