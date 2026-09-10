@@ -233,6 +233,8 @@ val customFontPatch =
                         mergeCandidates.joinToString { "${it.index}:${it.value}" },
                 )
             }
+            // The first ordered check is the merge boundary; the second is the continuation check.
+            // newx-resolver-lint: allow raw-first because bytecode order selects the merge boundary
             val mergeIndex = mergeCandidates.first().index
             val bypassCandidates =
                 paragraphMethod.instructions.withIndex().filter { (index, instruction) ->
