@@ -265,6 +265,18 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_CREATE);
     }
 
+    public static boolean hideNavigationProfile() {
+        return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_PROFILE);
+    }
+
+    public static boolean hideNavigationNews() {
+        return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_NEWS);
+    }
+
+    public static String navigationButtonsOrder() {
+        return SharedPref.getStringPref(Settings.NAVIGATION_BUTTONS_ORDER);
+    }
+
     public static boolean removeEmptyBottomSpace() {
         return SharedPref.getBooleanPref(Settings.REMOVE_EMPTY_BOTTOM_SPACE);
     }
