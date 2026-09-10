@@ -1,3 +1,14 @@
+## [3.10.0-dev.6](https://github.com/crimera/piko/compare/v3.10.0-dev.5...v3.10.0-dev.6) (2026-09-10)
+
+### 🐛 Bug Fixes
+
+* **Twitter - Show changelogs:** Error message is shown with changelog dialog ([e1238c3](https://github.com/crimera/piko/commit/e1238c3ffd38b1573a11a411000080f825f79583))
+* **Twitter:** Restore timeline position on startup ([ae231c5](https://github.com/crimera/piko/commit/ae231c596bf9b7d3b1f2a1cff9ef5e74151cd6b9))
+
+### ✨ New Features
+
+* **Twitter:** Add bulk feature flag selection and validation ([#1846](https://github.com/crimera/piko/issues/1846)) ([7b92ac8](https://github.com/crimera/piko/commit/7b92ac8626b2ff907769503ae85b688fd2471c36))
+
 ## [3.10.0-dev.5](https://github.com/crimera/piko/compare/v3.10.0-dev.4...v3.10.0-dev.5) (2026-09-07)
 
 ### 🐛 Bug Fixes

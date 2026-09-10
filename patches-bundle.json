@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-07T01:35:17",
-  "description": "## [3.10.0-dev.5](https://github.com/crimera/piko/compare/v3.10.0-dev.4...v3.10.0-dev.5) (2026-09-07)\n\n### 🐛 Bug Fixes\n\n* **Twitter:** restore relationship actions in user lists ([854f5e2](https://github.com/crimera/piko/commit/854f5e26831c997e376a7b68094a7fbde89fc790))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.5/patches-3.10.0-dev.5.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.5/patches-3.10.0-dev.5.mpp.asc",
-  "version": "3.10.0-dev.5"
+  "created_at": "2026-09-10T01:20:43",
+  "description": "## [3.10.0-dev.6](https://github.com/crimera/piko/compare/v3.10.0-dev.5...v3.10.0-dev.6) (2026-09-10)\n\n### 🐛 Bug Fixes\n\n* **Twitter - Show changelogs:** Error message is shown with changelog dialog ([e1238c3](https://github.com/crimera/piko/commit/e1238c3ffd38b1573a11a411000080f825f79583))\n* **Twitter:** Restore timeline position on startup ([ae231c5](https://github.com/crimera/piko/commit/ae231c596bf9b7d3b1f2a1cff9ef5e74151cd6b9))\n\n### ✨ New Features\n\n* **Twitter:** Add bulk feature flag selection and validation ([#1846](https://github.com/crimera/piko/issues/1846)) ([7b92ac8](https://github.com/crimera/piko/commit/7b92ac8626b2ff907769503ae85b688fd2471c36))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.6/patches-3.10.0-dev.6.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.6/patches-3.10.0-dev.6.mpp.asc",
+  "version": "3.10.0-dev.6"
 }
