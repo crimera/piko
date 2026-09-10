@@ -27,6 +27,9 @@ import android.widget.TextView;
 
 import java.util.function.Supplier;
 
+import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
+
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
@@ -39,117 +42,126 @@ import app.morphe.extension.instagram.theme.MaterialYouTheme;
 
 public class SettingsActivity extends Activity {
 
-    private LinearLayout root;
-    private LinearLayout toolbar;
-    private LinearLayout content;
-    private LinearLayout customContainer;
-    private TextView titleTextView;
-
     @SuppressLint("ResourceType")
-    @Override
-    protected void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-
+    static void setupOnActivity(Activity activity) {
         String displayTitle = null;
         String fragmentName = null;
 
-        // Extract both variables safely from the incoming intent bundle
-        if (getIntent() != null && getIntent().getExtras() != null) {
-            displayTitle = str(getIntent().getStringExtra(Constants.PIKO_FRAGMENT_TITLE));
-            fragmentName = getIntent().getStringExtra(Constants.PIKO_FRAGMENT_NAME);
+        if (activity.getIntent() != null && activity.getIntent().getExtras() != null) {
+            displayTitle = str(activity.getIntent().getStringExtra(Constants.PIKO_FRAGMENT_TITLE));
+            fragmentName = activity.getIntent().getStringExtra(Constants.PIKO_FRAGMENT_NAME);
         }
 
-        // Fallback to default localized string if no custom title was provided in the intent
         if (displayTitle == null || displayTitle.isEmpty()) {
             displayTitle = str("piko_title_settings");
         }
 
         boolean isRootSettings = fragmentName == null || Constants.PIKO_FRAGMENT_SETTINGS.equals(fragmentName);
-        createLayout(displayTitle, isRootSettings);
+        createLayoutOnActivity(activity, displayTitle, isRootSettings);
 
-        if (bundle == null) {
+        if (isRootSettings && activity instanceof ComponentActivity) {
+            ComponentActivity componentActivity = (ComponentActivity) activity;
+            componentActivity.getOnBackPressedDispatcher().addCallback(
+                    componentActivity,
+                    new OnBackPressedCallback(true) {
+                        @Override
+                        public void handleOnBackPressed() {
+                            if (SettingsRestart.promptRestartIfPending(activity)) {
+                                return;
+                            }
+                            setEnabled(false);
+                            componentActivity.getOnBackPressedDispatcher().onBackPressed();
+                        }
+                    }
+            );
+        }
+
+        if (activity.getFragmentManager().findFragmentById(1001) == null) {
             SettingsFragment fragment = new SettingsFragment();
-            if (getIntent() != null && getIntent().getExtras() != null) {
-                fragment.setArguments(getIntent().getExtras());
+            if (activity.getIntent() != null && activity.getIntent().getExtras() != null) {
+                fragment.setArguments(activity.getIntent().getExtras());
             }
 
-            getFragmentManager().beginTransaction().replace(1001, fragment).commit();
+            activity.getFragmentManager().beginTransaction().replace(1001, fragment).commit();
         }
     }
 
     @SuppressLint("ResourceType")
-    private void createLayout(String displayTitle, boolean isRootSettings) {
-        root = new LinearLayout(this);
+    @Override
+    protected void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setupOnActivity(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (SettingsRestart.promptRestartIfPending(this)) {
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @SuppressLint("ResourceType")
+    private static void createLayoutOnActivity(Activity activity, String displayTitle, boolean isRootSettings) {
+        LinearLayout root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
-        InstagramPreferenceStyle.applySystemBarStyle(this);
+        InstagramPreferenceStyle.applySystemBarStyle(activity);
 
-        // ---------- Toolbar ----------
-        toolbar = new LinearLayout(this);
+        LinearLayout toolbar = new LinearLayout(activity);
         toolbar.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
-        ImageView back = new ImageView(this);
+        ImageView back = new ImageView(activity);
         UI.setThemedIcon(back, UI.DRAWABLE_ARROW_BACK);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
+        back.setOnClickListener(v -> {
+            if (isRootSettings && SettingsRestart.promptRestartIfPending(activity)) {
+                return;
             }
+            activity.finish();
         });
 
-        titleTextView = new TextView(this);
-        titleTextView.setText(displayTitle); // Dynamically bound from intent data
+        TextView titleTextView = new TextView(activity);
+        titleTextView.setText(displayTitle);
         InstagramPreferenceStyle.applyToolbarLayout(
-                this, toolbar, back, titleTextView, isRootSettings);
+                activity, toolbar, back, titleTextView, isRootSettings);
         titleTextView.setTextColor(InstagramPreferenceStyle.primaryTextColor());
 
         toolbar.addView(back);
         toolbar.addView(titleTextView);
 
-        // ---------- Custom Container ----------
-        customContainer = new LinearLayout(this);
+        LinearLayout customContainer = new LinearLayout(activity);
         customContainer.setOrientation(LinearLayout.VERTICAL);
         customContainer.setBackgroundColor(Color.TRANSPARENT);
 
         root.addView(toolbar);
         root.addView(customContainer, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        // ---------- Content ----------
-        content = new LinearLayout(this);
+        LinearLayout content = new LinearLayout(activity);
         content.setId(1001);
         content.setOrientation(LinearLayout.VERTICAL);
         content.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
         root.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
-        root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                int topInset = insets.getSystemWindowInsetTop();
-                int bottomInset = insets.getSystemWindowInsetBottom();
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            int topInset = insets.getSystemWindowInsetTop();
+            int bottomInset = insets.getSystemWindowInsetBottom();
 
-                v.setPadding(0, topInset, 0, 0);
+            v.setPadding(0, topInset, 0, 0);
 
-                content.setPadding(
-                content.getPaddingLeft(),
-                content.getPaddingTop(),
-                content.getPaddingRight(),
-                bottomInset
-                );
+            content.setPadding(
+                    content.getPaddingLeft(),
+                    content.getPaddingTop(),
+                    content.getPaddingRight(),
+                    bottomInset
+            );
 
-                return insets;
-            }
+            return insets;
         });
 
-        setContentView(root);
+        activity.setContentView(root);
     }
-
-    public LinearLayout getCustomContainer() {
-        return customContainer;
-    }
-
-    // (Keep the nested static SettingsFragment class unchanged)
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
