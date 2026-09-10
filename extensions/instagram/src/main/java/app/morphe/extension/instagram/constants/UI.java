@@ -11,6 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -66,7 +67,30 @@ public class UI {
         TypedValue typedValue = new TypedValue();
         int attrId = ResourceUtils.getAttrIdentifier(attrName);
         boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
-        return context.getColor(typedValue.resourceId);
+        if (!resolved) {
+            // Seen on cold start when SettingsActivity is the first activity in the
+            // process (task-restore relaunch): Utils.getContext() doesn't carry IG's
+            // real theme yet, so IGDS design-system attrs aren't defined on it. Can't
+            // fix that at the source (Utils.getContext() is in the closed-source
+            // morphe.extensions.library dependency) — fall back instead of crashing.
+            Logger.printException(() -> "Theme attribute not resolved, using fallback: " + attrName,
+                    new Resources.NotFoundException(attrName));
+            return fallbackColour(context);
+        }
+        // resolveAttribute can yield either a resource reference (resourceId != 0,
+        // needs getColor(resourceId)) or a raw packed color already in typedValue.data
+        // (resourceId == 0 legitimately, not a failure).
+        return typedValue.resourceId != 0
+                ? context.getColor(typedValue.resourceId)
+                : typedValue.data;
+    }
+
+    private static int fallbackColour(Context context) {
+        int nightMask = context.getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        return nightMask == android.content.res.Configuration.UI_MODE_NIGHT_YES
+                ? 0xFF000000
+                : 0xFFFFFFFF;
     }
 
     public static boolean isDarkMode() {
