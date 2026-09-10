@@ -116,9 +116,12 @@ final class MaterialYouState {
             boolean pikoSettingsActivity,
             boolean activityDark
     ) {
-        return pikoSettingsActivity
-                ? observedInstagramDark
-                : activityDark;
+        // Was `cond ? Boolean : boolean` — mixed ternary unboxes the Boolean branch
+        // even when it's null, causing an NPE on cold start.
+        if (pikoSettingsActivity) {
+            return observedInstagramDark;
+        }
+        return activityDark;
     }
 
     static Boolean updateObservedInstagramDarkForNativeMode(
