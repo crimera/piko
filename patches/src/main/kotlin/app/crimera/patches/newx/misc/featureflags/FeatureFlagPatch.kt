@@ -10,6 +10,7 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -54,7 +55,10 @@ private object NewXFeatureSwitchRepositoryFingerprint : Fingerprint(
             !AccessFlags.STATIC.isSet(method.accessFlags) &&
             !AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
             !AccessFlags.ABSTRACT.isSet(classDef.accessFlags) &&
-            classDef.methods.privateServerLookupMethods().singleOrNull()?.let { lookup ->
+            requireAtMostOne(
+                label = "private NewX server-backed feature-switch lookup in ${classDef.type}",
+                candidates = classDef.methods.privateServerLookupMethods(),
+            )?.let { lookup ->
                 method.hasFeatureSwitchLookup(expectedMode = true, lookupMethod = lookup)
             } == true
     },
