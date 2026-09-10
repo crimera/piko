@@ -16,6 +16,7 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -127,11 +128,16 @@ val customizeNewXInlineActionsPatch =
 context(context: BytecodePatchContext)
 private fun patchActionNameBridge(models: app.crimera.patches.newx.models.ResolvedNewXInlineActionModels) {
     val inlineActionEntryClass = context.mutableClassDefBy(models.inlineActionEntryDescriptor)
-    val actionTypeGetter = inlineActionEntryClass.methods.singleOrNull { method ->
-        method.name == "getActionType" &&
-            method.parameterTypes.isEmpty() &&
-            method.returnType == models.postActionTypeDescriptor
-    }
+    val actionTypeGetter =
+        requireAtMostOne(
+            label = "NewX inline-action getActionType getter in ${inlineActionEntryClass.type}",
+            candidates =
+                inlineActionEntryClass.methods.filter { method ->
+                    method.name == "getActionType" &&
+                        method.parameterTypes.isEmpty() &&
+                        method.returnType == models.postActionTypeDescriptor
+                },
+        )
     val actionTypeRead =
         if (actionTypeGetter != null) {
             // BETA PATH: action type is private and exposed through getActionType().
