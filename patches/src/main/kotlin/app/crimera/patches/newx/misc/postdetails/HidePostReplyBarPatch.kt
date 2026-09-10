@@ -6,6 +6,7 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -243,9 +244,14 @@ private fun List<Instruction>.isNavigationInsetsCall(index: Int): Boolean {
         return false
     }
 
-    val insetRead = navigationInsetsReadsBefore(index).singleOrNull { read ->
-        callInstruction.registersUsed.contains(read.destinationRegister)
-    }
+    val insetRead =
+        requireAtMostOne(
+            label = "NewX navigation-insets read before call $index",
+            candidates =
+                navigationInsetsReadsBefore(index).filter { read ->
+                    callInstruction.registersUsed.contains(read.destinationRegister)
+                },
+        )
     return insetRead != null
 }
 
