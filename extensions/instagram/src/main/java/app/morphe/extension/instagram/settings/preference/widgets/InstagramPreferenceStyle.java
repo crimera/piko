@@ -38,7 +38,7 @@ import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.patches.customise.font.CustomFontContext;
-import app.morphe.extension.instagram.settings.SettingsActivity;
+import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.shared.ResourceUtils;
 
 public final class InstagramPreferenceStyle {
@@ -603,10 +603,13 @@ public final class InstagramPreferenceStyle {
     public static boolean useMaterialSwitchStyle(View view, boolean original) {
         Context context = view.getContext();
         while (context instanceof ContextWrapper) {
-            if (context instanceof SettingsActivity) {
+            if (context instanceof Activity && ActivityHook.isPiko((Activity) context)) {
                 return true;
             }
             context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (context instanceof Activity && ActivityHook.isPiko((Activity) context)) {
+            return true;
         }
         return original;
     }

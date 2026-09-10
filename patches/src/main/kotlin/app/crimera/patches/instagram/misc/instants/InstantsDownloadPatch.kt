@@ -32,7 +32,7 @@ val instantsDownloadPatch =
         name = "Save Instants",
         description = "Captures view-once Instants as you view them so you can re-view and download them later.",
     ) {
-        dependsOn(settingsPatch, instantsDownloadResourcePatch, mediaDataEntity)
+        dependsOn(settingsPatch, mediaDataEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
