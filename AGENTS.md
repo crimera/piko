@@ -25,6 +25,27 @@ NewX is an obfuscated app under active refactoring. A patch must survive ordinar
 - Keep compile-time model contracts separate from release bytecode. Stable models may be `compileOnly`; unstable owners, methods, enums, and descriptors belong in patch-time resolution and direct smali injection, never runtime reflection.
 - Preserve old targets. A resilience improvement must keep the old path's behavior unchanged and must be checked against at least one older declared target.
 
+### Resolver cardinality helpers
+
+Use the shared helpers for NewX resolver candidate collections:
+`patches/src/main/kotlin/app/crimera/patches/newx/utils/ResolverCardinality.kt`.
+
+```kotlin
+internal fun <T> requireExactlyOne(
+    label: String,
+    candidates: Collection<T>,
+    describe: (T) -> String = { candidate -> candidate.toString() },
+): T
+
+internal fun <T> requireAtMostOne(
+    label: String,
+    candidates: Collection<T>,
+    describe: (T) -> String = { candidate -> candidate.toString() },
+): T?
+```
+
+They fail with `PatchException` containing the label, cardinality, and candidate descriptions. Validate with `./gradlew :patches:lintNewxResolvers`; use `-PnewxResolverLintReportOnly=true` for report-only audits. If instruction order is intentionally contractual, document the exception beside the selection with a linter directive such as `// newx-resolver-lint: allow instruction-order raw-first because bytecode order is the contract`.
+
 ### Method
 
 1. **Freeze the target.** Record the exact package, version, APK, MPP, and output. Reuse stored decompilations and keep analysis scoped to the relevant package/file.
