@@ -251,6 +251,14 @@ public class ScreenBuilder {
                 )
         );
 
+        addPreference(
+                helper.switchPreference(
+                        str("piko_long_press_inbox_toggle_ghost_mode"),
+                        str("piko_long_press_inbox_toggle_ghost_mode_desc"),
+                        Settings.LONG_PRESS_INBOX_TOGGLE_GHOST_MODE
+                )
+        );
+
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(
                     helper.switchPreference(

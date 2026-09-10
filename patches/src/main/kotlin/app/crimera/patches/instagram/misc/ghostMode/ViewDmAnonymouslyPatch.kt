@@ -23,7 +23,7 @@ val viewDmAnonymouslyPatch =
     bytecodePatch(
         name = "View DMs anonymously",
     ) {
-        dependsOn(settingsPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)
+        dependsOn(settingsPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch, inboxGhostModePatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

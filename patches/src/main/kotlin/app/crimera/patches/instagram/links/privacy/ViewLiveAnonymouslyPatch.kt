@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.links.privacy
 import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.actionBar.chatActionBarButton.chatActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxActionBarButtonPatch
+import app.crimera.patches.instagram.misc.ghostMode.inboxGhostModePatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
@@ -19,7 +20,7 @@ val viewLiveAnonymouslyPatch =
     bytecodePatch(
         name = "View live anonymously",
     ) {
-        dependsOn(settingsPatch, interceptUriPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)
+        dependsOn(settingsPatch, interceptUriPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch, inboxGhostModePatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
