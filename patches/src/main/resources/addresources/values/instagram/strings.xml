@@ -176,17 +176,29 @@
     <string name="piko_more_options">More options</string>
 
     <!-- Navigation Section -->
-    <string name="piko_category_hide_navigation_buttons">Hide navigation buttons</string>
+    <string name="piko_category_hide_navigation_buttons">Reorder/Hide navigation buttons</string>
     <string name="piko_hide_navigation_feed">Hide Feed button</string>
     <string name="piko_hide_navigation_reels">Hide Reels button</string>
     <string name="piko_hide_navigation_direct">Hide Direct button</string>
     <string name="piko_hide_navigation_search">Hide Search button</string>
+    <string name="piko_hide_navigation_profile">Hide Profile button</string>
     <string name="piko_hide_navigation_create">Hide Create button</string>
+    <string name="piko_hide_navigation_news">Hide Notification button</string>
+    <string name="piko_reorder_navigation_buttons_title">Reorder Navigation Buttons</string>
+    <string name="piko_reorder_navigation_buttons_desc">You can customize navigation tabs according to your needs. (You can only place a maximum of 5 buttons.)</string>
+    <string name="piko_nav_tab_feed">Home</string>
+    <string name="piko_nav_tab_search">Search</string>
+    <string name="piko_nav_tab_reels">Reels</string>
+    <string name="piko_nav_tab_direct">Direct</string>
+    <string name="piko_nav_tab_create">Create</string>
+    <string name="piko_nav_tab_profile">Profile</string>
+    <string name="piko_nav_tab_news">Notification</string>
+    <string name="piko_reorder_navigation_buttons_reset">Reset</string>
 
     <!-- Information Section -->
     <string name="piko_category_about">About</string>
-    <string name="piko_export_pref">Export Piko settings</string>
-    <string name="piko_import_pref">Import Piko settings</string>
+    <string name="piko_export_pref">Export Piko preferences</string>
+    <string name="piko_import_pref">Import Piko preferences</string>
     <string name="piko_reset_pref">Reset Piko settings</string>
     <string name="piko_reset_pref_confirm">Reset Piko settings?</string>
     <string name="piko_reset_pref_success">Piko settings reset</string>
