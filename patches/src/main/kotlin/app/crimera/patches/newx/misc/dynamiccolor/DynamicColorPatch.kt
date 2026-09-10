@@ -853,6 +853,8 @@ private fun resolveAccentRamp(
     if (mismatchedScales.isNotEmpty()) {
         throw PatchException("NewX dark color scales are not reversed at $mismatchedScales")
     }
+    // Palette fields are emitted in semantic scale order; the first scale is the accent ramp.
+    // newx-resolver-lint: allow raw-first because palette order selects the accent ramp
     return standardScales.first()
 }
 
