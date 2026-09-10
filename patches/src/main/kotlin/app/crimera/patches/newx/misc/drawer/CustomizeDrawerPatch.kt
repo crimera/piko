@@ -43,6 +43,7 @@ private const val DRAWER_SCOPE = "Lcom/x/main/drawer/"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
+private const val FUNCTION2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
@@ -69,6 +70,19 @@ private val NEWX_DRAWER_FOOTER_ITEM_PARAMETERS =
         FUNCTION0_DESCRIPTOR,
     )
 
+// 12.25 moved footer rows to the shared title/icon/click renderer.
+private val NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS =
+    listOf(
+        "Ljava/lang/String;",
+        "L",
+        FUNCTION0_DESCRIPTOR,
+        "Landroidx/compose/ui/Modifier;",
+        FUNCTION2_DESCRIPTOR,
+        COMPOSER_DESCRIPTOR,
+        "I",
+        "I",
+    )
+
 private object NewXDrawerContentClassFingerprint : Fingerprint(
     definingClass = "Lcom/x/main/drawer/",
     returnType = "V",
@@ -93,6 +107,12 @@ private object NewXDrawerFooterItemFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
     parameters = NEWX_DRAWER_FOOTER_ITEM_PARAMETERS,
+)
+
+private object NewXDrawerSharedFooterItemFingerprint : Fingerprint(
+    classFingerprint = NewXDrawerContentClassFingerprint,
+    returnType = "V",
+    parameters = NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS,
 )
 
 /**
@@ -279,9 +299,12 @@ private fun MutableMethod.findDrawerFooterCalls(
                 .getReference<MethodReference>()
                 ?.isDrawerFooterDivider(renderer) == true
         }
-    if (dividerIndices.size != 1) return null
-
-    val dividerIndex = dividerIndices.single()
+    val dividerIndex =
+        requireExactlyOne(
+            label = "NewX drawer footer divider",
+            candidates = dividerIndices,
+            describe = { index -> "instruction index $index" },
+        )
     val footerCalls = methodInstructions.indices.mapNotNull { index ->
         if (index <= dividerIndex) return@mapNotNull null
         val instruction = methodInstructions[index]
@@ -573,7 +596,10 @@ val customizeNewXDrawerPatch =
             menuMatches.single().method.injectDrawerItemGuard(hiddenItems)
 
             // FOOTER ROWS: settings/help/feedback/media/imprint/debug render with a title.
-            val footerMatches = NewXDrawerFooterItemFingerprint.scopedMatchAllOrNull().orEmpty()
+            val footerMatches =
+                (NewXDrawerFooterItemFingerprint.scopedMatchAllOrNull().orEmpty() +
+                    NewXDrawerSharedFooterItemFingerprint.scopedMatchAllOrNull().orEmpty())
+                    .distinctBy { it.originalMethod.toString() }
             if (footerMatches.size > 1) {
                 throw PatchException(
                     "Expected one NewX drawer footer row renderer, found " +
