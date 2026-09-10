@@ -14,6 +14,7 @@ import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
@@ -300,11 +301,10 @@ private fun MutableMethod.findDrawerFooterCalls(
                 ?.isDrawerFooterDivider(renderer) == true
         }
     val dividerIndex =
-        requireExactlyOne(
+        requireAtMostOne(
             label = "NewX drawer footer divider",
             candidates = dividerIndices,
-            describe = { index -> "instruction index $index" },
-        )
+        ) ?: return null
     val footerCalls = methodInstructions.indices.mapNotNull { index ->
         if (index <= dividerIndex) return@mapNotNull null
         val instruction = methodInstructions[index]
