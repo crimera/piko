@@ -15,6 +15,7 @@ import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.FOR_YOU_TOPIC_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -1521,7 +1522,10 @@ private fun Method.parameterIndexForField(
                 parameterTypes[parameterIndex].toString() in expectedParameterTypes
         }
         .toList()
-    return parameterCandidates.singleOrNull()
+    return requireAtMostOne(
+        label = "NewX parameter index candidates for field $field",
+        candidates = parameterCandidates,
+    )
 }
 
 private fun List<CharSequence>.indexOfRegister(
