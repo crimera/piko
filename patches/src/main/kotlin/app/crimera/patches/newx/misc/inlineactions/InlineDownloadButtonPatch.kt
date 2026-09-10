@@ -24,6 +24,7 @@ import app.crimera.patches.newx.settings.singleChoice
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -490,9 +491,5 @@ private fun resolveIconField(resourceName: String): FieldReference {
                 ?.getReference<FieldReference>()
         }.distinctBy(FieldReference::toString)
 
-    if (fields.size == 1) return fields.single()
-    throw PatchException(
-        "Expected one NewX $resourceName icon field, found ${fields.size}: " +
-            fields.joinToString(),
-    )
+    return requireExactlyOne("NewX $resourceName icon field", fields)
 }

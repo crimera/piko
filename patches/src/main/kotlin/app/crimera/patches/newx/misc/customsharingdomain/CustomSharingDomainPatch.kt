@@ -5,6 +5,7 @@ import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXTextInput
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -240,14 +241,10 @@ val newXCustomSharingDomainPatch =
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun Fingerprint.requireSingleMatch(label: String): Match {
-    val matches = scopedMatchAllOrNull().orEmpty()
-    if (matches.size != 1) {
-        throw PatchException(
-            "Expected one $label match, found ${matches.size}: " +
-                matches.joinToString { it.originalMethod.toString() },
-        )
-    }
-    return matches.single()
+    return requireExactlyOne(
+        label = label,
+        candidates = scopedMatchAllOrNull().orEmpty(),
+    )
 }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
@@ -263,15 +260,14 @@ context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareSheetCopyCallbacks() {
     val currentMatches = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty()
     val legacyMatches = LegacyShareSheetCopyFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (currentMatches.size + legacyMatches.size != 1) {
-        throw PatchException(
-            "Expected one NewX share-sheet copy callback variant, found " +
-                (currentMatches.size + legacyMatches.size),
+    val selectedMatch =
+        requireExactlyOne(
+            label = "NewX share-sheet copy callback variant",
+            candidates = currentMatches + legacyMatches,
         )
-    }
 
-    if (currentMatches.size == 1) {
-        currentMatches.single().method.addInstructions(
+    if (currentMatches.any { it === selectedMatch }) {
+        selectedMatch.method.addInstructions(
             0,
             """
             invoke-static {p1}, $CHANGE_DOMAIN_METHOD
@@ -281,7 +277,7 @@ private fun hookShareSheetCopyCallbacks() {
         return
     }
 
-    val legacyMethod = legacyMatches.single().method
+    val legacyMethod = selectedMatch.method
     val stringCastIndices =
         legacyMethod.instructions.mapIndexedNotNull { index, instruction ->
             if (instruction.opcode != Opcode.CHECK_CAST) return@mapIndexedNotNull null
@@ -307,15 +303,14 @@ context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareIntentBuilder() {
     val currentMatches = ShareIntentBuilderFingerprint.scopedMatchAllOrNull().orEmpty()
     val movedMatches = MovedShareIntentBuilderFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (currentMatches.size + movedMatches.size != 1) {
-        throw PatchException(
-            "Expected one NewX share Intent builder variant, found " +
-                (currentMatches.size + movedMatches.size),
+    val selectedMatch =
+        requireExactlyOne(
+            label = "NewX share Intent builder variant",
+            candidates = currentMatches + movedMatches,
         )
-    }
 
-    if (currentMatches.size == 1) {
-        currentMatches.single().method.addInstructions(
+    if (currentMatches.any { it === selectedMatch }) {
+        selectedMatch.method.addInstructions(
             0,
             """
             invoke-static {p0}, $CHANGE_DOMAIN_METHOD
@@ -325,7 +320,7 @@ private fun hookShareIntentBuilder() {
         return
     }
 
-    hookMovedShareIntentCalls(movedMatches.single().method)
+    hookMovedShareIntentCalls(selectedMatch.method)
 }
 
 context(context: app.morphe.patcher.patch.BytecodePatchContext)

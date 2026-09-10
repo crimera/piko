@@ -4,6 +4,7 @@ import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.newXSettingsPatch
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
@@ -465,11 +466,7 @@ private fun resolveIconField(resourceName: String, iconType: String): FieldRefer
             }
             fieldCandidates.single()
         }.distinctBy(FieldReference::toString)
-    if (fields.size == 1) return fields.single()
-
-    throw PatchException(
-        "Expected one NewX $resourceName icon field, found ${fields.size}: ${fields.joinToString()}",
-    )
+    return requireExactlyOne("NewX $resourceName icon field", fields)
 }
 
 private fun List<Instruction>.resolveFieldRead(

@@ -10,6 +10,8 @@ import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
+import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -138,8 +140,11 @@ val dynamicColorPatch =
         execute {
             val providerMatches =
                 HorizonThemePaletteProviderFingerprint.scopedMatchAll()
-            requireExactlyOne("NewX Horizon theme palette provider", providerMatches)
-            val provider = providerMatches.single().method
+            val provider =
+                requireExactlyOne(
+                    "NewX Horizon theme palette provider",
+                    providerMatches,
+                ).method
             val paletteDescriptor = provider.returnType
             if (!paletteDescriptor.startsWith("L")) {
                 throw PatchException(
@@ -191,22 +196,6 @@ val dynamicColorPatch =
         }
     }
 
-internal fun <T> requireExactlyOne(
-    target: String,
-    matches: List<T>,
-) {
-    if (matches.size == 1) return
-    throw PatchException("Expected one $target, found ${matches.size}: ${matches.joinToString()}")
-}
-
-private fun <T> requireAtMostOne(
-    target: String,
-    matches: List<T>,
-) {
-    if (matches.size <= 1) return
-    throw PatchException("Expected at most one $target, found ${matches.size}: ${matches.joinToString()}")
-}
-
 context(context: BytecodePatchContext)
 private fun resolvePaletteConstructorReference(paletteDescriptor: String): String {
     val constructors =
@@ -217,12 +206,7 @@ private fun resolvePaletteConstructorReference(paletteDescriptor: String): Strin
                     method.returnType == "V" &&
                     method.parameterTypes.joinToString("") == PALETTE_CONSTRUCTOR_PARAMETERS
             }
-    if (constructors.size != 1) {
-        throw PatchException(
-            "Expected one NewX Horizon palette constructor, found ${constructors.size}: " +
-                constructors.joinToString(),
-        )
-    }
+    requireExactlyOne("NewX Horizon palette constructor", constructors)
     return "$paletteDescriptor-><init>($PALETTE_CONSTRUCTOR_PARAMETERS)V"
 }
 
@@ -235,13 +219,9 @@ private fun MutableMethod.resolvePaletteCacheFields(
             if (instruction.opcode != Opcode.SGET_OBJECT) return@mapNotNull null
             instruction.getReference<FieldReference>()?.takeIf { field -> field.type == "[I" }
         }.distinctBy(FieldReference::toString)
-    if (mappingArrayFields.size != 1) {
-        throw PatchException(
-            "Expected one NewX theme-variant mapping array, found " +
-                "${mappingArrayFields.size}: ${mappingArrayFields.joinToString()}",
-        )
-    }
-    val selectorByKind = resolveThemeVariantSelectors(mappingArrayFields.single())
+    val mappingArrayField =
+        requireExactlyOne("NewX theme-variant mapping array", mappingArrayFields)
+    val selectorByKind = resolveThemeVariantSelectors(mappingArrayField)
     val selectorRegister =
         instructions.singleOrNull { instruction -> instruction.opcode == Opcode.AGET }
             ?.let { instruction -> (instruction as? ThreeRegisterInstruction)?.registerA }
@@ -298,12 +278,13 @@ private fun resolveThemeVariantSelectors(
         indexed.value.opcode == Opcode.SPUT_OBJECT &&
             indexed.value.getReference<FieldReference>()?.toString() == mappingArrayField.toString()
     }
-    requireExactlyOne("NewX theme-variant mapping-array store", mappingStores)
+    val mappingStore =
+        requireExactlyOne("NewX theme-variant mapping-array store", mappingStores)
     val mappingArrayRegister =
-        (mappingStores.single().value as? OneRegisterInstruction)?.registerA
+        (mappingStore.value as? OneRegisterInstruction)?.registerA
             ?: throw PatchException(
                 "NewX theme-variant mapping-array store has no source register: " +
-                    mappingStores.single(),
+                    mappingStore,
             )
     val themeVariantFieldNames = PaletteKind.values().map(PaletteKind::themeVariantFieldName).toSet()
 
@@ -312,8 +293,8 @@ private fun resolveThemeVariantSelectors(
             indexed.value.opcode == Opcode.SGET_OBJECT &&
                 indexed.value.getReference<FieldReference>()?.name == kind.themeVariantFieldName
         }
-        requireExactlyOne("NewX ${kind.name} theme-variant enum read", enumReads)
-        val enumRead = enumReads.single()
+        val enumRead =
+            requireExactlyOne("NewX ${kind.name} theme-variant enum read", enumReads)
         val enumRegister =
             (enumRead.value as? OneRegisterInstruction)?.registerA
                 ?: throw PatchException("NewX ${kind.name} enum read has no destination register: $enumRead")
@@ -322,7 +303,7 @@ private fun resolveThemeVariantSelectors(
                 indexed.index > enumRead.index &&
                     indexed.value.opcode == Opcode.SGET_OBJECT &&
                     indexed.value.getReference<FieldReference>()?.name in themeVariantFieldNames
-            }?.index ?: mappingStores.single().index
+            }?.index ?: mappingStore.index
         if (blockEnd <= enumRead.index) {
             throw PatchException("NewX ${kind.name} enum read has no bounded mapping block: $initializer")
         }
@@ -339,8 +320,8 @@ private fun resolveThemeVariantSelectors(
                 indexed.value.registersUsed == listOf(enumRegister) &&
                 instructions.getOrNull(indexed.index + 1)?.opcode == Opcode.MOVE_RESULT
         }
-        requireExactlyOne("NewX ${kind.name} enum ordinal read", ordinalCandidates)
-        val ordinal = ordinalCandidates.single()
+        val ordinal =
+            requireExactlyOne("NewX ${kind.name} enum ordinal read", ordinalCandidates)
         val ordinalResultRegister =
             (instructions[ordinal.index + 1] as? OneRegisterInstruction)?.registerA
                 ?: throw PatchException(
@@ -355,8 +336,8 @@ private fun resolveThemeVariantSelectors(
                         store.registerC == ordinalResultRegister
                 } == true
         }
-        requireExactlyOne("NewX ${kind.name} selector store", arrayStoreCandidates)
-        val arrayStore = arrayStoreCandidates.single()
+        val arrayStore =
+            requireExactlyOne("NewX ${kind.name} selector store", arrayStoreCandidates)
         val valueRegister =
             (arrayStore.value as? ThreeRegisterInstruction)?.registerA
                 ?: throw PatchException("NewX ${kind.name} selector store has no value register")
@@ -369,8 +350,8 @@ private fun resolveThemeVariantSelectors(
                 literal != null &&
                 oneRegister.registerA == valueRegister
         }
-        requireExactlyOne("NewX ${kind.name} selector literal", selectorLiterals)
-        (selectorLiterals.single().value as NarrowLiteralInstruction).narrowLiteral
+        (requireExactlyOne("NewX ${kind.name} selector literal", selectorLiterals).value as NarrowLiteralInstruction)
+            .narrowLiteral
     }.also { selectorsByKind ->
         val selectors = selectorsByKind.values
         if (selectors.size != PaletteKind.values().size || selectors.toSet().size != selectors.size) {
@@ -426,13 +407,8 @@ private fun resolveFactory(
             indexed.value.opcode == Opcode.SPUT_OBJECT &&
                 indexed.value.getReference<FieldReference>()?.toString() == cacheField.toString()
         }
-    if (stores.size != 1) {
-        throw PatchException(
-            "Expected one cache store for $kind in $holder, found ${stores.size}",
-        )
-    }
-
-    val storeIndex = stores.single().index
+    val store = requireExactlyOne("NewX $kind palette cache store", stores)
+    val storeIndex = store.index
     val instructions = initializer.instructions.toList()
     val cacheStores = instructions.withIndex().filter { indexed ->
         indexed.value.opcode == Opcode.SPUT_OBJECT &&
@@ -446,8 +422,8 @@ private fun resolveFactory(
     }
     val previousStoreIndex = cacheStores.map { it.index }.filter { it < storeIndex }.maxOrNull() ?: -1
     val storeRegister =
-        (stores.single().value as? OneRegisterInstruction)?.registerA
-            ?: throw PatchException("NewX $kind palette cache store has no source register: ${stores.single()}")
+        (store.value as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException("NewX $kind palette cache store has no source register: $store")
     val factoryCandidates = instructions.withIndex().mapNotNull { allocation ->
         if (allocation.index !in (previousStoreIndex + 1) until storeIndex ||
             allocation.value.opcode != Opcode.NEW_INSTANCE
@@ -475,7 +451,7 @@ private fun resolveFactory(
                 constructor.value.receiverRegister() == allocationRegister
         }
         if (constructors.size != 1) return@mapNotNull null
-        val constructor = constructors.single()
+        val constructor = constructors[0]
         val constructorInstruction = constructor.value as? FiveRegisterInstruction
             ?: return@mapNotNull null
         if (constructorInstruction.registerCount != 2) return@mapNotNull null
@@ -501,11 +477,11 @@ private fun resolveFactory(
         FactoryAllocation(
             index = allocation.index,
             descriptor = factoryDescriptor,
-            selector = (selectorLiterals.single().value as NarrowLiteralInstruction).narrowLiteral,
+            selector = (selectorLiterals[0].value as NarrowLiteralInstruction).narrowLiteral,
         )
     }
-    requireExactlyOne("NewX $kind Function0 cache allocation", factoryCandidates)
-    val factoryAllocation = factoryCandidates.single()
+    val factoryAllocation =
+        requireExactlyOne("NewX $kind Function0 cache allocation", factoryCandidates)
     val factoryDescriptor = factoryAllocation.descriptor
     val factorySelector = factoryAllocation.selector
 
@@ -516,14 +492,7 @@ private fun resolveFactory(
                 method.parameterTypes.isEmpty() &&
                 method.returnType == "Ljava/lang/Object;"
         }
-    if (invokes.size != 1) {
-        throw PatchException(
-            "Expected one NewX $kind Function0.invoke(), found ${invokes.size}: " +
-                invokes.joinToString(),
-        )
-    }
-
-    val invoke = invokes.single()
+    val invoke = requireExactlyOne("NewX $kind Function0.invoke()", invokes)
     val paletteAllocation = invoke.resolvePaletteAllocationIndex(
         factorySelector = factorySelector,
         paletteDescriptor = paletteDescriptor,
@@ -580,13 +549,9 @@ private fun MutableMethod.resolvePaletteAllocationIndex(
     val switchInstructions = instructions.withIndex().filter { indexed ->
         indexed.value.opcode == Opcode.PACKED_SWITCH
     }
-    if (switchInstructions.size != 1) {
-        throw PatchException(
-            "Expected one NewX palette factory packed switch, found " +
-                "${switchInstructions.size}: $this",
-        )
-    }
-    val switchInstruction = switchInstructions.single().value as? BuilderInstruction31t
+    val switchInstruction =
+        requireExactlyOne("NewX palette factory packed switch", switchInstructions)
+            .value as? BuilderInstruction31t
         ?: throw PatchException("NewX palette factory switch is not mutable: $this")
     val payload = switchInstruction.target.location.instruction as? SwitchPayload
         ?: throw PatchException("NewX palette factory switch payload is missing: $this")
@@ -677,11 +642,11 @@ private fun MutableMethod.resolvePaletteIsLight(
             indexed.value.receiverRegister() ==
                 (instructions[allocation.index] as? OneRegisterInstruction)?.registerA
     }
-    requireExactlyOne(
-        "NewX palette constructor in selected allocation branch",
-        constructorCandidates,
-    )
-    val constructor = constructorCandidates.single()
+    val constructor =
+        requireExactlyOne(
+            "NewX palette constructor in selected allocation branch",
+            constructorCandidates,
+        )
     val range = constructor.value as? RegisterRangeInstruction
         ?: throw PatchException("NewX palette constructor is not an invoke-range: $this")
     val allocationRegister =
@@ -714,8 +679,8 @@ context(context: BytecodePatchContext)
 private fun patchDynamicAccentPalettes() {
     val providerMatches =
         NewXDynamicColorPaletteProviderFingerprint.scopedMatchAll()
-    requireExactlyOne("NewX dynamic color-scale provider", providerMatches)
-    val provider = providerMatches.single().method
+    val provider =
+        requireExactlyOne("NewX dynamic color-scale provider", providerMatches).method
     val paletteInterfaceDescriptor = provider.returnType
     if (!paletteInterfaceDescriptor.startsWith("L")) {
         throw PatchException(
@@ -798,10 +763,9 @@ private fun resolveNoArgConstructor(descriptor: String): MutableMethod {
                     method.parameterTypes.isEmpty() &&
                     method.returnType == "V"
             }
-    if (constructors.size == 1) return constructors.single()
-    throw PatchException(
-        "Expected one no-argument NewX dynamic palette constructor for $descriptor, found " +
-            "${constructors.size}: ${constructors.joinToString()}",
+    return requireExactlyOne(
+        "NewX no-argument dynamic palette constructor for $descriptor",
+        constructors,
     )
 }
 
@@ -888,8 +852,8 @@ private fun patchInlineActionTints() {
                 fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
             ),
         ).scopedMatchAll()
-    requireExactlyOne("NewX inline action entry renderer", entryMatches)
-    val entryMethod = entryMatches.single().method
+    val entryMethod =
+        requireExactlyOne("NewX inline action entry renderer", entryMatches).method
     val tintReference =
         entryMethod.instructions.mapNotNull { instruction ->
             if (instruction.opcode != Opcode.INVOKE_STATIC &&
@@ -909,9 +873,9 @@ private fun patchInlineActionTints() {
                 field.definingClass == actionTypeDescriptor && field.name == "Unfavorite"
             } == true
     }
-    requireExactlyOne("NewX Unfavorite enum read", unfavoriteReads)
+    val unfavoriteRead = requireExactlyOne("NewX Unfavorite enum read", unfavoriteReads)
     val likeComposableConstructors =
-        tintMethod.instructions.drop(unfavoriteReads.single().index + 1)
+        tintMethod.instructions.drop(unfavoriteRead.index + 1)
             .mapNotNull { instruction -> instruction.getReference<MethodReference>() }
             .filter { reference ->
                 reference.name == "<init>" &&
@@ -937,8 +901,8 @@ private fun patchInlineActionTints() {
                     } &&
                     reference.definingClass.hasComposableLambdaInvoke()
             }.distinctBy(MethodReference::toString)
-    requireExactlyOne("NewX like icon composable constructor", likeComposableConstructors)
-    val likeComposableConstructor = likeComposableConstructors.single()
+    val likeComposableConstructor =
+        requireExactlyOne("NewX like icon composable constructor", likeComposableConstructors)
 
     entryMethod.addInstructions(
         0,
@@ -947,7 +911,7 @@ private fun patchInlineActionTints() {
         move-result-wide p2
         """.trimIndent(),
     )
-    val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteReads.single().index)
+    val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteRead.index)
     patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
 }
 
@@ -1000,7 +964,9 @@ private fun wideReadsByOwner(
  */
 private fun isTabSlotColors(method: Method, horizon: String): Boolean {
     val reads = wideReadsByOwner(method, horizon)
-    if (reads.size != 1 || reads.values.single().size != 2) return false
+    if (reads.size != 1) return false
+    val ownerReads = reads.values.first()
+    if (ownerReads.size != 2) return false
     return method.implementation?.instructions?.toList().orEmpty().any { instruction ->
         instruction.getReference<MethodReference>()?.let { reference ->
             reference.definingClass.startsWith(TAB_RENDERER_SCOPE) &&
@@ -1032,14 +998,18 @@ private fun isTabIndicatorRenderer(method: Method): Boolean {
 
 private fun isProfileTabIndicator(method: Method, horizon: String): Boolean {
     val instructions = method.implementation?.instructions?.toList().orEmpty()
-    return instructions.any { instruction ->
+    val reads = wideReadsByOwner(method, horizon)
+    if (!instructions.any { instruction ->
         instruction.opcode == Opcode.SGET &&
             instruction.getReference<FieldReference>()?.let { field ->
                 field.definingClass.startsWith(TAB_RENDERER_SCOPE) && field.type == "F"
             } == true
-    } && wideReadsByOwner(method, horizon).size == 1 &&
-        wideReadsByOwner(method, horizon).values.single().size == 1 &&
-        hasFoundationBackground(instructions)
+    }) {
+        return false
+    }
+    if (reads.size != 1) return false
+    val ownerReads = reads.values.first()
+    return ownerReads.size == 1 && hasFoundationBackground(instructions)
 }
 
 private fun tabSlotColorsFingerprint(horizon: String) = Fingerprint(
@@ -1069,39 +1039,40 @@ private fun patchTabTints(horizon: String) {
     val slots = tabSlotColorsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
     val indicatorMatches = NewXTabIndicatorRendererFingerprint.scopedMatchAllOrNull().orEmpty()
     val profileMatches = profileTabIndicatorFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
-    requireAtMostOne("NewX tab slot renderer", slots)
-    requireAtMostOne("NewX tab indicator renderer", indicatorMatches)
-    requireAtMostOne("NewX profile tab indicator", profileMatches)
-    val containerReference = slots.singleOrNull()?.method?.resolveTabContainerReference(horizon)
+    val slotMatch = requireAtMostOne("NewX tab slot renderer", slots)
+    val indicatorMatch = requireAtMostOne("NewX tab indicator renderer", indicatorMatches)
+    val profileMatch = requireAtMostOne("NewX profile tab indicator", profileMatches)
+    val containerReference = slotMatch?.method?.resolveTabContainerReference(horizon)
     // Releases without a dedicated profile painter share the container indicator for timeline
     // and profile tabs; that sharing is proven by profile code calling the tabs container.
     val sharingProof =
-        if (profileMatches.isEmpty() && containerReference != null) {
+        if (profileMatch == null && containerReference != null) {
             profileSharesContainerIndicator(containerReference)
         } else {
             emptyList()
         }
-    requireAtMostOne("NewX profile/container indicator sharing proof", sharingProof)
-    val sharedIndicator = profileMatches.isEmpty() && sharingProof.size == 1
+    val sharingMatch =
+        requireAtMostOne("NewX profile/container indicator sharing proof", sharingProof)
+    val sharedIndicator = profileMatch == null && sharingMatch != null
     if (
-        slots.size == 1 &&
-            indicatorMatches.size == 1 &&
-            (profileMatches.size == 1 || sharedIndicator)
+        slotMatch != null &&
+            indicatorMatch != null &&
+            (profileMatch != null || sharedIndicator)
     ) {
-        slots.single().method.injectTabSlotTints(horizon)
-        indicatorMatches.single().method.injectTabIndicatorTint()
-        profileMatches.singleOrNull()?.method?.injectProfileTabIndicatorTint(horizon)
+        slotMatch.method.injectTabSlotTints(horizon)
+        indicatorMatch.method.injectTabIndicatorTint()
+        profileMatch?.method?.injectProfileTabIndicatorTint(horizon)
         return
     }
     val horizonReads = horizonTabsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
-    requireAtMostOne("NewX Horizon tab color fallback", horizonReads)
+    val horizonRead = requireAtMostOne("NewX Horizon tab color fallback", horizonReads)
     // A proven Horizon tab shape with no slot colors needs no hook: the dynamic palette
     // factories already replace the colors it reads.
     if (
         slots.isEmpty() &&
             indicatorMatches.isEmpty() &&
             profileMatches.isEmpty() &&
-            horizonReads.size == 1
+            horizonRead != null
     ) {
         return
     }
@@ -1150,28 +1121,8 @@ private fun MutableMethod.resolveTabContainerReference(horizon: String): MethodR
                     hasTabContainerArgumentFlow(indexed.index, reference, horizon)
             } == true
     }
-    if (calls.size != 1) {
-        val candidates = instructions.withIndex().mapNotNull { indexed ->
-            val instruction = indexed.value
-            if (instruction.opcode != Opcode.INVOKE_STATIC &&
-                instruction.opcode != Opcode.INVOKE_STATIC_RANGE
-            ) {
-                return@mapNotNull null
-            }
-            val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
-            val parameters = reference.parameterTypes.map(CharSequence::toString)
-            "${indexed.index}:$reference(size=${parameters.size},scope=${reference.definingClass.startsWith(TAB_RENDERER_SCOPE)}," +
-                "v=${reference.returnType == "V"},first=${parameters.firstOrNull()},string=${parameters.count { it == "Ljava/lang/String;" }}," +
-                "wide=${parameters.count { it == "J" }},fn=${parameters.count { it == FUNCTION0_DESCRIPTOR }}," +
-                "modifier=${COMPOSE_MODIFIER_DESCRIPTOR in parameters},composer=${COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR in parameters}," +
-                "int=${parameters.count { it == "I" }})"
-        }
-        throw PatchException(
-            "Expected one NewX tabs container call in slot renderer, found ${calls.size}; " +
-                "static candidates=${candidates.joinToString()}: $this",
-        )
-    }
-    return calls.single().value.getReference<MethodReference>()
+    val call = requireExactlyOne("NewX tabs container call in slot renderer", calls)
+    return call.value.getReference<MethodReference>()
         ?: throw PatchException("NewX tabs container call reference is missing: $this")
 }
 
@@ -1396,10 +1347,14 @@ private fun profileSharesContainerIndicator(containerReference: MethodReference)
                     instruction.getReference<MethodReference>()?.toString() ==
                         containerReference.toString()
             }
-            calls.size == 1 &&
-                calls.single().value.firstStaticArgumentRegister()?.let { argumentRegister ->
-                    instructions.objectArgumentFlowsFromList(calls.single().index, argumentRegister)
+            if (calls.size != 1) {
+                false
+            } else {
+                val call = calls[0]
+                call.value.firstStaticArgumentRegister()?.let { argumentRegister ->
+                    instructions.objectArgumentFlowsFromList(call.index, argumentRegister)
                 } == true
+            }
         },
     ).scopedMatchAllOrNull().orEmpty()
 /**
@@ -1422,8 +1377,11 @@ private fun isHorizonTabColorRead(method: Method, horizon: String): Boolean {
 }
 
 private fun MutableMethod.injectTabSlotTints(horizon: String) {
-    val reads = wideReadsByOwner(this, horizon).values.singleOrNull()
-        ?: throw PatchException("NewX tab slot colors have an unexpected shape: $this")
+    val reads =
+        requireExactlyOne(
+            "NewX tab slot color owner",
+            wideReadsByOwner(this, horizon).values,
+        )
     if (reads.size != 2) {
         throw PatchException("NewX tab slot colors have an unexpected shape: $this")
     }
@@ -1478,13 +1436,7 @@ private fun MutableMethod.injectProfileTabIndicatorTint(horizon: String) {
                 } == true
             }
         }
-    if (brandSites.size != 1) {
-        throw PatchException(
-            "Expected one NewX profile tab indicator tint site, found " +
-                "${brandSites.size} of ${brandReads.size}: $this",
-        )
-    }
-    val brandSite = brandSites.single()
+    val brandSite = requireExactlyOne("NewX profile tab indicator tint site", brandSites)
     val colorRegister =
         (brandSite.value as? OneRegisterInstruction)?.registerA
             ?: throw PatchException("NewX profile tab indicator has no color register: $this")
@@ -1637,8 +1589,8 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldRe
                 if (comparison.opcode == Opcode.IF_NE) fallthroughWrites else targetWrites
             val nonEqualWrites =
                 if (comparison.opcode == Opcode.IF_NE) targetWrites else fallthroughWrites
-            val equalValue = methodInstructions.resolveBooleanNormalizationValue(equalWrites.single())
-            val nonEqualValue = methodInstructions.resolveBooleanNormalizationValue(nonEqualWrites.single())
+            val equalValue = methodInstructions.resolveBooleanNormalizationValue(equalWrites[0])
+            val nonEqualValue = methodInstructions.resolveBooleanNormalizationValue(nonEqualWrites[0])
             if (equalValue != 1 || nonEqualValue != 0) return@flatMap emptyList()
 
             methodInstructions.withIndex().filter { indexed ->
@@ -1652,8 +1604,8 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldRe
             }
         }
     }
-    requireExactlyOne("NewX activated-like tint load in the active branch", colorCandidates)
-    val colorLoad = colorCandidates.single()
+    val colorLoad =
+        requireExactlyOne("NewX activated-like tint load in the active branch", colorCandidates)
     val activeLikeField = colorLoad.value.getReference<FieldReference>()
         ?: throw PatchException("NewX activated-like tint field is missing: $this")
     val colorRegister = (colorLoad.value as? OneRegisterInstruction)?.registerA
@@ -1698,8 +1650,7 @@ private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
             parameters[7] == "I" &&
             (parameters.size == 8 || parameters[8] == "I")
     }
-    requireExactlyOne("NewX like Lottie renderer call", candidates)
-    val candidate = candidates.single()
+    val candidate = requireExactlyOne("NewX like Lottie renderer call", candidates)
     val reference = candidate.value.getReference<MethodReference>()
         ?: throw PatchException("NewX like Lottie renderer reference is missing: $this")
     return ResolvedLottieRenderer(
@@ -1741,12 +1692,7 @@ private fun MutableMethod.injectLottieFallbackTint(activeLikeField: FieldReferen
             instruction.opcode == Opcode.SGET_WIDE &&
                 instruction.getReference<FieldReference>()?.toString() == activeLikeField.toString()
         }
-    if (colorLoads.size != 1) {
-        throw PatchException(
-            "Expected one NewX Lottie fallback tint, found ${colorLoads.size}: $this",
-        )
-    }
-    val colorLoad = colorLoads.single()
+    val colorLoad = requireExactlyOne("NewX Lottie fallback tint", colorLoads)
     val colorRegister = (colorLoad.value as? OneRegisterInstruction)?.registerA
         ?: throw PatchException("NewX Lottie fallback tint has no wide register: $this")
     addInstructions(

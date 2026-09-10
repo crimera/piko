@@ -1,5 +1,7 @@
 package app.crimera.patches.newx.models
 
+import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -30,11 +32,7 @@ private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 context(_: BytecodePatchContext)
 internal fun Fingerprint.requireSingle(target: String): Match {
     val matches = scopedMatchAll()
-    if (matches.size == 1) return matches.single()
-    throw PatchException(
-        "Expected one NewX $target, found ${matches.size}: " +
-            matches.joinToString { it.originalMethod.toString() },
-    )
+    return requireExactlyOne("NewX $target", matches)
 }
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 
@@ -48,12 +46,7 @@ internal fun Method.fieldForToStringLabel(label: String): FieldReference {
             instruction.getReference<StringReference>()?.string == label
         }
     }
-    if (labelIndices.size != 1) {
-        throw PatchException(
-            "Expected one NewX model label '$label' in $this, found ${labelIndices.size}",
-        )
-    }
-    val labelIndex = labelIndices.single()
+    val labelIndex = requireExactlyOne("NewX model label '$label' in $this", labelIndices)
 
     val labelInstruction = instructions[labelIndex] as? OneRegisterInstruction
         ?: throw PatchException("NewX model label '$label' has an unsupported register layout in $this")
@@ -111,17 +104,8 @@ internal fun requireSingleToStringField(
     owner: String,
     candidates: List<FieldReference>,
 ): FieldReference {
-    if (candidates.isEmpty()) {
-        throw PatchException("NewX model field for '$label' was not found in $owner")
-    }
     val distinct = candidates.distinctBy(FieldReference::toString)
-    if (distinct.size == 1) return distinct.single()
-    // First-match would silently bind the patch to an arbitrary descriptor; distinct duplicates
-    // are ambiguity and must fail loudly.
-    throw PatchException(
-        "Expected one NewX model field for '$label' in $owner, found " +
-            "${distinct.size} distinct candidates: ${distinct.joinToString()}",
-    )
+    return requireExactlyOne("NewX model field for '$label' in $owner", distinct)
 }
 
 internal fun Match.fieldForBooleanToStringLabel(label: String): FieldReference {
@@ -129,22 +113,14 @@ internal fun Match.fieldForBooleanToStringLabel(label: String): FieldReference {
     val labelIndices = instructions.mapIndexedNotNull { index, instruction ->
         index.takeIf { instruction.getReference<StringReference>()?.string == label }
     }
-    if (labelIndices.size != 1) {
-        throw PatchException(
-            "Expected one NewX boolean model label '$label' in $originalMethod, found ${labelIndices.size}",
-        )
-    }
+    requireExactlyOne("NewX boolean model label '$label' in $originalMethod", labelIndices)
     val fields = instructions.mapNotNull { instruction ->
         if (instruction.opcode != Opcode.IGET_BOOLEAN) return@mapNotNull null
         instruction.getReference<FieldReference>()?.takeIf { field ->
             field.definingClass == originalMethod.definingClass
         }
     }.distinctBy(FieldReference::toString)
-    if (fields.size == 1) return fields.single()
-    throw PatchException(
-        "Expected one NewX boolean model field after '$label' in $originalMethod, found " +
-            "${fields.size}: ${fields.joinToString()}",
-    )
+    return requireExactlyOne("NewX boolean model field after '$label' in $originalMethod", fields)
 }
 
 internal fun com.android.tools.smali.dexlib2.iface.ClassDef.requireSingleInstanceField(
@@ -154,17 +130,15 @@ internal fun com.android.tools.smali.dexlib2.iface.ClassDef.requireSingleInstanc
     val matches = fields.filter { field ->
         field.type == type && !AccessFlags.STATIC.isSet(field.accessFlags)
     }
-    if (matches.size == 1) return matches.single()
-    throw PatchException(
-        "Expected one NewX $semanticName field of type $type in $this, found " +
-            "${matches.size}: ${matches.joinToString()}",
-    )
+    return requireExactlyOne("NewX $semanticName field of type $type in $this", matches)
 }
 
 internal fun MutableClass.requirePublicFields(fields: List<FieldReference>) {
     fields.forEach { field ->
-        val definition = this.fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
-            ?: throw PatchException("NewX model field definition was not found: $field in $this")
+        val definition = requireExactlyOne(
+            "NewX model field definition $field in $this",
+            this.fields.filter { candidate -> candidate.toString() == field.toString() },
+        )
         if (AccessFlags.PUBLIC.isSet(definition.accessFlags)) return@forEach
         throw PatchException(
             "NewX generated bridge requires a public model field: $field in $this",
@@ -198,15 +172,15 @@ internal fun MutableClass.resolveFieldAccessor(
             method.returnType == field.type
     }
     // BETA PATH: prefer the stable getter exposed by the private model.
-    if (getterMatches.size == 1) return ModelFieldAccessor(field, getterMatches.single())
-    if (getterMatches.isNotEmpty()) {
-        throw PatchException(
-            "Expected one NewX $semanticName getter for $field in $this, found " +
-                getterMatches.joinToString(),
-        )
+    val getter = requireAtMostOne("NewX $semanticName getter for $field in $this", getterMatches)
+    if (getter != null) {
+        return ModelFieldAccessor(field, getter)
     }
     // ALPHA PATH: fall back to the validated public field.
-    val definition = fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
+    val definition = requireAtMostOne(
+        "NewX $semanticName field definition $field in $this",
+        fields.filter { candidate -> candidate.toString() == field.toString() },
+    )
     if (definition != null && AccessFlags.PUBLIC.isSet(definition.accessFlags)) {
         return ModelFieldAccessor(field, null)
     }
@@ -356,13 +330,8 @@ internal fun MutableClass.patchBridge(
             method.parameterTypes.joinToString("") == parameters &&
             method.returnType == returnType
     }
-    if (matches.size != 1) {
-        throw PatchException(
-            "Expected one NewX bridge $name($parameters)$returnType in $this, found " +
-                "${matches.size}: ${matches.joinToString()}",
-        )
-    }
-    matches.single().addInstructions(0, instructions.trimIndent())
+    requireExactlyOne("NewX bridge $name($parameters)$returnType in $this", matches)
+        .addInstructions(0, instructions.trimIndent())
 }
 
 context(context: BytecodePatchContext)
@@ -370,11 +339,7 @@ internal fun MethodReference.resolveCurrentMethod(label: String): Method {
     val owner = context.classDefByOrNull(definingClass)
         ?: throw PatchException("NewX $label owner was not found: $definingClass")
     val matches = owner.methods.filter { method -> matches(method) }
-    if (matches.size == 1) return matches.single()
-    throw PatchException(
-        "Expected one NewX $label matching $this in $owner, found " +
-            "${matches.size}: ${matches.joinToString()}",
-    )
+    return requireExactlyOne("NewX $label matching $this in $owner", matches)
 }
 
 context(context: BytecodePatchContext)
@@ -383,11 +348,7 @@ internal fun MethodReference.resolveMutableMethodOwner(
 ): Pair<MutableClass, MutableMethod> {
     val owner = context.mutableClassDefBy(definingClass)
     val matches = owner.methods.filter { method -> matches(method) }
-    if (matches.size == 1) return owner to matches.single()
-    throw PatchException(
-        "Expected one NewX $label matching $this in $owner, found " +
-            "${matches.size}: ${matches.joinToString()}",
-    )
+    return owner to requireExactlyOne("NewX $label matching $this in $owner", matches)
 }
 
 private fun MethodReference.matches(method: Method): Boolean =

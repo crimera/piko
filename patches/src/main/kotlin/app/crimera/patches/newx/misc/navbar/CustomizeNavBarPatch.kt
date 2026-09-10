@@ -8,6 +8,7 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.NAV_BAR_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -89,11 +90,7 @@ private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int {
                 instruction.location.index
             }
 
-    if (candidates.size == 1) return candidates.single()
-    throw PatchException(
-        "Expected one stable NewX tabData State constructor, found ${candidates.size}: " +
-            candidates.joinToString(),
-    )
+    return requireExactlyOne("stable NewX tabData State constructor", candidates)
 }
 
 private fun validateFingerprintMatch(match: Match) {
@@ -158,14 +155,7 @@ val customizeNewXNavBarPatch =
 
         execute {
             val matches = NewXTabDataFingerprint.scopedMatchAll()
-            if (matches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX tabData builder, found ${matches.size}: " +
-                        matches.joinToString { it.originalMethod.toString() },
-                )
-            }
-
-            matches.single().let { match ->
+            requireExactlyOne("NewX tabData builder", matches).let { match ->
                 validateFingerprintMatch(match)
                 match.method.apply {
                     val mapPutIndex = match.instructionMatches.last().index

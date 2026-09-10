@@ -46,6 +46,8 @@ internal fun <T> requireAtMostOne(
 
 They fail with `PatchException` containing the label, cardinality, and candidate descriptions. Validate with `./gradlew :patches:lintNewxResolvers`; use `-PnewxResolverLintReportOnly=true` for report-only audits. If instruction order is intentionally contractual, document the exception beside the selection with a linter directive such as `// newx-resolver-lint: allow instruction-order raw-first because bytecode order is the contract`.
 
+- Omit the optional `describe` argument unless the candidate's default `toString()` is not useful. Keep resolver call sites concise while retaining a semantic `label`.
+
 ### Method
 
 1. **Freeze the target.** Record the exact package, version, APK, MPP, and output. Reuse stored decompilations and keep analysis scoped to the relevant package/file.

@@ -12,6 +12,7 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSingleChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.MEDIA_TAB_RESOLVER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -145,16 +146,13 @@ val newXDefaultMediaTabPatch =
                 NewXCombinedProfileTimelineSeedFingerprint.scopedMatchAllOrNull().orEmpty()
             val refactoredMatches =
                 NewXCombinedProfileTimelineInitialSubTabFingerprint.scopedMatchAllOrNull().orEmpty()
-            val totalMatches = legacyMatches.size + refactoredMatches.size
-            if (totalMatches != 1) {
-                throw PatchException(
-                    "Expected one combined profile timeline seed across known shapes, found $totalMatches: " +
-                        (legacyMatches + refactoredMatches).joinToString { it.originalMethod.toString() },
+            val combinedMatch =
+                requireExactlyOne(
+                    label = "combined profile timeline seed across known shapes",
+                    candidates = legacyMatches + refactoredMatches,
                 )
-            }
-
             val isLegacyShape = legacyMatches.isNotEmpty()
-            val method = (legacyMatches + refactoredMatches).single().method
+            val method = combinedMatch.method
             val tabTypeDescriptor =
                 if (isLegacyShape) method.parameterTypes[0].toString()
                 else method.parameterTypes[1].toString()

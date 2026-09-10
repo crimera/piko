@@ -6,6 +6,7 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -212,8 +213,11 @@ val disableTimelineRefreshPatch =
                             instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
                                 ?.takeIf { it.definingClass.toString() == repoDescriptor }
                         }.distinctBy { "${it.definingClass}->${it.name}:${it.type}" }
-                    if (fieldReads.size != 1) return@mapNotNull null
-                    val dataField = fieldReads.single()
+                    val dataField =
+                        requireAtMostOne(
+                            label = "NewX URT repository data field read",
+                            candidates = fieldReads,
+                        ) ?: return@mapNotNull null
                     val dataFieldClass = runCatching { mutableClassDefBy(dataField.type.toString()) }.getOrNull()
                         ?: return@mapNotNull null
                     if (flowDescriptor !in dataFieldClass.interfaces.map(CharSequence::toString)) {
@@ -226,8 +230,12 @@ val disableTimelineRefreshPatch =
                             candidate.parameterTypes.isEmpty() &&
                                 candidate.returnType.toString() == "Ljava/util/List;"
                         }
-                    if (listGetters.size != 1) return@mapNotNull null
-                    Triple(method, dataField, listGetters.single())
+                    val listGetter =
+                        requireAtMostOne(
+                            label = "NewX URT timeline data flow list getter",
+                            candidates = listGetters,
+                        ) ?: return@mapNotNull null
+                    Triple(method, dataField, listGetter)
                 }
             if (flowGetterCandidates.size != 1) {
                 throw PatchException(

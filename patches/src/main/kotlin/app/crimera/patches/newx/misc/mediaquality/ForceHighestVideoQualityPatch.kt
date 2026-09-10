@@ -12,6 +12,7 @@ import app.crimera.patches.newx.settings.injectReadWithDefault
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -135,30 +136,26 @@ val newXForceHighestVideoQualityPatch =
             patchAudioTrackOverride(audioTrackMatches.single(), forceHighestQualitySetting)
 
             val bitrateLimiterMatches = MediaBitrateLimiterFingerprint.scopedMatchAllOrNull().orEmpty()
-            when {
-                bitrateLimiterMatches.size == 1 ->
-                    patchBitrateLimiter(bitrateLimiterMatches.single(), forceHighestQualitySetting)
-                bitrateLimiterMatches.size > 1 ->
+            if (bitrateLimiterMatches.isNotEmpty()) {
+                patchBitrateLimiter(
+                    requireExactlyOne("MediaBitrateLimiter match", bitrateLimiterMatches),
+                    forceHighestQualitySetting,
+                )
+            } else {
+                // Older targets also contain this already-unlimited policy
+                // alongside the telemetry limiter, so only use it as a
+                // fallback after the telemetry shape is absent.
+                val maxBitratePolicyMatches = MaxBitratePolicyFingerprint.scopedMatchAllOrNull().orEmpty()
+                if (maxBitratePolicyMatches.size != 1) {
                     throw PatchException(
-                        "Expected at most one MediaBitrateLimiter match, found ${bitrateLimiterMatches.size}: " +
-                            bitrateLimiterMatches.joinToString { it.originalMethod.toString() },
+                        "Expected one media bitrate capability across telemetry or max-policy shapes, " +
+                            "found telemetry=0, maxPolicy=${maxBitratePolicyMatches.size}: " +
+                            maxBitratePolicyMatches.joinToString { it.originalMethod.toString() },
                     )
-                else -> {
-                    // Older targets also contain this already-unlimited policy
-                    // alongside the telemetry limiter, so only use it as a
-                    // fallback after the telemetry shape is absent.
-                    val maxBitratePolicyMatches = MaxBitratePolicyFingerprint.scopedMatchAllOrNull().orEmpty()
-                    if (maxBitratePolicyMatches.size != 1) {
-                        throw PatchException(
-                            "Expected one media bitrate capability across telemetry or max-policy shapes, " +
-                                "found telemetry=0, maxPolicy=${maxBitratePolicyMatches.size}: " +
-                                maxBitratePolicyMatches.joinToString { it.originalMethod.toString() },
-                        )
-                    }
+                }
             }
         }
     }
-}
 
 private fun isBitrateFlowRead(instruction: Instruction?): Boolean {
     if (instruction?.opcode != Opcode.IGET_OBJECT) return false

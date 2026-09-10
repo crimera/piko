@@ -1,6 +1,7 @@
 package app.crimera.patches.newx.premium
 
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Match
@@ -146,11 +147,10 @@ val newXDownloadPatch =
             }
 
             // ALPHA + BETA PATH: shared URT/Compose timeline media-action handler.
-            val timelineHandler = requireMatches(
+            val timelineHandler = requireExactlyOne(
                 "NewX timeline download handler",
                 NewXDownloadEventHandlerFingerprint.scopedMatchAll(),
-                expectedCount = 1,
-            ).single()
+            )
             val timelinePatchedResults = timelineHandler.method.forceSubscriptionFeatureResults()
             if (timelinePatchedResults != TIMELINE_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT) {
                 throw PatchException(

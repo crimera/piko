@@ -6,6 +6,7 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -248,9 +249,12 @@ val restoreTimelinePositionPatch =
                 throw PatchException("NewX timeline-position map unexpectedly belongs to the component")
             }
             if (!AccessFlags.PUBLIC.isSet(
-                    mutableClassDefBy(mapField.definingClass.toString()).fields.single { field ->
-                        field.toString() == mapField.toString()
-                    }.accessFlags,
+                    requireExactlyOne(
+                        "NewX timeline-position map field definition",
+                        mutableClassDefBy(mapField.definingClass.toString()).fields.filter { field ->
+                            field.toString() == mapField.toString()
+                        },
+                    ).accessFlags,
                 )
             ) {
                 throw PatchException("NewX timeline-position map field is not public: $mapField")

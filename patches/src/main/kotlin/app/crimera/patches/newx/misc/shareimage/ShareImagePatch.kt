@@ -7,9 +7,9 @@ import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.Match
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -40,14 +40,6 @@ private object TimelinePostStateFingerprint : Fingerprint(
         ),
 )
 
-private fun requireMatches(label: String, matches: Collection<Match>, expected: Int = 1): List<Match> {
-    if (matches.size == expected) return matches.toList()
-    throw PatchException(
-        "Expected $expected $label matches, found ${matches.size}: " +
-            matches.joinToString { it.originalMethod.toString() },
-    )
-}
-
 @Suppress("unused")
 val newXShareImagePatch =
     bytecodePatch(
@@ -73,15 +65,15 @@ val newXShareImagePatch =
 
         execute {
             val timelinePostStateMatch =
-                requireMatches(
+                requireExactlyOne(
                     "NewX timeline-post state",
                     TimelinePostStateFingerprint.scopedMatchAll(),
-                ).single()
+                )
             val timelinePostStateType = timelinePostStateMatch.originalClassDef.type
             val postIdentifierField =
                 timelinePostStateMatch.fieldForToStringLabel(", postId=")
             val renderedPostMethod =
-                requireMatches(
+                requireExactlyOne(
                     "NewX individual post renderer",
                     Fingerprint(
                         returnType = "V",
@@ -109,7 +101,7 @@ val newXShareImagePatch =
                                 ),
                             ),
                     ).scopedMatchAll(),
-                ).single()
+                )
             val pointerCallMatch = renderedPostMethod.instructionMatches[0]
             val pointerCallReference =
                 pointerCallMatch.instruction.getReference<MethodReference>()

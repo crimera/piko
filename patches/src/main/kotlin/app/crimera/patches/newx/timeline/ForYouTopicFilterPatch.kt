@@ -16,6 +16,7 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.FOR_YOU_TOPIC_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -1070,14 +1071,10 @@ private fun Method.resolveForYouRefreshBridge(
     val forYouControllerFieldsForDispatch = forYouControllerFields.filter {
         it.type == refreshDispatch.definingClass
     }
-    if (forYouControllerFieldsForDispatch.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh controller field for " +
-                "${refreshDispatch.definingClass}, found " +
-                "${forYouControllerFieldsForDispatch.size}: ${forYouControllerFieldsForDispatch.joinToString()}",
-        )
-    }
-    val forYouControllerField = forYouControllerFieldsForDispatch.single()
+    val forYouControllerField = requireExactlyOne(
+        label = "NewX For You refresh controller field for ${refreshDispatch.definingClass}",
+        candidates = forYouControllerFieldsForDispatch,
+    )
 
     return ResolvedForYouRefreshBridge(
         stateField = stateField,
@@ -1120,8 +1117,10 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
                 }
         }
         .distinctBy(FieldReference::toString)
-    if (stateFields.size != 1) return null
-    val stateField = stateFields.single()
+    val stateField = requireAtMostOne(
+        label = "NewX For You refresh state field in $this",
+        candidates = stateFields,
+    ) ?: return null
 
     val stateGetters = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
@@ -1134,8 +1133,10 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
             }
         }
         .distinctBy(MethodReference::toString)
-    if (stateGetters.size != 1) return null
-    val stateGetter = stateGetters.single()
+    val stateGetter = requireAtMostOne(
+        label = "NewX For You refresh state getter in $this",
+        candidates = stateGetters,
+    ) ?: return null
 
     val pagesCastCandidates = instructions.withIndex()
         .filter { (index, instruction) ->
@@ -1148,8 +1149,10 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
                     field.definingClass == typeAt(index) && field.type == OBJECT_LIST_DESCRIPTOR
                 } == true
         }
-    if (pagesCastCandidates.size != 1) return null
-    val pagesCastIndex = pagesCastCandidates.single().index
+    val pagesCastIndex = requireAtMostOne(
+        label = "NewX For You refresh pages cast in $this",
+        candidates = pagesCastCandidates,
+    )?.index ?: return null
     val pagesType = typeAt(pagesCastIndex) ?: return null
 
     val pagesListFields = instructions.withIndex()
@@ -1157,24 +1160,30 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
         .mapNotNull { (index, _) -> fieldAt(index) }
         .filter { field -> field.definingClass == pagesType && field.type == OBJECT_LIST_DESCRIPTOR }
         .distinctBy(FieldReference::toString)
-    if (pagesListFields.size != 1) return null
-    val pagesListField = pagesListFields.single()
+    val pagesListField = requireAtMostOne(
+        label = "NewX For You refresh pages list field in $this",
+        candidates = pagesListFields,
+    ) ?: return null
 
     val pagesIndexFields = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.IGET }
         .mapNotNull { (index, _) -> fieldAt(index) }
         .filter { field -> field.definingClass == pagesType && field.type == INTEGER_DESCRIPTOR }
         .distinctBy(FieldReference::toString)
-    if (pagesIndexFields.size != 1) return null
-    val pagesIndexField = pagesIndexFields.single()
+    val pagesIndexField = requireAtMostOne(
+        label = "NewX For You refresh pages index field in $this",
+        candidates = pagesIndexFields,
+    ) ?: return null
 
     val pagesListRegisterCandidates = instructions.withIndex()
         .filter { (_, instruction) ->
             instruction.getReference<FieldReference>()?.toString() == pagesListField.toString()
         }
         .mapNotNull { (_, instruction) -> instruction as? TwoRegisterInstruction }
-    if (pagesListRegisterCandidates.size != 1) return null
-    val pagesListRegister = pagesListRegisterCandidates.single()
+    val pagesListRegister = requireAtMostOne(
+        label = "NewX For You refresh pages list register in $this",
+        candidates = pagesListRegisterCandidates,
+    ) ?: return null
     val pageLookupCandidates = instructions.withIndex()
         .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_INTERFACE }
         .mapNotNull { (index, instruction) ->
@@ -1190,8 +1199,10 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
             }
             index to reference
         }
-    if (pageLookupCandidates.size != 1) return null
-    val (pageLookupIndex, pageLookup) = pageLookupCandidates.single()
+    val (pageLookupIndex, pageLookup) = requireAtMostOne(
+        label = "NewX For You refresh page lookup in $this",
+        candidates = pageLookupCandidates,
+    ) ?: return null
 
     val componentCastIndex = pageLookupIndex + 2
     if (componentCastIndex >= instructions.size ||
@@ -1236,8 +1247,10 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
         .mapNotNull { (index, _) -> fieldAt(index) }
         .filter { field -> field.definingClass == forYouComponentType }
         .distinctBy(FieldReference::toString)
-    if (forYouControllerFields.size != 1) return null
-    val forYouControllerField = forYouControllerFields.single()
+    val forYouControllerField = requireAtMostOne(
+        label = "NewX For You refresh controller field in $this",
+        candidates = forYouControllerFields,
+    ) ?: return null
 
     val refreshDispatches = instructions.withIndex()
         .drop(forYouInstanceOfIndex + 1)
@@ -1501,16 +1514,18 @@ private fun Method.parameterIndexForField(
             instruction.opcode == Opcode.IPUT_OBJECT &&
                 instruction.getReference<FieldReference>()?.toString() == field.toString()
         }
-    if (writes.size != 1) return null
-
-    val write = writes.single().value as? TwoRegisterInstruction ?: return null
-    val sourceRegisters = if (write.registerB == thisRegister) {
+    val write = requireAtMostOne(
+        label = "NewX parameter field write for $field in $this",
+        candidates = writes,
+    ) ?: return null
+    val writeInstruction = write.value as? TwoRegisterInstruction ?: return null
+    val sourceRegisters = if (writeInstruction.registerB == thisRegister) {
         listOf(
-            write.registerA,
-            instructions.resolveObjectOriginRegister(writes.single().index, write.registerA),
+            writeInstruction.registerA,
+            instructions.resolveObjectOriginRegister(write.index, writeInstruction.registerA),
         )
     } else {
-        listOf(instructions.resolveObjectOriginRegister(writes.single().index, write.registerA))
+        listOf(instructions.resolveObjectOriginRegister(write.index, writeInstruction.registerA))
     }
     val parameterCandidates = sourceRegisters.asSequence()
         .mapNotNull { sourceRegister ->
@@ -1631,10 +1646,9 @@ private fun Method.fieldForSerializedArgument(
             }
         }
         .distinctBy(FieldReference::toString)
-    if (fields.size == 1) return fields.single()
-    throw PatchException(
-        "Expected one NewX serialized field for '$argumentName' in $this, found " +
-            "${fields.size}: ${fields.joinToString()}",
+    return requireExactlyOne(
+        label = "NewX serialized field for '$argumentName' in $this",
+        candidates = fields,
     )
 }
 

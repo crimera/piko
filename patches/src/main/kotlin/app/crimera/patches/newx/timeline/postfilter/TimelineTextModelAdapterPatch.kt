@@ -13,6 +13,7 @@ import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.resolvedNewXTimelineModels
 import app.crimera.patches.newx.models.smaliReference
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -281,14 +282,8 @@ private fun resolveInterfaceMethodByName(
         method.name == name &&
             method.parameterTypes.map(CharSequence::toString) == parameterTypes
     }
-    if (matches.size > 1) {
-        throw PatchException(
-            "Expected one NewX author $name declaration in $classDef, found " +
-                "${matches.size}: ${matches.joinToString()}",
-        )
-    }
-    if (matches.size == 1) {
-        val method = matches.single()
+    if (matches.isNotEmpty()) {
+        val method = requireExactlyOne("NewX author $name declaration in $classDef", matches)
         return ImmutableMethodReference(
             descriptor,
             name,
