@@ -60,7 +60,7 @@ private object NewXTabDataFingerprint : Fingerprint(
 private const val FINGERPRINT_ANCHOR_COUNT = 4
 private const val TAB_DATA_ARG_INDEX = 9
 private const val STATE_TAB_DATA_PARAMETER_INDEX = 8
-private val STATE_CONSTRUCTOR_PARAMETER_COUNTS = setOf(16, 18)
+private val STATE_CONSTRUCTOR_PARAMETER_COUNTS = setOf(16, 17, 18)
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
 
