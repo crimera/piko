@@ -49,6 +49,39 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `explicit cardinality guard permits indexed access with nullable failure`() {
+        val findings =
+            lint(
+                """
+                fun resolve(candidates: List<String>): String? {
+                    if (candidates.size != 1) return null
+                    return candidates[0]
+                }
+                fun isTarget(candidates: List<String>): Boolean {
+                    if (candidates.size != 1) return false
+                    return candidates[0].isNotEmpty()
+                }
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `unguarded indexed candidate access is rejected`() {
+        val findings = lint("val selected = candidates[0]")
+
+        assertEquals(listOf(NewXResolverLinter.Rule.RAW_INDEX), findings.map { it.rule })
+    }
+
+    @Test
+    fun `parameter type indexed access is not a resolver candidate`() {
+        val findings = lint("val parameterType = parameterTypes[0]")
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
     fun `at most one proof does not permit required candidate selection`() {
         val findings =
             lint(

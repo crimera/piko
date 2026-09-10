@@ -25,6 +25,7 @@ internal object NewXResolverLinter {
         RAW_LAST("raw-last", "last() selects one candidate without proving uniqueness"),
         RAW_FIND("raw-find", "find() returns the first matching candidate"),
         RAW_SINGLE("raw-single", "single() requires exactly one candidate"),
+        RAW_INDEX("raw-index", "indexed access selects one candidate without proving uniqueness"),
         NULLABLE_FIRST("nullable-first", "firstOrNull() can silently skip a required candidate"),
         NULLABLE_LAST("nullable-last", "lastOrNull() can silently skip a required candidate"),
         NULLABLE_SINGLE("nullable-single", "singleOrNull() can hide zero or ambiguous candidates"),
@@ -66,6 +67,7 @@ internal object NewXResolverLinter {
         Regex(
             """\.\s*(singleOrNull|firstOrNull|lastOrNull|elementAtOrNull|getOrNull|single|first|last|find)\s*(?=\(|\{)""",
         )
+    private val indexedAccessPattern = Regex("""\[\s*0\s*\]""")
     private val mapNotNullPattern = Regex("""\.\s*mapNotNull\s*(?=\{)""")
     private val identifierPattern = Regex("""[A-Za-z_][A-Za-z0-9_]*""")
     private val functionPattern = Regex("""\bfun\b""")
@@ -91,6 +93,7 @@ internal object NewXResolverLinter {
             Rule.RAW_LAST,
             Rule.RAW_FIND,
             Rule.RAW_SINGLE,
+            Rule.RAW_INDEX,
             Rule.NULLABLE_FIRST,
             Rule.NULLABLE_LAST,
             Rule.NULLABLE_INDEX,
@@ -149,17 +152,34 @@ internal object NewXResolverLinter {
         val masked = maskKotlin(source)
         val localSequenceVariables = findLocalSequenceVariables(masked)
         val selections =
-            selectionPattern.findAll(masked).map { match ->
-                val start = match.range.first
-                val callEnd = callEnd(masked, match.range.last + 1)
-                Selection(
-                    operation = match.groupValues[1],
-                    start = start,
-                    callEnd = callEnd,
-                    receiver = receiverBefore(masked, start),
-                    callText = masked.substring(start, callEnd),
-                )
-            }.toList()
+            buildList {
+                selectionPattern.findAll(masked).forEach { match ->
+                    val start = match.range.first
+                    val callEnd = callEnd(masked, match.range.last + 1)
+                    add(
+                        Selection(
+                            operation = match.groupValues[1],
+                            start = start,
+                            callEnd = callEnd,
+                            receiver = receiverBefore(masked, start),
+                            callText = masked.substring(start, callEnd),
+                        ),
+                    )
+                }
+                indexedAccessPattern.findAll(masked).forEach { match ->
+                    val start = match.range.first
+                    val callEnd = indexedAccessEnd(masked, start)
+                    add(
+                        Selection(
+                            operation = "index",
+                            start = start,
+                            callEnd = callEnd,
+                            receiver = receiverBefore(masked, start),
+                            callText = masked.substring(start, callEnd),
+                        ),
+                    )
+                }
+            }.sortedBy { selection -> selection.start }
         val mapSites =
             mapNotNullPattern.findAll(masked).map { match ->
                 val start = match.range.first
@@ -191,12 +211,12 @@ internal object NewXResolverLinter {
                 )
             if (localOrder) return@forEach
 
-            val exactProof = hasCardinalityProof(masked, selection.start, receiverKeys, exact = true)
+            val exactProof = selectionUsesExactProof(masked, selection)
             val atMostProof =
                 exactProof || hasCardinalityProof(masked, selection.start, receiverKeys, exact = false)
             val unsafe =
                 when (selection.operation) {
-                    "first", "last", "find", "single" -> !exactProof
+                    "first", "last", "find", "single", "index" -> !exactProof
                     "singleOrNull" ->
                         !atMostProof && nullableFallthrough(masked, source, selection)
                     "firstOrNull", "lastOrNull", "elementAtOrNull", "getOrNull" ->
@@ -254,7 +274,7 @@ internal object NewXResolverLinter {
                     exactProof || selectionUsesAtMostProof(masked, selection)
                 val unsafe =
                     when (selection.operation) {
-                        "first", "last", "find" -> !exactProof
+                        "first", "last", "find", "index" -> !exactProof
                         "singleOrNull", "firstOrNull", "lastOrNull", "elementAtOrNull", "getOrNull" ->
                             !atMostProof && nullableFallthrough(masked, source, selection)
                         else -> false
@@ -304,6 +324,7 @@ internal object NewXResolverLinter {
             "last" -> Rule.RAW_LAST
             "find" -> Rule.RAW_FIND
             "single" -> Rule.RAW_SINGLE
+            "index" -> Rule.RAW_INDEX
             "firstOrNull" -> Rule.NULLABLE_FIRST
             "lastOrNull" -> Rule.NULLABLE_LAST
             "singleOrNull" -> Rule.NULLABLE_SINGLE
@@ -314,12 +335,13 @@ internal object NewXResolverLinter {
     private fun selectionMessage(selection: Selection, receiverKeys: List<String>): String {
         val receiver = receiverKeys.joinToString().ifEmpty { selection.receiver.compact() }
         val cardinality =
-            if (selection.operation in setOf("single", "first", "last", "find")) {
+            if (selection.operation in setOf("single", "first", "last", "find", "index")) {
                 "exact"
             } else {
                 "exact/at-most-one"
             }
-        return "${selection.operation}() on candidate-like '$receiver'; require $cardinality " +
+        val operation = if (selection.operation == "index") "indexed access" else "${selection.operation}()"
+        return "$operation on candidate-like '$receiver'; require $cardinality " +
             "cardinality or use an explicit fail-closed resolver"
     }
 
@@ -437,6 +459,7 @@ internal object NewXResolverLinter {
         position: Int,
         receiverKeys: List<String>,
         exact: Boolean,
+        allowNullableFailure: Boolean = false,
     ): Boolean {
         if (receiverKeys.isEmpty()) return false
         val prefix = masked.substring(functionStart(masked, position), position)
@@ -451,8 +474,14 @@ internal object NewXResolverLinter {
             if (helperPattern.containsMatchIn(prefix)) return@any true
             val guard =
                 if (exact) {
+                        val failure =
+                            if (allowNullableFailure) {
+                                """(?:throw|error\s*\(|return(?:@[A-Za-z_][A-Za-z0-9_]*)?\s+(?:false|null))\b"""
+                            } else {
+                                """(?:throw|error\s*\(|return\s+false)\b"""
+                            }
                         Regex(
-                            """(?:if\s*\([^)]*\b$escaped\b\s*\.\s*size\s*!=\s*1[^)]*\))\s*(?:\{[\s\S]{0,900}?\b(?:throw|error\s*\(|return\s+false)\b|(?:throw|error\s*\(|return\s+false))""",
+                            """(?:if\s*\([^)]*\b$escaped\b\s*\.\s*size\s*!=\s*1[^)]*\))\s*(?:\{[\s\S]{0,900}?$failure|$failure)""",
                         setOf(RegexOption.DOT_MATCHES_ALL),
                     )
                 } else {
@@ -465,8 +494,95 @@ internal object NewXResolverLinter {
         }
     }
 
-    private fun selectionUsesExactProof(masked: String, selection: Selection): Boolean =
-        hasCardinalityProof(masked, selection.start, candidateKeys(selection.receiver), exact = true)
+    private fun selectionUsesExactProof(masked: String, selection: Selection): Boolean {
+        val receiverKeys = candidateKeys(selection.receiver)
+        if (selection.operation != "index") {
+            return hasCardinalityProof(masked, selection.start, receiverKeys, exact = true)
+        }
+        // A direct [0] may be the success path of an optional resolver; keep nullable failure
+        // local to indexed access so required method selections retain their stricter proof.
+        return hasCardinalityProof(
+            masked = masked,
+            position = selection.start,
+            receiverKeys = receiverKeys,
+            exact = true,
+            allowNullableFailure = true,
+        ) ||
+            hasIndexedBooleanElseProof(masked, selection.start, receiverKeys) ||
+            hasFixedListMappingProof(masked, selection.start, receiverKeys) ||
+            hasCombinedExactGuardProof(masked, selection.start, receiverKeys)
+    }
+
+    private fun hasIndexedBooleanElseProof(
+        masked: String,
+        position: Int,
+        receiverKeys: List<String>,
+    ): Boolean {
+        if (receiverKeys.isEmpty()) return false
+        val functionStartIndex = functionStart(masked, position)
+        val prefix = masked.substring(functionStartIndex, position)
+        return receiverKeys.any { key ->
+            val escaped = Regex.escape(key)
+            val guardPattern =
+                Regex(
+                    """if\s*\([^)]*\b$escaped\b\s*\.\s*size\s*!=\s*1[^)]*\)\s*\{\s*false\s*\}\s*else\s*\{""",
+                )
+            guardPattern.findAll(prefix).any { match ->
+                val elseBodyStart = functionStartIndex + match.range.last
+                val elseBodyEnd = matchingDelimiter(masked, elseBodyStart, '{', '}')
+                position < elseBodyEnd
+            }
+        }
+    }
+
+    private fun hasFixedListMappingProof(
+        masked: String,
+        position: Int,
+        receiverKeys: List<String>,
+    ): Boolean {
+        if (receiverKeys.isEmpty()) return false
+        val prefix = masked.substring(functionStart(masked, position), position)
+        return receiverKeys.any { key ->
+            val escaped = Regex.escape(key)
+            Regex(
+                """\b(?:val|var)\s+$escaped\s*=\s*listOf\s*\([^)]*,[^)]*\)\s*\.\s*map\s*\{""",
+                RegexOption.DOT_MATCHES_ALL,
+            ).containsMatchIn(prefix)
+        }
+    }
+
+    private fun hasCombinedExactGuardProof(
+        masked: String,
+        position: Int,
+        receiverKeys: List<String>,
+    ): Boolean {
+        if (receiverKeys.isEmpty()) return false
+        val functionStartIndex = functionStart(masked, position)
+        val prefix = masked.substring(functionStartIndex, position)
+        return receiverKeys.any { alias ->
+            val escapedAlias = Regex.escape(alias)
+            val aliasPattern =
+                Regex(
+                    """\b(?:val|var)\s+$escapedAlias\s*=\s*if\s*\([^)]*\)\s*([A-Za-z_][A-Za-z0-9_]*)\s*else\s*([A-Za-z_][A-Za-z0-9_]*)""",
+                    RegexOption.DOT_MATCHES_ALL,
+                )
+            aliasPattern.findAll(prefix).any { match ->
+                val guardPrefix = prefix.substring(0, match.range.first)
+                val first = match.groupValues[1]
+                val second = match.groupValues[2]
+                listOf(first to second, second to first).any { (guarded, other) ->
+                    val escapedGuarded = Regex.escape(guarded)
+                    val escapedOther = Regex.escape(other)
+                    val failure =
+                        """(?:throw\b|error\s*\(|return(?:@[A-Za-z_][A-Za-z0-9_]*)?\s+(?:false|null)\b|return(?:@[A-Za-z_][A-Za-z0-9_]*)?\s+emptyList\s*\()"""
+                    Regex(
+                        """if\s*\([^)]*\b$escapedGuarded\b\s*\.\s*size\s*!=\s*1[^)]*\|\|[^)]*\b$escapedOther\b\s*\.\s*size\s*!=\s*1[^)]*\)\s*(?:\{[\s\S]{0,900}?$failure|$failure)""",
+                        RegexOption.DOT_MATCHES_ALL,
+                    ).containsMatchIn(guardPrefix)
+                }
+            }
+        }
+    }
 
     private fun selectionUsesAtMostProof(masked: String, selection: Selection): Boolean =
         hasCardinalityProof(masked, selection.start, candidateKeys(selection.receiver), exact = false)
@@ -575,6 +691,9 @@ internal object NewXResolverLinter {
         return matchingDelimiter(masked, index, masked[index], closing)
     }
 
+    private fun indexedAccessEnd(masked: String, start: Int): Int =
+        matchingDelimiter(masked, start, '[', ']')
+
     private fun matchingDelimiter(masked: String, start: Int, opening: Char, closing: Char): Int {
         var depth = 0
         for (index in start until masked.length) {
@@ -600,6 +719,7 @@ internal object NewXResolverLinter {
                     if (depth > 0) depth-- else break
                 }
                 '=', ';', ',', ':' -> if (depth == 0) break
+                '&', '|' -> if (depth == 0) break
                 '\n' -> if (depth == 0) break
             }
             index--
