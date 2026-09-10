@@ -1,6 +1,7 @@
 package app.crimera.patches.newx.premium
 
 import app.crimera.patches.newx.models.fieldForToStringLabel
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
@@ -157,7 +158,10 @@ private fun isLegacyDownloadableAccessor(
         classDef.methods.filter { candidate ->
             candidate.returnType == "Z" &&
                 candidate.parameterTypes.isEmpty() &&
-                candidate.booleanFieldsRead().singleOrNull()?.toString() == field.toString()
+                requireAtMostOne(
+                    label = "boolean fields read by NewX legacy downloadable accessor $candidate",
+                    candidates = candidate.booleanFieldsRead(),
+                )?.toString() == field.toString()
         }
     if (accessors.size != 1) {
         throw PatchException(
