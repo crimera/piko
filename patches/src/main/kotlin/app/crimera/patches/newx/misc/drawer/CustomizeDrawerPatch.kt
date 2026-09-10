@@ -229,13 +229,20 @@ private data class DrawerFooterTarget(
     val method: MutableMethod,
     val callIndex: Int,
     val call: Instruction3rc,
+    val renderer: MethodReference,
 )
 
-private fun MethodReference.matches(other: MethodReference): Boolean =
-    definingClass.toString() == other.definingClass.toString() &&
-        name == other.name &&
-        parameterTypes.map(CharSequence::toString) == other.parameterTypes.map(CharSequence::toString) &&
-        returnType.toString() == other.returnType.toString()
+private data class DrawerFooterCall(
+    val index: Int,
+    val call: Instruction3rc,
+    val renderer: MethodReference,
+)
+
+private data class ResolvedDrawerFooterCalls(
+    val dividerIndex: Int,
+    val renderer: MethodReference,
+    val calls: List<IndexedValue<Instruction3rc>>,
+)
 
 private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
@@ -248,9 +255,22 @@ private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Bo
         parameters[3] == "I"
 }
 
+private fun MethodReference.isDrawerRowRenderer(): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return returnType.toString() == "V" &&
+        parameters.size in 8..9 &&
+        parameters.count { it == "Ljava/lang/String;" } == 1 &&
+        parameters.count { it.startsWith("Lcom/x/icons/") } == 1 &&
+        parameters.count { it == FUNCTION0_DESCRIPTOR } == 1 &&
+        parameters.count { it == "Landroidx/compose/ui/Modifier;" } == 1 &&
+        parameters.count { it == "Lkotlin/jvm/functions/Function2;" } == 1 &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        parameters.count { it == "I" } == 2
+}
+
 private fun MutableMethod.findDrawerFooterCalls(
     renderer: MethodReference,
-): List<IndexedValue<Instruction3rc>>? {
+): ResolvedDrawerFooterCalls? {
     val methodInstructions = instructions.toList()
     val dividerIndices =
         methodInstructions.indices.filter { index ->
@@ -261,21 +281,40 @@ private fun MutableMethod.findDrawerFooterCalls(
     if (dividerIndices.size != 1) return null
 
     val dividerIndex = dividerIndices.single()
-    val footerCallIndices =
-        methodInstructions.indices.filter { index ->
-            if (index <= dividerIndex) return@filter false
-            val instruction = methodInstructions[index]
-            instruction.opcode == Opcode.INVOKE_STATIC_RANGE &&
-                instruction.getReference<MethodReference>()?.matches(renderer) == true
+    val footerCalls = methodInstructions.indices.mapNotNull { index ->
+        if (index <= dividerIndex) return@mapNotNull null
+        val instruction = methodInstructions[index]
+        if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@mapNotNull null
+        val call = instruction as? Instruction3rc ?: return@mapNotNull null
+        val footerRenderer = instruction.getReference<MethodReference>()
+            ?: return@mapNotNull null
+        val isRequestedRenderer =
+            footerRenderer.toSmaliDescriptor() == renderer.toSmaliDescriptor()
+        if (footerRenderer.definingClass.toString() != renderer.definingClass.toString() ||
+            (!isRequestedRenderer && !footerRenderer.isDrawerRowRenderer()) ||
+            call.registerCount != footerRenderer.parameterTypes.size
+        ) {
+            return@mapNotNull null
         }
-    if (footerCallIndices.isEmpty()) return null
-    if (footerCallIndices.any { methodInstructions[it] !is Instruction3rc }) return null
-    val footerCalls =
-        footerCallIndices.map { index ->
-            IndexedValue(index, methodInstructions[index] as Instruction3rc)
+        DrawerFooterCall(
+            index = index,
+            call = call,
+            renderer = footerRenderer,
+        )
+    }
+    if (footerCalls.isEmpty()) return null
+    val rendererCandidates = footerCalls.map { call ->
+        call.renderer.toSmaliDescriptor()
+    }.distinct()
+    if (rendererCandidates.size != 1) return null
+    val footerRenderer = footerCalls.first().renderer
+    return ResolvedDrawerFooterCalls(
+        dividerIndex = dividerIndex,
+        renderer = footerRenderer,
+        calls = footerCalls.map { call ->
+            IndexedValue(call.index, call.call)
         }
-    if (footerCalls.any { it.value.registerCount != renderer.parameterTypes.size }) return null
-    return footerCalls
+    )
 }
 
 private val OBJECT_MOVE_OPCODES =
@@ -346,36 +385,30 @@ private fun resolveDrawerFooterTarget(
                         method.parameterTypes.map(CharSequence::toString) ==
                             List(3) { OBJECT_DESCRIPTOR }
                 }.forEach { method ->
-                    method.findDrawerFooterCalls(renderer)?.let { calls ->
-                        val dividerIndex =
-                            method.instructions.indices.firstOrNull { index ->
-                                method.instructions[index]
-                                    .getReference<MethodReference>()
-                                    ?.isDrawerFooterDivider(renderer) == true
-                            } ?: throw PatchException(
-                                "NewX drawer footer candidate lost its divider: $method",
-                            )
-                        val iconParameterIndex = renderer.parameterTypes.indexOfFirst { type ->
+                    method.findDrawerFooterCalls(renderer)?.let { footer ->
+                        val iconParameterIndex = footer.renderer.parameterTypes.indexOfFirst { type ->
                             type.toString().startsWith("Lcom/x/icons/")
                         }
                         if (iconParameterIndex < 0) {
-                            throw PatchException("NewX drawer footer renderer has no icon parameter: $renderer")
+                            throw PatchException(
+                                "NewX drawer footer renderer has no icon parameter: ${footer.renderer}",
+                            )
                         }
-                        val settingsCalls = calls.filter { (callIndex, call) ->
+                        val settingsCalls = footer.calls.filter { (callIndex, call) ->
                             method.instructions.hasFieldArgument(
                                 callIndex = callIndex,
                                 call = call,
-                                renderer = renderer,
+                                renderer = footer.renderer,
                                 parameterIndex = iconParameterIndex,
                                 field = settingsIconField,
-                                lowerBound = dividerIndex + 1,
+                                lowerBound = footer.dividerIndex + 1,
                             )
                         }
                         if (settingsCalls.size != 1) {
                             throw PatchException(
                                 "Expected exactly one NewX drawer settings-icon footer call in candidate $method, " +
                                     "found ${settingsCalls.size}; all footer calls: " +
-                                    calls.joinToString { "${it.index}:${it.value}" },
+                                    footer.calls.joinToString { "${it.index}:${it.value}" },
                             )
                         }
                         val footerCall = settingsCalls.single()
@@ -384,6 +417,7 @@ private fun resolveDrawerFooterTarget(
                                 method = method,
                                 callIndex = footerCall.index,
                                 call = footerCall.value,
+                                renderer = footer.renderer,
                             ),
                         )
                     }
@@ -569,7 +603,7 @@ val customizeNewXDrawerPatch =
             resolveDrawerFooterTarget(footerRenderer, settingsIconField).let { target ->
                 target.method.injectPikoSettingsDrawerItem(
                     target = target,
-                    renderer = footerRenderer,
+                    renderer = target.renderer,
                     settingsIconField = settingsIconField,
                     showPikoSettingsInDrawer = showPikoSettingsInDrawer,
                 )
