@@ -307,6 +307,7 @@ public final class MediaMerger {
             resolver.update(destination, completed, null, null);
 
             InlineDownloadButton.deleteExistingMedia(resolver, collection, fileName, relativePath, destination);
+            PublishedMediaRefresh.request(context, destination, mimeType);
             return true;
         } else {
             File primary = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
