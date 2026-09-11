@@ -185,6 +185,8 @@
     <string name="piko_category_navigation_tabs">Navigation bar</string>
     <string name="piko_navigation_tabs_title">Show and reorder tabs</string>
     <string name="piko_navigation_tabs_summary">Choose visible bottom tabs and drag to reorder them</string>
+    <string name="piko_navigation_startup_tab">App startup tab</string>
+    <string name="piko_navigation_startup_tab_summary">Choose which tab opens when the app starts</string>
     <string name="piko_navigation_tab_home">Home</string>
     <string name="piko_navigation_tab_reels">Reels</string>
     <string name="piko_navigation_tab_messages">Messages</string>

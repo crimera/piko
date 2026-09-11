@@ -355,7 +355,8 @@ final class NavigationBarAdapter extends BaseAdapter {
     boolean save() {
         return NavigationBarPatch.saveConfig(
                 state.order(),
-                state.visible()
+                state.visible(),
+                state.selectedStartup()
         );
     }
 

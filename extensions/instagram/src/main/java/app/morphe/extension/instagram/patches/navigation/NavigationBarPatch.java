@@ -6,6 +6,8 @@
 
 package app.morphe.extension.instagram.patches.navigation;
 
+import android.content.Intent;
+
 import app.morphe.extension.instagram.settings.SettingsRestart;
 import app.morphe.extension.instagram.utils.Pref;
 
@@ -21,6 +23,8 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public final class NavigationBarPatch {
     private static final String CONFIG_VERSION = "v2";
+    private static final String STARTUP_TAB_EXTRA =
+            "MainActivityAccountHelper.STARTUP_TAB";
     private static final List<Tab> DEFAULT_ORDER = Collections.unmodifiableList(
             Arrays.asList(
                     Tab.HOME,
@@ -110,10 +114,12 @@ public final class NavigationBarPatch {
     public static final class Config {
         private final List<Tab> order;
         private final Set<Tab> visible;
+        private final Tab startup;
 
-        private Config(List<Tab> order, Set<Tab> visible) {
+        private Config(List<Tab> order, Set<Tab> visible, Tab startup) {
             this.order = Collections.unmodifiableList(new ArrayList<>(order));
             this.visible = Collections.unmodifiableSet(EnumSet.copyOf(visible));
+            this.startup = startup;
         }
 
         public List<Tab> order() {
@@ -124,10 +130,13 @@ public final class NavigationBarPatch {
             return visible;
         }
 
+        public Tab startup() {
+            return startup;
+        }
     }
 
     public static Config defaultConfig() {
-        return new Config(DEFAULT_ORDER, DEFAULT_VISIBLE);
+        return new Config(DEFAULT_ORDER, DEFAULT_VISIBLE, Tab.HOME);
     }
 
     private static Config resolveConfig(
@@ -136,7 +145,7 @@ public final class NavigationBarPatch {
             Set<Tab> legacyVisible
     ) {
         if (stored == null || stored.isEmpty()) {
-            return legacyPresent ? normalize(DEFAULT_ORDER, legacyVisible) : defaultConfig();
+            return legacyPresent ? normalize(DEFAULT_ORDER, legacyVisible, Tab.HOME) : defaultConfig();
         }
         String versionPrefix = CONFIG_VERSION + "|";
         if (stored.startsWith(versionPrefix)) {
@@ -168,7 +177,11 @@ public final class NavigationBarPatch {
             visible.remove(Tab.NOTIFICATIONS);
             visible.remove(Tab.CREATE);
         }
-        return normalize(order, visible);
+        return normalize(
+                order,
+                visible,
+                sections.length > 1 ? Tab.fromKey(sections[1]) : null
+        );
     }
 
     public static Config loadConfig() {
@@ -192,8 +205,8 @@ public final class NavigationBarPatch {
         return config;
     }
 
-    public static boolean saveConfig(List<Tab> order, Set<Tab> visible) {
-        Config normalized = normalize(order, visible);
+    public static boolean saveConfig(List<Tab> order, Set<Tab> visible, Tab startup) {
+        Config normalized = normalize(order, visible, startup);
         String previous = Pref.navigationTabs();
         String next = encodeConfig(normalized);
         if (Objects.equals(previous, next)) return true;
@@ -263,8 +276,40 @@ public final class NavigationBarPatch {
         }
     }
 
+    public static boolean preflightStartup(Intent intent, boolean coldDefaultPath) {
+        try {
+            return intent != null
+                    && coldDefaultPath
+                    && !intent.hasExtra(STARTUP_TAB_EXTRA);
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
 
-    private static Config normalize(List<Tab> requestedOrder, Set<Tab> requestedVisible) {
+    public static void applyStartupTab(
+            Intent intent,
+            boolean coldDefaultPath,
+            List<Object> allCandidates
+    ) {
+        if (intent == null || !coldDefaultPath) return;
+        try {
+            if (intent.hasExtra(STARTUP_TAB_EXTRA)) return;
+            List<Candidate> candidates = classify(allCandidates);
+            Config config = loadConfig();
+            Tab[] choices = startupChoices(config);
+            for (Tab tab : choices) {
+                Candidate candidate = find(candidates, tab, new IdentityHashMap<>());
+                if (candidate != null && candidate.value instanceof Enum<?>) {
+                    intent.putExtra(STARTUP_TAB_EXTRA, ((Enum<?>) candidate.value).name());
+                    return;
+                }
+            }
+        } catch (Throwable ignored) {
+            // Preserve Instagram's native startup behavior.
+        }
+    }
+
+    private static Config normalize(List<Tab> requestedOrder, Set<Tab> requestedVisible, Tab startup) {
         List<Tab> order = new ArrayList<>();
         if (requestedOrder != null) {
             for (Tab tab : requestedOrder) {
@@ -278,9 +323,18 @@ public final class NavigationBarPatch {
         EnumSet<Tab> visible = EnumSet.noneOf(Tab.class);
         if (requestedVisible != null) visible.addAll(requestedVisible);
         if (visible.isEmpty()) visible.add(Tab.HOME);
-        return new Config(order, visible);
+        startup = resolveStartupTab(order, visible, startup);
+        return new Config(order, visible, startup);
     }
 
+    public static Tab resolveStartupTab(List<Tab> order, Set<Tab> visible, Tab startup) {
+        if (startup != null && startup != Tab.CREATE && visible.contains(startup)) return startup;
+        if (visible.contains(Tab.HOME)) return Tab.HOME;
+        for (Tab tab : order) {
+            if (tab != Tab.CREATE && visible.contains(tab)) return tab;
+        }
+        return Tab.HOME;
+    }
 
     private static EnumSet<Tab> legacyVisibleTabs(boolean nativeCreateVisible) {
         EnumSet<Tab> visible = EnumSet.copyOf(DEFAULT_VISIBLE);
@@ -299,9 +353,19 @@ public final class NavigationBarPatch {
             value.append(tab.key()).append(':')
                     .append(config.visible().contains(tab) ? '1' : '0');
         }
+        value.append('|').append(config.startup().key());
         return value.toString();
     }
 
+    private static Tab[] startupChoices(Config config) {
+        List<Tab> choices = new ArrayList<>();
+        choices.add(config.startup());
+        if (config.visible().contains(Tab.HOME) && !choices.contains(Tab.HOME)) choices.add(Tab.HOME);
+        for (Tab tab : config.order()) {
+            if (tab != Tab.CREATE && config.visible().contains(tab) && !choices.contains(tab)) choices.add(tab);
+        }
+        return choices.toArray(new Tab[0]);
+    }
 
     private static List<Candidate> classify(List<Object> tabs) {
         if (tabs == null) throw new IllegalArgumentException();
