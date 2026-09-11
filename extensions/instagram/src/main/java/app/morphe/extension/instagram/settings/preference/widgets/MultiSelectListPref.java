@@ -13,9 +13,16 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.patches.navigation.NavigationBarPatch;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.Helper;
+import app.morphe.extension.instagram.settings.preference.widgets.NavigationSettingsAccessPolicy.ActionBar;
+import app.morphe.extension.instagram.utils.Pref;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class MultiSelectListPref extends MultiSelectListPreference {
@@ -43,11 +50,58 @@ public class MultiSelectListPref extends MultiSelectListPreference {
         setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
+                ActionBar changed = actionBarForKey(preference.getKey());
+                HashSet<String> proposed = changed == null ? null : copyStringSet(newValue);
+                if (changed != null && needsSettingsLockoutWarning(changed, proposed)) {
+                    NavigationSettingsAccessWarning.show(getContext(), () -> {
+                        if (proposed == null) return false;
+                        if (!helper.setValue(preference, proposed)) return false;
+                        setValues(proposed);
+                        return true;
+                    });
+                    return false;
+                }
                 helper.setValue(preference,newValue);
                 return true;
             }
         });
     }
+
+    private static boolean needsSettingsLockoutWarning(
+            ActionBar changed,
+            Set<String> proposed
+    ) {
+        try {
+            return proposed == null || !NavigationSettingsAccessPolicy
+                    .hasDirectAccessAfterActionBarChange(
+                            NavigationBarPatch.loadConfig().visible(),
+                            changed,
+                            proposed.contains(Constants.AB_SETTINGS_ICON)
+                    );
+        } catch (Throwable ignored) {
+            return true;
+        }
+    }
+
+    private static ActionBar actionBarForKey(String key) {
+        if (Settings.ACTION_BAR_MAIN_FEED.key.equals(key)) return ActionBar.MAIN_FEED;
+        if (Settings.ACTION_BAR_USER_PROFILE.key.equals(key)) return ActionBar.PROFILE;
+        if (Settings.ACTION_BAR_INBOX.key.equals(key)) return ActionBar.INBOX;
+        if (Settings.ACTION_BAR_CHAT.key.equals(key)) return ActionBar.CHAT;
+        return null;
+    }
+
+    private static HashSet<String> copyStringSet(Object value) {
+        if (!(value instanceof Set<?>)) return null;
+
+        HashSet<String> copy = new HashSet<>();
+        for (Object entry : (Set<?>) value) {
+            if (!(entry instanceof String)) return null;
+            copy.add((String) entry);
+        }
+        return copy;
+    }
+
     public void setInitialValue(String key) {
         CharSequence[] entries = new CharSequence[]{};
         CharSequence[] entriesValues = new CharSequence[]{};

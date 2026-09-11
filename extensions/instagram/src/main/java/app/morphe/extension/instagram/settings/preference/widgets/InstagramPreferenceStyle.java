@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.settings.preference.widgets;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -23,10 +24,13 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -34,6 +38,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.shared.ResourceUtils;
 
 public final class InstagramPreferenceStyle {
+    static final long NAVIGATION_DRAG_DURATION_MS = 120L;
     private static final String TAG_TITLE = "piko_instagram_pref_title";
     private static final String TAG_SUMMARY = "piko_instagram_pref_summary";
     private static final String TAG_SWITCH = "piko_instagram_pref_switch";
@@ -43,6 +48,7 @@ public final class InstagramPreferenceStyle {
 
     public static final int TRAILING_SWITCH = 1;
     public static final int TRAILING_CHEVRON = 2;
+    private static final int TRAILING_CHECK = 3;
 
     private InstagramPreferenceStyle() {
     }
@@ -343,6 +349,96 @@ public final class InstagramPreferenceStyle {
         return view.findViewWithTag(TAG_SWITCH);
     }
 
+    public static View createNavigationCheckRow(
+            Context context,
+            CharSequence title,
+            String iconName,
+            boolean checked
+    ) {
+        PreferenceRow row = new PreferenceRow(context, TRAILING_CHECK);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setMinimumHeight(dp(context, 56));
+        row.setPadding(dp(context, 12), dp(context, 4), dp(context, 8), dp(context, 4));
+
+        CheckBox checkBox = new CheckBox(context);
+        checkBox.setClickable(false);
+        checkBox.setFocusable(false);
+        checkBox.setGravity(Gravity.CENTER);
+        checkBox.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        checkBox.setChecked(checked);
+        row.addView(checkBox, new LinearLayout.LayoutParams(dp(context, 32), dp(context, 48)));
+
+        ImageView iconView = new ImageView(context);
+        UI.setThemedIcon(iconView, iconName);
+        iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
+                dp(context, 24),
+                dp(context, 24)
+        );
+        iconParams.setMarginStart(dp(context, 8));
+        iconParams.setMarginEnd(dp(context, 12));
+        row.addView(iconView, iconParams);
+
+        TextView titleView = new TextView(context);
+        titleView.setText(title);
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+        titleView.setTextColor(primaryTextColor());
+        titleView.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                1f
+        );
+        titleParams.setMarginEnd(dp(context, 8));
+        row.addView(titleView, titleParams);
+        row.setHighlightView(titleView);
+
+        FrameLayout dragTarget = new FrameLayout(context);
+        dragTarget.setTag(TAG_TRAILING);
+        dragTarget.setContentDescription(title);
+        DragHandleView dragIcon = new DragHandleView(context);
+        dragIcon.setAlpha(0.72f);
+        FrameLayout.LayoutParams dragIconParams = new FrameLayout.LayoutParams(
+                dp(context, 24),
+                dp(context, 24),
+                Gravity.CENTER
+        );
+        dragTarget.addView(dragIcon, dragIconParams);
+        row.addView(dragTarget, new LinearLayout.LayoutParams(
+                dp(context, 48),
+                dp(context, 48)
+        ));
+
+        row.setSwitchAccessibilityChecked(checked);
+        row.setContentDescription(title);
+
+        return row;
+    }
+
+    public static boolean isNavigationDragHandleHit(View row, float rawX, float rawY) {
+        View dragTarget = row.findViewWithTag(TAG_TRAILING);
+        if (dragTarget == null || dragTarget.getVisibility() != View.VISIBLE) {
+            return false;
+        }
+        int[] location = new int[2];
+        dragTarget.getLocationOnScreen(location);
+        return rawX >= location[0]
+                && rawX < location[0] + dragTarget.getWidth()
+                && rawY >= location[1]
+                && rawY < location[1] + dragTarget.getHeight();
+    }
+
+    public static void setNavigationRowDragging(
+            View view,
+            boolean dragging,
+            boolean animate
+    ) {
+        if (view instanceof PreferenceRow
+                && ((PreferenceRow) view).trailingType == TRAILING_CHECK) {
+            ((PreferenceRow) view).setDragState(dragging, animate);
+        }
+    }
+
     public static void setNativeSwitchChecked(
             CompoundButton switchView,
             boolean checked,
@@ -409,6 +505,8 @@ public final class InstagramPreferenceStyle {
         private boolean pressedHighlightAllowed;
         private boolean switchClickAllowed = true;
         private boolean drawPressedHighlight;
+        private boolean drawDragHighlight;
+        private int dragOverlayColor;
         private boolean switchAccessibilityChecked;
         private ImageView iconView;
 
@@ -423,6 +521,10 @@ public final class InstagramPreferenceStyle {
             setOrientation(LinearLayout.HORIZONTAL);
             setGravity(Gravity.CENTER_VERTICAL);
             setWillNotDraw(false);
+            if (trailingType == TRAILING_CHECK) {
+                setOutlineProvider(ViewOutlineProvider.BOUNDS);
+                setClipToOutline(false);
+            }
         }
 
         private void initIconView(Context context) {
@@ -471,6 +573,33 @@ public final class InstagramPreferenceStyle {
             switchAccessibilityChecked = checked;
         }
 
+        void setDragState(boolean dragging, boolean animateState) {
+            drawDragHighlight = dragging;
+            dragOverlayColor = UI.isDarkMode() ? 0xff3f3f3f : 0x0d000000;
+            if (dragging && !UI.isDarkMode()) {
+                TypedArray colors = getContext().obtainStyledAttributes(
+                        new int[]{android.R.attr.colorBackgroundFloating}
+                );
+                setBackgroundColor(colors.getColor(0, backgroundColor()) | 0xff000000);
+                colors.recycle();
+            } else {
+                setBackground(null);
+            }
+            invalidate();
+
+            animate().cancel();
+            float translationZ = dragging
+                    ? dp(getContext(), 5f) : 0f;
+            if (animateState) {
+                animate()
+                        .translationZ(translationZ)
+                        .setDuration(NAVIGATION_DRAG_DURATION_MS)
+                        .start();
+            } else {
+                setTranslationZ(translationZ);
+            }
+        }
+
         void setHasSummary(boolean hasSummary) {
             int topPadding = dp(getContext(), topPaddingDp(trailingType, hasSummary));
             int bottomPadding = dp(getContext(), bottomPaddingDp(trailingType, hasSummary));
@@ -481,8 +610,10 @@ public final class InstagramPreferenceStyle {
         @Override
         public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
             super.onInitializeAccessibilityEvent(event);
-            if (trailingType == TRAILING_SWITCH) {
-                event.setClassName("android.widget.Switch");
+            if (trailingType == TRAILING_SWITCH || trailingType == TRAILING_CHECK) {
+                event.setClassName(trailingType == TRAILING_SWITCH
+                        ? "android.widget.Switch"
+                        : "android.widget.CheckBox");
                 event.setChecked(switchAccessibilityChecked);
             }
         }
@@ -490,8 +621,10 @@ public final class InstagramPreferenceStyle {
         @Override
         public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(info);
-            if (trailingType == TRAILING_SWITCH) {
-                info.setClassName("android.widget.Switch");
+            if (trailingType == TRAILING_SWITCH || trailingType == TRAILING_CHECK) {
+                info.setClassName(trailingType == TRAILING_SWITCH
+                        ? "android.widget.Switch"
+                        : "android.widget.CheckBox");
                 info.setCheckable(true);
                 info.setChecked(switchAccessibilityChecked);
             }
@@ -521,10 +654,14 @@ public final class InstagramPreferenceStyle {
 
         @Override
         protected void dispatchDraw(Canvas canvas) {
-            if (drawPressedHighlight) {
+            if (drawPressedHighlight || drawDragHighlight) {
                 pressedPaint.setStyle(Paint.Style.FILL);
-                pressedPaint.setColor(pressedBackgroundColor());
-                canvas.drawRect(0, highlightTop(), getWidth(), highlightBottom(), pressedPaint);
+                pressedPaint.setColor(
+                        drawDragHighlight ? dragOverlayColor : pressedBackgroundColor()
+                );
+                int top = highlightTop();
+                int bottom = highlightBottom();
+                canvas.drawRect(0, top, getWidth(), bottom, pressedPaint);
             }
             super.dispatchDraw(canvas);
         }
@@ -542,15 +679,15 @@ public final class InstagramPreferenceStyle {
                 return false;
             }
 
-            View switchView = findViewWithTag(TAG_SWITCH);
-            if (switchView == null) {
+            View excludedView = findViewWithTag(TAG_SWITCH);
+            if (excludedView == null) {
                 return true;
             }
 
             int horizontalSlop = dp(getContext(), 10);
             int verticalSlop = dp(getContext(), 3);
-            switchHitRect.set(0, 0, switchView.getWidth(), switchView.getHeight());
-            offsetDescendantRectToMyCoords(switchView, switchHitRect);
+            switchHitRect.set(0, 0, excludedView.getWidth(), excludedView.getHeight());
+            offsetDescendantRectToMyCoords(excludedView, switchHitRect);
             switchHitRect.inset(-horizontalSlop, -verticalSlop);
             return !switchHitRect.contains(Math.round(x), Math.round(y));
         }
@@ -588,4 +725,40 @@ public final class InstagramPreferenceStyle {
         }
     }
 
+    private static final class DragHandleView extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        DragHandleView(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            float lineWidth = dp(getContext(), 16f);
+            float stroke = dp(getContext(), 2f);
+            float left = (getWidth() - lineWidth) / 2.0f;
+            float right = left + lineWidth;
+            float radius = stroke / 2.0f;
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(secondaryTextColor());
+            for (int line = 0; line < 3; line++) {
+                float centerY = dp(
+                        getContext(),
+                        8f + 4f * line
+                );
+                canvas.drawRoundRect(
+                        left,
+                        centerY - radius,
+                        right,
+                        centerY + radius,
+                        radius,
+                        radius,
+                        paint
+                );
+            }
+        }
+    }
 }

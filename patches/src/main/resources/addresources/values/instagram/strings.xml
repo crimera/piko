@@ -182,6 +182,18 @@
     <string name="piko_hide_navigation_direct">Hide Direct button</string>
     <string name="piko_hide_navigation_search">Hide Search button</string>
     <string name="piko_hide_navigation_create">Hide Create button</string>
+    <string name="piko_category_navigation_tabs">Navigation bar</string>
+    <string name="piko_navigation_tabs_title">Show and reorder tabs</string>
+    <string name="piko_navigation_tabs_summary">Choose visible bottom tabs and drag to reorder them</string>
+    <string name="piko_navigation_tab_home">Home</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Messages</string>
+    <string name="piko_navigation_tab_search">Search</string>
+    <string name="piko_navigation_tab_profile">Profile</string>
+    <string name="piko_navigation_tab_notifications">Notifications</string>
+    <string name="piko_navigation_tab_create">Create</string>
+    <string name="piko_navigation_settings_lockout_title">No Piko settings button</string>
+    <string name="piko_navigation_settings_lockout_message">This setup removes every Piko settings entry from the visible tabs. You can still open Piko settings by long-pressing the app icon and selecting Piko settings.</string>
 
     <!-- Information Section -->
     <string name="piko_category_about">About</string>
@@ -206,6 +218,7 @@
     <string name="piko_import_fail">Import failed</string>
     <string name="piko_restart_app">The app needs to be restarted for the changes to reflect</string>
     <string name="piko_ok">OK</string>
+    <string name="piko_reset">Reset</string>
     <string name="piko_cancel">Cancel</string>
     <string name="piko_deleted">Deleted</string>
     <string name="piko_debug">Piko debug</string>

@@ -265,6 +265,22 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_CREATE);
     }
 
+    public static boolean hasLegacyNavigationSettings() {
+        return SharedPref.hasKey(Settings.HIDE_NAVIGATION_FEED.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_REELS.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_DIRECT.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_SEARCH.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_CREATE.key);
+    }
+
+    public static String navigationTabs() {
+        return SharedPref.getStringPref(Settings.NAVIGATION_TABS);
+    }
+
+    public static boolean setNavigationTabs(String value) {
+        return SharedPref.setStringPref(Settings.NAVIGATION_TABS.key, value);
+    }
+
     public static boolean removeEmptyBottomSpace() {
         return SharedPref.getBooleanPref(Settings.REMOVE_EMPTY_BOTTOM_SPACE);
     }

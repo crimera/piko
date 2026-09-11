@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.patches.navigation.NavigationBarPatch;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.entity.ProfileInfo;
@@ -83,6 +84,11 @@ public class ActionBarPatch {
             if(pref.contains(Constants.AB_SETTINGS_ICON)) {
                 UI.pikoSettingsGear(viewGroup);
             }
+
+            HomeActionBarLayout.observe(
+                    viewGroup,
+                    NavigationBarPatch::effectiveNotificationsVisibility
+            );
 
         } catch (Exception e) {
             Logger.printException(() -> "mainFeedActionBarButton failure", e);
