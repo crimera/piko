@@ -162,12 +162,12 @@ public final class InlineDownloadButton {
             }
 
             List<DownloadItem> downloads = downloadItems(mediaFor(post));
+            String username = sourceUsername(post);
             if (downloads.isEmpty()) {
-                NewXInAppNotification.show("No downloadable media found");
+                NewXInAppNotification.showForUser("No downloadable media found", username);
                 return true;
             }
 
-            String username = sourceUsername(post);
             String postId = sourcePostId(post);
             if (downloads.size() == 1) {
                 enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
@@ -629,7 +629,7 @@ public final class InlineDownloadButton {
                 case FAILED -> failed++;
             }
         }
-        showQueueResult(context, queued, skipped, failed);
+        showQueueResult(queued, skipped, failed, username);
     }
 
     private static void enqueueSingleDownload(
@@ -651,9 +651,9 @@ public final class InlineDownloadButton {
                         conflictBehavior()
                 );
         switch (state) {
-            case QUEUED -> NewXInAppNotification.show("Download started");
-            case SKIPPED -> NewXInAppNotification.show("Already downloaded or queued");
-            case FAILED -> NewXInAppNotification.show("Could not start download");
+            case QUEUED -> NewXInAppNotification.showForUser("Download started", username);
+            case SKIPPED -> NewXInAppNotification.showForUser("Already downloaded or queued", username);
+            case FAILED -> NewXInAppNotification.showForUser("Could not start download", username);
         }
     }
 
@@ -1069,20 +1069,20 @@ public final class InlineDownloadButton {
         return sanitized.isEmpty() ? fallback : sanitized;
     }
 
-    private static void showQueueResult(Context context, int queued, int skipped, int failed) {
+    private static void showQueueResult(int queued, int skipped, int failed, String username) {
         if (failed == 0 && skipped == 0) {
             String message = queued == 1 ? "Download started" : queued + " downloads started";
-            NewXInAppNotification.show(message);
+            NewXInAppNotification.showForUser(message, username);
             return;
         }
         if (queued == 0) {
             if (failed == 0 && skipped > 0) {
-                NewXInAppNotification.show(skipped == 1
+                NewXInAppNotification.showForUser(skipped == 1
                         ? "Already downloaded or queued"
-                        : skipped + " media already downloaded or queued");
+                        : skipped + " media already downloaded or queued", username);
                 return;
             }
-            NewXInAppNotification.show("Could not start download");
+            NewXInAppNotification.showForUser("Could not start download", username);
             return;
         }
         List<String> parts = new ArrayList<>();
@@ -1091,7 +1091,7 @@ public final class InlineDownloadButton {
                 ? "1 already downloaded or queued"
                 : skipped + " already downloaded or queued");
         if (failed > 0) parts.add(failed == 1 ? "1 failed" : failed + " failed");
-        NewXInAppNotification.show(String.join(", ", parts));
+        NewXInAppNotification.showForUser(String.join(", ", parts), username);
     }
 
     static ConflictBehavior conflictBehavior() {

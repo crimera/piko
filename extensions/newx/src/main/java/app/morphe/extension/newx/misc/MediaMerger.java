@@ -53,14 +53,17 @@ public final class MediaMerger {
             String postId
     ) {
         if (context == null || items == null || items.size() < 2) {
-            NewXInAppNotification.show("At least 2 images are required to merge");
+            NewXInAppNotification.showForUser("At least 2 images are required to merge", username);
             return;
         }
 
         Context applicationContext = context.getApplicationContext();
         Context safeContext = applicationContext != null ? applicationContext : context;
 
-        NewXInAppNotification.show("Downloading and merging " + items.size() + " images...");
+        NewXInAppNotification.showForUser(
+                "Downloading and merging " + items.size() + " images...",
+                username
+        );
         MERGE_EXECUTOR.execute(() -> performMerge(safeContext, items, username, postId));
     }
 
@@ -83,7 +86,7 @@ public final class MediaMerger {
                 final int sliceIndex = i + 1;
                 if (!downloaded) {
                     NewXLogger.printInfo(() -> LOG_PREFIX + "Failed to download slice " + sliceIndex + " from " + item.url);
-                    NewXInAppNotification.show("Failed to download image slice " + sliceIndex);
+                    NewXInAppNotification.showForUser("Failed to download image slice " + sliceIndex, username);
                     return;
                 }
             }
@@ -99,7 +102,7 @@ public final class MediaMerger {
                 opts.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(tempFiles.get(i).getAbsolutePath(), opts);
                 if (opts.outWidth <= 0 || opts.outHeight <= 0) {
-                    NewXInAppNotification.show("Failed to read dimensions of slice " + (i + 1));
+                    NewXInAppNotification.showForUser("Failed to read dimensions of slice " + (i + 1), username);
                     return;
                 }
                 widths[i] = opts.outWidth;
@@ -148,7 +151,7 @@ public final class MediaMerger {
                 try {
                     mergedBitmap = Bitmap.createBitmap(totalWidth, maxHeight, Bitmap.Config.RGB_565);
                 } catch (OutOfMemoryError oom2) {
-                    NewXInAppNotification.show("Out of memory while stitching images");
+                    NewXInAppNotification.showForUser("Out of memory while stitching images", username);
                     return;
                 }
             }
@@ -161,7 +164,7 @@ public final class MediaMerger {
                 Bitmap piece = BitmapFactory.decodeFile(tempFiles.get(i).getAbsolutePath());
                 if (piece == null) {
                     mergedBitmap.recycle();
-                    NewXInAppNotification.show("Failed to decode image slice " + (i + 1));
+                    NewXInAppNotification.showForUser("Failed to decode image slice " + (i + 1), username);
                     return;
                 }
 
@@ -192,7 +195,7 @@ public final class MediaMerger {
             String fileName = InlineDownloadButton.resolveTargetFileName(context, baseFileName, behavior, mimeType);
             if (fileName == null) {
                 mergedBitmap.recycle();
-                NewXInAppNotification.show("Merged image already exists: " + baseFileName);
+                NewXInAppNotification.showForUser("Merged image already exists: " + baseFileName, username);
                 return;
             }
 
@@ -203,15 +206,15 @@ public final class MediaMerger {
             if (saved) {
                 // MediaMerger uses raw HTTP rather than DownloadManager, so retain its
                 // merge-specific completion feedback.
-                NewXInAppNotification.show("Merged image saved: " + fileName);
+                NewXInAppNotification.showForUser("Merged image saved: " + fileName, username);
                 NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + fileName);
             } else {
-                NewXInAppNotification.show("Failed to save merged image: " + fileName);
+                NewXInAppNotification.showForUser("Failed to save merged image: " + fileName, username);
             }
 
         } catch (Throwable t) {
             NewXLogger.printException(() -> LOG_PREFIX + "Failed to merge images", t);
-            NewXInAppNotification.show("Failed to merge images");
+            NewXInAppNotification.showForUser("Failed to merge images", username);
         } finally {
             // Step 8: Clean up all temporary files from cache
             for (File tempFile : tempFiles) {

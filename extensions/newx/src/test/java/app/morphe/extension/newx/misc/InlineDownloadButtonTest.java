@@ -24,6 +24,26 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void downloadNotificationsIdentifyThePostAuthor() {
+        assertEquals(
+                "Download started — @jack",
+                NewXInAppNotification.formatForUser("Download started", "jack")
+        );
+        assertEquals(
+                "Already downloaded or queued — @jack",
+                NewXInAppNotification.formatForUser("Already downloaded or queued", "@jack")
+        );
+    }
+
+    @Test
+    public void downloadNotificationOmitsMissingAuthor() {
+        assertEquals(
+                "Download started",
+                NewXInAppNotification.formatForUser("Download started", " ")
+        );
+    }
+
+    @Test
     public void multipleMediaUsesOneBasedSuffix() {
         assertEquals(
                 "jack_123456789_1.jpg",

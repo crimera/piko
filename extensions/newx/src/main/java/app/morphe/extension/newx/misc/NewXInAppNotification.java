@@ -32,6 +32,24 @@ public final class NewXInAppNotification {
         if (!sent) Utils.showToastShort(message);
     }
 
+    /** Shows a status message while identifying the post's author. */
+    public static void showForUser(String message, String username) {
+        show(formatForUser(message, username));
+    }
+
+    static String formatForUser(String message, String username) {
+        if (username == null) return message;
+
+        String normalizedUsername = username.trim();
+        if (normalizedUsername.isEmpty()) return message;
+        if (normalizedUsername.charAt(0) == '@') {
+            normalizedUsername = normalizedUsername.substring(1).trim();
+        }
+        if (normalizedUsername.isEmpty()) return message;
+
+        return message + " — @" + normalizedUsername;
+    }
+
     // Replaced with direct smali calls to the resolved NewX notification model/sender.
     private static boolean send(String message) {
         return false;
