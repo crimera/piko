@@ -297,7 +297,7 @@ val newXInlineDownloadButtonPatch =
                     """
                         sget-object p1, $incomingIconField
                         iget p2, p0, $sizeField
-                        invoke-static {v$iconRegister, p2, p1}, $EXTENSION->selectIcon(Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;
+                        invoke-static {p0, v$iconRegister, p2, p1}, $EXTENSION->selectIcon(Ljava/lang/Object;Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;
                         move-result-object v$iconRegister
                         check-cast v$iconRegister, ${shareIconField.type}
                     """.trimIndent(),

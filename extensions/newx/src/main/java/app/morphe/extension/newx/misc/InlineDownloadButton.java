@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -80,6 +81,12 @@ public final class InlineDownloadButton {
     private static final int MAX_TRACKED_OBJECTS = 128;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final List<WeakReference<Object>> DOWNLOAD_ACTIONS = new ArrayList<>();
+    /**
+     * Compose can invoke a remembered icon lambda without re-running the parent action renderer.
+     * Keep the classification on that lambda rather than only in the render call stack. Weak keys
+     * ensure discarded composition objects can still be collected.
+     */
+    private static final Map<Object, Boolean> DOWNLOAD_ICON_RENDERERS = new WeakHashMap<>();
     private static volatile boolean patchApplied;
     private static boolean initialized;
     private static boolean downloadReceiverRegistered;
@@ -130,8 +137,30 @@ public final class InlineDownloadButton {
         return iconSize;
     }
 
-    public static Object selectIcon(Object nativeIcon, float markedIconSize, Object downloadIcon) {
-        boolean useDownloadIcon = Boolean.TRUE.equals(RENDERING_DOWNLOAD_ACTION.get());
+    /**
+     * Selects the icon for the current renderer. The render marker is only available while the
+     * parent action entry is being composed; Compose may invoke the remembered icon lambda again
+     * later, without that parent call. Remember the result against the lambda instance so those
+     * recompositions keep rendering the download icon.
+     */
+    public static Object selectIcon(
+            Object renderer,
+            Object nativeIcon,
+            float markedIconSize,
+            Object downloadIcon
+    ) {
+        Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
+        boolean useDownloadIcon;
+        synchronized (DOWNLOAD_ICON_RENDERERS) {
+            if (Boolean.TRUE.equals(renderMarker)) {
+                DOWNLOAD_ICON_RENDERERS.put(renderer, Boolean.TRUE);
+            } else if (Boolean.FALSE.equals(renderMarker)) {
+                // A remembered renderer can be reused for a different action after list changes.
+                DOWNLOAD_ICON_RENDERERS.remove(renderer);
+            }
+            useDownloadIcon = Boolean.TRUE.equals(renderMarker)
+                    || DOWNLOAD_ICON_RENDERERS.containsKey(renderer);
+        }
         RENDERING_DOWNLOAD_ACTION.remove();
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }

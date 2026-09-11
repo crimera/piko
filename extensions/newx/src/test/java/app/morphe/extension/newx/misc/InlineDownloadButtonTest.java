@@ -226,29 +226,48 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void selectIconConsumesRenderMarker() {
+    public void selectIconPersistsDownloadChoiceForRecomposition() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
         assertFalse(InlineDownloadButton.renderMarkerPending());
 
+        Object renderer = new Object();
         Object nativeIcon = new Object();
         Object downloadIcon = new Object();
         InlineDownloadButton.markIconSize(downloadAction, 18f);
         assertTrue(InlineDownloadButton.renderMarkerPending());
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
         assertFalse(InlineDownloadButton.renderMarkerPending());
 
-        // A consumed marker must not substitute the download icon a second time.
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+        // A remembered icon lambda can be invoked without the parent render marker.
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
     }
 
     @Test
     public void nativeActionRenderIsUntouched() {
         InlineDownloadButton.markIconSize(new Object(), 18f);
 
+        Object renderer = new Object();
         Object nativeIcon = new Object();
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, new Object()));
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, new Object()));
         assertFalse(InlineDownloadButton.renderMarkerPending());
+    }
+
+    @Test
+    public void reusedRendererCanSwitchBackToNativeAction() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        Object renderer = new Object();
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+
+        InlineDownloadButton.markIconSize(downloadAction, 18f);
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
+
+        InlineDownloadButton.markIconSize(new Object(), 18f);
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
     }
 
     @Test
@@ -278,21 +297,23 @@ public final class InlineDownloadButtonTest {
         }
 
         assertFalse(InlineDownloadButton.renderMarkerPending());
+        Object renderer = new Object();
         Object nativeIcon = new Object();
         Object downloadIcon = new Object();
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
     }
 
     @Test
     public void repeatedRecompositionLeavesNoRenderMarker() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
+        Object renderer = new Object();
         Object nativeIcon = new Object();
         Object downloadIcon = new Object();
 
         for (int pass = 0; pass < 5; pass++) {
             InlineDownloadButton.markIconSize(downloadAction, 18f);
-            assertSame(downloadIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+            assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
             assertFalse(InlineDownloadButton.renderMarkerPending());
 
             // Early-exit render pass: marker staged, icon lambda never consumes it.
@@ -301,7 +322,7 @@ public final class InlineDownloadButtonTest {
             assertFalse(InlineDownloadButton.renderMarkerPending());
 
             InlineDownloadButton.markIconSize(new Object(), 18f);
-            assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+            assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
             assertFalse(InlineDownloadButton.renderMarkerPending());
         }
     }
