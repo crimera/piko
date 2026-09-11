@@ -10,6 +10,7 @@ import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
@@ -29,6 +30,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -106,7 +108,7 @@ private fun saveScrollPositionFingerprint(
 val restoreTimelinePositionPatch =
     bytecodePatch(
         name = "NewX: Restore timeline position",
-        description = "Persists the timeline index and offset, then restores them after the app process restarts.",
+        description = "Persists supported timeline positions, then restores them after the app process restarts.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
@@ -119,6 +121,14 @@ val restoreTimelinePositionPatch =
                 defaultValue = true,
                 rebootApp = true,
             )
+        newXToggle(
+            id = "newx.profile.restore_position",
+            category = Categories.TIMELINE,
+            strings = settingStrings("piko_newx_restore_profile_position"),
+            order = 151,
+            defaultValue = false,
+            rebootApp = true,
+        )
 
         execute {
             val holderMatches = NewXScrollPositionHolderFingerprint.scopedMatchAll()
@@ -269,6 +279,37 @@ val restoreTimelinePositionPatch =
             val timelineGetterReference =
                 timelineGetterInstruction.getReference<MethodReference>()
                     ?: throw PatchException("NewX timeline-type getter call has no method reference")
+            val repositoryClass = mutableClassDefBy(timelineGetterReference.definingClass)
+            val timelineIdentityGetter =
+                requireExactlyOne(
+                    "NewX timeline identity getter",
+                    repositoryClass.methods.filter { method ->
+                        val returnType = method.returnType.toString()
+                        method.parameterTypes.isEmpty() &&
+                            returnType.startsWith("Lcom/x/models/timelines/") &&
+                            returnType != timelineGetterReference.returnType.toString() &&
+                            runCatching {
+                                mutableClassDefBy(returnType).fields.count { field ->
+                                    field.type.toString() == STRING_DESCRIPTOR
+                                } == 1
+                            }.getOrDefault(false)
+                    },
+                )
+            val timelineIdentityDescriptor = timelineIdentityGetter.returnType.toString()
+            val timelineIdentityGetterReference =
+                "${timelineGetterReference.definingClass}->${timelineIdentityGetter.name}()" +
+                    timelineIdentityDescriptor
+            val timelineIdentityField =
+                requireExactlyOne(
+                    "NewX timeline identity field",
+                    mutableClassDefBy(timelineIdentityDescriptor).fields.filter { field ->
+                        field.type.toString() == STRING_DESCRIPTOR
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(timelineIdentityField.accessFlags)) {
+                throw PatchException("NewX timeline identity field is not public: $timelineIdentityField")
+            }
+            val timelineIdentityFieldReference = timelineIdentityField.toString()
             val repositoryField =
                 getterMethod.instructions.mapNotNull { instruction ->
                     if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
@@ -320,8 +361,20 @@ val restoreTimelinePositionPatch =
                     iget-object v$mapRegister, v$mapOwnerRegister, $mapField
                     invoke-virtual {v$mapRegister, v$timelineRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->get(Ljava/lang/Object;)Ljava/lang/Object;
                     move-result-object v$positionsRegister
+                    invoke-static {v$timelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->useInMemoryPosition($ENUM_DESCRIPTOR)Z
+                    move-result v$mapRegister
+                    if-eqz v$mapRegister, :piko_newx_restore_position_ignore_native
                     if-nez v$positionsRegister, :piko_newx_restore_position_continue
-                    invoke-static {v$timelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I
+                    :piko_newx_restore_position_ignore_native
+                    const/4 v$positionsRegister, 0x0
+                    iget-object v$mapOwnerRegister, p0, $componentField
+                    iget-object v$mapRegister, v$mapOwnerRegister, $mapField
+                    invoke-virtual {v$mapRegister, v$timelineRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->remove(Ljava/lang/Object;)Ljava/lang/Object;
+                    move-result-object v$mapRegister
+                    invoke-interface {v$timelineGetterReceiverRegister}, $timelineIdentityGetterReference
+                    move-result-object v$mapRegister
+                    iget-object v$mapRegister, v$mapRegister, $timelineIdentityFieldReference
+                    invoke-static {v$timelineRegister, v$mapRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}Ljava/lang/String;)[I
                     move-result-object v$positionsRegister
                     if-eqz v$positionsRegister, :piko_newx_restore_position_continue
                     const/4 v$indexRegister, 0x0
@@ -415,7 +468,10 @@ val restoreTimelinePositionPatch =
                     iget-object v$fallbackRepositoryRegister, p0, $repositoryField
                     invoke-interface {v$fallbackRepositoryRegister}, $timelineGetterReference
                     move-result-object v$fallbackTimelineRegister
-                    invoke-static {v$fallbackTimelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I
+                    invoke-interface {v$fallbackRepositoryRegister}, $timelineIdentityGetterReference
+                    move-result-object v$fallbackRepositoryRegister
+                    iget-object v$fallbackRepositoryRegister, v$fallbackRepositoryRegister, $timelineIdentityFieldReference
+                    invoke-static {v$fallbackTimelineRegister, v$fallbackRepositoryRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}Ljava/lang/String;)[I
                     move-result-object v$fallbackPositionsRegister
                     if-eqz v$fallbackPositionsRegister, :piko_newx_restore_position_fallback
                     const/4 v${fallbackRead.register}, 0x0
@@ -437,7 +493,18 @@ val restoreTimelinePositionPatch =
                         saveMatches.joinToString { it.originalMethod.toString() },
                 )
             }
-            val saveMethod = saveMatches.single().method
+            val saveMatch = saveMatches.single()
+            val originalSaveMethod = saveMatch.method
+            if (originalSaveMethod.implementation == null) {
+                throw PatchException("NewX save-scroll-position method has no implementation")
+            }
+            val saveMethod =
+                originalSaveMethod.cloneMutable(
+                    additionalRegisters = originalSaveMethod.numberOfParameterRegisters + 1,
+                ).also { expandedMethod ->
+                    saveMatch.classDef.methods.remove(originalSaveMethod)
+                    saveMatch.classDef.methods.add(expandedMethod)
+                }
             val mapPutCandidates =
                 saveMethod.instructions.withIndex().filter { indexedInstruction ->
                     if (indexedInstruction.value.opcode != Opcode.INVOKE_VIRTUAL) return@filter false
@@ -466,12 +533,79 @@ val restoreTimelinePositionPatch =
             }
             val saveTimelineRegister = mapPutInstruction.registerD
             val saveHolderRegister = mapPutInstruction.registerE
-            if (saveTimelineRegister !in 0..15 || saveHolderRegister !in 0..15) {
+            val saveMapRegister = mapPutInstruction.registerC
+            if (saveTimelineRegister !in 0..15 ||
+                saveHolderRegister !in 0..15 ||
+                saveMapRegister !in 0..15
+            ) {
                 throw PatchException(
                     "NewX timeline-position save registers are not encodable: " +
-                        "v$saveTimelineRegister, v$saveHolderRegister",
+                        "v$saveTimelineRegister, v$saveHolderRegister, v$saveMapRegister",
                 )
             }
+
+            val saveRepositoryFieldRead =
+                requireExactlyOne(
+                    "NewX save-scroll-position repository read",
+                    saveMethod.instructions.withIndex().filter { indexedInstruction ->
+                        if (indexedInstruction.value.opcode != Opcode.IGET_OBJECT) return@filter false
+                        val field = indexedInstruction.value.getReference<FieldReference>() ?: return@filter false
+                        if (field.toString() != repositoryField.toString()) return@filter false
+                        val fieldInstruction =
+                            indexedInstruction.value as? TwoRegisterInstruction
+                                ?: return@filter false
+                        val getterInstruction = saveMethod.instructions.getOrNull(indexedInstruction.index + 1)
+                        val getterReference = getterInstruction?.getReference<MethodReference>()
+                            ?: return@filter false
+                        if (getterReference.toString() != timelineGetterReference.toString()) return@filter false
+                        val getterInvoke = getterInstruction as? FiveRegisterInstruction
+                            ?: return@filter false
+                        if (getterInvoke.registerCount != 1 ||
+                            getterInvoke.registerC != fieldInstruction.registerA
+                        ) {
+                            return@filter false
+                        }
+                        val resultInstruction = saveMethod.instructions.getOrNull(indexedInstruction.index + 2)
+                            as? OneRegisterInstruction
+                            ?: return@filter false
+                        if (resultInstruction.registerA != saveTimelineRegister) return@filter false
+                        indexedInstruction.index + 2 < mapPutIndex &&
+                            saveMethod.instructions.withIndex().none { laterInstruction ->
+                                laterInstruction.index > indexedInstruction.index + 2 &&
+                                    laterInstruction.index < mapPutIndex &&
+                                    laterInstruction.value.getReference<MethodReference>()?.toString() ==
+                                        timelineGetterReference.toString() &&
+                                    (saveMethod.instructions.getOrNull(laterInstruction.index + 1)
+                                        as? OneRegisterInstruction)?.registerA == saveTimelineRegister
+                            }
+                    },
+                )
+            val saveRepositoryFieldInstruction =
+                saveRepositoryFieldRead.value as? TwoRegisterInstruction
+                    ?: throw PatchException("NewX save-scroll-position repository read has no register layout")
+            val saveRepositoryRegister = saveRepositoryFieldInstruction.registerB
+            if (saveRepositoryRegister !in 0..15) {
+                throw PatchException(
+                    "NewX save-scroll-position repository register is not encodable: v$saveRepositoryRegister",
+                )
+            }
+            val saveIdentityRegister =
+                try {
+                    saveMethod
+                        .getFreeRegisterProvider(
+                            mapPutIndex,
+                            1,
+                            saveTimelineRegister,
+                            saveHolderRegister,
+                            saveMapRegister,
+                            saveRepositoryRegister,
+                        ).getFreeRegister4Bit()
+                } catch (exception: RuntimeException) {
+                    throw PatchException(
+                        "Could not allocate NewX timeline-position identity register",
+                        exception,
+                    )
+                }
 
             // Ranked Following uses the same shared save method as Latest Following, but
             // its Compose scroll policy has `a == false`. The original method branches
@@ -496,10 +630,17 @@ val restoreTimelinePositionPatch =
                 layoutPolicyGateCandidates.single().index + 1,
                 "nop",
             )
-            saveMethod.addInstruction(
+            saveMethod.addInstructions(
                 mapPutIndex,
-                "invoke-static {v$saveTimelineRegister, v$saveHolderRegister}, " +
-                    "$TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}Ljava/lang/Object;)V",
+                (
+                    """
+                    iget-object v$saveIdentityRegister, v$saveRepositoryRegister, $repositoryField
+                    invoke-interface {v$saveIdentityRegister}, $timelineIdentityGetterReference
+                    move-result-object v$saveIdentityRegister
+                    iget-object v$saveIdentityRegister, v$saveIdentityRegister, $timelineIdentityFieldReference
+                    invoke-static {v$saveTimelineRegister, v$saveIdentityRegister, v$saveHolderRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}Ljava/lang/String;Ljava/lang/Object;)V
+                    """.trimIndent()
+                ),
             )
         }
     }

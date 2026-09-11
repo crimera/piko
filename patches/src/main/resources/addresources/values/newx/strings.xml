@@ -23,7 +23,9 @@
     <string name="piko_newx_disable_timeline_refresh_title">Disable automatic timeline refresh</string>
     <string name="piko_newx_disable_timeline_refresh_summary">Prevents timeline jumps when NewX starts or returns to the foreground</string>
     <string name="piko_newx_restore_timeline_position_title">Restore timeline position</string>
-    <string name="piko_newx_restore_timeline_position_summary">Returns to your saved timeline position after the app restarts</string>
+    <string name="piko_newx_restore_timeline_position_summary">Returns to saved For You and Following positions after the app restarts</string>
+    <string name="piko_newx_restore_profile_position_title">Restore profile scroll position</string>
+    <string name="piko_newx_restore_profile_position_summary">Restores each profile tab to its own saved position, keyed by profile</string>
     <string name="piko_newx_hide_spaces_bar_title">Hide Spaces bar</string>
     <string name="piko_newx_hide_spaces_bar_summary">Hides the Spaces bar above NewX timelines</string>
     <string name="piko_newx_hide_new_post_pill_title">Hide new posts pill</string>

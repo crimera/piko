@@ -174,9 +174,11 @@ The automatic-refresh event hook applies the same gate and page-content logic be
 - `patches/src/main/kotlin/app/crimera/patches/newx/timeline/ForYouTopicFilterPatch.kt`
   - Marks explicit topic refreshes before clearing and reloading For You.
 - `extensions/newx/src/main/java/app/morphe/extension/newx/timeline/TimelineScrollPositionStore.java`
-  - Persists positions, but must not be used as proof that data has loaded.
+  - Persists For You and Following positions, but must not be used as proof that data has loaded.
+  - Profile restoration is opt-in and uses the profile timeline type plus the profile ID as its key.
 - `patches/src/main/kotlin/app/crimera/patches/newx/timeline/RestoreTimelinePositionPatch.kt`
-  - Hooks X's scroll-position holder and saves/restores timeline positions.
+  - Hooks X's scroll-position holder and saves/restores supported timeline positions.
+  - Bypasses X's process-local type-only map for unsupported timelines so profiles cannot inherit another profile's position.
 
 ## Validation
 
@@ -230,3 +232,4 @@ When a similar skeleton is reported:
 - The page-content helper is intentionally conservative. An unexpected non-list page is considered populated so a changed contract fails closed rather than enabling uncontrolled refreshes.
 - The gates are process-local and expire after 15 seconds. They cover the synchronous event/request chain; they are not a general retry mechanism for a failed network response.
 - This fix targets X `12.25.0-alpha.01`. Future releases must re-resolve the owners, signatures, page-flow shape, and event/request callsite from the target APK.
+- Profile scroll restoration is disabled by default. When enabled, positions are stored separately for each profile ID and profile timeline tab; old type-only profile keys are intentionally ignored.

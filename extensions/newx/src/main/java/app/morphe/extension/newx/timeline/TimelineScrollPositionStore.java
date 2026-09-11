@@ -18,8 +18,11 @@ public final class TimelineScrollPositionStore {
     private static final String PREFERENCES_NAME = "piko_newx_timeline_positions";
     private static final String RESTORE_TIMELINE_POSITION_SETTING =
             "newx.timeline.restore_position";
+    private static final String RESTORE_PROFILE_POSITION_SETTING =
+            "newx.profile.restore_position";
     private static final String INDEX_SUFFIX = ".index";
     private static final String OFFSET_SUFFIX = ".offset";
+    private static final String PROFILE_KEY_PREFIX = "profile.";
     private static final Pattern POSITION_PATTERN = Pattern.compile(
             "ScrollPositionHolder\\(firstVisibleItemIndex=(\\d+), firstVisibleItemScrollOffset=(\\d+)\\)"
     );
@@ -29,18 +32,29 @@ public final class TimelineScrollPositionStore {
 
     @Nullable
     public static int[] restore(Enum<?> timeline) {
-        if (timeline == null || !SettingsRegistry.getBooleanOrDefault(
-                RESTORE_TIMELINE_POSITION_SETTING,
-                true
-        )) {
-            return null;
-        }
+        return restore(timeline, null);
+    }
 
+    @Nullable
+    public static int[] restore(Enum<?> timeline, @Nullable String profileId) {
         try {
+            String key = storageKey(
+                    timeline == null ? null : timeline.name(),
+                    profileId,
+                    SettingsRegistry.getBooleanOrDefault(
+                            RESTORE_TIMELINE_POSITION_SETTING,
+                            true
+                    ),
+                    SettingsRegistry.getBooleanOrDefault(
+                            RESTORE_PROFILE_POSITION_SETTING,
+                            false
+                    )
+            );
+            if (key == null) return null;
+
             SharedPreferences preferences = preferences();
             if (preferences == null) return null;
 
-            String key = timeline.name();
             if (!preferences.contains(key + INDEX_SUFFIX)) return null;
 
             return new int[]{
@@ -54,13 +68,31 @@ public final class TimelineScrollPositionStore {
     }
 
     public static void save(Enum<?> timeline, Object holder) {
-        if (timeline == null || holder == null ||
-                !SettingsRegistry.getBooleanOrDefault(
-                        RESTORE_TIMELINE_POSITION_SETTING,
-                        true
-                )) return;
+        save(timeline, null, holder);
+    }
+
+    public static void save(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            Object holder
+    ) {
+        if (holder == null) return;
 
         try {
+            String key = storageKey(
+                    timeline == null ? null : timeline.name(),
+                    profileId,
+                    SettingsRegistry.getBooleanOrDefault(
+                            RESTORE_TIMELINE_POSITION_SETTING,
+                            true
+                    ),
+                    SettingsRegistry.getBooleanOrDefault(
+                            RESTORE_PROFILE_POSITION_SETTING,
+                            false
+                    )
+            );
+            if (key == null) return;
+
             SharedPreferences preferences = preferences();
             if (preferences == null) return;
 
@@ -92,7 +124,6 @@ public final class TimelineScrollPositionStore {
 
             if (index < 0 || offset < 0) return;
 
-            String key = timeline.name();
             preferences.edit()
                     .putInt(key + INDEX_SUFFIX, index)
                     .putInt(key + OFFSET_SUFFIX, offset)
@@ -100,6 +131,30 @@ public final class TimelineScrollPositionStore {
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to save NewX timeline position", exception);
         }
+    }
+
+    /** Returns whether X's process-local position map is valid for this timeline type. */
+    public static boolean useInMemoryPosition(Enum<?> timeline) {
+        return timeline != null && isHomeTimeline(timeline.name());
+    }
+
+    static String storageKey(
+            @Nullable String timelineName,
+            @Nullable String profileId,
+            boolean restoreTimelinePosition,
+            boolean restoreProfilePosition
+    ) {
+        if (timelineName == null) return null;
+        if (isHomeTimeline(timelineName)) {
+            return restoreTimelinePosition ? timelineName : null;
+        }
+        if (!restoreProfilePosition || !timelineName.startsWith("USER_PROFILE_")) return null;
+        if (profileId == null || profileId.trim().isEmpty()) return null;
+        return PROFILE_KEY_PREFIX + timelineName + "." + profileId.trim();
+    }
+
+    private static boolean isHomeTimeline(String timelineName) {
+        return "FOR_YOU".equals(timelineName) || "FOLLOWING".equals(timelineName);
     }
 
     @Nullable
