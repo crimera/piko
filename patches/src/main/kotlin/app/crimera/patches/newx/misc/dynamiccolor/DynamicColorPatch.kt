@@ -1167,7 +1167,7 @@ private fun List<Instruction>.wideArgumentFlowsFromPalette(
     val pending = mutableListOf(callIndex to argumentRegister)
     val visited = mutableSetOf<Pair<Int, Int>>()
     while (pending.isNotEmpty()) {
-        val (searchEnd, register) = pending.removeLast()
+        val (searchEnd, register) = pending.removeAt(pending.lastIndex)
         if (!visited.add(searchEnd to register)) continue
         val definitionIndex =
             (searchEnd - 1 downTo 0).firstOrNull { index ->
@@ -1206,7 +1206,7 @@ private fun List<Instruction>.objectArgumentFlowsFromDescriptor(
     val pending = mutableListOf(callIndex to argumentRegister)
     val visited = mutableSetOf<Pair<Int, Int>>()
     while (pending.isNotEmpty()) {
-        val (searchEnd, register) = pending.removeLast()
+        val (searchEnd, register) = pending.removeAt(pending.lastIndex)
         if (!visited.add(searchEnd to register)) continue
             val definitionIndex =
             (searchEnd - 1 downTo 0).firstOrNull { index ->
@@ -1299,7 +1299,7 @@ private fun List<Instruction>.objectArgumentFlowsFromList(
     val pending = mutableListOf(callIndex to argumentRegister)
     val visited = mutableSetOf<Pair<Int, Int>>()
     while (pending.isNotEmpty()) {
-        val (searchEnd, register) = pending.removeLast()
+        val (searchEnd, register) = pending.removeAt(pending.lastIndex)
         if (!visited.add(searchEnd to register)) continue
         val definitionIndex = (searchEnd - 1 downTo 0).firstOrNull { index ->
             this[index].objectDestinationRegister() == register
