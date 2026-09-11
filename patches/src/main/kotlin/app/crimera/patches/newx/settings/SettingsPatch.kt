@@ -37,9 +37,8 @@ internal val newXSettingsPatch =
             addAppResources("newx")
             prepareSettingsRegistryLoad()
 
-            // ALPHA PATH: usually has one Compose settings caller.
-            // BETA PATH: may have multiple callers for the same renderer; collapse them below.
-            // TODO: Re-evaluate the alpha caller shape when alpha is deprecated; retain beta deduplication.
+            // Compose lowering may produce multiple callers for the same renderer; collapse them
+            // before modifying the renderer.
             val callerMatches =
                 ComposeSettingsBasicItemCallerFingerprint.scopedMatchAll()
             if (callerMatches.isEmpty()) {

@@ -25,7 +25,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val SHARE_URL_RESOLVER_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/ShareUrlResolver;"
@@ -37,7 +36,6 @@ private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesh
 private const val SHARE_IMPL_DESCRIPTOR_PREFIX = "Lcom/x/share/impl/"
 private const val MOVED_SHARE_HELPER_DESCRIPTOR_PREFIX =
     "Lcom/google/android/gms/internal/mlkit_vision_common/"
-private const val LEGACY_SHARE_COPY_DESCRIPTOR_PREFIX = "Lcom/x/reactwithvideo/"
 private const val NAVIGATION_DESCRIPTOR_PREFIX = "Lcom/x/navigation/"
 private const val SHARE_STATUS_URL_PREFIX = "https://x.com/i/status/"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
@@ -68,23 +66,7 @@ internal object ShareSheetCopyCallbackFingerprint : Fingerprint(
     filters = listOf(string("link"), string("copy_link")),
 )
 
-/** Legacy share-sheet callback that receives both media URIs and post URLs. */
-internal object LegacyShareSheetCopyFingerprint : Fingerprint(
-    definingClass = LEGACY_SHARE_COPY_DESCRIPTOR_PREFIX,
-    parameters = listOf("Ljava/lang/Object;"),
-    returnType = "Ljava/lang/Object;",
-    filters = listOf(string("url")),
-)
-
-/** Shared Intent builder used by both the system chooser and direct-app share actions. */
-internal object ShareIntentBuilderFingerprint : Fingerprint(
-    definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
-    parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
-    returnType = INTENT_DESCRIPTOR,
-    filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
-)
-
-/** Share Intent helper moved out of the share implementation package in 12.23. */
+/** Share Intent helper moved out of the share implementation package in 12.23 and later. */
 internal object MovedShareIntentBuilderFingerprint : Fingerprint(
     definingClass = MOVED_SHARE_HELPER_DESCRIPTOR_PREFIX,
     parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
@@ -258,68 +240,28 @@ private fun hookShareSheetPostUrls() {
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareSheetCopyCallbacks() {
-    val currentMatches = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty()
-    val legacyMatches = LegacyShareSheetCopyFingerprint.scopedMatchAllOrNull().orEmpty()
     val selectedMatch =
         requireExactlyOne(
             label = "NewX share-sheet copy callback variant",
-            candidates = currentMatches + legacyMatches,
+            candidates = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty(),
         )
-
-    if (currentMatches.any { it === selectedMatch }) {
-        selectedMatch.method.addInstructions(
-            0,
-            """
-            invoke-static {p1}, $CHANGE_DOMAIN_METHOD
-            move-result-object p1
-            """.trimIndent(),
-        )
-        return
-    }
-
-    val legacyMethod = selectedMatch.method
-    val stringCastIndices =
-        legacyMethod.instructions.mapIndexedNotNull { index, instruction ->
-            if (instruction.opcode != Opcode.CHECK_CAST) return@mapIndexedNotNull null
-            if (instruction.getReference<TypeReference>()?.type != STRING_DESCRIPTOR) {
-                return@mapIndexedNotNull null
-            }
-            index
-        }
-    if (stringCastIndices.size != 1) {
-        throw PatchException(
-            "Expected one legacy NewX share URL cast in $legacyMethod, found " +
-                stringCastIndices.size,
-        )
-    }
-
-    val castIndex = stringCastIndices.single()
-    val castInstruction = legacyMethod.instructions[castIndex] as? OneRegisterInstruction
-        ?: throw PatchException("Expected a one-register legacy NewX share URL cast in $legacyMethod")
-    legacyMethod.addDomainRewrite(castIndex + 1, castInstruction.registerA)
+    selectedMatch.method.addInstructions(
+        0,
+        """
+        invoke-static {p1}, $CHANGE_DOMAIN_METHOD
+        move-result-object p1
+        """.trimIndent(),
+    )
 }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareIntentBuilder() {
-    val currentMatches = ShareIntentBuilderFingerprint.scopedMatchAllOrNull().orEmpty()
     val movedMatches = MovedShareIntentBuilderFingerprint.scopedMatchAllOrNull().orEmpty()
     val selectedMatch =
         requireExactlyOne(
             label = "NewX share Intent builder variant",
-            candidates = currentMatches + movedMatches,
+            candidates = movedMatches,
         )
-
-    if (currentMatches.any { it === selectedMatch }) {
-        selectedMatch.method.addInstructions(
-            0,
-            """
-            invoke-static {p0}, $CHANGE_DOMAIN_METHOD
-            move-result-object p0
-            """.trimIndent(),
-        )
-        return
-    }
-
     hookMovedShareIntentCalls(selectedMatch.method)
 }
 

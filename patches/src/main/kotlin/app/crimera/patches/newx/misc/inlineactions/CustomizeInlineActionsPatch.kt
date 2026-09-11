@@ -140,12 +140,10 @@ private fun patchActionNameBridge(models: app.crimera.patches.newx.models.Resolv
         )
     val actionTypeRead =
         if (actionTypeGetter != null) {
-            // BETA PATH: action type is private and exposed through getActionType().
-            // Keep this branch as the source for future model updates.
+            // Prefer the generated getter when the model exposes one.
             "invoke-virtual {p0}, $actionTypeGetter\nmove-result-object p0"
         } else {
-            // ALPHA PATH: action type remains a public field.
-            // TODO: Remove this fallback when alpha compatibility is deprecated.
+            // Otherwise require the obfuscated field to remain public before reading it directly.
             inlineActionEntryClass.requirePublicFields(listOf(models.inlineActionTypeField))
             "iget-object p0, p0, ${models.inlineActionTypeField}"
         }

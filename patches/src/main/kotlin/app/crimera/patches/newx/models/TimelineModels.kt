@@ -267,8 +267,7 @@ private fun resolveTimelineModels(): ResolvedNewXTimelineModels {
 
 context(context: BytecodePatchContext)
 private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
-    // ALPHA PATH uses public model fields; BETA PATH uses private-model getters.
-    // The shared bridges keep the extension API stable while this compatibility split remains.
+    // Resolve public fields and generated getters into one stable extension-facing contract.
     val immutableListMatches = TimelineItemsImmutableListConverterFingerprint.scopedMatchAll()
     val immutableListConverterCandidates = immutableListMatches.mapNotNull { match ->
         val method = match.originalMethod

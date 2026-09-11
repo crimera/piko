@@ -115,8 +115,7 @@ private data class AiDisclosureAccessors(
 
 context(context: BytecodePatchContext)
 private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
-    // ALPHA PATH uses public disclosure fields; BETA PATH uses generated model getters.
-    // TODO: Remove the field fallback when alpha compatibility is deprecated.
+    // Disclosure models may expose fields directly or through generated getters.
     val contentDisclosureMatches =
         ContentDisclosureModelFingerprint.scopedMatchAll()
     if (contentDisclosureMatches.size != 1) {

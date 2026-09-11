@@ -18,12 +18,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-// ALPHA-ONLY PATH: each video-tab handler has three direct subscription checks.
+// Each video-tab handler has three direct subscription checks.
 private const val VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT = 3
-// ALPHA + BETA PATH: the shared URT/Compose timeline handler has nine checks.
+// The shared URT/Compose timeline handler has nine checks.
 private const val TIMELINE_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT = 9
 
-// ALPHA + BETA: override subscription results at the actual media-action call sites.
+// Override subscription results at the actual media-action call sites.
 private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
     val subscriptionChecks =
         instructions
@@ -124,9 +124,6 @@ val newXDownloadPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
 
         execute {
-            // ALPHA PATH: patches the legacy video-tab download callbacks below.
-            // BETA PATH: this is intentionally empty; shared hooks below still must execute.
-            // TODO: Remove this fingerprint chain when alpha compatibility is deprecated.
             val videoDownloadMatches =
                 NewXVideoTabDownloadHandlerFingerprint.scopedMatchAllOrNull().orEmpty()
             if (videoDownloadMatches.isNotEmpty()) {
@@ -146,7 +143,6 @@ val newXDownloadPatch =
                 }
             }
 
-            // ALPHA + BETA PATH: shared URT/Compose timeline media-action handler.
             val timelineHandler = requireExactlyOne(
                 "NewX timeline download handler",
                 NewXDownloadEventHandlerFingerprint.scopedMatchAll(),
@@ -160,26 +156,22 @@ val newXDownloadPatch =
                 )
             }
 
-            // ALPHA: e()Z. BETA: Q()Z. Global all-tier premium status used by media saving.
             requireMatches(
                 "NewX premium subscription checker",
                 SubscriptionsFeaturesHasAnyPremiumFingerprint.scopedMatchAll(),
                 expectedCount = 1,
             ).forEach(::forceBooleanResult)
-            // ALPHA: g()Z. BETA: M()Z. Offline/media-gallery premium gate.
             requireMatches(
                 "NewX offline-video premium checker",
                 SubscriptionsFeaturesOfflinePremiumFingerprint.scopedMatchAll(),
                 expectedCount = 1,
             ).forEach(::forceBooleanResult)
-            // ALPHA: i()Z. BETA: s()Z. Feature flag shared by timeline, gallery, and video-tab paths.
             requireMatches(
                 "NewX offline-video feature gate",
                 SubscriptionsFeaturesOfflineVideoEnabledFingerprint.scopedMatchAll(),
                 expectedCount = 1,
             ).forEach(::forceBooleanResult)
 
-            // ALPHA: q4/u4/x4 h()Z. BETA: MediaContent nested classes isDownloadable()Z.
             requireMatches(
                 "NewX video media downloadability method",
                 MediaContentVideoIsDownloadableFingerprint.scopedMatchAll(),

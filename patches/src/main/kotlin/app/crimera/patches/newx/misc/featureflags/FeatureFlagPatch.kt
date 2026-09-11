@@ -37,14 +37,9 @@ private const val FEATURE_SWITCH_STORE_DESCRIPTOR =
 private const val FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR =
     "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchImportExport"
 
-// ALPHA PATH: preserved repository owner in 12.17.3-alpha.01.
-// TODO: Remove this repository and its accessor table when alpha compatibility is deprecated.
-private const val FEATURE_SWITCH_REPOSITORY_DESCRIPTOR =
-    "Lcom/x/featureswitches/FeatureSwitchesRepositoryImpl;"
-
 private const val FEATURE_SWITCHES_SCOPE = "Lcom/x/featureswitches/"
 
-// BETA PATH: repository fingerprint scoped to com/x/featureswitches/.
+// The repository owner and accessor names are obfuscated; resolve the server-backed contract.
 private object NewXFeatureSwitchRepositoryFingerprint : Fingerprint(
     definingClass = FEATURE_SWITCHES_SCOPE,
     name = "getBoolean",
@@ -75,9 +70,6 @@ private data class FeatureSwitchAccessor(
     val parameterTypes: List<String>,
     val returnType: String,
     val extensionMethod: String,
-    val methodNames: List<String> = listOf("get$typeName", "peek$typeName"),
-    /** `true` selects the server-backed accessor; null keeps the legacy named path. */
-    val lookupMode: Boolean? = null,
 ) {
     val returnOpcode =
         when {
@@ -93,92 +85,49 @@ private data class FeatureSwitchAccessor(
         }
 }
 
-private fun scalarAccessor(
-    typeName: String,
-    valueType: String,
-    extensionMethod: String,
-) = FeatureSwitchAccessor(
-    typeName = typeName,
-    parameterTypes = listOf(STRING_TYPE, valueType),
-    returnType = valueType,
-    extensionMethod = extensionMethod,
-)
-
-// ALPHA PATH: named accessors from FeatureSwitchesRepositoryImpl.
 private val FEATURE_SWITCH_ACCESSORS =
-    listOf(
-        scalarAccessor("Boolean", "Z", "resolveBoolean"),
-        scalarAccessor("Float", "F", "resolveFloat"),
-        scalarAccessor("Int", "I", "resolveInt"),
-        scalarAccessor("Long", "J", "resolveLong"),
-        scalarAccessor("Double", "D", "resolveDouble"),
-        FeatureSwitchAccessor(
-            "String",
-            listOf(STRING_TYPE, STRING_TYPE),
-            STRING_TYPE,
-            "resolveString",
-        ),
-        FeatureSwitchAccessor("List", listOf(STRING_TYPE), LIST_TYPE, "resolveList"),
-    )
-
-// BETA PATH: obfuscated repository accessors from 12.18.0-beta.0 and later.
-private val BETA_FEATURE_SWITCH_ACCESSORS =
     listOf(
         FeatureSwitchAccessor(
             "Boolean",
             listOf(STRING_TYPE, "Z"),
             "Z",
             "resolveBoolean",
-            methodNames = emptyList(),
-            lookupMode = true,
         ),
         FeatureSwitchAccessor(
             "Float",
             listOf(STRING_TYPE, "F"),
             "F",
             "resolveFloat",
-            methodNames = emptyList(),
-            lookupMode = true,
         ),
         FeatureSwitchAccessor(
             "Int",
             listOf(STRING_TYPE, "I"),
             "I",
             "resolveInt",
-            methodNames = emptyList(),
-            lookupMode = true,
         ),
         FeatureSwitchAccessor(
             "Long",
             listOf(STRING_TYPE, "J"),
             "J",
             "resolveLong",
-            methodNames = emptyList(),
-            lookupMode = true,
         ),
         FeatureSwitchAccessor(
             "Double",
             listOf(STRING_TYPE, "D"),
             "D",
             "resolveDouble",
-            methodNames = emptyList(),
-            lookupMode = true,
         ),
         FeatureSwitchAccessor(
             "String",
             listOf(STRING_TYPE, STRING_TYPE),
             STRING_TYPE,
             "resolveString",
-            methodNames = emptyList(),
-            lookupMode = true,
         ),
         FeatureSwitchAccessor(
             "List",
             listOf(STRING_TYPE),
             LIST_TYPE,
             "resolveList",
-            methodNames = emptyList(),
-            lookupMode = true,
         ),
     )
 
@@ -219,43 +168,31 @@ val featureFlagPatch =
         }
 
         execute {
-            val isAlpha = classDefByOrNull(FEATURE_SWITCH_REPOSITORY_DESCRIPTOR) != null
-            val repositoryResolution =
-                if (isAlpha) {
-                    FeatureSwitchRepositoryResolution(
-                        descriptor = FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
-                        accessors = FEATURE_SWITCH_ACCESSORS,
-                        lookupMethod = null,
-                    )
-                } else {
-                    val matches =
-                        NewXFeatureSwitchRepositoryFingerprint.scopedMatchAllOrNull().orEmpty()
-                    if (matches.size != 1) {
-                        throw PatchException(
-                            "Expected one NewX feature-switch repository in $FEATURE_SWITCHES_SCOPE, found ${matches.size}: " +
-                                matches.joinToString { it.originalClassDef.type },
-                        )
-                    }
-                    val repositoryClass = matches.single().originalClassDef
-                    val lookupMethods = repositoryClass.methods.privateServerLookupMethods()
-                    if (lookupMethods.size != 1) {
-                        throw PatchException(
-                            "Expected one private NewX server-backed feature-switch lookup in " +
-                                "${repositoryClass.type}, found ${lookupMethods.size}: " +
-                                lookupMethods.joinToString(),
-                        )
-                    }
-                    FeatureSwitchRepositoryResolution(
-                        descriptor = repositoryClass.type,
-                        accessors = BETA_FEATURE_SWITCH_ACCESSORS,
-                        lookupMethod = lookupMethods.single(),
-                    )
-                }
+            val matches = NewXFeatureSwitchRepositoryFingerprint.scopedMatchAllOrNull().orEmpty()
+            if (matches.size != 1) {
+                throw PatchException(
+                    "Expected one NewX feature-switch repository in $FEATURE_SWITCHES_SCOPE, found ${matches.size}: " +
+                        matches.joinToString { it.originalClassDef.type },
+                )
+            }
+            val repositoryClass = matches.single().originalClassDef
+            val lookupMethods = repositoryClass.methods.privateServerLookupMethods()
+            if (lookupMethods.size != 1) {
+                throw PatchException(
+                    "Expected one private NewX server-backed feature-switch lookup in " +
+                        "${repositoryClass.type}, found ${lookupMethods.size}: " +
+                        lookupMethods.joinToString(),
+                )
+            }
+            val repositoryResolution = FeatureSwitchRepositoryResolution(
+                descriptor = repositoryClass.type,
+                accessors = FEATURE_SWITCH_ACCESSORS,
+                lookupMethod = lookupMethods.single(),
+            )
             val repository = mutableClassDefBy(repositoryResolution.descriptor)
             repositoryResolution.accessors.forEach { accessor ->
                 val matches = repository.methods.matching(
                     accessor,
-                    semantic = !isAlpha,
                     lookupMethod = repositoryResolution.lookupMethod,
                 )
                 requireAccessorMatches(accessor, matches)
@@ -266,43 +203,31 @@ val featureFlagPatch =
 
 private fun Collection<MutableMethod>.matching(
     accessor: FeatureSwitchAccessor,
-    semantic: Boolean,
     lookupMethod: Method?,
 ) = filter { method ->
     AccessFlags.PUBLIC.isSet(method.accessFlags) &&
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
         method.parameterTypes.map(CharSequence::toString) == accessor.parameterTypes &&
         method.returnType == accessor.returnType &&
-        (accessor.methodNames.isEmpty() || method.name in accessor.methodNames) &&
-        (!semantic || method.hasFeatureSwitchLookup(accessor.lookupMode, lookupMethod))
+        method.hasFeatureSwitchLookup(expectedMode = true, lookupMethod = lookupMethod)
 }
 
 private fun requireAccessorMatches(
     accessor: FeatureSwitchAccessor,
     methods: List<MutableMethod>,
 ) {
-    val actualNames = methods.map(MutableMethod::getName).toSet()
-    if (
-        accessor.methodNames.isNotEmpty() &&
-            methods.size == accessor.methodNames.size &&
-            actualNames == accessor.methodNames.toSet()
-    ) return
-    if (accessor.methodNames.isEmpty() && methods.size == 1) return
+    if (methods.size == 1) return
 
     throw PatchException(
         "Expected NewX ${accessor.typeName.lowercase()} accessors " +
-            if (accessor.methodNames.isEmpty()) {
-                "one semantic server-backed accessor exactly once"
-            } else {
-                "${accessor.methodNames.joinToString()} exactly once"
-            } + ", found ${methods.joinToString()}",
+            "one semantic server-backed accessor exactly once, found ${methods.joinToString()}",
     )
 }
 
 /**
- * BETA repository accessors have unstable names, but retain the typed call to the repository's
- * private feature-value lookup. The literal immediately before the call distinguishes the
- * server-backed path (`1`) from the local peek path (`0`).
+ * Repository accessors have unstable names, but retain the typed call to the repository's private
+ * feature-value lookup. The literal immediately before the call distinguishes the server-backed
+ * path (`1`) from the local peek path (`0`).
  */
 private fun Method.hasFeatureSwitchLookup(
     expectedMode: Boolean?,

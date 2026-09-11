@@ -52,20 +52,7 @@ private object CanonicalPostModelFingerprint : Fingerprint(
     filters = listOf(string("CanonicalPost(id=")),
 )
 
-// ALPHA PATH: the inline-action model has no count field.
-// TODO: Remove this fingerprint when alpha compatibility is deprecated.
-private object InlineActionEntryModelWithoutCountFingerprint : Fingerprint(
-    definingClass = "Lcom/x/models/",
-    name = "toString",
-    returnType = STRING_DESCRIPTOR,
-    parameters = emptyList(),
-    filters = listOf(
-        string("InlineActionEntry(actionType="),
-        string(", isEnabled="),
-    ),
-)
-
-// BETA PATH: the inline-action model adds a count field; keep this shape for future updates.
+// Current NewX releases retain the count field while obfuscating the model owner and action type.
 private object InlineActionEntryModelWithCountFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/",
     name = "toString",
@@ -322,14 +309,7 @@ private fun resolvePostMediaModels(postModels: ResolvedNewXPostModels): Resolved
 
 context(context: BytecodePatchContext)
 private fun resolveInlineActionModels(): ResolvedNewXInlineActionModels {
-    val inlineActionEntryMatches =
-        listOf(
-            // ALPHA PATH: model without count.
-            InlineActionEntryModelWithoutCountFingerprint.scopedMatchAll(),
-            // BETA PATH: model with count.
-            InlineActionEntryModelWithCountFingerprint.scopedMatchAll(),
-        ).flatten()
-            .distinctBy { it.originalMethod.toString() }
+    val inlineActionEntryMatches = InlineActionEntryModelWithCountFingerprint.scopedMatchAll()
     if (inlineActionEntryMatches.size != 1) {
         throw PatchException(
             "Expected one NewX inline-action entry model across known shapes, found " +
@@ -487,11 +467,10 @@ private fun Method.hasInlineActionResultFlow(
 }
 
 /**
- * BETA PATH: the canonical-post accessor returns the collection of inline-action entries. The
- * presenter iterates that collection, casts each element to the resolved model, optionally maps
- * it through a copy/factory method, and adds the resulting entry to an ArrayList. Keep this
- * separate from the direct-entry path above because the collection descriptor is not the model
- * descriptor (for example, immutable `b` versus `k4` in unified 12.22).
+ * The canonical-post accessor returns a collection of inline-action entries. The presenter
+ * iterates that collection, casts each element to the resolved model, optionally maps it through
+ * a copy/factory method, and adds the resulting entry to an ArrayList. Keep this separate from
+ * the direct-entry path above because the collection descriptor is not the model descriptor.
  */
 private fun Method.hasInlineActionCollectionResultFlow(
     definingClass: String,

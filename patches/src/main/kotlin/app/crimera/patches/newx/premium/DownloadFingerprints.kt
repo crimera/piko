@@ -15,17 +15,13 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
-// ALPHA + BETA PATH: shared URT/Compose timeline media-action handler.
+// Shared URT/Compose timeline media-action handler.
 internal object NewXDownloadEventHandlerFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/items/post/",
     filters = listOf(string("download_video_to_offline")),
 )
 
-/**
- * ALPHA-ONLY PATH: legacy and new video-tab handlers handle VideoDownloadClicked and
- * VideoAddToOfflineClicked. Beta removed this feature-switch-shaped callback; beta uses the
- * shared URT handler above plus the global offline gates below.
- */
+/** Video-tab handlers for VideoDownloadClicked and VideoAddToOfflineClicked. */
 internal object NewXVideoTabDownloadHandlerFingerprint : Fingerprint(
     definingClass = "Lcom/x/video/tab/",
     filters = listOf(string("subscriptions_watermarked_video_download_enabled")),
@@ -45,7 +41,7 @@ internal object NewXVideoTabDownloadHandlerFingerprint : Fingerprint(
     },
 )
 
-// ALPHA: e()Z. BETA: Q()Z. Both are the all-tier premium gate used by media saving.
+// All-tier premium gate used by media saving.
 internal object SubscriptionsFeaturesHasAnyPremiumFingerprint : Fingerprint(
     definingClass = "Lcom/x/subscriptions/",
     returnType = "Z",
@@ -57,10 +53,7 @@ internal object SubscriptionsFeaturesHasAnyPremiumFingerprint : Fingerprint(
         ),
 )
 
-/**
- * ALPHA: g()Z. BETA: M()Z. Two-tier premium gate used by offline-video and media-gallery
- * downloads; the exact obfuscated method name is deliberately resolved from its strings.
- */
+/** Two-tier premium gate used by offline-video and media-gallery downloads. */
 internal object SubscriptionsFeaturesOfflinePremiumFingerprint : Fingerprint(
     definingClass = "Lcom/x/subscriptions/",
     returnType = "Z",
@@ -77,7 +70,7 @@ internal object SubscriptionsFeaturesOfflinePremiumFingerprint : Fingerprint(
     },
 )
 
-// ALPHA: i()Z. BETA: s()Z. Global feature flag used by every offline-video surface.
+// Global feature flag used by every offline-video surface.
 internal object SubscriptionsFeaturesOfflineVideoEnabledFingerprint : Fingerprint(
     definingClass = "Lcom/x/subscriptions/",
     returnType = "Z",
@@ -87,9 +80,8 @@ internal object SubscriptionsFeaturesOfflineVideoEnabledFingerprint : Fingerprin
 
 private const val DOWNLOADABLE_TEXT = ", isDownloadable="
 
-// ALPHA fallback only: the model accessor is obfuscated, so derive its field from the
-// semantic toString label. The shared resolver handles both direct and helper-based
-// StringBuilder layouts and fails on an absent or ambiguous field.
+// The model accessor is obfuscated, so derive its field from the semantic toString label. The
+// shared resolver handles both direct and helper-based StringBuilder layouts.
 private fun downloadableField(classDef: ClassDef): FieldReference {
     val toStringMethods =
         classDef.methods.filter { method ->
@@ -136,9 +128,8 @@ private fun ClassDef.hasNamedDownloadableAccessor(): Boolean =
     }
 
 /**
- * Alpha keeps the semantic downloadable property as an obfuscated override. The only
- * no-argument boolean method reading the field rendered next to `isDownloadable=` is the
- * property accessor; component methods were introduced by the beta model shape.
+ * The obfuscated downloadable property is the only no-argument boolean method reading the field
+ * rendered next to `isDownloadable=`; component methods are excluded from the structural match.
  */
 private fun isLegacyDownloadableAccessor(
     method: Method,
@@ -188,7 +179,7 @@ private object MediaContentVideoClassFingerprint : Fingerprint(
     filters = listOf(string("MediaContentVideo(mediaId=")),
 )
 
-// BETA: preserved isDownloadable(). ALPHA: structural obfuscated-accessor fallback.
+// Resolve either a preserved property name or the structural obfuscated accessor.
 internal object MediaContentVideoIsDownloadableFingerprint : Fingerprint(
     classFingerprint = MediaContentVideoClassFingerprint,
     returnType = "Z",
@@ -204,7 +195,7 @@ private object MediaContentGifClassFingerprint : Fingerprint(
     filters = listOf(string("MediaContentGif(mediaId=")),
 )
 
-// BETA: preserved isDownloadable(). ALPHA: structural obfuscated-accessor fallback.
+// Resolve either a preserved property name or the structural obfuscated accessor.
 internal object MediaContentGifIsDownloadableFingerprint : Fingerprint(
     classFingerprint = MediaContentGifClassFingerprint,
     returnType = "Z",
@@ -220,7 +211,7 @@ private object MediaContentImageClassFingerprint : Fingerprint(
     filters = listOf(string("MediaContentImage(mediaId=")),
 )
 
-// BETA: preserved isDownloadable(). ALPHA: structural obfuscated-accessor fallback.
+// Resolve either a preserved property name or the structural obfuscated accessor.
 internal object MediaContentImageIsDownloadableFingerprint : Fingerprint(
     classFingerprint = MediaContentImageClassFingerprint,
     returnType = "Z",

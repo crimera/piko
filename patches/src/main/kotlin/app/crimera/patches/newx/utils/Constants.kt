@@ -12,12 +12,6 @@ internal object Constants {
             apkFileType = ApkFileType.APKM,
             appIconColor = 0x000000,
             targets = listOf(
-                AppTarget(version = "12.20.5-prod.01"),
-                AppTarget(version = "12.21.1-prod.05"),
-                AppTarget(version = "12.22.0-beta.01"),
-                AppTarget(version = "12.22.0-prod.01"),
-                AppTarget(version = "12.23.0-prod.01"),
-                AppTarget(version = "12.23.1-prod.01"),
                 AppTarget(version = "12.24.0-prod.02"),
                 AppTarget(version = "12.25.0-alpha.01"),
                 AppTarget(version = "12.25.0-prod.01"),

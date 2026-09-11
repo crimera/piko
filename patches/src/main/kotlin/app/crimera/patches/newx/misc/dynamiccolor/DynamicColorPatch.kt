@@ -1028,12 +1028,6 @@ private fun profileTabIndicatorFingerprint(horizon: String) = Fingerprint(
     custom = { method, _ -> isProfileTabIndicator(method, horizon) },
 )
 
-private fun horizonTabsFingerprint(horizon: String) = Fingerprint(
-    definingClass = TAB_RENDERER_SCOPE,
-    custom = { method, _ -> isHorizonTabColorRead(method, horizon) },
-)
-
-
 context(context: BytecodePatchContext)
 private fun patchTabTints(horizon: String) {
     val slots = tabSlotColorsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
@@ -1064,22 +1058,9 @@ private fun patchTabTints(horizon: String) {
         profileMatch?.method?.injectProfileTabIndicatorTint(horizon)
         return
     }
-    val horizonReads = horizonTabsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
-    val horizonRead = requireAtMostOne("NewX Horizon tab color fallback", horizonReads)
-    // A proven Horizon tab shape with no slot colors needs no hook: the dynamic palette
-    // factories already replace the colors it reads.
-    if (
-        slots.isEmpty() &&
-            indicatorMatches.isEmpty() &&
-            profileMatches.isEmpty() &&
-            horizonRead != null
-    ) {
-        return
-    }
     throw PatchException(
         "NewX tab tint shapes are unmapped: slots=${slots.size}, " +
-            "indicator=${indicatorMatches.size}, profile=${profileMatches.size}, " +
-            "horizonReads=${horizonReads.size} for $horizon: " +
+            "indicator=${indicatorMatches.size}, profile=${profileMatches.size} for $horizon: " +
             (slots + indicatorMatches + profileMatches).joinToString(),
     )
 }
@@ -1357,25 +1338,6 @@ private fun profileSharesContainerIndicator(containerReference: MethodReference)
             }
         },
     ).scopedMatchAllOrNull().orEmpty()
-/**
- * Pre-separate-palette tab implementations read the tab color straight from the Horizon palette,
- * which the dynamic palette factories already replace. The descriptor is resolved, never named.
- */
-private fun isHorizonTabColorRead(method: Method, horizon: String): Boolean {
-    val instructions = method.implementation?.instructions?.toList().orEmpty()
-    return instructions.any { instruction ->
-        instruction.getReference<MethodReference>()?.returnType == horizon
-    } && instructions.any { instruction ->
-        instruction.opcode == Opcode.IGET_WIDE &&
-            instruction.getReference<FieldReference>()?.definingClass == horizon
-    } && instructions.any { instruction ->
-        instruction.getReference<MethodReference>()?.let { reference ->
-            reference.definingClass.startsWith(TAB_RENDERER_SCOPE) &&
-                "J" in reference.parameterTypes
-        } == true
-    }
-}
-
 private fun MutableMethod.injectTabSlotTints(horizon: String) {
     val reads =
         requireExactlyOne(

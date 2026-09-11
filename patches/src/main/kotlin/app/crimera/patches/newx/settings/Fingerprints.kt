@@ -22,9 +22,8 @@ internal val COMPOSE_SETTINGS_BASIC_ITEM_PARAMETERS =
 /**
  * Resolves the repackaged Compose row owner from its preserved X settings caller.
  *
- * ALPHA PATH: normally contributes one caller.
- * BETA PATH: may contribute multiple callers that share the same renderer.
- * TODO: Re-evaluate the alpha caller shape when alpha is deprecated; retain beta renderer deduplication.
+ * Multiple callers may share one renderer after Compose lowering; callers are deduplicated by
+ * the settings patch before the renderer is modified.
  */
 internal object ComposeSettingsBasicItemCallerFingerprint : Fingerprint(
     definingClass = "Lcom/x/settings/common/",

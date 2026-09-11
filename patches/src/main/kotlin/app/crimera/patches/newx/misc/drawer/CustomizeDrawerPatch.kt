@@ -103,7 +103,6 @@ private object NewXDrawerMenuItemFingerprint : Fingerprint(
 )
 
 // FOOTER ROWS: settings/help/feedback/media/imprint/debug pass their localized title.
-// (Also matches the legacy alpha footer shape, hence the loose object-typed slots.)
 private object NewXDrawerFooterItemFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",

@@ -81,11 +81,7 @@ private object NewXPostDetailReplyBarFingerprint : Fingerprint(
     custom = { method, _ -> method.isPostDetailReplyBarRenderer() },
 )
 
-/**
- * The root Compose renderer keeps this stable signature across targets. Older targets do not
- * contain the navigation-insets call; the resolver explicitly validates that legacy shape instead
- * of treating a missing fingerprint as a successful optional patch.
- */
+/** The root Compose renderer owns the main navigation-bar inset modifier. */
 private object NewXMainNavigationRootFingerprint : Fingerprint(
     definingClass = "Lcom/x/android/main/MainActivity;",
     returnType = "V",
@@ -462,7 +458,7 @@ private fun requireNavigationInsetsHook(
 }
 
 context(context: BytecodePatchContext)
-private fun resolveMainNavigationInsetsHook(): NavigationInsetsHook? {
+private fun resolveMainNavigationInsetsHook(): NavigationInsetsHook {
     val matches = NewXMainNavigationRootFingerprint.scopedMatchAllOrNull().orEmpty()
     if (matches.size != 1) {
         throw PatchException(
@@ -472,14 +468,6 @@ private fun resolveMainNavigationInsetsHook(): NavigationInsetsHook? {
     }
     val method = matches.single().method
     val callCount = method.navigationInsetsCallIndices().size
-    if (callCount == 0) {
-        if (method.hasString("insets")) {
-            throw PatchException(
-                "NewX main navigation root has the inset marker but no semantic inset call: $method",
-            )
-        }
-        return null
-    }
     if (callCount != 1) {
         throw PatchException(
             "Expected one NewX main navigation-insets call in $method, found $callCount",
@@ -615,9 +603,11 @@ val newXHidePostReplyBarPatch =
 
             hidePostReplyBar.returnVoidIfEnabled(renderer.method, 0)
             hidePostReplyBar.returnVoidIfEnabled(minimalContainer, 0)
-            navigationInsetsHook?.let { hook ->
-                hidePostReplyBar.branchIfEnabled(hook.method, hook.callIndex, hook.continuation)
-            }
+            hidePostReplyBar.branchIfEnabled(
+                navigationInsetsHook.method,
+                navigationInsetsHook.callIndex,
+                navigationInsetsHook.continuation,
+            )
             postDetailNavigationInsetsHook?.let { hook ->
                 hidePostReplyBar.branchIfEnabled(hook.method, hook.callIndex, hook.continuation)
             }

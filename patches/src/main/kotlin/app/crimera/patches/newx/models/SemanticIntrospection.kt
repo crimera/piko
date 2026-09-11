@@ -154,9 +154,8 @@ internal data class ModelFieldAccessor(
 /**
  * Resolves release-specific model access at patch time.
  *
- * BETA PATH: private model fields are read through generated getters.
- * ALPHA PATH: public model fields use direct iget instructions.
- * TODO: Remove the public-field fallback when alpha compatibility is deprecated.
+ * Models may expose fields through generated getters or public fields. Resolve the available
+ * representation once so generated bridges can use the same model contract.
  */
 internal fun MutableClass.resolveFieldAccessor(
     field: FieldReference,
@@ -171,12 +170,12 @@ internal fun MutableClass.resolveFieldAccessor(
             method.parameterTypes.isEmpty() &&
             method.returnType == field.type
     }
-    // BETA PATH: prefer the stable getter exposed by the private model.
+    // Prefer a generated getter when the model exposes one.
     val getter = requireAtMostOne("NewX $semanticName getter for $field in $this", getterMatches)
     if (getter != null) {
         return ModelFieldAccessor(field, getter)
     }
-    // ALPHA PATH: fall back to the validated public field.
+    // Otherwise require the field to be public before emitting a direct read.
     val definition = requireAtMostOne(
         "NewX $semanticName field definition $field in $this",
         fields.filter { candidate -> candidate.toString() == field.toString() },

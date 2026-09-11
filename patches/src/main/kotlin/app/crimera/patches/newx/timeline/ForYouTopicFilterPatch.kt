@@ -35,7 +35,6 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.numberOfParameterRegistersLogical
 import app.morphe.util.registersUsed
@@ -61,7 +60,6 @@ private const val HOME_TIMELINE_PACKAGE = "Lcom/x/android/main/"
 private const val HOME_MODELS_PACKAGE = "Lcom/x/models/"
 private const val HOME_FILTER_GROUP_FILTER_TYPE_LABEL = "HomeFilterGroup(filterType="
 private const val HOME_FILTER_GROUP_OPTIONS_LABEL = ", options="
-private const val FLOW_PREFIX = "Lkotlinx/coroutines/flow/"
 private const val INTRINSICS_DESCRIPTOR = "Lkotlin/jvm/internal/Intrinsics;"
 private const val OBJECT_LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val INTEGER_DESCRIPTOR = "I"
@@ -98,34 +96,16 @@ private data class ResolvedForYouRequestTarget(
 private data class ResolvedForYouTabHook(
     val method: MutableMethod,
     val insertionIndex: Int,
-    val refreshBridge: ForYouRefreshBridge,
-    val forYouPageRegister: Int?,
-    val forYouSingletonField: FieldReference?,
-    val reservedRegisterBase: Int?,
+    val refreshBridge: ResolvedForYouCurrentPageRefreshBridge,
+    val forYouPageRegister: Int,
+    val forYouSingletonField: FieldReference,
+    val reservedRegisterBase: Int,
 )
 
 private data class ResolvedTimelineEvent(
     val field: FieldReference,
     val dispatchParameterTypes: Set<String>,
 )
-
-private sealed interface ForYouRefreshBridge {
-}
-
-private data class ResolvedForYouRefreshBridge(
-    val stateField: FieldReference,
-    val stateGetter: MethodReference,
-    val pagesType: String,
-    val pagesListField: FieldReference,
-    val pagesIndexField: FieldReference,
-    val pageLookup: MethodReference,
-    val componentType: String,
-    val componentGetter: MethodReference,
-    val homeComponentType: String,
-    val forYouComponentType: String,
-    val forYouControllerField: FieldReference,
-    val refreshDispatch: MethodReference,
-) : ForYouRefreshBridge
 
 private data class ResolvedForYouCurrentPageRefreshBridge(
     val stateField: FieldReference,
@@ -139,7 +119,7 @@ private data class ResolvedForYouCurrentPageRefreshBridge(
     val forYouComponentType: String,
     val forYouControllerField: FieldReference,
     val refreshDispatch: MethodReference,
-) : ForYouRefreshBridge
+)
 
 private data class ResolvedForYouPageTarget(
     val singletonField: FieldReference,
@@ -205,64 +185,40 @@ val newXForYouTopicFilterPatch =
                     registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                 )
             val pageRegister = tabHook.forYouPageRegister
-            val additionalRegisters =
-                if (pageRegister == null) {
-                    listOf(
-                        tabHook.method
-                            .getFreeRegisterProvider(
-                                hookEnabledRead.nextIndex,
-                                1,
-                                hookEnabledRead.register,
-                        ).getFreeRegister4Bit(),
-                    )
-                } else {
-                    val reservedRegisterBase = tabHook.reservedRegisterBase
-                        ?: throw PatchException("NewX For You identity register area is missing")
-                    val registerCount = tabHook.method.implementation?.registerCount
-                        ?: throw PatchException("NewX For You tab hook has no implementation")
-                    val scratchRegisters = listOf(reservedRegisterBase, reservedRegisterBase + 1)
-                    if (scratchRegisters.any { it < 0 || it >= registerCount || it > 255 }) {
-                        throw PatchException(
-                            "NewX For You identity registers are not encodable or reserved: " +
-                                "${scratchRegisters.joinToString { "v$it" }} of $registerCount",
-                        )
-                    }
-                    if (pageRegister > 255) {
-                        throw PatchException(
-                            "NewX For You page register is not encodable in a move-object/from16: " +
-                                "v$pageRegister",
-                        )
-                    }
-                    scratchRegisters
-                }
-            val forYouPageComparisonRegister = additionalRegisters.getOrNull(0)
-                ?.takeIf { pageRegister != null }
-            val forYouSingletonRegister = additionalRegisters.getOrNull(1)
-                ?.takeIf { pageRegister != null }
-            val sheetResultRegister = forYouPageComparisonRegister ?: additionalRegisters.single()
-            val forYouIdentityGuard = if (pageRegister == null) {
-                ""
-            } else {
-                val singletonField = tabHook.forYouSingletonField
-                    ?: throw PatchException("NewX For You page identity field is missing")
-                val pageComparisonRegister = forYouPageComparisonRegister
-                    ?: throw PatchException("NewX For You page comparison register is missing")
-                val singletonRegister = forYouSingletonRegister
-                    ?: throw PatchException("NewX For You singleton register is missing")
-                if (singletonRegister != pageComparisonRegister + 1) {
-                    throw PatchException(
-                        "NewX For You identity registers must be contiguous for invoke-range: " +
-                            "page=v$pageComparisonRegister, singleton=v$singletonRegister",
-                    )
-                }
-                """
-                    move-object/from16 v$pageComparisonRegister, v$pageRegister
-                    sget-object v$singletonRegister, ${singletonField.smaliReference()}
-                    invoke-static/range {v$pageComparisonRegister .. v$singletonRegister}, $INTRINSICS_DESCRIPTOR->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
-                    move-result v$pageComparisonRegister
-                    if-eqz v$pageComparisonRegister, :piko_newx_for_you_topic_sheet_continue
-                """.trimIndent()
+            val reservedRegisterBase = tabHook.reservedRegisterBase
+            val registerCount = tabHook.method.implementation?.registerCount
+                ?: throw PatchException("NewX For You tab hook has no implementation")
+            val scratchRegisters = listOf(reservedRegisterBase, reservedRegisterBase + 1)
+            if (scratchRegisters.any { it < 0 || it >= registerCount || it > 255 }) {
+                throw PatchException(
+                    "NewX For You identity registers are not encodable or reserved: " +
+                        "${scratchRegisters.joinToString { "v$it" }} of $registerCount",
+                )
             }
+            if (pageRegister > 255) {
+                throw PatchException(
+                    "NewX For You page register is not encodable in a move-object/from16: " +
+                        "v$pageRegister",
+                )
+            }
+            val additionalRegisters = scratchRegisters
+            val forYouPageComparisonRegister = additionalRegisters[0]
+            val forYouSingletonRegister = additionalRegisters[1]
+            val sheetResultRegister = forYouPageComparisonRegister
+            val singletonField = tabHook.forYouSingletonField
+            if (forYouSingletonRegister != forYouPageComparisonRegister + 1) {
+                throw PatchException(
+                    "NewX For You identity registers must be contiguous for invoke-range: " +
+                        "page=v$forYouPageComparisonRegister, singleton=v$forYouSingletonRegister",
+                )
+            }
+            val forYouIdentityGuard = """
+                move-object/from16 v$forYouPageComparisonRegister, v$pageRegister
+                sget-object v$forYouSingletonRegister, ${singletonField.smaliReference()}
+                invoke-static/range {v$forYouPageComparisonRegister .. v$forYouSingletonRegister}, $INTRINSICS_DESCRIPTOR->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+                move-result v$forYouPageComparisonRegister
+                if-eqz v$forYouPageComparisonRegister, :piko_newx_for_you_topic_sheet_continue
+            """.trimIndent()
             tabHook.method.addInstructionsWithLabels(
                 hookEnabledRead.nextIndex,
                 """
@@ -323,7 +279,6 @@ private fun resolveForYouTabHook(
     context.classDefForEach { classDef ->
         classDef.methods.toList().forEach { originalMethod ->
             if (originalMethod.returnType != "V" || originalMethod.parameterTypes.size != 1) return@forEach
-            val implementation = originalMethod.implementation ?: return@forEach
             val modernHookCandidate = reselectedEventType?.let { eventType ->
                 originalMethod.resolveModernForYouTabHook(forYouPageTarget, eventType)
             }
@@ -365,38 +320,6 @@ private fun resolveForYouTabHook(
                 )
                 return@forEach
             }
-
-            val legacyHookIndex = originalMethod.resolveLegacyForYouTabHook(forYouPageTarget) ?: return@forEach
-            val mutableClass = context.mutableClassDefBy(classDef.type)
-            val mutableMethod = mutableClass.methods.singleOrNull { method ->
-                method.name == originalMethod.name &&
-                    method.returnType == originalMethod.returnType &&
-                    method.parameterTypes == originalMethod.parameterTypes
-            } as? MutableMethod ?: throw PatchException(
-                "NewX legacy For You tab event hook is not mutable: $originalMethod",
-            )
-            val refreshMethods = mutableClass.methods.filter { method ->
-                method.name != "<init>" &&
-                    method.returnType == "V" &&
-                    method.parameterTypes.isEmpty() &&
-                    method.isCurrentTimelineRefreshMethod(currentPageRefreshEvent)
-            }
-            if (refreshMethods.size != 1) {
-                throw PatchException(
-                    "Expected one NewX legacy For You refresh method for $originalMethod, " +
-                        "found ${refreshMethods.size}: ${refreshMethods.joinToString()}",
-                )
-            }
-            candidates += ResolvedForYouTabHook(
-                method = mutableMethod,
-                insertionIndex = legacyHookIndex,
-                refreshBridge = refreshMethods.single().resolveForYouRefreshBridge(
-                    currentPageRefreshEvent,
-                ),
-                forYouPageRegister = null,
-                forYouSingletonField = null,
-                reservedRegisterBase = null,
-            )
         }
     }
     if (candidates.size != 1) {
@@ -428,122 +351,6 @@ private fun resolveForYouReselectedEventType(): String? {
         )
     }
     return candidates.singleOrNull()
-}
-
-private fun Method.resolveLegacyForYouTabHook(
-    forYouPageTarget: ResolvedForYouPageTarget,
-): Int? {
-    val instructions = implementation?.instructions?.toList() ?: return null
-    val pageLookupCandidates = instructions.withIndex().filter { (_, instruction) ->
-        val reference = instruction.getReference<MethodReference>() ?: return@filter false
-        instruction.opcode == Opcode.INVOKE_STATIC &&
-            reference.name == "getOrNull" &&
-            reference.returnType == OBJECT_DESCRIPTOR &&
-            reference.parameterTypes.map(CharSequence::toString) ==
-                listOf(OBJECT_LIST_DESCRIPTOR, INTEGER_DESCRIPTOR)
-    }
-    if (pageLookupCandidates.isEmpty()) return null
-    val hasForYouSingletonRead = instructions.any { instruction ->
-        if (instruction.opcode != Opcode.SGET_OBJECT) return@any false
-        instruction.getReference<FieldReference>()?.matches(forYouPageTarget.singletonField) == true
-    }
-    if (!hasForYouSingletonRead) return null
-    if (pageLookupCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX legacy For You page lookup in $this, found " +
-                "${pageLookupCandidates.size}: ${pageLookupCandidates.joinToString()}",
-        )
-    }
-    val pageEqualityBranches = instructions.withIndex()
-        .mapNotNull { (index, instruction) ->
-            val reference = instruction.getReference<MethodReference>()
-                ?: return@mapNotNull null
-            if (instruction.opcode != Opcode.INVOKE_STATIC ||
-                reference.definingClass != INTRINSICS_DESCRIPTOR ||
-                reference.name != "areEqual" ||
-                reference.returnType != "Z" ||
-                reference.parameterTypes.map(CharSequence::toString) !=
-                    listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
-            ) {
-                return@mapNotNull null
-            }
-            val resultIndex = index + 1
-            val branchIndex = resultIndex + 1
-            if (branchIndex >= instructions.size ||
-                instructions[resultIndex].opcode != Opcode.MOVE_RESULT ||
-                instructions[branchIndex].opcode != Opcode.IF_EQZ
-            ) {
-                return@mapNotNull null
-            }
-            val pageLookupIndex = pageLookupCandidates
-                .lastOrNull { (candidateIndex, _) -> candidateIndex < index }
-                ?.index
-                ?: return@mapNotNull null
-            val equalityRegisters = instruction.registersUsed
-            val hasForYouSingletonOperand = instructions.withIndex()
-                .drop(maxOf(pageLookupIndex + 1, index - 8))
-                .takeWhile { (candidateIndex, _) -> candidateIndex < index }
-                .any { (_, candidateInstruction) ->
-                    if (candidateInstruction.opcode != Opcode.SGET_OBJECT) return@any false
-                    val singletonRegister =
-                        (candidateInstruction as? OneRegisterInstruction)?.registerA
-                        ?: return@any false
-                    singletonRegister in equalityRegisters &&
-                        candidateInstruction.getReference<FieldReference>()
-                            ?.matches(forYouPageTarget.singletonField) == true
-                }
-            if (!hasForYouSingletonOperand) return@mapNotNull null
-            branchIndex
-        }
-    if (pageEqualityBranches.isEmpty()) {
-        throw PatchException(
-            "Expected one NewX legacy For You page equality branch in $this, found none",
-        )
-    }
-    if (pageEqualityBranches.size != 1) {
-        throw PatchException(
-            "Expected one NewX legacy For You page equality branch, found " +
-                "${pageEqualityBranches.size} in $this: ${pageEqualityBranches.joinToString()}",
-        )
-    }
-    val pageEqualityBranch = pageEqualityBranches.single()
-
-    val hookCandidates = instructions.withIndex()
-        .drop(pageEqualityBranch + 1)
-        .mapNotNull { (castIndex, castInstruction) ->
-            if (castInstruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
-            val castRegister =
-                (castInstruction as? OneRegisterInstruction)?.registerA
-                    ?: return@mapNotNull null
-            val castType =
-                castInstruction.getReference<TypeReference>()?.type
-                    ?: return@mapNotNull null
-            val guardIndex = castIndex + 1
-            val fieldIndex = guardIndex + 1
-            if (fieldIndex >= instructions.size ||
-                instructions[guardIndex].opcode != Opcode.IF_EQZ ||
-                (instructions[guardIndex] as? OneRegisterInstruction)?.registerA != castRegister ||
-                instructions[fieldIndex].opcode != Opcode.IGET_OBJECT
-            ) {
-                return@mapNotNull null
-            }
-            val fieldInstruction = instructions[fieldIndex] as? TwoRegisterInstruction
-                ?: return@mapNotNull null
-            if (fieldInstruction.registerB != castRegister) return@mapNotNull null
-            val field = fieldInstruction.getReference<FieldReference>()
-                ?: return@mapNotNull null
-            if (field.definingClass != castType || !field.type.startsWith(FLOW_PREFIX)) {
-                return@mapNotNull null
-            }
-            guardIndex + 1
-        }
-    if (hookCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX legacy For You topic hook after the page equality branch, found " +
-                "${hookCandidates.size} in $this: ${hookCandidates.joinToString()}",
-        )
-    }
-    return hookCandidates.single()
 }
 
 context(context: BytecodePatchContext)
@@ -735,35 +542,6 @@ private fun Method.resolveModernForYouTabHook(
     return hookCandidates.single()
 }
 
-private fun Method.isCurrentTimelineRefreshMethod(
-    currentPageRefreshEvent: ResolvedTimelineEvent,
-): Boolean {
-    val implementation = implementation ?: return false
-    val instructions = implementation.instructions.toList()
-    val hasCurrentPageLookup = instructions.any { instruction ->
-        val reference = instruction.getReference<MethodReference>() ?: return@any false
-        instruction.opcode == Opcode.INVOKE_STATIC &&
-            reference.name == "getOrNull" &&
-            reference.returnType == OBJECT_DESCRIPTOR &&
-            reference.parameterTypes.map(CharSequence::toString) ==
-                listOf(OBJECT_LIST_DESCRIPTOR, INTEGER_DESCRIPTOR)
-    }
-    val hasTimelineRefreshEvent = instructions.any { instruction ->
-        if (instruction.opcode != Opcode.SGET_OBJECT) return@any false
-        val reference = instruction.getReference<FieldReference>() ?: return@any false
-        reference.matches(currentPageRefreshEvent.field)
-    }
-    val hasTimelineRefreshDispatch = instructions.any { instruction ->
-        if (instruction.opcode != Opcode.INVOKE_INTERFACE) return@any false
-        val reference = instruction.getReference<MethodReference>() ?: return@any false
-        reference.returnType == "V" &&
-            reference.parameterTypes.size == 1 &&
-            reference.parameterTypes.single().toString() in
-                currentPageRefreshEvent.dispatchParameterTypes
-    }
-    return hasCurrentPageLookup && hasTimelineRefreshEvent && hasTimelineRefreshDispatch
-}
-
 context(context: BytecodePatchContext)
 private fun installForYouRefreshBridge(
     tabHook: ResolvedForYouTabHook,
@@ -804,16 +582,10 @@ private fun installForYouRefreshBridge(
     val placeholderImplementation = bridgeMethod.implementation
         ?: throw PatchException("NewX For You refresh bridge has no implementation")
     placeholderImplementation.removeInstruction(placeholderImplementation.instructions.lastIndex)
-    val bridgeSmali = when (val refreshBridge = tabHook.refreshBridge) {
-        is ResolvedForYouRefreshBridge -> refreshBridge.toSmali(
-            clearAndRefreshEvent.field,
-            scrollToTopEvent.field,
-        )
-        is ResolvedForYouCurrentPageRefreshBridge -> refreshBridge.toSmali(
-            clearAndRefreshEvent.field,
-            scrollToTopEvent.field,
-        )
-    }
+    val bridgeSmali = tabHook.refreshBridge.toSmali(
+        clearAndRefreshEvent.field,
+        scrollToTopEvent.field,
+    )
     bridgeMethod.addInstructionsWithLabels(
         0,
         bridgeSmali,
@@ -857,239 +629,6 @@ private fun resolveSingletonTimelineEvent(eventLabel: String): ResolvedTimelineE
         )
     }
     return ResolvedTimelineEvent(fields.single(), dispatchParameterTypes)
-}
-
-private fun Method.resolveForYouRefreshBridge(
-    clearAndRefreshEvent: ResolvedTimelineEvent,
-): ResolvedForYouRefreshBridge {
-    val instructions = implementation?.instructions?.toList()
-        ?: throw PatchException("NewX For You refresh method has no implementation: $this")
-
-    fun fieldAt(index: Int): FieldReference =
-        instructions[index].getReference<FieldReference>()
-            ?: throw PatchException("NewX For You refresh field reference is missing at $index: $this")
-
-    fun typeAt(index: Int): String =
-        instructions[index].getReference<TypeReference>()?.type
-            ?: throw PatchException("NewX For You refresh type reference is missing at $index: $this")
-
-    val stateFieldCandidates = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
-        .map { (index, _) -> fieldAt(index) }
-        .filter { field ->
-            field.definingClass == definingClass &&
-                instructions.any { instruction ->
-                    if (instruction.opcode != Opcode.INVOKE_VIRTUAL) return@any false
-                    val reference = instruction.getReference<MethodReference>() ?: return@any false
-                    reference.definingClass == field.type &&
-                        reference.returnType == OBJECT_DESCRIPTOR &&
-                        reference.parameterTypes.isEmpty()
-                }
-        }
-        .distinctBy(FieldReference::toString)
-    if (stateFieldCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh state field in $this, found " +
-                "${stateFieldCandidates.size}: ${stateFieldCandidates.joinToString()}",
-        )
-    }
-    val stateField = stateFieldCandidates.single()
-
-    val stateGetterCandidates = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
-        .mapNotNull { (index, _) ->
-            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
-            reference.takeIf {
-                it.definingClass == stateField.type &&
-                    it.returnType == OBJECT_DESCRIPTOR &&
-                    it.parameterTypes.isEmpty()
-            }
-        }
-        .distinctBy(MethodReference::toString)
-    if (stateGetterCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh state getter in $this, found " +
-                "${stateGetterCandidates.size}: ${stateGetterCandidates.joinToString()}",
-        )
-    }
-    val stateGetter = stateGetterCandidates.single()
-
-    val pagesTypeCandidates = instructions.withIndex()
-        .filter { (index, instruction) ->
-            instruction.opcode == Opcode.CHECK_CAST &&
-                index > 1 &&
-                instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
-                instructions[index - 2].getReference<MethodReference>()?.matches(stateGetter) == true &&
-                instructions.getOrNull(index + 1)?.opcode == Opcode.IGET_OBJECT &&
-                instructions[index + 1].getReference<FieldReference>()?.let { field ->
-                    field.definingClass == typeAt(index) && field.type == OBJECT_LIST_DESCRIPTOR
-                } == true
-        }.mapNotNull { (index, _) -> typeAt(index) }.distinct()
-    if (pagesTypeCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh pages cast in $this, found " +
-                "${pagesTypeCandidates.size}: ${pagesTypeCandidates.joinToString()}",
-        )
-    }
-    val pagesType = pagesTypeCandidates.single()
-
-    val pagesListFields = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
-        .map { (index, _) -> fieldAt(index) }
-        .filter { field -> field.definingClass == pagesType && field.type == OBJECT_LIST_DESCRIPTOR }
-        .distinctBy(FieldReference::toString)
-    if (pagesListFields.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh pages list field in $this, found " +
-                "${pagesListFields.size}: ${pagesListFields.joinToString()}",
-        )
-    }
-    val pagesListField = pagesListFields.single()
-
-    val pagesIndexFields = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET }
-        .map { (index, _) -> fieldAt(index) }
-        .filter { field -> field.definingClass == pagesType && field.type == INTEGER_DESCRIPTOR }
-        .distinctBy(FieldReference::toString)
-    if (pagesIndexFields.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh pages index field in $this, found " +
-                "${pagesIndexFields.size}: ${pagesIndexFields.joinToString()}",
-        )
-    }
-    val pagesIndexField = pagesIndexFields.single()
-
-    val pageLookupCandidates = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_STATIC }
-        .mapNotNull { (index, _) ->
-            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
-            reference.takeIf {
-                it.name == "getOrNull" &&
-                    it.returnType == OBJECT_DESCRIPTOR &&
-                    it.parameterTypes.map(CharSequence::toString) ==
-                        listOf(OBJECT_LIST_DESCRIPTOR, INTEGER_DESCRIPTOR)
-            }
-        }
-        .distinctBy(MethodReference::toString)
-    if (pageLookupCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh page lookup in $this, found " +
-                "${pageLookupCandidates.size}: ${pageLookupCandidates.joinToString()}",
-        )
-    }
-    val pageLookup = pageLookupCandidates.single()
-
-    val componentTypeCandidates = instructions.withIndex()
-        .filter { (index, instruction) ->
-            instruction.opcode == Opcode.CHECK_CAST &&
-                index > 1 &&
-                instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
-                instructions[index - 2].getReference<MethodReference>()?.matches(pageLookup) == true
-        }.mapNotNull { (index, _) -> typeAt(index) }.distinct()
-    if (componentTypeCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh page component cast in $this, found " +
-                "${componentTypeCandidates.size}: ${componentTypeCandidates.joinToString()}",
-        )
-    }
-    val componentType = componentTypeCandidates.single()
-
-    val componentGetterCandidates = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_VIRTUAL }
-        .mapNotNull { (index, _) ->
-            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
-            reference.takeIf {
-                it.definingClass == componentType &&
-                    it.returnType == OBJECT_DESCRIPTOR &&
-                    it.parameterTypes.isEmpty()
-            }
-        }
-        .distinctBy(MethodReference::toString)
-    if (componentGetterCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh page component getter in $this, found " +
-                "${componentGetterCandidates.size}: ${componentGetterCandidates.joinToString()}",
-        )
-    }
-    val componentGetter = componentGetterCandidates.single()
-
-    val homeComponentTypeCandidates = instructions.withIndex()
-        .filter { (index, instruction) ->
-            instruction.opcode == Opcode.CHECK_CAST &&
-                index > 1 &&
-                instructions[index - 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
-                instructions[index - 2].getReference<MethodReference>()?.matches(componentGetter) == true
-        }.mapNotNull { (index, _) -> typeAt(index) }.distinct()
-    if (homeComponentTypeCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh home component cast in $this, found " +
-                "${homeComponentTypeCandidates.size}: ${homeComponentTypeCandidates.joinToString()}",
-        )
-    }
-    val homeComponentType = homeComponentTypeCandidates.single()
-
-    val forYouTypeCandidates = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.INSTANCE_OF }
-        .map { (index, _) -> typeAt(index) }
-        .distinct()
-    if (forYouTypeCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh For You component type in $this, found " +
-                "${forYouTypeCandidates.size}: ${forYouTypeCandidates.joinToString()}",
-        )
-    }
-    val forYouComponentType = forYouTypeCandidates.single()
-
-    val forYouControllerFields = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.IGET_OBJECT }
-        .map { (index, _) -> fieldAt(index) }
-        .filter { field ->
-            field.definingClass == forYouComponentType
-        }
-        .distinctBy(FieldReference::toString)
-
-    val refreshDispatchCandidates = instructions.withIndex()
-        .filter { (_, instruction) -> instruction.opcode == Opcode.INVOKE_INTERFACE }
-        .mapNotNull { (index, _) ->
-            val reference = instructions[index].getReference<MethodReference>() ?: return@mapNotNull null
-            reference.takeIf {
-                it.returnType == "V" &&
-                    it.parameterTypes.size == 1 &&
-                    it.parameterTypes.single().toString() in
-                        clearAndRefreshEvent.dispatchParameterTypes &&
-                    forYouControllerFields.any { field -> field.type == it.definingClass }
-            }
-        }
-        .distinctBy(MethodReference::toString)
-    if (refreshDispatchCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX For You refresh dispatch method in $this, found " +
-                "${refreshDispatchCandidates.size}: ${refreshDispatchCandidates.joinToString()}",
-        )
-    }
-    val refreshDispatch = refreshDispatchCandidates.single()
-    val forYouControllerFieldsForDispatch = forYouControllerFields.filter {
-        it.type == refreshDispatch.definingClass
-    }
-    val forYouControllerField = requireExactlyOne(
-        label = "NewX For You refresh controller field for ${refreshDispatch.definingClass}",
-        candidates = forYouControllerFieldsForDispatch,
-    )
-
-    return ResolvedForYouRefreshBridge(
-        stateField = stateField,
-        stateGetter = stateGetter,
-        pagesType = pagesType,
-        pagesListField = pagesListField,
-        pagesIndexField = pagesIndexField,
-        pageLookup = pageLookup,
-        componentType = componentType,
-        componentGetter = componentGetter,
-        homeComponentType = homeComponentType,
-        forYouComponentType = forYouComponentType,
-        forYouControllerField = forYouControllerField,
-        refreshDispatch = refreshDispatch,
-    )
 }
 
 private fun Method.tryResolveForYouCurrentPageRefreshBridge(
@@ -1298,49 +837,6 @@ private fun ResolvedForYouCurrentPageRefreshBridge.toSmali(
         invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
 
         :piko_for_you_refresh_current_page_done
-        return-void
-    """.trimIndent()
-
-private fun ResolvedForYouRefreshBridge.toSmali(
-    clearAndRefreshField: FieldReference,
-    scrollToTopField: FieldReference,
-): String =
-    """
-        iget-object v0, p0, ${stateField.smaliReference()}
-        invoke-virtual {v0}, ${stateGetter.smaliReference()}
-        move-result-object v1
-        check-cast v1, $pagesType
-        iget-object v1, v1, ${pagesListField.smaliReference()}
-        invoke-virtual {v0}, ${stateGetter.smaliReference()}
-        move-result-object v0
-        check-cast v0, $pagesType
-        iget v0, v0, ${pagesIndexField.smaliReference()}
-        invoke-static {v1, v0}, ${pageLookup.smaliReference()}
-        move-result-object v0
-        check-cast v0, $componentType
-        const/4 v1, 0x0
-        if-eqz v0, :piko_for_you_refresh_no_component
-        invoke-virtual {v0}, ${componentGetter.smaliReference()}
-        move-result-object v0
-        check-cast v0, $homeComponentType
-        goto :piko_for_you_refresh_component_ready
-
-        :piko_for_you_refresh_no_component
-        move-object v0, v1
-
-        :piko_for_you_refresh_component_ready
-        instance-of v2, v0, $forYouComponentType
-        if-eqz v2, :piko_for_you_refresh_done
-        check-cast v0, $forYouComponentType
-        iget-object v1, v0, ${forYouControllerField.smaliReference()}
-        if-eqz v1, :piko_for_you_refresh_done
-        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markForYouFilterRefresh()V
-        sget-object v0, ${clearAndRefreshField.smaliReference()}
-        invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
-        sget-object v0, ${scrollToTopField.smaliReference()}
-        invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
-
-        :piko_for_you_refresh_done
         return-void
     """.trimIndent()
 

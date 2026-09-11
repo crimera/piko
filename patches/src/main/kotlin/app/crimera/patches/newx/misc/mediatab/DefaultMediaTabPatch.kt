@@ -26,13 +26,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 /**
  * Targets the NewX combined profile timeline component constructor
  * (`com/x/profile/timeline/a` — used for the combined Posts+Highlights tab and the
  * combined Photos+Videos media tab). It seeds the selected sub-tab state with
- * `MutableStateFlow(primaryType)` — Videos for the combined media tab — which drives
+ * `MutableStateFlow(initialSubTab)` — Videos for the combined media tab — which drives
  * both the header tab label/dropdown and the displayed media grid.
  *
  * The seed value is routed through [MediaTabResolver.getEnumDefault] so the configured
@@ -43,21 +42,12 @@ import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 private fun isCombinedTimelineComponent(classDef: ClassDef) =
     classDef.interfaces.any { it.startsWith("Lcom/x/profile/timeline/") }
 
-/** True when a method takes `(primaryType, secondaryType, ...)` where both leading params share a type. */
-private fun hasPrimarySecondaryPair(parameterTypes: List<CharSequence>) =
-    parameterTypes.size >= 3 && parameterTypes[0] == parameterTypes[1]
-
 /** True when the refactored component takes `(tabTypes, initialSubTab, ...)`. */
 private fun hasTabTypesAndInitialSubTab(parameterTypes: List<CharSequence>) =
     parameterTypes.size >= 3 &&
         parameterTypes[0].toString() == "Ljava/util/List;" &&
         parameterTypes[1].toString().startsWith("Lcom/x/profile/") &&
         parameterTypes[1].toString().endsWith(";")
-
-/** True when [instruction] builds the `arrayOf(primaryType, secondaryType)` used for the grouped tab list. */
-private fun isPairArray(instruction: Instruction, elementType: CharSequence) =
-    (instruction.opcode == Opcode.FILLED_NEW_ARRAY || instruction.opcode == Opcode.FILLED_NEW_ARRAY_RANGE) &&
-        ((instruction as? ReferenceInstruction)?.reference as? TypeReference)?.type == "[$elementType"
 
 /** True when [instruction] is the `MutableStateFlow(seedValue)` factory call. */
 private fun isFlowSeed(instruction: Instruction) =
@@ -84,26 +74,7 @@ private fun resolverInvoke(register: Int) =
             "$MEDIA_TAB_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Object;)Ljava/lang/Object;"
     }
 
-private object NewXCombinedProfileTimelineSeedFingerprint : Fingerprint(
-    definingClass = "Lcom/x/profile/timeline/",
-    custom = { method, classDef ->
-        // morphe's Fingerprint `name` is only an identifier — it does NOT filter by
-        // method name, so the constructor guard has to live here.
-        method.name == "<init>" &&
-            isCombinedTimelineComponent(classDef) &&
-            hasPrimarySecondaryPair(method.parameterTypes) &&
-            method.implementation?.instructions?.any {
-                isPairArray(it, method.parameterTypes[0])
-            } == true &&
-            method.implementation?.instructions?.any { isFlowSeed(it) } == true
-    },
-)
-
-/**
- * Newer NewX builds changed the combined component contract to `(tabTypes, initialSubTab, ...)`.
- * The selected value is still the first object passed to the flow factory, but the call is now
- * an `/range` invoke from a parameter register instead of a 35c invoke from a local.
- */
+/** The combined component seeds its selected-sub-tab flow from the initial-sub-tab parameter. */
 private object NewXCombinedProfileTimelineInitialSubTabFingerprint : Fingerprint(
     definingClass = "Lcom/x/profile/timeline/",
     custom = { method, classDef ->
@@ -142,66 +113,34 @@ val newXDefaultMediaTabPatch =
         )
 
         execute {
-            val legacyMatches =
-                NewXCombinedProfileTimelineSeedFingerprint.scopedMatchAllOrNull().orEmpty()
             val refactoredMatches =
                 NewXCombinedProfileTimelineInitialSubTabFingerprint.scopedMatchAllOrNull().orEmpty()
             val combinedMatch =
                 requireExactlyOne(
                     label = "combined profile timeline seed across known shapes",
-                    candidates = legacyMatches + refactoredMatches,
+                    candidates = refactoredMatches,
                 )
-            val isLegacyShape = legacyMatches.isNotEmpty()
             val method = combinedMatch.method
-            val tabTypeDescriptor =
-                if (isLegacyShape) method.parameterTypes[0].toString()
-                else method.parameterTypes[1].toString()
+            val tabTypeDescriptor = method.parameterTypes[1].toString()
 
             val methodInstructions = method.instructions
-            val seedInvokeIndex =
-                if (isLegacyShape) {
-                    val pairArrayCandidates =
-                        methodInstructions.withIndex()
-                            .filter { (_, instruction) -> isPairArray(instruction, tabTypeDescriptor) }
-                    if (pairArrayCandidates.size != 1) {
-                        throw PatchException(
-                            "Expected one combined profile tab array in the NewX media tab seed, found " +
-                                "${pairArrayCandidates.size}: ${pairArrayCandidates.joinToString { "${it.index}:${it.value}" }}",
-                        )
+            val implementation = method.implementation
+                ?: throw PatchException("Refactored combined profile timeline component has no implementation")
+            val firstParameterRegister = implementation.registerCount - method.parameterTypes.size
+            val initialSubTabRegister = firstParameterRegister + 1
+            val seedCandidates =
+                methodInstructions.withIndex()
+                    .filter { (_, instruction) ->
+                        isFlowSeed(instruction) &&
+                            singleArgumentRegister(instruction) == initialSubTabRegister
                     }
-                    val pairArrayIndex = pairArrayCandidates.single().index
-                    val seedCandidates =
-                        (pairArrayIndex + 1 until methodInstructions.size)
-                            .filter { isFlowSeed(methodInstructions[it]) }
-                    if (seedCandidates.size != 1) {
-                        throw PatchException(
-                            "Expected one MutableStateFlow seed after the combined profile tab array, found " +
-                                "${seedCandidates.size}: ${seedCandidates.joinToString { index -> "${index}:${methodInstructions[index]}" }}",
-                        )
-                    }
-                    seedCandidates.single()
-                } else {
-                    val implementation = method.implementation
-                        ?: throw PatchException("Refactored combined profile timeline component has no implementation")
-                    val firstParameterRegister = implementation.registerCount - method.parameterTypes.size
-                    val initialSubTabRegister = firstParameterRegister + 1
-                    val seedCandidates =
-                        methodInstructions.withIndex()
-                            .filter { (_, instruction) ->
-                                isFlowSeed(instruction) &&
-                                    singleArgumentRegister(instruction) == initialSubTabRegister
-                            }
-                    if (seedCandidates.size != 1) {
-                        throw PatchException(
-                            "Expected one MutableStateFlow seed for the refactored initial sub-tab, found " +
-                                "${seedCandidates.size}: ${seedCandidates.joinToString { "${it.index}:${it.value}" }}",
-                        )
-                    }
-                    seedCandidates.single().index
-                }
-            if (seedInvokeIndex == -1) {
-                throw PatchException("Missing MutableStateFlow seed in the NewX combined profile timeline component")
+            if (seedCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one MutableStateFlow seed for the refactored initial sub-tab, found " +
+                        "${seedCandidates.size}: ${seedCandidates.joinToString { "${it.index}:${it.value}" }}",
+                )
             }
+            val seedInvokeIndex = seedCandidates.single().index
 
             val seedValueRegister =
                 singleArgumentRegister(methodInstructions[seedInvokeIndex])
@@ -212,13 +151,8 @@ val newXDefaultMediaTabPatch =
 
             // The seed value is replaced in place, so it must live in a scratch register — a
             // parameter register may be read again later in the constructor on other targets.
-            val implementation = method.implementation
-                ?: throw PatchException("Combined profile timeline component has no implementation")
-            val parameterRegisterFloor = implementation.registerCount - method.parameterTypes.size
-            val initialSubTabRegister = parameterRegisterFloor + 1
-            val isRefactoredInitialSubTab =
-                !isLegacyShape && seedValueRegister == initialSubTabRegister
-            if (seedValueRegister >= parameterRegisterFloor && !isRefactoredInitialSubTab) {
+            val parameterRegisterFloor = firstParameterRegister
+            if (seedValueRegister >= parameterRegisterFloor && seedValueRegister != initialSubTabRegister) {
                 throw PatchException(
                     "Seed value lives in a parameter register (v$seedValueRegister); adjust the fingerprint for this target",
                 )
