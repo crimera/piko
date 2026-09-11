@@ -13,6 +13,7 @@ import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.OpcodesFilter
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -28,6 +29,8 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction10t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -39,6 +42,8 @@ private const val LIST = "Ljava/util/List;"
 private const val OBJECT = "Ljava/lang/Object;"
 private const val STRING = "Ljava/lang/String;"
 private const val EXTENSION = "$PATCHES_DESCRIPTOR/navigation/NavigationBarPatch;"
+private const val INTENT = "Landroid/content/Intent;"
+private const val STARTUP_TAB_EXTRA = "MainActivityAccountHelper.STARTUP_TAB"
 private const val FRAGMENT_NAME_BRIDGE = "navigationFragmentName"
 
 private object NavigationBarFingerprint : Fingerprint(
@@ -62,6 +67,11 @@ private object NavigationEnumFingerprint : Fingerprint(
 
 private object EnumConstructorFingerprint : Fingerprint(name = "<init>")
 
+private object StartupFingerprint : Fingerprint(
+    strings = listOf(STARTUP_TAB_EXTRA),
+    parameters = listOf(INTENT, USER_SESSION_CLASS, "Z"),
+    returnType = "V",
+)
 
 private object InitialTabPositionFingerprint : Fingerprint(
     strings = listOf("feed_viewpager_empty_tabs"),
@@ -309,6 +319,58 @@ private fun installTransform(
     )
 }
 
+private fun installStartup(
+    method: MutableMethod,
+    allCandidates: MethodReference,
+) {
+    val parameters = method.parameterTypes.map(CharSequence::toString)
+    if (parameters != listOf(INTENT, USER_SESSION_CLASS, "Z") || method.returnType != "V") {
+        throw PatchException("Unexpected navigation startup method signature")
+    }
+    val firstParameter =
+        method.p0Register + if (AccessFlags.STATIC.isSet(method.accessFlags)) 0 else 1
+    val intentRegister = firstParameter
+    val sessionRegister = firstParameter + 1
+    val coldRegister = firstParameter + 2
+    val candidatesRegister =
+        method.findFreeRegister(0, listOf(intentRegister, sessionRegister, coldRegister))
+    requireLocalRegisters(method, listOf(candidatesRegister))
+    if (listOf(intentRegister, sessionRegister, coldRegister).any { it !in 0..0xf }) {
+        throw PatchException("Navigation startup requires 4-bit parameter registers")
+    }
+
+    val implementation =
+        method.implementation ?: throw PatchException("Navigation startup has no implementation")
+    val nativeStart =
+        method.instructions.firstOrNull()
+            ?: throw PatchException("Navigation startup has no first instruction")
+    val resumeNative = nativeStart.location.addNewLabel()
+    val candidateStart = "invoke-static {v$sessionRegister}, $allCandidates".toInstruction(method)
+    val candidateEnd =
+        "invoke-static {v$intentRegister, v$coldRegister, v$candidatesRegister}, $EXTENSION->applyStartupTab(Landroid/content/Intent;ZLjava/util/List;)V"
+            .toInstruction(method)
+    val candidateFailure = "move-exception v$candidatesRegister".toInstruction(method)
+    method.addInstructions(
+        0,
+        listOf(
+            "invoke-static {v$intentRegister, v$coldRegister}, $EXTENSION->preflightStartup(Landroid/content/Intent;Z)Z"
+                .toInstruction(method),
+            "move-result v$candidatesRegister".toInstruction(method),
+            BuilderInstruction21t(Opcode.IF_EQZ, candidatesRegister, resumeNative),
+            candidateStart,
+            "move-result-object v$candidatesRegister".toInstruction(method),
+            candidateEnd,
+            BuilderInstruction10t(Opcode.GOTO, resumeNative),
+            candidateFailure,
+            BuilderInstruction10t(Opcode.GOTO, resumeNative),
+        ),
+    )
+    implementation.addCatch(
+        candidateStart.location.addNewLabel(),
+        candidateEnd.location.addNewLabel(),
+        candidateFailure.location.addNewLabel(),
+    )
+}
 
 @Suppress("unused")
 val navigationBarPatch =
@@ -342,8 +404,12 @@ val navigationBarPatch =
             ) {
                 throw PatchException("Navigation candidates provider is not public static")
             }
+            val startupMatch =
+                StartupFingerprint.matchAll(0..Int.MAX_VALUE).singleOrNull()
+                    ?: throw PatchException("Expected one navigation startup method")
 
             installFragmentNameBridge(fragmentField)
+            installStartup(startupMatch.method, allCandidates)
             installTransform(navigationMatch.method, allCandidates)
             installInitialTabPosition(enumMatch.classDef.type)
             enableSettings("hideNavigationButtons")

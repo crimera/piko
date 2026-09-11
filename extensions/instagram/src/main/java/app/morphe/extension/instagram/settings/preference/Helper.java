@@ -17,6 +17,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.NavigationBarPreference;
+import app.morphe.extension.instagram.settings.preference.widgets.NavigationStartupPreference;
 import app.morphe.extension.instagram.settings.SettingsRestart;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.theme.MaterialYouTheme;
@@ -77,6 +78,14 @@ public class Helper {
         return preference;
     }
 
+    public Preference navigationStartupPreference(String title, String summary) {
+        NavigationStartupPreference preference = new NavigationStartupPreference(context);
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setSingleLineTitle(false);
+        return preference;
+    }
 
     public Preference editTextPreference(String title, String summary, StringSetting setting) {
         EditTextPref preference = new EditTextPref(context);

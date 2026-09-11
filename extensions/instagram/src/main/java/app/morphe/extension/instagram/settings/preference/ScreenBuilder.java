@@ -809,6 +809,12 @@ public class ScreenBuilder {
                 )
         );
 
+        addPreference(
+                helper.navigationStartupPreference(
+                        str("piko_navigation_startup_tab"),
+                        str("piko_navigation_startup_tab_summary")
+                )
+        );
     }
 
     public void buildRecommendedFlagsSection() {
