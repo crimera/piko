@@ -61,6 +61,21 @@ private val NEWX_DRAWER_MENU_ITEM_PARAMETERS =
         "I",
     )
 
+// Newer releases add an auxiliary content lambda before the Composer parameter.
+private val NEWX_DRAWER_MENU_ITEM_WITH_AUXILIARY_CONTENT_PARAMETERS =
+    listOf(
+        "Ljava/lang/String;",
+        "L",
+        FUNCTION0_DESCRIPTOR,
+        "L",
+        "Z",
+        "L",
+        FUNCTION3_DESCRIPTOR,
+        COMPOSER_DESCRIPTOR,
+        "I",
+        "I",
+    )
+
 private val NEWX_DRAWER_FOOTER_ITEM_PARAMETERS =
     listOf(
         "I",
@@ -100,6 +115,12 @@ private object NewXDrawerMenuItemFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
     parameters = NEWX_DRAWER_MENU_ITEM_PARAMETERS,
+)
+
+private object NewXDrawerMenuItemWithAuxiliaryContentFingerprint : Fingerprint(
+    classFingerprint = NewXDrawerContentClassFingerprint,
+    returnType = "V",
+    parameters = NEWX_DRAWER_MENU_ITEM_WITH_AUXILIARY_CONTENT_PARAMETERS,
 )
 
 // FOOTER ROWS: settings/help/feedback/media/imprint/debug pass their localized title.
@@ -585,14 +606,17 @@ val customizeNewXDrawerPatch =
                 )
             }
 
-            val menuMatches = NewXDrawerMenuItemFingerprint.scopedMatchAll()
-            if (menuMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX drawer menu item renderer, found ${menuMatches.size}: " +
-                        menuMatches.joinToString { it.originalMethod.toString() },
+            val menuMatches =
+                (NewXDrawerMenuItemFingerprint.scopedMatchAllOrNull().orEmpty() +
+                    NewXDrawerMenuItemWithAuxiliaryContentFingerprint.scopedMatchAllOrNull().orEmpty())
+                    .distinctBy { it.originalMethod.toString() }
+            val menuMatch =
+                requireExactlyOne(
+                    label = "NewX drawer menu item renderer",
+                    candidates = menuMatches,
+                    describe = { it.originalMethod.toString() },
                 )
-            }
-            menuMatches.single().method.injectDrawerItemGuard(hiddenItems)
+            menuMatch.method.injectDrawerItemGuard(hiddenItems)
 
             // FOOTER ROWS: settings/help/feedback/media/imprint/debug render with a title.
             val footerMatches =
@@ -607,7 +631,7 @@ val customizeNewXDrawerPatch =
             }
             val footerRendererMatch =
                 footerMatches.singleOrNull()?.also { it.method.injectDrawerItemGuard(hiddenItems) }
-                    ?: menuMatches.single()
+                    ?: menuMatch
             val footerRenderer =
                 ImmutableMethodReference(
                     footerRendererMatch.originalMethod.definingClass,
