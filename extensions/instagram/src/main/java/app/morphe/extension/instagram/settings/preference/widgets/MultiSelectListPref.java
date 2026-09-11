@@ -105,11 +105,14 @@ public class MultiSelectListPref extends MultiSelectListPreference {
     public void setInitialValue(String key) {
         CharSequence[] entries = new CharSequence[]{};
         CharSequence[] entriesValues = new CharSequence[]{};
+        // Migrate legacy action visibility before the preference reads its saved selection.
         if (key == Settings.ACTION_BAR_MAIN_FEED.key) {
+            Pref.mainFeedActionBarButtons();
             entries = ResourceUtils.getStringArray("piko_array_action_bar_main_feed");
             entriesValues = ResourceUtils.getStringArray("piko_array_action_bar_main_feed_val");
         }
         else if (key == Settings.ACTION_BAR_USER_PROFILE.key) {
+            Pref.userProfileActionBarButtons();
             entries = ResourceUtils.getStringArray("piko_array_action_bar_user_profile");
             entriesValues = ResourceUtils.getStringArray("piko_array_action_bar_user_profile_val");
         }

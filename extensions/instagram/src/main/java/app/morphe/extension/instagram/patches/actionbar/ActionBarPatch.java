@@ -29,6 +29,8 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 
 import com.instagram.common.session.UserSession;
 
@@ -93,6 +95,19 @@ public class ActionBarPatch {
         } catch (Exception e) {
             Logger.printException(() -> "mainFeedActionBarButton failure", e);
             PikoUtils.logger(e);
+        }
+    }
+
+    public static String filterHomeAction(String action) {
+        if ("share".equals(action) && Pref.getHideHomeCreateButton()) return null;
+        if ("news".equals(action) && Pref.getHideHomeNotificationsButton()) return null;
+        return action;
+    }
+
+    public static void hideProfileCreateButton(View view, int drawableId) {
+        if (drawableId != 0 && !Pref.userProfileActionBarButtons().contains(Constants.AB_CREATE)
+                && drawableId == ResourceUtils.getIdentifier(ResourceType.DRAWABLE, "instagram_add_outline_24")) {
+            view.setVisibility(View.GONE);
         }
     }
 

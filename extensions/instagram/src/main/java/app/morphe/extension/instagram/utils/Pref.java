@@ -8,6 +8,10 @@
 package app.morphe.extension.instagram.utils;
 
 import java.util.Set;
+import java.util.HashSet;
+import android.content.Context;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -249,6 +253,14 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_FEED);
     }
 
+    public static boolean getHideHomeCreateButton() {
+        return !mainFeedActionBarButtons().contains(Constants.AB_CREATE);
+    }
+
+    public static boolean getHideHomeNotificationsButton() {
+        return !mainFeedActionBarButtons().contains(Constants.AB_NOTIFICATIONS);
+    }
+
     public static boolean hideNavigationReels() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_REELS);
     }
@@ -329,11 +341,38 @@ public class Pref {
     }
 
     public static Set<String> mainFeedActionBarButtons() {
-        return SharedPref.getSetPref(Settings.ACTION_BAR_MAIN_FEED);
+        return loadAndMigrateActionBarButtons(Settings.ACTION_BAR_MAIN_FEED, true);
     }
 
     public static Set<String> userProfileActionBarButtons() {
-        return SharedPref.getSetPref(Settings.ACTION_BAR_USER_PROFILE);
+        return loadAndMigrateActionBarButtons(Settings.ACTION_BAR_USER_PROFILE, false);
+    }
+
+    private static Set<String> loadAndMigrateActionBarButtons(StringSetting setting, boolean home) {
+        Set<String> buttons = SharedPref.getSetPref(setting);
+        Context context = Utils.getContext();
+        var preferences = context == null ? null
+                : context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String migratedKey = setting.key + "_visibility_migrated";
+        if (preferences != null && preferences.getBoolean(migratedKey, false)) return buttons;
+
+        String createKey = Settings.HIDE_HOME_CREATE_BUTTON.key;
+        String notificationsKey = Settings.HIDE_HOME_NOTIFICATIONS_BUTTON.key;
+        buttons = new HashSet<>(buttons);
+        boolean hideCreate = buttons.remove("HIDE_CREATE");
+        if (home && preferences != null) hideCreate |= preferences.getBoolean(createKey, false);
+        if (!hideCreate) buttons.add(Constants.AB_CREATE);
+        if (home) {
+            boolean hideNotifications = buttons.remove("HIDE_NOTIFICATIONS");
+            if (preferences != null) hideNotifications |= preferences.getBoolean(notificationsKey, false);
+            if (!hideNotifications) buttons.add(Constants.AB_NOTIFICATIONS);
+        }
+        if (preferences != null) {
+            var editor = preferences.edit().putStringSet(setting.key, buttons).putBoolean(migratedKey, true);
+            if (home) editor.remove(createKey).remove(notificationsKey);
+            editor.apply();
+        }
+        return buttons;
     }
 
     public static Set<String> chatActionBarButtons() {

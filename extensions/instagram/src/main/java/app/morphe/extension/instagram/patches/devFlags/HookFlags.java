@@ -13,6 +13,7 @@ import java.util.Set;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptionsItem;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -51,7 +52,7 @@ public class HookFlags {
 
     private static void profileActionBarFlags() {
         Set<String> pref = Pref.userProfileActionBarButtons();
-        if(!pref.isEmpty()) {
+        if (!pref.equals(Set.of(Constants.AB_CREATE))) {
             BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
             BOOL_FLAGS.put("89230::0", true); //ig_android_profile_overflow_menu_redesign_launcher:enabled
         }
@@ -59,7 +60,7 @@ public class HookFlags {
 
     private static void mainFeedActionBarFlags() {
         Set<String> pref = Pref.mainFeedActionBarButtons();
-        if(!pref.isEmpty()) {
+        if (!pref.equals(Set.of(Constants.AB_CREATE, Constants.AB_NOTIFICATIONS))) {
             BOOL_FLAGS.put("81826::1", true); //igx_action_bar_service_replacement::is_main_feed_replaced
             BOOL_FLAGS.put("81826::4", true); //igx_action_bar_service_replacement::is_main_feed_large_screen_replaced
         }
