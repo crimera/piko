@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 import app.morphe.extension.instagram.patches.navigation.NavigationBarPatch.NotificationsVisibility;
+import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
@@ -131,7 +132,7 @@ final class HomeActionBarLayout {
                 if (collapsed != null && collapsed != container) restore();
 
                 NotificationsVisibility state = stateProvider.get();
-                if (state != NotificationsVisibility.VISIBLE
+                if ((state != NotificationsVisibility.VISIBLE && !Pref.getHideHomeNotificationsButton())
                         || hasVisibleDirectChild(container)) {
                     restore();
                 } else if (collapsed() != container

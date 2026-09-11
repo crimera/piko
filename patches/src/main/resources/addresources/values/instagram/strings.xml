@@ -266,6 +266,8 @@
     <string name="piko_action_bar_button_settings_icon">Settings icon</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
     <string name="piko_action_bar_button_profile_info_icon">Profile info icon</string>
+    <string name="piko_action_bar_button_create_icon">Create icon</string>
+    <string name="piko_action_bar_button_notifications_icon">Notifications icon</string>
 
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>

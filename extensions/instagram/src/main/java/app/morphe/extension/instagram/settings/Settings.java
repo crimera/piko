@@ -86,6 +86,8 @@ public class Settings {
     public static final BooleanSetting HIDE_NAVIGATION_SEARCH = new BooleanSetting("hide_navigation_search", false);
     public static final BooleanSetting HIDE_NAVIGATION_CREATE = new BooleanSetting("hide_navigation_create", false);
     public static final StringSetting NAVIGATION_TABS = new StringSetting("navigation_tabs", "");
+    public static final BooleanSetting HIDE_HOME_CREATE_BUTTON = new BooleanSetting("hide_home_create_button", false);
+    public static final BooleanSetting HIDE_HOME_NOTIFICATIONS_BUTTON = new BooleanSetting("hide_home_notifications_button", false);
 
     public static final StringSetting ACTION_BAR_MAIN_FEED = new StringSetting("action_bar_main_feed", "");
     public static final StringSetting ACTION_BAR_USER_PROFILE = new StringSetting("action_bar_user_profile", "");
