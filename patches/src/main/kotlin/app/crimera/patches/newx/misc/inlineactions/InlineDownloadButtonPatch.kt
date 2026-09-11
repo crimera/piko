@@ -101,6 +101,7 @@ val newXInlineDownloadButtonPatch =
             newXPostMediaModelResolutionPatch,
             newXInlineDownloadModelResolutionPatch,
             newXThumbnailCachePatch,
+            newXInAppNotificationPatch,
             newXExtensionPatch,
         )
 

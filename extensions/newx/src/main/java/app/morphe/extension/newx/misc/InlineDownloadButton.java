@@ -2,7 +2,6 @@ package app.morphe.extension.newx.misc;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import app.morphe.extension.shared.Utils;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.newx.utils.NewXUtils;
 import android.app.AlertDialog;
@@ -158,13 +157,13 @@ public final class InlineDownloadButton {
             context = NewXUtils.findUsableActivity(null);
             Object post = getPresenterPost(presenter);
             if (context == null || post == null) {
-                Utils.showToastShort("Could not find the selected post");
+                NewXInAppNotification.show("Could not find the selected post");
                 return true;
             }
 
             List<DownloadItem> downloads = downloadItems(mediaFor(post));
             if (downloads.isEmpty()) {
-                Utils.showToastShort("No downloadable media found");
+                NewXInAppNotification.show("No downloadable media found");
                 return true;
             }
 
@@ -178,7 +177,7 @@ public final class InlineDownloadButton {
             return true;
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
-            Utils.showToastShort("Could not download post media");
+            NewXInAppNotification.show("Could not download post media");
             return true;
         }
     }
@@ -652,9 +651,9 @@ public final class InlineDownloadButton {
                         conflictBehavior()
                 );
         switch (state) {
-            case QUEUED -> Utils.showToastShort("Download started");
-            case SKIPPED -> Utils.showToastShort("Already downloaded or queued");
-            case FAILED -> Utils.showToastShort("Could not start download");
+            case QUEUED -> NewXInAppNotification.show("Download started");
+            case SKIPPED -> NewXInAppNotification.show("Already downloaded or queued");
+            case FAILED -> NewXInAppNotification.show("Could not start download");
         }
     }
 
@@ -701,7 +700,7 @@ public final class InlineDownloadButton {
     ) {
         if (queueDownload(context, manager, fallbackUrl, fileName, mimeType, "Downloading media") ==
                 EnqueueState.FAILED) {
-            Utils.showToastShort("Download failed: " + fileName);
+            NewXInAppNotification.show("Download failed: " + fileName);
         }
     }
 
@@ -872,15 +871,17 @@ public final class InlineDownloadButton {
                     ? publishDownload(context, manager, downloadId, pending.fileName, pending.mimeType)
                     : moveLegacyDownload(context, pending.temporaryFileName, pending.fileName, pending.mimeType);
             if (!moved) {
-                Utils.showToastShort("Could not finalize download: " + pending.fileName);
+                NewXInAppNotification.show("Could not finalize download: " + pending.fileName);
                 return;
             }
 
-            removePendingDownload(context, manager, downloadId);
-            Utils.showToastShort("Downloaded: " + pending.fileName);
+            // Keep the DownloadManager row: removing it also dismisses the
+            // VISIBILITY_VISIBLE_NOTIFY_COMPLETED notification that represents completion
+            // for direct downloads. The app-owned pending metadata can be cleared safely.
+            clearPendingDownload(context, downloadId);
         } catch (IOException | RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to finalize NewX media download", exception);
-            Utils.showToastShort("Could not finalize download: " + pending.fileName);
+            NewXInAppNotification.show("Could not finalize download: " + pending.fileName);
         }
     }
 
@@ -896,7 +897,7 @@ public final class InlineDownloadButton {
             enqueueFallbackDownload(context, manager, fallbackUrl, pending.fileName, pending.mimeType);
             return;
         }
-        Utils.showToastShort("Download failed: " + pending.fileName);
+        NewXInAppNotification.show("Download failed: " + pending.fileName);
     }
 
     private static synchronized void removePendingDownload(
@@ -1071,17 +1072,17 @@ public final class InlineDownloadButton {
     private static void showQueueResult(Context context, int queued, int skipped, int failed) {
         if (failed == 0 && skipped == 0) {
             String message = queued == 1 ? "Download started" : queued + " downloads started";
-            Utils.showToastShort(message);
+            NewXInAppNotification.show(message);
             return;
         }
         if (queued == 0) {
             if (failed == 0 && skipped > 0) {
-                Utils.showToastShort(skipped == 1
+                NewXInAppNotification.show(skipped == 1
                         ? "Already downloaded or queued"
                         : skipped + " media already downloaded or queued");
                 return;
             }
-            Utils.showToastShort("Could not start download");
+            NewXInAppNotification.show("Could not start download");
             return;
         }
         List<String> parts = new ArrayList<>();
@@ -1090,7 +1091,7 @@ public final class InlineDownloadButton {
                 ? "1 already downloaded or queued"
                 : skipped + " already downloaded or queued");
         if (failed > 0) parts.add(failed == 1 ? "1 failed" : failed + " failed");
-        Utils.showToastShort(String.join(", ", parts));
+        NewXInAppNotification.show(String.join(", ", parts));
     }
 
     static ConflictBehavior conflictBehavior() {
