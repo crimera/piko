@@ -42,6 +42,11 @@ public class SharedPref extends BaseSharedPref {
         return INSTANCE.setString(key, defaultValue);
     }
 
+    public static boolean hasKey(String key) {
+        var preferences = INSTANCE.all();
+        return preferences != null && preferences.has(key);
+    }
+
     public static Set<String> getSetPref(StringSetting setting) {
         return INSTANCE.getSet(setting);
     }

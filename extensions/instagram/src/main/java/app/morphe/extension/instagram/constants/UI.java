@@ -11,6 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -26,7 +27,6 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
@@ -63,10 +63,40 @@ public class UI {
 
     public static int getThemedColour(String attrName) {
         Context context = Utils.getContext();
+        boolean dark = (context.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        int fallback = themedColourFallback(attrName, dark);
         TypedValue typedValue = new TypedValue();
-        int attrId = ResourceUtils.getAttrIdentifier(attrName);
-        boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
-        return context.getColor(typedValue.resourceId);
+        try {
+            int attrId = ResourceUtils.getAttrIdentifier(attrName);
+            boolean resolved = attrId != 0
+                    && context.getTheme().resolveAttribute(attrId, typedValue, true);
+            if (!resolved) return fallback;
+            if (typedValue.resourceId != 0) return context.getColor(typedValue.resourceId);
+            if (typedValue.type >= TypedValue.TYPE_FIRST_COLOR_INT
+                    && typedValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                return typedValue.data;
+            }
+            return fallback;
+        } catch (RuntimeException ignored) {
+            return fallback;
+        }
+    }
+
+    private static int themedColourFallback(String attrName, boolean dark) {
+        if (attrName != null && attrName.contains("secondary_background")) {
+            return dark ? 0xff262626 : 0xfff2f2f2;
+        }
+        if (attrName != null && attrName.contains("background")) {
+            return dark ? Color.BLACK : Color.WHITE;
+        }
+        if (attrName != null && attrName.contains("separator")) {
+            return dark ? 0xff363636 : 0xffdbdbdb;
+        }
+        if (attrName != null && attrName.contains("secondary_text")) {
+            return dark ? 0xffb3b3b3 : 0xff737373;
+        }
+        return dark ? Color.WHITE : Color.BLACK;
     }
 
     public static boolean isDarkMode() {
