@@ -998,7 +998,7 @@ public class ScreenBuilder {
         if (SettingsStatus.downloadSection()){
             addPreference(
                     helper.buttonPreference(
-                            str("piko_category_download_media"),
+                            str("piko_category_downloads"),
                             "",
                             Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA
                     )

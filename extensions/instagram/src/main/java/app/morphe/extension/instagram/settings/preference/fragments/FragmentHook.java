@@ -30,7 +30,7 @@ public class FragmentHook {
         }else if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
             actionBarTitleKey = "piko_category_misc";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
-            actionBarTitleKey = "piko_category_download_media";
+            actionBarTitleKey = "piko_category_downloads";
         }else if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
             actionBarTitleKey = "piko_category_navigation_tabs";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)){

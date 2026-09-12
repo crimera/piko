@@ -37,16 +37,15 @@ import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 public class UI {
 
     public static final String DRAWABLE_DOWNLOAD_ICON = "instagram_download_outline_24";
-    public static final String DRAWABLE_FB_DOWNLOAD_ICON = "fb_ic_download_filled_24";
     public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
     public static final String DRAWABLE_GEAR_ICON = "instagram_settings_pano_filled_24";
-    public static final String DRAWABLE_SHEILD_ICON = "fb_ic_badge_admin_filled_32";
+    public static final String DRAWABLE_ADS_ICON = "instagram_shield_outline_24";
     public static final String DRAWABLE_SNAPCHAT_ICON = "fb_ic_app_snapchat_filled_16";
     public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
     public static final String DRAWABLE_HISTORY_ICON = "instagram_history_outline_24";
-    public static final String DRAWABLE_CODE_ICON = "fb_ic_code_outline_24";
+    public static final String DRAWABLE_SHAPES_ICON = "fb_ic_more_shapes_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
     public static final String DRAWABLE_COLLECTIONS_ICON = "instagram_collections_pano_outline_24";

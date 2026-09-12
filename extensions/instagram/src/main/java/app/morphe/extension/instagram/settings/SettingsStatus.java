@@ -229,7 +229,7 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_category_hide_navigation_buttons"),SettingsStatus.hideNavigationButtons);
 
-        FLAGS.put(str("piko_category_download_media"),SettingsStatus.downloadMedia);
+        FLAGS.put(str("piko_category_downloads"),SettingsStatus.downloadMedia);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
@@ -280,7 +280,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
         FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
         FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
-        FLAGS.put(str("piko_category_download_media"),SettingsStatus.downloadMedia);
+        FLAGS.put(str("piko_category_downloads"),SettingsStatus.downloadMedia);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
