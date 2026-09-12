@@ -224,7 +224,6 @@
     <string name="piko_no_internet">Lütfen internete bağlanın</string>
     <string name="piko_tap_here">Buraya dokunun !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Araç Çubuğu Ayarları</string>
     <string name="piko_action_bar_main_feed">Ana akış eylem çubuğu simgeleri</string>
     <string name="piko_action_bar_user_profile">Profil sayfası eylem çubuğu simgeleri</string>
     <string name="piko_action_bar_chat">Sohbet eylem çubuğu simgeleri</string>
@@ -243,7 +242,6 @@
     <string name="piko_rec_flags_refresh_file">Bayrakları yenile</string>
     <string name="piko_rec_flags_last_modified_at">Son değiştirilme tarihi: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">İçeriği filtrele</string>
     <string name="piko_filter_story">Hikaye filtrele</string>
     <string name="piko_filter_story_types_to_hide">Gizlenecek hikaye türleri</string>
     <string name="piko_reel_type_ads_reel">Reklam Reels\'ları</string>

@@ -217,7 +217,6 @@
     <string name="piko_no_internet">Connettiti a internet</string>
     <string name="piko_tap_here">Clicca qui!!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Personalizzazione barra di azione</string>
     <string name="piko_action_bar_button_settings_icon">Icona Impostazioni</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Icona modalità fantasma</string>
     <string name="piko_action_bar_button_profile_info_icon">Icona informazioni profilo</string>
@@ -231,7 +230,6 @@
     <string name="piko_rec_flags_refresh_file">Aggiorna le opzioni</string>
     <string name="piko_rec_flags_last_modified_at">Ultima modifica: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Filtra contenuto</string>
     <string name="piko_filter_story">Filtra Storia</string>
     <string name="piko_filter_story_types_to_hide">Tipi di storie da nascondere</string>
     <string name="piko_reel_type_ads_reel">Reel pubblicitari</string>

@@ -224,7 +224,6 @@
     <string name="piko_no_internet">Conéctate a Internet</string>
     <string name="piko_tap_here">¡¡Toca aquí!!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Personalización de la barra de acciones</string>
     <string name="piko_action_bar_main_feed">Iconos de la barra de acciones del feed principal</string>
     <string name="piko_action_bar_user_profile">Iconos de la barra de acciones del perfil de usuario</string>
     <string name="piko_action_bar_chat">Iconos de la barra de acciones de chat</string>
@@ -243,7 +242,6 @@
     <string name="piko_rec_flags_refresh_file">Actualizar banderas</string>
     <string name="piko_rec_flags_last_modified_at">Última modificación: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Filtrar contenido</string>
     <string name="piko_filter_story">Historia de filtro</string>
     <string name="piko_filter_story_types_to_hide">Tipos de historias para ocultar</string>
     <string name="piko_reel_type_ads_reel">Anuncios de Reel</string>

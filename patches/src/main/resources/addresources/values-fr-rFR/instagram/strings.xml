@@ -173,6 +173,20 @@
     <string name="piko_hide_navigation_direct">Masquer le bouton \"Messages\"</string>
     <string name="piko_hide_navigation_search">Masquer le bouton \"Rechercher\"</string>
     <string name="piko_hide_navigation_create">Masquer le bouton \"Créer\"</string>
+    <string name="piko_category_navigation_tabs">Barre de navigation</string>
+    <string name="piko_navigation_tabs_title">Afficher et réorganiser les onglets</string>
+    <string name="piko_navigation_tabs_summary">Choisissez les onglets visibles en bas et faites-les glisser pour les réorganiser</string>
+    <string name="piko_navigation_startup_tab">Onglet au démarrage de l\'application</string>
+    <string name="piko_navigation_startup_tab_summary">Choisissez l\'onglet qui s\'ouvre au démarrage de l\'application</string>
+    <string name="piko_navigation_tab_home">Accueil</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Messages</string>
+    <string name="piko_navigation_tab_search">Rechercher</string>
+    <string name="piko_navigation_tab_profile">Profil</string>
+    <string name="piko_navigation_tab_notifications">Notifications</string>
+    <string name="piko_navigation_tab_create">Créer</string>
+    <string name="piko_navigation_settings_lockout_title">Aucun bouton paramètres de Piko</string>
+    <string name="piko_navigation_settings_lockout_message">Cette configuration supprime toutes les entrées des paramètres de Piko des onglets visibles. Vous pouvez toujours ouvrir les paramètres de Piko en appuyant longuement sur l\'icône de l\'application, puis en sélectionnant \'Paramètres de Piko\'.</string>
     <!-- Information Section -->
     <string name="piko_category_about">À propos</string>
     <string name="piko_export_pref">Exporter les paramètres Piko</string>
@@ -195,6 +209,7 @@
     <string name="piko_import_fail">Échec de l\'importation</string>
     <string name="piko_restart_app">L\'application doit être redémarrée pour que les modifications soient prises en compte</string>
     <string name="piko_ok">OK</string>
+    <string name="piko_reset">Réinitialiser</string>
     <string name="piko_cancel">Annuler</string>
     <string name="piko_deleted">Supprimé</string>
     <string name="piko_debug">Débogage de Piko</string>
@@ -224,7 +239,6 @@
     <string name="piko_no_internet">Veuillez vous connecter à Internet</string>
     <string name="piko_tap_here">Appuyez ici !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Personnalisation de la barre d\'actions</string>
     <string name="piko_action_bar_main_feed">Icônes de la barre d\'actions du fil principal</string>
     <string name="piko_action_bar_user_profile">Icônes de la barre d\'actions du profil utilisateur</string>
     <string name="piko_action_bar_chat">Icônes de la barre d\'actions du chat</string>
@@ -233,6 +247,8 @@
     <string name="piko_action_bar_button_settings_icon">Icône des paramètres</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Icône du mode fantôme</string>
     <string name="piko_action_bar_button_profile_info_icon">Icône des informations du profil</string>
+    <string name="piko_action_bar_button_create_icon">Icône \'Créer\'</string>
+    <string name="piko_action_bar_button_notifications_icon">Icône \'Notifications\'</string>
     <string name="piko_settings_on_action_bar">Paramètres de Piko sur la barre d\'actions</string>
     <string name="piko_settings_on_action_bar_desc">Déplacer le point d\'entrée des paramètres de Piko vers la barre d\'actions du fil principal</string>
     <!-- Developer Options Section -->
@@ -243,7 +259,6 @@
     <string name="piko_rec_flags_refresh_file">Actualiser les flags</string>
     <string name="piko_rec_flags_last_modified_at">Dernière modification : %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Filtrer le contenu</string>
     <string name="piko_filter_story">Filtrer la story</string>
     <string name="piko_filter_story_types_to_hide">Types de story à masquer</string>
     <string name="piko_reel_type_ads_reel">Publicités reel</string>

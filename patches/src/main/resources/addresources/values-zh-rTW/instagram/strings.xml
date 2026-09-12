@@ -198,7 +198,6 @@
     <string name="piko_no_internet">請連接到互聯網</string>
     <string name="piko_tap_here">點這裡！！</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">自訂操作列</string>
     <string name="piko_action_bar_main_feed">動態首頁操作列圖標</string>
     <string name="piko_action_bar_user_profile">個人檔案頁面操作列圖標</string>
     <string name="piko_action_bar_chat">訊息操作列圖標</string>
@@ -211,7 +210,6 @@
     <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
     <!-- Developer Options Section -->
     <!-- Story filters -->
-    <string name="piko_category_filter_content">內容過濾</string>
     <string name="piko_filter_story">過濾限時動態</string>
     <string name="piko_filter_story_types_to_hide">要隱藏的限時動態類型</string>
     <string name="piko_reel_type_ads_reel">廣告 Reel</string>

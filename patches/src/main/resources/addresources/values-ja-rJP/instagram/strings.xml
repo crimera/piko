@@ -126,6 +126,7 @@
     <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にするオプションを追加します。「DMを匿名で閲覧」が有効でも、手動で既読にすると相手に既読が表示されます</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">メディアのダウンロード</string>
+    <string name="piko_category_downloads">ダウンロード</string>
     <string name="piko_enable_download">ダウンロードを有効化</string>
     <string name="piko_enable_direct_download">直接ダウンロードを有効化</string>
     <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
@@ -173,6 +174,20 @@
     <string name="piko_hide_navigation_direct">DMボタンを非表示</string>
     <string name="piko_hide_navigation_search">検索ボタンを非表示</string>
     <string name="piko_hide_navigation_create">作成ボタンを非表示</string>
+    <string name="piko_category_navigation_tabs">ナビゲーションバー</string>
+    <string name="piko_navigation_tabs_title">タブの表示と並べ替え</string>
+    <string name="piko_navigation_tabs_summary">表示されているタブを選択し、ドラッグして並べ替えます</string>
+    <string name="piko_navigation_startup_tab">起動時のタブ</string>
+    <string name="piko_navigation_startup_tab_summary">アプリの起動時に開くタブを選択します</string>
+    <string name="piko_navigation_tab_home">ホーム</string>
+    <string name="piko_navigation_tab_reels">リール</string>
+    <string name="piko_navigation_tab_messages">メッセージ</string>
+    <string name="piko_navigation_tab_search">検索</string>
+    <string name="piko_navigation_tab_profile">プロフィール</string>
+    <string name="piko_navigation_tab_notifications">通知</string>
+    <string name="piko_navigation_tab_create">作成</string>
+    <string name="piko_navigation_settings_lockout_title">Piko設定ボタンがありません</string>
+    <string name="piko_navigation_settings_lockout_message">この設定では、表示されているタブからPiko設定を開けません。アプリのアイコンを長押してPiko設定を選択することでPiko設定を開けます。</string>
     <!-- Information Section -->
     <string name="piko_category_about">概要</string>
     <string name="piko_export_pref">Piko設定をエクスポート</string>
@@ -195,6 +210,7 @@
     <string name="piko_import_fail">インポートに失敗しました</string>
     <string name="piko_restart_app">変更を適用するにはアプリの再起動が必要です</string>
     <string name="piko_ok">OK</string>
+    <string name="piko_reset">リセット</string>
     <string name="piko_cancel">キャンセル</string>
     <string name="piko_deleted">削除しました</string>
     <string name="piko_debug">Pikoデバッグ</string>
@@ -224,7 +240,7 @@
     <string name="piko_no_internet">インターネットに接続してください</string>
     <string name="piko_tap_here">ここをタップ！！</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">アクションバーをカスタマイズ</string>
+    <string name="piko_category_action_bar">アクションバー</string>
     <string name="piko_action_bar_main_feed">[ホーム] タブに表示するアクション</string>
     <string name="piko_action_bar_user_profile">[プロフィール] タブに表示するアクション</string>
     <string name="piko_action_bar_chat">チャットに表示するアクション</string>
@@ -233,6 +249,8 @@
     <string name="piko_action_bar_button_settings_icon">設定</string>
     <string name="piko_action_bar_button_ghost_mode_icon">匿名モード</string>
     <string name="piko_action_bar_button_profile_info_icon">プロフィール情報</string>
+    <string name="piko_action_bar_button_create_icon">作成</string>
+    <string name="piko_action_bar_button_notifications_icon">通知</string>
     <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
     <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
     <!-- Developer Options Section -->
@@ -243,7 +261,7 @@
     <string name="piko_rec_flags_refresh_file">フラグを更新</string>
     <string name="piko_rec_flags_last_modified_at">最終更新：%s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">コンテンツをフィルタリング</string>
+    <string name="piko_category_filter_content">コンテンツフィルター</string>
     <string name="piko_filter_story">ストーリーをフィルタリング</string>
     <string name="piko_filter_story_types_to_hide">非表示にするストーリーの種類</string>
     <string name="piko_reel_type_ads_reel">広告リール</string>

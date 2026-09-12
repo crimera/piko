@@ -173,8 +173,24 @@
     <string name="piko_hide_navigation_direct">Приховати кнопку «Direct»</string>
     <string name="piko_hide_navigation_search">Приховати кнопку «Пошук»</string>
     <string name="piko_hide_navigation_create">Приховати кнопку «Створити»</string>
+    <string name="piko_category_navigation_tabs">Панель навігації</string>
+    <string name="piko_navigation_tabs_title">Відображення та зміна порядку вкладок</string>
+    <string name="piko_navigation_tabs_summary">Виберіть видимі нижні вкладки та перетягніть їх, щоб змінити порядок</string>
+    <string name="piko_navigation_startup_tab">Вкладка під час запуску</string>
+    <string name="piko_navigation_startup_tab_summary">Виберіть, яка вкладка відкриватиметься під час запуску програми</string>
+    <string name="piko_navigation_tab_home">Головна</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Повідомлення</string>
+    <string name="piko_navigation_tab_search">Пошук</string>
+    <string name="piko_navigation_tab_profile">Профіль</string>
+    <string name="piko_navigation_tab_notifications">Сповіщення</string>
+    <string name="piko_navigation_tab_create">Створити</string>
+    <string name="piko_navigation_settings_lockout_title">Без кнопки налаштувань Piko</string>
+    <string name="piko_navigation_settings_lockout_message">Це налаштування приховує всі пункти налаштувань Piko з видимих вкладок. Ви все одно зможете відкрити налаштування Piko, утримуючи піктограму застосунку та вибравши «Налаштування Piko».</string>
     <!-- Information Section -->
     <string name="piko_category_about">Про Piko</string>
+    <string name="piko_export_pref">Експортувати налаштування</string>
+    <string name="piko_import_pref">Імпортувати налаштування</string>
     <string name="piko_reset_pref">Скинути налаштування Piko</string>
     <string name="piko_reset_pref_confirm">Скинути налаштування Piko?</string>
     <string name="piko_reset_pref_success">Налаштування Piko видалено</string>
@@ -193,6 +209,7 @@
     <string name="piko_import_fail">Помилка імпорту</string>
     <string name="piko_restart_app">Застосунок потрібно перезапустити, щоб зміни набули чинності</string>
     <string name="piko_ok">ОК</string>
+    <string name="piko_reset">Скинути</string>
     <string name="piko_cancel">Скасувати</string>
     <string name="piko_deleted">Видалено</string>
     <string name="piko_debug">Відлагодження Piko</string>
@@ -222,7 +239,6 @@
     <string name="piko_no_internet">Будь ласка, підключіться до інтернету</string>
     <string name="piko_tap_here">Торкніться тут !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Налаштування панелі дій (Action bar)</string>
     <string name="piko_action_bar_main_feed">Піктограми панелі дій головної стрічки</string>
     <string name="piko_action_bar_user_profile">Піктограми панелі дій профілю користувача</string>
     <string name="piko_action_bar_chat">Піктограми панелі дій чату</string>
@@ -231,6 +247,8 @@
     <string name="piko_action_bar_button_settings_icon">Піктограма налаштувань</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Піктограма режиму «невидимки»</string>
     <string name="piko_action_bar_button_profile_info_icon">Піктограма інформації профілю</string>
+    <string name="piko_action_bar_button_create_icon">Значок «Створити»</string>
+    <string name="piko_action_bar_button_notifications_icon">Значок сповіщень</string>
     <string name="piko_settings_on_action_bar">Налаштування Piko на панелі дій</string>
     <string name="piko_settings_on_action_bar_desc">Перемістити кнопку налаштувань Piko на панель дій головної стрічки</string>
     <!-- Developer Options Section -->
@@ -241,7 +259,6 @@
     <string name="piko_rec_flags_refresh_file">Оновити прапорці</string>
     <string name="piko_rec_flags_last_modified_at">Останні зміни: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Фільтрація контенту</string>
     <string name="piko_filter_story">Фільтрація історій</string>
     <string name="piko_filter_story_types_to_hide">Типи історій для приховування</string>
     <string name="piko_reel_type_ads_reel">Рекламні Reels</string>

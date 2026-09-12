@@ -175,6 +175,8 @@
     <string name="piko_hide_navigation_create">Скрыть кнопку «Создать»</string>
     <!-- Information Section -->
     <string name="piko_category_about">Информация</string>
+    <string name="piko_export_pref">Экспортировать настройки Piko</string>
+    <string name="piko_import_pref">Импортировать настройки Piko</string>
     <string name="piko_reset_pref">Сбросить настройки Piko</string>
     <string name="piko_reset_pref_confirm">Сбросить настройки Piko?</string>
     <string name="piko_reset_pref_success">Настройки Piko сброшены</string>
@@ -222,7 +224,6 @@
     <string name="piko_no_internet">Пожалуйста, подключитесь к интернету</string>
     <string name="piko_tap_here">Нажмите здесь !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Настройка панели действий</string>
     <string name="piko_action_bar_main_feed">Иконки панели действий ленты</string>
     <string name="piko_action_bar_user_profile">Иконки панели действий профиля</string>
     <string name="piko_action_bar_chat">Иконки панели действий чата</string>
@@ -241,7 +242,6 @@
     <string name="piko_rec_flags_refresh_file">Обновить флаги</string>
     <string name="piko_rec_flags_last_modified_at">Последнее изменение: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Фильтрация контента</string>
     <string name="piko_filter_story">Фильтрация историй</string>
     <string name="piko_filter_story_types_to_hide">Типы скрываемых историй</string>
     <string name="piko_reel_type_ads_reel">Рекламные Reels</string>
