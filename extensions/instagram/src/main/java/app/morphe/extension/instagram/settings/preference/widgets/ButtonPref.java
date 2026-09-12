@@ -167,7 +167,7 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_ADS_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
-            return UI.DRAWABLE_SNAPCHAT_ICON;
+            return UI.DRAWABLE_GHOST_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
             return UI.DRAWABLE_LINK_ICON;
