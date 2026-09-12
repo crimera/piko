@@ -69,9 +69,9 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.9.0](https://github.com/crimera/piko/releases/tag/v3.9.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;133 patches total
+> **[v3.10.0-dev.6](https://github.com/crimera/piko/releases/tag/v3.10.0-dev.6)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;132 patches total
 <details>
-<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
+<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -147,6 +147,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Remove premium upsell](#remove-premium-upsell) | Removes premium upsells |  |
 | [Remove search suggestions](#remove-search-suggestions) | Hide/Remove search suggestion in explore section |  |
 | [Remove view count](#remove-view-count) | Removes the view count from the bottom of tweets |  |
+| [Restore legacy follower lists](#restore-legacy-follower-lists) | Restores the legacy follower and following list screen. |  |
 | [Round off numbers](#round-off-numbers) | Enable or disable rounding off numbers |  |
 | [Selectable Text](#selectable-text) | Makes bio and username selectable |  |
 | [Share Tweet as Image](#share-tweet-as-image) | Share tweets as rendered image. Requires X 11.0.0-release.0 or higher. |  |
@@ -159,7 +160,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;59 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;57 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -186,7 +187,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
-| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing. |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
@@ -218,7 +218,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Sanitize share links](#sanitize-share-links) |  |  |
 | [Save deleted messages](#save-deleted-messages) | Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them. |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
-| [Stories audio autoplay](#stories-audio-autoplay) |  |  |
 | [Theme](#theme) | Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |

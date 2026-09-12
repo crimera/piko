@@ -116,9 +116,10 @@ final class MaterialYouState {
             boolean pikoSettingsActivity,
             boolean activityDark
     ) {
-        return pikoSettingsActivity
-                ? observedInstagramDark
-                : activityDark;
+        if (pikoSettingsActivity) {
+            return observedInstagramDark;
+        }
+        return activityDark;
     }
 
     static Boolean updateObservedInstagramDarkForNativeMode(
@@ -126,9 +127,10 @@ final class MaterialYouState {
             Integer nativeMode,
             boolean requestedInstagramDark
     ) {
-        return nativeMode == null
-                ? observedInstagramDark
-                : requestedInstagramDark;
+        if (nativeMode == null) {
+            return observedInstagramDark;
+        }
+        return requestedInstagramDark;
     }
 
     static boolean resolveInstagramDark(

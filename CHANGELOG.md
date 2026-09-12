@@ -1,3 +1,55 @@
+## [3.10.0-dev.6](https://github.com/crimera/piko/compare/v3.10.0-dev.5...v3.10.0-dev.6) (2026-09-10)
+
+### 🐛 Bug Fixes
+
+* **Twitter - Show changelogs:** Error message is shown with changelog dialog ([e1238c3](https://github.com/crimera/piko/commit/e1238c3ffd38b1573a11a411000080f825f79583))
+* **Twitter:** Restore timeline position on startup ([ae231c5](https://github.com/crimera/piko/commit/ae231c596bf9b7d3b1f2a1cff9ef5e74151cd6b9))
+
+### ✨ New Features
+
+* **Twitter:** Add bulk feature flag selection and validation ([#1846](https://github.com/crimera/piko/issues/1846)) ([7b92ac8](https://github.com/crimera/piko/commit/7b92ac8626b2ff907769503ae85b688fd2471c36))
+
+## [3.10.0-dev.5](https://github.com/crimera/piko/compare/v3.10.0-dev.4...v3.10.0-dev.5) (2026-09-07)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** restore relationship actions in user lists ([854f5e2](https://github.com/crimera/piko/commit/854f5e26831c997e376a7b68094a7fbde89fc790))
+
+## [3.10.0-dev.4](https://github.com/crimera/piko/compare/v3.10.0-dev.3...v3.10.0-dev.4) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Add missing entity dependencies ([#1833](https://github.com/crimera/piko/issues/1833)) ([a19b255](https://github.com/crimera/piko/commit/a19b255eccd3b2fed5474bc481ab7f3ae6640be9))
+
+## [3.10.0-dev.3](https://github.com/crimera/piko/compare/v3.10.0-dev.2...v3.10.0-dev.3) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* Revert "fix(twitter - `Bring Back Twitter`): support to new versions" ([df9b407](https://github.com/crimera/piko/commit/df9b4079d33aea17dcda5e4ebacd7bc4307421b9))
+
+## [3.10.0-dev.2](https://github.com/crimera/piko/compare/v3.10.0-dev.1...v3.10.0-dev.2) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* **github:** use existing enhancement label and add missing twitter label ([6337845](https://github.com/crimera/piko/commit/63378453c020ce89f490e802356418816be6820a))
+* **twitter - `Bring Back Twitter`:** support to new versions ([ff97563](https://github.com/crimera/piko/commit/ff975634c0e30b87fbb06cdcae556ff00f351a7a))
+
+### ✨ New Features
+
+* **Instagram:** Embed metadata in downloaded videos ([#1828](https://github.com/crimera/piko/issues/1828)) ([9493252](https://github.com/crimera/piko/commit/949325266af15c51477101be81ad8692bb439557))
+
+## [3.10.0-dev.1](https://github.com/crimera/piko/compare/v3.9.0...v3.10.0-dev.1) (2026-09-03)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Prevent newlines in text preferences ([#1811](https://github.com/crimera/piko/issues/1811)) ([2cb1faa](https://github.com/crimera/piko/commit/2cb1faa3e18a7e99a5271957803cc5e6c278692e))
+* **Instagram:** Recover settings after crash ([#1822](https://github.com/crimera/piko/issues/1822)) ([8391a5b](https://github.com/crimera/piko/commit/8391a5b6817289307eb2fef96837c2055eebea99))
+* **Twitter:** guard null ShareTarget in modern share sheet link hook ([5066035](https://github.com/crimera/piko/commit/5066035bc43b7c27f7e13248f0edec5afa7be85a))
+
+### ✨ New Features
+
+* **Instagram:** Integrate `Disable onboarding permission prompts` patch into `Disable analytics` ([#1771](https://github.com/crimera/piko/issues/1771)) ([a7974cd](https://github.com/crimera/piko/commit/a7974cd4c66dff557c2905ea92ad73741b46fa44))
+
 ## [3.9.0](https://github.com/crimera/piko/compare/v3.8.0...v3.9.0) (2026-08-31)
 
 ### 🐛 Bug Fixes

@@ -7,9 +7,13 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEntity
+import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hideHomeActionButtonsPatch
+import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
@@ -44,10 +48,14 @@ val settingsPatch =
             sharedExtensionPatch,
             addSettingsActivityPatch,
             mainFeedActionBarButtonPatch,
+            hideHomeActionButtonsPatch,
+            userProfileActionBarButtonPatch,
+            userDataEntity,
             userProfileButtonPatch,
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
             profileInfoEntity,
+            instagramDialogBoxEntity,
             instagramButtonEntity,
             developerOptionsEntity,
             addResourcesPatch,

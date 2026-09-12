@@ -12,6 +12,7 @@ import app.crimera.patches.twitter.utils.is_11_40_or_greater
 import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
@@ -112,11 +113,14 @@ val handleModernShareSheetLinks =
                             .replace(dummy, dummyRegister.toString())
                             .replace(dummy2, linkRegister.toString())
 
-                    addInstructions(
+                    addInstructionsWithLabels(
                         linkMergeIndex + 1,
                         """
+                        if-eqz v$shareSheetWRegister, :piko_skip_share_hook
                         iget-object v$dummyRegister, v$shareSheetWRegister, $contextualPostField
                         $injectCode
+                        :piko_skip_share_hook
+                        nop
                         """.trimIndent(),
                     )
                 }

@@ -9,15 +9,12 @@ package app.morphe.extension.instagram.patches.download;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import android.os.Build;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.app.Activity;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.Pref;
@@ -34,6 +31,7 @@ import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.crimera.downloader.MediaDownloader;
+import app.morphe.extension.crimera.downloader.DownloadMetadata;
 import app.morphe.extension.crimera.downloader.DownloadRequest;
 import app.morphe.extension.crimera.downloader.MediaType;
 import app.morphe.extension.crimera.PikoUtils;
@@ -47,8 +45,14 @@ public class DownloadUtils {
         return SPLIT_BY_USERNAME ? username : null;
     }
 
-    private static void buildVariantDialogBox(Context context, MediaData currentMediaData, MediaType mediaType) throws Exception {
-        String username = currentMediaData.getUserData().getUsername();
+    private static void buildVariantDialogBox(
+            Context context,
+            MediaData mediaInfo,
+            int position,
+            MediaType mediaType
+    ) throws Exception {
+        MediaData currentMediaData = mediaInfo.getMediaAt(position);
+        String username = mediaInfo.getUserData().getUsername();
         List<MediaInterface> variantList;
         String title = "";
         if(mediaType.equals(MediaType.VIDEO)){
@@ -70,10 +74,18 @@ public class DownloadUtils {
                 MediaInterface data = variantList.get(which);
 
                 try {
-                    String filename = username + "_"+currentMediaData.getVariantFileName(data);
-                    String mediaUrl = data.getUrl();
                     String subFolder = getSubfolderName(username);
-                    downloadMediaUrl(context,mediaUrl,subFolder,filename);
+                    String fileName = username + "_" + currentMediaData.getVariantFileName(data);
+                    DownloadRequest request = buildMediaRequest(
+                            mediaInfo,
+                            currentMediaData,
+                            position,
+                            data.getMediaType(),
+                            data.getUrl(),
+                            subFolder,
+                            fileName
+                    );
+                    enqueueDownload(context, request);
                 } catch (Exception e) {
                     PikoUtils.logger(e);
                     Logger.printException(() -> "Error at buildVariantDialogBox", e);
@@ -145,10 +157,10 @@ public class DownloadUtils {
                         downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
 
                     } else if (selectedOption.equals(str("piko_video_variants"))) {
-                        buildVariantDialogBox(context, currentMediaData, MediaType.VIDEO);
+                        buildVariantDialogBox(context, mediaInfo, position, MediaType.VIDEO);
 
                     } else if (selectedOption.equals(str("piko_image_variants"))) {
-                        buildVariantDialogBox(context, currentMediaData, MediaType.IMAGE);
+                        buildVariantDialogBox(context, mediaInfo, position, MediaType.IMAGE);
 
                     }
                 } catch (Exception e) {
@@ -210,18 +222,34 @@ public class DownloadUtils {
             } else {
                 mediaUrl = mediaData.getMediaLink();
             }
-            String fileName = username+"_"+mediaData.getDownloadFilename(mediaType);
-
-            downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
+            String fileName = username + "_" + mediaData.getDownloadFilename(mediaType);
+            downloader.enqueue(buildMediaRequest(
+                    mediaInfo,
+                    mediaData,
+                    position,
+                    mediaType,
+                    mediaUrl,
+                    subFolder,
+                    fileName
+            ));
 
         } else if (position == -1) {
             int carouselSize = mediaInfo.getCarouselSize();
 
             for (int index = 0; index < carouselSize; index++) {
                 MediaData currentMediaData = mediaInfo.getMediaAt(index);
-                String fileName = username+"_"+currentMediaData.getDownloadFilename(MediaType.ANY);
+                String fileName = username + "_"
+                        + currentMediaData.getDownloadFilename(MediaType.ANY);
                 String mediaUrl = currentMediaData.getMediaLink();
-                downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
+                downloader.enqueue(buildMediaRequest(
+                        mediaInfo,
+                        currentMediaData,
+                        index,
+                        MediaType.ANY,
+                        mediaUrl,
+                        subFolder,
+                        fileName
+                ));
             }
         } else {
             Utils.showToastShort("There is nothing to download");
@@ -229,14 +257,57 @@ public class DownloadUtils {
 
     }
 
+    private static DownloadRequest buildMediaRequest(
+            MediaData rootMediaData,
+            MediaData childMediaData,
+            int carouselIndex,
+            MediaType mediaType,
+            String mediaUrl,
+            String subFolder,
+            String fileName
+    ) throws Exception {
+        DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
+        boolean isVideo = mediaType.equals(MediaType.VIDEO)
+                || (mediaType.equals(MediaType.ANY) && childMediaData.isVideo());
+        if (!isVideo || !Pref.embedDownloadMetadata()) {
+            return request;
+        }
+
+        try {
+            String username = rootMediaData.getUserData().getUsername();
+            Long takenAtSeconds = rootMediaData.getTakenAtSeconds();
+            Long uploadTimestampMillis = takenAtSeconds == null
+                    ? null
+                    : takenAtSeconds * 1000L;
+            DownloadMetadata metadata = new DownloadMetadata(
+                    rootMediaData.getDescriptionText(),
+                    Links.generatePostLink(rootMediaData, carouselIndex),
+                    username,
+                    uploadTimestampMillis
+            );
+            return new DownloadRequest(mediaUrl, subFolder, fileName, metadata);
+        } catch (Exception | LinkageError metadataException) {
+            PikoUtils.logger(metadataException);
+            Logger.printException(
+                    () -> "Could not collect download metadata",
+                    metadataException
+            );
+            return request;
+        }
+    }
+
 
     public static void downloadMediaUrl(Context context, String mediaUrl, String subFolder, String fileName) throws Exception {
+        enqueueDownload(context, new DownloadRequest(mediaUrl, subFolder, fileName));
+    }
+
+    private static void enqueueDownload(Context context, DownloadRequest request) {
         if(!Utils.isNetworkConnected()){
             Utils.showToastShort(str("piko_no_internet"));
             return;
         }
         MediaDownloader downloader = new MediaDownloader(context);
-        downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
+        downloader.enqueue(request);
     }
 
     public static void externalDownloader(Object mediaObject, int currentMediaIndex){

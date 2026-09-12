@@ -26,8 +26,12 @@ public class PikoSharedPrefCategory {
     public final SharedPreferences preferences;
 
     public PikoSharedPrefCategory(@NonNull String name) {
+        this(Objects.requireNonNull(Utils.getContext()), name);
+    }
+
+    public PikoSharedPrefCategory(@NonNull Context context, @NonNull String name) {
         this.name = Objects.requireNonNull(name);
-        preferences = Objects.requireNonNull(Utils.getContext()).getSharedPreferences(name, Context.MODE_PRIVATE);
+        preferences = Objects.requireNonNull(context).getSharedPreferences(name, Context.MODE_PRIVATE);
     }
 
     private void removeConflictingPreferenceKeyValue(@NonNull String key) {

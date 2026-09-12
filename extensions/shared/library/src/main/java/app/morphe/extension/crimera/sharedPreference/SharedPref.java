@@ -7,6 +7,8 @@
 
 package app.morphe.extension.crimera.sharedPreference;
 
+import android.content.SharedPreferences;
+
 import java.util.Set;
 import java.util.HashSet;
 
@@ -42,12 +44,27 @@ public class SharedPref extends BaseSharedPref {
         return INSTANCE.setString(key, defaultValue);
     }
 
+    public static boolean hasKey(String key) {
+        var preferences = INSTANCE.all();
+        return preferences != null && preferences.has(key);
+    }
+
     public static Set<String> getSetPref(StringSetting setting) {
         return INSTANCE.getSet(setting);
     }
 
     public static Boolean setSetPref(String key, Set<String> value) {
         return INSTANCE.setSet(key, value);
+    }
+
+    public static boolean registerOnSharedPreferenceChangeListener(
+            SharedPreferences.OnSharedPreferenceChangeListener listener
+    ) {
+        if (INSTANCE.sp == null) {
+            return false;
+        }
+        INSTANCE.sp.preferences.registerOnSharedPreferenceChangeListener(listener);
+        return true;
     }
 
     public static boolean clearAll() {

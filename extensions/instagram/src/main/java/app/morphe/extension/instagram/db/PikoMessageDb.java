@@ -18,14 +18,46 @@ import java.util.List;
 public class PikoMessageDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_dm_vault.db";
-    private static final int DB_VERSION = 2;
+    static final int DB_VERSION = 4;
     private static final String TABLE = "saved_messages";
     // sender_id → username directory. MQTT-delivered items carry only a numeric sender_id;
     // the REST path occasionally carries a full UserInfo. Every time we resolve a username we
-    // persist it here so later MQTT-only items (and notifications) can show the real handle.
+    // persist it here so later MQTT-only items can show the real handle.
     private static final String DIR_TABLE = "user_directory";
 
     private static volatile PikoMessageDb instance;
+
+    static String normalizeIdentity(String value) {
+        if (value == null) return null;
+        String normalized = value.trim();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
+    static String canonicalMessageId(String serverId, String clientContext) {
+        String server = normalizeIdentity(serverId);
+        return server != null ? server : normalizeIdentity(clientContext);
+    }
+
+    static String[] identityIndexStatements() {
+        return new String[]{
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_server_id ON " + TABLE
+                        + "(server_id) WHERE server_id IS NOT NULL AND server_id != ''",
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_client_context ON " + TABLE
+                        + "(client_context) WHERE client_context IS NOT NULL AND client_context != ''"
+        };
+    }
+
+    static String[] upgradeStatements(int oldVersion) {
+        List<String> statements = new ArrayList<>();
+        if (oldVersion < 3) {
+            statements.add("ALTER TABLE " + TABLE + " ADD COLUMN server_id TEXT");
+            statements.add("ALTER TABLE " + TABLE + " ADD COLUMN client_context TEXT");
+            statements.add("UPDATE " + TABLE + " SET server_id = message_id "
+                    + "WHERE message_id GLOB '[0-9]*' AND message_id NOT GLOB '*[^0-9]*'");
+            java.util.Collections.addAll(statements, identityIndexStatements());
+        }
+        return statements.toArray(new String[0]);
+    }
 
     public static PikoMessageDb getInstance(Context context) {
         if (instance == null) {
@@ -48,6 +80,8 @@ public class PikoMessageDb extends SQLiteOpenHelper {
             "CREATE TABLE " + TABLE + " (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "message_id TEXT UNIQUE NOT NULL," +
+            "server_id TEXT," +
+            "client_context TEXT," +
             "thread_id TEXT NOT NULL," +
             "sender_id TEXT," +
             "sender_username TEXT," +
@@ -59,6 +93,7 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         );
         db.execSQL("CREATE INDEX idx_thread_id ON " + TABLE + "(thread_id)");
         db.execSQL("CREATE INDEX idx_is_deleted ON " + TABLE + "(is_deleted)");
+        createIdentityIndexes(db);
         createDirTable(db);
     }
 
@@ -71,45 +106,198 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         );
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Additive upgrade: keep captured messages, just add the new directory table.
-        if (oldVersion < 2) createDirTable(db);
+    private void createIdentityIndexes(SQLiteDatabase db) {
+        for (String statement : identityIndexStatements()) {
+            db.execSQL(statement);
+        }
     }
 
-    /**
-     * Insert a captured message. If the row already exists (same message_id), the insert is
-     * ignored — EXCEPT that any newly-arriving non-empty content / username / sender_id is
-     * written into the existing row when its corresponding column is still empty.
-     */
-    public void insertOrIgnore(String messageId, String threadId, String senderId,
-                               String senderUsername, String content, String type, long timestamp) {
-        if (messageId == null || threadId == null) return;
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("message_id", messageId);
-        cv.put("thread_id", threadId);
-        cv.put("sender_id", senderId);
-        cv.put("sender_username", senderUsername != null ? senderUsername : "");
-        cv.put("content", content != null ? content : "");
-        cv.put("message_type", type != null ? type : "unknown");
-        cv.put("timestamp", timestamp);
-        long rowId = db.insertWithOnConflict(TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < 2) createDirTable(db);
+        for (String statement : upgradeStatements(oldVersion)) {
+            db.execSQL(statement);
+        }
+    }
 
-        // rowId == -1 → conflict, row already existed. Backfill any empty columns with the
-        // newly-supplied non-empty values.
-        if (rowId == -1) {
-            // A media url resolved on a later pass must be able to REPLACE an earlier caption /
-            // placeholder — fillIfEmpty alone would keep the caption, leaving the row non-http and
-            // the media untappable ("media not available"). Any http(s) value upgrades the content.
+    /** Insert or enrich a captured message using exact Instagram identifiers. */
+    public String upsertMessage(String serverId, String clientContext, String threadId,
+                                String senderId, String senderUsername, String content,
+                                String type, long timestamp) {
+        String normalizedServer = normalizeIdentity(serverId);
+        String normalizedClient = normalizeIdentity(clientContext);
+        String canonicalId = canonicalMessageId(normalizedServer, normalizedClient);
+        if (canonicalId == null) return null;
+
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            String messageId = resolveAndMergeMessageId(db, normalizedServer, normalizedClient);
+            if (messageId == null) {
+                ContentValues values = new ContentValues();
+                values.put("message_id", canonicalId);
+                values.put("server_id", normalizedServer);
+                values.put("client_context", normalizedClient);
+                values.put("thread_id", threadId != null ? threadId : "");
+                values.put("sender_id", senderId);
+                values.put("sender_username", senderUsername != null ? senderUsername : "");
+                values.put("content", content != null ? content : "");
+                values.put("message_type", type != null ? type : "unknown");
+                values.put("timestamp", timestamp);
+                long inserted = db.insertWithOnConflict(
+                        TABLE, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                messageId = inserted == -1
+                        ? resolveAndMergeMessageId(db, normalizedServer, normalizedClient)
+                        : canonicalId;
+            }
+
+            if (messageId == null) return null;
+            fillIfEmpty(db, messageId, "server_id", normalizedServer);
+            fillIfEmpty(db, messageId, "client_context", normalizedClient);
+            fillIfEmpty(db, messageId, "thread_id", threadId);
+            fillIfEmpty(db, messageId, "sender_id", senderId);
+            fillIfEmpty(db, messageId, "sender_username", senderUsername);
+            fillIfEmpty(db, messageId, "message_type", type);
             if (content != null && content.startsWith("http")) {
                 upgradeContentToUrl(db, messageId, content);
             } else {
                 fillIfEmpty(db, messageId, "content", content);
             }
-            fillIfEmpty(db, messageId, "sender_username", senderUsername);
-            fillIfEmpty(db, messageId, "sender_id", senderId);
+            db.setTransactionSuccessful();
+            return messageId;
+        } finally {
+            db.endTransaction();
         }
+    }
+
+    /** Resolve exact identifiers and merge separate server/client captures when both exist. */
+    public String resolveAndMergeMessageId(String serverId, String clientContext) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            String messageId = resolveAndMergeMessageId(db, serverId, clientContext);
+            db.setTransactionSuccessful();
+            return messageId;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    private String resolveAndMergeMessageId(SQLiteDatabase db, String serverId,
+                                            String clientContext) {
+        String normalizedServer = normalizeIdentity(serverId);
+        String normalizedClient = normalizeIdentity(clientContext);
+        String messageId = null;
+
+        if (normalizedServer != null) {
+            messageId = findMessageIdByColumn(db, "server_id", normalizedServer);
+        }
+        if (normalizedClient != null) {
+            String clientMessageId = findMessageIdByColumn(
+                    db, "client_context", normalizedClient);
+            if (messageId == null) {
+                messageId = clientMessageId;
+            } else if (clientMessageId != null && !messageId.equals(clientMessageId)) {
+                String olderMessageId = findOlderMessageId(db, messageId, clientMessageId);
+                String newerMessageId = olderMessageId.equals(messageId)
+                        ? clientMessageId : messageId;
+                mergeRows(db, olderMessageId, newerMessageId);
+                messageId = olderMessageId;
+            }
+        }
+
+        if (messageId != null) {
+            fillIfEmpty(db, messageId, "server_id", normalizedServer);
+            fillIfEmpty(db, messageId, "client_context", normalizedClient);
+        }
+        return messageId;
+    }
+
+    private String findMessageIdByColumn(SQLiteDatabase db, String identityColumn,
+                                         String identity) {
+        Cursor cursor = db.query(
+                TABLE,
+                new String[]{"message_id"},
+                identityColumn + " = ? OR message_id = ?",
+                new String[]{identity, identity},
+                null,
+                null,
+                "id ASC",
+                "1"
+        );
+        String result = cursor.moveToFirst() ? cursor.getString(0) : null;
+        cursor.close();
+        return result;
+    }
+
+    private String findOlderMessageId(SQLiteDatabase db, String firstId, String secondId) {
+        Cursor cursor = db.query(
+                TABLE,
+                new String[]{"message_id"},
+                "message_id IN (?, ?)",
+                new String[]{firstId, secondId},
+                null,
+                null,
+                "id ASC",
+                "1"
+        );
+        String result = cursor.moveToFirst() ? cursor.getString(0) : firstId;
+        cursor.close();
+        return result;
+    }
+
+    /** Merge server-only and client-only captures once a callback supplies both ids. */
+    private void mergeRows(SQLiteDatabase db, String primaryId, String secondaryId) {
+        Cursor cursor = db.query(
+                TABLE,
+                new String[]{
+                        "server_id", "client_context", "thread_id", "sender_id",
+                        "sender_username", "content", "message_type", "is_deleted"
+                },
+                "message_id = ?",
+                new String[]{secondaryId},
+                null,
+                null,
+                null,
+                "1"
+        );
+        if (!cursor.moveToFirst()) {
+            cursor.close();
+            return;
+        }
+
+        String secondaryServer = cursor.getString(0);
+        String secondaryClient = cursor.getString(1);
+        String threadId = cursor.getString(2);
+        String senderId = cursor.getString(3);
+        String senderUsername = cursor.getString(4);
+        String content = cursor.getString(5);
+        String messageType = cursor.getString(6);
+        boolean deleted = cursor.getInt(7) != 0;
+        cursor.close();
+
+        ContentValues released = new ContentValues();
+        released.putNull("server_id");
+        released.putNull("client_context");
+        db.update(TABLE, released, "message_id = ?", new String[]{secondaryId});
+
+        fillIfEmpty(db, primaryId, "server_id", secondaryServer);
+        fillIfEmpty(db, primaryId, "client_context", secondaryClient);
+        fillIfEmpty(db, primaryId, "thread_id", threadId);
+        fillIfEmpty(db, primaryId, "sender_id", senderId);
+        fillIfEmpty(db, primaryId, "sender_username", senderUsername);
+        fillIfEmpty(db, primaryId, "message_type", messageType);
+        if (content != null && content.startsWith("http")) {
+            upgradeContentToUrl(db, primaryId, content);
+        } else {
+            fillIfEmpty(db, primaryId, "content", content);
+        }
+        if (deleted) {
+            ContentValues values = new ContentValues();
+            values.put("is_deleted", 1);
+            db.update(TABLE, values, "message_id = ?", new String[]{primaryId});
+        }
+        db.delete(TABLE, "message_id = ?", new String[]{secondaryId});
     }
 
     /** Overwrite stored content with a media url when the stored value isn't already an http link.
@@ -130,8 +318,12 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         if (value == null || value.isEmpty()) return;
         ContentValues cv = new ContentValues();
         cv.put(column, value);
+        String emptyCondition = column + " IS NULL OR " + column + " = ''";
+        if ("message_type".equals(column)) {
+            emptyCondition += " OR " + column + " = 'unknown'";
+        }
         db.update(TABLE, cv,
-            "message_id = ? AND (" + column + " IS NULL OR " + column + " = '')",
+            "message_id = ? AND (" + emptyCondition + ")",
             new String[]{messageId});
     }
 
@@ -151,20 +343,6 @@ public class PikoMessageDb extends SQLiteOpenHelper {
             new String[]{senderId});
     }
 
-    /**
-     * Record a chat title as a username — but ONLY for a 1:1 chat, where the title names exactly
-     * one person. In a group the title names no single sender, so blindly applying it to every row
-     * (the old behaviour) made all members' messages show the same name. We therefore resolve the
-     * thread's sole sender and route through the directory (which backfills that sender's rows
-     * everywhere); a group thread (no sole sender) is left untouched.
-     */
-    public void setThreadUsername(String threadId, String username) {
-        if (threadId == null || threadId.isEmpty() || username == null || username.isEmpty()) return;
-        String sole = getSoleSenderId(threadId);
-        if (sole == null) return; // group (or empty) thread → never attribute the title to anyone
-        putUsername(sole, username);
-    }
-
     /** Look up a previously-resolved username for a sender_id, or null. */
     public String getUsername(String senderId) {
         if (senderId == null || senderId.isEmpty()) return null;
@@ -177,92 +355,61 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return (result != null && !result.isEmpty()) ? result : null;
     }
 
-    /** True if a row for messageId already exists and is NOT yet marked deleted. Used to
-     *  distinguish a live unsend (we saw the message alive first) from a historical unsent
-     *  item that arrives already-hidden during a sync (never seen alive → don't notify). */
-    public boolean isStoredAlive(String messageId) {
-        if (messageId == null) return false;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, new String[]{"is_deleted"}, "message_id = ?",
-                new String[]{messageId}, null, null, null);
-        boolean alive = false;
-        if (c.moveToFirst()) alive = c.getInt(0) == 0;
-        c.close();
-        return alive;
-    }
-
-    public boolean isStored(String messageId) {
-        if (messageId == null) return false;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, new String[]{"message_id"}, "message_id = ?",
-                new String[]{messageId}, null, null, null);
-        boolean stored = c.moveToFirst();
-        c.close();
-        return stored;
-    }
-
-    /** Permanently remove one saved message from the vault. */
-    public void deleteSaved(String messageId) {
-        if (messageId == null) return;
-        getWritableDatabase().delete(TABLE, "message_id = ?", new String[]{messageId});
-    }
-
-    /** Remove all saved messages (optionally just one thread). Pass null threadId to clear all. */
-    public int clearSaved(String threadId) {
-        if (threadId != null && !threadId.isEmpty()) {
-            return getWritableDatabase().delete(TABLE, "thread_id = ?", new String[]{threadId});
+    /** Permanently remove saved messages from the vault as one atomic operation. */
+    public void deleteSaved(List<String> messageIds) {
+        if (messageIds == null || messageIds.isEmpty()) return;
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            for (String messageId : messageIds) {
+                if (messageId != null) {
+                    db.delete(TABLE, "message_id = ?", new String[]{messageId});
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
-        return getWritableDatabase().delete(TABLE, null, null);
     }
 
-    public void markDeleted(String messageId) {
-        if (messageId == null) return;
+    /** Marks a live row deleted and returns true only for the first successful transition. */
+    public boolean markDeleted(String messageId) {
+        if (messageId == null) return false;
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("is_deleted", 1);
-        db.update(TABLE, cv, "message_id = ?", new String[]{messageId});
+        return db.update(TABLE, cv, "message_id = ? AND is_deleted = 0",
+                new String[]{messageId}) == 1;
     }
 
-    /** Returns sender_username if non-empty, else sender_id (numeric), else null. */
+    /** Returns the best available sender name for a notification. */
     public String getSenderDisplay(String messageId) {
         if (messageId == null) return null;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, new String[]{"sender_username", "sender_id"},
+        Cursor cursor = getReadableDatabase().query(
+                TABLE, new String[]{"sender_username", "sender_id"},
                 "message_id = ?", new String[]{messageId}, null, null, null);
-        String result = null;
-        String uid = null;
-        if (c.moveToFirst()) {
-            String uname = c.getString(0);
-            uid          = c.getString(1);
-            if (uname != null && !uname.isEmpty()) result = uname;
+        String username = null;
+        String senderId = null;
+        if (cursor.moveToFirst()) {
+            username = cursor.getString(0);
+            senderId = cursor.getString(1);
         }
-        c.close();
-        // Row had no username — consult the directory before falling back to the numeric id.
-        if (result == null && uid != null && !uid.isEmpty()) {
-            String dir = getUsername(uid);
-            result = (dir != null) ? dir : uid;
-        }
-        return result;
+        cursor.close();
+        if (username != null && !username.isEmpty()) return username;
+        if (senderId == null || senderId.isEmpty()) return null;
+        String directoryUsername = getUsername(senderId);
+        return directoryUsername != null ? directoryUsername : senderId;
     }
 
-    /** thread_id stored for a message, or null. */
-    public String getThreadIdOf(String messageId) {
-        if (messageId == null) return null;
-        Cursor c = getReadableDatabase().query(TABLE, new String[]{"thread_id"},
-                "message_id = ?", new String[]{messageId}, null, null, null);
-        String r = c.moveToFirst() ? c.getString(0) : null;
-        c.close();
-        return (r != null && !r.isEmpty()) ? r : null;
-    }
-
-    /** message_type stored for a message (e.g. image/video/voice_media), or null. */
+    /** Returns the stored message type, or null when it is unknown. */
     public String getMessageType(String messageId) {
         if (messageId == null) return null;
-        Cursor c = getReadableDatabase().query(TABLE, new String[]{"message_type"},
+        Cursor cursor = getReadableDatabase().query(
+                TABLE, new String[]{"message_type"},
                 "message_id = ?", new String[]{messageId}, null, null, null);
-        String r = c.moveToFirst() ? c.getString(0) : null;
-        c.close();
-        return (r != null && !r.isEmpty() && !"unknown".equals(r)) ? r : null;
+        String type = cursor.moveToFirst() ? cursor.getString(0) : null;
+        cursor.close();
+        return type != null && !type.isEmpty() && !"unknown".equals(type) ? type : null;
     }
 
     /** sender_id stored for a message, or null. */
@@ -275,40 +422,14 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return (r != null && !r.isEmpty()) ? r : null;
     }
 
-    /**
-     * The single distinct sender_id in a thread, or null if the thread has zero or more than one
-     * distinct sender. Used to recognise a 1:1 chat, where the action-bar title reliably names
-     * that one sender. Own outgoing messages are never stored, so they never count here — meaning
-     * a 1:1 thread has exactly one stored sender (the other participant), while a group has 2+ as
-     * soon as a second person sends. This is what keeps the username-learning safe in groups.
-     */
-    public String getSoleSenderId(String threadId) {
-        if (threadId == null || threadId.isEmpty()) return null;
-        SQLiteDatabase db = getReadableDatabase();
-        // distinct = true, limit 2: we only need to know whether there is exactly one.
-        Cursor c = db.query(true, TABLE, new String[]{"sender_id"},
-                "thread_id = ? AND sender_id IS NOT NULL AND sender_id != ''",
-                new String[]{threadId}, null, null, null, "2");
-        String sole = null;
-        int n = 0;
-        while (c.moveToNext()) { sole = c.getString(0); n++; }
-        c.close();
-        return n == 1 ? sole : null;
-    }
-
-    /**
-     * Any non-empty sender_username recorded for a thread, or null. Group-safe: returns a value
-     * ONLY for a 1:1 thread (a sole sender). In a group, an arbitrary member's name would otherwise
-     * be returned and applied to a different sender by the resolution chain — the exact bug where
-     * everyone's messages showed as the same person. Callers using this as a name fallback get null
-     * for groups and fall through to the per-sender directory / numeric id instead.
-     */
-    public String getThreadUsername(String threadId) {
-        if (threadId == null || threadId.isEmpty()) return null;
-        if (getSoleSenderId(threadId) == null) return null; // group thread → no single name
+    /** A previously stored username for this sender in this thread, or null. */
+    public String getThreadUsername(String threadId, String senderId) {
+        if (threadId == null || threadId.isEmpty()
+                || senderId == null || senderId.isEmpty()) return null;
         Cursor c = getReadableDatabase().query(TABLE, new String[]{"sender_username"},
-                "thread_id = ? AND sender_username IS NOT NULL AND sender_username != ''",
-                new String[]{threadId}, null, null, null, "1");
+                "thread_id = ? AND sender_id = ?"
+                        + " AND sender_username IS NOT NULL AND sender_username != ''",
+                new String[]{threadId, senderId}, null, null, null, "1");
         String r = c.moveToFirst() ? c.getString(0) : null;
         c.close();
         return (r != null && !r.isEmpty()) ? r : null;
@@ -336,33 +457,6 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         Cursor c = db.query(TABLE, null, "is_deleted = 1" + HAS_CONTENT, null, null, null, "timestamp DESC");
         while (c.moveToNext()) {
             result.add(rowToStringArray(c));
-        }
-        c.close();
-        return result;
-    }
-
-    public List<String[]> getDeletedMessagesForThread(String threadId) {
-        List<String[]> result = new ArrayList<>();
-        // Never scope to the empty-thread bucket: rows stored with thread_id = "" are orphans
-        // (thread id was unknown at capture) and must not surface as a specific chat's history.
-        if (threadId == null || threadId.isEmpty()) return result;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, null, "is_deleted = 1 AND thread_id = ?" + HAS_CONTENT,
-            new String[]{threadId}, null, null, "timestamp DESC");
-        while (c.moveToNext()) {
-            result.add(rowToStringArray(c));
-        }
-        c.close();
-        return result;
-    }
-
-    // Returns [messageId, threadId, senderUsername, content, messageType, timestamp, isDeleted]
-    public List<String[]> getAllMessages() {
-        List<String[]> result = new ArrayList<>();
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, null, null, null, null, null, "timestamp DESC");
-        while (c.moveToNext()) {
-            result.add(rowToStringArrayFull(c));
         }
         c.close();
         return result;
@@ -396,16 +490,4 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return storedUsername;
     }
 
-    private String[] rowToStringArrayFull(Cursor c) {
-        return new String[]{
-            c.getString(c.getColumnIndexOrThrow("message_id")),
-            c.getString(c.getColumnIndexOrThrow("thread_id")),
-            resolveUsername(c.getString(c.getColumnIndexOrThrow("sender_username")),
-                    c.getString(c.getColumnIndexOrThrow("sender_id"))),
-            c.getString(c.getColumnIndexOrThrow("content")),
-            c.getString(c.getColumnIndexOrThrow("message_type")),
-            String.valueOf(c.getLong(c.getColumnIndexOrThrow("timestamp"))),
-            String.valueOf(c.getInt(c.getColumnIndexOrThrow("is_deleted")))
-        };
-    }
 }

@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.misc.comment.saveMediaComment
 
 import app.crimera.patches.instagram.entity.commentDataEntity.commentDataEntity
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.misc.comment.addButtonAttribute
 import app.crimera.patches.instagram.misc.comment.addButtonInterface
 import app.crimera.patches.instagram.misc.comment.addCommentPatch
@@ -37,6 +38,7 @@ val saveMediaCommentPatch =
             addCommentPatch,
             commentButtonClickCheckPatch,
             commentDataEntity,
+            mediaDataEntity,
             resourceMappingPatch,
             decoderEntity,
             debugCommentPatch,

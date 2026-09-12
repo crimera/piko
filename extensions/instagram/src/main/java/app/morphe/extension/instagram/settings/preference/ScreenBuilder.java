@@ -198,26 +198,6 @@ public class ScreenBuilder {
     public void dmSection() {
         if (!(SettingsStatus.dmSection())) return;
 
-        if (SettingsStatus.disableTypingStatus) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_typing_status"),
-                            "",
-                            Settings.DISABLE_TYPING_STATUS
-                    )
-            );
-        }
-
-        if (SettingsStatus.viewDmAnonymously) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_view_dm_anonymously"),
-                            "",
-                            Settings.VIEW_DM_ANONYMOUSLY
-                    )
-            );
-        }
-
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(
                     helper.switchPreference(
@@ -311,7 +291,7 @@ public class ScreenBuilder {
             addPreference(
                     helper.switchPreference(
                             str("piko_view_dm_anonymously"),
-                            "",
+                            str("piko_view_dm_anonymously_desc"),
                             Settings.VIEW_DM_ANONYMOUSLY
                     )
             );
@@ -557,15 +537,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.storiesAudioAutoplay) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_stories_audio_autoplay"),
-                            "",
-                            Settings.STORIES_AUDIO_AUTOPLAY
-                    )
-            );
-        }
         if (SettingsStatus.disableDiscoverPeople) {
             addPreference(
                     helper.switchPreference(
@@ -716,6 +687,13 @@ public class ScreenBuilder {
         );
 
         addPreference(
+                helper.switchPreference(
+                        str("piko_embed_download_metadata"),
+                        str("piko_embed_download_metadata_desc"),
+                        Settings.EMBED_DOWNLOAD_METADATA
+                )
+        );
+        addPreference(
                 helper.buttonPreference(
                         str("piko_download_set_path"),
                         StorageUtils.getCustomPathForDisplay(),
@@ -824,45 +802,17 @@ public class ScreenBuilder {
     public void buildNavigationSection() {
         if (!(SettingsStatus.hideNavigationButtons)) return;
 
-        //  PreferenceCategory category = addCategory(str("piko_category_hide_navigation_buttons"));
-
         addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_feed"),
-                        "",
-                        Settings.HIDE_NAVIGATION_FEED
+                helper.navigationBarPreference(
+                        str("piko_navigation_tabs_title"),
+                        str("piko_navigation_tabs_summary")
                 )
         );
 
         addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_reels"),
-                        "",
-                        Settings.HIDE_NAVIGATION_REELS
-                )
-        );
-
-        addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_direct"),
-                        "",
-                        Settings.HIDE_NAVIGATION_DIRECT
-                )
-        );
-
-        addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_search"),
-                        "",
-                        Settings.HIDE_NAVIGATION_SEARCH
-                )
-        );
-
-        addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_create"),
-                        "",
-                        Settings.HIDE_NAVIGATION_CREATE
+                helper.navigationStartupPreference(
+                        str("piko_navigation_startup_tab"),
+                        str("piko_navigation_startup_tab_summary")
                 )
         );
     }
@@ -1048,7 +998,7 @@ public class ScreenBuilder {
         if (SettingsStatus.downloadSection()){
             addPreference(
                     helper.buttonPreference(
-                            str("piko_category_download_media"),
+                            str("piko_category_downloads"),
                             "",
                             Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA
                     )
@@ -1066,7 +1016,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideNavigationButtons){
             addPreference(
                     helper.buttonPreference(
-                            str("piko_category_hide_navigation_buttons"),
+                            str("piko_category_navigation_tabs"),
                             "",
                             Constants.PIKO_FRAGMENT_NAV_BTNS
                     )

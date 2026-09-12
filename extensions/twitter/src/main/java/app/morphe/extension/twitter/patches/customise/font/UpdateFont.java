@@ -80,7 +80,8 @@ public class UpdateFont {
 
     public static Spannable process(CharSequence input) {
         if(input == null) return null;
-        SpannableString ss = new SpannableString(input);
+        // Do not copy spans from an active editor; Selection and watcher spans can trigger editor callbacks.
+        SpannableString ss = new SpannableString(input.toString());
         if (textTypeface != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             if(isCustomFontEnabled) {
                 ss.setSpan(

@@ -2,15 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:padding="10dp"
-              android:orientation="vertical">
+              android:paddingTop="8dp"
+              android:paddingBottom="8dp"
+              android:orientation="horizontal">
 
-    <TextView
+    <CheckBox
             style="@style/TextAppearance.AppCompat.Medium"
             android:textColor="?attr/coreColorPrimaryText"
             android:id="@+id/searchItemText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:minHeight="48dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:gravity="center_vertical"
+            android:clickable="false"
+            android:focusable="false"/>
 
 </LinearLayout>

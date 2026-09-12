@@ -199,9 +199,9 @@
     <string name="piko_pref_customisation_exploretabs">Приховати пункти в Ознайомлення</string>
     <string name="piko_pref_customisation_searchtabs">Приховати пункти в пошуку</string>
     <string name="piko_pref_customisation_notificationtabs">Вкладки сповіщень для приховування</string>
-    <string name="piko_pref_customisation_reply_sorting">Сортувати відповідей за замовчуванням</string>
+    <string name="piko_pref_customisation_reply_sorting">Сортування відповідей за замовчуванням</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Раніше обрані</string>
-    <string name="piko_pref_customisation_post_font_size">Розмір шрифту у дописів</string>
+    <string name="piko_pref_customisation_post_font_size">Розмір шрифту у дописах</string>
     <string name="piko_pref_customisation_search_type_ahead">Приховати пошукові пропозиції</string>
     <string name="piko_pref_customisation_change_app_icon">Змінити іконку застосунку</string>
     <string name="piko_notifications_tab_priority">Пріоритетні</string>
@@ -360,7 +360,7 @@
     <string name="piko_app_icon_name_upsidedown">Догори дриґом</string>
     <string name="piko_app_icon_name_games_chamber">Ігрова кімната</string>
     <string name="piko_app_icon_name_pridesouthern">Південний прайд</string>
-    <string name="piko_app_icon_name_newzealand_pride_1">Прайд Нової Зеландії 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Прайд в Новій Зеландії 1</string>
     <string name="piko_app_icon_name_newzealand_pride_2">Прайд в Новій Зеландії 2</string>
     <string name="piko_app_icon_name_pride_month">Місяць прайду</string>
     <string name="piko_app_icon_name_fancy">Вишуканий</string>
