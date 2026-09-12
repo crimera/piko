@@ -988,6 +988,7 @@ public final class InlineDownloadButton {
         // Replace any pre-existing copy only after the new file is fully written, so a
         // failed download never destroys the previously saved media.
         deleteExistingMedia(resolver, collection, fileName, relativePath, destination);
+        PublishedMediaRefresh.request(context, destination, mimeType);
         return true;
     }
 
