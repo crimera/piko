@@ -8,6 +8,8 @@ package app.crimera.patches.newx.misc.bringbacktwitter
 
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patches.all.misc.resources.addAppResources
+import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValue
@@ -22,7 +24,11 @@ val bringBackTwitterPatch =
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
+        dependsOn(addResourcesPatch)
+
         execute {
+            addAppResources("twitter-bring-back")
+            
             document("AndroidManifest.xml").use { document ->
                 val application = document.getElementsByTagName("application").item(0) as Element
                 application.setAttribute("android:label", "Twitter")
@@ -96,6 +102,14 @@ val bringBackTwitterPatch =
                 }
             }
 
+            // Replace app icon background colors
+            val colorsXml = get("res").resolve("values/colors.xml")
+            if (colorsXml.exists()) {
+                document("res/values/colors.xml").use { document ->
+                    document.childNodes.findElementByAttributeValue("name", "ic_launcher_background")?.textContent = "@color/twitter_blue"
+                }
+            }
+
             // endregion
 
             listOf("mipmap-anydpi", "mipmap-anydpi-v26").forEach { dir ->
@@ -143,7 +157,7 @@ val bringBackTwitterPatch =
                 }
             }
 
-            // Keep splash colors; replace only the icon.
+            // Replace splash icon & colors
             val stylesXml = get("res").resolve("values/styles.xml")
             if (stylesXml.exists()) {
                 document("res/values/styles.xml").use { document ->
@@ -153,6 +167,7 @@ val bringBackTwitterPatch =
 
                     styleElement?.let { style ->
                         style.childNodes.findElementByAttributeValue("name", "windowSplashScreenAnimatedIcon")?.textContent = "@drawable/splash_screen_icon_animated"
+                        style.childNodes.findElementByAttributeValue("name", "windowSplashScreenBackground")?.textContent = "@color/twitter_blue"
                     }
                 }
             }
