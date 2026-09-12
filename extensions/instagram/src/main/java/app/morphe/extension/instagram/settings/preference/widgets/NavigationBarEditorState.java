@@ -19,7 +19,7 @@ import java.util.Set;
 final class NavigationBarEditorState {
     private final List<Tab> order;
     private final EnumSet<Tab> visible;
-    private Tab startup;
+    private final Tab startup;
 
     private NavigationBarEditorState(Config config) {
         order = new ArrayList<>(config.order());
@@ -45,7 +45,6 @@ final class NavigationBarEditorState {
 
     void setVisible(Tab tab, boolean checked) {
         if (checked) visible.add(tab); else visible.remove(tab);
-        startup = NavigationBarPatch.resolveStartupTab(order, visible, startup);
     }
 
     void move(Tab tab, int target) {
@@ -61,6 +60,5 @@ final class NavigationBarEditorState {
         order.addAll(defaults.order());
         visible.clear();
         visible.addAll(defaults.visible());
-        startup = NavigationBarPatch.resolveStartupTab(order, visible, startup);
     }
 }
