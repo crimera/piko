@@ -1,0 +1,1260 @@
+package app.morphe.extension.newx.timeline;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import app.morphe.extension.newx.filteredreplies.FilteredRepliesStore;
+import app.morphe.extension.newx.settings.NewXLogger;
+import app.morphe.extension.newx.postfilter.PostFilterMatcher;
+import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
+import app.morphe.extension.newx.postfilter.VerifiedAccountWhitelistStore;
+import app.morphe.extension.newx.utils.NewXUtils;
+
+public final class NewXTimelineFilter {
+
+    private static final String DEBUG_LOG_PREFIX = "[DEBUG-newx-timeline] ";
+    private static final String AI_SOURCE_USER_MARKED = "UserMarked";
+    private static final String AI_SOURCE_AUTO_DETECTED = "AutoDetected";
+    private static final String AI_SOURCE_NOT_IDENTIFIED = "SourceNotIdentified";
+    private static final String VERIFIED_TYPE_BUSINESS = "Business";
+    private static final String VERIFIED_TYPE_GOVERNMENT = "Government";
+    private static final String VERIFIED_TYPE_USER = "User";
+    private static final String VERIFIED_TYPE_UNKNOWN = "Unknown";
+    private static final String DISCOVER_MORE_ENTRY_ID = "tweetdetailrelatedtweets";
+    private static final int MAX_PARENT_HOPS = 32;
+    private static final TimelineModelAccess PRODUCTION_MODEL_ACCESS = new TimelineModelAccess() {
+        @Override boolean isModuleItem(Object value) { return isTimelineModuleItem(value); }
+        @Override boolean isPost(Object value) { return isTimelinePost(value); }
+        @Override boolean isModule(Object value) { return isTimelineModule(value); }
+        @Override boolean isRtbImageAd(Object value) { return isTimelineRtbImageAd(value); }
+        @Override Object getModuleItem(Object wrapper) { return NewXTimelineFilter.getModuleItem(wrapper); }
+        @Override boolean isModuleItemDispensable(Object wrapper) {
+            return NewXTimelineFilter.isModuleItemDispensable(wrapper);
+        }
+        @Override Object copyModuleItem(Object wrapper, Object item, boolean dispensable) {
+            return NewXTimelineFilter.copyModuleItem(wrapper, item, dispensable);
+        }
+        @Override List<?> getModuleChildren(Object module) { return getModuleInnerContent(module); }
+        @Override Object getModuleDisplayType(Object module) { return NewXTimelineFilter.getModuleDisplayType(module); }
+        @Override Object copyModule(Object module, List<?> children, Object displayType) {
+            return NewXTimelineFilter.copyModule(
+                    module,
+                    children,
+                    getModuleHeader(module),
+                    getModuleFooter(module),
+                    displayType,
+                    getModuleSortIndex(module),
+                    getModuleEntryId(module),
+                    getModuleClientEventInfo(module)
+            );
+        }
+        @Override Object getPostId(Object post) { return NewXTimelineFilter.getPostId(post); }
+        @Override Object getPostRepliedPostId(Object post) {
+            return NewXTimelineFilter.getPostRepliedPostId(post);
+        }
+        @Override boolean isVerticalConversation(Object displayType) {
+            return NewXTimelineFilter.isVerticalConversation(displayType);
+        }
+        @Override List<?> getVerticalConversationPostIds(Object displayType) {
+            return NewXTimelineFilter.getVerticalConversationPostIds(displayType);
+        }
+        @Override Object copyVerticalConversation(Object displayType, List<?> postIds) {
+            return NewXTimelineFilter.copyVerticalConversation(displayType, postIds);
+        }
+        @Override String getModuleEntryId(Object module) { return NewXTimelineFilter.getModuleEntryId(module); }
+        @Override Object getModuleClientEventInfo(Object module) {
+            return NewXTimelineFilter.getModuleClientEventInfo(module);
+        }
+        @Override String getPostEntryId(Object post) { return NewXTimelineFilter.getPostEntryId(post); }
+        @Override Object getPostClientEventInfo(Object post) {
+            return NewXTimelineFilter.getPostClientEventInfo(post);
+        }
+        @Override Object getPostPromotedMetadata(Object post) {
+            return NewXTimelineFilter.getPostPromotedMetadata(post);
+        }
+        @Override boolean isTrend(Object value) { return isTimelineTrend(value); }
+        @Override String getTrendEntryId(Object trend) { return NewXTimelineFilter.getTrendEntryId(trend); }
+        @Override Object getTrendClientEventInfo(Object trend) { return NewXTimelineFilter.getTrendClientEventInfo(trend); }
+        @Override Object getTrendPromotedMetadata(Object trend) { return NewXTimelineFilter.getTrendPromotedMetadata(trend); }
+        @Override String getTrendPromotedDescription(Object trend) { return NewXTimelineFilter.getTrendPromotedDescription(trend); }
+        @Override boolean isEventSummary(Object value) { return isTimelineEventSummary(value); }
+        @Override String getEventSummaryEntryId(Object eventSummary) { return NewXTimelineFilter.getEventSummaryEntryId(eventSummary); }
+        @Override Object getEventSummaryClientEventInfo(Object eventSummary) { return NewXTimelineFilter.getEventSummaryClientEventInfo(eventSummary); }
+        @Override Object getEventSummaryPromotedMetadata(Object eventSummary) { return NewXTimelineFilter.getEventSummaryPromotedMetadata(eventSummary); }
+        @Override boolean isPromotedClientEventInfo(Object eventInfo) {
+            return NewXTimelineFilter.isPromotedClientEventInfo(eventInfo);
+        }
+        @Override String getPostText(Object post) { return NewXTimelineFilter.getPostText(post); }
+        @Override List<?> getPostMentions(Object post) { return NewXTimelineFilter.getPostMentions(post); }
+        @Override int getMentionStartIdx(Object mention) {
+            return NewXTimelineFilter.getMentionStartIdx(mention);
+        }
+        @Override int getMentionEndIdx(Object mention) { return NewXTimelineFilter.getMentionEndIdx(mention); }
+        @Override String getMentionScreenName(Object mention) {
+            return NewXTimelineFilter.getMentionScreenName(mention);
+        }
+        @Override String getPostAuthorScreenName(Object post) {
+            return NewXTimelineFilter.getPostAuthorScreenName(post);
+        }
+        @Override Object getPostAuthorVerifiedType(Object post) {
+            return NewXTimelineFilter.getPostAuthorVerifiedType(post);
+        }
+        @Override String getPostAuthorId(Object post) {
+            return NewXTimelineFilter.getPostAuthorId(post);
+        }
+        @Override Object getContentDisclosure(Object post) { return NewXTimelineFilter.getContentDisclosure(post); }
+        @Override boolean hasAiGeneratedDisclosure(Object disclosure) {
+            return NewXTimelineFilter.hasAiGeneratedDisclosure(disclosure);
+        }
+        @Override Object getAiDetectionSource(Object disclosure) {
+            return NewXTimelineFilter.getAiDetectionSource(disclosure);
+        }
+    };
+
+    private NewXTimelineFilter() {
+    }
+
+    public static Object filterPromotedItems(Object timelineItems, boolean enabled) {
+        return filterPromotedItems(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterPromotedItems(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
+        return filterTimelineItems(timelineItems, enabled, false, null, modelAccess);
+    }
+
+    public static Object filterDiscoverMore(Object timelineItems, boolean enabled) {
+        return filterDiscoverMore(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterDiscoverMore(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
+        if (!enabled) return timelineItems;
+        return filterTimelineItems(timelineItems, false, false, null, Collections.emptySet(), true, modelAccess);
+    }
+
+    public static Object filterWhoToFollow(Object timelineItems, boolean enabled) {
+        return filterWhoToFollow(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterWhoToFollow(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
+        if (!enabled) return timelineItems;
+        return filterTimelineItems(timelineItems, false, true, null, modelAccess);
+    }
+
+    public static Object filterPostsByKeyword(Object timelineItems) {
+        try {
+            PostFilterRuleStore store = PostFilterRuleStore.shared();
+            if (!store.isEnabled()) return timelineItems;
+            return filterTimelineItems(
+                    timelineItems,
+                    false,
+                    false,
+                    store.snapshot(),
+                    Collections.emptySet(),
+                    false,
+                    PRODUCTION_MODEL_ACCESS
+            );
+        } catch (RuntimeException exception) {
+            logFailure("post-filter rule loading", exception);
+            return timelineItems;
+        }
+    }
+
+    public static Object filterPostsByKeyword(
+            Object timelineItems,
+            boolean enabled,
+            PostFilterRuleStore.Snapshot snapshot
+    ) {
+        return filterPostsByKeyword(timelineItems, enabled, snapshot, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterPostsByKeyword(
+            Object timelineItems,
+            boolean enabled,
+            PostFilterRuleStore.Snapshot snapshot,
+            TimelineModelAccess modelAccess
+    ) {
+        if (!enabled) return timelineItems;
+        return filterTimelineItems(timelineItems, false, false, snapshot, Collections.emptySet(), false, modelAccess);
+    }
+
+    public static Object filterPostsByVerifiedType(Object timelineItems, Set<String> typesToHide) {
+        return filterPostsByVerifiedType(timelineItems, typesToHide, true, true);
+    }
+
+    public static Object filterPostsByVerifiedType(
+            Object timelineItems,
+            Set<String> typesToHide,
+            boolean filterTimeline,
+            boolean filterThread
+    ) {
+        try {
+            Set<String> types = parseVerifiedTypes(typesToHide);
+            if (types.isEmpty() || (!filterTimeline && !filterThread)) return timelineItems;
+            return filterPostsByVerifiedType(
+                    timelineItems,
+                    types,
+                    filterTimeline,
+                    filterThread,
+                    VerifiedAccountWhitelistStore.shared().snapshot(),
+                    PRODUCTION_MODEL_ACCESS
+            );
+        } catch (RuntimeException exception) {
+            logFailure("verified-account filter loading", exception);
+            return timelineItems;
+        }
+    }
+
+    static Object filterPostsByVerifiedType(
+            Object timelineItems,
+            Set<String> typesToHide,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
+        return filterPostsByVerifiedType(
+                timelineItems,
+                typesToHide,
+                true,
+                true,
+                whitelist,
+                modelAccess
+        );
+    }
+
+    static Object filterPostsByVerifiedType(
+            Object timelineItems,
+            Set<String> typesToHide,
+            boolean filterTimeline,
+            boolean filterThread,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
+        Set<String> types = parseVerifiedTypes(typesToHide);
+        if (types.isEmpty() || (!filterTimeline && !filterThread)) return timelineItems;
+        return filterTimelineItems(
+                timelineItems,
+                false,
+                false,
+                null,
+                Collections.emptySet(),
+                false,
+                types,
+                whitelist == null ? Collections.emptySet() : whitelist,
+                filterTimeline,
+                filterThread,
+                modelAccess
+        );
+    }
+
+    private static Set<String> parseVerifiedTypes(Set<String> typesToHide) {
+        if (typesToHide == null || typesToHide.isEmpty()) return Collections.emptySet();
+        Set<String> types = new HashSet<>();
+        for (String type : typesToHide) {
+            if (isSupportedVerifiedType(type)) types.add(type);
+        }
+        return types;
+    }
+
+    private static boolean isSupportedVerifiedType(String type) {
+        return VERIFIED_TYPE_BUSINESS.equals(type)
+                || VERIFIED_TYPE_GOVERNMENT.equals(type)
+                || VERIFIED_TYPE_USER.equals(type)
+                || VERIFIED_TYPE_UNKNOWN.equals(type);
+    }
+    public static Object filterAiGeneratedPosts(Object timelineItems, Set<String> sourcesToHide) {
+        return filterAiGeneratedPosts(timelineItems, sourcesToHide, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterAiGeneratedPosts(
+            Object timelineItems,
+            Set<String> sourcesToHide,
+            TimelineModelAccess modelAccess
+    ) {
+        Set<String> sources = parseAiSources(sourcesToHide);
+        if (sources.isEmpty()) return timelineItems;
+        return filterTimelineItems(timelineItems, false, false, null, sources, false, modelAccess);
+    }
+
+    private static Set<String> parseAiSources(Set<String> sourcesToHide) {
+        if (sourcesToHide == null || sourcesToHide.isEmpty()) return Collections.emptySet();
+        Set<String> sources = new HashSet<>();
+        for (String source : sourcesToHide) {
+            if (source != null && isSupportedAiSource(source)) sources.add(source);
+        }
+        return sources;
+    }
+
+    private static boolean isSupportedAiSource(String source) {
+        return AI_SOURCE_USER_MARKED.equals(source)
+                || AI_SOURCE_AUTO_DETECTED.equals(source)
+                || AI_SOURCE_NOT_IDENTIFIED.equals(source);
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            TimelineModelAccess modelAccess
+    ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                Collections.emptySet(),
+                false,
+                modelAccess
+        );
+    }
+
+private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            TimelineModelAccess modelAccess
+    ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                Collections.emptySet(),
+                Collections.emptySet(),
+                modelAccess
+        );
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                verifiedTypesToHide,
+                whitelist,
+                false,
+                false,
+                modelAccess
+        );
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
+            TimelineModelAccess modelAccess
+    ) {
+        if (timelineItems == null) return null;
+        if (!filterPromotedItems
+                && !hideWhoToFollow
+                && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())
+                && (aiSourcesToHide == null || aiSourcesToHide.isEmpty())
+                && (!filterTimeline && !filterThread || verifiedTypesToHide == null || verifiedTypesToHide.isEmpty())
+                && !hideDiscoverMore) {
+            return timelineItems;
+        }
+        if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
+
+        try {
+            List<Object> filtered = null;
+            List<Object> unchangedPrefix = null;
+            List<?> sourceList = timelineItems instanceof List<?> list ? list : null;
+            int index = 0;
+            for (Object original : iterable) {
+                FilterResult result = filterObject(
+                        original,
+                        filterPromotedItems,
+                        hideWhoToFollow,
+                        ruleSnapshot,
+                        aiSourcesToHide,
+                        hideDiscoverMore,
+                        verifiedTypesToHide,
+                        whitelist,
+                        filterTimeline,
+                        filterThread,
+                        modelAccess
+                );
+                boolean changed = result.remove || result.item != original;
+                if (!changed) {
+                    if (filtered != null) filtered.add(original);
+                    else if (sourceList == null) {
+                        if (unchangedPrefix == null) unchangedPrefix = new ArrayList<>();
+                        unchangedPrefix.add(original);
+                    }
+                    index++;
+                    continue;
+                }
+
+                if (filtered == null) {
+                    filtered = new ArrayList<>(sourceList != null ? sourceList.size() : index + 1);
+                    if (sourceList != null) {
+                        filtered.addAll(sourceList.subList(0, index));
+                    } else if (unchangedPrefix != null) {
+                        filtered.addAll(unchangedPrefix);
+                        unchangedPrefix = null;
+                    }
+                }
+                if (!result.remove) filtered.add(result.item);
+                index++;
+            }
+            if (filtered == null) return timelineItems;
+            return immutableList(filtered);
+        } catch (RuntimeException exception) {
+            logFailure("top-level timeline filtering", exception);
+            return timelineItems;
+        }
+    }
+
+    private static FilterResult filterObject(
+            Object original,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
+            TimelineModelAccess modelAccess
+    ) {
+        if (original == null) return FilterResult.keep(null);
+        try {
+            if (modelAccess.isModuleItem(original)) {
+                return filterModuleItem(
+                        original,
+                        filterPromotedItems,
+                        hideWhoToFollow,
+                        ruleSnapshot,
+                        aiSourcesToHide,
+                        hideDiscoverMore,
+                        verifiedTypesToHide,
+                        whitelist,
+                        filterTimeline,
+                        filterThread,
+                        modelAccess
+                );
+            }
+            return filterItem(
+                    original,
+                    filterPromotedItems,
+                    hideWhoToFollow,
+                    ruleSnapshot,
+                    aiSourcesToHide,
+                    hideDiscoverMore,
+                    verifiedTypesToHide,
+                    whitelist,
+                    filterTimeline,
+                    filterTimeline,
+                    filterThread,
+                    modelAccess
+            );
+        } catch (RuntimeException exception) {
+            logFailure("timeline item " + original.getClass().getSimpleName(), exception);
+            return FilterResult.keep(original);
+        }
+    }
+
+    private static FilterResult filterModuleItem(
+            Object wrapper,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
+            TimelineModelAccess modelAccess
+    ) {
+        Object originalItem = modelAccess.getModuleItem(wrapper);
+        FilterResult result = filterItem(
+                originalItem,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                verifiedTypesToHide,
+                whitelist,
+                filterTimeline,
+                filterTimeline,
+                filterThread,
+                modelAccess
+        );
+        if (result.remove) return result;
+        if (result.item == originalItem) return FilterResult.keep(wrapper);
+        return FilterResult.replace(modelAccess.copyModuleItem(
+                wrapper,
+                result.item,
+                modelAccess.isModuleItemDispensable(wrapper)
+        ));
+    }
+
+    private static FilterResult filterItem(
+            Object item,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            boolean filterVerified,
+            boolean filterTimeline,
+            boolean filterThread,
+            TimelineModelAccess modelAccess
+    ) {
+        if (item == null) return FilterResult.keep(null);
+        if (filterPromotedItems) {
+            try {
+                if (isPromoted(item, modelAccess)) return FilterResult.remove();
+            } catch (RuntimeException exception) {
+                logDiagnostic("promoted-item check", exception, "item=" + describeValue(item));
+                throw exception;
+            }
+        }
+        if (modelAccess.isPost(item)) {
+            if (verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty()
+                    && (filterTimeline || filterThread)) {
+                notePostAuthorship(item, modelAccess);
+            }
+            try {
+                String textForFilter = modelAccess.getPostTextForFilter(item);
+                String authorScreenName = modelAccess.getPostAuthorScreenName(item);
+                if (filterVerified && isVerifiedAuthorToHide(item, verifiedTypesToHide, whitelist, modelAccess)) {
+                    return FilterResult.removeVerified();
+                }
+                if (PostFilterMatcher.findMatchReason(textForFilter, authorScreenName, ruleSnapshot) != null) {
+                    return FilterResult.remove();
+                }
+            } catch (RuntimeException exception) {
+                logDiagnostic("post keyword check", exception, "post=" + describeValue(item));
+                throw exception;
+            }
+            if (isAiGenerated(item, aiSourcesToHide, modelAccess)) return FilterResult.remove();
+        }
+        if (modelAccess.isModule(item)) {
+            return filterModule(
+                    item,
+                    filterPromotedItems,
+                    hideWhoToFollow,
+                    ruleSnapshot,
+                    aiSourcesToHide,
+                    hideDiscoverMore,
+                    verifiedTypesToHide,
+                    whitelist,
+                    filterTimeline,
+                    filterThread,
+                    modelAccess
+            );
+        }
+        return FilterResult.keep(item);
+    }
+
+    private static boolean isVerifiedAuthorToHide(
+            Object post,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            TimelineModelAccess modelAccess
+    ) {
+        if (verifiedTypesToHide == null || verifiedTypesToHide.isEmpty()) return false;
+        Object verifiedType = modelAccess.getPostAuthorVerifiedType(post);
+        if (!(verifiedType instanceof Enum<?> enumType)) return false;
+        if (!verifiedTypesToHide.contains(enumType.name())) return false;
+        if (VerifiedAccountWhitelistStore.matches(
+                whitelist,
+                modelAccess.getPostAuthorId(post),
+                modelAccess.getPostAuthorScreenName(post))) {
+            return false;
+        }
+        return !isOwnThreadReply(post, modelAccess);
+    }
+
+    /**
+     * True when the post is its thread owner's own reply: walking replied-to links
+     * reaches a head post by the same author. A missing parent link fails closed to
+     * hidden; the reply still lands in Filtered Replies.
+     */
+    private static boolean isOwnThreadReply(Object post, TimelineModelAccess modelAccess) {
+        String authorId = modelAccess.getPostAuthorId(post);
+        if (authorId == null || authorId.isEmpty()) return false;
+        String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+        String parentId = NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post));
+        if (parentId == null || parentId.isEmpty() || parentId.equals(postId)) return false;
+
+        FilteredRepliesStore store = FilteredRepliesStore.shared();
+        String current = parentId;
+        for (int hop = 0; hop < MAX_PARENT_HOPS; hop++) {
+            String currentAuthor = store.authorIdFor(current);
+            if (currentAuthor == null || currentAuthor.isEmpty()) return false;
+            String grandparent = store.parentIdFor(current);
+            if (grandparent == null || grandparent.isEmpty() || grandparent.equals(current)) {
+                return authorId.equals(currentAuthor);
+            }
+            current = grandparent;
+        }
+        return false;
+    }
+
+    private static boolean isAiGenerated(
+            Object post,
+            Set<String> aiSourcesToHide,
+            TimelineModelAccess modelAccess
+    ) {
+        if (aiSourcesToHide == null || aiSourcesToHide.isEmpty()) return false;
+        Object disclosure;
+        try {
+            disclosure = modelAccess.getContentDisclosure(post);
+        } catch (RuntimeException exception) {
+            logDiagnostic("AI disclosure read", exception, "post=" + describeValue(post));
+            throw exception;
+        }
+        if (disclosure == null) return false;
+
+        try {
+            if (!modelAccess.hasAiGeneratedDisclosure(disclosure)) return false;
+            Object source = modelAccess.getAiDetectionSource(disclosure);
+            if (source == null) return aiSourcesToHide.contains(AI_SOURCE_NOT_IDENTIFIED);
+            if (!(source instanceof Enum<?> enumSource)) return false;
+            return aiSourcesToHide.contains(enumSource.name());
+        } catch (RuntimeException exception) {
+            logDiagnostic(
+                    "AI disclosure classification",
+                    exception,
+                    "post=" + describeValue(post),
+                    "disclosure=" + describeValue(disclosure)
+            );
+            throw exception;
+        }
+    }
+
+    private static Object getContentDisclosure(Object post) {
+        return null;
+    }
+
+    private static boolean hasAiGeneratedDisclosure(Object disclosure) {
+        return false;
+    }
+
+    private static Object getAiDetectionSource(Object disclosure) {
+        return null;
+    }
+
+    private static FilterResult filterModule(
+            Object module,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
+            TimelineModelAccess modelAccess
+    ) {
+        String entryId = modelAccess.getModuleEntryId(module);
+        if (hideWhoToFollow && isWhoToFollowEntryId(entryId)) {
+            return FilterResult.remove();
+        }
+        if (hideDiscoverMore && isDiscoverMoreEntryId(entryId)) {
+            return FilterResult.remove();
+        }
+
+        String conversationRootId = extractConversationRootPostId(entryId);
+        boolean filterVerified = conversationRootId != null ? filterThread : filterTimeline;
+
+        List<?> originalChildren = modelAccess.getModuleChildren(module);
+        if (originalChildren == null || originalChildren.isEmpty()) {
+            return FilterResult.keep(module);
+        }
+
+        if (conversationRootId != null && filterVerified
+                && verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty()) {
+            noteModuleAuthorship(originalChildren, modelAccess);
+        }
+
+        List<Object> filteredChildren = null;
+        Set<Object> removedPostIds = null;
+        boolean changed = false;
+        for (int childIndex = 0; childIndex < originalChildren.size(); childIndex++) {
+            Object originalChild = originalChildren.get(childIndex);
+            if (originalChild == null) {
+                if (filteredChildren != null) filteredChildren.add(null);
+                continue;
+            }
+
+            Object originalItem = null;
+            FilterResult result;
+            try {
+                originalItem = modelAccess.getModuleItem(originalChild);
+                result = filterItem(
+                        originalItem,
+                        filterPromotedItems,
+                        hideWhoToFollow,
+                        ruleSnapshot,
+                        aiSourcesToHide,
+                        hideDiscoverMore,
+                        verifiedTypesToHide,
+                        whitelist,
+                        filterVerified,
+                        filterTimeline,
+                        filterThread,
+                        modelAccess
+                );
+            } catch (RuntimeException exception) {
+                logFailure(
+                        "timeline module child",
+                        exception,
+                        childContext(
+                                module,
+                                childIndex,
+                                originalChild,
+                                originalItem,
+                                filterPromotedItems,
+                                hideWhoToFollow,
+                                ruleSnapshot,
+                                aiSourcesToHide
+                        )
+                );
+                if (filteredChildren != null) filteredChildren.add(originalChild);
+                continue;
+            }
+
+            if (conversationRootId != null
+                    && filterVerified
+                    && verifiedTypesToHide != null
+                    && !verifiedTypesToHide.isEmpty()
+                    && modelAccess.isPost(originalItem)) {
+                associatePostWithConversation(conversationRootId, originalItem, modelAccess);
+            }
+
+            if (result.remove) {
+                if (filteredChildren == null) {
+                    filteredChildren = copyChildrenPrefix(originalChildren, childIndex);
+                }
+                changed = true;
+                if (modelAccess.isPost(originalItem)) {
+                    Object postId = modelAccess.getPostId(originalItem);
+                    if (postId != null) {
+                        if (removedPostIds == null) removedPostIds = new HashSet<>();
+                        removedPostIds.add(postId);
+                    }
+                    if (result.verifiedAuthorFiltered && conversationRootId != null) {
+                        recordFilteredReply(conversationRootId, originalItem, modelAccess);
+                    }
+                }
+                continue;
+            }
+            if (result.item == originalItem) {
+                if (filteredChildren != null) filteredChildren.add(originalChild);
+                continue;
+            }
+
+            try {
+                Object replacement = modelAccess.copyModuleItem(
+                        originalChild,
+                        result.item,
+                        modelAccess.isModuleItemDispensable(originalChild)
+                );
+                if (filteredChildren == null) {
+                    filteredChildren = copyChildrenPrefix(originalChildren, childIndex);
+                }
+                filteredChildren.add(replacement);
+                changed = true;
+            } catch (RuntimeException exception) {
+                logFailure(
+                        "timeline module child reconstruction",
+                        exception,
+                        childContext(
+                                module,
+                                childIndex,
+                                originalChild,
+                                result.item,
+                                filterPromotedItems,
+                                hideWhoToFollow,
+                                ruleSnapshot,
+                                aiSourcesToHide
+                        )
+                );
+                if (filteredChildren != null) filteredChildren.add(originalChild);
+            }
+        }
+
+        if (!changed) return FilterResult.keep(module);
+        if (filteredChildren == null || filteredChildren.isEmpty()) return FilterResult.remove();
+
+        try {
+            Object displayType = repairDisplayType(
+                    modelAccess.getModuleDisplayType(module),
+                    removedPostIds == null ? Collections.emptySet() : removedPostIds,
+                    modelAccess
+            );
+            return FilterResult.replace(modelAccess.copyModule(module, filteredChildren, displayType));
+        } catch (RuntimeException exception) {
+            logFailure("timeline module reconstruction", exception);
+            return FilterResult.keep(module);
+        }
+    }
+
+    /**
+     * Records authorship for every child before any filter decision, so the
+     * own-thread-reply walk sees siblings regardless of child order. Per-child
+     * failures only degrade the exemption back to hiding; they never throw.
+     */
+    private static void noteModuleAuthorship(List<?> children, TimelineModelAccess modelAccess) {
+        for (Object child : children) {
+            try {
+                if (child == null) continue;
+                Object item = modelAccess.getModuleItem(child);
+                if (modelAccess.isPost(item)) notePostAuthorship(item, modelAccess);
+            } catch (RuntimeException exception) {
+                logFailure("recording conversation authorship", exception);
+            }
+        }
+    }
+
+    private static void notePostAuthorship(Object post, TimelineModelAccess modelAccess) {
+        if (post == null) return;
+        try {
+            String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+            if (postId == null || postId.isEmpty()) return;
+            FilteredRepliesStore.shared().notePostAuthorship(
+                    postId,
+                    modelAccess.getPostAuthorId(post),
+                    NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post))
+            );
+        } catch (RuntimeException exception) {
+            logFailure("recording post authorship", exception);
+        }
+    }
+
+    private static void associatePostWithConversation(
+            String conversationRootId,
+            Object post,
+            TimelineModelAccess modelAccess
+    ) {
+        if (conversationRootId == null || post == null) return;
+        try {
+            String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+            if (postId != null && !postId.isEmpty()) {
+                FilteredRepliesStore store = FilteredRepliesStore.shared();
+                store.associatePostWithRoot(conversationRootId, postId);
+                String parentPostId = NewXUtils.identifierToString(
+                        modelAccess.getPostRepliedPostId(post)
+                );
+                if (parentPostId != null && !parentPostId.isEmpty()) {
+                    store.associatePostWithParent(postId, parentPostId);
+                }
+            }
+        } catch (RuntimeException exception) {
+            logFailure("associating post with conversation", exception);
+        }
+    }
+
+    private static List<Object> copyChildrenPrefix(List<?> children, int endExclusive) {
+        List<Object> prefix = new ArrayList<>(children.size());
+        for (int index = 0; index < endExclusive; index++) {
+            prefix.add(children.get(index));
+        }
+        return prefix;
+    }
+
+    private static Object repairDisplayType(
+            Object displayType,
+            Set<Object> removedPostIds,
+            TimelineModelAccess modelAccess
+    ) {
+        if (removedPostIds.isEmpty() || !modelAccess.isVerticalConversation(displayType)) return displayType;
+
+        List<?> originalIds = modelAccess.getVerticalConversationPostIds(displayType);
+        if (originalIds == null || originalIds.isEmpty()) return displayType;
+
+        List<Object> filteredIds = new ArrayList<>(originalIds.size());
+        for (Object id : originalIds) {
+            if (!removedPostIds.contains(id)) filteredIds.add(id);
+        }
+        if (filteredIds.size() == originalIds.size()) return displayType;
+        return modelAccess.copyVerticalConversation(displayType, filteredIds);
+    }
+
+    static String extractConversationRootPostId(String entryId) {
+        if (entryId == null) return null;
+        String prefix = null;
+        if (entryId.startsWith("conversationthread-")) {
+            prefix = "conversationthread-";
+        } else if (entryId.startsWith("conversation-")) {
+            prefix = "conversation-";
+        } else if (entryId.startsWith("home-conversation-")) {
+            prefix = "home-conversation-";
+        }
+        if (prefix == null) return null;
+
+        String rest = entryId.substring(prefix.length());
+        int dash = rest.indexOf('-');
+        String rootId = dash >= 0 ? rest.substring(0, dash) : rest;
+        return rootId.trim().isEmpty() ? null : rootId.trim();
+    }
+
+    private static void recordFilteredReply(
+            String conversationRootId,
+            Object post,
+            TimelineModelAccess modelAccess
+    ) {
+        try {
+            String replyId = NewXUtils.identifierToString(modelAccess.getPostId(post));
+            String screenName = modelAccess.getPostAuthorScreenName(post);
+            String authorId = modelAccess.getPostAuthorId(post);
+            Object verifiedTypeObj = modelAccess.getPostAuthorVerifiedType(post);
+            String verifiedType = verifiedTypeObj != null ? verifiedTypeObj.toString() : "";
+            String text = modelAccess.getPostText(post);
+            FilteredRepliesStore.shared().record(
+                    conversationRootId,
+                    new FilteredRepliesStore.FilteredReply(
+                            replyId != null ? replyId : "",
+                            screenName != null ? screenName : "",
+                            authorId != null ? authorId : "",
+                            verifiedType,
+                            text != null ? text : "",
+                            System.currentTimeMillis()
+                    )
+            );
+        } catch (RuntimeException exception) {
+            logFailure("recording filtered reply", exception);
+        }
+    }
+
+    private static boolean isWhoToFollowEntryId(String entryId) {
+        return entryId != null && entryId.startsWith("who-to-follow");
+    }
+
+    private static boolean isDiscoverMoreEntryId(String entryId) {
+        return entryId != null
+                && (DISCOVER_MORE_ENTRY_ID.equals(entryId)
+                || entryId.startsWith(DISCOVER_MORE_ENTRY_ID + "-"));
+    }
+
+    private static boolean isPromoted(Object item, TimelineModelAccess modelAccess) {
+        if (modelAccess.isRtbImageAd(item)) return true;
+        String entryId = null;
+        Object eventInfo = null;
+        if (modelAccess.isPost(item)) {
+            entryId = modelAccess.getPostEntryId(item);
+            eventInfo = modelAccess.getPostClientEventInfo(item);
+            if (modelAccess.getPostPromotedMetadata(item) != null) return true;
+        } else if (modelAccess.isModule(item)) {
+            entryId = modelAccess.getModuleEntryId(item);
+            eventInfo = modelAccess.getModuleClientEventInfo(item);
+        } else if (modelAccess.isTrend(item)) {
+            entryId = modelAccess.getTrendEntryId(item);
+            eventInfo = modelAccess.getTrendClientEventInfo(item);
+            if (modelAccess.getTrendPromotedMetadata(item) != null) return true;
+            if (modelAccess.getTrendPromotedDescription(item) != null) return true;
+        } else if (modelAccess.isEventSummary(item)) {
+            entryId = modelAccess.getEventSummaryEntryId(item);
+            eventInfo = modelAccess.getEventSummaryClientEventInfo(item);
+            if (modelAccess.getEventSummaryPromotedMetadata(item) != null) return true;
+        }
+        if (isPromotedEntryId(entryId)) return true;
+
+        return eventInfo != null && modelAccess.isPromotedClientEventInfo(eventInfo);
+    }
+
+    private static boolean isPromotedEntryId(String entryId) {
+        if (entryId == null) return false;
+        if (entryId.contains("promoted")) return true;
+        if (entryId.startsWith("ad-") || entryId.contains("-ad-")) return true;
+        if (entryId.contains("superhero") || entryId.contains("rtb")) return true;
+        return false;
+    }
+
+    private static boolean isTimelineTrend(Object value) {
+        return false;
+    }
+
+    private static String getTrendEntryId(Object trend) {
+        return null;
+    }
+
+    private static Object getTrendClientEventInfo(Object trend) {
+        return null;
+    }
+
+    private static Object getTrendPromotedMetadata(Object trend) {
+        return null;
+    }
+
+    private static String getTrendPromotedDescription(Object trend) {
+        return null;
+    }
+
+    private static boolean isTimelineEventSummary(Object value) {
+        return false;
+    }
+
+    private static String getEventSummaryEntryId(Object eventSummary) {
+        return null;
+    }
+
+    private static Object getEventSummaryClientEventInfo(Object eventSummary) {
+        return null;
+    }
+
+    private static Object getEventSummaryPromotedMetadata(Object eventSummary) {
+        return null;
+    }
+
+    private static boolean isTimelineModuleItem(Object value) {
+        return false;
+    }
+
+    private static boolean isTimelinePost(Object value) {
+        return false;
+    }
+
+    private static boolean isTimelineModule(Object value) {
+        return false;
+    }
+
+    private static boolean isTimelineRtbImageAd(Object value) {
+        return false;
+    }
+
+    private static Object getModuleItem(Object wrapper) {
+        return null;
+    }
+
+    private static boolean isModuleItemDispensable(Object wrapper) {
+        return false;
+    }
+
+    private static Object copyModuleItem(Object ignoredWrapper, Object item, boolean dispensable) {
+        return ignoredWrapper;
+    }
+
+    private static List<?> getModuleInnerContent(Object module) {
+        return null;
+    }
+
+    private static Object getModuleHeader(Object module) {
+        return null;
+    }
+
+    private static Object getModuleFooter(Object module) {
+        return null;
+    }
+
+    private static Object getModuleDisplayType(Object module) {
+        return null;
+    }
+
+    private static long getModuleSortIndex(Object module) {
+        return 0L;
+    }
+
+    private static String getModuleEntryId(Object module) {
+        return null;
+    }
+
+    private static Object getModuleClientEventInfo(Object module) {
+        return null;
+    }
+
+    private static String getPostEntryId(Object post) {
+        return null;
+    }
+
+    private static Object getPostClientEventInfo(Object post) {
+        return null;
+    }
+
+    private static Object getPostPromotedMetadata(Object post) {
+        return null;
+    }
+
+    private static boolean isPromotedClientEventInfo(Object eventInfo) {
+        return false;
+    }
+
+    private static boolean hasPromotedClientEventInfoComponent(String component) {
+        return component != null && component.toLowerCase(Locale.ROOT).contains("promoted");
+    }
+
+    private static Object getPostId(Object post) {
+        return null;
+    }
+
+    private static Object getPostRepliedPostId(Object post) {
+        return null;
+    }
+
+    private static boolean isVerticalConversation(Object displayType) {
+        return false;
+    }
+
+    private static List<?> getVerticalConversationPostIds(Object displayType) {
+        return null;
+    }
+
+    private static Object copyVerticalConversation(Object ignoredDisplayType, List<?> postIds) {
+        return ignoredDisplayType;
+    }
+
+    private static String getPostText(Object post) {
+        return null;
+    }
+
+    private static List<?> getPostMentions(Object post) {
+        return null;
+    }
+
+    private static int getMentionStartIdx(Object mention) {
+        return 0;
+    }
+
+    private static int getMentionEndIdx(Object mention) {
+        return 0;
+    }
+
+    private static String getMentionScreenName(Object mention) {
+        return null;
+    }
+
+    private static String getPostAuthorScreenName(Object post) {
+        return null;
+    }
+    private static Object getPostAuthorVerifiedType(Object post) {
+        return null;
+    }
+
+    private static String getPostAuthorId(Object post) {
+        return null;
+    }
+
+    private static Object copyModule(
+            Object ignoredModule,
+            List<?> children,
+            Object header,
+            Object footer,
+            Object displayType,
+            long sortIndex,
+            String entryId,
+            Object clientEventInfo
+    ) {
+        return null;
+    }
+
+    /**
+     * The timeline adapter replaces this body with NewX's immutable-list converter at patch time.
+     * Keep a Java-list fallback so host-side filtering tests can run without a patched APK.
+     */
+    private static Object immutableList(List<Object> filtered) {
+        return Collections.unmodifiableList(filtered);
+    }
+
+    private static String childContext(
+            Object module,
+            int childIndex,
+            Object child,
+            Object item,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide
+    ) {
+        return "module=" + describeValue(module)
+                + ", childIndex=" + childIndex
+                + ", child=" + describeValue(child)
+                + ", item=" + describeValue(item)
+                + ", filters={promoted=" + filterPromotedItems
+                + ", whoToFollow=" + hideWhoToFollow
+                + ", keywordRules=" + hasEnabledRules(ruleSnapshot)
+                + ", aiSources=" + aiSourcesToHide + "}";
+    }
+
+    private static boolean hasEnabledRules(PostFilterRuleStore.Snapshot snapshot) {
+        return snapshot != null && snapshot.hasEnabledRules();
+    }
+
+    private static String describeValue(Object value) {
+        if (value == null) return "null";
+        String description;
+        try {
+            description = value.toString();
+        } catch (RuntimeException exception) {
+            description = "<toString failed: " + exception.getClass().getSimpleName() + ">";
+        }
+        if (description.length() > 400) description = description.substring(0, 400) + "…";
+        return value.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(value))
+                + "=" + description;
+    }
+
+    private static void logFailure(String operation, Exception exception, String... context) {
+        String details = context.length == 0 ? "" : " [" + String.join(", ", context) + "]";
+        // Keep the toast as a visible repro signal while detailed context remains in the log.
+        NewXLogger.printException(() -> DEBUG_LOG_PREFIX + "Failed NewX " + operation + details, exception);
+    }
+
+    private static void logDiagnostic(String operation, Exception exception, String... context) {
+        String details = context.length == 0 ? "" : " [" + String.join(", ", context) + "]";
+        NewXLogger.printInfo(() -> DEBUG_LOG_PREFIX + "Failed NewX " + operation + details, exception);
+    }
+
+    private static final class FilterResult {
+        private final Object item;
+        private final boolean remove;
+        private final boolean verifiedAuthorFiltered;
+
+        private FilterResult(Object item, boolean remove, boolean verifiedAuthorFiltered) {
+            this.item = item;
+            this.remove = remove;
+            this.verifiedAuthorFiltered = verifiedAuthorFiltered;
+        }
+
+        private static FilterResult keep(Object item) {
+            return new FilterResult(item, false, false);
+        }
+
+        private static FilterResult replace(Object item) {
+            return new FilterResult(item, false, false);
+        }
+
+        private static FilterResult remove() {
+            return new FilterResult(null, true, false);
+        }
+
+        private static FilterResult removeVerified() {
+            return new FilterResult(null, true, true);
+        }
+    }
+}
