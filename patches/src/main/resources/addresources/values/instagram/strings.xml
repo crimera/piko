@@ -133,6 +133,7 @@
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
+    <string name="piko_category_downloads">Downloads</string>
     <string name="piko_enable_download">Enable download</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
     <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
@@ -256,7 +257,7 @@
     <string name="piko_tap_here">Tap here !!</string>
 
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Action bar customisation</string>
+    <string name="piko_category_action_bar">Action bar</string>
     <string name="piko_action_bar_main_feed">Main feed action bar icons</string>
     <string name="piko_action_bar_user_profile">User profile action bar icons</string>
     <string name="piko_action_bar_chat">Chat action bar icons</string>
@@ -282,7 +283,7 @@
 
 
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Filter content</string>
+    <string name="piko_category_filter_content">Content filters</string>
 
     <string name="piko_filter_story">Filter Story</string>
 
