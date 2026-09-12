@@ -42,7 +42,7 @@ public class UI {
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
     public static final String DRAWABLE_GEAR_ICON = "instagram_settings_pano_filled_24";
     public static final String DRAWABLE_ADS_ICON = "instagram_shield_outline_24";
-    public static final String DRAWABLE_SNAPCHAT_ICON = "fb_ic_app_snapchat_filled_16";
+    public static final String DRAWABLE_GHOST_ICON = "piko_ghost_icon";
     public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
     public static final String DRAWABLE_HISTORY_ICON = "instagram_history_outline_24";
     public static final String DRAWABLE_SHAPES_ICON = "fb_ic_more_shapes_outline_24";
