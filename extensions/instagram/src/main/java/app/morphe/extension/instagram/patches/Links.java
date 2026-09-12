@@ -113,12 +113,11 @@ public class Links {
        boolean shouldBlockUri = false;
         try {
             if (uri != null && uri.getPath() != null) {
-                String host = uri.getHost();
+                String host = uri.getHost() != null ? uri.getHost() : "";
                 String path = uri.getPath();
 
                 if (host.contains("graph.instagram.com")
-                        || host.contains("graph.facebook.com")
-                        || path.contains("/logging_client_events")) {
+                        || host.contains("graph.facebook.com")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
                 } else if (path.contains("/api/v2/media/seen/")) {
                     shouldBlockUri = Pref.viewStoriesAnonymously();
