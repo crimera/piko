@@ -55,6 +55,9 @@ val themePatch =
                 val originalApi31Base = captureApi31Base()
 
                 forceWhiteOnMediaChrome()
+                preserveCreationButtonContrast()
+                preserveLightClipsComposerContrast()
+                preserveLightOverflowStampBackgrounds()
                 applyLegacyTheme(amoled == true)
 
                 restoreApi31Base(

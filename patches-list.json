@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.9.0-dev.9",
+  "version": "3.10.0-dev.6",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -19,7 +19,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -37,6 +37,7 @@
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -119,7 +120,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -148,7 +149,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -176,7 +177,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -205,7 +206,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -261,7 +262,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -321,7 +322,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -398,7 +399,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -462,7 +463,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -491,7 +492,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -520,7 +521,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -552,7 +553,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -611,7 +612,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -639,7 +640,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -728,7 +729,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -757,7 +758,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -785,7 +786,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -813,7 +814,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -841,7 +842,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -869,7 +870,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -897,7 +898,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -925,7 +926,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -953,7 +954,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -981,7 +982,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1009,7 +1010,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1127,7 +1128,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1156,7 +1157,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1297,37 +1298,6 @@
     {
       "name": "Disable highlights",
       "description": null,
-      "default": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable onboarding permission prompts",
-      "description": "Prevents contacts and location permission onboarding prompts from appearing.",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1556,6 +1526,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1598,7 +1569,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1655,7 +1626,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1683,7 +1654,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1711,7 +1682,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1740,7 +1711,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1769,7 +1740,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1795,7 +1766,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1811,6 +1782,7 @@
       "description": "Adds support to share post links directly to external downloader",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -1889,7 +1861,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1905,6 +1877,7 @@
       "description": "Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -1949,7 +1922,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2003,7 +1976,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2032,7 +2005,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2060,7 +2033,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2089,7 +2062,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2117,7 +2090,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2145,7 +2118,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2173,7 +2146,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2202,7 +2175,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2230,7 +2203,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2258,7 +2231,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2316,7 +2289,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2345,7 +2318,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2434,7 +2407,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2462,7 +2435,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2491,7 +2464,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2520,7 +2493,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2641,7 +2614,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2671,7 +2644,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2730,7 +2703,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2788,7 +2761,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2912,7 +2885,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2928,6 +2901,7 @@
       "description": "Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -2962,6 +2936,8 @@
       "description": "Adds a new button to handle user related data like copy handle, download profile picture etc",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -3011,7 +2987,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3044,7 +3020,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3076,7 +3052,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3104,7 +3080,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3162,7 +3138,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3223,7 +3199,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3311,7 +3287,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3339,7 +3315,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3368,7 +3344,36 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Restore legacy follower lists",
+      "description": "Restores the legacy follower and following list screen.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3397,7 +3402,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3445,7 +3450,6 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
-        "BytecodePatch",
         "ResourcePatch"
       ],
       "compatiblePackages": [
@@ -3476,6 +3480,7 @@
       "description": "Adds a button to save media comments on posts and reels.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -3525,7 +3530,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3557,7 +3562,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3585,7 +3590,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3613,7 +3618,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3641,7 +3646,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3670,38 +3675,8 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Stories audio autoplay",
-      "description": null,
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3731,7 +3706,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.17.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,

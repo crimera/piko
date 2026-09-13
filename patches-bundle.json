@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-17T03:41:38",
-  "description": "## [3.9.0-dev.9](https://github.com/crimera/piko/compare/v3.9.0-dev.8...v3.9.0-dev.9) (2026-08-17)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** don't record an unsend we never captured ([#1728](https://github.com/crimera/piko/issues/1728)) ([e38bc52](https://github.com/crimera/piko/commit/e38bc52c246992cb5ada60c826b27a2d89163e52))\n* **Twitter:** `Block redirecting to X Lite` patch failed on X 12.6.0-release.0 ([01d4452](https://github.com/crimera/piko/commit/01d445211b68f43cd4dd56f962854f3df20d1f5e))\n* **Twitter:** Add `Block update screen` patch ([9f257f7](https://github.com/crimera/piko/commit/9f257f71f927d03b09c1dd1212ccd74d1e5d8413))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.9/patches-3.9.0-dev.9.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.9/patches-3.9.0-dev.9.mpp.asc",
-  "version": "3.9.0-dev.9"
+  "created_at": "2026-09-10T01:20:43",
+  "description": "## [3.10.0-dev.6](https://github.com/crimera/piko/compare/v3.10.0-dev.5...v3.10.0-dev.6) (2026-09-10)\n\n### 🐛 Bug Fixes\n\n* **Twitter - Show changelogs:** Error message is shown with changelog dialog ([e1238c3](https://github.com/crimera/piko/commit/e1238c3ffd38b1573a11a411000080f825f79583))\n* **Twitter:** Restore timeline position on startup ([ae231c5](https://github.com/crimera/piko/commit/ae231c596bf9b7d3b1f2a1cff9ef5e74151cd6b9))\n\n### ✨ New Features\n\n* **Twitter:** Add bulk feature flag selection and validation ([#1846](https://github.com/crimera/piko/issues/1846)) ([7b92ac8](https://github.com/crimera/piko/commit/7b92ac8626b2ff907769503ae85b688fd2471c36))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.6/patches-3.10.0-dev.6.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.6/patches-3.10.0-dev.6.mpp.asc",
+  "version": "3.10.0-dev.6"
 }
