@@ -15,6 +15,7 @@ import java.util.Set;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.BooleanSetting;
 import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.shared.settings.StringSetting;
@@ -182,17 +183,31 @@ public final class SettingsRegistry {
             String titleResourceName,
             boolean selectedByDefault
     ) {
-        requireMutable();
-        NodeBuilder node = NODES.get(settingId);
-        if (!(node instanceof ItemBuilder item) || (item.type != ItemType.SINGLE_CHOICE && item.type != ItemType.MULTI_CHOICE)) {
-            throw failure("Unknown NewX choice setting: " + settingId);
+        registerChoiceOption(
+                settingId,
+                optionId,
+                StringRef.sfc(titleResourceName),
+                titleResourceName,
+                selectedByDefault
+        );
+    }
+
+    /** Registers a choice whose title is an app resource discovered by a patch. */
+    public static synchronized void registerChoiceOptionResource(
+            String settingId,
+            String optionId,
+            int titleResourceId,
+            boolean selectedByDefault
+    ) {
+        if (titleResourceId == 0) {
+            throw failure("Invalid title resource ID for " + settingId + ": 0");
         }
-        if (item.options.containsKey(optionId)) {
-            throw failure("Duplicate choice option for " + settingId + ": " + optionId);
-        }
-        item.options.put(
-                Objects.requireNonNull(optionId),
-                new ChoiceBuilder(optionId, titleResourceName, selectedByDefault)
+        registerChoiceOption(
+                settingId,
+                optionId,
+                StringRef.constant(getStringResource(titleResourceId, settingId)),
+                null,
+                selectedByDefault
         );
     }
 
@@ -463,7 +478,11 @@ public final class SettingsRegistry {
         if (item.options.isEmpty()) {
             throw failure("Choice setting has no options: " + item.id);
         }
-        item.options.values().forEach(option -> validateStringResource(option.titleResourceName));
+        item.options.values().forEach(option -> {
+            if (option.titleResourceName != null) {
+                validateStringResource(option.titleResourceName);
+            }
+        });
     }
 
     private static SettingsNode.Category buildCategory(GroupBuilder group) {
@@ -535,7 +554,7 @@ public final class SettingsRegistry {
                 item.options.values().forEach(option -> {
                     options.add(new SettingsNode.ChoiceOption(
                             option.id,
-                            stringRef(option.titleResourceName)
+                            option.title
                     ));
                 });
                 StringSetting setting = new StringSetting(
@@ -559,7 +578,7 @@ public final class SettingsRegistry {
                 item.options.values().forEach(option -> {
                     options.add(new SettingsNode.ChoiceOption(
                             option.id,
-                            stringRef(option.titleResourceName)
+                            option.title
                     ));
                     if (option.selectedByDefault) defaults.add(option.id);
                 });
@@ -635,6 +654,44 @@ public final class SettingsRegistry {
             throw failure("Unknown NewX " + type + " setting: " + id);
         }
         return item;
+    }
+
+    private static void registerChoiceOption(
+            String settingId,
+            String optionId,
+            StringRef title,
+            @Nullable String titleResourceName,
+            boolean selectedByDefault
+    ) {
+        requireMutable();
+        ItemBuilder item = requireChoiceItem(settingId);
+        if (item.options.containsKey(optionId)) {
+            throw failure("Duplicate choice option for " + settingId + ": " + optionId);
+        }
+        item.options.put(
+                Objects.requireNonNull(optionId),
+                new ChoiceBuilder(optionId, title, titleResourceName, selectedByDefault)
+        );
+    }
+
+    private static ItemBuilder requireChoiceItem(String id) {
+        NodeBuilder node = NODES.get(id);
+        if (!(node instanceof ItemBuilder item)
+                || (item.type != ItemType.SINGLE_CHOICE && item.type != ItemType.MULTI_CHOICE)) {
+            throw failure("Unknown NewX choice setting: " + id);
+        }
+        return item;
+    }
+
+    private static String getStringResource(int resourceId, String settingId) {
+        try {
+            return Utils.getResources().getString(resourceId);
+        } catch (RuntimeException exception) {
+            throw failure(
+                    "Unable to resolve dynamic NewX choice title resource " +
+                            resourceId + " for " + settingId
+            );
+        }
     }
 
     private static void requireUnconfigured(ItemBuilder item) {
@@ -755,12 +812,19 @@ public final class SettingsRegistry {
 
     private static final class ChoiceBuilder {
         final String id;
-        final String titleResourceName;
+        final StringRef title;
+        @Nullable final String titleResourceName;
         final boolean selectedByDefault;
 
-        ChoiceBuilder(String id, String titleResourceName, boolean selectedByDefault) {
+        ChoiceBuilder(
+                String id,
+                StringRef title,
+                @Nullable String titleResourceName,
+                boolean selectedByDefault
+        ) {
             this.id = Objects.requireNonNull(id);
-            this.titleResourceName = Objects.requireNonNull(titleResourceName);
+            this.title = Objects.requireNonNull(title);
+            this.titleResourceName = titleResourceName;
             this.selectedByDefault = selectedByDefault;
         }
     }
