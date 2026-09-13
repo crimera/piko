@@ -1,15 +1,5 @@
 # Repository Agent Rules
 
-## Search safety
-
-- Scope every content search to the smallest known file or package directory.
-- Never run repository-wide `ffgrep`/grep for X-Lite or APK analysis. Broad indexed searches can hang or crash the coding-agent process.
-- Prefer exact-file `read` once a likely file is known.
-- Prefer exact-file `rg` for follow-up symbol checks.
-- Search one narrow package directory only when the target file is unknown; inspect the best result before searching again.
-- Exclude generated, decompiled, build, and vendor trees unless one is the explicit analysis target.
-- Do not launch multiple broad searches in parallel.
-
 ## Device safety
 
 - Installing a build on the user's device is allowed when needed for the requested validation.
@@ -85,6 +75,32 @@ They fail with `PatchException` containing the label, cardinality, and candidate
 8. **Build and patch exclusively.** Build the real MPP, patch the exact APK, and confirm the intended patches report `Applied` and `Saved to`.
 9. **Validate proportionally.** After a failure or explicit deep-validation request, inspect final DEX reachability and run focused old/new runtime tests. Include negative/control paths, not just the modified path.
 10. **Document evidence.** Record the target anchors, discarded anchors, cardinality, before/after hook, supported versions, and known limits so the next agent can improve the resolver instead of rediscovering it.
+
+### Test policy
+
+A test must guard a real failure mode. Keep tests that do one of these:
+
+- Aggregate integration over real contributions, resources, and extension reads
+  (`SettingsAggregateValidationTest` — the only test that prevents shipping a broken build).
+- Emitted-bytecode assertions: opcodes, invoke/result pairing, register allocation, branch
+  direction (`SettingsContributionPatchTest`). Smali bugs are silent until runtime on device.
+- CI linter fixture corpus (`NewXResolverLinterTest`). Every real false positive, false
+  negative, or resolver failure becomes a focused regression fixture here.
+- Fail-fast validation: duplicate IDs, bad defaults, malformed descriptors, empty builds.
+  One assertion per invariant; collapse happy-path/empty/ambiguous cases into a single test.
+
+Do not write tests that do any of these:
+
+- Unit-test trivial getters, builders, sorting, string derivation, or literal resource names.
+  Literals that change on intentional renames are churn, not protection.
+- Test test-only scaffolding. Support code serving one integration test needs no unit tests.
+- Test a thin wrapper while dodging the complex logic beside it. A deep analysis module
+  needs fixtures through its real entry point, not its 2-line helper.
+- Add a one-test file overlapping an existing suite. Merge it into the suite instead.
+- Cover what the aggregate integration test or a patch-time `PatchException` already covers.
+
+No new test file without naming the failure it would have caught. Unjustified tests are
+deleted in review; do not re-add a deleted test without new evidence.
 
 ### R8 and refactor policy
 

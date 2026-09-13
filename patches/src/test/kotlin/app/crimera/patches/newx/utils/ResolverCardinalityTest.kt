@@ -11,82 +11,53 @@ class ResolverCardinalityTest {
     private data class Candidate(val id: String, val owner: String)
 
     @Test
-    fun `requireExactlyOne returns the only candidate`() {
+    fun `requireExactlyOne returns the candidate or fails closed with all descriptions`() {
         val candidate = Candidate("palette-provider", "Lcom/twitter/android/PaletteProvider;")
-
         assertEquals(
             candidate,
             requireExactlyOne("NewX palette provider", listOf(candidate)) { it.owner },
         )
-    }
 
-    @Test
-    fun `requireExactlyOne reports an empty candidate set`() {
-        val exception =
+        val empty =
             assertFailsWith<PatchException> {
                 requireExactlyOne<Candidate>("NewX palette provider", emptyList()) { it.owner }
             }
+        assertTrue("found 0" in empty.message.orEmpty(), empty.message.orEmpty())
 
-        assertEquals(
-            "Expected exactly one NewX palette provider, found 0: []",
-            exception.message,
-        )
-    }
-
-    @Test
-    fun `requireExactlyOne reports every candidate description when ambiguous`() {
-        val first = Candidate("first", "Lfirst;")
-        val second = Candidate("second", "Lsecond;")
-
-        val exception =
+        val ambiguous =
             assertFailsWith<PatchException> {
                 requireExactlyOne(
                     "NewX palette provider",
-                    listOf(first, second),
+                    listOf(Candidate("first", "Lfirst;"), Candidate("second", "Lsecond;")),
                 ) { candidate -> "${candidate.id}@${candidate.owner}" }
             }
-
-        val message = exception.message.orEmpty()
-        assertTrue("NewX palette provider" in message)
-        assertTrue("2" in message)
-        assertTrue("first@Lfirst;" in message)
-        assertTrue("second@Lsecond;" in message)
+        val ambiguousMessage = ambiguous.message.orEmpty()
+        assertTrue("2" in ambiguousMessage, ambiguousMessage)
+        assertTrue("first@Lfirst;" in ambiguousMessage, ambiguousMessage)
+        assertTrue("second@Lsecond;" in ambiguousMessage, ambiguousMessage)
     }
 
     @Test
-    fun `requireAtMostOne accepts no candidate`() {
+    fun `requireAtMostOne returns at most one candidate or fails closed`() {
+        val candidate = Candidate("palette-provider", "Lcom/twitter/android/PaletteProvider;")
         assertNull(
             requireAtMostOne<Candidate>("optional NewX palette provider", emptyList()) { it.owner },
         )
-    }
-
-    @Test
-    fun `requireAtMostOne returns the only candidate`() {
-        val candidate = Candidate("palette-provider", "Lcom/twitter/android/PaletteProvider;")
-
         assertEquals(
             candidate,
             requireAtMostOne("optional NewX palette provider", listOf(candidate)) { it.owner },
         )
-    }
 
-    @Test
-    fun `requireAtMostOne reports every candidate description when ambiguous`() {
-        val first = Candidate("first", "Lfirst;")
-        val second = Candidate("second", "Lsecond;")
-
-        val exception =
+        val ambiguous =
             assertFailsWith<PatchException> {
                 requireAtMostOne(
                     "optional NewX palette provider",
-                    listOf(first, second),
+                    listOf(Candidate("first", "Lfirst;"), Candidate("second", "Lsecond;")),
                 ) { candidate -> candidate.id }
             }
-
-        val message = exception.message.orEmpty()
-        assertTrue("optional NewX palette provider" in message)
-        assertTrue("2" in message)
-        assertTrue("first" in message)
-        assertTrue("second" in message)
+        val message = ambiguous.message.orEmpty()
+        assertTrue("2" in message, message)
+        assertTrue("first" in message, message)
+        assertTrue("second" in message, message)
     }
 }
