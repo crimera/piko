@@ -222,6 +222,14 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void mediaInspectionDecisionRequiresHidingAndNoExistingDownloadAction() {
+        assertFalse(InlineDownloadButton.shouldInspectMedia(false, false));
+        assertFalse(InlineDownloadButton.shouldInspectMedia(false, true));
+        assertTrue(InlineDownloadButton.shouldInspectMedia(true, false));
+        assertFalse(InlineDownloadButton.shouldInspectMedia(true, true));
+    }
+
+    @Test
     public void videoRelativePathUsesMoviesDirectory() {
         assertEquals(
                 "Movies/Twitter/",

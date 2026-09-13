@@ -125,20 +125,27 @@ public final class InlineDownloadButton {
         if (!patchApplied || !isEnabled() || actions == null) return actions;
 
         try {
-            Object post = postFor(presenter);
-            boolean hasMedia = hasMedia(post);
-            if (hideWhenNoMedia() && !hasMedia) {
-                NewXLogger.printInfo(() -> "skip no-media actions=" + actions.size());
+            boolean hasDownloadAction = containsDownloadAction(actions);
+            if (hasDownloadAction) {
+                NewXLogger.printInfo(() -> "skip duplicate actions=" + actions.size());
                 return actions;
             }
-            if (containsDownloadAction(actions)) {
-                NewXLogger.printInfo(() -> "skip duplicate actions=" + actions.size());
+
+            boolean inspectMedia = shouldInspectMedia(hideWhenNoMedia(), hasDownloadAction);
+            boolean hasMedia = true;
+            if (inspectMedia) {
+                Object post = postFor(presenter);
+                hasMedia = hasMedia(post);
+            }
+            if (inspectMedia && !hasMedia) {
+                NewXLogger.printInfo(() -> "skip no-media actions=" + actions.size());
                 return actions;
             }
 
             Object downloadAction = createDownloadAction();
             registerDownloadAction(downloadAction);
-            NewXLogger.printInfo(() -> "add actions=" + actions.size() + " hasMedia=" + hasMedia
+            final boolean mediaAvailable = hasMedia;
+            NewXLogger.printInfo(() -> "add actions=" + actions.size() + " hasMedia=" + mediaAvailable
                     + " download=" + System.identityHashCode(downloadAction));
 
             List<Object> result = new ArrayList<>(actions.size() + 1);
@@ -262,6 +269,10 @@ public final class InlineDownloadButton {
 
     private static boolean hideWhenNoMedia() {
         return SettingsRegistry.getBooleanOrDefault(HIDE_NO_MEDIA_SETTING, true);
+    }
+
+    static boolean shouldInspectMedia(boolean hideNoMedia, boolean hasDownloadAction) {
+        return hideNoMedia && !hasDownloadAction;
     }
 
     static boolean hasMedia(Object post) {
