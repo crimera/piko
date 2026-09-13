@@ -10,6 +10,12 @@
 - Exclude generated, decompiled, build, and vendor trees unless one is the explicit analysis target.
 - Do not launch multiple broad searches in parallel.
 
+## Device safety
+
+- Installing a build on the user's device is allowed when needed for the requested validation.
+- Never launch, interact with, navigate, or otherwise control the user's device through adb or any other device-control mechanism without explicit permission.
+- For runtime reproduction, ask the user to use the app normally and report the failure or send a screenshot/logs.
+
 ## NewX patch philosophy and methodology
 
 NewX is an obfuscated app under active refactoring. A patch must survive ordinary R8 churn where possible, but must never guess when the app's behavior or contract has changed.
