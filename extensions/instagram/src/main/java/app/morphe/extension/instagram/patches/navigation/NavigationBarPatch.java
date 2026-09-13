@@ -49,7 +49,7 @@ public final class NavigationBarPatch {
     public enum Tab {
         HOME("home", "piko_navigation_tab_home", "tab_home_drawable", "fragment_feed", "FEED"),
         REELS("reels", "piko_navigation_tab_reels", "tab_clips_drawable", "fragment_clips", "CLIPS"),
-        MESSAGES("messages", "piko_navigation_tab_messages", "tab_direct_drawable", "fragment_direct_tab", "DIRECT"),
+        MESSAGES("messages", "piko_navigation_tab_messages", "tab_prism_direct_drawable", "fragment_direct_tab", "DIRECT"),
         SEARCH("search", "piko_navigation_tab_search", "tab_search_drawable", "fragment_search", "SEARCH"),
         PROFILE("profile", "piko_navigation_tab_profile", "tab_profile_drawable", "fragment_profile", "PROFILE"),
         NOTIFICATIONS("notifications", "piko_navigation_tab_notifications", "tab_activity_heart_drawable", "fragment_news", "NEWS"),
