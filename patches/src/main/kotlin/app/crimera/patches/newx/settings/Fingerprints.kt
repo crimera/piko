@@ -2,7 +2,7 @@ package app.crimera.patches.newx.settings
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal val COMPOSE_SETTINGS_BASIC_ITEM_PARAMETERS =
@@ -36,6 +36,11 @@ internal object ComposeSettingsBasicItemCallerFingerprint : Fingerprint(
         ),
 )
 
+/**
+ * The Compose compiler may type the composer prologue result as the public Composer interface or
+ * its runtime implementation. Match the stable runtime package/type shape, not generated method
+ * names or optional parameter null checks.
+ */
 internal fun composeSettingsBasicItemFingerprint(reference: MethodReference) =
     Fingerprint(
         definingClass = reference.definingClass,
@@ -44,10 +49,11 @@ internal fun composeSettingsBasicItemFingerprint(reference: MethodReference) =
         parameters = COMPOSE_SETTINGS_BASIC_ITEM_PARAMETERS,
         filters =
             listOf(
-                string("title"),
                 methodCall(
+                    opcode = Opcode.INVOKE_VIRTUAL,
+                    definingClass = "Landroidx/compose/runtime/",
                     parameters = listOf("I"),
-                    returnType = "Landroidx/compose/runtime/Composer;",
+                    returnType = "Landroidx/compose/runtime/",
                 ),
             ),
     )

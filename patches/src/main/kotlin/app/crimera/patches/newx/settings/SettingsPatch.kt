@@ -4,7 +4,9 @@ import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -65,15 +67,15 @@ internal val newXSettingsPatch =
             val rendererReference = rendererReferences.single()
             val matches =
                 composeSettingsBasicItemFingerprint(rendererReference)
-                    .scopedMatchAll()
-            if (matches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX Compose settings row renderer, found ${matches.size}: " +
-                        matches.joinToString { it.originalMethod.toString() },
+                    .scopedMatchAllOrNull()
+                    .orEmpty()
+            val rendererMatch =
+                requireExactlyOne(
+                    label = "NewX Compose settings row renderer",
+                    candidates = matches,
                 )
-            }
 
-            matches.single().let { match ->
+            rendererMatch.let { match ->
                 val originalMethod = match.originalMethod
                 val iconType = originalMethod.parameterTypes[2].toString()
                 val settingsIconField = resolveSettingsIconField(iconType)

@@ -57,6 +57,11 @@ private data class PostOptionContribution(
     val order: Int,
 )
 
+private data class IconAssignment(
+    val instruction: TwoRegisterInstruction,
+    val field: FieldReference,
+)
+
 private object PostOptionContributionIndex {
     private val contributions =
         IdentityHashMap<BytecodePatchContext, LinkedHashMap<String, PostOptionContribution>>()
@@ -277,35 +282,27 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
             "Expected NewX post-options icon assignments, found none",
         )
     }
-    val iconAssignments = iconAssignmentCandidates.map { candidate ->
-        candidate.value as? TwoRegisterInstruction
+    val iconAssignments = iconAssignmentCandidates.mapNotNull { candidate ->
+        val assignment = candidate.value as? TwoRegisterInstruction
             ?: throw PatchException(
                 "NewX post-options icon assignment has no registers at instruction ${candidate.index}",
             )
-    }
-    val iconResultRegisters = iconAssignments.map { assignment -> assignment.registerA }.distinct()
-    if (iconResultRegisters.size != 1) {
-        throw PatchException(
-            "Expected one NewX post-options icon result register, found " +
-                "${iconResultRegisters.size}: ${iconResultRegisters.joinToString()}",
-        )
-    }
-    val iconAssignmentFields = iconAssignmentCandidates.map { candidate ->
-        val assignment = candidate.value as TwoRegisterInstruction
-        renderer.method.instructions.resolveFieldRead(
+        val field = renderer.method.instructions.resolveFieldReadOrNull(
             register = assignment.registerB,
             untilIndex = candidate.index,
-        )
+        ) ?: return@mapNotNull null
+        IconAssignment(instruction = assignment, field = field)
     }
-    val iconTypes = iconAssignmentFields.map { field -> field.type }.distinct()
-    if (iconTypes.size != 1) {
-        throw PatchException(
-            "Expected one NewX post-options icon type across icon assignments, found " +
-                "${iconTypes.size}: ${iconAssignmentFields.joinToString()}",
+    val iconResultRegister =
+        requireExactlyOne(
+            label = "NewX post-options icon result register",
+            candidates = iconAssignments.map { assignment -> assignment.instruction.registerA }.distinct(),
         )
-    }
-    val iconResultRegister = iconResultRegisters.single()
-    val iconType = iconTypes.single()
+    val iconType =
+        requireExactlyOne(
+            label = "NewX post-options icon type",
+            candidates = iconAssignments.map { assignment -> assignment.field.type }.distinct(),
+        )
 
     // Compose keeps the lambda receiver/state in low registers; a Boolean result must not
     // overwrite a live object register such as v0.
@@ -506,6 +503,16 @@ private fun List<Instruction>.resolveFieldRead(
         "NewX post-options icon assignment has no reaching field for v$register before instruction $untilIndex",
     )
 }
+
+private fun List<Instruction>.resolveFieldReadOrNull(
+    register: Int,
+    untilIndex: Int,
+): FieldReference? =
+    try {
+        resolveFieldRead(register, untilIndex)
+    } catch (_: PatchException) {
+        null
+    }
 
 context(_: BytecodePatchContext)
 private fun resolveKotlinUnitField(): FieldReference {
