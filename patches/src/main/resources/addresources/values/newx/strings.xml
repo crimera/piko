@@ -32,6 +32,8 @@
     <string name="piko_newx_hide_new_post_pill_summary">Hides the pill that appears when newer posts are available</string>
     <string name="piko_newx_hide_new_post_button_title">Hide compose button</string>
     <string name="piko_newx_hide_new_post_button_summary">Removes the compose (new-post) button from NewX timelines</string>
+    <string name="piko_newx_hide_post_dividers_title">Hide post and thread dividers</string>
+    <string name="piko_newx_hide_post_dividers_summary">Removes dividers between posts and thread replies in NewX timelines</string>
     <string name="piko_newx_filter_promoted_posts_title">Filter promoted posts</string>
     <string name="piko_newx_filter_promoted_posts_summary">Removes promoted posts and promoted timeline modules</string>
     <string name="piko_newx_hide_who_to_follow_title">Hide who to follow</string>
