@@ -51,7 +51,7 @@ public class UI {
     public static final String DRAWABLE_COLLECTIONS_ICON = "instagram_collections_pano_outline_24";
     public static final String DRAWABLE_EYE_STROKE_ICON = "design_ic_visibility_off";
     public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
-    public static final String DRAWABLE_SHARE_TO_DIRECT = "gallery_share_to_direct_button";
+    public static final String DRAWABLE_SHARE_TO_DIRECT = "tab_prism_direct_drawable";
     public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
     public static final String DRAWABLE_ARROW_BACK =
             "instagram_arrow_left_pano_outline_24";
