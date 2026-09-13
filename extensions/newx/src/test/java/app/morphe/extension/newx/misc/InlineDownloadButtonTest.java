@@ -35,12 +35,10 @@ public final class InlineDownloadButtonTest {
     public void enableInlineDownloads() throws ReflectiveOperationException {
         settings().put(INLINE_DOWNLOAD_SETTING_ID, INLINE_DOWNLOAD_SETTING);
         INLINE_DOWNLOAD_SETTING.save(true);
-        InlineDownloadButton.finishRender();
     }
 
     @After
     public void removeInlineDownloadSetting() throws ReflectiveOperationException {
-        InlineDownloadButton.finishRender();
         settings().remove(INLINE_DOWNLOAD_SETTING_ID);
     }
 
@@ -308,47 +306,20 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void selectIconPersistsDownloadChoiceForRecomposition() {
+    public void signTaggedIconSizeSurvivesDeferredRendering() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
-        assertFalse(InlineDownloadButton.renderMarkerPending());
-
-        Object renderer = new Object();
         Object nativeIcon = new Object();
         Object downloadIcon = new Object();
-        InlineDownloadButton.markIconSize(downloadAction, 18f);
-        assertTrue(InlineDownloadButton.renderMarkerPending());
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-        assertFalse(InlineDownloadButton.renderMarkerPending());
+        float capturedSize = InlineDownloadButton.markIconSize(downloadAction, 18f);
 
-        // A remembered icon lambda can be invoked without the parent render marker.
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-    }
-
-    @Test
-    public void iconRendererIsRememberedBeforeItsFirstInvocation() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-        Object renderer = new Object();
-        Object nativeIcon = new Object();
-        Object downloadIcon = new Object();
-
-        InlineDownloadButton.markIconSize(downloadAction, 18f);
-        InlineDownloadButton.rememberIconRenderer(renderer);
-        InlineDownloadButton.finishRender();
-
-        // The icon lambda may be deferred until after the parent renderer exits.
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-    }
-
-    @Test
-    public void nativeActionRenderIsUntouched() {
-        InlineDownloadButton.markIconSize(new Object(), 18f);
-
-        Object renderer = new Object();
-        Object nativeIcon = new Object();
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, new Object()));
-        assertFalse(InlineDownloadButton.renderMarkerPending());
+        assertEquals(-18f, capturedSize, 0.0f);
+        assertEquals(18f, InlineDownloadButton.displayIconSize(capturedSize), 0.0f);
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
+                nativeIcon,
+                capturedSize,
+                downloadIcon
+        ));
     }
 
     @Test
@@ -363,230 +334,65 @@ public final class InlineDownloadButtonTest {
                 InlineDownloadButton.markIconSize(equalButDistinctNativeAction, 18f),
                 0.0f
         );
-        InlineDownloadButton.finishRender();
-        assertEquals(18.01f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0001f);
-        InlineDownloadButton.finishRender();
+        assertEquals(-18f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0f);
     }
 
     @Test
-    public void rendererMembershipUsesIdentityRatherThanEquals() {
-        Object equalityToken = new Object();
-        EqualObject downloadRenderer = new EqualObject(equalityToken);
-        EqualObject equalButDistinctNativeRenderer = new EqualObject(equalityToken);
-        Object downloadAction = new Object();
-        Object nativeIcon = new Object();
-        Object downloadIcon = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-
-        InlineDownloadButton.markIconSize(downloadAction, 18f);
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
-                downloadRenderer,
-                nativeIcon,
-                18f,
-                downloadIcon
-        ));
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(
-                equalButDistinctNativeRenderer,
-                nativeIcon,
-                18f,
-                downloadIcon
-        ));
-    }
-
-    @Test
-    public void downloadActionRegistrationEvictsOldestEntryAt512() {
+    public void downloadActionRegistrationDoesNotEvictVisibleEntry() {
         Object oldestAction = new Object();
         InlineDownloadButton.registerDownloadAction(oldestAction);
         List<Object> retainedActions = new ArrayList<>();
-        for (int index = 0; index < 512; index++) {
+        for (int index = 0; index < 2000; index++) {
             Object action = new Object();
             retainedActions.add(action);
             InlineDownloadButton.registerDownloadAction(action);
         }
 
-        assertEquals(18f, InlineDownloadButton.markIconSize(oldestAction, 18f), 0.0f);
-        InlineDownloadButton.finishRender();
-        assertEquals(18.01f, InlineDownloadButton.markIconSize(
+        assertEquals(-18f, InlineDownloadButton.markIconSize(oldestAction, 18f), 0.0f);
+        assertEquals(-18f, InlineDownloadButton.markIconSize(
                 retainedActions.get(retainedActions.size() - 1),
                 18f
-        ), 0.0001f);
-        InlineDownloadButton.finishRender();
+        ), 0.0f);
     }
 
     @Test
-    public void reusedRendererCanSwitchBackToNativeAction() {
+    public void nativeAndDownloadSlotsHaveDistinctCapturedValues() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
-        Object renderer = new Object();
         Object nativeIcon = new Object();
         Object downloadIcon = new Object();
 
-        InlineDownloadButton.markIconSize(downloadAction, 18f);
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
+        float nativeSize = InlineDownloadButton.markIconSize(new Object(), 18f);
+        float downloadSize = InlineDownloadButton.markIconSize(downloadAction, 18f);
 
-        InlineDownloadButton.markIconSize(new Object(), 18f);
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
+        assertEquals(18f, nativeSize, 0.0f);
+        assertEquals(-18f, downloadSize, 0.0f);
+        assertEquals(
+                InlineDownloadButton.displayIconSize(nativeSize),
+                InlineDownloadButton.displayIconSize(downloadSize),
+                0.0f
+        );
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, nativeSize, downloadIcon));
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
+                nativeIcon,
+                downloadSize,
+                downloadIcon
+        ));
     }
 
     @Test
-    public void trackedDownloadActionSurvivesLaterRegistrations() {
-        Object visibleAction = new Object();
-        InlineDownloadButton.registerDownloadAction(visibleAction);
-        // Scrolling composes new posts continuously; exceeding the old tracking cap must not
-        // unclassify a still-visible download action (it used to fall back to the share icon).
-        for (int index = 0; index < 200; index++) {
-            InlineDownloadButton.registerDownloadAction(new Object());
-        }
-
-        Object renderer = new Object();
-        Object nativeIcon = new Object();
-        Object downloadIcon = new Object();
-        InlineDownloadButton.markIconSize(visibleAction, 18f);
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-    }
-
-    @Test
-    public void downloadMarkNudgesIconSizeToForceRecomposition() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-
-        assertEquals(18.01f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0001f);
-        assertEquals(18f, InlineDownloadButton.markIconSize(new Object(), 18f), 0.0f);
-    }
-
-    @Test
-    public void disabledMarkIconSizeReturnsOriginalSizeWithoutStagingMarker() {
+    public void disabledRenderContractUsesNativeIcon() {
         INLINE_DOWNLOAD_SETTING.save(false);
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
+        Object nativeIcon = new Object();
 
         assertEquals(18f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0f);
-        assertFalse(InlineDownloadButton.renderMarkerPending());
-    }
-
-    @Test
-    public void disabledRememberIconRendererDoesNotTrackRenderer() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-        Object renderer = new Object();
-
-        InlineDownloadButton.markIconSize(downloadAction, 18f);
-        INLINE_DOWNLOAD_SETTING.save(false);
-        InlineDownloadButton.rememberIconRenderer(renderer);
-        InlineDownloadButton.finishRender();
-
-        INLINE_DOWNLOAD_SETTING.save(true);
-        Object nativeIcon = new Object();
         assertSame(nativeIcon, InlineDownloadButton.selectIcon(
-                renderer,
                 nativeIcon,
-                18f,
+                -18f,
                 new Object()
         ));
-    }
-
-    @Test
-    public void disabledSelectIconReturnsNativeIconWithoutChangingRememberedRenderer() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-        Object renderer = new Object();
-        Object nativeIcon = new Object();
-        Object downloadIcon = new Object();
-
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
-                renderer,
-                nativeIcon,
-                InlineDownloadButton.markIconSize(downloadAction, 18f),
-                downloadIcon
-        ));
-
-        INLINE_DOWNLOAD_SETTING.save(false);
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(
-                renderer,
-                nativeIcon,
-                18f,
-                downloadIcon
-        ));
-
-        INLINE_DOWNLOAD_SETTING.save(true);
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
-                renderer,
-                nativeIcon,
-                18f,
-                downloadIcon
-        ));
-    }
-
-    @Test
-    public void finishRenderClearsMarkerWhenFeatureIsDisabled() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-        InlineDownloadButton.markIconSize(downloadAction, 18f);
-        assertTrue(InlineDownloadButton.renderMarkerPending());
-
-        INLINE_DOWNLOAD_SETTING.save(false);
-        InlineDownloadButton.finishRender();
-
-        assertFalse(InlineDownloadButton.renderMarkerPending());
-    }
-
-    @Test
-    public void finishRenderClearsMarkerWhenIconRenderingExitsEarly() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-        InlineDownloadButton.markIconSize(downloadAction, 18f);
-        assertTrue(InlineDownloadButton.renderMarkerPending());
-
-        // Icon lambda never reached selectIcon (Compose skip path); entry-render exit
-        // cleanup must still clear the marker.
-        InlineDownloadButton.finishRender();
-        assertFalse(InlineDownloadButton.renderMarkerPending());
-    }
-
-    @Test
-    public void exceptionPathClearsRenderMarker() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-
-        try {
-            InlineDownloadButton.markIconSize(downloadAction, 18f);
-            assertTrue(InlineDownloadButton.renderMarkerPending());
-            throw new AssertionError("simulated Compose render failure");
-        } catch (Throwable exception) {
-            InlineDownloadButton.finishRender();
-        }
-
-        assertFalse(InlineDownloadButton.renderMarkerPending());
-        Object renderer = new Object();
-        Object nativeIcon = new Object();
-        Object downloadIcon = new Object();
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-    }
-
-    @Test
-    public void repeatedRecompositionLeavesNoRenderMarker() {
-        Object downloadAction = new Object();
-        InlineDownloadButton.registerDownloadAction(downloadAction);
-        Object renderer = new Object();
-        Object nativeIcon = new Object();
-        Object downloadIcon = new Object();
-
-        for (int pass = 0; pass < 5; pass++) {
-            InlineDownloadButton.markIconSize(downloadAction, 18f);
-            assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-            assertFalse(InlineDownloadButton.renderMarkerPending());
-
-            // Early-exit render pass: marker staged, icon lambda never consumes it.
-            InlineDownloadButton.markIconSize(downloadAction, 18f);
-            InlineDownloadButton.finishRender();
-            assertFalse(InlineDownloadButton.renderMarkerPending());
-
-            InlineDownloadButton.markIconSize(new Object(), 18f);
-            assertSame(nativeIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
-            assertFalse(InlineDownloadButton.renderMarkerPending());
-        }
     }
 
     @Test

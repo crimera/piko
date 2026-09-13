@@ -32,7 +32,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
@@ -89,35 +88,6 @@ private fun MutableMethod.freeRegisters4Bit(
     } catch (exception: RuntimeException) {
         throw PatchException("No free 4-bit registers at $this index $index", exception)
     }
-
-context(context: BytecodePatchContext)
-private fun rememberIconRendererAtConstruction(match: Match) {
-    val rendererClass = context.mutableClassDefBy(match.originalMethod.definingClass)
-    val rendererConstructor = requireExactlyOne(
-        "NewX TwitterShare icon lambda constructor",
-        rendererClass.methods.filter { method ->
-            method.name == "<init>" &&
-                method.returnType == "V" &&
-                method.parameterTypes.map(CharSequence::toString) == listOf("F", "I")
-        },
-    )
-    val rendererSuperCallIndex = requireExactlyOne(
-        "NewX TwitterShare icon lambda super constructor call",
-        rendererConstructor.instructions.mapIndexedNotNull { index, instruction ->
-            val reference = instruction.getReference<MethodReference>()
-                ?: return@mapIndexedNotNull null
-            index.takeIf {
-                instruction.opcode == Opcode.INVOKE_DIRECT &&
-                    reference.name == "<init>" &&
-                    reference.definingClass != rendererConstructor.definingClass
-            }
-        },
-    )
-    rendererConstructor.addInstruction(
-        rendererSuperCallIndex + 1,
-        "invoke-static {p0}, $EXTENSION->rememberIconRenderer(Ljava/lang/Object;)V",
-    )
-}
 
 @Suppress("unused")
 val newXInlineDownloadButtonPatch =
@@ -247,50 +217,12 @@ val newXInlineDownloadButtonPatch =
                         move/from16 p4, v$sizeRegister
                     """.trimIndent(),
                 )
-
-                // Unconditional marker cleanup: replace the shared exit location (every
-                // predecessor targets it) with finishRender and re-append the return. A
-                // plain insertion before it would be skippable when a branch targets the
-                // original return instruction.
-                val exits = instructions.filter { it.opcode == Opcode.RETURN_VOID }
-                if (exits.size != 1) {
-                    throw PatchException(
-                        "Expected one NewX inline-action entry renderer exit, found " +
-                            "${exits.size}: $this",
-                    )
-                }
-                val renderExit = instructions.indexOf(exits.single())
-                replaceInstruction(
-                    renderExit,
-                    "invoke-static {}, $EXTENSION->finishRender()V",
-                )
-                addInstruction(renderExit + 1, "return-void")
-
-                // The normal cleanup is outside this range so an exception from cleanup does
-                // not re-enter the handler. The catch-all rethrows after clearing the marker.
-                val implementation =
-                    inlineRenderer.method.implementation
-                        ?: throw PatchException("NewX inline-action entry renderer has no implementation")
-                if (implementation.tryBlocks.isNotEmpty()) {
-                    throw PatchException(
-                        "NewX inline-action entry renderer already has exception handlers: $this",
-                    )
-                }
-                val cleanupTryStart = implementation.newLabelForIndex(0)
-                val cleanupTryEnd = implementation.newLabelForIndex(renderExit)
-                val cleanupHandlerIndex = implementation.instructions.size
-                addInstructions(
-                    cleanupHandlerIndex,
-                    """
-                        move-exception v0
-                        invoke-static {}, $EXTENSION->finishRender()V
-                        throw v0
-                    """.trimIndent(),
-                )
-                val cleanupHandler = implementation.newLabelForIndex(cleanupHandlerIndex)
-                implementation.addCatch(cleanupTryStart, cleanupTryEnd, cleanupHandler)
             }
 
+            // The injected entry deliberately carries TwitterShare, which maps to exactly this
+            // ic_vector_share branch. Share/ic_vector_share_android is a separate native action
+            // and must remain untouched. The sign of the captured size is the complete download
+            // discriminator; normalize it before layout and read the original sign at icon choice.
             val shareIconField = resolveIconField("ic_vector_share")
             val incomingIconField = resolveIconField("ic_vector_incoming_stroke")
             if (shareIconField.type != incomingIconField.type) {
@@ -307,30 +239,60 @@ val newXInlineDownloadButtonPatch =
                         ),
                 ).scopedMatchAll(),
             )
-            rememberIconRendererAtConstruction(iconRenderer)
             iconRenderer.method.apply {
                 val iconAccess = iconRenderer.instructionMatches.singleOrNull { match ->
                     match.instruction.opcode == Opcode.SGET_OBJECT &&
-                        match.instruction.getReference<FieldReference>()?.toString() == shareIconField.toString()
-                } ?: throw PatchException("NewX share icon access was not found")
-                val iconRegister =
-                    (iconAccess.instruction as? OneRegisterInstruction)?.registerA
-                        ?: throw PatchException("NewX share icon access has no register")
-                val sizeAccess = iconRenderer.instructionMatches.singleOrNull { match ->
+                        match.instruction.getReference<FieldReference>()?.toString() ==
+                        shareIconField.toString()
+                } ?: throw PatchException("NewX TwitterShare icon access was not found")
+                val matchedSizeAccess = iconRenderer.instructionMatches.singleOrNull { match ->
                     val field = match.instruction.getReference<FieldReference>()
                     match.instruction.opcode == Opcode.IGET && field?.type == "F"
                 } ?: throw PatchException("NewX share icon size access was not found")
                 val sizeField =
-                    sizeAccess.instruction.getReference<FieldReference>()
+                    matchedSizeAccess.instruction.getReference<FieldReference>()
                         ?: throw PatchException("NewX share icon size field was not found")
+                // newx-resolver-lint: allow instruction-order previous-return because each
+                // packed-switch icon branch is a self-contained block ending in return-object.
+                val branchStart =
+                    instructions
+                        .subList(0, iconAccess.index)
+                        .indexOfLast { instruction -> instruction.opcode == Opcode.RETURN_OBJECT } + 1
+                val sizeAccess = requireExactlyOne(
+                    "NewX TwitterShare branch size access",
+                    instructions.mapIndexedNotNull { index, instruction ->
+                        index.takeIf {
+                            index in branchStart until iconAccess.index &&
+                                instruction.opcode == Opcode.IGET &&
+                                instruction.getReference<FieldReference>()?.toString() ==
+                                sizeField.toString()
+                        }?.let { accessIndex -> accessIndex to instruction }
+                    },
+                )
+                val sizeRegister =
+                    (sizeAccess.second as? OneRegisterInstruction)?.registerA
+                        ?: throw PatchException("NewX share icon size access has no register")
+                val iconRegister =
+                    (iconAccess.instruction as? OneRegisterInstruction)?.registerA
+                        ?: throw PatchException("NewX TwitterShare icon access has no register")
+
+                // Mutate from the later index first so the original size-access index remains
+                // valid for the normalization insertion below.
                 addInstructions(
                     iconAccess.index + 1,
                     """
                         sget-object p1, $incomingIconField
                         iget p2, p0, $sizeField
-                        invoke-static {p0, v$iconRegister, p2, p1}, $EXTENSION->selectIcon(Ljava/lang/Object;Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;
+                        invoke-static {v$iconRegister, p2, p1}, $EXTENSION->selectIcon(Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;
                         move-result-object v$iconRegister
                         check-cast v$iconRegister, ${shareIconField.type}
+                    """.trimIndent(),
+                )
+                addInstructions(
+                    sizeAccess.first + 1,
+                    """
+                        invoke-static {v$sizeRegister}, $EXTENSION->displayIconSize(F)F
+                        move-result v$sizeRegister
                     """.trimIndent(),
                 )
             }

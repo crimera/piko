@@ -33,9 +33,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -79,30 +77,14 @@ public final class InlineDownloadButton {
     private static final String PENDING_DOWNLOADS_PREFS = "piko_newx_inline_downloads";
     private static final String CONFLICT_SETTING = "newx.content.inline_download_conflict";
     private static final ConflictBehavior DEFAULT_CONFLICT_BEHAVIOR = ConflictBehavior.SKIP;
-    // Timeline scrolling creates a new download action object per composition, so this cap must
-    // comfortably exceed the number of live compositions. Eviction removes the oldest entries
-    // (scrolled-away posts) first; clearing everything here used to unclassify visible posts and
-    // flip their download icons back to the share icon.
-    private static final int MAX_TRACKED_OBJECTS = 512;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final IdentityWeakSet DOWNLOAD_ACTIONS = new IdentityWeakSet(MAX_TRACKED_OBJECTS);
-    /**
-     * Compose can invoke a remembered icon lambda without re-running the parent action renderer.
-     * Keep the classification on that lambda rather than only in the render call stack. Weak keys
-     * ensure discarded composition objects can still be collected.
-     */
-    private static final IdentityWeakSet DOWNLOAD_ICON_RENDERERS = new IdentityWeakSet();
+    // Timeline/profile scrolling creates a new action object per composition. Keep weak identity
+    // keys without a FIFO cap: a cap can evict an action that is still visible and make its icon
+    // fall back to Twitter's share glyph. Cleared weak keys are drained during set operations.
+    private static final IdentityWeakSet DOWNLOAD_ACTIONS = new IdentityWeakSet();
     private static volatile boolean patchApplied;
     private static boolean initialized;
     private static boolean downloadReceiverRegistered;
-    private static final ThreadLocal<Boolean> RENDERING_DOWNLOAD_ACTION = new ThreadLocal<>();
-    /**
-     * Compose skips re-invoking an icon lambda when its captured inputs are unchanged. Native
-     * share and download renderers otherwise capture identical inputs, so a slot flipping between
-     * them could keep showing the stale icon without ever reaching {@link #selectIcon}. Nudge the
-     * size for downloads by an imperceptible amount so the flip always recomposes.
-     */
-    private static final float DOWNLOAD_ICON_SIZE_EPSILON = 0.01f;
 
     private InlineDownloadButton() {
     }
@@ -159,84 +141,44 @@ public final class InlineDownloadButton {
         }
     }
 
-    /** Stages the rendered entry's identity for the icon lambda; consumed by
-     *  {@link #selectIcon} and unconditionally cleared by {@link #finishRender}. */
+    /**
+     * Encodes the download classification in the value captured by Twitter's icon lambda. The
+     * patched share branch restores the positive size before layout, then uses the retained sign
+     * to select the download icon. This makes native/download slot flips visible to Compose without
+     * relying on thread-local render ordering or remembered lambda identity.
+     */
     public static float markIconSize(Object action, float iconSize) {
         if (!isEnabled()) return iconSize;
 
         boolean downloadAction = isDownloadAction(action);
         NewXLogger.printInfo(() -> "mark action=" + System.identityHashCode(action)
                 + " download=" + downloadAction);
-        RENDERING_DOWNLOAD_ACTION.set(downloadAction);
-        return downloadAction ? iconSize + DOWNLOAD_ICON_SIZE_EPSILON : iconSize;
+        return downloadAction ? -Math.abs(iconSize) : iconSize;
     }
 
-    /** Remembers an icon lambda while its parent action render is still marked. */
-    public static void rememberIconRenderer(Object renderer) {
-        if (renderer == null || !isEnabled()) return;
-
-        Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
-        NewXLogger.printInfo(() -> "remember renderer=" + System.identityHashCode(renderer)
-                + " marker=" + renderMarker);
-        if (renderMarker == null) return;
-
-        if (Boolean.TRUE.equals(renderMarker)) {
-            DOWNLOAD_ICON_RENDERERS.add(renderer);
-        } else {
-            DOWNLOAD_ICON_RENDERERS.remove(renderer);
-        }
+    /** Returns the actual layout size for the sign-tagged icon-lambda value. */
+    public static float displayIconSize(float markedIconSize) {
+        return Math.abs(markedIconSize);
     }
 
-    /**
-     * Selects the icon for the current renderer. The render marker is only available while the
-     * parent action entry is being composed; Compose may invoke the remembered icon lambda again
-     * later, without that parent call. Remember the result against the lambda instance so those
-     * recompositions keep rendering the download icon.
-     */
+    /** Selects from the classification captured directly by the icon lambda. */
     public static Object selectIcon(
-            Object renderer,
             Object nativeIcon,
             float markedIconSize,
             Object downloadIcon
     ) {
         if (!isEnabled()) return nativeIcon;
 
-        Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
-        boolean remembered = DOWNLOAD_ICON_RENDERERS.contains(renderer);
-        if (Boolean.TRUE.equals(renderMarker)) {
-            if (!remembered) {
-                DOWNLOAD_ICON_RENDERERS.add(renderer);
-                remembered = true;
-            }
-        } else if (Boolean.FALSE.equals(renderMarker) && remembered) {
-            // A remembered renderer can be reused for a different action after list changes.
-            DOWNLOAD_ICON_RENDERERS.remove(renderer);
-            remembered = false;
-        }
-        boolean useDownloadIcon = Boolean.TRUE.equals(renderMarker) || remembered;
-        final boolean rememberedForLog = remembered;
-        NewXLogger.printInfo(() -> "select renderer=" + System.identityHashCode(renderer)
-                + " marker=" + renderMarker + " remembered=" + rememberedForLog
+        boolean useDownloadIcon = Float.floatToRawIntBits(markedIconSize) < 0;
+        NewXLogger.printInfo(() -> "select size=" + markedIconSize
                 + " download=" + useDownloadIcon);
-        RENDERING_DOWNLOAD_ACTION.remove();
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }
 
-    /** Unconditional marker cleanup; injected at the entry renderer's exit so an icon
-     *  lambda that exits before {@link #selectIcon} cannot leave stale state. */
-    public static void finishRender() {
-        RENDERING_DOWNLOAD_ACTION.remove();
-    }
-
-    static boolean renderMarkerPending() {
-        return RENDERING_DOWNLOAD_ACTION.get() != null;
-    }
-
     /**
-     * A weak set with identity, rather than equals(), membership semantics. The map is safe for
-     * monitor-free reads from the render hooks; only the optional FIFO used by the action set has a
-     * write-side lock. The thread-local probe avoids allocating a temporary weak reference for
-     * each membership lookup without retaining the looked-up object after the operation.
+     * A weak set with identity, rather than equals(), membership semantics. The thread-local probe
+     * avoids allocating a temporary weak reference for each membership lookup without retaining
+     * the looked-up object after the operation.
      */
     private static final class IdentityWeakSet {
         private static final Boolean PRESENT = Boolean.TRUE;
@@ -250,43 +192,12 @@ public final class InlineDownloadButton {
                 return new LookupKey();
             }
         };
-        private final ArrayDeque<IdentityWeakReference> fifo;
-        private final Object fifoLock;
-        private final int maxEntries;
-
-        IdentityWeakSet() {
-            this(0);
-        }
-
-        IdentityWeakSet(int maxEntries) {
-            if (maxEntries < 0) {
-                throw new IllegalArgumentException("maxEntries must not be negative");
-            }
-            this.maxEntries = maxEntries;
-            this.fifo = maxEntries == 0 ? null : new ArrayDeque<>(maxEntries);
-            this.fifoLock = maxEntries == 0 ? null : new Object();
-        }
-
         void add(Object referent) {
             if (referent == null) return;
 
+            drainClearedReferences();
             IdentityWeakReference entry = new IdentityWeakReference(referent, clearedReferences);
-            if (fifo == null) {
-                drainClearedReferences();
-                entries.putIfAbsent(entry, PRESENT);
-                return;
-            }
-
-            synchronized (fifoLock) {
-                drainClearedReferences();
-                removeClearedFifoEntries();
-                if (entries.putIfAbsent(entry, PRESENT) == null) {
-                    fifo.addLast(entry);
-                    while (fifo.size() > maxEntries) {
-                        entries.remove(fifo.removeFirst());
-                    }
-                }
-            }
+            entries.putIfAbsent(entry, PRESENT);
         }
 
         boolean contains(Object referent) {
@@ -302,32 +213,10 @@ public final class InlineDownloadButton {
             }
         }
 
-        boolean remove(Object referent) {
-            if (referent == null) return false;
-
-            drainClearedReferences();
-            LookupKey lookupKey = lookupKeys.get();
-            lookupKey.set(referent);
-            try {
-                return entries.remove(lookupKey) != null;
-            } finally {
-                lookupKey.clear();
-            }
-        }
-
         private void drainClearedReferences() {
             IdentityWeakReference reference;
             while ((reference = (IdentityWeakReference) clearedReferences.poll()) != null) {
                 entries.remove(reference);
-            }
-        }
-
-        private void removeClearedFifoEntries() {
-            Iterator<IdentityWeakReference> iterator = fifo.iterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().get() == null) {
-                    iterator.remove();
-                }
             }
         }
 
