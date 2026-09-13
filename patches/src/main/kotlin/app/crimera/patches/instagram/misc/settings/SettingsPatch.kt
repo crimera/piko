@@ -47,6 +47,7 @@ val settingsPatch =
         dependsOn(
             sharedExtensionPatch,
             addSettingsActivityPatch,
+            nativeSettingsSwitchStylePatch,
             mainFeedActionBarButtonPatch,
             hideHomeActionButtonsPatch,
             userProfileActionBarButtonPatch,
