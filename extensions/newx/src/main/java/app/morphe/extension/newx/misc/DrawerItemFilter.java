@@ -9,17 +9,26 @@ import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 
 public final class DrawerItemFilter {
+    private static final String RESOURCE_ITEM_ID_PREFIX = "RESOURCE_STRING_";
+
     private DrawerItemFilter() {
     }
 
-    // ALPHA/LEGACY PATH: legacy drawer rows expose their localized title.
-    // TODO: Remove this API when no supported release uses title-based drawer rows.
+    // Legacy drawer rows expose only their localized title. The patch encodes the
+    // source string resource ID in each option ID, so this path needs no release
+    // specific resource-name table.
     public static boolean shouldHide(String title, Set<String> hiddenItemIds) {
         if (title == null || hiddenItemIds == null || hiddenItemIds.isEmpty()) return false;
 
         try {
+            Context context = Utils.getContext();
+            if (context == null) return false;
+
+            Resources resources = context.getResources();
             for (String hiddenItemId : hiddenItemIds) {
-                if (hiddenItemId != null && matches(title, hiddenItemId)) return true;
+                if (hiddenItemId != null && matchesResourceId(title, hiddenItemId, resources)) {
+                    return true;
+                }
             }
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to customize NewX drawer", exception);
@@ -32,63 +41,23 @@ public final class DrawerItemFilter {
         return itemId != null && hiddenItemIds != null && hiddenItemIds.contains(itemId);
     }
 
-    private static boolean matches(String title, String itemId) {
-        return switch (itemId) {
-            case "PROFILE" -> matchesResource(title, "x_lite_drawer_profile_title", "drawer_profile_title");
-            case "PREMIUM" -> matchesResource(
-                    title,
-                    "x_lite_settings_subscription_title",
-                    "settings_subscription_title",
-                    "settings_subscription_premium_plus_title"
-            );
-            case "MONEY" -> matchesResource(title, "drawer_money_title");
-            case "COMMUNITIES" -> matchesResource(title, "drawer_communities_title");
-            case "BOOKMARKS" -> matchesResource(title, "x_lite_bookmarks_title", "bookmarks_title");
-            case "COMMUNITY_NOTES" -> matchesResource(title, "birdwatch_pivot_header_title");
-            case "OFFLINE_VIDEOS" -> matchesResource(
-                    title,
-                    "x_lite_offline_videos_title",
-                    "offline_videos_title"
-            );
-            case "LISTS" -> matchesResource(title, "x_lite_drawer_lists", "drawer_lists");
-            case "BOOST" -> matchesResource(
-                    title,
-                    "x_lite_quick_promote_boost_button_text",
-                    "quick_promote_boost_button_text"
-            );
-            case "SPACES" -> matchesResource(title, "spaces_tab_name");
-            case "FOLLOW_REQUESTS" -> matchesResource(
-                    title,
-                    "x_lite_follow_requests_title",
-                    "follow_requests_title"
-            );
-            case "MONETIZATION" -> matchesResource(title, "monetization_drawer_menu_title");
-            case "CREATOR_STUDIO" -> matchesResource(title, "creator_studio_drawer_menu_title");
-            case "ANALYTICS" -> matchesResource(
-                    title,
-                    "x_lite_subscriptions_drawer_menu_group_analytics",
-                    "subscriptions_drawer_menu_group_analytics"
-            );
-            case "SWITCH_TO_X" -> matchesResource(title, "switch_back_to_x_drawer_item_title");
-            case "GROK" -> matchesResource(title, "drawer_get_grok", "drawer_open_grok");
-            case "SETTINGS" -> matchesResource(title, "drawer_settings_title");
-            case "HELP_CENTER" -> matchesResource(title, "x_lite_help_center", "help_center");
-            case "FEEDBACK" -> matchesResource(title, "drawer_feedback_and_issues");
-            case "MEDIA_TRANSPARENCY" -> matchesResource(title, "drawer_media_transparency_title");
-            case "IMPRINT" -> matchesResource(title, "drawer_imprint_title");
-            default -> false;
-        };
-    }
+    private static boolean matchesResourceId(
+            String title,
+            String hiddenItemId,
+            Resources resources
+    ) {
+        if (!hiddenItemId.startsWith(RESOURCE_ITEM_ID_PREFIX)) return false;
 
-    private static boolean matchesResource(String title, String... resourceNames) {
-        Context context = Utils.getContext();
-        if (context == null) return false;
+        String encodedResourceIds = hiddenItemId.substring(RESOURCE_ITEM_ID_PREFIX.length());
+        if (encodedResourceIds.isEmpty()) return false;
 
-        Resources resources = context.getResources();
-        String packageName = context.getPackageName();
-        for (String resourceName : resourceNames) {
-            int resourceId = resources.getIdentifier(resourceName, "string", packageName);
-            if (resourceId != 0 && title.equals(resources.getString(resourceId))) return true;
+        for (String encodedResourceId : encodedResourceIds.split("-")) {
+            try {
+                int resourceId = Integer.parseInt(encodedResourceId, 16);
+                if (resourceId != 0 && title.equals(resources.getString(resourceId))) return true;
+            } catch (NumberFormatException | Resources.NotFoundException ignored) {
+                // A stale or malformed option must not hide unrelated rows.
+            }
         }
         return false;
     }

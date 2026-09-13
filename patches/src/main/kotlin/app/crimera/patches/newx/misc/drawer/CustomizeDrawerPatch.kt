@@ -3,6 +3,7 @@ package app.crimera.patches.newx.misc.drawer
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.MultiChoiceSettingDefinition
 import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
+import app.crimera.patches.newx.settings.SettingsRegistrationState
 import app.crimera.patches.newx.settings.ToggleSettingDefinition
 import app.crimera.patches.newx.settings.choice
 import app.crimera.patches.newx.settings.injectRead
@@ -14,6 +15,7 @@ import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
@@ -31,16 +33,20 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
+import java.util.Locale
 
 private const val DRAWER_SCOPE = "Lcom/x/main/drawer/"
+private const val DRAWER_RESOURCE_ITEM_ID_PREFIX = "RESOURCE_STRING_"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
@@ -280,11 +286,256 @@ private data class DrawerFooterCall(
     val renderer: MethodReference,
 )
 
+private data class DrawerRendererCall(
+    val method: MutableMethod,
+    val index: Int,
+    val call: Instruction3rc,
+    val renderer: MethodReference,
+)
+
 private data class ResolvedDrawerFooterCalls(
     val dividerIndex: Int,
     val renderer: MethodReference,
     val calls: List<IndexedValue<Instruction3rc>>,
 )
+
+private val INTEGER_MOVE_OPCODES =
+    setOf(Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16)
+
+private val INTEGER_LITERAL_OPCODES =
+    setOf(Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16)
+
+private val REGISTER_WRITE_OPCODES =
+    setOf(
+        Opcode.CHECK_CAST,
+        Opcode.CONST_STRING,
+        Opcode.CONST_STRING_JUMBO,
+        Opcode.IGET_OBJECT,
+        Opcode.INSTANCE_OF,
+        Opcode.MOVE_RESULT,
+        Opcode.MOVE_RESULT_OBJECT,
+        Opcode.NEW_ARRAY,
+        Opcode.NEW_INSTANCE,
+        Opcode.SGET_OBJECT,
+    )
+
+private fun MethodReference.isStringResourceLookup(): Boolean =
+    returnType.toString() == "Ljava/lang/String;" &&
+        parameterTypes.map(CharSequence::toString) == listOf(COMPOSER_DESCRIPTOR, "I")
+
+private fun Instruction.destinationRegisterOrNull(): Int? {
+    if (opcode in OBJECT_MOVE_OPCODES || opcode in INTEGER_MOVE_OPCODES) {
+        return (this as? TwoRegisterInstruction)?.registerA
+    }
+    if (opcode !in REGISTER_WRITE_OPCODES && opcode !in INTEGER_LITERAL_OPCODES) return null
+    return (this as? OneRegisterInstruction)?.registerA
+}
+
+private fun List<Instruction>.resolveIntegerLiterals(
+    instructionIndex: Int,
+    register: Int,
+): Set<Int> {
+    var trackedRegister = register
+    val literals = linkedSetOf<Int>()
+    for (index in instructionIndex - 1 downTo 0) {
+        val instruction = this[index]
+        if (instruction.opcode in INTEGER_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: continue
+            if (move.registerA != trackedRegister) continue
+            trackedRegister = move.registerB
+            continue
+        }
+        if (instruction.opcode in INTEGER_LITERAL_OPCODES) {
+            if ((instruction as? OneRegisterInstruction)?.registerA != trackedRegister) continue
+            (instruction as? NarrowLiteralInstruction)?.narrowLiteral?.let(literals::add)
+            continue
+        }
+    }
+    return literals
+}
+
+private fun List<Instruction>.resolveIntegerLiteralOnCurrentPath(
+    instructionIndex: Int,
+    register: Int,
+): Int? {
+    var trackedRegister = register
+    for (index in instructionIndex - 1 downTo 0) {
+        val instruction = this[index]
+        if (instruction.opcode in INTEGER_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: return null
+            if (move.registerA != trackedRegister) continue
+            trackedRegister = move.registerB
+            continue
+        }
+        if (instruction.opcode in INTEGER_LITERAL_OPCODES) {
+            if ((instruction as? OneRegisterInstruction)?.registerA != trackedRegister) continue
+            return (instruction as? NarrowLiteralInstruction)?.narrowLiteral
+        }
+        if (instruction.destinationRegisterOrNull() == trackedRegister) return null
+    }
+    return null
+}
+
+private fun List<Instruction>.valueReachesRegister(
+    valueIndex: Int,
+    valueRegister: Int,
+    targetIndex: Int,
+    targetRegister: Int,
+): Boolean {
+    val aliases = linkedSetOf(valueRegister)
+    for (index in valueIndex + 1 until targetIndex) {
+        val instruction = this[index]
+        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: return false
+            if (move.registerA in aliases) aliases.remove(move.registerA)
+            if (move.registerB in aliases) aliases.add(move.registerA)
+            continue
+        }
+        instruction.destinationRegisterOrNull()?.let(aliases::remove)
+    }
+    return targetRegister in aliases
+}
+
+private fun List<Instruction>.resolveDrawerTitleResourceIds(
+    callIndex: Int,
+    call: Instruction3rc,
+    renderer: MethodReference,
+): Set<Int> {
+    val parameters = renderer.parameterTypes.map(CharSequence::toString)
+    val titleParameterIndices = parameters.indices.filter { parameters[it] == "Ljava/lang/String;" }
+    if (titleParameterIndices.size != 1) {
+        throw PatchException("NewX drawer row renderer has an unexpected title parameter: $renderer")
+    }
+    val titleParameterIndex = titleParameterIndices.single()
+    val titleRegister = call.startRegister + parameters.take(titleParameterIndex).sumOf { type ->
+        if (type == "J" || type == "D") 2 else 1
+    }
+
+    val stringResourceNamespaces =
+        indices.mapNotNull { index ->
+            val lookupInstruction = this[index]
+            if (lookupInstruction.opcode != Opcode.INVOKE_STATIC &&
+                lookupInstruction.opcode != Opcode.INVOKE_STATIC_RANGE
+            ) {
+                return@mapNotNull null
+            }
+            val lookupReference = lookupInstruction.getReference<MethodReference>() ?: return@mapNotNull null
+            if (!lookupReference.isStringResourceLookup()) return@mapNotNull null
+            val registers = lookupInstruction.registersUsed
+            if (registers.size != 2) return@mapNotNull null
+            resolveIntegerLiteralOnCurrentPath(index, registers[1])
+        }.filter { it != 0 }
+        .map { it ushr 16 }
+        .toSet()
+
+    val resourceIds = linkedSetOf<Int>()
+    for (resultIndex in 1 until callIndex) {
+        val resultInstruction = this[resultIndex]
+        if (resultInstruction.opcode != Opcode.MOVE_RESULT_OBJECT) continue
+        val resultRegister = (resultInstruction as? OneRegisterInstruction)?.registerA ?: continue
+        if (!valueReachesRegister(resultIndex, resultRegister, callIndex, titleRegister)) continue
+
+        val lookupIndex = resultIndex - 1
+        val lookupInstruction = this.getOrNull(lookupIndex) ?: continue
+        if (lookupInstruction.opcode != Opcode.INVOKE_STATIC &&
+            lookupInstruction.opcode != Opcode.INVOKE_STATIC_RANGE
+        ) continue
+        val lookupReference = lookupInstruction.getReference<MethodReference>() ?: continue
+        if (!lookupReference.isStringResourceLookup()) continue
+
+        val registers = lookupInstruction.registersUsed
+        if (registers.size != 2) continue
+        resolveIntegerLiterals(lookupIndex, registers[1])
+            .filterTo(resourceIds) { resourceId ->
+                resourceId != 0 && resourceId ushr 16 in stringResourceNamespaces
+            }
+    }
+
+    if (resourceIds.isEmpty()) {
+        throw PatchException(
+            "NewX drawer row title has no resolvable string resource at call $callIndex in $renderer",
+        )
+    }
+    return resourceIds
+}
+
+context(context: BytecodePatchContext)
+private fun resolveDrawerRendererCalls(renderer: MethodReference): List<DrawerRendererCall> {
+    val expectedRegisterCount = renderer.parameterTypes.sumOf { type ->
+        if (type.toString() == "J" || type.toString() == "D") 2 else 1
+    }
+    val calls = buildList {
+        context.classDefForEach { classDef ->
+            if (!classDef.type.startsWith(DRAWER_SCOPE)) return@classDefForEach
+            val mutableClass = context.mutableClassDefBy(classDef.type)
+            mutableClass.methods.forEach { method ->
+                method.instructions.forEachIndexed { index, instruction ->
+                    if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@forEachIndexed
+                    val call = instruction as? Instruction3rc ?: return@forEachIndexed
+                    val reference = instruction.getReference<MethodReference>()
+                        ?: return@forEachIndexed
+                    if (reference.toSmaliDescriptor() != renderer.toSmaliDescriptor()) {
+                        return@forEachIndexed
+                    }
+                    if (call.registerCount != expectedRegisterCount) {
+                        throw PatchException(
+                            "NewX drawer renderer call register count changed in $method @ $index: " +
+                                "expected $expectedRegisterCount, found ${call.registerCount}",
+                        )
+                    }
+                    add(DrawerRendererCall(method, index, call, reference))
+                }
+            }
+        }
+    }
+    if (calls.isEmpty()) {
+        throw PatchException("Expected at least one NewX drawer renderer call for $renderer")
+    }
+    return calls
+}
+
+context(context: BytecodePatchContext)
+private fun resolveDrawerTitleResourceIds(
+    renderer: MethodReference,
+    calls: List<DrawerRendererCall>,
+): List<Int> {
+    val resourceIds = linkedSetOf<Int>()
+    calls.forEach { call ->
+        resourceIds += call.method.instructions.resolveDrawerTitleResourceIds(
+            callIndex = call.index,
+            call = call.call,
+            renderer = renderer,
+        )
+    }
+    return resourceIds.toList()
+}
+
+private fun resourceDrawerOptionId(resourceId: Int): String =
+    DRAWER_RESOURCE_ITEM_ID_PREFIX + resourceId.toString(16).uppercase(Locale.ROOT)
+
+private fun Int.toDrawerSmaliLiteral(): String =
+    if (this < 0) "-0x${(-this).toString(16)}" else "0x${toString(16)}"
+
+context(context: BytecodePatchContext)
+private fun injectDynamicDrawerOptions(
+    hiddenItems: MultiChoiceSettingDefinition,
+    resourceIds: List<Int>,
+) {
+    if (resourceIds.isEmpty()) {
+        throw PatchException("Expected at least one dynamic NewX drawer title resource")
+    }
+    val instructions = resourceIds.distinct().joinToString("\n") { resourceId ->
+        val optionId = resourceDrawerOptionId(resourceId)
+        """
+            const-string v0, "${hiddenItems.id}"
+            const-string v1, "$optionId"
+            const v2, ${resourceId.toDrawerSmaliLiteral()}
+            const/4 v3, 0x0
+            invoke-static/range {v0 .. v3}, $SETTINGS_REGISTRY_DESCRIPTOR->registerChoiceOptionResource(Ljava/lang/String;Ljava/lang/String;IZ)V
+        """.trimIndent()
+    }
+    SettingsRegistrationState.inject(context, instructions)
+}
 
 private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
@@ -572,27 +823,7 @@ val customizeNewXDrawerPatch =
                 defaultValue = emptySet(),
                 options =
                     listOf(
-                        choice("PROFILE", "piko_newx_drawer_profile"),
-                        choice("PREMIUM", "piko_newx_drawer_premium"),
-                        choice("MONEY", "piko_newx_drawer_money"),
-                        choice("COMMUNITIES", "piko_newx_drawer_communities"),
-                        choice("BOOKMARKS", "piko_newx_drawer_bookmarks"),
-                        choice("COMMUNITY_NOTES", "piko_newx_drawer_community_notes"),
-                        choice("OFFLINE_VIDEOS", "piko_newx_drawer_offline_videos"),
-                        choice("LISTS", "piko_newx_drawer_lists"),
-                        choice("BOOST", "piko_newx_drawer_boost"),
-                        choice("SPACES", "piko_newx_drawer_spaces"),
-                        choice("FOLLOW_REQUESTS", "piko_newx_drawer_follow_requests"),
-                        choice("MONETIZATION", "piko_newx_drawer_monetization"),
-                        choice("CREATOR_STUDIO", "piko_newx_drawer_creator_studio"),
-                        choice("ANALYTICS", "piko_newx_drawer_analytics"),
-                        choice("SWITCH_TO_X", "piko_newx_drawer_switch_to_x"),
                         choice("GROK", "piko_newx_drawer_grok"),
-                        choice("SETTINGS", "piko_newx_drawer_settings"),
-                        choice("HELP_CENTER", "piko_newx_drawer_help_center"),
-                        choice("FEEDBACK", "piko_newx_drawer_feedback"),
-                        choice("MEDIA_TRANSPARENCY", "piko_newx_drawer_media_transparency"),
-                        choice("IMPRINT", "piko_newx_drawer_imprint"),
                         choice("THEME_TOGGLE", "piko_newx_drawer_theme_toggle"),
                     ),
             )
@@ -616,6 +847,15 @@ val customizeNewXDrawerPatch =
                     candidates = menuMatches,
                     describe = { it.originalMethod.toString() },
                 )
+            val menuRenderer =
+                ImmutableMethodReference(
+                    menuMatch.originalMethod.definingClass,
+                    menuMatch.originalMethod.name,
+                    menuMatch.originalMethod.parameterTypes.map(CharSequence::toString),
+                    menuMatch.originalMethod.returnType,
+                )
+            val menuCalls = resolveDrawerRendererCalls(menuRenderer)
+            val menuResourceIds = resolveDrawerTitleResourceIds(menuRenderer, menuCalls)
             menuMatch.method.injectDrawerItemGuard(hiddenItems)
 
             // FOOTER ROWS: settings/help/feedback/media/imprint/debug render with a title.
@@ -651,14 +891,26 @@ val customizeNewXDrawerPatch =
             }
             val settingsIconType = settingsIconTypes.single()
             val settingsIconField = resolveSettingsIconField(settingsIconType)
-            resolveDrawerFooterTarget(footerRenderer, settingsIconField).let { target ->
-                target.method.injectPikoSettingsDrawerItem(
-                    target = target,
-                    renderer = target.renderer,
-                    settingsIconField = settingsIconField,
-                    showPikoSettingsInDrawer = showPikoSettingsInDrawer,
+            val footerTarget = resolveDrawerFooterTarget(footerRenderer, settingsIconField)
+            // Footer rows can be nested in conditional helpers such as the Grok bot menu.
+            // Discover every call to the resolved renderer, not only direct calls in the
+            // lambda that owns the settings footer divider.
+            val footerRendererCalls = resolveDrawerRendererCalls(footerTarget.renderer)
+            val footerResourceIds =
+                resolveDrawerTitleResourceIds(
+                    renderer = footerTarget.renderer,
+                    calls = footerRendererCalls,
                 )
-            }
+            injectDynamicDrawerOptions(
+                hiddenItems = hiddenItems,
+                resourceIds = (menuResourceIds + footerResourceIds).distinct(),
+            )
+            footerTarget.method.injectPikoSettingsDrawerItem(
+                target = footerTarget,
+                renderer = footerTarget.renderer,
+                settingsIconField = settingsIconField,
+                showPikoSettingsInDrawer = showPikoSettingsInDrawer,
+            )
 
             // THEME PATH: sun/moon toggle button; skip when the release has no theme toggle.
             val themeMatches = NewXDrawerThemeToggleFingerprint.scopedMatchAllOrNull().orEmpty()
