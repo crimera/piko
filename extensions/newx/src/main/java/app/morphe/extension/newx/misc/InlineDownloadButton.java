@@ -127,11 +127,19 @@ public final class InlineDownloadButton {
         try {
             Object post = postFor(presenter);
             boolean hasMedia = hasMedia(post);
-            if (hideWhenNoMedia() && !hasMedia) return actions;
-            if (containsDownloadAction(actions)) return actions;
+            if (hideWhenNoMedia() && !hasMedia) {
+                NewXLogger.printInfo(() -> "skip no-media actions=" + actions.size());
+                return actions;
+            }
+            if (containsDownloadAction(actions)) {
+                NewXLogger.printInfo(() -> "skip duplicate actions=" + actions.size());
+                return actions;
+            }
 
             Object downloadAction = createDownloadAction();
             registerDownloadAction(downloadAction);
+            NewXLogger.printInfo(() -> "add actions=" + actions.size() + " hasMedia=" + hasMedia
+                    + " download=" + System.identityHashCode(downloadAction));
 
             List<Object> result = new ArrayList<>(actions.size() + 1);
             result.addAll(actions);
@@ -147,6 +155,8 @@ public final class InlineDownloadButton {
      *  {@link #selectIcon} and unconditionally cleared by {@link #finishRender}. */
     public static float markIconSize(Object action, float iconSize) {
         boolean downloadAction = isDownloadAction(action);
+        NewXLogger.printInfo(() -> "mark action=" + System.identityHashCode(action)
+                + " download=" + downloadAction);
         RENDERING_DOWNLOAD_ACTION.set(downloadAction);
         return downloadAction ? iconSize + DOWNLOAD_ICON_SIZE_EPSILON : iconSize;
     }
@@ -156,6 +166,8 @@ public final class InlineDownloadButton {
         if (renderer == null) return;
 
         Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
+        NewXLogger.printInfo(() -> "remember renderer=" + System.identityHashCode(renderer)
+                + " marker=" + renderMarker);
         if (renderMarker == null) return;
 
         synchronized (DOWNLOAD_ICON_RENDERERS) {
@@ -190,6 +202,9 @@ public final class InlineDownloadButton {
             }
             useDownloadIcon = Boolean.TRUE.equals(renderMarker)
                     || DOWNLOAD_ICON_RENDERERS.containsKey(renderer);
+            NewXLogger.printInfo(() -> "select renderer=" + System.identityHashCode(renderer)
+                    + " marker=" + renderMarker + " remembered=" + DOWNLOAD_ICON_RENDERERS.containsKey(renderer)
+                    + " download=" + useDownloadIcon);
         }
         RENDERING_DOWNLOAD_ACTION.remove();
         return useDownloadIcon ? downloadIcon : nativeIcon;
