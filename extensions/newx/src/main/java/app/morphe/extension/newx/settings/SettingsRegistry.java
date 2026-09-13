@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.settings;
 
+import android.content.res.Resources;
+
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.shared.settings.StringSetting;
 
 public final class SettingsRegistry {
+    private static final String RESOURCE_STRING_OPTION_PREFIX = "RESOURCE_STRING_";
     private enum ItemType {
         TOGGLE,
         TEXT_INPUT,
@@ -35,6 +38,7 @@ public final class SettingsRegistry {
     private static final Map<String, NodeBuilder> NODES = new LinkedHashMap<>();
     private static final Map<String, GroupBuilder> CATEGORIES = new LinkedHashMap<>();
     private static final Map<String, Setting<?>> SETTINGS = new LinkedHashMap<>();
+    private static final List<String> DYNAMIC_CHOICE_DIAGNOSTICS = new ArrayList<>();
     private static List<SettingsNode.Category> catalog = Collections.emptyList();
     private static boolean frozen;
 
@@ -202,10 +206,15 @@ public final class SettingsRegistry {
         if (titleResourceId == 0) {
             throw failure("Invalid title resource ID for " + settingId + ": 0");
         }
+        validateResourceChoiceOptionId(settingId, optionId, titleResourceId);
+        String title = getStringResource(titleResourceId, settingId);
+        DYNAMIC_CHOICE_DIAGNOSTICS.add(
+                settingId + "/" + optionId + "=" + titleResourceId + " (" + title + ")"
+        );
         registerChoiceOption(
                 settingId,
                 optionId,
-                StringRef.constant(getStringResource(titleResourceId, settingId)),
+                StringRef.constant(title),
                 null,
                 selectedByDefault
         );
@@ -282,6 +291,12 @@ public final class SettingsRegistry {
         try {
             BuiltInSettings.register();
             freeze();
+            if (!DYNAMIC_CHOICE_DIAGNOSTICS.isEmpty()) {
+                NewXLogger.printInfo(
+                        () -> "Registered dynamic NewX choice resources: " +
+                                String.join(", ", DYNAMIC_CHOICE_DIAGNOSTICS)
+                );
+            }
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to initialize NewX settings", exception);
             throw exception;
@@ -685,11 +700,48 @@ public final class SettingsRegistry {
 
     private static String getStringResource(int resourceId, String settingId) {
         try {
-            return Utils.getResources().getString(resourceId);
+            Resources resources = Objects.requireNonNull(Utils.getResources());
+            String resourceType = resources.getResourceTypeName(resourceId);
+            if (!"string".equals(resourceType)) {
+                throw failure(
+                        "Dynamic NewX choice title resource is not a string: " +
+                                resourceId + " (" + resourceType + ") for " + settingId
+                );
+            }
+            return resources.getString(resourceId);
         } catch (RuntimeException exception) {
+            if (exception instanceof IllegalStateException) throw exception;
             throw failure(
                     "Unable to resolve dynamic NewX choice title resource " +
                             resourceId + " for " + settingId
+            );
+        }
+    }
+
+    private static void validateResourceChoiceOptionId(
+            String settingId,
+            String optionId,
+            int resourceId
+    ) {
+        Objects.requireNonNull(optionId);
+        if (!optionId.startsWith(RESOURCE_STRING_OPTION_PREFIX)) {
+            throw failure(
+                    "Dynamic NewX choice option must use " + RESOURCE_STRING_OPTION_PREFIX +
+                            " for " + settingId + ": " + optionId
+            );
+        }
+        String encodedResourceId = optionId.substring(RESOURCE_STRING_OPTION_PREFIX.length());
+        try {
+            if (Integer.parseInt(encodedResourceId, 16) != resourceId) {
+                throw failure(
+                        "Dynamic NewX choice option/resource mismatch for " + settingId +
+                                ": " + optionId + " != " + resourceId
+                );
+            }
+        } catch (NumberFormatException exception) {
+            throw failure(
+                    "Invalid dynamic NewX choice resource option for " + settingId +
+                            ": " + optionId
             );
         }
     }
