@@ -162,6 +162,8 @@ public final class InlineDownloadButton {
     /** Stages the rendered entry's identity for the icon lambda; consumed by
      *  {@link #selectIcon} and unconditionally cleared by {@link #finishRender}. */
     public static float markIconSize(Object action, float iconSize) {
+        if (!isEnabled()) return iconSize;
+
         boolean downloadAction = isDownloadAction(action);
         NewXLogger.printInfo(() -> "mark action=" + System.identityHashCode(action)
                 + " download=" + downloadAction);
@@ -171,7 +173,7 @@ public final class InlineDownloadButton {
 
     /** Remembers an icon lambda while its parent action render is still marked. */
     public static void rememberIconRenderer(Object renderer) {
-        if (renderer == null) return;
+        if (renderer == null || !isEnabled()) return;
 
         Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
         NewXLogger.printInfo(() -> "remember renderer=" + System.identityHashCode(renderer)
@@ -197,6 +199,8 @@ public final class InlineDownloadButton {
             float markedIconSize,
             Object downloadIcon
     ) {
+        if (!isEnabled()) return nativeIcon;
+
         Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
         boolean remembered = DOWNLOAD_ICON_RENDERERS.contains(renderer);
         if (Boolean.TRUE.equals(renderMarker)) {

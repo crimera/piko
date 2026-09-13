@@ -8,14 +8,42 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.shared.settings.BooleanSetting;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class InlineDownloadButtonTest {
+    private static final String INLINE_DOWNLOAD_SETTING_ID =
+            "newx.content.inline_download_button";
+    private static final BooleanSetting INLINE_DOWNLOAD_SETTING = new BooleanSetting(
+            INLINE_DOWNLOAD_SETTING_ID,
+            true,
+            false
+    );
+
+    @Before
+    public void enableInlineDownloads() throws ReflectiveOperationException {
+        settings().put(INLINE_DOWNLOAD_SETTING_ID, INLINE_DOWNLOAD_SETTING);
+        INLINE_DOWNLOAD_SETTING.save(true);
+        InlineDownloadButton.finishRender();
+    }
+
+    @After
+    public void removeInlineDownloadSetting() throws ReflectiveOperationException {
+        InlineDownloadButton.finishRender();
+        settings().remove(INLINE_DOWNLOAD_SETTING_ID);
+    }
+
     @Test
     public void singleMediaUsesRequestedTwitterFilename() {
         assertEquals(
@@ -429,6 +457,82 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void disabledMarkIconSizeReturnsOriginalSizeWithoutStagingMarker() {
+        INLINE_DOWNLOAD_SETTING.save(false);
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+
+        assertEquals(18f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0f);
+        assertFalse(InlineDownloadButton.renderMarkerPending());
+    }
+
+    @Test
+    public void disabledRememberIconRendererDoesNotTrackRenderer() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        Object renderer = new Object();
+
+        InlineDownloadButton.markIconSize(downloadAction, 18f);
+        INLINE_DOWNLOAD_SETTING.save(false);
+        InlineDownloadButton.rememberIconRenderer(renderer);
+        InlineDownloadButton.finishRender();
+
+        INLINE_DOWNLOAD_SETTING.save(true);
+        Object nativeIcon = new Object();
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(
+                renderer,
+                nativeIcon,
+                18f,
+                new Object()
+        ));
+    }
+
+    @Test
+    public void disabledSelectIconReturnsNativeIconWithoutChangingRememberedRenderer() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        Object renderer = new Object();
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
+                renderer,
+                nativeIcon,
+                InlineDownloadButton.markIconSize(downloadAction, 18f),
+                downloadIcon
+        ));
+
+        INLINE_DOWNLOAD_SETTING.save(false);
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(
+                renderer,
+                nativeIcon,
+                18f,
+                downloadIcon
+        ));
+
+        INLINE_DOWNLOAD_SETTING.save(true);
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
+                renderer,
+                nativeIcon,
+                18f,
+                downloadIcon
+        ));
+    }
+
+    @Test
+    public void finishRenderClearsMarkerWhenFeatureIsDisabled() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        InlineDownloadButton.markIconSize(downloadAction, 18f);
+        assertTrue(InlineDownloadButton.renderMarkerPending());
+
+        INLINE_DOWNLOAD_SETTING.save(false);
+        InlineDownloadButton.finishRender();
+
+        assertFalse(InlineDownloadButton.renderMarkerPending());
+    }
+
+    @Test
     public void finishRenderClearsMarkerWhenIconRenderingExitsEarly() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
@@ -552,6 +656,13 @@ public final class InlineDownloadButtonTest {
 
         assertEquals("twitter", InlineDownloadButton.sourceUsername(post));
         assertEquals("post", InlineDownloadButton.sourcePostId(post));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> settings() throws ReflectiveOperationException {
+        Field field = SettingsRegistry.class.getDeclaredField("SETTINGS");
+        field.setAccessible(true);
+        return (Map<String, Object>) field.get(null);
     }
 
     private static final class DownloadableMedia {
