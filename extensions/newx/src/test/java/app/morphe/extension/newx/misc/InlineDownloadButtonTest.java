@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -323,6 +324,68 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void actionMembershipUsesIdentityRatherThanEquals() {
+        Object equalityToken = new Object();
+        EqualObject downloadAction = new EqualObject(equalityToken);
+        EqualObject equalButDistinctNativeAction = new EqualObject(equalityToken);
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+
+        assertEquals(
+                18f,
+                InlineDownloadButton.markIconSize(equalButDistinctNativeAction, 18f),
+                0.0f
+        );
+        InlineDownloadButton.finishRender();
+        assertEquals(18.01f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0001f);
+        InlineDownloadButton.finishRender();
+    }
+
+    @Test
+    public void rendererMembershipUsesIdentityRatherThanEquals() {
+        Object equalityToken = new Object();
+        EqualObject downloadRenderer = new EqualObject(equalityToken);
+        EqualObject equalButDistinctNativeRenderer = new EqualObject(equalityToken);
+        Object downloadAction = new Object();
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+
+        InlineDownloadButton.markIconSize(downloadAction, 18f);
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(
+                downloadRenderer,
+                nativeIcon,
+                18f,
+                downloadIcon
+        ));
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(
+                equalButDistinctNativeRenderer,
+                nativeIcon,
+                18f,
+                downloadIcon
+        ));
+    }
+
+    @Test
+    public void downloadActionRegistrationEvictsOldestEntryAt512() {
+        Object oldestAction = new Object();
+        InlineDownloadButton.registerDownloadAction(oldestAction);
+        List<Object> retainedActions = new ArrayList<>();
+        for (int index = 0; index < 512; index++) {
+            Object action = new Object();
+            retainedActions.add(action);
+            InlineDownloadButton.registerDownloadAction(action);
+        }
+
+        assertEquals(18f, InlineDownloadButton.markIconSize(oldestAction, 18f), 0.0f);
+        InlineDownloadButton.finishRender();
+        assertEquals(18.01f, InlineDownloadButton.markIconSize(
+                retainedActions.get(retainedActions.size() - 1),
+                18f
+        ), 0.0001f);
+        InlineDownloadButton.finishRender();
+    }
+
+    @Test
     public void reusedRendererCanSwitchBackToNativeAction() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
@@ -560,6 +623,25 @@ public final class InlineDownloadButtonTest {
         @Override
         public String toString() {
             return "MediaContentImage(imageUrl=null)";
+        }
+    }
+
+    private static final class EqualObject {
+        private final Object equalityToken;
+
+        EqualObject(Object equalityToken) {
+            this.equalityToken = equalityToken;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof EqualObject
+                    && equalityToken == ((EqualObject) other).equalityToken;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(equalityToken);
         }
     }
 

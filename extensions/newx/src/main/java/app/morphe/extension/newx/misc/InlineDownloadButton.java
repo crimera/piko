@@ -28,17 +28,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -84,13 +85,13 @@ public final class InlineDownloadButton {
     // flip their download icons back to the share icon.
     private static final int MAX_TRACKED_OBJECTS = 512;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final List<WeakReference<Object>> DOWNLOAD_ACTIONS = new ArrayList<>();
+    private static final IdentityWeakSet DOWNLOAD_ACTIONS = new IdentityWeakSet(MAX_TRACKED_OBJECTS);
     /**
      * Compose can invoke a remembered icon lambda without re-running the parent action renderer.
      * Keep the classification on that lambda rather than only in the render call stack. Weak keys
      * ensure discarded composition objects can still be collected.
      */
-    private static final Map<Object, Boolean> DOWNLOAD_ICON_RENDERERS = new WeakHashMap<>();
+    private static final IdentityWeakSet DOWNLOAD_ICON_RENDERERS = new IdentityWeakSet();
     private static volatile boolean patchApplied;
     private static boolean initialized;
     private static boolean downloadReceiverRegistered;
@@ -177,12 +178,10 @@ public final class InlineDownloadButton {
                 + " marker=" + renderMarker);
         if (renderMarker == null) return;
 
-        synchronized (DOWNLOAD_ICON_RENDERERS) {
-            if (Boolean.TRUE.equals(renderMarker)) {
-                DOWNLOAD_ICON_RENDERERS.put(renderer, Boolean.TRUE);
-            } else {
-                DOWNLOAD_ICON_RENDERERS.remove(renderer);
-            }
+        if (Boolean.TRUE.equals(renderMarker)) {
+            DOWNLOAD_ICON_RENDERERS.add(renderer);
+        } else {
+            DOWNLOAD_ICON_RENDERERS.remove(renderer);
         }
     }
 
@@ -199,20 +198,22 @@ public final class InlineDownloadButton {
             Object downloadIcon
     ) {
         Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
-        boolean useDownloadIcon;
-        synchronized (DOWNLOAD_ICON_RENDERERS) {
-            if (Boolean.TRUE.equals(renderMarker)) {
-                DOWNLOAD_ICON_RENDERERS.put(renderer, Boolean.TRUE);
-            } else if (Boolean.FALSE.equals(renderMarker)) {
-                // A remembered renderer can be reused for a different action after list changes.
-                DOWNLOAD_ICON_RENDERERS.remove(renderer);
+        boolean remembered = DOWNLOAD_ICON_RENDERERS.contains(renderer);
+        if (Boolean.TRUE.equals(renderMarker)) {
+            if (!remembered) {
+                DOWNLOAD_ICON_RENDERERS.add(renderer);
+                remembered = true;
             }
-            useDownloadIcon = Boolean.TRUE.equals(renderMarker)
-                    || DOWNLOAD_ICON_RENDERERS.containsKey(renderer);
-            NewXLogger.printInfo(() -> "select renderer=" + System.identityHashCode(renderer)
-                    + " marker=" + renderMarker + " remembered=" + DOWNLOAD_ICON_RENDERERS.containsKey(renderer)
-                    + " download=" + useDownloadIcon);
+        } else if (Boolean.FALSE.equals(renderMarker) && remembered) {
+            // A remembered renderer can be reused for a different action after list changes.
+            DOWNLOAD_ICON_RENDERERS.remove(renderer);
+            remembered = false;
         }
+        boolean useDownloadIcon = Boolean.TRUE.equals(renderMarker) || remembered;
+        final boolean rememberedForLog = remembered;
+        NewXLogger.printInfo(() -> "select renderer=" + System.identityHashCode(renderer)
+                + " marker=" + renderMarker + " remembered=" + rememberedForLog
+                + " download=" + useDownloadIcon);
         RENDERING_DOWNLOAD_ACTION.remove();
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }
@@ -225,6 +226,157 @@ public final class InlineDownloadButton {
 
     static boolean renderMarkerPending() {
         return RENDERING_DOWNLOAD_ACTION.get() != null;
+    }
+
+    /**
+     * A weak set with identity, rather than equals(), membership semantics. The map is safe for
+     * monitor-free reads from the render hooks; only the optional FIFO used by the action set has a
+     * write-side lock. The thread-local probe avoids allocating a temporary weak reference for
+     * each membership lookup without retaining the looked-up object after the operation.
+     */
+    private static final class IdentityWeakSet {
+        private static final Boolean PRESENT = Boolean.TRUE;
+
+        private final ConcurrentHashMap<IdentityWeakReference, Boolean> entries =
+                new ConcurrentHashMap<>();
+        private final ReferenceQueue<Object> clearedReferences = new ReferenceQueue<>();
+        private final ThreadLocal<LookupKey> lookupKeys = new ThreadLocal<LookupKey>() {
+            @Override
+            protected LookupKey initialValue() {
+                return new LookupKey();
+            }
+        };
+        private final ArrayDeque<IdentityWeakReference> fifo;
+        private final Object fifoLock;
+        private final int maxEntries;
+
+        IdentityWeakSet() {
+            this(0);
+        }
+
+        IdentityWeakSet(int maxEntries) {
+            if (maxEntries < 0) {
+                throw new IllegalArgumentException("maxEntries must not be negative");
+            }
+            this.maxEntries = maxEntries;
+            this.fifo = maxEntries == 0 ? null : new ArrayDeque<>(maxEntries);
+            this.fifoLock = maxEntries == 0 ? null : new Object();
+        }
+
+        void add(Object referent) {
+            if (referent == null) return;
+
+            IdentityWeakReference entry = new IdentityWeakReference(referent, clearedReferences);
+            if (fifo == null) {
+                drainClearedReferences();
+                entries.putIfAbsent(entry, PRESENT);
+                return;
+            }
+
+            synchronized (fifoLock) {
+                drainClearedReferences();
+                removeClearedFifoEntries();
+                if (entries.putIfAbsent(entry, PRESENT) == null) {
+                    fifo.addLast(entry);
+                    while (fifo.size() > maxEntries) {
+                        entries.remove(fifo.removeFirst());
+                    }
+                }
+            }
+        }
+
+        boolean contains(Object referent) {
+            if (referent == null) return false;
+
+            drainClearedReferences();
+            LookupKey lookupKey = lookupKeys.get();
+            lookupKey.set(referent);
+            try {
+                return entries.containsKey(lookupKey);
+            } finally {
+                lookupKey.clear();
+            }
+        }
+
+        boolean remove(Object referent) {
+            if (referent == null) return false;
+
+            drainClearedReferences();
+            LookupKey lookupKey = lookupKeys.get();
+            lookupKey.set(referent);
+            try {
+                return entries.remove(lookupKey) != null;
+            } finally {
+                lookupKey.clear();
+            }
+        }
+
+        private void drainClearedReferences() {
+            IdentityWeakReference reference;
+            while ((reference = (IdentityWeakReference) clearedReferences.poll()) != null) {
+                entries.remove(reference);
+            }
+        }
+
+        private void removeClearedFifoEntries() {
+            Iterator<IdentityWeakReference> iterator = fifo.iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().get() == null) {
+                    iterator.remove();
+                }
+            }
+        }
+
+        private static Object referentOf(Object key) {
+            if (key instanceof IdentityWeakReference reference) return reference.get();
+            if (key instanceof LookupKey lookupKey) return lookupKey.referent;
+            return null;
+        }
+
+        private static final class IdentityWeakReference extends WeakReference<Object> {
+            private final int identityHashCode;
+
+            IdentityWeakReference(Object referent, ReferenceQueue<Object> queue) {
+                super(referent, queue);
+                identityHashCode = System.identityHashCode(referent);
+            }
+
+            @Override
+            public int hashCode() {
+                return identityHashCode;
+            }
+
+            @Override
+            public boolean equals(Object other) {
+                Object referent = get();
+                return referent != null && referent == referentOf(other);
+            }
+        }
+
+        private static final class LookupKey {
+            private Object referent;
+            private int identityHashCode;
+
+            void set(Object referent) {
+                this.referent = referent;
+                identityHashCode = System.identityHashCode(referent);
+            }
+
+            void clear() {
+                referent = null;
+                identityHashCode = 0;
+            }
+
+            @Override
+            public int hashCode() {
+                return identityHashCode;
+            }
+
+            @Override
+            public boolean equals(Object other) {
+                return referent != null && referent == referentOf(other);
+            }
+        }
     }
 
     public static boolean handleEvent(Object presenter, Object event) {
@@ -300,34 +452,11 @@ public final class InlineDownloadButton {
 
     static void registerDownloadAction(Object action) {
         if (action == null) throw unpatchedBridge("createDownloadAction returned null");
-        synchronized (DOWNLOAD_ACTIONS) {
-            removeClearedDownloadActions();
-            while (DOWNLOAD_ACTIONS.size() >= MAX_TRACKED_OBJECTS) {
-                DOWNLOAD_ACTIONS.remove(0);
-            }
-            DOWNLOAD_ACTIONS.add(new WeakReference<>(action));
-        }
+        DOWNLOAD_ACTIONS.add(action);
     }
 
     private static boolean isDownloadAction(Object candidate) {
-        if (candidate == null) return false;
-
-        synchronized (DOWNLOAD_ACTIONS) {
-            Iterator<WeakReference<Object>> iterator = DOWNLOAD_ACTIONS.iterator();
-            while (iterator.hasNext()) {
-                Object action = iterator.next().get();
-                if (action == null) {
-                    iterator.remove();
-                    continue;
-                }
-                if (action == candidate) return true;
-            }
-        }
-        return false;
-    }
-
-    private static void removeClearedDownloadActions() {
-        DOWNLOAD_ACTIONS.removeIf(reference -> reference.get() == null);
+        return DOWNLOAD_ACTIONS.contains(candidate);
     }
 
     private static Object findActionEntry(Object event) {
