@@ -78,7 +78,11 @@ public final class InlineDownloadButton {
     private static final String PENDING_DOWNLOADS_PREFS = "piko_newx_inline_downloads";
     private static final String CONFLICT_SETTING = "newx.content.inline_download_conflict";
     private static final ConflictBehavior DEFAULT_CONFLICT_BEHAVIOR = ConflictBehavior.SKIP;
-    private static final int MAX_TRACKED_OBJECTS = 128;
+    // Timeline scrolling creates a new download action object per composition, so this cap must
+    // comfortably exceed the number of live compositions. Eviction removes the oldest entries
+    // (scrolled-away posts) first; clearing everything here used to unclassify visible posts and
+    // flip their download icons back to the share icon.
+    private static final int MAX_TRACKED_OBJECTS = 512;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final List<WeakReference<Object>> DOWNLOAD_ACTIONS = new ArrayList<>();
     /**
@@ -91,6 +95,13 @@ public final class InlineDownloadButton {
     private static boolean initialized;
     private static boolean downloadReceiverRegistered;
     private static final ThreadLocal<Boolean> RENDERING_DOWNLOAD_ACTION = new ThreadLocal<>();
+    /**
+     * Compose skips re-invoking an icon lambda when its captured inputs are unchanged. Native
+     * share and download renderers otherwise capture identical inputs, so a slot flipping between
+     * them could keep showing the stale icon without ever reaching {@link #selectIcon}. Nudge the
+     * size for downloads by an imperceptible amount so the flip always recomposes.
+     */
+    private static final float DOWNLOAD_ICON_SIZE_EPSILON = 0.01f;
 
     private InlineDownloadButton() {
     }
@@ -114,7 +125,9 @@ public final class InlineDownloadButton {
         if (!patchApplied || !isEnabled() || actions == null) return actions;
 
         try {
-            if (hideWhenNoMedia() && !hasMedia(postFor(presenter))) return actions;
+            Object post = postFor(presenter);
+            boolean hasMedia = hasMedia(post);
+            if (hideWhenNoMedia() && !hasMedia) return actions;
             if (containsDownloadAction(actions)) return actions;
 
             Object downloadAction = createDownloadAction();
@@ -133,8 +146,9 @@ public final class InlineDownloadButton {
     /** Stages the rendered entry's identity for the icon lambda; consumed by
      *  {@link #selectIcon} and unconditionally cleared by {@link #finishRender}. */
     public static float markIconSize(Object action, float iconSize) {
-        RENDERING_DOWNLOAD_ACTION.set(isDownloadAction(action));
-        return iconSize;
+        boolean downloadAction = isDownloadAction(action);
+        RENDERING_DOWNLOAD_ACTION.set(downloadAction);
+        return downloadAction ? iconSize + DOWNLOAD_ICON_SIZE_EPSILON : iconSize;
     }
 
     /** Remembers an icon lambda while its parent action render is still marked. */
@@ -262,7 +276,9 @@ public final class InlineDownloadButton {
         if (action == null) throw unpatchedBridge("createDownloadAction returned null");
         synchronized (DOWNLOAD_ACTIONS) {
             removeClearedDownloadActions();
-            if (DOWNLOAD_ACTIONS.size() >= MAX_TRACKED_OBJECTS) DOWNLOAD_ACTIONS.clear();
+            while (DOWNLOAD_ACTIONS.size() >= MAX_TRACKED_OBJECTS) {
+                DOWNLOAD_ACTIONS.remove(0);
+            }
             DOWNLOAD_ACTIONS.add(new WeakReference<>(action));
         }
     }

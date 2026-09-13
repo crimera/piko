@@ -287,6 +287,32 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void trackedDownloadActionSurvivesLaterRegistrations() {
+        Object visibleAction = new Object();
+        InlineDownloadButton.registerDownloadAction(visibleAction);
+        // Scrolling composes new posts continuously; exceeding the old tracking cap must not
+        // unclassify a still-visible download action (it used to fall back to the share icon).
+        for (int index = 0; index < 200; index++) {
+            InlineDownloadButton.registerDownloadAction(new Object());
+        }
+
+        Object renderer = new Object();
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+        InlineDownloadButton.markIconSize(visibleAction, 18f);
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
+    }
+
+    @Test
+    public void downloadMarkNudgesIconSizeToForceRecomposition() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+
+        assertEquals(18.01f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0001f);
+        assertEquals(18f, InlineDownloadButton.markIconSize(new Object(), 18f), 0.0f);
+    }
+
+    @Test
     public void finishRenderClearsMarkerWhenIconRenderingExitsEarly() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
