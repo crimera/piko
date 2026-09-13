@@ -162,6 +162,51 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void canonicalMediaWinsWhenItHasDownloadableImage() {
+        List<?> canonicalMedia = Collections.singletonList(new ValidImageMedia());
+        List<?> repostedMedia = Collections.singletonList(new DownloadableMedia());
+
+        assertSame(canonicalMedia, InlineDownloadButton.selectMedia(canonicalMedia, repostedMedia));
+    }
+
+    @Test
+    public void validImageMediaIsDownloadable() {
+        assertTrue(InlineDownloadButton.isDownloadableMedia(new ValidImageMedia()));
+    }
+
+    @Test
+    public void imageWithoutHttpUrlIsNotDownloadable() {
+        assertFalse(InlineDownloadButton.isDownloadableMedia(new InvalidImageMedia()));
+        assertEquals(
+                Collections.emptyList(),
+                InlineDownloadButton.selectMedia(
+                        Collections.singletonList(new InvalidImageMedia()),
+                        Collections.emptyList()
+                )
+        );
+    }
+
+    @Test
+    public void validVideoMediaIsDownloadableWithoutParsingBitrate() {
+        assertTrue(InlineDownloadButton.isDownloadableMedia(new ValidVideoMedia("not-a-number")));
+    }
+
+    @Test
+    public void videoWithoutValidHttpMp4VariantIsNotDownloadable() {
+        List<?> invalidMedia = Collections.singletonList(new InvalidVideoMedia());
+        List<?> repostedMedia = Collections.singletonList(new DownloadableMedia());
+
+        assertFalse(InlineDownloadButton.isDownloadableMedia(invalidMedia.get(0)));
+        assertSame(repostedMedia, InlineDownloadButton.selectMedia(invalidMedia, repostedMedia));
+    }
+
+    @Test
+    public void validMp4VariantIsAcceptedForGifAndOtherMedia() {
+        assertTrue(InlineDownloadButton.isDownloadableMedia(new ValidGifMedia()));
+        assertTrue(InlineDownloadButton.isDownloadableMedia(new ValidOtherMedia()));
+    }
+
+    @Test
     public void hasMediaDoesNotUseReflectiveGetMediaFallback() {
         assertFalse(InlineDownloadButton.hasMedia(null));
         assertFalse(InlineDownloadButton.hasMedia(new MediaPost(null)));
@@ -444,6 +489,62 @@ public final class InlineDownloadButtonTest {
             return "MediaContentVideo(variants=[MediaVariant(" +
                     "url=https://video.twimg.com/media.mp4, bitRate=100, " +
                     "contentType=video/mp4)])";
+        }
+    }
+
+    private static final class ValidImageMedia {
+        @Override
+        public String toString() {
+            return "MediaContentImage(imageUrl=https://pbs.twimg.com/media/example.jpg)";
+        }
+    }
+
+    private static final class InvalidImageMedia {
+        @Override
+        public String toString() {
+            return "MediaContentImage(imageUrl=file:///media/example.jpg)";
+        }
+    }
+
+    private static final class ValidVideoMedia {
+        private final String bitRate;
+
+        ValidVideoMedia(String bitRate) {
+            this.bitRate = bitRate;
+        }
+
+        @Override
+        public String toString() {
+            return "MediaContentVideo(variants=[MediaVariant(" +
+                    "url=https://video.twimg.com/media, bitRate=" + bitRate + ", " +
+                    "contentType=video/mp4)])";
+        }
+    }
+
+    private static final class InvalidVideoMedia {
+        @Override
+        public String toString() {
+            return "MediaContentVideo(variants=[MediaVariant(" +
+                    "url=https://video.twimg.com/media.webm, bitRate=100, " +
+                    "contentType=video/webm)])";
+        }
+    }
+
+    private static final class ValidGifMedia {
+        @Override
+        public String toString() {
+            return "MediaContentGif(variants=[MediaVariant(" +
+                    "url=https://video.twimg.com/media, bitRate=null, " +
+                    "contentType=video/mp4)])";
+        }
+    }
+
+    private static final class ValidOtherMedia {
+        @Override
+        public String toString() {
+            return "MediaContentOther(variants=[MediaVariant(" +
+                    "url=https://video.twimg.com/media.mp4, bitRate=100, " +
+                    "contentType=application/octet-stream)])";
         }
     }
 

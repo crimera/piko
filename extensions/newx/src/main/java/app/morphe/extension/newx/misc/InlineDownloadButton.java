@@ -392,7 +392,57 @@ public final class InlineDownloadButton {
     }
 
     private static boolean hasDownloadableMedia(List<?> media) {
-        return !downloadItems(media).isEmpty();
+        if (media == null) return false;
+
+        for (Object item : media) {
+            if (isDownloadableMedia(item)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks only the fields needed to decide whether the media can be downloaded. This runs
+     * while the inline action list is being composed, so full download metadata and thumbnail
+     * URLs must stay on the click path in {@link #downloadItem}.
+     */
+    static boolean isDownloadableMedia(Object media) {
+        if (media == null) return false;
+
+        try {
+            String value = media.toString();
+            if (value == null) return false;
+            if (value.startsWith("MediaContentImage(")) {
+                return NewXUtils.isHttpUrl(ToStringParser.fieldValue(value, "imageUrl"));
+            }
+            return hasMp4Variant(value);
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to read NewX media", exception);
+            return false;
+        }
+    }
+
+    /** Boolean counterpart of {@link #bestMp4Variant}; it intentionally does not parse bitrates
+     * or allocate a {@link Variant}. */
+    private static boolean hasMp4Variant(String value) {
+        String prefix = "MediaVariant(url=";
+        int offset = 0;
+        while (true) {
+            int start = value.indexOf(prefix, offset);
+            if (start < 0) return false;
+            start += prefix.length();
+            int bitRateStart = value.indexOf(", bitRate=", start);
+            int contentTypeStart = value.indexOf(", contentType=", bitRateStart);
+            int end = value.indexOf(')', contentTypeStart);
+            if (bitRateStart < 0 || contentTypeStart < 0 || end < 0) return false;
+
+            String url = value.substring(start, bitRateStart);
+            String contentType = value.substring(contentTypeStart + 14, end);
+            if (NewXUtils.isHttpUrl(url) &&
+                    (contentType.equalsIgnoreCase("video/mp4") || url.toLowerCase().contains(".mp4"))) {
+                return true;
+            }
+            offset = end + 1;
+        }
     }
 
     private static final Pattern STATUS_URL_PATTERN =
