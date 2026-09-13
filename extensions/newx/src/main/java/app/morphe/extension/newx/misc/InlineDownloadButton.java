@@ -137,6 +137,22 @@ public final class InlineDownloadButton {
         return iconSize;
     }
 
+    /** Remembers an icon lambda while its parent action render is still marked. */
+    public static void rememberIconRenderer(Object renderer) {
+        if (renderer == null) return;
+
+        Boolean renderMarker = RENDERING_DOWNLOAD_ACTION.get();
+        if (renderMarker == null) return;
+
+        synchronized (DOWNLOAD_ICON_RENDERERS) {
+            if (Boolean.TRUE.equals(renderMarker)) {
+                DOWNLOAD_ICON_RENDERERS.put(renderer, Boolean.TRUE);
+            } else {
+                DOWNLOAD_ICON_RENDERERS.remove(renderer);
+            }
+        }
+    }
+
     /**
      * Selects the icon for the current renderer. The render marker is only available while the
      * parent action entry is being composed; Compose may invoke the remembered icon lambda again

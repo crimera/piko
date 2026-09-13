@@ -50,6 +50,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
@@ -88,6 +89,35 @@ private fun MutableMethod.freeRegisters4Bit(
     } catch (exception: RuntimeException) {
         throw PatchException("No free 4-bit registers at $this index $index", exception)
     }
+
+context(context: BytecodePatchContext)
+private fun rememberIconRendererAtConstruction(match: Match) {
+    val rendererClass = context.mutableClassDefBy(match.originalMethod.definingClass)
+    val rendererConstructor = requireExactlyOne(
+        "NewX TwitterShare icon lambda constructor",
+        rendererClass.methods.filter { method ->
+            method.name == "<init>" &&
+                method.returnType == "V" &&
+                method.parameterTypes.map(CharSequence::toString) == listOf("F", "I")
+        },
+    )
+    val rendererSuperCallIndex = requireExactlyOne(
+        "NewX TwitterShare icon lambda super constructor call",
+        rendererConstructor.instructions.mapIndexedNotNull { index, instruction ->
+            val reference = instruction.getReference<MethodReference>()
+                ?: return@mapIndexedNotNull null
+            index.takeIf {
+                instruction.opcode == Opcode.INVOKE_DIRECT &&
+                    reference.name == "<init>" &&
+                    reference.definingClass != rendererConstructor.definingClass
+            }
+        },
+    )
+    rendererConstructor.addInstruction(
+        rendererSuperCallIndex + 1,
+        "invoke-static {p0}, $EXTENSION->rememberIconRenderer(Ljava/lang/Object;)V",
+    )
+}
 
 @Suppress("unused")
 val newXInlineDownloadButtonPatch =
@@ -277,6 +307,7 @@ val newXInlineDownloadButtonPatch =
                         ),
                 ).scopedMatchAll(),
             )
+            rememberIconRendererAtConstruction(iconRenderer)
             iconRenderer.method.apply {
                 val iconAccess = iconRenderer.instructionMatches.singleOrNull { match ->
                     match.instruction.opcode == Opcode.SGET_OBJECT &&

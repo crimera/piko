@@ -244,6 +244,22 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void iconRendererIsRememberedBeforeItsFirstInvocation() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        Object renderer = new Object();
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+
+        InlineDownloadButton.markIconSize(downloadAction, 18f);
+        InlineDownloadButton.rememberIconRenderer(renderer);
+        InlineDownloadButton.finishRender();
+
+        // The icon lambda may be deferred until after the parent renderer exits.
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(renderer, nativeIcon, 18f, downloadIcon));
+    }
+
+    @Test
     public void nativeActionRenderIsUntouched() {
         InlineDownloadButton.markIconSize(new Object(), 18f);
 
