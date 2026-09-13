@@ -34,15 +34,22 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /**
  * Matches the Compose paragraph intrinsics constructor (AndroidParagraphIntrinsics, obfuscated
- * to `androidx/compose/ui/text/platform/d` in 12.14.0). The constructor resolves the
+ * to `androidx/compose/ui/text/platform/d` through 12.26.x and moved to `androidx/compose/ui/text/c`
+ * with an added trailing boolean parameter in 12.27.0-alpha.01). The constructor resolves the
  * paragraph's [android.graphics.Typeface] from the text style and applies it to the
  * paragraph TextPaint. NewX renders Compose-first, so this single constructor carries every
  * text surface (timeline, buttons, settings). Legacy View text has its own dedicated patch
  * set; it is intentionally not hooked here.
+ *
+ * The scope is the stable `androidx/compose/ui/text` library prefix, narrowed to constructors
+ * calling `Paint.setTypeface`. Sibling callers in that prefix (font resolution helpers,
+ * MetricAffectingSpan updates) are not constructors, so exactly one match is expected.
  */
 private val composeParagraphTypefaceFingerprint by lazy {
     Fingerprint(
-        definingClass = "androidx/compose/ui/text/platform",
+        definingClass = "androidx/compose/ui/text",
+        name = "<init>",
+        returnType = "V",
         filters =
             listOf(
                 methodCall(
@@ -162,7 +169,7 @@ val customFontPatch =
             }
             val paragraphMatch = paragraphMatches.single()
             val paragraphMethod = paragraphMatch.method
-            if (paragraphMethod.name != "<init>" || paragraphMethod.parameterTypes.size != 6) {
+            if (paragraphMethod.name != "<init>" || paragraphMethod.parameterTypes.size !in 6..7) {
                 throw PatchException(
                     "NewX compose paragraph typeface anchor is not the expected intrinsics " +
                         "constructor: ${paragraphMethod}",
