@@ -381,4 +381,7 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">activity</string>
+    <string name="piko_mark_story_seen">Mark as seen</string>
+    <string name="piko_story_seen_pending">Marking as seen</string>
+    <string name="piko_story_seen_sent">Marked as seen</string>
 </resources>
