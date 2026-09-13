@@ -354,4 +354,7 @@
     <string name="piko_media_like">polubienie</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">aktywność</string>
+    <string name="piko_mark_story_seen">Oznacz jako obejrzane</string>
+    <string name="piko_story_seen_pending">Oznaczanie jako obejrzane</string>
+    <string name="piko_story_seen_sent">Oznaczono jako obejrzane</string>
 </resources>
