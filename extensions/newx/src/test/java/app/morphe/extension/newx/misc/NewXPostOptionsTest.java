@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +21,21 @@ public final class NewXPostOptionsTest {
         assertEquals(1, groups.size());
         assertEquals(2, result.size());
         assertEquals(Collections.singletonList(Action.None), ((Group) result.get(1)).actions);
+    }
+
+    @Test
+    public void groupsCustomOptionsTogether() {
+        List<Group> groups = Collections.singletonList(new Group(Collections.singletonList(Action.Native)));
+
+        List<?> first = NewXPostOptions.addOption(groups, Action.None.name(), true);
+        List<?> result = NewXPostOptions.addOption(first, Action.ViewDebugDialog.name(), true);
+
+        assertEquals(2, result.size());
+        assertEquals(
+                Arrays.asList(Action.None, Action.ViewDebugDialog),
+                ((Group) result.get(1)).actions
+        );
+        assertEquals(Collections.singletonList(Action.None), ((Group) first.get(1)).actions);
     }
 
     @Test

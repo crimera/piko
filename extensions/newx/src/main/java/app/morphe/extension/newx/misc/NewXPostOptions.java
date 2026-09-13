@@ -20,6 +20,9 @@ public final class NewXPostOptions {
             Object action = findAction(groups, optionName);
             if (action == null || containsAction(groups, action)) return groups;
 
+            List<?> groupedOptions = appendToCustomGroup(groups, action);
+            if (groupedOptions != null) return groupedOptions;
+
             Object group = createOptionGroup(groups.get(0), action);
             if (group == null) return groups;
 
@@ -30,6 +33,41 @@ public final class NewXPostOptions {
             NewXLogger.printException(() -> "Failed to add NewX post-menu option " + optionName, exception);
             return groups;
         }
+    }
+
+    private static List<?> appendToCustomGroup(List<?> groups, Object action)
+            throws ReflectiveOperationException {
+        Object lastGroup = groups.get(groups.size() - 1);
+        List<?> customActions = findCustomActionList(lastGroup);
+        if (customActions == null) return null;
+
+        ArrayList<Object> combinedActions = new ArrayList<>(customActions);
+        combinedActions.add(action);
+
+        Object group = createOptionGroup(lastGroup, combinedActions);
+        if (group == null) return null;
+
+        ArrayList<Object> copy = new ArrayList<>(groups);
+        copy.set(copy.size() - 1, group);
+        return copy;
+    }
+
+    private static List<?> findCustomActionList(Object group) throws ReflectiveOperationException {
+        for (List<?> actionList : actionLists(group)) {
+            for (Object action : actionList) {
+                if (isCustomAction(action)) return actionList;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isCustomAction(Object action) {
+        if (!(action instanceof Enum<?> enumAction)) return false;
+
+        String actionName = enumAction.name();
+        return NewXPostOptionActions.BROWSE_OBJECT_ACTION.equals(actionName)
+                || NewXPostOptionActions.SHARE_IMAGE_ACTION.equals(actionName)
+                || NewXPostOptionActions.FILTERED_REPLIES_ACTION.equals(actionName);
     }
 
     public static boolean isAction(Object action, String optionName) {
@@ -69,12 +107,17 @@ public final class NewXPostOptions {
     }
 
     private static Object createOptionGroup(Object exemplar, Object action) throws ReflectiveOperationException {
+        return createOptionGroup(exemplar, Collections.singletonList(action));
+    }
+
+    private static Object createOptionGroup(Object exemplar, List<?> actions)
+            throws ReflectiveOperationException {
         for (Constructor<?> constructor : exemplar.getClass().getDeclaredConstructors()) {
             if (constructor.getParameterCount() != 1) continue;
             if (!List.class.isAssignableFrom(constructor.getParameterTypes()[0])) continue;
 
             constructor.setAccessible(true);
-            return constructor.newInstance(Collections.singletonList(action));
+            return constructor.newInstance(actions);
         }
         return null;
     }
