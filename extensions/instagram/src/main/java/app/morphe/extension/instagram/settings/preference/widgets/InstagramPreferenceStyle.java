@@ -8,6 +8,7 @@ package app.morphe.extension.instagram.settings.preference.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -35,6 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.settings.SettingsActivity;
 import app.morphe.extension.shared.ResourceUtils;
 
 public final class InstagramPreferenceStyle {
@@ -468,6 +470,17 @@ public final class InstagramPreferenceStyle {
         switchContext.applyOverrideConfiguration(overrideConfiguration);
         switchContext.getTheme().setTo(context.getTheme());
         return switchContext;
+    }
+
+    public static boolean useMaterialSwitchStyle(View view, boolean original) {
+        Context context = view.getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof SettingsActivity) {
+                return true;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return original;
     }
 
     private static CompoundButton createNativeSwitch(Context context) {
