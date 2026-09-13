@@ -126,6 +126,7 @@
     <string name="piko_enable_mark_chat_as_read_desc">Obtenga una opción, al presionar prolongadamente el chat, para marcarlo como leído. Cuando marcas un chat como leído, otros pueden ver que has leído sus mensajes, incluso cuando Ver mensajes directos de forma anónima está habilitado</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Descargar medios</string>
+    <string name="piko_category_downloads">Descargas</string>
     <string name="piko_enable_download">Activar descarga</string>
     <string name="piko_enable_direct_download">Activar descarga directa</string>
     <string name="piko_enable_direct_download_desc">Descarga el medio actual sin pedir opciones</string>
@@ -173,6 +174,20 @@
     <string name="piko_hide_navigation_direct">Ocultar botón Directo</string>
     <string name="piko_hide_navigation_search">Ocultar botón Buscar</string>
     <string name="piko_hide_navigation_create">Ocultar botón Crear</string>
+    <string name="piko_category_navigation_tabs">Barra de navegación</string>
+    <string name="piko_navigation_tabs_title">Mostrar y reordenar pestañas</string>
+    <string name="piko_navigation_tabs_summary">Elija las pestañas inferiores visibles y arrástrelas para reordenarlas</string>
+    <string name="piko_navigation_startup_tab">Pestaña de inicio de la aplicación</string>
+    <string name="piko_navigation_startup_tab_summary">Elija qué pestaña se abre cuando se inicia la aplicación</string>
+    <string name="piko_navigation_tab_home">Hogar</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Mensajes</string>
+    <string name="piko_navigation_tab_search">Buscar</string>
+    <string name="piko_navigation_tab_profile">Perfil</string>
+    <string name="piko_navigation_tab_notifications">Notificaciones</string>
+    <string name="piko_navigation_tab_create">Crear</string>
+    <string name="piko_navigation_settings_lockout_title">No hay botón de configuración de Piko</string>
+    <string name="piko_navigation_settings_lockout_message">Esta configuración elimina todas las entradas de configuración de Piko de las pestañas visibles. Aún puedes abrir la configuración de Piko presionando prolongadamente el ícono de la aplicación y seleccionando la configuración de Piko.</string>
     <!-- Information Section -->
     <string name="piko_category_about">Acerca de</string>
     <string name="piko_export_pref">Exportar configuración de Piko</string>
@@ -195,6 +210,7 @@
     <string name="piko_import_fail">Error al importar</string>
     <string name="piko_restart_app">La app necesita ser reiniciada para que los cambios se reflejen</string>
     <string name="piko_ok">Aceptar</string>
+    <string name="piko_reset">Restablecer</string>
     <string name="piko_cancel">Cancelar</string>
     <string name="piko_deleted">Eliminado</string>
     <string name="piko_debug">Depuración de Piko</string>
@@ -224,7 +240,7 @@
     <string name="piko_no_internet">Conéctate a Internet</string>
     <string name="piko_tap_here">¡¡Toca aquí!!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Personalización de la barra de acciones</string>
+    <string name="piko_category_action_bar">Barra de acción</string>
     <string name="piko_action_bar_main_feed">Iconos de la barra de acciones del feed principal</string>
     <string name="piko_action_bar_user_profile">Iconos de la barra de acciones del perfil de usuario</string>
     <string name="piko_action_bar_chat">Iconos de la barra de acciones de chat</string>
@@ -233,6 +249,8 @@
     <string name="piko_action_bar_button_settings_icon">Icono de configuración</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Icono de modo fantasma</string>
     <string name="piko_action_bar_button_profile_info_icon">Icono de información de perfil</string>
+    <string name="piko_action_bar_button_create_icon">Crear icono</string>
+    <string name="piko_action_bar_button_notifications_icon">Icono de notificaciones</string>
     <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
     <!-- Developer Options Section -->
@@ -243,7 +261,7 @@
     <string name="piko_rec_flags_refresh_file">Actualizar banderas</string>
     <string name="piko_rec_flags_last_modified_at">Última modificación: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Filtrar contenido</string>
+    <string name="piko_category_filter_content">Filtros de contenido</string>
     <string name="piko_filter_story">Historia de filtro</string>
     <string name="piko_filter_story_types_to_hide">Tipos de historias para ocultar</string>
     <string name="piko_reel_type_ads_reel">Anuncios de Reel</string>
@@ -336,4 +354,7 @@
     <string name="piko_media_like">me gusta</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">actividad</string>
+    <string name="piko_mark_story_seen">Marca como se ve</string>
+    <string name="piko_story_seen_pending">Marcado como se ve</string>
+    <string name="piko_story_seen_sent">Marcado como visto</string>
 </resources>

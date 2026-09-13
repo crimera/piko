@@ -126,6 +126,7 @@
     <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine uzun basıldığında okundu olarak işaretleme seçeneği sunar. Bir sohbeti okundu olarak işaretlediğinizde, \"Mesajlar için hayalet modu\" etkin olsa bile başkaları mesajlarını okuduğunuzu görebilir</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Medya indirme</string>
+    <string name="piko_category_downloads">İndirmeler</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>
     <string name="piko_enable_direct_download">Doğrudan indirmeyi etkinleştir</string>
     <string name="piko_enable_direct_download_desc">Mevcut görüntülenen medyayı seçenek sormadan indirir</string>
@@ -173,6 +174,20 @@
     <string name="piko_hide_navigation_direct">Mesajlar butonunu gizle</string>
     <string name="piko_hide_navigation_search">Arama butonunu gizle</string>
     <string name="piko_hide_navigation_create">Oluştur butonunu gizle</string>
+    <string name="piko_category_navigation_tabs">Gezinme çubuğu</string>
+    <string name="piko_navigation_tabs_title">Sekmeleri göster ve yeniden sırala</string>
+    <string name="piko_navigation_tabs_summary">Görünür alt sekmeleri seçin ve yeniden sıralamak için sürükleyin</string>
+    <string name="piko_navigation_startup_tab">Uygulama başlangıç sekmesi</string>
+    <string name="piko_navigation_startup_tab_summary">Uygulama açıldığında hangi sekmenin açılacağını seçin</string>
+    <string name="piko_navigation_tab_home">Ana Sayfa</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Mesajlar</string>
+    <string name="piko_navigation_tab_search">Ara</string>
+    <string name="piko_navigation_tab_profile">Profil</string>
+    <string name="piko_navigation_tab_notifications">Bildirimler</string>
+    <string name="piko_navigation_tab_create">Oluştur</string>
+    <string name="piko_navigation_settings_lockout_title">Piko ayarları butonu olmadan</string>
+    <string name="piko_navigation_settings_lockout_message">Bu yapılandırma, görünür sekmelerdeki tüm Piko ayarları girişlerini kaldırır. Piko ayarlarını yine de uygulama simgesine uzun basıp \"Piko ayarları\" seçeneğini belirleyerek açabilirsiniz.</string>
     <!-- Information Section -->
     <string name="piko_category_about">Hakkında</string>
     <string name="piko_export_pref">Piko ayarlarını dışa aktar</string>
@@ -195,6 +210,7 @@
     <string name="piko_import_fail">İçe aktarma başarısız</string>
     <string name="piko_restart_app">Değişikliklerin etkili olması için uygulamayı yeniden başlatın</string>
     <string name="piko_ok">Tamam</string>
+    <string name="piko_reset">Sıfırla</string>
     <string name="piko_cancel">İptal</string>
     <string name="piko_deleted">Silindi</string>
     <string name="piko_debug">Piko hata ayıklama</string>
@@ -224,7 +240,7 @@
     <string name="piko_no_internet">Lütfen internete bağlanın</string>
     <string name="piko_tap_here">Buraya dokunun !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Araç Çubuğu Ayarları</string>
+    <string name="piko_category_action_bar">Eylem çubuğu</string>
     <string name="piko_action_bar_main_feed">Ana akış eylem çubuğu simgeleri</string>
     <string name="piko_action_bar_user_profile">Profil sayfası eylem çubuğu simgeleri</string>
     <string name="piko_action_bar_chat">Sohbet eylem çubuğu simgeleri</string>
@@ -233,6 +249,8 @@
     <string name="piko_action_bar_button_settings_icon">Ayarlar simgesi</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Görünmez mod simgesi</string>
     <string name="piko_action_bar_button_profile_info_icon">Profil bilgisi simgesi</string>
+    <string name="piko_action_bar_button_create_icon">Oluştur simgesi</string>
+    <string name="piko_action_bar_button_notifications_icon">Bildirimler simgesi</string>
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
     <!-- Developer Options Section -->
@@ -243,7 +261,7 @@
     <string name="piko_rec_flags_refresh_file">Bayrakları yenile</string>
     <string name="piko_rec_flags_last_modified_at">Son değiştirilme tarihi: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">İçeriği filtrele</string>
+    <string name="piko_category_filter_content">İçerik filtreleri</string>
     <string name="piko_filter_story">Hikaye filtrele</string>
     <string name="piko_filter_story_types_to_hide">Gizlenecek hikaye türleri</string>
     <string name="piko_reel_type_ads_reel">Reklam Reels\'ları</string>

@@ -126,6 +126,7 @@
     <string name="piko_enable_mark_chat_as_read_desc">Dodaje opcję oznaczenia czatu jako przeczytanego po jego przytrzymaniu. Gdy oznaczysz czat jako przeczytany, inni zobaczą, że ich wiadomości zostały odczytane, nawet jeśli włączono \"Czytaj wiadomości anonimowo\"</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Pobieranie multimediów</string>
+    <string name="piko_category_downloads">Pobrane</string>
     <string name="piko_enable_download">Włącz pobieranie</string>
     <string name="piko_enable_direct_download">Włącz bezpośrednie pobieranie</string>
     <string name="piko_enable_direct_download_desc">Pobiera przeglądane multimedia od razu bez wyświetlania okna opcji</string>
@@ -173,6 +174,20 @@
     <string name="piko_hide_navigation_direct">Ukryj przycisk Wiadomości</string>
     <string name="piko_hide_navigation_search">Ukryj przycisk Szukaj</string>
     <string name="piko_hide_navigation_create">Ukryj przycisk Utwórz</string>
+    <string name="piko_category_navigation_tabs">Pasek nawigacji</string>
+    <string name="piko_navigation_tabs_title">Pokaż i zmień kolejność zakładek</string>
+    <string name="piko_navigation_tabs_summary">Wybierz widoczne dolne zakładki i przeciągnij, aby zmienić ich kolejność</string>
+    <string name="piko_navigation_startup_tab">Zakładka startowa aplikacji</string>
+    <string name="piko_navigation_startup_tab_summary">Wybierz zakładkę otwieraną przy uruchomieniu aplikacji</string>
+    <string name="piko_navigation_tab_home">Strona główna</string>
+    <string name="piko_navigation_tab_reels">Rolki</string>
+    <string name="piko_navigation_tab_messages">Wiadomości</string>
+    <string name="piko_navigation_tab_search">Szukaj</string>
+    <string name="piko_navigation_tab_profile">Profil</string>
+    <string name="piko_navigation_tab_notifications">Powiadomienia</string>
+    <string name="piko_navigation_tab_create">Utwórz</string>
+    <string name="piko_navigation_settings_lockout_title">Brak przycisku ustawień Piko</string>
+    <string name="piko_navigation_settings_lockout_message">Ta konfiguracja usuwa wszystkie odnośniki do ustawień Piko z widocznych kart. Ustawienia Piko nadal możesz otworzyć, przytrzymując ikonę aplikacji i wybierając ustawienia Piko.</string>
     <!-- Information Section -->
     <string name="piko_category_about">Informacje</string>
     <string name="piko_export_pref">Eksportuj ustawienia Piko</string>
@@ -195,6 +210,7 @@
     <string name="piko_import_fail">Błąd importu</string>
     <string name="piko_restart_app">Wymagany restart aplikacji, aby zastosować zmiany</string>
     <string name="piko_ok">OK</string>
+    <string name="piko_reset">Zresetuj</string>
     <string name="piko_cancel">Anuluj</string>
     <string name="piko_deleted">Usunięto</string>
     <string name="piko_debug">Debugowanie Piko</string>
@@ -224,7 +240,7 @@
     <string name="piko_no_internet">Połącz się z internetem</string>
     <string name="piko_tap_here">Dotknij tutaj</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Personalizacja paska akcji</string>
+    <string name="piko_category_action_bar">Pasek akcji</string>
     <string name="piko_action_bar_main_feed">Ikony paska akcji strony głównej</string>
     <string name="piko_action_bar_user_profile">Ikony paska akcji profilu użytkownika</string>
     <string name="piko_action_bar_chat">Ikony paska akcji czatu</string>
@@ -233,6 +249,8 @@
     <string name="piko_action_bar_button_settings_icon">Ikona ustawień</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ikona trybu ducha</string>
     <string name="piko_action_bar_button_profile_info_icon">Ikona informacji o profilu</string>
+    <string name="piko_action_bar_button_create_icon">Ikona tworzenia</string>
+    <string name="piko_action_bar_button_notifications_icon">Ikona powiadomień</string>
     <string name="piko_settings_on_action_bar">Ustawienia Piko na pasku akcji</string>
     <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji strony głównej</string>
     <!-- Developer Options Section -->
@@ -243,7 +261,7 @@
     <string name="piko_rec_flags_refresh_file">Odśwież flagi</string>
     <string name="piko_rec_flags_last_modified_at">Ostatnio zmodyfikowane: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Filtrowanie treści</string>
+    <string name="piko_category_filter_content">Filtry treści</string>
     <string name="piko_filter_story">Filtruj relacje</string>
     <string name="piko_filter_story_types_to_hide">Typy relacji do ukrycia</string>
     <string name="piko_reel_type_ads_reel">Rolka sponsorowana</string>

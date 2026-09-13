@@ -126,11 +126,14 @@
     <string name="piko_enable_mark_chat_as_read_desc">Tambahkan opsi, dengan menekan lama obrolan, untuk menandainya sebagai sudah dibaca. Saat Anda menandai obrolan sebagai sudah dibaca, orang lain dapat melihat bahwa Anda telah membaca pesan mereka, meskipun opsi Lihat pesan langsung secara anonim diaktifkan</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Unduh media</string>
+    <string name="piko_category_downloads">Unduhan</string>
     <string name="piko_enable_download">Aktifkan unduhan</string>
     <string name="piko_enable_direct_download">Aktifkan unduhan langsung</string>
     <string name="piko_enable_direct_download_desc">Mengunduh media yang sedang dilihat tanpa menanyakan pilihan</string>
     <string name="piko_download_username_folder">Pisahkan media berdasarkan nama pengguna</string>
     <string name="piko_download_username_folder_desc">Membuat subfolder berdasarkan nama pengguna</string>
+    <string name="piko_embed_download_metadata">Sematkan metadata video</string>
+    <string name="piko_embed_download_metadata_desc">Menambahkan keterangan, tautan postingan, pembuat, dan tanggal unggah ke berkas MP4 yang diunduh</string>
     <string name="piko_download_current_media">Unduh media saat ini</string>
     <string name="piko_download_as_image">Unduh sebagai gambar</string>
     <string name="piko_video_variants">Varian video</string>
@@ -171,8 +174,24 @@
     <string name="piko_hide_navigation_direct">Sembunyikan tombol Direct</string>
     <string name="piko_hide_navigation_search">Sembunyikan tombol Pencarian</string>
     <string name="piko_hide_navigation_create">Sembunyikan tombol Buat</string>
+    <string name="piko_category_navigation_tabs">Bilah navigasi</string>
+    <string name="piko_navigation_tabs_title">Tampilkan dan atur ulang tab</string>
+    <string name="piko_navigation_tabs_summary">Pilih tab bagian bawah yang terlihat dan seret untuk mengatur ulang urutannya</string>
+    <string name="piko_navigation_startup_tab">Tab mulai aplikasi</string>
+    <string name="piko_navigation_startup_tab_summary">Pilih tab mana yang akan terbuka saat membuka aplikasi</string>
+    <string name="piko_navigation_tab_home">Beranda</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Pesan</string>
+    <string name="piko_navigation_tab_search">Pencarian</string>
+    <string name="piko_navigation_tab_profile">Profil</string>
+    <string name="piko_navigation_tab_notifications">Pemberitahuan</string>
+    <string name="piko_navigation_tab_create">Buat</string>
+    <string name="piko_navigation_settings_lockout_title">Tidak ada tombol pengaturan Piko</string>
+    <string name="piko_navigation_settings_lockout_message">Pengaturan ini akan menghapus semua entri pengaturan Piko dari tab yang terlihat. Anda masih bisa membuka pengaturan Piko dengan menekan lama ikon aplikasi dan memilih pengaturan Piko.</string>
     <!-- Information Section -->
     <string name="piko_category_about">Tentang</string>
+    <string name="piko_export_pref">Ekspor pengaturan Piko</string>
+    <string name="piko_import_pref">Impor pengaturan Piko</string>
     <string name="piko_reset_pref">Atur ulang pengaturan Piko</string>
     <string name="piko_reset_pref_confirm">Atur ulang pengaturan Piko?</string>
     <string name="piko_reset_pref_success">Pengaturan Piko diatur ulang</string>
@@ -191,6 +210,7 @@
     <string name="piko_import_fail">Gagal mengimpor</string>
     <string name="piko_restart_app">Aplikasi perlu dimulai ulang agar perubahan tersebut dapat diterapkan</string>
     <string name="piko_ok">OKE</string>
+    <string name="piko_reset">Atur ulang</string>
     <string name="piko_cancel">Batalkan</string>
     <string name="piko_deleted">Dihapus</string>
     <string name="piko_debug">Debug Piko</string>
@@ -220,7 +240,7 @@
     <string name="piko_no_internet">Silakan sambungkan ke internet</string>
     <string name="piko_tap_here">Ketuk di sini !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Kustomisasi bilah tindakan</string>
+    <string name="piko_category_action_bar">Bilah tindakan</string>
     <string name="piko_action_bar_main_feed">Ikon bilah tindakan di feed utama</string>
     <string name="piko_action_bar_user_profile">Ikon bilah tindakan profil pengguna</string>
     <string name="piko_action_bar_chat">Ikon bilah tindakan obrolan</string>
@@ -229,6 +249,8 @@
     <string name="piko_action_bar_button_settings_icon">Ikon pengaturan</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ikon mode hantu</string>
     <string name="piko_action_bar_button_profile_info_icon">Ikon info profil</string>
+    <string name="piko_action_bar_button_create_icon">Ikon buat</string>
+    <string name="piko_action_bar_button_notifications_icon">Ikon pemberitahuan</string>
     <string name="piko_settings_on_action_bar">Pengaturan Piko di bilah tindakan</string>
     <string name="piko_settings_on_action_bar_desc">Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama</string>
     <!-- Developer Options Section -->
@@ -239,7 +261,7 @@
     <string name="piko_rec_flags_refresh_file">Segarkan tanda</string>
     <string name="piko_rec_flags_last_modified_at">Terakhir diubah: %s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Saring konten</string>
+    <string name="piko_category_filter_content">Penyaring konten</string>
     <string name="piko_filter_story">Saring Cerita</string>
     <string name="piko_filter_story_types_to_hide">Jenis cerita yang disembunyikan</string>
     <string name="piko_reel_type_ads_reel">Iklan reel</string>
