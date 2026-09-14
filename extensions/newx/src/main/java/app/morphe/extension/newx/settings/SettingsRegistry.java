@@ -318,6 +318,16 @@ public final class SettingsRegistry {
         }
     }
 
+    /** Returns the live setting object so hot paths can skip the registry map lookup. */
+    @Nullable
+    public static Setting<?> settingOrNull(String id) {
+        if (frozen) return SETTINGS.get(id);
+
+        synchronized (SettingsRegistry.class) {
+            return SETTINGS.get(id);
+        }
+    }
+
     public static synchronized List<SettingsNode.Category> catalog() {
         requireFrozen();
         return catalog;

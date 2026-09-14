@@ -7,8 +7,6 @@ import androidx.annotation.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
@@ -23,9 +21,6 @@ public final class TimelineScrollPositionStore {
     private static final String INDEX_SUFFIX = ".index";
     private static final String OFFSET_SUFFIX = ".offset";
     private static final String PROFILE_KEY_PREFIX = "profile.";
-    private static final Pattern POSITION_PATTERN = Pattern.compile(
-            "ScrollPositionHolder\\(firstVisibleItemIndex=(\\d+), firstVisibleItemScrollOffset=(\\d+)\\)"
-    );
     private static final Object SAVE_LOCK = new Object();
     private static volatile SharedPreferences cachedPreferences;
     private static SharedPreferences lastSavedPreferences;
@@ -74,7 +69,11 @@ public final class TimelineScrollPositionStore {
                 return null;
             }
 
-            if (!preferences.contains(key + INDEX_SUFFIX)) {
+            // Saved positions are never negative, so -1 doubles as the missing-entry
+            // sentinel. One fewer prefs lookup and key concat than contains() + getInt().
+            String indexKey = key + INDEX_SUFFIX;
+            int index = preferences.getInt(indexKey, -1);
+            if (index < 0) {
                 if (NewXLogger.isLoggingEnabled()) {
                     NewXLogger.logger("NewX restore miss timeline=" + timelineName + " key=" + key
                             + " reason=no-entry");
@@ -82,7 +81,6 @@ public final class TimelineScrollPositionStore {
                 return null;
             }
 
-            int index = preferences.getInt(key + INDEX_SUFFIX, 0);
             int offset = preferences.getInt(key + OFFSET_SUFFIX, 0);
             if (NewXLogger.isLoggingEnabled()) {
                 NewXLogger.logger("NewX restore hit timeline=" + timelineName + " key=" + key
@@ -148,10 +146,10 @@ public final class TimelineScrollPositionStore {
             int index = -1;
             int offset = -1;
 
-            Matcher matcher = POSITION_PATTERN.matcher(holder.toString());
-            if (matcher.matches()) {
-                index = Integer.parseInt(matcher.group(1));
-                offset = Integer.parseInt(matcher.group(2));
+            int[] parsed = parsePositionHolder(holder.toString());
+            if (parsed != null) {
+                index = parsed[0];
+                offset = parsed[1];
             } else {
                 Field[] fields = holder.getClass().getDeclaredFields();
                 int found = 0;
@@ -258,6 +256,33 @@ public final class TimelineScrollPositionStore {
         }
     }
 
+    /** Manual parse of the known holder shape; cheaper than a regex per save. */
+    @Nullable
+    private static int[] parsePositionHolder(String holder) {
+        if (holder == null) return null;
+        int indexValue = parseHolderField(holder, "firstVisibleItemIndex=");
+        if (indexValue < 0) return null;
+        int offsetValue = parseHolderField(holder, "firstVisibleItemScrollOffset=");
+        if (offsetValue < 0) return null;
+        return new int[]{indexValue, offsetValue};
+    }
+
+    private static int parseHolderField(String holder, String label) {
+        int valueStart = holder.indexOf(label);
+        if (valueStart < 0) return -1;
+        valueStart += label.length();
+        int valueEnd = valueStart;
+        while (valueEnd < holder.length() && Character.isDigit(holder.charAt(valueEnd))) {
+            valueEnd++;
+        }
+        if (valueEnd == valueStart) return -1;
+        try {
+            return Integer.parseInt(holder.substring(valueStart, valueEnd));
+        } catch (NumberFormatException exception) {
+            return -1;
+        }
+    }
+
     /** Returns whether X's process-local position map is valid for this timeline type. */
     public static boolean useInMemoryPosition(Enum<?> timeline) {
         String timelineName = timeline == null ? null : timeline.name();
@@ -279,8 +304,10 @@ public final class TimelineScrollPositionStore {
             return restoreTimelinePosition ? timelineName : null;
         }
         if (!restoreProfilePosition || !timelineName.startsWith("USER_PROFILE_")) return null;
-        if (profileId == null || profileId.trim().isEmpty()) return null;
-        return PROFILE_KEY_PREFIX + timelineName + "." + profileId.trim();
+        if (profileId == null) return null;
+        String trimmedProfileId = profileId.trim();
+        if (trimmedProfileId.isEmpty()) return null;
+        return PROFILE_KEY_PREFIX + timelineName + "." + trimmedProfileId;
     }
 
     private static boolean isHomeTimeline(String timelineName) {

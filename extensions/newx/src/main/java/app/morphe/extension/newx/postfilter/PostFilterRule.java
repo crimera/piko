@@ -57,8 +57,17 @@ public final class PostFilterRule {
 
     static String normalize(String value) {
         if (value == null) return "";
+        // NFKC is the identity on pure-ASCII input, so skip the Normalizer there.
+        if (isAscii(value)) return value.trim().toLowerCase(Locale.ROOT);
         return Normalizer.normalize(value, Normalizer.Form.NFKC)
                 .trim()
                 .toLowerCase(Locale.ROOT);
+    }
+
+    private static boolean isAscii(String value) {
+        for (int index = 0; index < value.length(); index++) {
+            if (value.charAt(index) > 127) return false;
+        }
+        return true;
     }
 }

@@ -491,7 +491,7 @@ public final class InlineDownloadButton {
             String url = value.substring(start, bitRateStart);
             String contentType = value.substring(contentTypeStart + 14, end);
             if (NewXUtils.isHttpUrl(url) &&
-                    (contentType.equalsIgnoreCase("video/mp4") || url.toLowerCase().contains(".mp4"))) {
+                    (contentType.equalsIgnoreCase("video/mp4") || NewXUtils.containsIgnoreCaseAscii(url, ".mp4"))) {
                 return true;
             }
             offset = end + 1;
@@ -722,7 +722,7 @@ public final class InlineDownloadButton {
             String url = value.substring(start, bitRateStart);
             String contentType = value.substring(contentTypeStart + 14, end);
             if (NewXUtils.isHttpUrl(url) &&
-                    (contentType.equalsIgnoreCase("video/mp4") || url.toLowerCase().contains(".mp4"))) {
+                    (contentType.equalsIgnoreCase("video/mp4") || NewXUtils.containsIgnoreCaseAscii(url, ".mp4"))) {
                 int bitRate = parseBitRate(value.substring(bitRateStart + 10, contentTypeStart));
                 if (best == null || bitRate > best.bitRate) best = new Variant(url, bitRate);
             }

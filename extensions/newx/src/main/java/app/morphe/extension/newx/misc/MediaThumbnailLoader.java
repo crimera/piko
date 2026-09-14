@@ -63,36 +63,51 @@ public final class MediaThumbnailLoader {
             Callback callback
     ) {
         if (callback == null) return;
+        // The synchronous section below runs on the caller (often UI) thread.
+        // Skip id allocation and log lambdas there when logging is off; the
+        // background executor section keeps plain printInfo calls (one cheap
+        // gate check each, negligible next to bitmap/network work).
+        boolean loggingEnabled = NewXLogger.isLoggingEnabled();
         if (!NewXUtils.isHttpUrl(networkUrl)) {
-            NewXLogger.printInfo(() -> LOG_PREFIX +
-                    "ignored request with invalid network URL: " + describeUrl(networkUrl));
+            if (loggingEnabled) {
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "ignored request with invalid network URL: " + describeUrl(networkUrl));
+            }
             return;
         }
 
-        int requestId = NEXT_REQUEST_ID.incrementAndGet();
-        NewXLogger.printInfo(() -> LOG_PREFIX +
-                "request #" + requestId + " queued network=" + describeUrl(networkUrl) +
-                        " cache=" + describeUrl(cacheUrl) +
-                        " context=" + (context == null ? "none" : context.getClass().getName())
-        );
+        int requestId = loggingEnabled ? NEXT_REQUEST_ID.incrementAndGet() : 0;
+        if (loggingEnabled) {
+            NewXLogger.printInfo(() -> LOG_PREFIX +
+                    "request #" + requestId + " queued network=" + describeUrl(networkUrl) +
+                            " cache=" + describeUrl(cacheUrl) +
+                            " context=" + (context == null ? "none" : context.getClass().getName())
+            );
+        }
 
         Bitmap cached = CACHE.get(networkUrl);
         if (cached != null && !cached.isRecycled()) {
-            NewXLogger.printInfo(() -> LOG_PREFIX +
-                    "request #" + requestId + " hit extension memory cache size=" +
-                            dimensions(cached) + " usage=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
-            );
-            MAIN_HANDLER.post(() -> {
+            if (loggingEnabled) {
                 NewXLogger.printInfo(() -> LOG_PREFIX +
-                        "request #" + requestId + " delivered from extension memory cache");
+                        "request #" + requestId + " hit extension memory cache size=" +
+                                dimensions(cached) + " usage=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
+                );
+            }
+            MAIN_HANDLER.post(() -> {
+                if (loggingEnabled) {
+                    NewXLogger.printInfo(() -> LOG_PREFIX +
+                            "request #" + requestId + " delivered from extension memory cache");
+                }
                 callback.onLoaded(cached);
             });
             return;
         }
         if (cached != null) {
             CACHE.remove(networkUrl);
-            NewXLogger.printInfo(() -> LOG_PREFIX +
-                    "request #" + requestId + " removed recycled extension-cache bitmap");
+            if (loggingEnabled) {
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId + " removed recycled extension-cache bitmap");
+            }
         }
 
         EXECUTOR.execute(() -> {
@@ -118,8 +133,10 @@ public final class MediaThumbnailLoader {
                             " extensionCache=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
             );
             MAIN_HANDLER.post(() -> {
-                NewXLogger.printInfo(() -> LOG_PREFIX +
-                        "request #" + requestId + " delivered to picker source=" + source);
+                if (NewXLogger.isLoggingEnabled()) {
+                    NewXLogger.printInfo(() -> LOG_PREFIX +
+                            "request #" + requestId + " delivered to picker source=" + source);
+                }
                 callback.onLoaded(loaded);
             });
         });

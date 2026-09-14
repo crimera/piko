@@ -46,6 +46,10 @@ public final class PostFilterRuleStore {
         private final List<PostFilterRule> rules;
         private final List<String> contentPhrases;
         private final List<String> usernamePhrases;
+        // Built once on first filter pass; snapshots are cached, so the
+        // automaton cost amortizes across all timeline loads until rules change.
+        private volatile PhraseMatcher contentMatcher;
+        private volatile PhraseMatcher usernameMatcher;
 
         private Snapshot(List<PostFilterRule> source) {
             rules = Collections.unmodifiableList(new ArrayList<>(source));
@@ -70,6 +74,22 @@ public final class PostFilterRuleStore {
 
         List<String> usernamePhrases() {
             return usernamePhrases;
+        }
+
+        PhraseMatcher contentMatcher() {
+            PhraseMatcher matcher = contentMatcher;
+            if (matcher != null) return matcher;
+            matcher = PhraseMatcher.of(contentPhrases);
+            contentMatcher = matcher;
+            return matcher;
+        }
+
+        PhraseMatcher usernameMatcher() {
+            PhraseMatcher matcher = usernameMatcher;
+            if (matcher != null) return matcher;
+            matcher = PhraseMatcher.of(usernamePhrases);
+            usernameMatcher = matcher;
+            return matcher;
         }
 
         public boolean hasEnabledRules() {

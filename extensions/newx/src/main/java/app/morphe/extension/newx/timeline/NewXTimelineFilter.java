@@ -157,9 +157,12 @@ public final class NewXTimelineFilter {
                 "newx.content.verified_account_filtering.thread",
                 false
         );
-        Set<String> verifiedTypesToHide = parseVerifiedTypes(readStringSetSetting(
-                "newx.content.hide_verified_account_types"
-        ));
+        Set<String> verifiedTypesToHide = Collections.emptySet();
+        if (filterTimeline || filterThread) {
+            verifiedTypesToHide = parseVerifiedTypes(readStringSetSetting(
+                    "newx.content.hide_verified_account_types"
+            ));
+        }
         Set<String> whitelist = Collections.emptySet();
         if (!verifiedTypesToHide.isEmpty() && (filterTimeline || filterThread)) {
             try {
@@ -652,7 +655,9 @@ private static Object filterTimelineItems(
             try {
                 if (isPromoted(item, modelAccess)) return FilterResult.remove();
             } catch (RuntimeException exception) {
-                logDiagnostic("promoted-item check", exception, "item=" + describeValue(item));
+                if (NewXLogger.isLoggingEnabled()) {
+                    logDiagnostic("promoted-item check", exception, "item=" + describeValue(item));
+                }
                 throw exception;
             }
         }
@@ -661,18 +666,25 @@ private static Object filterTimelineItems(
                     && (filterTimeline || filterThread)) {
                 notePostAuthorship(item, modelAccess);
             }
-            try {
-                String textForFilter = modelAccess.getPostTextForFilter(item);
-                String authorScreenName = modelAccess.getPostAuthorScreenName(item);
-                if (filterVerified && isVerifiedAuthorToHide(item, verifiedTypesToHide, whitelist, modelAccess)) {
-                    return FilterResult.removeVerified();
+            boolean needKeyword = ruleSnapshot != null && ruleSnapshot.hasEnabledRules();
+            boolean needVerifiedAuthor = filterVerified && verifiedTypesToHide != null
+                    && !verifiedTypesToHide.isEmpty();
+            if (needKeyword || needVerifiedAuthor) {
+                try {
+                    String textForFilter = needKeyword ? modelAccess.getPostTextForFilter(item) : null;
+                    String authorScreenName = modelAccess.getPostAuthorScreenName(item);
+                    if (needVerifiedAuthor && isVerifiedAuthorToHide(item, verifiedTypesToHide, whitelist, modelAccess)) {
+                        return FilterResult.removeVerified();
+                    }
+                    if (needKeyword && PostFilterMatcher.findMatchReason(textForFilter, authorScreenName, ruleSnapshot) != null) {
+                        return FilterResult.remove();
+                    }
+                } catch (RuntimeException exception) {
+                    if (NewXLogger.isLoggingEnabled()) {
+                        logDiagnostic("post keyword check", exception, "post=" + describeValue(item));
+                    }
+                    throw exception;
                 }
-                if (PostFilterMatcher.findMatchReason(textForFilter, authorScreenName, ruleSnapshot) != null) {
-                    return FilterResult.remove();
-                }
-            } catch (RuntimeException exception) {
-                logDiagnostic("post keyword check", exception, "post=" + describeValue(item));
-                throw exception;
             }
             if (isAiGenerated(item, aiSourcesToHide, modelAccess)) return FilterResult.remove();
         }
@@ -704,11 +716,12 @@ private static Object filterTimelineItems(
         Object verifiedType = modelAccess.getPostAuthorVerifiedType(post);
         if (!(verifiedType instanceof Enum<?> enumType)) return false;
         if (!verifiedTypesToHide.contains(enumType.name())) return false;
-        if (VerifiedAccountWhitelistStore.matches(
-                whitelist,
-                modelAccess.getPostAuthorId(post),
-                modelAccess.getPostAuthorScreenName(post))) {
-            return false;
+        if (whitelist != null && !whitelist.isEmpty()) {
+            String authorId = modelAccess.getPostAuthorId(post);
+            String authorScreenName = modelAccess.getPostAuthorScreenName(post);
+            if (VerifiedAccountWhitelistStore.matches(whitelist, authorId, authorScreenName)) {
+                return false;
+            }
         }
         return !isOwnThreadReply(post, modelAccess);
     }
@@ -749,7 +762,9 @@ private static Object filterTimelineItems(
         try {
             disclosure = modelAccess.getContentDisclosure(post);
         } catch (RuntimeException exception) {
-            logDiagnostic("AI disclosure read", exception, "post=" + describeValue(post));
+            if (NewXLogger.isLoggingEnabled()) {
+                logDiagnostic("AI disclosure read", exception, "post=" + describeValue(post));
+            }
             throw exception;
         }
         if (disclosure == null) return false;
@@ -761,12 +776,14 @@ private static Object filterTimelineItems(
             if (!(source instanceof Enum<?> enumSource)) return false;
             return aiSourcesToHide.contains(enumSource.name());
         } catch (RuntimeException exception) {
-            logDiagnostic(
-                    "AI disclosure classification",
-                    exception,
-                    "post=" + describeValue(post),
-                    "disclosure=" + describeValue(disclosure)
-            );
+            if (NewXLogger.isLoggingEnabled()) {
+                logDiagnostic(
+                        "AI disclosure classification",
+                        exception,
+                        "post=" + describeValue(post),
+                        "disclosure=" + describeValue(disclosure)
+                );
+            }
             throw exception;
         }
     }
@@ -796,7 +813,10 @@ private static Object filterTimelineItems(
             boolean filterThread,
             TimelineModelAccess modelAccess
     ) {
-        String entryId = modelAccess.getModuleEntryId(module);
+        boolean needEntryId = hideWhoToFollow || hideDiscoverMore
+                || ((filterTimeline || filterThread)
+                && verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty());
+        String entryId = needEntryId ? modelAccess.getModuleEntryId(module) : null;
         if (hideWhoToFollow && isWhoToFollowEntryId(entryId)) {
             return FilterResult.remove();
         }
@@ -804,7 +824,7 @@ private static Object filterTimelineItems(
             return FilterResult.remove();
         }
 
-        String conversationRootId = extractConversationRootPostId(entryId);
+        String conversationRootId = needEntryId ? extractConversationRootPostId(entryId) : null;
         boolean filterVerified = conversationRootId != null ? filterThread : filterTimeline;
 
         List<?> originalChildren = modelAccess.getModuleChildren(module);
@@ -846,20 +866,22 @@ private static Object filterTimelineItems(
                         modelAccess
                 );
             } catch (RuntimeException exception) {
-                logFailure(
-                        "timeline module child",
-                        exception,
-                        childContext(
-                                module,
-                                childIndex,
-                                originalChild,
-                                originalItem,
-                                filterPromotedItems,
-                                hideWhoToFollow,
-                                ruleSnapshot,
-                                aiSourcesToHide
-                        )
-                );
+                if (NewXLogger.isLoggingEnabled()) {
+                    logFailure(
+                            "timeline module child",
+                            exception,
+                            childContext(
+                                    module,
+                                    childIndex,
+                                    originalChild,
+                                    originalItem,
+                                    filterPromotedItems,
+                                    hideWhoToFollow,
+                                    ruleSnapshot,
+                                    aiSourcesToHide
+                            )
+                    );
+                }
                 if (filteredChildren != null) filteredChildren.add(originalChild);
                 continue;
             }
@@ -906,20 +928,22 @@ private static Object filterTimelineItems(
                 filteredChildren.add(replacement);
                 changed = true;
             } catch (RuntimeException exception) {
-                logFailure(
-                        "timeline module child reconstruction",
-                        exception,
-                        childContext(
-                                module,
-                                childIndex,
-                                originalChild,
-                                result.item,
-                                filterPromotedItems,
-                                hideWhoToFollow,
-                                ruleSnapshot,
-                                aiSourcesToHide
-                        )
-                );
+                if (NewXLogger.isLoggingEnabled()) {
+                    logFailure(
+                            "timeline module child reconstruction",
+                            exception,
+                            childContext(
+                                    module,
+                                    childIndex,
+                                    originalChild,
+                                    result.item,
+                                    filterPromotedItems,
+                                    hideWhoToFollow,
+                                    ruleSnapshot,
+                                    aiSourcesToHide
+                            )
+                    );
+                }
                 if (filteredChildren != null) filteredChildren.add(originalChild);
             }
         }
@@ -997,9 +1021,7 @@ private static Object filterTimelineItems(
 
     private static List<Object> copyChildrenPrefix(List<?> children, int endExclusive) {
         List<Object> prefix = new ArrayList<>(children.size());
-        for (int index = 0; index < endExclusive; index++) {
-            prefix.add(children.get(index));
-        }
+        prefix.addAll(children.subList(0, endExclusive));
         return prefix;
     }
 
@@ -1220,7 +1242,12 @@ private static Object filterTimelineItems(
     }
 
     private static boolean hasPromotedClientEventInfoComponent(String component) {
-        return component != null && component.toLowerCase(Locale.ROOT).contains("promoted");
+        // Runs in production via the patch-time bridge; avoid the lowered-copy alloc.
+        // Non-ASCII input keeps the exact toLowerCase semantics.
+        if (component == null) return false;
+        return NewXUtils.isAscii(component)
+                ? NewXUtils.containsIgnoreCaseAscii(component, "promoted")
+                : component.toLowerCase(Locale.ROOT).contains("promoted");
     }
 
     private static Object getPostId(Object post) {

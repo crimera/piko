@@ -1,7 +1,5 @@
 package app.morphe.extension.newx.postfilter;
 
-import java.util.List;
-
 public final class PostFilterMatcher {
     private PostFilterMatcher() {
     }
@@ -12,8 +10,14 @@ public final class PostFilterMatcher {
             PostFilterRuleStore.Snapshot snapshot
     ) {
         if (snapshot == null || !snapshot.hasEnabledRules()) return null;
-        if (postText != null && matches(postText, snapshot.contentPhrases())) return "KEYWORD_MAIN_TEXT";
-        if (authorScreenName != null && matches(authorScreenName, snapshot.usernamePhrases())) {
+        PhraseMatcher content = snapshot.contentMatcher();
+        if (!content.isEmpty() && postText != null && !postText.isEmpty()
+                && content.matches(PostFilterRule.normalize(postText))) {
+            return "KEYWORD_MAIN_TEXT";
+        }
+        PhraseMatcher usernames = snapshot.usernameMatcher();
+        if (!usernames.isEmpty() && authorScreenName != null && !authorScreenName.isEmpty()
+                && usernames.matches(PostFilterRule.normalize(authorScreenName))) {
             return "KEYWORD_USERNAME";
         }
         return null;
@@ -28,15 +32,5 @@ public final class PostFilterMatcher {
 
     public static String normalize(String value) {
         return PostFilterRule.normalize(value);
-    }
-
-    private static boolean matches(String candidate, List<String> phrases) {
-        if (candidate == null || candidate.isEmpty() || phrases.isEmpty()) return false;
-
-        String normalizedCandidate = normalize(candidate);
-        for (String phrase : phrases) {
-            if (normalizedCandidate.contains(phrase)) return true;
-        }
-        return false;
     }
 }

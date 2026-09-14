@@ -9,6 +9,8 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.Setting;
 
 /** Gates NewX diagnostics because Morphe's info and exception log methods are unconditional. */
 public final class NewXLogger {
@@ -30,17 +32,41 @@ public final class NewXLogger {
             "(?i)\\b(?:https?|ftp|content|file)://[^\\s\\[\\]<>\\\"']+"
     );
     private static final ServerLogBuffer SERVER_LOG_BUFFER = new ServerLogBuffer();
+    // Setting objects are stable after freeze with volatile values. Caching the
+    // reference skips the registry map lookup on every log-gate check in hot paths.
+    private static volatile Setting<?> cachedLoggingSetting;
+    private static volatile Setting<?> cachedServerLoggingSetting;
 
     private NewXLogger() {
     }
 
     public static boolean isLoggingEnabled() {
-        return SettingsRegistry.getBooleanOrDefault(LOGGING_SETTING_ID, false);
+        Setting<?> cached = cachedLoggingSetting;
+        if (cached instanceof BooleanSetting booleanSetting) {
+            try {
+                return booleanSetting.get();
+            } catch (RuntimeException ignored) {
+            }
+        }
+        boolean enabled = SettingsRegistry.getBooleanOrDefault(LOGGING_SETTING_ID, false);
+        Setting<?> resolved = SettingsRegistry.settingOrNull(LOGGING_SETTING_ID);
+        if (resolved instanceof BooleanSetting) cachedLoggingSetting = resolved;
+        return enabled;
     }
 
     public static boolean isServerLoggingEnabled() {
+        Setting<?> cached = cachedServerLoggingSetting;
+        if (cached instanceof BooleanSetting booleanSetting) {
+            try {
+                return booleanSetting.get();
+            } catch (RuntimeException ignored) {
+            }
+        }
         // The settings registry is loaded lazily; the patch's opt-in is the safe fallback.
-        return SettingsRegistry.getBooleanOrDefault(SERVER_LOGGING_SETTING_ID, true);
+        boolean enabled = SettingsRegistry.getBooleanOrDefault(SERVER_LOGGING_SETTING_ID, true);
+        Setting<?> resolved = SettingsRegistry.settingOrNull(SERVER_LOGGING_SETTING_ID);
+        if (resolved instanceof BooleanSetting) cachedServerLoggingSetting = resolved;
+        return enabled;
     }
 
     public static void printInfo(Logger.LogMessage message) {
