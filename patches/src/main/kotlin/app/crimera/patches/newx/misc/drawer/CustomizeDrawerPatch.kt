@@ -112,7 +112,6 @@ private object NewXDrawerContentClassFingerprint : Fingerprint(
     custom = { method, _ ->
         val parameters = method.parameterTypes.map(CharSequence::toString)
         parameters.size >= 40 &&
-            parameters.firstOrNull() == "Lcom/x/models/c8;" &&
             parameters.getOrNull(1)?.startsWith("Landroidx/compose/material3/") == true &&
             parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
             parameters.count { it == "Ljava/util/List;" } == 1 &&
@@ -121,10 +120,6 @@ private object NewXDrawerContentClassFingerprint : Fingerprint(
             parameters.count { it == "I" } >= 5 &&
             parameters.count { it == FUNCTION0_DESCRIPTOR } >= 10 &&
             parameters.count { it == FUNCTION1_DESCRIPTOR } >= 2 &&
-            "Lcom/x/main/api/z;" in parameters &&
-            "Lcom/x/main/api/r;" in parameters &&
-            "Lcom/x/main/api/k;" in parameters &&
-            "Lcom/x/main/api/u;" in parameters &&
             "Landroidx/compose/ui/Modifier;" in parameters
     },
 )
