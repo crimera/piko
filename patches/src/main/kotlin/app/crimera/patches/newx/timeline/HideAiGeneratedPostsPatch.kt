@@ -1,9 +1,7 @@
 package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
 import app.crimera.patches.newx.settings.choice
-import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.multiChoice
 import app.crimera.patches.newx.models.readBoolean
 import app.crimera.patches.newx.models.readObject
@@ -30,7 +28,6 @@ import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.numberOfParameterRegistersLogical
-import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 @Suppress("unused")
@@ -72,32 +69,13 @@ val newXHideAiGeneratedPostsPatch =
                 )
             }
 
-            val match = matches.single()
-            val method = ensureTimelineSuccessRegisters(match, requiredScratchRegisters = 4)
-            val timelineItemsRegister = method.p0Register + 2
-            if (timelineItemsRegister !in 0..15) {
-                throw PatchException(
-                    "NewX timelineItems register must fit a four-bit invoke: " +
-                        "v$timelineItemsRegister in $method",
-                )
-            }
-
-            method.apply {
-                val read =
-                    aiSourcesToHide.injectRead(
-                        method = this,
-                        index = method.numberOfParameterRegistersLogical,
-                        excludedRegisters = listOf(timelineItemsRegister),
-                        registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
-                    )
-                addInstructions(
-                    read.nextIndex,
-                    """
-                        invoke-static {v$timelineItemsRegister, v${read.register}}, $TIMELINE_FILTER_DESCRIPTOR->filterAiGeneratedPosts(Ljava/lang/Object;Ljava/util/Set;)Ljava/lang/Object;
-                        move-result-object v$timelineItemsRegister
-                    """.trimIndent(),
-                )
-            }
+            matches.single().method.addInstructions(
+                0,
+                """
+                    invoke-static {p2}, $TIMELINE_FILTER_DESCRIPTOR->filterAiGeneratedPosts(Ljava/lang/Object;)Ljava/lang/Object;
+                    move-result-object p2
+                """.trimIndent(),
+            )
         }
     }
 

@@ -1,8 +1,6 @@
 package app.crimera.patches.newx.ads
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
-import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
@@ -22,17 +20,16 @@ val newXHideAdsPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineAdModelAdapterPatch)
 
-        val filterPromotedPosts =
-            newXSettings {
-                category(Categories.CONTENT) {
-                    toggle(
-                        id = "newx.content.filter_promoted_posts",
-                        strings = settingStrings("piko_newx_filter_promoted_posts"),
-                        order = 100,
-                        defaultValue = true,
-                    )
-                }
+        newXSettings {
+            category(Categories.CONTENT) {
+                toggle(
+                    id = "newx.content.filter_promoted_posts",
+                    strings = settingStrings("piko_newx_filter_promoted_posts"),
+                    order = 100,
+                    defaultValue = true,
+                )
             }
+        }
 
         execute {
             val matches = NewXTimelineSuccessFingerprint.matchAll()
@@ -43,20 +40,12 @@ val newXHideAdsPatch =
                 )
             }
 
-            matches.single().method.apply {
-                val read =
-                    filterPromotedPosts.injectRead(
-                        method = this,
-                        index = 0,
-                        registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
-                    )
-                addInstructions(
-                    read.nextIndex,
-                    """
-                        invoke-static {p2, v${read.register}}, $TIMELINE_FILTER_DESCRIPTOR->filterPromotedItems(Ljava/lang/Object;Z)Ljava/lang/Object;
-                        move-result-object p2
-                    """.trimIndent(),
-                )
-            }
+            matches.single().method.addInstructions(
+                0,
+                """
+                    invoke-static {p2}, $TIMELINE_FILTER_DESCRIPTOR->filterPromotedItems(Ljava/lang/Object;)Ljava/lang/Object;
+                    move-result-object p2
+                """.trimIndent(),
+            )
         }
     }

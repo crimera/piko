@@ -9,6 +9,7 @@ import java.util.Set;
 
 import app.morphe.extension.newx.filteredreplies.FilteredRepliesStore;
 import app.morphe.extension.newx.settings.NewXLogger;
+import app.morphe.extension.newx.settings.SettingsRegistry;
 import app.morphe.extension.newx.postfilter.PostFilterMatcher;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
 import app.morphe.extension.newx.postfilter.VerifiedAccountWhitelistStore;
@@ -118,12 +119,22 @@ public final class NewXTimelineFilter {
     private NewXTimelineFilter() {
     }
 
+    public static Object filterPromotedItems(Object timelineItems) {
+        boolean enabled = SettingsRegistry.getBooleanOrDefault("newx.content.filter_promoted_posts", true);
+        return filterPromotedItems(timelineItems, enabled);
+    }
+
     public static Object filterPromotedItems(Object timelineItems, boolean enabled) {
         return filterPromotedItems(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
     }
 
     static Object filterPromotedItems(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
         return filterTimelineItems(timelineItems, enabled, false, null, modelAccess);
+    }
+
+    public static Object filterDiscoverMore(Object timelineItems) {
+        boolean enabled = SettingsRegistry.getBooleanOrDefault("newx.content.hide_discover_more", false);
+        return filterDiscoverMore(timelineItems, enabled);
     }
 
     public static Object filterDiscoverMore(Object timelineItems, boolean enabled) {
@@ -133,6 +144,11 @@ public final class NewXTimelineFilter {
     static Object filterDiscoverMore(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
         if (!enabled) return timelineItems;
         return filterTimelineItems(timelineItems, false, false, null, Collections.emptySet(), true, modelAccess);
+    }
+
+    public static Object filterWhoToFollow(Object timelineItems) {
+        boolean enabled = SettingsRegistry.getBooleanOrDefault("newx.content.hide_who_to_follow", false);
+        return filterWhoToFollow(timelineItems, enabled);
     }
 
     public static Object filterWhoToFollow(Object timelineItems, boolean enabled) {
@@ -179,6 +195,13 @@ public final class NewXTimelineFilter {
     ) {
         if (!enabled) return timelineItems;
         return filterTimelineItems(timelineItems, false, false, snapshot, Collections.emptySet(), false, modelAccess);
+    }
+
+    public static Object filterPostsByVerifiedType(Object timelineItems) {
+        boolean filterTimeline = SettingsRegistry.getBooleanOrDefault("newx.content.verified_account_filtering.timeline", false);
+        boolean filterThread = SettingsRegistry.getBooleanOrDefault("newx.content.verified_account_filtering.thread", false);
+        Set<String> types = SettingsRegistry.getStringSetOrDefault("newx.content.hide_verified_account_types");
+        return filterPostsByVerifiedType(timelineItems, types, filterTimeline, filterThread);
     }
 
     public static Object filterPostsByVerifiedType(Object timelineItems, Set<String> typesToHide) {
@@ -264,6 +287,11 @@ public final class NewXTimelineFilter {
                 || VERIFIED_TYPE_USER.equals(type)
                 || VERIFIED_TYPE_UNKNOWN.equals(type);
     }
+    public static Object filterAiGeneratedPosts(Object timelineItems) {
+        Set<String> sources = SettingsRegistry.getStringSetOrDefault("newx.content.hide_ai_generated_posts");
+        return filterAiGeneratedPosts(timelineItems, sources);
+    }
+
     public static Object filterAiGeneratedPosts(Object timelineItems, Set<String> sourcesToHide) {
         return filterAiGeneratedPosts(timelineItems, sourcesToHide, PRODUCTION_MODEL_ACCESS);
     }
