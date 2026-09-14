@@ -354,7 +354,7 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">lien</string>
     <string name="piko_media_activity">activité</string>
-    <string name="piko_mark_story_seen">Marque vue</string>
-    <string name="piko_story_seen_pending">Marquage tel qu\'il est vu</string>
-    <string name="piko_story_seen_sent">Marqué comme vu</string>
+    <string name="piko_mark_story_seen">Marquer comme vue</string>
+    <string name="piko_story_seen_pending">Marquage comme vue</string>
+    <string name="piko_story_seen_sent">Marqué comme vue</string>
 </resources>

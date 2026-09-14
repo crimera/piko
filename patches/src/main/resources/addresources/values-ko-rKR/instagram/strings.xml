@@ -249,7 +249,7 @@
     <string name="piko_action_bar_button_settings_icon">설정 아이콘</string>
     <string name="piko_action_bar_button_ghost_mode_icon">고스트 모드 아이콘</string>
     <string name="piko_action_bar_button_profile_info_icon">프로필 정보 아이콘</string>
-    <string name="piko_action_bar_button_create_icon">만들기 아이콘</string>
+    <string name="piko_action_bar_button_create_icon">아이콘 만들기</string>
     <string name="piko_action_bar_button_notifications_icon">알림 아이콘</string>
     <string name="piko_settings_on_action_bar">Piko 설정을 액션바로 이동</string>
     <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 액션바로 이동합니다</string>

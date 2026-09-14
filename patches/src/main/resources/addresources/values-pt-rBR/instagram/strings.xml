@@ -354,7 +354,7 @@
     <string name="piko_media_like">curtir</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">atividade</string>
-    <string name="piko_mark_story_seen">Marca como vista</string>
-    <string name="piko_story_seen_pending">Marcação como vista</string>
+    <string name="piko_mark_story_seen">Marcar como visto</string>
+    <string name="piko_story_seen_pending">Marcando como visto</string>
     <string name="piko_story_seen_sent">Marcado como visto</string>
 </resources>
