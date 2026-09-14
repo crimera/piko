@@ -16,7 +16,7 @@ public final class TimelineScrollPositionStoreTest {
     }
 
     @Test
-    public void homeKeysAreAllowedOnlyForForYouAndFollowing() {
+    public void homeKeysAreAllowedForForYouFollowingAndRankedFollowing() {
         assertEquals(
                 "FOR_YOU",
                 TimelineScrollPositionStore.storageKey("FOR_YOU", null, true, false)
@@ -25,7 +25,8 @@ public final class TimelineScrollPositionStoreTest {
                 "FOLLOWING",
                 TimelineScrollPositionStore.storageKey("FOLLOWING", null, true, false)
         );
-        assertNull(
+        assertEquals(
+                "RANKED_FOLLOWING",
                 TimelineScrollPositionStore.storageKey("RANKED_FOLLOWING", null, true, false)
         );
         assertNull(
@@ -37,7 +38,7 @@ public final class TimelineScrollPositionStoreTest {
     public void inMemoryPositionsAreAllowedOnlyForHomeTimelines() {
         assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.FOR_YOU));
         assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.FOLLOWING));
-        assertFalse(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.RANKED_FOLLOWING));
+        assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.RANKED_FOLLOWING));
         assertFalse(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.USER_PROFILE_POSTS_ONLY));
     }
 
