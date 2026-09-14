@@ -957,14 +957,13 @@ private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
     val constructorParameters = constructor.parameterTypes.map(CharSequence::toString)
     val requestFingerprint =
         Fingerprint(
-            parameters = listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR),
-            returnType = OBJECT_DESCRIPTOR,
-            filters =
-                listOf(
-                    string("requestType"),
-                    fieldAccess(
-                        opcode = Opcode.SGET_OBJECT,
-                        name = "FOR_YOU",
+                parameters = listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR),
+                returnType = OBJECT_DESCRIPTOR,
+                filters =
+                    listOf(
+                        fieldAccess(
+                            opcode = Opcode.SGET_OBJECT,
+                            name = "FOR_YOU",
                     ),
                     methodCall(
                         definingClass = queryClass.type,

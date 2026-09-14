@@ -66,16 +66,20 @@ private object NewXHomeReselectFingerprint : Fingerprint(
 
 private object NewXUrtRepositoryRequestFingerprint : Fingerprint(
     definingClass = "Lcom/x/repositories/urt/",
-    parameters = listOf("L", "L"),
+    name = "i",
+    parameters =
+        listOf(
+            "Lcom/x/models/timelines/d;",
+            "Lcom/x/models/timelines/items/j0;",
+        ),
     returnType = "V",
-    filters = listOf(string("requestType")),
+    custom = { method, _ -> method.implementation != null },
 )
 
 private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/",
     parameters = listOf("L"),
     returnType = "V",
-    strings = listOf("event"),
     filters =
         listOf(
             fieldAccess(
@@ -90,6 +94,31 @@ private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
                 returnType = "V",
             ),
         ),
+    custom = { method, _ ->
+        val instructions = method.implementation?.instructions?.toList().orEmpty()
+        val autoRefreshFieldReads = instructions.mapIndexedNotNull { index, instruction ->
+            if (instruction.opcode != Opcode.SGET_OBJECT) return@mapIndexedNotNull null
+            val reference =
+                instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
+                    ?: return@mapIndexedNotNull null
+            index.takeIf {
+                reference.name == "AUTO_REFRESH" &&
+                    reference.type.toString().startsWith("L")
+            }
+        }
+        val refreshRequestCalls = instructions.mapIndexedNotNull { index, instruction ->
+            if (instruction.opcode != Opcode.INVOKE_INTERFACE) return@mapIndexedNotNull null
+            val reference = instruction.getReference<MethodReference>()
+                ?: return@mapIndexedNotNull null
+            index.takeIf {
+                reference.definingClass.startsWith("Lcom/x/repositories/urt/") &&
+                    reference.parameterTypes.size == 2 &&
+                    reference.parameterTypes.all { it.toString().startsWith("L") } &&
+                    reference.returnType.toString() == "V"
+            }
+        }
+        autoRefreshFieldReads.size == 1 && refreshRequestCalls.size == 1
+    },
 )
 
 @Suppress("unused")

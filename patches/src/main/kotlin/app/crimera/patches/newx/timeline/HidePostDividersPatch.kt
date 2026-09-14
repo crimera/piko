@@ -7,7 +7,7 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -19,17 +19,17 @@ import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val ANDROID_SCOPE = "Lcom/x/android/"
-private const val COMMON_UI_SCOPE = "Lcom/x/ui/common/"
-private const val JETFUEL_ELEMENT_SCOPE = "Lcom/x/jetfuel/v2/element/"
 private const val URT_UI_SCOPE = "Lcom/x/urt/ui/"
 private const val COMPOSE_FOUNDATION_SCOPE = "Landroidx/compose/foundation/"
 private const val COMPOSE_RUNTIME_INTERNAL_SCOPE = "Landroidx/compose/runtime/internal/"
@@ -40,8 +40,6 @@ private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val INSETS_DESCRIPTOR = "I"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
-private const val THREAD_CONNECTOR_PARAMETER_NAME = "\$this\$threadConnector"
-private const val REPLY_FACEPILE_STATE_PARAMETER_NAME = "replyFacepileState"
 private const val TIMELINE_HEADER_KEY_ANCHOR = "timeline_header_key"
 /** The synthetic Compose lambda wraps the post content in the optional divider container. */
 private object NewXPostDividerRendererFingerprint : Fingerprint(
@@ -60,34 +58,16 @@ private object NewXPostDividerRendererFingerprint : Fingerprint(
 
 /** The shared Compose modifier draws the vertical connector used by threaded replies. */
 private object NewXThreadConnectorFingerprint : Fingerprint(
-    definingClass = COMMON_UI_SCOPE,
     returnType = MODIFIER_DESCRIPTOR,
     parameters = listOf(MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR, INSETS_DESCRIPTOR),
-    custom = { method, _ ->
-        method.instructions.any { instruction ->
-            instruction.getReference<StringReference>()?.string == THREAD_CONNECTOR_PARAMETER_NAME
-        } && method.instructions.count(Instruction::isDrawModifierCall) == 1
-    },
+    custom = { method, _ -> method.isNewXThreadConnectorCandidate() },
 )
 
 /** The reply facepile draws another connector behind the stacked reply avatars. */
 private object NewXReplyFacepileDividerFingerprint : Fingerprint(
-    definingClass = JETFUEL_ELEMENT_SCOPE,
+    parameters = listOf("L", "L", MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR, INSETS_DESCRIPTOR),
     returnType = "V",
-    custom = { method, classDef ->
-        val parameters = method.parameterTypes.map(CharSequence::toString)
-        classDef.type.startsWith(JETFUEL_ELEMENT_SCOPE) &&
-            parameters.size == 5 &&
-            parameters[0].isObjectDescriptor() &&
-            parameters[1].isObjectDescriptor() &&
-            parameters[2] == MODIFIER_DESCRIPTOR &&
-            parameters[3] == COMPOSER_DESCRIPTOR &&
-            parameters[4] == INSETS_DESCRIPTOR &&
-            method.instructions.any { instruction ->
-                instruction.getReference<StringReference>()?.string == REPLY_FACEPILE_STATE_PARAMETER_NAME
-            } &&
-            method.instructions.count(Instruction::isDrawModifierCall) == 1
-    },
+    custom = { method, _ -> method.hasReplyFacepileDividerFlow() },
 )
 
 /** The URT timeline content builder that adds timeline items and inter-module divider separators. */
@@ -143,6 +123,105 @@ private fun Instruction.isDrawModifierCall(): Boolean {
     return reference.returnType == MODIFIER_DESCRIPTOR &&
         reference.parameterTypes.map(CharSequence::toString) ==
             listOf(MODIFIER_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
+}
+
+private fun Instruction.isModifierCompositionCall(
+    incomingModifierRegister: Int,
+    drawModifierRegister: Int,
+): Boolean {
+    if (opcode != Opcode.INVOKE_INTERFACE && opcode != Opcode.INVOKE_INTERFACE_RANGE) return false
+    val reference = getReference<MethodReference>() ?: return false
+    return reference.definingClass == MODIFIER_DESCRIPTOR &&
+        reference.returnType == MODIFIER_DESCRIPTOR &&
+        reference.parameterTypes.map(CharSequence::toString) == listOf(MODIFIER_DESCRIPTOR) &&
+        registersUsed == listOf(incomingModifierRegister, drawModifierRegister)
+}
+
+internal fun Method.isNewXThreadConnectorCandidate(): Boolean {
+    if (!AccessFlags.STATIC.isSet(accessFlags)) return false
+    val implementation = implementation ?: return false
+    val instructions = implementation.instructions.toList()
+    val drawCallIndices =
+        instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf { instruction.isDrawModifierCall() }
+        }
+    if (drawCallIndices.size != 1) return false
+
+    val drawCallIndex = drawCallIndices[0]
+    val drawResult = instructions.getOrNull(drawCallIndex + 1) as? OneRegisterInstruction ?: return false
+    if (drawResult.opcode != Opcode.MOVE_RESULT_OBJECT) return false
+
+    val incomingModifierRegister = implementation.registerCount - numberOfParameterRegisters
+    val compositionCall = instructions.getOrNull(drawCallIndex + 2) ?: return false
+    if (!compositionCall.isModifierCompositionCall(incomingModifierRegister, drawResult.registerA)) {
+        return false
+    }
+
+    val compositionResult =
+        instructions.getOrNull(drawCallIndex + 3) as? OneRegisterInstruction ?: return false
+    if (compositionResult.opcode != Opcode.MOVE_RESULT_OBJECT) return false
+    val returnedModifier =
+        instructions.getOrNull(drawCallIndex + 4) as? OneRegisterInstruction ?: return false
+    return returnedModifier.opcode == Opcode.RETURN_OBJECT &&
+        returnedModifier.registerA == compositionResult.registerA
+}
+
+private fun Instruction.callsCollectionMethod(
+    definingClass: String,
+    name: String,
+    parameters: List<String>,
+    returnType: String,
+): Boolean {
+    val reference = getReference<MethodReference>() ?: return false
+    return reference.definingClass == definingClass &&
+        reference.name == name &&
+        reference.parameterTypes.map(CharSequence::toString) == parameters &&
+        reference.returnType == returnType
+}
+
+private fun Method.hasReplyFacepileDividerFlow(): Boolean {
+    if (!AccessFlags.STATIC.isSet(accessFlags)) return false
+    val instructions = implementation?.instructions?.toList() ?: return false
+    if (instructions.count(Instruction::isDrawModifierCall) != 1) return false
+
+    val listFields =
+        instructions.mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.type == "Ljava/util/ArrayList;"
+            }
+        }.distinctBy(FieldReference::toString)
+    if (listFields.size != 1) return false
+
+    return instructions.any { instruction ->
+        instruction.callsCollectionMethod(
+            definingClass = "Ljava/util/ArrayList;",
+            name = "size",
+            parameters = emptyList(),
+            returnType = "I",
+        )
+    } && instructions.any { instruction ->
+        instruction.callsCollectionMethod(
+            definingClass = "Ljava/lang/Iterable;",
+            name = "iterator",
+            parameters = emptyList(),
+            returnType = "Ljava/util/Iterator;",
+        )
+    } && instructions.any { instruction ->
+        instruction.callsCollectionMethod(
+            definingClass = "Ljava/util/Iterator;",
+            name = "hasNext",
+            parameters = emptyList(),
+            returnType = "Z",
+        )
+    } && instructions.any { instruction ->
+        instruction.callsCollectionMethod(
+            definingClass = "Ljava/util/Iterator;",
+            name = "next",
+            parameters = emptyList(),
+            returnType = OBJECT_DESCRIPTOR,
+        )
+    }
 }
 
 private fun String.isObjectDescriptor(): Boolean = startsWith('L') && endsWith(';')
@@ -259,7 +338,7 @@ private fun patchThreadConnector(
     val connector =
         requireExactlyOne(
             label = "NewX thread connector",
-            candidates = NewXThreadConnectorFingerprint.scopedMatchAll(),
+            candidates = NewXThreadConnectorFingerprint.scopedMatchAllOrNull().orEmpty(),
         )
     val originalMethod = connector.method
     val originalRegisterCount =
@@ -302,7 +381,7 @@ private fun patchReplyFacepileDivider(
     val renderer =
         requireExactlyOne(
             label = "NewX reply facepile divider renderer",
-            candidates = NewXReplyFacepileDividerFingerprint.scopedMatchAll(),
+            candidates = NewXReplyFacepileDividerFingerprint.scopedMatchAllOrNull().orEmpty(),
         )
     val originalMethod = renderer.method
     val originalRegisterCount =
@@ -354,7 +433,7 @@ private fun patchTimelineModuleDividers(
     val builder =
         requireExactlyOne(
             label = "NewX timeline module builder",
-            candidates = NewXTimelineModuleBuilderFingerprint.scopedMatchAll(),
+            candidates = NewXTimelineModuleBuilderFingerprint.scopedMatchAllOrNull().orEmpty(),
         )
     val originalMethod = builder.method
     val originalRegisterCount =
@@ -413,7 +492,7 @@ val newXHidePostDividersPatch =
             val renderer =
                 requireExactlyOne(
                     label = "NewX post divider renderer",
-                    candidates = NewXPostDividerRendererFingerprint.scopedMatchAll(),
+                    candidates = NewXPostDividerRendererFingerprint.scopedMatchAllOrNull().orEmpty(),
                 )
             val originalMethod = renderer.method
             val originalCalls = resolvePostDividerCalls(originalMethod)

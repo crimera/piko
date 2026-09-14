@@ -16,16 +16,18 @@ import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.REPLY_SORTING_RESOLVER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.util.getReference
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -42,33 +44,72 @@ private fun isRelevanceSget(instruction: Instruction): Boolean {
     return field.name == "Relevance" && field.type == field.definingClass
 }
 
+private fun isComposeStateCall(instruction: Instruction, inputRegister: Int): Boolean {
+    if (instruction.opcode != Opcode.INVOKE_STATIC && instruction.opcode != Opcode.INVOKE_STATIC_RANGE) {
+        return false
+    }
+    val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference ?: return false
+    return reference.definingClass.startsWith("Landroidx/compose/runtime/") &&
+        reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
+        reference.returnType.toString().startsWith("Landroidx/compose/runtime/") &&
+        instruction.registersUsed == listOf(inputRegister)
+}
+
+private fun isComposeStateInitializer(instructions: List<Instruction>, sgetIndex: Int): Boolean {
+    if (sgetIndex < 0 || sgetIndex + 3 >= instructions.size) return false
+    val sget = instructions[sgetIndex] as? OneRegisterInstruction ?: return false
+    if (!isRelevanceSget(sget)) return false
+
+    val inputRegister = sget.registerA
+    if (!isComposeStateCall(instructions[sgetIndex + 1], inputRegister)) return false
+
+    val moveResult = instructions[sgetIndex + 2] as? OneRegisterInstruction ?: return false
+    if (moveResult.opcode != Opcode.MOVE_RESULT_OBJECT || moveResult.registerA != inputRegister) {
+        return false
+    }
+
+    val returnInstruction = instructions[sgetIndex + 3] as? OneRegisterInstruction ?: return false
+    return returnInstruction.opcode == Opcode.RETURN_OBJECT &&
+        returnInstruction.registerA == inputRegister
+}
+
+private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
+
 /**
  * Targets the NewX Compose post-detail timeline repository initialization that seeds
  * TimelineRankingMode.Relevance before the repository factory call.
  */
 private object NewXComposeReplySortingFingerprint : Fingerprint(
-    definingClass = "Lcom/x/postdetail/",
+    name = "invokeSuspend",
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("Ljava/lang/Object;"),
+    custom = { method, classDef ->
+        !AccessFlags.STATIC.isSet(method.accessFlags) &&
+            classDef.superclass == "Lkotlin/coroutines/jvm/internal/SuspendLambda;" &&
+            classDef.interfaces.contains("Lkotlin/jvm/functions/Function2;")
+    },
     filters =
         listOf(
             fieldAccess(
                 opcode = Opcode.SGET_OBJECT,
                 name = "Relevance",
             ),
-            string("rankingMode"),
             string("timelineRepository"),
         ),
 )
 
 /**
  * Targets the synthetic FunctionReference that handles a reply-sorting choice from the sheet.
- * Both supported builds place this callback in the payments transaction package.
+ * The callback owner and package are release-specific; resolve it from the stable Kotlin
+ * function-reference shape and the semantic branch strings instead.
  */
 private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
-    definingClass = "Lcom/x/payments/transaction/",
+    name = "invoke",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
     custom = { method, classDef ->
-        classDef.superclass == "Lkotlin/jvm/internal/FunctionReferenceImpl;" &&
+        !AccessFlags.STATIC.isSet(method.accessFlags) &&
+            classDef.superclass == "Lkotlin/jvm/internal/FunctionReferenceImpl;" &&
             classDef.interfaces.contains("Lkotlin/jvm/functions/Function1;") &&
             method.implementation?.instructions?.any { instruction ->
                 val reference = (instruction as? ReferenceInstruction)?.reference
@@ -86,7 +127,9 @@ private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
  * `mutableStateOf(TimelineRankingMode.Relevance)`.
  */
 private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
-    definingClass = "Lcom/x/ui/common/",
+    name = "invoke",
+    returnType = "Ljava/lang/Object;",
+    parameters = emptyList(),
     filters =
         listOf(
             fieldAccess(
@@ -95,12 +138,10 @@ private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
             ),
         ),
     custom = { method, classDef ->
-        val instructions = method.implementation?.instructions
+        val instructions = method.implementation?.instructions?.toList()
         classDef.interfaces.contains("Lkotlin/jvm/functions/Function0;") &&
-            instructions?.any { ins ->
-                ins.opcode == Opcode.INVOKE_STATIC &&
-                    ((ins as? ReferenceInstruction)?.reference as? MethodReference)
-                        ?.definingClass?.startsWith("Landroidx/compose/runtime/") == true
+            instructions?.withIndex()?.any { (index, _) ->
+                isComposeStateInitializer(instructions, index)
             } == true
     },
 )
@@ -141,34 +182,36 @@ val newXDefaultReplySortingPatch =
 
         execute {
             // Patch the Compose post-detail timeline repository initialization.
-            val matches = NewXComposeReplySortingFingerprint.scopedMatchAllOrNull().orEmpty()
-            if (matches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX Compose reply sorting initializer, found ${matches.size}: " +
-                        matches.joinToString { it.originalMethod.toString() },
+            val match =
+                requireExactlyOne(
+                    label = "NewX Compose reply sorting initializer",
+                    candidates = NewXComposeReplySortingFingerprint.scopedMatchAllOrNull().orEmpty(),
                 )
-            }
-
-            val match = matches.single()
             val method = match.method
             val targetSgetCandidates = match.instructionMatches.filter { matchedInstruction ->
                 isRelevanceSget(matchedInstruction.instruction)
             }
-            if (targetSgetCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one reply sorting initializer Relevance sget-object, found " +
-                        "${targetSgetCandidates.size}: ${targetSgetCandidates.joinToString()}",
+            val targetSget =
+                requireExactlyOne(
+                    label = "reply sorting initializer Relevance sget-object",
+                    candidates = targetSgetCandidates,
                 )
-            }
-            val targetSgetIndex = targetSgetCandidates.single().index
-            val sgetInstruction = method.getInstruction<OneRegisterInstruction>(targetSgetIndex)
-            if (!isRelevanceSget(sgetInstruction)) {
-                throw PatchException("Reply sorting initializer did not match Relevance sget-object")
-            }
+            val targetSgetIndex = targetSget.index
+            val sgetInstruction = targetSget.instruction as? OneRegisterInstruction
+                ?: throw PatchException("Reply sorting initializer Relevance sget-object has no register")
             val sortRegister = sgetInstruction.registerA
             val fieldRef = sgetInstruction.getReference<FieldReference>()
                 ?: throw PatchException("Missing field reference in reply sorting sget-object")
             val enumClass = fieldRef.definingClass
+            val enumDefinition =
+                runCatching { mutableClassDefBy(enumClass) }.getOrNull()
+                    ?: throw PatchException("Resolved reply sorting enum is missing: $enumClass")
+            if (enumDefinition.superclass != ENUM_DESCRIPTOR) {
+                throw PatchException(
+                    "Resolved reply sorting type $enumClass is not an enum: " +
+                        "superclass=${enumDefinition.superclass}",
+                )
+            }
 
             method.addInstructions(
                 targetSgetIndex + 1,
@@ -181,17 +224,13 @@ val newXDefaultReplySortingPatch =
             )
 
             // Patch the Compose reply-sorting selection handler to remember the last choice.
-            val selectionMatches = NewXComposeReplySortingSelectionFingerprint
-                .scopedMatchAllOrNull()
-                .orEmpty()
-            if (selectionMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX Compose reply sorting selection handler, found " +
-                        "${selectionMatches.size}: " +
-                        selectionMatches.joinToString { it.originalMethod.toString() },
+            val selectionMatch =
+                requireExactlyOne(
+                    label = "NewX Compose reply sorting selection handler",
+                    candidates = NewXComposeReplySortingSelectionFingerprint
+                        .scopedMatchAllOrNull()
+                        .orEmpty(),
                 )
-            }
-            val selectionMatch = selectionMatches.single()
             val selectionMethod = selectionMatch.method
             val selectionImplementation =
                 selectionMethod.implementation
@@ -200,14 +239,18 @@ val newXDefaultReplySortingPatch =
                 matchedInstruction.instruction.getReference<StringReference>()?.string ==
                     "defaultUrtTimelineComponent"
             }
-            if (defaultUrtCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one selection handler defaultUrtTimelineComponent anchor, found " +
-                        "${defaultUrtCandidates.size}: ${defaultUrtCandidates.joinToString()}",
+            val defaultUrtAnchor =
+                requireExactlyOne(
+                    label = "selection handler defaultUrtTimelineComponent anchor",
+                    candidates = defaultUrtCandidates,
                 )
-            }
-            val defaultUrtIndex = defaultUrtCandidates.single().index
-            if (selectionMethod.parameterTypes.singleOrNull() != "Ljava/lang/Object;") {
+            val defaultUrtIndex = defaultUrtAnchor.index
+            val selectionParameter =
+                requireExactlyOne(
+                    label = "reply sorting selection handler parameter",
+                    candidates = selectionMethod.parameterTypes,
+                )
+            if (selectionParameter != "Ljava/lang/Object;") {
                 throw PatchException(
                     "Unexpected reply sorting selection handler parameters: " +
                         selectionMethod.parameterTypes,
@@ -251,32 +294,25 @@ val newXDefaultReplySortingPatch =
                 }
             val parameterCheckCastIndices =
                 (directParameterCheckCasts + movedParameterCheckCasts).distinct()
-            if (parameterCheckCastIndices.isEmpty()) {
-                throw PatchException(
-                    "Missing selection-parameter check-cast before reply sorting handler guard",
-                )
-            }
-
             val rankingModeCheckCastIndices = parameterCheckCastIndices.filter { index ->
                 selectionInstructions[index]
                     .getReference<TypeReference>()
                     ?.type == enumClass
             }
-            if (rankingModeCheckCastIndices.size != 1) {
-                throw PatchException(
-                    "Expected one selection-parameter TimelineRankingMode cast before the " +
-                        "defaultUrtTimelineComponent anchor, found " +
-                        "${rankingModeCheckCastIndices.size}: " +
-                        "${rankingModeCheckCastIndices.joinToString { "${it}:${selectionInstructions[it]}" }}",
+            val checkCastIndex =
+                requireExactlyOne(
+                    label = "selection-parameter cast matching resolved reply ranking enum $enumClass",
+                    candidates = rankingModeCheckCastIndices,
                 )
-            }
-            val checkCastIndex = rankingModeCheckCastIndices.single()
             val checkCastInstruction =
-                selectionInstructions.getOrNull(checkCastIndex) as? OneRegisterInstruction
+                selectionInstructions[checkCastIndex] as? OneRegisterInstruction
                     ?: throw PatchException("Reply sorting selection check-cast has no register")
             val checkedType = checkCastInstruction.getReference<TypeReference>()?.type
-            if (checkedType == null || checkedType == "Ljava/lang/Object;") {
-                throw PatchException("Reply sorting selection parameter has no concrete enum cast")
+            if (checkedType != enumClass) {
+                throw PatchException(
+                    "Reply sorting selection parameter cast type $checkedType does not match " +
+                        "resolved reply ranking enum $enumClass",
+                )
             }
             val selectedRegister = checkCastInstruction.registerA
 
@@ -292,44 +328,47 @@ val newXDefaultReplySortingPatch =
             val uiStateMatches = NewXComposeReplySortingUiStateFingerprint
                 .scopedMatchAllOrNull()
                 .orEmpty()
-            if (uiStateMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX Compose reply sorting UI state initializer, found " +
-                        "${uiStateMatches.size}: " +
-                        uiStateMatches.joinToString { it.originalMethod.toString() },
+            val uiStateCandidates =
+                uiStateMatches.flatMap { candidate ->
+                    candidate.instructionMatches
+                        .filter { matchedInstruction ->
+                            val field = matchedInstruction.instruction.getReference<FieldReference>()
+                            field?.definingClass == enumClass &&
+                                isComposeStateInitializer(
+                                    candidate.method.instructions,
+                                    matchedInstruction.index,
+                                )
+                        }
+                        .map { matchedInstruction -> candidate to matchedInstruction }
+                }
+            val uiStateCandidate =
+                requireExactlyOne(
+                    label = "NewX Compose reply sorting UI state Relevance initializer for $enumClass",
+                    candidates = uiStateCandidates,
                 )
-            }
-
-            val uiStateMatch = uiStateMatches.single()
+            val uiStateMatch = uiStateCandidate.first
             val uiStateMethod = uiStateMatch.method
-            val uiStateCandidates = uiStateMatch.instructionMatches.filter { matchedInstruction ->
-                isRelevanceSget(matchedInstruction.instruction)
-            }
-            if (uiStateCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one reply sorting UI state Relevance sget-object, found " +
-                        "${uiStateCandidates.size}: ${uiStateCandidates.joinToString()}",
-                )
-            }
-            val uiStateIndex = uiStateCandidates.single().index
-            val uiStateInstruction = uiStateMethod.getInstruction<OneRegisterInstruction>(uiStateIndex)
-            if (!isRelevanceSget(uiStateInstruction)) {
-                throw PatchException("Reply sorting UI state did not match Relevance sget-object")
-            }
+            val uiStateIndex = uiStateCandidate.second.index
+            val uiStateInstruction = uiStateCandidate.second.instruction as? OneRegisterInstruction
+                ?: throw PatchException("Reply sorting UI state Relevance sget-object has no register")
             val uiStateRegister = uiStateInstruction.registerA
             val uiStateField = uiStateInstruction.getReference<FieldReference>()
                 ?: throw PatchException("Missing field reference in reply sorting UI state sget-object")
-            val uiStateEnumClass = uiStateField.definingClass
+            if (uiStateField.definingClass != enumClass || !isRelevanceSget(uiStateInstruction)) {
+                throw PatchException(
+                    "Reply sorting UI state field ${uiStateField} does not match resolved " +
+                        "reply ranking enum $enumClass",
+                )
+            }
 
             uiStateMethod.addInstructions(
                 uiStateIndex + 1,
                 """
-                    const-class v$uiStateRegister, $uiStateEnumClass
+                    const-class v$uiStateRegister, $enumClass
                     invoke-static/range {v$uiStateRegister .. v$uiStateRegister}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
                     move-result-object v$uiStateRegister
-                    check-cast v$uiStateRegister, $uiStateEnumClass
+                    check-cast v$uiStateRegister, $enumClass
                 """.trimIndent(),
             )
         }
     }
-

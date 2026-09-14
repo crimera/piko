@@ -1,9 +1,9 @@
 package app.crimera.patches.newx.misc.inlineactions
 
 import app.crimera.patches.newx.utils.Constants.MEDIA_THUMBNAIL_LOADER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -56,13 +56,19 @@ private object CoilImageLoaderProviderFingerprint : Fingerprint(
     },
 )
 
-/** Scopes the concrete loader getter to the implementation of the resolved loader interface. */
+/** Scopes the concrete loader getter to the resolved loader contract or its implementation. */
 private fun coilImageLoaderMemoryCacheFingerprint(imageLoaderDescriptor: String) = Fingerprint(
     definingClass = COIL_SCOPE,
     parameters = emptyList(),
     custom = { method, classDef ->
+        val owner = classDef.type.toString()
+        val isResolvedLoaderOwner =
+            owner == imageLoaderDescriptor ||
+                classDef.interfaces.any { it.toString() == imageLoaderDescriptor }
+
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
-            classDef.interfaces.any { it.toString() == imageLoaderDescriptor } &&
+            method.parameterTypes.isEmpty() &&
+            isResolvedLoaderOwner &&
             method.returnType.toString().startsWith(MEMORY_CACHE_SCOPE)
     },
 )
@@ -203,12 +209,12 @@ private fun patchCoilThumbnailBridge(
 
 context(context: BytecodePatchContext)
 private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
-    val providerMatch = requireSingleCacheMatch(
+    val providerMatch = requireExactlyOne(
         "Coil image-loader provider",
         CoilImageLoaderProviderFingerprint.scopedMatchAllOrNull().orEmpty(),
     )
     val provider = providerMatch.originalMethod
-    val loaderMatch = requireSingleCacheMatch(
+    val loaderMatch = requireExactlyOne(
         "Coil image-loader memory-cache getter",
         coilImageLoaderMemoryCacheFingerprint(provider.returnType.toString())
             .scopedMatchAllOrNull()
@@ -224,14 +230,14 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
     val keyClass = context.mutableClassDefBy(keyDescriptor)
     val valueClass = context.mutableClassDefBy(valueDescriptor)
 
-    val strongCacheField = requireSingleCacheValue(
+    val strongCacheField = requireExactlyOne(
         "Coil strong memory-cache field",
         memoryCacheClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
                 context.hasCacheKeyAccessor(field.type.toString())
         },
     )
-    val weakCacheField = requireSingleCacheValue(
+    val weakCacheField = requireExactlyOne(
         "Coil weak memory-cache field",
         memoryCacheClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
@@ -241,21 +247,21 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
         },
     )
     val weakCacheClass = context.mutableClassDefBy(weakCacheField.type.toString())
-    val mapBackingField = requireSingleCacheValue(
+    val mapBackingField = requireExactlyOne(
         "Coil weak memory-cache backing field",
         weakCacheClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
                 field.type.toString() == OBJECT_DESCRIPTOR
         },
     )
-    val keyStringField = requireSingleCacheValue(
+    val keyStringField = requireExactlyOne(
         "Coil memory-cache key string field",
         keyClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
                 field.type.toString() == STRING_DESCRIPTOR
         },
     )
-    val imageField = requireSingleCacheValue(
+    val imageField = requireExactlyOne(
         "Coil memory-cache image field",
         valueClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
@@ -264,7 +270,7 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
     )
 
     val strongCacheClass = context.mutableClassDefBy(strongCacheField.type.toString())
-    val cacheKeys = requireSingleCacheValue(
+    val cacheKeys = requireExactlyOne(
         "Coil memory-cache key accessor",
         strongCacheClass.methods.filter { method ->
             !AccessFlags.STATIC.isSet(method.accessFlags) &&
@@ -272,7 +278,7 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
                 method.returnType.toString() == SET_DESCRIPTOR
         },
     )
-    val converterMatch = requireSingleCacheMatch(
+    val converterMatch = requireExactlyOne(
         "Coil image-to-Bitmap converter",
         coilBitmapConverterFingerprint(imageField.type.toString())
             .scopedMatchAllOrNull()
@@ -303,7 +309,7 @@ private fun resolveMemoryLookup(memoryCacheClass: ClassDef): Method {
             context.isMemoryKeyType(method.parameterTypes.single().toString()) &&
             context.isMemoryValueType(method.returnType.toString())
     }
-    return requireSingleCacheValue("Coil memory-cache lookup", matches)
+    return requireExactlyOne("Coil memory-cache lookup", matches)
 }
 
 private fun BytecodePatchContext.hasCacheKeyAccessor(descriptor: String): Boolean {
@@ -349,22 +355,15 @@ private fun BytecodePatchContext.isCoilImageType(descriptor: String): Boolean {
     }
 }
 
-private fun <T> requireSingleCacheValue(label: String, values: Collection<T>): T {
-    if (values.size == 1) return values.single()
-    throw PatchException(
-        "Expected one $label, found ${values.size}: " + values.joinToString(),
-    )
-}
-
-private fun requireSingleCacheMatch(label: String, matches: Collection<Match>): Match =
-    requireSingleCacheValue(label, matches)
-
 private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.requireHelper(
     name: String,
     parameters: List<String>,
 ): app.morphe.patcher.util.proxy.mutableTypes.MutableMethod =
-    methods.singleOrNull { method ->
-        method.name == name &&
-            method.parameterTypes.map(CharSequence::toString) == parameters &&
-            method.returnType == OBJECT_DESCRIPTOR
-    } ?: throw PatchException("NewX inline helper $name was not found")
+    requireExactlyOne(
+        "NewX inline helper $name",
+        methods.filter { method ->
+            method.name == name &&
+                method.parameterTypes.map(CharSequence::toString) == parameters &&
+                method.returnType == OBJECT_DESCRIPTOR
+        },
+    )

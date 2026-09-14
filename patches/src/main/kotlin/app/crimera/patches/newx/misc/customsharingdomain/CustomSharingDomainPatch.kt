@@ -20,6 +20,7 @@ import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -369,24 +370,68 @@ private fun hookShareSheetUrlConstructor(method: MutableMethod) {
     method.addDomainRewrite(fieldStoreIndex, valueRegister)
 }
 
-private fun MutableMethod.findStatusUrlResultIndices(): List<Int> =
-    instructions.mapIndexedNotNull { index, instruction ->
+private fun MutableMethod.findStatusUrlResultIndices(): List<Int> {
+    val methodInstructions = instructions
+    val offsets = IntArray(methodInstructions.size)
+    val indexByOffset = mutableMapOf<Int, Int>()
+    var codeOffset = 0
+    methodInstructions.forEachIndexed { index, instruction ->
+        offsets[index] = codeOffset
+        indexByOffset[codeOffset] = index
+        codeOffset += instruction.codeUnits
+    }
+    fun branchTargetIndex(index: Int): Int? {
+        val branch = methodInstructions[index] as? OffsetInstruction ?: return null
+        return indexByOffset[offsets[index] + branch.codeOffset]
+    }
+    return methodInstructions.mapIndexedNotNull { index, instruction ->
         if (instruction.opcode != Opcode.CONST_STRING && instruction.opcode != Opcode.CONST_STRING_JUMBO) {
             return@mapIndexedNotNull null
         }
         val reference = instruction.getReference<StringReference>() ?: return@mapIndexedNotNull null
         if (reference.string != SHARE_STATUS_URL_PREFIX) return@mapIndexedNotNull null
+        val markerRegister =
+            (instruction as? OneRegisterInstruction)?.registerA
+                ?: throw PatchException(
+                    "Expected a one-register status URL prefix in $this at instruction $index",
+                )
 
-        val builderIndex = index + 1
-        val builderOpcode = instructions.getOrNull(builderIndex)?.opcode
+        // The switch epilogue falls through to the shared prefix+id builder in 12.26 but routes
+        // the status branch through a goto to that same builder in 12.27. Follow one goto so both
+        // layouts resolve to the builder consuming the prefix register.
+        val successorIndex = index + 1
+        val successor =
+            methodInstructions.getOrNull(successorIndex)
+                ?: throw PatchException(
+                    "Expected status URL prefix to be followed by a static builder invoke in $this at " +
+                        "instruction $index",
+                )
+        val builderIndex =
+            when (successor.opcode) {
+                Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32 ->
+                    branchTargetIndex(successorIndex)
+                        ?: throw PatchException(
+                            "Expected status URL goto to resolve to a static builder invoke in $this at " +
+                                "instruction $successorIndex",
+                        )
+                else -> successorIndex
+            }
+        val builder = methodInstructions.getOrNull(builderIndex)
+        val builderOpcode = builder?.opcode
         if (builderOpcode != Opcode.INVOKE_STATIC && builderOpcode != Opcode.INVOKE_STATIC_RANGE) {
             throw PatchException(
                 "Expected status URL prefix to be followed by a static builder invoke in $this at " +
                     "instruction $index",
             )
         }
-        val resultIndex = index + 2
-        if (instructions.getOrNull(resultIndex)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+        if (markerRegister !in builder.registersUsed) {
+            throw PatchException(
+                "Expected status URL builder to consume the prefix register in $this at " +
+                    "instruction $builderIndex",
+            )
+        }
+        val resultIndex = builderIndex + 1
+        if (methodInstructions.getOrNull(resultIndex)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
             throw PatchException(
                 "Expected status URL builder to be followed by move-result-object in $this at " +
                     "instruction $builderIndex",
@@ -394,6 +439,7 @@ private fun MutableMethod.findStatusUrlResultIndices(): List<Int> =
         }
         resultIndex
     }
+}
 
 private fun MethodReference.matches(method: MutableMethod): Boolean =
     definingClass == method.definingClass &&

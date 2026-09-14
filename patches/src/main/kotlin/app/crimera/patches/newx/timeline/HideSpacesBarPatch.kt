@@ -9,7 +9,6 @@ import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.iface.Method
 
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
@@ -26,11 +25,6 @@ private object NewXSpacesBarFingerprint : Fingerprint(
             !packageRelativeName.contains('/') &&
             method.hasKnownSpacesBarSignature()
     },
-    filters =
-        listOf(
-            string("stateFlow"),
-            string("onSpaceClicked"),
-    ),
 )
 
 private val SPACES_BAR_PARAMETER_SUFFIXES =
@@ -50,6 +44,19 @@ private val SPACES_BAR_PARAMETER_SUFFIXES =
             FUNCTION_ONE_DESCRIPTOR,
             MODIFIER_DESCRIPTOR,
             "Z",
+            FUNCTION_ONE_DESCRIPTOR,
+            FUNCTION_ONE_DESCRIPTOR,
+            FUNCTION_ONE_DESCRIPTOR,
+            FUNCTION_ZERO_DESCRIPTOR,
+            COMPOSER_DESCRIPTOR,
+            "I",
+            "I",
+        ),
+        listOf(
+            FUNCTION_ONE_DESCRIPTOR,
+            MODIFIER_DESCRIPTOR,
+            "Z",
+            FUNCTION_ONE_DESCRIPTOR,
             FUNCTION_ONE_DESCRIPTOR,
             FUNCTION_ONE_DESCRIPTOR,
             FUNCTION_ONE_DESCRIPTOR,

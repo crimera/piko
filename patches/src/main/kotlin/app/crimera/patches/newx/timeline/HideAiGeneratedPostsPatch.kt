@@ -30,6 +30,7 @@ import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.numberOfParameterRegistersLogical
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 @Suppress("unused")
@@ -71,18 +72,38 @@ val newXHideAiGeneratedPostsPatch =
                 )
             }
 
-            matches.single().method.apply {
+            val match = matches.single()
+            val originalMethod = match.method
+            val method =
+                originalMethod.cloneMutable(
+                    // The 12.27 constructor has no local registers. Reserve one scratch
+                    // register while keeping the original parameter copies below it.
+                    additionalRegisters = originalMethod.numberOfParameterRegisters + 1,
+                ).also { expandedMethod ->
+                    match.classDef.methods.remove(originalMethod)
+                    match.classDef.methods.add(expandedMethod)
+                }
+            val timelineItemsRegister = originalMethod.p0Register + 2
+            if (timelineItemsRegister !in 0..15) {
+                throw PatchException(
+                    "NewX timelineItems register must fit a four-bit invoke: " +
+                        "v$timelineItemsRegister in $originalMethod",
+                )
+            }
+
+            method.apply {
                 val read =
                     aiSourcesToHide.injectRead(
                         method = this,
-                        index = 0,
+                        index = originalMethod.numberOfParameterRegistersLogical,
+                        excludedRegisters = listOf(timelineItemsRegister),
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
                 addInstructions(
                     read.nextIndex,
                     """
-                        invoke-static {p2, v${read.register}}, $TIMELINE_FILTER_DESCRIPTOR->filterAiGeneratedPosts(Ljava/lang/Object;Ljava/util/Set;)Ljava/lang/Object;
-                        move-result-object p2
+                        invoke-static {v$timelineItemsRegister, v${read.register}}, $TIMELINE_FILTER_DESCRIPTOR->filterAiGeneratedPosts(Ljava/lang/Object;Ljava/util/Set;)Ljava/lang/Object;
+                        move-result-object v$timelineItemsRegister
                     """.trimIndent(),
                 )
             }

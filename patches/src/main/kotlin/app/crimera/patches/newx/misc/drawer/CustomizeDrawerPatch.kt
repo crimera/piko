@@ -106,15 +106,27 @@ private val NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS =
     )
 
 private object NewXDrawerContentClassFingerprint : Fingerprint(
-    definingClass = "Lcom/x/main/drawer/",
+    definingClass = DRAWER_SCOPE,
+    name = "d",
     returnType = "V",
-    filters =
-        listOf(
-            string("drawerState"),
-            string("onBookmarkClicked"),
-            string("onCommunitiesClicked"),
-            string("onThemeSettingsClicked"),
-        ),
+    custom = { method, _ ->
+        val parameters = method.parameterTypes.map(CharSequence::toString)
+        parameters.size >= 40 &&
+            parameters.firstOrNull() == "Lcom/x/models/c8;" &&
+            parameters.getOrNull(1)?.startsWith("Landroidx/compose/material3/") == true &&
+            parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+            parameters.count { it == "Ljava/util/List;" } == 1 &&
+            parameters.count { it == "Ljava/util/Map;" } == 1 &&
+            parameters.count { it == "Z" } >= 10 &&
+            parameters.count { it == "I" } >= 5 &&
+            parameters.count { it == FUNCTION0_DESCRIPTOR } >= 10 &&
+            parameters.count { it == FUNCTION1_DESCRIPTOR } >= 2 &&
+            "Lcom/x/main/api/z;" in parameters &&
+            "Lcom/x/main/api/r;" in parameters &&
+            "Lcom/x/main/api/k;" in parameters &&
+            "Lcom/x/main/api/u;" in parameters &&
+            "Landroidx/compose/ui/Modifier;" in parameters
+    },
 )
 
 private object NewXDrawerMenuItemFingerprint : Fingerprint(
@@ -451,11 +463,6 @@ private fun List<Instruction>.resolveDrawerTitleResourceIds(
             }
     }
 
-    if (resourceIds.isEmpty()) {
-        throw PatchException(
-            "NewX drawer row title has no resolvable string resource at call $callIndex in $renderer",
-        )
-    }
     return resourceIds
 }
 
@@ -505,6 +512,12 @@ private fun resolveDrawerTitleResourceIds(
             callIndex = call.index,
             call = call.call,
             renderer = renderer,
+        )
+    }
+    if (resourceIds.isEmpty()) {
+        throw PatchException(
+            "NewX drawer renderer has no resolvable title string resources: $renderer; calls=" +
+                calls.joinToString { "${it.method} @${it.index}" },
         )
     }
     return resourceIds.toList()

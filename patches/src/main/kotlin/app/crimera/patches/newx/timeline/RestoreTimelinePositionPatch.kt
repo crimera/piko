@@ -131,50 +131,63 @@ val restoreTimelinePositionPatch =
         )
 
         execute {
-            val holderMatches = NewXScrollPositionHolderFingerprint.scopedMatchAll()
-            if (holderMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX scroll-position holder, found ${holderMatches.size}: " +
-                        holderMatches.joinToString { it.originalMethod.toString() },
+            val holderMatch =
+                requireExactlyOne(
+                    "NewX scroll-position holder",
+                    NewXScrollPositionHolderFingerprint.scopedMatchAll(),
                 )
-            }
-            val holderDescriptor = holderMatches.single().originalClassDef.type
-            val holderConstructorMatches =
+            val holderDescriptor = holderMatch.originalClassDef.type
+            requireExactlyOne(
+                "NewX scroll-position holder constructor",
                 mutableClassDefBy(holderDescriptor).methods.filter { method ->
                     method.name == "<init>" &&
                         method.parameterTypes.map(CharSequence::toString) == listOf("I", "I") &&
                         method.returnType == "V"
-                }
-            if (holderConstructorMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX scroll-position holder constructor, found " +
-                        "${holderConstructorMatches.size}: ${holderConstructorMatches.joinToString()}",
-                )
-            }
+                },
+            )
             val holderConstructorReference = "$holderDescriptor-><init>(II)V"
 
-            val getterMatches = scrollPositionGetterFingerprint(holderDescriptor).scopedMatchAll()
-            if (getterMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX scroll-position getter, found ${getterMatches.size}: " +
-                        getterMatches.joinToString { it.originalMethod.toString() },
+            val getterMatch =
+                requireExactlyOne(
+                    "NewX scroll-position getter",
+                    scrollPositionGetterFingerprint(holderDescriptor).scopedMatchAll(),
                 )
-            }
-            val getterMatch = getterMatches.single()
             var getterMethod = getterMatch.method
-            if (getterMethod.implementation == null) {
-                throw PatchException("NewX scroll-position getter has no implementation")
+            val originalRegisterCount =
+                getterMethod.implementation?.registerCount
+                    ?: throw PatchException("NewX scroll-position getter has no implementation")
+            val parameterRegisterCount = getterMethod.numberOfParameterRegisters
+            if (AccessFlags.STATIC.isSet(getterMethod.accessFlags)) {
+                throw PatchException("NewX scroll-position getter unexpectedly has no instance receiver")
             }
             val expandedMethod =
                 getterMethod.cloneMutable(
                     additionalRegisters =
-                        RESTORE_TEMPORARY_REGISTER_COUNT +
-                            FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT +
-                            getterMethod.numberOfParameterRegisters,
+                        parameterRegisterCount +
+                            RESTORE_TEMPORARY_REGISTER_COUNT +
+                            FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT,
                 )
             getterMatch.classDef.methods.remove(getterMethod)
             getterMatch.classDef.methods.add(expandedMethod)
             getterMethod = expandedMethod
+            val expandedRegisterCount =
+                getterMethod.implementation?.registerCount
+                    ?: throw PatchException("NewX cloned scroll-position getter has no implementation")
+            val scratchBase = originalRegisterCount
+            val restoreRegisters = scratchBase..scratchBase + 1
+            val fallbackRegisters = scratchBase + 2..scratchBase + 4
+            val scratchLast = fallbackRegisters.last
+            val shiftedParameterRegionStart = expandedRegisterCount - parameterRegisterCount
+            if (scratchBase < 0 || scratchLast > 15 || scratchLast >= shiftedParameterRegionStart) {
+                throw PatchException(
+                    "NewX scroll-position getter scratch register range is invalid for " +
+                        "${getterMatch.originalMethod}: originalRegisters=$originalRegisterCount, " +
+                        "expandedRegisters=$expandedRegisterCount, " +
+                        "parameterRegisters=$parameterRegisterCount, " +
+                        "attemptedRange=v$scratchBase..v$scratchLast, " +
+                        "shiftedParameterRegionStart=v$shiftedParameterRegionStart",
+                )
+            }
 
             val mapGetCandidates =
                 getterMethod.instructions.withIndex().filter { indexedInstruction ->
@@ -185,15 +198,10 @@ val restoreTimelinePositionPatch =
                         reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
                         reference.returnType.toString() == "Ljava/lang/Object;"
                 }
-            if (mapGetCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one NewX timeline-position map read, found " +
-                        "${mapGetCandidates.size}: ${mapGetCandidates.joinToString()}",
-                )
-            }
-            val mapGetIndex = mapGetCandidates.single().index
+            val mapGetCandidate = requireExactlyOne("NewX timeline-position map read", mapGetCandidates)
+            val mapGetIndex = mapGetCandidate.index
             val mapGetInstruction =
-                mapGetCandidates.single().value as? FiveRegisterInstruction
+                mapGetCandidate.value as? FiveRegisterInstruction
                     ?: throw PatchException("NewX timeline-position map read has an unsupported register layout")
             if (mapGetInstruction.registerCount != 2) {
                 throw PatchException(
@@ -229,32 +237,35 @@ val restoreTimelinePositionPatch =
                     if (!isEnum) return@mapNotNull null
                     indexedInstruction.index to methodReference
                 }
-            if (timelineResultCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one NewX timeline-type result feeding the map read, found " +
-                        "${timelineResultCandidates.size}: ${timelineResultCandidates.joinToString()}",
+            val timelineResultCandidate =
+                requireExactlyOne(
+                    "NewX timeline-type result feeding the map read",
+                    timelineResultCandidates,
                 )
-            }
-            val timelineResultIndex = timelineResultCandidates.single().first
+            val timelineResultIndex = timelineResultCandidate.first
 
             val mapField =
-                getterMethod.instructions.mapNotNull { instruction ->
-                    if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
-                    val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-                    field.takeIf { it.type.toString() == CONCURRENT_HASH_MAP_DESCRIPTOR }
-                }.singleOrNull()
-                    ?: throw PatchException("NewX timeline-position map field was not found uniquely")
+                requireExactlyOne(
+                    "NewX timeline-position map field",
+                    getterMethod.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+                        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+                        field.takeIf { it.type.toString() == CONCURRENT_HASH_MAP_DESCRIPTOR }
+                    },
+                )
             val componentDescriptor = getterMatch.originalMethod.definingClass
             val componentField =
-                getterMethod.instructions.mapNotNull { instruction ->
-                    if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
-                    val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-                    field.takeIf {
-                        it.definingClass.toString() == componentDescriptor &&
-                            it.type.toString() == mapField.definingClass.toString()
-                    }
-                }.singleOrNull()
-                    ?: throw PatchException("NewX timeline-position map owner field was not found uniquely")
+                requireExactlyOne(
+                    "NewX timeline-position map owner field",
+                    getterMethod.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+                        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+                        field.takeIf {
+                            it.definingClass.toString() == componentDescriptor &&
+                                it.type.toString() == mapField.definingClass.toString()
+                        }
+                    },
+                )
             if (mapField.definingClass.toString() == componentDescriptor) {
                 throw PatchException("NewX timeline-position map unexpectedly belongs to the component")
             }
@@ -311,15 +322,17 @@ val restoreTimelinePositionPatch =
             }
             val timelineIdentityFieldReference = timelineIdentityField.toString()
             val repositoryField =
-                getterMethod.instructions.mapNotNull { instruction ->
-                    if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
-                    val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-                    field.takeIf {
-                        it.definingClass.toString() == componentDescriptor &&
-                            it.type.toString() == timelineGetterReference.definingClass.toString()
-                    }
-                }.singleOrNull()
-                    ?: throw PatchException("NewX timeline repository field was not found uniquely")
+                requireExactlyOne(
+                    "NewX timeline repository field",
+                    getterMethod.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+                        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+                        field.takeIf {
+                            it.definingClass.toString() == componentDescriptor &&
+                                it.type.toString() == timelineGetterReference.definingClass.toString()
+                        }
+                    },
+                )
             val timelineGetterInvoke =
                 timelineGetterInstruction as? FiveRegisterInstruction
                     ?: throw PatchException("NewX timeline-type getter call has an unsupported register layout")
@@ -330,34 +343,16 @@ val restoreTimelinePositionPatch =
                 )
             }
             val timelineGetterReceiverRegister = timelineGetterInvoke.registerC
-            val restoreRegisters =
-                try {
-                    getterMethod
-                        .getFreeRegisterProvider(
-                            timelineResultIndex + 1,
-                            RESTORE_TEMPORARY_REGISTER_COUNT,
-                            timelineRegister,
-                            timelineGetterReceiverRegister,
-                        ).let { provider ->
-                            List(RESTORE_TEMPORARY_REGISTER_COUNT) {
-                                provider.getFreeRegister4Bit()
-                            }
-                        }
-                } catch (exception: RuntimeException) {
-                    throw PatchException(
-                        "Could not allocate NewX timeline-position restore registers",
-                        exception,
-                    )
-                }
-            val mapOwnerRegister = restoreRegisters[0]
+            val mapOwnerRegister = restoreRegisters.first
             val positionsRegister = mapOwnerRegister
-            val mapRegister = restoreRegisters[1]
+            val mapRegister = restoreRegisters.last
             val indexRegister = mapRegister
             val offsetRegister = timelineRegister
             getterMethod.addInstructionsWithLabels(
                 timelineResultIndex + 1,
                 """
-                    iget-object v$mapOwnerRegister, p0, $componentField
+                    move-object/from16 v$mapOwnerRegister, p0
+                    iget-object v$mapOwnerRegister, v$mapOwnerRegister, $componentField
                     iget-object v$mapRegister, v$mapOwnerRegister, $mapField
                     invoke-virtual {v$mapRegister, v$timelineRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->get(Ljava/lang/Object;)Ljava/lang/Object;
                     move-result-object v$positionsRegister
@@ -367,7 +362,8 @@ val restoreTimelinePositionPatch =
                     if-nez v$positionsRegister, :piko_newx_restore_position_continue
                     :piko_newx_restore_position_ignore_native
                     const/4 v$positionsRegister, 0x0
-                    iget-object v$mapOwnerRegister, p0, $componentField
+                    move-object/from16 v$mapOwnerRegister, p0
+                    iget-object v$mapOwnerRegister, v$mapOwnerRegister, $componentField
                     iget-object v$mapRegister, v$mapOwnerRegister, $mapField
                     invoke-virtual {v$mapRegister, v$timelineRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->remove(Ljava/lang/Object;)Ljava/lang/Object;
                     move-result-object v$mapRegister
@@ -385,7 +381,8 @@ val restoreTimelinePositionPatch =
                     invoke-direct {v$positionsRegister, v$indexRegister, v$offsetRegister}, $holderConstructorReference
                     invoke-interface {v$timelineGetterReceiverRegister}, $timelineGetterReference
                     move-result-object v$timelineRegister
-                    iget-object v$mapRegister, p0, $componentField
+                    move-object/from16 v$mapOwnerRegister, p0
+                    iget-object v$mapRegister, v$mapOwnerRegister, $componentField
                     iget-object v$mapRegister, v$mapRegister, $mapField
                     invoke-virtual {v$mapRegister, v$timelineRegister, v$positionsRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
                     move-result-object v$mapRegister
@@ -409,13 +406,11 @@ val restoreTimelinePositionPatch =
                         returnedHolder?.opcode == Opcode.RETURN_OBJECT &&
                         (returnedHolder as? OneRegisterInstruction)?.registerA == holderRegister
                 }
-            if (fallbackHolderCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one NewX zero-position fallback holder allocation, found " +
-                        "${fallbackHolderCandidates.size}: ${fallbackHolderCandidates.joinToString()}",
+            val fallbackHolderCandidate =
+                requireExactlyOne(
+                    "NewX zero-position fallback holder allocation",
+                    fallbackHolderCandidates,
                 )
-            }
-            val fallbackHolderCandidate = fallbackHolderCandidates.single()
             val fallbackHolderRegister =
                 (fallbackHolderCandidate.value as? OneRegisterInstruction)?.registerA
                     ?: throw PatchException("NewX zero-position fallback holder allocation has no register layout")
@@ -423,33 +418,17 @@ val restoreTimelinePositionPatch =
                 restoreTimelinePosition.injectRead(
                     method = getterMethod,
                     index = fallbackHolderCandidate.index,
-                    excludedRegisters = listOf(fallbackHolderRegister),
+                    excludedRegisters =
+                        restoreRegisters.toList() +
+                            fallbackRegisters.toList() +
+                            fallbackHolderRegister,
                     registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                 )
             val settingReadInstructionCount = fallbackRead.nextIndex - fallbackHolderCandidate.index
             getterMethod.removeInstructions(fallbackHolderCandidate.index, settingReadInstructionCount)
-            val fallbackRegisters =
-                try {
-                    getterMethod
-                        .getFreeRegisterProvider(
-                            fallbackHolderCandidate.index + 1,
-                            FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT,
-                            fallbackRead.register,
-                            fallbackHolderRegister,
-                        ).let { provider ->
-                            List(FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT) {
-                                provider.getFreeRegister4Bit()
-                            }
-                        }
-                } catch (exception: RuntimeException) {
-                    throw PatchException(
-                        "Could not allocate NewX fallback timeline-position restore registers",
-                        exception,
-                    )
-                }
-            val fallbackRepositoryRegister = fallbackRegisters[0]
-            val fallbackTimelineRegister = fallbackRegisters[1]
-            val fallbackPositionsRegister = fallbackRegisters[2]
+            val fallbackRepositoryRegister = fallbackRegisters.first
+            val fallbackTimelineRegister = fallbackRegisters.first + 1
+            val fallbackPositionsRegister = fallbackRegisters.last
             getterMethod.replaceInstruction(
                 fallbackHolderCandidate.index,
                 "const-string v${fallbackRead.register}, \"newx.timeline.restore_position\"",
@@ -465,7 +444,8 @@ val restoreTimelinePositionPatch =
                     invoke-static {v${fallbackRead.register}}, Lapp/morphe/extension/newx/settings/SettingsRegistry;->getBooleanOrDefault(Ljava/lang/String;)Z
                     move-result v${fallbackRead.register}
                     if-eqz v${fallbackRead.register}, :piko_newx_restore_position_fallback
-                    iget-object v$fallbackRepositoryRegister, p0, $repositoryField
+                    move-object/from16 v$fallbackRepositoryRegister, p0
+                    iget-object v$fallbackRepositoryRegister, v$fallbackRepositoryRegister, $repositoryField
                     invoke-interface {v$fallbackRepositoryRegister}, $timelineGetterReference
                     move-result-object v$fallbackTimelineRegister
                     invoke-interface {v$fallbackRepositoryRegister}, $timelineIdentityGetterReference
@@ -485,15 +465,11 @@ val restoreTimelinePositionPatch =
                 ExternalLabel("piko_newx_restore_position_fallback", nativeFallbackInstruction),
             )
 
-            val saveMatches =
-                saveScrollPositionFingerprint(componentDescriptor, holderDescriptor).scopedMatchAll()
-            if (saveMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX save-scroll-position method, found ${saveMatches.size}: " +
-                        saveMatches.joinToString { it.originalMethod.toString() },
+            val saveMatch =
+                requireExactlyOne(
+                    "NewX save-scroll-position method",
+                    saveScrollPositionFingerprint(componentDescriptor, holderDescriptor).scopedMatchAll(),
                 )
-            }
-            val saveMatch = saveMatches.single()
             val originalSaveMethod = saveMatch.method
             if (originalSaveMethod.implementation == null) {
                 throw PatchException("NewX save-scroll-position method has no implementation")
@@ -515,15 +491,10 @@ val restoreTimelinePositionPatch =
                             listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
                         reference.returnType.toString() == "Ljava/lang/Object;"
                 }
-            if (mapPutCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one NewX timeline-position map write, found " +
-                        "${mapPutCandidates.size}: ${mapPutCandidates.joinToString()}",
-                )
-            }
-            val mapPutIndex = mapPutCandidates.single().index
+            val mapPutCandidate = requireExactlyOne("NewX timeline-position map write", mapPutCandidates)
+            val mapPutIndex = mapPutCandidate.index
             val mapPutInstruction =
-                saveMethod.instructions[mapPutIndex] as? FiveRegisterInstruction
+                mapPutCandidate.value as? FiveRegisterInstruction
                     ?: throw PatchException("NewX timeline-position map write has an unsupported register layout")
             if (mapPutInstruction.registerCount != 3) {
                 throw PatchException(
@@ -620,14 +591,13 @@ val restoreTimelinePositionPatch =
                         field.definingClass.toString().startsWith("Landroidx/compose/foundation/layout/") &&
                         saveMethod.instructions.getOrNull(indexedInstruction.index + 1)?.opcode == Opcode.IF_EQZ
                 }
-            if (layoutPolicyGateCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one NewX Ranked Following save-policy gate, found " +
-                        "${layoutPolicyGateCandidates.size}: ${layoutPolicyGateCandidates.joinToString()}",
-                )
-            }
+            val layoutPolicyGateIndex =
+                requireExactlyOne(
+                    "NewX Ranked Following save-policy gate",
+                    layoutPolicyGateCandidates,
+                ).index
             saveMethod.replaceInstruction(
-                layoutPolicyGateCandidates.single().index + 1,
+                layoutPolicyGateIndex + 1,
                 "nop",
             )
             saveMethod.addInstructions(

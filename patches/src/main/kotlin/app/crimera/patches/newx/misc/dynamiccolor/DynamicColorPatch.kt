@@ -524,17 +524,38 @@ private fun MutableMethod.factoryResultFeedsStore(
     val consumers = instructions.withIndex().filter { indexed ->
         indexed.index > constructorIndex &&
             indexed.index < storeIndex &&
-            (indexed.value.opcode == Opcode.INVOKE_STATIC ||
-                indexed.value.opcode == Opcode.INVOKE_STATIC_RANGE) &&
             indexed.value.getReference<MethodReference>()?.let { reference ->
                 val functionParameter = reference.parameterTypes.indexOf(FUNCTION0_DESCRIPTOR)
-                functionParameter >= 0 &&
-                    reference.returnType.startsWith("L") &&
-                    indexed.value.registersUsed.getOrNull(functionParameter) == allocationRegister
-            } == true &&
-            instructions.getOrNull(indexed.index + 1)?.let { result ->
-                result.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                    (result as? OneRegisterInstruction)?.registerA == storeRegister
+                if (functionParameter < 0) return@let false
+                val registers = indexed.value.registersUsed
+                when (indexed.value.opcode) {
+                    Opcode.INVOKE_STATIC,
+                    Opcode.INVOKE_STATIC_RANGE,
+                    -> {
+                        reference.returnType.startsWith("L") &&
+                            registers.getOrNull(functionParameter) == allocationRegister &&
+                            instructions.getOrNull(indexed.index + 1)?.let { result ->
+                                result.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                                    (result as? OneRegisterInstruction)?.registerA == storeRegister
+                            } == true
+                    }
+                    Opcode.INVOKE_DIRECT,
+                    Opcode.INVOKE_DIRECT_RANGE,
+                    -> {
+                        // Newer Kotlin lowers LazyKt.b(Function0) to a direct
+                        // kotlin.Lazy(Function0) constructor. The Function0 is
+                        // the second invoke register and the constructed Lazy
+                        // object is stored immediately, so no move-result exists.
+                        reference.name == "<init>" &&
+                            reference.returnType == "V" &&
+                            reference.parameterTypes.map(CharSequence::toString) ==
+                                listOf(FUNCTION0_DESCRIPTOR) &&
+                            registers.getOrNull(functionParameter + 1) == allocationRegister &&
+                            registers.firstOrNull() == storeRegister &&
+                            indexed.index + 1 == storeIndex
+                    }
+                    else -> false
+                }
             } == true
     }
     return consumers.size == 1
@@ -831,7 +852,6 @@ private fun patchInlineActionTints() {
     val actionTypeDescriptor = models.postActionTypeDescriptor
     val entryMatches =
         Fingerprint(
-            definingClass = "Lcom/x/inlineactionbar/",
             parameters = listOf(
                 inlineActionEntryClass.type,
                 "L",
@@ -999,14 +1019,8 @@ private fun isTabIndicatorRenderer(method: Method): Boolean {
 private fun isProfileTabIndicator(method: Method, horizon: String): Boolean {
     val instructions = method.implementation?.instructions?.toList().orEmpty()
     val reads = wideReadsByOwner(method, horizon)
-    if (!instructions.any { instruction ->
-        instruction.opcode == Opcode.SGET &&
-            instruction.getReference<FieldReference>()?.let { field ->
-                field.definingClass.startsWith(TAB_RENDERER_SCOPE) && field.type == "F"
-            } == true
-    }) {
-        return false
-    }
+    // The profile indicator stopped reading the tab package's static width in 12.27;
+    // the semantic color-to-foundation-background flow remains unchanged.
     if (reads.size != 1) return false
     val ownerReads = reads.values.first()
     return ownerReads.size == 1 && hasFoundationBackground(instructions)
@@ -1025,7 +1039,12 @@ private object NewXTabIndicatorRendererFingerprint : Fingerprint(
 private fun profileTabIndicatorFingerprint(horizon: String) = Fingerprint(
     definingClass = PROFILE_INDICATOR_SCOPE,
     returnType = "Ljava/lang/Object;",
-    custom = { method, _ -> isProfileTabIndicator(method, horizon) },
+    custom = { method, classDef ->
+        // Do not include nested framework helpers such as text/selection; only the direct
+        // foundation/text lambda owns the profile indicator in the supported shapes.
+        classDef.type.removePrefix(PROFILE_INDICATOR_SCOPE).contains('/') == false &&
+            isProfileTabIndicator(method, horizon)
+    },
 )
 
 context(context: BytecodePatchContext)

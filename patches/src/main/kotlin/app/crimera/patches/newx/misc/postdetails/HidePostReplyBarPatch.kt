@@ -7,6 +7,7 @@ import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -29,7 +30,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val COMPOSER_MINIMAL_SCOPE = "Lcom/x/composer/minimal/"
 private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
@@ -57,17 +57,6 @@ private val CONDITIONAL_BRANCH_OPCODES =
         Opcode.IF_GTZ,
         Opcode.IF_LEZ,
     )
-
-/**
- * The full-screen photo/media renderer owns both the inline action bar and the reply composer. Its
- * native no-composer branch appends a navigation-bar spacer after the action bar. When the reply
- * composer is hidden by this patch, that existing branch must be selected as well.
- */
-private object NewXPhotoViewerControlsFingerprint : Fingerprint(
-    definingClass = MEDIA_SCOPE,
-    returnType = "V",
-    custom = { method, _ -> method.isPhotoViewerControlsRenderer() },
-)
 
 /**
  * The inline post-detail composer marks its text field with this stable Compose test tag. The
@@ -169,18 +158,38 @@ private fun Method.isMainNavigationRootRenderer(): Boolean {
 
 private fun Method.isPhotoViewerControlsRenderer(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
+    val hasKnownParameterShape =
+        when (parameters.size) {
+            10 ->
+                parameters[0].startsWith(INLINE_ACTION_BAR_SCOPE) &&
+                    parameters[1] == "Z" &&
+                    parameters[2].startsWith(COMPOSER_MINIMAL_SCOPE) &&
+                    parameters[3].startsWith(HAZE_SCOPE) &&
+                    parameters[4] == MODIFIER_DESCRIPTOR &&
+                    parameters[5] == "Ljava/lang/String;" &&
+                    parameters[6] == "Ljava/lang/String;" &&
+                    parameters[7] == FUNCTION1_DESCRIPTOR &&
+                    parameters[8] == COMPOSER_DESCRIPTOR &&
+                    parameters[9] == "I"
+
+            11 ->
+                parameters[0].startsWith(HAZE_SCOPE) &&
+                    parameters[1].startsWith(INLINE_ACTION_BAR_SCOPE) &&
+                    parameters[2].startsWith(COMPOSER_MINIMAL_SCOPE) &&
+                    parameters[3] == FUNCTION1_DESCRIPTOR &&
+                    parameters[4] == "Z" &&
+                    parameters[5] == MODIFIER_DESCRIPTOR &&
+                    parameters[6] == FUNCTION1_DESCRIPTOR &&
+                    parameters[7] == "Ljava/lang/String;" &&
+                    parameters[8] == "Ljava/lang/String;" &&
+                    parameters[9] == COMPOSER_DESCRIPTOR &&
+                    parameters[10] == "I"
+
+            else -> false
+        }
     return AccessFlags.STATIC.isSet(accessFlags) &&
         returnType == "V" &&
-        parameters.size == 10 &&
-        parameters.count { it.startsWith(INLINE_ACTION_BAR_SCOPE) } == 1 &&
-        parameters.count { it == "Z" } == 1 &&
-        parameters.count { it.startsWith(COMPOSER_MINIMAL_SCOPE) } == 1 &&
-        parameters.count { it.startsWith(HAZE_SCOPE) } == 1 &&
-        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
-        parameters.count { it == "Ljava/lang/String;" } == 2 &&
-        parameters.count { it == FUNCTION1_DESCRIPTOR } == 1 &&
-        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
-        parameters.count { it == "I" } == 1 &&
+        hasKnownParameterShape &&
         inlineActionBarRenderCallIndices().size == 1 &&
         navigationInsetsCallIndices().size == 1
 }
@@ -193,8 +202,8 @@ private fun Method.inlineActionBarRenderCallIndices(): List<Int> =
             ?: return@mapIndexedNotNull null
         val parameters = reference.parameterTypes.map(CharSequence::toString)
         val isInlineActionBarRender =
-            reference.definingClass.startsWith(INLINE_ACTION_BAR_SCOPE) &&
-                reference.returnType == "V" &&
+            reference.returnType == "V" &&
+                parameters.firstOrNull()?.startsWith(INLINE_ACTION_BAR_SCOPE) == true &&
                 parameters.getOrNull(1) == MODIFIER_DESCRIPTOR &&
                 parameters.any { it.startsWith(FOUNDATION_LAYOUT_SCOPE) } &&
                 parameters.any { it.startsWith(HAZE_SCOPE) } &&
@@ -202,13 +211,6 @@ private fun Method.inlineActionBarRenderCallIndices(): List<Int> =
                 parameters.count { it == "I" } >= 3
         index.takeIf { isInlineActionBarRender }
     }.orEmpty()
-
-private fun Method.hasString(value: String): Boolean =
-    implementation?.instructions?.any { instruction ->
-        instruction.getReference<StringReference>()?.string == value
-    } == true
-
-private fun Method.hasStrings(vararg values: String): Boolean = values.all(::hasString)
 
 /**
  * The Compose compiler and R8 rename the framework bridge methods used for window insets. The
@@ -310,12 +312,17 @@ private fun Method.isMinimalComposerRendererCaller(): Boolean {
 
 private fun Method.isMinimalComposerContainerCaller(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
-    return returnType == "V" &&
-        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
-        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
-        parameters.any { it.startsWith(COMPOSER_MINIMAL_SCOPE) } &&
-        parameters.any { it.startsWith(HAZE_SCOPE) } &&
-        hasStrings("inlineComposer", "hazeState")
+    return AccessFlags.STATIC.isSet(accessFlags) &&
+        returnType == "V" &&
+        parameters.size == 8 &&
+        parameters[0].startsWith(COMPOSER_MINIMAL_SCOPE) &&
+        parameters[1].startsWith(HAZE_SCOPE) &&
+        parameters[2] == MODIFIER_DESCRIPTOR &&
+        parameters[3] == "Z" &&
+        parameters[4] == FUNCTION1_DESCRIPTOR &&
+        parameters[5] == COMPOSER_DESCRIPTOR &&
+        parameters[6] == "I" &&
+        parameters[7] == "I"
 }
 
 private fun Method.isPostDetailReplyBarContainer(): Boolean {
@@ -378,18 +385,24 @@ private fun resolvePostDetailReplyBarContainers(renderer: Match): Pair<MutableMe
 
     val minimalMutableClass = context.mutableClassDefBy(minimalContainerCaller.definingClass)
     val minimalMutableMethod =
-        minimalMutableClass.methods.singleOrNull { method ->
-            method.matches(minimalContainerCaller)
-        } as? MutableMethod
+        requireExactlyOne(
+            label = "NewX mutable minimal reply-bar composition caller",
+            candidates = minimalMutableClass.methods.filter { method ->
+                method.matches(minimalContainerCaller)
+            },
+        ) as? MutableMethod
             ?: throw PatchException(
                 "NewX minimal reply-bar composition caller is not mutable: $minimalContainerCaller",
             )
 
     val postDetailMutableClass = context.mutableClassDefBy(postDetailContainer.definingClass)
     val postDetailMutableMethod =
-        postDetailMutableClass.methods.singleOrNull { method ->
-            method.matches(postDetailContainer)
-        } as? MutableMethod
+        requireExactlyOne(
+            label = "NewX mutable post-detail reply-bar container",
+            candidates = postDetailMutableClass.methods.filter { method ->
+                method.matches(postDetailContainer)
+            },
+        ) as? MutableMethod
             ?: throw PatchException(
                 "NewX post-detail reply-bar container is not mutable: $postDetailContainer",
             )
@@ -410,24 +423,13 @@ private fun findUniqueCaller(
             classDef.methods.forEach { method ->
                 if (!predicate(method)) return@forEach
                 val callSites = method.callSiteIndices(target)
-                if (callSites.isNotEmpty()) add(method to callSites.size)
+                if (callSites.isNotEmpty()) add(method to callSites)
             }
         }
     }
-    val invalidCallCounts = candidates.filter { (_, callCount) -> callCount != 1 }
-    if (invalidCallCounts.isNotEmpty()) {
-        throw PatchException(
-            "Expected one call to $target in $label candidates, found: " +
-                invalidCallCounts.joinToString { (method, callCount) -> "$method ($callCount)" },
-        )
-    }
-    if (candidates.size != 1) {
-        throw PatchException(
-            "Expected one $label, found ${candidates.size}: " +
-                candidates.joinToString { (method, _) -> method.toString() },
-        )
-    }
-    return candidates.single().first
+    val (caller, callSites) = requireExactlyOne(label, candidates)
+    requireExactlyOne("$label callsite to $target", callSites)
+    return caller
 }
 
 private fun requireNavigationInsetsHook(
@@ -436,14 +438,11 @@ private fun requireNavigationInsetsHook(
 ): NavigationInsetsHook {
     val instructions = method.instructions.toList()
     val callIndices = instructions.navigationInsetsCallIndices()
-    if (callIndices.size != 1) {
-        throw PatchException(
-            "Expected one $label navigation-insets call in $method, found " +
-                callIndices.size,
+    val callIndex =
+        requireExactlyOne(
+            label = "$label navigation-insets call in $method",
+            candidates = callIndices,
         )
-    }
-
-    val callIndex = callIndices.single()
     if (instructions.getOrNull(callIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
         throw PatchException(
             "$label navigation-insets call is not followed by move-result-object in $method",
@@ -460,19 +459,11 @@ private fun requireNavigationInsetsHook(
 context(context: BytecodePatchContext)
 private fun resolveMainNavigationInsetsHook(): NavigationInsetsHook {
     val matches = NewXMainNavigationRootFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (matches.size != 1) {
-        throw PatchException(
-            "Expected one NewX main navigation root renderer, found ${matches.size}: " +
-                matches.joinToString { it.originalMethod.toString() },
-        )
-    }
-    val method = matches.single().method
-    val callCount = method.navigationInsetsCallIndices().size
-    if (callCount != 1) {
-        throw PatchException(
-            "Expected one NewX main navigation-insets call in $method, found $callCount",
-        )
-    }
+    val method =
+        requireExactlyOne(
+            label = "NewX main navigation root renderer",
+            candidates = matches,
+        ).method
     return requireNavigationInsetsHook(method, "NewX main")
 }
 
@@ -481,13 +472,11 @@ private fun resolvePostDetailNavigationInsetsHook(
     postDetailContainer: MutableMethod,
 ): NavigationInsetsHook {
     val matches = NewXPostDetailNavigationInsetsFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (matches.size != 1) {
-        throw PatchException(
-            "Expected one NewX post-detail navigation inset renderer, found ${matches.size}: " +
-                matches.joinToString { it.originalMethod.toString() },
+    val match =
+        requireExactlyOne(
+            label = "NewX post-detail navigation inset renderer",
+            candidates = matches,
         )
-    }
-    val match = matches.single()
     if (!postDetailContainer.matches(match.originalMethod)) {
         throw PatchException(
             "NewX post-detail navigation inset renderer is not the reply-bar container: " +
@@ -506,30 +495,43 @@ context(context: BytecodePatchContext)
 private fun resolvePhotoViewerNavigationFallbackHook(
     minimalContainer: MutableMethod,
 ): PhotoViewerNavigationFallbackHook {
-    val matches = NewXPhotoViewerControlsFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (matches.size != 1) {
-        throw PatchException(
-            "Expected one NewX photo-viewer controls renderer, found ${matches.size}: " +
-                matches.joinToString { it.originalMethod.toString() },
+    val originalMethod =
+        findUniqueCaller(
+            target = minimalContainer,
+            scope = MEDIA_SCOPE,
+            label = "NewX photo-viewer controls renderer",
+            predicate = Method::isPhotoViewerControlsRenderer,
         )
-    }
-
-    val method = matches.single().method
+    val method =
+        requireExactlyOne(
+            label = "NewX mutable photo-viewer controls renderer",
+            candidates =
+                context.mutableClassDefBy(originalMethod.definingClass).methods.filter { method ->
+                    method.matches(originalMethod)
+                },
+        ) as? MutableMethod
+            ?: throw PatchException(
+                "NewX photo-viewer controls renderer is not mutable: $originalMethod",
+            )
     val instructions = method.instructions.toList()
     val actionBarCalls = method.inlineActionBarRenderCallIndices()
     val minimalComposerCalls = method.callSiteIndices(minimalContainer)
     val navigationInsetCalls = method.navigationInsetsCallIndices()
-    if (actionBarCalls.size != 1 || minimalComposerCalls.size != 1 || navigationInsetCalls.size != 1) {
-        throw PatchException(
-            "Expected one action-bar call, reply-composer call, and navigation-inset call in " +
-                "$method; found ${actionBarCalls.size}, ${minimalComposerCalls.size}, and " +
-                "${navigationInsetCalls.size}",
+    val actionBarCall =
+        requireExactlyOne(
+            label = "NewX photo-viewer action-bar call in $method",
+            candidates = actionBarCalls,
         )
-    }
-
-    val actionBarCall = actionBarCalls.single()
-    val minimalComposerCall = minimalComposerCalls.single()
-    val navigationInsetCall = navigationInsetCalls.single()
+    val minimalComposerCall =
+        requireExactlyOne(
+            label = "NewX photo-viewer reply-composer call in $method",
+            candidates = minimalComposerCalls,
+        )
+    val navigationInsetCall =
+        requireExactlyOne(
+            label = "NewX photo-viewer navigation-inset call in $method",
+            candidates = navigationInsetCalls,
+        )
     if (!(actionBarCall < minimalComposerCall && minimalComposerCall < navigationInsetCall)) {
         throw PatchException(
             "Unexpected photo-viewer control-flow order in $method: action bar at $actionBarCall, " +
@@ -553,18 +555,22 @@ private fun resolvePhotoViewerNavigationFallbackHook(
             }
         }
     val fallbackTargets = fallbackBranches.distinctBy { (_, targetIndex, _) -> targetIndex }
-    if (fallbackBranches.isEmpty() || fallbackTargets.size != 1) {
+    if (fallbackBranches.isEmpty()) {
         throw PatchException(
-            "Expected photo-viewer reply gates to share one navigation fallback in $method, " +
-                "found ${fallbackBranches.size} branches and ${fallbackTargets.size} targets: " +
-                fallbackBranches.joinToString { (index, targetIndex, _) -> "$index->$targetIndex" },
+            "Expected at least one photo-viewer reply gate in $method, found none",
         )
     }
+    val fallbackTarget =
+        requireExactlyOne(
+            label = "NewX photo-viewer navigation fallback target in $method",
+            candidates = fallbackTargets,
+        )
 
     return PhotoViewerNavigationFallbackHook(
         method = method,
+        // newx-resolver-lint: allow instruction-order raw-first because bytecode order is the contract.
         gateIndex = fallbackBranches.minOf { (index, _, _) -> index },
-        fallback = fallbackTargets.single().third,
+        fallback = fallbackTarget.third,
     )
 }
 
@@ -587,13 +593,11 @@ val newXHidePostReplyBarPatch =
 
         execute {
             val matches = NewXPostDetailReplyBarFingerprint.scopedMatchAll()
-            if (matches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX post-detail reply bar renderer, found ${matches.size}: " +
-                        matches.joinToString { it.originalMethod.toString() },
+            val renderer =
+                requireExactlyOne(
+                    label = "NewX post-detail reply bar renderer",
+                    candidates = matches,
                 )
-            }
-            val renderer = matches.single()
             val (minimalContainer, postDetailSheetContainer) = resolvePostDetailReplyBarContainers(renderer)
             val navigationInsetsHook = resolveMainNavigationInsetsHook()
             val postDetailNavigationInsetsHook =
@@ -608,9 +612,11 @@ val newXHidePostReplyBarPatch =
                 navigationInsetsHook.callIndex,
                 navigationInsetsHook.continuation,
             )
-            postDetailNavigationInsetsHook?.let { hook ->
-                hidePostReplyBar.branchIfEnabled(hook.method, hook.callIndex, hook.continuation)
-            }
+            hidePostReplyBar.branchIfEnabled(
+                postDetailNavigationInsetsHook.method,
+                postDetailNavigationInsetsHook.callIndex,
+                postDetailNavigationInsetsHook.continuation,
+            )
             photoViewerNavigationFallbackHook.let { hook ->
                 hidePostReplyBar.branchIfEnabled(hook.method, hook.gateIndex, hook.fallback)
             }

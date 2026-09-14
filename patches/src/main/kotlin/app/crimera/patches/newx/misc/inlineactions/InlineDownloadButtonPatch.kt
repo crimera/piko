@@ -27,7 +27,6 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -49,7 +48,6 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
@@ -60,17 +58,6 @@ private const val POST_MEDIA_HELPER = "getPostMedia"
 private const val REPOSTED_POST_HELPER = "getRepostedPost"
 private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
 private const val CREATE_ACTION_HELPER = "createDownloadAction"
-
-private fun requireSingle(
-    label: String,
-    matches: Collection<Match>,
-): Match {
-    if (matches.size == 1) return matches.single()
-    throw PatchException(
-        "Expected one $label, found ${matches.size}: " +
-            matches.joinToString { it.originalMethod.toString() },
-    )
-}
 
 private fun MutableMethod.requireStatic(label: String) {
     if (AccessFlags.STATIC.isSet(accessFlags)) return
@@ -171,10 +158,9 @@ val newXInlineDownloadButtonPatch =
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
             )
 
-            val inlineRenderer = requireSingle(
+            val inlineRenderer = requireExactlyOne(
                 "NewX inline-action entry renderer",
                 Fingerprint(
-                    definingClass = "Lcom/x/inlineactionbar/",
                     parameters =
                         listOf(
                             entryModels.inlineActionEntryDescriptor,
@@ -228,10 +214,9 @@ val newXInlineDownloadButtonPatch =
             if (shareIconField.type != incomingIconField.type) {
                 throw PatchException("NewX inline icon types differ")
             }
-            val iconRenderer = requireSingle(
+            val iconRenderer = requireExactlyOne(
                 "NewX TwitterShare icon lambda",
                 Fingerprint(
-                    definingClass = "Lcom/x/cards/impl/unified/components/appstore/",
                     filters =
                         listOf(
                             fieldAccess(opcode = Opcode.IGET, definingClass = "this", type = "F"),
@@ -240,15 +225,21 @@ val newXInlineDownloadButtonPatch =
                 ).scopedMatchAll(),
             )
             iconRenderer.method.apply {
-                val iconAccess = iconRenderer.instructionMatches.singleOrNull { match ->
-                    match.instruction.opcode == Opcode.SGET_OBJECT &&
-                        match.instruction.getReference<FieldReference>()?.toString() ==
-                        shareIconField.toString()
-                } ?: throw PatchException("NewX TwitterShare icon access was not found")
-                val matchedSizeAccess = iconRenderer.instructionMatches.singleOrNull { match ->
-                    val field = match.instruction.getReference<FieldReference>()
-                    match.instruction.opcode == Opcode.IGET && field?.type == "F"
-                } ?: throw PatchException("NewX share icon size access was not found")
+                val iconAccess = requireExactlyOne(
+                    "NewX TwitterShare icon access",
+                    iconRenderer.instructionMatches.filter { match ->
+                        match.instruction.opcode == Opcode.SGET_OBJECT &&
+                            match.instruction.getReference<FieldReference>()?.toString() ==
+                            shareIconField.toString()
+                    },
+                )
+                val matchedSizeAccess = requireExactlyOne(
+                    "NewX TwitterShare icon size field access",
+                    iconRenderer.instructionMatches.filter { match ->
+                        val field = match.instruction.getReference<FieldReference>()
+                        match.instruction.opcode == Opcode.IGET && field?.type == "F"
+                    },
+                )
                 val sizeField =
                     matchedSizeAccess.instruction.getReference<FieldReference>()
                         ?: throw PatchException("NewX share icon size field was not found")
@@ -258,16 +249,32 @@ val newXInlineDownloadButtonPatch =
                     instructions
                         .subList(0, iconAccess.index)
                         .indexOfLast { instruction -> instruction.opcode == Opcode.RETURN_OBJECT } + 1
-                val sizeAccess = requireExactlyOne(
-                    "NewX TwitterShare branch size access",
+                val branchLocalSizeAccesses = instructions.mapIndexedNotNull { index, instruction ->
+                    index.takeIf {
+                        index in branchStart until iconAccess.index &&
+                            instruction.opcode == Opcode.IGET &&
+                            instruction.getReference<FieldReference>()?.toString() ==
+                            sizeField.toString()
+                    }?.let { accessIndex -> accessIndex to instruction }
+                }
+                val packedSwitchIndexes = instructions.mapIndexedNotNull { index, instruction ->
+                    index.takeIf {
+                        index < iconAccess.index && instruction.opcode == Opcode.PACKED_SWITCH
+                    }
+                }
+                val preSwitchHoistedSizeAccesses = packedSwitchIndexes.flatMap { switchIndex ->
                     instructions.mapIndexedNotNull { index, instruction ->
                         index.takeIf {
-                            index in branchStart until iconAccess.index &&
+                            index < switchIndex &&
                                 instruction.opcode == Opcode.IGET &&
                                 instruction.getReference<FieldReference>()?.toString() ==
                                 sizeField.toString()
                         }?.let { accessIndex -> accessIndex to instruction }
-                    },
+                    }
+                }
+                val sizeAccess = requireExactlyOne(
+                    "NewX TwitterShare branch-local or pre-switch-hoisted size access",
+                    branchLocalSizeAccesses + preSwitchHoistedSizeAccesses,
                 )
                 val sizeRegister =
                     (sizeAccess.second as? OneRegisterInstruction)?.registerA
@@ -275,15 +282,18 @@ val newXInlineDownloadButtonPatch =
                 val iconRegister =
                     (iconAccess.instruction as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("NewX TwitterShare icon access has no register")
+                val (iconArgumentRegister, sizeArgumentRegister, incomingIconRegister) =
+                    freeRegisters4Bit(index = iconAccess.index + 1, count = 3)
 
                 // Mutate from the later index first so the original size-access index remains
                 // valid for the normalization insertion below.
                 addInstructions(
                     iconAccess.index + 1,
                     """
-                        sget-object p1, $incomingIconField
-                        iget p2, p0, $sizeField
-                        invoke-static {v$iconRegister, p2, p1}, $EXTENSION->selectIcon(Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;
+                        move-object/from16 v$iconArgumentRegister, v$iconRegister
+                        sget-object v$incomingIconRegister, $incomingIconField
+                        iget v$sizeArgumentRegister, p0, $sizeField
+                        invoke-static {v$iconArgumentRegister, v$sizeArgumentRegister, v$incomingIconRegister}, $EXTENSION->selectIcon(Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;
                         move-result-object v$iconRegister
                         check-cast v$iconRegister, ${shareIconField.type}
                     """.trimIndent(),
@@ -298,7 +308,7 @@ val newXInlineDownloadButtonPatch =
             }
 
             val inlinePresenterType = barModels.inlineActionBarDescriptor
-            val inlineEventHandler = requireSingle(
+            val inlineEventHandler = requireExactlyOne(
                 "NewX inline-action event handler",
                 Fingerprint(
                     definingClass = inlinePresenterType,
@@ -360,17 +370,13 @@ private fun patchPostModelBridges(
     val canonicalPostMediaField = mediaModels.canonicalPostMediaField
 
     val presenterClass = context.mutableClassDefBy(barModels.inlineActionBarDescriptor)
-    val presenterPostFields = presenterClass.fields.filter { field ->
-        !AccessFlags.STATIC.isSet(field.accessFlags) &&
-            field.type == postModels.contextualPostDescriptor
-    }
-    if (presenterPostFields.size != 1) {
-        throw PatchException(
-            "Expected one NewX inline presenter contextual-post field, found " +
-                "${presenterPostFields.size}: ${presenterPostFields.joinToString()}",
-        )
-    }
-    val presenterPostField = presenterPostFields.single()
+    val presenterPostField = requireExactlyOne(
+        "NewX inline presenter contextual-post field",
+        presenterClass.fields.filter { field ->
+            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                field.type == postModels.contextualPostDescriptor
+        },
+    )
     presenterClass.requirePublicFields(listOf(presenterPostField))
 
     val extensionClass = context.mutableClassDefBy(EXTENSION)
@@ -419,18 +425,18 @@ private fun patchPostModelBridges(
     )
 
     val entryClass = context.mutableClassDefBy(entryModels.inlineActionEntryDescriptor)
-    val actionConstructor = entryClass.methods.singleOrNull { method ->
-        method.toString() == downloadModels.inlineActionEntryConstructor.toString()
-    } ?: throw PatchException(
-        "Resolved NewX inline-action constructor is no longer present: " +
-            downloadModels.inlineActionEntryConstructor,
+    val actionConstructor = requireExactlyOne(
+        "NewX inline-action constructor",
+        entryClass.methods.filter { method ->
+            method.toString() == downloadModels.inlineActionEntryConstructor.toString()
+        },
     )
     val actionTypeClass = context.mutableClassDefBy(entryModels.postActionTypeDescriptor)
-    val carrierField = actionTypeClass.fields.singleOrNull { field ->
-        field.toString() == downloadModels.twitterShareActionField.toString()
-    } ?: throw PatchException(
-        "Resolved NewX TwitterShare action constant is no longer present: " +
-            downloadModels.twitterShareActionField,
+    val carrierField = requireExactlyOne(
+        "NewX TwitterShare action constant",
+        actionTypeClass.fields.filter { field ->
+            field.toString() == downloadModels.twitterShareActionField.toString()
+        },
     )
     val createActionPlaceholder = extensionClass.requireHelper(CREATE_ACTION_HELPER, emptyList())
     val registerCount = createActionPlaceholder.implementation?.registerCount ?: 0
@@ -460,29 +466,40 @@ private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.requireHelpe
     name: String,
     parameters: List<String>,
 ): MutableMethod =
-    methods.singleOrNull { method ->
-        method.name == name &&
-            method.parameterTypes.map { it.toString() } == parameters &&
-            method.returnType == "Ljava/lang/Object;"
-    } ?: throw PatchException("NewX inline helper $name was not found")
+    requireExactlyOne(
+        "NewX inline helper $name",
+        methods.filter { method ->
+            method.name == name &&
+                method.parameterTypes.map { it.toString() } == parameters &&
+                method.returnType == "Ljava/lang/Object;"
+        },
+    )
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String): FieldReference {
     val resourceId = getResourceId(ResourceType.DRAWABLE, resourceName)
     val fields =
         Fingerprint(
-            definingClass = "Lcom/x/icons/",
             name = "<clinit>",
             returnType = "V",
             parameters = emptyList(),
             filters = listOf(literal(resourceId)),
-        ).scopedMatchAll().mapNotNull { match ->
-            val literalIndex = match.instructionMatches.single().index
-            match.method.instructions
-                .drop(literalIndex + 1)
-                .take(4)
-                .firstOrNull { instruction -> instruction.opcode == Opcode.SPUT_OBJECT }
-                ?.getReference<FieldReference>()
+        ).scopedMatchAll().map { match ->
+            val literalIndex = requireExactlyOne(
+                "NewX $resourceName drawable resource literal in ${match.originalMethod}",
+                match.instructionMatches,
+            ).index
+            val store = requireExactlyOne(
+                "NewX $resourceName drawable field store after ${match.originalMethod}",
+                match.method.instructions
+                    .drop(literalIndex + 1)
+                    .take(4)
+                    .filter { instruction -> instruction.opcode == Opcode.SPUT_OBJECT },
+            )
+            store.getReference<FieldReference>()
+                ?: throw PatchException(
+                    "NewX $resourceName drawable field store has no field reference: $store",
+                )
         }.distinctBy(FieldReference::toString)
 
     return requireExactlyOne("NewX $resourceName icon field", fields)
