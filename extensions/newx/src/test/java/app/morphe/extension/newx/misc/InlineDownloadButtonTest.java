@@ -378,6 +378,12 @@ public final class InlineDownloadButtonTest {
                 downloadSize,
                 downloadIcon
         ));
+
+        assertEquals(18f, InlineDownloadButton.displayIconSize(nativeSize), 0.0f);
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, downloadIcon));
+
+        assertEquals(18f, InlineDownloadButton.displayIconSize(downloadSize), 0.0f);
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(nativeIcon, downloadIcon));
     }
 
     @Test

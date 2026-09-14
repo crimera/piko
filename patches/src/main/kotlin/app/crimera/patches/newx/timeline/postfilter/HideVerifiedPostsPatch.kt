@@ -14,6 +14,7 @@ import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.timeline.NewXTimelineSuccessFingerprint
+import app.crimera.patches.newx.timeline.ensureTimelineSuccessRegisters
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAll
@@ -25,6 +26,7 @@ import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.numberOfParameterRegistersLogical
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -108,28 +110,17 @@ val newXHideVerifiedPostsPatch =
             }
 
             val match = matches.single()
-            val originalMethod = match.method
-            val method =
-                originalMethod.cloneMutable(
-                    additionalRegisters = originalMethod.numberOfParameterRegisters + 3,
-                ).also { expandedMethod ->
-                    match.classDef.methods.remove(originalMethod)
-                    match.classDef.methods.add(expandedMethod)
-                }
-            val timelineItemsRegister =
-                resolveTimelineItemsRegister(
-                    originalMethod = originalMethod,
-                    clonedMethod = method,
-                )
+            val method = ensureTimelineSuccessRegisters(match, requiredScratchRegisters = 4)
+            val timelineItemsRegister = method.p0Register + 2
             if (timelineItemsRegister > 15) {
                 throw PatchException(
                     "NewX timelineItems register must fit a four-bit invoke: " +
-                        "v$timelineItemsRegister in $originalMethod",
+                        "v$timelineItemsRegister in $method",
                 )
             }
 
             method.apply {
-                val insertionIndex = originalMethod.numberOfParameterRegistersLogical
+                val insertionIndex = method.numberOfParameterRegistersLogical
                 val timelineRead =
                     filterTimeline.injectRead(
                         method = this,

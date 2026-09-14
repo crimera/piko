@@ -381,8 +381,8 @@ val restoreTimelinePositionPatch =
                     invoke-direct {v$positionsRegister, v$indexRegister, v$offsetRegister}, $holderConstructorReference
                     invoke-interface {v$timelineGetterReceiverRegister}, $timelineGetterReference
                     move-result-object v$timelineRegister
-                    move-object/from16 v$mapOwnerRegister, p0
-                    iget-object v$mapRegister, v$mapOwnerRegister, $componentField
+                    move-object/from16 v$mapRegister, p0
+                    iget-object v$mapRegister, v$mapRegister, $componentField
                     iget-object v$mapRegister, v$mapRegister, $mapField
                     invoke-virtual {v$mapRegister, v$timelineRegister, v$positionsRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
                     move-result-object v$mapRegister
@@ -515,51 +515,41 @@ val restoreTimelinePositionPatch =
                 )
             }
 
-            val saveRepositoryFieldRead =
-                requireExactlyOne(
-                    "NewX save-scroll-position repository read",
-                    saveMethod.instructions.withIndex().filter { indexedInstruction ->
-                        if (indexedInstruction.value.opcode != Opcode.IGET_OBJECT) return@filter false
-                        val field = indexedInstruction.value.getReference<FieldReference>() ?: return@filter false
-                        if (field.toString() != repositoryField.toString()) return@filter false
-                        val fieldInstruction =
-                            indexedInstruction.value as? TwoRegisterInstruction
-                                ?: return@filter false
-                        val getterInstruction = saveMethod.instructions.getOrNull(indexedInstruction.index + 1)
-                        val getterReference = getterInstruction?.getReference<MethodReference>()
+            requireExactlyOne(
+                "NewX save-scroll-position repository read",
+                saveMethod.instructions.withIndex().filter { indexedInstruction ->
+                    if (indexedInstruction.value.opcode != Opcode.IGET_OBJECT) return@filter false
+                    val field = indexedInstruction.value.getReference<FieldReference>() ?: return@filter false
+                    if (field.toString() != repositoryField.toString()) return@filter false
+                    val fieldInstruction =
+                        indexedInstruction.value as? TwoRegisterInstruction
                             ?: return@filter false
-                        if (getterReference.toString() != timelineGetterReference.toString()) return@filter false
-                        val getterInvoke = getterInstruction as? FiveRegisterInstruction
-                            ?: return@filter false
-                        if (getterInvoke.registerCount != 1 ||
-                            getterInvoke.registerC != fieldInstruction.registerA
-                        ) {
-                            return@filter false
+                    val getterInstruction = saveMethod.instructions.getOrNull(indexedInstruction.index + 1)
+                    val getterReference = getterInstruction?.getReference<MethodReference>()
+                        ?: return@filter false
+                    if (getterReference.toString() != timelineGetterReference.toString()) return@filter false
+                    val getterInvoke = getterInstruction as? FiveRegisterInstruction
+                        ?: return@filter false
+                    if (getterInvoke.registerCount != 1 ||
+                        getterInvoke.registerC != fieldInstruction.registerA
+                    ) {
+                        return@filter false
+                    }
+                    val resultInstruction = saveMethod.instructions.getOrNull(indexedInstruction.index + 2)
+                        as? OneRegisterInstruction
+                        ?: return@filter false
+                    if (resultInstruction.registerA != saveTimelineRegister) return@filter false
+                    indexedInstruction.index + 2 < mapPutIndex &&
+                        saveMethod.instructions.withIndex().none { laterInstruction ->
+                            laterInstruction.index > indexedInstruction.index + 2 &&
+                                laterInstruction.index < mapPutIndex &&
+                                laterInstruction.value.getReference<MethodReference>()?.toString() ==
+                                    timelineGetterReference.toString() &&
+                                (saveMethod.instructions.getOrNull(laterInstruction.index + 1)
+                                    as? OneRegisterInstruction)?.registerA == saveTimelineRegister
                         }
-                        val resultInstruction = saveMethod.instructions.getOrNull(indexedInstruction.index + 2)
-                            as? OneRegisterInstruction
-                            ?: return@filter false
-                        if (resultInstruction.registerA != saveTimelineRegister) return@filter false
-                        indexedInstruction.index + 2 < mapPutIndex &&
-                            saveMethod.instructions.withIndex().none { laterInstruction ->
-                                laterInstruction.index > indexedInstruction.index + 2 &&
-                                    laterInstruction.index < mapPutIndex &&
-                                    laterInstruction.value.getReference<MethodReference>()?.toString() ==
-                                        timelineGetterReference.toString() &&
-                                    (saveMethod.instructions.getOrNull(laterInstruction.index + 1)
-                                        as? OneRegisterInstruction)?.registerA == saveTimelineRegister
-                            }
-                    },
-                )
-            val saveRepositoryFieldInstruction =
-                saveRepositoryFieldRead.value as? TwoRegisterInstruction
-                    ?: throw PatchException("NewX save-scroll-position repository read has no register layout")
-            val saveRepositoryRegister = saveRepositoryFieldInstruction.registerB
-            if (saveRepositoryRegister !in 0..15) {
-                throw PatchException(
-                    "NewX save-scroll-position repository register is not encodable: v$saveRepositoryRegister",
-                )
-            }
+                },
+            )
             val saveIdentityRegister =
                 try {
                     saveMethod
@@ -569,7 +559,6 @@ val restoreTimelinePositionPatch =
                             saveTimelineRegister,
                             saveHolderRegister,
                             saveMapRegister,
-                            saveRepositoryRegister,
                         ).getFreeRegister4Bit()
                 } catch (exception: RuntimeException) {
                     throw PatchException(
@@ -604,7 +593,8 @@ val restoreTimelinePositionPatch =
                 mapPutIndex,
                 (
                     """
-                    iget-object v$saveIdentityRegister, v$saveRepositoryRegister, $repositoryField
+                    move-object/from16 v$saveIdentityRegister, p0
+                    iget-object v$saveIdentityRegister, v$saveIdentityRegister, $repositoryField
                     invoke-interface {v$saveIdentityRegister}, $timelineIdentityGetterReference
                     move-result-object v$saveIdentityRegister
                     iget-object v$saveIdentityRegister, v$saveIdentityRegister, $timelineIdentityFieldReference

@@ -73,21 +73,12 @@ val newXHideAiGeneratedPostsPatch =
             }
 
             val match = matches.single()
-            val originalMethod = match.method
-            val method =
-                originalMethod.cloneMutable(
-                    // The 12.27 constructor has no local registers. Reserve one scratch
-                    // register while keeping the original parameter copies below it.
-                    additionalRegisters = originalMethod.numberOfParameterRegisters + 1,
-                ).also { expandedMethod ->
-                    match.classDef.methods.remove(originalMethod)
-                    match.classDef.methods.add(expandedMethod)
-                }
-            val timelineItemsRegister = originalMethod.p0Register + 2
+            val method = ensureTimelineSuccessRegisters(match, requiredScratchRegisters = 4)
+            val timelineItemsRegister = method.p0Register + 2
             if (timelineItemsRegister !in 0..15) {
                 throw PatchException(
                     "NewX timelineItems register must fit a four-bit invoke: " +
-                        "v$timelineItemsRegister in $originalMethod",
+                        "v$timelineItemsRegister in $method",
                 )
             }
 
@@ -95,7 +86,7 @@ val newXHideAiGeneratedPostsPatch =
                 val read =
                     aiSourcesToHide.injectRead(
                         method = this,
-                        index = originalMethod.numberOfParameterRegistersLogical,
+                        index = method.numberOfParameterRegistersLogical,
                         excludedRegisters = listOf(timelineItemsRegister),
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )

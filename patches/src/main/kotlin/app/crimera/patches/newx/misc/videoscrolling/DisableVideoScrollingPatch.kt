@@ -23,6 +23,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
+import app.crimera.patches.newx.utils.requireExactlyOne
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -101,8 +102,12 @@ private fun patchVerticalPager(
         method.instructions.firstOrNull()
             ?: throw PatchException("NewX VerticalPager target has no instructions: ${match.originalMethod}")
     val p0Register = method.p0Register
-    val userScrollEnabledRegister = p0Register + 8
-    val defaultMaskRegister = p0Register + 17
+    val booleanParamIndex = requireExactlyOne(
+        "NewX VerticalPager userScrollEnabled parameter",
+        method.parameterTypes.indices.filter { method.parameterTypes[it].toString() == "Z" },
+    )
+    val userScrollEnabledRegister = p0Register + booleanParamIndex
+    val defaultMaskRegister = p0Register + method.parameterTypes.lastIndex
     if (userScrollEnabledRegister > 255 || defaultMaskRegister > 255) {
         throw PatchException(
             "NewX VerticalPager parameter registers exceed bytecode encoding limits: " +

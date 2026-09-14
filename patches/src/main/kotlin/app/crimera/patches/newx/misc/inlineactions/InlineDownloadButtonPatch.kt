@@ -44,10 +44,13 @@ import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.cloneMutable
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
+import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
@@ -67,9 +70,10 @@ private fun MutableMethod.requireStatic(label: String) {
 private fun MutableMethod.freeRegisters4Bit(
     index: Int,
     count: Int,
+    excludedRegisters: Collection<Int> = emptyList(),
 ): List<Int> =
     try {
-        getFreeRegisterProvider(index, count).let { provider ->
+        getFreeRegisterProvider(index, count, *excludedRegisters.toIntArray()).let { provider ->
             List(count) { provider.getFreeRegister4Bit() }
         }
     } catch (exception: RuntimeException) {
@@ -279,30 +283,62 @@ val newXInlineDownloadButtonPatch =
                 val sizeRegister =
                     (sizeAccess.second as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("NewX share icon size access has no register")
+                val sizeModifierCalls = instructions.mapIndexedNotNull { index, instruction ->
+                    if (index in branchStart until iconAccess.index &&
+                        instruction.opcode == Opcode.INVOKE_STATIC
+                    ) {
+                        val method = instruction.getReference<MethodReference>()
+                        if (method?.parameterTypes?.map { it.toString() } == listOf(MODIFIER, "F") &&
+                            method?.returnType == MODIFIER
+                        ) {
+                            index to instruction
+                        } else null
+                    } else null
+                }
+                val sizeModifierCall = requireExactlyOne(
+                    "NewX TwitterShare branch size modifier call",
+                    sizeModifierCalls,
+                )
                 val iconRegister =
                     (iconAccess.instruction as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("NewX TwitterShare icon access has no register")
-                val (iconArgumentRegister, sizeArgumentRegister, incomingIconRegister) =
-                    freeRegisters4Bit(index = iconAccess.index + 1, count = 3)
+                val parameterRegisterStart = p0Register
+                val parameterRegisters =
+                    parameterRegisterStart until
+                        (parameterRegisterStart + numberOfParameterRegisters)
 
-                // Mutate from the later index first so the original size-access index remains
-                // valid for the normalization insertion below.
+                // Mutate from the higher index first so the earlier size-modifier index remains valid.
+                val (incomingIconRegister,) =
+                    freeRegisters4Bit(
+                        index = iconAccess.index + 1,
+                        count = 1,
+                        excludedRegisters = parameterRegisters + iconRegister,
+                    )
+
                 addInstructions(
                     iconAccess.index + 1,
                     """
-                        move-object/from16 v$iconArgumentRegister, v$iconRegister
                         sget-object v$incomingIconRegister, $incomingIconField
-                        iget v$sizeArgumentRegister, p0, $sizeField
-                        invoke-static {v$iconArgumentRegister, v$sizeArgumentRegister, v$incomingIconRegister}, $EXTENSION->selectIcon(Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;
+                        invoke-static {v$iconRegister, v$incomingIconRegister}, $EXTENSION->selectIcon(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
                         move-result-object v$iconRegister
                         check-cast v$iconRegister, ${shareIconField.type}
                     """.trimIndent(),
                 )
+
+                val (displaySizeRegister,) =
+                    freeRegisters4Bit(
+                        index = sizeModifierCall.first,
+                        count = 1,
+                        excludedRegisters = parameterRegisters + sizeRegister,
+                    )
+
                 addInstructions(
-                    sizeAccess.first + 1,
+                    sizeModifierCall.first,
                     """
-                        invoke-static {v$sizeRegister}, $EXTENSION->displayIconSize(F)F
-                        move-result v$sizeRegister
+                        move/from16 v$displaySizeRegister, v$sizeRegister
+                        invoke-static {v$displaySizeRegister}, $EXTENSION->displayIconSize(F)F
+                        move-result v$displaySizeRegister
+                        move/from16 v$sizeRegister, v$displaySizeRegister
                     """.trimIndent(),
                 )
             }

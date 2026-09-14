@@ -92,6 +92,12 @@ private data class PostDividerCall(
     val booleanRegister: Int,
 )
 
+private data class ReplyFacepileDrawCall(
+    val index: Int,
+    val inputModifierRegister: Int,
+    val resultRegister: Int,
+)
+
 private fun Method.isPostDividerWrapperConstructor(): Boolean =
     name == "<init>" &&
         parameterTypes.map(CharSequence::toString).let { parameters ->
@@ -309,7 +315,7 @@ private fun resolvePostDividerCalls(method: Method): List<PostDividerCall> {
     }
 }
 
-private fun resolveReplyFacepileDrawCallIndex(method: Method): Int {
+private fun resolveReplyFacepileDrawCall(method: Method): ReplyFacepileDrawCall {
     val instructions = method.instructions.toList()
     val drawCallIndex =
         requireExactlyOne(
@@ -319,16 +325,36 @@ private fun resolveReplyFacepileDrawCallIndex(method: Method): Int {
                     index.takeIf { instruction.isDrawModifierCall() }
                 },
         )
-    if (instructions.getOrNull(drawCallIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+
+    val drawCall = instructions[drawCallIndex]
+    val inputModifierRegister =
+        drawCall.registersUsed.firstOrNull()
+            ?: throw PatchException(
+                "NewX reply facepile draw modifier call has no input modifier register: " +
+                    drawCall,
+            )
+    val drawResult = instructions.getOrNull(drawCallIndex + 1) as? OneRegisterInstruction
+    if (drawResult?.opcode != Opcode.MOVE_RESULT_OBJECT) {
         throw PatchException(
             "NewX reply facepile draw modifier call has no move-result-object: " +
-                instructions[drawCallIndex],
+                drawCall,
         )
     }
     if (instructions.getOrNull(drawCallIndex + 2) == null) {
         throw PatchException("NewX reply facepile draw modifier call has no continuation")
     }
-    return drawCallIndex
+    val resultRegister = drawResult.registerA
+    if (inputModifierRegister !in 0..0xffff || resultRegister !in 0..0xffff) {
+        throw PatchException(
+            "NewX reply facepile draw modifier call requires 16-bit registers: " +
+                "input v$inputModifierRegister, result v$resultRegister",
+        )
+    }
+    return ReplyFacepileDrawCall(
+        index = drawCallIndex,
+        inputModifierRegister = inputModifierRegister,
+        resultRegister = resultRegister,
+    )
 }
 
 context(context: BytecodePatchContext)
@@ -395,23 +421,30 @@ private fun patchReplyFacepileDivider(
     owner.methods.remove(originalMethod)
     owner.methods.add(method)
 
-    val drawCallIndex = resolveReplyFacepileDrawCallIndex(method)
+    val drawCall = resolveReplyFacepileDrawCall(method)
     val continuation =
-        method.instructions.getOrNull(drawCallIndex + 2)
+        method.instructions.getOrNull(drawCall.index + 2)
             ?: throw PatchException("NewX reply facepile draw call has no continuation")
+    val drawInstruction = method.instructions[drawCall.index]
     val settingRegister = originalRegisterCount
     val read =
         setting.injectReadWithDefault(
             method = method,
-            index = drawCallIndex,
+            index = drawCall.index,
             defaultValue = false,
             registerRange = settingRegister..settingRegister + 1,
         )
-    val label = "piko_newx_hide_post_dividers_reply_facepile_continue"
+    val drawLabel = "piko_newx_hide_post_dividers_reply_facepile_draw"
+    val continuationLabel = "piko_newx_hide_post_dividers_reply_facepile_continue"
     method.addInstructionsWithLabels(
         read.nextIndex,
-        "if-nez v${read.register}, :$label",
-        ExternalLabel(label, continuation),
+        """
+            if-eqz v${read.register}, :$drawLabel
+            move-object/from16 v${drawCall.resultRegister}, v${drawCall.inputModifierRegister}
+            goto :$continuationLabel
+        """.trimIndent(),
+        ExternalLabel(drawLabel, drawInstruction),
+        ExternalLabel(continuationLabel, continuation),
     )
 }
 

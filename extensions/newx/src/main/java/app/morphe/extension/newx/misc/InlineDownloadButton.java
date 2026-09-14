@@ -141,6 +141,9 @@ public final class InlineDownloadButton {
         }
     }
 
+    private static final ThreadLocal<Boolean> CURRENT_ICON_IS_DOWNLOAD =
+            new ThreadLocal<>();
+
     /**
      * Encodes the download classification in the value captured by Twitter's icon lambda. The
      * patched share branch restores the positive size before layout, then uses the retained sign
@@ -158,7 +161,22 @@ public final class InlineDownloadButton {
 
     /** Returns the actual layout size for the sign-tagged icon-lambda value. */
     public static float displayIconSize(float markedIconSize) {
+        CURRENT_ICON_IS_DOWNLOAD.set(Float.floatToRawIntBits(markedIconSize) < 0);
         return Math.abs(markedIconSize);
+    }
+
+    /** Selects from the classification captured directly by the icon lambda. */
+    public static Object selectIcon(
+            Object nativeIcon,
+            Object downloadIcon
+    ) {
+        if (!isEnabled()) return nativeIcon;
+
+        Boolean isDownload = CURRENT_ICON_IS_DOWNLOAD.get();
+        CURRENT_ICON_IS_DOWNLOAD.remove();
+        boolean useDownloadIcon = Boolean.TRUE.equals(isDownload);
+        NewXLogger.printInfo(() -> "select download=" + useDownloadIcon);
+        return useDownloadIcon ? downloadIcon : nativeIcon;
     }
 
     /** Selects from the classification captured directly by the icon lambda. */
@@ -169,6 +187,7 @@ public final class InlineDownloadButton {
     ) {
         if (!isEnabled()) return nativeIcon;
 
+        CURRENT_ICON_IS_DOWNLOAD.remove();
         boolean useDownloadIcon = Float.floatToRawIntBits(markedIconSize) < 0;
         NewXLogger.printInfo(() -> "select size=" + markedIconSize
                 + " download=" + useDownloadIcon);
