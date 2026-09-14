@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Falha ao apagar cache</string>
     <string name="piko_title_native_share_menu">Menu de compartilhamento nativo</string>
     <string name="piko_native_share_menu_toggle">Ativar menu de compartilhamento nativo</string>
+    <string name="piko_native_share_menu_items_to_hide">Itens do menu de compartilhamento nativo a serem ocultados</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Anúncios</string>
     <string name="piko_pref_hide_promoted_posts">Ocultar publicações promovidas</string>
@@ -139,12 +140,36 @@
     <string name="piko_pref_search_suggestion_desc">Oculta a sugestão de pesquisa na seção explorar.</string>
     <string name="piko_legacy_share_link">Links de compartilhamento antigos</string>
     <string name="piko_block_redirecting_to_x_lite">Bloquear o redirecionamento para o X Lite</string>
+    <string name="piko_pref_block_update_screen">Bloquear tela de atualização</string>
+    <string name="piko_pref_block_update_screen_desc">Bloqueia a tela de atualização \'Este aplicativo está desatualizado\' de ser exibida ao iniciar</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>
     <string name="piko_pref_feature_flags">Adicionar feature flags</string>
     <string name="piko_pref_edit_flag_title">Editar flag</string>
     <string name="piko_pref_add_flag_title">Adicionar flag</string>
     <string name="piko_pref_search_flags">Buscar flags</string>
+    <string name="piko_pref_add_selected_flags">Adicionar selecionado</string>
+    <string name="piko_pref_flag_name">Nome da flag</string>
+    <string name="piko_pref_flag_already_added">Já adicionado</string>
+    <string name="piko_pref_flag_invalid_name">Digite o nome da flag sem espaços, vírgulas ou dois pontos.</string>
+    <string name="piko_pref_select_flags">Selecione</string>
+    <string name="piko_pref_check_flags">Verifique as flags</string>
+    <string name="piko_pref_flags_enable">Ativado</string>
+    <string name="piko_pref_flags_disable">Desligado</string>
+    <string name="piko_pref_flags_remove_selected">Remover as flags selecionadas?</string>
+    <string name="piko_pref_flag_verify_name">Nomes de flag sugeridos</string>
+    <string name="piko_pref_flags_selected">%s selecionado</string>
+    <string name="piko_pref_flag_unknown">Não encontrado nos indicadores de pesquisa. Isso pode ser um erro de digitação ou um indicador que o aplicativo ainda não coletou.</string>
+    <string name="piko_pref_flag_duplicates">Entradas duplicadas</string>
+    <string name="piko_pref_flag_unverified_short">Nome não verificado</string>
+    <string name="piko_pref_flag_typo_short">Possível erro de digitação</string>
+    <string name="piko_pref_flag_merge_same">Essas entradas têm o mesmo valor. Combine-as em um único indicador e mantenha esse valor:</string>
+    <string name="piko_pref_flag_merge_conflict">Essas entradas têm valores diferentes. Escolha o valor que deseja manter ao combiná-las em uma única flag.</string>
+    <string name="piko_pref_flag_merge">Mesclar em um</string>
+    <string name="piko_pref_flag_keep_on">Mater ligado</string>
+    <string name="piko_pref_flag_keep_off">Manter desligado</string>
+    <string name="piko_pref_flag_suggested_name">Nome sugerido:</string>
+    <string name="piko_pref_flag_check_clear">Nenhum nome duplicado ou não verificado foi encontrado.</string>
     <string name="piko_pref_import_flags">Importar flags</string>
     <string name="piko_pref_export_flags">Exportar flags</string>
     <string name="piko_pref_reset_flags">Redefinir flags</string>
@@ -205,6 +230,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Mais informações sobre o perfil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Adiciona mais detalhes à página de perfil</string>
     <string name="piko_fast_follower">Seguidor rápido</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Estilo da fonte</string>
     <string name="piko_pref_add_font">Adicionar fonte</string>

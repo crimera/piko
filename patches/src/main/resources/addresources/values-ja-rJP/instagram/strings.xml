@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">入力状態を非表示</string>
     <string name="piko_disable_screenshot_detection">スクリーンショットの検出を無効化</string>
     <string name="piko_view_dm_anonymously">DMを匿名で閲覧</string>
+    <string name="piko_view_dm_anonymously_desc">有効にすると、メッセージを読んだことが相手に表示されません。この設定と「すべての匿名モードを有効化」の両方が無効の場合は、Instagramの「開封証明を表示」設定に従います</string>
     <string name="piko_turn_on_all_ghost_modes">すべての匿名モードを有効化</string>
     <string name="piko_ghost_modes_on">匿名モード：有効</string>
     <string name="piko_ghost_modes_default">匿名モード：無効</string>
@@ -57,7 +58,7 @@
     <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
     <string name="piko_hide_stories_tray_desc">メインフィードからストーリーズ欄を非表示にします</string>
     <string name="piko_hide_notes_tray">ノート欄を非表示</string>
-    <string name="piko_hide_notes_tray_desc">DMセクションのノート欄を非表示にします</string>
+    <string name="piko_hide_notes_tray_desc">DMのノート欄を非表示にします</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">シェアシートのグループ作成ボタンを非表示</string>
     <string name="piko_disable_double_tap_like_post">投稿をダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_reel">リールをダブルタップして「いいね！」を無効化</string>
@@ -89,12 +90,11 @@
     <string name="piko_loop_story">ストーリーをループ再生</string>
     <string name="piko_loop_story_desc">終了時に現在のストーリーを再生します</string>
     <string name="piko_disable_video_autoplay">動画を自動で再生しない</string>
-    <string name="piko_stories_audio_autoplay">ストーリーズの音声を自動で再生</string>
     <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
     <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
-    <string name="piko_improve_image_viewing">画像表示を改善</string>
-    <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します</string>
-    <string name="piko_hide_reshare_button">リシェアボタンを非表示</string>
+    <string name="piko_improve_image_viewing">画像を高画質で表示</string>
+    <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します。動作が遅くなったり、アプリデータの容量が増えたり、古いレイアウトに切り替わったりする場合があります</string>
+    <string name="piko_hide_reshare_button">再投稿ボタンを非表示</string>
     <string name="piko_copy_comment">コメントをコピー</string>
     <string name="piko_copy_comment_desc">投稿やリールのコメントをコピーするボタンを追加します</string>
     <string name="piko_comment_copied_success">コメントをコピーしました</string>
@@ -123,14 +123,17 @@
     <string name="piko_unlimited_replays">一時的なメディアを永続的にする</string>
     <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
     <string name="piko_enable_mark_chat_as_read">チャットを既読にするオプションを有効化</string>
-    <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にできるオプションを追加します</string>
+    <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にするオプションを追加します。「DMを匿名で閲覧」が有効でも、手動で既読にすると相手に既読が表示されます</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">メディアのダウンロード</string>
+    <string name="piko_category_downloads">ダウンロード</string>
     <string name="piko_enable_download">ダウンロードを有効化</string>
     <string name="piko_enable_direct_download">直接ダウンロードを有効化</string>
     <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
     <string name="piko_download_username_folder">ユーザーネームごとにメディアを分ける</string>
     <string name="piko_download_username_folder_desc">ユーザーネームごとにサブフォルダを作成します</string>
+    <string name="piko_embed_download_metadata">メタデータを埋め込む</string>
+    <string name="piko_embed_download_metadata_desc">ダウンロードしたMP4ファイルに、キャプション、投稿リンク、作成者、アップロード日を追加します</string>
     <string name="piko_download_current_media">現在のメディアをダウンロード</string>
     <string name="piko_download_as_image">画像としてダウンロード</string>
     <string name="piko_video_variants">動画の解像度</string>
@@ -171,6 +174,20 @@
     <string name="piko_hide_navigation_direct">DMボタンを非表示</string>
     <string name="piko_hide_navigation_search">検索ボタンを非表示</string>
     <string name="piko_hide_navigation_create">作成ボタンを非表示</string>
+    <string name="piko_category_navigation_tabs">ナビゲーションバー</string>
+    <string name="piko_navigation_tabs_title">タブの表示と並べ替え</string>
+    <string name="piko_navigation_tabs_summary">表示されているタブを選択し、ドラッグして並べ替えます</string>
+    <string name="piko_navigation_startup_tab">起動時のタブ</string>
+    <string name="piko_navigation_startup_tab_summary">アプリの起動時に開くタブを選択します</string>
+    <string name="piko_navigation_tab_home">ホーム</string>
+    <string name="piko_navigation_tab_reels">リール</string>
+    <string name="piko_navigation_tab_messages">メッセージ</string>
+    <string name="piko_navigation_tab_search">検索</string>
+    <string name="piko_navigation_tab_profile">プロフィール</string>
+    <string name="piko_navigation_tab_notifications">通知</string>
+    <string name="piko_navigation_tab_create">作成</string>
+    <string name="piko_navigation_settings_lockout_title">Piko設定ボタンがありません</string>
+    <string name="piko_navigation_settings_lockout_message">この設定では、表示されているタブからPiko設定を開けません。アプリのアイコンを長押してPiko設定を選択することでPiko設定を開けます。</string>
     <!-- Information Section -->
     <string name="piko_category_about">概要</string>
     <string name="piko_export_pref">Piko設定をエクスポート</string>
@@ -193,6 +210,7 @@
     <string name="piko_import_fail">インポートに失敗しました</string>
     <string name="piko_restart_app">変更を適用するにはアプリの再起動が必要です</string>
     <string name="piko_ok">OK</string>
+    <string name="piko_reset">リセット</string>
     <string name="piko_cancel">キャンセル</string>
     <string name="piko_deleted">削除しました</string>
     <string name="piko_debug">Pikoデバッグ</string>
@@ -222,7 +240,7 @@
     <string name="piko_no_internet">インターネットに接続してください</string>
     <string name="piko_tap_here">ここをタップ！！</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">アクションバーをカスタマイズ</string>
+    <string name="piko_category_action_bar">アクションバー</string>
     <string name="piko_action_bar_main_feed">[ホーム] タブに表示するアクション</string>
     <string name="piko_action_bar_user_profile">[プロフィール] タブに表示するアクション</string>
     <string name="piko_action_bar_chat">チャットに表示するアクション</string>
@@ -231,6 +249,8 @@
     <string name="piko_action_bar_button_settings_icon">設定</string>
     <string name="piko_action_bar_button_ghost_mode_icon">匿名モード</string>
     <string name="piko_action_bar_button_profile_info_icon">プロフィール情報</string>
+    <string name="piko_action_bar_button_create_icon">作成</string>
+    <string name="piko_action_bar_button_notifications_icon">通知</string>
     <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
     <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
     <!-- Developer Options Section -->
@@ -241,7 +261,7 @@
     <string name="piko_rec_flags_refresh_file">フラグを更新</string>
     <string name="piko_rec_flags_last_modified_at">最終更新：%s</string>
     <!-- Story filters -->
-    <string name="piko_category_filter_content">コンテンツをフィルタリング</string>
+    <string name="piko_category_filter_content">コンテンツフィルター</string>
     <string name="piko_filter_story">ストーリーをフィルタリング</string>
     <string name="piko_filter_story_types_to_hide">非表示にするストーリーの種類</string>
     <string name="piko_reel_type_ads_reel">広告リール</string>
@@ -271,7 +291,7 @@
     <string name="piko_reel_type_highlight_rewind_reel">過去のハイライト</string>
     <string name="piko_reel_type_inactive_hallpass_reel">無効なHall Passストーリー</string>
     <string name="piko_reel_type_mas_reel">複数ユーザーのまとめストーリー</string>
-    <string name="piko_reel_type_media_reshare">メディアのリシェア</string>
+    <string name="piko_reel_type_media_reshare">メディアの再投稿</string>
     <string name="piko_reel_type_memory_reel">思い出のストーリー</string>
     <string name="piko_reel_type_my_week_reel">今週のまとめ</string>
     <string name="piko_reel_type_netego_reel">おすすめのストーリー</string>
@@ -305,13 +325,11 @@
     <string name="piko_save_deleted_messages">削除したメッセージを保存</string>
     <string name="piko_save_deleted_messages_desc">サーバーから届いたDMを受信時にローカルへ保存します。送信を取り消したメッセージには削除済みのマークを付けるため、送信者が削除した後でも確認できます。</string>
     <string name="piko_view_deleted_messages">削除したメッセージを表示</string>
-    <string name="piko_deleted_in_chat">このチャットで削除</string>
     <string name="piko_all_deleted_messages">すべての削除したメッセージ</string>
-    <string name="piko_clear">削除</string>
-    <string name="piko_clear_chat_confirm">このチャットの削除したメッセージを削除しますか？</string>
-    <string name="piko_clear_all_confirm">削除したメッセージをすべて削除しますか？</string>
     <string name="piko_no_deleted_messages">削除したメッセージはありません。\nこの機能を有効にすると、メッセージを受信時に保存されます。</string>
-    <string name="piko_delete_saved_confirm">この保存したメッセージを削除しますか？</string>
+    <string name="piko_all">すべて</string>
+    <string name="piko_selected_count">%d件選択中</string>
+    <string name="piko_delete_selected_confirm">%d件のメッセージを削除しますか？</string>
     <string name="piko_delete">削除</string>
     <string name="piko_unknown">不明</string>
     <string name="piko_tap_to_view">タップして表示</string>
@@ -336,4 +354,7 @@
     <string name="piko_media_like">いいね</string>
     <string name="piko_media_link">リンク</string>
     <string name="piko_media_activity">アクティビティ</string>
+    <string name="piko_mark_story_seen">閲覧済みにする</string>
+    <string name="piko_story_seen_pending">送信中</string>
+    <string name="piko_story_seen_sent">閲覧済み</string>
 </resources>

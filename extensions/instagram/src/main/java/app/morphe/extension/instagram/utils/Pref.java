@@ -8,22 +8,24 @@
 package app.morphe.extension.instagram.utils;
 
 import java.util.Set;
+import java.util.HashSet;
+import android.content.Context;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
+import app.morphe.extension.shared.MarkChatAsReadScope;
 
 @SuppressWarnings("unused")
 public class Pref {
     private static final int MAX_IMAGE_SIZE = 4096;
-    public static boolean SHOULD_MARK_CHAT_AS_READ;
-    static {
-        SHOULD_MARK_CHAT_AS_READ = false;
-    }
-    public static void setMarkChatAsReadIndicator(boolean bool) {
-        SHOULD_MARK_CHAT_AS_READ = bool;
+
+    private static String removeLineBreaks(String value) {
+        return value.replace("\r", "").replace("\n", "");
     }
 
     public static boolean clearAllPreferences() {
@@ -66,7 +68,7 @@ public class Pref {
     }
 
     public static String customSharingDomain() {
-        return SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+        return removeLineBreaks(SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN));
     }
 
     public static boolean getTurnOnAllGhostModes() {
@@ -104,18 +106,26 @@ public class Pref {
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
-        if(enableMarkChatAsReadOption() && SHOULD_MARK_CHAT_AS_READ){
+        return shouldBlockDmSeen(
+                SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
+                Pref.getTurnOnAllGhostModes(),
+                enableMarkChatAsReadOption()
+        );
+    }
+
+    static boolean shouldBlockDmSeen(
+            boolean viewDmAnonymously,
+            boolean allGhostModes,
+            boolean manualReadOptionEnabled
+    ) {
+        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
-        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
+        return viewDmAnonymously || allGhostModes;
     }
 
     public static boolean disableVideoAutoplay() {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
-    }
-
-    public static boolean storiesAudioAutoplay() {
-        return SharedPref.getBooleanPref(Settings.STORIES_AUDIO_AUTOPLAY);
     }
 
     public
@@ -235,8 +245,20 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
+    public static boolean embedDownloadMetadata() {
+        return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
     public static boolean hideNavigationFeed() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_FEED);
+    }
+
+    public static boolean getHideHomeCreateButton() {
+        return !mainFeedActionBarButtons().contains(Constants.AB_CREATE);
+    }
+
+    public static boolean getHideHomeNotificationsButton() {
+        return !mainFeedActionBarButtons().contains(Constants.AB_NOTIFICATIONS);
     }
 
     public static boolean hideNavigationReels() {
@@ -253,6 +275,22 @@ public class Pref {
 
     public static boolean hideNavigationCreate() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_CREATE);
+    }
+
+    public static boolean hasLegacyNavigationSettings() {
+        return SharedPref.hasKey(Settings.HIDE_NAVIGATION_FEED.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_REELS.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_DIRECT.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_SEARCH.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_CREATE.key);
+    }
+
+    public static String navigationTabs() {
+        return SharedPref.getStringPref(Settings.NAVIGATION_TABS);
+    }
+
+    public static boolean setNavigationTabs(String value) {
+        return SharedPref.setStringPref(Settings.NAVIGATION_TABS.key, value);
     }
 
     public static boolean removeEmptyBottomSpace() {
@@ -299,15 +337,42 @@ public class Pref {
     }
 
     public static String externalDownloaderPackageName() {
-        return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+        return removeLineBreaks(SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME));
     }
 
     public static Set<String> mainFeedActionBarButtons() {
-        return SharedPref.getSetPref(Settings.ACTION_BAR_MAIN_FEED);
+        return loadAndMigrateActionBarButtons(Settings.ACTION_BAR_MAIN_FEED, true);
     }
 
     public static Set<String> userProfileActionBarButtons() {
-        return SharedPref.getSetPref(Settings.ACTION_BAR_USER_PROFILE);
+        return loadAndMigrateActionBarButtons(Settings.ACTION_BAR_USER_PROFILE, false);
+    }
+
+    private static Set<String> loadAndMigrateActionBarButtons(StringSetting setting, boolean home) {
+        Set<String> buttons = SharedPref.getSetPref(setting);
+        Context context = Utils.getContext();
+        var preferences = context == null ? null
+                : context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String migratedKey = setting.key + "_visibility_migrated";
+        if (preferences != null && preferences.getBoolean(migratedKey, false)) return buttons;
+
+        String createKey = Settings.HIDE_HOME_CREATE_BUTTON.key;
+        String notificationsKey = Settings.HIDE_HOME_NOTIFICATIONS_BUTTON.key;
+        buttons = new HashSet<>(buttons);
+        boolean hideCreate = buttons.remove("HIDE_CREATE");
+        if (home && preferences != null) hideCreate |= preferences.getBoolean(createKey, false);
+        if (!hideCreate) buttons.add(Constants.AB_CREATE);
+        if (home) {
+            boolean hideNotifications = buttons.remove("HIDE_NOTIFICATIONS");
+            if (preferences != null) hideNotifications |= preferences.getBoolean(notificationsKey, false);
+            if (!hideNotifications) buttons.add(Constants.AB_NOTIFICATIONS);
+        }
+        if (preferences != null) {
+            var editor = preferences.edit().putStringSet(setting.key, buttons).putBoolean(migratedKey, true);
+            if (home) editor.remove(createKey).remove(notificationsKey);
+            editor.apply();
+        }
+        return buttons;
     }
 
     public static Set<String> chatActionBarButtons() {

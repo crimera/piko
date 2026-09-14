@@ -16,9 +16,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -85,6 +90,7 @@ public class MediaDownloader {
     private void runDownloadTask(DownloadRequest request) {
         int notificationId = (int) System.currentTimeMillis();
         Uri outputDocumentUri = null;
+        File cacheFile = null;
         boolean downloadCompleted = false;
         Notification.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -126,36 +132,27 @@ public class MediaDownloader {
                 conn.connect();
 
                 int length = conn.getContentLength();
-                try (InputStream input = new BufferedInputStream(conn.getInputStream());
-                     OutputStream output = context.getContentResolver().openOutputStream(outputDocumentUri)) {
-                    if (output == null) {
-                        throw new IOException("Could not open download file");
-                    }
-
-                    byte[] buffer = new byte[8192];
-                    long total = 0;
-                    int count;
-                    long lastUpdateTime = 0;
-                    while ((count = input.read(buffer)) != -1) {
-                        total += count;
-                        output.write(buffer, 0, count);
-
-                        if (length > 0) {
-                            int per = (int) (total * 100 / length);
-
-                            // Cap the percentage at 99 inside the loop so it NEVER shows 100% until it actually completes
-                            if (per >= 100) per = 99;
-
-                            // Performance optimization: Only notify the system every 200ms to avoid clogging the OS thread
-                            long currentTime = System.currentTimeMillis();
-                            if (currentTime - lastUpdateTime > 200) {
-                                builder.setProgress(100, per, false);
-                                notificationManager.notify(notificationId, builder.build());
-                                lastUpdateTime = currentTime;
-                            }
+                if (request.metadata == null) {
+                    try (InputStream input = new BufferedInputStream(conn.getInputStream());
+                         OutputStream output = context.getContentResolver().openOutputStream(outputDocumentUri)) {
+                        if (output == null) {
+                            throw new IOException("Could not open download file");
                         }
+                        copyDownload(input, output, length, builder, notificationId);
                     }
-                    output.flush();
+                } else {
+                    cacheFile = File.createTempFile("piko-download-", ".mp4", context.getCacheDir());
+                    try (InputStream input = new BufferedInputStream(conn.getInputStream());
+                         OutputStream output = new BufferedOutputStream(new FileOutputStream(cacheFile))) {
+                        copyDownload(input, output, length, builder, notificationId);
+                    }
+
+                    try {
+                        writeMetadata(cacheFile, outputDocumentUri, request.metadata);
+                    } catch (Exception | LinkageError remuxException) {
+                        PikoUtils.logger(remuxException);
+                        copyRawFile(cacheFile, outputDocumentUri);
+                    }
                 }
             } finally {
                 if (conn != null) {
@@ -191,8 +188,75 @@ public class MediaDownloader {
             notificationManager.cancel(notificationId);
             PikoUtils.logger(e);
         } finally {
+            if (cacheFile != null && cacheFile.exists() && !cacheFile.delete()) {
+                PikoUtils.logger(new IOException("Could not delete download cache file"));
+            }
             isDownloading = false;
             processNext();
+        }
+    }
+
+    private void copyDownload(
+            InputStream input,
+            OutputStream output,
+            int length,
+            Notification.Builder builder,
+            int notificationId
+    ) throws IOException {
+        byte[] buffer = new byte[8192];
+        long total = 0;
+        int count;
+        long lastUpdateTime = 0;
+        while ((count = input.read(buffer)) != -1) {
+            total += count;
+            output.write(buffer, 0, count);
+
+            if (length > 0) {
+                int percent = (int) (total * 100 / length);
+                if (percent >= 100) percent = 99;
+
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastUpdateTime > 200) {
+                    builder.setProgress(100, percent, false);
+                    notificationManager.notify(notificationId, builder.build());
+                    lastUpdateTime = currentTime;
+                }
+            }
+        }
+        output.flush();
+    }
+
+    private void writeMetadata(File inputFile, Uri outputUri, DownloadMetadata metadata)
+            throws IOException {
+        ParcelFileDescriptor descriptor = context.getContentResolver()
+                .openFileDescriptor(outputUri, "rwt");
+        if (descriptor == null) {
+            throw new IOException("Could not open download file");
+        }
+        MetadataMuxer.write(
+                inputFile,
+                new ParcelFileDescriptor.AutoCloseOutputStream(descriptor),
+                metadata
+        );
+    }
+
+    private void copyRawFile(File inputFile, Uri outputUri) throws IOException {
+        try (InputStream input = new BufferedInputStream(new FileInputStream(inputFile))) {
+            ParcelFileDescriptor descriptor = context.getContentResolver()
+                    .openFileDescriptor(outputUri, "rwt");
+            if (descriptor == null) {
+                throw new IOException("Could not reopen download file");
+            }
+            try (OutputStream output = new BufferedOutputStream(
+                    new ParcelFileDescriptor.AutoCloseOutputStream(descriptor)
+            )) {
+                byte[] buffer = new byte[8192];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, count);
+                }
+                output.flush();
+            }
         }
     }
 

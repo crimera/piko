@@ -77,11 +77,9 @@
     <string name="piko_disable_story_flipping">停用自動切換限時動態</string>
     <string name="piko_disable_story_flipping_desc">停用自動切換/移動至下一個限時動態</string>
     <string name="piko_disable_video_autoplay">停用影片自動播放</string>
-    <string name="piko_stories_audio_autoplay">限時動態音訊自動播放</string>
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
-    <string name="piko_improve_image_viewing_desc">從伺服器擷取最高解像度的圖片</string>
     <string name="piko_hide_reshare_button">隱藏轉發按鈕</string>
     <string name="piko_copy_comment">複製留言</string>
     <string name="piko_copy_comment_desc">在貼文和 Reels 新增一個複製留言的按鈕</string>
@@ -146,8 +144,6 @@
     <string name="piko_hide_navigation_create">隱藏創作按鈕</string>
     <!-- Information Section -->
     <string name="piko_category_about">關於</string>
-    <string name="piko_export_pref">匯出 Piko 偏好設定</string>
-    <string name="piko_import_pref">匯入 Piko 偏好設定</string>
     <string name="piko_app_version">應用程式版本：%s</string>
     <string name="piko_patch_version">補丁版本：%s</string>
     <string name="piko_patch_info_title">補丁資訊</string>
@@ -189,7 +185,6 @@
     <string name="piko_no_internet">請連接到互聯網</string>
     <string name="piko_tap_here">點這裡！！</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">自訂操作列</string>
     <string name="piko_action_bar_main_feed">動態首頁操作列圖標</string>
     <string name="piko_action_bar_user_profile">個人檔案頁面操作列圖標</string>
     <string name="piko_action_bar_chat">訊息操作列圖標</string>

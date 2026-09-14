@@ -1,16 +1,14 @@
 <div align="center">
 
-<p align="center">
-    <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
-</p>
+<img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
 
-<h1 align="center">
+<h1>
     Morphe patches focused on Twitter/X & Instagram<br>
     <a href="https://t.me/pikopatches">
-        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"/>
     </a>
     <a href="https://crowdin.com/project/piko">
-        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white" alt="Crowdin"/>
     </a>
 </h1>
 
@@ -18,39 +16,36 @@
 
 ## 🕹️ Usage
 
-> Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
+Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
 
-**Morphe Manager**
+### Morphe Manager
 
-<details>
-<summary>Show steps</summary>
+Tap the link to add Piko as a patch source in Morphe Manager:
 
-Use the deep link to add Piko as a patch source in Morphe Manager:
-
-[➕ Add Piko to Morphe](https://morphe.software/add-source?github=crimera/piko)
+[**➕ Add Piko to Morphe**](https://morphe.software/add-source?github=crimera/piko)
 
 Then patch Twitter/X or Instagram:
 1. Tap X or Instagram app icon in Morphe
 2. Download original APKM file from ApkMirror. Do _not_ unspilt or modify the file, Morphe patches APKM directly
 3. Wait for patching to complete, install
 
-
-
-</details>
-
-**Morphe CLI**
+### Morphe CLI
 
 ```sh
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
-
-**X-Shim**
+### X-Shim
 
 Starting `12.5.0-release.0` **you need not** apply X-Shim along with Piko patches. X login and XChat will work fine without X-Shim patches.
 
+<details>
+
+<summary>Open old information</summary>
+
 <del>
-To patch with Twitter/X version 11.88 and above, you must include patches from another repo/project called [Piko-Shim](https://gitlab.com/inotia00/piko-shim/) developed by [@inotia00](https://github.com/inotia00)
+
+To patch with Twitter/X version 11.88 to 12.4, you must include patches from another repo/project called [X-Shim](https://gitlab.com/inotia00/x-shim) developed by [@inotia00](https://github.com/inotia00)
 
 [➕ Add X-Shim to Morphe](https://morphe.software/add-source?gitlab=inotia00/x-shim)
 
@@ -69,17 +64,19 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 
 </del>
 
+</details>
+
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.9.0-dev.9](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.9)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;133 patches total
+> **[v3.10.0-dev.7](https://github.com/crimera/piko/releases/tag/v3.10.0-dev.7)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;132 patches total
 <details>
-<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
+<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 12.17.0-release.0 |
+| 12.19.1-release.0 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
@@ -150,6 +147,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Remove premium upsell](#remove-premium-upsell) | Removes premium upsells |  |
 | [Remove search suggestions](#remove-search-suggestions) | Hide/Remove search suggestion in explore section |  |
 | [Remove view count](#remove-view-count) | Removes the view count from the bottom of tweets |  |
+| [Restore legacy follower lists](#restore-legacy-follower-lists) | Restores the legacy follower and following list screen. |  |
 | [Round off numbers](#round-off-numbers) | Enable or disable rounding off numbers |  |
 | [Selectable Text](#selectable-text) | Makes bio and username selectable |  |
 | [Share Tweet as Image](#share-tweet-as-image) | Share tweets as rendered image. Requires X 11.0.0-release.0 or higher. |  |
@@ -162,7 +160,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;59 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;57 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -181,6 +179,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Custom sharing domain](#custom-sharing-domain) | Allows for using custom domains when sharing posts, reels and stories. |  |
 | [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
+| [Customize navigation bar](#customize-navigation-bar) | Choose which tabs appear in the bottom navigation bar and reorder them |  |
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
 | [Disable ads](#disable-ads) |  |  |
 | [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
@@ -189,7 +188,6 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
-| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing. |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
@@ -202,7 +200,6 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Filter stories](#filter-stories) | Filter stories to hide based on different categories |  |
 | [Friendship status indicator](#friendship-status-indicator) | Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
-| [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |
 | [Hide notes tray](#hide-notes-tray) | Hides notes tray in DM section |  |
 | [Hide reshare button](#hide-reshare-button) | Hides the reshare button from both posts and reels. |  |
 | [Hide stories tray](#hide-stories-tray) | Hides stories tray from main feed. |  |
@@ -221,7 +218,6 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Sanitize share links](#sanitize-share-links) |  |  |
 | [Save deleted messages](#save-deleted-messages) | Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them. |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
-| [Stories audio autoplay](#stories-audio-autoplay) |  |  |
 | [Theme](#theme) | Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |

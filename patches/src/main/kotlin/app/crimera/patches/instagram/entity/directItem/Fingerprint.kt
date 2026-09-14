@@ -14,6 +14,7 @@ internal const val DIRECT_ITEM_CLASS = "$ENTITY_CLASS/DirectItem;"
 // --- Extension getters whose placeholder strings are rewritten at patch time. ---
 internal object GetBaseClassNameExtension : Fingerprint(name = "getBaseClassName", definingClass = DIRECT_ITEM_CLASS)
 internal object GetItemIdExtension : Fingerprint(name = "getItemId", definingClass = DIRECT_ITEM_CLASS)
+internal object GetClientContextExtension : Fingerprint(name = "getClientContext", definingClass = DIRECT_ITEM_CLASS)
 internal object GetUserIdExtension : Fingerprint(name = "getUserId", definingClass = DIRECT_ITEM_CLASS)
 internal object GetTextExtension : Fingerprint(name = "getText", definingClass = DIRECT_ITEM_CLASS)
 internal object SetTextExtension : Fingerprint(name = "setText", definingClass = DIRECT_ITEM_CLASS)
@@ -44,5 +45,5 @@ internal object FieldXmaLinkExtension : Fingerprint(name = "fieldXmaLink", defin
 
 // returnType omitted: v426 returns Z, v433+ returns V. const-string → iput pattern is present in both.
 internal object DirectItemDispatchFingerprint : Fingerprint(
-    strings = listOf("item_id", "user_id", "text", "timestamp", "hide_in_thread", "thread_key"),
+    strings = listOf("item_id", "client_context", "user_id", "text", "timestamp", "hide_in_thread", "thread_key"),
 )

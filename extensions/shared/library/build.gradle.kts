@@ -20,4 +20,8 @@ dependencies {
     implementation(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
     compileOnly(libs.appcompat)
+    implementation(project(
+        path = ":extensions:shared:media3",
+        configuration = "shadowedMedia3"
+    ))
 }
