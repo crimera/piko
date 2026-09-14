@@ -1,3 +1,14 @@
+## [3.10.0-dev.8](https://github.com/crimera/piko/compare/v3.10.0-dev.7...v3.10.0-dev.8) (2026-09-14)
+
+### 🐛 Bug Fixes
+
+* **ci:** Import Crowdin translations onto the latest dev ([#1890](https://github.com/crimera/piko/issues/1890)) ([385a8d1](https://github.com/crimera/piko/commit/385a8d1852434f0529d4a017f723ccc5cae4e0b8))
+* **Twitter:** Preserve links when applying custom fonts ([#1889](https://github.com/crimera/piko/issues/1889)) ([f5d1db8](https://github.com/crimera/piko/commit/f5d1db88cb2e1782436604168903347b43d3743c))
+
+### ✨ New Features
+
+* **Instagram:** Update the Direct icon in settings and in the navigation customization window. ([#1888](https://github.com/crimera/piko/issues/1888)) ([7e50716](https://github.com/crimera/piko/commit/7e507162e87e8ac586216fa7562add6bac355d28))
+
 ## [3.10.0-dev.7](https://github.com/crimera/piko/compare/v3.10.0-dev.6...v3.10.0-dev.7) (2026-09-13)
 
 ### 🐛 Bug Fixes
