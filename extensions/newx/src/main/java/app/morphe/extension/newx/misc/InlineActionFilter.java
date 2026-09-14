@@ -47,11 +47,20 @@ public final class InlineActionFilter {
         if (hiddenActionIds == null || hiddenActionIds.isEmpty()) return actions;
 
         try {
-            List<Object> filtered = new ArrayList<>(actions.size());
+            List<Object> filtered = null;
+            int index = 0;
             for (Object action : actions) {
-                if (!shouldHide(action, hiddenActionIds)) filtered.add(action);
+                if (shouldHide(action, hiddenActionIds)) {
+                    if (filtered == null) {
+                        filtered = new ArrayList<>(actions.size());
+                        filtered.addAll(actions.subList(0, index));
+                    }
+                } else if (filtered != null) {
+                    filtered.add(action);
+                }
+                index++;
             }
-            return filtered.size() == actions.size() ? actions : filtered;
+            return filtered == null ? actions : filtered;
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to customize NewX inline actions", exception);
             return actions;

@@ -40,7 +40,10 @@ public final class SettingsRegistry {
     private static final Map<String, Setting<?>> SETTINGS = new LinkedHashMap<>();
     private static final List<String> DYNAMIC_CHOICE_DIAGNOSTICS = new ArrayList<>();
     private static List<SettingsNode.Category> catalog = Collections.emptyList();
-    private static boolean frozen;
+    // Registration is complete before any runtime feature reads settings. The volatile
+    // publication lets the hot read path avoid taking the registry monitor while retaining a
+    // synchronized fallback for callers that arrive during startup.
+    private static volatile boolean frozen;
 
     private SettingsRegistry() {
     }
@@ -307,6 +310,14 @@ public final class SettingsRegistry {
         return frozen;
     }
 
+    public static boolean isRegistered(String id) {
+        if (frozen) return NODES.containsKey(id);
+
+        synchronized (SettingsRegistry.class) {
+            return NODES.containsKey(id);
+        }
+    }
+
     public static synchronized List<SettingsNode.Category> catalog() {
         requireFrozen();
         return catalog;
@@ -325,12 +336,12 @@ public final class SettingsRegistry {
      * Reads an optional setting without treating an omitted feature contribution as an error.
      * Contributions are selected independently by the user, so absence is a normal runtime state.
      */
-    public static synchronized boolean getBooleanOrDefault(String key) {
+    public static boolean getBooleanOrDefault(String key) {
         return getBooleanOrDefault(key, false);
     }
 
-    public static synchronized boolean getBooleanOrDefault(String key, boolean defaultValue) {
-        Setting<?> setting = SETTINGS.get(key);
+    public static boolean getBooleanOrDefault(String key, boolean defaultValue) {
+        Setting<?> setting = findSetting(key);
         if (setting == null) return defaultValue;
         if (!(setting instanceof BooleanSetting booleanSetting)) {
             throw failure("NewX setting is not boolean: " + key);
@@ -338,13 +349,13 @@ public final class SettingsRegistry {
         return booleanSetting.get();
     }
 
-    public static synchronized String getStringOrDefault(String key) {
+    public static String getStringOrDefault(String key) {
         return getStringOrDefault(key, "");
     }
 
-    public static synchronized String getStringOrDefault(String key, String defaultValue) {
+    public static String getStringOrDefault(String key, String defaultValue) {
         Objects.requireNonNull(defaultValue);
-        Setting<?> setting = SETTINGS.get(key);
+        Setting<?> setting = findSetting(key);
         if (setting == null) return defaultValue;
         if (!(setting instanceof StringSetting stringSetting)) {
             throw failure("NewX setting is not a string: " + key);
@@ -352,21 +363,29 @@ public final class SettingsRegistry {
         return stringSetting.get();
     }
 
-    public static synchronized Set<String> getStringSetOrDefault(String key) {
+    public static Set<String> getStringSetOrDefault(String key) {
         return getStringSetOrDefault(key, Collections.emptySet());
     }
 
-    public static synchronized Set<String> getStringSetOrDefault(
+    public static Set<String> getStringSetOrDefault(
             String key,
             Set<String> defaultValue
     ) {
         Objects.requireNonNull(defaultValue);
-        Setting<?> setting = SETTINGS.get(key);
+        Setting<?> setting = findSetting(key);
         if (setting == null) return defaultValue;
         if (!(setting instanceof StringSetSetting stringSetSetting)) {
             throw failure("NewX setting is not a string set: " + key);
         }
         return stringSetSetting.get();
+    }
+
+    private static Setting<?> findSetting(String key) {
+        if (frozen) return SETTINGS.get(key);
+
+        synchronized (SettingsRegistry.class) {
+            return SETTINGS.get(key);
+        }
     }
 
     private static void registerGroupInternal(

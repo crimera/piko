@@ -26,6 +26,12 @@ public final class TimelineScrollPositionStore {
     private static final Pattern POSITION_PATTERN = Pattern.compile(
             "ScrollPositionHolder\\(firstVisibleItemIndex=(\\d+), firstVisibleItemScrollOffset=(\\d+)\\)"
     );
+    private static final Object SAVE_LOCK = new Object();
+    private static volatile SharedPreferences cachedPreferences;
+    private static SharedPreferences lastSavedPreferences;
+    private static String lastSavedKey;
+    private static int lastSavedIndex = -1;
+    private static int lastSavedOffset = -1;
 
     private TimelineScrollPositionStore() {
     }
@@ -192,6 +198,66 @@ public final class TimelineScrollPositionStore {
         }
     }
 
+    /** Saves an already decoded position without allocating or reflectively parsing the holder. */
+    public static void save(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            int index,
+            int offset
+    ) {
+        boolean loggingEnabled = NewXLogger.isLoggingEnabled();
+        if (index < 0 || offset < 0) {
+            if (loggingEnabled) {
+                NewXLogger.logger("NewX save skip reason=negative-position");
+            }
+            return;
+        }
+
+        try {
+            boolean restoreTimelinePosition = SettingsRegistry.getBooleanOrDefault(
+                    RESTORE_TIMELINE_POSITION_SETTING,
+                    true
+            );
+            boolean restoreProfilePosition = SettingsRegistry.getBooleanOrDefault(
+                    RESTORE_PROFILE_POSITION_SETTING,
+                    false
+            );
+            String timelineName = timeline == null ? null : timeline.name();
+            String key = storageKey(
+                    timelineName,
+                    profileId,
+                    restoreTimelinePosition,
+                    restoreProfilePosition
+            );
+            if (key == null) return;
+
+            SharedPreferences preferences = preferences();
+            if (preferences == null) return;
+
+            synchronized (SAVE_LOCK) {
+                if (preferences == lastSavedPreferences && key.equals(lastSavedKey)
+                        && index == lastSavedIndex && offset == lastSavedOffset) {
+                    return;
+                }
+                preferences.edit()
+                        .putInt(key + INDEX_SUFFIX, index)
+                        .putInt(key + OFFSET_SUFFIX, offset)
+                        .apply();
+                lastSavedPreferences = preferences;
+                lastSavedKey = key;
+                lastSavedIndex = index;
+                lastSavedOffset = offset;
+            }
+
+            if (loggingEnabled) {
+                NewXLogger.logger("NewX save timeline=" + timelineName + " key=" + key
+                        + " index=" + index + " offset=" + offset);
+            }
+        } catch (Exception exception) {
+            NewXLogger.printException(() -> "Failed to save NewX timeline position", exception);
+        }
+    }
+
     /** Returns whether X's process-local position map is valid for this timeline type. */
     public static boolean useInMemoryPosition(Enum<?> timeline) {
         String timelineName = timeline == null ? null : timeline.name();
@@ -224,8 +290,18 @@ public final class TimelineScrollPositionStore {
 
     @Nullable
     private static SharedPreferences preferences() {
+        SharedPreferences cached = cachedPreferences;
+        if (cached != null) return cached;
+
         Context context = Utils.getContext();
         if (context == null) return null;
-        return context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        synchronized (TimelineScrollPositionStore.class) {
+            cached = cachedPreferences;
+            if (cached != null) return cached;
+            cached = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+            cachedPreferences = cached;
+            return cached;
+        }
     }
 }

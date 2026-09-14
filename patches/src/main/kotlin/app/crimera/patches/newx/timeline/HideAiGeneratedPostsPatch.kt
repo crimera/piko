@@ -37,7 +37,7 @@ val newXHideAiGeneratedPostsPatch =
         description = "Hides selected AI-generated posts from NewX timelines.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
-        dependsOn(newXTimelineModelAdapterPatch, newXPostModelResolutionPatch)
+        dependsOn(newXTimelineModelAdapterPatch, newXPostModelResolutionPatch, newXTimelineFilterPatch)
 
         val aiSourcesToHide =
             newXSettings {
@@ -61,21 +61,6 @@ val newXHideAiGeneratedPostsPatch =
             val accessors = resolveAiDisclosureAccessors()
             patchAiDisclosureAccessors(accessors)
 
-            val matches = NewXTimelineSuccessFingerprint.scopedMatchAll()
-            if (matches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX timeline success constructor, found ${matches.size}: " +
-                        matches.joinToString { it.originalMethod.toString() },
-                )
-            }
-
-            matches.single().method.addInstructions(
-                0,
-                """
-                    invoke-static {p2}, $TIMELINE_FILTER_DESCRIPTOR->filterAiGeneratedPosts(Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object p2
-                """.trimIndent(),
-            )
         }
     }
 

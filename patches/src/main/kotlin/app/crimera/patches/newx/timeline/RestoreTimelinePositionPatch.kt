@@ -146,6 +146,35 @@ val restoreTimelinePositionPatch =
                 },
             )
             val holderConstructorReference = "$holderDescriptor-><init>(II)V"
+            val holderPositionFields =
+                holderMatch.method.instructions.mapNotNull { instruction ->
+                    if (instruction.opcode != Opcode.IGET) return@mapNotNull null
+                    val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+                    field.takeIf {
+                        it.definingClass.toString() == holderDescriptor &&
+                            it.type.toString() == "I"
+                    }
+                }.distinctBy(FieldReference::toString)
+            if (holderPositionFields.size != 2) {
+                throw PatchException(
+                    "Expected two ordered NewX scroll-position holder fields, found " +
+                        "${holderPositionFields.size}: ${holderPositionFields.joinToString()}",
+                )
+            }
+            holderPositionFields.forEach { fieldReference ->
+                val definition =
+                    requireExactlyOne(
+                        "NewX scroll-position holder field definition $fieldReference",
+                        mutableClassDefBy(holderDescriptor).fields.filter { field ->
+                            field.toString() == fieldReference.toString()
+                        },
+                    )
+                if (!AccessFlags.PUBLIC.isSet(definition.accessFlags)) {
+                    throw PatchException(
+                        "NewX scroll-position holder field is not public: $fieldReference",
+                    )
+                }
+            }
 
             val getterMatch =
                 requireExactlyOne(
@@ -476,7 +505,7 @@ val restoreTimelinePositionPatch =
             }
             val saveMethod =
                 originalSaveMethod.cloneMutable(
-                    additionalRegisters = originalSaveMethod.numberOfParameterRegisters + 1,
+                    additionalRegisters = originalSaveMethod.numberOfParameterRegisters + 3,
                 ).also { expandedMethod ->
                     saveMatch.classDef.methods.remove(originalSaveMethod)
                     saveMatch.classDef.methods.add(expandedMethod)
@@ -550,22 +579,27 @@ val restoreTimelinePositionPatch =
                         }
                 },
             )
-            val saveIdentityRegister =
+            val saveRegisters =
                 try {
                     saveMethod
                         .getFreeRegisterProvider(
                             mapPutIndex,
-                            1,
+                            3,
                             saveTimelineRegister,
                             saveHolderRegister,
                             saveMapRegister,
-                        ).getFreeRegister4Bit()
+                        ).let { provider ->
+                            List(3) { provider.getFreeRegister4Bit() }
+                        }
                 } catch (exception: RuntimeException) {
                     throw PatchException(
-                        "Could not allocate NewX timeline-position identity register",
+                        "Could not allocate NewX timeline-position save registers",
                         exception,
                     )
                 }
+            val saveIdentityRegister = saveRegisters[0]
+            val saveIndexRegister = saveRegisters[1]
+            val saveOffsetRegister = saveRegisters[2]
 
             // Ranked Following uses the same shared save method as Latest Following, but
             // its Compose scroll policy has `a == false`. The original method branches
@@ -598,7 +632,9 @@ val restoreTimelinePositionPatch =
                     invoke-interface {v$saveIdentityRegister}, $timelineIdentityGetterReference
                     move-result-object v$saveIdentityRegister
                     iget-object v$saveIdentityRegister, v$saveIdentityRegister, $timelineIdentityFieldReference
-                    invoke-static {v$saveTimelineRegister, v$saveIdentityRegister, v$saveHolderRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}Ljava/lang/String;Ljava/lang/Object;)V
+                    iget v$saveIndexRegister, v$saveHolderRegister, ${holderPositionFields[0]}
+                    iget v$saveOffsetRegister, v$saveHolderRegister, ${holderPositionFields[1]}
+                    invoke-static {v$saveTimelineRegister, v$saveIdentityRegister, v$saveIndexRegister, v$saveOffsetRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}Ljava/lang/String;II)V
                     """.trimIndent()
                 ),
             )

@@ -72,6 +72,14 @@ val newXShareImagePatch =
             val timelinePostStateType = timelinePostStateMatch.originalClassDef.type
             val postIdentifierField =
                 timelinePostStateMatch.fieldForToStringLabel(", postId=")
+            requireExactlyOne(
+                "NewX post-identifier string accessor",
+                mutableClassDefBy(postIdentifierField.type).methods.filter { method ->
+                    method.name == "toString" &&
+                        method.parameterTypes.isEmpty() &&
+                        method.returnType == "Ljava/lang/String;"
+                },
+            )
             val renderedPostMethod =
                 requireExactlyOne(
                     "NewX individual post renderer",
@@ -137,7 +145,7 @@ val newXShareImagePatch =
                 """
                     move-object/from16 v$callbackRegister, p0
                     iget-object v$callbackRegister, v$callbackRegister, $postIdentifierField
-                    invoke-static {v$callbackRegister}, $SHARE_IMAGE_HANDLER->positionCallback(Ljava/lang/Object;)$FUNCTION1
+                    invoke-static {v$callbackRegister}, $SHARE_IMAGE_HANDLER->positionCallbackFromIdentifier(Ljava/lang/Object;)$FUNCTION1
                     move-result-object v$callbackRegister
                     invoke-static {v${modifierResult.registerA}, v$callbackRegister}, $onPositionedReference
                     move-result-object v${modifierResult.registerA}

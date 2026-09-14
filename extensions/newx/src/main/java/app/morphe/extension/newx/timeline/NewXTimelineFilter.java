@@ -119,6 +119,91 @@ public final class NewXTimelineFilter {
     private NewXTimelineFilter() {
     }
 
+    /** Applies all selected timeline filters in one traversal of the immutable item tree. */
+    public static Object filterTimelineItems(Object timelineItems) {
+        if (timelineItems == null) return null;
+
+        boolean filterPromotedItems = readBooleanSetting(
+                "newx.content.filter_promoted_posts",
+                false
+        );
+        boolean hideWhoToFollow = readBooleanSetting(
+                "newx.content.hide_who_to_follow",
+                false
+        );
+        boolean hideDiscoverMore = readBooleanSetting(
+                "newx.content.hide_discover_more",
+                false
+        );
+        Set<String> aiSourcesToHide = parseAiSources(readStringSetSetting(
+                "newx.content.hide_ai_generated_posts"
+        ));
+
+        PostFilterRuleStore.Snapshot ruleSnapshot = null;
+        if (SettingsRegistry.isRegistered("newx.content.post_filtering")) {
+            try {
+                PostFilterRuleStore store = PostFilterRuleStore.shared();
+                if (store.isEnabled()) ruleSnapshot = store.snapshot();
+            } catch (RuntimeException exception) {
+                logFailure("post-filter rule loading", exception);
+            }
+        }
+
+        boolean filterTimeline = readBooleanSetting(
+                "newx.content.verified_account_filtering.timeline",
+                false
+        );
+        boolean filterThread = readBooleanSetting(
+                "newx.content.verified_account_filtering.thread",
+                false
+        );
+        Set<String> verifiedTypesToHide = parseVerifiedTypes(readStringSetSetting(
+                "newx.content.hide_verified_account_types"
+        ));
+        Set<String> whitelist = Collections.emptySet();
+        if (!verifiedTypesToHide.isEmpty() && (filterTimeline || filterThread)) {
+            try {
+                whitelist = VerifiedAccountWhitelistStore.shared().snapshot();
+            } catch (RuntimeException exception) {
+                logFailure("verified-account whitelist loading", exception);
+            }
+        }
+
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                verifiedTypesToHide,
+                whitelist,
+                filterTimeline,
+                filterThread,
+                PRODUCTION_MODEL_ACCESS
+        );
+    }
+
+    private static boolean readBooleanSetting(String key, boolean defaultValue) {
+        if (!SettingsRegistry.isRegistered(key)) return defaultValue;
+        try {
+            return SettingsRegistry.getBooleanOrDefault(key, defaultValue);
+        } catch (RuntimeException exception) {
+            logFailure("timeline filter setting " + key, exception);
+            return defaultValue;
+        }
+    }
+
+    private static Set<String> readStringSetSetting(String key) {
+        if (!SettingsRegistry.isRegistered(key)) return Collections.emptySet();
+        try {
+            return SettingsRegistry.getStringSetOrDefault(key);
+        } catch (RuntimeException exception) {
+            logFailure("timeline filter setting " + key, exception);
+            return Collections.emptySet();
+        }
+    }
+
     public static Object filterPromotedItems(Object timelineItems) {
         boolean enabled = SettingsRegistry.getBooleanOrDefault("newx.content.filter_promoted_posts", true);
         return filterPromotedItems(timelineItems, enabled);

@@ -64,12 +64,13 @@ public final class MediaThumbnailLoader {
     ) {
         if (callback == null) return;
         if (!NewXUtils.isHttpUrl(networkUrl)) {
-            logInfo("ignored request with invalid network URL: " + describeUrl(networkUrl));
+            NewXLogger.printInfo(() -> LOG_PREFIX +
+                    "ignored request with invalid network URL: " + describeUrl(networkUrl));
             return;
         }
 
         int requestId = NEXT_REQUEST_ID.incrementAndGet();
-        logInfo(
+        NewXLogger.printInfo(() -> LOG_PREFIX +
                 "request #" + requestId + " queued network=" + describeUrl(networkUrl) +
                         " cache=" + describeUrl(cacheUrl) +
                         " context=" + (context == null ? "none" : context.getClass().getName())
@@ -77,43 +78,48 @@ public final class MediaThumbnailLoader {
 
         Bitmap cached = CACHE.get(networkUrl);
         if (cached != null && !cached.isRecycled()) {
-            logInfo(
+            NewXLogger.printInfo(() -> LOG_PREFIX +
                     "request #" + requestId + " hit extension memory cache size=" +
                             dimensions(cached) + " usage=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
             );
             MAIN_HANDLER.post(() -> {
-                logInfo("request #" + requestId + " delivered from extension memory cache");
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId + " delivered from extension memory cache");
                 callback.onLoaded(cached);
             });
             return;
         }
         if (cached != null) {
             CACHE.remove(networkUrl);
-            logInfo("request #" + requestId + " removed recycled extension-cache bitmap");
+            NewXLogger.printInfo(() -> LOG_PREFIX +
+                    "request #" + requestId + " removed recycled extension-cache bitmap");
         }
 
         EXECUTOR.execute(() -> {
             Bitmap bitmap = findCachedThumbnail(context, cacheUrl, requestId);
             boolean memoryCacheHit = bitmap != null;
             if (bitmap == null) {
-                logInfo("request #" + requestId + " thumbnail cache miss; falling back to network");
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId + " thumbnail cache miss; falling back to network");
                 bitmap = fetch(networkUrl, requestId);
             }
             if (bitmap == null) {
-                logInfo("request #" + requestId + " failed; no thumbnail available");
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId + " failed; no thumbnail available");
                 return;
             }
 
             String source = memoryCacheHit ? "image-loader memory cache" : "network";
             CACHE.put(networkUrl, bitmap);
             Bitmap loaded = bitmap;
-            logInfo(
+            NewXLogger.printInfo(() -> LOG_PREFIX +
                     "request #" + requestId + " completed source=" + source +
                             " size=" + dimensions(loaded) +
                             " extensionCache=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
             );
             MAIN_HANDLER.post(() -> {
-                logInfo("request #" + requestId + " delivered to picker source=" + source);
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId + " delivered to picker source=" + source);
                 callback.onLoaded(loaded);
             });
         });
@@ -125,33 +131,40 @@ public final class MediaThumbnailLoader {
             int requestId
     ) {
         if (context == null || !NewXUtils.isHttpUrl(cacheUrl)) {
-            logInfo("request #" + requestId + " skipped thumbnail cache lookup: no valid cache URL/context");
+            NewXLogger.printInfo(() -> LOG_PREFIX +
+                    "request #" + requestId +
+                            " skipped thumbnail cache lookup: no valid cache URL/context");
             return null;
         }
 
-        logInfo("request #" + requestId + " thumbnail cache lookup start key=" + describeUrl(cacheUrl));
+        NewXLogger.printInfo(() -> LOG_PREFIX +
+                "request #" + requestId + " thumbnail cache lookup start key=" + describeUrl(cacheUrl));
         try {
             Object cached = getCachedThumbnail(context, cacheUrl);
             if (!(cached instanceof Bitmap bitmap)) {
-                logInfo(
+                NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " thumbnail cache lookup miss result=" +
                                 (cached == null ? "null" : cached.getClass().getName())
                 );
                 return null;
             }
             if (bitmap.isRecycled()) {
-                logInfo("request #" + requestId + " thumbnail cache lookup returned recycled bitmap");
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId +
+                                " thumbnail cache lookup returned recycled bitmap");
                 return null;
             }
 
             Bitmap thumbnail = fitToTarget(bitmap);
-            logInfo(
+            NewXLogger.printInfo(() -> LOG_PREFIX +
                     "request #" + requestId + " thumbnail cache lookup hit sourceSize=" + dimensions(bitmap) +
                             " pickerSize=" + dimensions(thumbnail)
             );
             return thumbnail;
         } catch (RuntimeException | LinkageError exception) {
-            logException("request #" + requestId + " thumbnail cache lookup failed; using network fallback", exception);
+            NewXLogger.printException(() -> LOG_PREFIX +
+                    "request #" + requestId +
+                            " thumbnail cache lookup failed; using network fallback", exception);
             return null;
         }
     }
@@ -229,7 +242,8 @@ public final class MediaThumbnailLoader {
 
     private static Bitmap fetch(String url, int requestId) {
         HttpURLConnection connection = null;
-        logInfo("request #" + requestId + " network fetch start url=" + describeUrl(url));
+        NewXLogger.printInfo(() -> LOG_PREFIX +
+                "request #" + requestId + " network fetch start url=" + describeUrl(url));
         try {
             connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
@@ -241,13 +255,14 @@ public final class MediaThumbnailLoader {
             int responseCode = connection.getResponseCode();
             if (responseCode < HttpURLConnection.HTTP_OK ||
                     responseCode >= HttpURLConnection.HTTP_MULT_CHOICE) {
-                logInfo("request #" + requestId + " network rejected HTTP " + responseCode);
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId + " network rejected HTTP " + responseCode);
                 return null;
             }
 
             int contentLength = connection.getContentLength();
             if (contentLength > MAX_DOWNLOAD_BYTES) {
-                logInfo(
+                NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " network response too large bytes=" +
                                 contentLength
                 );
@@ -257,26 +272,28 @@ public final class MediaThumbnailLoader {
             try (InputStream input = connection.getInputStream()) {
                 byte[] data = readAtMost(input, contentLength);
                 if (data == null) {
-                    logInfo("request #" + requestId + " network response could not be read");
+                    NewXLogger.printInfo(() -> LOG_PREFIX +
+                            "request #" + requestId + " network response could not be read");
                     return null;
                 }
 
                 Bitmap bitmap = decode(data);
                 if (bitmap == null) {
-                    logInfo(
+                    NewXLogger.printInfo(() -> LOG_PREFIX +
                             "request #" + requestId + " network response failed to decode bytes=" +
                                     data.length
                     );
                     return null;
                 }
-                logInfo(
+                NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " network decode success bytes=" + data.length +
                                 " size=" + dimensions(bitmap)
                 );
                 return bitmap;
             }
         } catch (IOException | RuntimeException exception) {
-            logException("request #" + requestId + " network fetch failed", exception);
+            NewXLogger.printException(() -> LOG_PREFIX +
+                    "request #" + requestId + " network fetch failed", exception);
             return null;
         } finally {
             if (connection != null) connection.disconnect();
@@ -342,11 +359,4 @@ public final class MediaThumbnailLoader {
         return bitmap.getWidth() + "x" + bitmap.getHeight();
     }
 
-    private static void logInfo(String message) {
-        NewXLogger.printInfo(() -> LOG_PREFIX + message);
-    }
-
-    private static void logException(String message, Throwable throwable) {
-        NewXLogger.printException(() -> LOG_PREFIX + message, throwable);
-    }
 }

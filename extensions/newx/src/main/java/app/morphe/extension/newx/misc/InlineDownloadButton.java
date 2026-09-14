@@ -221,6 +221,7 @@ public final class InlineDownloadButton {
 
         boolean contains(Object referent) {
             if (referent == null) return false;
+            if (entries.isEmpty()) return false;
 
             drainClearedReferences();
             LookupKey lookupKey = lookupKeys.get();

@@ -11,12 +11,8 @@ import app.crimera.patches.newx.settings.multiChoice
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
-import app.crimera.patches.newx.timeline.NewXTimelineSuccessFingerprint
+import app.crimera.patches.newx.timeline.newXTimelineFilterPatch
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
-import app.crimera.patches.utils.scopedMatchAll
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 
 private const val FILTERED_REPLIES_HANDLER =
@@ -29,7 +25,7 @@ val newXHideVerifiedPostsPatch =
         description = "Hides posts and replies authored by selected timeline-reported verification types.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
-        dependsOn(newXTimelineTextModelAdapterPatch)
+        dependsOn(newXTimelineTextModelAdapterPatch, newXTimelineFilterPatch)
 
         val (filterTimeline, filterThread, verifiedTypesToHide) =
             newXSettings {
@@ -87,22 +83,4 @@ val newXHideVerifiedPostsPatch =
             iconResourceName = "ic_vector_filter",
             order = 270,
         )
-
-        execute {
-            val matches = NewXTimelineSuccessFingerprint.scopedMatchAll()
-            if (matches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX timeline success constructor, found ${matches.size}: " +
-                        matches.joinToString { it.originalMethod.toString() },
-                )
-            }
-
-            matches.single().method.addInstructions(
-                0,
-                """
-                    invoke-static {p2}, $TIMELINE_FILTER_DESCRIPTOR->filterPostsByVerifiedType(Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object p2
-                """.trimIndent(),
-            )
-        }
     }
