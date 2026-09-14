@@ -1,7 +1,6 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
-import app.crimera.patches.newx.timeline.isNewXThreadConnectorCandidate
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
@@ -19,43 +18,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
-    @Test
-    fun `thread-connector resolver survives null-check churn and rejects draw lookalike`() {
-        val controlConnector =
-            threadConnectorFixture(
-                methodName = "C",
-                namedNullCheck = true,
-                composesWithIncomingModifier = true,
-            )
-        val controlLookalike =
-            threadConnectorFixture(
-                methodName = "C",
-                namedNullCheck = true,
-                composesWithIncomingModifier = false,
-            )
-        val targetConnector =
-            threadConnectorFixture(
-                methodName = "a",
-                namedNullCheck = false,
-                composesWithIncomingModifier = true,
-            )
-        val targetLookalike =
-            threadConnectorFixture(
-                methodName = "a",
-                namedNullCheck = false,
-                composesWithIncomingModifier = false,
-            )
-
-        assertEquals(
-            listOf(true, false),
-            listOf(controlConnector, controlLookalike).map(Method::isNewXThreadConnectorCandidate),
-        )
-        assertEquals(
-            listOf(true, false),
-            listOf(targetConnector, targetLookalike).map(Method::isNewXThreadConnectorCandidate),
-        )
-    }
-
     @Test
     fun `new-post resolver survives null-check churn and rejects modifier lookalike`() {
         val controlRenderer = newPostRendererFixture(namedNullCheck = true, directModifier = true)
@@ -404,64 +366,6 @@ class NewXResolverLinterTest {
 
     private fun lint(source: String): List<NewXResolverLinter.Finding> =
         NewXResolverLinter.lintSource("Fixture.kt", source)
-
-    private fun threadConnectorFixture(
-        methodName: String,
-        namedNullCheck: Boolean,
-        composesWithIncomingModifier: Boolean,
-    ): Method {
-        val implementation = MethodImplementationBuilder(8)
-        if (namedNullCheck) {
-            implementation.addInstruction(
-                "const-string v4, \"\${'$'}this\${'$'}threadConnector\"".toInstruction(),
-            )
-            implementation.addInstruction(
-                (
-                    "invoke-static {v5, v4}, " +
-                        "Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(" +
-                        "Ljava/lang/Object;Ljava/lang/String;)V"
-                ).toInstruction(),
-            )
-        } else {
-            implementation.addInstruction(
-                "invoke-virtual {v5}, Ljava/lang/Object;->getClass()Ljava/lang/Class;".toInstruction(),
-            )
-        }
-        implementation.addInstruction(
-            (
-                "invoke-static {v0, v1}, Landroidx/compose/ui/draw/Fixture;->draw(" +
-                    "Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;)" +
-                    "Landroidx/compose/ui/Modifier;"
-            ).toInstruction(),
-        )
-        implementation.addInstruction("move-result-object v2".toInstruction())
-        val receiver = if (composesWithIncomingModifier) "v5" else "v0"
-        implementation.addInstruction(
-            (
-                "invoke-interface {$receiver, v2}, Landroidx/compose/ui/Modifier;->then(" +
-                    "Landroidx/compose/ui/Modifier;)Landroidx/compose/ui/Modifier;"
-            ).toInstruction(),
-        )
-        implementation.addInstruction("move-result-object v3".toInstruction())
-        implementation.addInstruction("return-object v3".toInstruction())
-
-        val parameters =
-            listOf(
-                "Landroidx/compose/ui/Modifier;",
-                "Landroidx/compose/runtime/Composer;",
-                "I",
-            ).map { type -> ImmutableMethodParameter(type, emptySet(), null) }
-        return ImmutableMethod(
-            "Lfixture/ThreadConnector;",
-            methodName,
-            parameters,
-            "Landroidx/compose/ui/Modifier;",
-            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
-            emptySet<ImmutableAnnotation>(),
-            emptySet<HiddenApiRestriction>(),
-            implementation.methodImplementation,
-        )
-    }
 
     private fun newPostRendererFixture(
         namedNullCheck: Boolean,

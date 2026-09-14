@@ -56,13 +56,6 @@ private object NewXPostDividerRendererFingerprint : Fingerprint(
     },
 )
 
-/** The shared Compose modifier draws the vertical connector used by threaded replies. */
-private object NewXThreadConnectorFingerprint : Fingerprint(
-    returnType = MODIFIER_DESCRIPTOR,
-    parameters = listOf(MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR, INSETS_DESCRIPTOR),
-    custom = { method, _ -> method.isNewXThreadConnectorCandidate() },
-)
-
 /** The reply facepile draws another connector behind the stacked reply avatars. */
 private object NewXReplyFacepileDividerFingerprint : Fingerprint(
     parameters = listOf("L", "L", MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR, INSETS_DESCRIPTOR),
@@ -129,47 +122,6 @@ private fun Instruction.isDrawModifierCall(): Boolean {
     return reference.returnType == MODIFIER_DESCRIPTOR &&
         reference.parameterTypes.map(CharSequence::toString) ==
             listOf(MODIFIER_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
-}
-
-private fun Instruction.isModifierCompositionCall(
-    incomingModifierRegister: Int,
-    drawModifierRegister: Int,
-): Boolean {
-    if (opcode != Opcode.INVOKE_INTERFACE && opcode != Opcode.INVOKE_INTERFACE_RANGE) return false
-    val reference = getReference<MethodReference>() ?: return false
-    return reference.definingClass == MODIFIER_DESCRIPTOR &&
-        reference.returnType == MODIFIER_DESCRIPTOR &&
-        reference.parameterTypes.map(CharSequence::toString) == listOf(MODIFIER_DESCRIPTOR) &&
-        registersUsed == listOf(incomingModifierRegister, drawModifierRegister)
-}
-
-internal fun Method.isNewXThreadConnectorCandidate(): Boolean {
-    if (!AccessFlags.STATIC.isSet(accessFlags)) return false
-    val implementation = implementation ?: return false
-    val instructions = implementation.instructions.toList()
-    val drawCallIndices =
-        instructions.mapIndexedNotNull { index, instruction ->
-            index.takeIf { instruction.isDrawModifierCall() }
-        }
-    if (drawCallIndices.size != 1) return false
-
-    val drawCallIndex = drawCallIndices[0]
-    val drawResult = instructions.getOrNull(drawCallIndex + 1) as? OneRegisterInstruction ?: return false
-    if (drawResult.opcode != Opcode.MOVE_RESULT_OBJECT) return false
-
-    val incomingModifierRegister = implementation.registerCount - numberOfParameterRegisters
-    val compositionCall = instructions.getOrNull(drawCallIndex + 2) ?: return false
-    if (!compositionCall.isModifierCompositionCall(incomingModifierRegister, drawResult.registerA)) {
-        return false
-    }
-
-    val compositionResult =
-        instructions.getOrNull(drawCallIndex + 3) as? OneRegisterInstruction ?: return false
-    if (compositionResult.opcode != Opcode.MOVE_RESULT_OBJECT) return false
-    val returnedModifier =
-        instructions.getOrNull(drawCallIndex + 4) as? OneRegisterInstruction ?: return false
-    return returnedModifier.opcode == Opcode.RETURN_OBJECT &&
-        returnedModifier.registerA == compositionResult.registerA
 }
 
 private fun Instruction.callsCollectionMethod(
@@ -358,49 +310,6 @@ private fun resolveReplyFacepileDrawCall(method: Method): ReplyFacepileDrawCall 
 }
 
 context(context: BytecodePatchContext)
-private fun patchThreadConnector(
-    setting: ToggleSettingDefinition,
-) {
-    val connector =
-        requireExactlyOne(
-            label = "NewX thread connector",
-            candidates = NewXThreadConnectorFingerprint.scopedMatchAllOrNull().orEmpty(),
-        )
-    val originalMethod = connector.method
-    val originalRegisterCount =
-        originalMethod.implementation?.registerCount
-            ?: throw PatchException("NewX thread connector has no implementation")
-    val owner = context.mutableClassDefBy(connector.originalClassDef.type)
-    val method =
-        originalMethod.cloneMutable(
-            additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
-        )
-    owner.methods.remove(originalMethod)
-    owner.methods.add(method)
-
-    val continuation =
-        method.instructions.firstOrNull()
-            ?: throw PatchException("NewX thread connector has no instructions")
-    val settingRegister = originalRegisterCount
-    val read =
-        setting.injectReadWithDefault(
-            method = method,
-            index = 0,
-            defaultValue = false,
-            registerRange = settingRegister..settingRegister + 1,
-        )
-    val label = "piko_newx_hide_post_dividers_thread_connector"
-    method.addInstructionsWithLabels(
-        read.nextIndex,
-        """
-            if-eqz v${read.register}, :$label
-            return-object p0
-        """.trimIndent(),
-        ExternalLabel(label, continuation),
-    )
-}
-
-context(context: BytecodePatchContext)
 private fun patchReplyFacepileDivider(
     setting: ToggleSettingDefinition,
 ) {
@@ -508,7 +417,7 @@ val newXHidePostDividersPatch =
     bytecodePatch(
         default = false,
         name = "NewX: Hide post dividers",
-        description = "Removes post, reply, and thread dividers shown in NewX timelines.",
+        description = "Removes post and reply dividers shown in NewX timelines.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
@@ -575,7 +484,6 @@ val newXHidePostDividersPatch =
                 )
             }
 
-            patchThreadConnector(hidePostDividers)
             patchReplyFacepileDivider(hidePostDividers)
             patchTimelineModuleDividers(hidePostDividers)
         }

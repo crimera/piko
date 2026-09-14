@@ -4485,7 +4485,7 @@
     },
     {
       "name": "NewX: Hide post dividers",
-      "description": "Removes post, reply, and thread dividers shown in NewX timelines.",
+      "description": "Removes post and reply dividers shown in NewX timelines.",
       "default": false,
       "dependencies": [
         "BytecodePatch"
