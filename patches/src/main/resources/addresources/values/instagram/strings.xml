@@ -224,6 +224,14 @@
     <string name="piko_reset">Reset</string>
     <string name="piko_cancel">Cancel</string>
     <string name="piko_deleted">Deleted</string>
+
+    <!-- Notes Custom Color -->
+    <string name="piko_notes_custom_color_title">Custom note text color</string>
+    <string name="piko_notes_custom_color_hint">#RRGGBB</string>
+    <string name="piko_notes_custom_color_invalid">Invalid hex color</string>
+    <string name="piko_enable_notes_custom_text_color">Custom note text color</string>
+    <string name="piko_enable_notes_custom_text_color_desc">Display a button next to the note during creation that allows entering a HEX color code for the text to set it to the desired color, which will be visible to everyone.</string>
+
     <string name="piko_debug">Piko debug</string>
     <string name="piko_debug_desc">Adds debug option on some of the components for testing</string>
     <string name="piko_export_experiment_list">Export experiment list</string>
@@ -280,7 +288,6 @@
     <string name="piko_rec_flags_no_file">Recommended flags file not found</string>
     <string name="piko_rec_flags_refresh_file">Refresh flags</string>
     <string name="piko_rec_flags_last_modified_at">Last modified: %s</string>
-
 
     <!-- Story filters -->
     <string name="piko_category_filter_content">Content filters</string>
