@@ -83,6 +83,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Restore Twitter branding" \
   -e "NewX: Hide post reply bar" \
   -e "NewX: Show poll results" \
+  -e "NewX: Customize post menu items" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \

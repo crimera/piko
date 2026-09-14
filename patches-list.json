@@ -3426,6 +3426,77 @@
       "options": []
     },
     {
+      "name": "NewX: Customize post menu items",
+      "description": "Lets you hide selected items from the NewX post menu.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "NewX",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.25.0-alpha.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.25.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.25.2-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.26.0-alpha.01",
+              "versionCodes": null,
+              "isExperimental": true,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.26.0-alpha.02",
+              "versionCodes": null,
+              "isExperimental": true,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.26.0-alpha.03",
+              "versionCodes": null,
+              "isExperimental": true,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.27.0-alpha.01",
+              "versionCodes": null,
+              "isExperimental": true,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "NewX: Customize timeline tabs",
       "description": "Lets you hide the For You or Following tab from the NewX home timeline.",
       "default": true,
@@ -6414,7 +6485,7 @@
     },
     {
       "name": "Theme",
-      "description": "Adds Material You and AMOLED options to Instagram's Dark mode settings on Android 12 and later. On Android 8\u201311, it applies a fixed Material You-style theme or an optional AMOLED theme.",
+      "description": "Adds Material You and AMOLED options to Instagram's Dark mode settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme.",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -6446,8 +6517,8 @@
       "options": [
         {
           "key": "amoled",
-          "title": "Pure-black AMOLED theme for Android 8\u201311",
-          "description": "Use a fixed pure-black AMOLED theme instead of the fixed Material You-style theme on Android 8\u201311. On Android 12 and later, select AMOLED in Instagram's Dark mode settings.",
+          "title": "Pure-black AMOLED theme for Android 8–11",
+          "description": "Use a fixed pure-black AMOLED theme instead of the fixed Material You-style theme on Android 8–11. On Android 12 and later, select AMOLED in Instagram's Dark mode settings.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,

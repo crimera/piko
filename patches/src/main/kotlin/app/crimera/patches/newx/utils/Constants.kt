@@ -34,6 +34,7 @@ internal object Constants {
     const val MEDIA_THUMBNAIL_LOADER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/MediaThumbnailLoader;"
     const val NAV_BAR_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/NavBarFilter;"
     const val DRAWER_ITEM_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/DrawerItemFilter;"
+    const val POST_OPTIONS_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/PostOptionsFilter;"
     const val REPLY_SORTING_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/ReplySortingResolver;"
     const val MEDIA_TAB_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/MediaTabResolver;"
     const val PROFILE_POST_SORTING_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/ProfilePostSortingResolver;"

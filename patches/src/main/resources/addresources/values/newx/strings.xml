@@ -161,6 +161,32 @@
     <string name="piko_newx_drawer_grok">Grok</string>
     <string name="piko_newx_drawer_theme_toggle">Theme toggle</string>
 
+    <string name="piko_newx_post_options_title">Post menu items to hide</string>
+    <string name="piko_newx_post_options_summary">Choose which items are hidden from the NewX post menu</string>
+    <string name="piko_newx_post_option_copy_link">Copy link</string>
+    <string name="piko_newx_post_option_share_via_dm">Share via direct message</string>
+    <string name="piko_newx_post_option_share">Share post</string>
+    <string name="piko_newx_post_option_bookmark">Bookmark</string>
+    <string name="piko_newx_post_option_follow">Follow</string>
+    <string name="piko_newx_post_option_mute">Mute</string>
+    <string name="piko_newx_post_option_block">Block</string>
+    <string name="piko_newx_post_option_report">Report</string>
+    <string name="piko_newx_post_option_not_interested">Not interested</string>
+    <string name="piko_newx_post_option_mute_conversation">Mute conversation</string>
+    <string name="piko_newx_post_option_pin">Pin</string>
+    <string name="piko_newx_post_option_delete">Delete</string>
+    <string name="piko_newx_post_option_edit">Edit</string>
+    <string name="piko_newx_post_option_quote">Quote</string>
+    <string name="piko_newx_post_option_repost">Repost</string>
+    <string name="piko_newx_post_option_like">Like</string>
+    <string name="piko_newx_post_option_dislike">Dislike</string>
+    <string name="piko_newx_post_option_view_analytics">View analytics</string>
+    <string name="piko_newx_post_option_change_reply_permission">Change who can reply</string>
+    <string name="piko_newx_post_option_add_to_list">Add to list</string>
+    <string name="piko_newx_post_option_community_note">Community note</string>
+    <string name="piko_newx_post_option_boost">Boost</string>
+    <string name="piko_newx_post_option_highlight">Highlight</string>
+
     <string name="piko_newx_post_filtering_title">Post filtering</string>
     <string name="piko_newx_post_filtering_summary">Hide posts containing user-defined words and phrases</string>
     <string name="piko_newx_post_filtering_enabled_title">Enable post filtering</string>
