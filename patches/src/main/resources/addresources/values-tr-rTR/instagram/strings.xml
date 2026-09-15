@@ -124,6 +124,11 @@
     <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
     <string name="piko_enable_mark_chat_as_read">Sohbeti okundu olarak işaretle seçeneğini etkinleştir</string>
     <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine basılı tutunca okundu olarak işaretleme seçeneği ekle</string>
+    <string name="piko_enable_hidden_chats">Gizli sohbetleri etkinleştir</string>
+    <string name="piko_enable_hidden_chats_desc">DM sohbetine uzun basınca Gizle seçeneği ekler</string>
+    <string name="piko_hidden_chats">Gizli sohbetler</string>
+    <string name="piko_hidden_chats_desc">Gizli sohbetleri görüntüle ve tekrar göster</string>
+    <string name="piko_hide_chat_button">Bu sohbeti gizle</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Medya indirme</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>

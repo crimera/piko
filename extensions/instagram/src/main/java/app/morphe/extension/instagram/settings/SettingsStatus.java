@@ -209,7 +209,9 @@ public class SettingsStatus {
     public static void unlimitedReplaysOnEphemeralMedia() {unlimitedReplaysOnEphemeralMedia = true;}
     public static boolean markChatAsRead = false;
     public static void markChatAsRead() { markChatAsRead = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || disableTypingStatus || viewDmAnonymously || saveDeletedMessages ;}
+    public static boolean hiddenChats = false;
+    public static void hiddenChats() { hiddenChats = true; }
+    public static boolean dmSection(){ return markChatAsRead || hiddenChats || unlimitedReplaysOnEphemeralMedia || disableTypingStatus || viewDmAnonymously || saveDeletedMessages ;}
 
     //Download section.
     public static boolean downloadMedia = false;
@@ -303,6 +305,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
 
         FLAGS.put(str("piko_enable_mark_chat_as_read"),SettingsStatus.markChatAsRead);
+        FLAGS.put(str("piko_enable_hidden_chats"),SettingsStatus.hiddenChats);
         FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
         FLAGS.put(str("piko_category_rec_flags"),SettingsStatus.recommendedFlags);
 

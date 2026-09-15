@@ -130,6 +130,11 @@
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
     <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read</string>
+    <string name="piko_enable_hidden_chats">Enable hidden chats</string>
+    <string name="piko_enable_hidden_chats_desc">Adds a Hide option when long pressing a DM conversation</string>
+    <string name="piko_hidden_chats">Hidden chats</string>
+    <string name="piko_hidden_chats_desc">View hidden conversations and show them again</string>
+    <string name="piko_hide_chat_button">Hide this chat</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>

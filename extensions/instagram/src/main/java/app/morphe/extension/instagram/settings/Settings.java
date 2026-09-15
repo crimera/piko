@@ -92,6 +92,7 @@ public class Settings {
     public static final StringSetting ACTION_BAR_INBOX = new StringSetting("action_bar_inbox", "");
 
     public static final BooleanSetting ENABLE_MARK_CHAT_AS_READ = new BooleanSetting("enable_mark_chat_as_read", true);
+    public static final BooleanSetting ENABLE_HIDDEN_CHATS = new BooleanSetting("enable_hidden_chats", true);
 
     public static final StringSetting FILTER_STORY_BY_TYPE = new StringSetting("filter_story_by_type", "");
     public static final StringSetting FILTER_STORY_BY_USER_TYPE = new StringSetting("filter_story_by_user_type", "");

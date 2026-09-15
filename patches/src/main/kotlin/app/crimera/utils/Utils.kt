@@ -33,7 +33,6 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
-import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle
 import org.w3c.dom.Element
 
 fun ResourcePatchContext.replaceXmlResources(
@@ -211,7 +210,7 @@ fun instructionToString(ins: Instruction): String =
         }
 
         is Instruction3rc -> {
-            "${ins.opcode.name} {v${ins.startRegister} .. v${ins.registerCount - 1}}, ${ins.reference}"
+            "${ins.opcode.name} {v${ins.startRegister} .. v${ins.startRegister + ins.registerCount - 1}}, ${ins.reference}"
         }
 
         is Instruction11x -> {
@@ -224,6 +223,10 @@ fun instructionToString(ins: Instruction): String =
 
         is Instruction31i -> {
             "${ins.opcode.name} v${ins.registerA}, ${ins.narrowLiteral}"
+        }
+
+        is Instruction22c -> {
+            "${ins.opcode.name} v${ins.registerA}, v${ins.registerB}, ${ins.reference}"
         }
 
         else -> {
