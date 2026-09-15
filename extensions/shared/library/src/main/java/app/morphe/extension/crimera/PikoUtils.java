@@ -152,6 +152,14 @@ public class PikoUtils {
         Log.d(logName, e +"\n");
         if (e instanceof Exception) {
             Exception ex = (Exception) e;
+            Throwable cause = ex.getCause();
+            if (cause != null) {
+                Log.d(logName, "CAUSED BY: " + cause + "\n");
+                for (StackTraceElement element : cause.getStackTrace()) {
+                    Log.d(logName, "Cause occurred at line " + element.getLineNumber() + " in " + element.getClassName()
+                            + "." + element.getMethodName());
+                }
+            }
         StackTraceElement[] stackTraceElements = ex.getStackTrace();
             for (StackTraceElement element : stackTraceElements) {
                 Log.d(logName, "Exception occurred at line " + element.getLineNumber() + " in " + element.getClassName()

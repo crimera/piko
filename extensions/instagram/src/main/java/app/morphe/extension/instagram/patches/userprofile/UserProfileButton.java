@@ -15,6 +15,7 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
+import app.morphe.extension.instagram.patches.dm.HiddenChats;
 
 public class UserProfileButton {
     private static boolean isSettingsInActionBar;
@@ -45,6 +46,9 @@ public class UserProfileButton {
             }
             if(!userProfileABPref.contains(Constants.AB_PROFILE_INFO_ICON) && Pref.isMoreOptionsOnProfilePatched()){
                 ProfileMoreOption.addProfileMoreOptionsButton(viewGroup, profileInfo);
+            }
+            if(Pref.enableHiddenChatsOption() && !isSelfProfile){
+                HiddenChats.addHideButton(viewGroup, profileInfo);
             }
         } catch (Exception e) {
             Logger.printException(() -> "Failed to add piko button: ", e);

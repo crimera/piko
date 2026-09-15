@@ -97,6 +97,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS) || Pref.getTurnOnAllGhostModes();
     }
 
+    public static boolean enableHiddenChatsOption() {
+        return SettingsStatus.hiddenChats && SharedPref.getBooleanPref(Settings.ENABLE_HIDDEN_CHATS);
+    }
+
     public static boolean enableMarkChatAsReadOption() {
         return SharedPref.getBooleanPref(Settings.ENABLE_MARK_CHAT_AS_READ) && SettingsStatus.markChatAsRead;
     }

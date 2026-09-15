@@ -27,6 +27,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
+import app.morphe.extension.instagram.patches.dm.HiddenChats;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -84,6 +85,9 @@ public class ButtonPref extends Preference {
 
                     } else if (key.equals("view_deleted_messages")) {
                         SavedMessagesHook.openDeletedMessages(context, false);
+
+                    } else if (key.equals("view_hidden_chats")) {
+                        HiddenChats.openHiddenChats(context);
 
                     } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
@@ -151,7 +155,8 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")
                 || key.equals("piko_rec_flags_refresh_file")
-                || key.equals("view_deleted_messages")));
+                || key.equals("view_deleted_messages")
+                || key.equals("view_hidden_chats")));
     }
 
     private static boolean hasPressedHighlight(String key) {
