@@ -320,11 +320,7 @@ public final class SettingsRenderer {
     }
 
     private static ButtonView dialogButton(Context context, String textResourceName) {
-        return new ButtonView(
-                context,
-                ButtonView.ButtonStyle.TEXT,
-                StringRef.str(textResourceName)
-        );
+        return NewXSettingsUi.dialogButton(context, StringRef.str(textResourceName));
     }
 
     private static boolean validateTextInput(

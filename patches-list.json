@@ -3356,10 +3356,11 @@
       "options": []
     },
     {
-      "name": "NewX: Customize navigation bar items",
-      "description": "Lets you hide selected items from the NewX bottom navigation bar.",
+      "name": "NewX: Customize navigation bar",
+      "description": "Reorder, hide, and replace NewX bottom navigation bar items.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3995,6 +3996,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4137,6 +4139,7 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4207,6 +4210,7 @@
       "description": "Removes the Discover more module from post-detail timelines.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -4630,6 +4634,7 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4840,6 +4845,7 @@
       "description": "Hides recommended-user sections (\"Who to follow\") from NewX timelines and profile pages.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -5059,6 +5065,7 @@
       "description": "Filters promoted posts and modules from NewX timelines.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],

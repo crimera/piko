@@ -49,7 +49,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Customize inline actions" \
   -e "NewX: Unlock downloads" \
   -e "NewX: Hide new posts pill" \
-  -e "NewX: Customize navigation bar items" \
+  -e "NewX: Customize navigation bar" \
   -e "NewX: Hide premium upsell" \
   -e "NewX: Unlock color customization" \
   -e "NewX: Disable blur effects" \
@@ -77,6 +77,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Hide timeline tabs bar" \
   -e "NewX: Customize timeline tabs" \
   -e "NewX: Disable video player scrolling" \
+  -e "NewX: Restore video picture-in-picture" \
   -e "NewX: Disable automatic timeline refresh" \
   -e "NewX: Restore timeline position" \
   -e "NewX: Open canonical URLs" \

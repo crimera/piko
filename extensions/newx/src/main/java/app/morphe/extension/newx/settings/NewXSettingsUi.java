@@ -2,6 +2,7 @@ package app.morphe.extension.newx.settings;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,12 +13,14 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.newx.misc.UpdateFont;
+import app.morphe.extension.newx.ui.ButtonView;
 import app.morphe.extension.newx.ui.Theme;
 
 /** Reusable themed views for extension-owned NewX settings screens. */
@@ -104,7 +107,21 @@ public final class NewXSettingsUi {
             boolean checked,
             boolean multiple
     ) {
-        return new ChoiceRow(context, title, checked, multiple);
+        return new ChoiceRow(context, title, 0, checked, multiple);
+    }
+
+    public static ChoiceRow choiceRow(
+            Context context,
+            CharSequence title,
+            int iconResource,
+            boolean checked,
+            boolean multiple
+    ) {
+        return new ChoiceRow(context, title, iconResource, checked, multiple);
+    }
+
+    public static ButtonView dialogButton(Context context, CharSequence label) {
+        return new ButtonView(context, ButtonView.ButtonStyle.TEXT, label);
     }
 
     public static View divider(Context context) {
@@ -144,6 +161,7 @@ public final class NewXSettingsUi {
 
     public static final class ChoiceRow extends LinearLayout {
         private final ChoiceIndicator indicator;
+        @Nullable private final ImageView iconView;
         private final boolean multiple;
         private boolean checked;
         @Nullable private CheckedChangeListener listener;
@@ -151,6 +169,7 @@ public final class NewXSettingsUi {
         private ChoiceRow(
                 Context context,
                 CharSequence title,
+                int iconResource,
                 boolean checked,
                 boolean multiple
         ) {
@@ -168,6 +187,20 @@ public final class NewXSettingsUi {
             applyRippleBackground(this);
             setClickable(true);
             setFocusable(true);
+
+            if (iconResource != 0) {
+                ImageView icon = new ImageView(context);
+                icon.setImageResource(iconResource);
+                LayoutParams iconParams = new LayoutParams(
+                        Theme.dpToPx(context, 24f),
+                        Theme.dpToPx(context, 24f)
+                );
+                iconParams.setMarginEnd(Theme.dpToPx(context, 16f));
+                addView(icon, iconParams);
+                iconView = icon;
+            } else {
+                iconView = null;
+            }
 
             TextView titleView = titleText(context);
             titleView.setText(title);
@@ -197,6 +230,14 @@ public final class NewXSettingsUi {
         public void setChecked(boolean checked) {
             this.checked = checked;
             indicator.setChecked(checked);
+            if (iconView == null) return;
+            iconView.setImageTintList(
+                    ColorStateList.valueOf(
+                            checked
+                                    ? Theme.primaryAccent(getContext())
+                                    : Theme.primaryText(getContext())
+                    )
+            );
         }
 
         public void setOnCheckedChangeListener(@Nullable CheckedChangeListener listener) {

@@ -154,6 +154,25 @@
     <string name="piko_newx_nav_bar_communities">Communities</string>
     <string name="piko_newx_nav_bar_spaces">Spaces</string>
 
+    <string name="piko_newx_nav_editor_title">Navigation bar</string>
+    <string name="piko_newx_nav_editor_summary">Reorder, hide, and replace NewX bottom navigation bar items</string>
+    <string name="piko_newx_nav_editor_hint">Drag the handle to reorder. Changes apply after an app restart.</string>
+    <string name="piko_newx_nav_editor_drag">Drag to reorder</string>
+    <string name="piko_newx_nav_editor_visible">Show item</string>
+    <string name="piko_newx_nav_editor_restart">Restart app to apply changes</string>
+    <string name="piko_newx_nav_editor_restart_title">Restart app?</string>
+    <string name="piko_newx_nav_editor_restart_message">The navigation bar changes take effect after the app restarts.</string>
+    <string name="piko_newx_nav_editor_restart_confirm">Restart</string>
+    <string name="piko_newx_nav_editor_opens">Opens: %1$s</string>
+    <string name="piko_newx_nav_editor_opens_default">Default</string>
+    <string name="piko_newx_nav_editor_opens_dialog">Opens</string>
+    <string name="piko_newx_nav_editor_icon">Icon: %1$s</string>
+    <string name="piko_newx_nav_editor_icon_dialog">Replacement icon</string>
+    <string name="piko_newx_nav_editor_icon_destination">Destination icon</string>
+    <string name="piko_newx_nav_editor_icon_original">Original item icon</string>
+    <string name="piko_newx_nav_replace_bookmarks">Bookmarks</string>
+    <string name="piko_newx_nav_replace_profile">Profile</string>
+
     <string name="piko_newx_drawer_title">Drawer items to hide</string>
     <string name="piko_newx_drawer_summary">Choose which items are hidden from the NewX navigation drawer</string>
     <string name="piko_newx_show_piko_settings_in_drawer_title">Show Piko Settings in the drawer footer</string>

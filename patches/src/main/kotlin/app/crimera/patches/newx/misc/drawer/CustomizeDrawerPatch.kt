@@ -16,8 +16,14 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
+import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
+import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
+import app.crimera.patches.newx.utils.resolveIntegerLiterals
+import app.crimera.patches.newx.utils.valueReachesRegister
+import app.crimera.patches.newx.utils.writesObjectRegister
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -45,7 +51,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
 import java.util.Locale
 
-private const val DRAWER_SCOPE = "Lcom/x/main/drawer/"
 private const val DRAWER_RESOURCE_ITEM_ID_PREFIX = "RESOURCE_STRING_"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
@@ -107,7 +112,6 @@ private val NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS =
 
 private object NewXDrawerContentClassFingerprint : Fingerprint(
     definingClass = DRAWER_SCOPE,
-    name = "d",
     returnType = "V",
     custom = { method, _ ->
         val parameters = method.parameterTypes.map(CharSequence::toString)
@@ -117,7 +121,7 @@ private object NewXDrawerContentClassFingerprint : Fingerprint(
             parameters.count { it == "Ljava/util/List;" } == 1 &&
             parameters.count { it == "Ljava/util/Map;" } == 1 &&
             parameters.count { it == "Z" } >= 10 &&
-            parameters.count { it == "I" } >= 5 &&
+            parameters.lastOrNull() == "I" &&
             parameters.count { it == FUNCTION0_DESCRIPTOR } >= 10 &&
             parameters.count { it == FUNCTION1_DESCRIPTOR } >= 2 &&
             "Landroidx/compose/ui/Modifier;" in parameters
@@ -306,103 +310,6 @@ private data class ResolvedDrawerFooterCalls(
     val calls: List<IndexedValue<Instruction3rc>>,
 )
 
-private val INTEGER_MOVE_OPCODES =
-    setOf(Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16)
-
-private val INTEGER_LITERAL_OPCODES =
-    setOf(Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16)
-
-private val REGISTER_WRITE_OPCODES =
-    setOf(
-        Opcode.CHECK_CAST,
-        Opcode.CONST_STRING,
-        Opcode.CONST_STRING_JUMBO,
-        Opcode.IGET_OBJECT,
-        Opcode.INSTANCE_OF,
-        Opcode.MOVE_RESULT,
-        Opcode.MOVE_RESULT_OBJECT,
-        Opcode.NEW_ARRAY,
-        Opcode.NEW_INSTANCE,
-        Opcode.SGET_OBJECT,
-    )
-
-private fun MethodReference.isStringResourceLookup(): Boolean =
-    returnType.toString() == "Ljava/lang/String;" &&
-        parameterTypes.map(CharSequence::toString) == listOf(COMPOSER_DESCRIPTOR, "I")
-
-private fun Instruction.destinationRegisterOrNull(): Int? {
-    if (opcode in OBJECT_MOVE_OPCODES || opcode in INTEGER_MOVE_OPCODES) {
-        return (this as? TwoRegisterInstruction)?.registerA
-    }
-    if (opcode !in REGISTER_WRITE_OPCODES && opcode !in INTEGER_LITERAL_OPCODES) return null
-    return (this as? OneRegisterInstruction)?.registerA
-}
-
-private fun List<Instruction>.resolveIntegerLiterals(
-    instructionIndex: Int,
-    register: Int,
-): Set<Int> {
-    var trackedRegister = register
-    val literals = linkedSetOf<Int>()
-    for (index in instructionIndex - 1 downTo 0) {
-        val instruction = this[index]
-        if (instruction.opcode in INTEGER_MOVE_OPCODES) {
-            val move = instruction as? TwoRegisterInstruction ?: continue
-            if (move.registerA != trackedRegister) continue
-            trackedRegister = move.registerB
-            continue
-        }
-        if (instruction.opcode in INTEGER_LITERAL_OPCODES) {
-            if ((instruction as? OneRegisterInstruction)?.registerA != trackedRegister) continue
-            (instruction as? NarrowLiteralInstruction)?.narrowLiteral?.let(literals::add)
-            continue
-        }
-    }
-    return literals
-}
-
-private fun List<Instruction>.resolveIntegerLiteralOnCurrentPath(
-    instructionIndex: Int,
-    register: Int,
-): Int? {
-    var trackedRegister = register
-    for (index in instructionIndex - 1 downTo 0) {
-        val instruction = this[index]
-        if (instruction.opcode in INTEGER_MOVE_OPCODES) {
-            val move = instruction as? TwoRegisterInstruction ?: return null
-            if (move.registerA != trackedRegister) continue
-            trackedRegister = move.registerB
-            continue
-        }
-        if (instruction.opcode in INTEGER_LITERAL_OPCODES) {
-            if ((instruction as? OneRegisterInstruction)?.registerA != trackedRegister) continue
-            return (instruction as? NarrowLiteralInstruction)?.narrowLiteral
-        }
-        if (instruction.destinationRegisterOrNull() == trackedRegister) return null
-    }
-    return null
-}
-
-private fun List<Instruction>.valueReachesRegister(
-    valueIndex: Int,
-    valueRegister: Int,
-    targetIndex: Int,
-    targetRegister: Int,
-): Boolean {
-    val aliases = linkedSetOf(valueRegister)
-    for (index in valueIndex + 1 until targetIndex) {
-        val instruction = this[index]
-        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
-            val move = instruction as? TwoRegisterInstruction ?: return false
-            if (move.registerA in aliases) aliases.remove(move.registerA)
-            if (move.registerB in aliases) aliases.add(move.registerA)
-            continue
-        }
-        instruction.destinationRegisterOrNull()?.let(aliases::remove)
-    }
-    return targetRegister in aliases
-}
-
 private fun List<Instruction>.resolveDrawerTitleResourceIds(
     callIndex: Int,
     call: Instruction3rc,
@@ -556,19 +463,6 @@ private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Bo
         parameters[3] == "I"
 }
 
-private fun MethodReference.isDrawerRowRenderer(): Boolean {
-    val parameters = parameterTypes.map(CharSequence::toString)
-    return returnType.toString() == "V" &&
-        parameters.size in 8..9 &&
-        parameters.count { it == "Ljava/lang/String;" } == 1 &&
-        parameters.count { it.startsWith("Lcom/x/icons/") } == 1 &&
-        parameters.count { it == FUNCTION0_DESCRIPTOR } == 1 &&
-        parameters.count { it == "Landroidx/compose/ui/Modifier;" } == 1 &&
-        parameters.count { it == "Lkotlin/jvm/functions/Function2;" } == 1 &&
-        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
-        parameters.count { it == "I" } == 2
-}
-
 private fun MutableMethod.findDrawerFooterCalls(
     renderer: MethodReference,
 ): ResolvedDrawerFooterCalls? {
@@ -619,19 +513,6 @@ private fun MutableMethod.findDrawerFooterCalls(
             IndexedValue(call.index, call.call)
         }
     )
-}
-
-private val OBJECT_MOVE_OPCODES =
-    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
-
-private fun Instruction.writesObjectRegister(register: Int): Boolean {
-    if (opcode in OBJECT_MOVE_OPCODES) {
-        return (this as? TwoRegisterInstruction)?.registerA == register
-    }
-    if (opcode == Opcode.SGET_OBJECT) {
-        return (this as? OneRegisterInstruction)?.registerA == register
-    }
-    return false
 }
 
 /** Proves which footer call receives the resolved settings icon, without relying on call order. */
