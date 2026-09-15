@@ -13,7 +13,7 @@ import app.morphe.extension.crimera.PikoUtils;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Spannable;
-import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.style.TypefaceSpan;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -80,7 +80,8 @@ public class UpdateFont {
 
     public static Spannable process(CharSequence input) {
         if(input == null) return null;
-        SpannableString ss = new SpannableString(input);
+        // Preserve content spans while excluding NoCopySpan editor state (selection and watchers).
+        SpannableStringBuilder ss = new SpannableStringBuilder(input);
         if (textTypeface != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             if(isCustomFontEnabled) {
                 ss.setSpan(

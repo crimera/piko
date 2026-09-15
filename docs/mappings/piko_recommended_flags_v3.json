@@ -128,5 +128,47 @@
     "name" : "Add Meta AI reels description pills",
     "desc" : "",
     "code" : "80654"
+  },
+  {
+    "name" : "Meta AI suggestions in search",
+    "desc" : "Disable to show recent profile searches instead.",
+    "code" : "111509::3"
+  },
+  {
+    "name" : "Collapsible recent searches",
+    "desc" : "Disable to stop the recent searches list from collapsing.",
+    "code" : "111509::9"
+  },
+  {
+    "name" : "Horizontal scroll for recent searches",
+    "desc" : "Disable to show recent searches in a vertical list instead.",
+    "code" : "111509::21"
+  },
+  {
+    "name" : "Search bar hint carousel",
+    "desc" : "",
+    "code" : "111509::25"
+  },
+  {
+    "name" : "Search bar hint carousel (dynamic)",
+    "desc" : "",
+    "code" : "111509::26"
+  },
+  {
+    "name" : "Suggested users in search null state",
+    "desc" : "Disable to hide suggested accounts from the search screen.",
+    "code" : "63806::0"
+  },
+  {
+    "name" : "Max recent searches shown (Android)",
+    "desc" : "Number of recent profiles kept in search history. Classic value was 25.",
+    "code" : "111509::17",
+    "type" : "long"
+  },
+  {
+    "name" : "Max recent searches shown",
+    "desc" : "Number of recent profiles kept in search history. Classic value was 25.",
+    "code" : "111509::1",
+    "type" : "long"
   }
 ]

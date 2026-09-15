@@ -16,6 +16,8 @@ import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
+import app.morphe.extension.instagram.settings.preference.widgets.NavigationBarPreference;
+import app.morphe.extension.instagram.settings.preference.widgets.NavigationStartupPreference;
 import app.morphe.extension.instagram.settings.SettingsRestart;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.theme.MaterialYouTheme;
@@ -65,6 +67,23 @@ public class Helper {
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
+        return preference;
+    }
+
+    public Preference navigationBarPreference(String title, String summary) {
+        NavigationBarPreference preference = new NavigationBarPreference(context);
+        preference.setTitle(title);
+        preference.setSummary(summary);
+        preference.setSingleLineTitle(false);
+        return preference;
+    }
+
+    public Preference navigationStartupPreference(String title, String summary) {
+        NavigationStartupPreference preference = new NavigationStartupPreference(context);
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -125,8 +144,9 @@ public class Helper {
                 if (saved) {
                     SettingsRestart.markChanged(previousValue, newValue);
                 }
+                return saved;
             }
-            return true;
+            return false;
         } catch (Exception ex) {
             Utils.showToastShort(ex.toString());
             Logger.printException(() -> "Failed setting pref: ", ex);

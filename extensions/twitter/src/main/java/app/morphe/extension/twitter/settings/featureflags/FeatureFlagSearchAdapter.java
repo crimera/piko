@@ -11,31 +11,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
+import android.widget.CheckBox;
 
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 class FeatureFlagSearchAdapter extends BaseAdapter {
     private final LayoutInflater inflater;
-    private final List<String> original;
+    private final FeatureFlagCatalog catalog;
     private final List<String> list;
 
-    FeatureFlagSearchAdapter(Context context, String[] list) {
+    FeatureFlagSearchAdapter(Context context, FeatureFlagCatalog catalog) {
         inflater = LayoutInflater.from(context);
 
-        original = Arrays.asList(list);
-        this.list = new ArrayList<>(Arrays.asList(list));
+        this.catalog = catalog;
+        this.list = new ArrayList<>(catalog.search(""));
     }
 
     private static class ViewHolder {
-        TextView textView;
+        CheckBox textView;
     }
 
     @Override
@@ -54,11 +51,17 @@ class FeatureFlagSearchAdapter extends BaseAdapter {
     }
 
     @Override
+    public boolean areAllItemsEnabled() { return false; }
+
+    @Override
+    public boolean isEnabled(int position) { return !catalog.isAdded(getItem(position)); }
+
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "search_item_row"), null);
+            convertView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "search_item_row"), parent, false);
 
             holder.textView = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "searchItemText"));
             convertView.setTag(holder);
@@ -66,23 +69,20 @@ class FeatureFlagSearchAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.textView.setText(list.get(position));
+        String name = getItem(position);
+        boolean added = catalog.isAdded(name);
+        holder.textView.setText(name);
+        holder.textView.setChecked(added || catalog.isSelected(name));
+        holder.textView.setEnabled(!added);
+        convertView.setEnabled(!added);
+        convertView.setAlpha(added ? 0.5f : 1f);
 
         return convertView;
     }
 
     public void filter(String charText) {
-        charText = charText.toLowerCase(Locale.getDefault());
         list.clear();
-        if (charText.isEmpty()) {
-            list.addAll(original);
-        } else {
-            for (String item : original) {
-                if (item.toLowerCase(Locale.getDefault()).contains(charText)) {
-                    list.add(item);
-                }
-            }
-        }
+        list.addAll(catalog.search(charText));
         notifyDataSetChanged();
     }
 }
