@@ -354,4 +354,7 @@
     <string name="piko_media_like">подобається</string>
     <string name="piko_media_link">посилання</string>
     <string name="piko_media_activity">активність</string>
+    <string name="piko_mark_story_seen">Позначити як переглянуте</string>
+    <string name="piko_story_seen_pending">Позначається як переглянуте…</string>
+    <string name="piko_story_seen_sent">Позначено як переглянуте</string>
 </resources>
