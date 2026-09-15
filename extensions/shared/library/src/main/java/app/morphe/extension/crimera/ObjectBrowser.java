@@ -56,6 +56,7 @@ public class ObjectBrowser {
             showObjectDialog(context, obj, title, false, null);
         } catch (Exception ex) {
             app.morphe.extension.crimera.PikoUtils.logger(ex);
+            Utils.showToastShort("Could not open object browser");
         }
     }
 
