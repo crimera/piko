@@ -848,7 +848,7 @@ public final class InlineDownloadButton {
         if (!NewXUtils.isHttpUrl(download.url)) return EnqueueState.FAILED;
 
         DownloadManager manager = downloadManager(context);
-        if (manager == null) return EnqueueState.FAILED;
+        if (manager == null && !MultiAppDownloads.isNeeded()) return EnqueueState.FAILED;
 
         String baseFileName = downloadFileName(username, postId, download.extension, index, mediaCount);
         String fileName;
@@ -866,7 +866,8 @@ public final class InlineDownloadButton {
                 download.url,
                 fileName,
                 download.mimeType,
-                "Downloading media from @" + username
+                "Downloading media from @" + username,
+                behavior
         );
     }
 
@@ -877,7 +878,7 @@ public final class InlineDownloadButton {
             String fileName,
             String mimeType
     ) {
-        if (queueDownload(context, manager, fallbackUrl, fileName, mimeType, "Downloading media") ==
+        if (queueDownload(context, manager, fallbackUrl, fileName, mimeType, "Downloading media", conflictBehavior()) ==
                 EnqueueState.FAILED) {
             NewXInAppNotification.show("Download failed: " + fileName);
         }
@@ -889,9 +890,17 @@ public final class InlineDownloadButton {
             String url,
             String fileName,
             String mimeType,
-            String description
+            String description,
+            ConflictBehavior behavior
     ) {
         String temporaryFileName = uniqueTemporaryDownloadFileName(fileName);
+        if (MultiAppDownloads.isNeeded()) {
+            return switch (MultiAppDownloads.enqueueInline(context, url, fileName, mimeType, behavior)) {
+                case QUEUED -> EnqueueState.QUEUED;
+                case SKIPPED -> EnqueueState.SKIPPED;
+                case FAILED -> EnqueueState.FAILED;
+            };
+        }
         try {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
                     .setTitle(fileName)
@@ -1138,6 +1147,7 @@ public final class InlineDownloadButton {
         // Replace any pre-existing copy only after the new file is fully written, so a
         // failed download never destroys the previously saved media.
         deleteExistingMedia(resolver, collection, fileName, relativePath, destination);
+        PublishedMediaRefresh.request(context, destination, mimeType);
         return true;
     }
 
@@ -1295,6 +1305,7 @@ public final class InlineDownloadButton {
                 baseFileName,
                 behavior,
                 fileName -> mediaExists(context, fileName, mimeType) || pendingFileExists(context, fileName)
+                        || (MultiAppDownloads.isNeeded() && MultiAppDownloads.pendingFileExists(fileName, mimeType))
         );
     }
 
@@ -1364,6 +1375,9 @@ public final class InlineDownloadButton {
             // query reports "missing" even though MediaStore will rename a colliding insert to
             // "file (1).jpg". Probe the provider's own name allocation to detect that case
             // without requesting broad media access from the user.
+            // Clone profiles can reject the name-probe's synthetic one-byte media item.
+            // Let MediaStore allocate the real completed media instead of failing before enqueue.
+            if (MultiAppDownloads.isNeeded()) return false;
             return mediaStoreNameIsOccupied(
                     resolver,
                     collection,
@@ -1433,7 +1447,7 @@ public final class InlineDownloadButton {
         return !requestedName.equals(allocatedName);
     }
 
-    private static String mediaStoreDisplayName(ContentResolver resolver, Uri media) {
+    static String mediaStoreDisplayName(ContentResolver resolver, Uri media) {
         try (Cursor cursor = resolver.query(
                 media,
                 new String[]{MediaStore.MediaColumns.DISPLAY_NAME},
