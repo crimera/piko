@@ -172,6 +172,11 @@
     <string name="piko_newx_nav_editor_icon_original">Original item icon</string>
     <string name="piko_newx_nav_replace_bookmarks">Bookmarks</string>
     <string name="piko_newx_nav_replace_profile">Profile</string>
+    <string name="piko_newx_nav_replace_lists">Lists</string>
+    <string name="piko_newx_nav_replace_communities">Communities</string>
+    <string name="piko_newx_nav_replace_history">History</string>
+    <string name="piko_newx_nav_replace_spaces">Spaces</string>
+    <string name="piko_newx_nav_replace_creator_studio">Creator Studio</string>
 
     <string name="piko_newx_drawer_title">Drawer items to hide</string>
     <string name="piko_newx_drawer_summary">Choose which items are hidden from the NewX navigation drawer</string>

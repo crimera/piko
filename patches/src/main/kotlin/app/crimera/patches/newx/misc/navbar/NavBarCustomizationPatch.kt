@@ -27,6 +27,7 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patches.all.misc.resources.hasResourceId
 import app.morphe.util.cloneMutable
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
@@ -85,12 +86,33 @@ private data class NavBarDestinationSpec(
     val id: String,
     val titleResourceName: String,
     val optionTitleResourceName: String,
+    val optional: Boolean = false,
+    val alternateTitleResourceName: String? = null,
 )
 
 private val NAV_BAR_DESTINATIONS =
     listOf(
         NavBarDestinationSpec("BOOKMARKS", "bookmarks_title", "piko_newx_nav_replace_bookmarks"),
         NavBarDestinationSpec("PROFILE", "drawer_profile_title", "piko_newx_nav_replace_profile"),
+        NavBarDestinationSpec("LISTS", "drawer_lists", "piko_newx_nav_replace_lists"),
+        NavBarDestinationSpec(
+            "COMMUNITIES",
+            "drawer_communities_title",
+            "piko_newx_nav_replace_communities",
+        ),
+        NavBarDestinationSpec(
+            "HISTORY",
+            "drawer_history_title",
+            "piko_newx_nav_replace_history",
+            optional = true,
+            alternateTitleResourceName = "bookmarks_title",
+        ),
+        NavBarDestinationSpec("SPACES", "spaces_tab_name", "piko_newx_nav_replace_spaces"),
+        NavBarDestinationSpec(
+            "CREATOR_STUDIO",
+            "creator_studio_drawer_menu_title",
+            "piko_newx_nav_replace_creator_studio",
+        ),
     )
 
 /** Navigation tab enum constants and their localized names. */
@@ -151,7 +173,17 @@ val customizeNewXNavBarPatch =
             injectNavBarFilter(tabDataMatch)
 
             val drawerRows = resolveDrawerRowCalls()
-            val destinations = NAV_BAR_DESTINATIONS.map { resolveNavBarDestination(it, drawerRows) }
+            val destinations =
+                NAV_BAR_DESTINATIONS.mapNotNull { spec ->
+                    if (!hasResourceId(ResourceType.STRING, spec.titleResourceName)) {
+                        if (spec.optional) return@mapNotNull null
+                        throw PatchException(
+                            "NewX required navigation destination title resource is missing: " +
+                                spec.titleResourceName,
+                        )
+                    }
+                    resolveNavBarDestination(spec, drawerRows)
+                }
             val contentTarget = resolveNavBarItemContent(tabData)
             val iconFields = destinations.map { it.iconField } + contentTarget.tabIconFields.values
             val iconDrawables = resolveIconDrawables(iconFields)
@@ -606,7 +638,10 @@ private fun resolveNavBarDestination(
     rows: List<DrawerRowCall>,
 ): ResolvedNavBarDestination {
     val titleResourceId = getResourceId(ResourceType.STRING, spec.titleResourceName)
-    val matches = rows.filter { it.titleResourceId.toLong() == titleResourceId }
+    val alternateTitleResourceId =
+        spec.alternateTitleResourceName?.let { getResourceId(ResourceType.STRING, it) }
+    val titleResourceIds = listOfNotNull(titleResourceId, alternateTitleResourceId).toSet()
+    val matches = rows.filter { it.titleResourceId.toLong() in titleResourceIds }
     val row =
         requireExactlyOne(
             "NewX drawer row for ${spec.titleResourceName}",

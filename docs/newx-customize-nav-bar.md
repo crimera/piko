@@ -5,6 +5,8 @@ Feature: `NewX: Customize navigation bar` (`customizeNewXNavBarPatch`).
 The patch replaces the old hide/replace single-choice settings with one editor custom screen. The
 screen lists the seven bottom navigation bar items and supports drag reordering, per-item
 visibility, and per-item replacement (drawer destination and icon).
+Replacement destinations include Bookmarks, Profile, Lists, Communities, Spaces, and Creator
+Studio. History is included on releases that expose its drawer entry.
 
 ## Why replacement and not an eighth item
 
@@ -28,12 +30,13 @@ so the editor just persists an ordered list and the filter rebuilds the map.
   receives the tab map (constructor parameter index 9) and injects
   `NavBarFilter.filter(Map) -> Map` before it.
 - Tab change method: unique `void` method in the component class whose only parameter is the
-  navigation enum and that reads the `com/arkivanov/decompose/router/stack/c` navigator field.
+  navigation enum and that reads the component's stack navigator field before invoking its
+  two-lambda navigation operation.
   The guard calls `openReplacementFor(tab)` and returns before the original body when the captured
   drawer click handled the request.
-- Item content lambda: unique constructor `(Z, <enum>, <f0>)`; the `ha` field is resolved from the
+- Item content lambda: unique constructor `(Z, <enum>, <f0>)`; the enum field is resolved from the
   constructor's `iput-object` of the tab parameter, and the icon/label renderer is the unique
-  `(<icons/b>, String, <f0>, Composer, I)V` method it calls. The method is cloned with one extra
+  `(<icons/*>, String, <f0>, Composer, I)V` method it calls. The method is cloned with one extra
   local (`cloneMutable(numberOfParameterRegisters + 1)`) because newer releases reuse the receiver
   parameter register for the label resource. The override hook is inserted at the renderer call
   itself: the label switch's internal jump target is the label conversion instruction, so an
@@ -42,11 +45,11 @@ so the editor just persists an ordered list and the filter rebuilds the map.
   enum-case mapping, the icon switch payloads are parsed for case branches, and the unselected
   switch's icon field is used for both states. The shared default icon covers the Communities case
   that reuses the pre-switch value.
-- Icon drawables: each `Lcom/x/icons/b;` static field is traced in its `<clinit>` back to the
-  `new-instance`/`const`/`<init>(I)V` allocation so the editor can render the app icons with
+- Icon drawables: each resolved `com/x/icons/*` static field is traced in its `<clinit>` back to
+  the `new-instance`/`const`/`<init>(I)V` allocation so the editor can render the app icons with
   `ImageView.setImageResource` without referencing app classes.
 - Drawer row: title-based drawer row renderers are discovered by shape
-  (`String, <icons/b>, Function0, Modifier, ...`, 8-10 params) and matched by the row's resolved
+  (`String, <icons/*>, Function0, Modifier, ...`, 8-10 params) and matched by the row's resolved
   title resource id. Rows may live outside `com/x/main/drawer/` in a lazy row lambda, so the scan is
   not package-scoped.
 - Every selection is cardinality-checked with `requireExactlyOne`; a missing row, icon, field,
