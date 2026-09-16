@@ -19,6 +19,8 @@ dependencies {
     implementation(libs.gson)
 
     implementation(libs.morphe.patches.library)
+
+    testImplementation(kotlin("test"))
 }
 
 tasks {
@@ -29,6 +31,24 @@ tasks {
 
         classpath = sourceSets["main"].runtimeClasspath
         mainClass.set("app.morphe.util.resource.CheckStringKt")
+    }
+
+    register<JavaExec>("lintNewxResolvers") {
+        description = "Checks NewX resolvers for unsafe candidate selection and nullable fallthrough"
+        group = "verification"
+
+        dependsOn(classes)
+
+        classpath = sourceSets["main"].runtimeClasspath
+        mainClass.set("app.crimera.tools.newx.NewXResolverLinterKt")
+        args(
+            providers.gradleProperty("newxResolverSourceRoot").orElse(
+                rootProject.projectDir.resolve("patches/src/main/kotlin/app/crimera/patches/newx").absolutePath,
+            ).get(),
+        )
+        if (providers.gradleProperty("newxResolverLintReportOnly").isPresent) {
+            args("--report-only")
+        }
     }
 
     register<JavaExec>("generatePatchesList") {
