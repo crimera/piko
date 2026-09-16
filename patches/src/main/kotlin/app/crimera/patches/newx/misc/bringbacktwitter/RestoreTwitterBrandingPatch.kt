@@ -14,6 +14,10 @@ import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValue
 import org.w3c.dom.Element
+import java.io.FileWriter
+import java.nio.file.Files
+
+private const val SPLASH_BACKGROUND = "@color/twitter_splash_background"
 
 @Suppress("unused")
 val bringBackTwitterPatch =
@@ -28,6 +32,7 @@ val bringBackTwitterPatch =
 
         execute {
             addAppResources("twitter-bring-back")
+            ensureNightSplashBackground()
             
             document("AndroidManifest.xml").use { document ->
                 val application = document.getElementsByTagName("application").item(0) as Element
@@ -167,7 +172,7 @@ val bringBackTwitterPatch =
 
                     styleElement?.let { style ->
                         style.childNodes.findElementByAttributeValue("name", "windowSplashScreenAnimatedIcon")?.textContent = "@drawable/splash_screen_icon_animated"
-                        style.childNodes.findElementByAttributeValue("name", "windowSplashScreenBackground")?.textContent = "@color/twitter_blue"
+                        style.childNodes.findElementByAttributeValue("name", "windowSplashScreenBackground")?.textContent = SPLASH_BACKGROUND
                     }
                 }
             }
@@ -192,3 +197,35 @@ val bringBackTwitterPatch =
             }
         }
     }
+
+private fun app.morphe.patcher.patch.ResourcePatchContext.ensureNightSplashBackground() {
+    val valuesNight = get("res/values-night")
+    if (!valuesNight.isDirectory) {
+        Files.createDirectories(valuesNight.toPath())
+    }
+
+    val colorsPath = "res/values-night/colors.xml"
+    val colorsFile = valuesNight.resolve("colors.xml")
+    if (!colorsFile.exists()) {
+        FileWriter(colorsFile).use { writer ->
+            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
+        }
+    }
+
+    document(colorsPath).use { document ->
+        val colors = document.getElementsByTagName("color")
+        for (index in 0 until colors.length) {
+            val color = colors.item(index) as? Element ?: continue
+            if (color.getAttribute("name") != "twitter_splash_background") continue
+            color.textContent = "#000000"
+            return@use
+        }
+
+        document.documentElement.appendChild(
+            document.createElement("color").apply {
+                setAttribute("name", "twitter_splash_background")
+                textContent = "#000000"
+            },
+        )
+    }
+}
