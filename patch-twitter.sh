@@ -6,8 +6,16 @@ ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 cd "$ROOT_DIR"
 
 INSTALL=false
+# Morphe Manager's adaptive default is higher, but 512 MB is its supported heap floor. Keeping
+# local patch runs at that floor catches memory regressions that a desktop-sized heap would hide.
+PATCHER_MAX_HEAP_MB="${PATCHER_MAX_HEAP_MB:-512}"
 FASTDEPLOY_PLATFORM_TOOLS_VERSION="${FASTDEPLOY_PLATFORM_TOOLS_VERSION:-36.0.0}"
 FASTDEPLOY_PLATFORM_TOOLS_DIR="${FASTDEPLOY_PLATFORM_TOOLS_DIR:-${HOME}/.cache/piko/platform-tools-${FASTDEPLOY_PLATFORM_TOOLS_VERSION}}"
+
+if [[ ! "$PATCHER_MAX_HEAP_MB" =~ ^[1-9][0-9]*$ ]]; then
+  echo "PATCHER_MAX_HEAP_MB must be a positive integer: $PATCHER_MAX_HEAP_MB" >&2
+  exit 1
+fi
 
 VER=$(grep "^version" gradle.properties | cut -d= -f2 | tr -d ' ')
 MPP="patches/build/libs/patches-${VER}.mpp"
@@ -39,7 +47,8 @@ for arg in "$@"; do
   esac
 done
 
-java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
+echo "Patcher JVM heap limit: ${PATCHER_MAX_HEAP_MB} MB"
+java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -p "$MPP" \
   --keystore Morphe.keystore \
   --exclusive \

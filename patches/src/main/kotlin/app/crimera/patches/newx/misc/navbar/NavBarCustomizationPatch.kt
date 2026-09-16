@@ -46,6 +46,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstructio
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -315,11 +316,12 @@ private fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCont
 
     // The item content lambda captures (selected, tab, badge); R8 erases its field types, so the
     // constructor is the stable identity.
-    val contentClasses = mutableListOf<Pair<String, MutableMethod>>()
+    // This is a read-only discovery pass. Converting every class to a mutable proxy here keeps
+    // the whole APK alive and can exceed the manager's 512 MB minimum heap on large NewX builds.
+    val contentClasses = mutableListOf<String>()
     context.classDefForEach { classDef ->
-        val mutableClass = context.mutableClassDefBy(classDef.type)
         val constructors =
-            mutableClass.methods.filter { method ->
+            classDef.methods.filter { method ->
                 method.returnType.toString() == "V" &&
                     method.parameterTypes.map(CharSequence::toString) ==
                     listOf("Z", tabData.navigationType, tabData.tabDataValueType)
@@ -330,11 +332,20 @@ private fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCont
                     "NewX navigation bar item content constructor in ${classDef.type}",
                     constructors,
                 ) { it.toString() }
-            contentClasses += classDef.type.toString() to constructor
+            contentClasses += classDef.type.toString()
         }
     }
-    val (consumerClass, contentConstructor) =
-        requireExactlyOne("NewX navigation bar item content class", contentClasses) { "${it.first} ${it.second}" }
+    val consumerClass = requireExactlyOne("NewX navigation bar item content class", contentClasses)
+    val consumerClassDef = context.mutableClassDefBy(consumerClass)
+    val contentConstructor =
+        requireExactlyOne(
+            "NewX navigation bar item content constructor in $consumerClass",
+            consumerClassDef.methods.filter { method ->
+                method.returnType.toString() == "V" &&
+                    method.parameterTypes.map(CharSequence::toString) ==
+                    listOf("Z", tabData.navigationType, tabData.tabDataValueType)
+            },
+        ) { it.toString() }
 
     val tabParameterRegister = contentConstructor.p0Register + 2
     val navigationFieldInstructions =
@@ -364,7 +375,6 @@ private fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCont
     val originalRegisterCount =
         originalMethod.implementation?.registerCount
             ?: throw PatchException("NewX navigation bar item content has no implementation: $originalMethod")
-    val consumerClassDef = context.mutableClassDefBy(consumerClass)
     val consumerMethod =
         originalMethod.cloneMutable(
             additionalRegisters = originalMethod.numberOfParameterRegisters + 1,
@@ -588,7 +598,7 @@ private fun NavBarItemContentTarget.injectReplacementOverride() {
 }
 
 private data class DrawerRowCall(
-    val method: MutableMethod,
+    val method: Method,
     val callIndex: Int,
     val call: Instruction3rc,
     val titleResourceId: Int,
@@ -602,21 +612,23 @@ private data class DrawerRowCall(
 context(context: BytecodePatchContext)
 private fun resolveDrawerRowCalls(): List<DrawerRowCall> {
     val rows = mutableListOf<DrawerRowCall>()
+    // Keep this APK-wide scan immutable. Calling mutableClassDefBy for every class materializes a
+    // mutable proxy for the entire APK and is the source of patch-time OOMs on manager-sized heaps.
     context.classDefForEach { classDef ->
-        val mutableClass = context.mutableClassDefBy(classDef.type)
-        mutableClass.methods.forEach { method ->
+        classDef.methods.forEach { method ->
             if (method.implementation == null) return@forEach
-            method.instructions.forEachIndexed { index, instruction ->
+            val methodInstructions = method.implementation?.instructions?.toList() ?: return@forEach
+            methodInstructions.forEachIndexed { index, instruction ->
                 if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@forEachIndexed
                 val call = instruction as? Instruction3rc ?: return@forEachIndexed
                 val renderer = instruction.getReference<MethodReference>() ?: return@forEachIndexed
                 if (!renderer.isDrawerRowRenderer()) return@forEachIndexed
                 val titleRegister = call.startRegister
                 val titleResourceId =
-                    method.instructions.resolveTitleResourceIdAtRowCall(index, titleRegister)
+                    methodInstructions.resolveTitleResourceIdAtRowCall(index, titleRegister)
                         ?: return@forEachIndexed
                 val iconField =
-                    method.instructions.resolveIconField(index, titleRegister + 1)
+                    methodInstructions.resolveIconField(index, titleRegister + 1)
                         ?: return@forEachIndexed
                 rows +=
                     DrawerRowCall(
@@ -647,11 +659,23 @@ private fun resolveNavBarDestination(
             "NewX drawer row for ${spec.titleResourceName}",
             matches,
         ) { "${it.method} @ ${it.callIndex}" }
+    val mutableMethodCandidates =
+        context.mutableClassDefBy(row.method.definingClass).methods.filter { method ->
+            method.name == row.method.name &&
+                method.returnType.toString() == row.method.returnType.toString() &&
+                method.parameterTypes.map(CharSequence::toString) ==
+                row.method.parameterTypes.map(CharSequence::toString)
+        }
+    val mutableMethod =
+        requireExactlyOne(
+            "NewX mutable drawer row method ${row.method}",
+            mutableMethodCandidates,
+        ) { it.toString() }
     return ResolvedNavBarDestination(
         spec = spec,
         titleResourceId = titleResourceId,
         iconField = row.iconField,
-        method = row.method,
+        method = mutableMethod,
         callIndex = row.callIndex,
         clickRegister = row.call.startRegister + 2,
     )
