@@ -47,8 +47,7 @@ public final class Theme {
         boolean dynamicColors =
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                         && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
-        boolean amoledBlack = dynamicColors
-                && SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
+        boolean amoledBlack = SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
         return new SettingsSnapshot(dynamicColors, amoledBlack);
     }
 
@@ -216,8 +215,7 @@ public final class Theme {
     }
 
     private static boolean useAmoledBlack(Context context) {
-        return usesDynamicColors()
-                && isDark(context)
+        return isDark(context)
                 && SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
     }
 

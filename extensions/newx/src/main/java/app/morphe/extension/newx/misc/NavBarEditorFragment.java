@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -18,7 +19,9 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
@@ -30,15 +33,21 @@ import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
 /**
- * Drag-and-drop editor for the NewX bottom navigation bar: item order, visibility, replacement
- * destination, and replacement icon. Changes are picked up on the next app start.
+ * Drag-and-drop editor for the effective NewX bottom navigation destinations. The app still owns
+ * up to five native slots underneath; this screen presents those slots as a single destination list.
  */
 @SuppressWarnings("deprecation")
 public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     private static final String DRAG_MIME = "piko/newx-navbar-item";
 
-    private final List<Row> rows = new ArrayList<>();
+    private final List<Row> shownRows = new ArrayList<>();
+    private final List<Row> availableRows = new ArrayList<>();
     private LinearLayout rowsContainer;
+    private ButtonView restartButton;
+    private View restartFooter;
+    @Nullable private TextView availableHeader;
+    private boolean dropHandled;
+    private boolean hasPendingChanges;
 
     @Override
     public View onCreateView(
@@ -51,25 +60,17 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
 
-        TextView hint = NewXSettingsUi.summaryText(context);
-        hint.setText(StringRef.str("piko_newx_nav_editor_hint"));
-        hint.setPadding(
-                Theme.dpToPx(context, 24f),
-                Theme.dpToPx(context, 16f),
-                Theme.dpToPx(context, 24f),
-                Theme.dpToPx(context, 12f)
-        );
-        root.addView(hint, new LinearLayout.LayoutParams(-1, -2));
-
         ScrollView scroll = new ScrollView(context);
+        scroll.setFillViewport(true);
+        scroll.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
         rowsContainer = new LinearLayout(context);
         rowsContainer.setOrientation(LinearLayout.VERTICAL);
         rowsContainer.setOnDragListener(this::onDrag);
         scroll.addView(rowsContainer, new ViewGroup.LayoutParams(-1, -2));
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1f));
-
+        restartFooter = buildRestartRow(context);
         root.addView(NewXSettingsUi.divider(context));
-        root.addView(buildRestartRow(context), new LinearLayout.LayoutParams(-1, -2));
+        root.addView(restartFooter, new LinearLayout.LayoutParams(-1, -2));
 
         rebuildRows();
         return root;
@@ -88,43 +89,98 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     private void rebuildRows() {
         LinearLayout container = rowsContainer;
         if (container == null) return;
+
         container.removeAllViews();
-        rows.clear();
+        shownRows.clear();
+        availableRows.clear();
 
         Context context = requireContext();
-        List<String> tabIds = NavBarConfig.shared().orderedTabs(NavBarCatalog.tabIds());
-        for (String tabId : tabIds) {
-            Row row = createRow(context, tabId);
-            row.divider = NewXSettingsUi.divider(context);
-            rows.add(row);
-            container.addView(row.root, new LinearLayout.LayoutParams(-1, -2));
-            container.addView(row.divider, new LinearLayout.LayoutParams(-1, -2));
+        TextView hint = NewXSettingsUi.summaryText(context);
+        hint.setText(StringRef.str("piko_newx_nav_editor_hint"));
+        hint.setPadding(
+                Theme.dpToPx(context, 24f),
+                Theme.dpToPx(context, 16f),
+                Theme.dpToPx(context, 24f),
+                Theme.dpToPx(context, 12f)
+        );
+        container.addView(hint, new LinearLayout.LayoutParams(-1, -2));
+
+        NavBarConfig config = NavBarConfig.shared();
+        List<String> nativeTabs = NavBarCatalog.liveTabIds();
+        List<String> orderedTabs = config.orderedTabs(nativeTabs);
+        Set<String> shownTabIds = new HashSet<>(config.shownTabs(nativeTabs));
+
+        addSectionHeader(context, "piko_newx_nav_editor_shown");
+        for (String tabId : orderedTabs) {
+            if (!shownTabIds.contains(tabId)) continue;
+            Row row = createTabRow(context, tabId);
+            shownRows.add(row);
+            addRow(container, row);
         }
+
+        container.addView(
+                NewXSettingsUi.divider(context),
+                new LinearLayout.LayoutParams(-1, -2)
+        );
+        availableHeader = addSectionHeader(context, "piko_newx_nav_editor_available");
+
+        for (String tabId : orderedTabs) {
+            if (shownTabIds.contains(tabId)) continue;
+            Row row = createTabRow(context, tabId);
+            availableRows.add(row);
+            addRow(container, row);
+        }
+
+        Set<String> assignedDestinations = assignedDestinations(config);
+        for (NavBarCatalog.Destination destination : NavBarCatalog.destinations()) {
+            if (assignedDestinations.contains(destination.id)) continue;
+            Row row = createDestinationRow(context, destination.id);
+            availableRows.add(row);
+            addRow(container, row);
+        }
+
+    }
+
+    private TextView addSectionHeader(Context context, String titleResourceName) {
+        TextView header = NewXSettingsUi.summaryText(context);
+        header.setText(StringRef.str(titleResourceName));
+        header.setTextColor(Theme.primaryAccent(context));
+        header.setPadding(
+                Theme.dpToPx(context, 24f),
+                Theme.dpToPx(context, 18f),
+                Theme.dpToPx(context, 24f),
+                Theme.dpToPx(context, 8f)
+        );
+        rowsContainer.addView(header, new LinearLayout.LayoutParams(-1, -2));
+        return header;
+    }
+
+    private void addRow(LinearLayout container, Row row) {
+        container.addView(row.root, new LinearLayout.LayoutParams(-1, -2));
     }
 
     private View buildRestartRow(Context context) {
-        LinearLayout row = new LinearLayout(context);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setMinimumHeight(Theme.dpToPx(context, 56f));
-        row.setPadding(
-                Theme.dpToPx(context, 20f),
-                Theme.dpToPx(context, 14f),
-                Theme.dpToPx(context, 20f),
-                Theme.dpToPx(context, 14f)
+        LinearLayout footer = new LinearLayout(context);
+        footer.setGravity(Gravity.CENTER);
+        footer.setPadding(
+                Theme.dpToPx(context, 16f),
+                Theme.dpToPx(context, 12f),
+                Theme.dpToPx(context, 16f),
+                Theme.dpToPx(context, 12f)
         );
-        NewXSettingsUi.applyRippleBackground(row);
-
-        TextView restart = NewXSettingsUi.titleText(context);
-        restart.setText(StringRef.str("piko_newx_nav_editor_restart"));
-        restart.setTextColor(Theme.primaryAccent(context));
-        row.addView(restart, new LinearLayout.LayoutParams(-1, -2));
-
-        row.setOnClickListener(ignored -> confirmRestart());
-        return row;
+        restartButton = new ButtonView(
+                context,
+                ButtonView.ButtonStyle.FILLED,
+                StringRef.str("piko_newx_nav_editor_restart")
+        );
+        restartButton.setEnabled(hasPendingChanges);
+        restartButton.setOnClickListener(ignored -> confirmRestart());
+        footer.addView(restartButton, new LinearLayout.LayoutParams(-1, -2));
+        return footer;
     }
 
     private void confirmRestart() {
+        if (restartButton == null || !restartButton.isEnabled()) return;
         Context context = requireContext();
         DialogView dialog =
                 new DialogView(context)
@@ -152,21 +208,28 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         dialog.addButton(cancel).addButton(restart).show();
     }
 
-    private Row createRow(Context context, String tabId) {
-        NavBarCatalog.Tab tab = NavBarCatalog.tab(tabId);
-        String title = tab == null ? tabId : StringRef.str(tab.labelResourceName);
+    private Row createTabRow(Context context, String tabId) {
+        Row row = new Row(tabId, null);
+        createRowView(context, row);
+        return row;
+    }
 
-        Row row = new Row(tabId);
+    private Row createDestinationRow(Context context, String destinationId) {
+        Row row = new Row(null, destinationId);
+        createRowView(context, row);
+        return row;
+    }
 
+    private void createRowView(Context context, Row row) {
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.HORIZONTAL);
         root.setGravity(Gravity.CENTER_VERTICAL);
-        root.setMinimumHeight(Theme.dpToPx(context, 72f));
+        root.setMinimumHeight(Theme.dpToPx(context, 64f));
         root.setPadding(
                 Theme.dpToPx(context, 12f),
-                Theme.dpToPx(context, 10f),
+                Theme.dpToPx(context, 8f),
                 Theme.dpToPx(context, 16f),
-                Theme.dpToPx(context, 10f)
+                Theme.dpToPx(context, 8f)
         );
         row.root = root;
 
@@ -175,10 +238,21 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         row.handle.setTextSize(22f);
         row.handle.setGravity(Gravity.CENTER);
         row.handle.setContentDescription(StringRef.str("piko_newx_nav_editor_drag"));
-        row.handle.setOnLongClickListener(ignored -> {
+        View.OnLongClickListener dragListener = ignored -> {
             startDrag(row);
             return true;
-        });
+        };
+        row.handle.setOnLongClickListener(dragListener);
+        View.OnTouchListener touchRecorder = (view, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                row.dragTouchX = view.getLeft() + Math.round(event.getX());
+                row.dragTouchY = view.getTop() + Math.round(event.getY());
+            }
+            return false;
+        };
+        root.setOnTouchListener(touchRecorder);
+        row.handle.setOnTouchListener(touchRecorder);
+        root.setOnLongClickListener(dragListener);
         root.addView(row.handle, new LinearLayout.LayoutParams(Theme.dpToPx(context, 40f), -2));
 
         row.iconView = new ImageView(context);
@@ -188,293 +262,265 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
                 new LinearLayout.LayoutParams(Theme.dpToPx(context, 24f), Theme.dpToPx(context, 24f))
         );
 
-        LinearLayout labels = new LinearLayout(context);
-        labels.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(0, -2, 1f);
-        labelParams.setMarginStart(Theme.dpToPx(context, 16f));
-        labelParams.setMarginEnd(Theme.dpToPx(context, 12f));
-        root.addView(labels, labelParams);
-
         row.titleView = NewXSettingsUi.titleText(context);
-        row.titleView.setText(title);
-        labels.addView(row.titleView, new LinearLayout.LayoutParams(-1, -2));
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, -2, 1f);
+        titleParams.setMarginStart(Theme.dpToPx(context, 16f));
+        root.addView(row.titleView, titleParams);
+        row.iconView.setOnTouchListener(touchRecorder);
+        row.titleView.setOnTouchListener(touchRecorder);
+        row.iconView.setOnLongClickListener(dragListener);
+        row.titleView.setOnLongClickListener(dragListener);
 
-        LinearLayout choices = new LinearLayout(context);
-        choices.setOrientation(LinearLayout.HORIZONTAL);
-        choices.setPadding(0, Theme.dpToPx(context, 5f), 0, 0);
-
-        row.opensView = choiceText(context);
-        row.opensView.setOnClickListener(ignored -> showDestinationDialog(row));
-        choices.addView(row.opensView, new LinearLayout.LayoutParams(-2, -2));
-
-        row.iconChoiceView = choiceText(context);
-        LinearLayout.LayoutParams iconChoiceParams = new LinearLayout.LayoutParams(-2, -2);
-        iconChoiceParams.setMarginStart(Theme.dpToPx(context, 16f));
-        row.iconChoiceView.setOnClickListener(ignored -> showIconDialog(row));
-        choices.addView(row.iconChoiceView, iconChoiceParams);
-
-        labels.addView(choices, new LinearLayout.LayoutParams(-1, -2));
-
-        row.visibleSwitch = new NewXSettingsUi.SwitchControl(context);
-        row.visibleSwitch.setInteractive(true);
-        row.visibleSwitch.setContentDescription(StringRef.str("piko_newx_nav_editor_visible"));
-        row.visibleSwitch.setOnCheckedChangeListener(checked -> {
-            if (row.updating) return;
-            NavBarConfig.shared().setHidden(row.tabId, !checked);
-            row.refresh();
-        });
-        root.addView(
-                row.visibleSwitch,
-                new LinearLayout.LayoutParams(Theme.dpToPx(context, 52f), Theme.dpToPx(context, 32f))
-        );
-
+        NewXSettingsUi.applyRippleBackground(root);
         row.refresh();
-        return row;
     }
 
-    private TextView choiceText(Context context) {
-        TextView view = NewXSettingsUi.summaryText(context);
-        view.setPadding(
-                0,
-                Theme.dpToPx(context, 4f),
-                Theme.dpToPx(context, 4f),
-                Theme.dpToPx(context, 4f)
-        );
-        NewXSettingsUi.applyRippleBackground(view);
-        return view;
+    private Set<String> assignedDestinations(NavBarConfig config) {
+        Set<String> assigned = new HashSet<>();
+        for (String tabId : config.shownTabs(NavBarCatalog.liveTabIds())) {
+            String destinationId = config.destinationFor(tabId);
+            if (destinationId == null) continue;
+            if (NavBarCatalog.destination(destinationId) == null) continue;
+            assigned.add(destinationId);
+        }
+        return assigned;
     }
 
     private void startDrag(Row row) {
-        ClipData data = ClipData.newPlainText(DRAG_MIME, row.tabId);
-        View.DragShadowBuilder shadow = new View.DragShadowBuilder(row.root);
+        String itemId = row.tabId == null ? row.destinationId : row.tabId;
+        if (itemId == null) return;
+        dropHandled = false;
+        ClipData data = ClipData.newPlainText(DRAG_MIME, itemId);
+        int touchPointX = row.dragTouchX;
+        if (touchPointX < 0) touchPointX = Theme.dpToPx(requireContext(), 64f);
+        int touchPointY = row.dragTouchY;
+        if (touchPointY < 0) touchPointY = row.root.getHeight() / 2;
+        View.DragShadowBuilder shadow = new RowDragShadow(row.root, touchPointX, touchPointY);
         row.root.startDragAndDrop(data, shadow, row, 0);
     }
 
+    private void markChanged() {
+        hasPendingChanges = true;
+        if (restartButton != null) restartButton.setEnabled(true);
+    }
+
     private boolean onDrag(View view, DragEvent event) {
+        Object state = event.getLocalState();
+        if (!(state instanceof Row row)) return false;
+
         switch (event.getAction()) {
-            case DragEvent.ACTION_DRAG_STARTED: {
-                Object state = event.getLocalState();
-                if (state instanceof Row row) row.root.setAlpha(0.4f);
+            case DragEvent.ACTION_DRAG_STARTED:
+                row.root.setAlpha(0.4f);
                 return true;
-            }
-            case DragEvent.ACTION_DRAG_LOCATION: {
-                Object state = event.getLocalState();
-                if (!(state instanceof Row row)) return true;
-                int target = rowIndexAt(event.getY());
-                if (target >= 0) moveRow(row, target);
-                return true;
-            }
             case DragEvent.ACTION_DROP:
-            case DragEvent.ACTION_DRAG_ENDED: {
-                Object state = event.getLocalState();
-                if (state instanceof Row row) {
-                    row.root.setAlpha(1f);
-                    row.refresh();
-                }
-                persistOrder();
+                if (dropHandled) return true;
+                dropHandled = true;
+                applyDrop(row, event.getY());
                 return true;
-            }
+            case DragEvent.ACTION_DRAG_ENDED:
+                row.root.setAlpha(1f);
+                return true;
             default:
-                return false;
+                return true;
         }
     }
 
-    private int rowIndexAt(float y) {
-        if (rows.isEmpty()) return -1;
-        if (y < rows.get(0).root.getTop()) return 0;
-        int lastIndex = rows.size() - 1;
-        if (y > rows.get(lastIndex).root.getBottom()) return lastIndex;
-        for (int index = 0; index <= lastIndex; index++) {
-            View rowView = rows.get(index).root;
-            if (y >= rowView.getTop() && y <= rowView.getBottom()) return index;
+    private void applyDrop(Row source, float y) {
+        if (isShownSection(y)) {
+            int targetIndex = shownInsertionIndex(y);
+            if (source.isShown()) {
+                reorderShown(source, targetIndex);
+                return;
+            }
+            if (source.isDestination()) {
+                addDestinationToShown(source.destinationId, targetIndex);
+                return;
+            }
+            showNativeTab(source.tabId, targetIndex);
+            return;
         }
-        return -1;
+
+        if (!source.isShown()) return;
+        removeFromShown(source);
     }
 
-    private void moveRow(Row row, int target) {
-        int current = rows.indexOf(row);
-        if (current < 0 || current == target) return;
-
-        View divider = row.divider;
-        if (divider == null) return;
-
-        rowsContainer.removeView(row.root);
-        rowsContainer.removeView(divider);
-        rows.remove(current);
-        rows.add(target, row);
-        int childIndex = Math.min(target * 2, rowsContainer.getChildCount());
-        rowsContainer.addView(row.root, childIndex);
-        rowsContainer.addView(divider, childIndex + 1);
+    private boolean isShownSection(float y) {
+        TextView header = availableHeader;
+        return header == null || y < header.getTop();
     }
 
-    private void persistOrder() {
-        List<String> order = new ArrayList<>(rows.size());
-        for (Row row : rows) order.add(row.tabId);
-        NavBarConfig.shared().saveOrder(order);
+    private int shownInsertionIndex(float y) {
+        for (int index = 0; index < shownRows.size(); index++) {
+            View row = shownRows.get(index).root;
+            if (y < row.getTop() + row.getHeight() / 2f) return index;
+        }
+        return shownRows.size();
     }
 
-    private void showDestinationDialog(Row row) {
-        if (!row.opensView.isEnabled()) return;
-        Context context = requireContext();
+    private void reorderShown(Row source, int targetIndex) {
+        int currentIndex = shownRows.indexOf(source);
+        if (currentIndex < 0) return;
+
+        shownRows.remove(currentIndex);
+        int insertionIndex = Math.min(targetIndex, shownRows.size());
+        if (currentIndex < targetIndex) insertionIndex = Math.max(0, insertionIndex - 1);
+        if (currentIndex == insertionIndex) {
+            shownRows.add(currentIndex, source);
+            return;
+        }
+        shownRows.add(insertionIndex, source);
+        markChanged();
+        persistLayout();
+        rebuildRows();
+    }
+
+    private void addDestinationToShown(@Nullable String destinationId, int targetIndex) {
+        if (destinationId == null) return;
+        NavBarCatalog.Destination destination = NavBarCatalog.destination(destinationId);
+        if (destination == null) return;
+
         NavBarConfig config = NavBarConfig.shared();
-        String current = config.destinationFor(row.tabId);
-
-        DialogView dialog =
-                new DialogView(context)
-                        .setTitle(StringRef.str("piko_newx_nav_editor_opens_dialog"));
-        dialog.getDialog().setCanceledOnTouchOutside(true);
-
-        LinearLayout options = optionList(context);
-        dialog.setScrollableBodyView(options);
-        addOption(
-                context,
-                options,
-                StringRef.str("piko_newx_nav_editor_opens_default"),
-                0,
-                current == null,
-                () -> {
-                    config.setReplacement(row.tabId, "", config.iconFor(row.tabId));
-                    dialog.dismiss();
-                    row.refresh();
-                }
-        );
-        for (NavBarCatalog.Destination destination : NavBarCatalog.destinations()) {
-            addOption(
-                    context,
-                    options,
-                    context.getString(destination.titleResourceId),
-                    destination.drawableRes,
-                    destination.id.equals(current),
-                    () -> {
-                        config.setReplacement(
-                                row.tabId,
-                                destination.id,
-                                config.iconFor(row.tabId)
-                        );
-                        dialog.dismiss();
-                        row.refresh();
-                    }
-            );
+        if (shownRows.size() == NavBarConfig.MAX_VISIBLE_ITEMS) {
+            if (shownRows.isEmpty()) return;
+            Row target = shownRows.get(Math.min(targetIndex, shownRows.size() - 1));
+            if (target.tabId == null) return;
+            config.setReplacement(target.tabId, destinationId);
+            markChanged();
+            rebuildRows();
+            return;
         }
 
-        ButtonView cancel =
-                NewXSettingsUi.dialogButton(
-                        context,
-                        StringRef.str("piko_newx_settings_cancel")
-                );
-        cancel.setOnClickListener(ignored -> dialog.dismiss());
-        dialog.addButton(cancel).show();
+        Row freeSlot = firstAvailableNativeRow();
+        if (freeSlot == null || freeSlot.tabId == null) return;
+
+        config.setHidden(freeSlot.tabId, false);
+        config.setReplacement(freeSlot.tabId, destinationId);
+        shownRows.add(Math.min(targetIndex, shownRows.size()), freeSlot);
+        markChanged();
+        persistLayout();
+        rebuildRows();
     }
 
-    private void showIconDialog(Row row) {
-        if (!row.iconChoiceView.isEnabled()) return;
-        Context context = requireContext();
+    @Nullable
+    private Row firstAvailableNativeRow() {
+        for (Row row : availableRows) {
+            if (!row.isDestination()) return row;
+        }
+        return null;
+    }
+
+    private void showNativeTab(@Nullable String tabId, int targetIndex) {
+        if (tabId == null) return;
         NavBarConfig config = NavBarConfig.shared();
-        String current = config.iconFor(row.tabId);
+        config.setReplacement(tabId, null);
 
-        DialogView dialog =
-                new DialogView(context)
-                        .setTitle(StringRef.str("piko_newx_nav_editor_icon_dialog"));
-        dialog.getDialog().setCanceledOnTouchOutside(true);
-
-        LinearLayout options = optionList(context);
-        dialog.setScrollableBodyView(options);
-        NavBarCatalog.Destination destination =
-                NavBarCatalog.destination(config.destinationFor(row.tabId));
-        int destinationDrawable = destination == null ? tabDrawable(row.tabId) : destination.drawableRes;
-        addOption(
-                context,
-                options,
-                StringRef.str("piko_newx_nav_editor_icon_destination"),
-                destinationDrawable,
-                NavBarConfig.ICON_DESTINATION.equals(current),
-                () -> {
-                    dialog.dismiss();
-                    setIcon(row, NavBarConfig.ICON_DESTINATION);
-                }
-        );
-        addOption(
-                context,
-                options,
-                StringRef.str("piko_newx_nav_editor_icon_original"),
-                tabDrawable(row.tabId),
-                NavBarConfig.ICON_ORIGINAL.equals(current),
-                () -> {
-                    dialog.dismiss();
-                    setIcon(row, NavBarConfig.ICON_ORIGINAL);
-                }
-        );
-        for (NavBarCatalog.Icon icon : NavBarCatalog.icons()) {
-            addOption(
-                    context,
-                    options,
-                    StringRef.str(icon.labelResourceName),
-                    icon.drawableRes,
-                    icon.id.equals(current),
-                    () -> {
-                        dialog.dismiss();
-                        setIcon(row, icon.id);
-                    }
-            );
+        if (shownRows.size() == NavBarConfig.MAX_VISIBLE_ITEMS) {
+            if (shownRows.isEmpty()) return;
+            Row target = shownRows.get(Math.min(targetIndex, shownRows.size() - 1));
+            if (target.tabId == null) return;
+            config.setReplacement(target.tabId, null);
+            config.setHidden(target.tabId, true);
+            shownRows.remove(target);
         }
 
-        ButtonView cancel =
-                NewXSettingsUi.dialogButton(
-                        context,
-                        StringRef.str("piko_newx_settings_cancel")
-                );
-        cancel.setOnClickListener(ignored -> dialog.dismiss());
-        dialog.addButton(cancel).show();
+        config.setHidden(tabId, false);
+        Row source = findAvailableNativeRow(tabId);
+        if (source == null) return;
+        shownRows.add(Math.min(targetIndex, shownRows.size()), source);
+        markChanged();
+        persistLayout();
+        rebuildRows();
     }
 
-    private static LinearLayout optionList(Context context) {
-        LinearLayout options = new LinearLayout(context);
-        options.setOrientation(LinearLayout.VERTICAL);
-        return options;
-    }
-
-    private static void addOption(
-            Context context,
-            LinearLayout options,
-            CharSequence title,
-            int iconResource,
-            boolean selected,
-            Runnable onSelected
-    ) {
-        NewXSettingsUi.ChoiceRow option =
-                NewXSettingsUi.choiceRow(context, title, iconResource, selected, false);
-        option.setOnCheckedChangeListener(checked -> {
-            if (!checked) return;
-            onSelected.run();
-        });
-        options.addView(option, new LinearLayout.LayoutParams(-1, -2));
-    }
-
-    private void setIcon(Row row, String iconId) {
-        NavBarConfig config = NavBarConfig.shared();
-        config.setReplacement(row.tabId, config.destinationFor(row.tabId), iconId);
-        row.refresh();
-    }
-
-    private int effectiveDrawable(String tabId) {
-        NavBarConfig config = NavBarConfig.shared();
-        String destinationId = config.destinationFor(tabId);
-        int fallback = tabDrawable(tabId);
-        if (destinationId == null) return fallback;
-
-        String iconId = config.iconFor(tabId);
-        if (NavBarConfig.ICON_ORIGINAL.equals(iconId)) return fallback;
-        if (NavBarConfig.ICON_DESTINATION.equals(iconId)) {
-            NavBarCatalog.Destination destination = NavBarCatalog.destination(destinationId);
-            return destination == null ? fallback : destination.drawableRes;
+    @Nullable
+    private Row findAvailableNativeRow(String tabId) {
+        for (Row row : availableRows) {
+            if (tabId.equals(row.tabId)) return row;
         }
-        NavBarCatalog.Icon icon = NavBarCatalog.icon(iconId);
-        return icon == null ? fallback : icon.drawableRes;
+        return null;
     }
 
-    private int tabDrawable(String tabId) {
-        NavBarCatalog.Tab tab = NavBarCatalog.tab(tabId);
-        return tab == null ? 0 : tab.drawableRes;
+    private void removeFromShown(Row source) {
+        if (source.tabId == null) return;
+        NavBarConfig config = NavBarConfig.shared();
+        String destinationId = config.destinationFor(source.tabId);
+        if (destinationId != null) config.setReplacement(source.tabId, null);
+        config.setHidden(source.tabId, true);
+        shownRows.remove(source);
+        markChanged();
+        persistLayout();
+        rebuildRows();
+    }
+
+    private void persistLayout() {
+        NavBarConfig config = NavBarConfig.shared();
+        List<String> order = new ArrayList<>();
+        Set<String> shownTabIds = new HashSet<>();
+        for (Row row : shownRows) {
+            if (row.tabId == null) continue;
+            order.add(row.tabId);
+            shownTabIds.add(row.tabId);
+        }
+        for (Row row : availableRows) {
+            if (row.tabId == null || order.contains(row.tabId)) continue;
+            order.add(row.tabId);
+        }
+        for (String tabId : config.orderedTabs(NavBarCatalog.tabIds())) {
+            if (!order.contains(tabId)) order.add(tabId);
+        }
+
+        config.saveOrder(order);
+        for (String tabId : NavBarCatalog.liveTabIds()) {
+            config.setHidden(tabId, !shownTabIds.contains(tabId));
+        }
+    }
+
+    private final class Row {
+        @Nullable final String tabId;
+        @Nullable final String destinationId;
+        LinearLayout root;
+        TextView handle;
+        ImageView iconView;
+        TextView titleView;
+        int dragTouchX = -1;
+        int dragTouchY = -1;
+
+        Row(@Nullable String tabId, @Nullable String destinationId) {
+            this.tabId = tabId;
+            this.destinationId = destinationId;
+        }
+
+        boolean isShown() {
+            return shownRows.contains(this);
+        }
+
+        boolean isDestination() {
+            return tabId == null;
+        }
+
+        void refresh() {
+            Context context = requireContext();
+            NavBarConfig config = NavBarConfig.shared();
+            NavBarCatalog.Tab tab = tabId == null ? null : NavBarCatalog.tab(tabId);
+            NavBarCatalog.Destination destination =
+                    isDestination()
+                            ? NavBarCatalog.destination(destinationId)
+                            : NavBarCatalog.destination(config.destinationFor(tabId));
+
+            if (destination != null) {
+                iconView.setImageResource(destination.drawableRes);
+                titleView.setText(context.getString(destination.titleResourceId));
+                return;
+            }
+            if (tab != null) {
+                iconView.setImageResource(tab.drawableRes);
+                titleView.setText(StringRef.str(tab.labelResourceName));
+                return;
+            }
+
+            iconView.setImageDrawable(null);
+            titleView.setText(isDestination() ? destinationId : tabId);
+        }
     }
 
     private Context requireContext() {
@@ -483,74 +529,21 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         return context;
     }
 
-    private final class Row {
-        final String tabId;
-        LinearLayout root;
-        TextView handle;
-        ImageView iconView;
-        TextView titleView;
-        TextView opensView;
-        TextView iconChoiceView;
-        NewXSettingsUi.SwitchControl visibleSwitch;
-        View divider;
-        boolean updating;
+    private static final class RowDragShadow extends View.DragShadowBuilder {
+        private final int touchPointX;
+        private final int touchPointY;
 
-        Row(String tabId) {
-            this.tabId = tabId;
+        RowDragShadow(View view, int touchPointX, int touchPointY) {
+            super(view);
+            this.touchPointX = touchPointX;
+            this.touchPointY = touchPointY;
         }
 
-        void refresh() {
-            NavBarConfig config = NavBarConfig.shared();
-            iconView.setImageResource(effectiveDrawable(tabId));
-
-            NavBarCatalog.Tab tab = NavBarCatalog.tab(tabId);
-            titleView.setText(tab == null ? tabId : StringRef.str(tab.labelResourceName));
-
-            String destinationId = config.destinationFor(tabId);
-            boolean hasDestination = destinationId != null;
-            boolean visible = !config.isHidden(tabId);
-            boolean iconEnabled = visible && hasDestination;
-
-            opensView.setText(
-                    StringRef.str("piko_newx_nav_editor_opens", destinationLabel(destinationId))
-            );
-            opensView.setEnabled(visible);
-            opensView.setAlpha(visible ? 1f : 0.5f);
-
-            iconChoiceView.setEnabled(iconEnabled);
-            iconChoiceView.setAlpha(iconEnabled ? 1f : 0.5f);
-            iconChoiceView.setText(
-                    StringRef.str("piko_newx_nav_editor_icon", iconLabel(config.iconFor(tabId)))
-            );
-
-            float alpha = visible ? 1f : 0.5f;
-            handle.setAlpha(alpha);
-            iconView.setAlpha(alpha);
-            titleView.setAlpha(alpha);
-
-            updating = true;
-            visibleSwitch.setChecked(visible, true);
-            updating = false;
-        }
-
-        private String destinationLabel(@Nullable String destinationId) {
-            if (destinationId == null) {
-                return StringRef.str("piko_newx_nav_editor_opens_default");
-            }
-            NavBarCatalog.Destination destination = NavBarCatalog.destination(destinationId);
-            if (destination == null) return destinationId;
-            return requireContext().getString(destination.titleResourceId);
-        }
-
-        private String iconLabel(String iconId) {
-            if (iconId == null || iconId.isEmpty() || NavBarConfig.ICON_DESTINATION.equals(iconId)) {
-                return StringRef.str("piko_newx_nav_editor_icon_destination");
-            }
-            if (NavBarConfig.ICON_ORIGINAL.equals(iconId)) {
-                return StringRef.str("piko_newx_nav_editor_icon_original");
-            }
-            NavBarCatalog.Icon icon = NavBarCatalog.icon(iconId);
-            return icon == null ? iconId : StringRef.str(icon.labelResourceName);
+        @Override
+        public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
+            super.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
+            shadowTouchPoint.x = Math.max(0, Math.min(touchPointX, shadowSize.x));
+            shadowTouchPoint.y = Math.max(0, Math.min(touchPointY, shadowSize.y));
         }
     }
 }

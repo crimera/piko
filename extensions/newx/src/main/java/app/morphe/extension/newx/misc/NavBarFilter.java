@@ -21,13 +21,16 @@ public final class NavBarFilter {
             Set<String> hidden = config.hiddenTabs();
             List<Object> availableKeys = new ArrayList<>(tabData.size());
             List<String> availableTabIds = new ArrayList<>(tabData.size());
+            List<String> registeredTabIds = NavBarCatalog.tabIds();
             for (Object key : tabData.keySet()) {
                 if (key == null) continue;
+                if (!registeredTabIds.isEmpty() && !registeredTabIds.contains(key.toString())) continue;
                 availableKeys.add(key);
                 availableTabIds.add(key.toString());
             }
+            NavBarCatalog.updateLiveTabIds(availableTabIds);
 
-            List<String> orderedTabIds = config.orderedTabs(availableTabIds);
+            List<String> orderedTabIds = config.shownTabs(availableTabIds);
             Map<String, Object> keysByTabId = new LinkedHashMap<>(availableKeys.size());
             Map<String, Object> valuesByTabId = new LinkedHashMap<>(availableKeys.size());
             for (Map.Entry<Object, Object> entry : tabData.entrySet()) {

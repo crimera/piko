@@ -17,14 +17,17 @@ import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.cloneMutable
+import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.registersUsed
@@ -55,9 +58,18 @@ private const val EXPECTED_FACTORY_COUNT = 3
 private const val REQUIRED_FACTORY_REGISTER_COUNT = 37
 private const val ACCENT_SETTINGS_SCRATCH_REGISTER_COUNT = 3
 private const val ACCENT_SETTINGS_SNAPSHOT_INSTRUCTION_COUNT = 2
+private const val PALETTE_CONSTRUCTOR_REGISTER_COUNT = 36
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val DYNAMIC_COLOR_PALETTE_DESCRIPTOR =
     "$EXTENSION_PACKAGE/theme/DynamicColorPalette;"
+
+private val AMOLED_BACKGROUND_COLORS = mapOf(
+    7 to 0xFF00000000000000UL.toLong(),
+    8 to 0x8000000000000000UL.toLong(),
+    9 to 0xFF00000000000000UL.toLong(),
+    13 to 0xCC00000000000000UL.toLong(),
+    15 to 0xFF00000000000000UL.toLong(),
+)
 
 private enum class PaletteKind(
     val helperMethod: String,
@@ -72,7 +84,7 @@ private enum class PaletteKind(
 private data class ResolvedFactory(
     val kind: PaletteKind,
     val method: MutableMethod,
-    val paletteAllocationIndex: Int,
+    val paletteAllocation: PaletteAllocation,
 )
 
 private data class ExpandedAccentConstructor(
@@ -83,6 +95,11 @@ private data class ExpandedAccentConstructor(
 private data class PaletteAllocation(
     val index: Int,
     val branchEndIndex: Int,
+)
+
+private data class PaletteConstructor(
+    val index: Int,
+    val instruction: RegisterRangeInstruction,
 )
 
 private data class FactoryAllocation(
@@ -166,7 +183,7 @@ val dynamicColorPatch =
                     )
                 }
 
-            if (factories.map { it.method to it.paletteAllocationIndex }.distinct().size !=
+            if (factories.map { it.method to it.paletteAllocation.index }.distinct().size !=
                 EXPECTED_FACTORY_COUNT
             ) {
                 throw PatchException(
@@ -179,10 +196,10 @@ val dynamicColorPatch =
                 .groupBy(ResolvedFactory::method)
                 .values
                 .forEach { methodFactories ->
-                    methodFactories.sortedByDescending(ResolvedFactory::paletteAllocationIndex)
+                    methodFactories.sortedByDescending { it.paletteAllocation.index }
                         .forEach { factory ->
                             factory.method.injectDynamicPalette(
-                                index = factory.paletteAllocationIndex,
+                                allocation = factory.paletteAllocation,
                                 kind = factory.kind,
                                 paletteDescriptor = paletteDescriptor,
                                 constructorReference = constructorReference,
@@ -505,7 +522,7 @@ private fun resolveFactory(
             "NewX ${kind.name} palette branch has unexpected isLight=$isLight: $invoke",
         )
     }
-    return ResolvedFactory(kind, invoke, paletteAllocation.index)
+    return ResolvedFactory(kind, invoke, paletteAllocation)
 }
 
 private fun Instruction.receiverRegister(): Int? =
@@ -656,6 +673,27 @@ private fun MutableMethod.resolvePaletteIsLight(
     allocation: PaletteAllocation,
     constructorReference: String,
 ): Boolean {
+    val constructor = resolvePaletteConstructor(allocation, constructorReference)
+    val isLightRegister = constructor.instruction.startRegister + 1
+    val isLightLiterals = instructions.withIndex().filter { indexed ->
+        val instruction = indexed.value
+        val oneRegister = instruction as? OneRegisterInstruction
+        val narrowLiteral = instruction as? NarrowLiteralInstruction
+        indexed.index in (allocation.index + 1) until constructor.index &&
+            oneRegister != null &&
+            narrowLiteral != null &&
+            oneRegister.registerA == isLightRegister &&
+            narrowLiteral.narrowLiteral in 0..1
+    }
+    requireExactlyOne("NewX palette isLight literal in selected branch", isLightLiterals)
+    val isLightLiteral = isLightLiterals.single().value as NarrowLiteralInstruction
+    return isLightLiteral.narrowLiteral == 1
+}
+
+private fun MutableMethod.resolvePaletteConstructor(
+    allocation: PaletteAllocation,
+    constructorReference: String,
+): PaletteConstructor {
     val constructorCandidates = instructions.withIndex().filter { indexed ->
         indexed.index > allocation.index &&
             indexed.index < allocation.branchEndIndex &&
@@ -679,21 +717,13 @@ private fun MutableMethod.resolvePaletteIsLight(
                 "v${range.startRegister}: $this",
         )
     }
-
-    val isLightRegister = range.startRegister + 1
-    val isLightLiterals = instructions.withIndex().filter { indexed ->
-        val instruction = indexed.value
-        val oneRegister = instruction as? OneRegisterInstruction
-        val narrowLiteral = instruction as? NarrowLiteralInstruction
-        indexed.index in (allocation.index + 1) until constructor.index &&
-            oneRegister != null &&
-            narrowLiteral != null &&
-            oneRegister.registerA == isLightRegister &&
-            narrowLiteral.narrowLiteral in 0..1
+    if (range.registerCount != PALETTE_CONSTRUCTOR_REGISTER_COUNT) {
+        throw PatchException(
+            "NewX palette constructor needs $PALETTE_CONSTRUCTOR_REGISTER_COUNT registers, " +
+                "found ${range.registerCount}: $this",
+        )
     }
-    requireExactlyOne("NewX palette isLight literal in selected branch", isLightLiterals)
-    val isLightLiteral = isLightLiterals.single().value as NarrowLiteralInstruction
-    return isLightLiteral.narrowLiteral == 1
+    return PaletteConstructor(constructor.index, range)
 }
 
 context(context: BytecodePatchContext)
@@ -1756,13 +1786,15 @@ private fun MutableMethod.injectDynamicAccentTones(
 }
 
 private fun MutableMethod.injectDynamicPalette(
-    index: Int,
+    allocation: PaletteAllocation,
     kind: PaletteKind,
     paletteDescriptor: String,
     constructorReference: String,
 ) {
-    val originalAllocation = instructions.getOrNull(index)
-        ?: throw PatchException("NewX $kind palette allocation index is out of bounds: $index")
+    val originalAllocation = instructions.getOrNull(allocation.index)
+        ?: throw PatchException(
+            "NewX $kind palette allocation index is out of bounds: ${allocation.index}",
+        )
     if (originalAllocation.opcode != Opcode.NEW_INSTANCE ||
         originalAllocation.getReference<TypeReference>()?.type != paletteDescriptor
     ) {
@@ -1777,11 +1809,58 @@ private fun MutableMethod.injectDynamicPalette(
         )
     }
 
+    if (kind == PaletteKind.LIGHTS_OUT) {
+        injectAmoledBlackBackgrounds(
+            resolvePaletteConstructor(allocation, constructorReference),
+        )
+    }
+
     // This helper moves all incoming labels from the original new-instance to the API guard.
     // API < 31 falls through a no-op into the byte-for-byte original allocation sequence.
     addInstructionsAtControlFlowLabel(
-        index,
+        allocation.index,
         kind.dynamicPaletteInstructions(paletteDescriptor, constructorReference),
+    )
+}
+
+private fun MutableMethod.injectAmoledBlackBackgrounds(constructor: PaletteConstructor) {
+    val constructorRegisters =
+        (constructor.instruction.startRegister until
+            constructor.instruction.startRegister + constructor.instruction.registerCount).toList()
+    val scratchRegister =
+        try {
+            getFreeRegisterProvider(
+                constructor.index,
+                1,
+                *constructorRegisters.toIntArray(),
+            ).getFreeRegister()
+        } catch (exception: RuntimeException) {
+            throw PatchException(
+                "NewX AMOLED palette override has no free scratch register: $this",
+            )
+        }
+    if (scratchRegister !in 0..255) {
+        throw PatchException(
+            "NewX AMOLED palette override scratch register v$scratchRegister cannot be encoded: $this",
+        )
+    }
+
+    val label = "piko_newx_amoled_original_lights_out"
+    val overrides = buildString {
+        appendLine("invoke-static {}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isAmoledBlack()Z")
+        appendLine("move-result v$scratchRegister")
+        appendLine("if-eqz v$scratchRegister, :$label")
+        AMOLED_BACKGROUND_COLORS
+            .toSortedMap()
+            .forEach { (token, color) ->
+                val colorRegister = constructor.instruction.startRegister + 2 + token * 2
+                appendLine("const-wide v$colorRegister, ${wideLiteral(color)}")
+            }
+    }
+    addInstructionsWithLabels(
+        constructor.index,
+        overrides,
+        ExternalLabel(label, constructor.instruction),
     )
 }
 
@@ -1823,3 +1902,6 @@ private fun PaletteKind.dynamicPaletteInstructions(
         append("nop")
     }
 }
+
+private fun wideLiteral(value: Long): String =
+    "0x${value.toULong().toString(16).padStart(16, '0')}L"

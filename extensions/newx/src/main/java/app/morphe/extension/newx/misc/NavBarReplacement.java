@@ -26,20 +26,13 @@ public final class NavBarReplacement {
         DESTINATION_CLICKS.put(destinationId, click);
     }
 
-    /** Injection point: substitutes the icon of the configured navigation bar item. */
+    /** Injection point: substitutes the icon with the configured destination's icon. */
     public static Object overrideIcon(Object tab, Object originalIcon) {
         String destinationId = configuredDestination(tab);
         if (destinationId == null) return originalIcon;
         NavBarCatalog.Destination destination = NavBarCatalog.destination(destinationId);
         if (destination == null) return originalIcon;
-
-        String iconId = NavBarConfig.shared().iconFor(tab.toString());
-        if (NavBarConfig.ICON_ORIGINAL.equals(iconId)) return originalIcon;
-        if (iconId == null || iconId.isEmpty() || NavBarConfig.ICON_DESTINATION.equals(iconId)) {
-            return destination.icon;
-        }
-        NavBarCatalog.Icon icon = NavBarCatalog.icon(iconId);
-        return icon == null ? destination.icon : icon.icon;
+        return destination.icon;
     }
 
     /** Injection point: substitutes the localized label of the configured navigation bar item. */

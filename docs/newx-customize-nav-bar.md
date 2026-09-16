@@ -3,20 +3,23 @@
 Feature: `NewX: Customize navigation bar` (`customizeNewXNavBarPatch`).
 
 The patch replaces the old hide/replace single-choice settings with one editor custom screen. The
-screen lists the seven bottom navigation bar items and supports drag reordering, per-item
-visibility, and per-item replacement (drawer destination and icon).
+screen has a `Shown in navigation bar` section and an `Available destinations` section. Dragging
+reorders shown native slots, hides a shown slot when it is dropped into the available section, or
+assigns an available destination to a shown slot. The shown section is capped at five items.
 Replacement destinations include Bookmarks, Profile, Lists, Communities, Spaces, and Creator
-Studio. History is included on releases that expose its drawer entry.
+Studio. History is included on releases that expose its drawer entry. Destination labels and icons
+always come from the resolved drawer row.
 
 ## Why replacement and not an eighth item
 
 The NewX bar is a fixed Kotlin enum (`Lcom/x/navigation/ha;` on 12.25, renamed per release) with
-seven constants. The bar renders one item per entry of the tab map
+five native slots. The bar renders one item per entry of the tab map
 (`Lcom/x/main/api/e0;->i`, `Map<ha, f0>`) and selection is the head of the Decompose child stack.
 Every enum consumer is an exhaustive `when` that throws `NoWhenBranchMatchedException`. Adding a
 new constant would require enum injection plus patches to the item icon/label switch, the child
 renderer switch, and the bar map, and the Bookmarks screen is a `screenNavigator` route rather than
-a tab component, so it could never be selected. Replacing an item reuses the app's own navigation.
+a tab component, so it could never be selected. Available destinations reuse the app's own drawer
+navigation instead of adding new enum values.
 
 Order and visibility are free: the bar iterates the `LinkedHashMap` the extension filter returns,
 so the editor just persists an ordered list and the filter rebuilds the map.
@@ -43,8 +46,7 @@ so the editor just persists an ordered list and the filter rebuilds the map.
   earlier insertion is skipped by every case but the fall-through one.
 - Tab icons: the item content icon switches are parsed. The `when` mapping array is parsed for the
   enum-case mapping, the icon switch payloads are parsed for case branches, and the unselected
-  switch's icon field is used for both states. The shared default icon covers the Communities case
-  that reuses the pre-switch value.
+  switch's icon field is used for both states.
 - Icon drawables: each resolved `com/x/icons/*` static field is traced in its `<clinit>` back to
   the `new-instance`/`const`/`<init>(I)V` allocation so the editor can render the app icons with
   `ImageView.setImageResource` without referencing app classes.
@@ -57,26 +59,24 @@ so the editor just persists an ordered list and the filter rebuilds the map.
 
 ## Editor screen
 
-`NavBarEditorFragment` (`newx.navigation.editor` custom screen) lists the tabs from
-`NavBarCatalog.tabIds()` in the stored order. Each row has a drag handle, the effective icon, the
-localized title, `Opens:` and `Icon:` selectors, and a visibility switch.
+`NavBarEditorFragment` (`newx.navigation.editor` custom screen) lists the five native slots from
+`NavBarCatalog.tabIds()` in the stored order, followed by unassigned drawer destinations. Each row
+has a drag handle, the effective icon, and the localized title.
 
 - Order is persisted with `NavBarConfig.saveOrder` on every drop.
-- Visibility is persisted immediately.
-- `Opens` is a single-choice dialog (Default plus each registered destination) and `Icon` is a
-  drawable list dialog (Destination icon, Original item icon, then every registered icon). Both use
-  the shared `DialogView` card and `ChoiceRow` rows, so they follow the NewX dynamic color roles and
-  the AMOLED surface. Both selectors are disabled while the item is hidden, and the icon selector is
-  disabled until a destination is chosen.
-- Tab and dialog icons are tinted with `Theme.primaryText` and `Theme.primaryAccent` when selected,
-  because the app icon drawables carry their own fill color.
-- A footer row offers a restart prompt, because the tab map is built once when the component is
-  constructed.
+- Dropping any shown slot into the available section hides it; a replacement also clears its
+  destination, so both the native slot and the destination become available again.
+- Dropping an available destination onto a shown slot assigns it directly; duplicate destinations
+  are omitted from the available section.
+- Tab and destination icons are tinted with `Theme.primaryText` because the app icon drawables carry
+  their own fill color.
+- The scrollable content ends with a rounded filled restart button. It stays disabled until a
+  navbar change is made, because the tab map is built once when the component is constructed.
 
 ## Injected hooks
 
-- `NavBarCatalog.registerDestination/registerIcon/registerTab` and the internal
-  `NavBarConfig` settings run at settings-registry load.
+- `NavBarCatalog.registerDestination/registerTab` and the internal `NavBarConfig` settings run at
+  settings-registry load.
 - `NavBarFilter.filter(Map)`: reorders and hides entries using `NavBarConfig`.
 - `NavBarReplacement.overrideIcon` / `overrideLabel`: substituted at the icon/label renderer call.
 - `NavBarReplacement.openReplacementFor(tab)`: at the tab change method entry; returns `false` and
@@ -90,10 +90,8 @@ localized title, `Opens:` and `Icon:` selectors, and a visibility switch.
 - Changes require an app restart before the bar reflects them.
 - The replaced item is a launcher: it never renders as selected and the underneath tab stays
   selected, matching the drawer shortcut behavior.
-- A custom icon is the same image in selected and unselected states; `ORIGINAL` keeps both
-  originals.
 - The tab badge (`f0`) is not cleared, so a replaced Messages item can still show the DM badge.
-- The drag list does not auto-scroll; all seven rows fit on typical phone heights.
+- The drag list does not auto-scroll.
 - If the drawer click has not been captured yet (the drawer row was never composed), the item falls
   back to the original tab until the next drawer composition.
 

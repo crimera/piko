@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,20 +16,18 @@ import app.morphe.extension.shared.settings.StringSetting;
 
 /**
  * Editor-managed NewX navigation bar configuration: item order, hidden items, and per-item
- * replacement destination/icon.
+ * replacement destinations.
  *
  * <p>The values are extension-owned settings rather than registry entries because they are managed
  * by the drag-and-drop editor screen, not by generated single-choice rows.
  */
 public final class NavBarConfig {
-    public static final String ICON_DESTINATION = "DESTINATION";
-    public static final String ICON_ORIGINAL = "ORIGINAL";
+    public static final int MAX_VISIBLE_ITEMS = 5;
 
     private static final String ORDER_KEY = "newx.navigation.items.order";
     private static final String HIDDEN_KEY = "newx.navigation.items.hidden";
     private static final String REPLACEMENT_KEY = "newx.navigation.items.replacement";
     private static final String DESTINATION_FIELD = "d";
-    private static final String ICON_FIELD = "i";
 
     private final StringSetting order = new StringSetting(ORDER_KEY, "");
     private final StringSetting hidden = new StringSetting(HIDDEN_KEY, "");
@@ -58,6 +57,18 @@ public final class NavBarConfig {
         return result;
     }
 
+    /** Returns the configured native slots that can be shown, capped by the app's bar capacity. */
+    public List<String> shownTabs(List<String> available) {
+        Set<String> hidden = hiddenTabs();
+        List<String> result = new ArrayList<>(Math.min(available.size(), MAX_VISIBLE_ITEMS));
+        for (String tab : orderedTabs(available)) {
+            if (hidden.contains(tab)) continue;
+            result.add(tab);
+            if (result.size() == MAX_VISIBLE_ITEMS) break;
+        }
+        return result;
+    }
+
     public void saveOrder(List<String> tabs) {
         order.save(String.join(",", tabs));
     }
@@ -80,7 +91,7 @@ public final class NavBarConfig {
         hidden.save(String.join(",", tabs));
     }
 
-    /** @return the drawer destination id for [tab], or an empty string when the tab is unchanged. */
+    /** @return the drawer destination id for the tab, or {@code null} when unchanged. */
     @Nullable
     public String destinationFor(String tab) {
         JSONObject entry = replacementEntry(tab);
@@ -89,37 +100,16 @@ public final class NavBarConfig {
         return destination.isEmpty() ? null : destination;
     }
 
-    /** @return the configured icon id, {@link #ICON_DESTINATION} by default. */
-    public String iconFor(String tab) {
-        JSONObject entry = replacementEntry(tab);
-        if (entry == null) return ICON_DESTINATION;
-        String icon = entry.optString(ICON_FIELD, ICON_DESTINATION);
-        return icon.isEmpty() ? ICON_DESTINATION : icon;
-    }
-
-    public void setReplacement(String tab, @Nullable String destinationId, String iconId) {
+    public void setReplacement(String tab, @Nullable String destinationId) {
         try {
             JSONObject replacements = replacements();
-            JSONObject entry = replacements.optJSONObject(tab);
-            if (entry == null) entry = new JSONObject();
-
             boolean hasDestination = destinationId != null && !destinationId.isEmpty();
-            if (hasDestination) {
-                entry.put(DESTINATION_FIELD, destinationId);
-            } else {
-                entry.remove(DESTINATION_FIELD);
-            }
-
-            if (hasDestination && iconId != null && !iconId.isEmpty()
-                    && !ICON_DESTINATION.equals(iconId)) {
-                entry.put(ICON_FIELD, iconId);
-            } else {
-                entry.remove(ICON_FIELD);
-            }
-
-            if (entry.length() == 0) {
+            if (!hasDestination) {
                 replacements.remove(tab);
             } else {
+                removeDestinationFromOtherTabs(replacements, tab, destinationId);
+                JSONObject entry = new JSONObject();
+                entry.put(DESTINATION_FIELD, destinationId);
                 replacements.put(tab, entry);
             }
             this.replacement.save(replacements.toString());
@@ -128,6 +118,25 @@ public final class NavBarConfig {
                     () -> "Failed to save the NewX navigation bar replacement for " + tab,
                     exception
             );
+        }
+    }
+
+    private static void removeDestinationFromOtherTabs(
+            JSONObject replacements,
+            String tab,
+            String destinationId
+    ) throws JSONException {
+        List<String> tabs = new ArrayList<>();
+        Iterator<String> keys = replacements.keys();
+        while (keys.hasNext()) tabs.add(keys.next());
+
+        for (String otherTab : tabs) {
+            if (tab.equals(otherTab)) continue;
+            JSONObject entry = replacements.optJSONObject(otherTab);
+            if (entry == null || !destinationId.equals(entry.optString(DESTINATION_FIELD, ""))) {
+                continue;
+            }
+            replacements.remove(otherTab);
         }
     }
 

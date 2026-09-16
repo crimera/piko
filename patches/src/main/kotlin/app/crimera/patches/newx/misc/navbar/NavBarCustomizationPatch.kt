@@ -76,8 +76,6 @@ private const val OVERRIDE_LABEL_DESCRIPTOR =
     "$NAV_BAR_REPLACEMENT_DESCRIPTOR->overrideLabel($OBJECT_DESCRIPTOR$STRING_DESCRIPTOR)$STRING_DESCRIPTOR"
 private const val REGISTER_DESTINATION_DESCRIPTOR =
     "$NAV_BAR_CATALOG_DESCRIPTOR->registerDestination($STRING_DESCRIPTOR I$OBJECT_DESCRIPTOR I)V"
-private const val REGISTER_ICON_DESCRIPTOR =
-    "$NAV_BAR_CATALOG_DESCRIPTOR->registerIcon($STRING_DESCRIPTOR$OBJECT_DESCRIPTOR I$STRING_DESCRIPTOR)V"
 private const val REGISTER_TAB_DESCRIPTOR =
     "$NAV_BAR_CATALOG_DESCRIPTOR->registerTab($STRING_DESCRIPTOR I$STRING_DESCRIPTOR)V"
 private const val SET_DESTINATION_CLICK_DESCRIPTOR =
@@ -86,46 +84,40 @@ private const val SET_DESTINATION_CLICK_DESCRIPTOR =
 private data class NavBarDestinationSpec(
     val id: String,
     val titleResourceName: String,
-    val optionTitleResourceName: String,
     val optional: Boolean = false,
     val alternateTitleResourceName: String? = null,
 )
 
 private val NAV_BAR_DESTINATIONS =
     listOf(
-        NavBarDestinationSpec("BOOKMARKS", "bookmarks_title", "piko_newx_nav_replace_bookmarks"),
-        NavBarDestinationSpec("PROFILE", "drawer_profile_title", "piko_newx_nav_replace_profile"),
-        NavBarDestinationSpec("LISTS", "drawer_lists", "piko_newx_nav_replace_lists"),
+        NavBarDestinationSpec("BOOKMARKS", "bookmarks_title"),
+        NavBarDestinationSpec("PROFILE", "drawer_profile_title"),
+        NavBarDestinationSpec("LISTS", "drawer_lists"),
         NavBarDestinationSpec(
             "COMMUNITIES",
             "drawer_communities_title",
-            "piko_newx_nav_replace_communities",
         ),
         NavBarDestinationSpec(
             "HISTORY",
             "drawer_history_title",
-            "piko_newx_nav_replace_history",
             optional = true,
             alternateTitleResourceName = "bookmarks_title",
         ),
-        NavBarDestinationSpec("SPACES", "spaces_tab_name", "piko_newx_nav_replace_spaces"),
+        NavBarDestinationSpec("SPACES", "spaces_tab_name"),
         NavBarDestinationSpec(
             "CREATOR_STUDIO",
             "creator_studio_drawer_menu_title",
-            "piko_newx_nav_replace_creator_studio",
         ),
     )
 
-/** Navigation tab enum constants and their localized names. */
-private val NAV_BAR_TAB_OPTIONS =
+/** Native navigation slots and their localized names. */
+private val NAV_BAR_NATIVE_TAB_OPTIONS =
     listOf(
         "HOME" to "piko_newx_nav_bar_home",
         "EXPLORE" to "piko_newx_nav_bar_explore",
         "GROK" to "piko_newx_nav_bar_grok",
         "NOTIFICATIONS" to "piko_newx_nav_bar_notifications",
         "DM" to "piko_newx_nav_bar_dm",
-        "COMMUNITIES" to "piko_newx_nav_bar_communities",
-        "SPACES" to "piko_newx_nav_bar_spaces",
     )
 
 private data class ResolvedNavBarDestination(
@@ -451,7 +443,7 @@ private fun MutableMethod.resolveNavigationTabIcons(
         instructions.resolveDefaultIconField(iconSwitches.first(), iconRegister)
             ?: throw PatchException("NewX navigation default icon was not resolved: $this")
     val unselectedCases = packedSwitchCases(iconSwitches.last())
-    return NAV_BAR_TAB_OPTIONS.associate { (name, _) ->
+    return NAV_BAR_NATIVE_TAB_OPTIONS.associate { (name, _) ->
         val case =
             enumCases[name]
                 ?: throw PatchException("NewX navigation when mapping has no case for $name: $this")
@@ -673,7 +665,7 @@ private fun resolveNavBarDestination(
         ) { it.toString() }
     return ResolvedNavBarDestination(
         spec = spec,
-        titleResourceId = titleResourceId,
+        titleResourceId = titleResourceId.toLong(),
         iconField = row.iconField,
         method = mutableMethod,
         callIndex = row.callIndex,
@@ -742,27 +734,8 @@ private fun injectSettingsRegistrations(
                 invoke-static {v0, v1, v2, v3}, $REGISTER_DESTINATION_DESCRIPTOR
             """.trimIndent()
         }
-    val tabTitles = NAV_BAR_TAB_OPTIONS.toMap()
-    val iconInstructions =
-        (destinations.map { destination ->
-            Triple(
-                "ICON_${destination.spec.id}",
-                destination.iconField,
-                destination.spec.optionTitleResourceName,
-            )
-        } + tabIconFields.map { (name, field) ->
-            Triple("ICON_$name", field, tabTitles.getValue(name))
-        }).joinToString("\n") { (id, field, labelResourceName) ->
-            """
-                const-string v0, "$id"
-                sget-object v1, $field
-                const v2, ${iconDrawables.getValue(field.toString()).toSmaliLiteral()}
-                const-string v3, "$labelResourceName"
-                invoke-static {v0, v1, v2, v3}, $REGISTER_ICON_DESCRIPTOR
-            """.trimIndent()
-        }
     val tabInstructions =
-        NAV_BAR_TAB_OPTIONS.joinToString("\n") { (name, labelResourceName) ->
+        NAV_BAR_NATIVE_TAB_OPTIONS.joinToString("\n") { (name, labelResourceName) ->
             val drawableResource =
                 iconDrawables.getValue(tabIconFields.getValue(name).toString()).toSmaliLiteral()
             """
@@ -774,7 +747,7 @@ private fun injectSettingsRegistrations(
         }
     SettingsRegistrationState.inject(
         context,
-        destinationInstructions + "\n" + iconInstructions + "\n" + tabInstructions,
+        destinationInstructions + "\n" + tabInstructions,
     )
 }
 
