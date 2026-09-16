@@ -379,7 +379,8 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
 
         LinearLayout options = optionList(context);
         dialog.setScrollableBodyView(options);
-        NavBarCatalog.Destination destination = NavBarCatalog.destination(current);
+        NavBarCatalog.Destination destination =
+                NavBarCatalog.destination(config.destinationFor(row.tabId));
         int destinationDrawable = destination == null ? tabDrawable(row.tabId) : destination.drawableRes;
         addOption(
                 context,
