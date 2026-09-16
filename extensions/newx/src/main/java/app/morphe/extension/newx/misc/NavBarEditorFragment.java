@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.DragEvent;
@@ -42,7 +44,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
 
     private final List<Row> shownRows = new ArrayList<>();
     private final List<Row> availableRows = new ArrayList<>();
-    private LinearLayout rowsContainer;
+    private DropIndicatorLayout rowsContainer;
     private ButtonView restartButton;
     private View restartFooter;
     @Nullable private TextView availableHeader;
@@ -63,7 +65,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
-        rowsContainer = new LinearLayout(context);
+        rowsContainer = new DropIndicatorLayout(context);
         rowsContainer.setOrientation(LinearLayout.VERTICAL);
         rowsContainer.setOnDragListener(this::onDrag);
         scroll.addView(rowsContainer, new ViewGroup.LayoutParams(-1, -2));
@@ -87,7 +89,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     }
 
     private void rebuildRows() {
-        LinearLayout container = rowsContainer;
+        DropIndicatorLayout container = rowsContainer;
         if (container == null) return;
 
         container.removeAllViews();
@@ -113,20 +115,19 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         addSectionHeader(context, "piko_newx_nav_editor_shown");
         for (String tabId : orderedTabs) {
             if (!shownTabIds.contains(tabId)) continue;
-            Row row = createTabRow(context, tabId);
+            Row row = createTabRow(context, tabId, true);
             shownRows.add(row);
             addRow(container, row);
         }
 
-        container.addView(
-                NewXSettingsUi.divider(context),
-                new LinearLayout.LayoutParams(-1, -2)
-        );
+        container.addView(NewXSettingsUi.divider(context));
         availableHeader = addSectionHeader(context, "piko_newx_nav_editor_available");
 
         for (String tabId : orderedTabs) {
-            if (shownTabIds.contains(tabId)) continue;
-            Row row = createTabRow(context, tabId);
+            boolean shownWithoutReplacement =
+                    shownTabIds.contains(tabId) && config.destinationFor(tabId) == null;
+            if (shownWithoutReplacement) continue;
+            Row row = createTabRow(context, tabId, false);
             availableRows.add(row);
             addRow(container, row);
         }
@@ -208,14 +209,14 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         dialog.addButton(cancel).addButton(restart).show();
     }
 
-    private Row createTabRow(Context context, String tabId) {
-        Row row = new Row(tabId, null);
+    private Row createTabRow(Context context, String tabId, boolean showReplacement) {
+        Row row = new Row(tabId, null, showReplacement);
         createRowView(context, row);
         return row;
     }
 
     private Row createDestinationRow(Context context, String destinationId) {
-        Row row = new Row(null, destinationId);
+        Row row = new Row(null, destinationId, false);
         createRowView(context, row);
         return row;
     }
@@ -312,17 +313,64 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
             case DragEvent.ACTION_DRAG_STARTED:
                 row.root.setAlpha(0.4f);
                 return true;
+            case DragEvent.ACTION_DRAG_LOCATION:
+                updateDropIndicator(row, event.getY());
+                return true;
+            case DragEvent.ACTION_DRAG_EXITED:
+                rowsContainer.clearDropIndicator();
+                return true;
             case DragEvent.ACTION_DROP:
+                rowsContainer.clearDropIndicator();
                 if (dropHandled) return true;
                 dropHandled = true;
                 applyDrop(row, event.getY());
                 return true;
             case DragEvent.ACTION_DRAG_ENDED:
+                rowsContainer.clearDropIndicator();
                 row.root.setAlpha(1f);
                 return true;
             default:
                 return true;
         }
+    }
+
+    private void updateDropIndicator(Row source, float y) {
+        if (!isShownSection(y)) {
+            if (source.isShown() && availableHeader != null) {
+                rowsContainer.showDropTarget(availableHeader);
+                return;
+            }
+            rowsContainer.clearDropIndicator();
+            return;
+        }
+
+        int targetIndex = shownInsertionIndex(y);
+        boolean usesExistingSlot =
+                source.tabId != null && findShownNativeRow(source.tabId) != null;
+        boolean replacesTarget =
+                !source.isShown()
+                        && !usesExistingSlot
+                        && shownRows.size() == NavBarConfig.MAX_VISIBLE_ITEMS;
+        if (replacesTarget && !shownRows.isEmpty()) {
+            Row target = shownRows.get(Math.min(targetIndex, shownRows.size() - 1));
+            rowsContainer.showDropTarget(target.root);
+            return;
+        }
+
+        rowsContainer.showInsertionLine(shownInsertionY(targetIndex));
+    }
+
+    private float shownInsertionY(int targetIndex) {
+        if (shownRows.isEmpty()) {
+            TextView header = availableHeader;
+            return header == null ? 0f : header.getTop();
+        }
+        if (targetIndex <= 0) return shownRows.get(0).root.getTop();
+        if (targetIndex >= shownRows.size()) {
+            View lastRow = shownRows.get(shownRows.size() - 1).root;
+            return lastRow.getBottom();
+        }
+        return shownRows.get(targetIndex).root.getTop();
     }
 
     private void applyDrop(Row source, float y) {
@@ -404,7 +452,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     @Nullable
     private Row firstAvailableNativeRow() {
         for (Row row : availableRows) {
-            if (!row.isDestination()) return row;
+            if (row.tabId != null && findShownNativeRow(row.tabId) == null) return row;
         }
         return null;
     }
@@ -412,6 +460,22 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     private void showNativeTab(@Nullable String tabId, int targetIndex) {
         if (tabId == null) return;
         NavBarConfig config = NavBarConfig.shared();
+        Row existingSlot = findShownNativeRow(tabId);
+        if (existingSlot != null) {
+            config.setReplacement(tabId, null);
+            int currentIndex = shownRows.indexOf(existingSlot);
+            shownRows.remove(currentIndex);
+            int insertionIndex = Math.min(targetIndex, shownRows.size());
+            if (currentIndex < targetIndex) insertionIndex = Math.max(0, insertionIndex - 1);
+            shownRows.add(insertionIndex, existingSlot);
+            markChanged();
+            persistLayout();
+            rebuildRows();
+            return;
+        }
+
+        Row source = findAvailableNativeRow(tabId);
+        if (source == null) return;
         config.setReplacement(tabId, null);
 
         if (shownRows.size() == NavBarConfig.MAX_VISIBLE_ITEMS) {
@@ -424,8 +488,6 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         }
 
         config.setHidden(tabId, false);
-        Row source = findAvailableNativeRow(tabId);
-        if (source == null) return;
         shownRows.add(Math.min(targetIndex, shownRows.size()), source);
         markChanged();
         persistLayout();
@@ -435,6 +497,14 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     @Nullable
     private Row findAvailableNativeRow(String tabId) {
         for (Row row : availableRows) {
+            if (tabId.equals(row.tabId)) return row;
+        }
+        return null;
+    }
+
+    @Nullable
+    private Row findShownNativeRow(String tabId) {
+        for (Row row : shownRows) {
             if (tabId.equals(row.tabId)) return row;
         }
         return null;
@@ -478,6 +548,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     private final class Row {
         @Nullable final String tabId;
         @Nullable final String destinationId;
+        final boolean showReplacement;
         LinearLayout root;
         TextView handle;
         ImageView iconView;
@@ -485,9 +556,14 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         int dragTouchX = -1;
         int dragTouchY = -1;
 
-        Row(@Nullable String tabId, @Nullable String destinationId) {
+        Row(
+                @Nullable String tabId,
+                @Nullable String destinationId,
+                boolean showReplacement
+        ) {
             this.tabId = tabId;
             this.destinationId = destinationId;
+            this.showReplacement = showReplacement;
         }
 
         boolean isShown() {
@@ -505,7 +581,9 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
             NavBarCatalog.Destination destination =
                     isDestination()
                             ? NavBarCatalog.destination(destinationId)
-                            : NavBarCatalog.destination(config.destinationFor(tabId));
+                            : showReplacement
+                                    ? NavBarCatalog.destination(config.destinationFor(tabId))
+                                    : null;
 
             if (destination != null) {
                 iconView.setImageResource(destination.drawableRes);
@@ -544,6 +622,75 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
             super.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
             shadowTouchPoint.x = Math.max(0, Math.min(touchPointX, shadowSize.x));
             shadowTouchPoint.y = Math.max(0, Math.min(touchPointY, shadowSize.y));
+        }
+    }
+
+    private static final class DropIndicatorLayout extends LinearLayout {
+        private final Paint indicatorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final float horizontalInset;
+        private final float strokeWidth;
+        private float indicatorTop = -1f;
+        private float indicatorBottom = -1f;
+
+        DropIndicatorLayout(Context context) {
+            super(context);
+            horizontalInset = Theme.dpToPx(context, 12f);
+            strokeWidth = Theme.dpToPx(context, 3f);
+            indicatorPaint.setColor(Theme.primaryAccent(context));
+            indicatorPaint.setStrokeWidth(strokeWidth);
+        }
+
+        void showInsertionLine(float y) {
+            indicatorTop = y;
+            indicatorBottom = y;
+            invalidate();
+        }
+
+        void showDropTarget(View target) {
+            indicatorTop = target.getTop();
+            indicatorBottom = target.getBottom();
+            invalidate();
+        }
+
+        void clearDropIndicator() {
+            if (indicatorTop < 0f) return;
+            indicatorTop = -1f;
+            indicatorBottom = -1f;
+            invalidate();
+        }
+
+        @Override
+        protected void dispatchDraw(Canvas canvas) {
+            super.dispatchDraw(canvas);
+            if (indicatorTop < 0f) return;
+
+            float left = horizontalInset;
+            float right = getWidth() - horizontalInset;
+            float radius = strokeWidth;
+            if (indicatorTop == indicatorBottom) {
+                indicatorPaint.setStyle(Paint.Style.FILL);
+                canvas.drawRoundRect(
+                        left,
+                        indicatorTop - strokeWidth / 2f,
+                        right,
+                        indicatorTop + strokeWidth / 2f,
+                        radius,
+                        radius,
+                        indicatorPaint
+                );
+                return;
+            }
+
+            indicatorPaint.setStyle(Paint.Style.STROKE);
+            canvas.drawRoundRect(
+                    left,
+                    indicatorTop + strokeWidth / 2f,
+                    right,
+                    indicatorBottom - strokeWidth / 2f,
+                    Theme.dpToPx(getContext(), 8f),
+                    Theme.dpToPx(getContext(), 8f),
+                    indicatorPaint
+            );
         }
     }
 }
