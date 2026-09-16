@@ -152,7 +152,7 @@
 
     <string name="piko_newx_nav_editor_title">Navigation bar</string>
     <string name="piko_newx_nav_editor_summary">Choose up to five destinations for the NewX bottom navigation bar</string>
-    <string name="piko_newx_nav_editor_hint">Drag destinations between sections. Changes apply after an app restart.</string>
+    <string name="piko_newx_nav_editor_hint">Drag destinations between sections. Hold near the top or bottom to scroll. Changes apply after an app restart.</string>
     <string name="piko_newx_nav_editor_shown">Shown in navigation bar (up to 5)</string>
     <string name="piko_newx_nav_editor_available">Available destinations</string>
     <string name="piko_newx_nav_editor_drag">Drag to move</string>

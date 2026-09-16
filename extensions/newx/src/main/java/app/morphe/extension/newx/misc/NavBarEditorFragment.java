@@ -41,15 +41,30 @@ import app.morphe.extension.shared.Utils;
 @SuppressWarnings("deprecation")
 public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     private static final String DRAG_MIME = "piko/newx-navbar-item";
+    private static final long DRAG_SCROLL_FRAME_DELAY_MS = 16L;
+    private static final float DRAG_SCROLL_EDGE_DP = 80f;
+
 
     private final List<Row> shownRows = new ArrayList<>();
     private final List<Row> availableRows = new ArrayList<>();
     private DropIndicatorLayout rowsContainer;
+    private ScrollView scrollView;
     private ButtonView restartButton;
     private View restartFooter;
     @Nullable private TextView availableHeader;
     private boolean dropHandled;
     private boolean hasPendingChanges;
+    @Nullable private Row draggingRow;
+    private float dragViewportY;
+    private final Runnable dragScrollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Row row = draggingRow;
+            if (row == null || rowsContainer == null || scrollView == null) return;
+            scrollForDrag(row);
+            rowsContainer.postDelayed(this, DRAG_SCROLL_FRAME_DELAY_MS);
+        }
+    };
 
     @Override
     public View onCreateView(
@@ -65,6 +80,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        scrollView = scroll;
         rowsContainer = new DropIndicatorLayout(context);
         rowsContainer.setOrientation(LinearLayout.VERTICAL);
         rowsContainer.setOnDragListener(this::onDrag);
@@ -311,27 +327,82 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
 
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_STARTED:
+                draggingRow = row;
                 row.root.setAlpha(0.4f);
                 return true;
+            case DragEvent.ACTION_DRAG_ENTERED:
+                draggingRow = row;
+                return true;
             case DragEvent.ACTION_DRAG_LOCATION:
-                updateDropIndicator(row, event.getY());
+                dragViewportY = event.getY() - scrollView.getScrollY();
+                rowsContainer.removeCallbacks(dragScrollRunnable);
+                if (scrollForDrag(row)) {
+                    rowsContainer.postDelayed(dragScrollRunnable, DRAG_SCROLL_FRAME_DELAY_MS);
+                }
                 return true;
             case DragEvent.ACTION_DRAG_EXITED:
+                stopDragScrolling();
                 rowsContainer.clearDropIndicator();
                 return true;
             case DragEvent.ACTION_DROP:
+                stopDragScrolling();
                 rowsContainer.clearDropIndicator();
                 if (dropHandled) return true;
                 dropHandled = true;
                 applyDrop(row, event.getY());
                 return true;
             case DragEvent.ACTION_DRAG_ENDED:
+                stopDragScrolling();
                 rowsContainer.clearDropIndicator();
                 row.root.setAlpha(1f);
                 return true;
             default:
                 return true;
         }
+    }
+
+    private boolean scrollForDrag(Row source) {
+        ScrollView scroll = scrollView;
+        DropIndicatorLayout container = rowsContainer;
+        if (scroll == null || container == null) return false;
+
+        int viewportHeight = scroll.getHeight();
+        int scrollRange = Math.max(0, container.getHeight() - viewportHeight);
+        if (viewportHeight <= 0 || scrollRange == 0) {
+            updateDropIndicator(source, dragViewportY + scroll.getScrollY());
+            return false;
+        }
+
+        float edge = Math.min(
+                Theme.dpToPx(requireContext(), DRAG_SCROLL_EDGE_DP),
+                viewportHeight / 3f
+        );
+        int maxStep = Math.max(1, Theme.dpToPx(requireContext(), 24f));
+        float distanceFromEdge;
+        int direction;
+        if (dragViewportY < edge) {
+            distanceFromEdge = edge - dragViewportY;
+            direction = -1;
+        } else if (dragViewportY > viewportHeight - edge) {
+            distanceFromEdge = dragViewportY - (viewportHeight - edge);
+            direction = 1;
+        } else {
+            updateDropIndicator(source, dragViewportY + scroll.getScrollY());
+            return false;
+        }
+
+        float intensity = Math.min(1f, distanceFromEdge / edge);
+        int requestedDelta = direction * Math.max(1, Math.round(maxStep * intensity));
+        int oldScrollY = scroll.getScrollY();
+        scroll.scrollBy(0, requestedDelta);
+        int actualDelta = scroll.getScrollY() - oldScrollY;
+        updateDropIndicator(source, dragViewportY + scroll.getScrollY());
+        return actualDelta != 0;
+    }
+
+    private void stopDragScrolling() {
+        draggingRow = null;
+        if (rowsContainer != null) rowsContainer.removeCallbacks(dragScrollRunnable);
     }
 
     private void updateDropIndicator(Row source, float y) {

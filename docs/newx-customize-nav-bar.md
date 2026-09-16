@@ -91,7 +91,7 @@ has a drag handle, the effective icon, and the localized title.
 - The replaced item is a launcher: it never renders as selected and the underneath tab stays
   selected, matching the drawer shortcut behavior.
 - The tab badge (`f0`) is not cleared, so a replaced Messages item can still show the DM badge.
-- The drag list does not auto-scroll.
+- The drag list auto-scrolls when a dragged item is held near the top or bottom edge.
 - If the drawer click has not been captured yet (the drawer row was never composed), the item falls
   back to the original tab until the next drawer composition.
 
