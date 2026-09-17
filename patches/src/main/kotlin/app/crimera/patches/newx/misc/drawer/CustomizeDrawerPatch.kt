@@ -136,7 +136,7 @@ private object NewXDrawerContentClassFingerprint : Fingerprint(
     custom = { method, _ ->
         val parameters = method.parameterTypes.map(CharSequence::toString)
         parameters.size >= 40 &&
-            parameters.getOrNull(1)?.startsWith("Landroidx/compose/material3/") == true &&
+            parameters.any { it.startsWith("Landroidx/compose/material3/") } &&
             parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
             parameters.count { it == "Ljava/util/List;" } == 1 &&
             parameters.count { it == "Ljava/util/Map;" } == 1 &&
@@ -1067,7 +1067,10 @@ private fun resolveDrawerTabNavigation(
     val closerArgField =
         requireExactlyOne(
             label = "NewX drawer close argument",
-            candidates = prologueArgFields + listOfNotNull(inlineArgField),
+            candidates =
+                (prologueArgFields + listOfNotNull(inlineArgField))
+                    .filter { it.type.toString().startsWith("Lcom/x/main/api/") }
+                    .distinctBy(FieldReference::toString),
             describe = { it.toString() },
         )
     if (!closerArgField.type.toString().startsWith("Lcom/x/main/api/")) {

@@ -216,9 +216,13 @@
     },
     {
       "name": "NewX: Customize drawer items",
-      "description": "Lets you hide selected items from the NewX navigation drawer.",
+      "description": "Lets you hide selected items from the NewX navigation drawer, and optionally add Messages and Grok shortcuts.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
