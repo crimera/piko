@@ -50,6 +50,8 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -69,15 +71,91 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
-import java.util.Locale
+import org.w3c.dom.Element
 
-private const val DRAWER_RESOURCE_ITEM_ID_PREFIX = "RESOURCE_STRING_"
+private const val DRAWER_RESOURCE_ITEM_ID_PREFIX = "RESOURCE_NAME_"
+private const val DRAWER_RESOURCE_TYPE = "string"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+
+/**
+ * Resolves the current APK's string entry names before the bytecode patch emits option IDs.
+ * Resource IDs are intentionally not used as persisted identifiers: aapt2 is free to renumber
+ * them on every app update.
+ */
+private object DrawerResourceNames {
+    @Volatile
+    private var namesById: Map<Int, String> = emptyMap()
+
+    fun replace(names: Map<Int, String>) {
+        namesById = names.toMap()
+    }
+
+    fun requireName(resourceId: Int): String =
+        namesById[resourceId]
+            ?: throw PatchException(
+                "NewX drawer string resource has no entry name: " +
+                    "0x${resourceId.toUInt().toString(16)}",
+            )
+}
+
+/**
+ * The resource mapping patch decodes resources.arsc to public.xml. Keep the reverse lookup in a
+ * drawer-local table so the bytecode patch can turn discovered string IDs into stable names.
+ */
+private val drawerResourceNamesPatch =
+    resourcePatch(
+        name = "NewX: Resolve drawer resource names",
+        description = "Resolves stable names for dynamically discovered drawer strings.",
+        default = false,
+    ) {
+        dependsOn(resourceMappingPatch)
+
+        execute {
+            document("res/values/public.xml").use { publicXml ->
+                val entries = linkedMapOf<Int, String>()
+                val nodes = publicXml.getElementsByTagName("public")
+                for (index in 0 until nodes.length) {
+                    val element = nodes.item(index) as? Element ?: continue
+                    if (element.getAttribute("type") != DRAWER_RESOURCE_TYPE) continue
+
+                    val idText = element.getAttribute("id")
+                    val resourceId =
+                        idText
+                            .removePrefix("0x")
+                            .toLongOrNull(16)
+                            ?.takeIf { it in 1..0xffffffffL }
+                            ?.toInt()
+                            ?: throw PatchException(
+                                "Invalid NewX drawer string resource id: $idText",
+                            )
+                    val entryName = element.getAttribute("name")
+                    if (entryName.isBlank()) {
+                        throw PatchException(
+                            "NewX drawer string resource 0x${resourceId.toUInt().toString(16)} " +
+                                "has no entry name",
+                        )
+                    }
+                    val previousName = entries.put(resourceId, entryName)
+                    if (previousName != null && previousName != entryName) {
+                        throw PatchException(
+                            "Duplicate NewX drawer string resource id " +
+                                "0x${resourceId.toUInt().toString(16)}: " +
+                                "$previousName and $entryName",
+                        )
+                    }
+                }
+                if (entries.isEmpty()) {
+                    throw PatchException("NewX drawer resource table has no string entries")
+                }
+                DrawerResourceNames.replace(entries)
+            }
+        }
+    }
 
 private val NEWX_DRAWER_MENU_ITEM_PARAMETERS =
     listOf(
@@ -446,7 +524,7 @@ private fun resolveDrawerTitleResourceIds(
 }
 
 private fun resourceDrawerOptionId(resourceId: Int): String =
-    DRAWER_RESOURCE_ITEM_ID_PREFIX + resourceId.toString(16).uppercase(Locale.ROOT)
+    DRAWER_RESOURCE_ITEM_ID_PREFIX + DrawerResourceNames.requireName(resourceId)
 
 // Catalog ids for the editor shortcuts. Mirrors DrawerEditorFragment.SHORTCUTS.
 private const val DRAWER_SHORTCUT_PIKO = "DRAWER_SHORTCUT_PIKO"
@@ -1182,6 +1260,7 @@ val customizeNewXDrawerPatch =
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXSettingsPatch)
+        dependsOn(drawerResourceNamesPatch)
 
         newXCustomScreen(
             id = "newx.drawer.editor",

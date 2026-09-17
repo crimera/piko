@@ -1,5 +1,6 @@
 package app.morphe.extension.newx.settings;
 
+import android.content.Context;
 import android.content.res.Resources;
 
 import androidx.annotation.Nullable;
@@ -24,6 +25,7 @@ import app.morphe.extension.shared.settings.StringSetting;
 
 public final class SettingsRegistry {
     private static final String RESOURCE_STRING_OPTION_PREFIX = "RESOURCE_STRING_";
+    private static final String RESOURCE_NAME_OPTION_PREFIX = "RESOURCE_NAME_";
     private enum ItemType {
         TOGGLE,
         TEXT_INPUT,
@@ -314,13 +316,14 @@ public final class SettingsRegistry {
             throw failure("Invalid title resource ID for " + settingId + ": 0");
         }
         validateResourceChoiceOptionId(settingId, optionId, titleResourceId);
+        String stableOptionId = resourceNameOptionId(titleResourceId, settingId);
         String title = getStringResource(titleResourceId, settingId);
         DYNAMIC_CHOICE_DIAGNOSTICS.add(
-                settingId + "/" + optionId + "=" + titleResourceId + " (" + title + ")"
+                settingId + "/" + stableOptionId + "=" + titleResourceId + " (" + title + ")"
         );
         registerChoiceOption(
                 settingId,
-                optionId,
+                stableOptionId,
                 StringRef.constant(title),
                 null,
                 selectedByDefault
@@ -898,16 +901,69 @@ public final class SettingsRegistry {
         }
     }
 
+    private static String resourceNameOptionId(int resourceId, String settingId) {
+        try {
+            Context context = Objects.requireNonNull(Utils.getContext());
+            Resources resources = context.getResources();
+            String resourceType = resources.getResourceTypeName(resourceId);
+            if (!"string".equals(resourceType)) {
+                throw failure(
+                        "Dynamic NewX choice title resource is not a string: " +
+                                resourceId + " (" + resourceType + ") for " + settingId
+                );
+            }
+            return RESOURCE_NAME_OPTION_PREFIX + resources.getResourceEntryName(resourceId);
+        } catch (RuntimeException exception) {
+            if (exception instanceof IllegalStateException) throw exception;
+            throw failure(
+                    "Unable to resolve dynamic NewX choice resource entry name " +
+                            resourceId + " for " + settingId
+            );
+        }
+    }
+
     private static void validateResourceChoiceOptionId(
             String settingId,
             String optionId,
             int resourceId
     ) {
         Objects.requireNonNull(optionId);
+        if (optionId.startsWith(RESOURCE_NAME_OPTION_PREFIX)) {
+            String entryName = optionId.substring(RESOURCE_NAME_OPTION_PREFIX.length());
+            if (entryName.isEmpty()) {
+                throw failure(
+                        "Invalid dynamic NewX choice resource name for " + settingId +
+                                ": " + optionId
+                );
+            }
+            try {
+                Context context = Objects.requireNonNull(Utils.getContext());
+                int resolvedResourceId = context.getResources().getIdentifier(
+                        entryName,
+                        "string",
+                        context.getPackageName()
+                );
+                if (resolvedResourceId != resourceId) {
+                    throw failure(
+                            "Dynamic NewX choice option/resource mismatch for " + settingId +
+                                    ": " + optionId + " != " + resourceId
+                    );
+                }
+            } catch (RuntimeException exception) {
+                if (exception instanceof IllegalStateException) throw exception;
+                throw failure(
+                        "Unable to resolve dynamic NewX choice resource name for " +
+                                settingId + ": " + optionId
+                );
+            }
+            return;
+        }
+
         if (!optionId.startsWith(RESOURCE_STRING_OPTION_PREFIX)) {
             throw failure(
-                    "Dynamic NewX choice option must use " + RESOURCE_STRING_OPTION_PREFIX +
-                            " for " + settingId + ": " + optionId
+                    "Dynamic NewX choice option must use " + RESOURCE_NAME_OPTION_PREFIX +
+                            " or " + RESOURCE_STRING_OPTION_PREFIX + " for " + settingId +
+                            ": " + optionId
             );
         }
         String encodedResourceId = optionId.substring(RESOURCE_STRING_OPTION_PREFIX.length());

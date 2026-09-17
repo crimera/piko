@@ -9,14 +9,14 @@ import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 
 public final class DrawerItemFilter {
-    private static final String RESOURCE_ITEM_ID_PREFIX = "RESOURCE_STRING_";
+    private static final String RESOURCE_NAME_ITEM_ID_PREFIX = "RESOURCE_NAME_";
+    private static final String RESOURCE_STRING_ITEM_ID_PREFIX = "RESOURCE_STRING_";
 
     private DrawerItemFilter() {
     }
 
-    // Legacy drawer rows expose only their localized title. The patch encodes the
-    // source string resource ID in each option ID, so this path needs no release
-    // specific resource-name table.
+    // Legacy drawer rows expose only their localized title. Stable option IDs carry the
+    // string entry name, while RESOURCE_STRING_ remains readable for older saved settings.
     public static boolean shouldHide(String title, Set<String> hiddenItemIds) {
         if (title == null || hiddenItemIds == null || hiddenItemIds.isEmpty()) return false;
 
@@ -26,7 +26,12 @@ public final class DrawerItemFilter {
 
             Resources resources = context.getResources();
             for (String hiddenItemId : hiddenItemIds) {
-                if (hiddenItemId != null && matchesResourceId(title, hiddenItemId, resources)) {
+                if (hiddenItemId != null && matchesResourceOption(
+                        title,
+                        hiddenItemId,
+                        context,
+                        resources
+                )) {
                     return true;
                 }
             }
@@ -41,14 +46,32 @@ public final class DrawerItemFilter {
         return itemId != null && hiddenItemIds != null && hiddenItemIds.contains(itemId);
     }
 
-    private static boolean matchesResourceId(
+    private static boolean matchesResourceOption(
             String title,
             String hiddenItemId,
+            Context context,
             Resources resources
     ) {
-        if (!hiddenItemId.startsWith(RESOURCE_ITEM_ID_PREFIX)) return false;
+        if (hiddenItemId.startsWith(RESOURCE_NAME_ITEM_ID_PREFIX)) {
+            String entryName = hiddenItemId.substring(RESOURCE_NAME_ITEM_ID_PREFIX.length());
+            if (entryName.isEmpty()) return false;
 
-        String encodedResourceIds = hiddenItemId.substring(RESOURCE_ITEM_ID_PREFIX.length());
+            int resourceId = resources.getIdentifier(
+                    entryName,
+                    "string",
+                    context.getPackageName()
+            );
+            try {
+                return resourceId != 0 && title.equals(resources.getString(resourceId));
+            } catch (Resources.NotFoundException ignored) {
+                // A stale or malformed option must not hide unrelated rows.
+                return false;
+            }
+        }
+
+        if (!hiddenItemId.startsWith(RESOURCE_STRING_ITEM_ID_PREFIX)) return false;
+
+        String encodedResourceIds = hiddenItemId.substring(RESOURCE_STRING_ITEM_ID_PREFIX.length());
         if (encodedResourceIds.isEmpty()) return false;
 
         for (String encodedResourceId : encodedResourceIds.split("-")) {

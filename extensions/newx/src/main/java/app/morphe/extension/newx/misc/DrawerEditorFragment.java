@@ -384,17 +384,22 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
     private static Set<String> hiddenItems() {
         Setting<?> setting = SettingsRegistry.settingOrNull(HIDDEN_ITEMS_ID);
         if (!(setting instanceof StringSetSetting hidden)) return new LinkedHashSet<>();
-        return new LinkedHashSet<>(hidden.get());
+        Set<String> canonical = new LinkedHashSet<>();
+        for (String optionId : hidden.get()) {
+            if (optionId != null) canonical.add(DrawerCatalog.canonicalOptionId(optionId));
+        }
+        return canonical;
     }
 
     private static void setHidden(String optionId, boolean hidden) {
         Setting<?> setting = SettingsRegistry.settingOrNull(HIDDEN_ITEMS_ID);
         if (!(setting instanceof StringSetSetting hiddenSetting)) return;
         Set<String> updated = new LinkedHashSet<>(hiddenSetting.get());
+        String canonicalOptionId = DrawerCatalog.canonicalOptionId(optionId);
+        updated.remove(optionId);
+        updated.remove(canonicalOptionId);
         if (hidden) {
-            updated.add(optionId);
-        } else {
-            updated.remove(optionId);
+            updated.add(canonicalOptionId);
         }
         hiddenSetting.save(updated);
     }
