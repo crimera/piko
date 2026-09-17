@@ -28,6 +28,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
+private const val URT_REPOSITORY_PACKAGE = "Lcom/x/repositories/urt/"
 private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineScrollPositionStore;"
 private const val TIMELINE_REFRESH_GATE_DESCRIPTOR =
@@ -64,17 +65,14 @@ private object NewXHomeReselectFingerprint : Fingerprint(
         ),
 )
 
-private object NewXUrtRepositoryRequestFingerprint : Fingerprint(
-    definingClass = "Lcom/x/repositories/urt/",
-    name = "i",
-    parameters =
-        listOf(
-            "Lcom/x/models/timelines/d;",
-            "Lcom/x/models/timelines/items/j0;",
-        ),
-    returnType = "V",
-    custom = { method, _ -> method.implementation != null },
-)
+private fun newXUrtRepositoryRequestFingerprint(requestCall: MethodReference) =
+    Fingerprint(
+        definingClass = URT_REPOSITORY_PACKAGE,
+        name = requestCall.name,
+        parameters = requestCall.parameterTypes.map(CharSequence::toString),
+        returnType = requestCall.returnType.toString(),
+        custom = { method, _ -> method.implementation != null },
+    )
 
 private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/",
@@ -89,7 +87,7 @@ private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
             ),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
-                definingClass = "Lcom/x/repositories/urt/",
+                definingClass = URT_REPOSITORY_PACKAGE,
                 parameters = listOf("L", "L"),
                 returnType = "V",
             ),
@@ -111,7 +109,7 @@ private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
             val reference = instruction.getReference<MethodReference>()
                 ?: return@mapIndexedNotNull null
             index.takeIf {
-                reference.definingClass.startsWith("Lcom/x/repositories/urt/") &&
+                reference.definingClass.startsWith(URT_REPOSITORY_PACKAGE) &&
                     reference.parameterTypes.size == 2 &&
                     reference.parameterTypes.all { it.toString().startsWith("L") } &&
                     reference.returnType.toString() == "V"
@@ -198,7 +196,77 @@ val disableTimelineRefreshPatch =
                 )
             }
 
-            val urtRepoMatches = NewXUrtRepositoryRequestFingerprint.scopedMatchAll()
+            val autoRefreshEventMatches = NewXUrtAutoRefreshEventFingerprint.scopedMatchAll()
+            if (autoRefreshEventMatches.size != 1) {
+                throw PatchException(
+                    "Expected one NewX URT automatic-refresh event handler, found " +
+                        "${autoRefreshEventMatches.size}: " +
+                        autoRefreshEventMatches.joinToString { it.originalMethod.toString() },
+                )
+            }
+
+            val autoRefreshEventMethod = autoRefreshEventMatches.single().method
+            val autoRefreshFieldCandidates =
+                autoRefreshEventMethod.instructions.withIndex().filter { indexedInstruction ->
+                    if (indexedInstruction.value.opcode != Opcode.SGET_OBJECT) return@filter false
+                    val reference = indexedInstruction.value.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
+                        ?: return@filter false
+                    reference.name == "AUTO_REFRESH" &&
+                        reference.type.toString().startsWith("L")
+                }
+            if (autoRefreshFieldCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one NewX URT automatic-refresh request-type read, found " +
+                        "${autoRefreshFieldCandidates.size}",
+                )
+            }
+
+            val autoRefreshFieldCandidate = autoRefreshFieldCandidates.single()
+            val autoRefreshFieldInstruction =
+                autoRefreshFieldCandidate.value as? OneRegisterInstruction
+                    ?: throw PatchException("NewX URT automatic-refresh request-type read has no register layout")
+            val autoRefreshFieldReference =
+                autoRefreshFieldCandidate.value.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
+                    ?: throw PatchException("NewX URT automatic-refresh request-type read has no field reference")
+            val autoRefreshTypeDescriptor = autoRefreshFieldReference.type.toString()
+            val autoRefreshRegister = autoRefreshFieldInstruction.registerA
+            val requestCallCandidate =
+                autoRefreshEventMethod.instructions.withIndex().firstOrNull { indexedInstruction ->
+                    if (indexedInstruction.index <= autoRefreshFieldCandidate.index ||
+                        indexedInstruction.value.opcode != Opcode.INVOKE_INTERFACE
+                    ) {
+                        return@firstOrNull false
+                    }
+                    val reference = indexedInstruction.value.getReference<MethodReference>()
+                        ?: return@firstOrNull false
+                    reference.definingClass.startsWith(URT_REPOSITORY_PACKAGE) &&
+                        reference.parameterTypes.firstOrNull()?.toString() == autoRefreshTypeDescriptor &&
+                        reference.parameterTypes.getOrNull(1)?.toString()?.startsWith("L") == true &&
+                        reference.parameterTypes.size == 2 &&
+                        reference.returnType.toString() == "V"
+                } ?: throw PatchException("NewX URT automatic-refresh request call was not found")
+            val requestCallReference =
+                requestCallCandidate.value.getReference<MethodReference>()
+                    ?: throw PatchException("NewX URT automatic-refresh request call has no method reference")
+            val requestCallInstruction =
+                requestCallCandidate.value as? FiveRegisterInstruction
+                    ?: throw PatchException("NewX URT automatic-refresh request call has an unsupported register layout")
+            if (requestCallInstruction.registerCount != 3) {
+                throw PatchException(
+                    "Unexpected NewX URT automatic-refresh request register count: " +
+                        requestCallInstruction.registerCount,
+                )
+            }
+            val repositoryReceiverRegister = requestCallInstruction.registerC
+            if (repositoryReceiverRegister !in 0..15) {
+                throw PatchException(
+                    "NewX URT automatic-refresh repository register is not encodable: " +
+                        "v$repositoryReceiverRegister",
+                )
+            }
+
+            val urtRepoMatches =
+                newXUrtRepositoryRequestFingerprint(requestCallReference).scopedMatchAll()
             if (urtRepoMatches.size != 1) {
                 throw PatchException(
                     "Expected one NewX URT repository request handler, found ${urtRepoMatches.size}: " +
@@ -208,7 +276,7 @@ val disableTimelineRefreshPatch =
             val urtRepoMatch = urtRepoMatches.single()
             val repoDescriptor = urtRepoMatch.originalMethod.definingClass
             val requestTypeDescriptor =
-                urtRepoMatch.originalMethod.parameterTypes.firstOrNull()?.toString()?.takeIf { it.startsWith("L") }
+                requestCallReference.parameterTypes.firstOrNull()?.toString()?.takeIf { it.startsWith("L") }
                     ?: throw PatchException("NewX URT repository request has no object request-type parameter")
             val repositoryClass = mutableClassDefBy(repoDescriptor)
             val timelineGetterMatches =
@@ -282,6 +350,23 @@ val disableTimelineRefreshPatch =
                 "$repoDescriptor->${timelineDataGetter.name}()$timelineDataFlowDescriptor"
             val timelineDataFlowListGetterReference =
                 "$timelineDataFlowDescriptor->${timelineDataFlowListGetter.name}()Ljava/util/List;"
+            val eventRepositoryClass = mutableClassDefBy(requestCallReference.definingClass.toString())
+            val eventTimelineDataGetterMatches =
+                eventRepositoryClass.methods.filter { method ->
+                    method.name == timelineDataGetter.name &&
+                        method.parameterTypes.isEmpty() &&
+                        method.returnType.toString() == timelineDataFlowDescriptor
+                }
+            if (eventTimelineDataGetterMatches.size != 1) {
+                throw PatchException(
+                    "Expected one NewX URT event timeline data flow getter on " +
+                        "${requestCallReference.definingClass}, found ${eventTimelineDataGetterMatches.size}: " +
+                        eventTimelineDataGetterMatches.joinToString(),
+                )
+            }
+            val eventTimelineDataGetter = eventTimelineDataGetterMatches.single()
+            val eventTimelineDataGetterReference =
+                "${requestCallReference.definingClass}->${eventTimelineDataGetter.name}()$timelineDataFlowDescriptor"
             val repositoryAutoRefreshFieldReference =
                 "$requestTypeDescriptor->AUTO_REFRESH:$requestTypeDescriptor"
             val repositoryViewportAwareAutoRefreshFieldReference =
@@ -348,93 +433,6 @@ val disableTimelineRefreshPatch =
                     ),
                 )
             }
-
-            val autoRefreshEventMatches = NewXUrtAutoRefreshEventFingerprint.scopedMatchAll()
-            if (autoRefreshEventMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX URT automatic-refresh event handler, found " +
-                        "${autoRefreshEventMatches.size}: " +
-                        autoRefreshEventMatches.joinToString { it.originalMethod.toString() },
-                )
-            }
-
-            val autoRefreshEventMethod = autoRefreshEventMatches.single().method
-            val autoRefreshFieldCandidates =
-                autoRefreshEventMethod.instructions.withIndex().filter { indexedInstruction ->
-                    if (indexedInstruction.value.opcode != Opcode.SGET_OBJECT) return@filter false
-                    val reference = indexedInstruction.value.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
-                        ?: return@filter false
-                    reference.name == "AUTO_REFRESH" &&
-                        reference.type.toString().startsWith("L")
-                }
-            if (autoRefreshFieldCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one NewX URT automatic-refresh request-type read, found " +
-                        "${autoRefreshFieldCandidates.size}",
-                )
-            }
-
-            val autoRefreshFieldCandidate = autoRefreshFieldCandidates.single()
-            val autoRefreshFieldInstruction =
-                autoRefreshFieldCandidate.value as? OneRegisterInstruction
-                    ?: throw PatchException("NewX URT automatic-refresh request-type read has no register layout")
-            val autoRefreshFieldReference =
-                autoRefreshFieldCandidate.value.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
-                    ?: throw PatchException("NewX URT automatic-refresh request-type read has no field reference")
-            val autoRefreshTypeDescriptor = autoRefreshFieldReference.type.toString()
-            val autoRefreshRegister = autoRefreshFieldInstruction.registerA
-            val requestCallCandidate =
-                autoRefreshEventMethod.instructions.withIndex().firstOrNull { indexedInstruction ->
-                    if (indexedInstruction.index <= autoRefreshFieldCandidate.index ||
-                        indexedInstruction.value.opcode != Opcode.INVOKE_INTERFACE
-                    ) {
-                        return@firstOrNull false
-                    }
-                    val reference = indexedInstruction.value.getReference<MethodReference>()
-                        ?: return@firstOrNull false
-                    reference.definingClass.startsWith("Lcom/x/repositories/urt/") &&
-                        reference.parameterTypes.firstOrNull()?.toString() == autoRefreshTypeDescriptor &&
-                        reference.parameterTypes.getOrNull(1)?.toString()?.startsWith("L") == true &&
-                        reference.parameterTypes.size == 2 &&
-                        reference.returnType.toString() == "V"
-                } ?: throw PatchException("NewX URT automatic-refresh request call was not found")
-            val requestCallReference =
-                requestCallCandidate.value.getReference<MethodReference>()
-                    ?: throw PatchException("NewX URT automatic-refresh request call has no method reference")
-            val requestCallInstruction =
-                requestCallCandidate.value as? FiveRegisterInstruction
-                    ?: throw PatchException("NewX URT automatic-refresh request call has an unsupported register layout")
-            if (requestCallInstruction.registerCount != 3) {
-                throw PatchException(
-                    "Unexpected NewX URT automatic-refresh request register count: " +
-                        requestCallInstruction.registerCount,
-                )
-            }
-            val repositoryReceiverRegister = requestCallInstruction.registerC
-            if (repositoryReceiverRegister !in 0..15) {
-                throw PatchException(
-                    "NewX URT automatic-refresh repository register is not encodable: " +
-                        "v$repositoryReceiverRegister",
-                )
-            }
-
-            val eventRepositoryClass = mutableClassDefBy(requestCallReference.definingClass.toString())
-            val eventTimelineDataGetterMatches =
-                eventRepositoryClass.methods.filter { method ->
-                    method.name == timelineDataGetter.name &&
-                        method.parameterTypes.isEmpty() &&
-                        method.returnType.toString() == timelineDataFlowDescriptor
-                }
-            if (eventTimelineDataGetterMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX URT event timeline data flow getter on " +
-                        "${requestCallReference.definingClass}, found ${eventTimelineDataGetterMatches.size}: " +
-                        eventTimelineDataGetterMatches.joinToString(),
-                )
-            }
-            val eventTimelineDataGetter = eventTimelineDataGetterMatches.single()
-            val eventTimelineDataGetterReference =
-                "${requestCallReference.definingClass}->${eventTimelineDataGetter.name}()$timelineDataFlowDescriptor"
 
             val settingRead =
                 disableTimelineRefresh.injectRead(
