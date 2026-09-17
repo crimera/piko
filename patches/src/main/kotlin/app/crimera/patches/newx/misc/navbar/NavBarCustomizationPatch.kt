@@ -122,7 +122,7 @@ val customizeNewXNavBarPatch =
             strings = settingStrings("piko_newx_nav_editor"),
             order = 100,
             fragmentClassDescriptor = NAV_BAR_EDITOR_DESCRIPTOR,
-            iconResourceName = "ic_vector_menu",
+            iconResourceName = "ic_vector_bulleted_list",
         )
 
         execute {
