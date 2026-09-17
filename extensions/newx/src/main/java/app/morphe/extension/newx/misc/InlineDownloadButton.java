@@ -78,6 +78,11 @@ public final class InlineDownloadButton {
     private static final String CONFLICT_SETTING = "newx.content.inline_download_conflict";
     private static final ConflictBehavior DEFAULT_CONFLICT_BEHAVIOR = ConflictBehavior.SKIP;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
+    // Click-time media resolution and DownloadManager/MediaStore enqueue run here so the
+    // inline-action event handler returns immediately instead of blocking the UI thread on
+    // post toString parsing and storage IPC. DOWNLOAD_EXECUTOR stays reserved for download
+    // finalization, which can be busy copying large files.
+    private static final ExecutorService CLICK_EXECUTOR = Executors.newSingleThreadExecutor();
     // Timeline/profile scrolling creates a new action object per composition. Keep weak identity
     // keys without a FIFO cap: a cap can evict an action that is still visible and make its icon
     // fall back to Twitter's share glyph. Cleared weak keys are drained during set operations.
@@ -298,33 +303,51 @@ public final class InlineDownloadButton {
         Object action = findActionEntry(event);
         if (!isDownloadAction(action)) return false;
 
-        Context context = null;
         try {
-            context = NewXUtils.findUsableActivity(null);
+            Context context = NewXUtils.findUsableActivity(null);
             Object post = getPresenterPost(presenter);
             if (context == null || post == null) {
                 NewXInAppNotification.show("Could not find the selected post");
                 return true;
             }
 
-            List<DownloadItem> downloads = downloadItems(mediaFor(post));
-            String username = sourceUsername(post);
-            if (downloads.isEmpty()) {
-                NewXInAppNotification.showForUser("No downloadable media found", username);
-                return true;
-            }
-
-            String postId = sourcePostId(post);
-            if (downloads.size() == 1) {
-                enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
-            } else {
-                showMediaPicker(context, downloads, username, postId);
-            }
+            // Media parsing and storage IPC run off the UI thread; the picker and result
+            // toasts are posted back. The event is still consumed synchronously so the
+            // native share handler does not run for the download action.
+            Context applicationContext = context.getApplicationContext();
+            Context safeContext = applicationContext != null ? applicationContext : context;
+            CLICK_EXECUTOR.execute(() -> resolveAndPresent(safeContext, post));
             return true;
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
             NewXInAppNotification.show("Could not download post media");
             return true;
+        }
+    }
+
+    private static void resolveAndPresent(Context context, Object post) {
+        final List<DownloadItem> downloads;
+        final String username;
+        final String postId;
+        try {
+            downloads = downloadItems(mediaFor(post));
+            username = sourceUsername(post);
+            postId = sourcePostId(post);
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to process inline download action", exception);
+            NewXUtils.runOnUiThread(() -> NewXInAppNotification.show("Could not download post media"));
+            return;
+        }
+        if (downloads.isEmpty()) {
+            NewXUtils.runOnUiThread(() ->
+                    NewXInAppNotification.showForUser("No downloadable media found", username));
+            return;
+        }
+
+        if (downloads.size() == 1) {
+            enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
+        } else {
+            NewXUtils.runOnUiThread(() -> showMediaPicker(context, downloads, username, postId));
         }
     }
 
@@ -789,26 +812,36 @@ public final class InlineDownloadButton {
             String username,
             String postId
     ) {
-        int queued = 0;
-        int skipped = 0;
-        int failed = 0;
-        ConflictBehavior behavior = conflictBehavior();
-        for (int index = 0; index < downloads.size(); index++) {
-            switch (enqueueDownload(
-                    context,
-                    downloads.get(index),
-                    username,
-                    postId,
-                    index,
-                    downloads.size(),
-                    behavior
-            )) {
-                case QUEUED -> queued++;
-                case SKIPPED -> skipped++;
-                case FAILED -> failed++;
+        Context applicationContext = context.getApplicationContext();
+        Context safeContext = applicationContext != null ? applicationContext : context;
+        List<DownloadItem> items = new ArrayList<>(downloads);
+        // Conflict probing hits MediaStore per item; keep it off the picker button path.
+        CLICK_EXECUTOR.execute(() -> {
+            int queued = 0;
+            int skipped = 0;
+            int failed = 0;
+            ConflictBehavior behavior = conflictBehavior();
+            for (int index = 0; index < items.size(); index++) {
+                switch (enqueueDownload(
+                        safeContext,
+                        items.get(index),
+                        username,
+                        postId,
+                        index,
+                        items.size(),
+                        behavior
+                )) {
+                    case QUEUED -> queued++;
+                    case SKIPPED -> skipped++;
+                    case FAILED -> failed++;
+                }
             }
-        }
-        showQueueResult(queued, skipped, failed, username);
+            int queuedResult = queued;
+            int skippedResult = skipped;
+            int failedResult = failed;
+            NewXUtils.runOnUiThread(() ->
+                    showQueueResult(queuedResult, skippedResult, failedResult, username));
+        });
     }
 
     private static void enqueueSingleDownload(
@@ -819,9 +852,15 @@ public final class InlineDownloadButton {
             int index,
             int mediaCount
     ) {
-        EnqueueState state =
-                enqueueDownload(
-                        context,
+        Context applicationContext = context.getApplicationContext();
+        Context safeContext = applicationContext != null ? applicationContext : context;
+        // Conflict probing does MediaStore IPC plus a blocking prefs commit; the tap
+        // handler and picker buttons must not wait for it.
+        CLICK_EXECUTOR.execute(() -> {
+            final EnqueueState state;
+            try {
+                state = enqueueDownload(
+                        safeContext,
                         download,
                         username,
                         postId,
@@ -829,11 +868,20 @@ public final class InlineDownloadButton {
                         mediaCount,
                         conflictBehavior()
                 );
-        switch (state) {
-            case QUEUED -> NewXInAppNotification.showForUser("Download started", username);
-            case SKIPPED -> NewXInAppNotification.showForUser("Already downloaded or queued", username);
-            case FAILED -> NewXInAppNotification.showForUser("Could not start download", username);
-        }
+            } catch (RuntimeException exception) {
+                NewXLogger.printException(() -> "Failed to enqueue NewX media download", exception);
+                NewXUtils.runOnUiThread(() ->
+                        NewXInAppNotification.showForUser("Could not start download", username));
+                return;
+            }
+            NewXUtils.runOnUiThread(() -> {
+                switch (state) {
+                    case QUEUED -> NewXInAppNotification.showForUser("Download started", username);
+                    case SKIPPED -> NewXInAppNotification.showForUser("Already downloaded or queued", username);
+                    case FAILED -> NewXInAppNotification.showForUser("Could not start download", username);
+                }
+            });
+        });
     }
 
     private static synchronized EnqueueState enqueueDownload(
