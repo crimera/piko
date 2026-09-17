@@ -40,44 +40,53 @@ internal val newXSettingsPatch =
             prepareSettingsRegistryLoad()
 
             // Compose lowering may produce multiple callers for the same renderer; collapse them
-            // before modifying the renderer.
-            val callerMatches =
-                ComposeSettingsBasicItemCallerFingerprint.scopedMatchAll()
-            if (callerMatches.isEmpty()) {
-                throw PatchException("Expected at least one NewX Compose settings row caller")
-            }
-            val rendererReferences =
-                callerMatches
-                    .map { caller ->
-                        caller.instructionMatches.single().instruction
-                            .getReference<MethodReference>()
-                            ?: throw PatchException(
-                                "NewX Compose settings row call has no method reference in " +
-                                    caller.originalMethod,
-                            )
-                    }
-                    .distinctBy(MethodReference::toString)
-            if (rendererReferences.size != 1) {
-                throw PatchException(
-                    "Expected one NewX Compose settings row renderer across " +
-                        "${callerMatches.size} callers, found ${rendererReferences.size}: " +
-                        rendererReferences.joinToString(),
-                )
-            }
-            val rendererReference = rendererReferences.single()
-            val matches =
-                composeSettingsBasicItemFingerprint(rendererReference)
+            // before modifying the renderer. Newer lowering can omit the in-package caller, so
+            // fall back to the scoped renderer fingerprint and keep the same semantic check.
+            val callerRendererReferences =
+                ComposeSettingsBasicItemCallerFingerprint
                     .scopedMatchAllOrNull()
                     .orEmpty()
+                    .flatMap { caller ->
+                        caller.instructionMatches.mapNotNull { instructionMatch ->
+                            instructionMatch.instruction.getReference<MethodReference>()
+                        }
+                    }
+                    .filter { reference ->
+                        composeSettingsBasicItemLayout(reference.parameterTypes) != null
+                    }
+                    .distinctBy(MethodReference::toString)
+            val callerRendererMatches =
+                callerRendererReferences.flatMap { reference ->
+                    composeSettingsBasicItemFingerprint(reference)
+                        .scopedMatchAllOrNull()
+                        .orEmpty()
+                }
+            val matches =
+                if (callerRendererMatches.isNotEmpty()) {
+                    callerRendererMatches
+                } else {
+                    ComposeSettingsBasicItemRendererFingerprint
+                        .scopedMatchAllOrNull()
+                        .orEmpty()
+                        .filter { match ->
+                            composeSettingsBasicItemLayout(match.originalMethod.parameterTypes) != null
+                        }
+                }
             val rendererMatch =
                 requireExactlyOne(
                     label = "NewX Compose settings row renderer",
-                    candidates = matches,
+                    candidates = matches.distinctBy { match -> match.originalMethod.toString() },
                 )
 
             rendererMatch.let { match ->
                 val originalMethod = match.originalMethod
-                val iconType = originalMethod.parameterTypes[2].toString()
+                val layout =
+                    composeSettingsBasicItemLayout(originalMethod.parameterTypes)
+                        ?: throw PatchException(
+                            "NewX Compose settings row renderer has an unsupported parameter " +
+                                "layout: ${originalMethod.parameterTypes}",
+                        )
+                val iconType = originalMethod.parameterTypes[layout.iconParameterIndex].toString()
                 val settingsIconField = resolveSettingsIconField(iconType)
                 val rendererDescriptor =
                     "${originalMethod.definingClass}->${originalMethod.name}(" +
@@ -99,21 +108,21 @@ internal val newXSettingsPatch =
                         invoke-static/range {p0 .. p0}, $COMPOSE_SETTINGS_HOOK_DESCRIPTOR->isAdditionalResourcesTitle(Ljava/lang/String;)Z
                         move-result v$titleRegister
                         if-eqz v$titleRegister, :piko_newx_settings_original
-                        move-object/from16 v$titleRegister, p0
-                        move-object/from16 v$summaryRegister, p1
-                        move-object/from16 v$iconRegister, p2
-                        move-object/from16 v$clickRegister, p3
+                        move-object/from16 v$titleRegister, p${layout.titleRegister}
+                        move-object/from16 v$summaryRegister, p${layout.summaryRegister}
+                        move-object/from16 v$iconRegister, p${layout.iconRegister}
+                        move-object/from16 v$clickRegister, p${layout.clickRegister}
                         invoke-static {}, $COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsTitle()Ljava/lang/String;
-                        move-result-object p0
-                        const/16 p1, 0x0
-                        sget-object p2, $settingsIconField
+                        move-result-object p${layout.titleRegister}
+                        const/16 p${layout.summaryRegister}, 0x0
+                        sget-object p${layout.iconRegister}, $settingsIconField
                         invoke-static {}, $COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()Lkotlin/jvm/functions/Function0;
-                        move-result-object p3
-                        invoke-static/range {p0 .. p11}, $rendererDescriptor
-                        move-object/from16 p0, v$titleRegister
-                        move-object/from16 p1, v$summaryRegister
-                        move-object/from16 p2, v$iconRegister
-                        move-object/from16 p3, v$clickRegister
+                        move-result-object p${layout.clickRegister}
+                        invoke-static/range {p0 .. p${layout.parameterEndRegister}}, $rendererDescriptor
+                        move-object/from16 p${layout.titleRegister}, v$titleRegister
+                        move-object/from16 p${layout.summaryRegister}, v$summaryRegister
+                        move-object/from16 p${layout.iconRegister}, v$iconRegister
+                        move-object/from16 p${layout.clickRegister}, v$clickRegister
                         :piko_newx_settings_original
                         nop
                     """.trimIndent(),
