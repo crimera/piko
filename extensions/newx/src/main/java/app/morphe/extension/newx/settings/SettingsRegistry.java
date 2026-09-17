@@ -92,7 +92,33 @@ public final class SettingsRegistry {
             @Nullable String summaryResourceName,
             int order
     ) {
-        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.TOGGLE);
+        registerToggle(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                true
+        );
+    }
+
+    public static synchronized void registerToggle(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            int order,
+            boolean visible
+    ) {
+        registerItem(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                ItemType.TOGGLE,
+                visible
+        );
     }
 
     public static synchronized void configureToggle(String id, boolean defaultValue, boolean rebootApp) {
@@ -110,7 +136,33 @@ public final class SettingsRegistry {
             @Nullable String summaryResourceName,
             int order
     ) {
-        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.TEXT_INPUT);
+        registerTextInput(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                true
+        );
+    }
+
+    public static synchronized void registerTextInput(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            int order,
+            boolean visible
+    ) {
+        registerItem(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                ItemType.TEXT_INPUT,
+                visible
+        );
     }
 
     public static synchronized void configureTextInput(
@@ -152,7 +204,33 @@ public final class SettingsRegistry {
             @Nullable String summaryResourceName,
             int order
     ) {
-        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.SINGLE_CHOICE);
+        registerSingleChoice(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                true
+        );
+    }
+
+    public static synchronized void registerSingleChoice(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            int order,
+            boolean visible
+    ) {
+        registerItem(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                ItemType.SINGLE_CHOICE,
+                visible
+        );
     }
 
     public static synchronized void configureSingleChoice(
@@ -174,7 +252,33 @@ public final class SettingsRegistry {
             @Nullable String summaryResourceName,
             int order
     ) {
-        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.MULTI_CHOICE);
+        registerMultiChoice(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                true
+        );
+    }
+
+    public static synchronized void registerMultiChoice(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            int order,
+            boolean visible
+    ) {
+        registerItem(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                ItemType.MULTI_CHOICE,
+                visible
+        );
     }
 
     public static synchronized void configureMultiChoice(String id, boolean rebootApp) {
@@ -230,7 +334,33 @@ public final class SettingsRegistry {
             @Nullable String summaryResourceName,
             int order
     ) {
-        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.ACTION);
+        registerAction(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                true
+        );
+    }
+
+    public static synchronized void registerAction(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            int order,
+            boolean visible
+    ) {
+        registerItem(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                ItemType.ACTION,
+                visible
+        );
     }
 
     public static synchronized void configureAction(String id, String handlerClassDescriptor) {
@@ -266,7 +396,15 @@ public final class SettingsRegistry {
             @Nullable String iconResourceName,
             int order
     ) {
-        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.CUSTOM_SCREEN);
+        registerItem(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                ItemType.CUSTOM_SCREEN,
+                true
+        );
         ItemBuilder item = requireItem(id, ItemType.CUSTOM_SCREEN);
         item.iconResourceName = iconResourceName;
     }
@@ -454,7 +592,8 @@ public final class SettingsRegistry {
             String titleResourceName,
             @Nullable String summaryResourceName,
             int order,
-            ItemType type
+            ItemType type,
+            boolean visible
     ) {
         requireMutable();
         if (NODES.containsKey(id)) {
@@ -467,7 +606,8 @@ public final class SettingsRegistry {
                 titleResourceName,
                 summaryResourceName,
                 order,
-                type
+                type,
+                visible
         );
         NODES.put(id, item);
         requireGroup(parentId).children.add(item);
@@ -574,7 +714,14 @@ public final class SettingsRegistry {
                         item.rebootApp
                 );
                 SETTINGS.put(item.id, setting);
-                yield new SettingsNode.Toggle(item.id, title, summary, item.order, setting);
+                yield new SettingsNode.Toggle(
+                        item.id,
+                        title,
+                        summary,
+                        item.order,
+                        setting,
+                        item.visible
+                );
             }
             case TEXT_INPUT -> {
                 StringSetting setting = new StringSetting(
@@ -590,7 +737,8 @@ public final class SettingsRegistry {
                         item.order,
                         setting,
                         item.inputKind,
-                        item.validatorClassDescriptor
+                        item.validatorClassDescriptor,
+                        item.visible
                 );
             }
             case SINGLE_CHOICE -> {
@@ -613,7 +761,8 @@ public final class SettingsRegistry {
                         summary,
                         item.order,
                         setting,
-                        options
+                        options,
+                        item.visible
                 );
             }
             case MULTI_CHOICE -> {
@@ -634,7 +783,8 @@ public final class SettingsRegistry {
                         summary,
                         item.order,
                         setting,
-                        options
+                        options,
+                        item.visible
                 );
             }
             case ACTION -> new SettingsNode.Action(
@@ -642,7 +792,8 @@ public final class SettingsRegistry {
                     title,
                     summary,
                     item.order,
-                    item.handlerClassDescriptor
+                    item.handlerClassDescriptor,
+                    item.visible
             );
             case CUSTOM_SCREEN -> new SettingsNode.CustomScreen(
                     item.id,
@@ -868,6 +1019,7 @@ public final class SettingsRegistry {
 
     private static final class ItemBuilder extends NodeBuilder {
         final ItemType type;
+        final boolean visible;
         final Map<String, ChoiceBuilder> options = new LinkedHashMap<>();
         boolean configured;
         boolean rebootApp;
@@ -884,10 +1036,12 @@ public final class SettingsRegistry {
                 String titleResourceName,
                 @Nullable String summaryResourceName,
                 int order,
-                ItemType type
+                ItemType type,
+                boolean visible
         ) {
             super(parentId, id, titleResourceName, summaryResourceName, order);
             this.type = type;
+            this.visible = visible;
         }
     }
 

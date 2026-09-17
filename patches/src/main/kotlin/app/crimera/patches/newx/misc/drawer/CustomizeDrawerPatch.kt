@@ -7,14 +7,29 @@ import app.crimera.patches.newx.settings.SettingsRegistrationState
 import app.crimera.patches.newx.settings.ToggleSettingDefinition
 import app.crimera.patches.newx.settings.choice
 import app.crimera.patches.newx.settings.injectRead
+import app.crimera.patches.newx.settings.newXCustomScreen
 import app.crimera.patches.newx.settings.newXSettingsPatch
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.resolveSettingsIconField
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXMultiChoice
+import app.crimera.patches.newx.misc.navbar.NewXNavBarTabData
+import app.crimera.patches.newx.misc.navbar.NewXTabDataFingerprint
+import app.crimera.patches.newx.misc.navbar.resolveIconField
+import app.crimera.patches.newx.misc.navbar.resolveNavBarItemContent
+import app.crimera.patches.newx.misc.navbar.resolveTitleResourceIdAtRowCall
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.getResourceId
+import app.crimera.patches.newx.misc.navbar.resolveTabChangeMethod
+import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
+import app.crimera.patches.newx.misc.navbar.validateNewXNavBarTabData
+import app.crimera.patches.newx.misc.navbar.resolveIconDrawables
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
+import app.crimera.patches.newx.utils.Constants.DRAWER_CATALOG_DESCRIPTOR
+import app.crimera.patches.newx.utils.Constants.DRAWER_EDITOR_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.Constants.DRAWER_TAB_OPENER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
 import app.crimera.patches.newx.utils.destinationRegisterOrNull
@@ -27,17 +42,22 @@ import app.crimera.patches.newx.utils.writesObjectRegister
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.cloneMutable
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
+import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -428,6 +448,99 @@ private fun resolveDrawerTitleResourceIds(
 private fun resourceDrawerOptionId(resourceId: Int): String =
     DRAWER_RESOURCE_ITEM_ID_PREFIX + resourceId.toString(16).uppercase(Locale.ROOT)
 
+// Catalog ids for the editor shortcuts. Mirrors DrawerEditorFragment.SHORTCUTS.
+private const val DRAWER_SHORTCUT_PIKO = "DRAWER_SHORTCUT_PIKO"
+private const val DRAWER_SHORTCUT_MESSAGES = "DRAWER_SHORTCUT_MESSAGES"
+private const val DRAWER_SHORTCUT_GROK = "DRAWER_SHORTCUT_GROK"
+private const val DRAWER_SHORTCUT_NOTIFICATIONS = "DRAWER_SHORTCUT_NOTIFICATIONS"
+
+private data class DrawerCatalogEntry(
+    val optionId: String,
+    val iconField: FieldReference?,
+)
+
+/**
+ * Maps every distinct drawer title to its row icon, when the icon resolves to a stable
+ * icon field. Rows without a resolvable icon are still listed so the editor shows them
+ * without an icon.
+ */
+private fun drawerCatalogEntries(calls: List<DrawerRendererCall>): List<DrawerCatalogEntry> {
+    val iconsByResource = linkedMapOf<Int, FieldReference?>()
+    calls.forEach { call ->
+        val parameters = call.renderer.parameterTypes.map(CharSequence::toString)
+        val iconParameterIndex =
+            parameters.indexOfFirst { it.startsWith("Lcom/x/icons/") }.takeIf { it >= 0 } ?: 1
+        val iconRegister = call.call.startRegister + iconParameterIndex
+        val iconField =
+            call.method.instructions.resolveIconField(call.index, iconRegister)
+                ?.takeIf { field -> field.type.toString().startsWith("Lcom/x/icons/") }
+        call.method.instructions.resolveDrawerTitleResourceIds(
+            callIndex = call.index,
+            call = call.call,
+            renderer = call.renderer,
+        ).forEach { resourceId ->
+            iconsByResource.putIfAbsent(resourceId, iconField)
+            if (iconsByResource[resourceId] == null && iconField != null) {
+                iconsByResource[resourceId] = iconField
+            }
+        }
+    }
+    return iconsByResource.map { (resourceId, iconField) ->
+        DrawerCatalogEntry(resourceDrawerOptionId(resourceId), iconField)
+    }
+}
+
+context(context: BytecodePatchContext)
+private fun injectDrawerCatalog(
+    nativeEntries: List<DrawerCatalogEntry>,
+    shortcutIcons: Map<String, FieldReference>,
+    settingsIconField: FieldReference,
+) {
+    val iconFields =
+        (nativeEntries.mapNotNull { it.iconField } +
+            shortcutIcons.values + settingsIconField)
+            .distinctBy(FieldReference::toString)
+    val drawables = resolveIconDrawables(iconFields)
+    val instructions = buildString {
+        nativeEntries.forEach { entry ->
+            val drawable = entry.iconField?.let { drawables[it.toString()] } ?: 0
+            appendLine("const-string v0, \"${entry.optionId}\"")
+            appendLine("const v1, ${drawable.toDrawerSmaliLiteral()}")
+            appendLine(
+                "invoke-static {v0, v1}, " +
+                    "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
+            )
+        }
+        shortcutIcons.forEach { (optionId, iconField) ->
+            val drawable = drawables.getValue(iconField.toString()).toDrawerSmaliLiteral()
+            appendLine("const-string v0, \"$optionId\"")
+            appendLine("const v1, $drawable")
+            appendLine(
+                "invoke-static {v0, v1}, " +
+                    "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
+            )
+        }
+        appendLine("const-string v0, \"$DRAWER_SHORTCUT_PIKO\"")
+        appendLine(
+            "const v1, " +
+                drawables.getValue(settingsIconField.toString()).toDrawerSmaliLiteral(),
+        )
+        appendLine(
+            "invoke-static {v0, v1}, " +
+                "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
+        )
+        listOf("GROK", "THEME_TOGGLE").forEach { optionId ->
+            appendLine("const-string v0, \"$optionId\"")
+            appendLine("const v1, 0x0")
+            appendLine(
+                "invoke-static {v0, v1}, " +
+                    "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
+            )
+        }
+    }
+    SettingsRegistrationState.inject(context, instructions)
+}
+
 private fun Int.toDrawerSmaliLiteral(): String =
     if (this < 0) "-0x${(-this).toString(16)}" else "0x${toString(16)}"
 
@@ -627,6 +740,64 @@ private fun MutableMethod.injectPikoSettingsDrawerItem(
     settingsIconField: FieldReference,
     showPikoSettingsInDrawer: ToggleSettingDefinition,
 ) {
+    injectAdditionalDrawerRow(
+        target = target,
+        renderer = renderer,
+        iconField = settingsIconField,
+        toggle = showPikoSettingsInDrawer,
+        titleDescriptor = "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsTitle()Ljava/lang/String;",
+        clickDescriptor = "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()$FUNCTION0_DESCRIPTOR",
+        labelSuffix = "settings_drawer_continue",
+    )
+}
+
+/**
+ * Emits one extra drawer row after an executed row call, reusing its registers for the
+ * shared parameters. Each injection captures the instruction currently following the call as
+ * its skip target, so sequential injections chain correctly.
+ */
+private fun MutableMethod.injectAdditionalDrawerRow(
+    target: DrawerFooterTarget,
+    renderer: MethodReference,
+    iconField: FieldReference,
+    toggle: ToggleSettingDefinition?,
+    titleDescriptor: String,
+    clickDescriptor: String,
+    labelSuffix: String,
+    registerConstraint: SettingReadRegisterConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+) {
+    injectSnapshotDrawerRow(
+        callIndex = target.callIndex,
+        startRegister = target.call.startRegister,
+        registerCount = target.call.registerCount,
+        renderer = renderer,
+        iconField = iconField,
+        toggle = toggle,
+        titleDescriptor = titleDescriptor,
+        clickDescriptor = clickDescriptor,
+        labelSuffix = labelSuffix,
+        registerConstraint = registerConstraint,
+    )
+}
+
+/**
+ * Emits one extra drawer row reusing an executed row call's registers. Only title, icon,
+ * and click are replaced; the shared parameters keep values the app itself populated, so
+ * the emission must sit at the same call site. The title null-guard skips emission when
+ * the anchor call did not execute on this path.
+ */
+private fun MutableMethod.injectSnapshotDrawerRow(
+    callIndex: Int,
+    startRegister: Int,
+    registerCount: Int,
+    renderer: MethodReference,
+    iconField: FieldReference,
+    toggle: ToggleSettingDefinition?,
+    titleDescriptor: String,
+    clickDescriptor: String,
+    labelSuffix: String,
+    registerConstraint: SettingReadRegisterConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+) {
     val parameters = renderer.parameterTypes.map(CharSequence::toString)
     val titleIndices = parameters.indices.filter { parameters[it] == "Ljava/lang/String;" }
     val clickIndices = parameters.indices.filter { parameters[it] == FUNCTION0_DESCRIPTOR }
@@ -639,45 +810,58 @@ private fun MutableMethod.injectPikoSettingsDrawerItem(
     val titleIndex = titleIndices.single()
     val clickIndex = clickIndices.single()
     val iconIndex = iconIndices.single()
-    if (settingsIconField.type.toString() != parameters[iconIndex]) {
+    if (iconField.type.toString() != parameters[iconIndex]) {
         throw PatchException(
-            "NewX drawer settings icon type changed: renderer=${parameters[iconIndex]}, " +
-                "field=${settingsIconField.type}",
+            "NewX drawer icon type changed: renderer=${parameters[iconIndex]}, " +
+                "field=${iconField.type}",
         )
     }
 
-    val startRegister = target.call.startRegister
-    val endRegister = startRegister + target.call.registerCount - 1
+    val endRegister = startRegister + registerCount - 1
     if (startRegister < 0 || endRegister > 255) {
         throw PatchException(
-            "NewX drawer footer call registers are outside v0..v255: " +
+            "NewX drawer row registers are outside v0..v255: " +
                 "v$startRegister..v$endRegister",
+        )
+    }
+    if (registerCount != parameters.size) {
+        throw PatchException(
+            "NewX drawer row register count changed: expected ${parameters.size}, found $registerCount",
         )
     }
 
     val continuationInstruction =
-        instructions.getOrNull(target.callIndex + 1)
-            ?: throw PatchException("NewX drawer footer settings call has no continuation: ${target.method}")
+        instructions.getOrNull(callIndex + 1)
+            ?: throw PatchException("NewX drawer row injection point has no continuation: $this")
+    // A null toggle skips the setting read entirely: the title provider returns null while
+    // disabled, and the null title skips the row. Dense call sites may have no free register.
     val settingRead =
-        showPikoSettingsInDrawer.injectRead(
+        toggle?.injectRead(
             method = this,
-            index = target.callIndex + 1,
+            index = callIndex + 1,
             excludedRegisters = (startRegister..endRegister).toList(),
-            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+            registerConstraint = registerConstraint,
         )
+    val insertionIndex = settingRead?.nextIndex ?: (callIndex + 1)
     val rowDescriptor = renderer.toSmaliDescriptor()
     val titleRegister = startRegister + titleIndex
     val iconRegister = startRegister + iconIndex
     val clickRegister = startRegister + clickIndex
-    val continueLabel = "piko_newx_settings_drawer_continue"
+    val continueLabel = "piko_newx_${labelSuffix}"
+    val toggleGuard =
+        if (settingRead == null) {
+            ""
+        } else {
+            "if-eqz v${settingRead.register}, :$continueLabel\n"
+        }
     addInstructionsWithLabels(
-        settingRead.nextIndex,
+        insertionIndex,
         """
-            if-eqz v${settingRead.register}, :$continueLabel
-            invoke-static {}, $COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsTitle()Ljava/lang/String;
+            ${toggleGuard}invoke-static {}, $titleDescriptor
             move-result-object v$titleRegister
-            sget-object v$iconRegister, $settingsIconField
-            invoke-static {}, $COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()$FUNCTION0_DESCRIPTOR
+            if-eqz v$titleRegister, :$continueLabel
+            sget-object v$iconRegister, $iconField
+            invoke-static {}, $clickDescriptor
             move-result-object v$clickRegister
             invoke-static/range {v$startRegister .. v$endRegister}, $rowDescriptor
         """.trimIndent(),
@@ -685,14 +869,325 @@ private fun MutableMethod.injectPikoSettingsDrawerItem(
     )
 }
 
+/**
+ * Finds the Profile menu row: the only unconditionally composed top-section row, which makes
+ * its registers safe to snapshot for rows emitted later at the end of the menu section.
+ */
+private data class ProfileRowAnchor(
+    val target: DrawerFooterTarget,
+    val renderer: MethodReference,
+)
+
+/**
+ * Finds the Profile menu row among title-based row renderers. Menu rows may use a different
+ * renderer than the footer rows, so the anchor carries its own renderer for the snapshot
+ * and the emission.
+ */
+private fun MutableMethod.findProfileRowCall(): ProfileRowAnchor {
+    val profileTitleId = getResourceId(ResourceType.STRING, "drawer_profile_title")
+    val candidates = instructions.indices.mapNotNull { index ->
+        val instruction = instructions[index]
+        if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@mapNotNull null
+        val call = instruction as? Instruction3rc ?: return@mapNotNull null
+        val renderer = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+        if (!renderer.isDrawerRowRenderer()) return@mapNotNull null
+        if (call.registerCount != renderer.parameterTypes.size) {
+            throw PatchException(
+                "NewX drawer renderer call register count changed in $this @ $index: " +
+                    "expected ${renderer.parameterTypes.size}, found ${call.registerCount}",
+            )
+        }
+        val titleId = instructions.resolveTitleResourceIdAtRowCall(index, call.startRegister)
+        if (titleId?.toLong() != profileTitleId) return@mapNotNull null
+        IndexedValue(index, Pair(call, renderer))
+    }
+    val (callIndex, row) =
+        requireExactlyOne("NewX drawer profile row", candidates) { "${it.index}:${it.value.first}" }
+    return ProfileRowAnchor(
+        target = DrawerFooterTarget(
+            method = this,
+            callIndex = callIndex,
+            call = row.first,
+            renderer = row.second,
+        ),
+        renderer = row.second,
+    )
+}
+
+private data class DrawerTabNavigation(
+    val componentClass: String,
+    val enumType: String,
+    val tabChangeDescriptor: String,
+    val closerField: FieldReference,
+    val closerMethod: MethodReference,
+    val closerArgField: FieldReference,
+)
+
+/**
+ * Resolves the tab-open contract for the drawer shortcuts: the tab change method shared with
+ * the navigation bar patch, plus the drawer-close triple extracted from the Communities drawer
+ * click (stack push, then close). The Communities case proves both the close field on the tab
+ * component and the close argument without hardcoding obfuscated owners.
+ */
+context(context: BytecodePatchContext)
+private fun resolveDrawerTabNavigation(
+    tabData: NewXNavBarTabData,
+    tabChangeMethod: MutableMethod,
+): DrawerTabNavigation {
+    val communitiesField = "${tabData.navigationType}->COMMUNITIES:${tabData.navigationType}"
+    // Read-only discovery pass; see the navigation bar patch for why mutable proxies are avoided.
+    val dispatcherClasses = mutableListOf<String>()
+    context.classDefForEach { classDef ->
+        classDef.methods.forEach { method ->
+            if (method.name != "invoke" ||
+                method.returnType.toString() != OBJECT_DESCRIPTOR ||
+                method.parameterTypes.isNotEmpty() ||
+                method.implementation == null
+            ) return@forEach
+            val methodInstructions = method.implementation?.instructions?.toList() ?: return@forEach
+            val readsCommunities =
+                methodInstructions.any { instruction ->
+                    instruction.opcode == Opcode.SGET_OBJECT &&
+                        instruction.getReference<FieldReference>()?.toString() == communitiesField
+                }
+            val hasSwitch =
+                methodInstructions.any { instruction -> instruction.opcode == Opcode.PACKED_SWITCH }
+            if (readsCommunities && hasSwitch) dispatcherClasses += classDef.type.toString()
+        }
+    }
+    val dispatcherClass = requireExactlyOne("NewX drawer click dispatcher", dispatcherClasses)
+    val dispatcher =
+        requireExactlyOne(
+            label = "NewX drawer click dispatcher invoke",
+            candidates = context.mutableClassDefBy(dispatcherClass).methods.filter { method ->
+                method.name == "invoke" &&
+                    method.returnType.toString() == OBJECT_DESCRIPTOR &&
+                    method.parameterTypes.isEmpty() &&
+                    method.implementation != null
+            },
+        ) { it.toString() }
+    val dispatcherInstructions = dispatcher.instructions.toList()
+    val communitiesIndex =
+        requireExactlyOne(
+            label = "NewX Communities drawer click",
+            candidates = dispatcherInstructions.indices.filter { index ->
+                val instruction = dispatcherInstructions[index]
+                instruction.opcode == Opcode.SGET_OBJECT &&
+                    instruction.getReference<FieldReference>()?.toString() == communitiesField
+            },
+        ) { it.toString() }
+    val stackPushIndex =
+        dispatcherInstructions.indices.firstOrNull { index ->
+            if (index <= communitiesIndex) return@firstOrNull false
+            val instruction = dispatcherInstructions[index]
+            if (instruction.opcode != Opcode.INVOKE_VIRTUAL &&
+                instruction.opcode != Opcode.INVOKE_VIRTUAL_RANGE
+            ) return@firstOrNull false
+            val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
+            reference.returnType.toString() == "V" &&
+                reference.parameterTypes.map(CharSequence::toString) ==
+                listOf(FUNCTION2_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
+        } ?: throw PatchException("NewX Communities drawer click has no tab stack push: $dispatcher")
+    val closerIndex =
+        dispatcherInstructions.indices.firstOrNull { index ->
+            if (index <= stackPushIndex) return@firstOrNull false
+            val instruction = dispatcherInstructions[index]
+            if (instruction.opcode != Opcode.INVOKE_INTERFACE &&
+                instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
+            ) return@firstOrNull false
+            val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
+            reference.returnType.toString() == "V" &&
+                reference.parameterTypes.map(CharSequence::toString) == listOf(OBJECT_DESCRIPTOR)
+        } ?: throw PatchException("NewX Communities drawer click has no drawer close call: $dispatcher")
+    val closerInstruction = dispatcherInstructions[closerIndex]
+    val closerRegisters = closerInstruction.registersUsed
+    if (closerRegisters.size != 2) {
+        throw PatchException(
+            "NewX drawer close call has an unexpected register shape in $dispatcher @ $closerIndex",
+        )
+    }
+    val closerObjectRegister = closerRegisters[0]
+    val closerArgRegister = closerRegisters[1]
+    val closerMethod =
+        closerInstruction.getReference<MethodReference>()
+            ?: throw PatchException("NewX drawer close call has no method reference: $dispatcher")
+    val closerField =
+        requireExactlyOne(
+            label = "NewX drawer close field",
+            candidates = dispatcherInstructions.indices.filter { index ->
+                if (index <= stackPushIndex || index >= closerIndex) return@filter false
+                val instruction = dispatcherInstructions[index]
+                if (instruction.opcode != Opcode.IGET_OBJECT) return@filter false
+                val destination = (instruction as? TwoRegisterInstruction)?.registerA
+                destination == closerObjectRegister &&
+                    dispatcherInstructions.valueReachesRegister(
+                        index,
+                        destination,
+                        closerIndex,
+                        closerObjectRegister,
+                    )
+            },
+        ) { "$it:${dispatcherInstructions[it].getReference<FieldReference>()}" }
+            .let { dispatcherInstructions[it].getReference<FieldReference>() }
+            ?: throw PatchException("NewX drawer close field has no field reference: $dispatcher")
+    if (closerField.definingClass.toString() != tabData.componentClass) {
+        throw PatchException(
+            "NewX drawer close field is not on the tab component: $closerField",
+        )
+    }
+    if (closerField.type.toString() != closerMethod.definingClass.toString()) {
+        throw PatchException(
+            "NewX drawer close field type changed: field=${closerField.type}, " +
+                "method=${closerMethod.definingClass}",
+        )
+    }
+    // The close argument is loaded once in the prologue before the dispatch switch and shared
+    // by every drawer click; the switch jumps straight into the Communities case block, so the
+    // prologue value is intact on the real path. A dataflow check cannot prove this because
+    // other case blocks reuse the same registers, so the prologue load is resolved by position
+    // and cross-checked against the stable API package instead.
+    val switchIndex =
+        dispatcherInstructions.indices.firstOrNull { index ->
+            dispatcherInstructions[index].opcode == Opcode.PACKED_SWITCH
+        } ?: throw PatchException("NewX drawer click dispatcher has no dispatch switch: $dispatcher")
+    if (switchIndex >= communitiesIndex) {
+        throw PatchException("NewX drawer dispatch switch is outside the prologue: $dispatcher")
+    }
+    // Older releases load the close argument inline in the case block; newer ones hoist it
+    // into the prologue before the dispatch switch. A dataflow check cannot prove the prologue
+    // load because other case blocks reuse the same registers, so each shape is resolved by
+    // position and the combined cardinality is asserted.
+    val prologueArgFields = dispatcherInstructions.indices.mapNotNull { index ->
+        if (index >= switchIndex) return@mapNotNull null
+        val instruction = dispatcherInstructions[index]
+        if (instruction.opcode != Opcode.SGET_OBJECT) return@mapNotNull null
+        instruction.getReference<FieldReference>()
+    }
+    val inlineArgField = dispatcherInstructions.resolveIconField(closerIndex, closerArgRegister)
+    val closerArgField =
+        requireExactlyOne(
+            label = "NewX drawer close argument",
+            candidates = prologueArgFields + listOfNotNull(inlineArgField),
+            describe = { it.toString() },
+        )
+    if (!closerArgField.type.toString().startsWith("Lcom/x/main/api/")) {
+        throw PatchException(
+            "NewX drawer close argument is not a stable API type: $closerArgField",
+        )
+    }
+    return DrawerTabNavigation(
+        componentClass = tabData.componentClass,
+        enumType = tabData.navigationType,
+        tabChangeDescriptor =
+            "${tabChangeMethod.definingClass}->${tabChangeMethod.name}(" +
+                "${tabChangeMethod.parameterTypes.joinToString("")})${tabChangeMethod.returnType}",
+        closerField = closerField,
+        closerMethod = closerMethod,
+        closerArgField = closerArgField,
+    )
+}
+
+/** Captures the tab component after its constructor finishes so shortcuts can open tabs. */
+context(context: BytecodePatchContext)
+private fun hookDrawerTabComponent(tabData: NewXNavBarTabData) {
+    val classDef = context.mutableClassDefBy(tabData.componentClass)
+    val superType = classDef.superclass.toString()
+    val constructors =
+        classDef.methods.filter { method ->
+            method.name == "<init>" && method.implementation != null
+        }
+    if (constructors.isEmpty()) {
+        throw PatchException("NewX tab component has no constructor: ${tabData.componentClass}")
+    }
+    constructors.forEach { constructor ->
+        val superCallIndex =
+            constructor.instructions.indexOfFirst { instruction ->
+                (instruction.opcode == Opcode.INVOKE_DIRECT ||
+                    instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
+                    instruction.getReference<MethodReference>()?.let { reference ->
+                        reference.name == "<init>" &&
+                            reference.definingClass.toString() == superType
+                    } == true
+            }
+        if (superCallIndex < 0) {
+            throw PatchException("NewX tab component constructor has no super call: $constructor")
+        }
+        constructor.addInstructions(
+            superCallIndex + 1,
+            "invoke-static/range {p0 .. p0}, " +
+                "$DRAWER_TAB_OPENER_DESCRIPTOR->setComponent(Ljava/lang/Object;)V",
+        )
+    }
+}
+
+/** Replaces the shortcut bodies with direct tab-open plus drawer-close invokes. */
+context(context: BytecodePatchContext)
+private fun replaceDrawerTabOpenerBodies(navigation: DrawerTabNavigation) {
+    val openerClass = context.mutableClassDefBy(DRAWER_TAB_OPENER_DESCRIPTOR)
+    replaceDrawerTabOpenerBody(openerClass, "openMessages", "DM", navigation)
+    replaceDrawerTabOpenerBody(openerClass, "openGrok", "GROK", navigation)
+    replaceDrawerTabOpenerBody(openerClass, "openNotifications", "NOTIFICATIONS", navigation)
+}
+
+private fun replaceDrawerTabOpenerBody(
+    openerClass: MutableClass,
+    name: String,
+    enumEntry: String,
+    navigation: DrawerTabNavigation,
+) {
+    val original =
+        requireExactlyOne(
+            label = "DrawerTabOpener.$name",
+            candidates = openerClass.methods.filter { method ->
+                method.name == name && method.parameterTypes.isEmpty() && method.returnType == "V"
+            },
+        ) { it.toString() }
+    val expanded =
+        original.cloneMutable(
+            additionalRegisters = original.numberOfParameterRegisters + 3,
+        )
+    openerClass.methods.remove(original)
+    openerClass.methods.add(expanded)
+    val implementation =
+        expanded.implementation
+            ?: throw PatchException("DrawerTabOpener.$name has no implementation")
+    while (implementation.instructions.isNotEmpty()) {
+        implementation.removeInstruction(implementation.instructions.lastIndex)
+    }
+    expanded.addInstructions(
+        0,
+        """
+            sget-object v0, ${navigation.enumType}->$enumEntry:${navigation.enumType}
+            sget-object v1, $DRAWER_TAB_OPENER_DESCRIPTOR->component:Ljava/lang/Object;
+            if-eqz v1, :piko_drawer_tab_done
+            check-cast v1, ${navigation.componentClass}
+            invoke-virtual {v1, v0}, ${navigation.tabChangeDescriptor}
+            sget-object v0, ${navigation.closerArgField}
+            iget-object v2, v1, ${navigation.closerField}
+            invoke-interface {v2, v0}, ${navigation.closerMethod.toSmaliDescriptor()}
+            :piko_drawer_tab_done
+            return-void
+        """.trimIndent(),
+    )
+}
+
 @Suppress("unused")
 val customizeNewXDrawerPatch =
     bytecodePatch(
         name = "NewX: Customize drawer items",
-        description = "Lets you hide selected items from the NewX navigation drawer.",
+        description = "Lets you hide selected items from the NewX navigation drawer, and optionally add Messages and Grok shortcuts.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXSettingsPatch)
+
+        newXCustomScreen(
+            id = "newx.drawer.editor",
+            category = Categories.NAVIGATION,
+            strings = settingStrings("piko_newx_drawer_editor"),
+            order = 90,
+            fragmentClassDescriptor = DRAWER_EDITOR_DESCRIPTOR,
+            iconResourceName = "ic_vector_menu",
+        )
 
         val showPikoSettingsInDrawer =
             newXToggle(
@@ -701,6 +1196,37 @@ val customizeNewXDrawerPatch =
                 strings = settingStrings("piko_newx_show_piko_settings_in_drawer"),
                 order = 100,
                 defaultValue = true,
+                visible = false,
+            )
+
+        val showMessagesInDrawer =
+            newXToggle(
+                id = "newx.navigation.show_messages_in_drawer",
+                category = Categories.NAVIGATION,
+                strings = settingStrings("piko_newx_show_messages_in_drawer"),
+                order = 110,
+                defaultValue = false,
+                visible = false,
+            )
+
+        val showGrokInDrawer =
+            newXToggle(
+                id = "newx.navigation.show_grok_in_drawer",
+                category = Categories.NAVIGATION,
+                strings = settingStrings("piko_newx_show_grok_in_drawer"),
+                order = 120,
+                defaultValue = false,
+                visible = false,
+            )
+
+        val showNotificationsInDrawer =
+            newXToggle(
+                id = "newx.navigation.show_notifications_in_drawer",
+                category = Categories.NAVIGATION,
+                strings = settingStrings("piko_newx_show_notifications_in_drawer"),
+                order = 130,
+                defaultValue = false,
+                visible = false,
             )
 
         val hiddenItems =
@@ -710,6 +1236,7 @@ val customizeNewXDrawerPatch =
                 strings = settingStrings("piko_newx_drawer"),
                 order = 200,
                 defaultValue = emptySet(),
+                visible = false,
                 options =
                     listOf(
                         choice("GROK", "piko_newx_drawer_grok"),
@@ -794,11 +1321,77 @@ val customizeNewXDrawerPatch =
                 hiddenItems = hiddenItems,
                 resourceIds = (menuResourceIds + footerResourceIds).distinct(),
             )
+            val tabDataMatch =
+                requireExactlyOne(
+                    label = "NewX tabData builder",
+                    candidates = NewXTabDataFingerprint.scopedMatchAll(),
+                )
+            val tabData = validateNewXNavBarTabData(tabDataMatch)
+            val tabChangeMethod = resolveTabChangeMethod(tabData)
+            val tabIconFields = resolveNavBarItemContent(tabData).tabIconFields
+            val messagesIcon =
+                tabIconFields["DM"]
+                    ?: throw PatchException("NewX Messages tab icon was not resolved")
+            val grokIcon =
+                tabIconFields["GROK"]
+                    ?: throw PatchException("NewX Grok tab icon was not resolved")
+            val notificationsIcon =
+                tabIconFields["NOTIFICATIONS"]
+                    ?: throw PatchException("NewX Notifications tab icon was not resolved")
+            injectDrawerCatalog(
+                nativeEntries = drawerCatalogEntries(menuCalls + footerRendererCalls),
+                shortcutIcons =
+                    mapOf(
+                        DRAWER_SHORTCUT_MESSAGES to messagesIcon,
+                        DRAWER_SHORTCUT_GROK to grokIcon,
+                        DRAWER_SHORTCUT_NOTIFICATIONS to notificationsIcon,
+                    ),
+                settingsIconField = settingsIconField,
+            )
+            val tabNavigation = resolveDrawerTabNavigation(tabData, tabChangeMethod)
+            hookDrawerTabComponent(tabData)
+            replaceDrawerTabOpenerBodies(tabNavigation)
+            // Emit Messages and Grok directly after the unconditional Profile row, borrowing
+            // its registers. Composer changed-flags are only valid at the call site that
+            // produced them, so emitting anywhere else renders nothing. Injections run in
+            // descending index order so earlier indices stay valid. Each emission captures
+            // the instruction currently following the anchor as its skip target, so
+            // injecting Grok first chains the fallthrough correctly.
+            val profileAnchor = footerTarget.method.findProfileRowCall()
             footerTarget.method.injectPikoSettingsDrawerItem(
                 target = footerTarget,
                 renderer = footerTarget.renderer,
                 settingsIconField = settingsIconField,
                 showPikoSettingsInDrawer = showPikoSettingsInDrawer,
+            )
+            // Null toggle: the title provider returns null while disabled, so no setting
+            // read register is needed at this dense call site.
+            footerTarget.method.injectAdditionalDrawerRow(
+                target = profileAnchor.target,
+                renderer = profileAnchor.renderer,
+                iconField = notificationsIcon,
+                toggle = null,
+                titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsTitle()Ljava/lang/String;",
+                clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsClickHandler()$FUNCTION0_DESCRIPTOR",
+                labelSuffix = "notifications_drawer_continue",
+            )
+            footerTarget.method.injectAdditionalDrawerRow(
+                target = profileAnchor.target,
+                renderer = profileAnchor.renderer,
+                iconField = grokIcon,
+                toggle = null,
+                titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokTitle()Ljava/lang/String;",
+                clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokClickHandler()$FUNCTION0_DESCRIPTOR",
+                labelSuffix = "grok_drawer_continue",
+            )
+            footerTarget.method.injectAdditionalDrawerRow(
+                target = profileAnchor.target,
+                renderer = profileAnchor.renderer,
+                iconField = messagesIcon,
+                toggle = null,
+                titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesTitle()Ljava/lang/String;",
+                clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesClickHandler()$FUNCTION0_DESCRIPTOR",
+                labelSuffix = "messages_drawer_continue",
             )
 
             // THEME PATH: sun/moon toggle button; skip when the release has no theme toggle.

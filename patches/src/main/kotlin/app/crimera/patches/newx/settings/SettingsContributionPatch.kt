@@ -504,6 +504,7 @@ private fun StringBuilder.appendItemRegistration(
             stringValue(item.titleResourceName),
             nullableStringValue(item.summaryResourceName),
             intValue(item.order),
+            booleanValue(item.visible),
         )
     appendInvoke(values, "$method(${values.descriptor()})V")
 }

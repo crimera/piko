@@ -61,6 +61,7 @@ internal fun SettingsGroupBuilder.toggle(
     order: Int = 0,
     defaultValue: Boolean,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
 ): ToggleSettingDefinition =
     toggle(
         id = id,
@@ -69,6 +70,7 @@ internal fun SettingsGroupBuilder.toggle(
         order = order,
         defaultValue = defaultValue,
         rebootApp = rebootApp,
+        visible = visible,
     )
 
 internal fun SettingsGroupBuilder.input(
@@ -77,6 +79,7 @@ internal fun SettingsGroupBuilder.input(
     order: Int = 0,
     defaultValue: String,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
     inputKind: InputKind = InputKind.TEXT,
     validatorClassDescriptor: String? = null,
 ): TextInputSettingDefinition =
@@ -87,6 +90,7 @@ internal fun SettingsGroupBuilder.input(
         order = order,
         defaultValue = defaultValue,
         rebootApp = rebootApp,
+        visible = visible,
         inputKind = inputKind,
         validatorClassDescriptor = validatorClassDescriptor,
     )
@@ -97,6 +101,7 @@ internal fun SettingsGroupBuilder.singleChoice(
     order: Int = 0,
     defaultValue: String,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
     options: List<ChoiceOption>,
 ): SingleChoiceSettingDefinition =
     singleChoice(
@@ -106,6 +111,7 @@ internal fun SettingsGroupBuilder.singleChoice(
         order = order,
         defaultValue = defaultValue,
         rebootApp = rebootApp,
+        visible = visible,
         options = options,
     )
 
@@ -115,6 +121,7 @@ internal fun SettingsGroupBuilder.multiChoice(
     order: Int = 0,
     defaultValue: Set<String>,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
     options: List<ChoiceOption>,
 ): MultiChoiceSettingDefinition =
     multiChoice(
@@ -124,6 +131,7 @@ internal fun SettingsGroupBuilder.multiChoice(
         order = order,
         defaultValue = defaultValue,
         rebootApp = rebootApp,
+        visible = visible,
         options = options,
     )
 
@@ -132,6 +140,7 @@ internal fun SettingsGroupBuilder.action(
     strings: SettingStrings,
     order: Int = 0,
     handlerClassDescriptor: String,
+    visible: Boolean = true,
 ): ActionSettingDefinition =
     action(
         id = id,
@@ -139,6 +148,7 @@ internal fun SettingsGroupBuilder.action(
         summaryResourceName = strings.summaryResourceName,
         order = order,
         handlerClassDescriptor = handlerClassDescriptor,
+        visible = visible,
     )
 
 internal fun SettingsGroupBuilder.customScreen(
@@ -175,6 +185,7 @@ internal fun BytecodePatchBuilder.newXToggle(
     order: Int = 0,
     defaultValue: Boolean,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
 ): ToggleSettingDefinition =
     newXSettings {
         category(category) {
@@ -185,6 +196,7 @@ internal fun BytecodePatchBuilder.newXToggle(
                 order = order,
                 defaultValue = defaultValue,
                 rebootApp = rebootApp,
+                visible = visible,
             )
         }
     }
@@ -196,6 +208,7 @@ internal fun BytecodePatchBuilder.newXTextInput(
     order: Int = 0,
     defaultValue: String,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
     inputKind: InputKind = InputKind.TEXT,
     validatorClassDescriptor: String? = null,
 ): TextInputSettingDefinition =
@@ -208,6 +221,7 @@ internal fun BytecodePatchBuilder.newXTextInput(
                 order = order,
                 defaultValue = defaultValue,
                 rebootApp = rebootApp,
+                visible = visible,
                 inputKind = inputKind,
                 validatorClassDescriptor = validatorClassDescriptor,
             )
@@ -221,6 +235,7 @@ internal fun BytecodePatchBuilder.newXSingleChoice(
     order: Int = 0,
     defaultValue: String,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
     options: List<ChoiceOption>,
 ): SingleChoiceSettingDefinition =
     newXSettings {
@@ -232,6 +247,7 @@ internal fun BytecodePatchBuilder.newXSingleChoice(
                 order = order,
                 defaultValue = defaultValue,
                 rebootApp = rebootApp,
+                visible = visible,
                 options = options,
             )
         }
@@ -244,6 +260,7 @@ internal fun BytecodePatchBuilder.newXMultiChoice(
     order: Int = 0,
     defaultValue: Set<String>,
     rebootApp: Boolean = false,
+    visible: Boolean = true,
     options: List<ChoiceOption>,
 ): MultiChoiceSettingDefinition =
     newXSettings {
@@ -255,6 +272,7 @@ internal fun BytecodePatchBuilder.newXMultiChoice(
                 order = order,
                 defaultValue = defaultValue,
                 rebootApp = rebootApp,
+                visible = visible,
                 options = options,
             )
         }
@@ -287,6 +305,7 @@ internal fun BytecodePatchBuilder.newXAction(
     strings: SettingStrings,
     order: Int = 0,
     handlerClassDescriptor: String,
+    visible: Boolean = true,
 ): ActionSettingDefinition =
     newXSettings {
         category(category) {
@@ -296,6 +315,7 @@ internal fun BytecodePatchBuilder.newXAction(
                 summaryResourceName = strings.summaryResourceName,
                 order = order,
                 handlerClassDescriptor = handlerClassDescriptor,
+                visible = visible,
             )
         }
     }

@@ -150,9 +150,10 @@ public final class SettingsRenderer {
             PreferenceGroup parent,
             List<SettingsNode> children,
             GroupNavigator groupNavigator,
-            ScreenNavigator screenNavigator
+        ScreenNavigator screenNavigator
     ) {
         for (SettingsNode child : children) {
+            if (!child.visible) continue;
             if (child instanceof SettingsNode.Group group) {
                 parent.addPreference(group(preferenceContext, group, groupNavigator));
                 continue;

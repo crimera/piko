@@ -24,7 +24,10 @@ internal data class SettingsGroupDefinition(
     val children: List<SettingsNodeDefinition>,
 ) : SettingsNodeDefinition
 
-internal sealed interface SettingItemDefinition : SettingsNodeDefinition
+internal sealed interface SettingItemDefinition : SettingsNodeDefinition {
+    val visible: Boolean
+        get() = true
+}
 
 internal sealed interface ValueSettingDefinition<T> : SettingItemDefinition {
     val defaultValue: T
@@ -38,6 +41,7 @@ internal data class ToggleSettingDefinition(
     override val order: Int,
     override val defaultValue: Boolean,
     override val rebootApp: Boolean = false,
+    override val visible: Boolean = true,
 ) : ValueSettingDefinition<Boolean>
 
 internal enum class InputKind {
@@ -54,6 +58,7 @@ internal data class TextInputSettingDefinition(
     override val rebootApp: Boolean = false,
     val inputKind: InputKind = InputKind.TEXT,
     val validatorClassDescriptor: String? = null,
+    override val visible: Boolean = true,
 ) : ValueSettingDefinition<String>
 
 internal data class ChoiceOption(
@@ -69,6 +74,7 @@ internal data class SingleChoiceSettingDefinition(
     override val defaultValue: String,
     override val rebootApp: Boolean = false,
     val options: List<ChoiceOption>,
+    override val visible: Boolean = true,
 ) : ValueSettingDefinition<String>
 
 internal data class MultiChoiceSettingDefinition(
@@ -79,6 +85,7 @@ internal data class MultiChoiceSettingDefinition(
     override val defaultValue: Set<String>,
     override val rebootApp: Boolean = false,
     val options: List<ChoiceOption>,
+    override val visible: Boolean = true,
 ) : ValueSettingDefinition<Set<String>>
 
 internal data class ActionSettingDefinition(
@@ -87,6 +94,7 @@ internal data class ActionSettingDefinition(
     override val summaryResourceName: String?,
     override val order: Int,
     val handlerClassDescriptor: String,
+    override val visible: Boolean = true,
 ) : SettingItemDefinition
 
 internal data class CustomScreenSettingDefinition(
@@ -180,6 +188,7 @@ internal class SettingsGroupBuilder(
         order: Int = 0,
         defaultValue: Boolean,
         rebootApp: Boolean = false,
+        visible: Boolean = true,
     ): ToggleSettingDefinition =
         add(
             ToggleSettingDefinition(
@@ -189,6 +198,7 @@ internal class SettingsGroupBuilder(
                 order,
                 defaultValue,
                 rebootApp,
+                visible,
             ),
         )
 
@@ -201,6 +211,7 @@ internal class SettingsGroupBuilder(
         rebootApp: Boolean = false,
         inputKind: InputKind = InputKind.TEXT,
         validatorClassDescriptor: String? = null,
+        visible: Boolean = true,
     ): TextInputSettingDefinition =
         add(
             TextInputSettingDefinition(
@@ -212,6 +223,7 @@ internal class SettingsGroupBuilder(
                 rebootApp,
                 inputKind,
                 validatorClassDescriptor,
+                visible,
             ),
         )
 
@@ -223,6 +235,7 @@ internal class SettingsGroupBuilder(
         defaultValue: String,
         rebootApp: Boolean = false,
         options: List<ChoiceOption>,
+        visible: Boolean = true,
     ): SingleChoiceSettingDefinition =
         add(
             SingleChoiceSettingDefinition(
@@ -233,6 +246,7 @@ internal class SettingsGroupBuilder(
                 defaultValue,
                 rebootApp,
                 options,
+                visible,
             ),
         )
 
@@ -244,6 +258,7 @@ internal class SettingsGroupBuilder(
         defaultValue: Set<String>,
         rebootApp: Boolean = false,
         options: List<ChoiceOption>,
+        visible: Boolean = true,
     ): MultiChoiceSettingDefinition =
         add(
             MultiChoiceSettingDefinition(
@@ -254,6 +269,7 @@ internal class SettingsGroupBuilder(
                 defaultValue,
                 rebootApp,
                 options,
+                visible,
             ),
         )
 
@@ -263,6 +279,7 @@ internal class SettingsGroupBuilder(
         summaryResourceName: String? = null,
         order: Int = 0,
         handlerClassDescriptor: String,
+        visible: Boolean = true,
     ): ActionSettingDefinition =
         add(
             ActionSettingDefinition(
@@ -271,6 +288,7 @@ internal class SettingsGroupBuilder(
                 summaryResourceName,
                 order,
                 handlerClassDescriptor,
+                visible,
             ),
         )
 

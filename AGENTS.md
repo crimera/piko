@@ -6,6 +6,13 @@
 - Never launch, interact with, navigate, or otherwise control the user's device through adb or any other device-control mechanism without explicit permission.
 - For runtime reproduction, ask the user to use the app normally and report the failure or send a screenshot/logs.
 
+## Build and patch testing
+
+- Build the patch bundle from the current checkout before patch testing: `./gradlew :patches:build --no-daemon`.
+- Run patch tests through `./patch-twitter.sh`, not a direct Morphe CLI invocation. Pass the exact APK explicitly when it is not the script's current default, for example: `./patch-twitter.sh apks/twitter_12.27.0-alpha.01.apk`.
+- Do not patch with a stale MPP or mix artifacts from different source revisions. Confirm the script's output path and applied-patch report before testing.
+- Do not pass `--install` or otherwise control a device unless the user explicitly requests it; ask the user to launch and exercise the patched app.
+
 ## NewX patch philosophy and methodology
 
 NewX is an obfuscated app under active refactoring. A patch must survive ordinary R8 churn where possible, but must never guess when the app's behavior or contract has changed.

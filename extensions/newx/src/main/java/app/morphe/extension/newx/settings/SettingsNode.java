@@ -16,12 +16,20 @@ public abstract class SettingsNode {
     public final StringRef title;
     @Nullable public final StringRef summary;
     public final int order;
+    public final boolean visible;
 
-    SettingsNode(String id, StringRef title, @Nullable StringRef summary, int order) {
+    SettingsNode(
+            String id,
+            StringRef title,
+            @Nullable StringRef summary,
+            int order,
+            boolean visible
+    ) {
         this.id = Objects.requireNonNull(id);
         this.title = Objects.requireNonNull(title);
         this.summary = summary;
         this.order = order;
+        this.visible = visible;
     }
 
     public static class Group extends SettingsNode {
@@ -36,7 +44,7 @@ public abstract class SettingsNode {
                 int order,
                 List<SettingsNode> children
         ) {
-            super(id, title, summary, order);
+            super(id, title, summary, order, true);
             this.iconResourceName = iconResourceName;
             this.children = Collections.unmodifiableList(List.copyOf(children));
         }
@@ -56,8 +64,14 @@ public abstract class SettingsNode {
     }
 
     public abstract static class Item extends SettingsNode {
-        Item(String id, StringRef title, @Nullable StringRef summary, int order) {
-            super(id, title, summary, order);
+        Item(
+                String id,
+                StringRef title,
+                @Nullable StringRef summary,
+                int order,
+                boolean visible
+        ) {
+            super(id, title, summary, order, visible);
         }
     }
 
@@ -69,9 +83,10 @@ public abstract class SettingsNode {
                 StringRef title,
                 @Nullable StringRef summary,
                 int order,
-                Setting<T> setting
+                Setting<T> setting,
+                boolean visible
         ) {
-            super(id, title, summary, order);
+            super(id, title, summary, order, visible);
             this.setting = Objects.requireNonNull(setting);
         }
     }
@@ -82,9 +97,10 @@ public abstract class SettingsNode {
                 StringRef title,
                 @Nullable StringRef summary,
                 int order,
-                BooleanSetting setting
+                BooleanSetting setting,
+                boolean visible
         ) {
-            super(id, title, summary, order, setting);
+            super(id, title, summary, order, setting, visible);
         }
     }
 
@@ -104,9 +120,10 @@ public abstract class SettingsNode {
                 int order,
                 StringSetting setting,
                 InputKind inputKind,
-                @Nullable String validatorClassDescriptor
+                @Nullable String validatorClassDescriptor,
+                boolean visible
         ) {
-            super(id, title, summary, order, setting);
+            super(id, title, summary, order, setting, visible);
             this.inputKind = Objects.requireNonNull(inputKind);
             this.validatorClassDescriptor = validatorClassDescriptor;
         }
@@ -131,9 +148,10 @@ public abstract class SettingsNode {
                 @Nullable StringRef summary,
                 int order,
                 StringSetting setting,
-                List<ChoiceOption> options
+                List<ChoiceOption> options,
+                boolean visible
         ) {
-            super(id, title, summary, order, setting);
+            super(id, title, summary, order, setting, visible);
             this.options = Collections.unmodifiableList(List.copyOf(options));
         }
     }
@@ -147,9 +165,10 @@ public abstract class SettingsNode {
                 @Nullable StringRef summary,
                 int order,
                 StringSetSetting setting,
-                List<ChoiceOption> options
+                List<ChoiceOption> options,
+                boolean visible
         ) {
-            super(id, title, summary, order, setting);
+            super(id, title, summary, order, setting, visible);
             this.options = Collections.unmodifiableList(List.copyOf(options));
         }
     }
@@ -162,9 +181,10 @@ public abstract class SettingsNode {
                 StringRef title,
                 @Nullable StringRef summary,
                 int order,
-                String handlerClassDescriptor
+                String handlerClassDescriptor,
+                boolean visible
         ) {
-            super(id, title, summary, order);
+            super(id, title, summary, order, visible);
             this.handlerClassDescriptor = Objects.requireNonNull(handlerClassDescriptor);
         }
     }
@@ -181,7 +201,7 @@ public abstract class SettingsNode {
                 @Nullable String iconResourceName,
                 String fragmentClassDescriptor
         ) {
-            super(id, title, summary, order);
+            super(id, title, summary, order, true);
             this.iconResourceName = iconResourceName;
             this.fragmentClassDescriptor = Objects.requireNonNull(fragmentClassDescriptor);
         }

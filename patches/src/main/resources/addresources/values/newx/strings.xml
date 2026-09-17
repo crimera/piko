@@ -165,6 +165,21 @@
     <string name="piko_newx_drawer_summary">Choose which items are hidden from the NewX navigation drawer</string>
     <string name="piko_newx_show_piko_settings_in_drawer_title">Show Piko Settings in the drawer footer</string>
     <string name="piko_newx_show_piko_settings_in_drawer_summary">Adds a shortcut to Piko Settings to the NewX drawer footer</string>
+    <string name="piko_newx_show_messages_in_drawer_title">Show Messages in the drawer</string>
+    <string name="piko_newx_show_messages_in_drawer_summary">Adds a Messages shortcut below Profile in the NewX drawer</string>
+    <string name="piko_newx_show_grok_in_drawer_title">Show Grok in the drawer</string>
+    <string name="piko_newx_show_grok_in_drawer_summary">Adds a Grok shortcut below Profile in the NewX drawer</string>
+    <string name="piko_newx_show_notifications_in_drawer_title">Show Notifications in the drawer</string>
+    <string name="piko_newx_show_notifications_in_drawer_summary">Adds a Notifications shortcut below Profile in the NewX drawer</string>
+    <string name="piko_newx_drawer_editor_title">Drawer</string>
+    <string name="piko_newx_drawer_editor_summary">Choose which items appear in the NewX navigation drawer</string>
+    <string name="piko_newx_drawer_editor_hint">Toggles apply the next time the drawer opens. Restart the app to apply changes immediately.</string>
+    <string name="piko_newx_drawer_editor_shortcuts">Shortcuts</string>
+    <string name="piko_newx_drawer_editor_items">Drawer items</string>
+    <string name="piko_newx_drawer_editor_restart">Restart app to apply changes</string>
+    <string name="piko_newx_drawer_editor_restart_title">Restart app?</string>
+    <string name="piko_newx_drawer_editor_restart_message">The drawer changes take effect after the app restarts.</string>
+    <string name="piko_newx_drawer_editor_restart_confirm">Restart</string>
     <string name="piko_newx_drawer_grok">Grok</string>
     <string name="piko_newx_drawer_theme_toggle">Theme toggle</string>
 

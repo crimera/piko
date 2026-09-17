@@ -37,6 +37,7 @@ final class SettingsSearchIndex {
             List<Result> results
     ) {
         for (SettingsNode child : children) {
+            if (!child.visible) continue;
             if (child instanceof SettingsNode.Group group) {
                 collectChildren(
                         group.children,
