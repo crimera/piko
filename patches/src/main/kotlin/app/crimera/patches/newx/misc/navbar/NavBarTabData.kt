@@ -51,9 +51,11 @@ internal data class NavBarItemContentTarget(
     val method: MutableMethod,
     val navigationField: FieldReference,
     val iconType: String,
+    val tabDataValueType: String,
     val rendererCallIndex: Int,
     val iconRegister: Int,
     val labelRegister: Int,
+    val tabDataValueRegister: Int,
     val thisRegister: Int,
     val tabIconFields: Map<String, FieldReference>,
 )
@@ -251,6 +253,25 @@ internal fun resolveTabChangeMethod(tabData: NewXNavBarTabData): MutableMethod {
     return requireExactlyOne("NewX tab change method", candidates) { it.toString() }
 }
 
+context(context: BytecodePatchContext)
+internal fun resolveTabDataValueConstructor(tabDataValueType: String): MethodReference {
+    val classDef = context.mutableClassDefBy(tabDataValueType)
+    val instanceFields = classDef.fields.filter { !com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(it.accessFlags) }
+    val fieldTypes = instanceFields.map { it.type.toString() }.sorted()
+    
+    val primaryConstructors = classDef.methods.filter { method ->
+        method.name == "<init>" && method.parameterTypes.map { it.toString() }.sorted() == fieldTypes
+    }
+    
+    val constructor = requireExactlyOne("NewX TabDataValueType primary constructor", primaryConstructors)
+    return ImmutableMethodReference(
+        tabDataValueType,
+        "<init>",
+        constructor.parameterTypes,
+        "V"
+    )
+}
+
 internal fun MutableMethod.hasStackNavigationCall(): Boolean =
     instructions.withIndex().any { (index, instruction) ->
         if (instruction.opcode != Opcode.IGET_OBJECT) return@any false
@@ -376,14 +397,17 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
             ?: throw PatchException("NewX navigation bar item renderer call is not a 5-register invoke")
     val iconRegister = rendererCall.registerC
     val labelRegister = rendererCall.registerD
+    val tabDataValueRegister = rendererCall.registerE
 
     return NavBarItemContentTarget(
         method = consumerMethod,
         navigationField = navigationField,
         iconType = renderer.parameterTypes.first().toString(),
+        tabDataValueType = tabData.tabDataValueType,
         rendererCallIndex = rendererCallIndex,
         iconRegister = iconRegister,
         labelRegister = labelRegister,
+        tabDataValueRegister = tabDataValueRegister,
         thisRegister = originalRegisterCount,
         tabIconFields = consumerMethod.resolveNavigationTabIcons(tabData.navigationType, iconRegister),
     )

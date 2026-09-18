@@ -241,6 +241,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
+        "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",

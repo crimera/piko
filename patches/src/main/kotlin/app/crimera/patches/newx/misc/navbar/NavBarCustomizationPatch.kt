@@ -62,6 +62,8 @@ private const val OVERRIDE_ICON_DESCRIPTOR =
     "$NAV_BAR_REPLACEMENT_DESCRIPTOR->overrideIcon($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
 private const val OVERRIDE_LABEL_DESCRIPTOR =
     "$NAV_BAR_REPLACEMENT_DESCRIPTOR->overrideLabel($OBJECT_DESCRIPTOR$STRING_DESCRIPTOR)$STRING_DESCRIPTOR"
+private const val SHOULD_CLEAR_BADGE_DESCRIPTOR =
+    "$NAV_BAR_REPLACEMENT_DESCRIPTOR->shouldClearBadge($OBJECT_DESCRIPTOR)Z"
 private const val REGISTER_DESTINATION_DESCRIPTOR =
     "$NAV_BAR_CATALOG_DESCRIPTOR->registerDestination($STRING_DESCRIPTOR I$OBJECT_DESCRIPTOR I)V"
 private const val REGISTER_TAB_DESCRIPTOR =
@@ -151,8 +153,10 @@ val customizeNewXNavBarPatch =
             injectSettingsRegistrations(destinations, contentTarget.tabIconFields, iconDrawables)
             injectDestinationClickCaptures(destinations)
 
+            val tabDataConstructor = resolveTabDataValueConstructor(tabData.tabDataValueType)
+
             resolveTabChangeMethod(tabData).injectReplacementGuard()
-            contentTarget.injectReplacementOverride()
+            contentTarget.injectReplacementOverride(tabDataConstructor)
         }
     }
 
@@ -231,20 +235,31 @@ private fun MutableMethod.injectReplacementGuard() {
  * The receiver cannot be read at the render call either: the compiler reuses parameter registers
  * for the icon and label there, so it is preserved in an unused local at method entry.
  */
-private fun NavBarItemContentTarget.injectReplacementOverride() {
-    val workRegister =
+private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor: MethodReference) {
+    if (tabDataConstructor.parameterTypes.any { it == "J" || it == "D" }) {
+        throw PatchException("NewX tab data replacement does not support wide parameters")
+    }
+
+    val provider =
         try {
             method.getFreeRegisterProvider(
                 rendererCallIndex,
-                1,
+                2,
                 iconRegister,
                 labelRegister,
+                tabDataValueRegister,
                 thisRegister,
-            ).getFreeRegister4Bit()
+            )
         } catch (exception: RuntimeException) {
             throw PatchException("No safe register for the NewX navigation bar replacement: ${exception.message}")
         }
-    method.addInstructions(
+    val instanceRegister = provider.getFreeRegister4Bit()
+    val workRegister = provider.getFreeRegister4Bit()
+    
+    val paramRegisters = tabDataConstructor.parameterTypes.joinToString("") { ", v$workRegister" }
+    val endLabel = "piko_newx_replace_badge_end"
+
+    method.addInstructionsWithLabels(
         rendererCallIndex,
         """
             iget-object v$workRegister, v$thisRegister, $navigationField
@@ -252,10 +267,22 @@ private fun NavBarItemContentTarget.injectReplacementOverride() {
             move-result-object v$workRegister
             check-cast v$workRegister, $iconType
             move-object/from16 v$iconRegister, v$workRegister
+            
             iget-object v$workRegister, v$thisRegister, $navigationField
             invoke-static {v$workRegister, v$labelRegister}, $OVERRIDE_LABEL_DESCRIPTOR
             move-result-object v$labelRegister
+            
+            iget-object v$workRegister, v$thisRegister, $navigationField
+            invoke-static {v$workRegister}, $SHOULD_CLEAR_BADGE_DESCRIPTOR
+            move-result v$workRegister
+            if-eqz v$workRegister, :$endLabel
+            new-instance v$instanceRegister, ${tabDataConstructor.definingClass}
+            const/4 v$workRegister, 0
+            invoke-direct {v$instanceRegister$paramRegisters}, ${tabDataConstructor.toSmaliDescriptor()}
+            move-object/from16 v$tabDataValueRegister, v$instanceRegister
         """.trimIndent(),
+        ExternalLabel(endLabel, method.instructions.getOrNull(rendererCallIndex) 
+            ?: throw PatchException("NewX tab replacement renderer call is missing"))
     )
     method.addInstructions(0, "move-object/from16 v$thisRegister, p0")
 }

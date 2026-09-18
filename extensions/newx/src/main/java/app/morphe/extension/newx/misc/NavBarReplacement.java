@@ -55,6 +55,11 @@ public final class NavBarReplacement {
         }
     }
 
+    /** Injection point: returns true if the tab is replaced and its badge should be cleared. */
+    public static boolean shouldClearBadge(Object tab) {
+        return configuredDestination(tab) != null;
+    }
+
     /** Injection point: opens the replacement screen instead of changing the selected tab. */
     public static boolean openReplacementFor(Object tab) {
         String destinationId = configuredDestination(tab);
