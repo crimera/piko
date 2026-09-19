@@ -64,6 +64,8 @@
     <string name="piko_hide_notes_tray">Hide notes tray</string>
     <string name="piko_hide_notes_tray_desc">Hides notes tray in DM section</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Hide group creation button on sharesheet</string>
+    <string name="piko_hide_reels_follow_button">Hide Reels follow button</string>
+    <string name="piko_hide_reels_follow_button_desc">Removes the follow button from the Reels author row</string>
     <string name="piko_disable_double_tap_like_post">Disable double tap like on post</string>
     <string name="piko_disable_double_tap_like_reel">Disable double tap like on reel</string>
     <string name="piko_disable_double_tap_like_comment">Disable double tap like on comment</string>
@@ -100,8 +102,6 @@
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server. May reduce performance, increase app data size, or cause the app to switch to an older layout</string>
     <string name="piko_hide_reshare_button">Hide reshare button</string>
-    <string name="piko_hide_reels_follow_button">Hide Reels follow button</string>
-    <string name="piko_hide_reels_follow_button_desc">Removes the follow button from the Reels</string>
     <string name="piko_copy_comment">Copy comment</string>
     <string name="piko_copy_comment_desc">Adds a button to copy comments on posts and reels</string>
     <string name="piko_comment_copied_success">Comment copied</string>
