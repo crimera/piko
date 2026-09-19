@@ -42,6 +42,23 @@ public final class NewXCrashHandlerTest {
         assertEquals("exact", NewXCrashHandler.boundText("exact", 5));
     }
 
+    @Test(expected = AssertionError.class)
+    public void testCrashThrows() {
+        NewXCrashHandler.testCrash("test");
+    }
+
+    @Test
+    public void testCrashEscapesExceptionCatch() {
+        try {
+            NewXCrashHandler.testCrash("test");
+        } catch (Exception exception) {
+            throw new AssertionError("testCrash must escape catch (Exception): " + exception);
+        } catch (AssertionError expected) {
+            return;
+        }
+        throw new AssertionError("testCrash did not throw");
+    }
+
     @Test
     public void nullInputsFallBackToUnavailable() {
         String report = NewXCrashHandler.formatReport(null, null, null, null);

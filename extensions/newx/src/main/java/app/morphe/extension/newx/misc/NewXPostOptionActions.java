@@ -11,6 +11,7 @@ public final class NewXPostOptionActions {
     public static final String BROWSE_OBJECT_ACTION = "None";
     public static final String SHARE_IMAGE_ACTION = "ViewDebugDialog";
     public static final String FILTERED_REPLIES_ACTION = "ServerFeedbackAction";
+    public static final String CRASH_APP_ACTION = "AppealWarning";
 
     private NewXPostOptionActions() {
     }

@@ -67,7 +67,8 @@ public final class NewXPostOptions {
         String actionName = enumAction.name();
         return NewXPostOptionActions.BROWSE_OBJECT_ACTION.equals(actionName)
                 || NewXPostOptionActions.SHARE_IMAGE_ACTION.equals(actionName)
-                || NewXPostOptionActions.FILTERED_REPLIES_ACTION.equals(actionName);
+                || NewXPostOptionActions.FILTERED_REPLIES_ACTION.equals(actionName)
+                || NewXPostOptionActions.CRASH_APP_ACTION.equals(actionName);
     }
 
     public static boolean isAction(Object action, String optionName) {

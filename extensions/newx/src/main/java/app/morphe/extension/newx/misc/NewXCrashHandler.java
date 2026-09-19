@@ -202,6 +202,15 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
         return PendingIntent.getBroadcast(context, requestCode, intent, flags);
     }
 
+    /**
+     * Throws to simulate a crash for testing crash logging. Uses {@link Error}
+     * instead of {@link Exception} so it escapes the settings action try/catch
+     * and reaches this handler as an uncaught throwable.
+     */
+    public static void testCrash(String source) {
+        throw new AssertionError("Piko requested test crash" + (source != null ? ": " + source : ""));
+    }
+
     static void showToast(Context context, String message) {
         if (context == null || message == null) return;
         Runnable show = () -> {
