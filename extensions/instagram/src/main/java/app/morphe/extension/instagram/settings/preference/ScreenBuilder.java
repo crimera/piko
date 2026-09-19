@@ -427,6 +427,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideReelsFollowButton) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_reels_follow_button"),
+                            str("piko_hide_reels_follow_button_desc"),
+                            Settings.HIDE_REELS_FOLLOW_BUTTON
+                    )
+            );
+        }
 
         if (SettingsStatus.disableDoubleTapLike) {
             addPreference(
