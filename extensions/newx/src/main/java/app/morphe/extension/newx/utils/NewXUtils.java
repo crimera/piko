@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import app.morphe.extension.shared.Utils;
@@ -233,9 +234,130 @@ public final class NewXUtils {
     private static final Pattern UNSAFE_FILE_CHARS =
             Pattern.compile("[^A-Za-z0-9._-]");
 
+    private static final Pattern STATUS_URL_PATTERN =
+            Pattern.compile("https?://(?:[a-zA-Z0-9-]+\\.)*(?:twitter|x|fxtwitter|vxtwitter|fixupx|twx)\\.com/([A-Za-z0-9_]+)/status/\\d+");
+
     public static String sanitizeFileName(String value) {
         if (value == null) return "";
         return UNSAFE_FILE_CHARS.matcher(value).replaceAll("_");
+    }
+
+    /**
+     * Resolves the source post identity used by NewX media features. The input may be either the
+     * timeline post wrapper or its contextual-post model; both expose the same semantic fields in
+     * their toString representation across the supported releases.
+     */
+    public static String sourcePostId(Object post) {
+        String postText = postText(post);
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalPostId = ToStringParser.fieldValue(originalPostText, "id");
+            if (originalPostId != null) return safeFileSegment(originalPostId, "post");
+        }
+
+        String sourcePostId = sourceMediaField(postText, "sourcePostIdentifier");
+        if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
+
+        String canonicalPostText = canonicalPostText(post);
+        String postId = ToStringParser.fieldValue(canonicalPostText, "id");
+        if (postId != null) return safeFileSegment(postId, "post");
+
+        return safeFileSegment(ToStringParser.fieldValue(postText, "id"), "post");
+    }
+
+    public static String sourceUsername(Object post) {
+        String postText = postText(post);
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalAuthor = ToStringParser.fieldValue(originalPostText, "author");
+            String originalScreenName = originalAuthor == null
+                    ? null
+                    : ToStringParser.fieldValue(originalAuthor, "screenName");
+            if (originalScreenName != null) return safeFileSegment(originalScreenName, "twitter");
+        }
+
+        if (sourceMediaField(postText, "sourcePostIdentifier") != null) {
+            String mentionScreenName = firstMentionScreenName(postText);
+            if (mentionScreenName != null) return safeFileSegment(mentionScreenName, "twitter");
+
+            String expandedUrlScreenName = mediaExpandedUrlScreenName(postText);
+            if (expandedUrlScreenName != null) {
+                return safeFileSegment(expandedUrlScreenName, "twitter");
+            }
+        }
+
+        String canonicalPostText = canonicalPostText(post);
+        String author = ToStringParser.fieldValue(canonicalPostText, "author");
+        String screenName = author == null ? null : ToStringParser.fieldValue(author, "screenName");
+        if (screenName != null) return safeFileSegment(screenName, "twitter");
+
+        String rawAuthor = ToStringParser.fieldValue(postText, "author");
+        String rawScreenName = rawAuthor == null ? null : ToStringParser.fieldValue(rawAuthor, "screenName");
+        return safeFileSegment(rawScreenName, "twitter");
+    }
+
+    private static String postText(Object post) {
+        return post == null ? null : post.toString();
+    }
+
+    private static String canonicalPostText(Object post) {
+        String postText = postText(post);
+        if (postText == null) return null;
+
+        String canonicalPost = ToStringParser.fieldValue(postText, "canonicalPost");
+        return canonicalPost != null ? canonicalPost : postText;
+    }
+
+    private static String originalRepostedPostText(String postText) {
+        if (postText == null) return null;
+
+        String repostedPost = ToStringParser.fieldValue(postText, "rePostedPost");
+        if (repostedPost == null) return null;
+
+        String canonicalPost = ToStringParser.fieldValue(repostedPost, "canonicalPost");
+        return canonicalPost != null ? canonicalPost : repostedPost;
+    }
+
+    private static String firstMentionScreenName(String text) {
+        String entityList = ToStringParser.fieldValue(text, "entityList");
+        if (entityList == null) return null;
+
+        String mentions = ToStringParser.fieldValue(entityList, "mentions");
+        return mentions == null ? null : ToStringParser.fieldValue(mentions, "screenName");
+    }
+
+    private static String mediaExpandedUrlScreenName(String text) {
+        if (text == null) return null;
+
+        String entityList = ToStringParser.fieldValue(text, "entityList");
+        String searchScope = entityList != null ? entityList : text;
+        String expandedUrl = ToStringParser.fieldValue(searchScope, "expandedUrl");
+        String screenName = screenNameFromUrl(expandedUrl);
+        return screenName != null ? screenName : screenNameFromUrl(searchScope);
+    }
+
+    private static String screenNameFromUrl(String url) {
+        if (url == null) return null;
+
+        Matcher matcher = STATUS_URL_PATTERN.matcher(url);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private static String sourceMediaField(String text, String fieldName) {
+        if (text == null) return null;
+
+        String sourceInfo = ToStringParser.fieldValue(text, "sourceInfo");
+        return sourceInfo == null ? null : ToStringParser.fieldValue(sourceInfo, fieldName);
+    }
+
+    private static String safeFileSegment(String value, String fallback) {
+        if (value == null) return fallback;
+
+        String sanitized = value.trim().replaceFirst("^@", "")
+                .replaceAll("[^A-Za-z0-9._-]+", "_")
+                .replaceAll("_+", "_")
+                .replaceAll("^[._-]+|[._-]+$", "");
+        return sanitized.isEmpty() ? fallback : sanitized;
     }
 
     private static volatile Handler mainHandler;

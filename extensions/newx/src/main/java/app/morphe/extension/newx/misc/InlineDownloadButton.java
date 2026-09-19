@@ -41,7 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import app.morphe.extension.newx.settings.NewXLogger;
@@ -521,125 +520,12 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static final Pattern STATUS_URL_PATTERN =
-            Pattern.compile("https?://(?:[a-zA-Z0-9-]+\\.)*(?:twitter|x|fxtwitter|vxtwitter|fixupx|twx)\\.com/([A-Za-z0-9_]+)/status/\\d+");
-
     static String sourcePostId(Object post) {
-        String postText = postText(post);
-        String originalPostText = originalRepostedPostText(postText);
-        if (originalPostText != null) {
-            String originalPostId = ToStringParser.fieldValue(originalPostText, "id");
-            if (originalPostId != null) return safeFileSegment(originalPostId, "post");
-        }
-
-        if (hasRepostedMedia(postText)) {
-            String sourcePostId = sourceMediaField(postText, "sourcePostIdentifier");
-            if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
-        }
-
-        String canonicalText = canonicalPostText(post);
-        String postId = ToStringParser.fieldValue(canonicalText, "id");
-        if (postId != null) return safeFileSegment(postId, "post");
-
-        String rawPostId = ToStringParser.fieldValue(postText, "id");
-        if (rawPostId != null) return safeFileSegment(rawPostId, "post");
-
-        return safeFileSegment(null, "post");
+        return NewXUtils.sourcePostId(post);
     }
 
     static String sourceUsername(Object post) {
-        String postText = postText(post);
-        String originalPostText = originalRepostedPostText(postText);
-        if (originalPostText != null) {
-            String originalAuthor = ToStringParser.fieldValue(originalPostText, "author");
-            String originalScreenName = originalAuthor == null
-                    ? null
-                    : ToStringParser.fieldValue(originalAuthor, "screenName");
-            if (originalScreenName != null) return safeFileSegment(originalScreenName, "twitter");
-        }
-
-        // Folded RT posts or posts with credited/reposted media carry sourceInfo
-        // on their media, and the original author's screen name in the first RT
-        // mention, in expandedUrl, or on the post author.
-        if (hasRepostedMedia(postText)) {
-            String sourceScreenName = firstMentionScreenName(postText);
-            if (sourceScreenName != null) return safeFileSegment(sourceScreenName, "twitter");
-
-            String expandedUrlScreenName = mediaExpandedUrlScreenName(postText);
-            if (expandedUrlScreenName != null) return safeFileSegment(expandedUrlScreenName, "twitter");
-        }
-
-        String canonicalText = canonicalPostText(post);
-        String author = ToStringParser.fieldValue(canonicalText, "author");
-        String screenName = author == null ? null : ToStringParser.fieldValue(author, "screenName");
-        if (screenName != null) return safeFileSegment(screenName, "twitter");
-
-        String rawAuthor = ToStringParser.fieldValue(postText, "author");
-        String rawScreenName = rawAuthor == null ? null : ToStringParser.fieldValue(rawAuthor, "screenName");
-        if (rawScreenName != null) return safeFileSegment(rawScreenName, "twitter");
-
-        return safeFileSegment(null, "twitter");
-    }
-
-    private static String postText(Object post) {
-        return post == null ? null : post.toString();
-    }
-
-    private static String canonicalPostText(Object post) {
-        try {
-            Object canonicalPost = canonicalPost(post);
-            if (canonicalPost != null) return canonicalPost.toString();
-        } catch (RuntimeException ignored) {
-        }
-        String postText = postText(post);
-        if (postText == null) return null;
-        String canonicalField = ToStringParser.fieldValue(postText, "canonicalPost");
-        return canonicalField != null ? canonicalField : postText;
-    }
-
-    private static String originalRepostedPostText(String postText) {
-        if (postText == null) return null;
-        String repostedPost = ToStringParser.fieldValue(postText, "rePostedPost");
-        if (repostedPost == null) return null;
-        String canonical = ToStringParser.fieldValue(repostedPost, "canonicalPost");
-        return canonical != null ? canonical : repostedPost;
-    }
-
-    private static boolean hasRepostedMedia(String text) {
-        return sourceMediaField(text, "sourcePostIdentifier") != null;
-    }
-
-    private static String firstMentionScreenName(String text) {
-        String entityList = ToStringParser.fieldValue(text, "entityList");
-        if (entityList == null) return null;
-        String mentions = ToStringParser.fieldValue(entityList, "mentions");
-        if (mentions == null) return null;
-        // Mentions are ordered by appearance; the first one is the "RT @name:"
-        // source of a repost.
-        return ToStringParser.fieldValue(mentions, "screenName");
-    }
-
-    private static String mediaExpandedUrlScreenName(String text) {
-        if (text == null) return null;
-        String entityList = ToStringParser.fieldValue(text, "entityList");
-        String searchScope = entityList != null ? entityList : text;
-        String expandedUrl = ToStringParser.fieldValue(searchScope, "expandedUrl");
-        String screenName = screenNameFromUrl(expandedUrl);
-        if (screenName != null) return screenName;
-        return screenNameFromUrl(searchScope);
-    }
-
-    private static String screenNameFromUrl(String url) {
-        if (url == null) return null;
-        Matcher matcher = STATUS_URL_PATTERN.matcher(url);
-        return matcher.find() ? matcher.group(1) : null;
-    }
-
-    private static String sourceMediaField(String text, String fieldName) {
-        if (text == null) return null;
-        String sourceInfo = ToStringParser.fieldValue(text, "sourceInfo");
-        if (sourceInfo == null) return null;
-        return ToStringParser.fieldValue(sourceInfo, fieldName);
+        return NewXUtils.sourceUsername(post);
     }
 
 

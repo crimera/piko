@@ -2,7 +2,6 @@ package app.morphe.extension.newx.misc;
 
 import android.app.Activity;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.newx.utils.NewXUtils;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -38,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.newx.utils.NewXUtils;
 import kotlin.jvm.functions.Function1;
 
 /** Bridges NewX's rendered Compose post row to an Android image share intent. */
@@ -48,7 +48,7 @@ public final class NewXShareImageHandler {
     private static final String URT_POST_CLASS = "com.x.models.timelines.items.UrtTimelinePost";
     private static final int MAX_CAPTURE_PIXELS = 16_000_000;
     private static final int MAX_RENDERED_POSTS = 128;
-    private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
+    private static volatile Handler mainHandler;
     private static final Object RENDERED_POSTS_LOCK = new Object();
     private static final Map<String, WeakReference<PositionCallback>> RENDERED_POSTS =
             new LinkedHashMap<>(MAX_RENDERED_POSTS, 0.75f, true);
@@ -111,7 +111,7 @@ public final class NewXShareImageHandler {
         if (context == null || post == null) return;
 
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            MAIN_HANDLER.post(() -> shareAsImage(context, post));
+            mainHandler().post(() -> shareAsImage(context, post));
             return;
         }
 
@@ -125,8 +125,10 @@ public final class NewXShareImageHandler {
         }
 
         String id;
+        String fileName;
         try {
             id = postId(post);
+            fileName = shareImageFileName(post);
         } catch (ReflectiveOperationException exception) {
             Utils.showToastShort("Could not identify the selected post");
             return;
@@ -137,7 +139,9 @@ public final class NewXShareImageHandler {
         }
 
         View decorView = activity.getWindow().getDecorView();
-        decorView.postOnAnimation(() -> decorView.postOnAnimation(() -> captureRenderedPost(activity, id)));
+        decorView.postOnAnimation(() -> decorView.postOnAnimation(
+                () -> captureRenderedPost(activity, id, fileName)
+        ));
     }
 
     public static String labelFor(Object action, Object originalLabel) {
@@ -149,7 +153,7 @@ public final class NewXShareImageHandler {
         return isShareImageAction(action);
     }
 
-    private static void captureRenderedPost(Activity activity, String postId) {
+    private static void captureRenderedPost(Activity activity, String postId, String fileName) {
         View decorView = activity.getWindow().getDecorView();
         if (!decorView.isAttachedToWindow()) {
             Utils.showToastShort("Post is no longer rendered");
@@ -190,8 +194,8 @@ public final class NewXShareImageHandler {
                     activity.getWindow(),
                     bounds,
                     bitmap,
-                    result -> finishCapture(activity, bitmap, postId, result),
-                    MAIN_HANDLER
+                    result -> finishCapture(activity, bitmap, fileName, postId, result),
+                    mainHandler()
             );
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> DEBUG_TAG + ": PixelCopy request failed", exception);
@@ -200,7 +204,13 @@ public final class NewXShareImageHandler {
         }
     }
 
-    private static void finishCapture(Context context, Bitmap bitmap, String postId, int result) {
+    private static void finishCapture(
+            Context context,
+            Bitmap bitmap,
+            String fileName,
+            String postId,
+            int result
+    ) {
         if (result != PixelCopy.SUCCESS) {
             NewXLogger.printException(
                     () -> DEBUG_TAG + ": PixelCopy result=" + result + " for post " + postId
@@ -212,7 +222,7 @@ public final class NewXShareImageHandler {
 
         Uri uri;
         try {
-            uri = saveImage(context, bitmap, postId);
+            uri = saveImage(context, bitmap, fileName);
         } finally {
             bitmap.recycle();
         }
@@ -450,9 +460,38 @@ public final class NewXShareImageHandler {
         return bitmap;
     }
 
-    private static Uri saveImage(Context context, Bitmap bitmap, String postId) {
+    static String shareImageFileName(String username, String postId) {
+        return "tweet_" + safeFileSegment(username, "twitter") + "_" +
+                safeFileSegment(postId, "post") + ".png";
+    }
+
+    private static String shareImageFileName(Object post) {
+        return shareImageFileName(
+                NewXUtils.sourceUsername(post),
+                NewXUtils.sourcePostId(post)
+        );
+    }
+
+    private static String safeFileSegment(String value, String fallback) {
+        if (value == null) return fallback;
+
+        String sanitized = value.trim().replaceFirst("^@", "")
+                .replaceAll("[^A-Za-z0-9._-]+", "_")
+                .replaceAll("_+", "_")
+                .replaceAll("^[._-]+|[._-]+$", "");
+        return sanitized.isEmpty() ? fallback : sanitized;
+    }
+
+    private static Handler mainHandler() {
+        Handler handler = mainHandler;
+        if (handler != null) return handler;
+        handler = new Handler(Looper.getMainLooper());
+        mainHandler = handler;
+        return handler;
+    }
+
+    private static Uri saveImage(Context context, Bitmap bitmap, String fileName) {
         ContentResolver resolver = context.getContentResolver();
-        String fileName = "tweet_" + NewXUtils.sanitizeFileName(postId) + ".png";
         ContentValues values = new ContentValues();
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
         values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
