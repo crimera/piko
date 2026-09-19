@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 
 import androidx.core.widget.NestedScrollView;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -40,33 +40,83 @@ public final class ProfilePhotosGallery {
         return SettingsRegistry.getBooleanOrDefault(SETTING_ID, true);
     }
 
+    private static final Object PENDING_PHOTO_LOCK = new Object();
+    private static final long PENDING_PHOTO_TIMEOUT_MS = 1500L;
+    private static String pendingPhotoPostId;
+    private static int pendingPhotoIndex = -1;
+    private static long pendingPhotoExpiresAt;
+
+    public static void requestNativePhoto(String postId, int photoIndex) {
+        if (postId == null || postId.trim().isEmpty() || photoIndex < 0) return;
+        synchronized (PENDING_PHOTO_LOCK) {
+            pendingPhotoPostId = postId;
+            pendingPhotoIndex = photoIndex;
+            pendingPhotoExpiresAt = System.currentTimeMillis() + PENDING_PHOTO_TIMEOUT_MS;
+        }
+    }
+
+    public static int peekPendingPhotoIndex(String postId) {
+        if (postId == null) return -1;
+        synchronized (PENDING_PHOTO_LOCK) {
+            if (pendingPhotoIndex < 0
+                    || !postId.equals(pendingPhotoPostId)
+                    || System.currentTimeMillis() > pendingPhotoExpiresAt) {
+                clearPendingPhotoLocked();
+                return -1;
+            }
+            return pendingPhotoIndex;
+        }
+    }
+
+    public static void clearPendingPhoto() {
+        synchronized (PENDING_PHOTO_LOCK) {
+            clearPendingPhotoLocked();
+        }
+    }
+
+    private static void clearPendingPhotoLocked() {
+        pendingPhotoPostId = null;
+        pendingPhotoIndex = -1;
+        pendingPhotoExpiresAt = 0L;
+    }
+
     public static Function1<Object, Object> createFactory(
             List<?> items,
             Object callback,
+            Object itemClickCallback,
             float topPaddingDp,
             float bottomPaddingDp
     ) {
-        return new GalleryFactory(items, callback, topPaddingDp, bottomPaddingDp);
+        return new GalleryFactory(items, callback, itemClickCallback, topPaddingDp, bottomPaddingDp);
     }
 
     public static Function1<Object, Object> createUpdater(
             List<?> items,
             Object callback,
+            Object itemClickCallback,
             float topPaddingDp,
             float bottomPaddingDp
     ) {
-        return new GalleryUpdater(items, callback, topPaddingDp, bottomPaddingDp);
+        return new GalleryUpdater(items, callback, itemClickCallback, topPaddingDp, bottomPaddingDp);
     }
 
     private static final class GalleryFactory implements Function1<Object, Object> {
         private final List<?> items;
         private final Object callback;
+        private final Object itemClickCallback;
         private final float topPaddingDp;
         private final float bottomPaddingDp;
 
-        GalleryFactory(List<?> items, Object callback, float topPaddingDp, float bottomPaddingDp) {
+        GalleryFactory(
+                List<?> items,
+                Object callback,
+                Object itemClickCallback,
+                float topPaddingDp,
+                float bottomPaddingDp
+        ) {
             this.items = items;
             this.callback = callback;
+            this.itemClickCallback = itemClickCallback;
             this.topPaddingDp = topPaddingDp;
             this.bottomPaddingDp = bottomPaddingDp;
         }
@@ -77,6 +127,7 @@ public final class ProfilePhotosGallery {
                     (Context) context,
                     items,
                     callback,
+                    itemClickCallback,
                     topPaddingDp,
                     bottomPaddingDp
             );
@@ -86,12 +137,20 @@ public final class ProfilePhotosGallery {
     private static final class GalleryUpdater implements Function1<Object, Object> {
         private final List<?> items;
         private final Object callback;
+        private final Object itemClickCallback;
         private final float topPaddingDp;
         private final float bottomPaddingDp;
 
-        GalleryUpdater(List<?> items, Object callback, float topPaddingDp, float bottomPaddingDp) {
+        GalleryUpdater(
+                List<?> items,
+                Object callback,
+                Object itemClickCallback,
+                float topPaddingDp,
+                float bottomPaddingDp
+        ) {
             this.items = items;
             this.callback = callback;
+            this.itemClickCallback = itemClickCallback;
             this.topPaddingDp = topPaddingDp;
             this.bottomPaddingDp = bottomPaddingDp;
         }
@@ -99,7 +158,13 @@ public final class ProfilePhotosGallery {
         @Override
         public Object invoke(Object view) {
             if (view instanceof GalleryView galleryView) {
-                galleryView.update(items, callback, topPaddingDp, bottomPaddingDp);
+                galleryView.update(
+                        items,
+                        callback,
+                        itemClickCallback,
+                        topPaddingDp,
+                        bottomPaddingDp
+                );
             }
             // AndroidView ignores the updater result; avoid referencing the host's obfuscated
             // Kotlin Unit singleton field from the extension DEX.
@@ -112,6 +177,7 @@ public final class ProfilePhotosGallery {
         private final GalleryGrid grid;
         private final LoadingIndicatorView loadingIndicator;
         private Object callback;
+        private Object itemClickCallback;
         private List<?> currentItems;
         private int currentItemCount = -1;
         private boolean loadMoreInFlight = false;
@@ -120,6 +186,7 @@ public final class ProfilePhotosGallery {
                 Context context,
                 List<?> items,
                 Object callback,
+                Object itemClickCallback,
                 float topPaddingDp,
                 float bottomPaddingDp
         ) {
@@ -127,6 +194,7 @@ public final class ProfilePhotosGallery {
             // helper before enabling nested scrolling in NestedScrollView's constructor.
             super(context, null);
             this.callback = callback;
+            this.itemClickCallback = itemClickCallback;
             float density = getResources().getDisplayMetrics().density;
             int topPadding = Math.round(Math.max(0f, topPaddingDp) * density);
             int bottomPadding = Math.round(Math.max(0f, bottomPaddingDp) * density);
@@ -146,6 +214,7 @@ public final class ProfilePhotosGallery {
             content.setBackgroundColor(Color.TRANSPARENT);
 
             grid = new GalleryGrid(context);
+            grid.setItemClickCallback(itemClickCallback);
             content.addView(grid, new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -167,8 +236,16 @@ public final class ProfilePhotosGallery {
             setItems(items);
         }
 
-        void update(List<?> items, Object callback, float topPaddingDp, float bottomPaddingDp) {
+        void update(
+                List<?> items,
+                Object callback,
+                Object itemClickCallback,
+                float topPaddingDp,
+                float bottomPaddingDp
+        ) {
             this.callback = callback;
+            this.itemClickCallback = itemClickCallback;
+            grid.setItemClickCallback(itemClickCallback);
             float density = getResources().getDisplayMetrics().density;
             setPadding(
                     0,
@@ -186,6 +263,16 @@ public final class ProfilePhotosGallery {
             boolean itemCountChanged = currentItemCount != nextItems.size();
             List<GalleryCell> cells = extractCells(nextItems);
             grid.setCells(cells);
+            if (itemsChanged || itemCountChanged) {
+                final int itemCount = nextItems.size();
+                final int cellCount = cells.size();
+                logPagination(
+                        "items updated count=" + itemCount +
+                                " cells=" + cellCount +
+                                " previousCount=" + currentItemCount +
+                                " inFlight=" + loadMoreInFlight
+                );
+            }
             currentItems = nextItems;
             currentItemCount = nextItems.size();
             if (!loadMoreInFlight || itemsChanged || itemCountChanged) {
@@ -208,8 +295,15 @@ public final class ProfilePhotosGallery {
             if (now - lastLoadMoreTime <= 1200) return;
 
             lastLoadMoreTime = now;
+            logPagination(
+                    "threshold reached remaining=" + remaining +
+                            " contentHeight=" + contentHeight +
+                            " viewportHeight=" + height +
+                            " callback=" + (callback == null ? "null" : callback.getClass().getName())
+            );
             setLoadingMore(true);
             boolean dispatched = requestLoadMore(callback);
+            logPagination("dispatch result=" + dispatched);
             if (!dispatched) {
                 setLoadingMore(false);
                 return;
@@ -232,151 +326,289 @@ public final class ProfilePhotosGallery {
         }
 
         private void setLoadingMore(boolean loading) {
+            if (loadMoreInFlight != loading) {
+                logPagination("loading=" + loading);
+            }
             loadMoreInFlight = loading;
             loadingIndicator.setVisibility(loading ? View.VISIBLE : View.GONE);
         }
     }
+    private static final String PAGINATION_LOG_PREFIX =
+            "[PikoNewX][PhotosGallery][Pagination] ";
+
+    private static void logPagination(String message) {
+        NewXLogger.printInfo(() -> PAGINATION_LOG_PREFIX + message);
+    }
+
+    private static void logPaginationFailure(String message, Throwable throwable) {
+        NewXLogger.printException(() -> PAGINATION_LOG_PREFIX + message, throwable);
+    }
 
     public static boolean requestLoadMore(Object callback) {
-        if (callback == null) return false;
+        if (callback == null) {
+            logPagination("requestLoadMore callback=null");
+            return false;
+        }
+
+        logPagination("requestLoadMore callback=" + callback.getClass().getName());
         try {
-            Object urtComponent = findUrtComponent(callback);
+            Object pagingEvent = getPagingEvent();
+            if (pagingEvent == null) {
+                logPagination("requestLoadMore event=null");
+                return false;
+            }
+            logPagination("event=" + pagingEvent.getClass().getName());
+
+            Object urtComponent = findUrtComponent(callback, pagingEvent);
             if (urtComponent == null) {
-                NewXLogger.printInfo(() -> "[PikoNewX][PhotosGallery] could not find UrtComponent from " + callback.getClass().getName());
+                logPagination("UrtComponent not found callback=" + callback.getClass().getName());
                 return false;
             }
+            logPagination("UrtComponent=" + urtComponent.getClass().getName());
 
-            Object bottomPaginator = getBottomPaginator(urtComponent);
+            Object bottomPaginator = getBottomPaginator(urtComponent, pagingEvent);
             if (bottomPaginator == null) {
-                NewXLogger.printInfo(() -> "[PikoNewX][PhotosGallery] could not find bottom paginator from " + urtComponent.getClass().getName());
+                logPagination("bottom paginator not found component=" + urtComponent.getClass().getName());
                 return false;
             }
+            logPagination("bottom paginator=" + bottomPaginator.getClass().getName());
 
-            return triggerBottomPaging(bottomPaginator);
+            return triggerBottomPaging(bottomPaginator, pagingEvent);
         } catch (Throwable t) {
-            NewXLogger.printInfo(() -> "[PikoNewX][PhotosGallery] requestLoadMore failed: " + t.getMessage());
+            logPaginationFailure("requestLoadMore failed", t);
             return false;
         }
     }
 
-    private static Object findUrtComponent(Object callback) {
-        if (callback == null) return null;
+    private static Object findUrtComponent(Object callback, Object pagingEvent) {
+        if (callback == null || pagingEvent == null) return null;
         Class<?> clazz = callback.getClass();
-        for (Field field : clazz.getDeclaredFields()) {
+        Field[] fields = clazz.getDeclaredFields();
+        logPagination("searching component callbackFields=" + fields.length);
+        for (Field field : fields) {
             try {
                 field.setAccessible(true);
                 Object value = field.get(callback);
-                if (value != null && isUrtComponent(value)) {
-                    return value;
-                }
-            } catch (Throwable ignored) {
+                if (value == null) continue;
+                boolean matches = isUrtComponent(value, pagingEvent);
+                logPagination(
+                        "callback field=" + field.getName() +
+                                " type=" + value.getClass().getName() +
+                                " matches=" + matches
+                );
+                if (matches) return value;
+            } catch (Throwable t) {
+                logPaginationFailure("callback field inspection failed field=" + field.getName(), t);
             }
         }
-        if (isUrtComponent(callback)) {
-            return callback;
-        }
+        boolean callbackMatches = isUrtComponent(callback, pagingEvent);
+        logPagination("callback itself matches=" + callbackMatches);
+        if (callbackMatches) return callback;
         return null;
     }
 
-    private static boolean isUrtComponent(Object obj) {
-        if (obj == null) return false;
-        Class<?> clazz = obj.getClass();
-        String name = clazz.getName();
-        if (name.startsWith("com.x.urt.")) {
-            for (Method m : clazz.getMethods()) {
-                if (m.getName().equals("p") && m.getParameterTypes().length == 0) {
-                    return true;
-                }
+    private static Object getPagingEvent() {
+        try {
+            Object event = createPagingEvent();
+            logPagination("createPagingEvent returned=" +
+                    (event == null ? "null" : event.getClass().getName()));
+            return event;
+        } catch (Throwable t) {
+            logPaginationFailure("createPagingEvent failed", t);
+            return null;
+        }
+    }
+
+    private static List<Method> allMethods(Class<?> type) {
+        List<Method> methods = new ArrayList<>();
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            Collections.addAll(methods, current.getDeclaredMethods());
+        }
+        return methods;
+    }
+
+    private static boolean isPagingDispatchMethod(Method method, Object pagingEvent) {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        return pagingEvent != null &&
+                !Modifier.isStatic(method.getModifiers()) &&
+                method.getReturnType() == void.class &&
+                parameterTypes.length == 1 &&
+                parameterTypes[0].isInterface() &&
+                parameterTypes[0].isInstance(pagingEvent);
+    }
+
+    private static boolean isBottomPaginatorType(Class<?> type, Object pagingEvent) {
+        if (type == null || pagingEvent == null) return false;
+
+        // A UrtComponent getter commonly declares the paginator interface rather than
+        // its concrete implementation. Interface methods include inherited dispatch APIs.
+        if (type.isInterface()) {
+            for (Method method : type.getMethods()) {
+                if (isPagingDispatchMethod(method, pagingEvent)) return true;
+            }
+            return false;
+        }
+
+        for (Method method : allMethods(type)) {
+            if (isPagingDispatchMethod(method, pagingEvent)) return true;
+        }
+        for (Class<?> interfaceType : type.getInterfaces()) {
+            if (isBottomPaginatorType(interfaceType, pagingEvent)) return true;
+        }
+        return false;
+    }
+
+    private static boolean isBottomPaginator(Object value, Object pagingEvent) {
+        if (value == null || pagingEvent == null) return false;
+        return isBottomPaginatorType(value.getClass(), pagingEvent);
+    }
+
+    private static boolean isUrtComponent(Object obj, Object pagingEvent) {
+        if (obj == null || pagingEvent == null) return false;
+        for (Method method : allMethods(obj.getClass())) {
+            if (Modifier.isStatic(method.getModifiers()) ||
+                    method.getParameterTypes().length != 0) {
+                continue;
+            }
+
+            Class<?> returnType = method.getReturnType();
+            if (isBottomPaginatorType(returnType, pagingEvent)) return true;
+            if (!returnType.isInterface()) continue;
+            try {
+                method.setAccessible(true);
+                if (isBottomPaginator(method.invoke(obj), pagingEvent)) return true;
+            } catch (Throwable ignored) {
             }
         }
         return false;
     }
 
-    private static Object getBottomPaginator(Object urtComponent) {
+    private static Object getBottomPaginator(Object urtComponent, Object pagingEvent) {
         Class<?> clazz = urtComponent.getClass();
-        try {
-            Method pMethod = clazz.getMethod("p");
-            pMethod.setAccessible(true);
-            Object paginator = pMethod.invoke(urtComponent);
-            if (paginator != null) return paginator;
-        } catch (Throwable ignored) {
-        }
+        String expectedPaginatorClass = createBottomPaginatorClassName();
+        int getterCandidates = 0;
+        for (Method method : allMethods(clazz)) {
+            if (Modifier.isStatic(method.getModifiers()) ||
+                    method.getParameterTypes().length != 0) {
+                continue;
+            }
 
-        for (Field field : clazz.getDeclaredFields()) {
+            Class<?> returnType = method.getReturnType();
+            if (!returnType.isInterface() &&
+                    !isBottomPaginatorType(returnType, pagingEvent)) {
+                continue;
+            }
+            getterCandidates++;
             try {
-                field.setAccessible(true);
-                Object val = field.get(urtComponent);
-                if (val != null && val.getClass().getName().contains("paging.bottom")) {
-                    return val;
-                }
-            } catch (Throwable ignored) {
+                method.setAccessible(true);
+                Object paginator = method.invoke(urtComponent);
+                boolean shapeMatches = isBottomPaginator(paginator, pagingEvent);
+                boolean matches = shapeMatches &&
+                        expectedPaginatorClass.equals(paginator.getClass().getName());
+                logPagination(
+                        "paginator getter=" + method.getName() +
+                                " declared=" + returnType.getName() +
+                                " value=" + (paginator == null ? "null" : paginator.getClass().getName()) +
+                                " shapeMatches=" + shapeMatches +
+                                " matches=" + matches
+                );
+                if (matches) return paginator;
+            } catch (Throwable t) {
+                logPaginationFailure("paginator getter failed method=" + method.getName(), t);
             }
         }
+
+        int fieldCandidates = 0;
+        for (Class<?> current = clazz; current != null; current = current.getSuperclass()) {
+            for (Field field : current.getDeclaredFields()) {
+                Class<?> fieldType = field.getType();
+                if (Modifier.isStatic(field.getModifiers()) ||
+                        (!fieldType.isInterface() &&
+                                !isBottomPaginatorType(fieldType, pagingEvent))) {
+                    continue;
+                }
+                fieldCandidates++;
+                try {
+                    field.setAccessible(true);
+                    Object paginator = field.get(urtComponent);
+                    boolean shapeMatches = isBottomPaginator(paginator, pagingEvent);
+                    boolean matches = shapeMatches &&
+                            expectedPaginatorClass.equals(paginator.getClass().getName());
+                    logPagination(
+                            "paginator field=" + field.getName() +
+                                    " declared=" + fieldType.getName() +
+                                    " value=" + (paginator == null ? "null" : paginator.getClass().getName()) +
+                                    " shapeMatches=" + shapeMatches +
+                                    " matches=" + matches
+                    );
+                    if (matches) return paginator;
+                } catch (Throwable t) {
+                    logPaginationFailure("paginator field failed field=" + field.getName(), t);
+                }
+            }
+        }
+        logPagination(
+                "paginator candidates getters=" + getterCandidates +
+                        " fields=" + fieldCandidates + " none matched expected=" + expectedPaginatorClass
+        );
         return null;
     }
 
-    private static boolean triggerBottomPaging(Object bottomPaginator) {
-        Class<?> clazz = bottomPaginator.getClass();
+    private static boolean triggerBottomPaging(Object bottomPaginator, Object pagingEvent) {
+        List<Method> terminationMethods = new ArrayList<>();
+        for (Method method : allMethods(bottomPaginator.getClass())) {
+            if (!Modifier.isStatic(method.getModifiers()) &&
+                    method.getParameterTypes().length == 0 &&
+                    (method.getReturnType() == boolean.class ||
+                            method.getReturnType() == Boolean.class)) {
+                terminationMethods.add(method);
+            }
+        }
+        if (terminationMethods.size() == 1) {
+            Method terminationMethod = terminationMethods.get(0);
+            try {
+                terminationMethod.setAccessible(true);
+                boolean terminated = Boolean.TRUE.equals(terminationMethod.invoke(bottomPaginator));
+                logPagination("termination method=" + terminationMethod.getName() + " result=" + terminated);
+                if (terminated) {
+                    logPagination("bottom pagination already terminated");
+                    return false;
+                }
+            } catch (Throwable t) {
+                logPaginationFailure("termination check failed method=" + terminationMethod.getName(), t);
+            }
+        } else {
+            logPagination("termination method count=" + terminationMethods.size());
+        }
 
-        // Check if bottom pagination has terminated
-        try {
-            Method eMethod = clazz.getMethod("e");
-            eMethod.setAccessible(true);
-            Object terminated = eMethod.invoke(bottomPaginator);
-            if (Boolean.TRUE.equals(terminated)) {
-                NewXLogger.printInfo(() -> "[PikoNewX][PhotosGallery] bottom pagination already terminated");
+        int dispatchCandidates = 0;
+        for (Method method : allMethods(bottomPaginator.getClass())) {
+            if (!isPagingDispatchMethod(method, pagingEvent)) continue;
+            dispatchCandidates++;
+            logPagination(
+                    "dispatch method=" + method.getDeclaringClass().getName() +
+                            "." + method.getName() +
+                            " event=" + pagingEvent.getClass().getName()
+            );
+            method.setAccessible(true);
+            try {
+                method.invoke(bottomPaginator, pagingEvent);
+                logPagination("dispatch invocation returned");
+                return true;
+            } catch (Throwable t) {
+                logPaginationFailure("dispatch invocation failed method=" + method.getName(), t);
                 return false;
             }
-        } catch (Throwable ignored) {
         }
-
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.getName().equals("a") && method.getParameterTypes().length == 1) {
-                method.setAccessible(true);
-                Class<?> paramType = method.getParameterTypes()[0];
-                Object event = createPagingEvent(paramType, clazz.getClassLoader());
-                if (event != null) {
-                    try {
-                        method.invoke(bottomPaginator, event);
-                        NewXLogger.printInfo(() -> "[PikoNewX][PhotosGallery] triggered bottom pagination");
-                        return true;
-                    } catch (Throwable t) {
-                        NewXLogger.printInfo(() -> "[PikoNewX][PhotosGallery] invoke pagination failed: " + t.getMessage());
-                    }
-                }
-            }
-        }
+        logPagination("dispatch candidates=" + dispatchCandidates + " none matched");
         return false;
     }
 
-    private static Object createPagingEvent(Class<?> targetInterface, ClassLoader loader) {
-        String[] candidateNames = new String[]{
-                "com.x.urt.paging.e",
-                "com.x.urt.paging.d",
-                "com.x.urt.paging.f",
-                "com.x.urt.paging.b",
-                "com.x.urt.paging.a"
-        };
-        for (String name : candidateNames) {
-            try {
-                Class<?> cls = Class.forName(name, false, loader);
-                if (targetInterface.isAssignableFrom(cls)) {
-                    for (Constructor<?> ctor : cls.getDeclaredConstructors()) {
-                        ctor.setAccessible(true);
-                        Class<?>[] pTypes = ctor.getParameterTypes();
-                        if (pTypes.length == 0) {
-                            return ctor.newInstance();
-                        } else if (pTypes.length == 3 && pTypes[1] == int.class && pTypes[2] == int.class) {
-                            return ctor.newInstance(null, 0, 0);
-                        } else if (pTypes.length == 1 && pTypes[0] == int.class) {
-                            return ctor.newInstance(0);
-                        }
-                    }
-                }
-            } catch (Throwable ignored) {
-            }
-        }
-        return null;
+    private static Object createPagingEvent() {
+        throw new IllegalStateException("NewX paging event bridge was not patched");
+    }
+    private static String createBottomPaginatorClassName() {
+        throw new IllegalStateException("NewX bottom paginator class bridge was not patched");
     }
 
     private static final class GalleryGrid extends ViewGroup {
@@ -384,12 +616,17 @@ public final class ProfilePhotosGallery {
         private static final int GAP_DP = 2;
         private final int gapPixels;
         private List<GalleryCell> cells = Collections.emptyList();
+        private Object itemClickCallback;
 
         GalleryGrid(Context context) {
             super(context);
             gapPixels = Math.max(1, Math.round(GAP_DP * getResources().getDisplayMetrics().density));
             setBackgroundColor(Color.BLACK);
             setWillNotDraw(true);
+        }
+
+        void setItemClickCallback(Object callback) {
+            itemClickCallback = callback;
         }
 
         void setCells(List<GalleryCell> nextCells) {
@@ -434,6 +671,31 @@ public final class ProfilePhotosGallery {
         }
 
         private void openPhoto(GalleryCell cell) {
+            String postId = null;
+            try {
+                postId = NewXUtils.sourcePostId(cell.timelineItem);
+            } catch (RuntimeException ignored) {
+            }
+
+            if (postId != null
+                    && !postId.equals("post")
+                    && itemClickCallback instanceof Function1) {
+                requestNativePhoto(postId, Math.max(0, cell.photoIndex - 1));
+                try {
+                    Function1<Object, Object> callback = (Function1<Object, Object>) itemClickCallback;
+                    callback.invoke(cell.timelineItem);
+                } catch (Throwable exception) {
+                    clearPendingPhoto();
+                    NewXLogger.printInfo(() ->
+                            "[PikoNewX][PhotosGallery] native viewer callback failed: "
+                                    + exception.getMessage());
+                }
+            }
+
+            openPhotoIntent(cell);
+        }
+
+        private void openPhotoIntent(GalleryCell cell) {
             Context context = getContext();
             String target = photoDeepLink(cell);
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(target));
