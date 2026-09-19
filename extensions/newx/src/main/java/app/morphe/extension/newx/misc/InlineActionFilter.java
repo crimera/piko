@@ -79,6 +79,7 @@ public final class InlineActionFilter {
             case "Share" -> hiddenActionIds.contains("TwitterShare");
             case "AddToBookmarks", "RemoveFromBookmarks" ->
                     hiddenActionIds.contains("AddRemoveBookmarks");
+            case "UndoDislike" -> hiddenActionIds.contains("Dislike");
             default -> false;
         };
     }

@@ -23,6 +23,22 @@ public final class InlineActionFilterTest {
     }
 
     @Test
+    public void filterHidesDislikeStateWithOneSetting() {
+        List<?> actions = new ArrayList<>(List.of(
+                action("Dislike"),
+                action("UndoDislike"),
+                action("Favorite")
+        ));
+        InlineActionFilter.prepareHiddenActions(Set.of("Dislike"));
+        InlineActionFilter.preparePresenter(new Object());
+
+        List<?> result = InlineActionFilter.filter(actions);
+
+        assertEquals(1, result.size());
+        assertSame(actions.get(2), result.get(0));
+    }
+
+    @Test
     public void filterClearsPreparedStateAfterConsumption() {
         List<?> actions = new ArrayList<>(List.of(action("Reply")));
         InlineActionFilter.prepareHiddenActions(Set.of("Reply"));

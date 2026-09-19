@@ -144,6 +144,7 @@
     <string name="piko_newx_inline_action_reply">Reply</string>
     <string name="piko_newx_inline_action_repost">Repost</string>
     <string name="piko_newx_inline_action_like">Like</string>
+    <string name="piko_newx_inline_action_dislike">Dislike</string>
     <string name="piko_newx_inline_action_view_count">View count</string>
     <string name="piko_newx_inline_action_bookmark">Bookmark</string>
     <string name="piko_newx_inline_action_share">Share</string>

@@ -53,6 +53,7 @@ val customizeNewXInlineActionsPatch =
                                 choice("Reply", "piko_newx_inline_action_reply"),
                                 choice("Retweet", "piko_newx_inline_action_repost"),
                                 choice("Favorite", "piko_newx_inline_action_like"),
+                                choice("Dislike", "piko_newx_inline_action_dislike"),
                                 choice("ViewCount", "piko_newx_inline_action_view_count"),
                                 choice("AddRemoveBookmarks", "piko_newx_inline_action_bookmark"),
                                 choice("TwitterShare", "piko_newx_inline_action_share"),
