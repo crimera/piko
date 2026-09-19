@@ -25,6 +25,7 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableField
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getFreeRegisterProvider
+import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -33,6 +34,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val ACTIVITY_CLASS = "Landroid/app/Activity;"
 private const val IG_LINEAR_LAYOUT_CLASS = "Lcom/instagram/common/ui/base/IgLinearLayout;"
@@ -260,6 +262,41 @@ val userProfileActionBarButtonPatch =
                         },
                     )
                 }
+
+            val iconFactory = mutableClassDefBy(profileActionBarBuilderMethod.definingClass).methods
+                .filter { method ->
+                    method.returnType == "Landroid/widget/ImageView;" && method.parameterTypes.size == 4 &&
+                        method.parameterTypes.take(3) == listOf(
+                            "Landroid/content/Context;", USER_SESSION_CLASS,
+                            ProfileActionBarRelatedFingerprint.classDef.type,
+                        )
+                }.singleOrNull()
+                ?: throw PatchException("Expected one profile action icon factory")
+            iconFactory.apply {
+                val modelRegister = declaredParameterRegister(this, 3)
+                val drawableField = instructions.filter { instruction ->
+                    instruction.opcode == Opcode.IGET &&
+                        instruction.registersUsed.size == 2 && instruction.registersUsed[1] == modelRegister
+                }.mapNotNull { it.getReference<FieldReference>() }
+                    .filter { it.definingClass == parameterTypes.last() && it.type == "I" }
+                    .singleOrNull()
+                    ?: throw PatchException("Expected one profile action drawable field")
+                val returnInstruction = instructions.withIndex().filter { it.value.opcode == Opcode.RETURN_OBJECT }
+                    .singleOrNull() ?: throw PatchException("Expected one profile action icon return")
+                val viewRegister = returnInstruction.value.registersUsed.single()
+                val registers = getFreeRegisterProvider(returnInstruction.index, 2, modelRegister, viewRegister)
+                val viewCopy = registers.getFreeRegister()
+                val drawableCopy = registers.getFreeRegister()
+                addInstructionsAtControlFlowLabel(
+                    returnInstruction.index,
+                    """
+                    move-object/from16 v$viewCopy, v$modelRegister
+                    iget v$drawableCopy, v$viewCopy, $drawableField
+                    move-object/from16 v$viewCopy, v$viewRegister
+                    invoke-static {v$viewCopy, v$drawableCopy}, $ACTIONBAR_DESCRIPTOR->hideProfileCreateButton(Landroid/view/View;I)V
+                    """.trimIndent(),
+                )
+            }
 
             profileActionBarBuilderMethod.apply {
                 fun uniqueParameterIndex(type: String): Int {

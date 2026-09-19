@@ -4,6 +4,10 @@ on:
     - cron: "0 */12 * * *" # every 12 hours
   workflow_dispatch:
 
+concurrency:
+  group: crowdin-pull
+  cancel-in-progress: false
+
 jobs:
   pull:
     name: Pull translations from Crowdin
@@ -33,44 +37,59 @@ jobs:
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
   merge:
-    name: Squash merge Crowdin into Dev
+    name: Import Crowdin translations into Dev
     if: github.event_name == 'workflow_dispatch'
     needs: pull
     permissions:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout crowdin branch to run checks on it
-      - name: Checkout crowdin branch
-        uses: actions/checkout@v7
-        with:
-          ref: crowdin
-          fetch-depth: 0
-          clean: true
-
-      # Step 2: Run string checks on the crowdin branch
-      - name: Check strings on crowdin
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew clean checkStringResources --no-daemon
-
-      # Step 3: Checkout dev branch to prepare for merging
-      - name: Checkout dev branch for merge
+      - name: Checkout dev
         uses: actions/checkout@v7
         with:
           ref: dev
           fetch-depth: 0
           clean: true
 
-      # Step 4: Fetch the latest crowdin branch (already checked)
-      - name: Fetch crowdin branch
-        run: git fetch origin crowdin
+      - name: Download translations onto dev
+        uses: crowdin/github-action@v2
+        with:
+          config: crowdin.yml
+          upload_sources: false
+          download_translations: true
+          push_translations: false
+          create_pull_request: false
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
-      # Step 5: Squash merge crowdin into dev
-      - name: Squash merge crowdin into dev
+      - name: Stage translation changes
+        id: translations
         run: |
+          git add -- \
+            ':(glob)patches/src/main/resources/addresources/values-*/instagram/strings.xml' \
+            ':(glob)patches/src/main/resources/addresources/values-*/shared/strings.xml' \
+            ':(glob)patches/src/main/resources/addresources/values-*/twitter/strings.xml'
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check translated strings
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew checkStringResources --no-daemon
+
+      - name: Commit translations to dev
+        if: steps.translations.outputs.changed == 'true'
+        run: |
+          git fetch origin dev
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
+            echo "::error::dev changed during the import. Run this workflow again to check translations against the latest dev."
+            exit 1
+          fi
           git config --local user.name "Crowdin Bot"
           git config --local user.email "support+bot@crowdin.com"
-          git merge --squash origin/crowdin
-          git commit --allow-empty -m "chore: Update translations from Crowdin"
-          git push origin dev
+          git commit -m "chore(translations): Update translations from Crowdin"
+          git push origin HEAD:refs/heads/dev

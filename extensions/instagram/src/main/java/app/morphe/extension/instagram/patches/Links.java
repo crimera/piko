@@ -25,6 +25,7 @@ import app.morphe.extension.shared.ShareLinkSanitizer;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.PostType;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.patches.story.StorySeenRequestScope;
 import app.morphe.extension.crimera.PikoUtils;
 
 import app.morphe.extension.instagram.settings.ActivityHook;
@@ -44,12 +45,11 @@ public class Links {
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
     private static final boolean DISABLE_HIGHLIGHTS;
-    private static final boolean DISABLE_ONBOARDING_PERMISSION_PROMPTS;
     private static final List<String> META_PACKAGES;
     private static final ShareLinkSanitizer SHARE_LINK_SANITIZER = new ShareLinkSanitizer(
             "instagram.com",
             Arrays.asList("comment_id", "img_index", "open_comments", "story_media_id"),
-            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si")
+            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si", "stkn")
     );
 
     static {
@@ -60,7 +60,6 @@ public class Links {
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
-        DISABLE_ONBOARDING_PERMISSION_PROMPTS = SettingsStatus.disableOnboardingPermissionPrompts;
 
         META_PACKAGES = Arrays.asList(
                 "com.instagram.android",      // Instagram
@@ -81,11 +80,14 @@ public class Links {
     }
 
     public static boolean setStorySeen(boolean seenStatus){
-        return Pref.viewStoriesAnonymously() ? true:seenStatus;
+        return StorySeenRequestScope.resolveSeenStatus(
+                seenStatus,
+                Pref.viewStoriesAnonymously()
+        );
     }
 
     public static boolean shouldBlockOnboardingScreen(String appId) {
-        if (!DISABLE_ONBOARDING_PERMISSION_PROMPTS || appId == null) {
+        if (!DISABLE_ANALYTICS || appId == null) {
             return false;
         }
 
@@ -115,18 +117,16 @@ public class Links {
        boolean shouldBlockUri = false;
         try {
             if (uri != null && uri.getPath() != null) {
-                String host = uri.getHost();
+                String host = uri.getHost() != null ? uri.getHost() : "";
                 String path = uri.getPath();
 
                 if (host.contains("graph.instagram.com")
-                        || host.contains("graph.facebook.com")
-                        || path.contains("/logging_client_events")) {
+                        || host.contains("graph.facebook.com")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
-                } else if (path.contains("/consent/existing_user_flow/")
-                        || path.contains("/consent/new_user_flow/")) {
-                    shouldBlockUri = DISABLE_ONBOARDING_PERMISSION_PROMPTS;
                 } else if (path.contains("/api/v2/media/seen/")) {
-                    shouldBlockUri = Pref.viewStoriesAnonymously();
+                    shouldBlockUri = Pref.viewStoriesAnonymously()
+                            && !StorySeenRequestScope.isActive();
+                    StorySeenRequestScope.onStorySeenRequest(shouldBlockUri);
                 } else if (path.contains("/heartbeat_and_get_viewer_count/")) {
                     shouldBlockUri = Pref.viewLiveAnonymously();
                 } else if (path.contains("/feed/reels_tray/")
@@ -239,8 +239,10 @@ public class Links {
     }
 
     public static String generatePostLink(Object mediaObject, int position) throws Exception {
-        MediaData mediaData = new MediaData(mediaObject);
+        return generatePostLink(new MediaData(mediaObject), position);
+    }
 
+    public static String generatePostLink(MediaData mediaData, int position) throws Exception {
         String postShortCode = mediaData.getShortcode();
         PostType postType = mediaData.getPostType();
 
