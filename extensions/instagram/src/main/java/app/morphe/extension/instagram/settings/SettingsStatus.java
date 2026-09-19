@@ -135,8 +135,12 @@ public class SettingsStatus {
     public static void disableDoubleTapLike() {
         disableDoubleTapLike = true;
     }
+    public static boolean hideReelsFollowButton = false;
+    public static void hideReelsFollowButton() {
+        hideReelsFollowButton = true;
+    }
     public static boolean distractionFreeSection() {
-        return (disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling || disableSwipeToCreate);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling || disableSwipeToCreate);
     }
 
     //Misc section.
@@ -256,6 +260,7 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_disable_double_tap_to_like"),SettingsStatus.disableDoubleTapLike);
         FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);
+        FLAGS.put(str("piko_hide_reels_follow_button"),SettingsStatus.hideReelsFollowButton);
         FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
         FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
         FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);
