@@ -207,7 +207,9 @@ public class SettingsStatus {
     public static void unlimitedReplaysOnEphemeralMedia() {unlimitedReplaysOnEphemeralMedia = true;}
     public static boolean markChatAsRead = false;
     public static void markChatAsRead() { markChatAsRead = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages ;}
+    public static boolean notesCustomTextColor = false;
+    public static void notesCustomTextColor() { notesCustomTextColor = true; }
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || notesCustomTextColor ;}
 
     //Download section.
     public static boolean downloadMedia = false;

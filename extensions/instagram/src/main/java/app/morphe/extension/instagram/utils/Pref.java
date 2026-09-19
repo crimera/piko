@@ -157,6 +157,20 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
 
+    public static boolean enableNotesCustomTextColor() {
+        return SharedPref.getBooleanPref(Settings.ENABLE_NOTES_CUSTOM_TEXT_COLOR);
+    }
+
+    public static boolean notesCustomTextColorEnabled() {
+        return enableNotesCustomTextColor()
+                && SharedPref.getBooleanPref(Settings.NOTES_CUSTOM_TEXT_COLOR_ENABLED)
+                && SettingsStatus.notesCustomTextColor;
+    }
+
+    public static String notesCustomTextColorHex() {
+        return SharedPref.getStringPref(Settings.NOTES_CUSTOM_TEXT_COLOR_HEX);
+    }
+
     public static boolean disableReelsScrolling() {
         return SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
