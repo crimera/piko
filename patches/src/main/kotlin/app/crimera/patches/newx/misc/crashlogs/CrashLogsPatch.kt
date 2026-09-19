@@ -36,7 +36,6 @@ private val newXCrashLogsResourcePatch =
 
                 listOf(
                     "app.morphe.extension.newx.misc.NewXCrashCopyReceiver",
-                    "app.morphe.extension.newx.misc.NewXCrashShareReceiver",
                 ).forEach { receiverName ->
                     val receiver = document.createElement("receiver")
                     receiver.setAttribute("android:name", receiverName)

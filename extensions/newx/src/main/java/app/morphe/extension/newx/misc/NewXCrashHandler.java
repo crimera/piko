@@ -195,11 +195,34 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
         Intent intent = new Intent(context, receiver);
         intent.setAction(receiver.getName() + ".ACTION");
         intent.putExtra(EXTRA_CRASH_PATH, report.getAbsolutePath());
+        return PendingIntent.getBroadcast(context, requestCode, intent, pendingIntentFlags());
+    }
+
+    /**
+     * Direct share intent for the notification action. Android 12+ blocks
+     * notification trampolines, so share must not hop through a broadcast
+     * receiver that calls startActivity; it launches the chooser directly.
+     */
+    static PendingIntent shareIntent(Context context, File report) {
+        String text = shareText(report);
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.putExtra(Intent.EXTRA_SUBJECT, "Piko crash log: " + report.getName());
+        share.putExtra(Intent.EXTRA_TEXT, text != null ? text : report.getName());
+        Intent chooser = Intent.createChooser(share, "Share crash log");
+        return PendingIntent.getActivity(context, 1, chooser, pendingIntentFlags());
+    }
+
+    static String shareText(File report) {
+        return readBounded(report, MAX_SHARE_CHARS);
+    }
+
+    private static int pendingIntentFlags() {
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
-        return PendingIntent.getBroadcast(context, requestCode, intent, flags);
+        return flags;
     }
 
     /**
@@ -265,7 +288,7 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
                 .setStyle(new Notification.BigTextStyle().bigText(
                         preview != null ? preview : report.getName()))
                 .addAction(android.R.drawable.ic_menu_share, "Share",
-                        actionIntent(context, NewXCrashShareReceiver.class, report, 1))
+                        shareIntent(context, report))
                 .addAction(android.R.drawable.ic_menu_edit, "Copy",
                         actionIntent(context, NewXCrashCopyReceiver.class, report, 2))
                 .setAutoCancel(true);
@@ -283,11 +306,7 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
             Intent launch = context.getPackageManager()
                     .getLaunchIntentForPackage(context.getPackageName());
             if (launch == null) return null;
-            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                flags |= PendingIntent.FLAG_IMMUTABLE;
-            }
-            return PendingIntent.getActivity(context, 0, launch, flags);
+            return PendingIntent.getActivity(context, 0, launch, pendingIntentFlags());
         } catch (Throwable ignored) {
             return null;
         }

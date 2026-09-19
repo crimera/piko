@@ -1,9 +1,16 @@
 package app.morphe.extension.newx.misc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 /**
  * Guards crash report assembly: a share/copy payload that exceeds the Binder
@@ -11,6 +18,9 @@ import org.junit.Test;
  * its device/app sections is useless for debugging.
  */
 public final class NewXCrashHandlerTest {
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
     @Test
     public void reportContainsAllSections() {
         String report = NewXCrashHandler.formatReport(
@@ -57,6 +67,32 @@ public final class NewXCrashHandlerTest {
             return;
         }
         throw new AssertionError("testCrash did not throw");
+    }
+
+    @Test
+    public void shareTextReadsReportFile() throws Exception {
+        File report = temporaryFolder.newFile("piko-crash-test.txt");
+        Files.write(report.toPath(), "crash body".getBytes(StandardCharsets.UTF_8));
+
+        assertEquals("crash body", NewXCrashHandler.shareText(report));
+    }
+
+    @Test
+    public void shareTextIsBounded() throws Exception {
+        File report = temporaryFolder.newFile("piko-crash-big.txt");
+        byte[] oversized = new byte[NewXCrashHandler.MAX_SHARE_CHARS + 1000];
+        java.util.Arrays.fill(oversized, (byte) 'x');
+        Files.write(report.toPath(), oversized);
+
+        String text = NewXCrashHandler.shareText(report);
+
+        assertTrue(text.endsWith("[text truncated]"));
+        assertTrue(text.length() <= NewXCrashHandler.MAX_SHARE_CHARS + 100);
+    }
+
+    @Test
+    public void shareTextMissingFileIsNull() {
+        assertNull(NewXCrashHandler.shareText(new File("does-not-exist.txt")));
     }
 
     @Test
