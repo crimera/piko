@@ -354,4 +354,6 @@
     <string name="piko_media_like">beğeni</string>
     <string name="piko_media_link">bağlantı</string>
     <string name="piko_media_activity">aktivite</string>
+    <string name="piko_mark_story_seen">Görüldüğü gibi işaretle</string>
+    <string name="piko_story_seen_sent">Görüldüğü gibi işaretlendi</string>
 </resources>

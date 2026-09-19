@@ -148,6 +148,7 @@
     <string name="piko_pref_edit_flag_title">Modifica flag</string>
     <string name="piko_pref_add_flag_title">Aggiungi flag</string>
     <string name="piko_pref_search_flags">Cerca flag</string>
+    <string name="piko_pref_add_selected_flags">Aggiungi selezionati</string>
     <string name="piko_pref_import_flags">Importa le flag</string>
     <string name="piko_pref_export_flags">Esporta le flag</string>
     <string name="piko_pref_reset_flags">Ripristina le flag</string>

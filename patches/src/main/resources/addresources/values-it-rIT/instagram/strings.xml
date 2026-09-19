@@ -37,6 +37,7 @@
     <string name="piko_disable_typing_status">Disabilita lo stato sta scrivendo</string>
     <string name="piko_disable_screenshot_detection">Disabilita il rilevamento degli screenshot</string>
     <string name="piko_view_dm_anonymously">Visualizza i messaggi diretti anonimamente</string>
+    <string name="piko_view_dm_anonymously_desc">Se abilitato, altri non possono vedere quando hai letto i loro messaggi. Quando entrambe queste impostazioni e Attiva tutte le modalità fantasma sono disabilitate, verrà utilizzata l\'impostazione Mostra ricevute di lettura di Instagram</string>
     <string name="piko_turn_on_all_ghost_modes">Attiva tutte le modalità fantasma</string>
     <string name="piko_ghost_modes_on">Modalità fantasma: ON</string>
     <string name="piko_ghost_modes_default">Modalità fantasma: DEFAULT</string>
@@ -70,6 +71,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disabilita analytics</string>
     <string name="piko_delete_analytics_cache">Elimina la cache analytics</string>
+    <string name="piko_disable_analytics_desc">Blocca gli analytics che vengono inviati ai server Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Disabilita scopri le persone</string>
     <string name="piko_disable_discover_people_desc">Disabilita la sezione scopri le persone sul profilo utente</string>
     <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>
@@ -121,13 +123,17 @@
     <string name="piko_unlimited_replays">Rendi permanenti i contenuti temporanei</string>
     <string name="piko_unlimited_replays_desc">Cambia la visualizzazione non scaduta una volta, visualizza due volte i media per la visualizzazione permanente</string>
     <string name="piko_enable_mark_chat_as_read">Abilita l\'opzione per contrassegnare la chat come letta</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Ottieni un\'opzione, premendo a lungo la chat per contrassegnarla come letta. Quando si contrassegna una chat come letta, altri possono vedere che hai letto i loro messaggi, anche quando Visualizza i messaggi diretti in modo anonimo è abilitato</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Scarica file multimediali</string>
+    <string name="piko_category_downloads">Download</string>
     <string name="piko_enable_download">Abilita download</string>
     <string name="piko_enable_direct_download">Abilita download diretto</string>
     <string name="piko_enable_direct_download_desc">Scarica il media attualmente visualizzato senza chiedere per le opzioni</string>
     <string name="piko_download_username_folder">Dividi i file per nome utente</string>
     <string name="piko_download_username_folder_desc">Crea sottocartelle in base al nome utente</string>
+    <string name="piko_embed_download_metadata">Incorpora metadati video</string>
+    <string name="piko_embed_download_metadata_desc">Aggiunge la didascalia, il link del post, il creatore e la data di caricamento del file MP4 scaricato</string>
     <string name="piko_download_current_media">Scarica il media corrente</string>
     <string name="piko_download_as_image">Scarica come immagine</string>
     <string name="piko_video_variants">Varianti video</string>
@@ -168,8 +174,24 @@
     <string name="piko_hide_navigation_direct">Nascondi pulsante messaggi</string>
     <string name="piko_hide_navigation_search">Nascondi il pulsante Cerca</string>
     <string name="piko_hide_navigation_create">Nascondi il pulsante Crea</string>
+    <string name="piko_category_navigation_tabs">Barra di navigazione</string>
+    <string name="piko_navigation_tabs_title">Mostra e riordina le schede</string>
+    <string name="piko_navigation_tabs_summary">Scegli le schede inferiori visibili e trascina per riordinarle</string>
+    <string name="piko_navigation_startup_tab">Scheda di avvio</string>
+    <string name="piko_navigation_startup_tab_summary">Scegli quale scheda si apre all\'avvio dell\'app</string>
+    <string name="piko_navigation_tab_home">Home</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Messaggi</string>
+    <string name="piko_navigation_tab_search">Cerca</string>
+    <string name="piko_navigation_tab_profile">Profilo</string>
+    <string name="piko_navigation_tab_notifications">Notifiche</string>
+    <string name="piko_navigation_tab_create">Crea</string>
+    <string name="piko_navigation_settings_lockout_title">Nessun pulsante impostazioni Piko</string>
+    <string name="piko_navigation_settings_lockout_message">Questa configurazione rimuove ogni voce di impostazioni Piko dalle schede visibili. Puoi ancora aprire le impostazioni Piko premendo a lungo l\'icona dell\'app e selezionando le impostazioni Piko.</string>
     <!-- Information Section -->
     <string name="piko_category_about">Informazioni</string>
+    <string name="piko_export_pref">Esporta impostazioni Piko</string>
+    <string name="piko_import_pref">Importa impostazioni Piko</string>
     <string name="piko_reset_pref">Ripristina impostazioni Piko</string>
     <string name="piko_reset_pref_confirm">Ripristinare impostazioni Piko?</string>
     <string name="piko_reset_pref_success">Ripristino impostazioni Piko</string>
@@ -188,6 +210,7 @@
     <string name="piko_import_fail">Importazione fallita</string>
     <string name="piko_restart_app">L\'applicazione deve essere riavviata affinché le modifiche abbiano effetto</string>
     <string name="piko_ok">OK</string>
+    <string name="piko_reset">Reset</string>
     <string name="piko_cancel">Annulla</string>
     <string name="piko_deleted">Eliminato</string>
     <string name="piko_debug">Debug Piko</string>
@@ -217,9 +240,17 @@
     <string name="piko_no_internet">Connettiti a internet</string>
     <string name="piko_tap_here">Clicca qui!!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Barra d\'azione</string>
+    <string name="piko_action_bar_main_feed">Icone principali della barra d\'azione</string>
+    <string name="piko_action_bar_user_profile">Icone barra d\'azione profilo utente</string>
+    <string name="piko_action_bar_chat">Icone barra d\'azione chat</string>
+    <string name="piko_action_bar_chat_desc">Icone barra d\'azione all\'interno di un DM</string>
+    <string name="piko_action_bar_inbox">Icone barra d\'azione Posta in arrivo</string>
     <string name="piko_action_bar_button_settings_icon">Icona Impostazioni</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Icona modalità fantasma</string>
     <string name="piko_action_bar_button_profile_info_icon">Icona informazioni profilo</string>
+    <string name="piko_action_bar_button_create_icon">Crea icona</string>
+    <string name="piko_action_bar_button_notifications_icon">Icona notifiche</string>
     <string name="piko_settings_on_action_bar">Impostazioni Piko sulla barra delle azioni</string>
     <string name="piko_settings_on_action_bar_desc">Sposta l\'apertura delle impostazioni Piko nella barra delle azioni principale del feed</string>
     <!-- Developer Options Section -->
@@ -230,6 +261,7 @@
     <string name="piko_rec_flags_refresh_file">Aggiorna le opzioni</string>
     <string name="piko_rec_flags_last_modified_at">Ultima modifica: %s</string>
     <!-- Story filters -->
+    <string name="piko_category_filter_content">Filtri dei contenuti</string>
     <string name="piko_filter_story">Filtra Storia</string>
     <string name="piko_filter_story_types_to_hide">Tipi di storie da nascondere</string>
     <string name="piko_reel_type_ads_reel">Reel pubblicitari</string>
@@ -263,6 +295,9 @@
     <string name="piko_view_deleted_messages">Vedi messaggi eliminati</string>
     <string name="piko_all_deleted_messages">Tutti i messaggi eliminati</string>
     <string name="piko_no_deleted_messages">Nessun messaggio ancora eliminato.\nAbilita la funzione e i messaggi verranno salvati al loro arrivo.</string>
+    <string name="piko_all">Tutti</string>
+    <string name="piko_selected_count">%d selezionati</string>
+    <string name="piko_delete_selected_confirm">Eliminare %d messaggi selezionati?</string>
     <string name="piko_delete">Elimina</string>
     <string name="piko_unknown">Sconosciuto</string>
     <string name="piko_tap_to_view">tocca per visualizzare</string>
@@ -287,4 +322,7 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">attività</string>
+    <string name="piko_mark_story_seen">Contrassegna come visto</string>
+    <string name="piko_story_seen_pending">Contrassegnando come visto</string>
+    <string name="piko_story_seen_sent">Contrassegnato come visto</string>
 </resources>

@@ -187,7 +187,7 @@
     <string name="piko_navigation_tab_notifications">通知</string>
     <string name="piko_navigation_tab_create">作成</string>
     <string name="piko_navigation_settings_lockout_title">Piko設定ボタンがありません</string>
-    <string name="piko_navigation_settings_lockout_message">この設定では、表示されているタブからPiko設定を開けません。アプリのアイコンを長押してPiko設定を選択することでPiko設定を開けます。</string>
+    <string name="piko_navigation_settings_lockout_message">この設定では、表示されているタブからPiko設定を開けません。アプリのアイコンを長押ししてPiko設定を選択することでPiko設定を開けます。</string>
     <!-- Information Section -->
     <string name="piko_category_about">概要</string>
     <string name="piko_export_pref">Piko設定をエクスポート</string>
