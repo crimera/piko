@@ -97,7 +97,7 @@ They fail with `PatchException` containing the label, cardinality, and candidate
 7. **Mutate minimally.** Preserve register widths, invoke/result pairing, labels, reachability, value representation, and unrelated callers. Mutate from high indexes downward or rematch after edits.
 8. **Build and patch exclusively.** Build the real MPP, patch the exact APK, and confirm the intended patches report `Applied` and `Saved to`.
 9. **Validate proportionally.** After a failure or explicit deep-validation request, inspect final DEX reachability and run focused old/new runtime tests. Include negative/control paths, not just the modified path.
-10. **Document evidence.** Record the target anchors, discarded anchors, cardinality, before/after hook, supported versions, and known limits so the next agent can improve the resolver instead of rediscovering it.
+10. **Document evidence.** Record the target anchors, discarded anchors, cardinality, before/after hook, supported versions, and known limits so the next agent can improve the resolver instead of rediscovering it. After modifying NewX patch or extension sources, run `graphify update .` so the knowledge graph stays current.
 
 ### Test policy
 

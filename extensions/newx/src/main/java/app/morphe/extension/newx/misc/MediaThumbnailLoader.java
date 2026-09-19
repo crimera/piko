@@ -1,20 +1,25 @@
 package app.morphe.extension.newx.misc;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.LruCache;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,7 +29,7 @@ import app.morphe.extension.newx.utils.NewXUtils;
 
 /** Loads small media previews without blocking the UI thread. */
 public final class MediaThumbnailLoader {
-    private static final int MAX_CACHE_KILOBYTES = 4 * 1024;
+    private static final int MAX_CACHE_KILOBYTES = 8 * 1024;
     private static final int MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024;
     private static final int TARGET_SIZE_PX = 256;
     private static final int CONNECT_TIMEOUT_MILLIS = 6_000;
@@ -35,7 +40,7 @@ public final class MediaThumbnailLoader {
     private static final String GLIDE_DIAGNOSTIC_LOG_PREFIX =
             "[PikoNewX][Thumbnail][GlideDiag] ";
 
-    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(3);
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4);
     private static final AtomicInteger NEXT_REQUEST_ID = new AtomicInteger();
     private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
     private static final LruCache<String, Bitmap> CACHE = new LruCache<>(MAX_CACHE_KILOBYTES) {
@@ -63,10 +68,6 @@ public final class MediaThumbnailLoader {
             Callback callback
     ) {
         if (callback == null) return;
-        // The synchronous section below runs on the caller (often UI) thread.
-        // Skip id allocation and log lambdas there when logging is off; the
-        // background executor section keeps plain printInfo calls (one cheap
-        // gate check each, negligible next to bitmap/network work).
         boolean loggingEnabled = NewXLogger.isLoggingEnabled();
         if (!NewXUtils.isHttpUrl(networkUrl)) {
             if (loggingEnabled) {
@@ -104,42 +105,149 @@ public final class MediaThumbnailLoader {
         }
         if (cached != null) {
             CACHE.remove(networkUrl);
-            if (loggingEnabled) {
-                NewXLogger.printInfo(() -> LOG_PREFIX +
-                        "request #" + requestId + " removed recycled extension-cache bitmap");
-            }
         }
 
         EXECUTOR.execute(() -> {
+            // 1. Try Glide/Coil memory cache with exact cacheUrl
             Bitmap bitmap = findCachedThumbnail(context, cacheUrl, requestId);
-            boolean memoryCacheHit = bitmap != null;
+            String source = "image-loader memory cache";
+
+            // 2. Try Glide/Coil memory cache with base media key (matches any size cached by the app)
             if (bitmap == null) {
-                NewXLogger.printInfo(() -> LOG_PREFIX +
-                        "request #" + requestId + " thumbnail cache miss; falling back to network");
-                bitmap = fetch(networkUrl, requestId);
+                String baseKey = baseMediaKey(networkUrl);
+                if (baseKey != null && !baseKey.equals(cacheUrl)) {
+                    bitmap = findCachedThumbnail(context, baseKey, requestId);
+                }
             }
+
+            // 3. Try local disk cache
+            if (bitmap == null) {
+                bitmap = findDiskCachedThumbnail(context, networkUrl, cacheUrl, requestId);
+                if (bitmap != null) {
+                    source = "disk cache";
+                }
+            }
+
+            // 4. Fetch from network and save to disk cache
+            if (bitmap == null) {
+                String fetchUrl = cacheUrl != null ? cacheUrl : networkUrl;
+                bitmap = fetchAndCache(context, fetchUrl, networkUrl, requestId);
+                if (bitmap != null) {
+                    source = "network";
+                }
+            }
+
             if (bitmap == null) {
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " failed; no thumbnail available");
                 return;
             }
 
-            String source = memoryCacheHit ? "image-loader memory cache" : "network";
             CACHE.put(networkUrl, bitmap);
             Bitmap loaded = bitmap;
+            String loadedSource = source;
             NewXLogger.printInfo(() -> LOG_PREFIX +
-                    "request #" + requestId + " completed source=" + source +
+                    "request #" + requestId + " completed source=" + loadedSource +
                             " size=" + dimensions(loaded) +
                             " extensionCache=" + CACHE.size() + "/" + CACHE.maxSize() + "KB"
             );
             MAIN_HANDLER.post(() -> {
                 if (NewXLogger.isLoggingEnabled()) {
                     NewXLogger.printInfo(() -> LOG_PREFIX +
-                            "request #" + requestId + " delivered to picker source=" + source);
+                            "request #" + requestId + " delivered source=" + loadedSource);
                 }
                 callback.onLoaded(loaded);
             });
         });
+    }
+
+    private static String baseMediaKey(String url) {
+        if (url == null) return null;
+        try {
+            Uri uri = Uri.parse(url);
+            String path = uri.getPath();
+            if (path != null) {
+                int lastSlash = path.lastIndexOf('/');
+                if (lastSlash >= 0 && lastSlash + 1 < path.length()) {
+                    String filename = path.substring(lastSlash + 1);
+                    int dot = filename.indexOf('.');
+                    return dot > 0 ? filename.substring(0, dot) : filename;
+                }
+            }
+        } catch (RuntimeException ignored) {
+        }
+        return url;
+    }
+
+    private static File getDiskCacheDir(Context context) {
+        if (context == null) return null;
+        try {
+            File cacheDir = new File(context.getCacheDir(), "piko_media_cache");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+            return cacheDir;
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    private static String hashKey(String url) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] digest = md.digest(url.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            return sb.toString();
+        } catch (Throwable t) {
+            return Integer.toHexString(url.hashCode());
+        }
+    }
+
+    private static Bitmap findDiskCachedThumbnail(
+            Context context,
+            String networkUrl,
+            String cacheUrl,
+            int requestId
+    ) {
+        File cacheDir = getDiskCacheDir(context);
+        if (cacheDir == null) return null;
+
+        String[] keys = new String[]{networkUrl, cacheUrl};
+        for (String key : keys) {
+            if (key == null) continue;
+            File file = new File(cacheDir, hashKey(key));
+            if (file.exists() && file.length() > 0) {
+                try {
+                    Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                    if (bitmap != null) {
+                        NewXLogger.printInfo(() -> LOG_PREFIX +
+                                "request #" + requestId + " disk cache hit: " + file.getName());
+                        return fitToTarget(bitmap);
+                    }
+                } catch (Throwable ignored) {
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void saveToDiskCache(Context context, String key, byte[] data) {
+        if (context == null || key == null || data == null || data.length == 0) return;
+        File cacheDir = getDiskCacheDir(context);
+        if (cacheDir == null) return;
+        try {
+            File file = new File(cacheDir, hashKey(key));
+            File temp = new File(cacheDir, hashKey(key) + ".tmp");
+            try (FileOutputStream fos = new FileOutputStream(temp)) {
+                fos.write(data);
+                fos.flush();
+            }
+            temp.renameTo(file);
+        } catch (Throwable ignored) {
+        }
     }
 
     private static Bitmap findCachedThumbnail(
@@ -148,9 +256,6 @@ public final class MediaThumbnailLoader {
             int requestId
     ) {
         if (context == null || !NewXUtils.isHttpUrl(cacheUrl)) {
-            NewXLogger.printInfo(() -> LOG_PREFIX +
-                    "request #" + requestId +
-                            " skipped thumbnail cache lookup: no valid cache URL/context");
             return null;
         }
 
@@ -159,16 +264,9 @@ public final class MediaThumbnailLoader {
         try {
             Object cached = getCachedThumbnail(context, cacheUrl);
             if (!(cached instanceof Bitmap bitmap)) {
-                NewXLogger.printInfo(() -> LOG_PREFIX +
-                        "request #" + requestId + " thumbnail cache lookup miss result=" +
-                                (cached == null ? "null" : cached.getClass().getName())
-                );
                 return null;
             }
             if (bitmap.isRecycled()) {
-                NewXLogger.printInfo(() -> LOG_PREFIX +
-                        "request #" + requestId +
-                                " thumbnail cache lookup returned recycled bitmap");
                 return null;
             }
 
@@ -257,12 +355,17 @@ public final class MediaThumbnailLoader {
         return null;
     }
 
-    private static Bitmap fetch(String url, int requestId) {
+    private static Bitmap fetchAndCache(
+            Context context,
+            String downloadUrl,
+            String networkUrl,
+            int requestId
+    ) {
         HttpURLConnection connection = null;
         NewXLogger.printInfo(() -> LOG_PREFIX +
-                "request #" + requestId + " network fetch start url=" + describeUrl(url));
+                "request #" + requestId + " network fetch start url=" + describeUrl(downloadUrl));
         try {
-            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection = (HttpURLConnection) new URL(downloadUrl).openConnection();
             connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
             connection.setReadTimeout(READ_TIMEOUT_MILLIS);
             connection.setInstanceFollowRedirects(true);
@@ -292,6 +395,12 @@ public final class MediaThumbnailLoader {
                     NewXLogger.printInfo(() -> LOG_PREFIX +
                             "request #" + requestId + " network response could not be read");
                     return null;
+                }
+
+                // Persist to disk cache
+                saveToDiskCache(context, networkUrl, data);
+                if (downloadUrl != null && !downloadUrl.equals(networkUrl)) {
+                    saveToDiskCache(context, downloadUrl, data);
                 }
 
                 Bitmap bitmap = decode(data);

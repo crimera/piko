@@ -73,6 +73,7 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar ../piko/morphe-desktop-1.11.0-all.jar pa
   -e "NewX: Hide AI-generated posts" \
   -e "NewX: Hide posts by verified account type" \
   -e "NewX: Set default media tab" \
+  -e "NewX: Gallery profile Photos tab" \
   -e "NewX: Set default profile post sorting" \
   -e "NewX: Custom font" \
   -e "NewX: Custom sharing domain" \

@@ -44,6 +44,8 @@
     <string name="piko_newx_hide_post_reply_bar_summary">Hides the persistent reply bar in post details while keeping the compose button available</string>
     <string name="piko_newx_hide_ai_generated_posts_title">Hide AI-generated posts</string>
     <string name="piko_newx_hide_ai_generated_posts_summary">Hides selected AI-generated posts from NewX timelines</string>
+    <string name="piko_newx_hide_grok_title">Hide Grok buttons</string>
+    <string name="piko_newx_hide_grok_summary">Removes Grok buttons from posts, post details, and profile headers</string>
     <string name="piko_newx_hide_ai_generated_posts_user_marked">User-marked</string>
     <string name="piko_newx_hide_ai_generated_posts_auto_detected">Automatically detected</string>
     <string name="piko_newx_hide_ai_generated_posts_source_not_identified">AI source not identified</string>
@@ -94,6 +96,8 @@
     <string name="piko_newx_remember_reply_sorting_summary">Uses your last selected reply-sort order instead of the default</string>
     <string name="piko_newx_media_tab_default_title">Default media tab</string>
     <string name="piko_newx_media_tab_default_summary">Default sub-tab shown when opening a profile media tab</string>
+    <string name="piko_newx_gallery_profile_photos_title">Gallery layout for Photos tab</string>
+    <string name="piko_newx_gallery_profile_photos_summary">Replaces the profile Photos timeline with a 3-column media gallery</string>
     <string name="piko_newx_profile_post_sort_default_title">Default profile post sorting</string>
     <string name="piko_newx_profile_post_sort_default_summary">Default order shown when opening profile posts (Most recent or Popular)</string>
     <string name="piko_newx_profile_post_sort_latest">Most recent</string>
