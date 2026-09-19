@@ -177,6 +177,12 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
     }
 
+    // Receives the original shouldShowFollowButton() result; can only turn true into false.
+    public static boolean showReelsFollowButton(boolean original) {
+        boolean hide = SharedPref.getBooleanPref(Settings.HIDE_REELS_FOLLOW_BUTTON) && SettingsStatus.hideReelsFollowButton;
+        return original && !hide;
+    }
+
     public static boolean enableDevOptions() {
         return SharedPref.getBooleanPref(Settings.DEVELOPER_OPTIONS);
     }
