@@ -207,6 +207,8 @@
     <string name="piko_newx_post_option_repost">Repost</string>
     <string name="piko_newx_post_option_like">Like</string>
     <string name="piko_newx_post_option_dislike">Dislike</string>
+    <string name="piko_newx_post_option_view_interactions">View post interactions</string>
+    <string name="piko_newx_post_option_view_hidden_replies">View hidden replies</string>
     <string name="piko_newx_post_option_view_analytics">View analytics</string>
     <string name="piko_newx_post_option_change_reply_permission">Change who can reply</string>
     <string name="piko_newx_post_option_add_to_list">Add to list</string>
