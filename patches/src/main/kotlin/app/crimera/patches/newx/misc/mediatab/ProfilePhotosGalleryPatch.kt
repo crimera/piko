@@ -19,7 +19,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
@@ -651,17 +650,25 @@ private data class NativeMethodCall(
 )
 
 private data class NativePhotoViewerTarget(
-    val method: MutableMethod,
-    val postParameterIndex: Int,
-    val postHandleGetter: NativeMethodCall,
-    val handleIdGetter: NativeMethodCall,
-    val idStringGetter: NativeMethodCall,
     val mediaGetter: NativeMethodCall,
     val routeConstructor: NativeMethodCall,
     val routeClass: String,
     val routeMediaType: String,
-    val navigationField: FieldReference,
     val navigationCall: NativeMethodCall,
+)
+
+private data class ItemClickViewerTarget(
+    val ownerType: String,
+    val methodName: String,
+    val parameterTypes: List<String>,
+    val itemEventType: String,
+    val itemEventField: String,
+    val navigationField: String,
+)
+
+private data class ItemMediaDelegate(
+    val itemType: String,
+    val holderField: String?,
 )
 
 context(context: BytecodePatchContext)
@@ -757,10 +764,6 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
     }
     val hostMethod = requireExactlyOne("NewX post media event handler", hostMethods)
     val postType = dispatch.second.parameterTypes[1].toString()
-    val postParameterIndex = hostMethod.parameterTypes.indexOfFirst { it.toString() == postType }
-    if (postParameterIndex < 0) {
-        throw PatchException("NewX post media event handler lost its post model parameter: $hostMethod")
-    }
 
     val routeCandidates = buildList {
         hostMethod.instructions
@@ -800,21 +803,6 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
     val routeMediaType = route.second.parameterTypes.single().toString()
 
     val postClass = context.mutableClassDefBy(postType)
-    fun hasIdAccessor(type: String): Boolean {
-        val valueClass = runCatching { context.mutableClassDefBy(type) }.getOrNull()
-            ?: return false
-        val methods = valueClass.methods + valueClass.interfaces.flatMap { interfaceType ->
-            runCatching { context.mutableClassDefBy(interfaceType.toString()) }
-                .getOrNull()
-                ?.methods
-                .orEmpty()
-        }
-        return methods.any {
-            it.name == "getId" &&
-                it.parameterTypes.isEmpty() &&
-                it.returnType.toString().startsWith("L")
-        }
-    }
     val postAccessors =
         (postClass.methods + postClass.interfaces.flatMap { interfaceType ->
             runCatching { context.mutableClassDefBy(interfaceType.toString()) }
@@ -839,61 +827,10 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
     val mediaGetters = usedPostAccessors.filter {
         it.parameterTypes.isEmpty() && it.returnType.toString() == timelineListDescriptor
     }
-    val handleGetters = usedPostAccessors.filter {
-        it.parameterTypes.isEmpty() &&
-            it.returnType.toString().startsWith("L") &&
-            it.returnType.toString() != timelineListDescriptor &&
-            hasIdAccessor(it.returnType.toString())
-    }
-    val postContract = requireExactlyOne(
-        label = "NewX post media model contract for $postType list=$timelineListDescriptor " +
-            "media=${mediaGetters.joinToString { it.toString() }} " +
-            "handles=${handleGetters.joinToString { it.toString() }}",
-        candidates = listOfNotNull(
-            if (mediaGetters.size == 1 && handleGetters.size == 1) {
-                Triple(postClass, mediaGetters.single(), handleGetters.single())
-            } else {
-                null
-            },
-        ),
-    )
-    val mediaGetter = postContract.second.toNativeCall()
-    val postHandleGetter = postContract.third.toNativeCall()
-
-    val handleClass = context.mutableClassDefBy(postContract.third.returnType.toString())
-    val handleIdGetters =
-        handleClass.methods.filter {
-            it.name == "getId" &&
-                it.parameterTypes.isEmpty() &&
-                it.returnType.toString().startsWith("L")
-        } + handleClass.interfaces.flatMap { interfaceType ->
-            runCatching { context.mutableClassDefBy(interfaceType.toString()) }
-                .getOrNull()
-                ?.methods
-                ?.filter {
-                    it.name == "getId" &&
-                        it.parameterTypes.isEmpty() &&
-                        it.returnType.toString().startsWith("L")
-                }
-                .orEmpty()
-        }
-    val handleIdGetter = requireExactlyOne(
-        label = "NewX post id handle accessor",
-        candidates = handleIdGetters.distinctBy { it.toNativeCall().descriptor },
-    ).toNativeCall()
-    val idType = handleIdGetters
-        .distinctBy { it.toNativeCall().descriptor }
-        .single { it.toNativeCall().descriptor == handleIdGetter.descriptor }
-        .returnType
-        .toString()
-    val idClass = context.mutableClassDefBy(idType)
-    val idStringGetter = requireExactlyOne(
-        label = "NewX post id string accessor",
-        candidates = idClass.methods.filter {
-            it.name != "toString" &&
-                it.parameterTypes.isEmpty() &&
-                it.returnType.toString() == STRING
-        },
+    val mediaGetter = requireExactlyOne(
+        label = "NewX post media list accessor for $postType list=$timelineListDescriptor " +
+            "media=${mediaGetters.joinToString { it.toString() }}",
+        candidates = mediaGetters.distinctBy { it.toNativeCall().descriptor },
     ).toNativeCall()
 
     // Controller, destination, and navigate call are all derived from the call graph:
@@ -922,20 +859,13 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
                 "${field.type}->${field.name} ${method.name}($destination,Z)V"
             },
         )
-    val navigationField = navigation.first
     val navigationCall = navigation.second.toNativeCall()
 
     return NativePhotoViewerTarget(
-        method = hostMethod,
-        postParameterIndex = postParameterIndex,
-        postHandleGetter = postHandleGetter,
-        handleIdGetter = handleIdGetter,
-        idStringGetter = idStringGetter,
         mediaGetter = mediaGetter,
         routeConstructor = routeConstructor,
         routeClass = routeClass,
         routeMediaType = routeMediaType,
-        navigationField = navigationField,
         navigationCall = navigationCall,
     )
 }
@@ -947,56 +877,228 @@ private fun receiverRegister(method: Method): Int {
     return implementation.registerCount - parameterWidth - 1
 }
 
-private fun nativePhotoViewerInstructions(target: NativePhotoViewerTarget): String {
-    val postRegister = parameterRegister(target.method, target.postParameterIndex)
-    val receiverRegister = receiverRegister(target.method)
-    val navigationField = target.navigationField.toSmaliDescriptor()
+private fun itemClickViewerInstructions(
+    event: NativePhotoViewerTarget,
+    target: ItemClickViewerTarget,
+    delegates: List<ItemMediaDelegate>,
+    eventRegister: Int,
+    receiverRegister: Int,
+): String {
+    val mediaOwner = event.mediaGetter.descriptor.substringBefore("->")
+    val delegateCascade = delegates.mapIndexed { index, delegate ->
+        val holderRead = delegate.holderField?.let { "iget-object v0, v0, $it" }.orEmpty()
+        """
+            instance-of v1, v0, ${delegate.itemType}
+            if-eqz v1, :piko_newx_gallery_next_$index
+            check-cast v0, ${delegate.itemType}
+            $holderRead
+            check-cast v0, $mediaOwner
+            goto :piko_newx_gallery_have_post
+            :piko_newx_gallery_next_$index
+        """.trimIndent()
+    }.joinToString("\n")
+    // NOTE: instance-of is format 22c (both registers 4-bit). The event parameter
+    // lives in a high register, so it must be copied down with move-object/from16
+    // first; referencing it directly drops the instruction at assembly time and
+    // breaks verification (if-eqz on an undefined register).
     return """
-        move-object/from16 v0, v$postRegister
-        ${target.postHandleGetter.opcode} {v0}, ${target.postHandleGetter.descriptor}
-        move-result-object v0
-        ${target.handleIdGetter.opcode} {v0}, ${target.handleIdGetter.descriptor}
-        move-result-object v0
-        ${target.idStringGetter.opcode} {v0}, ${target.idStringGetter.descriptor}
-        move-result-object v0
-        invoke-static {v0}, $GALLERY_EXTENSION->peekPendingPhotoIndex(Ljava/lang/String;)I
+        move-object/from16 v0, v$eventRegister
+        instance-of v1, v0, ${target.itemEventType}
+        if-eqz v1, :piko_newx_gallery_original
+        check-cast v0, ${target.itemEventType}
+        iget-object v0, v0, ${target.itemEventField}
+        move-object v2, v0
+        $delegateCascade
+        goto :piko_newx_gallery_original
+        :piko_newx_gallery_have_post
+        invoke-static {v2}, $GALLERY_EXTENSION->takePendingPhotoIndex(Ljava/lang/Object;)I
         move-result v1
-        if-ltz v1, :piko_newx_native_photo_original
-        move-object/from16 v0, v$postRegister
-        ${target.mediaGetter.opcode} {v0}, ${target.mediaGetter.descriptor}
+        if-ltz v1, :piko_newx_gallery_original
+        ${event.mediaGetter.opcode} {v0}, ${event.mediaGetter.descriptor}
         move-result-object v2
         invoke-interface {v2}, $JAVA_LIST->size()I
         move-result v3
-        if-ltz v1, :piko_newx_native_photo_clear
-        if-ge v1, v3, :piko_newx_native_photo_clear
+        invoke-static {v3, v1}, $GALLERY_EXTENSION->reportGalleryTap(II)V
+        if-ltz v1, :piko_newx_gallery_clear
+        if-ge v1, v3, :piko_newx_gallery_clear
         invoke-interface {v2, v1}, $JAVA_LIST->get(I)$OBJECT
         move-result-object v4
-        check-cast v4, ${target.routeMediaType}
-        new-instance v5, ${target.routeClass}
-        invoke-direct {v5, v4}, ${target.routeConstructor.descriptor}
+        check-cast v4, ${event.routeMediaType}
+        new-instance v5, ${event.routeClass}
+        invoke-direct {v5, v4}, ${event.routeConstructor.descriptor}
         invoke-static {}, $GALLERY_EXTENSION->clearPendingPhoto()V
         move-object/from16 v7, v$receiverRegister
-        iget-object v6, v7, $navigationField
+        iget-object v6, v7, ${target.navigationField}
         const/4 v7, 0
-        ${target.navigationCall.opcode} {v6, v5, v7}, ${target.navigationCall.descriptor}
+        ${event.navigationCall.opcode} {v6, v5, v7}, ${event.navigationCall.descriptor}
         return-void
-        :piko_newx_native_photo_clear
+        :piko_newx_gallery_clear
         invoke-static {}, $GALLERY_EXTENSION->clearPendingPhoto()V
-        :piko_newx_native_photo_original
+        :piko_newx_gallery_original
     """.trimIndent()
 }
 
 context(context: BytecodePatchContext)
-private fun patchNativePhotoViewer() {
-    val target = resolveNativePhotoViewerTarget()
-    val owner = context.mutableClassDefBy(target.method.definingClass)
-    val expanded = target.method.cloneMutable(additionalRegisters = 8)
-    owner.methods.remove(target.method)
-    owner.methods.add(expanded)
-    expanded.addInstructions(
-        0,
-        nativePhotoViewerInstructions(target.copy(method = expanded)),
+private fun resolveItemClickViewerTargets(
+    event: NativePhotoViewerTarget,
+): Pair<List<ItemClickViewerTarget>, List<ItemMediaDelegate>> {
+    // The gallery tap invokes the timeline item-click callback, which wraps the item
+    // in an item-click event (x0 wrapping the o0 item) and dispatches it to the URT
+    // component. Hooking the media-tap handler (g5.z) can never fire from that path,
+    // so the divert moves to the item-event consumers instead.
+    val mediaOwner = event.mediaGetter.descriptor.substringBefore("->")
+    val navigationOwner = event.navigationCall.descriptor.substringBefore("->")
+    val classDefs = allClassDefs(context)
+    val classByType = classDefs.associateBy { it.type.toString() }
+
+    val closures = mutableMapOf<String, Set<String>>()
+    fun closure(type: String): Set<String> {
+        closures[type]?.let { return it }
+        closures[type] = emptySet()
+        val classDef = classByType[type] ?: return emptySet()
+        val result = mutableSetOf(type)
+        classDef.interfaces.mapTo(result) { it.toString() }
+        classDef.interfaces.forEach { result.addAll(closure(it.toString())) }
+        classDef.superclass?.toString()?.let { result.addAll(closure(it)) }
+        closures[type] = result
+        return result
+    }
+    fun implements(classType: String, target: String): Boolean = target in closure(classType)
+
+    // Item-click event fields: the single instance field of a final event class whose type
+    // is an interface that a media holder also implements. On this target that is x0.a:o0
+    // with the j1 timeline item delegating its u5 media contract to its o6 holder field.
+    data class ItemEvent(val field: String, val eventType: String, val itemType: String)
+    val itemEvents = classDefs.mapNotNull { classDef ->
+        val type = classDef.type.toString()
+        if (!AccessFlags.FINAL.isSet(classDef.accessFlags)) return@mapNotNull null
+        if (AccessFlags.INTERFACE.isSet(classDef.accessFlags)) return@mapNotNull null
+        if (AccessFlags.ABSTRACT.isSet(classDef.accessFlags)) return@mapNotNull null
+        val instanceFields = classDef.fields.filter { !AccessFlags.STATIC.isSet(it.accessFlags) }
+        if (instanceFields.size != 1) return@mapNotNull null
+        val field = instanceFields[0]
+        val itemType = field.type.toString()
+        if (!itemType.startsWith("L")) return@mapNotNull null
+        // The gallery tap wraps a timeline item model (o0 in the timelines scope),
+        // not a bare media holder (o6 is also wrapped elsewhere, e.g. NFL events).
+        if (!itemType.startsWith(TIMELINE_MODEL_SCOPE)) return@mapNotNull null
+        val itemClass = classByType[itemType] ?: return@mapNotNull null
+        if (!AccessFlags.INTERFACE.isSet(itemClass.accessFlags)) return@mapNotNull null
+        val heldByMediaHolder = classDefs.any { candidate ->
+            val candidateType = candidate.type.toString()
+            !AccessFlags.INTERFACE.isSet(candidate.accessFlags) &&
+                !AccessFlags.ABSTRACT.isSet(candidate.accessFlags) &&
+                implements(candidateType, itemType) &&
+                implements(candidateType, mediaOwner)
+        }
+        if (!heldByMediaHolder) return@mapNotNull null
+        ItemEvent(field.toSmaliDescriptor(), type, itemType)
+    }
+    val itemEvent = requireExactlyOne(
+        "NewX gallery item-click event",
+        itemEvents,
     )
+
+    // Media delegates: concrete item models carrying the u5 media contract, either
+    // directly (the post model itself) or through a single holder field (j1.a:o6).
+    // Item types without media fall through to the original handler per tap.
+    val delegates = classDefs.mapNotNull { classDef ->
+        val type = classDef.type.toString()
+        if (AccessFlags.INTERFACE.isSet(classDef.accessFlags)) return@mapNotNull null
+        if (AccessFlags.ABSTRACT.isSet(classDef.accessFlags)) return@mapNotNull null
+        if (!implements(type, itemEvent.itemType)) return@mapNotNull null
+        if (implements(type, mediaOwner)) return@mapNotNull ItemMediaDelegate(type, null)
+        val holderFields = classDef.fields.filter { field ->
+            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                field.type.toString().startsWith("L") &&
+                implements(field.type.toString(), mediaOwner)
+        }
+        if (holderFields.size != 1) return@mapNotNull null
+        ItemMediaDelegate(type, holderFields[0].toSmaliDescriptor())
+    }
+    if (delegates.isEmpty()) {
+        throw PatchException(
+            "NewX gallery item-click media delegates: no ${itemEvent.itemType} model carries $mediaOwner",
+        )
+    }
+
+    // Hook methods: instance void methods taking a single interface parameter implemented
+    // by the event class, reading the item field. The gallery tap reaches them through
+    // the item-click callback; without a pending entry the preamble falls through, so
+    // hooking every consumer is behavior-preserving.
+    val targets = mutableListOf<ItemClickViewerTarget>()
+    classDefs.forEach { classDef ->
+        val ownerType = classDef.type.toString()
+        classDef.methods.forEach methodLoop@{ method ->
+            if (AccessFlags.STATIC.isSet(method.accessFlags)) return@methodLoop
+            if (method.returnType.toString() != VOID_DESCRIPTOR) return@methodLoop
+            if (method.parameterTypes.size != 1) return@methodLoop
+            val parameterType = method.parameterTypes.single().toString()
+            if (!parameterType.startsWith("L")) return@methodLoop
+            val parameterClass = classByType[parameterType] ?: return@methodLoop
+            if (!AccessFlags.INTERFACE.isSet(parameterClass.accessFlags)) return@methodLoop
+            val instructions = method.implementation?.instructions?.toList() ?: return@methodLoop
+            if (!implements(itemEvent.eventType, parameterType)) return@methodLoop
+            val readsItem = instructions.any { instruction ->
+                if (instruction.opcode != Opcode.IGET_OBJECT) return@any false
+                (instruction as? ReferenceInstruction)?.reference?.toString() == itemEvent.field
+            }
+            if (!readsItem) return@methodLoop
+            val navigationFields = classDef.fields.filter { field ->
+                !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                    field.type.toString() == navigationOwner
+            }
+            val navigationField = requireExactlyOne(
+                "NewX gallery item-click navigation field in $ownerType",
+                navigationFields,
+            )
+            targets.add(
+                ItemClickViewerTarget(
+                    ownerType = ownerType,
+                    methodName = method.name.toString(),
+                    parameterTypes = method.parameterTypes.map(CharSequence::toString),
+                    itemEventType = itemEvent.eventType,
+                    itemEventField = itemEvent.field,
+                    navigationField = navigationField.toSmaliDescriptor(),
+                ),
+            )
+        }
+    }
+    if (targets.isEmpty()) {
+        throw PatchException(
+            "NewX gallery item-click viewer targets: no item-event consumer with a navigation controller found",
+        )
+    }
+    return targets.distinct() to delegates
+}
+
+context(context: BytecodePatchContext)
+private fun patchItemClickPhotoViewer() {
+    val event = resolveNativePhotoViewerTarget()
+    val (targets, delegates) = resolveItemClickViewerTargets(event)
+    targets.forEach { target ->
+        val owner = context.mutableClassDefBy(target.ownerType)
+        val method = requireExactlyOne(
+            "NewX gallery item-click viewer method ${target.ownerType}->${target.methodName}",
+            owner.methods.filter { method ->
+                method.name.toString() == target.methodName &&
+                    method.parameterTypes.map(CharSequence::toString) == target.parameterTypes
+            },
+        )
+        val expanded = method.cloneMutable(additionalRegisters = 8)
+        owner.methods.remove(method)
+        owner.methods.add(expanded)
+        expanded.addInstructions(
+            0,
+            itemClickViewerInstructions(
+                event = event,
+                target = target,
+                delegates = delegates,
+                eventRegister = parameterRegister(expanded, 0),
+                receiverRegister = receiverRegister(expanded),
+            ),
+        )
+    }
 }
 
 private fun galleryInstructions(
@@ -1151,6 +1253,6 @@ val newXProfilePhotosGalleryPatch =
                 ),
             )
             patchPagingEventBridge(pagingEvent)
-            patchNativePhotoViewer()
+            patchItemClickPhotoViewer()
         }
     }

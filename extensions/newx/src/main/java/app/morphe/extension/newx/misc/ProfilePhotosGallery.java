@@ -42,29 +42,49 @@ public final class ProfilePhotosGallery {
 
     private static final Object PENDING_PHOTO_LOCK = new Object();
     private static final long PENDING_PHOTO_TIMEOUT_MS = 1500L;
-    private static String pendingPhotoPostId;
+    private static Object pendingPhotoItem;
     private static int pendingPhotoIndex = -1;
+    private static long pendingPhotoToken;
+    private static long pendingPhotoTokenSource;
     private static long pendingPhotoExpiresAt;
 
-    public static void requestNativePhoto(String postId, int photoIndex) {
-        if (postId == null || postId.trim().isEmpty() || photoIndex < 0) return;
+    // The pending tap is keyed by timeline-item identity, not by post id string.
+    // The patched handler receives the exact same item object the gallery invoked
+    // the click callback with, so identity matching is immune to id-format drift
+    // between toString parsing and the obfuscated id accessors.
+    public static long requestNativePhoto(Object item, int photoIndex) {
+        if (item == null || photoIndex < 0) return -1L;
         synchronized (PENDING_PHOTO_LOCK) {
-            pendingPhotoPostId = postId;
+            pendingPhotoItem = item;
             pendingPhotoIndex = photoIndex;
+            pendingPhotoTokenSource++;
+            pendingPhotoToken = pendingPhotoTokenSource;
             pendingPhotoExpiresAt = System.currentTimeMillis() + PENDING_PHOTO_TIMEOUT_MS;
+            return pendingPhotoToken;
         }
     }
 
-    public static int peekPendingPhotoIndex(String postId) {
-        if (postId == null) return -1;
+    public static int takePendingPhotoIndex(Object item) {
+        if (item == null) return -1;
         synchronized (PENDING_PHOTO_LOCK) {
             if (pendingPhotoIndex < 0
-                    || !postId.equals(pendingPhotoPostId)
+                    || pendingPhotoItem != item && !item.equals(pendingPhotoItem)
                     || System.currentTimeMillis() > pendingPhotoExpiresAt) {
                 clearPendingPhotoLocked();
                 return -1;
             }
-            return pendingPhotoIndex;
+            int index = pendingPhotoIndex;
+            clearPendingPhotoLocked();
+            return index;
+        }
+    }
+
+    public static boolean isPendingPhotoToken(long token) {
+        synchronized (PENDING_PHOTO_LOCK) {
+            return token >= 0
+                    && pendingPhotoIndex >= 0
+                    && pendingPhotoToken == token
+                    && System.currentTimeMillis() <= pendingPhotoExpiresAt;
         }
     }
 
@@ -75,7 +95,7 @@ public final class ProfilePhotosGallery {
     }
 
     private static void clearPendingPhotoLocked() {
-        pendingPhotoPostId = null;
+        pendingPhotoItem = null;
         pendingPhotoIndex = -1;
         pendingPhotoExpiresAt = 0L;
     }
@@ -338,6 +358,15 @@ public final class ProfilePhotosGallery {
 
     private static void logPagination(String message) {
         NewXLogger.printInfo(() -> PAGINATION_LOG_PREFIX + message);
+    }
+
+    /**
+     * Patch-time diagnostic: reports what the injected viewer preamble resolved for
+     * a tap (media list size, requested index). Stable signature so the patch can
+     * call it across releases.
+     */
+    public static void reportGalleryTap(int mediaSize, int photoIndex) {
+        logPagination("tap resolved mediaSize=" + mediaSize + " photoIndex=" + photoIndex);
     }
 
     private static void logPaginationFailure(String message, Throwable throwable) {
@@ -676,11 +705,23 @@ public final class ProfilePhotosGallery {
                 postId = NewXUtils.sourcePostId(cell.timelineItem);
             } catch (RuntimeException ignored) {
             }
+            final String callbackType = itemClickCallback == null
+                    ? "null"
+                    : itemClickCallback.getClass().getName();
+            final String itemType = cell.timelineItem == null
+                    ? "null"
+                    : cell.timelineItem.getClass().getName();
+            logPagination("photo tap postId=" + postId
+                    + " photoIndex=" + cell.photoIndex
+                    + " callback=" + callbackType
+                    + " item=" + itemType);
 
-            if (postId != null
-                    && !postId.equals("post")
-                    && itemClickCallback instanceof Function1) {
-                requestNativePhoto(postId, Math.max(0, cell.photoIndex - 1));
+            // The pending tap is keyed by timeline-item identity: the patched handler
+            // receives this exact object through the click callback. The token guards
+            // the delayed fallback against a newer tap overwriting the entry.
+            if (cell.timelineItem != null && itemClickCallback instanceof Function1) {
+                final long tapToken =
+                        requestNativePhoto(cell.timelineItem, Math.max(0, cell.photoIndex - 1));
                 try {
                     Function1<Object, Object> callback = (Function1<Object, Object>) itemClickCallback;
                     callback.invoke(cell.timelineItem);
@@ -689,7 +730,24 @@ public final class ProfilePhotosGallery {
                     NewXLogger.printInfo(() ->
                             "[PikoNewX][PhotosGallery] native viewer callback failed: "
                                     + exception.getMessage());
+                    openPhotoIntent(cell);
+                    return;
                 }
+                // The patched handler consumes the pending photo synchronously when it
+                // takes over and navigates to the immersive viewer. Give an async
+                // dispatcher a chance before falling back to the post-detail link.
+                // A superseded token means a newer tap owns the entry: skip the
+                // fallback so one tap never fires another tap's deep link.
+                postDelayed(() -> {
+                    if (!isPendingPhotoToken(tapToken)) {
+                        logPagination("photo tap handled natively, skipping deep link");
+                        return;
+                    }
+                    logPagination("photo tap not consumed natively, falling back to deep link");
+                    clearPendingPhoto();
+                    openPhotoIntent(cell);
+                }, 400);
+                return;
             }
 
             openPhotoIntent(cell);
