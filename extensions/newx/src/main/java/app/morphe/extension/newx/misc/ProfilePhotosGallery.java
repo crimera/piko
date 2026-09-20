@@ -193,6 +193,9 @@ public final class ProfilePhotosGallery {
     }
 
     private static final class GalleryView extends NestedScrollView {
+        // Compose restores AndroidView hierarchy state by view ID when the viewer is dismissed.
+        private static final int VIEW_STATE_ID = 0x1f0f0f01;
+
         private final LinearLayout content;
         private final GalleryGrid grid;
         private final LoadingIndicatorView loadingIndicator;
@@ -213,6 +216,7 @@ public final class ProfilePhotosGallery {
             // The target APK retains this constructor shape. It initializes the nested-scrolling
             // helper before enabling nested scrolling in NestedScrollView's constructor.
             super(context, null);
+            setId(VIEW_STATE_ID);
             this.callback = callback;
             this.itemClickCallback = itemClickCallback;
             float density = getResources().getDisplayMetrics().density;
