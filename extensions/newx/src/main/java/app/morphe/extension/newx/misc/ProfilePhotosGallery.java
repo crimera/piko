@@ -42,29 +42,49 @@ public final class ProfilePhotosGallery {
 
     private static final Object PENDING_PHOTO_LOCK = new Object();
     private static final long PENDING_PHOTO_TIMEOUT_MS = 1500L;
-    private static String pendingPhotoPostId;
+    private static Object pendingPhotoItem;
     private static int pendingPhotoIndex = -1;
+    private static long pendingPhotoToken;
+    private static long pendingPhotoTokenSource;
     private static long pendingPhotoExpiresAt;
 
-    public static void requestNativePhoto(String postId, int photoIndex) {
-        if (postId == null || postId.trim().isEmpty() || photoIndex < 0) return;
+    // The pending tap is keyed by timeline-item identity, not by post id string.
+    // The patched handler receives the exact same item object the gallery invoked
+    // the click callback with, so identity matching is immune to id-format drift
+    // between toString parsing and the obfuscated id accessors.
+    public static long requestNativePhoto(Object item, int photoIndex) {
+        if (item == null || photoIndex < 0) return -1L;
         synchronized (PENDING_PHOTO_LOCK) {
-            pendingPhotoPostId = postId;
+            pendingPhotoItem = item;
             pendingPhotoIndex = photoIndex;
+            pendingPhotoTokenSource++;
+            pendingPhotoToken = pendingPhotoTokenSource;
             pendingPhotoExpiresAt = System.currentTimeMillis() + PENDING_PHOTO_TIMEOUT_MS;
+            return pendingPhotoToken;
         }
     }
 
-    public static int peekPendingPhotoIndex(String postId) {
-        if (postId == null) return -1;
+    public static int takePendingPhotoIndex(Object item) {
+        if (item == null) return -1;
         synchronized (PENDING_PHOTO_LOCK) {
             if (pendingPhotoIndex < 0
-                    || !postId.equals(pendingPhotoPostId)
+                    || pendingPhotoItem != item && !item.equals(pendingPhotoItem)
                     || System.currentTimeMillis() > pendingPhotoExpiresAt) {
                 clearPendingPhotoLocked();
                 return -1;
             }
-            return pendingPhotoIndex;
+            int index = pendingPhotoIndex;
+            clearPendingPhotoLocked();
+            return index;
+        }
+    }
+
+    public static boolean isPendingPhotoToken(long token) {
+        synchronized (PENDING_PHOTO_LOCK) {
+            return token >= 0
+                    && pendingPhotoIndex >= 0
+                    && pendingPhotoToken == token
+                    && System.currentTimeMillis() <= pendingPhotoExpiresAt;
         }
     }
 
@@ -75,7 +95,7 @@ public final class ProfilePhotosGallery {
     }
 
     private static void clearPendingPhotoLocked() {
-        pendingPhotoPostId = null;
+        pendingPhotoItem = null;
         pendingPhotoIndex = -1;
         pendingPhotoExpiresAt = 0L;
     }
@@ -173,6 +193,9 @@ public final class ProfilePhotosGallery {
     }
 
     private static final class GalleryView extends NestedScrollView {
+        // Compose restores AndroidView hierarchy state by view ID when the viewer is dismissed.
+        private static final int VIEW_STATE_ID = 0x1f0f0f01;
+
         private final LinearLayout content;
         private final GalleryGrid grid;
         private final LoadingIndicatorView loadingIndicator;
@@ -181,7 +204,7 @@ public final class ProfilePhotosGallery {
         private List<?> currentItems;
         private int currentItemCount = -1;
         private boolean loadMoreInFlight = false;
-        private long lastLoadMoreTime = 0;
+        private boolean paginationArmed = false;
         GalleryView(
                 Context context,
                 List<?> items,
@@ -193,6 +216,7 @@ public final class ProfilePhotosGallery {
             // The target APK retains this constructor shape. It initializes the nested-scrolling
             // helper before enabling nested scrolling in NestedScrollView's constructor.
             super(context, null);
+            setId(VIEW_STATE_ID);
             this.callback = callback;
             this.itemClickCallback = itemClickCallback;
             float density = getResources().getDisplayMetrics().density;
@@ -205,8 +229,13 @@ public final class ProfilePhotosGallery {
             setVerticalScrollBarEnabled(false);
             setHorizontalScrollBarEnabled(false);
             setOnScrollChangeListener((View.OnScrollChangeListener) (view, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                if (scrollY <= oldScrollY) return;
+                if (scrollY <= oldScrollY || loadMoreInFlight) return;
+                paginationArmed = true;
                 checkLoadMore();
+            });
+            addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                if (!paginationArmed || loadMoreInFlight || !isAtBottom()) return;
+                post(this::checkLoadMore);
             });
 
             content = new LinearLayout(context);
@@ -280,8 +309,17 @@ public final class ProfilePhotosGallery {
             }
         }
 
+        private boolean isAtBottom() {
+            if (getChildCount() == 0) return false;
+            View child = getChildAt(0);
+            int contentHeight = child.getHeight();
+            int viewportHeight = getHeight();
+            if (contentHeight <= 0 || viewportHeight <= 0) return false;
+            return child.getBottom() - (getScrollY() + viewportHeight - getPaddingBottom()) <= 0;
+        }
+
         private void checkLoadMore() {
-            if (loadMoreInFlight || getChildCount() == 0) return;
+            if (!paginationArmed || loadMoreInFlight || getChildCount() == 0) return;
             View child = getChildAt(0);
             int contentHeight = child.getHeight();
             int scrollY = getScrollY();
@@ -290,11 +328,7 @@ public final class ProfilePhotosGallery {
 
             int remaining = child.getBottom() - (scrollY + height - getPaddingBottom());
             if (remaining > 0) return;
-
-            long now = System.currentTimeMillis();
-            if (now - lastLoadMoreTime <= 1200) return;
-
-            lastLoadMoreTime = now;
+            paginationArmed = false;
             logPagination(
                     "threshold reached remaining=" + remaining +
                             " contentHeight=" + contentHeight +
@@ -309,8 +343,8 @@ public final class ProfilePhotosGallery {
                 return;
             }
 
-            // The footer extends the scroll content after the threshold is reached. Keep the
-            // viewport at the new bottom so the indeterminate indicator is immediately visible.
+            // Keep the in-flight footer visible without allowing its repositioning to arm
+            // another request.
             post(() -> {
                 if (loadMoreInFlight) {
                     scrollTo(0, child.getBottom());
@@ -340,8 +374,25 @@ public final class ProfilePhotosGallery {
         NewXLogger.printInfo(() -> PAGINATION_LOG_PREFIX + message);
     }
 
+    /**
+     * Patch-time diagnostic: reports what the injected viewer preamble resolved for
+     * a tap (media list size, requested index). Stable signature so the patch can
+     * call it across releases.
+     */
+    public static void reportGalleryTap(int mediaSize, int photoIndex) {
+        logPagination("tap resolved mediaSize=" + mediaSize + " photoIndex=" + photoIndex);
+    }
+
     private static void logPaginationFailure(String message, Throwable throwable) {
         NewXLogger.printException(() -> PAGINATION_LOG_PREFIX + message, throwable);
+    }
+
+    /**
+     * Patch-time bridge: reads the native paginator state as
+     * [needsMore, terminated, threshold].
+     */
+    public static Object[] readPagingState(Object bottomPaginator) {
+        throw new IllegalStateException("NewX paging state bridge was not patched");
     }
 
     public static boolean requestLoadMore(Object callback) {
@@ -372,6 +423,28 @@ public final class ProfilePhotosGallery {
                 return false;
             }
             logPagination("bottom paginator=" + bottomPaginator.getClass().getName());
+
+            Object[] state = readPagingState(bottomPaginator);
+            if (state == null || state.length != 3) {
+                logPagination("paging state unavailable");
+                return false;
+            }
+            boolean needsMore = Boolean.TRUE.equals(state[0]);
+            boolean terminated = Boolean.TRUE.equals(state[1]);
+            int threshold = state[2] instanceof Integer ? (Integer) state[2] : -1;
+            logPagination(
+                    "paginator state needsMore=" + needsMore +
+                            " terminated=" + terminated +
+                            " threshold=" + threshold
+            );
+            if (terminated) {
+                logPagination("bottom pagination already terminated");
+                return false;
+            }
+            if (!needsMore) {
+                logPagination("bottom paginator reports no more data");
+                return false;
+            }
 
             return triggerBottomPaging(bottomPaginator, pagingEvent);
         } catch (Throwable t) {
@@ -555,32 +628,6 @@ public final class ProfilePhotosGallery {
     }
 
     private static boolean triggerBottomPaging(Object bottomPaginator, Object pagingEvent) {
-        List<Method> terminationMethods = new ArrayList<>();
-        for (Method method : allMethods(bottomPaginator.getClass())) {
-            if (!Modifier.isStatic(method.getModifiers()) &&
-                    method.getParameterTypes().length == 0 &&
-                    (method.getReturnType() == boolean.class ||
-                            method.getReturnType() == Boolean.class)) {
-                terminationMethods.add(method);
-            }
-        }
-        if (terminationMethods.size() == 1) {
-            Method terminationMethod = terminationMethods.get(0);
-            try {
-                terminationMethod.setAccessible(true);
-                boolean terminated = Boolean.TRUE.equals(terminationMethod.invoke(bottomPaginator));
-                logPagination("termination method=" + terminationMethod.getName() + " result=" + terminated);
-                if (terminated) {
-                    logPagination("bottom pagination already terminated");
-                    return false;
-                }
-            } catch (Throwable t) {
-                logPaginationFailure("termination check failed method=" + terminationMethod.getName(), t);
-            }
-        } else {
-            logPagination("termination method count=" + terminationMethods.size());
-        }
-
         int dispatchCandidates = 0;
         for (Method method : allMethods(bottomPaginator.getClass())) {
             if (!isPagingDispatchMethod(method, pagingEvent)) continue;
@@ -676,11 +723,23 @@ public final class ProfilePhotosGallery {
                 postId = NewXUtils.sourcePostId(cell.timelineItem);
             } catch (RuntimeException ignored) {
             }
+            final String callbackType = itemClickCallback == null
+                    ? "null"
+                    : itemClickCallback.getClass().getName();
+            final String itemType = cell.timelineItem == null
+                    ? "null"
+                    : cell.timelineItem.getClass().getName();
+            logPagination("photo tap postId=" + postId
+                    + " photoIndex=" + cell.photoIndex
+                    + " callback=" + callbackType
+                    + " item=" + itemType);
 
-            if (postId != null
-                    && !postId.equals("post")
-                    && itemClickCallback instanceof Function1) {
-                requestNativePhoto(postId, Math.max(0, cell.photoIndex - 1));
+            // The pending tap is keyed by timeline-item identity: the patched handler
+            // receives this exact object through the click callback. The token guards
+            // the delayed fallback against a newer tap overwriting the entry.
+            if (cell.timelineItem != null && itemClickCallback instanceof Function1) {
+                final long tapToken =
+                        requestNativePhoto(cell.timelineItem, Math.max(0, cell.photoIndex - 1));
                 try {
                     Function1<Object, Object> callback = (Function1<Object, Object>) itemClickCallback;
                     callback.invoke(cell.timelineItem);
@@ -689,7 +748,24 @@ public final class ProfilePhotosGallery {
                     NewXLogger.printInfo(() ->
                             "[PikoNewX][PhotosGallery] native viewer callback failed: "
                                     + exception.getMessage());
+                    openPhotoIntent(cell);
+                    return;
                 }
+                // The patched handler consumes the pending photo synchronously when it
+                // takes over and navigates to the immersive viewer. Give an async
+                // dispatcher a chance before falling back to the post-detail link.
+                // A superseded token means a newer tap owns the entry: skip the
+                // fallback so one tap never fires another tap's deep link.
+                postDelayed(() -> {
+                    if (!isPendingPhotoToken(tapToken)) {
+                        logPagination("photo tap handled natively, skipping deep link");
+                        return;
+                    }
+                    logPagination("photo tap not consumed natively, falling back to deep link");
+                    clearPendingPhoto();
+                    openPhotoIntent(cell);
+                }, 400);
+                return;
             }
 
             openPhotoIntent(cell);
