@@ -14,6 +14,7 @@ internal object Constants {
             targets = listOf(
                 AppTarget(version = "12.27.0-prod.01"),
                 AppTarget(version = "12.28.0-alpha.01", isExperimental = true),
+                AppTarget(version = "12.28.0-alpha.04", isExperimental = true),
             ),
         )
 
