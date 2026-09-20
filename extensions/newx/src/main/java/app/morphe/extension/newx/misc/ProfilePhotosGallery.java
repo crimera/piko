@@ -224,7 +224,7 @@ public final class ProfilePhotosGallery {
             loadingIndicator.setVisibility(View.GONE);
             LinearLayout.LayoutParams loadingParams = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    Math.max(1, Theme.dpToPx(context, 48f))
+                    Math.max(1, Theme.dpToPx(context, 32f))
             );
             loadingParams.topMargin = Theme.dpToPx(context, 8f);
             content.addView(loadingIndicator, loadingParams);

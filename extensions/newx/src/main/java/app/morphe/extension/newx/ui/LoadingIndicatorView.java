@@ -14,8 +14,8 @@ import android.view.View;
  * the host app's opaque widget style.</p>
  */
 public final class LoadingIndicatorView extends View {
-    private static final float DEFAULT_SIZE_DP = 48f;
-    private static final float STROKE_WIDTH_DP = 6f;
+    private static final float DEFAULT_SIZE_DP = 32f;
+    private static final float STROKE_WIDTH_DP = 4f;
     private static final float SWEEP_DEGREES = 112f;
     private static final long ROTATION_DURATION_MS = 1000L;
 
