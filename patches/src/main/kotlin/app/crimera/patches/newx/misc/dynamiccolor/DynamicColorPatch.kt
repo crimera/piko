@@ -7,6 +7,8 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
+import app.crimera.patches.newx.models.firstParameterSlot
+import app.crimera.patches.newx.models.isInlineActionEntryRenderer
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
@@ -32,6 +34,7 @@ import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
@@ -882,21 +885,10 @@ private fun patchInlineActionTints() {
     val actionTypeDescriptor = models.postActionTypeDescriptor
     val entryMatches =
         Fingerprint(
-            parameters = listOf(
-                inlineActionEntryClass.type,
-                "L",
-                "J",
-                "F",
-                "L",
-                "L",
-                "J",
-                "L",
-                "L",
-                "Landroidx/compose/ui/Modifier;",
-                "Landroidx/compose/runtime/Composer;",
-                "I",
-            ),
             returnType = "V",
+            custom = { method, _ ->
+                method.isInlineActionEntryRenderer(inlineActionEntryClass.type)
+            },
             filters = listOf(
                 fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
                 fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
@@ -954,11 +946,18 @@ private fun patchInlineActionTints() {
     val likeComposableConstructor =
         requireExactlyOne("NewX like icon composable constructor", likeComposableConstructors)
 
+    // First wide long slot (the tint timestamp); Compose inserts auxiliary params between
+    // releases, so resolve the slot instead of hardcoding p2.
+    if (!AccessFlags.STATIC.isSet(entryMethod.accessFlags)) {
+        throw PatchException("NewX inline action entry renderer is unexpectedly instance: $entryMethod")
+    }
+    val tintSlot = entryMethod.firstParameterSlot("J")
+
     entryMethod.addInstructions(
         0,
         """
-        invoke-static/range {p2 .. p3}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionTint(J)J
-        move-result-wide p2
+        invoke-static/range {p$tintSlot .. p${tintSlot + 1}}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionTint(J)J
+        move-result-wide p$tintSlot
         """.trimIndent(),
     )
     val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteRead.index)

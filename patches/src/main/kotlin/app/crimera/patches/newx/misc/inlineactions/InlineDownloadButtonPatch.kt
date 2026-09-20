@@ -7,6 +7,8 @@ import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.ResolvedNewXInlineDownloadModels
 import app.crimera.patches.newx.models.ResolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.ResolvedNewXPostModels
+import app.crimera.patches.newx.models.firstParameterSlot
+import app.crimera.patches.newx.models.isInlineActionEntryRenderer
 import app.crimera.patches.newx.models.requirePublicFields
 import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
@@ -165,22 +167,10 @@ val newXInlineDownloadButtonPatch =
             val inlineRenderer = requireExactlyOne(
                 "NewX inline-action entry renderer",
                 Fingerprint(
-                    parameters =
-                        listOf(
-                            entryModels.inlineActionEntryDescriptor,
-                            "L",
-                            "J",
-                            "F",
-                            "L",
-                            "L",
-                            "J",
-                            "L",
-                            "L",
-                            MODIFIER,
-                            COMPOSER,
-                            "I",
-                        ),
                     returnType = "V",
+                    custom = { method, _ ->
+                        method.isInlineActionEntryRenderer(entryModels.inlineActionEntryDescriptor)
+                    },
                     filters =
                         listOf(
                             fieldAccess(
@@ -196,15 +186,17 @@ val newXInlineDownloadButtonPatch =
             )
             inlineRenderer.method.apply {
                 requireStatic("NewX inline-action entry renderer")
+                // Icon-size float slot; Compose inserts auxiliary params between releases.
+                val sizeSlot = firstParameterSlot("F")
                 val (entryRegister, sizeRegister) = freeRegisters4Bit(index = 0, count = 2)
                 addInstructions(
                     0,
                     """
                         move-object/from16 v$entryRegister, p0
-                        move/from16 v$sizeRegister, p4
+                        move/from16 v$sizeRegister, p$sizeSlot
                         invoke-static {v$entryRegister, v$sizeRegister}, $EXTENSION->markIconSize(Ljava/lang/Object;F)F
                         move-result v$sizeRegister
-                        move/from16 p4, v$sizeRegister
+                        move/from16 p$sizeSlot, v$sizeRegister
                     """.trimIndent(),
                 )
             }

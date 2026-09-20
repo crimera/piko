@@ -23,6 +23,7 @@ import java.util.WeakHashMap
 
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
+private const val COMPOSE_MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val INLINE_ACTION_BAR_SCOPE = "Lcom/x/inlineactionbar/"
 private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
 private const val ITERATOR_DESCRIPTOR = "Ljava/util/Iterator;"
@@ -228,6 +229,37 @@ internal fun resolvedNewXInlineActionBarModels(): ResolvedNewXInlineActionBarMod
 context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineDownloadModels(): ResolvedNewXInlineDownloadModels =
     postModelResolutionState().inlineDownloadModels()
+
+/**
+ * Semantic match for the NewX inline-action entry renderer. Never match this composable by an
+ * exact parameter list: R8 repackages the owner (alpha.04 hides it under a
+ * firebase/crashlytics namespace) and Compose inserts auxiliary params between releases
+ * (Haze blur effect in alpha.01, an extra boolean in alpha.04). Invariants: void renderer,
+ * first param is the entry model, Modifier and Composer present, trailing change-flags int.
+ * Callers add the entry field-read filters and assert single cardinality.
+ */
+internal fun Method.isInlineActionEntryRenderer(entryDescriptor: String): Boolean {
+    if (returnType != "V") return false
+    val params = parameterTypes.map(CharSequence::toString)
+    if (params.firstOrNull() != entryDescriptor) return false
+    if (params.lastOrNull() != "I") return false
+    if (COMPOSER_DESCRIPTOR !in params) return false
+    if (COMPOSE_MODIFIER_DESCRIPTOR !in params) return false
+    return true
+}
+
+/**
+ * Slot of the first parameter with the given descriptor, counting wide (J/D) params as two
+ * slots. For static methods the slot equals the p-register index.
+ */
+internal fun Method.firstParameterSlot(descriptor: String): Int {
+    var slot = 0
+    for (type in parameterTypes.map(CharSequence::toString)) {
+        if (type == descriptor) return slot
+        slot += if (type == "J" || type == "D") 2 else 1
+    }
+    throw PatchException("NewX renderer has no $descriptor parameter: $this")
+}
 
 context(context: BytecodePatchContext)
 private fun resolvePostModelAnchors(): ResolvedNewXPostModelAnchors {
