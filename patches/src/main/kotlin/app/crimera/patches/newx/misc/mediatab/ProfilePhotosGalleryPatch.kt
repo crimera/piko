@@ -3,6 +3,10 @@ package app.crimera.patches.newx.misc.mediatab
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.inlineactions.newXThumbnailCachePatch
 import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.Groups
+import app.crimera.patches.newx.settings.customScreen
+import app.crimera.patches.newx.settings.group
+import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
@@ -1049,6 +1053,20 @@ val newXProfilePhotosGalleryPatch =
                 order = 105,
                 defaultValue = true,
             )
+
+        newXSettings {
+            category(Categories.ADVANCED) {
+                group(Groups.DEBUG_TOOLS) {
+                    customScreen(
+                        id = "newx.advanced.debug_tools.gallery_cache_stats",
+                        strings = settingStrings("piko_newx_gallery_cache_stats"),
+                        order = 175,
+                        fragmentClassDescriptor =
+                            "Lapp/morphe/extension/newx/misc/GalleryCacheStatsFragment;",
+                    )
+                }
+            }
+        }
 
         execute {
             val timelineType = resolveTimelineType()

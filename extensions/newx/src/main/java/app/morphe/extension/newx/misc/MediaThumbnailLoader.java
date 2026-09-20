@@ -13,16 +13,15 @@ import android.util.LruCache;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.utils.NewXUtils;
@@ -42,6 +41,17 @@ public final class MediaThumbnailLoader {
 
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4);
     private static final AtomicInteger NEXT_REQUEST_ID = new AtomicInteger();
+    private static final AtomicBoolean DISK_CLEANUP_SCHEDULED = new AtomicBoolean(false);
+    // Session-tier analytics for the Developer tools stats screen. All increments are
+    // lock-free AtomicLong updates on paths that already run; they never block loading.
+    private static final AtomicLong EXTENSION_MEMORY_HITS = new AtomicLong();
+    private static final AtomicLong IMAGE_LOADER_MEMORY_HITS = new AtomicLong();
+    private static final AtomicLong DISK_HITS = new AtomicLong();
+    private static final AtomicLong NETWORK_SUCCESS = new AtomicLong();
+    private static final AtomicLong NETWORK_FAILED = new AtomicLong();
+    private static final AtomicLong BYTES_DOWNLOADED = new AtomicLong();
+    private static final AtomicLong ENTRIES_PERSISTED = new AtomicLong();
+    private static final AtomicLong OVERSIZED_SKIPPED = new AtomicLong();
     private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
     private static final LruCache<String, Bitmap> CACHE = new LruCache<>(MAX_CACHE_KILOBYTES) {
         @Override
@@ -52,6 +62,68 @@ public final class MediaThumbnailLoader {
 
     public interface Callback {
         void onLoaded(Bitmap bitmap);
+    }
+
+    /** Process-lifetime request-tier counters for the Developer tools stats screen. */
+    public static final class SessionStats {
+        public final long extensionMemoryHits;
+        public final long imageLoaderMemoryHits;
+        public final long diskHits;
+        public final long networkSuccess;
+        public final long networkFailed;
+        public final long bytesDownloaded;
+        public final long entriesPersisted;
+        public final long oversizedSkipped;
+        public final int memoryCacheKilobytes;
+        public final int memoryCacheMaxKilobytes;
+
+        SessionStats(
+                long extensionMemoryHits,
+                long imageLoaderMemoryHits,
+                long diskHits,
+                long networkSuccess,
+                long networkFailed,
+                long bytesDownloaded,
+                long entriesPersisted,
+                long oversizedSkipped,
+                int memoryCacheKilobytes,
+                int memoryCacheMaxKilobytes
+        ) {
+            this.extensionMemoryHits = extensionMemoryHits;
+            this.imageLoaderMemoryHits = imageLoaderMemoryHits;
+            this.diskHits = diskHits;
+            this.networkSuccess = networkSuccess;
+            this.networkFailed = networkFailed;
+            this.bytesDownloaded = bytesDownloaded;
+            this.entriesPersisted = entriesPersisted;
+            this.oversizedSkipped = oversizedSkipped;
+            this.memoryCacheKilobytes = memoryCacheKilobytes;
+            this.memoryCacheMaxKilobytes = memoryCacheMaxKilobytes;
+        }
+    }
+
+    public static SessionStats sessionStats() {
+        int used;
+        int max;
+        try {
+            used = CACHE.size();
+            max = CACHE.maxSize();
+        } catch (RuntimeException e) {
+            used = 0;
+            max = MAX_CACHE_KILOBYTES;
+        }
+        return new SessionStats(
+                EXTENSION_MEMORY_HITS.get(),
+                IMAGE_LOADER_MEMORY_HITS.get(),
+                DISK_HITS.get(),
+                NETWORK_SUCCESS.get(),
+                NETWORK_FAILED.get(),
+                BYTES_DOWNLOADED.get(),
+                ENTRIES_PERSISTED.get(),
+                OVERSIZED_SKIPPED.get(),
+                used,
+                max
+        );
     }
 
     private MediaThumbnailLoader() {
@@ -88,6 +160,7 @@ public final class MediaThumbnailLoader {
 
         Bitmap cached = CACHE.get(networkUrl);
         if (cached != null && !cached.isRecycled()) {
+            EXTENSION_MEMORY_HITS.incrementAndGet();
             if (loggingEnabled) {
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " hit extension memory cache size=" +
@@ -110,6 +183,7 @@ public final class MediaThumbnailLoader {
         EXECUTOR.execute(() -> {
             // 1. Try Glide/Coil memory cache with exact cacheUrl
             Bitmap bitmap = findCachedThumbnail(context, cacheUrl, requestId);
+            if (bitmap != null) IMAGE_LOADER_MEMORY_HITS.incrementAndGet();
             String source = "image-loader memory cache";
 
             // 2. Try Glide/Coil memory cache with base media key (matches any size cached by the app)
@@ -117,6 +191,7 @@ public final class MediaThumbnailLoader {
                 String baseKey = baseMediaKey(networkUrl);
                 if (baseKey != null && !baseKey.equals(cacheUrl)) {
                     bitmap = findCachedThumbnail(context, baseKey, requestId);
+                    if (bitmap != null) IMAGE_LOADER_MEMORY_HITS.incrementAndGet();
                 }
             }
 
@@ -124,6 +199,7 @@ public final class MediaThumbnailLoader {
             if (bitmap == null) {
                 bitmap = findDiskCachedThumbnail(context, networkUrl, cacheUrl, requestId);
                 if (bitmap != null) {
+                    DISK_HITS.incrementAndGet();
                     source = "disk cache";
                 }
             }
@@ -138,6 +214,7 @@ public final class MediaThumbnailLoader {
             }
 
             if (bitmap == null) {
+                NETWORK_FAILED.incrementAndGet();
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " failed; no thumbnail available");
                 return;
@@ -182,27 +259,26 @@ public final class MediaThumbnailLoader {
     private static File getDiskCacheDir(Context context) {
         if (context == null) return null;
         try {
-            File cacheDir = new File(context.getCacheDir(), "piko_media_cache");
-            if (!cacheDir.exists()) {
-                cacheDir.mkdirs();
-            }
-            return cacheDir;
+            File root = context.getCacheDir();
+            if (root == null) return null;
+            return MediaDiskCache.resolveDir(root);
         } catch (Throwable ignored) {
             return null;
         }
     }
 
-    private static String hashKey(String url) {
+    /** Schedules the one-shot bounded-cache cleanup off the UI thread. */
+    private static void ensureDiskCleanup(File dir) {
+        if (dir == null) return;
+        if (!DISK_CLEANUP_SCHEDULED.compareAndSet(false, true)) return;
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] digest = md.digest(url.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : digest) {
-                sb.append(String.format("%02x", b & 0xff));
-            }
-            return sb.toString();
-        } catch (Throwable t) {
-            return Integer.toHexString(url.hashCode());
+            EXECUTOR.execute(() -> {
+                try {
+                    MediaDiskCache.cleanup(dir);
+                } catch (Throwable ignored) {
+                }
+            });
+        } catch (RuntimeException ignored) {
         }
     }
 
@@ -214,40 +290,41 @@ public final class MediaThumbnailLoader {
     ) {
         File cacheDir = getDiskCacheDir(context);
         if (cacheDir == null) return null;
+        ensureDiskCleanup(cacheDir);
 
-        String[] keys = new String[]{networkUrl, cacheUrl};
+        String secondKey = cacheUrl != null && !cacheUrl.equals(networkUrl) ? cacheUrl : null;
+        String[] keys = secondKey == null
+                ? new String[]{networkUrl}
+                : new String[]{networkUrl, secondKey};
         for (String key : keys) {
             if (key == null) continue;
-            File file = new File(cacheDir, hashKey(key));
-            if (file.exists() && file.length() > 0) {
-                try {
-                    Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-                    if (bitmap != null) {
-                        NewXLogger.printInfo(() -> LOG_PREFIX +
-                                "request #" + requestId + " disk cache hit: " + file.getName());
-                        return fitToTarget(bitmap);
-                    }
-                } catch (Throwable ignored) {
-                }
+            byte[] data;
+            try {
+                data = MediaDiskCache.readEntry(cacheDir, key);
+            } catch (Throwable ignored) {
+                continue;
             }
+            if (data == null) continue;
+            Bitmap bitmap;
+            try {
+                bitmap = decode(data);
+            } catch (Throwable ignored) {
+                bitmap = null;
+            }
+            if (bitmap != null) {
+                NewXLogger.printInfo(() -> LOG_PREFIX +
+                        "request #" + requestId + " disk cache hit key=" + describeUrl(key));
+                return bitmap;
+            }
+            try {
+                MediaDiskCache.deleteEntry(cacheDir, key);
+            } catch (Throwable ignored) {
+            }
+            NewXLogger.printInfo(() -> LOG_PREFIX +
+                    "request #" + requestId + " disk entry undecodable, deleted key=" +
+                            describeUrl(key));
         }
         return null;
-    }
-
-    private static void saveToDiskCache(Context context, String key, byte[] data) {
-        if (context == null || key == null || data == null || data.length == 0) return;
-        File cacheDir = getDiskCacheDir(context);
-        if (cacheDir == null) return;
-        try {
-            File file = new File(cacheDir, hashKey(key));
-            File temp = new File(cacheDir, hashKey(key) + ".tmp");
-            try (FileOutputStream fos = new FileOutputStream(temp)) {
-                fos.write(data);
-                fos.flush();
-            }
-            temp.renameTo(file);
-        } catch (Throwable ignored) {
-        }
     }
 
     private static Bitmap findCachedThumbnail(
@@ -375,6 +452,7 @@ public final class MediaThumbnailLoader {
             int responseCode = connection.getResponseCode();
             if (responseCode < HttpURLConnection.HTTP_OK ||
                     responseCode >= HttpURLConnection.HTTP_MULT_CHOICE) {
+                NETWORK_FAILED.incrementAndGet();
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " network rejected HTTP " + responseCode);
                 return null;
@@ -382,6 +460,7 @@ public final class MediaThumbnailLoader {
 
             int contentLength = connection.getContentLength();
             if (contentLength > MAX_DOWNLOAD_BYTES) {
+                NETWORK_FAILED.incrementAndGet();
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " network response too large bytes=" +
                                 contentLength
@@ -392,25 +471,45 @@ public final class MediaThumbnailLoader {
             try (InputStream input = connection.getInputStream()) {
                 byte[] data = readAtMost(input, contentLength);
                 if (data == null) {
+                    NETWORK_FAILED.incrementAndGet();
                     NewXLogger.printInfo(() -> LOG_PREFIX +
                             "request #" + requestId + " network response could not be read");
                     return null;
                 }
 
-                // Persist to disk cache
-                saveToDiskCache(context, networkUrl, data);
-                if (downloadUrl != null && !downloadUrl.equals(networkUrl)) {
-                    saveToDiskCache(context, downloadUrl, data);
-                }
-
+                // Persist under the canonical network key only; oversized responses are
+                // still decoded and displayed but never stored.
                 Bitmap bitmap = decode(data);
                 if (bitmap == null) {
+                    NETWORK_FAILED.incrementAndGet();
                     NewXLogger.printInfo(() -> LOG_PREFIX +
                             "request #" + requestId + " network response failed to decode bytes=" +
                                     data.length
                     );
                     return null;
                 }
+                if (data.length > MediaDiskCache.MAX_DISK_ENTRY_BYTES) {
+                    OVERSIZED_SKIPPED.incrementAndGet();
+                    NewXLogger.printInfo(() -> LOG_PREFIX +
+                            "request #" + requestId + " network entry too large for disk bytes=" +
+                                    data.length);
+                } else {
+                    try {
+                        File cacheDir = getDiskCacheDir(context);
+                        if (cacheDir != null) {
+                            ensureDiskCleanup(cacheDir);
+                            try {
+                                if (MediaDiskCache.write(cacheDir, networkUrl, data)) {
+                                    ENTRIES_PERSISTED.incrementAndGet();
+                                }
+                            } catch (Throwable ignored) {
+                            }
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                }
+                NETWORK_SUCCESS.incrementAndGet();
+                BYTES_DOWNLOADED.addAndGet(data.length);
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " network decode success bytes=" + data.length +
                                 " size=" + dimensions(bitmap)
@@ -418,6 +517,7 @@ public final class MediaThumbnailLoader {
                 return bitmap;
             }
         } catch (IOException | RuntimeException exception) {
+            NETWORK_FAILED.incrementAndGet();
             NewXLogger.printException(() -> LOG_PREFIX +
                     "request #" + requestId + " network fetch failed", exception);
             return null;
