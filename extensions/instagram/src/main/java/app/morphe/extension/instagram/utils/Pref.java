@@ -16,7 +16,6 @@ import app.morphe.extension.crimera.settings.StringSetting;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
-
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.shared.MarkChatAsReadScope;
 
@@ -252,6 +251,10 @@ public class Pref {
 
     public static boolean embedDownloadMetadata() {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
+    public static String downloadFileNameTemplate() {
+        return removeLineBreaks(SharedPref.getStringPref(Settings.DOWNLOAD_FILE_NAME_TEMPLATE));
     }
 
     public static boolean hideNavigationFeed() {

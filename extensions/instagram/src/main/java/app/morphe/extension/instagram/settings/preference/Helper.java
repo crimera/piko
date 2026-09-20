@@ -15,6 +15,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
+import app.morphe.extension.instagram.settings.preference.widgets.DownloadFileNameTemplatePref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.NavigationBarPreference;
 import app.morphe.extension.instagram.settings.preference.widgets.NavigationStartupPreference;
@@ -102,6 +103,21 @@ public class Helper {
         preference.setNumericOnly(true);
         return preference;
     }
+
+    public Preference downloadFileNameTemplatePreference(
+            String title,
+            String summary,
+            StringSetting setting
+    ) {
+        DownloadFileNameTemplatePref preference = new DownloadFileNameTemplatePref(context);
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setKey(setting.key);
+        preference.setDefaultValue(setting.defaultValue);
+        return preference;
+    }
+
     public Preference multiSelectListPref(String title, String summary, StringSetting setting) {
         MultiSelectListPref preference = new MultiSelectListPref(context);
         String key = setting.key;

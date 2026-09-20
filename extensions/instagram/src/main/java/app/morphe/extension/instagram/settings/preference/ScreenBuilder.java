@@ -702,6 +702,15 @@ public class ScreenBuilder {
                         Settings.EMBED_DOWNLOAD_METADATA
                 )
         );
+
+        addPreference(
+                helper.downloadFileNameTemplatePreference(
+                        str("piko_download_file_name_template"),
+                        Pref.downloadFileNameTemplate(),
+                        Settings.DOWNLOAD_FILE_NAME_TEMPLATE
+                )
+        );
+
         addPreference(
                 helper.buttonPreference(
                         str("piko_download_set_path"),

@@ -142,6 +142,18 @@
     <string name="piko_download_username_folder_desc">Creates subfolders based on username</string>
     <string name="piko_embed_download_metadata">Embed video metadata</string>
     <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
+    <string name="piko_download_file_name_template">Filename format</string>
+    <string name="piko_download_file_name_template_invalid">Invalid filename</string>
+    <string name="piko_download_file_name_insert_token">Insert %1$s</string>
+    <string name="piko_download_file_name_variables">Variables</string>
+    <string name="piko_download_file_name_token_username">Username</string>
+    <string name="piko_download_file_name_token_media_id">Media ID</string>
+    <string name="piko_download_file_name_token_shortcode">Shortcode</string>
+    <string name="piko_download_file_name_token_upload_date">Date</string>
+    <string name="piko_download_file_name_token_upload_time">Time</string>
+    <string name="piko_download_file_name_token_type">Type</string>
+    <string name="piko_download_file_name_token_carousel_index">Carousel</string>
+    <string name="piko_download_file_name_token_variant_suffix">Variant</string>
     <string name="piko_download_current_media">Download current media</string>
     <string name="piko_download_as_image">Download as image</string>
     <string name="piko_video_variants">Video variants</string>
@@ -153,7 +165,6 @@
     <string name="piko_download_all">Download all</string>
     <string name="piko_downloading_media">Downloading: </string>
     <string name="piko_downloaded_media">Downloaded: </string>
-    <string name="piko_media_exists">Media exists</string>
     <string name="piko_download_failed_media">Download failed : </string>
     <string name="piko_download_set_path">Choose download folder</string>
     <string name="piko_download_set_path_success">Download directory updated!</string>
