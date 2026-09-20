@@ -217,6 +217,30 @@ private fun MethodReference.isComposeLambdaWrapperConstructor(): Boolean =
 private fun List<Instruction>.isTimelineModuleDividerItem(
     index: Int,
     instruction: Instruction,
+): Boolean = index in timelineModuleDividerItemIndices()
+
+/**
+ * Zero-key divider items, preferring inline-built content lambdas. Older releases build
+ * the divider lambdas inline (foundation adapter + runtime wrapper ctors); newer ones
+ * hoist the content into a shared static holder (urt/ui/a->e on alpha.04). Both shapes
+ * coexist on older targets, so the inline shape wins when present: that preserves the
+ * established hook, while the hoisted shape keeps newer releases working.
+ */
+private fun List<Instruction>.timelineModuleDividerItemIndices(): List<Int> {
+    val inline =
+        indices.filter { index ->
+            isZeroKeyDividerItem(index, this[index]) &&
+                hasInlineDividerLambdas(index)
+        }
+    if (inline.isNotEmpty()) return inline
+    return indices.filter { index ->
+        isZeroKeyDividerItem(index, this[index]) && hasHoistedDividerLambda(index)
+    }
+}
+
+private fun List<Instruction>.isZeroKeyDividerItem(
+    index: Int,
+    instruction: Instruction,
 ): Boolean {
     if (!instruction.isLazyListItemCall()) return false
     val keyRegister = instruction.registersUsed.getOrNull(1) ?: return false
@@ -228,10 +252,11 @@ private fun List<Instruction>.isTimelineModuleDividerItem(
                 candidate is OneRegisterInstruction && candidate.registerA == keyRegister
             }
             .lastOrNull()
-    if (keyConstant?.isZeroConstant() != true) return false
+    return keyConstant?.isZeroConstant() == true
+}
 
-    val startIndex = maxOf(0, index - 8)
-    val precedingInstructions = subList(startIndex, index)
+private fun List<Instruction>.hasInlineDividerLambdas(index: Int): Boolean {
+    val precedingInstructions = subList(maxOf(0, index - 8), index)
     return precedingInstructions.any { candidate ->
         candidate.getReference<MethodReference>()?.isComposeFoundationLambdaAdapterConstructor() == true
     } && precedingInstructions.any { candidate ->
@@ -239,8 +264,17 @@ private fun List<Instruction>.isTimelineModuleDividerItem(
     }
 }
 
+private fun List<Instruction>.hasHoistedDividerLambda(index: Int): Boolean {
+    val contentRegister = get(index).registersUsed.getOrNull(2) ?: return false
+    return subList(maxOf(0, index - 8), index).any { candidate ->
+        candidate.opcode == Opcode.SGET_OBJECT &&
+            (candidate as? OneRegisterInstruction)?.registerA == contentRegister &&
+            candidate.getReference<FieldReference>()?.type?.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) == true
+    }
+}
+
 private fun List<Instruction>.hasTimelineModuleDividerItem(): Boolean =
-    indices.count { index -> isTimelineModuleDividerItem(index, this[index]) } == 1
+    timelineModuleDividerItemIndices().size == 1
 
 private fun resolvePostDividerCalls(method: Method): List<PostDividerCall> {
     val helperReferences =
