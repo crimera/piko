@@ -5,6 +5,7 @@ import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXTextInput
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -35,6 +36,8 @@ private const val CUSTOM_DOMAIN_VALIDATOR_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/CustomSharingDomainValidator;"
 private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesheet/"
 private const val SHARE_IMPL_DESCRIPTOR_PREFIX = "Lcom/x/share/impl/"
+private const val DM_SHARESHEET_DESCRIPTOR_PREFIX = "Lcom/x/dm/sharesheet/"
+private const val SHARE_API_I_DESCRIPTOR = "Lcom/x/share/api/i;"
 private const val MOVED_SHARE_HELPER_DESCRIPTOR_PREFIX =
     "Lcom/google/android/gms/internal/mlkit_vision_common/"
 private const val NAVIGATION_DESCRIPTOR_PREFIX = "Lcom/x/navigation/"
@@ -59,12 +62,22 @@ internal object ShareSheetUrlConstructorFingerprint : Fingerprint(
     filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
 )
 
-/** Copy callback that writes the post URL to the clipboard in newer NewX builds. */
+/** Copy callback that writes the post URL to the clipboard (pre-12.28 post share flow). */
 internal object ShareSheetCopyCallbackFingerprint : Fingerprint(
     definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
     parameters = listOf(STRING_DESCRIPTOR),
     returnType = "V",
     filters = listOf(string("link"), string("copy_link")),
+)
+
+/**
+ * DM share stub that replaced the copy path in 12.28. Proves contract move vs broken anchor:
+ * old builds have both real impl (above) and stub; new builds have stub only.
+ */
+internal object ShareSheetCopyStubFingerprint : Fingerprint(
+    definingClass = DM_SHARESHEET_DESCRIPTOR_PREFIX,
+    parameters = listOf(STRING_DESCRIPTOR),
+    returnType = "V",
 )
 
 /** Share Intent helper moved out of the share implementation package in 12.23 and later. */
@@ -73,6 +86,14 @@ internal object MovedShareIntentBuilderFingerprint : Fingerprint(
     parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
     returnType = INTENT_DESCRIPTOR,
     filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
+)
+
+/** Post share Intent builder owning status URL construction (12.28+ static helper). */
+internal object ShareImplIntentBuilderFingerprint : Fingerprint(
+    definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
+    parameters = listOf(SHARE_API_I_DESCRIPTOR),
+    returnType = INTENT_DESCRIPTOR,
+    filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
 )
 
 /** URL getter used by post-detail navigation and quote/interactor links. */
@@ -241,10 +262,21 @@ private fun hookShareSheetPostUrls() {
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareSheetCopyCallbacks() {
+    val matches = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty()
+    if (matches.isEmpty()) {
+        // 12.28+: post copy moved into the share-sheet URL field (hookShareSheetPostUrls covers
+        // SEND + Compose copy via h.v/b0). The DM stub remains as a no-op. Validate the stub so
+        // an unknown breakage still fails closed instead of silently skipping.
+        requireExactlyOne(
+            label = "NewX share-sheet copy stub variant",
+            candidates = ShareSheetCopyStubFingerprint.scopedMatchAllOrNull().orEmpty(),
+        )
+        return
+    }
     val selectedMatch =
         requireExactlyOne(
             label = "NewX share-sheet copy callback variant",
-            candidates = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty(),
+            candidates = matches,
         )
     selectedMatch.method.addInstructions(
         0,
@@ -263,15 +295,26 @@ private fun hookShareIntentBuilder() {
             label = "NewX share Intent builder variant",
             candidates = movedMatches,
         )
-    hookMovedShareIntentCalls(selectedMatch.method)
+    val helperMethod = selectedMatch.method
+    val oldCopy =
+        requireAtMostOne(
+            label = "NewX share-sheet copy callback variant",
+            candidates = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty(),
+        )
+    if (oldCopy != null) {
+        hookHelperCallSites(oldCopy.method.definingClass, helperMethod)
+        return
+    }
+    val newOwner =
+        ShareImplIntentBuilderFingerprint.requireSingleMatch("NewX share Intent owner")
+    hookHelperCallSites(newOwner.method.definingClass, helperMethod)
 }
 
 context(context: app.morphe.patcher.patch.BytecodePatchContext)
-private fun hookMovedShareIntentCalls(helperMethod: MutableMethod) {
-    val copyMatch = ShareSheetCopyCallbackFingerprint.requireSingleMatch("NewX share-sheet copy callback")
-    val shareClass = context.classDefByOrNull(copyMatch.method.definingClass)
+private fun hookHelperCallSites(shareClassDescriptor: String, helperMethod: MutableMethod) {
+    val shareClass = context.classDefByOrNull(shareClassDescriptor)
         ?: throw PatchException(
-            "NewX share implementation class is missing: ${copyMatch.method.definingClass}",
+            "NewX share implementation class is missing: $shareClassDescriptor",
         )
     val methodsWithCalls = buildList {
         shareClass.methods.forEach { method ->
