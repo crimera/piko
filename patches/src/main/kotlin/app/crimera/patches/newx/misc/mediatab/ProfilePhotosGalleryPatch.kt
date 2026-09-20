@@ -61,8 +61,10 @@ private const val FUNCTION3 = "Lkotlin/jvm/functions/Function3;"
 private const val OBJECT = "Ljava/lang/Object;"
 private const val STRING = "Ljava/lang/String;"
 private const val JAVA_LIST = "Ljava/util/List;"
-private const val NAVIGATION_DESTINATION = "Lcom/x/navigation/jj;"
-private const val NAVIGATION_CONTROLLER = "Lcom/x/navigation/kj;"
+// Navigation controller/destination are never hardcoded: R8 reassigns the short
+// navigation names every release (jj/kj on alpha.01 became unrelated classes on
+// alpha.04 while the real pair moved to sj/rj). Both are derived from the
+// navigate (destination, Z) call below.
 private const val GALLERY_EXTENSION = "Lapp/morphe/extension/newx/misc/ProfilePhotosGallery;"
 
 private data class ResolvedTimelineType(
@@ -770,7 +772,11 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
             .forEach { routeClass ->
                 val route = runCatching { context.mutableClassDefBy(routeClass) }.getOrNull()
                     ?: return@forEach
-                if (!classImplements(routeClass, NAVIGATION_DESTINATION)) return@forEach
+                // No destination check here: the destination interface is R8-renamed
+                // every release and is derived from the navigate call below instead.
+                // The single abstract-media constructor is the complete route shape:
+                // post-wrapping routes (concrete post param) and multi-arg routes
+                // never match it.
                 route.methods
                     .filter { it.name == "<init>" && it.parameterTypes.size == 1 }
                     .filter { constructor ->
@@ -890,21 +896,34 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
         },
     ).toNativeCall()
 
-    val navigationFields = hostClass.fields.filter {
-        classImplements(it.type.toString(), NAVIGATION_CONTROLLER)
-    }
-    val navigationField = requireExactlyOne(
-        label = "NewX post navigation controller field",
-        candidates = navigationFields,
-    )
-    val navigationClass = context.mutableClassDefBy(navigationField.type.toString())
-    val navigationCall = requireExactlyOne(
-        label = "NewX native photo navigation call",
-        candidates = navigationClass.methods.filter {
-            it.parameterTypes.map(CharSequence::toString) == listOf(NAVIGATION_DESTINATION, "Z") &&
-                it.returnType.toString() == "V"
-        },
-    ).toNativeCall()
+    // Controller, destination, and navigate call are all derived from the call graph:
+    // the controller field's class must declare a (destination, Z) -> V method whose
+    // destination is a supertype of the resolved route (kj/k(jj,Z) on old targets,
+    // sj/k(rj,Z) on alpha.04). Never hardcode either descriptor; R8 reassigns them.
+    val navigationCandidates =
+        hostClass.fields.flatMap { field ->
+            val navigationClass =
+                runCatching { context.mutableClassDefBy(field.type.toString()) }.getOrNull()
+                    ?: return@flatMap emptyList()
+            navigationClass.methods.mapNotNull { method ->
+                val parameters = method.parameterTypes.map(CharSequence::toString)
+                if (parameters.size != 2 || parameters[1] != "Z") return@mapNotNull null
+                if (method.returnType.toString() != "V") return@mapNotNull null
+                if (!parameters[0].startsWith("L")) return@mapNotNull null
+                if (!classImplements(routeClass, parameters[0])) return@mapNotNull null
+                Triple(field, method, parameters[0])
+            }
+        }
+    val navigation =
+        requireExactlyOne(
+            label = "NewX native photo navigation (controller field, call, destination)",
+            candidates = navigationCandidates,
+            describe = { (field, method, destination) ->
+                "${field.type}->${field.name} ${method.name}($destination,Z)V"
+            },
+        )
+    val navigationField = navigation.first
+    val navigationCall = navigation.second.toNativeCall()
 
     return NativePhotoViewerTarget(
         method = hostMethod,
