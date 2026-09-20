@@ -28,8 +28,12 @@ import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction11n
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21s
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -521,6 +525,17 @@ private fun writesRegister(instruction: Instruction, register: Int): Boolean {
     return destination == register
 }
 
+// Reads the destination of a const/4, const/16, or const/high16 instruction.
+// Uses the format interface directly: the shared OneRegisterInstruction cast does
+// not resolve against dexlib2 instruction objects in this runtime (every such
+// cast yields null), while the format interface resolves correctly.
+private fun constDestination(instruction: Instruction): Int? =
+    when (instruction.opcode) {
+        Opcode.CONST_4 -> (instruction as? Instruction11n)?.registerA
+        Opcode.CONST_16 -> (instruction as? Instruction21s)?.registerA
+        else -> null
+    }
+
 
 private fun traceParameterIndex(
     method: Method,
@@ -651,9 +666,13 @@ private data class NativeMethodCall(
 
 private data class NativePhotoViewerTarget(
     val mediaGetter: NativeMethodCall,
+    val postType: String,
+    val ebClass: String,
+    val ebConstructor: NativeMethodCall,
+    val w0Type: String,
     val routeConstructor: NativeMethodCall,
     val routeClass: String,
-    val routeMediaType: String,
+    val viewerFlags: Int,
     val navigationCall: NativeMethodCall,
 )
 
@@ -669,6 +688,8 @@ private data class ItemClickViewerTarget(
 private data class ItemMediaDelegate(
     val itemType: String,
     val holderField: String?,
+    val w0Field: String,
+    val postFields: List<String>,
 )
 
 context(context: BytecodePatchContext)
@@ -765,7 +786,46 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
     val hostMethod = requireExactlyOne("NewX post media event handler", hostMethods)
     val postType = dispatch.second.parameterTypes[1].toString()
 
-    val routeCandidates = buildList {
+    // Post-context route (eb): built in the media branch from the post model, two
+    // scribe strings, and a w0. Matched by construction in the host method plus a
+    // 5-arg constructor led by the post model.
+    val ebConstructors = buildList {
+        hostMethod.instructions
+            .mapNotNull { instruction ->
+                if (instruction.opcode != Opcode.NEW_INSTANCE) return@mapNotNull null
+                (instruction as? ReferenceInstruction)?.reference?.toString()
+            }
+            .distinct()
+            .forEach { ebClass ->
+                val eb = runCatching { context.mutableClassDefBy(ebClass) }.getOrNull()
+                    ?: return@forEach
+                eb.methods
+                    .filter { method ->
+                        method.name == "<init>" &&
+                            !AccessFlags.SYNTHETIC.isSet(method.accessFlags) &&
+                            method.parameterTypes.size == 5 &&
+                            method.parameterTypes.first().toString() == postType
+                    }
+                    .forEach { constructor ->
+                        add(ebClass to constructor)
+                    }
+            }
+    }
+    val ebRoute = requireExactlyOne(
+        label = "NewX viewer post-context route",
+        candidates = ebConstructors,
+    )
+    val ebClass = ebRoute.first
+    val ebConstructor = ebRoute.second.toNativeCall()
+    val w0Type = ebRoute.second.parameterTypes.map(CharSequence::toString)[3]
+
+    // Full viewer destination: (media list, selected index, post context, three
+    // strings, flags). The single-media constructor on the same class opens the
+    // bare viewer without post chrome (profile headers, cards); the media branch
+    // always uses this full one. No destination check here: the destination
+    // interface is R8-renamed every release and is derived from the navigate
+    // call below instead.
+    val viewerConstructors = buildList {
         hostMethod.instructions
             .mapNotNull { instruction ->
                 if (instruction.opcode != Opcode.NEW_INSTANCE) return@mapNotNull null
@@ -775,32 +835,31 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
             .forEach { routeClass ->
                 val route = runCatching { context.mutableClassDefBy(routeClass) }.getOrNull()
                     ?: return@forEach
-                // No destination check here: the destination interface is R8-renamed
-                // every release and is derived from the navigate call below instead.
-                // The single abstract-media constructor is the complete route shape:
-                // post-wrapping routes (concrete post param) and multi-arg routes
-                // never match it.
                 route.methods
-                    .filter { it.name == "<init>" && it.parameterTypes.size == 1 }
-                    .filter { constructor ->
-                        val mediaType = constructor.parameterTypes.single().toString()
-                        val mediaClass = runCatching { context.mutableClassDefBy(mediaType) }.getOrNull()
-                        mediaClass != null &&
-                            AccessFlags.ABSTRACT.isSet(mediaClass.accessFlags) &&
-                            !AccessFlags.INTERFACE.isSet(mediaClass.accessFlags)
+                    .filter { method ->
+                        if (method.name != "<init>") return@filter false
+                        val parameters = method.parameterTypes.map(CharSequence::toString)
+                        parameters.size == 7 &&
+                            parameters[0] == JAVA_LIST &&
+                            parameters[1] == INT_DESCRIPTOR &&
+                            parameters[2] == ebClass &&
+                            parameters[3] == STRING &&
+                            parameters[4] == STRING &&
+                            parameters[5] == STRING &&
+                            parameters[6] == INT_DESCRIPTOR
                     }
                     .forEach { constructor ->
                         add(routeClass to constructor)
                     }
             }
     }
-    val route = requireExactlyOne(
-        label = "NewX native photo destination",
-        candidates = routeCandidates,
+    val viewerRoute = requireExactlyOne(
+        label = "NewX full viewer destination",
+        candidates = viewerConstructors,
     )
-    val routeClass = route.first
-    val routeConstructor = route.second.toNativeCall()
-    val routeMediaType = route.second.parameterTypes.single().toString()
+    val routeClass = viewerRoute.first
+    val routeConstructor = viewerRoute.second.toNativeCall()
+    val viewerFlags = resolveViewerFlags(hostMethod, routeConstructor.descriptor)
 
     val postClass = context.mutableClassDefBy(postType)
     val postAccessors =
@@ -863,11 +922,76 @@ private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
 
     return NativePhotoViewerTarget(
         mediaGetter = mediaGetter,
+        postType = postType,
+        ebClass = ebClass,
+        ebConstructor = ebConstructor,
+        w0Type = w0Type,
         routeConstructor = routeConstructor,
         routeClass = routeClass,
-        routeMediaType = routeMediaType,
+        viewerFlags = viewerFlags,
         navigationCall = navigationCall,
     )
+}
+
+// Viewer flags: the int constant feeding the destination constructor's last
+// argument at its media-branch call site. The mask selects which constructor
+// params fall back to defaults, so it is read from the call site, never
+// hardcoded: R8 keeps values but source changes could move them.
+private fun resolveViewerFlags(hostMethod: Method, constructorDescriptor: String): Int {
+    val instructions = hostMethod.implementation?.instructions?.toList()
+        ?: throw PatchException("NewX post media event handler has no implementation: $hostMethod")
+    val flags = instructions.mapIndexedNotNull { index, instruction ->
+        if (instruction.opcode != Opcode.INVOKE_DIRECT_RANGE) return@mapIndexedNotNull null
+        val range = instruction as? Instruction3rc ?: return@mapIndexedNotNull null
+        if (range.registerCount != 8) return@mapIndexedNotNull null
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (reference.name.toString() != "<init>") return@mapIndexedNotNull null
+        val descriptor = methodDescriptor(
+            owner = reference.definingClass.toString(),
+            name = reference.name.toString(),
+            parameters = reference.parameterTypes.map(CharSequence::toString),
+            returnType = reference.returnType.toString(),
+        )
+        if (descriptor != constructorDescriptor) return@mapIndexedNotNull null
+        nearbyFlagsConstant(instructions, index, range.startRegister + 7)
+    }.distinct()
+    return requireExactlyOne(
+        "NewX viewer destination flags",
+        flags,
+    )
+}
+
+// Reads a flags int constant feeding a call-site argument register. Looks back
+// over instructions provably free of register writes (consts to other registers,
+// invokes, branches, returns, field stores); any other shape aborts the site so a
+// stale value can never be picked up. Uses the const format interfaces directly
+// because the shared OneRegisterInstruction cast does not resolve against
+// dexlib2 instruction objects in this runtime.
+private fun nearbyFlagsConstant(
+    instructions: List<Instruction>,
+    callIndex: Int,
+    flagsRegister: Int,
+): Int? {
+    val start = maxOf(0, callIndex - 8)
+    for (cursor in callIndex - 1 downTo start) {
+        val prior = instructions.elementAt(cursor)
+        if (constDestination(prior) == flagsRegister) {
+            return (prior as? NarrowLiteralInstruction)?.narrowLiteral
+        }
+        val name = prior.opcode.name
+        val sideEffectFree = name.startsWith("CONST") ||
+            name.startsWith("INVOKE") ||
+            name.startsWith("IF_") ||
+            name.startsWith("GOTO") ||
+            name.startsWith("RETURN") ||
+            name == "NOP" ||
+            name.startsWith("MONITOR") ||
+            name.startsWith("IPUT") ||
+            name.startsWith("SPUT") ||
+            name == "THROW"
+        if (!sideEffectFree) return null
+    }
+    return null
 }
 
 private fun receiverRegister(method: Method): Int {
@@ -885,22 +1009,47 @@ private fun itemClickViewerInstructions(
     receiverRegister: Int,
 ): String {
     val mediaOwner = event.mediaGetter.descriptor.substringBefore("->")
+    // Per item type: narrow to the model, resolve its media holder, stash it, then
+    // hunt the post model for the viewer post context (holder first, then the item
+    // fields that can hold it). Every miss falls through with the pending entry
+    // intact, so the Java side degrades to the deep-link fallback. Register plan:
+    // v0 work, v1 flags, v2 item, v4 holder, v5 w0; the tail reuses v0..v7 for the
+    // consecutive range invokes below.
     val delegateCascade = delegates.mapIndexed { index, delegate ->
         val holderRead = delegate.holderField?.let { "iget-object v0, v0, $it" }.orEmpty()
+        val postHunt = delegate.postFields.mapIndexed { fieldIndex, postField ->
+            """
+            iget-object v0, v2, $postField
+            instance-of v1, v0, ${event.postType}
+            if-eqz v1, :piko_newx_gallery_qh_${index}_$fieldIndex
+            iget-object v5, v2, ${delegate.w0Field}
+            goto :piko_newx_gallery_have_q1
+            :piko_newx_gallery_qh_${index}_$fieldIndex
+            """.trimIndent()
+        }.joinToString("\n")
         """
             instance-of v1, v0, ${delegate.itemType}
             if-eqz v1, :piko_newx_gallery_next_$index
             check-cast v0, ${delegate.itemType}
+            check-cast v2, ${delegate.itemType}
             $holderRead
             check-cast v0, $mediaOwner
-            goto :piko_newx_gallery_have_post
+            move-object v4, v0
+            instance-of v1, v0, ${event.postType}
+            if-eqz v1, :piko_newx_gallery_qh_${index}_holder
+            iget-object v5, v2, ${delegate.w0Field}
+            goto :piko_newx_gallery_have_q1
+            :piko_newx_gallery_qh_${index}_holder
+            $postHunt
+            goto :piko_newx_gallery_original
             :piko_newx_gallery_next_$index
         """.trimIndent()
     }.joinToString("\n")
     // NOTE: instance-of is format 22c (both registers 4-bit). The event parameter
     // lives in a high register, so it must be copied down with move-object/from16
     // first; referencing it directly drops the instruction at assembly time and
-    // breaks verification (if-eqz on an undefined register).
+    // breaks verification (if-eqz on an undefined register). The same applies to
+    // the range invokes below: all argument registers stay within v0..v7.
     return """
         move-object/from16 v0, v$eventRegister
         instance-of v1, v0, ${target.itemEventType}
@@ -910,23 +1059,37 @@ private fun itemClickViewerInstructions(
         move-object v2, v0
         $delegateCascade
         goto :piko_newx_gallery_original
-        :piko_newx_gallery_have_post
+        :piko_newx_gallery_have_q1
         invoke-static {v2}, $GALLERY_EXTENSION->takePendingPhotoIndex(Ljava/lang/Object;)I
         move-result v1
         if-ltz v1, :piko_newx_gallery_original
-        ${event.mediaGetter.opcode} {v0}, ${event.mediaGetter.descriptor}
+        ${event.mediaGetter.opcode} {v4}, ${event.mediaGetter.descriptor}
         move-result-object v2
         invoke-interface {v2}, $JAVA_LIST->size()I
         move-result v3
         invoke-static {v3, v1}, $GALLERY_EXTENSION->reportGalleryTap(II)V
         if-ltz v1, :piko_newx_gallery_clear
         if-ge v1, v3, :piko_newx_gallery_clear
-        invoke-interface {v2, v1}, $JAVA_LIST->get(I)$OBJECT
-        move-result-object v4
-        check-cast v4, ${event.routeMediaType}
-        new-instance v5, ${event.routeClass}
-        invoke-direct {v5, v4}, ${event.routeConstructor.descriptor}
-        invoke-static {}, $GALLERY_EXTENSION->clearPendingPhoto()V
+        move v6, v1
+        move-object v7, v2
+        move-object v1, v0
+        check-cast v1, ${event.postType}
+        move-object v4, v5
+        new-instance v0, ${event.ebClass}
+        const/16 v2, 0x0
+        const/16 v3, 0x0
+        const/16 v5, 0x0
+        invoke-direct/range {v0 .. v5}, ${event.ebConstructor.descriptor}
+        move-object v3, v0
+        new-instance v0, ${event.routeClass}
+        move-object v1, v7
+        move v2, v6
+        const/16 v4, 0x0
+        const/16 v5, 0x0
+        const/16 v6, 0x0
+        const/16 v7, 0x${event.viewerFlags.toString(16)}
+        invoke-direct/range {v0 .. v7}, ${event.routeConstructor.descriptor}
+        move-object v5, v0
         move-object/from16 v7, v$receiverRegister
         iget-object v6, v7, ${target.navigationField}
         const/4 v7, 0
@@ -1001,20 +1164,44 @@ private fun resolveItemClickViewerTargets(
 
     // Media delegates: concrete item models carrying the u5 media contract, either
     // directly (the post model itself) or through a single holder field (j1.a:o6).
+    // Each delegate also records how to reach the viewer post context from the item:
+    // the w0 field for eb construction, and the fields that can hold the post model
+    // (any field whose type the post model implements, e.g. j1.a:o6 for a q1 post).
     // Item types without media fall through to the original handler per tap.
     val delegates = classDefs.mapNotNull { classDef ->
         val type = classDef.type.toString()
         if (AccessFlags.INTERFACE.isSet(classDef.accessFlags)) return@mapNotNull null
         if (AccessFlags.ABSTRACT.isSet(classDef.accessFlags)) return@mapNotNull null
         if (!implements(type, itemEvent.itemType)) return@mapNotNull null
-        if (implements(type, mediaOwner)) return@mapNotNull ItemMediaDelegate(type, null)
-        val holderFields = classDef.fields.filter { field ->
-            !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                field.type.toString().startsWith("L") &&
-                implements(field.type.toString(), mediaOwner)
+        val holderField = if (implements(type, mediaOwner)) {
+            null
+        } else {
+            val holderFields = classDef.fields.filter { field ->
+                !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                    field.type.toString().startsWith("L") &&
+                    implements(field.type.toString(), mediaOwner)
+            }
+            if (holderFields.size != 1) return@mapNotNull null
+            holderFields[0].toSmaliDescriptor()
         }
-        if (holderFields.size != 1) return@mapNotNull null
-        ItemMediaDelegate(type, holderFields[0].toSmaliDescriptor())
+        val w0Fields = classDef.fields.filter { field ->
+            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                field.type.toString() == event.w0Type
+        }
+        if (w0Fields.size != 1) return@mapNotNull null
+        val postFields = classDef.fields
+            .filter { field ->
+                !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                    field.type.toString().startsWith("L") &&
+                    implements(event.postType, field.type.toString())
+            }
+            .map { it.toSmaliDescriptor() }
+        ItemMediaDelegate(
+            itemType = type,
+            holderField = holderField,
+            w0Field = w0Fields[0].toSmaliDescriptor(),
+            postFields = postFields,
+        )
     }
     if (delegates.isEmpty()) {
         throw PatchException(
