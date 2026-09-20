@@ -7,10 +7,9 @@ import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionBarModelResolutionPatch
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
 import app.crimera.patches.newx.settings.choice
 import app.crimera.patches.newx.settings.group
-import app.crimera.patches.newx.settings.injectRead
+import app.crimera.patches.newx.settings.injectReadWithRegister
 import app.crimera.patches.newx.settings.multiChoice
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
@@ -24,8 +23,8 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.cloneMutable
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
+import app.morphe.util.numberOfParameterRegisters
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -71,7 +70,16 @@ val customizeNewXInlineActionsPatch =
                 barModels.inlineActionStateBuilder.resolveMutableMethodOwner(
                     "inline action state builder",
                 )
-            val method = originalMethod.cloneMutable(additionalRegisters = 2)
+            // m0->d() is a dense Compose presenter: every low register is live at the
+            // conversion hook, so liveness-based allocation finds no free register. Reserve two
+            // fresh locals below the parameter block and address them explicitly.
+            val originalRegisterCount =
+                originalMethod.implementation?.registerCount
+                    ?: throw PatchException("NewX inline action state builder has no implementation: $originalMethod")
+            val method =
+                originalMethod.cloneMutable(
+                    additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
+                )
             inlineActionBarClass.methods.remove(originalMethod)
             inlineActionBarClass.methods.add(method)
             if (AccessFlags.STATIC.isSet(method.accessFlags)) {
@@ -99,14 +107,20 @@ val customizeNewXInlineActionsPatch =
                 throw PatchException("NewX inline action list conversion result not found in $method")
             }
             val resultRegister = resultInstruction.registerA
-            val freeRegisters = method.getFreeRegisterProvider(resultIndex + 1, 1, resultRegister)
-            val listRegister = freeRegisters.getFreeRegister4Bit()
+            // Explicit scratch locals: setting (byte/range) + list copy (byte/range). Both are fresh
+            // locals created by the clone above, so no liveness search is needed.
+            val settingRegister = originalRegisterCount
+            val listRegister = originalRegisterCount + 1
+            if (listRegister > 255) {
+                throw PatchException(
+                    "NewX inline action scratch registers exceed v255 in $method: v$settingRegister, v$listRegister",
+                )
+            }
             val read =
-                hiddenInlineActions.injectRead(
+                hiddenInlineActions.injectReadWithRegister(
                     method = method,
                     index = resultIndex + 1,
-                    excludedRegisters = listOf(resultRegister, listRegister),
-                    registerConstraint = SettingReadRegisterConstraint.BYTE,
+                    register = settingRegister,
                 )
 
             // Loop exits target the immutable conversion. Hook its result, then restore the
@@ -117,7 +131,7 @@ val customizeNewXInlineActionsPatch =
                     invoke-static/range {v${read.register} .. v${read.register}}, $INLINE_ACTION_FILTER_DESCRIPTOR->prepareHiddenActions(Ljava/util/Set;)V
                     invoke-static/range {p0 .. p0}, $INLINE_ACTION_FILTER_DESCRIPTOR->preparePresenter(Ljava/lang/Object;)V
                     move-object/from16 v$listRegister, v$resultRegister
-                    invoke-static {v$listRegister}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;
+                    invoke-static/range {v$listRegister .. v$listRegister}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;
                     move-result-object v$resultRegister
                     invoke-static/range {v$resultRegister .. v$resultRegister}, $conversionReference
                     move-result-object v$resultRegister

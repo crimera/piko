@@ -227,6 +227,31 @@ internal fun MultiChoiceSettingDefinition.injectRead(
         returnType = "Ljava/util/Set;",
     )
 
+// The caller reserves this register when normal liveness-based allocation cannot find safe
+// locals in dense methods (e.g. Compose presenters holding every low register live at the hook
+// point). The register must be a fresh local below the parameter block: clone with
+// additionalRegisters = numberOfParameterRegisters + needed, then use originalRegisterCount
+// upwards. BYTE/range form keeps high locals (v16+) usable, unlike FOUR_BIT.
+internal fun MultiChoiceSettingDefinition.injectReadWithRegister(
+    method: MutableMethod,
+    index: Int,
+    register: Int,
+): InjectedSettingRead {
+    require(register in 0..255) {
+        "NewX setting read requires a byte register v0..v255, got v$register"
+    }
+    method.addInstructions(
+        index,
+        valueReadInstructions(
+            methodName = "getStringSetOrDefault",
+            returnType = "Ljava/util/Set;",
+            destinationRegister = register,
+            registerConstraint = SettingReadRegisterConstraint.BYTE,
+        ),
+    )
+    return InjectedSettingRead(register = register, nextIndex = index + READ_INSTRUCTION_COUNT)
+}
+
 private fun SettingItemDefinition.injectSettingRead(
     method: MutableMethod,
     index: Int,
