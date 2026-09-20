@@ -57,6 +57,7 @@ object Constants {
         move-result-object v%s"""
 
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
+    const val CUSTOM_FONT_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise/font/CustomFont;"
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
     const val ACTIONBAR_DESCRIPTOR = "$PATCHES_DESCRIPTOR/actionbar/ActionBarPatch;"
 

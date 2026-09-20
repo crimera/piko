@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.crimera.PikoUtils;
 
@@ -88,6 +89,9 @@ public class InstaUtils {
     }
 
     public static void deletePref(){
+        // The preferences are wiped either way; the added font files are a separate concern the
+        // preference wipe knows nothing about, so a failure there must not mask a real reset.
+        FontStorage.deleteAll();
         if(Pref.clearAllPreferences()){
             PikoUtils.toast(str("piko_reset_pref_success"));
             Utils.restartApp(Utils.getContext());

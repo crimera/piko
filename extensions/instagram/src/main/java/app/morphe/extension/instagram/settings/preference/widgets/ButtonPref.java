@@ -64,9 +64,9 @@ public class ButtonPref extends Preference {
 
                     if (key.equals("piko_export_dev_overrides") || key.equals("piko_import_dev_overrides") || key.equals("piko_import_id_mapping")
                             || key.equals("piko_export_pref") || key.equals("piko_import_pref")
-                            || key.equals("piko_download_set_path")) {
+                            || key.equals("piko_download_set_path") || key.equals("piko_pref_add_font")) {
                         ActivityHook.launchFragment((Activity) context, key);
-                        
+
                     } else if (key.equals("piko_reset_pref")) {
                         InstaUtils.showResetSettingsDialog(context);
 
@@ -151,6 +151,7 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")
                 || key.equals("piko_rec_flags_refresh_file")
+                || key.equals("piko_pref_add_font")
                 || key.equals("view_deleted_messages")));
     }
 
@@ -198,6 +199,9 @@ public class ButtonPref extends Preference {
         }
         if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
             return UI.DRAWABLE_SHARE_TO_REEL;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_FONT)){
+            return UI.DRAWABLE_TEXT_ICON;
         }
         return null;
     }

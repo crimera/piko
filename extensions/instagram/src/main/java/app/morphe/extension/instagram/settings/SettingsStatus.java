@@ -222,6 +222,11 @@ public class SettingsStatus {
     public static void storyFilters(){storyFilters = true;}
     public static boolean filterContentSection(){return storyFilters; }
 
+    // Font section.
+    public static boolean customFont = false;
+    public static void customFont() { customFont = true; }
+    public static boolean fontSection(){ return customFont; }
+
 
         public static void loadStatusMap(){
         FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
@@ -293,6 +298,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_enable_mark_chat_as_read"),SettingsStatus.markChatAsRead);
         FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
         FLAGS.put(str("piko_category_rec_flags"),SettingsStatus.recommendedFlags);
+        FLAGS.put(str("piko_custom_font"),SettingsStatus.customFont);
 
     }
 

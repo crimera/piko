@@ -26,6 +26,7 @@ import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.patches.Links;
+import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -87,6 +88,56 @@ public class ScreenBuilder {
                             Settings.HIDE_SUGGESTED_CONTENT
                     )
             );
+        }
+    }
+
+    public void buildFontSection(FontSelection selection) {
+        if (!(SettingsStatus.fontSection())) return;
+
+        // Written here rather than left to the preference framework, which persists only after
+        // this listener has run - everything below has to read the new value straight away.
+        SwitchPref customFont = new SwitchPref(context);
+        customFont.setTitle(str("piko_custom_font"));
+        customFont.setSummary(str("piko_custom_font_desc"));
+        customFont.setKey(Settings.CUSTOM_FONT.key);
+        customFont.setPersistent(false);
+        customFont.setChecked(FontStorage.isEnabled());
+        customFont.setOnPreferenceChangeListener((preference, newValue) -> {
+            FontStorage.setEnabled(Boolean.TRUE.equals(newValue));
+            selection.notifyEnabledChanged();
+            Utils.showToastShort(str("piko_restart_app"));
+            return true;
+        });
+        addPreference(customFont);
+
+        Preference addFont = helper.buttonPreference(
+                str("piko_pref_add_font"),
+                str("piko_pref_add_font_desc"),
+                "piko_pref_add_font"
+        );
+        selection.registerDependent(addFont);
+        addPreference(addFont);
+
+        List<String> fonts = FontStorage.list();
+        if (!fonts.isEmpty()) {
+            // So scrolling through the list does not stall on a disk read the first time each row
+            // comes into view.
+            FontStorage.warmPreviewCache(fonts);
+        }
+
+        PreferenceCategory category = addCategory(str("piko_pref_added_fonts"));
+        selection.registerDependent(category);
+
+        // The system font sits above every added font and is never removed - it is what an unset
+        // choice already resolves to, so there is always a font selected and usable here.
+        FontPref systemFontRow = new FontPref(context, FontStorage.SYSTEM_FONT, selection);
+        selection.registerRow(systemFontRow);
+        addPreference(category, systemFontRow);
+
+        for (String font : fonts) {
+            FontPref row = new FontPref(context, font, selection);
+            selection.registerRow(row);
+            addPreference(category, row);
         }
     }
 
@@ -1022,6 +1073,16 @@ public class ScreenBuilder {
                         Constants.PIKO_FRAGMENT_ACTION_BAR
                 )
         );
+
+        if (SettingsStatus.fontSection()){
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_font"),
+                            "",
+                            Constants.PIKO_FRAGMENT_FONT
+                    )
+            );
+        }
 
         if (SettingsStatus.hideNavigationButtons){
             addPreference(

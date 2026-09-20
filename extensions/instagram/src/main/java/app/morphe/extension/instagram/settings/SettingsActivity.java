@@ -25,13 +25,18 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.patches.customise.font.CustomFont;
+import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
+import app.morphe.extension.instagram.settings.preference.widgets.FontPref;
+import app.morphe.extension.instagram.settings.preference.widgets.FontSelection;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -102,6 +107,7 @@ public class SettingsActivity extends Activity {
         titleTextView.setText(displayTitle); // Dynamically bound from intent data
         InstagramPreferenceStyle.applyToolbarLayout(
                 this, toolbar, back, titleTextView, isRootSettings);
+        CustomFont.applyTo(titleTextView);
         titleTextView.setTextColor(InstagramPreferenceStyle.primaryTextColor());
 
         toolbar.addView(back);
@@ -149,10 +155,16 @@ public class SettingsActivity extends Activity {
         return customContainer;
     }
 
-    // (Keep the nested static SettingsFragment class unchanged)
-    public static class SettingsFragment extends PreferenceFragment {
+    public static class SettingsFragment extends PreferenceFragment
+            implements FontSelection.Listener {
 
         Context context;
+
+        /** Which fonts the font section was built from, so a font added elsewhere is noticed. */
+        private List<String> renderedFonts;
+
+        /** Set only on the font screen. */
+        private FontSelection fontSelection;
 
         private void refreshPreferenceSummary(
                 String key,
@@ -167,6 +179,14 @@ public class SettingsActivity extends Activity {
         @Override
         public void onResume() {
             super.onResume();
+
+            // The font picker runs in its own activity, so a font added there only shows up once
+            // the list has been built again.
+            if (renderedFonts != null && !renderedFonts.equals(FontStorage.list())) {
+                rebuildFontScreen();
+                return;
+            }
+
             refreshPreferenceSummary(
                     "piko_download_set_path",
                     StorageUtils::getCustomPathForDisplay
@@ -226,6 +246,9 @@ public class SettingsActivity extends Activity {
             } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_REC_FLAGS)) {
                 preferenceManager.setSharedPreferencesName(Constants.REC_FLAGS);
                 screenBuilder.buildRecommendedFlagsSection();
+            } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_FONT)) {
+                prepareFontSelection();
+                screenBuilder.buildFontSection(fontSelection);
             }
 
             setPreferenceScreen(screen);
@@ -251,11 +274,47 @@ public class SettingsActivity extends Activity {
                 listView.setSelector(new ColorDrawable(Color.TRANSPARENT));
                 listView.setCacheColorHint(Color.TRANSPARENT);
                 listView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
+
+                // Resolved by position on every long press, rather than attached to each row's own
+                // view, since the list recycles those views across whichever font ends up bound to
+                // them - a listener kept on the view itself would drift onto the wrong font.
+                listView.setOnItemLongClickListener((parent, view, position, id) -> {
+                    Object item = parent.getItemAtPosition(position);
+                    if (!(item instanceof FontPref)) {
+                        return false;
+                    }
+                    ((FontPref) item).confirmDelete();
+                    return true;
+                });
             }
 
             if (rootView != null) {
                 rootView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
             }
+        }
+
+        @Override
+        public void onListChanged() {
+            rebuildFontScreen();
+        }
+
+        /** Starts a fresh selection for the font screen that is about to be built. */
+        private void prepareFontSelection() {
+            renderedFonts = FontStorage.list();
+            fontSelection = new FontSelection();
+            fontSelection.setListener(this);
+        }
+
+        /**
+         * Builds the font list again so it matches the fonts that are there now. Adding or
+         * removing a row is not something the preference list can do in place, but replacing the
+         * whole screen keeps the activity - and the list's own styling - as it is.
+         */
+        private void rebuildFontScreen() {
+            PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
+            prepareFontSelection();
+            new ScreenBuilder(context, screen, new Helper(context)).buildFontSection(fontSelection);
+            setPreferenceScreen(screen);
         }
     }
 }
