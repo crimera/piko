@@ -30,6 +30,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,6 +42,8 @@ import app.morphe.extension.shared.Utils;
 
 public class MediaDownloader {
     private static final String CHANNEL_ID = "media_download_channel";
+    // Separate downloader instances must reserve names before another request can choose them.
+    private static final Object CREATE_DOCUMENT_LOCK = new Object();
     private final Context context;
     private final NotificationManager notificationManager;
     private final LinkedBlockingQueue<DownloadRequest> queue = new LinkedBlockingQueue<>();
@@ -98,32 +102,33 @@ public class MediaDownloader {
         } else {
             builder = new Notification.Builder(context);
         }
-        String downloadStartString = ExtensionStrings.DOWNLOAD_ONGOING + request.fileName;
         builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                .setContentTitle(downloadStartString)
+                .setContentTitle(ExtensionStrings.DOWNLOAD_ONGOING + request.fileName)
                 .setOngoing(true) // Keeps notification un-swipable during download execution.
                 .setProgress(100, 0, false);
 
         notificationManager.notify(notificationId, builder.build());
 
         try {
-            Uri targetDirectoryUri = getTargetDirectoryUri(request);
-            if (findChildDocument(targetDirectoryUri, request.fileName, null) != null) {
-                showToast(ExtensionStrings.DOWNLOAD_MEDIA_EXISTS);
-                notificationManager.cancel(notificationId);
-                return;
+            synchronized (CREATE_DOCUMENT_LOCK) {
+                Uri targetDirectoryUri = getTargetDirectoryUri(request);
+                request.fileName = DownloadFileNames.findAvailable(
+                        request.fileName, getChildNames(targetDirectoryUri)
+                );
+                outputDocumentUri = DocumentsContract.createDocument(
+                        context.getContentResolver(),
+                        targetDirectoryUri,
+                        getMimeType(request.fileName),
+                        request.fileName
+                );
             }
-
-            outputDocumentUri = DocumentsContract.createDocument(
-                    context.getContentResolver(),
-                    targetDirectoryUri,
-                    getMimeType(request.fileName),
-                    request.fileName
-            );
             if (outputDocumentUri == null) {
                 throw new IOException("Could not create download file");
             }
 
+            String downloadStartString = ExtensionStrings.DOWNLOAD_ONGOING + request.fileName;
+            builder.setContentTitle(downloadStartString);
+            notificationManager.notify(notificationId, builder.build());
             showToast(downloadStartString);
             HttpURLConnection conn = null;
             try {
@@ -305,6 +310,19 @@ public class MediaDownloader {
         }
 
         return directoryUri;
+    }
+
+    private Set<String> getChildNames(Uri parentUri) throws IOException {
+        Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+                parentUri, DocumentsContract.getDocumentId(parentUri)
+        );
+        String[] projection = {DocumentsContract.Document.COLUMN_DISPLAY_NAME};
+        Set<String> names = new HashSet<>();
+        try (Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null)) {
+            if (cursor == null) throw new IOException("Could not read download folder");
+            while (cursor.moveToNext()) names.add(cursor.getString(0));
+        }
+        return names;
     }
 
     private Uri findChildDocument(Uri parentUri, String displayName, String mimeType) {

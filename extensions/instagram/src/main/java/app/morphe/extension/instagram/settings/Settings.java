@@ -7,6 +7,7 @@ package app.morphe.extension.instagram.settings;
 
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.patches.download.DownloadFileNameFormatter;
 
 public class Settings {
     public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);
@@ -76,6 +77,8 @@ public class Settings {
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false);
     public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false);
+    public static final StringSetting DOWNLOAD_FILE_NAME_TEMPLATE =
+            new StringSetting("download_file_name_template", DownloadFileNameFormatter.DEFAULT_TEMPLATE);
     // Should be kept empty by default as its handled in `StorageUtils.java`
     public static final StringSetting CUSTOM_DOWNLOAD_PATH = new StringSetting("custom_download_path", "");
     public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");

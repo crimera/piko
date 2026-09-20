@@ -13,6 +13,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -83,7 +84,8 @@ public class DownloadUtils {
                             data.getMediaType(),
                             data.getUrl(),
                             subFolder,
-                            fileName
+                            fileName,
+                            data.getVariantTag()
                     );
                     enqueueDownload(context, request);
                 } catch (Exception e) {
@@ -230,7 +232,8 @@ public class DownloadUtils {
                     mediaType,
                     mediaUrl,
                     subFolder,
-                    fileName
+                    fileName,
+                    null
             ));
 
         } else if (position == -1) {
@@ -248,7 +251,8 @@ public class DownloadUtils {
                         MediaType.ANY,
                         mediaUrl,
                         subFolder,
-                        fileName
+                        fileName,
+                        null
                 ));
             }
         } else {
@@ -264,11 +268,47 @@ public class DownloadUtils {
             MediaType mediaType,
             String mediaUrl,
             String subFolder,
-            String fileName
+            String fallbackFileName,
+            String variantTag
     ) throws Exception {
-        DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
         boolean isVideo = mediaType.equals(MediaType.VIDEO)
                 || (mediaType.equals(MediaType.ANY) && childMediaData.isVideo());
+        String fileName = fallbackFileName;
+
+        try {
+            String username = rootMediaData.getUserData().getUsername();
+            Long takenAtSeconds = rootMediaData.getTakenAtSeconds();
+            Long uploadTimestampMillis = takenAtSeconds == null
+                    ? null
+                    : takenAtSeconds * 1000L;
+            String variantSuffix = variantTag == null || variantTag.trim().isEmpty()
+                    ? ""
+                    : variantTag;
+            DownloadFileNameFormatter.Values fileNameValues =
+                    new DownloadFileNameFormatter.Values(
+                            username,
+                            childMediaData.getMediaPkId(),
+                            rootMediaData.getShortcode(),
+                            uploadTimestampMillis,
+                            isVideo ? "video" : "image",
+                            carouselIndex,
+                            variantSuffix
+                    );
+            fileName = DownloadFileNameFormatter.format(
+                    Pref.downloadFileNameTemplate(),
+                    fileNameValues,
+                    isVideo ? ".mp4" : ".jpg",
+                    ZoneId.systemDefault()
+            );
+        } catch (Exception | LinkageError fileNameException) {
+            PikoUtils.logger(fileNameException);
+            Logger.printException(
+                    () -> "Could not format download filename",
+                    fileNameException
+            );
+        }
+
+        DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
         if (!isVideo || !Pref.embedDownloadMetadata()) {
             return request;
         }

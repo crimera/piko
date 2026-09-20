@@ -55,7 +55,6 @@ public class Constants {
         ExtensionStrings.setDownloadOngoing(str("piko_downloading_media"));
         ExtensionStrings.setDownloadCompleted(str("piko_downloaded_media"));
         ExtensionStrings.setDownloadError(str("piko_download_failed_media"));
-        ExtensionStrings.setDownloadMediaExists(str("piko_media_exists"));
         ExtensionStrings.setDownloadSetPathFailed(str("piko_download_set_path_failed"));
         ExtensionStrings.setDownloadSetPathSuccess(str("piko_download_set_path_success"));
         ExtensionStrings.setDownloadGrantPermission(str("piko_download_choose_folder"));
