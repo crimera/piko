@@ -193,8 +193,8 @@ public final class ProfilePhotosGallery {
     }
 
     private static final class GalleryView extends NestedScrollView {
-        // Compose restores AndroidView hierarchy state by view ID when the viewer is dismissed.
-        private static final int VIEW_STATE_ID = 0x1f0f0f01;
+        // Generate once per process so recreated AndroidView instances share the same state key.
+        private static final int VIEW_STATE_ID = View.generateViewId();
 
         private final LinearLayout content;
         private final GalleryGrid grid;
