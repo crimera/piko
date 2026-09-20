@@ -47,6 +47,7 @@ private const val VIEW_INTEROP_SCOPE = "Landroidx/compose/ui/viewinterop/"
 private const val PAGING_SCOPE = "Lcom/x/urt/paging/"
 private const val BOTTOM_PAGING_SCOPE = "${PAGING_SCOPE}bottom/"
 private const val PAGING_EVENT_HELPER = "createPagingEvent"
+private const val PAGING_STATE_HELPER = "readPagingState"
 private const val PAGINATOR_TYPE_HELPER = "createBottomPaginatorClassName"
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
 private const val VOID_DESCRIPTOR = "V"
@@ -61,9 +62,15 @@ private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION1 = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION3 = "Lkotlin/jvm/functions/Function3;"
+private const val FUNCTION2 = "Lkotlin/jvm/functions/Function2;"
 private const val OBJECT = "Ljava/lang/Object;"
 private const val STRING = "Ljava/lang/String;"
 private const val JAVA_LIST = "Ljava/util/List;"
+private const val OBJECT_ARRAY = "[Ljava/lang/Object;"
+private const val BOOLEAN = "Ljava/lang/Boolean;"
+private const val INTEGER = "Ljava/lang/Integer;"
+private const val PAGING_STATE_FLOW = "Lkotlinx/coroutines/flow/u2;"
+private const val LAZY_LIST_STATE = "Landroidx/compose/foundation/lazy/j0;"
 // Navigation controller/destination are never hardcoded: R8 reassigns the short
 // navigation names every release (jj/kj on alpha.01 became unrelated classes on
 // alpha.04 while the real pair moved to sj/rj). Both are derived from the
@@ -84,7 +91,18 @@ private data class ResolvedComposeContracts(
 private data class ResolvedPagingEvent(
     val eventType: String,
     val constructorReference: String,
+    val eventKindField: String,
+    val paginatorType: String,
     val paginatorClassName: String,
+    val state: ResolvedPagingState,
+)
+
+private data class ResolvedPagingState(
+    val stateType: String,
+    val stateFlowGetter: NativeMethodCall,
+    val needsMore: NativeMethodCall,
+    val terminated: NativeMethodCall,
+    val threshold: NativeMethodCall,
 )
 
 
@@ -408,14 +426,137 @@ private fun resolvePagingEvent(): ResolvedPagingEvent {
             "NewX bottom pagination request event constructor",
             requestEventClass.methods.filter(::isRequestEventConstructor),
         )
+
+    val eventKindType = requestConstructor.parameterDescriptors().first()
+    val eventKindClass =
+        classByType[eventKindType]
+            ?: throw PatchException("NewX bottom pagination event kind is missing: $eventKindType")
+    val eventKindFields = eventKindClass.fields.filter { field ->
+        field.name == "LAZY_LIST_SCROLL" &&
+            AccessFlags.STATIC.isSet(field.accessFlags) &&
+            field.type.toString() == eventKindType
+    }
+    val eventKindField =
+        requireExactlyOne("NewX bottom pagination lazy-scroll event kind", eventKindFields)
+            .toSmaliDescriptor()
+
+    fun isStateInterface(classDef: ClassDef): Boolean =
+        AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
+            classDef.methods.any { method ->
+                method.name == "b" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.returnType.toString() == INT_DESCRIPTOR
+            } &&
+            classDef.methods.any { method ->
+                method.name == "c" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.returnType.toString() == "Z"
+            } &&
+            classDef.methods.any { method ->
+                method.name == "isTerminated" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.returnType.toString() == "Z"
+            }
+
+    val stateClassCandidates = dispatchInstructions.mapNotNull { instruction ->
+        if (instruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
+        val type = instruction.getReference<TypeReference>()?.type?.toString()
+            ?: return@mapNotNull null
+        val stateClass = classByType[type] ?: return@mapNotNull null
+        val stateInterfaces = stateClass.interfaces.mapNotNull { interfaceType ->
+            classByType[interfaceType.toString()]
+        }.filter(::isStateInterface)
+        type.takeIf { stateInterfaces.size == 1 }
+    }.distinct()
+    val stateType =
+        requireExactlyOne("NewX bottom paginator state class", stateClassCandidates)
+    val stateClass =
+        classByType[stateType]
+            ?: throw PatchException("NewX bottom paginator state class is missing: $stateType")
+    val stateInterface = requireExactlyOne(
+        "NewX bottom paginator state interface",
+        stateClass.interfaces.mapNotNull { interfaceType ->
+            classByType[interfaceType.toString()]
+        }.filter(::isStateInterface),
+    )
+
+    val paginatorClass =
+        classByType[dispatch.definingClass.toString()]
+            ?: throw PatchException(
+                "NewX bottom paginator class is missing: ${dispatch.definingClass}",
+            )
+    val stateFlowGetter = requireExactlyOne(
+        "NewX bottom paginator state-flow getter",
+        paginatorClass.methods.filter { method ->
+            !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                method.parameterTypes.isEmpty() &&
+                method.returnType.toString() == PAGING_STATE_FLOW
+        },
+    ).toNativeCall()
+
+    val nativeTriggerCandidates = classDefs.flatMap { classDef ->
+        classDef.methods.filter { method ->
+            AccessFlags.STATIC.isSet(method.accessFlags) &&
+                method.returnType.toString() == VOID_DESCRIPTOR &&
+                method.parameterDescriptors() == listOf(
+                    stateInterface.type.toString(),
+                    LAZY_LIST_STATE,
+                    FUNCTION2,
+                    COMPOSER,
+                    INT_DESCRIPTOR,
+                )
+        }
+    }
+    val nativeTrigger =
+        requireExactlyOne("NewX native bottom paginator scroll trigger", nativeTriggerCandidates)
+    val triggerStateMethods =
+        nativeTrigger.implementation?.instructions
+            ?.mapNotNull { instruction -> instruction.getReference<MethodReference>() }
+            ?.filter { reference ->
+                reference.definingClass.toString() == stateInterface.type.toString() &&
+                    reference.parameterTypes.isEmpty()
+            }
+            ?.distinctBy { reference -> reference.toString() }
+            .orEmpty()
+    val thresholdMethod = requireExactlyOne(
+        "NewX native bottom paginator threshold state method",
+        triggerStateMethods.filter { reference ->
+            reference.returnType.toString() == INT_DESCRIPTOR
+        },
+    ).toNativeCall()
+    val needsMoreMethod = requireExactlyOne(
+        "NewX native bottom paginator needs-more state method",
+        triggerStateMethods.filter { reference ->
+            reference.returnType.toString() == "Z" &&
+                reference.name.toString() != "isTerminated"
+        },
+    ).toNativeCall()
+    val terminatedMethod = requireExactlyOne(
+        "NewX native bottom paginator terminated state method",
+        stateInterface.methods.filter { method ->
+            method.name == "isTerminated" &&
+                method.parameterTypes.isEmpty() &&
+                method.returnType.toString() == "Z"
+        },
+    ).toNativeCall()
+
     return ResolvedPagingEvent(
         eventType = requestEventType,
         constructorReference = requestConstructor.smaliReference(),
+        eventKindField = eventKindField,
+        paginatorType = dispatch.definingClass.toString(),
         paginatorClassName = dispatch.definingClass
             .toString()
             .removePrefix("L")
             .removeSuffix(";")
             .replace('/', '.'),
+        state = ResolvedPagingState(
+            stateType = stateType,
+            stateFlowGetter = stateFlowGetter,
+            needsMore = needsMoreMethod,
+            terminated = terminatedMethod,
+            threshold = thresholdMethod,
+        ),
     )
 }
 
@@ -456,15 +597,86 @@ private fun patchPagingEventBridge(event: ResolvedPagingEvent) {
     helper.addInstructions(
         0,
         """
-            new-instance v0, ${event.eventType}
-            const/4 v1, 0x0
+            sget-object v0, ${event.eventKindField}
+            new-instance v1, ${event.eventType}
             const/4 v2, 0x0
             const/4 v3, 0x0
-            invoke-direct {v0, v1, v2, v3}, ${event.constructorReference}
-            return-object v0
+            invoke-direct {v1, v0, v2, v3}, ${event.constructorReference}
+            return-object v1
         """.trimIndent(),
     )
+    patchPagingStateBridge(event)
     patchBottomPaginatorClassBridge(event.paginatorClassName)
+}
+
+context(context: BytecodePatchContext)
+private fun patchPagingStateBridge(event: ResolvedPagingEvent) {
+    val extensionClass = context.mutableClassDefBy(GALLERY_EXTENSION)
+    val placeholder =
+        requireExactlyOne(
+            "NewX gallery paging-state bridge",
+            extensionClass.methods.filter { method ->
+                method.name == PAGING_STATE_HELPER &&
+                    method.parameterTypes.map(CharSequence::toString) == listOf(OBJECT) &&
+                    method.returnType.toString() == OBJECT_ARRAY &&
+                    AccessFlags.STATIC.isSet(method.accessFlags)
+            },
+        )
+    val implementation =
+        placeholder.implementation
+            ?: throw PatchException("NewX gallery paging-state bridge has no implementation: $placeholder")
+    val requiredRegisterCount = 7
+    val helper =
+        if (implementation.registerCount >= requiredRegisterCount) {
+            placeholder
+        } else {
+            placeholder.cloneMutable(
+                additionalRegisters = requiredRegisterCount - implementation.registerCount,
+            ).also { expanded ->
+                extensionClass.methods.remove(placeholder)
+                extensionClass.methods.add(expanded)
+            }
+        }
+    val helperImplementation =
+        helper.implementation
+            ?: throw PatchException("NewX gallery paging-state bridge has no implementation: $helper")
+    while (helperImplementation.instructions.isNotEmpty()) {
+        helperImplementation.removeInstruction(helperImplementation.instructions.lastIndex)
+    }
+    val state = event.state
+    helper.addInstructions(
+        0,
+        """
+            move-object/from16 v0, p0
+            check-cast v0, ${event.paginatorType}
+            ${state.stateFlowGetter.opcode} {v0}, ${state.stateFlowGetter.descriptor}
+            move-result-object v1
+            invoke-interface {v1}, $PAGING_STATE_FLOW->getValue()$OBJECT
+            move-result-object v0
+            check-cast v0, ${state.stateType}
+            ${state.needsMore.opcode} {v0}, ${state.needsMore.descriptor}
+            move-result v1
+            ${state.terminated.opcode} {v0}, ${state.terminated.descriptor}
+            move-result v2
+            ${state.threshold.opcode} {v0}, ${state.threshold.descriptor}
+            move-result v3
+            const/4 v5, 0x3
+            new-array v4, v5, $OBJECT_ARRAY
+            invoke-static {v1}, $BOOLEAN->valueOf(Z)$BOOLEAN
+            move-result-object v6
+            const/4 v5, 0x0
+            aput-object v6, v4, v5
+            invoke-static {v2}, $BOOLEAN->valueOf(Z)$BOOLEAN
+            move-result-object v6
+            const/4 v5, 0x1
+            aput-object v6, v4, v5
+            invoke-static {v3}, $INTEGER->valueOf(I)$INTEGER
+            move-result-object v6
+            const/4 v5, 0x2
+            aput-object v6, v4, v5
+            return-object v4
+        """.trimIndent(),
+    )
 }
 
 context(context: BytecodePatchContext)

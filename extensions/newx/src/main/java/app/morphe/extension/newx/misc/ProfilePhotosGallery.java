@@ -201,7 +201,7 @@ public final class ProfilePhotosGallery {
         private List<?> currentItems;
         private int currentItemCount = -1;
         private boolean loadMoreInFlight = false;
-        private long lastLoadMoreTime = 0;
+        private boolean paginationArmed = false;
         GalleryView(
                 Context context,
                 List<?> items,
@@ -225,8 +225,13 @@ public final class ProfilePhotosGallery {
             setVerticalScrollBarEnabled(false);
             setHorizontalScrollBarEnabled(false);
             setOnScrollChangeListener((View.OnScrollChangeListener) (view, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                if (scrollY <= oldScrollY) return;
+                if (scrollY <= oldScrollY || loadMoreInFlight) return;
+                paginationArmed = true;
                 checkLoadMore();
+            });
+            addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                if (!paginationArmed || loadMoreInFlight || !isAtBottom()) return;
+                post(this::checkLoadMore);
             });
 
             content = new LinearLayout(context);
@@ -300,8 +305,17 @@ public final class ProfilePhotosGallery {
             }
         }
 
+        private boolean isAtBottom() {
+            if (getChildCount() == 0) return false;
+            View child = getChildAt(0);
+            int contentHeight = child.getHeight();
+            int viewportHeight = getHeight();
+            if (contentHeight <= 0 || viewportHeight <= 0) return false;
+            return child.getBottom() - (getScrollY() + viewportHeight - getPaddingBottom()) <= 0;
+        }
+
         private void checkLoadMore() {
-            if (loadMoreInFlight || getChildCount() == 0) return;
+            if (!paginationArmed || loadMoreInFlight || getChildCount() == 0) return;
             View child = getChildAt(0);
             int contentHeight = child.getHeight();
             int scrollY = getScrollY();
@@ -310,11 +324,7 @@ public final class ProfilePhotosGallery {
 
             int remaining = child.getBottom() - (scrollY + height - getPaddingBottom());
             if (remaining > 0) return;
-
-            long now = System.currentTimeMillis();
-            if (now - lastLoadMoreTime <= 1200) return;
-
-            lastLoadMoreTime = now;
+            paginationArmed = false;
             logPagination(
                     "threshold reached remaining=" + remaining +
                             " contentHeight=" + contentHeight +
@@ -329,8 +339,8 @@ public final class ProfilePhotosGallery {
                 return;
             }
 
-            // The footer extends the scroll content after the threshold is reached. Keep the
-            // viewport at the new bottom so the indeterminate indicator is immediately visible.
+            // Keep the in-flight footer visible without allowing its repositioning to arm
+            // another request.
             post(() -> {
                 if (loadMoreInFlight) {
                     scrollTo(0, child.getBottom());
@@ -373,6 +383,14 @@ public final class ProfilePhotosGallery {
         NewXLogger.printException(() -> PAGINATION_LOG_PREFIX + message, throwable);
     }
 
+    /**
+     * Patch-time bridge: reads the native paginator state as
+     * [needsMore, terminated, threshold].
+     */
+    public static Object[] readPagingState(Object bottomPaginator) {
+        throw new IllegalStateException("NewX paging state bridge was not patched");
+    }
+
     public static boolean requestLoadMore(Object callback) {
         if (callback == null) {
             logPagination("requestLoadMore callback=null");
@@ -401,6 +419,28 @@ public final class ProfilePhotosGallery {
                 return false;
             }
             logPagination("bottom paginator=" + bottomPaginator.getClass().getName());
+
+            Object[] state = readPagingState(bottomPaginator);
+            if (state == null || state.length != 3) {
+                logPagination("paging state unavailable");
+                return false;
+            }
+            boolean needsMore = Boolean.TRUE.equals(state[0]);
+            boolean terminated = Boolean.TRUE.equals(state[1]);
+            int threshold = state[2] instanceof Integer ? (Integer) state[2] : -1;
+            logPagination(
+                    "paginator state needsMore=" + needsMore +
+                            " terminated=" + terminated +
+                            " threshold=" + threshold
+            );
+            if (terminated) {
+                logPagination("bottom pagination already terminated");
+                return false;
+            }
+            if (!needsMore) {
+                logPagination("bottom paginator reports no more data");
+                return false;
+            }
 
             return triggerBottomPaging(bottomPaginator, pagingEvent);
         } catch (Throwable t) {
@@ -584,32 +624,6 @@ public final class ProfilePhotosGallery {
     }
 
     private static boolean triggerBottomPaging(Object bottomPaginator, Object pagingEvent) {
-        List<Method> terminationMethods = new ArrayList<>();
-        for (Method method : allMethods(bottomPaginator.getClass())) {
-            if (!Modifier.isStatic(method.getModifiers()) &&
-                    method.getParameterTypes().length == 0 &&
-                    (method.getReturnType() == boolean.class ||
-                            method.getReturnType() == Boolean.class)) {
-                terminationMethods.add(method);
-            }
-        }
-        if (terminationMethods.size() == 1) {
-            Method terminationMethod = terminationMethods.get(0);
-            try {
-                terminationMethod.setAccessible(true);
-                boolean terminated = Boolean.TRUE.equals(terminationMethod.invoke(bottomPaginator));
-                logPagination("termination method=" + terminationMethod.getName() + " result=" + terminated);
-                if (terminated) {
-                    logPagination("bottom pagination already terminated");
-                    return false;
-                }
-            } catch (Throwable t) {
-                logPaginationFailure("termination check failed method=" + terminationMethod.getName(), t);
-            }
-        } else {
-            logPagination("termination method count=" + terminationMethods.size());
-        }
-
         int dispatchCandidates = 0;
         for (Method method : allMethods(bottomPaginator.getClass())) {
             if (!isPagingDispatchMethod(method, pagingEvent)) continue;
