@@ -16,7 +16,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
@@ -30,6 +29,8 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val COMPOSER_MINIMAL_SCOPE = "Lcom/x/composer/minimal/"
 private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
@@ -66,7 +67,6 @@ private val CONDITIONAL_BRANCH_OPCODES =
 private object NewXPostDetailReplyBarFingerprint : Fingerprint(
     definingClass = COMPOSER_MINIMAL_SCOPE,
     returnType = "V",
-    filters = listOf(string("post-detail-reply-text-field")),
     custom = { method, _ -> method.isPostDetailReplyBarRenderer() },
 )
 
@@ -354,6 +354,69 @@ private fun MutableMethod.matches(target: Method): Boolean =
         returnType == target.returnType &&
         parameterTypes.map(CharSequence::toString) == target.parameterTypes.map(CharSequence::toString)
 
+context(context: BytecodePatchContext)
+private fun resolvePostDetailReplyBarRenderer(): Match {
+    val shapeMatches = NewXPostDetailReplyBarFingerprint.scopedMatchAll()
+    // Older releases carry the test tag directly in the renderer; newer ones host it
+    // in a Function2 lambda one hop down (alpha.04). Prefer the direct match when present.
+    val directMatches = shapeMatches.filter { match ->
+        match.method.implementation?.instructions?.any { instruction ->
+            instruction.getReference<StringReference>()?.string ==
+                "post-detail-reply-text-field"
+        } == true
+    }
+    if (directMatches.isNotEmpty()) {
+        return requireExactlyOne(
+            label = "NewX post-detail reply bar renderer",
+            candidates = directMatches,
+        )
+    }
+    // The reply text field test tag moved one hop down: the renderer no longer contains
+    // it directly (alpha.04 hosts it in a Function2 lambda instantiated by a helper).
+    // Resolve owner -> instantiator -> direct caller instead of hardcoding any of them.
+    val anchorOwners = buildList {
+        context.classDefForEach { classDef ->
+            if (classDef.methods.any { method ->
+                    method.implementation?.instructions?.any { instruction ->
+                        instruction.getReference<StringReference>()?.string ==
+                            "post-detail-reply-text-field"
+                    } == true
+                }) {
+                add(classDef.type)
+            }
+        }
+    }
+    val anchorOwner =
+        requireExactlyOne(
+            label = "NewX reply text field lambda owner",
+            candidates = anchorOwners,
+        )
+    val instantiators = buildList {
+        context.classDefForEach { classDef ->
+            classDef.methods.forEach { method ->
+                if (method.implementation?.instructions?.any { instruction ->
+                        instruction.opcode == Opcode.NEW_INSTANCE &&
+                            instruction.getReference<TypeReference>()?.type == anchorOwner
+                    } == true) {
+                    add(method)
+                }
+            }
+        }
+    }
+    val instantiator =
+        requireExactlyOne(
+            label = "NewX reply text field lambda instantiator",
+            candidates = instantiators,
+            describe = { "$it" },
+        )
+    return requireExactlyOne(
+        label = "NewX post-detail reply bar renderer",
+        candidates = shapeMatches.filter { match ->
+            match.method.callSiteIndices(instantiator).isNotEmpty()
+        },
+    )
+}
+
 /**
  * The renderer is called through minimal-composer helpers before the post-detail sheet adds the
  * navigation-bar inset. Resolving that call chain keeps the container hooks independent of the
@@ -592,12 +655,8 @@ val newXHidePostReplyBarPatch =
             )
 
         execute {
-            val matches = NewXPostDetailReplyBarFingerprint.scopedMatchAll()
             val renderer =
-                requireExactlyOne(
-                    label = "NewX post-detail reply bar renderer",
-                    candidates = matches,
-                )
+                resolvePostDetailReplyBarRenderer()
             val (minimalContainer, postDetailSheetContainer) = resolvePostDetailReplyBarContainers(renderer)
             val navigationInsetsHook = resolveMainNavigationInsetsHook()
             val postDetailNavigationInsetsHook =
