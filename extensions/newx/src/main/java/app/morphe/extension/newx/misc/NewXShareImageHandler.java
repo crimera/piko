@@ -26,11 +26,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 import app.morphe.extension.newx.utils.NewXUtils;
+import app.morphe.extension.newx.utils.ToStringParser;
 import kotlin.jvm.functions.Function1;
 
 /** Bridges NewX's rendered Compose post row to an Android image share intent. */
@@ -46,16 +45,23 @@ public final class NewXShareImageHandler {
     private static final String OPTION_NAME = NewXPostOptionActions.SHARE_IMAGE_ACTION;
     private static final String SETTING_ID = "newx.content.share_post_as_image";
     private static final String URT_POST_CLASS = "com.x.models.timelines.items.UrtTimelinePost";
+    private static final String SPATIAL_BOUNDS_CLASS = "androidx.compose.ui.spatial.c";
+    private static final String INT_RECT_CLASS = "androidx.compose.ui.unit.k";
     private static final int MAX_CAPTURE_PIXELS = 16_000_000;
-    private static final int MAX_RENDERED_POSTS = 128;
+    private static final int MAX_RENDERED_BOUNDS = 128;
     private static volatile Handler mainHandler;
-    private static final Object RENDERED_POSTS_LOCK = new Object();
-    private static final Map<String, WeakReference<PositionCallback>> RENDERED_POSTS =
-            new LinkedHashMap<>(MAX_RENDERED_POSTS, 0.75f, true);
+    private static final Object RENDERED_BOUNDS_LOCK = new Object();
     private static final Map<String, Rect> RENDERED_BOUNDS =
-            new LinkedHashMap<>(MAX_RENDERED_POSTS, 0.75f, true);
+            new LinkedHashMap<String, Rect>(MAX_RENDERED_BOUNDS, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Rect> eldest) {
+                    return size() > MAX_RENDERED_BOUNDS;
+                }
+            };
     private static final Map<Class<?>, BoundsReader> BOUNDS_READERS = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Field[]> RECTANGLE_FIELDS = new ConcurrentHashMap<>();
     private static final Function1<Object, Object> NO_POSITION_CALLBACK = coordinates -> null;
+    private static volatile boolean boundsAccessorUnavailable;
 
     private NewXShareImageHandler() {
     }
@@ -82,9 +88,8 @@ public final class NewXShareImageHandler {
     }
 
     private static Function1<Object, Object> createPositionCallback(String postId) {
-        if (postId == null) return NO_POSITION_CALLBACK;
-        String normalizedPostId = postId.trim();
-        if (normalizedPostId.isEmpty()) return NO_POSITION_CALLBACK;
+        String normalizedPostId = normalizePostId(postId);
+        if (normalizedPostId == null) return NO_POSITION_CALLBACK;
         return registerRenderedPost(normalizedPostId);
     }
 
@@ -124,23 +129,17 @@ public final class NewXShareImageHandler {
             return;
         }
 
-        String id;
         String fileName;
         try {
-            id = postId(post);
+            if (postId(post) == null) throw new ReflectiveOperationException("Post ID is empty");
             fileName = shareImageFileName(post);
         } catch (ReflectiveOperationException exception) {
             Utils.showToastShort("Could not identify the selected post");
             return;
         }
-        if (id == null) {
-            Utils.showToastShort("Could not identify the selected post");
-            return;
-        }
-
         View decorView = activity.getWindow().getDecorView();
         decorView.postOnAnimation(() -> decorView.postOnAnimation(
-                () -> captureRenderedPost(activity, id, fileName)
+                () -> captureRenderedPost(activity, post, fileName)
         ));
     }
 
@@ -153,9 +152,27 @@ public final class NewXShareImageHandler {
         return isShareImageAction(action);
     }
 
-    private static void captureRenderedPost(Activity activity, String postId, String fileName) {
+    private static void captureRenderedPost(Activity activity, Object post, String fileName) {
         View decorView = activity.getWindow().getDecorView();
         if (!decorView.isAttachedToWindow()) {
+            Utils.showToastShort("Post is no longer rendered");
+            return;
+        }
+
+        String postId;
+        try {
+            postId = postId(post);
+        } catch (ReflectiveOperationException exception) {
+            NewXLogger.printException(() -> DEBUG_TAG + ": Could not resolve post ID at capture", exception);
+            Utils.showToastShort("Post is no longer rendered");
+            return;
+        }
+        if (postId == null) {
+            Utils.showToastShort("Post is no longer rendered");
+            return;
+        }
+        if (boundsAccessorUnavailable) {
+            NewXLogger.printInfo(() -> DEBUG_TAG + ": Window bounds accessor is unavailable");
             Utils.showToastShort("Post is no longer rendered");
             return;
         }
@@ -166,16 +183,23 @@ public final class NewXShareImageHandler {
             Utils.showToastShort("Post is no longer rendered");
             return;
         }
+        Rect parentBounds = renderedBounds(resolveParentId(post));
+        if (canUnionWithParent(parentBounds, bounds)) {
+            bounds = union(bounds, parentBounds);
+        }
+        final Rect captureBounds = bounds;
         NewXLogger.printInfo(
-                () -> DEBUG_TAG + ": Requesting post " + postId + " bounds=" + bounds
+                () -> DEBUG_TAG + ": Requesting post " + postId + " bounds=" + captureBounds
                         + " window=" + decorView.getWidth() + "x" + decorView.getHeight()
         );
-        if (bounds.left < 0 || bounds.top < 0 || bounds.right > decorView.getWidth() || bounds.bottom > decorView.getHeight()) {
+        if (captureBounds.left < 0 || captureBounds.top < 0 ||
+                captureBounds.right > decorView.getWidth() ||
+                captureBounds.bottom > decorView.getHeight()) {
             Utils.showToastShort("Make the entire post visible before sharing");
             return;
         }
 
-        long pixelCount = (long) bounds.width() * bounds.height();
+        long pixelCount = (long) captureBounds.width() * captureBounds.height();
         if (pixelCount <= 0 || pixelCount > MAX_CAPTURE_PIXELS) {
             Utils.showToastShort("Rendered post is too large to capture");
             return;
@@ -183,7 +207,9 @@ public final class NewXShareImageHandler {
 
         Bitmap bitmap;
         try {
-            bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
+            bitmap = Bitmap.createBitmap(
+                    captureBounds.width(), captureBounds.height(), Bitmap.Config.ARGB_8888
+            );
         } catch (RuntimeException | OutOfMemoryError error) {
             Utils.showToastShort("Could not allocate the post image");
             return;
@@ -192,7 +218,7 @@ public final class NewXShareImageHandler {
         try {
             PixelCopy.request(
                     activity.getWindow(),
-                    bounds,
+                    captureBounds,
                     bitmap,
                     result -> finishCapture(activity, bitmap, fileName, postId, result),
                     mainHandler()
@@ -234,65 +260,117 @@ public final class NewXShareImageHandler {
     }
 
     private static Rect renderedBounds(String postId) {
-        synchronized (RENDERED_POSTS_LOCK) {
-            Rect bounds = RENDERED_BOUNDS.get(postId);
+        String normalizedPostId = normalizePostId(postId);
+        if (normalizedPostId == null) return null;
+        synchronized (RENDERED_BOUNDS_LOCK) {
+            Rect bounds = RENDERED_BOUNDS.get(normalizedPostId);
             return bounds == null ? null : new Rect(bounds);
         }
     }
 
-    private static PositionCallback registerRenderedPost(String postId) {
-        synchronized (RENDERED_POSTS_LOCK) {
-            removeClearedTargets();
-            WeakReference<PositionCallback> existingReference = RENDERED_POSTS.get(postId);
-            PositionCallback existing = existingReference == null ? null : existingReference.get();
-            if (existing != null) return existing;
+    private static String resolveParentId(Object post) {
+        Object canonicalPost = canonicalPost(post);
+        if (canonicalPost == null) return null;
 
-            evictRenderedPostIfNeeded();
-            PositionCallback callback = new PositionCallback(postId);
-            RENDERED_POSTS.put(postId, new WeakReference<>(callback));
-            return callback;
-        }
+        String reflectedId = reflectedParentId(canonicalPost);
+        if (reflectedId != null) return normalizePostId(reflectedId);
+
+        String labelId = ToStringParser.fieldValue(
+                String.valueOf(canonicalPost), "repliedPostId"
+        );
+        return normalizePostId(labelId);
     }
 
-    private static void evictRenderedPostIfNeeded() {
-        if (RENDERED_POSTS.size() < MAX_RENDERED_POSTS &&
-                RENDERED_BOUNDS.size() < MAX_RENDERED_POSTS) {
-            return;
-        }
+    private static Object canonicalPost(Object post) {
+        Object postResult = NewXUtils.invokeIfPresent(post, "getPostResult");
+        return NewXUtils.invokeIfPresent(postResult, "getCanonicalPost");
+    }
 
-        Iterator<String> renderedPostIds = RENDERED_POSTS.keySet().iterator();
-        if (renderedPostIds.hasNext()) {
-            String oldestPostId = renderedPostIds.next();
-            renderedPostIds.remove();
-            RENDERED_BOUNDS.remove(oldestPostId);
-            return;
-        }
+    private static String reflectedParentId(Object canonicalPost) {
+        Object getterValue = NewXUtils.invokeIfPresent(canonicalPost, "getRepliedPostId");
+        String getterId = identifierValue(getterValue);
+        if (getterId != null) return getterId;
 
-        Iterator<String> boundPostIds = RENDERED_BOUNDS.keySet().iterator();
-        if (boundPostIds.hasNext()) {
-            boundPostIds.next();
-            boundPostIds.remove();
+        Object namedFieldValue = fieldValue(canonicalPost, "repliedPostId");
+        String namedFieldId = identifierValue(namedFieldValue);
+        if (namedFieldId != null) return namedFieldId;
+
+        String labelId = ToStringParser.fieldValue(
+                String.valueOf(canonicalPost), "repliedPostId"
+        );
+        if (labelId == null) return null;
+
+        for (Class<?> type = canonicalPost.getClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                if (field.getType() != Long.class ||
+                        java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(canonicalPost);
+                    if (value != null && labelId.equals(String.valueOf(value))) {
+                        return String.valueOf(value);
+                    }
+                } catch (IllegalAccessException | RuntimeException ignored) {
+                    // The toString label remains the safe fallback below.
+                }
+            }
         }
+        return null;
+    }
+
+    private static Object fieldValue(Object target, String fieldName) {
+        for (Class<?> type = target.getClass(); type != null; type = type.getSuperclass()) {
+            try {
+                Field field = type.getDeclaredField(fieldName);
+                if (field.getType() != Long.class ||
+                        java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                    return null;
+                }
+                field.setAccessible(true);
+                return field.get(target);
+            } catch (NoSuchFieldException exception) {
+                // Continue through the model hierarchy.
+            } catch (IllegalAccessException | RuntimeException exception) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private static boolean canUnionWithParent(Rect parent, Rect selected) {
+        if (parent == null || selected == null || parent.width() <= 0 || parent.height() <= 0 ||
+                selected.width() <= 0 || selected.height() <= 0) {
+            return false;
+        }
+        if (parent.bottom > selected.top + 4) return false;
+
+        int overlap = Math.min(parent.right, selected.right) -
+                Math.max(parent.left, selected.left);
+        return overlap > 0 && (long) overlap * 2 > selected.width();
+    }
+
+    private static Rect union(Rect first, Rect second) {
+        return new Rect(
+                Math.min(first.left, second.left),
+                Math.min(first.top, second.top),
+                Math.max(first.right, second.right),
+                Math.max(first.bottom, second.bottom)
+        );
+    }
+
+    private static PositionCallback registerRenderedPost(String postId) {
+        return new PositionCallback(postId);
     }
 
     private static void registerRenderedBounds(String postId, Rect bounds) {
-        synchronized (RENDERED_POSTS_LOCK) {
-            Rect previous = RENDERED_BOUNDS.get(postId);
+        String normalizedPostId = normalizePostId(postId);
+        if (normalizedPostId == null || bounds == null) return;
+        synchronized (RENDERED_BOUNDS_LOCK) {
+            Rect previous = RENDERED_BOUNDS.get(normalizedPostId);
             if (bounds.equals(previous)) return;
-
-            evictRenderedPostIfNeeded();
-            RENDERED_BOUNDS.put(postId, new Rect(bounds));
-        }
-    }
-
-    private static void removeClearedTargets() {
-        Iterator<Map.Entry<String, WeakReference<PositionCallback>>> entries =
-                RENDERED_POSTS.entrySet().iterator();
-        while (entries.hasNext()) {
-            Map.Entry<String, WeakReference<PositionCallback>> entry = entries.next();
-            if (entry.getValue().get() != null) continue;
-            entries.remove();
-            RENDERED_BOUNDS.remove(entry.getKey());
+            RENDERED_BOUNDS.put(normalizedPostId, new Rect(bounds));
         }
     }
 
@@ -302,14 +380,7 @@ public final class NewXShareImageHandler {
         synchronized (BOUNDS_READERS) {
             reader = BOUNDS_READERS.get(layoutBoundsClass);
             if (reader != null) return reader;
-            Method[] methods = layoutBoundsClass.getMethods();
-            ArrayList<Method> candidates = new ArrayList<>(methods.length);
-            for (Method method : methods) {
-                if (method.getParameterCount() == 0 && !method.getReturnType().isPrimitive()) {
-                    candidates.add(method);
-                }
-            }
-            reader = new BoundsReader(candidates.toArray(new Method[0]));
+            reader = new BoundsReader(layoutBoundsClass);
             BOUNDS_READERS.put(layoutBoundsClass, reader);
             return reader;
         }
@@ -322,6 +393,8 @@ public final class NewXShareImageHandler {
 
     private static Rect readIntRect(Object value) throws IllegalAccessException {
         if (value == null) return null;
+
+        if (!INT_RECT_CLASS.equals(value.getClass().getName())) return null;
 
         Class<?> valueClass = value.getClass();
         Field[] fields = RECTANGLE_FIELDS.get(valueClass);
@@ -336,26 +409,19 @@ public final class NewXShareImageHandler {
         }
         if (fields.length == 0) return null;
 
-        int first = coordinate(fields[0], value);
-        int second = coordinate(fields[1], value);
-        int third = coordinate(fields[2], value);
-        int fourth = coordinate(fields[3], value);
-        return new Rect(first, second, third, fourth);
+        return new Rect(
+                fields[0].getInt(value),
+                fields[1].getInt(value),
+                fields[2].getInt(value),
+                fields[3].getInt(value)
+        );
     }
-
-    private static int coordinate(Field field, Object value) throws IllegalAccessException {
-        return field.getType() == float.class
-                ? Math.round(field.getFloat(value))
-                : field.getInt(value);
-    }
-
-    private static final Map<Class<?>, Field[]> RECTANGLE_FIELDS = new ConcurrentHashMap<>();
 
     private static Field[] rectangleFields(Class<?> type) {
         Field[] declaredFields = type.getDeclaredFields();
         ArrayList<Field> coordinates = new ArrayList<>(4);
         for (Field field : declaredFields) {
-            if ((field.getType() != int.class && field.getType() != float.class) ||
+            if (field.getType() != int.class ||
                     java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
@@ -368,39 +434,58 @@ public final class NewXShareImageHandler {
     }
 
     private static final class BoundsReader {
-        private final Method[] allMethods;
-        private volatile Method[] resolvedMethods;
+        private final Method accessor;
 
-        private BoundsReader(Method[] allMethods) {
-            this.allMethods = allMethods;
+        private BoundsReader(Class<?> layoutBoundsClass) {
+            accessor = resolveAccessor(layoutBoundsClass);
         }
 
         private Rect read(Object layoutBounds) {
-            Method[] methods = resolvedMethods;
-            ArrayList<Method> validMethods = methods == null ? new ArrayList<>() : null;
-            Rect result = null;
-            for (Method method : methods == null ? allMethods : methods) {
-                try {
-                    Rect candidate = readIntRect(method.invoke(layoutBounds));
-                    if (validMethods != null) validMethods.add(method);
-                    if (candidate == null || candidate.width() <= 0 || candidate.height() <= 0) {
-                        continue;
-                    }
-                    if (result == null || candidate.top > result.top ||
-                            (candidate.top == result.top && candidate.left > result.left)) {
-                        result = candidate;
-                    }
-                } catch (ReflectiveOperationException | RuntimeException exception) {
+            if (accessor == null) return null;
+            try {
+                Rect bounds = readIntRect(accessor.invoke(layoutBounds));
+                if (bounds == null) boundsAccessorUnavailable = true;
+                return bounds;
+            } catch (ReflectiveOperationException | RuntimeException exception) {
+                boundsAccessorUnavailable = true;
+                NewXLogger.printException(
+                        () -> DEBUG_TAG + ": Could not read window bounds from " +
+                                SPATIAL_BOUNDS_CLASS + ".c()",
+                        exception
+                );
+                return null;
+            }
+        }
+
+        private static Method resolveAccessor(Class<?> layoutBoundsClass) {
+            if (!SPATIAL_BOUNDS_CLASS.equals(layoutBoundsClass.getName())) {
+                boundsAccessorUnavailable = true;
+                NewXLogger.printInfo(
+                        () -> DEBUG_TAG + ": Unexpected bounds callback type " +
+                                layoutBoundsClass.getName()
+                );
+                return null;
+            }
+            try {
+                Method method = layoutBoundsClass.getMethod("c");
+                if (method.getParameterCount() != 0 ||
+                        !INT_RECT_CLASS.equals(method.getReturnType().getName())) {
+                    boundsAccessorUnavailable = true;
                     NewXLogger.printInfo(
-                            () -> DEBUG_TAG + ": Ignoring non-rectangle bounds candidate",
-                            exception
+                            () -> DEBUG_TAG + ": Bounds accessor c() has unexpected signature"
                     );
+                    return null;
                 }
+                method.setAccessible(true);
+                return method;
+            } catch (ReflectiveOperationException | RuntimeException exception) {
+                boundsAccessorUnavailable = true;
+                NewXLogger.printException(
+                        () -> DEBUG_TAG + ": Missing " + SPATIAL_BOUNDS_CLASS + ".c()",
+                        exception
+                );
+                return null;
             }
-            if (resolvedMethods == null && validMethods != null && !validMethods.isEmpty()) {
-                resolvedMethods = validMethods.toArray(new Method[0]);
-            }
-            return result;
         }
     }
 
@@ -564,6 +649,12 @@ public final class NewXShareImageHandler {
 
     private static String identifierValue(Object identifier) {
         return NewXUtils.identifierToString(identifier);
+    }
+
+    private static String normalizePostId(String postId) {
+        if (postId == null) return null;
+        String normalized = postId.trim();
+        return normalized.isEmpty() ? null : normalized;
     }
 
     private static String stringValue(Object value, String fallback) {
