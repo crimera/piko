@@ -205,6 +205,11 @@ public final class ProfilePhotosGallery {
         private int currentItemCount = -1;
         private boolean loadMoreInFlight = false;
         private boolean paginationArmed = false;
+        // Short content cannot be scrolled, so the scroll listener never arms
+        // pagination. Track the item count we already auto-requested for so a
+        // viewport that stays short after an append still loads the next page
+        // exactly once instead of looping on every layout pass.
+        private int autoLoadItemCount = -1;
         GalleryView(
                 Context context,
                 List<?> items,
@@ -234,7 +239,7 @@ public final class ProfilePhotosGallery {
                 checkLoadMore();
             });
             addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                if (!paginationArmed || loadMoreInFlight || !isAtBottom()) return;
+                if (loadMoreInFlight) return;
                 post(this::checkLoadMore);
             });
 
@@ -309,17 +314,8 @@ public final class ProfilePhotosGallery {
             }
         }
 
-        private boolean isAtBottom() {
-            if (getChildCount() == 0) return false;
-            View child = getChildAt(0);
-            int contentHeight = child.getHeight();
-            int viewportHeight = getHeight();
-            if (contentHeight <= 0 || viewportHeight <= 0) return false;
-            return child.getBottom() - (getScrollY() + viewportHeight - getPaddingBottom()) <= 0;
-        }
-
         private void checkLoadMore() {
-            if (!paginationArmed || loadMoreInFlight || getChildCount() == 0) return;
+            if (loadMoreInFlight || getChildCount() == 0) return;
             View child = getChildAt(0);
             int contentHeight = child.getHeight();
             int scrollY = getScrollY();
@@ -328,11 +324,21 @@ public final class ProfilePhotosGallery {
 
             int remaining = child.getBottom() - (scrollY + height - getPaddingBottom());
             if (remaining > 0) return;
+
+            // A real scroll armed the request; otherwise the content is shorter than
+            // the viewport (nothing to scroll). Allow that auto-request once per item
+            // count so an append that still underfills the viewport keeps paginating.
+            boolean autoTrigger = !paginationArmed;
+            if (autoTrigger) {
+                if (autoLoadItemCount == currentItemCount) return;
+                autoLoadItemCount = currentItemCount;
+            }
             paginationArmed = false;
             logPagination(
                     "threshold reached remaining=" + remaining +
                             " contentHeight=" + contentHeight +
                             " viewportHeight=" + height +
+                            " auto=" + autoTrigger +
                             " callback=" + (callback == null ? "null" : callback.getClass().getName())
             );
             setLoadingMore(true);
