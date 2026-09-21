@@ -65,8 +65,7 @@ public class Settings {
     public static final StringSetting CHANGE_LIKE_ANIMATION = new StringSetting("change_like_animation", "ARES_LIKE_ACTIVATION");
     public static final StringSetting CUSTOMISE_STORY_RING_SIZE = new StringSetting("customise_story_ring_size", "100");
     public static final BooleanSetting ENABLE_MORE_OPTIONS_ON_POST = new BooleanSetting("enable_more_option_on_post", true);
-    public static final BooleanSetting CUSTOM_FONT = new BooleanSetting("custom_font", false);
-    public static final StringSetting CUSTOM_FONT_SELECTED = new StringSetting("custom_font_selected", "");
+    public static final BooleanSetting USE_SYSTEM_FONT = new BooleanSetting("use_system_font", false);
 
     public static final BooleanSetting DISABLE_DOUBLE_TAP_LIKE_POST = new BooleanSetting("disable_double_tap_like_post", false);
     public static final BooleanSetting DISABLE_DOUBLE_TAP_LIKE_REEL = new BooleanSetting("disable_double_tap_like_reel", false);

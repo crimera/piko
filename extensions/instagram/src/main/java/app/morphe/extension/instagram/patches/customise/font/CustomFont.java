@@ -99,12 +99,12 @@ public class CustomFont {
      */
     private static volatile boolean active;
 
-    /** The font the app is drawn in. Written once, in {@link #load}. */
+    /** The stored font file's typeface. Null, and unused, when {@link #systemFontSelected}. */
     private static Typeface customTypeface;
 
     /**
-     * Whether {@link #customTypeface} stands for {@link FontStorage#SYSTEM_FONT} rather than a
-     * font file. Written once, in {@link #load}, alongside {@link #customTypeface} itself.
+     * Whether the app is drawn in the system font rather than {@link #customTypeface}. Written
+     * once, in {@link #load}, alongside {@link #customTypeface} itself.
      */
     private static boolean systemFontSelected;
 
@@ -121,33 +121,21 @@ public class CustomFont {
     /**
      * Settles the font for the life of the process. Injected into the app's start up, so the first
      * text the app draws already has a typeface to be drawn in and no request has to go looking.
+     *
+     * A stored font always wins over the system-font switch: the switch only ever matters when
+     * nothing has been added.
      */
     public static void load() {
-        String font = effectiveFont();
-        if (font == null) {
-            return;
+        if (FontStorage.hasFile()) {
+            customTypeface = FontStorage.loadTypeface();
+            systemFontSelected = false;
+            active = customTypeface != null;
+        } else if (FontStorage.useSystemFont()) {
+            systemFontSelected = true;
+            active = true;
+        } else {
+            active = false;
         }
-
-        // Already parsed and cached by effectiveFont()'s usability check, just above - read back
-        // rather than parsed again, so the file is not decoded twice on every cold start.
-        customTypeface = FontStorage.previewTypeface(font);
-        systemFontSelected = FontStorage.isSystemFont(font);
-        active = customTypeface != null;
-    }
-
-    /**
-     * The font the app would be drawn in if it started now, null when it would use Instagram's
-     * own. A font that is switched off or no longer there is no different from none at all.
-     *
-     * {@link FontStorage#SYSTEM_FONT} - the empty string - is itself a real answer here, so
-     * "nothing to draw in" has to be its own value rather than being folded into an empty one.
-     */
-    private static String effectiveFont() {
-        if (!FontStorage.isEnabled()) {
-            return null;
-        }
-        String selected = FontStorage.selected();
-        return FontStorage.isUsable(selected) ? selected : null;
     }
 
     /**
