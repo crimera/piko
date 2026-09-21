@@ -171,6 +171,10 @@ public final class NewXShareImageHandler {
             Utils.showToastShort("Post is no longer rendered");
             return;
         }
+        NewXLogger.printInfo(
+                () -> DEBUG_TAG + ": post class=" + post.getClass().getName() +
+                        " id=" + postId + " source=" + NewXUtils.sourcePostId(post)
+        );
         if (boundsAccessorUnavailable) {
             NewXLogger.printInfo(() -> DEBUG_TAG + ": Window bounds accessor is unavailable");
             Utils.showToastShort("Post is no longer rendered");
@@ -183,14 +187,39 @@ public final class NewXShareImageHandler {
             Utils.showToastShort("Post is no longer rendered");
             return;
         }
-        Rect parentBounds = renderedBounds(resolveParentId(post));
-        if (canUnionWithParent(parentBounds, bounds)) {
-            bounds = union(bounds, parentBounds);
+        final Rect selectedBounds = bounds;
+        ParentResolution parent = resolveParent(post);
+        NewXLogger.printInfo(
+                () -> DEBUG_TAG + ": canonical=" + parent.canonicalClass +
+                        " parentId=" + parent.parentId + " path=" + parent.path
+        );
+        Rect parentBounds = renderedBounds(parent.parentId);
+        NewXLogger.printInfo(
+                () -> DEBUG_TAG + ": map size=" + renderedBoundsSize() +
+                        " selectedBounds=" + boundsDescription(selectedBounds) +
+                " parentKey=" + parent.parentId +
+                " parentBounds=" + boundsDescription(parentBounds)
+        );
+        int adjacencySlop = adjacencySlopPx(decorView);
+        int overlap = horizontalOverlap(parentBounds, selectedBounds);
+        boolean unionParent = canUnionWithParent(parentBounds, selectedBounds, adjacencySlop);
+        String windowBounds = boundsDescription(selectedBounds);
+        if (unionParent) {
+            bounds = union(selectedBounds, parentBounds);
         }
         final Rect captureBounds = bounds;
         NewXLogger.printInfo(
-                () -> DEBUG_TAG + ": Requesting post " + postId + " bounds=" + captureBounds
-                        + " window=" + decorView.getWidth() + "x" + decorView.getHeight()
+                () -> DEBUG_TAG + ": adjacency parent.bottom=" +
+                        (parentBounds == null ? "null" : parentBounds.bottom) +
+                        " selected.top=" + selectedBounds.top +
+                        " gap=" + (parentBounds == null ? "null" :
+                                selectedBounds.top - parentBounds.bottom) +
+                        " overlapPx=" + overlap +
+                        " slopPx=" + adjacencySlop +
+                        " union=" + unionParent +
+                        " captureBounds=" + boundsDescription(captureBounds) +
+                        " window=" + decorView.getWidth() + "x" + decorView.getHeight() +
+                        " windowBounds=" + windowBounds
         );
         if (captureBounds.left < 0 || captureBounds.top < 0 ||
                 captureBounds.right > decorView.getWidth() ||
@@ -268,87 +297,198 @@ public final class NewXShareImageHandler {
         }
     }
 
-    private static String resolveParentId(Object post) {
-        Object canonicalPost = canonicalPost(post);
-        if (canonicalPost == null) return null;
+    private static ParentResolution resolveParent(Object post) {
+        Object canonicalPost = null;
+        try {
+            canonicalPost = findCanonicalPost(findPostResult(post));
+            if (canonicalPost != null) {
+                ParentIdResolution canonicalParent = parentIdFromCanonical(canonicalPost);
+                if (canonicalParent != null) {
+                    return new ParentResolution(
+                            normalizePostId(canonicalParent.id),
+                            canonicalParent.path,
+                            canonicalPost.getClass().getName()
+                    );
+                }
+            }
+        } catch (RuntimeException ignored) {
+            // The wrapper label fallback below keeps reflection failures fail-closed.
+        }
 
-        String reflectedId = reflectedParentId(canonicalPost);
-        if (reflectedId != null) return normalizePostId(reflectedId);
-
-        String labelId = ToStringParser.fieldValue(
-                String.valueOf(canonicalPost), "repliedPostId"
+        String wrapperParentId = normalizePostId(
+                ToStringParser.fieldValue(safeObjectString(post), "repliedPostId")
         );
-        return normalizePostId(labelId);
+        if (wrapperParentId != null) {
+            return new ParentResolution(wrapperParentId, "label", canonicalClass(canonicalPost));
+        }
+        return new ParentResolution(null, "none", canonicalClass(canonicalPost));
     }
 
-    private static Object canonicalPost(Object post) {
-        Object postResult = NewXUtils.invokeIfPresent(post, "getPostResult");
-        return NewXUtils.invokeIfPresent(postResult, "getCanonicalPost");
+    private static Object findPostResult(Object post) {
+        if (post == null) return null;
+        Object namedResult = readInstanceField(post, "a");
+        if (namedResult != null) return namedResult;
+        return firstModelFieldValue(post);
     }
 
-    private static String reflectedParentId(Object canonicalPost) {
-        Object getterValue = NewXUtils.invokeIfPresent(canonicalPost, "getRepliedPostId");
-        String getterId = identifierValue(getterValue);
-        if (getterId != null) return getterId;
+    private static Object findCanonicalPost(Object postResult) {
+        if (isCanonicalPost(postResult)) return postResult;
+        return firstCanonicalFieldValue(postResult);
+    }
 
-        Object namedFieldValue = fieldValue(canonicalPost, "repliedPostId");
-        String namedFieldId = identifierValue(namedFieldValue);
-        if (namedFieldId != null) return namedFieldId;
-
+    private static ParentIdResolution parentIdFromCanonical(Object canonicalPost) {
         String labelId = ToStringParser.fieldValue(
-                String.valueOf(canonicalPost), "repliedPostId"
+                safeObjectString(canonicalPost), "repliedPostId"
         );
         if (labelId == null) return null;
 
         for (Class<?> type = canonicalPost.getClass(); type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {
-                if (field.getType() != Long.class ||
-                        java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
+                        (field.getType() != Long.class && field.getType() != long.class)) {
                     continue;
                 }
-                try {
-                    field.setAccessible(true);
-                    Object value = field.get(canonicalPost);
-                    if (value != null && labelId.equals(String.valueOf(value))) {
-                        return String.valueOf(value);
-                    }
-                } catch (IllegalAccessException | RuntimeException ignored) {
-                    // The toString label remains the safe fallback below.
+                Object value = readField(canonicalPost, field);
+                if (value != null && labelId.equals(String.valueOf(value))) {
+                    return new ParentIdResolution(String.valueOf(value), "field");
                 }
+            }
+        }
+        return new ParentIdResolution(labelId, "label");
+    }
+
+    private static String canonicalClass(Object canonicalPost) {
+        return canonicalPost == null ? "null" : canonicalPost.getClass().getName();
+    }
+
+    private static String safeObjectString(Object value) {
+        if (value == null) return null;
+        try {
+            return String.valueOf(value);
+        } catch (RuntimeException exception) {
+            return null;
+        }
+    }
+
+    private static Object firstModelFieldValue(Object target) {
+        if (target == null) return null;
+        for (Class<?> type = target.getClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
+                        !field.getType().getName().startsWith("com.x.models.")) {
+                    continue;
+                }
+                Object value = readField(target, field);
+                if (value != null) return value;
             }
         }
         return null;
     }
 
-    private static Object fieldValue(Object target, String fieldName) {
+    private static Object firstCanonicalFieldValue(Object target) {
+        if (target == null) return null;
+        for (Class<?> type = target.getClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
+                Object value = readField(target, field);
+                if (isCanonicalPost(value)) return value;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isCanonicalPost(Object value) {
+        if (value == null) return false;
+        for (Class<?> type = value.getClass(); type != null; type = type.getSuperclass()) {
+            if ("com.x.models.t0".equals(type.getName())) return true;
+        }
+        try {
+            return String.valueOf(value).startsWith("CanonicalPost(");
+        } catch (RuntimeException exception) {
+            return false;
+        }
+    }
+
+    private static Object readInstanceField(Object target, String fieldName) {
+        if (target == null) return null;
         for (Class<?> type = target.getClass(); type != null; type = type.getSuperclass()) {
             try {
                 Field field = type.getDeclaredField(fieldName);
-                if (field.getType() != Long.class ||
-                        java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
-                    return null;
-                }
-                field.setAccessible(true);
-                return field.get(target);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) return null;
+                return readField(target, field);
             } catch (NoSuchFieldException exception) {
-                // Continue through the model hierarchy.
-            } catch (IllegalAccessException | RuntimeException exception) {
+                // Continue through the wrapper hierarchy.
+            } catch (RuntimeException exception) {
                 return null;
             }
         }
         return null;
     }
 
-    private static boolean canUnionWithParent(Rect parent, Rect selected) {
+    private static Object readField(Object target, Field field) {
+        try {
+            field.setAccessible(true);
+            if (field.getType() == long.class) return field.getLong(target);
+            return field.get(target);
+        } catch (IllegalAccessException | RuntimeException exception) {
+            return null;
+        }
+    }
+
+    private static int renderedBoundsSize() {
+        synchronized (RENDERED_BOUNDS_LOCK) {
+            return RENDERED_BOUNDS.size();
+        }
+    }
+
+    private static int adjacencySlopPx(View decorView) {
+        float density = decorView.getResources().getDisplayMetrics().density;
+        return Math.max(1, Math.round(8f * density));
+    }
+
+    private static int horizontalOverlap(Rect parent, Rect selected) {
+        if (parent == null || selected == null) return 0;
+        return Math.max(0, Math.min(parent.right, selected.right) -
+                Math.max(parent.left, selected.left));
+    }
+
+    private static boolean canUnionWithParent(Rect parent, Rect selected, int slopPx) {
         if (parent == null || selected == null || parent.width() <= 0 || parent.height() <= 0 ||
                 selected.width() <= 0 || selected.height() <= 0) {
             return false;
         }
-        if (parent.bottom > selected.top + 4) return false;
+        if (parent.bottom > selected.top + slopPx) return false;
 
-        int overlap = Math.min(parent.right, selected.right) -
-                Math.max(parent.left, selected.left);
+        int overlap = horizontalOverlap(parent, selected);
         return overlap > 0 && (long) overlap * 2 > selected.width();
+    }
+
+    private static String boundsDescription(Rect bounds) {
+        return bounds == null
+                ? "null"
+                : bounds.left + "," + bounds.top + "," + bounds.right + "," + bounds.bottom;
+    }
+
+    private static final class ParentResolution {
+        private final String parentId;
+        private final String path;
+        private final String canonicalClass;
+
+        private ParentResolution(String parentId, String path, String canonicalClass) {
+            this.parentId = parentId;
+            this.path = path;
+            this.canonicalClass = canonicalClass;
+        }
+    }
+
+    private static final class ParentIdResolution {
+        private final String id;
+        private final String path;
+
+        private ParentIdResolution(String id, String path) {
+            this.id = id;
+            this.path = path;
+        }
     }
 
     private static Rect union(Rect first, Rect second) {
@@ -503,8 +643,7 @@ public final class NewXShareImageHandler {
         final int width = 1080;
         final int padding = 72;
         Object author = NewXUtils.invoke(post, "getAuthor");
-        Object postResult = NewXUtils.invoke(post, "getPostResult");
-        Object canonicalPost = postResult == null ? null : NewXUtils.invoke(postResult, "getCanonicalPost");
+        Object canonicalPost = findCanonicalPost(findPostResult(post));
         String name = stringValue(NewXUtils.invoke(author, "getName"), "X user");
         String screenName = stringValue(NewXUtils.invoke(author, "getScreenName"), "");
         String text = stringValue(canonicalPost == null ? null : NewXUtils.invoke(canonicalPost, "getText"), "");
@@ -654,7 +793,7 @@ public final class NewXShareImageHandler {
     private static String normalizePostId(String postId) {
         if (postId == null) return null;
         String normalized = postId.trim();
-        return normalized.isEmpty() ? null : normalized;
+        return normalized.isEmpty() || "0".equals(normalized) ? null : normalized;
     }
 
     private static String stringValue(Object value, String fallback) {
