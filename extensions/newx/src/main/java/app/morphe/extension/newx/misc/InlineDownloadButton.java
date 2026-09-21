@@ -296,7 +296,7 @@ public final class InlineDownloadButton {
         }
     }
 
-    public static boolean handleEvent(Object presenter, Object event) {
+    public static boolean handleEvent(Object presenter, Object event, boolean longPress) {
         if (!patchApplied) return false;
 
         Object action = findActionEntry(event);
@@ -315,7 +315,7 @@ public final class InlineDownloadButton {
             // native share handler does not run for the download action.
             Context applicationContext = context.getApplicationContext();
             Context safeContext = applicationContext != null ? applicationContext : context;
-            CLICK_EXECUTOR.execute(() -> resolveAndPresent(safeContext, post));
+            CLICK_EXECUTOR.execute(() -> resolveAndPresent(safeContext, post, longPress));
             return true;
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
@@ -324,7 +324,7 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static void resolveAndPresent(Context context, Object post) {
+    private static void resolveAndPresent(Context context, Object post, boolean longPress) {
         final List<DownloadItem> downloads;
         final String username;
         final String postId;
@@ -343,11 +343,16 @@ public final class InlineDownloadButton {
             return;
         }
 
+        // Long press is the "download everything" shortcut and skips the picker entirely.
+        if (longPress) {
+            enqueueAllDownloads(context, downloads, username, postId);
+            return;
+        }
         if (downloads.size() == 1) {
             enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
-        } else {
-            NewXUtils.runOnUiThread(() -> showMediaPicker(context, downloads, username, postId));
+            return;
         }
+        NewXUtils.runOnUiThread(() -> showMediaPicker(context, downloads, username, postId));
     }
 
     private static boolean isEnabled() {

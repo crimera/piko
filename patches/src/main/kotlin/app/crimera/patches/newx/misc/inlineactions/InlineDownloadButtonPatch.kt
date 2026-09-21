@@ -50,12 +50,16 @@ import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
+private const val RESOURCES_DESCRIPTOR = "Landroid/content/res/Resources;"
 private const val EXTENSION = "Lapp/morphe/extension/newx/misc/InlineDownloadButton;"
 private const val PRESENTER_POST_HELPER = "getPresenterPost"
 private const val CANONICAL_POST_HELPER = "getCanonicalPost"
@@ -357,6 +361,10 @@ val newXInlineDownloadButtonPatch =
                         ),
                 ).scopedMatchAll(),
             )
+            val longPressEventType = resolveInlineLongPressEventType(
+                inlineEventHandler.originalMethod,
+                entryModels.inlineActionEntryDescriptor,
+            )
             inlineEventHandler.method.apply {
                 requireStatic("NewX inline-action event handler")
                 if (parameterTypes.firstOrNull().toString() != inlinePresenterType) {
@@ -366,14 +374,19 @@ val newXInlineDownloadButtonPatch =
                     parameterTypes.dropLast(1).sumOf { type ->
                         if (type.toString() == "J" || type.toString() == "D") 2 else 1
                     }
-                val (presenterRegister, eventRegister) = freeRegisters4Bit(index = 0, count = 2)
+                // The presenter receives a distinct event type for long press, but it carries the
+                // same action entry. Classify the gesture from that native event identity so the
+                // extension can download every media item without opening the picker.
+                val (presenterRegister, eventRegister, longPressRegister) =
+                    freeRegisters4Bit(index = 0, count = 3)
                 val nativeStart = instructions.first()
                 addInstructionsWithLabels(
                     0,
                     """
                         move-object/from16 v$presenterRegister, p0
                         move-object/from16 v$eventRegister, p$eventParameter
-                        invoke-static {v$presenterRegister, v$eventRegister}, $EXTENSION->handleEvent(Ljava/lang/Object;Ljava/lang/Object;)Z
+                        instance-of v$longPressRegister, v$eventRegister, $longPressEventType
+                        invoke-static {v$presenterRegister, v$eventRegister, v$longPressRegister}, $EXTENSION->handleEvent(Ljava/lang/Object;Ljava/lang/Object;Z)Z
                         move-result v$presenterRegister
                         if-eqz v$presenterRegister, :piko_newx_inline_download_continue
                         return-void
@@ -382,6 +395,45 @@ val newXInlineDownloadButtonPatch =
                 )
             }
         }
+    }
+
+/**
+ * The inline-action bar dispatches two gesture events through the presenter handler. The tap event
+ * also carries resources for the presenter's limited-action messaging; the long-press event carries
+ * only the action entry. Both implement the event interface, so resolve the long-press event as the
+ * one that implements the event interface, exposes the action entry, and exposes no resources.
+ * Resolve it semantically rather than by its obfuscated name.
+ */
+context(context: BytecodePatchContext)
+private fun resolveInlineLongPressEventType(
+    eventHandler: Method,
+    actionEntryDescriptor: String,
+): String {
+    val eventInterfaceDescriptor = eventHandler.parameterTypes.lastOrNull()?.toString()
+        ?: throw PatchException("NewX inline event handler has no event parameter: $eventHandler")
+    val instructions = eventHandler.implementation?.instructions
+        ?: throw PatchException("NewX inline event handler has no implementation: $eventHandler")
+
+    return requireExactlyOne(
+        "NewX inline-action long-press event",
+        instructions
+            .filter { instruction -> instruction.opcode == Opcode.INSTANCE_OF }
+            .mapNotNull { instruction -> instruction.getReference<TypeReference>()?.type }
+            .distinct()
+            .filter { type ->
+                val eventClass = context.classDefByOrNull(type) ?: return@filter false
+                val carriesActionEntry = eventClass.exposesGetter(actionEntryDescriptor)
+                val carriesResources = eventClass.exposesGetter(RESOURCES_DESCRIPTOR)
+                eventClass.interfaces.any { descriptor ->
+                    descriptor.toString() == eventInterfaceDescriptor
+                } && carriesActionEntry && !carriesResources
+            },
+    )
+}
+
+private fun ClassDef.exposesGetter(returnType: String): Boolean =
+    methods.any { method ->
+        method.parameterTypes.isEmpty() && method.returnType == returnType
     }
 
 context(context: BytecodePatchContext)
