@@ -170,6 +170,46 @@
     <string name="piko_newx_inline_download_conflict_overwrite">Перезаписать существующий файл</string>
     <string name="piko_newx_inline_download_conflict_rename">Сохранить под новым именем</string>
     <string name="piko_newx_inline_download_conflict_skip">Пропустить уже скачанные медиафайлы</string>
+    <string name="piko_newx_inline_download_options_title">Настройки скачивания</string>
+    <string name="piko_newx_inline_download_options_summary">Выберите, куда сохранять скачанные файлы и как их называть</string>
+    <string name="piko_newx_inline_download_filename_template_title">Шаблон имени файла</string>
+    <string name="piko_newx_inline_download_filename_template_summary">Формирует имя сохраняемого файла на основе данных публикации. Нажмите, чтобы изменить шаблон и сразу увидеть результат.</string>
+    <string name="piko_newx_inline_download_images_tree_uri_title">Папка для скачанных изображений</string>
+    <string name="piko_newx_inline_download_images_tree_uri_summary">Выбранная папка для скачанных изображений</string>
+    <string name="piko_newx_inline_download_videos_tree_uri_title">Папка для скачанных видео</string>
+    <string name="piko_newx_inline_download_videos_tree_uri_summary">Выбранная папка для скачанных видео</string>
+    <string name="piko_newx_inline_download_images_display_path_title">Путь к папке для скачанных изображений</string>
+    <string name="piko_newx_inline_download_images_display_path_summary">Путь к папке для скачанных изображений в удобном для чтения виде</string>
+    <string name="piko_newx_inline_download_videos_display_path_title">Путь к папке для скачанных видео</string>
+    <string name="piko_newx_inline_download_videos_display_path_summary">Путь к папке для скачанных видео в удобном для чтения виде</string>
+
+    <string name="piko_newx_download_options_folders">Папки</string>
+    <string name="piko_newx_download_options_folder_images">Изображения</string>
+    <string name="piko_newx_download_options_folder_videos">Видео</string>
+    <string name="piko_newx_download_options_folder_not_set">Не выбрана — нажмите, чтобы выбрать</string>
+    <string name="piko_newx_download_options_folder_denied">Нажмите, чтобы снова предоставить доступ</string>
+    <string name="piko_newx_download_options_folder_hint">Файлы сохраняются прямо в выбранную папку. Чтобы скачанные файлы отображались в галерее, выберите папку внутри Pictures или DCIM.</string>
+    <string name="piko_newx_download_options_filename_hint">Нажмите на переменную, чтобы вставить её. Всё за пределами фигурных скобок остаётся без изменений.</string>
+    <string name="piko_newx_download_options_filename_preview">Предпросмотр: %1$s</string>
+    <string name="piko_newx_download_options_filename_reset">Восстановить шаблон по умолчанию</string>
+    <string name="piko_newx_download_options_changed">Папка для скачивания изменена</string>
+    <string name="piko_newx_download_options_cancelled">Папка не выбрана</string>
+
+    <string name="piko_newx_download_filename_title">Шаблон имени файла</string>
+    <string name="piko_newx_download_filename_tokens">Переменные</string>
+    <string name="piko_newx_download_filename_error_empty">Введите шаблон имени файла</string>
+    <string name="piko_newx_download_filename_error_unclosed">Не закрыта фигурная скобка</string>
+    <string name="piko_newx_download_filename_error_static">Добавьте {id} или {timestamp}, чтобы файлы из разных публикаций не перезаписывали друг друга</string>
+    <string name="piko_newx_download_filename_error_unknown">Неизвестная переменная {%1$s}</string>
+
+    <string name="piko_newx_download_first_run_title">Выберите папку для скачивания</string>
+    <string name="piko_newx_download_first_run_images">Для скачанных изображений нужна папка. Выберите её, чтобы легко находить сохранённые файлы.</string>
+    <string name="piko_newx_download_first_run_videos">Для скачанных видео нужна папка. Выберите её, чтобы легко находить сохранённые файлы.</string>
+    <string name="piko_newx_download_first_run_both">Чтобы скачивать изображения и видео, выберите папку для каждого типа файлов.</string>
+    <string name="piko_newx_download_first_run_images_action">Выбрать папку для изображений</string>
+    <string name="piko_newx_download_first_run_videos_action">Выбрать папку для видео</string>
+    <string name="piko_newx_download_first_run_retry">После выбора папки нажмите кнопку скачивания ещё раз.</string>
+    
     <string name="piko_newx_inline_actions_title">Действия под публикациями для скрытия</string>
     <string name="piko_newx_inline_actions_summary">Выберите, какие действия скрыть под публикациями NewX</string>
     <string name="piko_newx_inline_action_reply">Ответить</string>
