@@ -12,15 +12,19 @@ import app.morphe.extension.newx.utils.ToStringParser;
 /**
  * Renders the user-configurable inline download filename template.
  *
- * <p>Token names are the canonical model field names NewX declares in its own serialization
- * schema, never R8-renamed descriptors, so the names survive app refactors.
+ * <p>Token names are stable, model-derived names rather than R8-renamed descriptors, so they
+ * survive app refactors. {@code userName} is the editor-facing name for the post author's handle
+ * (NewX's {@code screenName} field); the legacy {@code screenName} token is still accepted so
+ * templates saved before the rename keep rendering.
  */
 public final class DownloadFileName {
     static final String TEMPLATE_SETTING = DownloadSettings.FILENAME_TEMPLATE;
-    static final String DEFAULT_TEMPLATE = "{screenName}_{id}";
+    static final String DEFAULT_TEMPLATE = "{userName}_{id}";
 
     static final String TOKEN_ID = "id";
-    static final String TOKEN_SCREEN_NAME = "screenName";
+    static final String TOKEN_USER_NAME = "userName";
+    /** Pre-rename token for the same value, kept so saved templates still render. */
+    static final String TOKEN_SCREEN_NAME_LEGACY = "screenName";
     static final String TOKEN_NAME = "name";
     static final String TOKEN_DISPLAY_NAME = "displayName";
     static final String TOKEN_TIMESTAMP = "timestamp";
@@ -30,7 +34,7 @@ public final class DownloadFileName {
     /** Tokens offered as chips in the template editor, in insertion order. */
     private static final String[] EDITOR_TOKENS = {
             TOKEN_ID,
-            TOKEN_SCREEN_NAME,
+            TOKEN_USER_NAME,
             TOKEN_NAME,
             TOKEN_TIMESTAMP,
             TOKEN_MEDIA_INDEX,
@@ -124,7 +128,8 @@ public final class DownloadFileName {
             switch (token) {
                 case TOKEN_ID:
                     return id;
-                case TOKEN_SCREEN_NAME:
+                case TOKEN_USER_NAME:
+                case TOKEN_SCREEN_NAME_LEGACY:
                     return screenName;
                 case TOKEN_NAME:
                 case TOKEN_DISPLAY_NAME:
@@ -144,7 +149,8 @@ public final class DownloadFileName {
 
         static boolean isKnownToken(String token) {
             return token.equals(TOKEN_ID)
-                    || token.equals(TOKEN_SCREEN_NAME)
+                    || token.equals(TOKEN_USER_NAME)
+                    || token.equals(TOKEN_SCREEN_NAME_LEGACY)
                     || token.equals(TOKEN_NAME)
                     || token.equals(TOKEN_DISPLAY_NAME)
                     || token.equals(TOKEN_TIMESTAMP)

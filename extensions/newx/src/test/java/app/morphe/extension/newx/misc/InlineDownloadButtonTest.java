@@ -346,11 +346,13 @@ public final class InlineDownloadButtonTest {
 
         assertEquals("1234567890123456789-jack-Jack-2026-01-31-123456-1-jpg",
                 DownloadFileName.render(
-                        "{id}-{screenName}-{name}-{timestamp}-{mediaIndex}-{ext}", post, 0, 1, "jpg"));
-        // {displayName} is the documented alias for {name}; dropping it would silently break
-        // every template users wrote against the alias.
+                        "{id}-{userName}-{name}-{timestamp}-{mediaIndex}-{ext}", post, 0, 1, "jpg"));
+        // {displayName} and the pre-rename {screenName} are documented aliases; dropping them
+        // would silently break every template users already wrote against the alias.
         assertEquals(DownloadFileName.render("{name}", post, 0, 1, "jpg"),
                 DownloadFileName.render("{displayName}", post, 0, 1, "jpg"));
+        assertEquals(DownloadFileName.render("{userName}", post, 0, 1, "jpg"),
+                DownloadFileName.render("{screenName}", post, 0, 1, "jpg"));
     }
 
     @Test
@@ -369,26 +371,28 @@ public final class InlineDownloadButtonTest {
     @Test
     public void validationRejectsEmptyUnclosedAndPostIndependentTemplates() {
         assertEquals(DownloadFileName.Outcome.OK,
+                DownloadFileName.validate("{userName}_{id}").outcome);
+        assertEquals(DownloadFileName.Outcome.OK,
                 DownloadFileName.validate("{screenName}_{id}").outcome);
         assertEquals(DownloadFileName.Outcome.EMPTY, DownloadFileName.validate("   ").outcome);
         assertEquals(DownloadFileName.Outcome.UNCLOSED, DownloadFileName.validate("{id").outcome);
         // Without a post-dependent token every download would resolve to one name.
         assertEquals(DownloadFileName.Outcome.STATIC,
-                DownloadFileName.validate("{screenName}_{mediaIndex}_{ext}").outcome);
+                DownloadFileName.validate("{userName}_{mediaIndex}_{ext}").outcome);
         assertEquals(DownloadFileName.Outcome.OK,
-                DownloadFileName.validate("{screenName}_{timestamp}").outcome);
+                DownloadFileName.validate("{userName}_{timestamp}").outcome);
     }
 
     @Test
     public void mediaIndexSuffixIsAddedOnlyWhenTemplateOmitsIt() {
         DownloadFileName.PostContext post = DownloadFileName.PostContext.sample();
 
-        assertEquals("jack_1.jpg", DownloadFileName.render("{screenName}", post, 0, 2, "jpg"));
-        assertEquals("jack_2.jpg", DownloadFileName.render("{screenName}", post, 1, 2, "jpg"));
+        assertEquals("jack_1.jpg", DownloadFileName.render("{userName}", post, 0, 2, "jpg"));
+        assertEquals("jack_2.jpg", DownloadFileName.render("{userName}", post, 1, 2, "jpg"));
         // A single item never gets a suffix, even though the template has no index token.
-        assertEquals("jack.jpg", DownloadFileName.render("{screenName}", post, 0, 1, "jpg"));
+        assertEquals("jack.jpg", DownloadFileName.render("{userName}", post, 0, 1, "jpg"));
         // An explicit index token must not be suffixed a second time.
-        assertEquals("jack_2.jpg", DownloadFileName.render("{screenName}_{mediaIndex}", post, 1, 2, "jpg"));
+        assertEquals("jack_2.jpg", DownloadFileName.render("{userName}_{mediaIndex}", post, 1, 2, "jpg"));
     }
 
     @Test
@@ -396,9 +400,9 @@ public final class InlineDownloadButtonTest {
         DownloadFileName.PostContext post = DownloadFileName.PostContext.sample();
 
         assertEquals("jack_1234567890123456789.jpg",
-                DownloadFileName.render("{screenName}_{id}.{ext}", post, 0, 1, "jpg"));
+                DownloadFileName.render("{userName}_{id}.{ext}", post, 0, 1, "jpg"));
         assertEquals("jack_1234567890123456789.jpg",
-                DownloadFileName.render("{screenName}_{id}", post, 0, 1, "jpg"));
+                DownloadFileName.render("{userName}_{id}", post, 0, 1, "jpg"));
     }
 
     @Test
