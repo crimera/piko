@@ -10,8 +10,10 @@ package app.morphe.extension.crimera.downloader;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.database.Cursor;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -183,13 +185,18 @@ public class MediaDownloader {
             final String finalFileName = request.fileName;
             final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
             final String completedToast = request.completedToast != null ? request.completedToast : downloadCompletedString;
+            // Built here and not in the posted task, it queries the provider for the mime type.
+            final PendingIntent viewFileIntent =
+                    buildViewFilePendingIntent(outputDocumentUri, finalFileName, finalNotificationId);
 
             mainHandler.post(() -> {
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
                         .setContentTitle(downloadCompletedString)
                         .setContentText(finalFileName)
                         .setOngoing(false) // This unlocks the swipe lock completely
-                        .setProgress(0, 0, false); // Wipes the progress track bar layout away entirely
+                        .setProgress(0, 0, false) // Wipes the progress track bar layout away entirely
+                        .setAutoCancel(true)
+                        .setContentIntent(viewFileIntent);
                 // Force post the update layout
                 notificationManager.notify(finalNotificationId, builder.build());
 
@@ -309,6 +316,24 @@ public class MediaDownloader {
                 }
                 output.flush();
             }
+        }
+    }
+
+    // Opens the downloaded file in whichever app handles its mime type.
+    private PendingIntent buildViewFilePendingIntent(Uri documentUri, String fileName, int requestCode) {
+        try {
+            String providerMimeType = context.getContentResolver().getType(documentUri);
+            String mimeType = providerMimeType != null ? providerMimeType : getMimeType(fileName);
+            Intent viewIntent = new Intent(Intent.ACTION_VIEW)
+                    .setDataAndType(documentUri, mimeType)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            return PendingIntent.getActivity(context, requestCode, viewIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } catch (Exception e) {
+            // A notification without a tap action is better than crashing the app.
+            PikoUtils.logger(e);
+            return null;
         }
     }
 
