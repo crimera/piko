@@ -168,6 +168,25 @@ public class ListItem extends LinearLayout {
         setLeadingImage(image, null);
     }
 
+    /**
+     * Navigation-style leading icon matching the settings DSL group rows:
+     * bare icon tinted with the secondary text color, no tonal badge.
+     */
+    public void setNavigationIcon(IconView.IconType iconType) {
+        setBareLeadingIcon(iconType, themeSettings.secondaryText(getContext()));
+    }
+
+    /** Bare leading icon without the tonal badge, for settings-style rows. */
+    public void setBareLeadingIcon(IconView.IconType iconType, int iconColor) {
+        leadingImageView.setImageDrawable(null);
+        leadingImageView.setVisibility(View.GONE);
+        leadingIconView.setVisibility(View.VISIBLE);
+        leadingIconView.setIconType(iconType);
+        leadingIconView.setIconColor(iconColor);
+        leadingContainer.setBackground(null);
+        leadingContainer.setClipToOutline(false);
+    }
+
     public void setLeadingImage(@Nullable Bitmap image, @Nullable Integer containerBgColor) {
         if (image == null) return;
         if (containerBgColor != null) setLeadingContainerBackground(containerBgColor);

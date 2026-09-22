@@ -54,7 +54,9 @@ private const val VOID_DESCRIPTOR = "V"
 private const val FLOAT_DESCRIPTOR = "F"
 private const val INT_DESCRIPTOR = "I"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
-private const val LAYOUT_DIRECTION_DESCRIPTOR = "Landroidx/compose/ui/unit/m;"
+private const val COMPOSE_UNIT_SCOPE = "Landroidx/compose/ui/unit/"
+private const val LAYOUT_DIRECTION_LTR = "Ltr"
+private const val LAYOUT_DIRECTION_RTL = "Rtl"
 private const val OBJECT_LIST_METHOD = "subList"
 private const val PHOTOS_ENUM_NAME = "USER_PROFILE_PHOTOS"
 private const val PADDING_SIDE_COUNT = 4
@@ -69,8 +71,7 @@ private const val JAVA_LIST = "Ljava/util/List;"
 private const val OBJECT_ARRAY = "[Ljava/lang/Object;"
 private const val BOOLEAN = "Ljava/lang/Boolean;"
 private const val INTEGER = "Ljava/lang/Integer;"
-private const val PAGING_STATE_FLOW = "Lkotlinx/coroutines/flow/u2;"
-private const val LAZY_LIST_STATE = "Landroidx/compose/foundation/lazy/j0;"
+private const val COMPOSE_LAZY_SCOPE = "Landroidx/compose/foundation/lazy/"
 // Navigation controller/destination are never hardcoded: R8 reassigns the short
 // navigation names every release (jj/kj on alpha.01 became unrelated classes on
 // alpha.04 while the real pair moved to sj/rj). Both are derived from the
@@ -100,6 +101,7 @@ private data class ResolvedPagingEvent(
 private data class ResolvedPagingState(
     val stateType: String,
     val stateFlowGetter: NativeMethodCall,
+    val stateValueGetter: NativeMethodCall,
     val needsMore: NativeMethodCall,
     val terminated: NativeMethodCall,
     val threshold: NativeMethodCall,
@@ -236,6 +238,19 @@ private fun resolveTimelineListDescriptor(): String {
 context(context: BytecodePatchContext)
 private fun resolveComposeContracts(): ResolvedComposeContracts {
     val classDefs = allClassDefs(context)
+    // LayoutDirection is the Compose ui.unit enum exposing Ltr/Rtl. Its obfuscated
+    // descriptor is not stable, so resolve it from its (preserved) enum members.
+    val layoutDirection = requireExactlyOne(
+        "NewX Compose LayoutDirection enum",
+        classDefs.filter { classDef ->
+            isDirectDescriptorInScope(classDef.type.toString(), COMPOSE_UNIT_SCOPE) &&
+                classDef.superclass?.toString() == ENUM_DESCRIPTOR &&
+                classDef.fields
+                    .filter { it.type.toString() == classDef.type.toString() }
+                    .map { it.name.toString() }
+                    .toSet() == setOf(LAYOUT_DIRECTION_LTR, LAYOUT_DIRECTION_RTL)
+        },
+    ).type.toString()
     val paddingCandidates = classDefs.filter { classDef ->
         isDirectDescriptorInScope(classDef.type.toString(), COMPOSE_LAYOUT_SCOPE) &&
             AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
@@ -245,7 +260,7 @@ private fun resolveComposeContracts(): ResolvedComposeContracts {
             } == 2 &&
             classDef.methods.count { method ->
                 method.returnType.toString() == FLOAT_DESCRIPTOR &&
-                    method.parameterDescriptors() == listOf(LAYOUT_DIRECTION_DESCRIPTOR)
+                    method.parameterDescriptors() == listOf(layoutDirection)
             } == 2
     }
     val paddingInterface =
@@ -440,23 +455,20 @@ private fun resolvePagingEvent(): ResolvedPagingEvent {
         requireExactlyOne("NewX bottom pagination lazy-scroll event kind", eventKindFields)
             .toSmaliDescriptor()
 
-    fun isStateInterface(classDef: ClassDef): Boolean =
-        AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
-            classDef.methods.any { method ->
-                method.name == "b" &&
-                    method.parameterTypes.isEmpty() &&
-                    method.returnType.toString() == INT_DESCRIPTOR
-            } &&
-            classDef.methods.any { method ->
-                method.name == "c" &&
-                    method.parameterTypes.isEmpty() &&
-                    method.returnType.toString() == "Z"
-            } &&
-            classDef.methods.any { method ->
-                method.name == "isTerminated" &&
-                    method.parameterTypes.isEmpty() &&
-                    method.returnType.toString() == "Z"
-            }
+    // The state contract is identified by shape, not by the obfuscated method
+    // names: the abstract surface is exactly one no-arg int and two no-arg
+    // booleans, with the preserved isTerminated() default alongside it.
+    // threshold/needsMore are re-derived by return type from the trigger below.
+    fun isStateInterface(classDef: ClassDef): Boolean {
+        if (!AccessFlags.INTERFACE.isSet(classDef.accessFlags)) return false
+        val noArgMethods = classDef.methods.filter { it.parameterTypes.isEmpty() }
+        if (noArgMethods.none { it.name == "isTerminated" && it.returnType.toString() == "Z" }) {
+            return false
+        }
+        val abstractNoArg = noArgMethods.filter { AccessFlags.ABSTRACT.isSet(it.accessFlags) }
+        return abstractNoArg.count { it.returnType.toString() == INT_DESCRIPTOR } == 1 &&
+            abstractNoArg.count { it.returnType.toString() == "Z" } == 2
+    }
 
     val stateClassCandidates = dispatchInstructions.mapNotNull { instruction ->
         if (instruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
@@ -485,26 +497,33 @@ private fun resolvePagingEvent(): ResolvedPagingEvent {
             ?: throw PatchException(
                 "NewX bottom paginator class is missing: ${dispatch.definingClass}",
             )
-    val stateFlowGetter = requireExactlyOne(
-        "NewX bottom paginator state-flow getter",
-        paginatorClass.methods.filter { method ->
-            !AccessFlags.STATIC.isSet(method.accessFlags) &&
-                method.parameterTypes.isEmpty() &&
-                method.returnType.toString() == PAGING_STATE_FLOW
-        },
-    ).toNativeCall()
+    val stateFlowGetter =
+        requireExactlyOne(
+            "NewX bottom paginator state-flow getter",
+            paginatorClass.methods.filter { method ->
+                !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                    method.parameterTypes.isEmpty() &&
+                    isStateFlowInterface(method.returnType.toString(), classByType)
+            },
+        )
+    val stateValueGetter =
+        resolveStateValueGetter(stateFlowGetter.returnType.toString(), classByType)
+    val stateFlowGetterCall = stateFlowGetter.toNativeCall()
 
     val nativeTriggerCandidates = classDefs.flatMap { classDef ->
         classDef.methods.filter { method ->
-            AccessFlags.STATIC.isSet(method.accessFlags) &&
-                method.returnType.toString() == VOID_DESCRIPTOR &&
-                method.parameterDescriptors() == listOf(
-                    stateInterface.type.toString(),
-                    LAZY_LIST_STATE,
-                    FUNCTION2,
-                    COMPOSER,
-                    INT_DESCRIPTOR,
-                )
+            if (!AccessFlags.STATIC.isSet(method.accessFlags)) return@filter false
+            if (method.returnType.toString() != VOID_DESCRIPTOR) return@filter false
+            // The scroll state (LazyListState) is obfuscated too; match it by the
+            // stable lazy scope instead of its release-specific short name. The
+            // lazy/grid state lives deeper and is excluded by the direct-scope check.
+            val parameters = method.parameterDescriptors()
+            parameters.size == 5 &&
+                parameters[0] == stateInterface.type.toString() &&
+                isDirectDescriptorInScope(parameters[1], COMPOSE_LAZY_SCOPE) &&
+                parameters[2] == FUNCTION2 &&
+                parameters[3] == COMPOSER &&
+                parameters[4] == INT_DESCRIPTOR
         }
     }
     val nativeTrigger =
@@ -552,7 +571,8 @@ private fun resolvePagingEvent(): ResolvedPagingEvent {
             .replace('/', '.'),
         state = ResolvedPagingState(
             stateType = stateType,
-            stateFlowGetter = stateFlowGetter,
+            stateFlowGetter = stateFlowGetterCall,
+            stateValueGetter = stateValueGetter,
             needsMore = needsMoreMethod,
             terminated = terminatedMethod,
             threshold = thresholdMethod,
@@ -651,7 +671,7 @@ private fun patchPagingStateBridge(event: ResolvedPagingEvent) {
             check-cast v0, ${event.paginatorType}
             ${state.stateFlowGetter.opcode} {v0}, ${state.stateFlowGetter.descriptor}
             move-result-object v1
-            invoke-interface {v1}, $PAGING_STATE_FLOW->getValue()$OBJECT
+            ${state.stateValueGetter.opcode} {v1}, ${state.stateValueGetter.descriptor}
             move-result-object v0
             check-cast v0, ${state.stateType}
             ${state.needsMore.opcode} {v0}, ${state.needsMore.descriptor}
@@ -932,6 +952,49 @@ private fun Method.toNativeCall(): NativeMethodCall =
         ),
         opcode = invocationOpcode(definingClass.toString()),
     )
+
+private fun isStateFlowInterface(
+    type: String,
+    classByType: Map<String, ClassDef>,
+): Boolean {
+    val classDef = classByType[type] ?: return false
+    return AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
+        classDef.methods.any { method ->
+            method.name == "getValue" &&
+                method.parameterTypes.isEmpty() &&
+                method.returnType.toString() == OBJECT
+        }
+}
+
+context(context: BytecodePatchContext)
+private fun resolveStateValueGetter(
+    flowType: String,
+    classByType: Map<String, ClassDef>,
+): NativeMethodCall {
+    val visited = mutableSetOf<String>()
+    val pending = mutableListOf(flowType)
+    while (pending.isNotEmpty()) {
+        val currentType = pending.removeAt(0)
+        if (!visited.add(currentType)) continue
+        val classDef = classByType[currentType] ?: continue
+        val getters =
+            classDef.methods.filter { method ->
+                method.name == "getValue" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.returnType.toString() == OBJECT
+            }
+        if (getters.isNotEmpty()) {
+            return requireExactlyOne(
+                "NewX bottom paginator state-flow getValue on $currentType",
+                getters,
+            ).toNativeCall()
+        }
+        pending += classDef.interfaces.map(CharSequence::toString)
+    }
+    throw PatchException(
+        "NewX bottom paginator state-flow getValue is missing for $flowType",
+    )
+}
 
 context(context: BytecodePatchContext)
 private fun MethodReference.toNativeCall(): NativeMethodCall =

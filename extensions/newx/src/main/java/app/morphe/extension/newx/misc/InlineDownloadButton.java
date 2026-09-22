@@ -6,42 +6,27 @@ import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.newx.utils.NewXUtils;
 import android.app.AlertDialog;
 import android.app.Application;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.provider.MediaStore;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import java.io.File;
+import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.newx.settings.NewXSettingsUi;
+import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.newx.ui.DialogView;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
@@ -51,36 +36,14 @@ import app.morphe.extension.newx.utils.ToStringParser;
 public final class InlineDownloadButton {
     private static final String SETTING_ID = "newx.content.inline_download_button";
     private static final String HIDE_NO_MEDIA_SETTING = "newx.content.inline_download_hide_no_media";
-    private static final String DOWNLOAD_DIRECTORY = "Twitter";
-    // Primary public directories. These literal values match Environment.DIRECTORY_PICTURES /
-    // DIRECTORY_MOVIES and are exactly the strings MediaStore accepts as RELATIVE_PATH primary
-    // directories. Kept explicit so the path is deterministic and not dependent on framework
-    // constants that resolve to null under some test runtimes.
-    private static final String PICTURES_DIRECTORY = "Pictures";
-    private static final String MOVIES_DIRECTORY = "Movies";
-
-    /** Primary public directory for a MIME type: videos publish to Movies, all other media
-     *  (images) to Pictures. Required because MediaStore restricts each collection to specific
-     *  primary directories (Video allows only DCIM/Movies; Images allows only DCIM/Pictures). */
-    private static String primaryDirectoryForMime(String mimeType) {
-        return mimeType != null && mimeType.startsWith("video/")
-                ? MOVIES_DIRECTORY
-                : PICTURES_DIRECTORY;
-    }
-
-    /** Scoped-storage relative path under which a download is published, e.g. "Movies/Twitter/"
-     *  for videos and "Pictures/Twitter/" for images. */
-    static String relativeDownloadPath(String mimeType) {
-        return primaryDirectoryForMime(mimeType) + "/" + DOWNLOAD_DIRECTORY + "/";
-    }
-    private static final String PENDING_DOWNLOADS_PREFS = "piko_newx_inline_downloads";
-    private static final String CONFLICT_SETTING = "newx.content.inline_download_conflict";
-    private static final ConflictBehavior DEFAULT_CONFLICT_BEHAVIOR = ConflictBehavior.SKIP;
-    private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
-    // Click-time media resolution and DownloadManager/MediaStore enqueue run here so the
-    // inline-action event handler returns immediately instead of blocking the UI thread on
-    // post toString parsing and storage IPC. DOWNLOAD_EXECUTOR stays reserved for download
-    // finalization, which can be busy copying large files.
+    /** Concurrent transfers. Small enough to stay gentle on the connection pool and providers. */
+    private static final int TRANSFER_THREADS = 4;
+    private static final ExecutorService DOWNLOAD_EXECUTOR =
+            Executors.newFixedThreadPool(TRANSFER_THREADS);
+    // Click-time media resolution and SAF document creation run here so the inline-action event
+    // handler returns immediately instead of blocking the UI thread on post toString parsing and
+    // provider IPC. DOWNLOAD_EXECUTOR stays reserved for the transfers themselves, which can be
+    // busy copying large videos.
     private static final ExecutorService CLICK_EXECUTOR = Executors.newSingleThreadExecutor();
     // Timeline/profile scrolling creates a new action object per composition. Keep weak identity
     // keys without a FIFO cap: a cap can evict an action that is still visible and make its icon
@@ -88,7 +51,6 @@ public final class InlineDownloadButton {
     private static final IdentityWeakSet DOWNLOAD_ACTIONS = new IdentityWeakSet();
     private static volatile boolean patchApplied;
     private static boolean initialized;
-    private static boolean downloadReceiverRegistered;
 
     private InlineDownloadButton() {
     }
@@ -103,8 +65,6 @@ public final class InlineDownloadButton {
         if (initialized) return;
 
         NewXUtils.initialize(application);
-        registerDownloadReceiver(application);
-        resumePendingDownloads(application);
         initialized = true;
     }
 
@@ -296,7 +256,7 @@ public final class InlineDownloadButton {
         }
     }
 
-    public static boolean handleEvent(Object presenter, Object event) {
+    public static boolean handleEvent(Object presenter, Object event, boolean longPress) {
         if (!patchApplied) return false;
 
         Object action = findActionEntry(event);
@@ -315,7 +275,7 @@ public final class InlineDownloadButton {
             // native share handler does not run for the download action.
             Context applicationContext = context.getApplicationContext();
             Context safeContext = applicationContext != null ? applicationContext : context;
-            CLICK_EXECUTOR.execute(() -> resolveAndPresent(safeContext, post));
+            CLICK_EXECUTOR.execute(() -> resolveAndPresent(safeContext, post, longPress));
             return true;
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
@@ -324,14 +284,17 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static void resolveAndPresent(Context context, Object post) {
+    private static void resolveAndPresent(Context context, Object post, boolean longPress) {
         final List<DownloadItem> downloads;
+        final DownloadFileName.PostContext postContext;
         final String username;
-        final String postId;
         try {
+            // Materialize the (large) post toString once. Rebuilding it for every field lookup was
+            // a dominant click-path cost before any download work started.
+            String postText = post.toString();
             downloads = downloadItems(mediaFor(post));
-            username = sourceUsername(post);
-            postId = sourcePostId(post);
+            postContext = DownloadFileName.PostContext.fromText(postText);
+            username = NewXUtils.sourceUsername(postText);
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
             NewXUtils.runOnUiThread(() -> NewXInAppNotification.show("Could not download post media"));
@@ -343,11 +306,26 @@ public final class InlineDownloadButton {
             return;
         }
 
-        if (downloads.size() == 1) {
-            enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
-        } else {
-            NewXUtils.runOnUiThread(() -> showMediaPicker(context, downloads, username, postId));
+        // A destination that was never chosen, or whose persisted grant is gone after a restore,
+        // has to be resolved before any item is queued. Never fall back to an app-private folder.
+        boolean[] missing = missingDestinations(context, downloads);
+        if (missing[0] || missing[1]) {
+            boolean imagesMissing = missing[0];
+            boolean videosMissing = missing[1];
+            NewXUtils.runOnUiThread(() -> promptForDestination(context, imagesMissing, videosMissing));
+            return;
         }
+
+        // Long press is the "download everything" shortcut and skips the picker entirely.
+        if (longPress) {
+            enqueueAllDownloads(context, downloads, postContext, username);
+            return;
+        }
+        if (downloads.size() == 1) {
+            enqueueSingleDownload(context, downloads.get(0), postContext, username, 0, 1);
+            return;
+        }
+        NewXUtils.runOnUiThread(() -> showMediaPicker(context, downloads, username, postContext));
     }
 
     private static boolean isEnabled() {
@@ -520,15 +498,6 @@ public final class InlineDownloadButton {
         }
     }
 
-    static String sourcePostId(Object post) {
-        return NewXUtils.sourcePostId(post);
-    }
-
-    static String sourceUsername(Object post) {
-        return NewXUtils.sourceUsername(post);
-    }
-
-
     private static List<DownloadItem> downloadItems(List<?> media) {
         List<DownloadItem> downloads = new ArrayList<>(media.size());
         for (Object item : media) {
@@ -664,29 +633,28 @@ public final class InlineDownloadButton {
             Context context,
             List<DownloadItem> downloads,
             String username,
-            String postId
+            DownloadFileName.PostContext postContext
     ) {
         MediaPickerDialog.show(
                 context,
                 downloads,
                 username,
-                postId,
                 new MediaPickerDialog.OnMediaSelectedListener() {
                     @Override
                     public void onDownloadItem(int index) {
                         if (index >= 0 && index < downloads.size()) {
-                            enqueueSingleDownload(context, downloads.get(index), username, postId, index, downloads.size());
+                            enqueueSingleDownload(context, downloads.get(index), postContext, username, index, downloads.size());
                         }
                     }
 
                     @Override
                     public void onDownloadAll() {
-                        enqueueAllDownloads(context, downloads, username, postId);
+                        enqueueAllDownloads(context, downloads, postContext, username);
                     }
 
                     @Override
                     public void onDownloadAndMerge(List<DownloadItem> items) {
-                        MediaMerger.downloadAndMerge(context, items, username, postId);
+                        MediaMerger.downloadAndMerge(context, items, username, postContext);
                     }
                 }
         );
@@ -695,27 +663,37 @@ public final class InlineDownloadButton {
     private static void enqueueAllDownloads(
             Context context,
             List<DownloadItem> downloads,
-            String username,
-            String postId
+            DownloadFileName.PostContext postContext,
+            String username
     ) {
         Context applicationContext = context.getApplicationContext();
         Context safeContext = applicationContext != null ? applicationContext : context;
         List<DownloadItem> items = new ArrayList<>(downloads);
-        // Conflict probing hits MediaStore per item; keep it off the picker button path.
+        // Name resolution and document creation hit the provider per item; keep it off the
+        // picker button path.
         CLICK_EXECUTOR.execute(() -> {
+            final DownloadDestination.ConflictPolicy policy;
+            try {
+                policy = DownloadDestination.conflictPolicy();
+            } catch (RuntimeException exception) {
+                NewXLogger.printException(() -> "Unsupported NewX download conflict policy", exception);
+                NewXUtils.runOnUiThread(() ->
+                        NewXInAppNotification.showForUser("Could not start download", username));
+                return;
+            }
+
             int queued = 0;
             int skipped = 0;
             int failed = 0;
-            ConflictBehavior behavior = conflictBehavior();
             for (int index = 0; index < items.size(); index++) {
                 switch (enqueueDownload(
                         safeContext,
                         items.get(index),
+                        postContext,
                         username,
-                        postId,
                         index,
                         items.size(),
-                        behavior
+                        policy
                 )) {
                     case QUEUED -> queued++;
                     case SKIPPED -> skipped++;
@@ -733,29 +711,28 @@ public final class InlineDownloadButton {
     private static void enqueueSingleDownload(
             Context context,
             DownloadItem download,
+            DownloadFileName.PostContext postContext,
             String username,
-            String postId,
             int index,
             int mediaCount
     ) {
         Context applicationContext = context.getApplicationContext();
         Context safeContext = applicationContext != null ? applicationContext : context;
-        // Conflict probing does MediaStore IPC plus a blocking prefs commit; the tap
-        // handler and picker buttons must not wait for it.
+        // Document creation does provider IPC; the tap handler must not wait for it.
         CLICK_EXECUTOR.execute(() -> {
             final EnqueueState state;
             try {
                 state = enqueueDownload(
                         safeContext,
                         download,
+                        postContext,
                         username,
-                        postId,
                         index,
                         mediaCount,
-                        conflictBehavior()
+                        DownloadDestination.conflictPolicy()
                 );
             } catch (RuntimeException exception) {
-                NewXLogger.printException(() -> "Failed to enqueue NewX media download", exception);
+                NewXLogger.printException(() -> "Failed to start NewX media download", exception);
                 NewXUtils.runOnUiThread(() ->
                         NewXInAppNotification.showForUser("Could not start download", username));
                 return;
@@ -763,7 +740,7 @@ public final class InlineDownloadButton {
             NewXUtils.runOnUiThread(() -> {
                 switch (state) {
                     case QUEUED -> NewXInAppNotification.showForUser("Download started", username);
-                    case SKIPPED -> NewXInAppNotification.showForUser("Already downloaded or queued", username);
+                    case SKIPPED -> NewXInAppNotification.showForUser("Already downloaded", username);
                     case FAILED -> NewXInAppNotification.showForUser("Could not start download", username);
                 }
             });
@@ -773,413 +750,188 @@ public final class InlineDownloadButton {
     private static synchronized EnqueueState enqueueDownload(
             Context context,
             DownloadItem download,
+            DownloadFileName.PostContext postContext,
             String username,
-            String postId,
             int index,
             int mediaCount,
-            ConflictBehavior behavior
+            DownloadDestination.ConflictPolicy policy
     ) {
         if (!NewXUtils.isHttpUrl(download.url)) return EnqueueState.FAILED;
 
-        DownloadManager manager = downloadManager(context);
-        if (manager == null) return EnqueueState.FAILED;
-
-        String baseFileName = downloadFileName(username, postId, download.extension, index, mediaCount);
-        String fileName;
+        final DownloadDestination.MediaKind kind;
         try {
-            fileName = resolveTargetFileName(context, baseFileName, behavior, download.mimeType);
-        } catch (RuntimeException exception) {
-            NewXLogger.printException(() -> "Failed to resolve NewX download target", exception);
-            return EnqueueState.FAILED;
-        }
-        if (fileName == null) return EnqueueState.SKIPPED;
-
-        return queueDownload(
-                context,
-                manager,
-                download.url,
-                fileName,
-                download.mimeType,
-                "Downloading media from @" + username
-        );
-    }
-
-    private static synchronized void enqueueFallbackDownload(
-            Context context,
-            DownloadManager manager,
-            String fallbackUrl,
-            String fileName,
-            String mimeType
-    ) {
-        if (queueDownload(context, manager, fallbackUrl, fileName, mimeType, "Downloading media") ==
-                EnqueueState.FAILED) {
-            NewXInAppNotification.show("Download failed: " + fileName);
-        }
-    }
-
-    private static EnqueueState queueDownload(
-            Context context,
-            DownloadManager manager,
-            String url,
-            String fileName,
-            String mimeType,
-            String description
-    ) {
-        String temporaryFileName = uniqueTemporaryDownloadFileName(fileName);
-        try {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
-                    .setTitle(fileName)
-                    .setDescription(description)
-                    .setMimeType(mimeType)
-                    .setAllowedOverMetered(true)
-                    .setAllowedOverRoaming(true)
-                    .setNotificationVisibility(
-                            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                    );
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Scoped storage: stage in the app-private external files dir so the
-                // temporary file is never media-scanned. It is published to MediaStore
-                // once via publishDownload(); manager.remove() then drops the stage.
-                // Staging in a public dir (the old path) left
-                // "<stem>_tmp_<uuid>.<ext>" orphans next to the final file when
-                // remove() didn't reclaim the public copy (seen on Android 16 / OnePlus).
-                request.setDestinationInExternalFilesDir(
-                        context,
-                        primaryDirectoryForMime(mimeType),
-                        DOWNLOAD_DIRECTORY + "/" + temporaryFileName
-                );
-            } else {
-                request.setDestinationInExternalPublicDir(
-                        primaryDirectoryForMime(mimeType),
-                        DOWNLOAD_DIRECTORY + "/" + temporaryFileName
-                );
-            }
-
-            long downloadId = manager.enqueue(request);
-            try {
-                savePendingDownload(context, downloadId, temporaryFileName, fileName, mimeType, url);
-            } catch (RuntimeException exception) {
-                manager.remove(downloadId);
-                throw exception;
-            }
-            finishPendingDownloadAsync(context, manager, downloadId);
-            return EnqueueState.QUEUED;
-        } catch (RuntimeException exception) {
-            NewXLogger.printException(() -> "Failed to enqueue NewX media download", exception);
-            return EnqueueState.FAILED;
-        }
-    }
-
-    private static DownloadManager downloadManager(Context context) {
-        Object service = context.getSystemService(Context.DOWNLOAD_SERVICE);
-        return service instanceof DownloadManager manager ? manager : null;
-    }
-
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
-    private static void registerDownloadReceiver(Context context) {
-        if (downloadReceiverRegistered) return;
-
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context receiverContext, Intent intent) {
-                long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                if (downloadId < 0) return;
-
-                DownloadManager manager = downloadManager(receiverContext);
-                if (manager == null) return;
-                finishPendingDownloadAsync(receiverContext, manager, downloadId);
-            }
-        };
-        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
-        } else {
-            context.registerReceiver(receiver, filter);
-        }
-        downloadReceiverRegistered = true;
-    }
-
-    private static void resumePendingDownloads(Context context) {
-        DownloadManager manager = downloadManager(context);
-        if (manager == null) return;
-
-        Map<String, ?> pending = pendingDownloads(context).getAll();
-        for (String key : pending.keySet()) {
-            try {
-                finishPendingDownloadAsync(context, manager, Long.parseLong(key));
-            } catch (NumberFormatException exception) {
-                pendingDownloads(context).edit().remove(key).apply();
-            }
-        }
-    }
-
-    private static void savePendingDownload(
-            Context context,
-            long downloadId,
-            String temporaryFileName,
-            String fileName,
-            String mimeType,
-            String url
-    ) {
-        String value = temporaryFileName + "\n" + fileName + "\n" + mimeType + "\n" + (url != null ? url : "");
-        boolean saved = pendingDownloads(context)
-                .edit()
-                .putString(String.valueOf(downloadId), value)
-                .commit();
-        if (!saved) throw new IllegalStateException("Could not persist pending download");
-    }
-
-    private static PendingDownload pendingDownload(Context context, long downloadId) {
-        String value = pendingDownloads(context).getString(String.valueOf(downloadId), null);
-        if (value == null) return null;
-
-        String[] fields = value.split("\n", -1);
-        if (fields.length < 3) {
-            clearPendingDownload(context, downloadId);
-            return null;
-        }
-        String url = fields.length >= 4 ? fields[3] : "";
-        return new PendingDownload(fields[0], fields[1], fields[2], url);
-    }
-
-    private static SharedPreferences pendingDownloads(Context context) {
-        return context.getSharedPreferences(PENDING_DOWNLOADS_PREFS, Context.MODE_PRIVATE);
-    }
-
-    private static void clearPendingDownload(Context context, long downloadId) {
-        pendingDownloads(context).edit().remove(String.valueOf(downloadId)).apply();
-    }
-
-    private static void finishPendingDownloadAsync(
-            Context context,
-            DownloadManager manager,
-            long downloadId
-    ) {
-        Context applicationContext = context.getApplicationContext();
-        Context safeContext = applicationContext != null ? applicationContext : context;
-        DOWNLOAD_EXECUTOR.execute(() -> finishPendingDownload(safeContext, manager, downloadId));
-    }
-
-    private static void finishPendingDownload(
-            Context context,
-            DownloadManager manager,
-            long downloadId
-    ) {
-        PendingDownload pending = pendingDownload(context, downloadId);
-        if (pending == null) return;
-
-        int status = downloadStatus(manager, downloadId);
-        if (status == DownloadManager.STATUS_PENDING ||
-                status == DownloadManager.STATUS_RUNNING ||
-                status == DownloadManager.STATUS_PAUSED) {
-            return;
-        }
-        if (status != DownloadManager.STATUS_SUCCESSFUL) {
-            handleFailedDownload(context, manager, downloadId, pending);
-            return;
-        }
-
-        try {
-            boolean moved = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                    ? publishDownload(context, manager, downloadId, pending.fileName, pending.mimeType)
-                    : moveLegacyDownload(context, pending.temporaryFileName, pending.fileName, pending.mimeType);
-            if (!moved) {
-                NewXInAppNotification.show("Could not finalize download: " + pending.fileName);
-                return;
-            }
-
-            // Keep the DownloadManager row: removing it also dismisses the
-            // VISIBILITY_VISIBLE_NOTIFY_COMPLETED notification that represents completion
-            // for direct downloads. The app-owned pending metadata can be cleared safely.
-            clearPendingDownload(context, downloadId);
-        } catch (IOException | RuntimeException exception) {
-            NewXLogger.printException(() -> "Failed to finalize NewX media download", exception);
-            NewXInAppNotification.show("Could not finalize download: " + pending.fileName);
-        }
-    }
-
-    private static synchronized void handleFailedDownload(
-            Context context,
-            DownloadManager manager,
-            long downloadId,
-            PendingDownload pending
-    ) {
-        removePendingDownload(context, manager, downloadId);
-        if (pending.url != null && pending.url.contains("name=orig")) {
-            String fallbackUrl = pending.url.replace("name=orig", "name=4096x4096");
-            enqueueFallbackDownload(context, manager, fallbackUrl, pending.fileName, pending.mimeType);
-            return;
-        }
-        NewXInAppNotification.show("Download failed: " + pending.fileName);
-    }
-
-    private static synchronized void removePendingDownload(
-            Context context,
-            DownloadManager manager,
-            long downloadId
-    ) {
-        clearPendingDownload(context, downloadId);
-        manager.remove(downloadId);
-    }
-
-    private static int downloadStatus(DownloadManager manager, long downloadId) {
-        DownloadManager.Query query = new DownloadManager.Query().setFilterById(downloadId);
-        try (Cursor cursor = manager.query(query)) {
-            if (cursor == null || !cursor.moveToFirst()) return -1;
-            int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-            return statusIndex < 0 ? -1 : cursor.getInt(statusIndex);
-        }
-    }
-
-    private static boolean publishDownload(
-            Context context,
-            DownloadManager manager,
-            long downloadId,
-            String fileName,
-            String mimeType
-    ) throws IOException {
-        Uri source = manager.getUriForDownloadedFile(downloadId);
-        if (source == null) return false;
-
-        ContentResolver resolver = context.getContentResolver();
-        Uri collection = mimeType.startsWith("video/")
-                ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-                : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-        String relativePath = relativeDownloadPath(mimeType);
-
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-        values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
-        values.put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath);
-        values.put(MediaStore.MediaColumns.IS_PENDING, 1);
-
-        Uri destination = resolver.insert(collection, values);
-        if (destination == null) return false;
-
-        try (InputStream input = resolver.openInputStream(source);
-             OutputStream output = resolver.openOutputStream(destination, "w")) {
-            if (input == null || output == null) throw new IOException("Could not open media streams");
-            copy(input, output);
-        } catch (IOException | RuntimeException exception) {
-            resolver.delete(destination, null, null);
-            throw exception;
-        }
-
-        ContentValues completed = new ContentValues();
-        completed.put(MediaStore.MediaColumns.IS_PENDING, 0);
-        resolver.update(destination, completed, null, null);
-
-        // Replace any pre-existing copy only after the new file is fully written, so a
-        // failed download never destroys the previously saved media.
-        deleteExistingMedia(resolver, collection, fileName, relativePath, destination);
-        return true;
-    }
-
-    static void deleteExistingMedia(
-            ContentResolver resolver,
-            Uri collection,
-            String fileName,
-            String relativePath,
-            Uri destination
-    ) {
-        String destinationId = destination.getLastPathSegment();
-        if (destinationId == null) return;
-
-        try {
-            resolver.delete(
-                    collection,
-                    existingMediaSelection(),
-                    existingMediaSelectionArgs(fileName, relativePath, destinationId)
+            kind = DownloadDestination.mediaKindFor(download.mimeType);
+        } catch (IllegalArgumentException exception) {
+            NewXLogger.printException(
+                    () -> "Unsupported NewX download media type: " + download.mimeType,
+                    exception
             );
-        } catch (RuntimeException exception) {
-            NewXLogger.printException(() -> "Failed to replace existing NewX media", exception);
+            return EnqueueState.FAILED;
         }
+
+        String fileName = DownloadFileName.render(
+                DownloadSettings.filenameTemplate(),
+                postContext,
+                index,
+                mediaCount,
+                download.extension
+        );
+
+        final DownloadDestination.Target target;
+        try {
+            target = DownloadDestination.reserve(context, kind, fileName, download.mimeType, policy);
+        } catch (IOException | RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to create the NewX download file", exception);
+            return EnqueueState.FAILED;
+        }
+        if (target == null) return EnqueueState.SKIPPED;
+
+        // Post the progress notification now, at enqueue time. Creating it on the transfer thread
+        // made it wait for every queued download ahead of it to finish streaming first.
+        int notificationId =
+                DownloadDestination.beginDownloadNotification(context, target.fileName());
+        // A large video must not occupy CLICK_EXECUTOR: queue-result reporting and further taps
+        // run there.
+        downloadAsync(context, download.url, target, username, notificationId);
+        return EnqueueState.QUEUED;
     }
 
-    static String existingMediaSelection() {
-        return MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
-                MediaStore.MediaColumns.RELATIVE_PATH + "=? AND " +
-                MediaStore.MediaColumns._ID + "!=?";
-    }
-
-    static String[] existingMediaSelectionArgs(
-            String fileName,
-            String relativePath,
-            String destinationId
-    ) {
-        return new String[]{fileName, relativePath, destinationId};
-    }
-
-    private static boolean moveLegacyDownload(
+    private static void downloadAsync(
             Context context,
-            String temporaryFileName,
-            String fileName,
-            String mimeType
-    ) throws IOException {
-        File primary = Environment.getExternalStoragePublicDirectory(primaryDirectoryForMime(mimeType));
-        File directory = new File(primary, DOWNLOAD_DIRECTORY);
-        if (!directory.isDirectory()) return false;
-        File temporaryFile = new File(directory, temporaryFileName);
-        if (!temporaryFile.isFile()) return false;
-
-        File finalFile = new File(directory, fileName);
-        Files.move(
-                temporaryFile.toPath(),
-                finalFile.toPath(),
-                StandardCopyOption.REPLACE_EXISTING
-        );
-        context.sendBroadcast(
-                new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(finalFile))
-        );
-        return true;
-    }
-
-    private static void copy(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[64 * 1024];
-        int read;
-        while ((read = input.read(buffer)) != -1) {
-            output.write(buffer, 0, read);
-        }
-    }
-
-    static String temporaryDownloadFileName(String fileName) {
-        return temporaryDownloadFileName(fileName, "_tmp");
-    }
-
-    static String uniqueTemporaryDownloadFileName(String fileName) {
-        return temporaryDownloadFileName(
-                fileName,
-                "_tmp_" + UUID.randomUUID().toString().replace("-", "")
-        );
-    }
-
-    private static String temporaryDownloadFileName(String fileName, String suffix) {
-        int extensionIndex = fileName.lastIndexOf('.');
-        if (extensionIndex <= 0) return fileName + suffix;
-        return fileName.substring(0, extensionIndex) + suffix + fileName.substring(extensionIndex);
-    }
-
-    static String downloadFileName(
+            String url,
+            DownloadDestination.Target target,
             String username,
-            String postId,
-            String extension,
-            int index,
-            int mediaCount
+            int notificationId
     ) {
-        String baseName = safeFileSegment(username, "twitter") + "_" +
-                safeFileSegment(postId, "post");
-        String suffix = mediaCount > 1 ? "_" + (index + 1) : "";
-        return baseName + suffix + "." + safeFileSegment(extension, "bin");
+        DOWNLOAD_EXECUTOR.execute(() -> {
+            boolean saved;
+            try {
+                saved = DownloadDestination.save(context, target, url, notificationId);
+            } catch (RuntimeException exception) {
+                NewXLogger.printException(() -> "Failed to download " + target.fileName(), exception);
+                DownloadDestination.cancelNotification(context, notificationId);
+                DownloadDestination.discard(context, target);
+                saved = false;
+            }
+
+            // Success is reported by the OS download notification, which is already on screen.
+            // Only surface a failure, since that notification is cancelled on error.
+            boolean failed = !saved;
+            if (failed) {
+                NewXUtils.runOnUiThread(() -> NewXInAppNotification.showForUser(
+                        "Could not save " + target.fileName(),
+                        username
+                ));
+            }
+        });
     }
 
-    static String safeFileSegment(String value, String fallback) {
-        if (value == null) return fallback;
+    /**
+     * First-run gate. Downloads never fall back to an app-private folder: a destination that was
+     * never chosen, or whose persisted grant is gone after a restore, aborts the action and offers
+     * the picker instead.
+     */
+    private static void promptForDestination(
+            Context context,
+            boolean imagesMissing,
+            boolean videosMissing
+    ) {
+        Activity activity = currentActivity();
+        if (activity == null) {
+            NewXInAppNotification.show("Set a download folder in Download options");
+            return;
+        }
 
-        String sanitized = value.trim().replaceFirst("^@", "")
-                .replaceAll("[^A-Za-z0-9._-]+", "_")
-                .replaceAll("_+", "_")
-                .replaceAll("^[._-]+|[._-]+$", "");
-        return sanitized.isEmpty() ? fallback : sanitized;
+        String requirement = imagesMissing && videosMissing
+                ? "piko_newx_download_first_run_both"
+                : imagesMissing
+                        ? "piko_newx_download_first_run_images"
+                        : "piko_newx_download_first_run_videos";
+
+        LinearLayout body = dialogForm(activity);
+        TextView retry = NewXSettingsUi.summaryText(activity);
+        retry.setText(StringRef.str("piko_newx_download_first_run_retry"));
+        body.addView(retry, new LinearLayout.LayoutParams(-1, -2));
+
+        DialogView dialog = new DialogView(activity)
+                .setTitle(StringRef.str("piko_newx_download_first_run_title"))
+                .setSubtitle(StringRef.str(requirement))
+                .setBodyView(body);
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        if (imagesMissing) {
+            dialog.addButton(pickFolderButton(
+                    activity,
+                    dialog,
+                    DownloadDestination.MediaKind.IMAGES,
+                    "piko_newx_download_first_run_images_action"
+            ));
+        }
+        if (videosMissing) {
+            dialog.addButton(pickFolderButton(
+                    activity,
+                    dialog,
+                    DownloadDestination.MediaKind.VIDEOS,
+                    "piko_newx_download_first_run_videos_action"
+            ));
+        }
+
+        ButtonView cancel = NewXSettingsUi.dialogButton(
+                activity,
+                StringRef.str("piko_newx_settings_cancel")
+        );
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+        dialog.addButton(cancel);
+        dialog.show();
+    }
+
+    private static ButtonView pickFolderButton(
+            Activity activity,
+            DialogView dialog,
+            DownloadDestination.MediaKind kind,
+            String labelResource
+    ) {
+        ButtonView button = NewXSettingsUi.dialogButton(activity, StringRef.str(labelResource));
+        button.setOnClickListener(ignored -> {
+            dialog.dismiss();
+            // The picker writes the setting itself, so the user just taps download again.
+            activity.startActivity(new Intent(activity, DownloadFolderPickerActivity.class)
+                    .putExtra(DownloadFolderPickerActivity.KIND_EXTRA, kind.name()));
+        });
+        return button;
+    }
+
+    private static LinearLayout dialogForm(Context context) {
+        LinearLayout form = new LinearLayout(context);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(Theme.dpToPx(context, 24f), 0, Theme.dpToPx(context, 24f), 0);
+        return form;
+    }
+
+    /** Reports which media types in this action have no usable destination. */
+    private static boolean[] missingDestinations(Context context, List<DownloadItem> downloads) {
+        boolean needsImages = false;
+        boolean needsVideos = false;
+        for (DownloadItem item : downloads) {
+            DownloadDestination.MediaKind kind;
+            try {
+                kind = DownloadDestination.mediaKindFor(item.mimeType);
+            } catch (IllegalArgumentException exception) {
+                // Unsupported media is reported per item; it must not block the whole action.
+                continue;
+            }
+            if (kind == DownloadDestination.MediaKind.VIDEOS) {
+                needsVideos = true;
+            } else {
+                needsImages = true;
+            }
+        }
+        return new boolean[] {
+                needsImages
+                        && !DownloadDestination.isConfigured(context, DownloadDestination.MediaKind.IMAGES),
+                needsVideos
+                        && !DownloadDestination.isConfigured(context, DownloadDestination.MediaKind.VIDEOS),
+        };
     }
 
     private static void showQueueResult(int queued, int skipped, int failed, String username) {
@@ -1191,8 +943,8 @@ public final class InlineDownloadButton {
         if (queued == 0) {
             if (failed == 0 && skipped > 0) {
                 NewXInAppNotification.showForUser(skipped == 1
-                        ? "Already downloaded or queued"
-                        : skipped + " media already downloaded or queued", username);
+                        ? "Already downloaded"
+                        : skipped + " media already downloaded", username);
                 return;
             }
             NewXInAppNotification.showForUser("Could not start download", username);
@@ -1201,185 +953,12 @@ public final class InlineDownloadButton {
         List<String> parts = new ArrayList<>();
         parts.add(queued == 1 ? "1 download started" : queued + " downloads started");
         if (skipped > 0) parts.add(skipped == 1
-                ? "1 already downloaded or queued"
-                : skipped + " already downloaded or queued");
+                ? "1 already downloaded"
+                : skipped + " already downloaded");
         if (failed > 0) parts.add(failed == 1 ? "1 failed" : failed + " failed");
         NewXInAppNotification.showForUser(String.join(", ", parts), username);
     }
 
-    static ConflictBehavior conflictBehavior() {
-        String value = SettingsRegistry.getStringOrDefault(
-                CONFLICT_SETTING,
-                DEFAULT_CONFLICT_BEHAVIOR.name()
-        );
-        for (ConflictBehavior behavior : ConflictBehavior.values()) {
-            if (behavior.name().equalsIgnoreCase(value)) return behavior;
-        }
-        return DEFAULT_CONFLICT_BEHAVIOR;
-    }
-
-    @androidx.annotation.Nullable
-    static String resolveTargetFileName(
-            Context context,
-            String baseFileName,
-            ConflictBehavior behavior,
-            String mimeType
-    ) {
-        return resolveTargetFileName(
-                baseFileName,
-                behavior,
-                fileName -> mediaExists(context, fileName, mimeType) || pendingFileExists(context, fileName)
-        );
-    }
-
-    static String resolveTargetFileName(
-            String baseFileName,
-            ConflictBehavior behavior,
-            Predicate<String> isOccupied
-    ) {
-        if (behavior == null || isOccupied == null) {
-            throw new IllegalArgumentException("Download target resolver is incomplete");
-        }
-
-        return switch (behavior) {
-            case OVERWRITE -> baseFileName;
-            case SKIP -> isOccupied.test(baseFileName) ? null : baseFileName;
-            case RENAME -> isOccupied.test(baseFileName)
-                    ? uniqueFileName(baseFileName, isOccupied)
-                    : baseFileName;
-        };
-    }
-
-    private static String uniqueFileName(String baseFileName, Predicate<String> isOccupied) {
-        int dot = baseFileName.lastIndexOf('.');
-        String stem = dot > 0 ? baseFileName.substring(0, dot) : baseFileName;
-        String extension = dot > 0 ? baseFileName.substring(dot) : "";
-        int counter = 1;
-        while (true) {
-            String candidate = stem + "_" + counter + extension;
-            if (!isOccupied.test(candidate)) return candidate;
-            counter++;
-        }
-    }
-
-    private static boolean pendingFileExists(Context context, String fileName) {
-        for (Object value : pendingDownloads(context).getAll().values()) {
-            if (!(value instanceof String serialized)) continue;
-
-            String[] fields = serialized.split("\n", -1);
-            if (fields.length >= 3 && fileName.equals(fields[1])) return true;
-        }
-        return false;
-    }
-
-    private static boolean mediaExists(Context context, String fileName, String mimeType) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContentResolver resolver = context.getContentResolver();
-            String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
-                    MediaStore.MediaColumns.RELATIVE_PATH + "=?";
-            Uri collection = mediaCollectionForMime(mimeType);
-            String relativePath = relativeDownloadPath(mimeType);
-            try (Cursor cursor = resolver.query(
-                    collection,
-                    new String[]{MediaStore.MediaColumns._ID},
-                    selection,
-                    new String[]{fileName, relativePath},
-                    null
-            )) {
-                if (cursor != null && cursor.moveToFirst()) return true;
-            } catch (RuntimeException exception) {
-                // Android 13+ hides media owned by other apps when the user has not granted
-                // READ_MEDIA_* permission. The fallback below still detects the collision.
-                NewXLogger.printException(() -> "Failed to query NewX media existence", exception);
-            }
-
-            // Old inline downloads were indexed with no owner package. On AOSP Android 16 they
-            // are invisible to this app because READ_MEDIA_* is normally denied, so a normal
-            // query reports "missing" even though MediaStore will rename a colliding insert to
-            // "file (1).jpg". Probe the provider's own name allocation to detect that case
-            // without requesting broad media access from the user.
-            return mediaStoreNameIsOccupied(
-                    resolver,
-                    collection,
-                    relativePath,
-                    fileName,
-                    mimeType
-            );
-        }
-
-        File primary = Environment.getExternalStoragePublicDirectory(primaryDirectoryForMime(mimeType));
-        File directory = new File(primary, DOWNLOAD_DIRECTORY);
-        return new File(directory, fileName).isFile();
-    }
-
-    private static Uri mediaCollectionForMime(String mimeType) {
-        return mimeType != null && mimeType.startsWith("video/")
-                ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-                : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-    }
-
-    private static boolean mediaStoreNameIsOccupied(
-            ContentResolver resolver,
-            Uri collection,
-            String relativePath,
-            String fileName,
-            String mimeType
-    ) {
-        ContentValues probeValues = new ContentValues();
-        probeValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-        probeValues.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
-        probeValues.put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath);
-        probeValues.put(MediaStore.MediaColumns.IS_PENDING, 1);
-
-        Uri probe = resolver.insert(collection, probeValues);
-        if (probe == null) {
-            throw new IllegalStateException("Could not probe NewX media name availability");
-        }
-
-        try {
-            try (OutputStream output = resolver.openOutputStream(probe, "w")) {
-                if (output == null) {
-                    throw new IllegalStateException("Could not open NewX media name probe");
-                }
-                // MediaProvider allocates the final unique filesystem name lazily when the
-                // pending URI is opened. An insert/update-only probe can therefore miss an
-                // existing file on AOSP even though the real download is renamed on write.
-                output.write(0);
-            }
-
-            ContentValues publishValues = new ContentValues();
-            publishValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
-            resolver.update(probe, publishValues, null, null);
-
-            String allocatedName = mediaStoreDisplayName(resolver, probe);
-            if (allocatedName == null) {
-                throw new IllegalStateException("MediaStore probe returned no display name");
-            }
-            return mediaStoreAllocatedNameDiffers(fileName, allocatedName);
-        } catch (IOException exception) {
-            throw new IllegalStateException("Could not write NewX media name probe", exception);
-        } finally {
-            resolver.delete(probe, null, null);
-        }
-    }
-
-    static boolean mediaStoreAllocatedNameDiffers(String requestedName, String allocatedName) {
-        return !requestedName.equals(allocatedName);
-    }
-
-    private static String mediaStoreDisplayName(ContentResolver resolver, Uri media) {
-        try (Cursor cursor = resolver.query(
-                media,
-                new String[]{MediaStore.MediaColumns.DISPLAY_NAME},
-                null,
-                null,
-                null
-        )) {
-            if (cursor == null || !cursor.moveToFirst()) return null;
-            int displayNameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
-            return displayNameIndex < 0 ? null : cursor.getString(displayNameIndex);
-        }
-    }
 
     static Activity currentActivity() {
         return NewXUtils.findUsableActivity(null);
@@ -1434,20 +1013,6 @@ public final class InlineDownloadButton {
             this.label = label;
             this.thumbnailUrl = thumbnailUrl;
             this.thumbnailCacheUrl = thumbnailCacheUrl;
-        }
-    }
-
-    private static final class PendingDownload {
-        final String temporaryFileName;
-        final String fileName;
-        final String mimeType;
-        final String url;
-
-        PendingDownload(String temporaryFileName, String fileName, String mimeType, String url) {
-            this.temporaryFileName = temporaryFileName;
-            this.fileName = fileName;
-            this.mimeType = mimeType;
-            this.url = url;
         }
     }
 

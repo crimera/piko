@@ -144,6 +144,10 @@ public final class SettingsBackupRestore {
     }
 
     private static void ensureAllSettingsLoaded() {
+        // Contributed setting nodes (including the hidden download folder URIs and the filename
+        // template) only exist once the registry has built its settings, and the backup exports
+        // whatever Setting instances are loaded. load() is idempotent.
+        SettingsRegistry.load();
         FeatureSwitchStore.shared();
         ForYouTopicFilter.shared().enabled.get();
         PostFilterRuleStore.shared();

@@ -30,6 +30,19 @@ internal val newXSettingsResourcePatch =
                         )
                     }
                 application.appendChild(activity)
+
+                val folderPicker =
+                    document.createElement("activity").apply {
+                        setAttribute(
+                            "android:name",
+                            "app.morphe.extension.newx.misc.DownloadFolderPickerActivity",
+                        )
+                        setAttribute("android:excludeFromRecents", "true")
+                        setAttribute("android:exported", "false")
+                        // The picker has no UI of its own; it only hosts the SAF folder chooser.
+                        setAttribute("android:theme", "@android:style/Theme.Translucent.NoTitleBar")
+                    }
+                application.appendChild(folderPicker)
             }
         }
     }
