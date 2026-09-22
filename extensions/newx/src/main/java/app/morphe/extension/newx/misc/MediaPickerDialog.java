@@ -51,7 +51,6 @@ public final class MediaPickerDialog {
             Context context,
             List<InlineDownloadButton.DownloadItem> downloads,
             String username,
-            String postId,
             OnMediaSelectedListener listener
     ) {
         if (context == null || downloads == null || downloads.isEmpty() || listener == null) {

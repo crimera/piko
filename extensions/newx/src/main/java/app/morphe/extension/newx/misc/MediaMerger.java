@@ -1,24 +1,16 @@
 package app.morphe.extension.newx.misc;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,13 +18,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import app.morphe.extension.newx.misc.InlineDownloadButton.ConflictBehavior;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.utils.NewXUtils;
 
 /**
  * Downloads multiple image slices in the background, stitches them horizontally
- * in 1-2-3-4 order, and publishes the final merged image to MediaStore/Pictures/Twitter.
+ * in 1-2-3-4 order, and saves the final merged image through {@link DownloadDestination} so a
+ * merge lands in the same folder, under the same filename template, as a plain download.
  * Intermediate splits are stored in cache and deleted immediately after merging.
  */
 public final class MediaMerger {
@@ -50,7 +42,7 @@ public final class MediaMerger {
             Context context,
             List<InlineDownloadButton.DownloadItem> items,
             String username,
-            String postId
+            DownloadFileName.PostContext postContext
     ) {
         if (context == null || items == null || items.size() < 2) {
             NewXInAppNotification.showForUser("At least 2 images are required to merge", username);
@@ -64,14 +56,14 @@ public final class MediaMerger {
                 "Downloading and merging " + items.size() + " images...",
                 username
         );
-        MERGE_EXECUTOR.execute(() -> performMerge(safeContext, items, username, postId));
+        MERGE_EXECUTOR.execute(() -> performMerge(safeContext, items, username, postContext));
     }
 
     private static void performMerge(
             Context context,
             List<InlineDownloadButton.DownloadItem> items,
             String username,
-            String postId
+            DownloadFileName.PostContext postContext
     ) {
         List<File> tempFiles = new ArrayList<>();
         try {
@@ -188,26 +180,47 @@ public final class MediaMerger {
             String mimeType = isAllPng ? "image/png" : "image/jpeg";
             Bitmap.CompressFormat format = isAllPng ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG;
 
-            String baseFileName = InlineDownloadButton.safeFileSegment(username, "twitter") + "_" +
-                    InlineDownloadButton.safeFileSegment(postId, "post") + "." + extension;
+            // A merge is one output for the whole action, so it renders the template without a
+            // media index rather than inheriting the index of the last slice.
+            String fileName = DownloadFileName.render(
+                    DownloadSettings.filenameTemplate(),
+                    postContext,
+                    0,
+                    1,
+                    extension
+            );
 
-            ConflictBehavior behavior = InlineDownloadButton.conflictBehavior();
-            String fileName = InlineDownloadButton.resolveTargetFileName(context, baseFileName, behavior, mimeType);
-            if (fileName == null) {
+            // Step 7: Reserve the destination document before encoding, so a skipped merge costs
+            // no work and the file lands where the user configured.
+            final DownloadDestination.Target target;
+            try {
+                target = DownloadDestination.reserve(
+                        context,
+                        DownloadDestination.MediaKind.IMAGES,
+                        fileName,
+                        mimeType,
+                        DownloadDestination.conflictPolicy()
+                );
+            } catch (IOException | RuntimeException exception) {
                 mergedBitmap.recycle();
-                NewXInAppNotification.showForUser("Merged image already exists: " + baseFileName, username);
+                NewXLogger.printException(() -> LOG_PREFIX + "Failed to create merged image document", exception);
+                NewXInAppNotification.showForUser("Failed to save merged image: " + fileName, username);
+                return;
+            }
+            if (target == null) {
+                mergedBitmap.recycle();
+                NewXInAppNotification.showForUser("Merged image already exists: " + fileName, username);
                 return;
             }
 
-            // Step 7: Save to MediaStore (or legacy external storage)
-            boolean saved = saveMergedBitmap(context, mergedBitmap, fileName, mimeType, format);
+            boolean saved = saveMergedBitmap(context, mergedBitmap, target, format);
             mergedBitmap.recycle();
 
             if (saved) {
-                // MediaMerger uses raw HTTP rather than DownloadManager, so retain its
-                // merge-specific completion feedback.
-                NewXInAppNotification.showForUser("Merged image saved: " + fileName, username);
-                NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + fileName);
+                // MediaMerger streams the slices itself rather than going through the URL-based
+                // DownloadDestination transfer, so retain its merge-specific completion feedback.
+                NewXInAppNotification.showForUser("Merged image saved: " + target.fileName(), username);
+                NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + target.fileName());
             } else {
                 NewXInAppNotification.showForUser("Failed to save merged image: " + fileName, username);
             }
@@ -274,55 +287,14 @@ public final class MediaMerger {
     private static boolean saveMergedBitmap(
             Context context,
             Bitmap bitmap,
-            String fileName,
-            String mimeType,
+            DownloadDestination.Target target,
             Bitmap.CompressFormat format
-    ) throws IOException {
+    ) {
         int quality = format == Bitmap.CompressFormat.PNG ? 100 : 95;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContentResolver resolver = context.getContentResolver();
-            Uri collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-            String relativePath = InlineDownloadButton.relativeDownloadPath(mimeType);
-
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath);
-            values.put(MediaStore.MediaColumns.IS_PENDING, 1);
-
-            Uri destination = resolver.insert(collection, values);
-            if (destination == null) return false;
-
-            try (OutputStream output = resolver.openOutputStream(destination, "w")) {
-                if (output == null) throw new IOException("Could not open output stream for destination: " + destination);
-                bitmap.compress(format, quality, output);
-            } catch (IOException | RuntimeException exception) {
-                resolver.delete(destination, null, null);
-                throw exception;
-            }
-
-            ContentValues completed = new ContentValues();
-            completed.put(MediaStore.MediaColumns.IS_PENDING, 0);
-            resolver.update(destination, completed, null, null);
-
-            InlineDownloadButton.deleteExistingMedia(resolver, collection, fileName, relativePath, destination);
-            return true;
-        } else {
-            File primary = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            File directory = new File(primary, "Twitter");
-            if (!directory.isDirectory() && !directory.mkdirs()) {
-                return false;
-            }
-
-            File finalFile = new File(directory, fileName);
-            try (FileOutputStream output = new FileOutputStream(finalFile)) {
-                bitmap.compress(format, quality, output);
-            }
-            context.sendBroadcast(
-                    new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(finalFile))
-            );
-            return true;
-        }
+        return DownloadDestination.save(
+                context,
+                target,
+                output -> bitmap.compress(format, quality, output)
+        );
     }
 }

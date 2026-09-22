@@ -24,6 +24,7 @@ import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.newx.ui.ChoiceRow;
 import app.morphe.extension.newx.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
 
@@ -387,7 +388,7 @@ public final class SettingsRenderer {
         LinearLayout options = choiceList(context);
         dialog.setScrollableBodyView(options);
         for (SettingsNode.ChoiceOption option : item.options) {
-            NewXSettingsUi.ChoiceRow row = NewXSettingsUi.choiceRow(
+            ChoiceRow row = NewXSettingsUi.choiceRow(
                     context,
                     option.title.toString(),
                     option.id.equals(item.setting.get()),
@@ -438,7 +439,7 @@ public final class SettingsRenderer {
         LinearLayout options = choiceList(context);
         dialog.setScrollableBodyView(options);
         for (SettingsNode.ChoiceOption option : item.options) {
-            NewXSettingsUi.ChoiceRow row = NewXSettingsUi.choiceRow(
+            ChoiceRow row = NewXSettingsUi.choiceRow(
                     context,
                     option.title.toString(),
                     selectedValues.contains(option.id),

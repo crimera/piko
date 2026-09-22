@@ -20,12 +20,15 @@ import app.crimera.patches.newx.models.newXPostMediaModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.choice
+import app.crimera.patches.newx.settings.customScreen
 import app.crimera.patches.newx.settings.group
+import app.crimera.patches.newx.settings.input
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.singleChoice
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
@@ -90,7 +93,9 @@ private fun MutableMethod.freeRegisters4Bit(
 val newXInlineDownloadButtonPatch =
     bytecodePatch(
         name = "NewX: Inline download button",
-        description = "Adds a Download button below NewX posts and saves images to Pictures/Twitter and videos to Movies/Twitter.",
+        description =
+            "Adds a Download button below NewX posts and saves media to a folder you choose, " +
+                "with a customizable filename template.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(
@@ -146,6 +151,54 @@ val newXInlineDownloadButtonPatch =
                                 choice("rename", "piko_newx_inline_download_conflict_rename"),
                                 choice("skip", "piko_newx_inline_download_conflict_skip"),
                             ),
+                    )
+                    // Folders and the filename template need richer editors than a settings row, so
+                    // they live in the Download options screen.
+                    customScreen(
+                        id = "newx.content.inline_download.options",
+                        strings = settingStrings("piko_newx_inline_download_options"),
+                        order = 410,
+                        fragmentClassDescriptor = DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR,
+                    )
+                    // The template is edited only from the Download options screen, which owns the
+                    // token chips and live preview. It stays registered as a setting so
+                    // "back up settings" carries it, but is hidden from the list.
+                    input(
+                        id = "newx.content.inline_download.filename_template",
+                        strings = settingStrings("piko_newx_inline_download_filename_template"),
+                        order = 600,
+                        defaultValue = "{screenName}_{id}",
+                        visible = false,
+                    )
+                    // Hidden nodes store the SAF destination for each media type. They are declared
+                    // as registry settings so "back up settings" carries them between installs.
+                    input(
+                        id = "newx.content.inline_download.images_tree_uri",
+                        strings = settingStrings("piko_newx_inline_download_images_tree_uri"),
+                        order = 700,
+                        defaultValue = "",
+                        visible = false,
+                    )
+                    input(
+                        id = "newx.content.inline_download.videos_tree_uri",
+                        strings = settingStrings("piko_newx_inline_download_videos_tree_uri"),
+                        order = 710,
+                        defaultValue = "",
+                        visible = false,
+                    )
+                    input(
+                        id = "newx.content.inline_download.images_display_path",
+                        strings = settingStrings("piko_newx_inline_download_images_display_path"),
+                        order = 720,
+                        defaultValue = "",
+                        visible = false,
+                    )
+                    input(
+                        id = "newx.content.inline_download.videos_display_path",
+                        strings = settingStrings("piko_newx_inline_download_videos_display_path"),
+                        order = 730,
+                        defaultValue = "",
+                        visible = false,
                     )
                 }
             }

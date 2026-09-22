@@ -170,6 +170,46 @@
     <string name="piko_newx_inline_download_conflict_overwrite">Overwrite the existing file</string>
     <string name="piko_newx_inline_download_conflict_rename">Save with a new name</string>
     <string name="piko_newx_inline_download_conflict_skip">Skip already-downloaded media</string>
+    <string name="piko_newx_inline_download_options_title">Download options</string>
+    <string name="piko_newx_inline_download_options_summary">Choose where downloads are saved and how files are named</string>
+    <string name="piko_newx_inline_download_filename_template_title">Filename template</string>
+    <string name="piko_newx_inline_download_filename_template_summary">Builds the saved filename from post values. Tap to edit, with a live preview of the result.</string>
+    <string name="piko_newx_inline_download_images_tree_uri_title">Images download folder</string>
+    <string name="piko_newx_inline_download_images_tree_uri_summary">Folder chosen for downloaded images</string>
+    <string name="piko_newx_inline_download_videos_tree_uri_title">Videos download folder</string>
+    <string name="piko_newx_inline_download_videos_tree_uri_summary">Folder chosen for downloaded videos</string>
+    <string name="piko_newx_inline_download_images_display_path_title">Images download folder path</string>
+    <string name="piko_newx_inline_download_images_display_path_summary">Human-readable path of the images download folder</string>
+    <string name="piko_newx_inline_download_videos_display_path_title">Videos download folder path</string>
+    <string name="piko_newx_inline_download_videos_display_path_summary">Human-readable path of the videos download folder</string>
+
+    <string name="piko_newx_download_options_folders">Folders</string>
+    <string name="piko_newx_download_options_folder_images">Images</string>
+    <string name="piko_newx_download_options_folder_videos">Videos</string>
+    <string name="piko_newx_download_options_folder_not_set">Not set — tap to choose</string>
+    <string name="piko_newx_download_options_folder_denied">Tap to give access again</string>
+    <string name="piko_newx_download_options_folder_hint">Files are written straight into the folder you pick. Pick a folder under Pictures or DCIM to have downloads appear in your gallery.</string>
+    <string name="piko_newx_download_options_filename_hint">Tap a token to insert it. Anything outside braces is kept as-is.</string>
+    <string name="piko_newx_download_options_filename_preview">Preview: %1$s</string>
+    <string name="piko_newx_download_options_filename_reset">Reset to default</string>
+    <string name="piko_newx_download_options_changed">Download folder updated</string>
+    <string name="piko_newx_download_options_cancelled">No folder selected</string>
+
+    <string name="piko_newx_download_filename_title">Filename template</string>
+    <string name="piko_newx_download_filename_tokens">Tokens</string>
+    <string name="piko_newx_download_filename_error_empty">Enter a filename template</string>
+    <string name="piko_newx_download_filename_error_unclosed">A brace was opened but never closed</string>
+    <string name="piko_newx_download_filename_error_static">Add {id} or {timestamp} so different posts do not overwrite each other</string>
+    <string name="piko_newx_download_filename_error_unknown">Unknown token {%1$s}</string>
+
+    <string name="piko_newx_download_first_run_title">Choose a download folder</string>
+    <string name="piko_newx_download_first_run_images">Downloaded images need a folder. Pick one so they are saved where you can find them.</string>
+    <string name="piko_newx_download_first_run_videos">Downloaded videos need a folder. Pick one so they are saved where you can find them.</string>
+    <string name="piko_newx_download_first_run_both">Images and videos each need a folder before they can be downloaded.</string>
+    <string name="piko_newx_download_first_run_images_action">Choose images folder</string>
+    <string name="piko_newx_download_first_run_videos_action">Choose videos folder</string>
+    <string name="piko_newx_download_first_run_retry">Tap download again once the folder is set.</string>
+
     <string name="piko_newx_inline_actions_title">Inline actions to hide</string>
     <string name="piko_newx_inline_actions_summary">Choose which actions are hidden below NewX posts</string>
     <string name="piko_newx_inline_action_reply">Reply</string>

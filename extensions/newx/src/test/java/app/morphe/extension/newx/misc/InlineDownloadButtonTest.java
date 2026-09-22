@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import app.morphe.extension.newx.settings.SettingsRegistry;
 import app.morphe.extension.shared.settings.BooleanSetting;
@@ -43,14 +44,6 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void singleMediaUsesRequestedTwitterFilename() {
-        assertEquals(
-                "jack_123456789.jpg",
-                InlineDownloadButton.downloadFileName("jack", "123456789", "jpg", 0, 1)
-        );
-    }
-
-    @Test
     public void downloadNotificationsIdentifyThePostAuthor() {
         assertEquals(
                 "Download started — @jack",
@@ -71,98 +64,11 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void multipleMediaUsesOneBasedSuffix() {
-        assertEquals(
-                "jack_123456789_1.jpg",
-                InlineDownloadButton.downloadFileName("jack", "123456789", "jpg", 0, 4)
-        );
-        assertEquals(
-                "jack_123456789_4.mp4",
-                InlineDownloadButton.downloadFileName("jack", "123456789", "mp4", 3, 4)
-        );
-    }
-
-    @Test
-    public void filenameSegmentsAreSanitized() {
-        assertEquals(
-                "jack_user_post_id.jpg",
-                InlineDownloadButton.downloadFileName("@jack/user", "post:id", "jpg", 0, 1)
-        );
-    }
-
-    @Test
     public void thumbnailCacheUrlKeepsOriginalMediaUrl() {
         String sourceUrl = "https://pbs.twimg.com/media/example.jpg?format=jpg&name=orig";
         String media = "MediaContentImage(imageUrl=" + sourceUrl + ")";
 
         assertEquals(sourceUrl, InlineDownloadButton.thumbnailCacheUrlForMedia(media));
-    }
-
-    @Test
-    public void temporarySuffixPrecedesExtension() {
-        assertEquals(
-                "jack_123456789_tmp.jpg",
-                InlineDownloadButton.temporaryDownloadFileName("jack_123456789.jpg")
-        );
-        assertEquals(
-                "download_tmp",
-                InlineDownloadButton.temporaryDownloadFileName("download")
-        );
-    }
-
-    @Test
-    public void occupiedTargetIsSkipped() {
-        String target = "jack_123456789.jpg";
-
-        assertNull(InlineDownloadButton.resolveTargetFileName(
-                target,
-                InlineDownloadButton.ConflictBehavior.SKIP,
-                Set.of(target)::contains
-        ));
-    }
-
-    @Test
-    public void mediaStoreRenamedAllocationIsTreatedAsOccupied() {
-        assertTrue(InlineDownloadButton.mediaStoreAllocatedNameDiffers(
-                "jack_123456789.jpg",
-                "jack_123456789 (1).jpg"
-        ));
-        assertFalse(InlineDownloadButton.mediaStoreAllocatedNameDiffers(
-                "jack_123456789.jpg",
-                "jack_123456789.jpg"
-        ));
-    }
-
-    @Test
-    public void renameSkipsOccupiedTargets() {
-        String target = "jack_123456789.jpg";
-
-        assertEquals(
-                target,
-                InlineDownloadButton.resolveTargetFileName(
-                        target,
-                        InlineDownloadButton.ConflictBehavior.RENAME,
-                        Set.of()::contains
-                )
-        );
-        assertEquals(
-                "jack_123456789_2.jpg",
-                InlineDownloadButton.resolveTargetFileName(
-                        target,
-                        InlineDownloadButton.ConflictBehavior.RENAME,
-                        Set.of(target, "jack_123456789_1.jpg")::contains
-                )
-        );
-    }
-
-    @Test
-    public void uniqueTemporaryDownloadNamesDoNotCollide() {
-        String first = InlineDownloadButton.uniqueTemporaryDownloadFileName("jack_123456789.jpg");
-        String second = InlineDownloadButton.uniqueTemporaryDownloadFileName("jack_123456789.jpg");
-
-        assertNotEquals(first, second);
-        assertTrue(first.startsWith("jack_123456789_tmp_"));
-        assertTrue(first.endsWith(".jpg"));
     }
 
     @Test
@@ -254,55 +160,6 @@ public final class InlineDownloadButtonTest {
         assertFalse(InlineDownloadButton.shouldInspectMedia(false, true));
         assertTrue(InlineDownloadButton.shouldInspectMedia(true, false));
         assertFalse(InlineDownloadButton.shouldInspectMedia(true, true));
-    }
-
-    @Test
-    public void videoRelativePathUsesMoviesDirectory() {
-        assertEquals(
-                "Movies/Twitter/",
-                InlineDownloadButton.relativeDownloadPath("video/mp4")
-        );
-    }
-
-    @Test
-    public void gifRelativePathUsesMoviesDirectory() {
-        assertEquals(
-                "Movies/Twitter/",
-                InlineDownloadButton.relativeDownloadPath("video/mp4")
-        );
-    }
-
-    @Test
-    public void imageRelativePathUsesPicturesDirectory() {
-        assertEquals(
-                "Pictures/Twitter/",
-                InlineDownloadButton.relativeDownloadPath("image/jpeg")
-        );
-    }
-
-    @Test
-    public void unknownMimeFallsBackToPicturesDirectory() {
-        assertEquals(
-                "Pictures/Twitter/",
-                InlineDownloadButton.relativeDownloadPath("application/octet-stream")
-        );
-        assertEquals(
-                "Pictures/Twitter/",
-                InlineDownloadButton.relativeDownloadPath(null)
-        );
-    }
-
-    @Test
-    public void conflictCleanupExcludesPublishedDestination() {
-        assertTrue(InlineDownloadButton.existingMediaSelection().contains("!=?"));
-        assertArrayEquals(
-                new String[]{"jack_123456789.jpg", "Pictures/Twitter/", "42"},
-                InlineDownloadButton.existingMediaSelectionArgs(
-                        "jack_123456789.jpg",
-                        "Pictures/Twitter/",
-                        "42"
-                )
-        );
     }
 
     @Test
@@ -402,7 +259,7 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void repostWithAttachedMediaExtractsScreenNameFromExpandedUrl() {
+    public void repostWithAttachedMediaResolvesOriginalPosterAndSourceId() {
         String post = "ContextualPost(canonicalPost=CanonicalPost(id=2091833522717663582, " +
                 "text=菊地姫奈さんのお尻って国宝だよな！\nhttps://t.co/KfA7O5wSze, " +
                 "timestamp=2026-08-24T10:22:30Z, " +
@@ -420,8 +277,13 @@ public final class InlineDownloadButtonTest {
                 "author=MinimalUser(id=1252509176015790080, screenName=Chetanc54455628, name=一日一グラビア), " +
                 "legacyCard=null, rePostedPost=null)";
 
-        assertEquals("Phot0_detective", InlineDownloadButton.sourceUsername(post));
-        assertEquals("2088553803364843766", InlineDownloadButton.sourcePostId(post));
+        // A download of a repost must be filed under the original poster, not the retweeter.
+        DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
+        assertEquals("Phot0_detective", context.screenName);
+        assertEquals("2088553803364843766", context.id);
+        assertEquals("写真集探偵", context.sourceUserDisplayName);
+        assertEquals("Phot0_detective_2088553803364843766.jpg",
+                DownloadFileName.render(null, context, 0, 1, "jpg"));
     }
 
     @Test
@@ -433,12 +295,13 @@ public final class InlineDownloadButtonTest {
                 "author=MinimalUser(id=1252509176015790080, screenName=Chetanc54455628, name=一日一グラビア), " +
                 "rePostedPost=null)";
 
-        assertEquals("Chetanc54455628", InlineDownloadButton.sourceUsername(post));
-        assertEquals("2088553803364843766", InlineDownloadButton.sourcePostId(post));
+        DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
+        assertEquals("Chetanc54455628", context.screenName);
+        assertEquals("2088553803364843766", context.id);
     }
 
     @Test
-    public void foldedRetweetWithMentionsExtractsMentionScreenName() {
+    public void foldedRetweetWithMentionsResolvesMentionScreenName() {
         String post = "ContextualPost(canonicalPost=CanonicalPost(id=2088336364039184458, " +
                 "media=[MediaContentImage(mediaId=1, " +
                 "sourceInfo=SourceInfo(sourcePostIdentifier=2088279482146898407))], " +
@@ -446,28 +309,137 @@ public final class InlineDownloadButtonTest {
                 "author=MinimalUser(id=1, screenName=pokorakun, name=pokorakun), " +
                 "rePostedPost=null)";
 
-        assertEquals("chachironi3", InlineDownloadButton.sourceUsername(post));
-        assertEquals("2088279482146898407", InlineDownloadButton.sourcePostId(post));
+        DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
+        assertEquals("chachironi3", context.screenName);
+        assertEquals("2088279482146898407", context.id);
     }
 
     @Test
-    public void structuredRepostExtractsOriginalAuthorAndId() {
+    public void structuredRepostResolvesOriginalAuthorAndId() {
         String post = "ContextualPost(canonicalPost=CanonicalPost(id=2088334976651792559, " +
                 "author=MinimalUser(id=9, screenName=retweeter, name=Retweeter), media=[]), " +
                 "rePostedPost=RePostedPost(canonicalPost=CanonicalPost(id=2088221458740969716, " +
                 "author=MinimalUser(id=1423483994084048906, screenName=hige_hurai, name=Hige Hurai), " +
                 "media=[MediaContentImage(mediaId=1)])))";
 
-        assertEquals("hige_hurai", InlineDownloadButton.sourceUsername(post));
-        assertEquals("2088221458740969716", InlineDownloadButton.sourcePostId(post));
+        DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
+        assertEquals("hige_hurai", context.screenName);
+        assertEquals("2088221458740969716", context.id);
+        assertEquals("Hige Hurai", context.name);
     }
 
     @Test
-    public void completelyUnresolvablePostGracefullyFallsBackToDefaults() {
-        String post = "CorruptedPost()";
+    public void completelyUnresolvablePostFallsBackToDefaultName() {
+        DownloadFileName.PostContext context = DownloadFileName.PostContext.from("CorruptedPost()");
 
-        assertEquals("twitter", InlineDownloadButton.sourceUsername(post));
-        assertEquals("post", InlineDownloadButton.sourcePostId(post));
+        assertNull(context.id);
+        assertNull(context.screenName);
+        // Tokens with no value must not leave braces behind, and a fully unresolved name must not
+        // sanitize to an empty filename the provider would reject.
+        assertEquals("twitter_post.jpg",
+                DownloadFileName.render("{screenName}_{id}", context, 0, 1, "jpg"));
+    }
+
+    @Test
+    public void templateRendersEveryEditorToken() {
+        DownloadFileName.PostContext post = DownloadFileName.PostContext.sample();
+
+        assertEquals("1234567890123456789-jack-Jack-2026-01-31-123456-1-jpg",
+                DownloadFileName.render(
+                        "{id}-{screenName}-{name}-{timestamp}-{mediaIndex}-{ext}", post, 0, 1, "jpg"));
+        // {displayName} is the documented alias for {name}; dropping it would silently break
+        // every template users wrote against the alias.
+        assertEquals(DownloadFileName.render("{name}", post, 0, 1, "jpg"),
+                DownloadFileName.render("{displayName}", post, 0, 1, "jpg"));
+    }
+
+    @Test
+    public void unknownTokenStaysLiteralAndIsRejectedByValidation() {
+        DownloadFileName.PostContext post = DownloadFileName.PostContext.sample();
+
+        // A typo must be visible in the filename and blocked in the editor, never silently
+        // rendered as an empty segment that collides with every other download.
+        assertEquals("idd_jack.jpg",
+                DownloadFileName.render("{idd}_{screenName}", post, 0, 1, "jpg"));
+        DownloadFileName.Validation validation = DownloadFileName.validate("{screenName}_{idd}");
+        assertEquals(DownloadFileName.Outcome.UNKNOWN_TOKEN, validation.outcome);
+        assertEquals("idd", validation.token);
+    }
+
+    @Test
+    public void validationRejectsEmptyUnclosedAndPostIndependentTemplates() {
+        assertEquals(DownloadFileName.Outcome.OK,
+                DownloadFileName.validate("{screenName}_{id}").outcome);
+        assertEquals(DownloadFileName.Outcome.EMPTY, DownloadFileName.validate("   ").outcome);
+        assertEquals(DownloadFileName.Outcome.UNCLOSED, DownloadFileName.validate("{id").outcome);
+        // Without a post-dependent token every download would resolve to one name.
+        assertEquals(DownloadFileName.Outcome.STATIC,
+                DownloadFileName.validate("{screenName}_{mediaIndex}_{ext}").outcome);
+        assertEquals(DownloadFileName.Outcome.OK,
+                DownloadFileName.validate("{screenName}_{timestamp}").outcome);
+    }
+
+    @Test
+    public void mediaIndexSuffixIsAddedOnlyWhenTemplateOmitsIt() {
+        DownloadFileName.PostContext post = DownloadFileName.PostContext.sample();
+
+        assertEquals("jack_1.jpg", DownloadFileName.render("{screenName}", post, 0, 2, "jpg"));
+        assertEquals("jack_2.jpg", DownloadFileName.render("{screenName}", post, 1, 2, "jpg"));
+        // A single item never gets a suffix, even though the template has no index token.
+        assertEquals("jack.jpg", DownloadFileName.render("{screenName}", post, 0, 1, "jpg"));
+        // An explicit index token must not be suffixed a second time.
+        assertEquals("jack_2.jpg", DownloadFileName.render("{screenName}_{mediaIndex}", post, 1, 2, "jpg"));
+    }
+
+    @Test
+    public void explicitExtensionTokenReplacesTheAutomaticSuffix() {
+        DownloadFileName.PostContext post = DownloadFileName.PostContext.sample();
+
+        assertEquals("jack_1234567890123456789.jpg",
+                DownloadFileName.render("{screenName}_{id}.{ext}", post, 0, 1, "jpg"));
+        assertEquals("jack_1234567890123456789.jpg",
+                DownloadFileName.render("{screenName}_{id}", post, 0, 1, "jpg"));
+    }
+
+    @Test
+    public void sanitizerStripsSegmentsThatCouldEscapeTheChosenFolder() {
+        DownloadFileName.PostContext post = new DownloadFileName.PostContext(
+                "../../etc/passwd",
+                "..\\..\\evil",
+                "a/b",
+                "2026-01-31-123456",
+                null,
+                null,
+                null);
+
+        String rendered = DownloadFileName.render("{screenName}_{id}_{name}", post, 0, 1, "jpg");
+        assertEquals("evil_etc_passwd_a_b.jpg", rendered);
+        assertFalse(rendered.contains("/"));
+        assertFalse(rendered.contains("\\"));
+        assertFalse(rendered.contains(".."));
+        assertFalse(rendered.startsWith("."));
+    }
+
+    @Test
+    public void mediaKindRoutingRejectsNonMediaMimeTypes() {
+        assertEquals(DownloadDestination.MediaKind.IMAGES,
+                DownloadDestination.mediaKindFor("image/jpeg"));
+        assertEquals(DownloadDestination.MediaKind.VIDEOS,
+                DownloadDestination.mediaKindFor("video/mp4"));
+
+        // An unroutable mime must fail closed rather than land in the wrong folder.
+        try {
+            DownloadDestination.mediaKindFor("application/pdf");
+            fail("Expected an unroutable MIME type to be rejected");
+        } catch (IllegalArgumentException expected) {
+            assertTrue(expected.getMessage().contains("application/pdf"));
+        }
+        try {
+            DownloadDestination.mediaKindFor(null);
+            fail("Expected a null MIME type to be rejected");
+        } catch (IllegalArgumentException expected) {
+            // Expected.
+        }
     }
 
     @SuppressWarnings("unchecked")

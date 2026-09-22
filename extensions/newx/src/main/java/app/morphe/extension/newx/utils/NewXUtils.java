@@ -248,52 +248,114 @@ public final class NewXUtils {
      * their toString representation across the supported releases.
      */
     public static String sourcePostId(Object post) {
-        String postText = postText(post);
-        String originalPostText = originalRepostedPostText(postText);
-        if (originalPostText != null) {
-            String originalPostId = ToStringParser.fieldValue(originalPostText, "id");
-            if (originalPostId != null) return safeFileSegment(originalPostId, "post");
-        }
-
-        String sourcePostId = sourceMediaField(postText, "sourcePostIdentifier");
-        if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
-
-        String canonicalPostText = canonicalPostText(post);
-        String postId = ToStringParser.fieldValue(canonicalPostText, "id");
-        if (postId != null) return safeFileSegment(postId, "post");
-
-        return safeFileSegment(ToStringParser.fieldValue(postText, "id"), "post");
+        return safeFileSegment(rawSourcePostId(post), "post");
     }
 
     public static String sourceUsername(Object post) {
-        String postText = postText(post);
+        return safeFileSegment(rawSourceScreenName(post), "twitter");
+    }
+
+    /** Text form of {@link #sourceUsername(Object)}, for callers that already hold the toString. */
+    public static String sourceUsername(String postText) {
+        return safeFileSegment(rawSourceScreenName(postText), "twitter");
+    }
+
+    /**
+     * Resolves the source post id before filename sanitization. Used where the identifier is
+     * substituted into a user-configured template instead of a fixed filename.
+     */
+    public static String rawSourcePostId(Object post) {
+        return rawSourcePostId(postText(post));
+    }
+
+    /**
+     * Text form of {@link #rawSourcePostId(Object)}, for callers that already hold the toString.
+     * A post's toString can be large and is expensive to rebuild per field lookup.
+     */
+    public static String rawSourcePostId(String postText) {
         String originalPostText = originalRepostedPostText(postText);
         if (originalPostText != null) {
-            String originalAuthor = ToStringParser.fieldValue(originalPostText, "author");
-            String originalScreenName = originalAuthor == null
-                    ? null
-                    : ToStringParser.fieldValue(originalAuthor, "screenName");
-            if (originalScreenName != null) return safeFileSegment(originalScreenName, "twitter");
+            String originalPostId = ToStringParser.fieldValue(originalPostText, "id");
+            if (originalPostId != null) return originalPostId;
+        }
+
+        String sourcePostId = sourceMediaField(postText, "sourcePostIdentifier");
+        if (sourcePostId != null) return sourcePostId;
+
+        String canonicalText = canonicalPostText(postText);
+        String postId = ToStringParser.fieldValue(canonicalText, "id");
+        if (postId != null) return postId;
+
+        return ToStringParser.fieldValue(postText, "id");
+    }
+
+    /**
+     * Resolves the author handle before filename sanitization. Suspended-account posts expose a
+     * placeholder author, so the media mention/expanded-URL fallbacks are tried first.
+     */
+    public static String rawSourceScreenName(Object post) {
+        return rawSourceScreenName(postText(post));
+    }
+
+    /** Text form of {@link #rawSourceScreenName(Object)}. */
+    public static String rawSourceScreenName(String postText) {
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalScreenName = rawAuthorField(originalPostText, "screenName");
+            if (originalScreenName != null) return originalScreenName;
         }
 
         if (sourceMediaField(postText, "sourcePostIdentifier") != null) {
             String mentionScreenName = firstMentionScreenName(postText);
-            if (mentionScreenName != null) return safeFileSegment(mentionScreenName, "twitter");
+            if (mentionScreenName != null) return mentionScreenName;
 
             String expandedUrlScreenName = mediaExpandedUrlScreenName(postText);
-            if (expandedUrlScreenName != null) {
-                return safeFileSegment(expandedUrlScreenName, "twitter");
-            }
+            if (expandedUrlScreenName != null) return expandedUrlScreenName;
         }
 
-        String canonicalPostText = canonicalPostText(post);
-        String author = ToStringParser.fieldValue(canonicalPostText, "author");
-        String screenName = author == null ? null : ToStringParser.fieldValue(author, "screenName");
-        if (screenName != null) return safeFileSegment(screenName, "twitter");
+        String canonicalScreenName = rawAuthorField(canonicalPostText(postText), "screenName");
+        if (canonicalScreenName != null) return canonicalScreenName;
 
-        String rawAuthor = ToStringParser.fieldValue(postText, "author");
-        String rawScreenName = rawAuthor == null ? null : ToStringParser.fieldValue(rawAuthor, "screenName");
-        return safeFileSegment(rawScreenName, "twitter");
+        return rawAuthorField(postText, "screenName");
+    }
+
+    /**
+     * Resolves the author display name shown on the post. The author model is polymorphic: only
+     * the user-backed variants ({@code MinimalUser}, {@code ProfileUser}) carry a name.
+     */
+    public static String rawSourceDisplayName(Object post) {
+        return rawSourceDisplayName(postText(post));
+    }
+
+    /** Text form of {@link #rawSourceDisplayName(Object)}. */
+    public static String rawSourceDisplayName(String postText) {
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalName = rawAuthorField(originalPostText, "name");
+            if (originalName != null) return originalName;
+        }
+
+        String canonicalName = rawAuthorField(canonicalPostText(postText), "name");
+        if (canonicalName != null) return canonicalName;
+
+        return rawAuthorField(postText, "name");
+    }
+
+    /** Reads a raw source-media lineage field such as {@code sourcePostIdentifier}. */
+    public static String rawSourceMediaField(Object post, String fieldName) {
+        return rawSourceMediaField(postText(post), fieldName);
+    }
+
+    /** Text form of {@link #rawSourceMediaField(Object, String)}. */
+    public static String rawSourceMediaField(String postText, String fieldName) {
+        return sourceMediaField(postText, fieldName);
+    }
+
+    private static String rawAuthorField(String text, String fieldName) {
+        if (text == null) return null;
+
+        String author = ToStringParser.fieldValue(text, "author");
+        return author == null ? null : ToStringParser.fieldValue(author, fieldName);
     }
 
     private static String postText(Object post) {
@@ -301,7 +363,10 @@ public final class NewXUtils {
     }
 
     private static String canonicalPostText(Object post) {
-        String postText = postText(post);
+        return canonicalPostText(postText(post));
+    }
+
+    private static String canonicalPostText(String postText) {
         if (postText == null) return null;
 
         String canonicalPost = ToStringParser.fieldValue(postText, "canonicalPost");
