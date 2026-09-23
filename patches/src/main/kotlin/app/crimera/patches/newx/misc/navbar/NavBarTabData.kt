@@ -502,13 +502,13 @@ internal fun resolveEnumSwitchCases(
 
 internal fun MutableMethod.packedSwitchCases(switchIndex: Int): List<PackedSwitchCase> {
     val instruction = instructions[switchIndex] as? BuilderInstruction31t
-        ?: throw PatchException("NewX navigation icon switch is not a mutable packed switch: $this")
+        ?: throw PatchException("NewX packed switch is not a mutable packed switch: $this")
     val payload = instruction.target.location.instruction as? SwitchPayload
-        ?: throw PatchException("NewX navigation icon switch payload is missing: $this")
+        ?: throw PatchException("NewX packed switch payload is missing: $this")
     val elements =
         payload.switchElements.map { element ->
             element as? BuilderSwitchElement
-                ?: throw PatchException("NewX navigation icon switch case is not mutable: $this")
+                ?: throw PatchException("NewX packed switch case is not mutable: $this")
         }
     return elements.map { element ->
         val start = element.target.location.index

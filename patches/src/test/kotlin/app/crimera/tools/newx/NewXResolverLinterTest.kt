@@ -1,11 +1,13 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
+import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.immutable.ImmutableAnnotation
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
@@ -363,6 +365,75 @@ class NewXResolverLinterTest {
             root.toFile().deleteRecursively()
         }
     }
+
+    @Test
+    fun `module divider selection accepts non-foundation inline adapter and scopes discriminator`() {
+        val instructions = moduleDividerBuilderFixture()
+
+        val selected =
+            instructions.timelineModuleDividerItemIndices { adapterType, discriminator ->
+                dividerAdapterCaseBlock(adapterType, discriminator)
+            }
+
+        assertEquals(listOf(8), selected)
+    }
+
+    @Test
+    fun `module divider selection rejects hoisted and non-divider lambda items`() {
+        val instructions = moduleDividerBuilderFixture()
+
+        val selected =
+            instructions.timelineModuleDividerItemIndices { _, _ ->
+                listOf("return-void".toInstruction())
+            }
+
+        assertTrue(selected.isEmpty(), selected.toString())
+    }
+
+    private fun moduleDividerBuilderFixture(): List<Instruction> =
+        listOf(
+            // Divider item: a non-foundation adapter discriminator whose case block draws a divider.
+            "new-instance v1, Lfixture/DividerAdapter;".toInstruction(),
+            "const/16 v2, 0x7".toInstruction(),
+            "invoke-direct {v1, v3, v2}, Lfixture/DividerAdapter;-><init>(Ljava/lang/Object;I)V".toInstruction(),
+            "new-instance v4, Landroidx/compose/runtime/internal/f;".toInstruction(),
+            "const v5, 0x1".toInstruction(),
+            "invoke-direct {v4, v1, v6, v5}, Landroidx/compose/runtime/internal/f;-><init>(Ljava/lang/Object;ZI)V".toInstruction(),
+            "const/4 v7, 0x3".toInstruction(),
+            "const/4 v0, 0x0".toInstruction(),
+            "invoke-static {v8, v0, v4, v7}, Landroidx/compose/foundation/lazy/k;->u(Landroidx/compose/foundation/lazy/k;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;I)V".toInstruction(),
+            // Sibling item: same adapter, different discriminator that does not draw a divider.
+            "new-instance v11, Lfixture/DividerAdapter;".toInstruction(),
+            "const/16 v12, 0x3".toInstruction(),
+            "invoke-direct {v11, v13, v12}, Lfixture/DividerAdapter;-><init>(Ljava/lang/Object;I)V".toInstruction(),
+            "new-instance v14, Landroidx/compose/runtime/internal/f;".toInstruction(),
+            "const v5, 0x2".toInstruction(),
+            "invoke-direct {v14, v11, v6, v5}, Landroidx/compose/runtime/internal/f;-><init>(Ljava/lang/Object;ZI)V".toInstruction(),
+            "const/4 v15, 0x3".toInstruction(),
+            "const/4 v10, 0x0".toInstruction(),
+            "invoke-static {v8, v10, v14, v15}, Landroidx/compose/foundation/lazy/k;->u(Landroidx/compose/foundation/lazy/k;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;I)V".toInstruction(),
+            // Zero-key item with a hoisted static lambda that overwrites a stale wrapper register.
+            "const/4 v1, 0x0".toInstruction(),
+            "sget-object v4, Lfixture/Holder;->hoisted:Landroidx/compose/runtime/internal/f;".toInstruction(),
+            "const/4 v3, 0x3".toInstruction(),
+            "invoke-static {v8, v1, v4, v3}, Landroidx/compose/foundation/lazy/k;->u(Landroidx/compose/foundation/lazy/k;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;I)V".toInstruction(),
+        )
+
+    private fun dividerAdapterCaseBlock(
+        adapterType: String,
+        discriminator: Int,
+    ): List<Instruction>? =
+        when {
+            adapterType != "Lfixture/DividerAdapter;" -> null
+            discriminator == 0x7 ->
+                listOf(
+                    (
+                        "invoke-static/range {v0 .. v6}, Landroidx/compose/material3/x;->f(" +
+                            "FIIJLandroidx/compose/runtime/Composer;Landroidx/compose/ui/Modifier;)V"
+                    ).toInstruction(),
+                )
+            else -> listOf("return-void".toInstruction())
+        }
 
     private fun lint(source: String): List<NewXResolverLinter.Finding> =
         NewXResolverLinter.lintSource("Fixture.kt", source)

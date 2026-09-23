@@ -1,12 +1,15 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.misc.navbar.packedSwitchCases
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.ToggleSettingDefinition
 import app.crimera.patches.newx.settings.injectReadWithDefault
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -28,11 +31,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val ANDROID_SCOPE = "Lcom/x/android/"
 private const val URT_UI_SCOPE = "Lcom/x/urt/ui/"
-private const val COMPOSE_FOUNDATION_SCOPE = "Landroidx/compose/foundation/"
 private const val COMPOSE_RUNTIME_INTERNAL_SCOPE = "Landroidx/compose/runtime/internal/"
+private const val MATERIAL3_SCOPE = "Landroidx/compose/material3/"
 private const val LAZY_PACKAGE = "Landroidx/compose/foundation/lazy/"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
@@ -76,7 +80,7 @@ private object NewXTimelineModuleBuilderFingerprint : Fingerprint(
             method.instructions.any { instruction ->
                 instruction.getReference<StringReference>()?.string == TIMELINE_HEADER_KEY_ANCHOR
             } &&
-            method.instructions.toList().hasTimelineModuleDividerItem()
+            method.instructions.toList().hasZeroKeyLazyItem()
     },
 )
 
@@ -201,12 +205,6 @@ private fun Instruction.isZeroConstant(): Boolean =
         this is NarrowLiteralInstruction &&
         narrowLiteral == 0
 
-private fun MethodReference.isComposeFoundationLambdaAdapterConstructor(): Boolean =
-    name == "<init>" &&
-        definingClass.startsWith(COMPOSE_FOUNDATION_SCOPE) &&
-        returnType == "V" &&
-        parameterTypes.map(CharSequence::toString) == listOf(OBJECT_DESCRIPTOR, INSETS_DESCRIPTOR)
-
 private fun MethodReference.isComposeLambdaWrapperConstructor(): Boolean =
     name == "<init>" &&
         definingClass.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) &&
@@ -214,31 +212,13 @@ private fun MethodReference.isComposeLambdaWrapperConstructor(): Boolean =
         parameterTypes.map(CharSequence::toString) ==
             listOf(OBJECT_DESCRIPTOR, "Z", INSETS_DESCRIPTOR)
 
-private fun List<Instruction>.isTimelineModuleDividerItem(
-    index: Int,
-    instruction: Instruction,
-): Boolean = index in timelineModuleDividerItemIndices()
-
 /**
- * Zero-key divider items, preferring inline-built content lambdas. Older releases build
- * the divider lambdas inline (foundation adapter + runtime wrapper ctors); newer ones
- * hoist the content into a shared static holder (urt/ui/a->e on alpha.04). Both shapes
- * coexist on older targets, so the inline shape wins when present: that preserves the
- * established hook, while the hoisted shape keeps newer releases working.
+ * The module separators are zero-key lazy items whose content lambda is built inline as a runtime
+ * `internal/f` wrapper around an obfuscated adapter. The adapter's owner and discriminator churn
+ * across releases, so the content is proven to be a divider by resolving the discriminator into the
+ * adapter's `invoke` switch and inspecting the resulting case block.
  */
-private fun List<Instruction>.timelineModuleDividerItemIndices(): List<Int> {
-    val inline =
-        indices.filter { index ->
-            isZeroKeyDividerItem(index, this[index]) &&
-                hasInlineDividerLambdas(index)
-        }
-    if (inline.isNotEmpty()) return inline
-    return indices.filter { index ->
-        isZeroKeyDividerItem(index, this[index]) && hasHoistedDividerLambda(index)
-    }
-}
-
-private fun List<Instruction>.isZeroKeyDividerItem(
+private fun List<Instruction>.isZeroKeyLazyItem(
     index: Int,
     instruction: Instruction,
 ): Boolean {
@@ -255,26 +235,128 @@ private fun List<Instruction>.isZeroKeyDividerItem(
     return keyConstant?.isZeroConstant() == true
 }
 
-private fun List<Instruction>.hasInlineDividerLambdas(index: Int): Boolean {
-    val precedingInstructions = subList(maxOf(0, index - 8), index)
-    return precedingInstructions.any { candidate ->
-        candidate.getReference<MethodReference>()?.isComposeFoundationLambdaAdapterConstructor() == true
-    } && precedingInstructions.any { candidate ->
-        candidate.getReference<MethodReference>()?.isComposeLambdaWrapperConstructor() == true
+private fun List<Instruction>.hasZeroKeyLazyItem(): Boolean =
+    indices.any { index -> isZeroKeyLazyItem(index, this[index]) }
+
+private data class InlineContentLambda(
+    val adapterType: String,
+    val discriminator: Int,
+)
+
+private fun List<Instruction>.inlineContentLambda(
+    contentRegister: Int,
+    callIndex: Int,
+): InlineContentLambda? {
+    val wrapperIndex =
+        (callIndex - 1 downTo 0).firstOrNull { index ->
+            val instruction = this[index]
+            instruction.getReference<MethodReference>()?.isComposeLambdaWrapperConstructor() == true &&
+                instruction.registersUsed.firstOrNull() == contentRegister
+        } ?: return null
+    // A later write to the content register means the wrapper is stale, not the item's lambda.
+    if ((wrapperIndex + 1 until callIndex).any { index ->
+            this[index].destinationRegisterOrNull() == contentRegister
+        }
+    ) {
+        return null
+    }
+    val adapterRegister = this[wrapperIndex].registersUsed.getOrNull(1) ?: return null
+
+    val adapterNewInstanceIndex =
+        (wrapperIndex - 1 downTo 0).firstOrNull { index ->
+            val instruction = this[index]
+            instruction.opcode == Opcode.NEW_INSTANCE &&
+                (instruction as? OneRegisterInstruction)?.registerA == adapterRegister
+        } ?: return null
+    val adapterType =
+        this[adapterNewInstanceIndex].getReference<TypeReference>()?.toString() ?: return null
+
+    val adapterConstructorIndex =
+        (adapterNewInstanceIndex + 1 until wrapperIndex).firstOrNull { index ->
+            val instruction = this[index]
+            (instruction.opcode == Opcode.INVOKE_DIRECT ||
+                instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
+                instruction.registersUsed.firstOrNull() == adapterRegister
+        } ?: return null
+    val constructorReference =
+        this[adapterConstructorIndex].getReference<MethodReference>() ?: return null
+    val discriminatorParameter =
+        constructorReference.parameterTypes
+            .map(CharSequence::toString)
+            .withIndex()
+            .singleOrNull { (_, parameter) -> parameter == INSETS_DESCRIPTOR }
+            ?.index ?: return null
+    val discriminatorRegister =
+        this[adapterConstructorIndex].registersUsed.getOrNull(discriminatorParameter + 1) ?: return null
+    val discriminator =
+        resolveIntegerLiteralOnCurrentPath(
+            instructionIndex = adapterConstructorIndex,
+            register = discriminatorRegister,
+        ) ?: return null
+    return InlineContentLambda(adapterType = adapterType, discriminator = discriminator)
+}
+
+/**
+ * Zero-key lazy items whose inline content lambda resolves to a case block that draws a Material3
+ * divider. The block lookup is injected so the selection predicate can be exercised against fixture
+ * bytecode without a patch context.
+ */
+internal fun List<Instruction>.timelineModuleDividerItemIndices(
+    contentLambdaBlock: (adapterType: String, discriminator: Int) -> List<Instruction>?,
+): List<Int> =
+    indices.filter { index ->
+        if (!isZeroKeyLazyItem(index, this[index])) return@filter false
+        val contentRegister = this[index].registersUsed.getOrNull(2) ?: return@filter false
+        val lambda = inlineContentLambda(contentRegister, index) ?: return@filter false
+        val block =
+            contentLambdaBlock(lambda.adapterType, lambda.discriminator) ?: return@filter false
+        block.any(Instruction::isMaterial3DividerCall)
+    }
+
+context(context: BytecodePatchContext)
+private fun dividerLambdaCaseBlock(
+    adapterType: String,
+    discriminator: Int,
+): List<Instruction>? {
+    val adapterClass = context.mutableClassDefBy(adapterType)
+    val invoke =
+        requireExactlyOne(
+            label = "NewX divider lambda adapter invoke in $adapterType",
+            candidates =
+                adapterClass.methods.filter { method ->
+                    method.name == "invoke" &&
+                        method.parameterTypes.map(CharSequence::toString) ==
+                            listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR) &&
+                        method.returnType == OBJECT_DESCRIPTOR
+                },
+        )
+    val instructions = invoke.instructions.toList()
+    val switchIndex =
+        instructions.indexOfFirst { instruction -> instruction.opcode == Opcode.PACKED_SWITCH }
+    if (switchIndex < 0) return instructions
+    if (instructions.any { instruction -> instruction.opcode == Opcode.SPARSE_SWITCH }) return null
+
+    val cases = invoke.packedSwitchCases(switchIndex)
+    val target = cases.singleOrNull { candidate -> candidate.key == discriminator }
+    return if (target != null) {
+        instructions.subList(target.startIndex, target.endIndex)
+    } else {
+        val defaultEnd =
+            cases.minOfOrNull { candidate -> candidate.startIndex } ?: instructions.size
+        instructions.subList(switchIndex + 1, defaultEnd)
     }
 }
 
-private fun List<Instruction>.hasHoistedDividerLambda(index: Int): Boolean {
-    val contentRegister = get(index).registersUsed.getOrNull(2) ?: return false
-    return subList(maxOf(0, index - 8), index).any { candidate ->
-        candidate.opcode == Opcode.SGET_OBJECT &&
-            (candidate as? OneRegisterInstruction)?.registerA == contentRegister &&
-            candidate.getReference<FieldReference>()?.type?.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) == true
-    }
+private fun Instruction.isMaterial3DividerCall(): Boolean {
+    if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
+    val reference = getReference<MethodReference>() ?: return false
+    if (!reference.definingClass.startsWith(MATERIAL3_SCOPE) || reference.returnType != "V") return false
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    return parameters.firstOrNull() == "F" &&
+        "J" in parameters &&
+        COMPOSER_DESCRIPTOR in parameters &&
+        MODIFIER_DESCRIPTOR in parameters
 }
-
-private fun List<Instruction>.hasTimelineModuleDividerItem(): Boolean =
-    timelineModuleDividerItemIndices().size == 1
 
 private fun resolvePostDividerCalls(method: Method): List<PostDividerCall> {
     val helperReferences =
@@ -391,14 +473,16 @@ private fun patchReplyFacepileDivider(
     )
 }
 
+context(context: BytecodePatchContext)
 private fun resolveTimelineModuleDividerCallIndex(method: Method): Int {
     val instructions = method.instructions.toList()
+    val dividers =
+        instructions.timelineModuleDividerItemIndices { adapterType, discriminator ->
+            dividerLambdaCaseBlock(adapterType, discriminator)
+        }
     return requireExactlyOne(
         label = "NewX timeline module divider item",
-        candidates =
-            instructions.mapIndexedNotNull { index, instruction ->
-                index.takeIf { instructions.isTimelineModuleDividerItem(index, instruction) }
-            },
+        candidates = dividers,
     )
 }
 
