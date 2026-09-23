@@ -74,6 +74,20 @@ private val AMOLED_BACKGROUND_COLORS = mapOf(
     15 to 0xFF00000000000000UL.toLong(),
 )
 
+/**
+ * The classic Twitter dim surfaces, taken from NewX's own DIM palette. NewX routes both "Dim"
+ * and "Lights out" to the LIGHTS_OUT factory, so the blue DIM palette is unreachable and dark
+ * mode shows the near-black LIGHTS_OUT surfaces instead. These values restore the old dim look
+ * for the shared dark palette when dynamic color is off and AMOLED is off.
+ */
+private val DIM_BACKGROUND_COLORS = mapOf(
+    7 to 0xFF15202B00000000UL.toLong(),
+    8 to 0xBF15202B00000000UL.toLong(),
+    9 to 0xFF10192200000000UL.toLong(),
+    13 to 0xCC15202B00000000UL.toLong(),
+    15 to 0xFF15202B00000000UL.toLong(),
+)
+
 private enum class PaletteKind(
     val helperMethod: String,
     val isLight: Boolean,
@@ -1809,7 +1823,7 @@ private fun MutableMethod.injectDynamicPalette(
     }
 
     if (kind == PaletteKind.LIGHTS_OUT) {
-        injectAmoledBlackBackgrounds(
+        injectDarkBackgrounds(
             resolvePaletteConstructor(allocation, constructorReference),
         )
     }
@@ -1822,7 +1836,13 @@ private fun MutableMethod.injectDynamicPalette(
     )
 }
 
-private fun MutableMethod.injectAmoledBlackBackgrounds(constructor: PaletteConstructor) {
+/**
+ * Runs only on the original dark palette path, which dynamic color bypasses with an early
+ * `return-object`. Defaults the shared dark surfaces to the classic dim values and lets AMOLED
+ * overwrite them with pure black, so dynamic-off + AMOLED-off restores dim while AMOLED keeps
+ * its independent pure-black behavior.
+ */
+private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor) {
     val constructorRegisters =
         (constructor.instruction.startRegister until
             constructor.instruction.startRegister + constructor.instruction.registerCount).toList()
@@ -1835,32 +1855,39 @@ private fun MutableMethod.injectAmoledBlackBackgrounds(constructor: PaletteConst
             ).getFreeRegister()
         } catch (exception: RuntimeException) {
             throw PatchException(
-                "NewX AMOLED palette override has no free scratch register: $this",
+                "NewX dark palette background override has no free scratch register: $this",
             )
         }
     if (scratchRegister !in 0..255) {
         throw PatchException(
-            "NewX AMOLED palette override scratch register v$scratchRegister cannot be encoded: $this",
+            "NewX dark palette background override scratch register v$scratchRegister " +
+                "cannot be encoded: $this",
         )
     }
 
-    val label = "piko_newx_amoled_original_lights_out"
+    val originalLabel = "piko_newx_original_lights_out_backgrounds"
     val overrides = buildString {
         appendLine("invoke-static {}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isAmoledBlack()Z")
         appendLine("move-result v$scratchRegister")
-        appendLine("if-eqz v$scratchRegister, :$label")
-        AMOLED_BACKGROUND_COLORS
-            .toSortedMap()
-            .forEach { (token, color) ->
-                val colorRegister = constructor.instruction.startRegister + 2 + token * 2
-                appendLine("const-wide v$colorRegister, ${wideLiteral(color)}")
-            }
+        appendBackgroundColors(constructor, DIM_BACKGROUND_COLORS)
+        appendLine("if-eqz v$scratchRegister, :$originalLabel")
+        appendBackgroundColors(constructor, AMOLED_BACKGROUND_COLORS)
     }
     addInstructionsWithLabels(
         constructor.index,
         overrides,
-        ExternalLabel(label, constructor.instruction),
+        ExternalLabel(originalLabel, constructor.instruction),
     )
+}
+
+private fun StringBuilder.appendBackgroundColors(
+    constructor: PaletteConstructor,
+    colors: Map<Int, Long>,
+) {
+    colors.toSortedMap().forEach { (token, color) ->
+        val colorRegister = constructor.instruction.startRegister + 2 + token * 2
+        appendLine("const-wide v$colorRegister, ${wideLiteral(color)}")
+    }
 }
 
 private fun PaletteKind.dynamicPaletteInstructions(
