@@ -117,13 +117,27 @@ Final-DEX `changeDomain` call sites after the fix:
 The helper-owner fallback in `hookShareIntentBuilder` still selects only
 `Lcom/x/share/impl/k` when the package-scoped `ShareSheetCopyCallbackFingerprint`
 misses. On 12.28 the semantic copy callback and three `z8->a` share-Intent call
-sites (`c`, `d`, `e`) live in the merged `Landroidx/camera/core/impl/n`.
-Post-share copy and share-via receive the already-rewritten share-sheet URL, so
-the reported issue is fixed, but share paths that build a fresh URL do not.
-The clearest example is profile sharing, where `sharesheet/h->a` builds
-`"https://x.com/" + handle` and calls `sharesheet/l->d`, which is not rewritten.
+sites (`c`, `d`, `e`) live in the merged `Landroidx/camera/core/impl/n`, so the
+patch does not rewrite those call sites directly. In practice the reported
+surfaces are still covered because the URL that reaches `n.c`/`n.e` and the copy
+callback is the share-sheet URL field (`h.v`/`b0.h`), which the
+control-flow-label fix now rewrites.
+
+This includes normal profile sharing (user-verified on device):
+`Lcom/x/profile/header/v1->g` builds `Lcom/x/share/api/f`, whose `a()` returns
+`"https://x.com/" + handle`; the sharesheet factory stores that URL in `e0`,
+`h.<init>` rewrites `h.v`, and copy/via then consume the rewritten value.
+
+Only one reachable path still emits the stock host, the sharesheet `q` item:
+
+- `Lcom/x/dms/components/sharesheet/h;->a(Lcom/x/dms/components/sharesheet/z;)V`
+  instructions 550-556 build `"https://x.com/" + b0.j->D()` and call
+  `sharesheet/l->d`, i.e. chooser `Landroidx/camera/core/impl/n;->d` ->
+  `z8->a(url, null)`, which the patch does not hook. It is reached from the
+  DM/account share context and was not part of the reported post share flow.
+
 A follow-up should broaden the copy-callback discovery and hook every class that
-invokes the resolved helper so those fresh-URL paths are covered.
+invokes the resolved helper so fresh-URL sites like this are covered.
 
 ## Validation
 
