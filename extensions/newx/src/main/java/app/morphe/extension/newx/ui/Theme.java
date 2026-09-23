@@ -17,6 +17,11 @@ public final class Theme {
     private static final String AMOLED_BLACK_SETTING = "newx.theme.amoled_black";
     // Keep elevated surfaces visible against the AMOLED base surface.
     private static final int AMOLED_ELEVATED_SURFACE = Color.rgb(19, 24, 29);
+    // Classic X "Dim" surfaces. NewX routes every dark mode to its LIGHTS_OUT palette, so the
+    // extension-owned screens mirror the dim tokens the patch restores for the Compose palette.
+    private static final int DIM_SURFACE = 0xFF15202B;
+    private static final int DIM_SURFACE_CONTAINER_HIGH = 0xFF182430;
+    private static final int DIM_SURFACE_VARIANT = 0xFF1E2732;
 
     private Theme() {
     }
@@ -52,25 +57,51 @@ public final class Theme {
     }
 
     public static int surface(Context context) {
-        int fallback = isDark(context) ? Color.rgb(20, 18, 24) : Color.rgb(254, 247, 255);
-        return dynamicColor(context, "surface", fallback);
+        return surfaceColor(context, usesDynamicColors());
     }
 
     public static int surfaceContainer(Context context) {
-        int fallback = isDark(context) ? Color.BLACK : Color.WHITE;
-        if (useAmoledBlack(context)) return Color.BLACK;
-        return dynamicColor(context, "surface", fallback);
+        return surfaceContainerColor(context, usesDynamicColors(), useAmoledBlack(context));
     }
 
     public static int surfaceContainerHigh(Context context) {
-        int fallback = isDark(context) ? Color.rgb(40, 42, 48) : Color.rgb(243, 237, 247);
-        if (useAmoledBlack(context)) fallback = AMOLED_ELEVATED_SURFACE;
-        return dynamicColor(context, "surface_container_high", fallback);
+        return surfaceContainerHighColor(context, usesDynamicColors(), useAmoledBlack(context));
     }
 
     public static int surfaceVariant(Context context) {
-        int fallback = isDark(context) ? Color.rgb(54, 56, 64) : Color.rgb(231, 224, 236);
-        return dynamicColor(context, "surface_container_high", fallback);
+        return surfaceVariantColor(context, usesDynamicColors());
+    }
+
+    private static int surfaceColor(Context context, boolean dynamicColors) {
+        int fallback = isDark(context) ? DIM_SURFACE : Color.rgb(254, 247, 255);
+        return dynamicColor(context, "surface", fallback, dynamicColors);
+    }
+
+    private static int surfaceContainerColor(
+            Context context,
+            boolean dynamicColors,
+            boolean amoledBlack
+    ) {
+        if (amoledBlack && isDark(context)) return Color.BLACK;
+        int fallback = isDark(context) ? DIM_SURFACE : Color.WHITE;
+        return dynamicColor(context, "surface", fallback, dynamicColors);
+    }
+
+    private static int surfaceContainerHighColor(
+            Context context,
+            boolean dynamicColors,
+            boolean amoledBlack
+    ) {
+        int fallback = isDark(context)
+                ? DIM_SURFACE_CONTAINER_HIGH
+                : Color.rgb(243, 237, 247);
+        if (amoledBlack && isDark(context)) fallback = AMOLED_ELEVATED_SURFACE;
+        return dynamicColor(context, "surface_container_high", fallback, dynamicColors);
+    }
+
+    private static int surfaceVariantColor(Context context, boolean dynamicColors) {
+        int fallback = isDark(context) ? DIM_SURFACE_VARIANT : Color.rgb(231, 224, 236);
+        return dynamicColor(context, "surface_container_high", fallback, dynamicColors);
     }
 
     public static int primaryText(Context context) {
@@ -249,31 +280,19 @@ public final class Theme {
         }
 
         public int surface(Context context) {
-            int fallback = Theme.isDark(context)
-                    ? Color.rgb(20, 18, 24)
-                    : Color.rgb(254, 247, 255);
-            return dynamicColor(context, "surface", fallback);
+            return Theme.surfaceColor(context, dynamicColors);
         }
 
         public int surfaceContainer(Context context) {
-            int fallback = Theme.isDark(context) ? Color.BLACK : Color.WHITE;
-            if (amoledBlack && Theme.isDark(context)) return Color.BLACK;
-            return dynamicColor(context, "surface", fallback);
+            return Theme.surfaceContainerColor(context, dynamicColors, amoledBlack);
         }
 
         public int surfaceContainerHigh(Context context) {
-            int fallback = Theme.isDark(context)
-                    ? Color.rgb(40, 42, 48)
-                    : Color.rgb(243, 237, 247);
-            if (amoledBlack && Theme.isDark(context)) fallback = AMOLED_ELEVATED_SURFACE;
-            return dynamicColor(context, "surface_container_high", fallback);
+            return Theme.surfaceContainerHighColor(context, dynamicColors, amoledBlack);
         }
 
         public int surfaceVariant(Context context) {
-            int fallback = Theme.isDark(context)
-                    ? Color.rgb(54, 56, 64)
-                    : Color.rgb(231, 224, 236);
-            return dynamicColor(context, "surface_container_high", fallback);
+            return Theme.surfaceVariantColor(context, dynamicColors);
         }
 
         public int primaryText(Context context) {
