@@ -16,6 +16,7 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -410,7 +411,11 @@ private fun hookShareSheetUrlConstructor(method: MutableMethod) {
     val valueRegister =
         (method.instructions[fieldStoreIndex] as? TwoRegisterInstruction)?.registerA
             ?: throw PatchException("Expected a two-register share URL field store in $method")
-    method.addDomainRewrite(fieldStoreIndex, valueRegister)
+    // The field store is the merge point for every URL branch (post URL, status builder,
+    // trending/lists, null). A plain insert before the store leaves the branch labels on the
+    // original IPUT, so those paths would skip the rewrite. Insert at the control-flow label so
+    // the branch targets run the rewrite before the store.
+    method.addDomainRewriteAtControlFlowLabel(fieldStoreIndex, valueRegister)
 }
 
 private fun MutableMethod.findStatusUrlResultIndices(): List<Int> {
@@ -491,13 +496,18 @@ private fun MethodReference.matches(method: MutableMethod): Boolean =
         parameterTypes.map(CharSequence::toString) == method.parameterTypes.map(CharSequence::toString)
 
 private fun MutableMethod.addDomainRewrite(instructionIndex: Int, register: Int) {
+    addInstructions(instructionIndex, domainRewriteInstructions(register))
+}
+
+private fun MutableMethod.addDomainRewriteAtControlFlowLabel(instructionIndex: Int, register: Int) {
+    addInstructionsAtControlFlowLabel(instructionIndex, domainRewriteInstructions(register))
+}
+
+private fun domainRewriteInstructions(register: Int): String {
     val invokeOpcode = if (register <= 15) "invoke-static" else "invoke-static/range"
     val registerRange = if (register <= 15) "{v$register}" else "{v$register .. v$register}"
-    addInstructions(
-        instructionIndex,
-        """
+    return """
         $invokeOpcode $registerRange, $CHANGE_DOMAIN_METHOD
         move-result-object v$register
-        """.trimIndent(),
-    )
+        """.trimIndent()
 }
