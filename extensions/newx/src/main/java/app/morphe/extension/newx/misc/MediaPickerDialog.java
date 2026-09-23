@@ -42,6 +42,7 @@ public final class MediaPickerDialog {
         void onDownloadItem(int index);
         void onDownloadAll();
         void onDownloadAndMerge(List<InlineDownloadButton.DownloadItem> items);
+        void onShowResolutions(int index);
     }
 
     private MediaPickerDialog() {
@@ -238,18 +239,17 @@ public final class MediaPickerDialog {
                         }
                         updateUiHolder[0].run();
                     });
-                } else if (showCopyLinkButton) {
-                    itemRow.createTrailingIconButton(
-                            IconView.IconType.COPY_LINK,
-                            themeSettings.secondaryText(current),
-                            v -> {
-                                dialog.dismiss();
-                                Utils.setClipboard(item.url);
-                                Utils.showToastShort("Link copied");
-                            }
-                    );
                 } else {
-                    itemRow.setTrailingView(null);
+                    bindTrailingActions(
+                            current,
+                            itemRow,
+                            item,
+                            itemIndex,
+                            themeSettings,
+                            showCopyLinkButton,
+                            dialog,
+                            listener
+                    );
                 }
             }
         };
@@ -261,24 +261,22 @@ public final class MediaPickerDialog {
 
             ListItem itemRow = new ListItem(current, themeSettings);
             itemRow.setTitle(item.label + (hasMultiple ? " " + (i + 1) : ""));
-            itemRow.setSubtitle(null);
+            itemRow.setSubtitle(item.resolution);
 
             IconView.IconType iconType = resolveIconType(item);
             int primaryAccent = themeSettings.primaryAccent(current);
             itemRow.setLeadingIcon(iconType, primaryAccent, themeSettings.surfaceVariant(current));
 
-            if (showCopyLinkButton) {
-                View copyLinkButton = itemRow.createTrailingIconButton(
-                        IconView.IconType.COPY_LINK,
-                        themeSettings.secondaryText(current),
-                        v -> {
-                            dialog.dismiss();
-                            Utils.setClipboard(item.url);
-                            Utils.showToastShort("Link copied");
-                        }
-                );
-                itemRow.setTrailingView(copyLinkButton);
-            }
+            bindTrailingActions(
+                    current,
+                    itemRow,
+                    item,
+                    selectedIndex,
+                    themeSettings,
+                    showCopyLinkButton,
+                    dialog,
+                    listener
+            );
 
             // Normal tap
             itemRow.setOnClickListener(v -> {
@@ -415,6 +413,48 @@ public final class MediaPickerDialog {
         dialog.setScrollableBodyView(listContainer);
         dialog.show();
         NewXLogger.printInfo(() -> LOG_PREFIX + "picker shown");
+    }
+
+    private static void bindTrailingActions(
+            android.app.Activity activity,
+            ListItem itemRow,
+            InlineDownloadButton.DownloadItem item,
+            int itemIndex,
+            Theme.SettingsSnapshot themeSettings,
+            boolean showCopyLinkButton,
+            BottomSheetView dialog,
+            OnMediaSelectedListener listener
+    ) {
+        boolean showResolutions = item.resolutionOptions.size() > 1;
+        if (!showResolutions && !showCopyLinkButton) {
+            itemRow.setTrailingView(null);
+            return;
+        }
+
+        LinearLayout row = itemRow.beginTrailingButtons();
+        if (showResolutions) {
+            itemRow.addTrailingIconButton(
+                    row,
+                    IconView.IconType.RESOLUTION,
+                    themeSettings.secondaryText(activity),
+                    v -> {
+                        dialog.dismiss();
+                        listener.onShowResolutions(itemIndex);
+                    }
+            );
+        }
+        if (showCopyLinkButton) {
+            itemRow.addTrailingIconButton(
+                    row,
+                    IconView.IconType.COPY_LINK,
+                    themeSettings.secondaryText(activity),
+                    v -> {
+                        dialog.dismiss();
+                        Utils.setClipboard(item.url);
+                        Utils.showToastShort("Link copied");
+                    }
+            );
+        }
     }
 
     static boolean isImage(InlineDownloadButton.DownloadItem item) {

@@ -9,7 +9,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.net.Uri;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -27,6 +26,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
@@ -36,8 +37,22 @@ import app.morphe.extension.newx.utils.ToStringParser;
 public final class InlineDownloadButton {
     private static final String SETTING_ID = "newx.content.inline_download_button";
     private static final String HIDE_NO_MEDIA_SETTING = "newx.content.inline_download_hide_no_media";
+    private static final String IMAGE_QUALITY_SETTING = "newx.content.inline_download.image_resolution";
+    private static final String VIDEO_QUALITY_SETTING = "newx.content.inline_download.video_quality";
+    /** Sentinel preference that keeps the resolution chooser instead of auto-selecting. */
+    private static final String QUALITY_ASK = "ask";
+    private static final String QUALITY_ORIGINAL = "original";
+    private static final String QUALITY_HIGHEST = "highest";
     /** Concurrent transfers. Small enough to stay gentle on the connection pool and providers. */
     private static final int TRANSFER_THREADS = 4;
+    /**
+     * NewX video variants carry only url/bitrate/contentType. Twitter encodes each mp4 variant's
+     * resolution in the URL path (`.../vid/1280x720/....mp4`), so the chooser reads it from there.
+     */
+    private static final Pattern VIDEO_RESOLUTION_PATTERN = Pattern.compile("/(\\d{2,5}x\\d{2,5})/");
+    /** Named twimg image sizes, in the order offered by the resolution chooser. */
+    private static final String[] NAMED_IMAGE_SIZES = {"4096x4096", "large", "medium", "small"};
+    private static final int[] NAMED_IMAGE_CAPS = {4096, 2048, 1200, 680};
     private static final ExecutorService DOWNLOAD_EXECUTOR =
             Executors.newFixedThreadPool(TRANSFER_THREADS);
     // Click-time media resolution and SAF document creation run here so the inline-action event
@@ -316,13 +331,33 @@ public final class InlineDownloadButton {
             return;
         }
 
-        // Long press is the "download everything" shortcut and skips the picker entirely.
-        if (longPress) {
-            enqueueAllDownloads(context, downloads, postContext, username);
+        if (downloads.size() == 1) {
+            DownloadItem single = downloads.get(0);
+            // A saved quality preference makes a tap download straight away, which would leave no
+            // way back to the chooser, so long press opens it. With "ask", tap already does.
+            if (longPress) {
+                if (single.resolutionOptions.size() > 1) {
+                    showResolutionChooser(context, single, postContext, username, 0, 1);
+                } else {
+                    enqueueSingleDownload(context, single, postContext, username, 0, 1);
+                }
+                return;
+            }
+            DownloadItem preferred = autoSelectedOption(single);
+            if (preferred != null) {
+                enqueueSingleDownload(context, preferred, postContext, username, 0, 1);
+            } else if (single.resolutionOptions.size() > 1) {
+                showResolutionChooser(context, single, postContext, username, 0, 1);
+            } else {
+                enqueueSingleDownload(context, single, postContext, username, 0, 1);
+            }
             return;
         }
-        if (downloads.size() == 1) {
-            enqueueSingleDownload(context, downloads.get(0), postContext, username, 0, 1);
+
+        // Long press on a multi-media post is the "download everything" shortcut and skips the
+        // picker entirely.
+        if (longPress) {
+            enqueueAllDownloads(context, downloads, postContext, username);
             return;
         }
         NewXUtils.runOnUiThread(() -> showMediaPicker(context, downloads, username, postContext));
@@ -474,7 +509,7 @@ public final class InlineDownloadButton {
         }
     }
 
-    /** Boolean counterpart of {@link #bestMp4Variant}; it intentionally does not parse bitrates
+    /** Boolean counterpart of {@link #mp4Variants}; it intentionally does not parse bitrates
      * or allocate a {@link Variant}. */
     private static boolean hasMp4Variant(String value) {
         String prefix = "MediaVariant(url=";
@@ -498,7 +533,7 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static List<DownloadItem> downloadItems(List<?> media) {
+    static List<DownloadItem> downloadItems(List<?> media) {
         List<DownloadItem> downloads = new ArrayList<>(media.size());
         for (Object item : media) {
             if (item == null) continue;
@@ -520,28 +555,220 @@ public final class InlineDownloadButton {
         if (value.startsWith("MediaContentImage(")) {
             String url = ToStringParser.fieldValue(value, "imageUrl");
             if (!NewXUtils.isHttpUrl(url)) return null;
-            return new DownloadItem(
-                    originalImageUrl(url),
-                    "jpg",
-                    "image/jpeg",
-                    "Image",
-                    thumbnailUrl,
-                    thumbnailCacheUrl
-            );
+            return imageDownloadItem(value, url, thumbnailUrl, thumbnailCacheUrl);
         }
 
-        Variant bestVariant = bestMp4Variant(value);
-        if (bestVariant == null) return null;
+        List<Variant> variants = mp4Variants(value);
+        if (variants.isEmpty()) return null;
 
         String label = value.startsWith("MediaContentGif(") ? "GIF" : "Video";
+        List<DownloadItem> options = new ArrayList<>(variants.size());
+        for (Variant variant : variants) {
+            String optionLabel = variant.resolution != null ? variant.resolution : label;
+            String detail = formatBitRate(variant.bitRate);
+            options.add(new DownloadItem(
+                    variant.url,
+                    "mp4",
+                    "video/mp4",
+                    optionLabel,
+                    thumbnailUrl,
+                    thumbnailCacheUrl,
+                    variant.resolution,
+                    detail,
+                    null,
+                    java.util.Collections.emptyList()
+            ));
+        }
+        // mp4Variants sorts by descending bitrate, so the first entry is the current default.
+        DownloadItem best = options.get(0);
         return new DownloadItem(
-                bestVariant.url,
+                best.url,
                 "mp4",
                 "video/mp4",
                 label,
                 thumbnailUrl,
-                thumbnailCacheUrl
+                thumbnailCacheUrl,
+                best.resolution,
+                null,
+                null,
+                options
         );
+    }
+
+    /**
+     * Builds the image download item plus its twimg size variants. The original resolution comes
+     * from the model's {@code originalImgWidth}/{@code originalImgHeight} fields; the named sizes
+     * are the same ones the app's own image loader requests, scaled to fit their cap.
+     */
+    private static DownloadItem imageDownloadItem(
+            String value,
+            String url,
+            String thumbnailUrl,
+            String thumbnailCacheUrl
+    ) {
+        int[] size = imageOriginalSize(value);
+        String resolution = resolutionLabel(size);
+        List<DownloadItem> options = new ArrayList<>();
+        options.add(new DownloadItem(
+                originalImageUrl(url),
+                "jpg",
+                "image/jpeg",
+                "Original",
+                thumbnailUrl,
+                thumbnailCacheUrl,
+                resolution,
+                resolution,
+                "original",
+                java.util.Collections.emptyList()
+        ));
+
+        if (size != null && isTwimgHost(url)) {
+            for (int index = 0; index < NAMED_IMAGE_SIZES.length; index++) {
+                int cap = NAMED_IMAGE_CAPS[index];
+                String optionResolution = resolutionLabel(scaleToFit(size[0], size[1], cap));
+                options.add(new DownloadItem(
+                        imageUrlWithName(url, NAMED_IMAGE_SIZES[index]),
+                        "jpg",
+                        "image/jpeg",
+                        friendlySizeLabel(NAMED_IMAGE_SIZES[index]),
+                        thumbnailUrl,
+                        thumbnailCacheUrl,
+                        optionResolution,
+                        optionResolution,
+                        NAMED_IMAGE_SIZES[index],
+                        java.util.Collections.emptyList()
+                ));
+            }
+        }
+
+        // Named sizes that the CDN serves at the original dimensions (because the original is
+        // smaller than the cap) are not real choices, so the chooser only shows distinct sizes.
+        options = dedupeByResolution(options);
+
+        DownloadItem original = options.get(0);
+        return new DownloadItem(
+                original.url,
+                "jpg",
+                "image/jpeg",
+                "Image",
+                thumbnailUrl,
+                thumbnailCacheUrl,
+                resolution,
+                null,
+                null,
+                options
+        );
+    }
+
+    /** Keeps the first (best) option for each distinct pixel size. */
+    private static List<DownloadItem> dedupeByResolution(List<DownloadItem> options) {
+        List<DownloadItem> unique = new ArrayList<>(options.size());
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (DownloadItem option : options) {
+            String key = option.resolution != null ? option.resolution : "url:" + option.url;
+            if (seen.add(key)) unique.add(option);
+        }
+        return unique;
+    }
+
+    private static String friendlySizeLabel(String name) {
+        switch (name) {
+            case "large":
+                return "Large";
+            case "medium":
+                return "Medium";
+            case "small":
+                return "Small";
+            case "4096x4096":
+                return "4096px";
+            default:
+                return name;
+        }
+    }
+
+    private static int[] imageOriginalSize(String value) {
+        int width = parsePositiveInt(ToStringParser.fieldValue(value, "originalImgWidth"));
+        int height = parsePositiveInt(ToStringParser.fieldValue(value, "originalImgHeight"));
+        if (width <= 0 || height <= 0) return null;
+        return new int[] {width, height};
+    }
+
+    private static int parsePositiveInt(String value) {
+        if (value == null) return 0;
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : 0;
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
+    private static String resolutionLabel(int[] size) {
+        return size == null || size[0] <= 0 || size[1] <= 0 ? null : size[0] + "x" + size[1];
+    }
+
+    /** NewX variant bitrates are bits per second, not kbps. */
+    static String formatBitRate(int bitRate) {
+        if (bitRate <= 0) return null;
+        if (bitRate >= 1_000_000) {
+            long tenths = Math.round(bitRate / 100_000.0);
+            return (tenths / 10) + "." + (tenths % 10) + " Mbps";
+        }
+        if (bitRate >= 1_000) {
+            return Math.round(bitRate / 1_000.0) + " kbps";
+        }
+        return bitRate + " bps";
+    }
+
+    /** Scales to fit inside a square cap without upscaling, matching twimg's named sizes. */
+    private static int[] scaleToFit(int width, int height, int cap) {
+        int longest = Math.max(width, height);
+        if (longest <= cap) return new int[] {width, height};
+        double scale = (double) cap / longest;
+        return new int[] {(int) Math.round(width * scale), (int) Math.round(height * scale)};
+    }
+
+    private static boolean isTwimgHost(String url) {
+        String host = hostOf(url);
+        return host != null && (host.equals("twimg.com") || host.endsWith(".twimg.com"));
+    }
+
+    /** Host without the port/user-info, parsed without the Android Uri dependency. */
+    private static String hostOf(String url) {
+        if (url == null) return null;
+        int schemeIndex = url.indexOf("://");
+        if (schemeIndex < 0) return null;
+
+        int start = schemeIndex + 3;
+        int end = url.length();
+        for (int index = start; index < url.length(); index++) {
+            char character = url.charAt(index);
+            if (character == '/' || character == '?' || character == '#'
+                    || character == ':') {
+                end = index;
+                break;
+            }
+        }
+        if (start >= end) return null;
+
+        String authority = url.substring(start, end);
+        int userInfoEnd = authority.lastIndexOf('@');
+        if (userInfoEnd >= 0) authority = authority.substring(userInfoEnd + 1);
+        return authority.isEmpty() ? null : authority.toLowerCase();
+    }
+
+    private static String imageUrlWithName(String url, String name) {
+        if (!isTwimgHost(url)) return url;
+        int cut = url.length();
+        int queryIndex = url.indexOf('?');
+        if (queryIndex >= 0) cut = Math.min(cut, queryIndex);
+        int fragmentIndex = url.indexOf('#');
+        if (fragmentIndex >= 0) cut = Math.min(cut, fragmentIndex);
+        return url.substring(0, cut) + "?format=jpg&name=" + name;
+    }
+
+    private static String originalImageUrl(String url) {
+        return imageUrlWithName(url, "orig");
     }
 
     static String thumbnailUrlForMedia(String mediaText) {
@@ -569,43 +796,43 @@ public final class InlineDownloadButton {
 
     private static String thumbnailUrlForImage(String url) {
         if (!NewXUtils.isHttpUrl(url)) return null;
-
-        Uri uri = Uri.parse(url);
-        String host = uri.getHost();
-        if (host == null || !(host.equals("twimg.com") || host.endsWith(".twimg.com"))) {
-            return url;
-        }
-
-        return uri.buildUpon()
-                .clearQuery()
-                .appendQueryParameter("format", "jpg")
-                .appendQueryParameter("name", "small")
-                .build()
-                .toString();
+        if (!isTwimgHost(url)) return url;
+        return imageUrlWithName(url, "small");
     }
 
-    private static Variant bestMp4Variant(String value) {
-        Variant best = null;
+    /** All downloadable mp4 variants, highest bitrate first. */
+    private static List<Variant> mp4Variants(String value) {
+        List<Variant> variants = new ArrayList<>();
         String prefix = "MediaVariant(url=";
         int offset = 0;
         while (true) {
             int start = value.indexOf(prefix, offset);
-            if (start < 0) return best;
+            if (start < 0) break;
             start += prefix.length();
             int bitRateStart = value.indexOf(", bitRate=", start);
             int contentTypeStart = value.indexOf(", contentType=", bitRateStart);
             int end = value.indexOf(')', contentTypeStart);
-            if (bitRateStart < 0 || contentTypeStart < 0 || end < 0) return best;
+            if (bitRateStart < 0 || contentTypeStart < 0 || end < 0) break;
 
             String url = value.substring(start, bitRateStart);
             String contentType = value.substring(contentTypeStart + 14, end);
             if (NewXUtils.isHttpUrl(url) &&
                     (contentType.equalsIgnoreCase("video/mp4") || NewXUtils.containsIgnoreCaseAscii(url, ".mp4"))) {
-                int bitRate = parseBitRate(value.substring(bitRateStart + 10, contentTypeStart));
-                if (best == null || bitRate > best.bitRate) best = new Variant(url, bitRate);
+                variants.add(new Variant(
+                        url,
+                        parseBitRate(value.substring(bitRateStart + 10, contentTypeStart)),
+                        resolutionFromUrl(url)
+                ));
             }
             offset = end + 1;
         }
+        variants.sort((left, right) -> Integer.compare(right.bitRate, left.bitRate));
+        return variants;
+    }
+
+    private static String resolutionFromUrl(String url) {
+        Matcher matcher = VIDEO_RESOLUTION_PATTERN.matcher(url);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     private static int parseBitRate(String value) {
@@ -614,19 +841,6 @@ public final class InlineDownloadButton {
         } catch (NumberFormatException ignored) {
             return 0;
         }
-    }
-
-    private static String originalImageUrl(String url) {
-        Uri uri = Uri.parse(url);
-        String host = uri.getHost();
-        if (host == null || !host.endsWith("twimg.com")) return url;
-
-        return uri.buildUpon()
-                .clearQuery()
-                .appendQueryParameter("format", "jpg")
-                .appendQueryParameter("name", "orig")
-                .build()
-                .toString();
     }
 
     private static void showMediaPicker(
@@ -643,7 +857,16 @@ public final class InlineDownloadButton {
                     @Override
                     public void onDownloadItem(int index) {
                         if (index >= 0 && index < downloads.size()) {
-                            enqueueSingleDownload(context, downloads.get(index), postContext, username, index, downloads.size());
+                            DownloadItem item = downloads.get(index);
+                            DownloadItem preferred = autoSelectedOption(item);
+                            enqueueSingleDownload(
+                                    context,
+                                    preferred != null ? preferred : item,
+                                    postContext,
+                                    username,
+                                    index,
+                                    downloads.size()
+                            );
                         }
                     }
 
@@ -656,8 +879,136 @@ public final class InlineDownloadButton {
                     public void onDownloadAndMerge(List<DownloadItem> items) {
                         MediaMerger.downloadAndMerge(context, items, username, postContext);
                     }
+
+                    @Override
+                    public void onShowResolutions(int index) {
+                        if (index >= 0 && index < downloads.size()) {
+                            showResolutionChooser(
+                                    context,
+                                    downloads.get(index),
+                                    postContext,
+                                    username,
+                                    index,
+                                    downloads.size()
+                            );
+                        }
+                    }
                 }
         );
+    }
+
+    private static void showResolutionChooser(
+            Context context,
+            DownloadItem item,
+            DownloadFileName.PostContext postContext,
+            String username,
+            int index,
+            int mediaCount
+    ) {
+        NewXUtils.runOnUiThread(() -> ResolutionChooserDialog.show(
+                context,
+                item,
+                username,
+                option -> enqueueSingleDownload(
+                        context,
+                        option,
+                        postContext,
+                        username,
+                        index,
+                        mediaCount,
+                        true
+                )
+        ));
+    }
+
+    /**
+     * Returns the option matching the saved quality preference, or null when the chooser should be
+     * shown. Photos use the exact twimg size tiers; videos and GIFs use a best-effort variant
+     * policy since the model has no per-variant resolution field.
+     */
+    private static DownloadItem autoSelectedOption(DownloadItem item) {
+        if (item == null || item.resolutionOptions.size() <= 1) return null;
+
+        if (isImageItem(item)) {
+            String preference = SettingsRegistry.getStringOrDefault(IMAGE_QUALITY_SETTING, QUALITY_ORIGINAL);
+            return QUALITY_ASK.equals(preference) ? null : selectImageOption(item, preference);
+        }
+
+        String preference = SettingsRegistry.getStringOrDefault(VIDEO_QUALITY_SETTING, QUALITY_HIGHEST);
+        return QUALITY_ASK.equals(preference) ? null : selectVideoOption(item, preference);
+    }
+
+    private static boolean isImageItem(DownloadItem item) {
+        return item.mimeType != null && item.mimeType.startsWith("image/");
+    }
+
+    static DownloadItem selectImageOption(DownloadItem item, String preference) {
+        for (DownloadItem option : item.resolutionOptions) {
+            if (preference.equals(option.qualityKey)) return option;
+        }
+        // Non-twimg photos only expose the original, so fall back to the best available size.
+        return item.resolutionOptions.get(0);
+    }
+
+    static DownloadItem selectVideoOption(DownloadItem item, String preference) {
+        List<DownloadItem> options = item.resolutionOptions;
+        if ("highest".equals(preference)) return options.get(0);
+        if ("lowest".equals(preference)) return options.get(options.size() - 1);
+
+        int target = targetHeight(preference);
+        if (target <= 0) return options.get(0);
+
+        // Prefer the largest variant at or below the requested quality. Quality tiers name the
+        // short side (1080p is 1920x1080 or 1080x1920), which is the width on portrait videos.
+        DownloadItem atOrBelow = null;
+        DownloadItem nextAbove = null;
+        int atOrBelowQuality = -1;
+        int nextAboveQuality = Integer.MAX_VALUE;
+        for (DownloadItem option : options) {
+            int quality = resolutionShortSide(option.resolution);
+            if (quality <= 0) continue;
+            if (quality <= target) {
+                if (quality > atOrBelowQuality) {
+                    atOrBelowQuality = quality;
+                    atOrBelow = option;
+                }
+            } else if (quality < nextAboveQuality) {
+                nextAboveQuality = quality;
+                nextAbove = option;
+            }
+        }
+        if (atOrBelow != null) return atOrBelow;
+        if (nextAbove != null) return nextAbove;
+        return options.get(0);
+    }
+
+    private static int targetHeight(String preference) {
+        switch (preference) {
+            case "1080p":
+                return 1080;
+            case "720p":
+                return 720;
+            case "480p":
+                return 480;
+            case "360p":
+                return 360;
+            default:
+                return 0;
+        }
+    }
+
+    /**
+     * Quality tier of a variant: the shorter edge, so portrait videos rank by width rather than by
+     * their (much larger) height.
+     */
+    private static int resolutionShortSide(String resolution) {
+        if (resolution == null) return 0;
+        int separator = resolution.indexOf('x');
+        if (separator < 0) return 0;
+        int width = parsePositiveInt(resolution.substring(0, separator));
+        int height = parsePositiveInt(resolution.substring(separator + 1));
+        if (width <= 0 || height <= 0) return 0;
+        return Math.min(width, height);
     }
 
     private static void enqueueAllDownloads(
@@ -686,14 +1037,17 @@ public final class InlineDownloadButton {
             int skipped = 0;
             int failed = 0;
             for (int index = 0; index < items.size(); index++) {
+                DownloadItem chosen = autoSelectedOption(items.get(index));
+                if (chosen == null) chosen = items.get(index);
                 switch (enqueueDownload(
                         safeContext,
-                        items.get(index),
+                        chosen,
                         postContext,
                         username,
                         index,
                         items.size(),
-                        policy
+                        policy,
+                        false
                 )) {
                     case QUEUED -> queued++;
                     case SKIPPED -> skipped++;
@@ -716,6 +1070,18 @@ public final class InlineDownloadButton {
             int index,
             int mediaCount
     ) {
+        enqueueSingleDownload(context, download, postContext, username, index, mediaCount, false);
+    }
+
+    private static void enqueueSingleDownload(
+            Context context,
+            DownloadItem download,
+            DownloadFileName.PostContext postContext,
+            String username,
+            int index,
+            int mediaCount,
+            boolean explicitResolution
+    ) {
         Context applicationContext = context.getApplicationContext();
         Context safeContext = applicationContext != null ? applicationContext : context;
         // Document creation does provider IPC; the tap handler must not wait for it.
@@ -729,7 +1095,8 @@ public final class InlineDownloadButton {
                         username,
                         index,
                         mediaCount,
-                        DownloadDestination.conflictPolicy()
+                        DownloadDestination.conflictPolicy(),
+                        explicitResolution
                 );
             } catch (RuntimeException exception) {
                 NewXLogger.printException(() -> "Failed to start NewX media download", exception);
@@ -754,7 +1121,8 @@ public final class InlineDownloadButton {
             String username,
             int index,
             int mediaCount,
-            DownloadDestination.ConflictPolicy policy
+            DownloadDestination.ConflictPolicy policy,
+            boolean explicitResolution
     ) {
         if (!NewXUtils.isHttpUrl(download.url)) return EnqueueState.FAILED;
 
@@ -769,13 +1137,22 @@ public final class InlineDownloadButton {
             return EnqueueState.FAILED;
         }
 
+        String template = DownloadSettings.filenameTemplate();
         String fileName = DownloadFileName.render(
-                DownloadSettings.filenameTemplate(),
+                template,
                 postContext,
                 index,
                 mediaCount,
-                download.extension
+                download.extension,
+                download.resolution
         );
+        // Only a chooser pick gets the automatic suffix; auto-selected preferences keep the plain
+        // filename. An explicit {resolution} token already places it, so do not append twice.
+        boolean templateUsesResolution = template != null
+                && template.contains("{" + DownloadFileName.TOKEN_RESOLUTION + "}");
+        if (explicitResolution && download.resolution != null && !templateUsesResolution) {
+            fileName = withResolutionSuffix(fileName, download.resolution);
+        }
 
         final DownloadDestination.Target target;
         try {
@@ -794,6 +1171,13 @@ public final class InlineDownloadButton {
         // run there.
         downloadAsync(context, download.url, target, username, notificationId);
         return EnqueueState.QUEUED;
+    }
+
+    static String withResolutionSuffix(String fileName, String resolution) {
+        if (fileName == null || resolution == null || resolution.isEmpty()) return fileName;
+        int dot = fileName.lastIndexOf('.');
+        if (dot <= 0) return fileName + "_" + resolution;
+        return fileName.substring(0, dot) + "_" + resolution + fileName.substring(dot);
     }
 
     private static void downloadAsync(
@@ -984,6 +1368,14 @@ public final class InlineDownloadButton {
         final String label;
         final String thumbnailUrl;
         final String thumbnailCacheUrl;
+        /** Original/known resolution as "WxH", or null when the model does not expose one. */
+        final String resolution;
+        /** Secondary chooser text (bitrate, size name), or null. */
+        final String detail;
+        /** Stable key into the saved quality preference (image sizes), or null. */
+        final String qualityKey;
+        /** Selectable sizes/variants for this media; empty when there is nothing to choose. */
+        final List<DownloadItem> resolutionOptions;
 
         DownloadItem(String url, String extension, String mimeType, String label) {
             this(url, extension, mimeType, label, null, null);
@@ -1007,22 +1399,56 @@ public final class InlineDownloadButton {
                 String thumbnailUrl,
                 String thumbnailCacheUrl
         ) {
+            this(
+                    url,
+                    extension,
+                    mimeType,
+                    label,
+                    thumbnailUrl,
+                    thumbnailCacheUrl,
+                    null,
+                    null,
+                    null,
+                    java.util.Collections.emptyList()
+            );
+        }
+
+        DownloadItem(
+                String url,
+                String extension,
+                String mimeType,
+                String label,
+                String thumbnailUrl,
+                String thumbnailCacheUrl,
+                String resolution,
+                String detail,
+                String qualityKey,
+                List<DownloadItem> resolutionOptions
+        ) {
             this.url = url;
             this.extension = extension;
             this.mimeType = mimeType;
             this.label = label;
             this.thumbnailUrl = thumbnailUrl;
             this.thumbnailCacheUrl = thumbnailCacheUrl;
+            this.resolution = resolution;
+            this.detail = detail;
+            this.qualityKey = qualityKey;
+            this.resolutionOptions = resolutionOptions == null
+                    ? java.util.Collections.emptyList()
+                    : resolutionOptions;
         }
     }
 
     private static final class Variant {
         final String url;
         final int bitRate;
+        final String resolution;
 
-        Variant(String url, int bitRate) {
+        Variant(String url, int bitRate, String resolution) {
             this.url = url;
             this.bitRate = bitRate;
+            this.resolution = resolution;
         }
     }
 }

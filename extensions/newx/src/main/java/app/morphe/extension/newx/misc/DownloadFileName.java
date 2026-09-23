@@ -29,6 +29,8 @@ public final class DownloadFileName {
     static final String TOKEN_DISPLAY_NAME = "displayName";
     static final String TOKEN_TIMESTAMP = "timestamp";
     static final String TOKEN_MEDIA_INDEX = "mediaIndex";
+    /** Resolution of the media being saved, e.g. {@code 1920x1080}. */
+    static final String TOKEN_RESOLUTION = "resolution";
     static final String TOKEN_EXTENSION = "ext";
 
     /** Tokens offered as chips in the template editor, in insertion order. */
@@ -38,6 +40,7 @@ public final class DownloadFileName {
             TOKEN_NAME,
             TOKEN_TIMESTAMP,
             TOKEN_MEDIA_INDEX,
+            TOKEN_RESOLUTION,
             TOKEN_EXTENSION,
     };
 
@@ -158,6 +161,7 @@ public final class DownloadFileName {
                     || token.equals("sourceUserIdentifier")
                     || token.equals("sourceUserDisplayName")
                     || token.equals(TOKEN_MEDIA_INDEX)
+                    || token.equals(TOKEN_RESOLUTION)
                     || token.equals(TOKEN_EXTENSION);
         }
     }
@@ -173,9 +177,23 @@ public final class DownloadFileName {
             int mediaCount,
             @Nullable String extension
     ) {
+        return render(template, post, index, mediaCount, extension, null);
+    }
+
+    public static String render(
+            @Nullable String template,
+            PostContext post,
+            int index,
+            int mediaCount,
+            @Nullable String extension,
+            @Nullable String resolution
+    ) {
         String pattern = template == null || template.trim().isEmpty() ? DEFAULT_TEMPLATE : template;
         String resolvedExtension = sanitizeSegment(extension, "bin");
-        String stem = sanitizeSegment(renderTokens(pattern, post, index, resolvedExtension), null);
+        String stem = sanitizeSegment(
+                renderTokens(pattern, post, index, resolvedExtension, resolution),
+                null
+        );
         if (stem == null) {
             // Every token resolved to nothing; keep the pre-template naming scheme.
             stem = sanitizeSegment(post.screenName, "twitter") + "_" +
@@ -193,7 +211,7 @@ public final class DownloadFileName {
 
     /** Preview text for the editor, using the sample context. */
     public static String preview(@Nullable String template) {
-        return render(template, PostContext.sample(), 0, 2, "jpg");
+        return render(template, PostContext.sample(), 0, 2, "jpg", "1920x1080");
     }
 
     /** Template validation outcomes. */
@@ -271,7 +289,13 @@ public final class DownloadFileName {
         }
     }
 
-    private static String renderTokens(String pattern, PostContext post, int index, String extension) {
+    private static String renderTokens(
+            String pattern,
+            PostContext post,
+            int index,
+            String extension,
+            @Nullable String resolution
+    ) {
         StringBuilder rendered = new StringBuilder(pattern.length() + 16);
         int cursor = 0;
         while (cursor < pattern.length()) {
@@ -294,6 +318,8 @@ public final class DownloadFileName {
                 value = String.valueOf(index + 1);
             } else if (token.equals(TOKEN_EXTENSION)) {
                 value = extension;
+            } else if (token.equals(TOKEN_RESOLUTION)) {
+                value = resolution;
             } else {
                 value = post.value(token);
             }

@@ -140,6 +140,40 @@ val newXInlineDownloadButtonPatch =
                         order = 350,
                         defaultValue = true,
                     )
+                    // Preferred quality for downloads that skip the picker. "ask" keeps the
+                    // resolution chooser; any other value auto-selects the matching option.
+                    singleChoice(
+                        id = "newx.content.inline_download.image_resolution",
+                        strings = settingStrings("piko_newx_inline_download_image_resolution"),
+                        order = 360,
+                        defaultValue = "original",
+                        options =
+                            listOf(
+                                choice("ask", "piko_newx_inline_download_quality_ask"),
+                                choice("original", "piko_newx_inline_download_quality_original"),
+                                choice("4096x4096", "piko_newx_inline_download_quality_4096"),
+                                choice("large", "piko_newx_inline_download_quality_large"),
+                                choice("medium", "piko_newx_inline_download_quality_medium"),
+                                choice("small", "piko_newx_inline_download_quality_small"),
+                            ),
+                    )
+                    // Videos and GIFs share the same variant model, so one policy covers both.
+                    singleChoice(
+                        id = "newx.content.inline_download.video_quality",
+                        strings = settingStrings("piko_newx_inline_download_video_quality"),
+                        order = 370,
+                        defaultValue = "highest",
+                        options =
+                            listOf(
+                                choice("ask", "piko_newx_inline_download_quality_ask"),
+                                choice("highest", "piko_newx_inline_download_quality_highest"),
+                                choice("1080p", "piko_newx_inline_download_quality_1080p"),
+                                choice("720p", "piko_newx_inline_download_quality_720p"),
+                                choice("480p", "piko_newx_inline_download_quality_480p"),
+                                choice("360p", "piko_newx_inline_download_quality_360p"),
+                                choice("lowest", "piko_newx_inline_download_quality_lowest"),
+                            ),
+                    )
                     singleChoice(
                         id = "newx.content.inline_download_conflict",
                         strings = settingStrings("piko_newx_inline_download_conflict"),

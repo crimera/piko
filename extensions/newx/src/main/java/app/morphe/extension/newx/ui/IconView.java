@@ -20,6 +20,7 @@ public class IconView extends View {
         DOWNLOAD,
         CLOSE,
         COPY_LINK,
+        RESOLUTION,
         CHECKBOX_CHECKED,
         CHECKBOX_UNCHECKED
     }
@@ -86,6 +87,9 @@ public class IconView extends View {
                 break;
             case COPY_LINK:
                 drawCopyLinkIcon(canvas, cx, cy, size, strokeWidth);
+                break;
+            case RESOLUTION:
+                drawResolutionIcon(canvas, cx, cy, size, strokeWidth);
                 break;
             case CHECKBOX_CHECKED:
                 drawCheckboxChecked(canvas, cx, cy, size, strokeWidth);
@@ -231,6 +235,33 @@ public class IconView extends View {
 
         // Center connecting line: line x1="8" x2="16" y1="12" y2="12"
         canvas.drawLine(left + 8f * scale, top + 12f * scale, left + 16f * scale, top + 12f * scale, paint);
+    }
+
+    private void drawResolutionIcon(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+
+        // Corner brackets read as a resolution/dimension frame.
+        float half = size * 0.26f;
+        float arm = size * 0.14f;
+        canvas.drawLine(cx - half, cy - half, cx - half + arm, cy - half, paint);
+        canvas.drawLine(cx - half, cy - half, cx - half, cy - half + arm, paint);
+        canvas.drawLine(cx + half, cy - half, cx + half - arm, cy - half, paint);
+        canvas.drawLine(cx + half, cy - half, cx + half, cy - half + arm, paint);
+        canvas.drawLine(cx - half, cy + half, cx - half + arm, cy + half, paint);
+        canvas.drawLine(cx - half, cy + half, cx - half, cy + half - arm, paint);
+        canvas.drawLine(cx + half, cy + half, cx + half - arm, cy + half, paint);
+        canvas.drawLine(cx + half, cy + half, cx + half, cy + half - arm, paint);
+
+        // Diagonal expand arrow through the middle.
+        canvas.drawLine(cx - size * 0.14f, cy + size * 0.14f, cx + size * 0.14f, cy - size * 0.14f, paint);
+        path.reset();
+        path.moveTo(cx + size * 0.06f, cy - size * 0.14f);
+        path.lineTo(cx + size * 0.14f, cy - size * 0.14f);
+        path.lineTo(cx + size * 0.14f, cy - size * 0.06f);
+        canvas.drawPath(path, paint);
     }
 
     private void drawCheckboxChecked(Canvas canvas, float cx, float cy, float size, float strokeWidth) {

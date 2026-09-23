@@ -216,6 +216,35 @@ public class ListItem extends LinearLayout {
     }
 
     public View createTrailingIconButton(IconView.IconType iconType, int iconColor, OnClickListener listener) {
+        View button = buildTrailingIconButton(iconType, iconColor, listener);
+        setTrailingView(button);
+        return button;
+    }
+
+    /**
+     * Replaces the trailing area with a horizontal row that can hold several icon buttons,
+     * e.g. a resolution chooser followed by copy-link.
+     */
+    public LinearLayout beginTrailingButtons() {
+        LinearLayout row = new LinearLayout(getContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        setTrailingView(row);
+        return row;
+    }
+
+    public View addTrailingIconButton(
+            LinearLayout container,
+            IconView.IconType iconType,
+            int iconColor,
+            OnClickListener listener
+    ) {
+        View button = buildTrailingIconButton(iconType, iconColor, listener);
+        container.addView(button);
+        return button;
+    }
+
+    private View buildTrailingIconButton(IconView.IconType iconType, int iconColor, OnClickListener listener) {
         Context context = getContext();
         FrameLayout btnContainer = new FrameLayout(context);
         int btnSize = Theme.dpToPx(context, 40f);
@@ -242,8 +271,6 @@ public class ListItem extends LinearLayout {
         if (listener != null) {
             btnContainer.setOnClickListener(listener);
         }
-
-        setTrailingView(btnContainer);
         return btnContainer;
     }
 }
