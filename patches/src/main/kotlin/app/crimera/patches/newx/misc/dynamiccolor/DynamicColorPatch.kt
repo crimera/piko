@@ -14,6 +14,9 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.newx.utils.INTEGER_MOVE_OPCODES
+import app.crimera.patches.newx.utils.destinationRegisterOrNull
+import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -227,6 +230,7 @@ val dynamicColorPatch =
             patchDynamicAccentPalettes()
             patchInlineActionTints()
             patchTabTints(paletteDescriptor)
+            patchXdsChromeBackground()
         }
     }
 
@@ -1126,6 +1130,304 @@ private fun patchTabTints(horizon: String) {
             (slots + indicatorMatches + profileMatches).joinToString(),
     )
 }
+
+context(context: BytecodePatchContext)
+private fun patchXdsChromeBackground() {
+    val backgroundFields = buildList<FieldReference> {
+        context.classDefForEach { classDef ->
+            for (method in classDef.methods) {
+                if (!method.isComposeModifierBackground()) continue
+                val instructions = method.implementation?.instructions?.toList() ?: continue
+                for ((index, instruction) in instructions.withIndex()) {
+                    if (instruction.opcode != Opcode.IGET_WIDE) continue
+                    val field = instruction.getReference<FieldReference>() ?: continue
+                    if (field.type != "J") continue
+
+                    val colorRegister =
+                        (instruction as? TwoRegisterInstruction)?.registerA
+                            ?: throw PatchException(
+                                "NewX XDS background field read has no destination: $instruction",
+                            )
+                    if (instructions.hasComposeBackgroundUse(index, colorRegister)) add(field)
+                }
+            }
+        }
+    }.distinctBy(FieldReference::toString)
+
+    val schemeResolution = mutableListOf<String>()
+    val schemeBackgroundFields = backgroundFields.filter { field ->
+        val schemeClass = context.classDefByOrNull(field.definingClass)
+        if (schemeClass == null) {
+            schemeResolution += "$field: owner missing"
+            return@filter false
+        }
+        val constructors = schemeClass.methods.filter { method ->
+            method.name == "<init>" &&
+                method.returnType == "V" &&
+                method.parameterTypes.firstOrNull()?.toString() == "J" &&
+                method.assignsFirstColorParameter(field)
+        }
+        val constructor =
+            requireAtMostOne(
+                "NewX XDS first-color constructor for $field",
+                constructors,
+            ) ?: run {
+                schemeResolution += "$field: no first-color constructor"
+                return@filter false
+            }
+
+        val classInitializers = schemeClass.methods.filter { method ->
+            method.name == "<clinit>" &&
+                method.parameterTypes.isEmpty() &&
+                method.returnType == "V"
+        }
+        val classInitializer =
+            requireAtMostOne(
+                "NewX XDS class initializer for ${schemeClass.type}",
+                classInitializers,
+            ) ?: run {
+                schemeResolution += "$field: no static initializer"
+                return@filter false
+            }
+
+        val darkConstructionCount = classInitializer.findDarkSchemeConstructions(
+            schemeClass.type.toString(),
+            constructor,
+        ).size == 1
+        schemeResolution += "$field: singleton shape=$darkConstructionCount"
+        darkConstructionCount
+    }
+    if (schemeBackgroundFields.isEmpty()) {
+        throw PatchException(
+            "NewX XDS chrome background field has no unique dark scheme candidate: " +
+                schemeResolution.joinToString(),
+        )
+    }
+    val backgroundField =
+        requireExactlyOne("NewX XDS chrome background field", schemeBackgroundFields)
+    val schemeClass = context.mutableClassDefBy(backgroundField.definingClass)
+    val constructor =
+        requireExactlyOne(
+            "NewX XDS scheme constructor for the chrome background",
+            schemeClass.methods.filter { method ->
+                method.name == "<init>" &&
+                    method.returnType == "V" &&
+                    method.parameterTypes.firstOrNull()?.toString() == "J" &&
+                    method.assignsFirstColorParameter(backgroundField)
+            },
+        )
+    val classInitializer =
+        requireExactlyOne(
+            "NewX XDS scheme static initializer",
+            schemeClass.methods.filter { method ->
+                method.name == "<clinit>" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.returnType == "V"
+            },
+        )
+    val darkSchemeConstructions =
+        classInitializer.findDarkSchemeConstructions(schemeClass.type.toString(), constructor)
+    val darkConstruction =
+        requireExactlyOne(
+            "NewX XDS dark scheme construction for the chrome background",
+            darkSchemeConstructions,
+        )
+
+    classInitializer.addInstructions(
+        darkConstruction.index,
+        """
+            invoke-static/range {v${darkConstruction.colorRegister} .. v${darkConstruction.colorRegister + 1}}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J
+            move-result-wide v${darkConstruction.colorRegister}
+        """.trimIndent(),
+    )
+}
+
+private data class XdsDarkConstruction(
+    val index: Int,
+    val colorRegister: Int,
+)
+
+private fun Method.findDarkSchemeConstructions(
+    schemeDescriptor: String,
+    constructor: Method,
+): List<XdsDarkConstruction> {
+    val instructions = implementation?.instructions?.toList() ?: return emptyList()
+    val constructorParameters = constructor.parameterTypes.map(CharSequence::toString)
+    val firstMaskIndex = constructorParameters.indexOfFirst { parameter -> parameter == "I" }
+    if (firstMaskIndex < 0 || !constructor.hasFirstColorDefaultMaskBit()) return emptyList()
+
+    return instructions.withIndex().mapNotNull { indexed ->
+        val instruction = indexed.value
+        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+        if (reference.definingClass != schemeDescriptor ||
+            reference.name != "<init>" ||
+            reference.returnType != "V" ||
+            reference.parameterTypes.map(CharSequence::toString) != constructorParameters ||
+            constructorParameters.firstOrNull() != "J"
+        ) {
+            return@mapNotNull null
+        }
+
+        val registers = instruction as? RegisterRangeInstruction ?: return@mapNotNull null
+        val expectedRegisterCount = 1 + constructorParameters.sumOf(String::registerWidth)
+        if (registers.registerCount != expectedRegisterCount) return@mapNotNull null
+
+        val maskRegister = registers.startRegister + 1 +
+            constructorParameters.take(firstMaskIndex).sumOf(String::registerWidth)
+        val maskValue = instructions.resolveIntegerLiteralOnCurrentPath(indexed.index, maskRegister)
+            ?: return@mapNotNull null
+        if ((maskValue and 1) != 0) return@mapNotNull null
+
+        val nextInstruction = instructions.getOrNull(indexed.index + 1) ?: return@mapNotNull null
+        val singletonField = nextInstruction.getReference<FieldReference>() ?: return@mapNotNull null
+        if (nextInstruction.opcode != Opcode.SPUT_OBJECT ||
+            singletonField.type != schemeDescriptor ||
+            (nextInstruction as? OneRegisterInstruction)?.registerA != registers.startRegister
+        ) {
+            return@mapNotNull null
+        }
+
+        val colorRegister = registers.startRegister + 1
+        val latestColorWrite = instructions.withIndex()
+            .take(indexed.index)
+            .lastOrNull { (_, prior) -> prior.writesWideRegisterPair(colorRegister) }
+            ?.value
+        if (latestColorWrite?.opcode != Opcode.SGET_WIDE ||
+            (latestColorWrite as? OneRegisterInstruction)?.registerA != colorRegister
+        ) {
+            return@mapNotNull null
+        }
+        XdsDarkConstruction(indexed.index, colorRegister)
+    }
+}
+
+private fun Method.hasFirstColorDefaultMaskBit(): Boolean {
+    val implementation = implementation ?: return false
+    val instructions = implementation.instructions.toList()
+    val parameters = parameterTypes.map(CharSequence::toString)
+    val firstMaskIndex = parameters.indexOfFirst { parameter -> parameter == "I" }
+    if (firstMaskIndex < 0) return false
+    val parameterStart = implementation.registerCount - parameters.sumOf(String::registerWidth)
+    val firstMaskRegister = parameterStart +
+        parameters.take(firstMaskIndex).sumOf(String::registerWidth)
+
+    return instructions.withIndex().any { (index, instruction) ->
+        if (instruction.opcode != Opcode.AND_INT_LIT8 &&
+            instruction.opcode != Opcode.AND_INT_LIT16
+        ) {
+            return@any false
+        }
+        val and = instruction as? TwoRegisterInstruction ?: return@any false
+        val literal = instruction as? NarrowLiteralInstruction ?: return@any false
+        if (literal.narrowLiteral != 1) return@any false
+        val branch = instructions.getOrNull(index + 1) ?: return@any false
+        if (branch.opcode != Opcode.IF_EQZ ||
+            (branch as? OneRegisterInstruction)?.registerA != and.registerA
+        ) {
+            return@any false
+        }
+        instructions.integerRegisterResolvesToParameter(index, and.registerB, firstMaskRegister)
+    }
+}
+
+private fun List<Instruction>.integerRegisterResolvesToParameter(
+    instructionIndex: Int,
+    register: Int,
+    parameterRegister: Int,
+): Boolean {
+    var sourceRegister = register
+    for (index in instructionIndex - 1 downTo 0) {
+        val instruction = this[index]
+        if (instruction.opcode in INTEGER_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: return false
+            if (move.registerA != sourceRegister) continue
+            sourceRegister = move.registerB
+            if (sourceRegister == parameterRegister) return true
+            continue
+        }
+        if (instruction.destinationRegisterOrNull() == sourceRegister) return false
+    }
+    return sourceRegister == parameterRegister
+}
+
+private fun Method.isComposeModifierBackground(): Boolean {
+    if (!AccessFlags.STATIC.isSet(accessFlags) || returnType != MODIFIER_DESCRIPTOR) return false
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return MODIFIER_DESCRIPTOR in parameters && COMPOSER_DESCRIPTOR in parameters
+}
+
+private fun List<Instruction>.hasComposeBackgroundUse(
+    fieldReadIndex: Int,
+    colorRegister: Int,
+): Boolean = withIndex().any { (index, instruction) ->
+    index > fieldReadIndex && instruction.isComposeBackgroundInvoke(colorRegister)
+}
+
+private fun Instruction.isComposeBackgroundInvoke(colorRegister: Int): Boolean {
+    val reference = getReference<MethodReference>() ?: return false
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    if (reference.returnType != MODIFIER_DESCRIPTOR || MODIFIER_DESCRIPTOR !in parameters) {
+        return false
+    }
+    val registers = invokeArgumentRegisters() ?: return false
+    var registerIndex = 0
+    for (parameter in parameters) {
+        if (parameter == "J" && registers.getOrNull(registerIndex) == colorRegister) return true
+        registerIndex += parameter.registerWidth()
+    }
+    return false
+}
+
+private fun Instruction.invokeArgumentRegisters(): List<Int>? = when (this) {
+    is RegisterRangeInstruction ->
+        (startRegister until startRegister + registerCount).toList()
+    is FiveRegisterInstruction ->
+        listOf(registerC, registerD, registerE, registerF, registerG).take(registerCount)
+    else -> null
+}
+
+private fun Method.assignsFirstColorParameter(field: FieldReference): Boolean {
+    if (AccessFlags.STATIC.isSet(accessFlags)) return false
+    val implementation = implementation ?: return false
+    val instructions = implementation.instructions.toList()
+    val fieldWrites = instructions.withIndex().filter { (_, instruction) ->
+        instruction.opcode == Opcode.IPUT_WIDE &&
+            instruction.getReference<FieldReference>()?.toString() == field.toString()
+    }
+    if (fieldWrites.size != 1) return false
+
+    val (index, instruction) = fieldWrites.single()
+    val storedColorRegister = (instruction as? TwoRegisterInstruction)?.registerA ?: return false
+    val firstParameterRegister =
+        implementation.registerCount - parameterTypes.sumOf { it.toString().registerWidth() }
+    if (storedColorRegister == firstParameterRegister) return true
+
+    val latestStoredColorWrite = instructions.take(index)
+        .lastOrNull { previous -> previous.writesWideRegisterPair(storedColorRegister) }
+        ?: return false
+    val move = latestStoredColorWrite as? TwoRegisterInstruction ?: return false
+    return latestStoredColorWrite.opcode.setsWideRegister() &&
+        move.registerA == storedColorRegister &&
+        move.registerB == firstParameterRegister
+}
+
+private fun Instruction.writesWideRegisterPair(register: Int): Boolean {
+    if (!opcode.setsRegister()) return false
+    val destination = when (this) {
+        is OneRegisterInstruction -> registerA
+        is TwoRegisterInstruction -> registerA
+        is ThreeRegisterInstruction -> registerA
+        else -> return false
+    }
+    val destinationRegisters =
+        if (opcode.setsWideRegister()) listOf(destination, destination + 1) else listOf(destination)
+    return destinationRegisters.any { writtenRegister -> writtenRegister in register..register + 1 }
+}
+
+private fun String.registerWidth(): Int = if (this == "J" || this == "D") 2 else 1
+
+private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
+private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 
 private fun MethodReference.isTabContainerRenderer(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)

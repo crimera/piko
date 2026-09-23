@@ -55,6 +55,8 @@ public final class DynamicColorPalette {
     private static final int ALPHA_GLASS_BACKGROUND = 0xCC;
     private static final int ALPHA_LIGHT_GLASS_SHADOW = 0x26;
     private static final int ALPHA_DARK_GLASS_SHADOW = 0x50;
+    private static final int DIM_XDS_BACKGROUND = 0xFF15202B;
+    private static final int BLACK_XDS_BACKGROUND = 0xFF000000;
 
     private DynamicColorPalette() {
     }
@@ -69,6 +71,42 @@ public final class DynamicColorPalette {
 
     public static boolean isAmoledBlack() {
         return SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
+    }
+
+    /** Supplies the XDS dark-surface color used by transparent chrome and its haze tint. */
+    public static long xdsChromeBackground(long originalColor) {
+        Context context = Utils.getContext();
+        if (context == null) {
+            throw new IllegalStateException("NewX XDS colors need the initialized host context");
+        }
+
+        TwitterTheme theme = TwitterTheme.fromContext(context);
+        if (theme == TwitterTheme.STANDARD) return originalColor;
+        boolean dynamicEnabled = isEnabled();
+        boolean amoledBlack = theme == TwitterTheme.LIGHTS_OUT && isAmoledBlack();
+        long dynamicSurface = dynamicEnabled && !amoledBlack ? color(DARK_SURFACE) : 0L;
+        return resolveXdsChromeBackground(
+                theme,
+                dynamicEnabled,
+                amoledBlack,
+                originalColor,
+                dynamicSurface
+        );
+    }
+
+    static long resolveXdsChromeBackground(
+            TwitterTheme theme,
+            boolean dynamicEnabled,
+            boolean amoledBlack,
+            long originalColor,
+            long dynamicSurface
+    ) {
+        if (theme == TwitterTheme.STANDARD) return originalColor;
+        if (theme == TwitterTheme.LIGHTS_OUT && amoledBlack) {
+            return pack(BLACK_XDS_BACKGROUND);
+        }
+        if (dynamicEnabled) return dynamicSurface;
+        return pack(DIM_XDS_BACKGROUND);
     }
 
     public static long light(int token) {
