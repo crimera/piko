@@ -11,6 +11,7 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -80,11 +81,53 @@ private object SubmitWorkHandlerFingerprint : Fingerprint(
     },
 )
 
-private data class RegisterLocation(
+internal data class RegisterLocation(
     val index: Int,
     val register: Int,
     val branchTargetIndex: Int,
 )
+
+/**
+ * Selects the failure operation comparison from the `Post` comparisons after POST_FAILURE.
+ *
+ * Through 12.28 the POST_SUCCESS event is in the same method and bounds the failure comparison.
+ * 12.29 delegates success logging to the upload submit step, so the failure comparison is the first
+ * of the two comparisons, bounded by the success operation that gates the delegated call.
+ */
+internal fun selectSubmitFailureOperation(
+    laterOperationCandidates: List<RegisterLocation>,
+    successEventIndex: Int?,
+): RegisterLocation {
+    if (successEventIndex != null) {
+        val bounded =
+            laterOperationCandidates.filter { candidate ->
+                candidate.index < successEventIndex && candidate.branchTargetIndex < successEventIndex
+            }
+        return requireExactlyOne(
+            "NewX failure operation register between POST_FAILURE and POST_SUCCESS",
+            bounded,
+        )
+    }
+    if (laterOperationCandidates.size != 2) {
+        throw PatchException(
+            "Expected failure and success NewX post-operation comparisons after POST_FAILURE, " +
+                "found ${laterOperationCandidates.size}: all=$laterOperationCandidates",
+        )
+    }
+    val successOperationIndex = laterOperationCandidates.maxOf { candidate -> candidate.index }
+    val failureOperation =
+        requireExactlyOne(
+            "NewX failure operation comparison",
+            laterOperationCandidates.filter { candidate -> candidate.index < successOperationIndex },
+        )
+    if (failureOperation.branchTargetIndex >= successOperationIndex) {
+        throw PatchException(
+            "NewX failure operation is not bounded by the success operation: " +
+                "failure=$failureOperation, successIndex=$successOperationIndex",
+        )
+    }
+    return failureOperation
+}
 
 private data class ThrowableRead(
     val index: Int,
@@ -265,51 +308,45 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
         )
     }
     val failureEvent = failureEventCandidates.single()
-    val successEventFields = findEventFields(instructions, POST_SUCCESS_FIELD_NAME)
-    if (successEventFields.size != 1) {
-        throw PatchException(
-            "Expected one NewX POST_SUCCESS event, found " +
-                "${successEventFields.size}: ${successEventFields.joinToString()}",
-        )
-    }
-
-    val successEvent = successEventFields.single()
-    if (
-        failureEvent.field.definingClass.toString() != successEvent.field.definingClass.toString() ||
-            failureEvent.field.type.toString() != successEvent.field.type.toString()
-    ) {
-        throw PatchException(
-            "NewX submit events use different enum types: " +
-                "POST_FAILURE=${failureEvent.field}, POST_SUCCESS=${successEvent.field}",
-        )
-    }
-
     val failureEventIndex = failureEvent.index
-    val successEventIndex = successEvent.index
-    if (failureEventIndex >= successEventIndex) {
-        throw PatchException(
-            "NewX submit event order is invalid: " +
-                "POST_FAILURE@$failureEventIndex, POST_SUCCESS@$successEventIndex",
-        )
-    }
-
     val operationCandidates = instructions.mapIndexedNotNull { index, instruction ->
         findPostOperationRegister(instructions, index, instruction)
     }
-    val failureOperationCandidates = operationCandidates.filter { candidate ->
-        candidate.index > failureEventIndex &&
-            candidate.index < successEventIndex &&
-            candidate.branchTargetIndex < successEventIndex
+    val laterOperationCandidates = operationCandidates.filter { candidate ->
+        candidate.index > failureEventIndex
     }
-    if (failureOperationCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX failure operation register between POST_FAILURE and POST_SUCCESS, " +
-                "found ${failureOperationCandidates.size}: all=$operationCandidates, " +
-                "POST_FAILURE@$failureEventIndex, POST_SUCCESS@$successEventIndex",
-        )
-    }
-
-    val operationRegister = failureOperationCandidates.single().register
+    val successEventFields = findEventFields(instructions, POST_SUCCESS_FIELD_NAME)
+    val successEventIndex =
+        when (successEventFields.size) {
+            1 -> {
+                val successEvent = requireExactlyOne("NewX POST_SUCCESS event", successEventFields)
+                if (
+                    failureEvent.field.definingClass.toString() !=
+                        successEvent.field.definingClass.toString() ||
+                        failureEvent.field.type.toString() != successEvent.field.type.toString()
+                ) {
+                    throw PatchException(
+                        "NewX submit events use different enum types: " +
+                            "POST_FAILURE=${failureEvent.field}, POST_SUCCESS=${successEvent.field}",
+                    )
+                }
+                if (failureEventIndex >= successEvent.index) {
+                    throw PatchException(
+                        "NewX submit event order is invalid: " +
+                            "POST_FAILURE@$failureEventIndex, POST_SUCCESS@${successEvent.index}",
+                    )
+                }
+                successEvent.index
+            }
+            0 -> null
+            else ->
+                throw PatchException(
+                    "Expected at most one NewX POST_SUCCESS event, found " +
+                        "${successEventFields.size}: ${successEventFields.joinToString()}",
+                )
+        }
+    val failureOperation = selectSubmitFailureOperation(laterOperationCandidates, successEventIndex)
+    val operationRegister = failureOperation.register
     if (throwableRead.register !in 0..15 || operationRegister !in 0..15) {
         throw PatchException(
             "NewX submit failure registers do not fit invoke: " +

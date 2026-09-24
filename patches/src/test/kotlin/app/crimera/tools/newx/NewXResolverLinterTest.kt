@@ -1,8 +1,11 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
+import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
+import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
@@ -438,6 +441,33 @@ class NewXResolverLinterTest {
             listOf(true, false),
             listOf(profileHeader, urlEntityCopy).map(Method::constructsProfileHeaderModel),
         )
+    }
+
+    @Test
+    fun `submit failure operation selection handles absent POST_SUCCESS event`() {
+        val failureComparison = RegisterLocation(index = 20, register = 9, branchTargetIndex = 25)
+        val successComparison = RegisterLocation(index = 40, register = 5, branchTargetIndex = 60)
+
+        assertEquals(
+            failureComparison,
+            selectSubmitFailureOperation(
+                laterOperationCandidates = listOf(failureComparison, successComparison),
+                successEventIndex = null,
+            ),
+        )
+        assertEquals(
+            failureComparison,
+            selectSubmitFailureOperation(
+                laterOperationCandidates = listOf(failureComparison, successComparison),
+                successEventIndex = 45,
+            ),
+        )
+        assertFailsWith<PatchException> {
+            selectSubmitFailureOperation(
+                laterOperationCandidates = listOf(failureComparison),
+                successEventIndex = null,
+            )
+        }
     }
 
     private fun moduleDividerBuilderFixture(): List<Instruction> =
