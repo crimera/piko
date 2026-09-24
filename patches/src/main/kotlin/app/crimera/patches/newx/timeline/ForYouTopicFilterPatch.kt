@@ -57,6 +57,7 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
 private const val HOME_TIMELINE_PACKAGE = "Lcom/x/android/main/"
+private const val HOME_REPOSITORIES_PACKAGE = "Lcom/x/repositories/home/"
 private const val HOME_MODELS_PACKAGE = "Lcom/x/models/"
 private const val HOME_FILTER_GROUP_FILTER_TYPE_LABEL = "HomeFilterGroup(filterType="
 private const val HOME_FILTER_GROUP_OPTIONS_LABEL = ", options="
@@ -955,10 +956,13 @@ private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
 
     val (constructor, topicParameterIndex) = constructorCandidates.single()
     val constructorParameters = constructor.parameterTypes.map(CharSequence::toString)
+    // 12.27/12.28 build the For You request in a (Object,Object)→Object lambda; 12.29 R8-moved
+    // the body into a typed repository method returning the query class. Match the semantic
+    // conjunction (FOR_YOU enum read + query constructor call) inside the stable home repository
+    // package instead of a release-specific method shape.
     val requestFingerprint =
         Fingerprint(
-                parameters = listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR),
-                returnType = OBJECT_DESCRIPTOR,
+                definingClass = HOME_REPOSITORIES_PACKAGE,
                 filters =
                     listOf(
                         fieldAccess(
