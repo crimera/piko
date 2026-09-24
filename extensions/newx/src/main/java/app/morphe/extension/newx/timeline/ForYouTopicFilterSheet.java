@@ -57,8 +57,8 @@ final class ForYouTopicFilterSheet {
             LinkedHashSet<String> selected = new LinkedHashSet<>(storedSelection);
 
             BottomSheetView sheet = new BottomSheetView(activity);
-            sheet.setTitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_title"));
-            sheet.setSubtitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_hint"));
+            sheet.setTitle(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_topic_title"));
+            sheet.setSubtitle(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_topic_hint"));
 
             LinearLayout body = new LinearLayout(activity);
             body.setOrientation(LinearLayout.VERTICAL);
@@ -120,12 +120,10 @@ final class ForYouTopicFilterSheet {
 
     private static void updateActionButton(ButtonView button, int selectedCount) {
         if (selectedCount > 0) {
-            button.setText(selectedCount == 1
-                    ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_snooze_one")
-                    : app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_snooze_many", selectedCount));
+            button.setText(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_topic_snooze_count", selectedCount));
             button.setButtonStyle(ButtonView.ButtonStyle.FILLED);
         } else {
-            button.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_reset"));
+            button.setText(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_reset"));
             button.setButtonStyle(ButtonView.ButtonStyle.TONAL);
         }
     }

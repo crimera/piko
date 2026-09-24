@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.timeline;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -16,7 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
@@ -41,8 +42,8 @@ public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
 
         masterSwitch = NewXSettingsUi.switchRow(
                 context,
-                StringRef.str("piko_newx_topic_filter_enabled_title"),
-                StringRef.str("piko_newx_topic_filter_enabled_summary"),
+                NewXStrings.str("piko_newx_topic_filter_enabled_title"),
+                NewXStrings.str("piko_newx_topic_filter_enabled_summary"),
                 ForYouTopicFilter.shared().enabled.get()
         );
         masterSwitch.setOnCheckedChangeListener(this::setFilteringEnabled);
@@ -65,7 +66,7 @@ public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
         super.onResume();
         Activity activity = getActivity();
         if (activity instanceof NewXSettingsActivity settingsActivity) {
-            settingsActivity.setPageTitle(StringRef.str("piko_newx_topic_filtering_title"));
+            settingsActivity.setPageTitle(NewXStrings.str("piko_newx_topic_filtering_title"));
         }
         ForYouTopicFilter.addTopicCatalogListener(topicCatalogListener);
         refreshTopics();
@@ -97,7 +98,7 @@ public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
         List<ForYouTopicFilter.Topic> topics = ForYouTopicFilter.topicOptions();
         if (topics.isEmpty()) {
             TextView empty = NewXSettingsUi.summaryText(requireContext());
-            empty.setText(StringRef.str("piko_newx_topic_filtering_empty"));
+            empty.setText(NewXStrings.str("piko_newx_topic_filtering_empty"));
             int padding = Theme.dpToPx(requireContext(), 24f);
             empty.setPadding(padding, padding, padding, padding);
             topicsContainer.addView(empty, new LinearLayout.LayoutParams(-1, -2));

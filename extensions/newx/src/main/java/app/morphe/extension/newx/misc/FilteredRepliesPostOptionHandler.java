@@ -30,7 +30,7 @@ public final class FilteredRepliesPostOptionHandler {
     }
 
     public static String labelFor(Object action, Object originalLabel) {
-        if (isFilteredRepliesAction(action)) return app.morphe.extension.shared.StringRef.str("piko_newx_filtered_replies_option_label");
+        if (isFilteredRepliesAction(action)) return app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_filtered_replies_option_label");
         return originalLabel instanceof String ? (String) originalLabel : null;
     }
 
@@ -46,19 +46,19 @@ public final class FilteredRepliesPostOptionHandler {
             Context context = presenterData.getContext();
             Object post = presenterData.getValue();
             if (context == null || post == null) {
-                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_missing"));
+                Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_post_missing"));
                 return true;
             }
 
             Activity activity = NewXUtils.findUsableActivity(context);
             if (activity == null) {
-                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_screen_missing"));
+                Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_screen_missing"));
                 return true;
             }
 
             String postId = NewXUtils.identifierToString(NewXUtils.invoke(post, "getId"));
             if (postId == null || postId.isEmpty()) {
-                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_identify_failed"));
+                Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_post_identify_failed"));
                 return true;
             }
 
@@ -66,7 +66,7 @@ public final class FilteredRepliesPostOptionHandler {
             return true;
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to handle filtered replies option", exception);
-            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_filtered_open_failed"));
+            Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_filtered_open_failed"));
             return true;
         }
     }

@@ -24,7 +24,7 @@ public final class NewXObjectBrowserHandler {
     }
 
     public static String labelFor(Object action, Object originalLabel) {
-        if (isBrowseObjectAction(action)) return app.morphe.extension.shared.StringRef.str("piko_newx_ui_browse_object");
+        if (isBrowseObjectAction(action)) return app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_browse_object");
         return originalLabel instanceof String ? (String) originalLabel : null;
     }
 
@@ -39,15 +39,15 @@ public final class NewXObjectBrowserHandler {
             NewXUtils.PresenterData presenterData = NewXUtils.findPresenterData(presenter, URT_POST_CLASS);
             Context context = presenterData.getContext();
             Object post = presenterData.getValue();
-            if (context == null || post == null) return fail(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_missing"));
+            if (context == null || post == null) return fail(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_post_missing"));
 
             Activity activity = NewXUtils.findUsableActivity(context);
-            if (activity == null) return fail(app.morphe.extension.shared.StringRef.str("piko_newx_ui_screen_missing"));
+            if (activity == null) return fail(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_screen_missing"));
 
             NewXUtils.runOnUiThread(() -> ObjectBrowser.browseObject(activity, post));
             return true;
         } catch (IllegalAccessException | RuntimeException exception) {
-            return fail(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_missing"));
+            return fail(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_post_missing"));
         }
     }
 

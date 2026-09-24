@@ -16,7 +16,7 @@
     <string name="piko_shared_object_browser_copied">Copied: %1$s</string>
     <string name="piko_shared_object_browser_executed">Executed: %1$s()</string>
     <string name="piko_shared_object_browser_error">Error: %1$s</string>
-    <string name="piko_shared_object_browser_list_title">%1$s (%2$d items)</string>
+    <string name="piko_shared_object_browser_list_title">%1$s (items: %2$d)</string>
     <string name="piko_shared_object_browser_array_title">%1$s (Array)</string>
     <string name="piko_shared_object_browser_search_items">Search items...</string>
     <string name="piko_shared_object_browser_close">Close</string>

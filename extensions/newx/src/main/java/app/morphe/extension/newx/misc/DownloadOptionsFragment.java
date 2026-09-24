@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.misc;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +28,6 @@ import app.morphe.extension.newx.ui.DialogView;
 import app.morphe.extension.newx.ui.IconView;
 import app.morphe.extension.newx.ui.ListItem;
 import app.morphe.extension.newx.ui.Theme;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
 /**
@@ -67,7 +68,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
 
         imagesRow = optionRow(
                 context,
-                StringRef.str("piko_newx_download_options_folder_images"),
+                NewXStrings.str("piko_newx_download_options_folder_images"),
                 IconView.IconType.IMAGE,
                 view -> openPicker(DownloadDestination.MediaKind.IMAGES)
         );
@@ -75,7 +76,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
 
         videosRow = optionRow(
                 context,
-                StringRef.str("piko_newx_download_options_folder_videos"),
+                NewXStrings.str("piko_newx_download_options_folder_videos"),
                 IconView.IconType.VIDEO,
                 view -> openPicker(DownloadDestination.MediaKind.VIDEOS)
         );
@@ -83,7 +84,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
 
         filenameRow = optionRow(
                 context,
-                StringRef.str("piko_newx_download_filename_title"),
+                NewXStrings.str("piko_newx_download_filename_title"),
                 IconView.IconType.DOWNLOAD,
                 view -> showFilenameEditor()
         );
@@ -98,7 +99,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
 
         Activity activity = getActivity();
         if (activity instanceof NewXSettingsActivity settingsActivity) {
-            settingsActivity.setPageTitle(StringRef.str("piko_newx_inline_download_options_title"));
+            settingsActivity.setPageTitle(NewXStrings.str("piko_newx_inline_download_options_title"));
         }
         refresh();
     }
@@ -135,10 +136,10 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
             path = tree == null ? null : DownloadDestination.displayPathFor(tree);
         }
         if (path == null) {
-            return StringRef.str("piko_newx_download_options_folder_not_set");
+            return NewXStrings.str("piko_newx_download_options_folder_not_set");
         }
         if (!DownloadDestination.isConfigured(context, kind)) {
-            return path + " \u2014 " + StringRef.str("piko_newx_download_options_folder_denied");
+            return path + " \u2014 " + NewXStrings.str("piko_newx_download_options_folder_denied");
         }
         return path;
     }
@@ -176,7 +177,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
         form.addView(chips, tokenRowParams(activity));
 
         DialogView dialog = new DialogView(activity)
-                .setTitle(StringRef.str("piko_newx_download_filename_title"))
+                .setTitle(NewXStrings.str("piko_newx_download_filename_title"))
                 .setScrollableBodyView(form);
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
@@ -195,26 +196,26 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
                 String error = DownloadFileName.validationError(value);
                 preview.setText(error != null
                         ? error
-                        : StringRef.str(
+                        : NewXStrings.str(
                                 "piko_newx_download_options_filename_preview",
                                 DownloadFileName.preview(value)
                         ));
             }
         });
-        preview.setText(StringRef.str(
+        preview.setText(NewXStrings.str(
                 "piko_newx_download_options_filename_preview",
                 DownloadFileName.preview(input.getText().toString())
         ));
 
         ButtonView cancel = NewXSettingsUi.dialogButton(
                 activity,
-                StringRef.str("piko_newx_settings_cancel")
+                NewXStrings.str("piko_newx_settings_cancel")
         );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
 
         ButtonView reset = NewXSettingsUi.dialogButton(
                 activity,
-                StringRef.str("piko_newx_download_options_filename_reset")
+                NewXStrings.str("piko_newx_download_options_filename_reset")
         );
         reset.setOnClickListener(ignored -> {
             input.setText(DownloadFileName.DEFAULT_TEMPLATE);
@@ -223,7 +224,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
 
         ButtonView save = NewXSettingsUi.dialogButton(
                 activity,
-                StringRef.str("piko_newx_settings_ok")
+                NewXStrings.str("piko_newx_settings_ok")
         );
         save.setOnClickListener(ignored -> {
             String value = input.getText().toString();

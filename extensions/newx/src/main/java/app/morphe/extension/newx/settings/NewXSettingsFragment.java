@@ -11,7 +11,6 @@ import android.widget.ListView;
 
 import java.util.List;
 
-import app.morphe.extension.shared.StringRef;
 
 @SuppressWarnings("deprecation")
 public final class NewXSettingsFragment extends PreferenceFragment {
@@ -101,7 +100,7 @@ public final class NewXSettingsFragment extends PreferenceFragment {
 
     private void setSearchEmptyState(boolean visible, String query) {
         if (searchField == null) return;
-        CharSequence message = StringRef.str(
+        CharSequence message = NewXStrings.str(
                 "piko_newx_settings_search_no_results",
                 query == null ? "" : query.trim()
         );
@@ -123,7 +122,7 @@ public final class NewXSettingsFragment extends PreferenceFragment {
         if (!(activity instanceof NewXSettingsActivity settingsActivity)) return;
         settingsActivity.setPageTitle(
                 group == null
-                        ? app.morphe.extension.shared.StringRef.str("piko_newx_settings_title")
+                        ? app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_settings_title")
                         : group.title.toString()
         );
         updatePatchVersionFooterVisibility();

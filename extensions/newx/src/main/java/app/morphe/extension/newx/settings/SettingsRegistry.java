@@ -299,7 +299,7 @@ public final class SettingsRegistry {
         registerChoiceOption(
                 settingId,
                 optionId,
-                StringRef.sfc(titleResourceName),
+                NewXStrings.sfc(titleResourceName),
                 titleResourceName,
                 selectedByDefault
         );
@@ -324,7 +324,7 @@ public final class SettingsRegistry {
         registerChoiceOption(
                 settingId,
                 stableOptionId,
-                StringRef.constant(title),
+                NewXStrings.forResourceId(titleResourceId),
                 null,
                 selectedByDefault
         );
@@ -820,7 +820,7 @@ public final class SettingsRegistry {
     }
 
     private static StringRef stringRef(String resourceName) {
-        return StringRef.sfc(resourceName);
+        return NewXStrings.sfc(resourceName);
     }
 
     @Nullable

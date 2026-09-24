@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.newx.featureswitches.FeatureSwitchImportExport;
 import app.morphe.extension.newx.misc.UpdateFont;
@@ -83,7 +82,7 @@ public final class NewXSettingsActivity extends Activity {
     private void onBackStackChanged() {
         updateBackCallback();
         if (getFragmentManager().getBackStackEntryCount() == 0) {
-            setPageTitle(StringRef.str("piko_newx_settings_title"));
+            setPageTitle(NewXStrings.str("piko_newx_settings_title"));
             return;
         }
         setPatchVersionFooterVisible(false);
@@ -178,7 +177,7 @@ public final class NewXSettingsActivity extends Activity {
         );
 
         patchVersionFooter = new TextView(this);
-        patchVersionFooter.setText(StringRef.str(
+        patchVersionFooter.setText(NewXStrings.str(
                 "piko_newx_patch_version",
                 Utils.getPatchesReleaseVersion()
         ));
@@ -219,7 +218,7 @@ public final class NewXSettingsActivity extends Activity {
         ImageButton navigationButton = new ImageButton(this);
         navigationButton.setImageDrawable(navigationIcon);
         navigationButton.setBackgroundColor(Color.TRANSPARENT);
-        navigationButton.setContentDescription(app.morphe.extension.shared.StringRef.str("piko_newx_ui_back"));
+        navigationButton.setContentDescription(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_back"));
         navigationButton.setOnClickListener(ignored -> onBackPressed());
         toolbar.addView(
                 navigationButton,
@@ -230,7 +229,7 @@ public final class NewXSettingsActivity extends Activity {
         );
 
         toolbarTitle = new TextView(this);
-        toolbarTitle.setText(StringRef.str("piko_newx_settings_title"));
+        toolbarTitle.setText(NewXStrings.str("piko_newx_settings_title"));
         toolbarTitle.setTextColor(contentColor);
         toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
         toolbarTitle.setGravity(Gravity.CENTER_VERTICAL);

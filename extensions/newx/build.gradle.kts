@@ -14,6 +14,8 @@ dependencies {
     compileOnly(libs.appcompat)
 
     testImplementation(project(":extensions:newx:stub"))
+    // Locale-aware references extend the same StringRef used in the installed extension.
+    testImplementation(libs.morphe.extensions.library)
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20250517")
 }

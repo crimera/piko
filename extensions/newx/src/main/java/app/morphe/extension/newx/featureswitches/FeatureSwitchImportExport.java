@@ -1,6 +1,6 @@
 package app.morphe.extension.newx.featureswitches;
 
-import static app.morphe.extension.shared.StringRef.str;
+import static app.morphe.extension.newx.settings.NewXStrings.str;
 
 import android.app.Activity;
 import android.content.Intent;

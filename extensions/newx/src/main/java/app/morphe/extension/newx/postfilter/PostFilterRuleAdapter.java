@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.postfilter;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
@@ -11,7 +13,6 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.List;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.Theme;
 
@@ -109,7 +110,7 @@ final class PostFilterRuleAdapter extends BaseAdapter {
 
         NewXSettingsUi.SwitchControl enabled = new NewXSettingsUi.SwitchControl(context);
         enabled.setInteractive(true);
-        enabled.setContentDescription(StringRef.str("piko_newx_post_filtering_rule_enabled"));
+        enabled.setContentDescription(NewXStrings.str("piko_newx_post_filtering_rule_enabled"));
         root.addView(enabled, new LinearLayout.LayoutParams(
                 Theme.dpToPx(context, 52f),
                 Theme.dpToPx(context, 32f)
@@ -119,10 +120,10 @@ final class PostFilterRuleAdapter extends BaseAdapter {
 
     private CharSequence scopeSummary(PostFilterRule rule) {
         if (rule.matchesContent() && rule.matchesUsernames()) {
-            return StringRef.str("piko_newx_post_filtering_scope_both");
+            return NewXStrings.str("piko_newx_post_filtering_scope_both");
         }
-        if (rule.matchesContent()) return StringRef.str("piko_newx_post_filtering_scope_content");
-        return StringRef.str("piko_newx_post_filtering_scope_usernames");
+        if (rule.matchesContent()) return NewXStrings.str("piko_newx_post_filtering_scope_content");
+        return NewXStrings.str("piko_newx_post_filtering_scope_usernames");
     }
 
     private static final class Row {

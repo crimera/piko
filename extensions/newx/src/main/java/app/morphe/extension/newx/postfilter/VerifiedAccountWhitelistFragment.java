@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.postfilter;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -23,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.ButtonView;
@@ -52,7 +53,7 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
         root.addView(content, matchParent());
 
         TextView summary = NewXSettingsUi.summaryText(context);
-        summary.setText(StringRef.str("piko_newx_verified_account_whitelist_summary"));
+        summary.setText(NewXStrings.str("piko_newx_verified_account_whitelist_summary"));
         summary.setPadding(
                 Theme.dpToPx(context, 24f),
                 Theme.dpToPx(context, 16f),
@@ -81,7 +82,7 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
         listContainer.addView(list, matchParent());
 
         emptyState = new TextView(context);
-        emptyState.setText(StringRef.str("piko_newx_verified_account_whitelist_empty"));
+        emptyState.setText(NewXStrings.str("piko_newx_verified_account_whitelist_empty"));
         emptyState.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         emptyState.setTextColor(Theme.secondaryText(context));
         emptyState.setGravity(Gravity.CENTER);
@@ -91,7 +92,7 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
 
         View addButton = NewXSettingsUi.floatingActionButton(
                 context,
-                StringRef.str("piko_newx_verified_account_whitelist_add"),
+                NewXStrings.str("piko_newx_verified_account_whitelist_add"),
                 ignored -> showAccountDialog()
         );
         FrameLayout.LayoutParams addParams = new FrameLayout.LayoutParams(
@@ -116,7 +117,7 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
         super.onResume();
         Activity activity = getActivity();
         if (activity instanceof NewXSettingsActivity settingsActivity) {
-            settingsActivity.setPageTitle(StringRef.str("piko_newx_verified_account_whitelist_title"));
+            settingsActivity.setPageTitle(NewXStrings.str("piko_newx_verified_account_whitelist_title"));
         }
         refreshAccounts();
     }
@@ -134,7 +135,7 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
 
         EditText account = NewXSettingsUi.textInput(
                 context,
-                StringRef.str("piko_newx_verified_account_whitelist_account_hint"),
+                NewXStrings.str("piko_newx_verified_account_whitelist_account_hint"),
                 InputType.TYPE_CLASS_TEXT
         );
         form.addView(account, new LinearLayout.LayoutParams(-1, -2));
@@ -146,21 +147,21 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
         DialogView dialog = new DialogView(context)
-                .setTitle(StringRef.str("piko_newx_verified_account_whitelist_add_title"))
+                .setTitle(NewXStrings.str("piko_newx_verified_account_whitelist_add_title"))
                 .setScrollableBodyView(form);
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
         ButtonView cancel = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_verified_account_whitelist_cancel")
+                NewXStrings.str("piko_newx_verified_account_whitelist_cancel")
         );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
 
         ButtonView save = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_verified_account_whitelist_save")
+                NewXStrings.str("piko_newx_verified_account_whitelist_save")
         );
         save.setOnClickListener(ignored -> {
             try {
@@ -178,8 +179,8 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
 
     private CharSequence validationMessage(VerifiedAccountWhitelistStore.ValidationError error) {
         return switch (error) {
-            case BLANK_ACCOUNT -> StringRef.str("piko_newx_verified_account_whitelist_error_blank");
-            case DUPLICATE_ACCOUNT -> StringRef.str("piko_newx_verified_account_whitelist_error_duplicate");
+            case BLANK_ACCOUNT -> NewXStrings.str("piko_newx_verified_account_whitelist_error_blank");
+            case DUPLICATE_ACCOUNT -> NewXStrings.str("piko_newx_verified_account_whitelist_error_duplicate");
         };
     }
 

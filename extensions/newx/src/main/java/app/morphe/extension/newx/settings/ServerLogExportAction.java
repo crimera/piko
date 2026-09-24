@@ -4,7 +4,6 @@ import android.app.Activity;
 
 import java.util.List;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
 public final class ServerLogExportAction implements SettingsActionHandler {
@@ -31,6 +30,6 @@ public final class ServerLogExportAction implements SettingsActionHandler {
     }
 
     private static void showToast(Activity activity, String resourceName) {
-        activity.runOnUiThread(() -> Utils.showToastShort(StringRef.str(resourceName)));
+        activity.runOnUiThread(() -> Utils.showToastShort(NewXStrings.str(resourceName)));
     }
 }

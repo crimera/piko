@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.featureswitches;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -27,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.ButtonView;
@@ -58,7 +59,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
 
         search = NewXSettingsUi.textInput(
                 context,
-                StringRef.str("piko_newx_feature_switch_search_hint"),
+                NewXStrings.str("piko_newx_feature_switch_search_hint"),
                 InputType.TYPE_CLASS_TEXT
         );
         search.setSingleLine(true);
@@ -87,7 +88,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
 
         View addButton = NewXSettingsUi.floatingActionButton(
                 context,
-                StringRef.str("piko_newx_feature_switch_add"),
+                NewXStrings.str("piko_newx_feature_switch_add"),
                 ignored -> showAddDialog()
         );
         FrameLayout.LayoutParams addParams = new FrameLayout.LayoutParams(
@@ -126,7 +127,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         super.onResume();
         Activity activity = getActivity();
         if (activity instanceof NewXSettingsActivity settingsActivity) {
-            settingsActivity.setPageTitle(StringRef.str("piko_newx_feature_switches_title"));
+            settingsActivity.setPageTitle(NewXStrings.str("piko_newx_feature_switches_title"));
         }
         refresh();
     }
@@ -147,7 +148,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
 
         EditText key = NewXSettingsUi.textInput(
                 context,
-                StringRef.str("piko_newx_feature_switch_key_hint"),
+                NewXStrings.str("piko_newx_feature_switch_key_hint"),
                 InputType.TYPE_CLASS_TEXT
         );
         key.setSingleLine(true);
@@ -164,7 +165,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         );
 
         TextView typeTitle = NewXSettingsUi.titleText(context);
-        typeTitle.setText(StringRef.str("piko_newx_feature_switch_value_type"));
+        typeTitle.setText(NewXStrings.str("piko_newx_feature_switch_value_type"));
         typeTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         typeTitle.setSingleLine(true);
         typeRow.addView(typeTitle, new LinearLayout.LayoutParams(0, -2, 1f));
@@ -206,14 +207,14 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
         DialogView dialog = new DialogView(context)
-                .setTitle(StringRef.str("piko_newx_feature_switch_add_title"))
+                .setTitle(NewXStrings.str("piko_newx_feature_switch_add_title"))
                 .setBodyView(form);
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
         ButtonView next = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_feature_switch_next")
+                NewXStrings.str("piko_newx_feature_switch_next")
         );
         next.setOnClickListener(ignored -> {
             String featureKey = key.getText().toString().trim();
@@ -247,7 +248,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         if (featureType == FeatureSwitchStore.ValueType.BOOLEAN) {
             booleanValue = NewXSettingsUi.switchRow(
                     context,
-                    StringRef.str("piko_newx_feature_switch_boolean_value"),
+                    NewXStrings.str("piko_newx_feature_switch_boolean_value"),
                     null,
                     Boolean.TRUE.equals(effectiveValue)
             );
@@ -272,7 +273,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
         DialogView dialog = new DialogView(context)
-                .setTitle(StringRef.str("piko_newx_feature_switch_edit_title"))
+                .setTitle(NewXStrings.str("piko_newx_feature_switch_edit_title"))
                 .setSubtitle(featureKey)
                 .setBodyView(form);
         ButtonView remove = null;
@@ -280,7 +281,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
             remove = new ButtonView(
                     context,
                     ButtonView.ButtonStyle.TEXT,
-                    StringRef.str("piko_newx_feature_switch_remove")
+                    NewXStrings.str("piko_newx_feature_switch_remove")
             );
             remove.setTextColor(Color.rgb(244, 33, 46));
             remove.setOnClickListener(ignored -> {
@@ -295,7 +296,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         ButtonView save = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_feature_switch_save")
+                NewXStrings.str("piko_newx_feature_switch_save")
         );
         NewXSettingsUi.SwitchRow finalBooleanValue = booleanValue;
         EditText finalTextValue = textValue;
@@ -333,7 +334,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
     }
 
     private void showValidation(TextView validation, String resourceName) {
-        validation.setText(StringRef.str(resourceName));
+        validation.setText(NewXStrings.str(resourceName));
         validation.setVisibility(View.VISIBLE);
     }
 
@@ -388,7 +389,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
     }
 
     private String typeLabel(FeatureSwitchStore.ValueType type) {
-        return StringRef.str(switch (type) {
+        return NewXStrings.str(switch (type) {
             case BOOLEAN -> "piko_newx_feature_switch_type_boolean";
             case INT -> "piko_newx_feature_switch_type_int";
             case LONG -> "piko_newx_feature_switch_type_long";
@@ -412,7 +413,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
     }
 
     private CharSequence editorHint(FeatureSwitchStore.ValueType type) {
-        return StringRef.str(switch (type) {
+        return NewXStrings.str(switch (type) {
             case INT, LONG, FLOAT, DOUBLE -> "piko_newx_feature_switch_number_value";
             case STRING -> "piko_newx_feature_switch_string_value";
             case STRING_LIST -> "piko_newx_feature_switch_list_value";
@@ -443,7 +444,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         String query = search == null ? "" : search.getText().toString();
         List<FeatureSwitchStore.Entry> entries = store.snapshot(query);
         adapter.submit(entries, query);
-        emptyState.setText(StringRef.str(query.trim().isEmpty()
+        emptyState.setText(NewXStrings.str(query.trim().isEmpty()
                 ? "piko_newx_feature_switch_empty"
                 : "piko_newx_feature_switch_no_results"));
         emptyState.setVisibility(entries.isEmpty() ? View.VISIBLE : View.GONE);

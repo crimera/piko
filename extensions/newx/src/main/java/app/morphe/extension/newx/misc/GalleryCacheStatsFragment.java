@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.misc;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -20,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
@@ -72,7 +73,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         ButtonView refresh = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.FILLED,
-                StringRef.str("piko_newx_gallery_cache_refresh")
+                NewXStrings.str("piko_newx_gallery_cache_refresh")
         );
         refresh.setOnClickListener(ignored -> loadStats());
         LinearLayout.LayoutParams refreshParams = new LinearLayout.LayoutParams(0, -2, 1f);
@@ -82,7 +83,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         ButtonView clear = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.TONAL,
-                StringRef.str("piko_newx_gallery_cache_clear")
+                NewXStrings.str("piko_newx_gallery_cache_clear")
         );
         clear.setOnClickListener(ignored -> confirmClear());
         buttons.addView(clear, new LinearLayout.LayoutParams(0, -2, 1f));
@@ -97,7 +98,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         Activity activity = getActivity();
         if (activity instanceof NewXSettingsActivity settingsActivity) {
             settingsActivity.setPageTitle(
-                    StringRef.str("piko_newx_gallery_cache_stats_title"));
+                    NewXStrings.str("piko_newx_gallery_cache_stats_title"));
         }
         loadStats();
     }
@@ -114,7 +115,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         Context appContext = activity.getApplicationContext();
         if (appContext == null) appContext = activity;
         Context context = appContext;
-        setStatus(StringRef.str("piko_newx_gallery_cache_loading").toString());
+        setStatus(NewXStrings.str("piko_newx_gallery_cache_loading").toString());
         new Thread(() -> {
             MediaDiskCache.Stats disk;
             MediaThumbnailLoader.SessionStats session;
@@ -143,18 +144,18 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         List<CharSequence> diskRows = diskRows(disk);
         List<CharSequence> sessionRows = sessionRows(session);
         addSection(
-                StringRef.str("piko_newx_gallery_cache_disk_title"),
+                NewXStrings.str("piko_newx_gallery_cache_disk_title"),
                 diskRows.isEmpty()
-                        ? List.of(StringRef.str("piko_newx_gallery_cache_empty"))
+                        ? List.of(NewXStrings.str("piko_newx_gallery_cache_empty"))
                         : diskRows
         );
         addSection(
-                StringRef.str("piko_newx_gallery_cache_session_title"),
+                NewXStrings.str("piko_newx_gallery_cache_session_title"),
                 sessionRows
         );
         addSection(
-                StringRef.str("piko_newx_gallery_cache_limits_title"),
-                List.of(StringRef.str(
+                NewXStrings.str("piko_newx_gallery_cache_limits_title"),
+                List.of(NewXStrings.str(
                         "piko_newx_gallery_cache_limits",
                         formatBytes(MediaDiskCache.MAX_DISK_CACHE_BYTES),
                         formatBytes(MediaDiskCache.MAX_DISK_ENTRY_BYTES),
@@ -187,27 +188,27 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         if (disk.entryCount <= 0) return lines;
         int percent = MediaDiskCache.MAX_DISK_CACHE_BYTES <= 0 ? 0
                 : (int) Math.min(100L, disk.totalBytes * 100L / MediaDiskCache.MAX_DISK_CACHE_BYTES);
-        lines.add(StringRef.str(
+        lines.add(NewXStrings.str(
                 "piko_newx_gallery_cache_usage",
                 formatBytes(disk.totalBytes),
                 formatBytes(MediaDiskCache.MAX_DISK_CACHE_BYTES),
                 percent
         ));
-        lines.add(StringRef.str("piko_newx_gallery_cache_entries", disk.entryCount));
-        lines.add(StringRef.str(
+        lines.add(NewXStrings.str("piko_newx_gallery_cache_entries", disk.entryCount));
+        lines.add(NewXStrings.str(
                 "piko_newx_gallery_cache_largest", formatBytes(disk.largestBytes)));
         if (disk.oldestModified > 0L) {
-            lines.add(StringRef.str(
+            lines.add(NewXStrings.str(
                     "piko_newx_gallery_cache_oldest", formatInstant(disk.oldestModified)));
         }
         if (disk.newestModified > 0L && disk.newestModified != disk.oldestModified) {
-            lines.add(StringRef.str(
+            lines.add(NewXStrings.str(
                     "piko_newx_gallery_cache_newest", formatInstant(disk.newestModified)));
         }
-        lines.add(StringRef.str("piko_newx_gallery_cache_tmp", disk.tmpCount));
+        lines.add(NewXStrings.str("piko_newx_gallery_cache_tmp", disk.tmpCount));
         long evicted = MediaDiskCache.evictedEntries();
         if (evicted > 0L) {
-            lines.add(StringRef.str(
+            lines.add(NewXStrings.str(
                     "piko_newx_gallery_cache_evicted",
                     evicted,
                     formatBytes(MediaDiskCache.evictedBytes())
@@ -218,23 +219,23 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
 
     private static List<CharSequence> sessionRows(MediaThumbnailLoader.SessionStats session) {
         List<CharSequence> lines = new ArrayList<>();
-        lines.add(StringRef.str(
+        lines.add(NewXStrings.str(
                 "piko_newx_gallery_cache_hits_memory", session.extensionMemoryHits));
-        lines.add(StringRef.str(
+        lines.add(NewXStrings.str(
                 "piko_newx_gallery_cache_hits_loader", session.imageLoaderMemoryHits));
-        lines.add(StringRef.str("piko_newx_gallery_cache_hits_disk", session.diskHits));
-        lines.add(StringRef.str(
+        lines.add(NewXStrings.str("piko_newx_gallery_cache_hits_disk", session.diskHits));
+        lines.add(NewXStrings.str(
                 "piko_newx_gallery_cache_network",
                 session.networkSuccess,
                 formatBytes(session.bytesDownloaded),
                 session.networkFailed
         ));
-        lines.add(StringRef.str(
+        lines.add(NewXStrings.str(
                 "piko_newx_gallery_cache_persisted",
                 session.entriesPersisted,
                 session.oversizedSkipped
         ));
-        lines.add(StringRef.str(
+        lines.add(NewXStrings.str(
                 "piko_newx_gallery_cache_memory",
                 session.memoryCacheKilobytes,
                 session.memoryCacheMaxKilobytes
@@ -246,19 +247,19 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         Activity activity = getActivity();
         if (activity == null) return;
         DialogView dialog = new DialogView(activity)
-                .setTitle(StringRef.str("piko_newx_gallery_cache_clear_title"))
-                .setSubtitle(StringRef.str("piko_newx_gallery_cache_clear_message"));
+                .setTitle(NewXStrings.str("piko_newx_gallery_cache_clear_title"))
+                .setSubtitle(NewXStrings.str("piko_newx_gallery_cache_clear_message"));
         dialog.getDialog().setCanceledOnTouchOutside(true);
         ButtonView cancel = new ButtonView(
                 activity,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_settings_cancel")
+                NewXStrings.str("piko_newx_settings_cancel")
         );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
         ButtonView clear = new ButtonView(
                 activity,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_gallery_cache_clear")
+                NewXStrings.str("piko_newx_gallery_cache_clear")
         );
         clear.setTextColor(Color.rgb(244, 33, 46));
         clear.setOnClickListener(ignored -> {
@@ -276,7 +277,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         Context appContext = activity.getApplicationContext();
         if (appContext == null) appContext = activity;
         Context context = appContext;
-        setStatus(StringRef.str("piko_newx_gallery_cache_loading").toString());
+        setStatus(NewXStrings.str("piko_newx_gallery_cache_loading").toString());
         new Thread(() -> {
             int deleted;
             try {
@@ -290,7 +291,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
             if (current == null || destroyed) return;
             current.runOnUiThread(() -> {
                 if (destroyed) return;
-                setStatus(StringRef.str(
+                setStatus(NewXStrings.str(
                         "piko_newx_gallery_cache_cleared", finalDeleted).toString());
                 loadStats();
             });
@@ -318,7 +319,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         if (current == null || destroyed) return;
         current.runOnUiThread(() -> {
             if (destroyed) return;
-            setStatus(StringRef.str("piko_newx_gallery_cache_failed").toString());
+            setStatus(NewXStrings.str("piko_newx_gallery_cache_failed").toString());
         });
     }
 

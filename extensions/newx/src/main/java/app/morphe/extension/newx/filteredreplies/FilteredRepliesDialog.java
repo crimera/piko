@@ -51,17 +51,15 @@ public final class FilteredRepliesDialog {
                 FilteredRepliesStore.shared().getReplies(postId);
 
         if (replies.isEmpty()) {
-            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_filtered_empty"));
+            Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_filtered_empty"));
             return;
         }
 
         BottomSheetView sheet = new BottomSheetView(activity);
-        sheet.setTitle(app.morphe.extension.shared.StringRef.str("piko_newx_filtered_replies_option_label"));
+        sheet.setTitle(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_filtered_replies_option_label"));
 
         int count = replies.size();
-        String subtitle = count == 1
-                ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_filtered_one")
-                : app.morphe.extension.shared.StringRef.str("piko_newx_ui_filtered_many", count);
+        String subtitle = app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_filtered_count", count);
         sheet.setSubtitle(subtitle);
 
         LinearLayout listContainer = new LinearLayout(activity);
@@ -116,7 +114,7 @@ public final class FilteredRepliesDialog {
             String text = reply.getPostText();
             if (!text.isEmpty()) {
                 Utils.setClipboard(text);
-                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_filtered_replies_copied"));
+                Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_filtered_replies_copied"));
             }
             return true;
         });
@@ -177,7 +175,7 @@ public final class FilteredRepliesDialog {
         TextView textView = new TextView(context);
         String postText = reply.getPostText();
         if (postText.isEmpty()) {
-            textView.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_reply_no_text"));
+            textView.setText(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_reply_no_text"));
             textView.setTypeface(UpdateFont.customTypefaceOr(Typeface.defaultFromStyle(Typeface.ITALIC)));
         } else {
             textView.setText(postText);
@@ -223,7 +221,7 @@ public final class FilteredRepliesDialog {
     }
 
     private static void setWhitelistedState(ButtonView button) {
-        button.setText(app.morphe.extension.shared.StringRef.str("piko_newx_filtered_replies_whitelisted"));
+        button.setText(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_filtered_replies_whitelisted"));
         button.setButtonStyle(ButtonView.ButtonStyle.TONAL);
         button.setEnabled(false);
         button.setOnClickListener(null);
@@ -234,17 +232,17 @@ public final class FilteredRepliesDialog {
             String screenName,
             Map<String, List<ButtonView>> authorButtons
     ) {
-        button.setText(app.morphe.extension.shared.StringRef.str("piko_newx_filtered_replies_whitelist_add"));
+        button.setText(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_filtered_replies_whitelist_add"));
         button.setButtonStyle(ButtonView.ButtonStyle.FILLED);
         button.setEnabled(true);
         button.setOnClickListener(v -> {
             try {
                 VerifiedAccountWhitelistStore.shared().add(screenName);
-                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_whitelist_added", screenName));
+                Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_whitelist_added", screenName));
             } catch (VerifiedAccountWhitelistStore.ValidationException e) {
-                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_whitelist_exists", screenName));
+                Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_whitelist_exists", screenName));
             } catch (Exception e) {
-                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_whitelist_failed", e.getMessage()));
+                Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_whitelist_failed", e.getMessage()));
             }
             updateAuthorButtons(authorButtons, screenName);
         });

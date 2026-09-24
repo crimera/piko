@@ -460,9 +460,6 @@
     <string name="piko_newx_ui_download_started">Download started</string>
     <string name="piko_newx_ui_already_downloaded">Already downloaded</string>
     <string name="piko_newx_ui_download_set_folder">Set a download folder in Download options</string>
-    <string name="piko_newx_ui_download_one_started">1 download started</string>
-    <string name="piko_newx_ui_download_one_skipped">1 already downloaded</string>
-    <string name="piko_newx_ui_download_one_failed">1 failed</string>
     <string name="piko_newx_ui_download_media_title">Download media</string>
     <string name="piko_newx_ui_select_media_hint">Select media to save to your device</string>
     <string name="piko_newx_ui_download_merge">Download &amp; Merge</string>
@@ -476,7 +473,6 @@
     <string name="piko_newx_ui_reply_no_text">(No text content)</string>
     <string name="piko_newx_ui_topic_title">For You topics</string>
     <string name="piko_newx_ui_topic_hint">Select topics to show in your For You timeline</string>
-    <string name="piko_newx_ui_topic_snooze_one">Snooze 1 topic</string>
     <string name="piko_newx_ui_reset">Reset</string>
     <string name="piko_newx_ui_resolution_title">Choose resolution</string>
     <string name="piko_newx_ui_quality_title">Choose quality</string>
@@ -491,10 +487,8 @@
     <string name="piko_newx_ui_capture_too_large">Rendered post is too large to capture</string>
     <string name="piko_newx_ui_capture_allocate">Could not allocate the post image</string>
     <string name="piko_newx_ui_capture_save">Could not save the post image</string>
-    <string name="piko_newx_ui_downloads_started">%1$d downloads started</string>
-    <string name="piko_newx_ui_media_skipped">%1$d media already downloaded</string>
-    <string name="piko_newx_ui_downloads_skipped">%1$d already downloaded</string>
-    <string name="piko_newx_ui_downloads_failed">%1$d failed</string>
+    <string name="piko_newx_ui_downloads_started">Downloads started: %1$d</string>
+    <string name="piko_newx_ui_downloads_skipped">Already downloaded: %1$d</string>
     <string name="piko_newx_ui_save_failed">Could not save %1$s</string>
     <string name="piko_newx_ui_media_author">From @%1$s</string>
     <string name="piko_newx_ui_download_all">Download All (%1$d)</string>
@@ -511,12 +505,9 @@
     <string name="piko_newx_ui_whitelist_added">Added @%1$s to whitelist</string>
     <string name="piko_newx_ui_whitelist_exists">@%1$s is already whitelisted</string>
     <string name="piko_newx_ui_whitelist_failed">Failed to whitelist: %1$s</string>
-    <string name="piko_newx_ui_topic_snooze_many">Snooze %1$d topics</string>
     <string name="piko_newx_ui_label_image">Image</string>
     <string name="piko_newx_ui_label_video">Video</string>
     <string name="piko_newx_ui_downloads_channel">Downloads</string>
-    <string name="piko_newx_ui_filtered_one">1 reply hidden by verified accounts filter</string>
-    <string name="piko_newx_ui_filtered_many">%1$d replies hidden by verified accounts filter</string>
     <string name="piko_newx_ui_share_image_label">Share Tweet as Image</string>
     <string name="piko_newx_ui_browse_object">Browse Tweet Object</string>
     <string name="piko_newx_ui_crash_gone">Crash log is no longer available</string>
@@ -532,4 +523,7 @@
     <string name="piko_newx_ui_crash_log_saved">Crash log saved: %1$s</string>
     <string name="piko_newx_ui_copy">Copy</string>
     <string name="piko_newx_ui_crash_channel">Piko crash logs</string>
+    <string name="piko_newx_ui_download_result">Started: %1$d; already downloaded: %2$d; failed: %3$d</string>
+    <string name="piko_newx_ui_topic_snooze_count">Topics to snooze: %1$d</string>
+    <string name="piko_newx_ui_filtered_count">Replies hidden by verified account filtering: %1$d</string>
 </resources>

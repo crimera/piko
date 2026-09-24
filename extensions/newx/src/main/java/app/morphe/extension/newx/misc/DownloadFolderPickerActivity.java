@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.misc;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,7 +10,6 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
 /**
@@ -49,7 +50,7 @@ public final class DownloadFolderPickerActivity extends Activity {
             startActivityForResult(pick, PICK_TREE_REQUEST);
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "No activity available for ACTION_OPEN_DOCUMENT_TREE", exception);
-            Utils.showToastShort(StringRef.str("piko_newx_download_options_cancelled"));
+            Utils.showToastShort(NewXStrings.str("piko_newx_download_options_cancelled"));
             finish();
         }
     }
@@ -62,7 +63,7 @@ public final class DownloadFolderPickerActivity extends Activity {
 
         Uri treeUri = data == null ? null : data.getData();
         if (resultCode != RESULT_OK || treeUri == null) {
-            Utils.showToastShort(StringRef.str("piko_newx_download_options_cancelled"));
+            Utils.showToastShort(NewXStrings.str("piko_newx_download_options_cancelled"));
             finish();
             return;
         }
@@ -84,7 +85,7 @@ public final class DownloadFolderPickerActivity extends Activity {
                 treeUri,
                 DownloadDestination.displayPathFor(treeUri)
         );
-        Utils.showToastShort(StringRef.str("piko_newx_download_options_changed"));
+        Utils.showToastShort(NewXStrings.str("piko_newx_download_options_changed"));
         finish();
     }
 

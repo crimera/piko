@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.featureswitches;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -22,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.Theme;
 
@@ -108,7 +109,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
             ));
-            header.bind(StringRef.str(sectionItem.titleResourceName), sectionItem.collapsed);
+            header.bind(NewXStrings.str(sectionItem.titleResourceName), sectionItem.collapsed);
             header.setOnClickListener(ignored -> toggleSection(sectionItem.overridden));
             return header;
         }
@@ -228,7 +229,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
     }
 
     private String valueText(Object value) {
-        if (value == null) return StringRef.str("piko_newx_feature_switch_null").toString();
+        if (value == null) return NewXStrings.str("piko_newx_feature_switch_null").toString();
         if (value instanceof List<?> list) {
             if (list.isEmpty()) return "[]";
             return "[" + String.join(", ", list.stream()

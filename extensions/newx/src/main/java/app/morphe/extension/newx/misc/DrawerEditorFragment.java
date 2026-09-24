@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.misc;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -31,7 +33,6 @@ import app.morphe.extension.newx.settings.StringSetSetting;
 import app.morphe.extension.newx.ui.ButtonView;
 import app.morphe.extension.newx.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.BooleanSetting;
 import app.morphe.extension.shared.settings.Setting;
@@ -113,7 +114,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         super.onResume();
         Activity activity = getActivity();
         if (activity instanceof NewXSettingsActivity settingsActivity) {
-            settingsActivity.setPageTitle(StringRef.str("piko_newx_drawer_editor_title"));
+            settingsActivity.setPageTitle(NewXStrings.str("piko_newx_drawer_editor_title"));
         }
         rebuildRows();
     }
@@ -130,7 +131,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         restartButton = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.FILLED,
-                StringRef.str("piko_newx_drawer_editor_restart")
+                NewXStrings.str("piko_newx_drawer_editor_restart")
         );
         restartButton.setEnabled(hasPendingChanges);
         restartButton.setOnClickListener(ignored -> confirmRestart());
@@ -148,21 +149,21 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         Context context = requireContext();
         DialogView dialog =
                 new DialogView(context)
-                        .setTitle(StringRef.str("piko_newx_drawer_editor_restart_title"))
-                        .setSubtitle(StringRef.str("piko_newx_drawer_editor_restart_message"));
+                        .setTitle(NewXStrings.str("piko_newx_drawer_editor_restart_title"))
+                        .setSubtitle(NewXStrings.str("piko_newx_drawer_editor_restart_message"));
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
         ButtonView cancel =
                 NewXSettingsUi.dialogButton(
                         context,
-                        StringRef.str("piko_newx_settings_cancel")
+                        NewXStrings.str("piko_newx_settings_cancel")
                 );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
 
         ButtonView restart =
                 NewXSettingsUi.dialogButton(
                         context,
-                        StringRef.str("piko_newx_drawer_editor_restart_confirm")
+                        NewXStrings.str("piko_newx_drawer_editor_restart_confirm")
                 );
         restart.setOnClickListener(ignored -> {
             dialog.dismiss();
@@ -179,7 +180,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
 
         Context context = requireContext();
         TextView hint = NewXSettingsUi.summaryText(context);
-        hint.setText(StringRef.str("piko_newx_drawer_editor_hint"));
+        hint.setText(NewXStrings.str("piko_newx_drawer_editor_hint"));
         hint.setPadding(
                 Theme.dpToPx(context, 24f),
                 Theme.dpToPx(context, 16f),
@@ -210,8 +211,8 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         Collections.sort(
                 sorted,
                 (left, right) -> compareNames(
-                        StringRef.str(left.titleResourceName),
-                        StringRef.str(right.titleResourceName)
+                        NewXStrings.str(left.titleResourceName),
+                        NewXStrings.str(right.titleResourceName)
                 )
         );
         return sorted;
@@ -240,7 +241,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
 
     private TextView sectionHeader(Context context, String titleResourceName) {
         TextView header = NewXSettingsUi.summaryText(context);
-        header.setText(StringRef.str(titleResourceName));
+        header.setText(NewXStrings.str(titleResourceName));
         header.setTextColor(Theme.primaryAccent(context));
         header.setPadding(
                 Theme.dpToPx(context, 24f),
@@ -257,7 +258,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         Context context = requireContext();
         View row = switchRow(
                 context,
-                StringRef.str(shortcut.titleResourceName),
+                NewXStrings.str(shortcut.titleResourceName),
                 DrawerCatalog.drawableFor(shortcut.catalogIconId),
                 Boolean.TRUE.equals(toggle.get()),
                 checked -> {

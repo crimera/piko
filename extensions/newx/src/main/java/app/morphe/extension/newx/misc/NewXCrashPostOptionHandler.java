@@ -20,7 +20,7 @@ public final class NewXCrashPostOptionHandler {
     }
 
     public static String labelFor(Object action, Object originalLabel) {
-        if (isCrashAppAction(action)) return app.morphe.extension.shared.StringRef.str("piko_newx_crash_app_title");
+        if (isCrashAppAction(action)) return app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_crash_app_title");
         return originalLabel instanceof String ? (String) originalLabel : null;
     }
 
@@ -35,7 +35,7 @@ public final class NewXCrashPostOptionHandler {
             NewXCrashHandler.testCrash("post menu");
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to crash from NewX post menu", exception);
-            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_crash_failed"));
+            Utils.showToastShort(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_crash_failed"));
         }
         return true;
     }

@@ -586,13 +586,16 @@ public final class DownloadDestination {
     private static void createNotificationChannel(Context context) {
         NotificationManager manager = notificationManager(context);
         if (manager == null) return;
-        if (manager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) != null) return;
-
-        NotificationChannel channel = new NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                app.morphe.extension.shared.StringRef.str("piko_newx_ui_downloads_channel"),
-                NotificationManager.IMPORTANCE_LOW
-        );
+        NotificationChannel channel = manager.getNotificationChannel(NOTIFICATION_CHANNEL_ID);
+        String name = app.morphe.extension.newx.settings.NewXStrings.str(
+                context, "piko_newx_ui_downloads_channel");
+        if (channel == null) {
+            channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name,
+                    NotificationManager.IMPORTANCE_LOW);
+        } else {
+            // Refresh the display name while retaining the ID and the user's channel settings.
+            channel.setName(name);
+        }
         manager.createNotificationChannel(channel);
     }
 

@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.misc;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import app.morphe.extension.newx.ui.Theme;
@@ -12,7 +14,6 @@ import android.content.Intent;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.ButtonView;
 import app.morphe.extension.newx.ui.DialogView;
@@ -281,7 +282,7 @@ public final class InlineDownloadButton {
             Context context = NewXUtils.findUsableActivity(null);
             Object post = getPresenterPost(presenter);
             if (context == null || post == null) {
-                NewXInAppNotification.show(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_missing"));
+                NewXInAppNotification.show(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_post_missing"));
                 return true;
             }
 
@@ -294,7 +295,7 @@ public final class InlineDownloadButton {
             return true;
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
-            NewXInAppNotification.show(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_media_failed"));
+            NewXInAppNotification.show(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_download_media_failed"));
             return true;
         }
     }
@@ -312,12 +313,12 @@ public final class InlineDownloadButton {
             username = NewXUtils.sourceUsername(postText);
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
-            NewXUtils.runOnUiThread(() -> NewXInAppNotification.show(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_media_failed")));
+            NewXUtils.runOnUiThread(() -> NewXInAppNotification.show(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_download_media_failed")));
             return;
         }
         if (downloads.isEmpty()) {
             NewXUtils.runOnUiThread(() ->
-                    NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_no_media"), username));
+                    NewXInAppNotification.showForUser(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_no_media"), username));
             return;
         }
 
@@ -1029,7 +1030,7 @@ public final class InlineDownloadButton {
             } catch (RuntimeException exception) {
                 NewXLogger.printException(() -> "Unsupported NewX download conflict policy", exception);
                 NewXUtils.runOnUiThread(() ->
-                        NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_start_failed"), username));
+                        NewXInAppNotification.showForUser(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_download_start_failed"), username));
                 return;
             }
 
@@ -1101,14 +1102,14 @@ public final class InlineDownloadButton {
             } catch (RuntimeException exception) {
                 NewXLogger.printException(() -> "Failed to start NewX media download", exception);
                 NewXUtils.runOnUiThread(() ->
-                        NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_start_failed"), username));
+                        NewXInAppNotification.showForUser(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_download_start_failed"), username));
                 return;
             }
             NewXUtils.runOnUiThread(() -> {
                 switch (state) {
-                    case QUEUED -> NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_started"), username);
-                    case SKIPPED -> NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_already_downloaded"), username);
-                    case FAILED -> NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_start_failed"), username);
+                    case QUEUED -> NewXInAppNotification.showForUser(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_download_started"), username);
+                    case SKIPPED -> NewXInAppNotification.showForUser(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_already_downloaded"), username);
+                    case FAILED -> NewXInAppNotification.showForUser(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_download_start_failed"), username);
                 }
             });
         });
@@ -1203,7 +1204,7 @@ public final class InlineDownloadButton {
             boolean failed = !saved;
             if (failed) {
                 NewXUtils.runOnUiThread(() -> NewXInAppNotification.showForUser(
-                        app.morphe.extension.shared.StringRef.str("piko_newx_ui_save_failed", target.fileName()),
+                        app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_save_failed", target.fileName()),
                         username
                 ));
             }
@@ -1222,7 +1223,7 @@ public final class InlineDownloadButton {
     ) {
         Activity activity = currentActivity();
         if (activity == null) {
-            NewXInAppNotification.show(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_set_folder"));
+            NewXInAppNotification.show(app.morphe.extension.newx.settings.NewXStrings.str("piko_newx_ui_download_set_folder"));
             return;
         }
 
@@ -1234,12 +1235,12 @@ public final class InlineDownloadButton {
 
         LinearLayout body = dialogForm(activity);
         TextView retry = NewXSettingsUi.summaryText(activity);
-        retry.setText(StringRef.str("piko_newx_download_first_run_retry"));
+        retry.setText(NewXStrings.str("piko_newx_download_first_run_retry"));
         body.addView(retry, new LinearLayout.LayoutParams(-1, -2));
 
         DialogView dialog = new DialogView(activity)
-                .setTitle(StringRef.str("piko_newx_download_first_run_title"))
-                .setSubtitle(StringRef.str(requirement))
+                .setTitle(NewXStrings.str("piko_newx_download_first_run_title"))
+                .setSubtitle(NewXStrings.str(requirement))
                 .setBodyView(body);
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
@@ -1262,7 +1263,7 @@ public final class InlineDownloadButton {
 
         ButtonView cancel = NewXSettingsUi.dialogButton(
                 activity,
-                StringRef.str("piko_newx_settings_cancel")
+                NewXStrings.str("piko_newx_settings_cancel")
         );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
         dialog.addButton(cancel);
@@ -1275,7 +1276,7 @@ public final class InlineDownloadButton {
             DownloadDestination.MediaKind kind,
             String labelResource
     ) {
-        ButtonView button = NewXSettingsUi.dialogButton(activity, StringRef.str(labelResource));
+        ButtonView button = NewXSettingsUi.dialogButton(activity, NewXStrings.str(labelResource));
         button.setOnClickListener(ignored -> {
             dialog.dismiss();
             // The picker writes the setting itself, so the user just taps download again.
@@ -1319,28 +1320,18 @@ public final class InlineDownloadButton {
     }
 
     private static void showQueueResult(int queued, int skipped, int failed, String username) {
+        final String message;
         if (failed == 0 && skipped == 0) {
-            String message = queued == 1 ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_started") : app.morphe.extension.shared.StringRef.str("piko_newx_ui_downloads_started", queued);
-            NewXInAppNotification.showForUser(message, username);
-            return;
+            message = NewXStrings.str("piko_newx_ui_downloads_started", queued);
+        } else if (queued == 0) {
+            message = failed == 0 && skipped > 0
+                    ? NewXStrings.str("piko_newx_ui_downloads_skipped", skipped)
+                    : NewXStrings.str("piko_newx_ui_download_start_failed");
+        } else {
+            // A complete, quantity-neutral message lets translators choose order and punctuation.
+            message = NewXStrings.str("piko_newx_ui_download_result", queued, skipped, failed);
         }
-        if (queued == 0) {
-            if (failed == 0 && skipped > 0) {
-                NewXInAppNotification.showForUser(skipped == 1
-                        ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_already_downloaded")
-                        : app.morphe.extension.shared.StringRef.str("piko_newx_ui_media_skipped", skipped), username);
-                return;
-            }
-            NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_start_failed"), username);
-            return;
-        }
-        List<String> parts = new ArrayList<>();
-        parts.add(queued == 1 ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_one_started") : app.morphe.extension.shared.StringRef.str("piko_newx_ui_downloads_started", queued));
-        if (skipped > 0) parts.add(skipped == 1
-                ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_one_skipped")
-                : app.morphe.extension.shared.StringRef.str("piko_newx_ui_downloads_skipped", skipped));
-        if (failed > 0) parts.add(failed == 1 ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_one_failed") : app.morphe.extension.shared.StringRef.str("piko_newx_ui_downloads_failed", failed));
-        NewXInAppNotification.showForUser(String.join(", ", parts), username);
+        NewXInAppNotification.showForUser(message, username);
     }
 
 

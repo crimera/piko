@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.misc.UpdateFont;
 import app.morphe.extension.newx.ui.Theme;
 
@@ -71,7 +70,7 @@ final class SettingsSearchField extends LinearLayout {
         input.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         input.setTextColor(Theme.primaryText(context));
         input.setHintTextColor(Theme.secondaryText(context));
-        input.setHint(StringRef.str("piko_newx_settings_search_hint"));
+        input.setHint(NewXStrings.str("piko_newx_settings_search_hint"));
         input.setTypeface(UpdateFont.customTypefaceOr(input.getTypeface()));
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         input.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
@@ -114,7 +113,7 @@ final class SettingsSearchField extends LinearLayout {
                 clearIconId == 0 ? android.R.drawable.ic_menu_close_clear_cancel : clearIconId
         );
         clearButton.setContentDescription(
-                StringRef.str("piko_newx_settings_search_clear")
+                NewXStrings.str("piko_newx_settings_search_clear")
         );
         clearButton.setClickable(true);
         clearButton.setFocusable(true);

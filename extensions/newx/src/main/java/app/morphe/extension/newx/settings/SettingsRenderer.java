@@ -20,7 +20,6 @@ import java.util.Set;
 
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.newx.ui.ButtonView;
@@ -322,7 +321,7 @@ public final class SettingsRenderer {
     }
 
     private static ButtonView dialogButton(Context context, String textResourceName) {
-        return NewXSettingsUi.dialogButton(context, StringRef.str(textResourceName));
+        return NewXSettingsUi.dialogButton(context, NewXStrings.str(textResourceName));
     }
 
     private static boolean validateTextInput(
@@ -343,7 +342,7 @@ public final class SettingsRenderer {
                     () -> "NewX text input validation failed: " + item.id,
                     exception
             );
-            Utils.showToastShort(StringRef.str("piko_newx_setting_validation_failed"));
+            Utils.showToastShort(NewXStrings.str("piko_newx_setting_validation_failed"));
         }
         return false;
     }
@@ -489,7 +488,7 @@ public final class SettingsRenderer {
                 instantiateAction(activity, item.handlerClassDescriptor).run(activity);
             } catch (Exception exception) {
                 NewXLogger.printException(() -> "NewX settings action failed: " + item.id, exception);
-                Utils.showToastShort(StringRef.str("piko_newx_action_failed"));
+                Utils.showToastShort(NewXStrings.str("piko_newx_action_failed"));
             }
             return true;
         });
@@ -512,8 +511,8 @@ public final class SettingsRenderer {
         if (!setting.rebootApp) return;
 
         DialogView dialog = new DialogView(activity)
-                .setTitle(StringRef.str("piko_newx_restart_title"))
-                .setSubtitle(StringRef.str("piko_newx_restart_summary"));
+                .setTitle(NewXStrings.str("piko_newx_restart_title"))
+                .setSubtitle(NewXStrings.str("piko_newx_restart_summary"));
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
         ButtonView cancel = dialogButton(activity, "piko_newx_settings_cancel");
@@ -521,7 +520,7 @@ public final class SettingsRenderer {
         ButtonView restart = new ButtonView(
                 activity,
                 ButtonView.ButtonStyle.FILLED,
-                StringRef.str("piko_newx_restart_now")
+                NewXStrings.str("piko_newx_restart_now")
         );
         restart.setOnClickListener(ignored -> {
             dialog.dismiss();

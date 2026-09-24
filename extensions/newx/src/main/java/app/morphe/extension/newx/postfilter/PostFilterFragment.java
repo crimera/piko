@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.postfilter;
 
+import app.morphe.extension.newx.settings.NewXStrings;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -18,7 +20,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.ButtonView;
@@ -51,7 +52,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
 
         masterSwitch = NewXSettingsUi.switchRow(
                 context,
-                StringRef.str("piko_newx_post_filtering_enabled_title"),
+                NewXStrings.str("piko_newx_post_filtering_enabled_title"),
                 null,
                 store.isEnabled()
         );
@@ -77,7 +78,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         rulesContainer.addView(list, matchParent());
 
         emptyState = new TextView(context);
-        emptyState.setText(StringRef.str("piko_newx_post_filtering_empty"));
+        emptyState.setText(NewXStrings.str("piko_newx_post_filtering_empty"));
         emptyState.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         emptyState.setTextColor(Theme.secondaryText(context));
         emptyState.setGravity(Gravity.CENTER);
@@ -87,7 +88,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
 
         addButton = NewXSettingsUi.floatingActionButton(
                 context,
-                StringRef.str("piko_newx_post_filtering_add"),
+                NewXStrings.str("piko_newx_post_filtering_add"),
                 ignored -> showRuleDialog(null)
         );
         FrameLayout.LayoutParams addParams = new FrameLayout.LayoutParams(
@@ -112,7 +113,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         super.onResume();
         Activity activity = getActivity();
         if (activity instanceof NewXSettingsActivity settingsActivity) {
-            settingsActivity.setPageTitle(StringRef.str("piko_newx_post_filtering_title"));
+            settingsActivity.setPageTitle(NewXStrings.str("piko_newx_post_filtering_title"));
         }
         refreshRules();
     }
@@ -141,7 +142,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
 
         EditText phrase = NewXSettingsUi.textInput(
                 context,
-                StringRef.str("piko_newx_post_filtering_phrase_hint"),
+                NewXStrings.str("piko_newx_post_filtering_phrase_hint"),
                 InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
         );
         if (editingRule != null) phrase.setText(editingRule.getPhrase());
@@ -168,7 +169,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
         DialogView dialog = new DialogView(context)
-                .setTitle(StringRef.str(editingRule == null
+                .setTitle(NewXStrings.str(editingRule == null
                         ? "piko_newx_post_filtering_add_title"
                         : "piko_newx_post_filtering_edit_title"))
                 .setScrollableBodyView(form);
@@ -177,14 +178,14 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         ButtonView cancel = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_post_filtering_cancel")
+                NewXStrings.str("piko_newx_post_filtering_cancel")
         );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
 
         ButtonView save = new ButtonView(
                 context,
                 ButtonView.ButtonStyle.TEXT,
-                StringRef.str("piko_newx_post_filtering_save")
+                NewXStrings.str("piko_newx_post_filtering_save")
         );
         save.setOnClickListener(ignored -> {
             try {
@@ -215,7 +216,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
             ButtonView remove = new ButtonView(
                     context,
                     ButtonView.ButtonStyle.TEXT,
-                    StringRef.str("piko_newx_post_filtering_remove")
+                    NewXStrings.str("piko_newx_post_filtering_remove")
             );
             remove.setTextColor(Color.rgb(244, 33, 46));
             remove.setOnClickListener(ignored -> {
@@ -230,9 +231,9 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
 
     private CharSequence validationMessage(PostFilterRuleStore.ValidationError error) {
         return switch (error) {
-            case BLANK_PHRASE -> StringRef.str("piko_newx_post_filtering_error_blank");
-            case NO_SCOPE -> StringRef.str("piko_newx_post_filtering_error_scope");
-            case DUPLICATE_PHRASE -> StringRef.str("piko_newx_post_filtering_error_duplicate");
+            case BLANK_PHRASE -> NewXStrings.str("piko_newx_post_filtering_error_blank");
+            case NO_SCOPE -> NewXStrings.str("piko_newx_post_filtering_error_scope");
+            case DUPLICATE_PHRASE -> NewXStrings.str("piko_newx_post_filtering_error_duplicate");
         };
     }
 
@@ -241,7 +242,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
             String textResource,
             boolean checked
     ) {
-        return NewXSettingsUi.switchRow(context, StringRef.str(textResource), null, checked);
+        return NewXSettingsUi.switchRow(context, NewXStrings.str(textResource), null, checked);
     }
 
     private void refreshRules() {

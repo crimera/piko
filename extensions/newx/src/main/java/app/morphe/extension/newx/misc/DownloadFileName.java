@@ -371,10 +371,10 @@ public final class DownloadFileName {
     }
 
     private static String stringRef(String name) {
-        return app.morphe.extension.shared.StringRef.str(name);
+        return app.morphe.extension.newx.settings.NewXStrings.str(name);
     }
 
     private static String formatStringRef(String name, Object argument) {
-        return app.morphe.extension.shared.StringRef.str(name, argument);
+        return app.morphe.extension.newx.settings.NewXStrings.str(name, argument);
     }
 }
