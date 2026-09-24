@@ -13,12 +13,14 @@ import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import app.crimera.patches.newx.utils.destinationRegisterOrNull
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.morphe.patcher.patch.BytecodePatchContext
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderSwitchElement
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
@@ -31,6 +33,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
 
+private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 internal const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 internal const val FUNCTION2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 internal const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
@@ -62,7 +65,6 @@ internal data class NavBarItemContentTarget(
 
 /** Resolved NewX navigation tab data shared by all navigation bar patches. */
 internal data class NewXNavBarTabData(
-    val componentClass: String,
     val navigationType: String,
     val tabDataValueType: String,
 )
@@ -142,7 +144,6 @@ internal fun validateNewXNavBarTabData(match: Match): NewXNavBarTabData {
         ?: throw PatchException("NewX tabData Map.put value type could not be resolved")
 
     return NewXNavBarTabData(
-        componentClass = match.method.definingClass.toString(),
         navigationType = tabTypeDescriptor,
         tabDataValueType = tabDataValueType,
     )
@@ -169,6 +170,7 @@ internal data class TabDataFilterTarget(
     val method: MutableMethod,
     val insertionIndex: Int,
     val tabDataRegister: Int,
+    val resultType: String,
 )
 
 private const val TAB_DATA_ARG_INDEX = 9
@@ -176,6 +178,7 @@ private const val STATE_TAB_DATA_PARAMETER_INDEX = 8
 private val STATE_CONSTRUCTOR_PARAMETER_COUNTS = setOf(16, 17, 18)
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
+private const val LINKED_HASH_MAP_DESCRIPTOR = "Ljava/util/LinkedHashMap;"
 
 /** Resolves the state constructor argument that receives the tab map. */
 internal fun resolveNewXNavBarFilterTarget(match: Match): TabDataFilterTarget {
@@ -192,27 +195,59 @@ internal fun resolveNewXNavBarFilterTarget(match: Match): TabDataFilterTarget {
         throw PatchException("NewX tabData Map.put fingerprint anchor is invalid")
     }
 
+    val mapPut =
+        mapPutInstruction as? Instruction35c
+            ?: throw PatchException("NewX tabData Map.put is not a 35c instruction")
+    val mapRegister =
+        mapPut.registersUsed.firstOrNull()
+            ?: throw PatchException("NewX tabData Map.put has no map register")
+
     val stateInitIndex = match.method.findStateInitIndex(mapPutIndex)
-    val stateInitInstruction =
-        match.method.instructions.getOrNull(stateInitIndex) as? Instruction3rc
-            ?: throw PatchException("NewX tabData State constructor is not a range instruction")
-    if (stateInitInstruction.opcode != Opcode.INVOKE_DIRECT_RANGE) {
-        throw PatchException("NewX tabData State constructor is not invoke-direct/range")
-    }
-    if (TAB_DATA_ARG_INDEX !in 0 until stateInitInstruction.registerCount) {
-        throw PatchException(
-            "NewX tabData argument index $TAB_DATA_ARG_INDEX is outside the " +
-                "${stateInitInstruction.registerCount}-register State constructor range",
+    if (stateInitIndex != null) {
+        val stateInitInstruction =
+            match.method.instructions.getOrNull(stateInitIndex) as? Instruction3rc
+                ?: throw PatchException("NewX tabData State constructor is not a range instruction")
+        if (stateInitInstruction.opcode != Opcode.INVOKE_DIRECT_RANGE) {
+            throw PatchException("NewX tabData State constructor is not invoke-direct/range")
+        }
+        if (TAB_DATA_ARG_INDEX !in 0 until stateInitInstruction.registerCount) {
+            throw PatchException(
+                "NewX tabData argument index $TAB_DATA_ARG_INDEX is outside the " +
+                    "${stateInitInstruction.registerCount}-register State constructor range",
+            )
+        }
+        return TabDataFilterTarget(
+            method = match.method,
+            insertionIndex = stateInitIndex,
+            tabDataRegister = stateInitInstruction.startRegister + TAB_DATA_ARG_INDEX,
+            resultType = MAP_DESCRIPTOR,
         )
+    }
+
+    // 12.29 wraps the tab map in a landing wrapper constructor instead of a state holder.
+    val wrapperInitIndex = match.method.findTabDataWrapperInitIndex(mapPutIndex, mapRegister)
+    val wrapperInitInstruction =
+        match.method.instructions.getOrNull(wrapperInitIndex) as? Instruction35c
+            ?: throw PatchException("NewX tabData wrapper constructor is not a 35c instruction")
+    val wrapperReference =
+        wrapperInitInstruction.getReference<MethodReference>()
+            ?: throw PatchException("NewX tabData wrapper constructor has no method reference")
+    val mapArgumentIndex =
+        wrapperReference.parameterTypes.indexOfFirst { type ->
+            type.toString() == LINKED_HASH_MAP_DESCRIPTOR
+        }
+    if (mapArgumentIndex < 0) {
+        throw PatchException("NewX tabData wrapper constructor has no LinkedHashMap argument")
     }
     return TabDataFilterTarget(
         method = match.method,
-        insertionIndex = stateInitIndex,
-        tabDataRegister = stateInitInstruction.startRegister + TAB_DATA_ARG_INDEX,
+        insertionIndex = wrapperInitIndex,
+        tabDataRegister = wrapperInitInstruction.registersUsed[mapArgumentIndex + 1],
+        resultType = LINKED_HASH_MAP_DESCRIPTOR,
     )
 }
 
-private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int {
+private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int? {
     val candidates =
         instructions
             .drop(anchorIndex + 1)
@@ -237,20 +272,102 @@ private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int {
                 instruction.location.index
             }
 
-    return requireExactlyOne("stable NewX tabData State constructor", candidates)
+    return requireAtMostOne("stable NewX tabData State constructor", candidates)
+}
+
+private fun MutableMethod.findTabDataWrapperInitIndex(
+    anchorIndex: Int,
+    mapRegister: Int,
+): Int {
+    val candidates =
+        instructions
+            .drop(anchorIndex + 1)
+            .mapNotNull { instruction ->
+                if (instruction.opcode != Opcode.INVOKE_DIRECT) return@mapNotNull null
+
+                val invoke = instruction as? Instruction35c ?: return@mapNotNull null
+                val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+                val parameters = reference.parameterTypes.map { it.toString() }
+                if (reference.name != "<init>" ||
+                    reference.returnType != "V" ||
+                    parameters != listOf(MAP_DESCRIPTOR, "Z", LINKED_HASH_MAP_DESCRIPTOR)
+                ) {
+                    return@mapNotNull null
+                }
+                // Tie the wrapper to the exact map the fingerprint built, so no obfuscated owner
+                // is needed and a stray (Map, Z, LinkedHashMap) constructor cannot match.
+                val linkedHashMapIndex = parameters.indexOf(LINKED_HASH_MAP_DESCRIPTOR)
+                if (invoke.registersUsed.getOrNull(linkedHashMapIndex + 1) != mapRegister) {
+                    return@mapNotNull null
+                }
+
+                instruction.location.index
+            }
+
+    return requireExactlyOne("NewX tabData wrapper constructor", candidates)
+}
+
+/**
+ * The tab change methods consume the navigation tab (optionally with a reselect Function0) and
+ * perform the stack navigation. The plain parameter shape excludes the MainActivity deep-link
+ * handlers, which share the stack-navigation call but also take a route and arguments.
+ */
+context(context: BytecodePatchContext)
+internal fun resolveTabChangeMethods(tabData: NewXNavBarTabData): List<MutableMethod> {
+    val matches = mutableListOf<TabChangeMethodKey>()
+    context.classDefForEach { classDef ->
+        classDef.methods.forEach { method ->
+            if (method.implementation == null) return@forEach
+            if (method.returnType.toString() != "V") return@forEach
+            val parameters = method.parameterTypes.map(CharSequence::toString)
+            if (parameters.firstOrNull() != tabData.navigationType) return@forEach
+            if (!parameters.isTabChangeSignature()) return@forEach
+            if (!method.hasStackNavigationCall()) return@forEach
+            matches += TabChangeMethodKey(classDef.type.toString(), method.name, parameters)
+        }
+    }
+    if (matches.isEmpty()) {
+        throw PatchException(
+            "Expected at least one NewX tab change method for ${tabData.navigationType}, found 0",
+        )
+    }
+    return matches.map { key -> mutableTabChangeMethod(key) }
+}
+
+private fun List<String>.isTabChangeSignature(): Boolean =
+    size == 1 || (size == 2 && this[1] == FUNCTION0_DESCRIPTOR)
+
+internal data class TabChangeMethodKey(
+    val definingClass: String,
+    val name: String,
+    val parameterTypes: List<String>,
+)
+
+/** Resolves a single navigation component's tab change method, or null when it has none (12.29+). */
+context(context: BytecodePatchContext)
+internal fun resolveComponentTabChangeMethod(
+    componentClass: String,
+    navigationType: String,
+): MutableMethod? {
+    val candidates =
+        context.mutableClassDefBy(componentClass).methods.filter { method ->
+            method.implementation != null &&
+                method.returnType.toString() == "V" &&
+                method.parameterTypes.map(CharSequence::toString) == listOf(navigationType) &&
+                method.hasStackNavigationCall()
+        }
+    return requireAtMostOne("NewX tab change method", candidates) { it.toString() }
 }
 
 context(context: BytecodePatchContext)
-internal fun resolveTabChangeMethod(tabData: NewXNavBarTabData): MutableMethod {
-    val componentClass = context.mutableClassDefBy(tabData.componentClass)
+private fun mutableTabChangeMethod(key: TabChangeMethodKey): MutableMethod {
     val candidates =
-        componentClass.methods.filter { method ->
-            method.implementation != null &&
+        context.mutableClassDefBy(key.definingClass).methods.filter { method ->
+            method.name == key.name &&
                 method.returnType.toString() == "V" &&
-                method.parameterTypes.map(CharSequence::toString) == listOf(tabData.navigationType) &&
-                method.hasStackNavigationCall()
+                method.parameterTypes.map(CharSequence::toString) == key.parameterTypes
         }
-    return requireExactlyOne("NewX tab change method", candidates) { it.toString() }
+    return requireExactlyOne("NewX tab change method ${key.name}", candidates) { it.toString() }
 }
 
 context(context: BytecodePatchContext)
@@ -272,12 +389,13 @@ internal fun resolveTabDataValueConstructor(tabDataValueType: String): MethodRef
     )
 }
 
-internal fun MutableMethod.hasStackNavigationCall(): Boolean =
-    instructions.withIndex().any { (index, instruction) ->
+internal fun Method.hasStackNavigationCall(): Boolean {
+    val methodInstructions = implementation?.instructions?.toList() ?: return false
+    return methodInstructions.withIndex().any { (index, instruction) ->
         if (instruction.opcode != Opcode.IGET_OBJECT) return@any false
         val fieldLoad = instruction as? TwoRegisterInstruction ?: return@any false
         val field = instruction.getReference<FieldReference>() ?: return@any false
-        val call = instructions.getOrNull(index + 1) ?: return@any false
+        val call = methodInstructions.getOrNull(index + 1) ?: return@any false
         if (call.opcode != Opcode.INVOKE_VIRTUAL && call.opcode != Opcode.INVOKE_VIRTUAL_RANGE) {
             return@any false
         }
@@ -288,6 +406,7 @@ internal fun MutableMethod.hasStackNavigationCall(): Boolean =
             reference.parameterTypes.map(CharSequence::toString) ==
                 listOf(FUNCTION2_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
     }
+}
 
 context(context: BytecodePatchContext)
 internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemContentTarget {

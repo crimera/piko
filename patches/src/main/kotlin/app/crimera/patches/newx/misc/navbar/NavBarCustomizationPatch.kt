@@ -167,7 +167,7 @@ val customizeNewXNavBarPatch =
 
             val tabDataConstructor = resolveTabDataValueConstructor(tabData.tabDataValueType)
 
-            resolveTabChangeMethod(tabData).injectReplacementGuard()
+            resolveTabChangeMethods(tabData).forEach { it.injectReplacementGuard() }
             contentTarget.injectReplacementOverride(tabDataConstructor)
         }
     }
@@ -197,6 +197,7 @@ private fun injectNavBarFilter(match: Match) {
             move-object/from16 v$workRegister, v${target.tabDataRegister}
             invoke-static {v$workRegister}, $NAV_BAR_FILTER_DESCRIPTOR->filter(Ljava/util/Map;)Ljava/util/Map;
             move-result-object v$workRegister
+            check-cast v$workRegister, ${target.resultType}
             move-object/16 v${target.tabDataRegister}, v$workRegister
         """.trimIndent(),
     )

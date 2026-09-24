@@ -20,7 +20,7 @@ import app.crimera.patches.newx.misc.navbar.resolveNavBarItemContent
 import app.crimera.patches.newx.misc.navbar.resolveTitleResourceIdAtRowCall
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
-import app.crimera.patches.newx.misc.navbar.resolveTabChangeMethod
+import app.crimera.patches.newx.misc.navbar.resolveComponentTabChangeMethod
 import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.crimera.patches.newx.misc.navbar.validateNewXNavBarTabData
 import app.crimera.patches.newx.misc.navbar.resolveIconDrawables
@@ -995,11 +995,54 @@ private fun MutableMethod.findProfileRowCall(): ProfileRowAnchor {
 private data class DrawerTabNavigation(
     val componentClass: String,
     val enumType: String,
-    val tabChangeDescriptor: String,
+    val tabChangeDescriptor: String?,
+    val tabChangeFunctionField: FieldReference?,
     val closerField: FieldReference,
     val closerMethod: MethodReference,
     val closerArgField: FieldReference,
 )
+
+private val CASE_END_OPCODES = setOf(Opcode.RETURN_OBJECT, Opcode.RETURN_VOID, Opcode.THROW)
+
+/**
+ * Resolves the 12.29+ tab change shape: a captured Function1 field invoked with the tab in the
+ * Communities click. Returns the invoke index and the field it loads, or null for older releases
+ * that push the stack frame inline.
+ */
+private fun List<Instruction>.resolveTabChangeFunction(
+    communitiesIndex: Int,
+    caseEndIndex: Int,
+): Pair<Int, FieldReference>? {
+    for (index in communitiesIndex + 1 until caseEndIndex) {
+        val instruction = this[index]
+        if (instruction.opcode != Opcode.INVOKE_INTERFACE &&
+            instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
+        ) continue
+        val reference = instruction.getReference<MethodReference>() ?: continue
+        if (reference.definingClass.toString() != FUNCTION1_DESCRIPTOR ||
+            reference.name != "invoke" ||
+            reference.parameterTypes.map(CharSequence::toString) != listOf(OBJECT_DESCRIPTOR) ||
+            reference.returnType.toString() != OBJECT_DESCRIPTOR
+        ) continue
+        val receiver = instruction.registersUsed.firstOrNull() ?: continue
+        val field = resolveRegisterField(receiver, index) ?: continue
+        return index to field
+    }
+    return null
+}
+
+private fun List<Instruction>.resolveRegisterField(
+    register: Int,
+    beforeIndex: Int,
+): FieldReference? {
+    for (index in beforeIndex - 1 downTo 0) {
+        val instruction = this[index]
+        if (instruction.destinationRegisterOrNull() != register) continue
+        if (instruction.opcode != Opcode.IGET_OBJECT) return null
+        return instruction.getReference<FieldReference>()
+    }
+    return null
+}
 
 /**
  * Resolves the tab-open contract for the drawer shortcuts: the tab change method shared with
@@ -1010,7 +1053,6 @@ private data class DrawerTabNavigation(
 context(context: BytecodePatchContext)
 private fun resolveDrawerTabNavigation(
     tabData: NewXNavBarTabData,
-    tabChangeMethod: MutableMethod,
 ): DrawerTabNavigation {
     val communitiesField = "${tabData.navigationType}->COMMUNITIES:${tabData.navigationType}"
     // Read-only discovery pass; see the navigation bar patch for why mutable proxies are avoided.
@@ -1054,9 +1096,16 @@ private fun resolveDrawerTabNavigation(
                     instruction.getReference<FieldReference>()?.toString() == communitiesField
             },
         ) { it.toString() }
+    // The Communities case ends at the first return; bound the scan to that case so a later
+    // click handler cannot supply a false tab change or closer.
+    val caseEndIndex =
+        dispatcherInstructions.indices.firstOrNull { index ->
+            index > communitiesIndex &&
+                dispatcherInstructions[index].opcode in CASE_END_OPCODES
+        } ?: dispatcherInstructions.size
     val stackPushIndex =
         dispatcherInstructions.indices.firstOrNull { index ->
-            if (index <= communitiesIndex) return@firstOrNull false
+            if (index <= communitiesIndex || index >= caseEndIndex) return@firstOrNull false
             val instruction = dispatcherInstructions[index]
             if (instruction.opcode != Opcode.INVOKE_VIRTUAL &&
                 instruction.opcode != Opcode.INVOKE_VIRTUAL_RANGE
@@ -1065,10 +1114,25 @@ private fun resolveDrawerTabNavigation(
             reference.returnType.toString() == "V" &&
                 reference.parameterTypes.map(CharSequence::toString) ==
                 listOf(FUNCTION2_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
-        } ?: throw PatchException("NewX Communities drawer click has no tab stack push: $dispatcher")
+        }
+    // 12.29 routes the tab change through a captured Function1 field on the drawer component
+    // instead of pushing the stack frame inline.
+    val tabChangeFunction =
+        if (stackPushIndex == null) {
+            dispatcherInstructions.resolveTabChangeFunction(communitiesIndex, caseEndIndex)
+                ?: throw PatchException(
+                    "NewX Communities drawer click has neither a tab stack push nor a tab " +
+                        "change function: $dispatcher",
+                )
+        } else {
+            null
+        }
+    val tabChangeIndex =
+        stackPushIndex ?: tabChangeFunction?.first
+            ?: throw PatchException("NewX Communities drawer click has no tab change: $dispatcher")
     val closerIndex =
         dispatcherInstructions.indices.firstOrNull { index ->
-            if (index <= stackPushIndex) return@firstOrNull false
+            if (index <= tabChangeIndex || index >= caseEndIndex) return@firstOrNull false
             val instruction = dispatcherInstructions[index]
             if (instruction.opcode != Opcode.INVOKE_INTERFACE &&
                 instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
@@ -1093,7 +1157,7 @@ private fun resolveDrawerTabNavigation(
         requireExactlyOne(
             label = "NewX drawer close field",
             candidates = dispatcherInstructions.indices.filter { index ->
-                if (index <= stackPushIndex || index >= closerIndex) return@filter false
+                if (index <= tabChangeIndex || index >= closerIndex) return@filter false
                 val instruction = dispatcherInstructions[index]
                 if (instruction.opcode != Opcode.IGET_OBJECT) return@filter false
                 val destination = (instruction as? TwoRegisterInstruction)?.registerA
@@ -1108,11 +1172,9 @@ private fun resolveDrawerTabNavigation(
         ) { "$it:${dispatcherInstructions[it].getReference<FieldReference>()}" }
             .let { dispatcherInstructions[it].getReference<FieldReference>() }
             ?: throw PatchException("NewX drawer close field has no field reference: $dispatcher")
-    if (closerField.definingClass.toString() != tabData.componentClass) {
-        throw PatchException(
-            "NewX drawer close field is not on the tab component: $closerField",
-        )
-    }
+    // The dispatcher receiver owns both the close field and (12.27-12.28) the tab change method.
+    // 12.29 moved only the tab change out; the capture target stays the close-field owner.
+    val componentClass = closerField.definingClass.toString()
     if (closerField.type.toString() != closerMethod.definingClass.toString()) {
         throw PatchException(
             "NewX drawer close field type changed: field=${closerField.type}, " +
@@ -1156,12 +1218,23 @@ private fun resolveDrawerTabNavigation(
             "NewX drawer close argument is not a stable API type: $closerArgField",
         )
     }
+    val tabChangeDescriptor =
+        if (tabChangeFunction == null) {
+            val method =
+                resolveComponentTabChangeMethod(componentClass, tabData.navigationType)
+                    ?: throw PatchException(
+                        "NewX tab component $componentClass has no tab change method",
+                    )
+            "${method.definingClass}->${method.name}(" +
+                "${method.parameterTypes.joinToString("")})${method.returnType}"
+        } else {
+            null
+        }
     return DrawerTabNavigation(
-        componentClass = tabData.componentClass,
+        componentClass = componentClass,
         enumType = tabData.navigationType,
-        tabChangeDescriptor =
-            "${tabChangeMethod.definingClass}->${tabChangeMethod.name}(" +
-                "${tabChangeMethod.parameterTypes.joinToString("")})${tabChangeMethod.returnType}",
+        tabChangeDescriptor = tabChangeDescriptor,
+        tabChangeFunctionField = tabChangeFunction?.second,
         closerField = closerField,
         closerMethod = closerMethod,
         closerArgField = closerArgField,
@@ -1170,15 +1243,15 @@ private fun resolveDrawerTabNavigation(
 
 /** Captures the tab component after its constructor finishes so shortcuts can open tabs. */
 context(context: BytecodePatchContext)
-private fun hookDrawerTabComponent(tabData: NewXNavBarTabData) {
-    val classDef = context.mutableClassDefBy(tabData.componentClass)
+private fun hookDrawerTabComponent(componentClass: String) {
+    val classDef = context.mutableClassDefBy(componentClass)
     val superType = classDef.superclass.toString()
     val constructors =
         classDef.methods.filter { method ->
             method.name == "<init>" && method.implementation != null
         }
     if (constructors.isEmpty()) {
-        throw PatchException("NewX tab component has no constructor: ${tabData.componentClass}")
+        throw PatchException("NewX tab component has no constructor: $componentClass")
     }
     constructors.forEach { constructor ->
         val superCallIndex =
@@ -1235,6 +1308,18 @@ private fun replaceDrawerTabOpenerBody(
     while (implementation.instructions.isNotEmpty()) {
         implementation.removeInstruction(implementation.instructions.lastIndex)
     }
+    val tabChange =
+        navigation.tabChangeDescriptor?.let { descriptor ->
+            "invoke-virtual {v1, v0}, $descriptor"
+        } ?: run {
+            val field = navigation.tabChangeFunctionField
+                ?: throw PatchException(
+                    "Drawer tab change is missing on ${navigation.componentClass}",
+                )
+            "iget-object v2, v1, $field\n" +
+                "invoke-interface {v2, v0}, " +
+                "$FUNCTION1_DESCRIPTOR->invoke(Ljava/lang/Object;)Ljava/lang/Object;"
+        }
     expanded.addInstructions(
         0,
         """
@@ -1242,7 +1327,7 @@ private fun replaceDrawerTabOpenerBody(
             sget-object v1, $DRAWER_TAB_OPENER_DESCRIPTOR->component:Ljava/lang/Object;
             if-eqz v1, :piko_drawer_tab_done
             check-cast v1, ${navigation.componentClass}
-            invoke-virtual {v1, v0}, ${navigation.tabChangeDescriptor}
+            $tabChange
             sget-object v0, ${navigation.closerArgField}
             iget-object v2, v1, ${navigation.closerField}
             invoke-interface {v2, v0}, ${navigation.closerMethod.toSmaliDescriptor()}
@@ -1409,7 +1494,6 @@ val customizeNewXDrawerPatch =
                     candidates = NewXTabDataFingerprint.scopedMatchAll(),
                 )
             val tabData = validateNewXNavBarTabData(tabDataMatch)
-            val tabChangeMethod = resolveTabChangeMethod(tabData)
             val tabIconFields = resolveNavBarItemContent(tabData).tabIconFields
             val messagesIcon =
                 tabIconFields["DM"]
@@ -1430,8 +1514,8 @@ val customizeNewXDrawerPatch =
                     ),
                 settingsIconField = settingsIconField,
             )
-            val tabNavigation = resolveDrawerTabNavigation(tabData, tabChangeMethod)
-            hookDrawerTabComponent(tabData)
+            val tabNavigation = resolveDrawerTabNavigation(tabData)
+            hookDrawerTabComponent(tabNavigation.componentClass)
             replaceDrawerTabOpenerBodies(tabNavigation)
             // Emit Messages and Grok directly after the unconditional Profile row, borrowing
             // its registers. Composer changed-flags are only valid at the call site that
