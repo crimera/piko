@@ -39,9 +39,8 @@ private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesh
 private const val SHARE_IMPL_DESCRIPTOR_PREFIX = "Lcom/x/share/impl/"
 private const val DM_SHARESHEET_DESCRIPTOR_PREFIX = "Lcom/x/dm/sharesheet/"
 private const val SHARE_API_I_DESCRIPTOR = "Lcom/x/share/api/i;"
-private const val MOVED_SHARE_HELPER_DESCRIPTOR_PREFIX =
-    "Lcom/google/android/gms/internal/mlkit_vision_common/"
 private const val NAVIGATION_DESCRIPTOR_PREFIX = "Lcom/x/navigation/"
+private const val INTENT_CLASS = "Landroid/content/Intent;"
 private const val SHARE_STATUS_URL_PREFIX = "https://x.com/i/status/"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val INTENT_DESCRIPTOR = "Landroid/content/Intent;"
@@ -81,13 +80,62 @@ internal object ShareSheetCopyStubFingerprint : Fingerprint(
     returnType = "V",
 )
 
-/** Share Intent helper moved out of the share implementation package in 12.23 and later. */
+/**
+ * Share Intent helper that builds the ACTION_SEND Intent for the system share sheet.
+ *
+ * R8 repartitions obfuscated classes into arbitrary fake packages and renumbers class and method
+ * names on every release: 12.27-prod `mlkit_vision_common/d7;->b`, 12.28 `.../v6`, `.../k8`,
+ * `.../z8`, 12.29-alpha `mlkit_vision_face/b6`. No owner descriptor survives, so the resolver
+ * anchors on the construction contract instead: `(String, String) -> Intent` that seeds an
+ * ACTION_SEND Intent and keys EXTRA_TEXT on it.
+ */
 internal object MovedShareIntentBuilderFingerprint : Fingerprint(
-    definingClass = MOVED_SHARE_HELPER_DESCRIPTOR_PREFIX,
     parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
     returnType = INTENT_DESCRIPTOR,
     filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
+    custom = { method, _ -> method.buildsActionSendIntentWithText() },
 )
+
+/** Proves ACTION_SEND seeds the Intent and EXTRA_TEXT keys the share text. */
+private fun Method.buildsActionSendIntentWithText(): Boolean {
+    val methodInstructions = implementation?.instructions?.toList() ?: return false
+
+    fun registersHoldingString(value: String): Set<Int> =
+        methodInstructions.mapNotNull { instruction ->
+            val reference = instruction.getReference<StringReference>() ?: return@mapNotNull null
+            if (reference.string != value) return@mapNotNull null
+            (instruction as? OneRegisterInstruction)?.registerA
+        }.toSet()
+
+    val actionRegisters = registersHoldingString(SEND_ACTION)
+    val textRegisters = registersHoldingString(EXTRA_TEXT)
+    if (actionRegisters.isEmpty() || textRegisters.isEmpty()) return false
+
+    fun List<Instruction>.hasIntentInvoke(
+        name: String,
+        parameterTypes: List<String>,
+        keyArgumentRegister: (List<Int>) -> Int?,
+    ): Boolean =
+        any { instruction ->
+            val reference = instruction.getReference<MethodReference>() ?: return@any false
+            reference.definingClass == INTENT_CLASS &&
+                reference.name == name &&
+                reference.parameterTypes.map(CharSequence::toString) == parameterTypes &&
+                keyArgumentRegister(instruction.registersUsed) != null
+        }
+
+    val seedsAction =
+        methodInstructions.hasIntentInvoke("<init>", listOf(STRING_DESCRIPTOR)) { arguments ->
+            arguments.getOrNull(1)?.takeIf { it in actionRegisters }
+        }
+    val keysExtraText =
+        methodInstructions.hasIntentInvoke(
+            "putExtra",
+            listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
+        ) { arguments -> arguments.getOrNull(1)?.takeIf { it in textRegisters } }
+
+    return seedsAction && keysExtraText
+}
 
 /** Post share Intent builder owning status URL construction (12.28+ static helper). */
 internal object ShareImplIntentBuilderFingerprint : Fingerprint(
