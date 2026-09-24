@@ -590,7 +590,7 @@ public final class DownloadDestination {
 
         NotificationChannel channel = new NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "Downloads",
+                app.morphe.extension.shared.StringRef.str("piko_newx_ui_downloads_channel"),
                 NotificationManager.IMPORTANCE_LOW
         );
         manager.createNotificationChannel(channel);

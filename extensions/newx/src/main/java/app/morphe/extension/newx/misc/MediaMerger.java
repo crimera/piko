@@ -45,7 +45,7 @@ public final class MediaMerger {
             DownloadFileName.PostContext postContext
     ) {
         if (context == null || items == null || items.size() < 2) {
-            NewXInAppNotification.showForUser("At least 2 images are required to merge", username);
+            NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_minimum"), username);
             return;
         }
 
@@ -53,7 +53,7 @@ public final class MediaMerger {
         Context safeContext = applicationContext != null ? applicationContext : context;
 
         NewXInAppNotification.showForUser(
-                "Downloading and merging " + items.size() + " images...",
+                app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_progress", items.size()),
                 username
         );
         MERGE_EXECUTOR.execute(() -> performMerge(safeContext, items, username, postContext));
@@ -78,7 +78,7 @@ public final class MediaMerger {
                 final int sliceIndex = i + 1;
                 if (!downloaded) {
                     NewXLogger.printInfo(() -> LOG_PREFIX + "Failed to download slice " + sliceIndex + " from " + item.url);
-                    NewXInAppNotification.showForUser("Failed to download image slice " + sliceIndex, username);
+                    NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_slice_download_failed", sliceIndex), username);
                     return;
                 }
             }
@@ -94,7 +94,7 @@ public final class MediaMerger {
                 opts.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(tempFiles.get(i).getAbsolutePath(), opts);
                 if (opts.outWidth <= 0 || opts.outHeight <= 0) {
-                    NewXInAppNotification.showForUser("Failed to read dimensions of slice " + (i + 1), username);
+                    NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_slice_dimensions_failed", (i + 1)), username);
                     return;
                 }
                 widths[i] = opts.outWidth;
@@ -143,7 +143,7 @@ public final class MediaMerger {
                 try {
                     mergedBitmap = Bitmap.createBitmap(totalWidth, maxHeight, Bitmap.Config.RGB_565);
                 } catch (OutOfMemoryError oom2) {
-                    NewXInAppNotification.showForUser("Out of memory while stitching images", username);
+                    NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_memory"), username);
                     return;
                 }
             }
@@ -156,7 +156,7 @@ public final class MediaMerger {
                 Bitmap piece = BitmapFactory.decodeFile(tempFiles.get(i).getAbsolutePath());
                 if (piece == null) {
                     mergedBitmap.recycle();
-                    NewXInAppNotification.showForUser("Failed to decode image slice " + (i + 1), username);
+                    NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_slice_decode_failed", (i + 1)), username);
                     return;
                 }
 
@@ -204,12 +204,12 @@ public final class MediaMerger {
             } catch (IOException | RuntimeException exception) {
                 mergedBitmap.recycle();
                 NewXLogger.printException(() -> LOG_PREFIX + "Failed to create merged image document", exception);
-                NewXInAppNotification.showForUser("Failed to save merged image: " + fileName, username);
+                NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_save_failed", fileName), username);
                 return;
             }
             if (target == null) {
                 mergedBitmap.recycle();
-                NewXInAppNotification.showForUser("Merged image already exists: " + fileName, username);
+                NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_exists", fileName), username);
                 return;
             }
 
@@ -219,15 +219,15 @@ public final class MediaMerger {
             if (saved) {
                 // MediaMerger streams the slices itself rather than going through the URL-based
                 // DownloadDestination transfer, so retain its merge-specific completion feedback.
-                NewXInAppNotification.showForUser("Merged image saved: " + target.fileName(), username);
+                NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_saved", target.fileName()), username);
                 NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + target.fileName());
             } else {
-                NewXInAppNotification.showForUser("Failed to save merged image: " + fileName, username);
+                NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_save_failed", fileName), username);
             }
 
         } catch (Throwable t) {
-            NewXLogger.printException(() -> LOG_PREFIX + "Failed to merge images", t);
-            NewXInAppNotification.showForUser("Failed to merge images", username);
+            NewXLogger.printException(() -> LOG_PREFIX + app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_failed"), t);
+            NewXInAppNotification.showForUser(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_failed"), username);
         } finally {
             // Step 8: Clean up all temporary files from cache
             for (File tempFile : tempFiles) {

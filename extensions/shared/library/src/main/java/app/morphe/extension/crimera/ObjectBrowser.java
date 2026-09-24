@@ -33,6 +33,16 @@ import app.morphe.extension.shared.Utils;
 
 public class ObjectBrowser {
 
+    private static String pikoLanguageText(Context context, String name, Object... args) {
+        try {
+            int id = context.getResources().getIdentifier(name, "string", context.getPackageName());
+            if (id != 0) return context.getString(id, args);
+        } catch (Throwable ignored) {
+        }
+        // Last-resort diagnostic only; Android selects default English when a locale is absent.
+        return name;
+    }
+
     private static final int MAX_DISPLAY_LENGTH = 50;
 
     private static class SearchableRow {
@@ -48,7 +58,7 @@ public class ObjectBrowser {
     public static void browseObject(Context context, Object obj) {
         try {
             if (context == null || obj == null) {
-                Utils.showToastShort("Cannot browse null object");
+                Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_null"));
                 return;
             }
 
@@ -56,13 +66,13 @@ public class ObjectBrowser {
             showObjectDialog(context, obj, title, false, null);
         } catch (Exception ex) {
             app.morphe.extension.crimera.PikoUtils.logger(ex);
-            Utils.showToastShort("Could not open object browser");
+            Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_open_failed"));
         }
     }
 
     private static void browseObject(Context context, Object obj, String path) {
         if (context == null || obj == null) {
-            Utils.showToastShort("Cannot browse null object");
+            Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_null"));
             return;
         }
 
@@ -72,7 +82,7 @@ public class ObjectBrowser {
 
     private static void browseClass(Context context, Class<?> clazz) {
         if (clazz.isPrimitive() || clazz == String.class) {
-            Utils.showToastShort("Type: " + clazz.getSimpleName());
+            Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_type", clazz.getSimpleName()));
             return;
         }
 
@@ -88,7 +98,7 @@ public class ObjectBrowser {
         mainContainer.setOrientation(LinearLayout.VERTICAL);
 
         EditText searchBox = new EditText(context);
-        searchBox.setHint("Search fields and methods...");
+        searchBox.setHint(pikoLanguageText(context, "piko_shared_object_browser_search"));
         LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -107,7 +117,7 @@ public class ObjectBrowser {
         Class<?> clazz = classView != null ? classView : (obj != null ? obj.getClass() : null);
         if (clazz == null) {
             TextView error = new TextView(context);
-            error.setText("Could not resolve class: " + title);
+            error.setText(pikoLanguageText(context, "piko_shared_object_browser_class_failed", title));
             container.addView(error);
         } else {
             // Class info section at the top
@@ -117,7 +127,7 @@ public class ObjectBrowser {
         if (clazz != null) {
             // Fields section header
             TextView fieldsHeader = new TextView(context);
-            fieldsHeader.setText("━━ Fields ━━");
+            fieldsHeader.setText(pikoLanguageText(context, "piko_shared_object_browser_fields"));
             fieldsHeader.setTextColor(0xFF64B5F6);
             fieldsHeader.setTypeface(null, Typeface.BOLD);
             fieldsHeader.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(8));
@@ -137,7 +147,7 @@ public class ObjectBrowser {
                     container.addView(row);
                 } catch (Exception e) {
                     TextView errorRow = new TextView(context);
-                    errorRow.setText("Error reading field: " + field.getName());
+                    errorRow.setText(pikoLanguageText(context, "piko_shared_object_browser_field_failed", field.getName()));
                     container.addView(errorRow);
                 }
             }
@@ -146,7 +156,7 @@ public class ObjectBrowser {
         // Methods section
         if (clazz != null) {
             TextView methodsHeader = new TextView(context);
-            methodsHeader.setText("━━ Methods ━━");
+            methodsHeader.setText(pikoLanguageText(context, "piko_shared_object_browser_methods"));
             methodsHeader.setTextColor(0xFF81C784);
             methodsHeader.setTypeface(null, Typeface.BOLD);
             methodsHeader.setPadding(dpToPx(16), dpToPx(24), dpToPx(16), dpToPx(8));
@@ -173,7 +183,7 @@ public class ObjectBrowser {
                     container.addView(row);
                 } catch (Exception e) {
                     TextView errorRow = new TextView(context);
-                    errorRow.setText("Error reading method: " + method.getName());
+                    errorRow.setText(pikoLanguageText(context, "piko_shared_object_browser_method_failed", method.getName()));
                     container.addView(errorRow);
                 }
             }
@@ -198,7 +208,7 @@ public class ObjectBrowser {
 
         mainContainer.addView(scrollView);
         builder.setView(mainContainer);
-        builder.setNeutralButton("Close", null);
+        builder.setNeutralButton(pikoLanguageText(context, "piko_shared_object_browser_close"), null);
         builder.show();
     }
 
@@ -374,7 +384,7 @@ public class ObjectBrowser {
             textView.setTypeface(Typeface.MONOSPACE);
             textView.setOnClickListener(v -> {
                 Utils.setClipboard(String.valueOf(finalFieldValue));
-                Utils.showToastShort("Copied: " + String.valueOf(finalFieldValue));
+                Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_copied", String.valueOf(finalFieldValue)));
             });
             return textView;
         }
@@ -462,9 +472,9 @@ public class ObjectBrowser {
                 if (isVoid) {
                     try {
                         method.invoke(obj);
-                        Utils.showToastShort("Executed: " + methodName + "()");
+                        Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_executed", methodName));
                     } catch (Exception e) {
-                        Utils.showToastShort("Error: " + e.getMessage());
+                        Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_error", e.getMessage()));
                     }
                 } else {
                     try {
@@ -478,7 +488,7 @@ public class ObjectBrowser {
                             browseObject(context, result, methodPath + "()");
                         }
                     } catch (Exception e) {
-                        Utils.showToastShort("Error: " + e.getMessage());
+                        Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_error", e.getMessage()));
                     }
                 }
             });
@@ -489,13 +499,13 @@ public class ObjectBrowser {
 
     private static void showListDialog(Context context, List<?> list, String parentPath) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(parentPath + " (" + list.size() + " items)");
+        builder.setTitle(pikoLanguageText(context, "piko_shared_object_browser_list_title", parentPath, list.size()));
 
         LinearLayout mainContainer = new LinearLayout(context);
         mainContainer.setOrientation(LinearLayout.VERTICAL);
 
         EditText searchBox = new EditText(context);
-        searchBox.setHint("Search items...");
+        searchBox.setHint(pikoLanguageText(context, "piko_shared_object_browser_search_items"));
         LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -535,7 +545,7 @@ public class ObjectBrowser {
                 final String finalValue = String.valueOf(item);
                 textView.setOnClickListener(v -> {
                     Utils.setClipboard(finalValue);
-                    Utils.showToastShort("Copied: " + finalValue);
+                    Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_copied", finalValue));
                 });
             } else {
                 textView.setText("[" + i + "] " + getClassName(item.getClass()) + " ->");
@@ -565,19 +575,19 @@ public class ObjectBrowser {
 
         mainContainer.addView(scrollView);
         builder.setView(mainContainer);
-        builder.setNeutralButton("Close", null);
+        builder.setNeutralButton(pikoLanguageText(context, "piko_shared_object_browser_close"), null);
         builder.show();
     }
 
     private static void showArrayDialog(Context context, Object array, String parentPath) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(parentPath + " (Array)");
+        builder.setTitle(pikoLanguageText(context, "piko_shared_object_browser_array_title", parentPath));
 
         LinearLayout mainContainer = new LinearLayout(context);
         mainContainer.setOrientation(LinearLayout.VERTICAL);
 
         EditText searchBox = new EditText(context);
-        searchBox.setHint("Search items...");
+        searchBox.setHint(pikoLanguageText(context, "piko_shared_object_browser_search_items"));
         LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -619,7 +629,7 @@ public class ObjectBrowser {
                 final String finalValue = String.valueOf(item);
                 textView.setOnClickListener(v -> {
                     Utils.setClipboard(finalValue);
-                    Utils.showToastShort("Copied: " + finalValue);
+                    Utils.showToastShort(pikoLanguageText(context, "piko_shared_object_browser_copied", finalValue));
                 });
             } else {
                 textView.setText("[" + i + "] " + getClassName(item.getClass()) + " ->");
@@ -649,7 +659,7 @@ public class ObjectBrowser {
 
         mainContainer.addView(scrollView);
         builder.setView(mainContainer);
-        builder.setNeutralButton("Close", null);
+        builder.setNeutralButton(pikoLanguageText(context, "piko_shared_object_browser_close"), null);
         builder.show();
     }
 

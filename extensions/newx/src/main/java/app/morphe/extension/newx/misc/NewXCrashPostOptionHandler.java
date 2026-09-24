@@ -11,7 +11,6 @@ public final class NewXCrashPostOptionHandler {
     private static final String OPTION_NAME = NewXPostOptionActions.CRASH_APP_ACTION;
     private static final String CRASH_POST_OPTION_SETTING_ID =
             "newx.advanced.debug_tools.crash_post_option";
-    private static final String OPTION_LABEL = "Crash app";
 
     private NewXCrashPostOptionHandler() {
     }
@@ -21,7 +20,7 @@ public final class NewXCrashPostOptionHandler {
     }
 
     public static String labelFor(Object action, Object originalLabel) {
-        if (isCrashAppAction(action)) return OPTION_LABEL;
+        if (isCrashAppAction(action)) return app.morphe.extension.shared.StringRef.str("piko_newx_crash_app_title");
         return originalLabel instanceof String ? (String) originalLabel : null;
     }
 
@@ -36,7 +35,7 @@ public final class NewXCrashPostOptionHandler {
             NewXCrashHandler.testCrash("post menu");
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to crash from NewX post menu", exception);
-            Utils.showToastShort("Could not crash the app");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_crash_failed"));
         }
         return true;
     }

@@ -57,8 +57,8 @@ final class ForYouTopicFilterSheet {
             LinkedHashSet<String> selected = new LinkedHashSet<>(storedSelection);
 
             BottomSheetView sheet = new BottomSheetView(activity);
-            sheet.setTitle("For You topics");
-            sheet.setSubtitle("Select topics to show in your For You timeline");
+            sheet.setTitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_title"));
+            sheet.setSubtitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_hint"));
 
             LinearLayout body = new LinearLayout(activity);
             body.setOrientation(LinearLayout.VERTICAL);
@@ -121,11 +121,11 @@ final class ForYouTopicFilterSheet {
     private static void updateActionButton(ButtonView button, int selectedCount) {
         if (selectedCount > 0) {
             button.setText(selectedCount == 1
-                    ? "Snooze 1 topic"
-                    : "Snooze " + selectedCount + " topics");
+                    ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_snooze_one")
+                    : app.morphe.extension.shared.StringRef.str("piko_newx_ui_topic_snooze_many", selectedCount));
             button.setButtonStyle(ButtonView.ButtonStyle.FILLED);
         } else {
-            button.setText("Reset");
+            button.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_reset"));
             button.setButtonStyle(ButtonView.ButtonStyle.TONAL);
         }
     }

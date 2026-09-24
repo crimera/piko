@@ -49,7 +49,7 @@ public final class ResolutionChooserDialog {
         }
 
         BottomSheetView dialog = new BottomSheetView(current);
-        dialog.setTitle(isImage(item) ? "Choose resolution" : "Choose quality");
+        dialog.setTitle(isImage(item) ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_resolution_title") : app.morphe.extension.shared.StringRef.str("piko_newx_ui_quality_title"));
         dialog.setSubtitle(subtitleFor(item, username));
 
         Theme.SettingsSnapshot themeSettings = Theme.snapshot();
@@ -58,7 +58,7 @@ public final class ResolutionChooserDialog {
 
         for (InlineDownloadButton.DownloadItem option : item.resolutionOptions) {
             ListItem row = new ListItem(current, themeSettings);
-            row.setTitle(option.label);
+            row.setTitle(("Original".equals(option.label) ? app.morphe.extension.shared.StringRef.str("piko_newx_inline_download_quality_original") : ("Large".equals(option.label) ? app.morphe.extension.shared.StringRef.str("piko_newx_inline_download_quality_large") : ("Medium".equals(option.label) ? app.morphe.extension.shared.StringRef.str("piko_newx_inline_download_quality_medium") : ("Small".equals(option.label) ? app.morphe.extension.shared.StringRef.str("piko_newx_inline_download_quality_small") : option.label)))));
             row.setSubtitle(option.detail != null ? option.detail : option.resolution);
             row.setLeadingIcon(
                     resolveIconType(item),
@@ -84,7 +84,7 @@ public final class ResolutionChooserDialog {
     ) {
         StringBuilder builder = new StringBuilder();
         if (username != null && !username.trim().isEmpty()) {
-            builder.append("From @").append(username.trim());
+            builder.append(app.morphe.extension.shared.StringRef.str("piko_newx_ui_media_author", username.trim()));
         }
         if (item.resolution != null) {
             if (builder.length() > 0) builder.append(" · ");

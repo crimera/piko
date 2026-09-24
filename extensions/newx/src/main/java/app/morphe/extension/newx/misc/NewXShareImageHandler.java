@@ -101,13 +101,13 @@ public final class NewXShareImageHandler {
             Context context = presenterData.getContext();
             Object post = presenterData.getValue();
             if (context == null || post == null) {
-                Utils.showToastShort("Could not find the selected post");
+                Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_missing"));
                 return true;
             }
             shareAsImage(context, post);
             return true;
         } catch (IllegalAccessException exception) {
-            Utils.showToastShort("Could not find the selected post");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_missing"));
             return true;
         }
     }
@@ -125,7 +125,7 @@ public final class NewXShareImageHandler {
             NewXLogger.printException(
                     () -> DEBUG_TAG + ": No activity for context " + context.getClass().getName()
             );
-            Utils.showToastShort("Could not capture the rendered post");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_capture_failed"));
             return;
         }
 
@@ -134,7 +134,7 @@ public final class NewXShareImageHandler {
             if (postId(post) == null) throw new ReflectiveOperationException("Post ID is empty");
             fileName = shareImageFileName(post);
         } catch (ReflectiveOperationException exception) {
-            Utils.showToastShort("Could not identify the selected post");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_identify_failed"));
             return;
         }
         View decorView = activity.getWindow().getDecorView();
@@ -144,7 +144,7 @@ public final class NewXShareImageHandler {
     }
 
     public static String labelFor(Object action, Object originalLabel) {
-        if (isShareImageAction(action)) return "Share Tweet as Image";
+        if (isShareImageAction(action)) return app.morphe.extension.shared.StringRef.str("piko_newx_ui_share_image_label");
         return originalLabel instanceof String ? (String) originalLabel : null;
     }
 
@@ -155,7 +155,7 @@ public final class NewXShareImageHandler {
     private static void captureRenderedPost(Activity activity, Object post, String fileName) {
         View decorView = activity.getWindow().getDecorView();
         if (!decorView.isAttachedToWindow()) {
-            Utils.showToastShort("Post is no longer rendered");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_not_visible"));
             return;
         }
 
@@ -164,11 +164,11 @@ public final class NewXShareImageHandler {
             postId = postId(post);
         } catch (ReflectiveOperationException exception) {
             NewXLogger.printException(() -> DEBUG_TAG + ": Could not resolve post ID at capture", exception);
-            Utils.showToastShort("Post is no longer rendered");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_not_visible"));
             return;
         }
         if (postId == null) {
-            Utils.showToastShort("Post is no longer rendered");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_not_visible"));
             return;
         }
         NewXLogger.printInfo(
@@ -177,14 +177,14 @@ public final class NewXShareImageHandler {
         );
         if (boundsAccessorUnavailable) {
             NewXLogger.printInfo(() -> DEBUG_TAG + ": Window bounds accessor is unavailable");
-            Utils.showToastShort("Post is no longer rendered");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_not_visible"));
             return;
         }
 
         Rect bounds = renderedBounds(postId);
         if (bounds == null) {
             NewXLogger.printException(() -> DEBUG_TAG + ": No resolved bounds for post " + postId);
-            Utils.showToastShort("Post is no longer rendered");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_not_visible"));
             return;
         }
         final Rect selectedBounds = bounds;
@@ -224,13 +224,13 @@ public final class NewXShareImageHandler {
         if (captureBounds.left < 0 || captureBounds.top < 0 ||
                 captureBounds.right > decorView.getWidth() ||
                 captureBounds.bottom > decorView.getHeight()) {
-            Utils.showToastShort("Make the entire post visible before sharing");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_post_show_entire"));
             return;
         }
 
         long pixelCount = (long) captureBounds.width() * captureBounds.height();
         if (pixelCount <= 0 || pixelCount > MAX_CAPTURE_PIXELS) {
-            Utils.showToastShort("Rendered post is too large to capture");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_capture_too_large"));
             return;
         }
 
@@ -240,7 +240,7 @@ public final class NewXShareImageHandler {
                     captureBounds.width(), captureBounds.height(), Bitmap.Config.ARGB_8888
             );
         } catch (RuntimeException | OutOfMemoryError error) {
-            Utils.showToastShort("Could not allocate the post image");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_capture_allocate"));
             return;
         }
 
@@ -255,7 +255,7 @@ public final class NewXShareImageHandler {
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> DEBUG_TAG + ": PixelCopy request failed", exception);
             bitmap.recycle();
-            Utils.showToastShort("Could not capture the rendered post");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_capture_failed"));
         }
     }
 
@@ -271,7 +271,7 @@ public final class NewXShareImageHandler {
                     () -> DEBUG_TAG + ": PixelCopy result=" + result + " for post " + postId
             );
             bitmap.recycle();
-            Utils.showToastShort("Could not capture the rendered post");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_capture_failed"));
             return;
         }
 
@@ -282,7 +282,7 @@ public final class NewXShareImageHandler {
             bitmap.recycle();
         }
         if (uri == null) {
-            Utils.showToastShort("Could not save the post image");
+            Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_capture_save"));
             return;
         }
         shareImage(context, uri);
@@ -777,7 +777,7 @@ public final class NewXShareImageHandler {
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setClipData(ClipData.newRawUri("image", uri));
 
-        Intent chooser = Intent.createChooser(intent, "Share Tweet as Image");
+        Intent chooser = Intent.createChooser(intent, app.morphe.extension.shared.StringRef.str("piko_newx_ui_share_image_label"));
         if (!(context instanceof Activity)) chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(chooser);
     }

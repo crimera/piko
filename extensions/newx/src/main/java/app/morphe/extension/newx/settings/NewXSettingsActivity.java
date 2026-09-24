@@ -219,7 +219,7 @@ public final class NewXSettingsActivity extends Activity {
         ImageButton navigationButton = new ImageButton(this);
         navigationButton.setImageDrawable(navigationIcon);
         navigationButton.setBackgroundColor(Color.TRANSPARENT);
-        navigationButton.setContentDescription("Back");
+        navigationButton.setContentDescription(app.morphe.extension.shared.StringRef.str("piko_newx_ui_back"));
         navigationButton.setOnClickListener(ignored -> onBackPressed());
         toolbar.addView(
                 navigationButton,

@@ -75,11 +75,11 @@ public final class MediaPickerDialog {
         }
 
         BottomSheetView dialog = new BottomSheetView(current);
-        dialog.setTitle("Download media");
+        dialog.setTitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_media_title"));
 
         String defaultSubtitle = (username != null && !username.trim().isEmpty())
-                ? "From @" + username.trim()
-                : "Select media to save to your device";
+                ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_media_author", username.trim())
+                : app.morphe.extension.shared.StringRef.str("piko_newx_ui_select_media_hint");
         dialog.setSubtitle(defaultSubtitle);
 
         LinearLayout listContainer = new LinearLayout(current);
@@ -116,7 +116,7 @@ public final class MediaPickerDialog {
             mergeButton = new ButtonView(
                     current,
                     ButtonView.ButtonStyle.TONAL,
-                    "Download & Merge"
+                    app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_merge")
             );
             dialog.addButton(mergeButton);
         } else {
@@ -127,7 +127,7 @@ public final class MediaPickerDialog {
         final ButtonView downloadButton = new ButtonView(
                 current,
                 ButtonView.ButtonStyle.FILLED,
-                hasMultiple ? "Download All (" + downloads.size() + ")" : "Download (1)"
+                hasMultiple ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_all", downloads.size()) : app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_one")
         );
         if (!hasMultiple) {
             downloadButton.setVisibility(View.GONE);
@@ -157,19 +157,19 @@ public final class MediaPickerDialog {
             }
 
             if (isSelectionMode[0]) {
-                dialog.setTitle("Select media");
-                dialog.setSubtitle(selectedCount + " of " + downloads.size() + " selected");
+                dialog.setTitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_select_media_title"));
+                dialog.setSubtitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_media_selected", selectedCount, downloads.size()));
                 downloadButton.setEnabled(true);
                 if (selectedCount == downloads.size()) {
-                    downloadButton.setText("Download All (" + downloads.size() + ")");
+                    downloadButton.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_all", downloads.size()));
                 } else {
-                    downloadButton.setText("Download (" + selectedCount + ")");
+                    downloadButton.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_selected", selectedCount));
                 }
                 downloadButton.setVisibility(View.VISIBLE);
 
                 if (mergeButton != null) {
                     if (selectedImageCount >= 2) {
-                        mergeButton.setText("Merge (" + selectedImageCount + ")");
+                        mergeButton.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_merge_selected", selectedImageCount));
                         mergeButton.setVisibility(View.VISIBLE);
                         mergeButton.setEnabled(true);
                     } else {
@@ -177,18 +177,18 @@ public final class MediaPickerDialog {
                     }
                 }
             } else {
-                dialog.setTitle("Download media");
+                dialog.setTitle(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_media_title"));
                 dialog.setSubtitle(defaultSubtitle);
                 downloadButton.setEnabled(true);
                 if (hasMultiple) {
-                    downloadButton.setText("Download All (" + downloads.size() + ")");
+                    downloadButton.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_all", downloads.size()));
                     downloadButton.setVisibility(View.VISIBLE);
                 } else {
                     downloadButton.setVisibility(View.GONE);
                 }
 
                 if (mergeButton != null) {
-                    mergeButton.setText("Download & Merge");
+                    mergeButton.setText(app.morphe.extension.shared.StringRef.str("piko_newx_ui_download_merge"));
                     mergeButton.setVisibility(View.VISIBLE);
                     mergeButton.setEnabled(true);
                 }
@@ -260,7 +260,7 @@ public final class MediaPickerDialog {
             InlineDownloadButton.DownloadItem item = downloads.get(i);
 
             ListItem itemRow = new ListItem(current, themeSettings);
-            itemRow.setTitle(item.label + (hasMultiple ? " " + (i + 1) : ""));
+            itemRow.setTitle(("Image".equals(item.label) ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_label_image") : "Video".equals(item.label) ? app.morphe.extension.shared.StringRef.str("piko_newx_ui_label_video") : item.label) + (hasMultiple ? " " + (i + 1) : ""));
             itemRow.setSubtitle(item.resolution);
 
             IconView.IconType iconType = resolveIconType(item);
@@ -451,7 +451,7 @@ public final class MediaPickerDialog {
                     v -> {
                         dialog.dismiss();
                         Utils.setClipboard(item.url);
-                        Utils.showToastShort("Link copied");
+                        Utils.showToastShort(app.morphe.extension.shared.StringRef.str("piko_newx_ui_link_copied"));
                     }
             );
         }
