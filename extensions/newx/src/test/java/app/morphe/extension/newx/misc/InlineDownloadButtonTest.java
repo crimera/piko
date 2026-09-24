@@ -428,6 +428,9 @@ public final class InlineDownloadButtonTest {
         EqualObject equalButDistinctNativeAction = new EqualObject(equalityToken);
         InlineDownloadButton.registerDownloadAction(downloadAction);
 
+        assertTrue(InlineDownloadButton.isDownloadAction(downloadAction));
+        assertFalse(InlineDownloadButton.isDownloadAction(equalButDistinctNativeAction));
+        assertFalse(InlineDownloadButton.isDownloadAction(null));
         assertEquals(
                 18f,
                 InlineDownloadButton.markIconSize(equalButDistinctNativeAction, 18f),

@@ -1,8 +1,10 @@
 package app.crimera.patches.newx.models
 
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -100,6 +102,19 @@ internal data class ResolvedNewXInlineDownloadModels(
 )
 
 /**
+ * Handles for the shared inline-action-bar layout lambda. The injected download action reuses the
+ * TwitterShare carrier for its icon/click semantics, but this release's layout switch does not map
+ * TwitterShare to a native kind and classifies it as Countless, which reserves a wider slot. The
+ * patch identity-gates the injected action immediately before the kind model is built and rewrites
+ * only its kind to IconOnly.
+ */
+internal data class ResolvedNewXInlineActionKindOverride(
+    val layoutLambda: MethodReference,
+    val kindModelConstructor: MethodReference,
+    val iconOnlyField: FieldReference,
+)
+
+/**
  * Immutable handles for the shared post-model fingerprints. Feature resolvers derive their own
  * fields from these handles so media/action requirements do not become core-post requirements.
  */
@@ -117,6 +132,7 @@ private class PostModelResolutionState {
     private var inlineActionModels: ResolvedNewXInlineActionModels? = null
     private var inlineActionBarModels: ResolvedNewXInlineActionBarModels? = null
     private var inlineDownloadModels: ResolvedNewXInlineDownloadModels? = null
+    private var inlineActionKindOverride: ResolvedNewXInlineActionKindOverride? = null
 
     context(context: BytecodePatchContext)
     fun postModelAnchors(): ResolvedNewXPostModelAnchors = synchronized(this) {
@@ -149,6 +165,13 @@ private class PostModelResolutionState {
     fun inlineDownloadModels(): ResolvedNewXInlineDownloadModels = synchronized(this) {
         inlineDownloadModels ?: resolveInlineDownloadModels(inlineActionModels()).also {
             inlineDownloadModels = it
+        }
+    }
+
+    context(context: BytecodePatchContext)
+    fun inlineActionKindOverride(): ResolvedNewXInlineActionKindOverride = synchronized(this) {
+        inlineActionKindOverride ?: resolveInlineActionKindOverride(inlineActionModels()).also {
+            inlineActionKindOverride = it
         }
     }
 }
@@ -229,6 +252,10 @@ internal fun resolvedNewXInlineActionBarModels(): ResolvedNewXInlineActionBarMod
 context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineDownloadModels(): ResolvedNewXInlineDownloadModels =
     postModelResolutionState().inlineDownloadModels()
+
+context(context: BytecodePatchContext)
+internal fun resolvedNewXInlineActionKindOverride(): ResolvedNewXInlineActionKindOverride =
+    postModelResolutionState().inlineActionKindOverride()
 
 /**
  * Semantic match for the NewX inline-action entry renderer. Never match this composable by an
@@ -691,4 +718,91 @@ private fun resolveInlineDownloadModels(
         inlineActionEntryConstructor = inlineActionEntryConstructor,
         twitterShareActionField = twitterShareActionField,
     )
+}
+
+context(context: BytecodePatchContext)
+private fun resolveInlineActionKindOverride(
+    entryModels: ResolvedNewXInlineActionModels,
+): ResolvedNewXInlineActionKindOverride {
+    // The download action is injected with the TwitterShare carrier so it keeps the native share
+    // slot's icon/click wiring. This release's action-bar layout classifies TwitterShare as
+    // Countless because its kind switch has no entry for it, which reserves a wider slot than the
+    // icon-only layout. Resolve the shared layout lambda and the kind model it constructs so the
+    // patch can rewrite only the injected action's kind. The action-type field read grounds the
+    // lambda as the one that consumes the inline-action entries.
+    val layoutLambda = requireExactlyOne(
+        "NewX inline-action kind layout lambda",
+        Fingerprint(
+            definingClass = INLINE_ACTION_BAR_SCOPE,
+            name = "invoke",
+            returnType = "Ljava/lang/Object;",
+            parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
+            filters = listOf(
+                fieldAccess(
+                    opcode = Opcode.IGET_OBJECT,
+                    reference = entryModels.inlineActionTypeField,
+                ),
+            ),
+        ).scopedMatchAll(),
+    ).originalMethod
+
+    val kindConstructors = layoutLambda.implementation
+        ?.instructions
+        ?.toList()
+        .orEmpty()
+        .mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                isInlineActionKindModelConstructor(instruction) { type ->
+                    context.classDefByOrNull(type)?.let { kindClass ->
+                        AccessFlags.ENUM.isSet(kindClass.accessFlags)
+                    } == true
+                }
+            }?.let { constructorIndex -> constructorIndex to instruction }
+        }
+    val kindConstructor = requireExactlyOne(
+        "NewX inline-action kind model constructor",
+        kindConstructors,
+    ).second.let { instruction ->
+        instruction.getReference<MethodReference>()
+            ?: throw PatchException("NewX inline-action kind model constructor has no reference")
+    }
+    val kindEnumDescriptor = kindConstructor.parameterTypes.last().toString()
+    val kindEnumClass = context.classDefByOrNull(kindEnumDescriptor)
+        ?: throw PatchException("NewX inline-action kind enum was not found: $kindEnumDescriptor")
+    if (!AccessFlags.ENUM.isSet(kindEnumClass.accessFlags)) {
+        throw PatchException("NewX inline-action kind type is not an enum: $kindEnumClass")
+    }
+    val iconOnlyField = requireExactlyOne(
+        "NewX inline-action IconOnly kind",
+        kindEnumClass.fields.filter { field ->
+            field.name == "IconOnly" &&
+                field.type == kindEnumDescriptor &&
+                AccessFlags.STATIC.isSet(field.accessFlags)
+        },
+    )
+
+    return ResolvedNewXInlineActionKindOverride(
+        layoutLambda = layoutLambda,
+        kindModelConstructor = kindConstructor,
+        iconOnlyField = iconOnlyField,
+    )
+}
+
+/**
+ * A kind model constructor takes exactly three parameters and its final parameter is the kind
+ * enum. The final parameter is a reference type, so it is never wide; the intermediate layout
+ * constructors this must not match (for example `Modifier` padding) have different arities.
+ */
+internal fun isInlineActionKindModelConstructor(
+    instruction: Instruction,
+    isEnumType: (String) -> Boolean,
+): Boolean {
+    if (instruction.opcode != Opcode.INVOKE_DIRECT) return false
+    val reference = instruction.getReference<MethodReference>() ?: return false
+    if (reference.name != "<init>") return false
+    val parameterTypes = reference.parameterTypes.map(CharSequence::toString)
+    if (parameterTypes.size != 3) return false
+    val kindType = parameterTypes.last()
+    if (kindType == "J" || kindType == "D") return false
+    return isEnumType(kindType)
 }

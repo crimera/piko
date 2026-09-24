@@ -3,6 +3,7 @@ package app.crimera.patches.newx.misc.inlineactions
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionBarModels
+import app.crimera.patches.newx.models.ResolvedNewXInlineActionKindOverride
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.ResolvedNewXInlineDownloadModels
 import app.crimera.patches.newx.models.ResolvedNewXPostMediaModels
@@ -10,7 +11,9 @@ import app.crimera.patches.newx.models.ResolvedNewXPostModels
 import app.crimera.patches.newx.models.firstParameterSlot
 import app.crimera.patches.newx.models.isInlineActionEntryRenderer
 import app.crimera.patches.newx.models.requirePublicFields
+import app.crimera.patches.newx.models.resolveMutableMethodOwner
 import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
+import app.crimera.patches.newx.models.resolvedNewXInlineActionKindOverride
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.resolvedNewXInlineDownloadModels
 import app.crimera.patches.newx.models.resolvedNewXPostMediaModels
@@ -35,6 +38,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
@@ -51,11 +55,14 @@ import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -249,6 +256,7 @@ val newXInlineDownloadButtonPatch =
             val barModels = resolvedNewXInlineActionBarModels()
             val mediaModels = resolvedNewXPostMediaModels()
             val downloadModels = resolvedNewXInlineDownloadModels()
+            val kindOverrideModels = resolvedNewXInlineActionKindOverride()
             patchPostModelBridges(
                 resolvedNewXPostModels(),
                 entryModels,
@@ -256,6 +264,7 @@ val newXInlineDownloadButtonPatch =
                 mediaModels,
                 downloadModels,
             )
+            patchInlineActionKindOverride(entryModels, kindOverrideModels)
             newXInitHook.fingerprint.method.addInstruction(
                 0,
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
@@ -489,6 +498,110 @@ val newXInlineDownloadButtonPatch =
             }
         }
     }
+
+/**
+ * The shared inline-action-bar layout lambda builds one kind model per entry and classifies
+ * TwitterShare as Countless because this release's native kind switch has no TwitterShare arm.
+ * That reserves a wider slot than the icon-only layout and leaves a trailing gap after the
+ * injected download button. Identity-gate the injected action immediately before the kind model
+ * constructor and rewrite only its kind register to IconOnly, leaving native actions untouched.
+ */
+context(context: BytecodePatchContext)
+private fun patchInlineActionKindOverride(
+    entryModels: ResolvedNewXInlineActionModels,
+    kindModels: ResolvedNewXInlineActionKindOverride,
+) {
+    val (_, layoutMethod) = kindModels.layoutLambda.resolveMutableMethodOwner(
+        "NewX inline-action kind layout lambda",
+    )
+
+    // The action-type field read is the only place the layout lambda touches an action entry; its
+    // object register is that entry. This grounds the register instead of assuming a v-name.
+    val actionTypeReads = layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf {
+            instruction.opcode == Opcode.IGET_OBJECT &&
+                instruction.getReference<FieldReference>()?.toString() ==
+                entryModels.inlineActionTypeField.toString()
+        }
+    }
+    val actionTypeReadIndex = requireExactlyOne(
+        "NewX inline-action kind action-type read in $layoutMethod",
+        actionTypeReads,
+    )
+    val entryRegister =
+        layoutMethod.getInstruction<TwoRegisterInstruction>(actionTypeReadIndex).registerB
+
+    // The same register must be the checked-cast entry the collection iterator produced, proving
+    // it is the per-composition action object rather than an unrelated value.
+    val entryCasts = layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf {
+            instruction.opcode == Opcode.CHECK_CAST &&
+                instruction.getReference<TypeReference>()?.type ==
+                entryModels.inlineActionEntryDescriptor &&
+                (instruction as? OneRegisterInstruction)?.registerA == entryRegister
+        }
+    }
+    requireExactlyOne(
+        "NewX inline-action entry cast for v$entryRegister in $layoutMethod",
+        entryCasts,
+    )
+
+    val constructorIndex = requireExactlyOne(
+        "NewX inline-action kind model construction in $layoutMethod",
+        layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                instruction.opcode == Opcode.INVOKE_DIRECT &&
+                    instruction.getReference<MethodReference>()?.toString() ==
+                    kindModels.kindModelConstructor.toString()
+            }
+        },
+    )
+    val constructorInstruction = layoutMethod.getInstruction<Instruction>(constructorIndex)
+    // The kind is the last constructor parameter in this contract, and enum values are not wide.
+    val kindRegister = constructorInstruction.registersUsed.last()
+    if (kindRegister == entryRegister) {
+        throw PatchException(
+            "NewX inline-action entry and kind registers collide in $layoutMethod",
+        )
+    }
+
+    // The entry must still be the first argument of the render call the constructor feeds, so the
+    // register is live and unmodified at the rewrite point.
+    requireExactlyOne(
+        "NewX inline-action render call for v$entryRegister in $layoutMethod",
+        layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
+            val reference = instruction.getReference<MethodReference>()
+                ?: return@mapIndexedNotNull null
+            index.takeIf {
+                index > constructorIndex &&
+                    instruction.opcode in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) &&
+                    reference.parameterTypes.firstOrNull()?.toString() ==
+                    entryModels.inlineActionEntryDescriptor &&
+                    instruction.registersUsed.firstOrNull() == entryRegister
+            }
+        },
+    )
+
+    val parameterRegisters = layoutMethod.p0Register until
+        (layoutMethod.p0Register + layoutMethod.numberOfParameterRegisters)
+    val (scratchRegister,) = layoutMethod.freeRegisters4Bit(
+        index = constructorIndex,
+        count = 1,
+        excludedRegisters = parameterRegisters + entryRegister + kindRegister,
+    )
+    val continueTarget = layoutMethod.instructions[constructorIndex]
+    layoutMethod.addInstructionsWithLabels(
+        constructorIndex,
+        """
+            move-object/from16 v$scratchRegister, v$entryRegister
+            invoke-static {v$scratchRegister}, $EXTENSION->isDownloadAction(Ljava/lang/Object;)Z
+            move-result v$scratchRegister
+            if-eqz v$scratchRegister, :piko_newx_inline_download_kind_keep
+            sget-object v$kindRegister, ${kindModels.iconOnlyField}
+        """.trimIndent(),
+        ExternalLabel("piko_newx_inline_download_kind_keep", continueTarget),
+    )
+}
 
 /**
  * The inline-action bar dispatches two gesture events through the presenter handler. The tap event

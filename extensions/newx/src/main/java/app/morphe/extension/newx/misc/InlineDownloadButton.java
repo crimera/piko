@@ -403,7 +403,12 @@ public final class InlineDownloadButton {
         DOWNLOAD_ACTIONS.add(action);
     }
 
-    private static boolean isDownloadAction(Object candidate) {
+    /**
+     * Identity classification of the injected download action. The inline action bar's shared
+     * layout lambda calls this from injected smali to force IconOnly layout for the download slot,
+     * so it must stay public and allocation-free.
+     */
+    public static boolean isDownloadAction(Object candidate) {
         return DOWNLOAD_ACTIONS.contains(candidate);
     }
 

@@ -4,6 +4,7 @@ import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
 import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
+import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.morphe.patcher.patch.PatchException
@@ -489,6 +490,28 @@ class NewXResolverLinterTest {
         assertEquals(
             listOf(0),
             instructions.indices.filter { index -> isInitialSubTabSeed(instructions, index) },
+        )
+    }
+
+    @Test
+    fun `inline-action kind model constructor is the three-parameter enum model`() {
+        val kindConstructor =
+            "invoke-direct {v3, v12, v4, v13}, Lcom/x/inlineactionbar/d1;-><init>(ZZLcom/x/inlineactionbar/f1;)V"
+                .toInstruction()
+        val layoutConstructor =
+            "invoke-direct {v3, v4, v5, v4, v15}, Landroidx/compose/foundation/layout/b3;-><init>(FFFF)V"
+                .toInstruction()
+        val objectConstructor =
+            "invoke-direct {v3, v12, v4, v13}, Lcom/x/inlineactionbar/d1;-><init>(ZZLjava/lang/Object;)V"
+                .toInstruction()
+
+        fun isKindEnum(descriptor: String) = descriptor == "Lcom/x/inlineactionbar/f1;"
+
+        assertEquals(
+            listOf(true, false, false),
+            listOf(kindConstructor, layoutConstructor, objectConstructor).map { instruction ->
+                isInlineActionKindModelConstructor(instruction, ::isKindEnum)
+            },
         )
     }
 
