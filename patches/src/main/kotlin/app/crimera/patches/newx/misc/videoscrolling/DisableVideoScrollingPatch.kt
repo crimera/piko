@@ -33,48 +33,61 @@ private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION4_DESCRIPTOR = "Lkotlin/jvm/functions/Function4;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 
-private const val VERTICAL_PAGER_OWNER_SCOPE = "Lcom/google/"
+private const val PAGER_PARAMETER_PREFIX = "Landroidx/compose/foundation/pager/"
+private const val LAYOUT_PARAMETER_PREFIX = "Landroidx/compose/foundation/layout/"
+private const val UI_PARAMETER_PREFIX = "Landroidx/compose/ui/"
+private const val SNAPPING_PARAMETER_PREFIX = "Landroidx/compose/foundation/gestures/snapping/"
+private const val NESTED_SCROLL_PARAMETER_PREFIX = "Landroidx/compose/ui/input/nestedscroll/"
+private const val FOUNDATION_PARAMETER_PREFIX = "Landroidx/compose/foundation/"
 
-// R8 merges Compose PagerKt into a repackaged library holder. The holder moved from Play Core to
-// another Google package in 12.27, while Compose's pager ABI also removed the page-size float.
-// Match the stable Compose parameter roles and the non-obfuscated orientation enum instead of the
-// holder's generated class and method names.
-private fun hasVerticalPagerParameters(parameters: List<String>): Boolean {
-    if (parameters.size == 18) {
-        return parameters[0].startsWith("Landroidx/compose/foundation/pager/") &&
-            parameters[1] == MODIFIER_DESCRIPTOR &&
-            parameters[2].startsWith("Landroidx/compose/foundation/layout/") &&
-            parameters[3].startsWith("Landroidx/compose/foundation/pager/") &&
-            parameters[4] == "I" &&
-            parameters[5] == "F" &&
-            parameters[6].startsWith("Landroidx/compose/ui/") &&
-            parameters[7].startsWith("Landroidx/compose/foundation/gestures/snapping/") &&
-            parameters[8] == "Z" &&
-            parameters[9] == FUNCTION1_DESCRIPTOR &&
-            parameters[10].startsWith("Landroidx/compose/ui/input/nestedscroll/") &&
-            parameters[11].startsWith("Landroidx/compose/foundation/gestures/snapping/") &&
-            parameters[12].startsWith("Landroidx/compose/foundation/") &&
-            parameters[13] == FUNCTION4_DESCRIPTOR &&
-            parameters[14] == COMPOSER_DESCRIPTOR &&
-            parameters.drop(15).all { it == "I" }
-    }
-    if (parameters.size != 17) return false
-    return parameters[0].startsWith("Landroidx/compose/foundation/pager/") &&
-        parameters[1] == MODIFIER_DESCRIPTOR &&
-        parameters[2].startsWith("Landroidx/compose/foundation/layout/") &&
-        parameters[3].startsWith("Landroidx/compose/foundation/pager/") &&
-        parameters[4] == "I" &&
-        parameters[5].startsWith("Landroidx/compose/ui/") &&
-        parameters[6].startsWith("Landroidx/compose/foundation/gestures/snapping/") &&
-        parameters[7] == "Z" &&
-        parameters[8] == FUNCTION1_DESCRIPTOR &&
-        parameters[9].startsWith("Landroidx/compose/ui/input/nestedscroll/") &&
-        parameters[10].startsWith("Landroidx/compose/foundation/gestures/snapping/") &&
-        parameters[11].startsWith("Landroidx/compose/foundation/") &&
-        parameters[12] == FUNCTION4_DESCRIPTOR &&
-        parameters[13] == COMPOSER_DESCRIPTOR &&
-        parameters.drop(14).all { it == "I" }
-}
+// R8 merges Compose's PagerKt into a repackaged library holder whose generated package and method
+// name move between releases (12.28: Lcom/google/android/play/core/appupdate/b;, 12.29:
+// Lcom/bumptech/glide/e;). Match the stable Compose ABI parameter roles and the non-obfuscated
+// orientation enum instead of the holder's identity. Compose's pager ABI dropped its page-size
+// float after 12.27, so accept both the 17- and 18-parameter arities. Prefix declarations use
+// Morphe's STARTS_WITH parameter semantics; primitives stay exact.
+private val VERTICAL_PAGER_PARAMETERS_17 =
+    listOf(
+        PAGER_PARAMETER_PREFIX,
+        MODIFIER_DESCRIPTOR,
+        LAYOUT_PARAMETER_PREFIX,
+        PAGER_PARAMETER_PREFIX,
+        "I",
+        UI_PARAMETER_PREFIX,
+        SNAPPING_PARAMETER_PREFIX,
+        "Z",
+        FUNCTION1_DESCRIPTOR,
+        NESTED_SCROLL_PARAMETER_PREFIX,
+        SNAPPING_PARAMETER_PREFIX,
+        FOUNDATION_PARAMETER_PREFIX,
+        FUNCTION4_DESCRIPTOR,
+        COMPOSER_DESCRIPTOR,
+        "I",
+        "I",
+        "I",
+    )
+
+private val VERTICAL_PAGER_PARAMETERS_18 =
+    listOf(
+        PAGER_PARAMETER_PREFIX,
+        MODIFIER_DESCRIPTOR,
+        LAYOUT_PARAMETER_PREFIX,
+        PAGER_PARAMETER_PREFIX,
+        "I",
+        "F",
+        UI_PARAMETER_PREFIX,
+        SNAPPING_PARAMETER_PREFIX,
+        "Z",
+        FUNCTION1_DESCRIPTOR,
+        NESTED_SCROLL_PARAMETER_PREFIX,
+        SNAPPING_PARAMETER_PREFIX,
+        FOUNDATION_PARAMETER_PREFIX,
+        FUNCTION4_DESCRIPTOR,
+        COMPOSER_DESCRIPTOR,
+        "I",
+        "I",
+        "I",
+    )
 
 private fun isVerticalPagerMethod(method: Method): Boolean =
     method.implementation?.instructions?.any { instruction ->
@@ -84,14 +97,20 @@ private fun isVerticalPagerMethod(method: Method): Boolean =
             field.definingClass.startsWith("Landroidx/compose/foundation/gestures/")
     } == true
 
-private object VerticalPagerFingerprint : Fingerprint(
-    definingClass = VERTICAL_PAGER_OWNER_SCOPE,
+private object VerticalPager17Fingerprint : Fingerprint(
     returnType = "V",
-    custom = { method, _ ->
-        hasVerticalPagerParameters(method.parameterTypes.map(CharSequence::toString)) &&
-            isVerticalPagerMethod(method)
-    },
+    parameters = VERTICAL_PAGER_PARAMETERS_17,
+    custom = { method, _ -> isVerticalPagerMethod(method) },
 )
+
+private object VerticalPager18Fingerprint : Fingerprint(
+    returnType = "V",
+    parameters = VERTICAL_PAGER_PARAMETERS_18,
+    custom = { method, _ -> isVerticalPagerMethod(method) },
+)
+
+private val verticalPagerFingerprints =
+    listOf(VerticalPager17Fingerprint, VerticalPager18Fingerprint)
 
 private fun patchVerticalPager(
     match: Match,
@@ -161,7 +180,10 @@ val newXDisableVideoScrollingPatch =
             )
 
         execute {
-            val matches = VerticalPagerFingerprint.scopedMatchAllOrNull().orEmpty()
+            val matches =
+                verticalPagerFingerprints
+                    .flatMap { fingerprint -> fingerprint.scopedMatchAllOrNull().orEmpty() }
+                    .distinctBy { match -> match.originalMethod }
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one NewX VerticalPager implementation, found ${matches.size}: " +
