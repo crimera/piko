@@ -1,7 +1,10 @@
 package app.crimera.patches.newx.misc.postdetails
 
 import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
+import app.crimera.patches.newx.settings.ToggleSettingDefinition
 import app.crimera.patches.newx.settings.branchIfEnabled
+import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
@@ -12,13 +15,14 @@ import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
-import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -37,11 +41,11 @@ private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
 private const val MEDIA_SCOPE = "Lcom/x/media/"
 private const val INLINE_ACTION_BAR_SCOPE = "Lcom/x/inlineactionbar/"
 private const val HAZE_SCOPE = "Ldev/chrisbanes/haze/"
+private const val IMMERSIVE_CHROME_SCOPE = "Lcom/x/ui/immersive/chrome/"
 private const val FOUNDATION_LAYOUT_SCOPE = "Landroidx/compose/foundation/layout/"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
-private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
 private val CONDITIONAL_BRANCH_OPCODES =
     setOf(
@@ -68,13 +72,6 @@ private object NewXPostDetailReplyBarFingerprint : Fingerprint(
     definingClass = COMPOSER_MINIMAL_SCOPE,
     returnType = "V",
     custom = { method, _ -> method.isPostDetailReplyBarRenderer() },
-)
-
-/** The root Compose renderer owns the main navigation-bar inset modifier. */
-private object NewXMainNavigationRootFingerprint : Fingerprint(
-    definingClass = "Lcom/x/android/main/MainActivity;",
-    returnType = "V",
-    custom = { method, _ -> method.isMainNavigationRootRenderer() },
 )
 
 /**
@@ -107,6 +104,17 @@ private data class PhotoViewerNavigationFallbackHook(
     val method: MutableMethod,
     val gateIndex: Int,
     val fallback: Instruction,
+)
+
+internal data class ImmersiveActionBarSafeAreaHook(
+    val method: MutableMethod,
+    val actionBarCallIndex: Int,
+    val actionBarCall: Instruction,
+    val modifierRegister: Int,
+    val composerRegister: Int,
+    val windowInsetsHolderProvider: MethodReference,
+    val navigationBarsField: FieldReference,
+    val insetsPaddingCall: MethodReference,
 )
 
 /**
@@ -221,46 +229,6 @@ private fun Method.isPostDetailReplyBarRenderer(): Boolean {
     return parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
         parameters.count { it == "Ljava/lang/String;" } == 1 &&
         parameters.any { it.startsWith(HAZE_SCOPE) }
-}
-
-private fun Method.isMainNavigationRootRenderer(): Boolean {
-    val parameters = parameterTypes.map(CharSequence::toString)
-    if (
-        parameters.size != 4 ||
-            parameters[0] != "Z" ||
-            !parameters[1].isObjectDescriptor() ||
-            parameters[2] != COMPOSER_DESCRIPTOR ||
-            parameters[3] != "I"
-    ) {
-        return false
-    }
-
-    val lambdaType = parameters[1]
-    val lambdaRegister = p0Register + 2
-    val lambdaCalls = implementation?.instructions?.mapIndexedNotNull { index, instruction ->
-        if (
-            instruction.opcode !in
-                setOf(
-                    Opcode.INVOKE_INTERFACE,
-                    Opcode.INVOKE_INTERFACE_RANGE,
-                    Opcode.INVOKE_VIRTUAL,
-                    Opcode.INVOKE_VIRTUAL_RANGE,
-                )
-        ) {
-            return@mapIndexedNotNull null
-        }
-        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-        val arguments = instruction.registersUsed
-        index.takeIf {
-            reference.definingClass == lambdaType &&
-                reference.name == "invoke" &&
-                reference.parameterTypes.map(CharSequence::toString) ==
-                    listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR) &&
-                reference.returnType == OBJECT_DESCRIPTOR &&
-                arguments.firstOrNull() == lambdaRegister
-        }
-    }.orEmpty()
-    return lambdaCalls.size == 1
 }
 
 private fun Method.isPhotoViewerControlsRenderer(): Boolean {
@@ -439,8 +407,6 @@ private fun Method.isPostDetailReplyBarContainer(): Boolean {
         parameters.any { it.startsWith(HAZE_SCOPE) } &&
         parameters.any { it.startsWith(POST_DETAIL_SHEET_SCOPE) }
 }
-
-private fun String.isObjectDescriptor(): Boolean = startsWith("L") && endsWith(';')
 
 private fun Method.callSiteIndices(target: Method): List<Int> =
     implementation?.instructions?.mapIndexedNotNull { index, instruction ->
@@ -627,17 +593,6 @@ private fun requireNavigationInsetsHook(
 }
 
 context(context: BytecodePatchContext)
-private fun resolveMainNavigationInsetsHook(): NavigationInsetsHook {
-    val matches = NewXMainNavigationRootFingerprint.scopedMatchAllOrNull().orEmpty()
-    val method =
-        requireExactlyOne(
-            label = "NewX main navigation root renderer",
-            candidates = matches,
-        ).method
-    return requireNavigationInsetsHook(method, "NewX main")
-}
-
-context(context: BytecodePatchContext)
 private fun resolvePostDetailNavigationInsetsHook(
     postDetailContainer: MutableMethod,
 ): NavigationInsetsHook {
@@ -654,6 +609,184 @@ private fun resolvePostDetailNavigationInsetsHook(
         )
     }
     return requireNavigationInsetsHook(postDetailContainer, "NewX post-detail")
+}
+
+private fun Method.isImmersiveMediaControlsRenderer(minimalContainer: Method): Boolean {
+    val parameters = parameterTypes.map(CharSequence::toString)
+    return AccessFlags.STATIC.isSet(accessFlags) &&
+        returnType == "V" &&
+        parameters.any { it.startsWith(INLINE_ACTION_BAR_SCOPE) } &&
+        parameters.any { it.startsWith(COMPOSER_MINIMAL_SCOPE) } &&
+        parameters.any { it.startsWith(HAZE_SCOPE) } &&
+        parameters.any { it.startsWith(IMMERSIVE_CHROME_SCOPE) } &&
+        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        inlineActionBarRenderCallIndices().size == 1 &&
+        callSiteIndices(minimalContainer).size == 1 &&
+        navigationInsetsCallIndices().size == 1
+}
+
+private fun Instruction.argumentRegister(
+    reference: MethodReference,
+    parameterIndex: Int,
+): Int? {
+    val registerOffset =
+        reference.parameterTypes
+            .take(parameterIndex)
+            .sumOf { parameter -> if (parameter.toString() in setOf("J", "D")) 2 else 1 }
+    return registersUsed.getOrNull(registerOffset)
+}
+
+/**
+ * Resolves the 12.29 immersive-media action row and reuses the exact navigation-bar inset object
+ * from its native no-composer spacer. Applying that inset to the row modifier moves the controls;
+ * forcing the separate spacer branch was ineffective here and added blank space to other layouts.
+ */
+context(context: BytecodePatchContext)
+private fun resolveImmersiveActionBarSafeAreaHook(
+    minimalContainer: MutableMethod,
+): ImmersiveActionBarSafeAreaHook? {
+    val originalMethod =
+        requireAtMostOne(
+            label = "NewX immersive-media action-bar renderer",
+            candidates = buildList<Method> {
+                context.classDefForEach { classDef ->
+                    if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
+                    classDef.methods.forEach { method ->
+                        if (method.isImmersiveMediaControlsRenderer(minimalContainer)) add(method)
+                    }
+                }
+            },
+        ) ?: return null
+    val method =
+        requireExactlyOne(
+            label = "NewX mutable immersive-media action-bar renderer",
+            candidates = context.mutableClassDefBy(originalMethod.definingClass).methods.filter { candidate ->
+                candidate.matches(originalMethod)
+            },
+        ) as? MutableMethod
+            ?: throw PatchException(
+                "NewX immersive-media action-bar renderer is not mutable: $originalMethod",
+            )
+    val instructions = method.instructions.toList()
+    val actionBarCallIndex =
+        requireExactlyOne(
+            label = "NewX immersive-media inline action-bar call in $method",
+            candidates = method.inlineActionBarRenderCallIndices(),
+        )
+    val minimalComposerCallIndex =
+        requireExactlyOne(
+            label = "NewX immersive-media reply-composer call in $method",
+            candidates = method.callSiteIndices(minimalContainer),
+        )
+    val navigationInsetsCallIndex =
+        requireExactlyOne(
+            label = "NewX immersive-media navigation-insets call in $method",
+            candidates = method.navigationInsetsCallIndices(),
+        )
+    if (!(actionBarCallIndex < minimalComposerCallIndex && minimalComposerCallIndex < navigationInsetsCallIndex)) {
+        throw PatchException(
+            "Unexpected immersive-media control order in $method: action bar at $actionBarCallIndex, " +
+                "reply composer at $minimalComposerCallIndex, navigation inset at $navigationInsetsCallIndex",
+        )
+    }
+
+    val actionBarCall = instructions[actionBarCallIndex]
+    val actionBarReference = actionBarCall.getReference<MethodReference>()
+        ?: throw PatchException("NewX immersive-media action-bar call has no reference in $method")
+    val modifierParameterIndex =
+        requireExactlyOne(
+            label = "NewX immersive-media action-bar Modifier parameter",
+            candidates = actionBarReference.parameterTypes.indices.filter { index ->
+                actionBarReference.parameterTypes[index].toString() == MODIFIER_DESCRIPTOR
+            },
+        )
+    val composerParameterIndex =
+        requireExactlyOne(
+            label = "NewX immersive-media action-bar Composer parameter",
+            candidates = actionBarReference.parameterTypes.indices.filter { index ->
+                actionBarReference.parameterTypes[index].toString() == COMPOSER_DESCRIPTOR
+            },
+        )
+    val modifierRegister = actionBarCall.argumentRegister(actionBarReference, modifierParameterIndex)
+        ?: throw PatchException("NewX immersive-media action-bar Modifier register is unavailable in $method")
+    val composerRegister = actionBarCall.argumentRegister(actionBarReference, composerParameterIndex)
+        ?: throw PatchException("NewX immersive-media action-bar Composer register is unavailable in $method")
+
+    val insetsPaddingCall = instructions[navigationInsetsCallIndex].getReference<MethodReference>()
+        ?: throw PatchException("NewX immersive-media insets call has no reference in $method")
+    val insetsRegister = instructions[navigationInsetsCallIndex].registersUsed.getOrNull(1)
+        ?: throw PatchException("NewX immersive-media insets call has no inset register in $method")
+    val navigationBarsReadIndex =
+        requireExactlyOne(
+            label = "NewX immersive-media navigation-bars field read in $method",
+            candidates = (minimalComposerCallIndex + 1 until navigationInsetsCallIndex).filter { index ->
+                val instruction = instructions[index]
+                val registers = instruction as? TwoRegisterInstruction ?: return@filter false
+                val field = instruction.getReference<FieldReference>() ?: return@filter false
+                instruction.opcode == Opcode.IGET_OBJECT &&
+                    registers.registerA == insetsRegister &&
+                    field.type.toString().startsWith(FOUNDATION_LAYOUT_SCOPE)
+            },
+        )
+    val navigationBarsRead = instructions[navigationBarsReadIndex] as TwoRegisterInstruction
+    val navigationBarsField = instructions[navigationBarsReadIndex].getReference<FieldReference>()
+        ?: throw PatchException("NewX immersive-media navigation-bars read has no field in $method")
+    val windowInsetsHolderProvider =
+        requireExactlyOne(
+            label = "NewX immersive-media WindowInsets holder provider in $method",
+            candidates = (minimalComposerCallIndex + 1 until navigationBarsReadIndex).mapNotNull { index ->
+                val instruction = instructions[index]
+                if (!instruction.isStaticInvocation()) return@mapNotNull null
+                val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+                val result = instructions.getOrNull(index + 1) as? OneRegisterInstruction
+                    ?: return@mapNotNull null
+                reference.takeIf {
+                    reference.returnType == navigationBarsField.definingClass &&
+                        reference.parameterTypes.map(CharSequence::toString) == listOf(COMPOSER_DESCRIPTOR) &&
+                        result.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                        result.registerA == navigationBarsRead.registerB
+                }
+            },
+        )
+
+    return ImmersiveActionBarSafeAreaHook(
+        method = method,
+        actionBarCallIndex = actionBarCallIndex,
+        actionBarCall = actionBarCall,
+        modifierRegister = modifierRegister,
+        composerRegister = composerRegister,
+        windowInsetsHolderProvider = windowInsetsHolderProvider,
+        navigationBarsField = navigationBarsField,
+        insetsPaddingCall = insetsPaddingCall,
+    )
+}
+
+internal fun applyImmersiveActionBarSafeAreaHook(
+    setting: ToggleSettingDefinition,
+    hook: ImmersiveActionBarSafeAreaHook,
+) {
+    val settingRead =
+        setting.injectRead(
+            method = hook.method,
+            index = hook.actionBarCallIndex,
+            excludedRegisters = listOf(hook.modifierRegister, hook.composerRegister),
+            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+        )
+    val scratchRegister = settingRead.register
+    val continuationLabel = "piko_newx_immersive_action_bar_${hook.actionBarCallIndex}"
+    hook.method.addInstructionsWithLabels(
+        settingRead.nextIndex,
+        """
+            if-eqz v$scratchRegister, :$continuationLabel
+            invoke-static/range {v${hook.composerRegister} .. v${hook.composerRegister}}, ${hook.windowInsetsHolderProvider}
+            move-result-object v$scratchRegister
+            iget-object v$scratchRegister, v$scratchRegister, ${hook.navigationBarsField}
+            invoke-static {v${hook.modifierRegister}, v$scratchRegister}, ${hook.insetsPaddingCall}
+            move-result-object v${hook.modifierRegister}
+        """.trimIndent(),
+        ExternalLabel(continuationLabel, hook.actionBarCall),
+    )
 }
 
 /**
@@ -765,22 +898,20 @@ val newXHidePostReplyBarPatch =
             val renderer =
                 resolvePostDetailReplyBarRenderer()
             val (minimalContainer, postDetailSheetContainer) = resolvePostDetailReplyBarContainers(renderer)
-            val navigationInsetsHook = resolveMainNavigationInsetsHook()
             val postDetailNavigationInsetsHook =
                 resolvePostDetailNavigationInsetsHook(postDetailSheetContainer)
             val photoViewerNavigationFallbackHook =
                 resolvePhotoViewerNavigationFallbackHook(minimalContainer)
+            val immersiveActionBarSafeAreaHook =
+                resolveImmersiveActionBarSafeAreaHook(minimalContainer)
 
             val postDetailInsetApplication =
                 postDetailSheetContainer.classifyInsetApplication(postDetailNavigationInsetsHook.callIndex)
 
+            // MainActivity's navigation-bar padding is the screen-wide safe area, not reply-bar
+            // spacing. Keep it so the remaining post actions stay above the gesture pill.
             hidePostReplyBar.returnVoidIfEnabled(renderer.method, 0)
             hidePostReplyBar.returnVoidIfEnabled(minimalContainer, 0)
-            hidePostReplyBar.branchIfEnabled(
-                navigationInsetsHook.method,
-                navigationInsetsHook.callIndex,
-                navigationInsetsHook.continuation,
-            )
             // A gated inset is the app's own "this composition is bottom-anchored" signal (the
             // fullscreen photo screen). Keep it applied: it reserves the gesture area once the
             // composer is hidden, and `minimalContainer` already removes the reply bar, its
@@ -796,6 +927,12 @@ val newXHidePostReplyBarPatch =
             }
             photoViewerNavigationFallbackHook.let { hook ->
                 hidePostReplyBar.branchIfEnabled(hook.method, hook.gateIndex, hook.fallback)
+            }
+            immersiveActionBarSafeAreaHook?.let { hook ->
+                // 12.29's new immersive renderer owns the visible likes/repost/share row. Pad that
+                // row itself; do not force its separate no-composer spacer, which affects shared
+                // media layouts and previously introduced a blank timeline gap.
+                applyImmersiveActionBarSafeAreaHook(hidePostReplyBar, hook)
             }
         }
     }

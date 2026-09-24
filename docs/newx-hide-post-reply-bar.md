@@ -33,23 +33,17 @@ guards both the minimal-composer container (`minimal/h`) and the post-detail she
 (`postdetailsheet/f`) with `returnVoidIfEnabled`. This completely removes the fading black gradient
 scrim, blur box, and empty inset space.
 
-Newer targets also apply the navigation-bar inset to the shared `MainActivity` content root. The
-patch resolves that call from the stable state-singleton -> Composer getter -> inset-field ->
-`Modifier` data flow, not from obfuscated Compose owner or method names. Older targets without that
-root call are accepted only after the stable root method is found and verified to have no `insets`
-marker. Post-detail sheets have a second, local navigation-insets call; its host is resolved from
-the renderer call chain and the same data flow, so Compose owner/method renames do not silently
-skip it.
+The shared `MainActivity` content root applies a system-bar safe area and remains untouched by this
+patch. Runtime testing showed that keeping this root inset alone does not protect the likes/repost/
+share row in the 12.29 immersive screen. The visible row is rendered in the immersive-media
+renderer, before its composer/no-composer branch. With the hide setting enabled, the patch applies
+that renderer's existing `navigationBarsIgnoringVisibility` inset to the row's own modifier before
+rendering it. It does not force the separate no-composer spacer, which previously created a gap.
 
 Every required match is cardinality-checked before mutation: one tagged renderer, one caller at
-each call-chain edge, one mutable container per resolved owner, and one post-detail inset call.
-The root inset hook allows only the explicitly validated legacy zero-call shape or one call. A
-navigation call must be followed by `move-result-object`, and the setting branch targets the
-instruction after that result, preventing invalid bytecode when the inset is skipped.
-
-Validated root/post-detail inset cardinalities are `0/1` for `12.20.5-prod.01` and
-`12.21.1-prod.05`, and `1/1` for `12.22.0-beta.01`, `12.22.0-prod.01`, `12.23.0-prod.01`,
-`12.23.1-prod.01`, and `12.25.0-alpha.01`.
+each call-chain edge, one mutable container per resolved owner, one post-detail inset call, and at
+most one semantic immersive-media action-row renderer. The latter derives the exact action-row
+modifier, Composer, WindowInsets holder, navigation-bars field, and modifier call from bytecode.
 
 ## Validation
 
@@ -67,13 +61,12 @@ The post-detail reply-bar container applies its local navigation-bar inset in on
 
 - **Gated** (verified 12.27/12.28/12.29): a composition-local flag selects the inset, so only
   bottom-anchored immersive compositions (the fullscreen photo screen) reserve the gesture area.
-  The patch must not touch the container here: `composer/minimal/b;->h`'s guard already hides the
-  reply bar, its gradient scrim, and the blur box, while the gated inset keeps the inline action
-  bar above the gesture pill.
+  Preserve the container's gate and hide the composer at `composer/minimal/b;->h`. On 12.29,
+  separately apply the immersive-media renderer's native navigation-bar inset to the likes/repost/
+  share row itself; the container and `MainActivity` insets do not move that row.
 - **Unconditional** (legacy containers): the inset is part of the reply bar's "empty inset space"
   and is removed together with the bar, as in `98ee98c8`.
 
-`HidePostReplyBarPatch.classifyInsetApplication` distinguishes the shapes at patch time and fails
-closed on anything else. Deleting the container guards unconditionally is what dropped the 12.29
-photo screen's action bar into the gesture pill; see
-`docs/newx-resolver-linter/incidents/2026-09-24-12-29-hide-reply-bar-inset-and-gap.md`.
+`HidePostReplyBarPatch.classifyInsetApplication` distinguishes the container shapes at patch time
+and fails closed on anything else. The 12.29 action-row regression and its follow-up are recorded in
+`docs/newx-resolver-linter/incidents/2026-09-24-12-29-main-activity-root-inset-follow-up.md`.

@@ -1,24 +1,29 @@
 package app.crimera.patches.newx.misc.postdetails
 
-// Guards the failure reported against 12.29.0-alpha.04: the hide-reply-bar guards deleted the
-// post-detail container's navigation-insets reservation together with the reply bar, dropping the
-// fullscreen photo screen's action bar into the gesture pill. The classifier decides whether a
-// container's inset is the app's own gated gesture reservation: misclassifying a GATED application
-// as UNCONDITIONAL reintroduces the pill overlap, and misclassifying an UNCONDITIONAL one as GATED
-// reintroduces the legacy empty inset space below the reply bar.
+// Guards the 12.29.0-alpha.04 gesture-pill regression. Container classification preserves the
+// existing inset contract, while the emitted-bytecode check proves the immersive likes/repost/share
+// row receives navigation padding before it renders rather than mutating the reply editor.
 
+import app.crimera.patches.newx.settings.ToggleSettingDefinition
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
+import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.immutable.ImmutableAnnotation
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -44,6 +49,71 @@ class HidePostReplyBarPatchTest {
             diamondContainer(skipArmInstruction = "const/4 v1, 0x0")
                 .classifyInsetApplication(callIndex = 1)
         }
+    }
+
+    @Test
+    fun `immersive action row receives navigation padding before it renders`() {
+        val method = immersiveActionBarFixture()
+        val actionBarCall = method.instructions.first()
+        val holderProvider =
+            ImmutableMethodReference(
+                "Lapp/crimera/test/WindowInsetsHolder;",
+                "current",
+                listOf("Landroidx/compose/runtime/Composer;"),
+                "Lapp/crimera/test/WindowInsetsHolder;",
+            )
+        val navigationBarsField =
+            ImmutableFieldReference(
+                "Lapp/crimera/test/WindowInsetsHolder;",
+                "navigationBarsIgnoringVisibility",
+                "Lapp/crimera/test/WindowInsets;",
+            )
+        val insetsPadding =
+            ImmutableMethodReference(
+                "Landroidx/compose/foundation/layout/TestLayout;",
+                "windowInsetsPadding",
+                listOf(
+                    "Landroidx/compose/ui/Modifier;",
+                    "Lapp/crimera/test/WindowInsets;",
+                ),
+                "Landroidx/compose/ui/Modifier;",
+            )
+        applyImmersiveActionBarSafeAreaHook(
+            ToggleSettingDefinition(
+                id = "newx.test.hide_post_reply_bar",
+                titleResourceName = "piko_newx_test_title",
+                summaryResourceName = null,
+                order = 0,
+                defaultValue = false,
+            ),
+            ImmersiveActionBarSafeAreaHook(
+                method = method,
+                actionBarCallIndex = 0,
+                actionBarCall = actionBarCall,
+                modifierRegister = 1,
+                composerRegister = 8,
+                windowInsetsHolderProvider = holderProvider,
+                navigationBarsField = navigationBarsField,
+                insetsPaddingCall = insetsPadding,
+            ),
+        )
+
+        val instructions = method.instructions
+        val actionBarCallIndex = instructions.indexOf(actionBarCall)
+        val insetFieldIndex = instructions.indexOfFirst { instruction ->
+            instruction.getReference<FieldReference>() == navigationBarsField
+        }
+        val paddingCallIndex = instructions.indexOfFirst { instruction ->
+            instruction.getReference<MethodReference>() == insetsPadding
+        }
+        assertEquals(true, insetFieldIndex in 0 until actionBarCallIndex)
+        assertEquals(true, paddingCallIndex in (insetFieldIndex + 1) until actionBarCallIndex)
+        assertEquals(Opcode.MOVE_RESULT_OBJECT, instructions[paddingCallIndex + 1].opcode)
+        assertEquals(
+            1,
+            (instructions[paddingCallIndex + 1] as OneRegisterInstruction).registerA,
+            "the padded Modifier must replace the action row's Modifier register",
+        )
     }
 
     /** `if-eqz v0, :skip` / apply arm (`invoke` + `move-result-object v1`) / `goto :merge` / skip arm / merge. */
@@ -77,8 +147,19 @@ class HidePostReplyBarPatchTest {
         return method
     }
 
-    private fun fixture(): MutableMethod {
-        val implementation = MethodImplementationBuilder(3)
+    private fun immersiveActionBarFixture(): MutableMethod {
+        val method = fixture(registerCount = 12)
+        method.addInstructionsWithLabels(
+            0,
+            """
+                invoke-static {v1, v8}, Lapp/crimera/test/ActionBar;->renderActionBar(Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;)V
+            """.trimIndent(),
+        )
+        return method
+    }
+
+    private fun fixture(registerCount: Int = 3): MutableMethod {
+        val implementation = MethodImplementationBuilder(registerCount)
         implementation.addInstruction("return-void".toInstruction())
         return MutableMethod(
             ImmutableMethod(
