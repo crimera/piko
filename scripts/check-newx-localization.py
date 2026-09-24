@@ -15,6 +15,49 @@ args = parser.parse_args()
 repo = Path(__file__).resolve().parents[1]
 fixtures = {
     'androidx/annotation/NonNull.java': 'package androidx.annotation; public @interface NonNull {}',
+    'androidx/annotation/Nullable.java': 'package androidx.annotation; public @interface Nullable {}',
+    'app/morphe/extension/shared/settings/Setting.java': 'package app.morphe.extension.shared.settings; public class Setting<T> {}',
+    'app/morphe/extension/shared/settings/BooleanSetting.java': 'package app.morphe.extension.shared.settings; public class BooleanSetting extends Setting<Boolean> {}',
+    'app/morphe/extension/shared/settings/StringSetting.java': 'package app.morphe.extension.shared.settings; public class StringSetting extends Setting<String> {}',
+    'app/morphe/extension/newx/settings/StringSetSetting.java': 'package app.morphe.extension.newx.settings; public class StringSetSetting extends app.morphe.extension.shared.settings.Setting<java.util.Set<String>> {}',
+    'app/morphe/extension/newx/settings/SettingsRegistry.java': '''package app.morphe.extension.newx.settings;
+public class SettingsRegistry {
+    static java.util.List<SettingsNode.Category> nodes;
+    public static java.util.List<SettingsNode.Category> catalog() { return nodes; }
+}''',
+    'app/morphe/extension/newx/settings/SearchLocaleAudit.java': '''package app.morphe.extension.newx.settings;
+import java.util.List;
+import java.util.Locale;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.settings.StringSetting;
+public class SearchLocaleAudit {
+    public static int run() {
+        var label = NewXStrings.sfc("label");
+        var choice = new SettingsNode.SingleChoice("choice", label, label, 0,
+                new StringSetting(), List.of(new SettingsNode.ChoiceOption("option", label)), true);
+        var group = new SettingsNode.Group("group", label, null, null, 0, List.of(choice));
+        SettingsRegistry.nodes = List.of(new SettingsNode.Category("category", label, null,
+                null, 0, List.of(group)));
+        Utils.context.resources.locale = Locale.ENGLISH;
+        var english = SettingsSearchIndex.results();
+        if (SettingsSearchMatcher.match(english, "English").size() != 1)
+            throw new AssertionError("English settings search did not match");
+        Utils.context.resources.locale = Locale.SIMPLIFIED_CHINESE;
+        var chinese = SettingsSearchIndex.results();
+        var result = chinese.get(0);
+        if (!result.title.equals("中文") || !result.summary.equals("中文")
+                || !result.path.equals("中文 → 中文")
+                || !result.keywords.equals("中文 中文 中文 → 中文 choice 中文"))
+            throw new AssertionError("Search index retained text from the previous locale: " + result.keywords);
+        if (SettingsSearchMatcher.match(chinese, "中文").size() != 1
+                || !SettingsSearchMatcher.match(chinese, "English").isEmpty())
+            throw new AssertionError("Search matcher retained the previous locale");
+        Utils.context.resources.locale = Locale.ENGLISH;
+        if (SettingsSearchMatcher.match(SettingsSearchIndex.results(), "English").size() != 1)
+            throw new AssertionError("Search did not return to English");
+        return 4;
+    }
+}''',
     'android/content/res/Resources.java': '''package android.content.res;
 public class Resources {
     public java.util.Locale locale = java.util.Locale.ENGLISH;
@@ -79,6 +122,7 @@ public class LocaleAudit {
         equal("100% complete; %1$s", NewXStrings.str("literal"));
         equal("100% complete; %1$s", NewXStrings.sfc("literal").toString());
         equal("%.1f", NewXStrings.forResourceId(2).toString());
+        checks += app.morphe.extension.newx.settings.SearchLocaleAudit.run();
         System.out.println("Locale-aware production resource checks passed: " + checks);
     }
 }''',
@@ -93,6 +137,7 @@ with tempfile.TemporaryDirectory(prefix='newx-localization-') as directory:
         entry = next(name for name in archive.namelist() if name.endswith('/StringRef.java'))
         (root / 'app/morphe/extension/shared/StringRef.java').write_bytes(archive.read(entry))
     sources = [str(path) for path in root.rglob('*.java')]
-    sources.append(str(repo / 'extensions/newx/src/main/java/app/morphe/extension/newx/settings/NewXStrings.java'))
+    for name in ('NewXStrings', 'SettingsNode', 'SettingsSearchIndex', 'SettingsSearchMatcher'):
+        sources.append(str(repo / f'extensions/newx/src/main/java/app/morphe/extension/newx/settings/{name}.java'))
     subprocess.run(['javac', '-encoding', 'UTF-8', '-d', str(root / 'classes'), *sources], check=True)
     subprocess.run(['java', '-cp', str(root / 'classes'), 'LocaleAudit'], check=True)

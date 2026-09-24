@@ -7,16 +7,14 @@ import java.util.List;
 /** Builds the searchable view of the frozen NewX settings catalog. */
 final class SettingsSearchIndex {
     private static final String HIERARCHY_SEPARATOR = " \u2192 ";
-    private static List<Result> cachedResults;
 
     private SettingsSearchIndex() {
     }
 
-    static synchronized List<Result> results() {
-        if (cachedResults == null) {
-            cachedResults = Collections.unmodifiableList(buildResults());
-        }
-        return cachedResults;
+    static List<Result> results() {
+        // The catalog is frozen, but its labels follow the current resource locale.
+        // Resolve text for each search render instead of retaining a process-wide snapshot.
+        return Collections.unmodifiableList(buildResults());
     }
 
     private static List<Result> buildResults() {
