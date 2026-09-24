@@ -401,6 +401,33 @@ class NewXResolverLinterTest {
         assertTrue(selected.isEmpty(), selected.toString())
     }
 
+    @Test
+    fun `module divider selection follows null key through object moves`() {
+        val instructions =
+            listOf(
+                // 12.29 lowers the null reference key to a zero constant that reaches the lazy call
+                // through move-object aliases, so the direct-const window alone misses the divider.
+                "const/4 v0, 0x0".toInstruction(),
+                "move-object v1, v0".toInstruction(),
+                "new-instance v2, Lfixture/DividerAdapter;".toInstruction(),
+                "const/16 v3, 0x7".toInstruction(),
+                "invoke-direct {v2, v4, v3}, Lfixture/DividerAdapter;-><init>(Ljava/lang/Object;I)V".toInstruction(),
+                "new-instance v5, Landroidx/compose/runtime/internal/f;".toInstruction(),
+                "const v6, 0x1".toInstruction(),
+                "invoke-direct {v5, v2, v7, v6}, Landroidx/compose/runtime/internal/f;-><init>(Ljava/lang/Object;ZI)V".toInstruction(),
+                "const/4 v8, 0x3".toInstruction(),
+                "move-object v9, v1".toInstruction(),
+                "invoke-static {v10, v9, v5, v8}, Landroidx/compose/foundation/lazy/k;->u(Landroidx/compose/foundation/lazy/k;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;I)V".toInstruction(),
+            )
+
+        val selected =
+            instructions.timelineModuleDividerItemIndices { adapterType, discriminator ->
+                dividerAdapterCaseBlock(adapterType, discriminator)
+            }
+
+        assertEquals(listOf(10), selected)
+    }
+
     private fun moduleDividerBuilderFixture(): List<Instruction> =
         listOf(
             // Divider item: a non-foundation adapter discriminator whose case block draws a divider.

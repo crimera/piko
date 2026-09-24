@@ -84,6 +84,33 @@ internal fun List<Instruction>.resolveIntegerLiteralOnCurrentPath(
     return null
 }
 
+/**
+ * Resolves the single constant reaching [register] on the current path, following integer and
+ * object moves alike. Kotlin lowers a null reference argument to a zero constant that reaches the
+ * call through `move-object` aliases, so object moves must be followed to prove a zero/null value.
+ */
+internal fun List<Instruction>.resolveConstantOnCurrentPath(
+    instructionIndex: Int,
+    register: Int,
+): Int? {
+    var trackedRegister = register
+    for (index in instructionIndex - 1 downTo 0) {
+        val instruction = this[index]
+        if (instruction.opcode in INTEGER_MOVE_OPCODES || instruction.opcode in OBJECT_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: return null
+            if (move.registerA != trackedRegister) continue
+            trackedRegister = move.registerB
+            continue
+        }
+        if (instruction.opcode in INTEGER_LITERAL_OPCODES) {
+            if ((instruction as? OneRegisterInstruction)?.registerA != trackedRegister) continue
+            return (instruction as? NarrowLiteralInstruction)?.narrowLiteral
+        }
+        if (instruction.destinationRegisterOrNull() == trackedRegister) return null
+    }
+    return null
+}
+
 /** Follows object moves to prove which value finally reaches [targetRegister]. */
 internal fun List<Instruction>.valueReachesRegister(
     valueIndex: Int,

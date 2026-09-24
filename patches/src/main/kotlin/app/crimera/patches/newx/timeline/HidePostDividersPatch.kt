@@ -9,6 +9,7 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.newx.utils.resolveConstantOnCurrentPath
 import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -26,7 +27,6 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
-import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -200,11 +200,6 @@ private fun Instruction.isLazyListItemCall(): Boolean {
         parameters[3] == INSETS_DESCRIPTOR
 }
 
-private fun Instruction.isZeroConstant(): Boolean =
-    (opcode == Opcode.CONST_4 || opcode == Opcode.CONST_16 || opcode == Opcode.CONST) &&
-        this is NarrowLiteralInstruction &&
-        narrowLiteral == 0
-
 private fun MethodReference.isComposeLambdaWrapperConstructor(): Boolean =
     name == "<init>" &&
         definingClass.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) &&
@@ -216,7 +211,9 @@ private fun MethodReference.isComposeLambdaWrapperConstructor(): Boolean =
  * The module separators are zero-key lazy items whose content lambda is built inline as a runtime
  * `internal/f` wrapper around an obfuscated adapter. The adapter's owner and discriminator churn
  * across releases, so the content is proven to be a divider by resolving the discriminator into the
- * adapter's `invoke` switch and inspecting the resulting case block.
+ * adapter's `invoke` switch and inspecting the resulting case block. The null key may reach the call
+ * through `move-object` aliases (12.29), so the key is resolved with the move-following data-flow
+ * helper instead of a fixed instruction window.
  */
 private fun List<Instruction>.isZeroKeyLazyItem(
     index: Int,
@@ -224,15 +221,7 @@ private fun List<Instruction>.isZeroKeyLazyItem(
 ): Boolean {
     if (!instruction.isLazyListItemCall()) return false
     val keyRegister = instruction.registersUsed.getOrNull(1) ?: return false
-    val keyConstant =
-        (maxOf(0, index - 4) until index)
-            .asSequence()
-            .map { candidateIndex -> get(candidateIndex) }
-            .filter { candidate ->
-                candidate is OneRegisterInstruction && candidate.registerA == keyRegister
-            }
-            .lastOrNull()
-    return keyConstant?.isZeroConstant() == true
+    return resolveConstantOnCurrentPath(index, keyRegister) == 0
 }
 
 private fun List<Instruction>.hasZeroKeyLazyItem(): Boolean =
