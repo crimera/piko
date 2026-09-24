@@ -5,7 +5,9 @@ import app.crimera.patches.newx.misc.drawer.isStringResourceLookup
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.SettingsRegistrationState
+import app.crimera.patches.newx.settings.choice
 import app.crimera.patches.newx.settings.newXCustomScreen
+import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.NAV_BAR_FILTER_DESCRIPTOR
@@ -125,6 +127,16 @@ val customizeNewXNavBarPatch =
             order = 100,
             fragmentClassDescriptor = NAV_BAR_EDITOR_DESCRIPTOR,
             iconResourceName = "ic_vector_bulleted_list",
+        )
+
+        newXMultiChoice(
+            id = "newx.content.hidden_navbar_badges",
+            category = Categories.NAVIGATION,
+            strings = settingStrings("piko_newx_nav_badges"),
+            order = 110,
+            defaultValue = emptySet(),
+            visible = false,
+            options = NAV_BAR_NATIVE_TAB_OPTIONS.map { (name, labelResourceName) -> choice(name, labelResourceName) },
         )
 
         execute {

@@ -28,11 +28,16 @@ import java.util.Set;
 import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
+import app.morphe.extension.newx.settings.SettingsNode;
+import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.newx.settings.StringSetSetting;
 import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.newx.ui.ChoiceRow;
 import app.morphe.extension.newx.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.settings.Setting;
 
 /**
  * Drag-and-drop editor for the effective NewX bottom navigation destinations. The app still owns
@@ -41,6 +46,7 @@ import app.morphe.extension.shared.Utils;
 @SuppressWarnings("deprecation")
 public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     private static final String DRAG_MIME = "piko/newx-navbar-item";
+    private static final String HIDE_BADGES_ID = "newx.content.hidden_navbar_badges";
     private static final long DRAG_SCROLL_FRAME_DELAY_MS = 16L;
     private static final float DRAG_SCROLL_EDGE_DP = 80f;
 
@@ -113,6 +119,8 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         availableRows.clear();
 
         Context context = requireContext();
+        container.addView(badgeRow(context), new LinearLayout.LayoutParams(-1, -2));
+        container.addView(NewXSettingsUi.divider(context));
         TextView hint = NewXSettingsUi.summaryText(context);
         hint.setText(StringRef.str("piko_newx_nav_editor_hint"));
         hint.setPadding(
@@ -174,6 +182,139 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
 
     private void addRow(LinearLayout container, Row row) {
         container.addView(row.root, new LinearLayout.LayoutParams(-1, -2));
+    }
+
+    private View badgeRow(Context context) {
+        LinearLayout root = new LinearLayout(context);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(
+                Theme.dpToPx(context, 24f),
+                Theme.dpToPx(context, 16f),
+                Theme.dpToPx(context, 24f),
+                Theme.dpToPx(context, 16f)
+        );
+        NewXSettingsUi.applyRippleBackground(root);
+        root.setClickable(true);
+        root.setFocusable(true);
+
+        TextView title = NewXSettingsUi.titleText(context);
+        title.setText(StringRef.str("piko_newx_nav_badges_title"));
+        root.addView(title, new LinearLayout.LayoutParams(-1, -2));
+
+        TextView summary = NewXSettingsUi.summaryText(context);
+        summary.setText(badgeSummary());
+        summary.setPadding(0, Theme.dpToPx(context, 6f), 0, 0);
+        root.addView(summary, new LinearLayout.LayoutParams(-1, -2));
+
+        root.setOnClickListener(ignored -> showBadgeDialog());
+        return root;
+    }
+
+    private CharSequence badgeSummary() {
+        SettingsNode.MultiChoice node = findHideBadgesNode();
+        Set<String> hidden = hiddenBadges();
+        if (node == null || hidden.isEmpty()) {
+            return StringRef.str("piko_newx_nav_badges_summary");
+        }
+        List<String> names = new ArrayList<>();
+        for (SettingsNode.ChoiceOption option : node.options) {
+            if (hidden.contains(option.id)) names.add(option.title.toString());
+        }
+        for (String id : hidden) {
+            boolean known = false;
+            for (SettingsNode.ChoiceOption option : node.options) {
+                if (option.id.equals(id)) {
+                    known = true;
+                    break;
+                }
+            }
+            if (!known) names.add(id);
+        }
+        if (names.isEmpty()) return StringRef.str("piko_newx_nav_badges_summary");
+        return android.text.TextUtils.join(", ", names);
+    }
+
+    private void showBadgeDialog() {
+        SettingsNode.MultiChoice node = findHideBadgesNode();
+        if (node == null) return;
+        Setting<?> raw = SettingsRegistry.settingOrNull(HIDE_BADGES_ID);
+        if (!(raw instanceof StringSetSetting setting)) return;
+        Context context = requireContext();
+
+        Set<String> selected = new HashSet<>(setting.get());
+        DialogView dialog = new DialogView(context).setTitle(node.title.toString());
+        if (node.summary != null) dialog.setSubtitle(node.summary.toString());
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        LinearLayout options = new LinearLayout(context);
+        options.setOrientation(LinearLayout.VERTICAL);
+        dialog.setScrollableBodyView(options);
+        for (SettingsNode.ChoiceOption option : node.options) {
+            ChoiceRow row = NewXSettingsUi.choiceRow(
+                    context,
+                    option.title.toString(),
+                    selected.contains(option.id),
+                    true
+            );
+            row.setOnCheckedChangeListener(checked -> {
+                if (checked) {
+                    selected.add(option.id);
+                } else {
+                    selected.remove(option.id);
+                }
+            });
+            options.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        ButtonView cancel = NewXSettingsUi.dialogButton(
+                context,
+                StringRef.str("piko_newx_settings_cancel")
+        );
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+        ButtonView save = NewXSettingsUi.dialogButton(
+                context,
+                StringRef.str("piko_newx_settings_ok")
+        );
+        save.setOnClickListener(ignored -> {
+            Set<String> next = StringSetSetting.immutableCopy(selected);
+            if (!setting.get().equals(next)) {
+                setting.save(next);
+                markChanged();
+            }
+            dialog.dismiss();
+            rebuildRows();
+        });
+        dialog.addButton(cancel).addButton(save).show();
+    }
+
+    @Nullable
+    private static SettingsNode.MultiChoice findHideBadgesNode() {
+        for (SettingsNode.Category category : SettingsRegistry.catalog()) {
+            SettingsNode.MultiChoice found = findHideBadgesNode(category);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    @Nullable
+    private static SettingsNode.MultiChoice findHideBadgesNode(SettingsNode.Group group) {
+        for (SettingsNode child : group.children) {
+            if (child instanceof SettingsNode.MultiChoice multiChoice
+                    && HIDE_BADGES_ID.equals(multiChoice.id)) {
+                return multiChoice;
+            }
+            if (child instanceof SettingsNode.Group nested) {
+                SettingsNode.MultiChoice found = findHideBadgesNode(nested);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    private static Set<String> hiddenBadges() {
+        Setting<?> setting = SettingsRegistry.settingOrNull(HIDE_BADGES_ID);
+        if (!(setting instanceof StringSetSetting hidden)) return new HashSet<>();
+        return new HashSet<>(hidden.get());
     }
 
     private View buildRestartRow(Context context) {
