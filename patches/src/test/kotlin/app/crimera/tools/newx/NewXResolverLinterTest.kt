@@ -1,6 +1,7 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
+import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
@@ -468,6 +469,27 @@ class NewXResolverLinterTest {
                 successEventIndex = null,
             )
         }
+    }
+
+    @Test
+    fun `media tab sub-tab seed ignores the Boolean FALSE post-sorting seed`() {
+        val instructions =
+            listOf(
+                (
+                    "invoke-static {v1}, Lkotlinx/coroutines/flow/z;->c(" +
+                        "Ljava/lang/Object;)Lkotlinx/coroutines/flow/w2;"
+                ).toInstruction(),
+                "sget-object v2, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;".toInstruction(),
+                (
+                    "invoke-static {v2}, Lkotlinx/coroutines/flow/z;->c(" +
+                        "Ljava/lang/Object;)Lkotlinx/coroutines/flow/w2;"
+                ).toInstruction(),
+            )
+
+        assertEquals(
+            listOf(0),
+            instructions.indices.filter { index -> isInitialSubTabSeed(instructions, index) },
+        )
     }
 
     private fun moduleDividerBuilderFixture(): List<Instruction> =

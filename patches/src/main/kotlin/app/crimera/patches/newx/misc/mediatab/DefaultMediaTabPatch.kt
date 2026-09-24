@@ -25,6 +25,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /**
@@ -57,6 +58,26 @@ private fun isFlowSeed(instruction: Instruction) =
                 reference.parameterTypes == listOf("Ljava/lang/Object;")
         } == true
 
+/** True when [instruction] reads the `Boolean.FALSE` post-sorting default. */
+private fun isBooleanFalse(instruction: Instruction) =
+    instruction.opcode == Opcode.SGET_OBJECT &&
+        ((instruction as? ReferenceInstruction)?.reference as? FieldReference)?.let { field ->
+            field.definingClass == "Ljava/lang/Boolean;" && field.name == "FALSE"
+        } == true
+
+/**
+ * True when the flow seed at [index] is the selected sub-tab state. The post-sorting state is also
+ * a `MutableStateFlow`, but it is seeded with `Boolean.FALSE`; the sub-tab seed never is.
+ */
+internal fun isInitialSubTabSeed(
+    instructions: List<Instruction>,
+    index: Int,
+): Boolean {
+    if (!isFlowSeed(instructions[index])) return false
+    val previous = instructions.getOrNull(index - 1) ?: return true
+    return !isBooleanFalse(previous)
+}
+
 /** Returns the one argument register for a one-argument flow factory call. */
 private fun singleArgumentRegister(instruction: Instruction): Int? =
     when (instruction) {
@@ -82,11 +103,8 @@ private object NewXCombinedProfileTimelineInitialSubTabFingerprint : Fingerprint
             isCombinedTimelineComponent(classDef) &&
             hasTabTypesAndInitialSubTab(method.parameterTypes) &&
             method.implementation?.let { implementation ->
-                val firstParameterRegister = implementation.registerCount - method.parameterTypes.size
-                val initialSubTabRegister = firstParameterRegister + 1
-                implementation.instructions.any {
-                    isFlowSeed(it) && singleArgumentRegister(it) == initialSubTabRegister
-                }
+                val instructions = implementation.instructions.toList()
+                instructions.indices.any { index -> isInitialSubTabSeed(instructions, index) }
             } == true
     },
 )
@@ -113,34 +131,26 @@ val newXDefaultMediaTabPatch =
         )
 
         execute {
-            val refactoredMatches =
+            val matches =
                 NewXCombinedProfileTimelineInitialSubTabFingerprint.scopedMatchAllOrNull().orEmpty()
             val combinedMatch =
                 requireExactlyOne(
-                    label = "combined profile timeline seed across known shapes",
-                    candidates = refactoredMatches,
+                    label = "combined profile timeline seed",
+                    candidates = matches,
                 )
             val method = combinedMatch.method
             val tabTypeDescriptor = method.parameterTypes[1].toString()
 
             val methodInstructions = method.instructions
-            val implementation = method.implementation
-                ?: throw PatchException("Refactored combined profile timeline component has no implementation")
-            val firstParameterRegister = implementation.registerCount - method.parameterTypes.size
-            val initialSubTabRegister = firstParameterRegister + 1
             val seedCandidates =
-                methodInstructions.withIndex()
-                    .filter { (_, instruction) ->
-                        isFlowSeed(instruction) &&
-                            singleArgumentRegister(instruction) == initialSubTabRegister
-                    }
-            if (seedCandidates.size != 1) {
-                throw PatchException(
-                    "Expected one MutableStateFlow seed for the refactored initial sub-tab, found " +
-                        "${seedCandidates.size}: ${seedCandidates.joinToString { "${it.index}:${it.value}" }}",
-                )
-            }
-            val seedInvokeIndex = seedCandidates.single().index
+                methodInstructions.withIndex().filter { (index, _) ->
+                    isInitialSubTabSeed(methodInstructions, index)
+                }
+            val seedInvokeIndex =
+                requireExactlyOne(
+                    label = "combined profile timeline sub-tab seed",
+                    candidates = seedCandidates,
+                ).index
 
             val seedValueRegister =
                 singleArgumentRegister(methodInstructions[seedInvokeIndex])
@@ -148,15 +158,6 @@ val newXDefaultMediaTabPatch =
                         "Combined profile timeline seed is not a one-register invoke: " +
                             methodInstructions[seedInvokeIndex],
                     )
-
-            // The seed value is replaced in place, so it must live in a scratch register — a
-            // parameter register may be read again later in the constructor on other targets.
-            val parameterRegisterFloor = firstParameterRegister
-            if (seedValueRegister >= parameterRegisterFloor && seedValueRegister != initialSubTabRegister) {
-                throw PatchException(
-                    "Seed value lives in a parameter register (v$seedValueRegister); adjust the fingerprint for this target",
-                )
-            }
 
             method.addInstructions(
                 seedInvokeIndex,
