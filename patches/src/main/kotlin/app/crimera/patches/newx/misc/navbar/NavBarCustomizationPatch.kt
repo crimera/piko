@@ -275,17 +275,20 @@ private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor
     method.addInstructionsWithLabels(
         rendererCallIndex,
         """
-            iget-object v$workRegister, v$thisRegister, $navigationField
+            move-object/from16 v$workRegister, v$thisRegister
+            iget-object v$workRegister, v$workRegister, $navigationField
             invoke-static {v$workRegister, v$iconRegister}, $OVERRIDE_ICON_DESCRIPTOR
             move-result-object v$workRegister
             check-cast v$workRegister, $iconType
             move-object/from16 v$iconRegister, v$workRegister
             
-            iget-object v$workRegister, v$thisRegister, $navigationField
+            move-object/from16 v$workRegister, v$thisRegister
+            iget-object v$workRegister, v$workRegister, $navigationField
             invoke-static {v$workRegister, v$labelRegister}, $OVERRIDE_LABEL_DESCRIPTOR
             move-result-object v$labelRegister
             
-            iget-object v$workRegister, v$thisRegister, $navigationField
+            move-object/from16 v$workRegister, v$thisRegister
+            iget-object v$workRegister, v$workRegister, $navigationField
             invoke-static {v$workRegister}, $SHOULD_CLEAR_BADGE_DESCRIPTOR
             move-result v$workRegister
             if-eqz v$workRegister, :$endLabel
