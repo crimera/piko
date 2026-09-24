@@ -26,6 +26,7 @@ import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.patches.Links;
+import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -88,6 +89,38 @@ public class ScreenBuilder {
                     )
             );
         }
+    }
+
+    public void buildFontSection() {
+        if (!(SettingsStatus.fontSection())) return;
+
+        // Written here rather than left to the preference framework, which persists only after
+        // this listener has run - FontStorage.useSystemFont() has to read the new value straight
+        // away, from load() on the next start up.
+        SwitchPref useSystemFont = new SwitchPref(context);
+        useSystemFont.setTitle(str("piko_use_system_font"));
+        useSystemFont.setSummary(str("piko_use_system_font_desc"));
+        useSystemFont.setKey(Settings.USE_SYSTEM_FONT.key);
+        useSystemFont.setPersistent(false);
+        useSystemFont.setChecked(FontStorage.useSystemFont());
+        useSystemFont.setOnPreferenceChangeListener((preference, newValue) -> {
+            FontStorage.setUseSystemFont(Boolean.TRUE.equals(newValue));
+            Utils.showToastShort(str("piko_restart_app"));
+            return true;
+        });
+        addPreference(useSystemFont);
+
+        addPreference(helper.buttonPreference(
+                str("piko_pref_add_font"),
+                str("piko_pref_add_font_desc"),
+                "piko_pref_add_font"
+        ));
+
+        addPreference(helper.buttonPreference(
+                str("piko_pref_delete_font"),
+                "",
+                "piko_pref_delete_font"
+        ));
     }
 
     public void buildDeveloperSection() {
@@ -491,6 +524,15 @@ public class ScreenBuilder {
                             str("piko_material_you_title"),
                             "",
                             Settings.MATERIAL_YOU_THEME
+                    )
+            );
+        }
+        if (SettingsStatus.fontSection()) {
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_font"),
+                            "",
+                            Constants.PIKO_FRAGMENT_FONT
                     )
             );
         }
