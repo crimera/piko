@@ -18,10 +18,14 @@ fixtures = {
     'android/content/res/Resources.java': '''package android.content.res;
 public class Resources {
     public java.util.Locale locale = java.util.Locale.ENGLISH;
-    public int getIdentifier(String name, String type, String pkg) { return name.equals("label") ? 1 : name.equals("number") ? 2 : 0; }
+    public int getIdentifier(String name, String type, String pkg) { return name.equals("label") ? 1 : name.equals("number") ? 2 : name.equals("literal") ? 3 : 0; }
+    public String getString(int id) {
+        if (id == 3) return "100% complete; %1$s";
+        if (id == 2) return "%.1f";
+        return locale.getLanguage().equals("zh") ? "中文" : "English";
+    }
     public String getString(int id, Object... args) {
-        if (id == 1) return locale.getLanguage().equals("zh") ? "中文" : "English";
-        return String.format(locale, "%.1f", args);
+        return String.format(locale, getString(id), args);
     }
 }''',
     'android/content/Context.java': '''package android.content;
@@ -29,6 +33,7 @@ public class Context {
     public final android.content.res.Resources resources = new android.content.res.Resources();
     public android.content.res.Resources getResources() { return resources; }
     public String getPackageName() { return "com.twitter.android"; }
+    public String getString(int id) { return resources.getString(id); }
     public String getString(int id, Object... args) { return resources.getString(id, args); }
 }''',
     'android/app/Activity.java': 'package android.app; public class Activity extends android.content.Context {}',
@@ -71,6 +76,9 @@ public class LocaleAudit {
         ResourceUtils.useActivityContextIfAvailable = false;
         equal("中文", named.toString());
         equal("missing", NewXStrings.str("missing"));
+        equal("100% complete; %1$s", NewXStrings.str("literal"));
+        equal("100% complete; %1$s", NewXStrings.sfc("literal").toString());
+        equal("%.1f", NewXStrings.forResourceId(2).toString());
         System.out.println("Locale-aware production resource checks passed: " + checks);
     }
 }''',

@@ -237,7 +237,8 @@ public final class NewXCrashHandler implements Thread.UncaughtExceptionHandler {
     static String localized(Context context, String name, Object... args) {
         try {
             int id = context.getResources().getIdentifier(name, "string", context.getPackageName());
-            if (id != 0) return context.getString(id, args);
+            if (id != 0) return args != null && args.length == 0
+                    ? context.getString(id) : context.getString(id, args);
         } catch (Throwable ignored) {
         }
         // Last-resort diagnostic only; Android selects default English when a locale is absent.

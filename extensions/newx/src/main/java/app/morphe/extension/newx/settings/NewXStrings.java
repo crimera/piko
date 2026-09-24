@@ -51,7 +51,8 @@ public final class NewXStrings extends StringRef {
         if (context == null) return name;
         int id = resourceId != 0 ? resourceId
                 : context.getResources().getIdentifier(name, "string", context.getPackageName());
-        return id == 0 ? name : context.getString(id, args);
+        if (id == 0) return name;
+        return args != null && args.length == 0 ? context.getString(id) : context.getString(id, args);
     }
 
     @Override
