@@ -6,7 +6,7 @@ import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
@@ -27,7 +27,14 @@ private const val FUNCTION_ZERO_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION_THREE_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val COMPOSE_ANIMATION_SCOPE = "Landroidx/compose/animation/"
-private const val MODIFIER_PARAMETER_INDEX = 2
+
+private fun newPostButtonVisibilityFilter() =
+    methodCall(
+        opcode = Opcode.INVOKE_INTERFACE,
+        name = "isVisible",
+        parameters = listOf(),
+        returnType = "Z",
+    )
 
 private object NewXNewPostButtonCandidateFingerprint : Fingerprint(
     parameters =
@@ -38,15 +45,24 @@ private object NewXNewPostButtonCandidateFingerprint : Fingerprint(
             FUNCTION_ZERO_DESCRIPTOR,
         ),
     returnType = "V",
-    filters =
+    filters = listOf(newPostButtonVisibilityFilter()),
+    custom = { method, _ -> method.isNewPostButtonRendererCandidate() },
+)
+
+// 12.29 relocated the renderer and lowered its Compose ABI to (Modifier, Function0, Composer, I, I):
+// content parameters first, then Composer and the two changed/default bitmasks. Resolve both shapes
+// and share the common mutation below.
+private object NewXNewPostButtonComposeFlagCandidateFingerprint : Fingerprint(
+    parameters =
         listOf(
-            methodCall(
-                opcode = Opcode.INVOKE_INTERFACE,
-                name = "isVisible",
-                parameters = listOf(),
-                returnType = "Z",
-            ),
+            MODIFIER_DESCRIPTOR,
+            FUNCTION_ZERO_DESCRIPTOR,
+            COMPOSER_DESCRIPTOR,
+            "I",
+            "I",
         ),
+    returnType = "V",
+    filters = listOf(newPostButtonVisibilityFilter()),
     custom = { method, _ -> method.isNewPostButtonRendererCandidate() },
 )
 
@@ -82,6 +98,8 @@ private fun List<Instruction>.originatesFromObjectParameter(
     argumentRegister: Int,
     parameterRegister: Int,
 ): Boolean {
+    if (argumentRegister == parameterRegister) return true
+
     var trackedRegister = argumentRegister
     var searchEnd = useIndex
     val visitedRegisters = mutableSetOf<Int>()
@@ -90,11 +108,15 @@ private fun List<Instruction>.originatesFromObjectParameter(
         val writeIndex =
             (searchEnd - 1 downTo 0).firstOrNull { index ->
                 this[index].destinationRegister() == trackedRegister
-            } ?: return trackedRegister == parameterRegister
+            } ?: return false
         val write = this[writeIndex]
         if (write.opcode !in OBJECT_MOVE_OPCODES) return false
         val move = write as? TwoRegisterInstruction ?: return false
         trackedRegister = move.registerB
+        // A conditional default assignment can overwrite the parameter slot before the alias
+        // (e.g. `sget-object p0, Modifier.Companion`), so reaching the parameter register proves
+        // provenance without requiring the slot's own pre-write.
+        if (trackedRegister == parameterRegister) return true
         searchEnd = writeIndex
     }
     return false
@@ -106,20 +128,11 @@ private fun List<Instruction>.originatesFromObjectParameter(
  * which has the same Compose ABI and visibility call but supplies an invoke-produced modifier.
  */
 internal fun Method.isNewPostButtonRendererCandidate(): Boolean {
+    if (!AccessFlags.STATIC.isSet(accessFlags) || returnType != "V") return false
+
     val parameters = parameterTypes.map(CharSequence::toString)
-    if (
-        !AccessFlags.STATIC.isSet(accessFlags) ||
-        returnType != "V" ||
-        parameters !=
-        listOf(
-            "I",
-            COMPOSER_DESCRIPTOR,
-            MODIFIER_DESCRIPTOR,
-            FUNCTION_ZERO_DESCRIPTOR,
-        )
-    ) {
-        return false
-    }
+    val modifierParameterIndex = parameters.indexOf(MODIFIER_DESCRIPTOR)
+    if (modifierParameterIndex < 0 || parameters.count { it == MODIFIER_DESCRIPTOR } != 1) return false
 
     val implementation = implementation ?: return false
     val instructions = implementation.instructions.toList()
@@ -153,8 +166,7 @@ internal fun Method.isNewPostButtonRendererCandidate(): Boolean {
     val firstParameterRegister =
         implementation.registerCount - parameters.sumOf(String::registerWidth)
     val modifierParameterRegister =
-        firstParameterRegister +
-            parameters.take(MODIFIER_PARAMETER_INDEX).sumOf(String::registerWidth)
+        firstParameterRegister + parameters.take(modifierParameterIndex).sumOf(String::registerWidth)
     return instructions.originatesFromObjectParameter(
         useIndex = animatedVisibilityIndex,
         argumentRegister = argumentRegisters[1],
@@ -182,10 +194,15 @@ val hideNewPostButtonPatch =
             )
 
         execute {
+            val candidates =
+                buildList {
+                    addAll(NewXNewPostButtonCandidateFingerprint.scopedMatchAllOrNull().orEmpty())
+                    addAll(NewXNewPostButtonComposeFlagCandidateFingerprint.scopedMatchAllOrNull().orEmpty())
+                }
             val renderer =
                 requireExactlyOne(
                     label = "NewX new-post button renderer",
-                    candidates = NewXNewPostButtonCandidateFingerprint.scopedMatchAll(),
+                    candidates = candidates,
                 )
             hideNewPostButton.returnVoidIfEnabled(renderer.method, 0)
         }

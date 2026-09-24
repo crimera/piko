@@ -38,6 +38,17 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `new-post resolver survives 12-29 compose-flag ABI and conditional default modifier`() {
+        val renderer = newPostRendererComposeFlagFixture(directModifier = true)
+        val lookalike = newPostRendererComposeFlagFixture(directModifier = false)
+
+        assertEquals(
+            listOf(true, false),
+            listOf(renderer, lookalike).map(Method::isNewPostButtonRendererCandidate),
+        )
+    }
+
+    @Test
     fun `raw candidate selection is rejected`() {
         val findings = lint("val selected = candidates.first()")
 
@@ -437,6 +448,63 @@ class NewXResolverLinterTest {
 
     private fun lint(source: String): List<NewXResolverLinter.Finding> =
         NewXResolverLinter.lintSource("Fixture.kt", source)
+
+    private fun newPostRendererComposeFlagFixture(directModifier: Boolean): Method {
+        val implementation = MethodImplementationBuilder(14)
+        implementation.addInstruction(
+            "invoke-virtual {v10}, Ljava/lang/Object;->getClass()Ljava/lang/Class;".toInstruction(),
+        )
+        implementation.addInstruction(
+            "invoke-interface {v2}, Lfixture/Visibility;->isVisible()Z".toInstruction(),
+        )
+        implementation.addInstruction("move-result v0".toInstruction())
+        if (directModifier) {
+            // 12.29's default-modifier branch overwrites the Modifier parameter slot (v9 = p0) before
+            // the alias, so provenance must short-circuit on reaching the parameter register.
+            implementation.addInstruction(
+                (
+                    "sget-object v9, Lfixture/CompanionModifier;->Companion:" +
+                        "Landroidx/compose/ui/Modifier;"
+                ).toInstruction(),
+            )
+            implementation.addInstruction("move-object v1, v9".toInstruction())
+        } else {
+            implementation.addInstruction(
+                (
+                    "sget-object v1, Lfixture/CompanionModifier;->Companion:" +
+                        "Landroidx/compose/ui/Modifier;"
+                ).toInstruction(),
+            )
+        }
+        implementation.addInstruction(
+            (
+                "invoke-static/range {v0 .. v8}, Landroidx/compose/animation/Fixture;->render(" +
+                    "ZLandroidx/compose/ui/Modifier;Lfixture/Enter;Lfixture/Exit;" +
+                    "Ljava/lang/String;Lkotlin/jvm/functions/Function3;" +
+                    "Landroidx/compose/runtime/Composer;II)V"
+            ).toInstruction(),
+        )
+        implementation.addInstruction("return-void".toInstruction())
+
+        val parameters =
+            listOf(
+                "Landroidx/compose/ui/Modifier;",
+                "Lkotlin/jvm/functions/Function0;",
+                "Landroidx/compose/runtime/Composer;",
+                "I",
+                "I",
+            ).map { type -> ImmutableMethodParameter(type, emptySet(), null) }
+        return ImmutableMethod(
+            "Lfixture/NewPostRenderer;",
+            "render",
+            parameters,
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+            emptySet<ImmutableAnnotation>(),
+            emptySet<HiddenApiRestriction>(),
+            implementation.methodImplementation,
+        )
+    }
 
     private fun newPostRendererFixture(
         namedNullCheck: Boolean,
