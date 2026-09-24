@@ -15,8 +15,9 @@ import app.morphe.extension.newx.theme.TwitterTheme;
 public final class Theme {
     private static final String DYNAMIC_COLOR_SETTING = "newx.theme.dynamic_color";
     private static final String AMOLED_BLACK_SETTING = "newx.theme.amoled_black";
-    // Keep elevated surfaces visible against the AMOLED base surface.
-    private static final int AMOLED_ELEVATED_SURFACE = Color.rgb(19, 24, 29);
+    // Keep elevated surfaces visible against the AMOLED base surface. Kept as a literal so the
+    // class has no Android calls during static initialization and stays unit-testable.
+    private static final int AMOLED_ELEVATED_SURFACE = 0xFF13181D;
     // Classic X "Dim" surfaces. NewX routes every dark mode to its LIGHTS_OUT palette, so the
     // extension-owned screens mirror the dim tokens the patch restores for the Compose palette.
     private static final int DIM_SURFACE = 0xFF15202B;
@@ -52,7 +53,10 @@ public final class Theme {
         boolean dynamicColors =
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                         && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
-        boolean amoledBlack = SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
+        boolean amoledBlack = resolveAmoledBlack(
+                SettingsRegistry.isRegistered(AMOLED_BLACK_SETTING),
+                SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false)
+        );
         return new SettingsSnapshot(dynamicColors, amoledBlack);
     }
 
@@ -246,8 +250,21 @@ public final class Theme {
     }
 
     private static boolean useAmoledBlack(Context context) {
-        return isDark(context)
-                && SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
+        return isDark(context) && resolveAmoledBlack(
+                SettingsRegistry.isRegistered(AMOLED_BLACK_SETTING),
+                SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false)
+        );
+    }
+
+    /**
+     * Whether dark surfaces should resolve to pure black. The AMOLED toggle is contributed by the
+     * NewX dynamic color patch, which also injects the dim palette into the host. When that patch
+     * is absent the toggle is unregistered and X renders its native LIGHTS_OUT near-black palette
+     * for every dark mode, so extension-owned surfaces must stay black instead of falling back to
+     * the dim tokens used to mirror the patched host palette.
+     */
+    static boolean resolveAmoledBlack(boolean settingRegistered, boolean settingValue) {
+        return !settingRegistered || settingValue;
     }
 
     private static int checkboxChecked(Context context, boolean dynamicColors) {
