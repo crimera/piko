@@ -165,6 +165,8 @@
     <string name="piko_newx_inline_download_hide_no_media_summary">Only shows the inline download button on posts with downloadable media</string>
     <string name="piko_newx_media_picker_copy_link_title">Show copy-link button</string>
     <string name="piko_newx_media_picker_copy_link_summary">Shows a button for copying media URLs in the download media picker</string>
+    <string name="piko_newx_media_picker_resolution_button_title">Show resolution chooser</string>
+    <string name="piko_newx_media_picker_resolution_button_summary">Shows the icon that opens the resolution chooser per media item in the download media picker</string>
     <string name="piko_newx_media_picker_thumbnails_title">Load media thumbnails</string>
     <string name="piko_newx_media_picker_thumbnails_summary">Loads image previews in the download media picker instead of media type icons</string>
     <string name="piko_newx_media_picker_merge_button_title">Show merge button</string>

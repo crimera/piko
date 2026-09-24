@@ -34,6 +34,7 @@ import app.morphe.extension.newx.utils.NewXUtils;
  */
 public final class MediaPickerDialog {
     private static final String COPY_LINK_SETTING_ID = "newx.content.media_picker_copy_link";
+    private static final String RESOLUTION_BUTTON_SETTING_ID = "newx.content.media_picker_resolution_button";
     private static final String THUMBNAILS_SETTING_ID = "newx.content.media_picker_thumbnails";
     private static final String MERGE_BUTTON_SETTING_ID = "newx.content.media_picker_merge_button";
     private static final String LOG_PREFIX = "[PikoNewX][MediaPicker] ";
@@ -87,12 +88,14 @@ public final class MediaPickerDialog {
 
         boolean hasMultiple = downloads.size() > 1;
         boolean showCopyLinkButton = showCopyLinkButton();
+        boolean showResolutionButton = resolutionButtonEnabled();
         boolean loadThumbnails = thumbnailsEnabled();
         Theme.SettingsSnapshot themeSettings = Theme.snapshot();
         NewXLogger.printInfo(() ->
                 LOG_PREFIX + "showing picker items=" + downloads.size() +
                         " thumbnailsEnabled=" + loadThumbnails +
-                        " copyLinkEnabled=" + showCopyLinkButton
+                        " copyLinkEnabled=" + showCopyLinkButton +
+                        " resolutionButtonEnabled=" + showResolutionButton
         );
 
         final Set<Integer> selectedIndices = new LinkedHashSet<>();
@@ -246,6 +249,7 @@ public final class MediaPickerDialog {
                             item,
                             itemIndex,
                             themeSettings,
+                            showResolutionButton,
                             showCopyLinkButton,
                             dialog,
                             listener
@@ -273,6 +277,7 @@ public final class MediaPickerDialog {
                     item,
                     selectedIndex,
                     themeSettings,
+                    showResolutionButton,
                     showCopyLinkButton,
                     dialog,
                     listener
@@ -421,11 +426,12 @@ public final class MediaPickerDialog {
             InlineDownloadButton.DownloadItem item,
             int itemIndex,
             Theme.SettingsSnapshot themeSettings,
+            boolean showResolutionButton,
             boolean showCopyLinkButton,
             BottomSheetView dialog,
             OnMediaSelectedListener listener
     ) {
-        boolean showResolutions = item.resolutionOptions.size() > 1;
+        boolean showResolutions = showResolutionButton && item.resolutionOptions.size() > 1;
         if (!showResolutions && !showCopyLinkButton) {
             itemRow.setTrailingView(null);
             return;
@@ -470,6 +476,10 @@ public final class MediaPickerDialog {
 
     private static boolean showCopyLinkButton() {
         return SettingsRegistry.getBooleanOrDefault(COPY_LINK_SETTING_ID, true);
+    }
+
+    private static boolean resolutionButtonEnabled() {
+        return SettingsRegistry.getBooleanOrDefault(RESOLUTION_BUTTON_SETTING_ID, true);
     }
 
     private static boolean thumbnailsEnabled() {
