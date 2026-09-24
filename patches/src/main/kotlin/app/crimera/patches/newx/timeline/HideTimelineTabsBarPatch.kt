@@ -1,13 +1,18 @@
 package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.newXToggle
+import app.crimera.patches.newx.settings.Groups
+import app.crimera.patches.newx.settings.group
+import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.literal
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
@@ -25,6 +30,10 @@ private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val COMMON_TABS_SCOPE = "Lcom/x/ui/common/tabs/"
 private const val INTEGER_DESCRIPTOR = "I"
 
+// android.R.string "add_tab" ("Add tab"): the content description only the home timeline
+// add-tab button carries. The resource id is stable across the declared NewX targets.
+private const val ADD_TAB_STRING_RESOURCE_ID = 0x7f14006d
+
 private val TIMELINE_TABS_COMMON_PARAMETERS =
     listOf(
         FUNCTION_ONE_DESCRIPTOR,
@@ -35,6 +44,13 @@ private val TIMELINE_TABS_COMMON_PARAMETERS =
         MODIFIER_DESCRIPTOR,
         COMPOSER_DESCRIPTOR,
         "I",
+    )
+
+private val TIMELINE_ADD_TAB_PARAMETERS =
+    listOf(
+        FUNCTION_ZERO_DESCRIPTOR,
+        COMPOSER_DESCRIPTOR,
+        INTEGER_DESCRIPTOR,
     )
 
 private object NewXTimelineTabsBarFingerprint : Fingerprint(
@@ -48,23 +64,50 @@ private object NewXTimelineTabsBarFingerprint : Fingerprint(
     },
 )
 
+private object NewXTimelineAddTabButtonFingerprint : Fingerprint(
+    definingClass = HOME_TABBED_SCOPE,
+    returnType = "V",
+    filters = listOf(literal(ADD_TAB_STRING_RESOURCE_ID)),
+    custom = { method, classDef ->
+        val packageRelativeName = classDef.type.removePrefix(HOME_TABBED_SCOPE)
+        classDef.type.startsWith(HOME_TABBED_SCOPE) &&
+            !packageRelativeName.contains('/') &&
+            method.isTimelineAddTabButton()
+    },
+)
+
 @Suppress("unused")
 val newXHideTimelineTabsBarPatch =
     bytecodePatch(
         name = "NewX: Hide timeline tabs bar",
-        description = "Removes the For You and Following tabs bar from NewX home timelines.",
+        description = "Removes the For You and Following tabs bar from NewX home timelines, with an option to hide the add-tab (+) button.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
-        val hideTimelineTabsBar =
-            newXToggle(
-                id = "newx.timeline.hide_tabs_bar",
-                category = Categories.TIMELINE,
-                strings = settingStrings("piko_newx_hide_timeline_tabs"),
-                order = 175,
-                defaultValue = false,
-                rebootApp = true,
-            )
+        val (hideTimelineTabsBar, hideTimelineAddTab) =
+            newXSettings {
+                category(Categories.TIMELINE) {
+                    group(Groups.TIMELINE_TABS) {
+                        val hideTabsBar =
+                            toggle(
+                                id = "newx.timeline.hide_tabs_bar",
+                                strings = settingStrings("piko_newx_hide_timeline_tabs"),
+                                order = 200,
+                                defaultValue = false,
+                                rebootApp = true,
+                            )
+                        val hideAddTab =
+                            toggle(
+                                id = "newx.timeline.hide_add_tab_button",
+                                strings = settingStrings("piko_newx_hide_timeline_add_tab"),
+                                order = 300,
+                                defaultValue = false,
+                                rebootApp = true,
+                            )
+                        hideTabsBar to hideAddTab
+                    }
+                }
+            }
 
         execute {
             val matches = NewXTimelineTabsBarFingerprint.scopedMatchAll()
@@ -72,7 +115,19 @@ val newXHideTimelineTabsBarPatch =
             matches.forEach { match ->
                 hideTimelineTabsBar.returnVoidIfEnabled(match.method, 0)
             }
+
+            val addTabButton =
+                requireExactlyOne(
+                    label = "NewX timeline add-tab button",
+                    candidates = NewXTimelineAddTabButtonFingerprint.scopedMatchAll(),
+                )
+            hideTimelineAddTab.returnVoidIfEnabled(addTabButton.method, 0)
         }
+}
+
+private fun Method.isTimelineAddTabButton(): Boolean {
+    if (!AccessFlags.STATIC.isSet(accessFlags)) return false
+    return parameterTypes.map(CharSequence::toString) == TIMELINE_ADD_TAB_PARAMETERS
 }
 
 private fun Method.isTimelineTabsRenderer(): Boolean {

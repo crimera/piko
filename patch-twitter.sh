@@ -25,11 +25,7 @@ if [[ ! -f "$MPP" ]]; then
   exit 1
 fi
 
-# BETA PATH: current default input for future NewX updates.
-# ALPHA PATH: pass the 12.17.3-alpha.01 APK explicitly while compatibility is retained.
-# TODO: Remove the alpha invocation note when the alpha target is deprecated.
-#DEFAULT_APK="../twitter-analysis/apks/twitter_12.22.0-prod.01.apk"
-DEFAULT_APK="./apks/12.27.0-prod.01.apk"
+DEFAULT_APK="./apks/12.28.0-prod.01.apk"
 OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
 APK="$DEFAULT_APK"
 FLAGS=()

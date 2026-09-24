@@ -2,9 +2,12 @@ package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.choice
-import app.crimera.patches.newx.settings.newXSingleChoice
+import app.crimera.patches.newx.settings.group
+import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.newx.settings.singleChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.TIMELINE_TAB_FILTER_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAll
@@ -62,20 +65,25 @@ val customizeNewXTimelineTabsPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 
-        newXSingleChoice(
-            id = "newx.timeline.tab_visibility",
-            category = Categories.TIMELINE,
-            strings = settingStrings("piko_newx_timeline_tabs"),
-            order = 150,
-            defaultValue = "show_both",
-            rebootApp = true,
-            options =
-                listOf(
-                    choice("show_both", "piko_newx_timeline_tabs_show_both"),
-                    choice("hide_for_you", "piko_newx_timeline_tabs_hide_for_you"),
-                    choice("hide_following", "piko_newx_timeline_tabs_hide_following"),
-                ),
-        )
+        newXSettings {
+            category(Categories.TIMELINE) {
+                group(Groups.TIMELINE_TABS) {
+                    singleChoice(
+                        id = "newx.timeline.tab_visibility",
+                        strings = settingStrings("piko_newx_timeline_tabs"),
+                        order = 100,
+                        defaultValue = "show_both",
+                        rebootApp = true,
+                        options =
+                            listOf(
+                                choice("show_both", "piko_newx_timeline_tabs_show_both"),
+                                choice("hide_for_you", "piko_newx_timeline_tabs_hide_for_you"),
+                                choice("hide_following", "piko_newx_timeline_tabs_hide_following"),
+                            ),
+                    )
+                }
+            }
+        }
 
         execute {
             val matches = HomeTabbedComponentFingerprint.scopedMatchAll()

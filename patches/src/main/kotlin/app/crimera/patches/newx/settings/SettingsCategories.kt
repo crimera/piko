@@ -73,6 +73,15 @@ internal object Categories {
 }
 
 internal object Groups {
+    val TIMELINE_TABS =
+        SettingsGroupMetadata(
+            id = "newx.timeline.tabs",
+            titleResourceName = "piko_newx_group_timeline_tabs_title",
+            summaryResourceName = "piko_newx_group_timeline_tabs_summary",
+            iconResourceName = "ic_vector_bulleted_list",
+            order = 160,
+        )
+
     val FOR_YOU_FILTERING =
         SettingsGroupMetadata(
             id = "newx.timeline.for_you_filtering",

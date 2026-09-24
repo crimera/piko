@@ -283,10 +283,17 @@ public final class TimelineScrollPositionStore {
         }
     }
 
-    /** Returns whether X's process-local position map is valid for this timeline type. */
+    /**
+     * Returns whether X's process-local position map should be trusted for this timeline type.
+     *
+     * <p>X keys the map by timeline type only, so per-profile timelines must use the persistent
+     * store instead. Every other type must keep its native holder: deleting it breaks in-session
+     * back navigation (for example CONVERSATION threads) because the persistent store has no
+     * entry to replace it with, and X then rebuilds the list at index 0.
+     */
     public static boolean useInMemoryPosition(Enum<?> timeline) {
         String timelineName = timeline == null ? null : timeline.name();
-        boolean useInMemory = timeline != null && isHomeTimeline(timelineName);
+        boolean useInMemory = timelineName != null && !timelineName.startsWith("USER_PROFILE_");
         if (NewXLogger.isLoggingEnabled()) {
             NewXLogger.logger("NewX in-memory timeline=" + timelineName + " useInMemory=" + useInMemory);
         }

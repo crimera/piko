@@ -12,6 +12,7 @@ public final class TimelineScrollPositionStoreTest {
         FOR_YOU,
         FOLLOWING,
         RANKED_FOLLOWING,
+        CONVERSATION,
         USER_PROFILE_POSTS_ONLY,
     }
 
@@ -35,10 +36,12 @@ public final class TimelineScrollPositionStoreTest {
     }
 
     @Test
-    public void inMemoryPositionsAreAllowedOnlyForHomeTimelines() {
+    public void inMemoryPositionsAreAllowedForEveryTimelineExceptProfiles() {
         assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.FOR_YOU));
         assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.FOLLOWING));
         assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.RANKED_FOLLOWING));
+        // Conversation threads have no persistent key, so the native holder must survive.
+        assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.CONVERSATION));
         assertFalse(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.USER_PROFILE_POSTS_ONLY));
     }
 
