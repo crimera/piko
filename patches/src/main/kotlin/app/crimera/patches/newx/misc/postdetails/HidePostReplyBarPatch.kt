@@ -158,38 +158,12 @@ private fun Method.isMainNavigationRootRenderer(): Boolean {
 
 private fun Method.isPhotoViewerControlsRenderer(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
-    val hasKnownParameterShape =
-        when (parameters.size) {
-            10 ->
-                parameters[0].startsWith(INLINE_ACTION_BAR_SCOPE) &&
-                    parameters[1] == "Z" &&
-                    parameters[2].startsWith(COMPOSER_MINIMAL_SCOPE) &&
-                    parameters[3].startsWith(HAZE_SCOPE) &&
-                    parameters[4] == MODIFIER_DESCRIPTOR &&
-                    parameters[5] == "Ljava/lang/String;" &&
-                    parameters[6] == "Ljava/lang/String;" &&
-                    parameters[7] == FUNCTION1_DESCRIPTOR &&
-                    parameters[8] == COMPOSER_DESCRIPTOR &&
-                    parameters[9] == "I"
-
-            11 ->
-                parameters[0].startsWith(HAZE_SCOPE) &&
-                    parameters[1].startsWith(INLINE_ACTION_BAR_SCOPE) &&
-                    parameters[2].startsWith(COMPOSER_MINIMAL_SCOPE) &&
-                    parameters[3] == FUNCTION1_DESCRIPTOR &&
-                    parameters[4] == "Z" &&
-                    parameters[5] == MODIFIER_DESCRIPTOR &&
-                    parameters[6] == FUNCTION1_DESCRIPTOR &&
-                    parameters[7] == "Ljava/lang/String;" &&
-                    parameters[8] == "Ljava/lang/String;" &&
-                    parameters[9] == COMPOSER_DESCRIPTOR &&
-                    parameters[10] == "I"
-
-            else -> false
-        }
     return AccessFlags.STATIC.isSet(accessFlags) &&
         returnType == "V" &&
-        hasKnownParameterShape &&
+        parameters.any { it.startsWith(INLINE_ACTION_BAR_SCOPE) } &&
+        parameters.any { it.startsWith(COMPOSER_MINIMAL_SCOPE) } &&
+        parameters.any { it.startsWith(HAZE_SCOPE) } &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } >= 1 &&
         inlineActionBarRenderCallIndices().size == 1 &&
         navigationInsetsCallIndices().size == 1
 }
@@ -555,22 +529,36 @@ private fun resolvePostDetailNavigationInsetsHook(
  * flow so the hide setting can select it without recreating Compose inset behavior.
  */
 context(context: BytecodePatchContext)
+private fun resolvePhotoViewerNavigationFallbackHooks(
+    minimalContainer: MutableMethod,
+): List<PhotoViewerNavigationFallbackHook> {
+    val callers =
+        buildList {
+            context.classDefForEach { classDef ->
+                if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
+                classDef.methods.forEach { method ->
+                    if (!method.isPhotoViewerControlsRenderer()) return@forEach
+                    if (method.callSiteIndices(minimalContainer).isNotEmpty()) add(method)
+                }
+            }
+        }
+    if (callers.isEmpty()) {
+        throw PatchException("Expected at least one NewX photo-viewer controls renderer")
+    }
+    return callers.map { caller -> resolvePhotoViewerNavigationFallbackHook(minimalContainer, caller) }
+}
+
+context(context: BytecodePatchContext)
 private fun resolvePhotoViewerNavigationFallbackHook(
     minimalContainer: MutableMethod,
+    originalMethod: Method,
 ): PhotoViewerNavigationFallbackHook {
-    val originalMethod =
-        findUniqueCaller(
-            target = minimalContainer,
-            scope = MEDIA_SCOPE,
-            label = "NewX photo-viewer controls renderer",
-            predicate = Method::isPhotoViewerControlsRenderer,
-        )
     val method =
         requireExactlyOne(
             label = "NewX mutable photo-viewer controls renderer",
             candidates =
-                context.mutableClassDefBy(originalMethod.definingClass).methods.filter { method ->
-                    method.matches(originalMethod)
+                context.mutableClassDefBy(originalMethod.definingClass).methods.filter { candidate ->
+                    candidate.matches(originalMethod)
                 },
         ) as? MutableMethod
             ?: throw PatchException(
@@ -661,8 +649,8 @@ val newXHidePostReplyBarPatch =
             val navigationInsetsHook = resolveMainNavigationInsetsHook()
             val postDetailNavigationInsetsHook =
                 resolvePostDetailNavigationInsetsHook(postDetailSheetContainer)
-            val photoViewerNavigationFallbackHook =
-                resolvePhotoViewerNavigationFallbackHook(minimalContainer)
+            val photoViewerNavigationFallbackHooks =
+                resolvePhotoViewerNavigationFallbackHooks(minimalContainer)
 
             hidePostReplyBar.returnVoidIfEnabled(renderer.method, 0)
             hidePostReplyBar.returnVoidIfEnabled(minimalContainer, 0)
@@ -676,7 +664,7 @@ val newXHidePostReplyBarPatch =
                 postDetailNavigationInsetsHook.callIndex,
                 postDetailNavigationInsetsHook.continuation,
             )
-            photoViewerNavigationFallbackHook.let { hook ->
+            photoViewerNavigationFallbackHooks.forEach { hook ->
                 hidePostReplyBar.branchIfEnabled(hook.method, hook.gateIndex, hook.fallback)
             }
             hidePostReplyBar.returnVoidIfEnabled(postDetailSheetContainer, 0)
