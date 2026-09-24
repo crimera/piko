@@ -143,6 +143,40 @@ internal fun MutableMethod.markAsContentFontResolver() {
     addInstruction(0, "invoke-static {}, $BEGIN_CONTENT_FONT_REQUEST")
 }
 
+/**
+ * Hooks React Native's "Optimistic VF App Lite" font registration, found by walking back from its
+ * log string to the nearest call that turns a `Context` into a `Typeface` - the same way piko's
+ * closed Force System Font patch (#1795) found it.
+ */
+internal fun MutableMethod.hookReactNativeFontRegistration(stringIndex: Int) {
+    val searchStart = maxOf(0, stringIndex - 12)
+    val factoryIndex =
+        (searchStart until stringIndex).lastOrNull { index ->
+            val reference = getInstruction(index).getReference<MethodReference>()
+            getInstruction(index).opcode == Opcode.INVOKE_VIRTUAL &&
+                reference?.returnType == TYPEFACE_CLASS &&
+                reference.parameterTypes.singleOrNull()?.toString() == "Landroid/content/Context;"
+        } ?: throw PatchException(
+            "$definingClass->$name has no Typeface factory call to hook",
+        )
+
+    val resultIndex = factoryIndex + 1
+    if (getInstruction(resultIndex).opcode != Opcode.MOVE_RESULT_OBJECT) {
+        throw PatchException(
+            "$definingClass->$name's Typeface factory result has an unexpected shape",
+        )
+    }
+    val register = getInstruction(resultIndex).registersUsed[0]
+
+    addInstructions(
+        resultIndex + 1,
+        """
+        invoke-static {v$register}, $APPLY_CUSTOM_FONT
+        move-result-object v$register
+        """.trimIndent(),
+    )
+}
+
 /** Return instruction indices, last one first so earlier indices stay valid while patching. */
 private fun MutableMethod.returnIndices() =
     instructions

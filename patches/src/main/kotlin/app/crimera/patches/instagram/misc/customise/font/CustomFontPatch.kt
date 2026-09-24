@@ -34,13 +34,18 @@ val customFontPatch =
                 "invoke-static {}, $LOAD_CUSTOM_FONT",
             )
 
-            // The app resolves fonts through four independent paths, and text only changes
-            // consistently when all four are covered.
+            // The app resolves fonts through five independent paths, and text only changes
+            // consistently when all five are covered.
 
             // 1. The typeface repository, used by the classic views. It is handed a descriptor of
             //    the font it is resolving, which is what tells the interface fonts apart from the
             //    creative fonts of the story editor, notes and profile bios.
+            //
+            //    For some descriptors it resolves its own answer via path 4 (ResourcesCompat) and
+            //    caches whatever that returns, so it is marked as a resolver too: path 4 must not
+            //    substitute there, or the cache keeps the substituted value regardless of descriptor.
             val typefaceRepository = TypefaceRepositoryLoadFingerprint.classDef.type
+            TypefaceRepositoryLoadFingerprint.method.markAsContentFontResolver()
             TypefaceRepositoryLoadFingerprint.method.hookResolvedTypefaces()
 
             // 2. The IGDS font helper, used by IgTextViews, Bloks mounted text, spans and paints.
@@ -61,6 +66,11 @@ val customFontPatch =
                         it.parameterTypes.map(CharSequence::toString) == GET_FONT_PARAMETERS
                 }
                 .forEach { it.hookReturnedTypefaces() }
+
+            // 5. React Native's "Optimistic VF App Lite" variable font, resolved on its own and
+            //    never reaching the paths above.
+            val registrationIndex = ReactNativeFontRegistrationFingerprint.stringMatches.single().index
+            ReactNativeFontRegistrationFingerprint.method.hookReactNativeFontRegistration(registrationIndex)
 
             // Fonts the user picks inside the app - story and reel stickers, note and profile bio
             // styles - are resolved by handing the repository itself to a resolver along with the

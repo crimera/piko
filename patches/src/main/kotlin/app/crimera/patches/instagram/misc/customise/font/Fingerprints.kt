@@ -50,3 +50,9 @@ internal object ResourcesCompatFontFingerprint : Fingerprint(
     returnType = "Landroid/graphics/Typeface;",
     strings = listOf("Font resource ID #0x", " could not be retrieved."),
 )
+
+/** React Native's registration of the "Optimistic VF App Lite" variable font. */
+internal object ReactNativeFontRegistrationFingerprint : Fingerprint(
+    strings = listOf("Optimistic VF App Lite "),
+    custom = { method, _ -> method.parameters.isEmpty() && method.returnType.startsWith("L") },
+)

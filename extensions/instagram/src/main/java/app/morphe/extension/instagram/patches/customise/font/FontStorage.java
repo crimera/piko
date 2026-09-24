@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
@@ -172,6 +173,10 @@ public final class FontStorage {
                 }
             }
 
+            if (!isValidFont(temp)) {
+                return ImportResult.NOT_A_FONT;
+            }
+
             if (!temp.renameTo(destination)) {
                 throw new IOException("Could not move the imported font into place");
             }
@@ -212,5 +217,69 @@ public final class FontStorage {
 
         // TrueType.
         return header[0] == 0x00 && header[1] == 0x01 && header[2] == 0x00 && header[3] == 0x00;
+    }
+
+    /**
+     * Whether the file holds a real sfnt table directory, with every table's offset and length
+     * inside the file - checked instead of trusting {@link Typeface#createFromFile}, which can
+     * silently return the default typeface for a file that fails to parse.
+     */
+    private static boolean isValidFont(File file) {
+        try (RandomAccessFile in = new RandomAccessFile(file, "r")) {
+            long length = in.length();
+            if (length < 12) {
+                return false;
+            }
+
+            byte[] header = new byte[4];
+            in.readFully(header);
+            long tableDirectory = 0;
+
+            if (new String(header, 0, 4, StandardCharsets.ISO_8859_1).equals("ttcf")) {
+                // A TrueType collection points at its first font's own table directory.
+                if (length < 16) {
+                    return false;
+                }
+                in.seek(8);
+                if (readUnsignedInt(in) < 1) {
+                    return false;
+                }
+                tableDirectory = readUnsignedInt(in);
+            }
+
+            if (tableDirectory + 12 > length) {
+                return false;
+            }
+            in.seek(tableDirectory + 4);
+            int numTables = in.readUnsignedShort();
+            if (numTables < 1 || numTables > 64) {
+                return false;
+            }
+
+            long directoryEnd = tableDirectory + 12 + (long) numTables * 16;
+            if (directoryEnd > length) {
+                return false;
+            }
+
+            in.seek(tableDirectory + 12);
+            for (int i = 0; i < numTables; i++) {
+                in.skipBytes(8); // Tag and checksum.
+                long tableOffset = readUnsignedInt(in);
+                long tableLength = readUnsignedInt(in);
+                if (tableOffset + tableLength > length) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private static long readUnsignedInt(RandomAccessFile in) throws IOException {
+        return ((long) in.readUnsignedByte() << 24)
+                | (in.readUnsignedByte() << 16)
+                | (in.readUnsignedByte() << 8)
+                | in.readUnsignedByte();
     }
 }

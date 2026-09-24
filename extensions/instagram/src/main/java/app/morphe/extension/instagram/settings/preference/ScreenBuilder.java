@@ -518,6 +518,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.fontSection()) {
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_font"),
+                            "",
+                            Constants.PIKO_FRAGMENT_FONT
+                    )
+            );
+        }
         if (SettingsStatus.unlockPlusBenefits) {
             addPreference(
                     helper.switchPreference(
@@ -1055,16 +1064,6 @@ public class ScreenBuilder {
                         Constants.PIKO_FRAGMENT_ACTION_BAR
                 )
         );
-
-        if (SettingsStatus.fontSection()){
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_category_font"),
-                            "",
-                            Constants.PIKO_FRAGMENT_FONT
-                    )
-            );
-        }
 
         if (SettingsStatus.hideNavigationButtons){
             addPreference(

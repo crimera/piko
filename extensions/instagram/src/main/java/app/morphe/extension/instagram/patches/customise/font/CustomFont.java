@@ -11,6 +11,8 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.SystemClock;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.Map;
@@ -221,6 +223,24 @@ public class CustomFont {
         }
     }
 
+    /** Applies the custom font to every {@link TextView} nested under a view piko built itself. */
+    public static void applyToTree(View root) {
+        if (!active || root == null) {
+            return;
+        }
+
+        if (root instanceof TextView) {
+            applyTo((TextView) root);
+        }
+
+        if (root instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                applyToTree(group.getChildAt(i));
+            }
+        }
+    }
+
     /**
      * Injected at the entry of the resolvers that turn a font the user picked inside the app into a
      * typeface. Those resolvers ask the repository for fonts the interface uses as well, so the
@@ -285,6 +305,10 @@ public class CustomFont {
      */
     private static Typeface derive(Typeface original) {
         if (systemFontSelected) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                Typeface family = Typeface.create(FontStorage.SYSTEM_FONT_FAMILY, Typeface.NORMAL);
+                return Typeface.create(family, original.getWeight(), original.isItalic());
+            }
             return Typeface.create(FontStorage.SYSTEM_FONT_FAMILY, styleOf(original));
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
