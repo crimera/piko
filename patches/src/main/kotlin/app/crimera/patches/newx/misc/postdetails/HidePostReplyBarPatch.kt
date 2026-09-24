@@ -109,6 +109,113 @@ private data class PhotoViewerNavigationFallbackHook(
     val fallback: Instruction,
 )
 
+/**
+ * How a reply-bar container applies its local navigation-bar inset. GATED containers let a runtime
+ * composition flag decide: bottom-anchored immersive surfaces (the fullscreen photo screen) reserve
+ * the gesture area while scrolling sheets do not. UNCONDITIONAL containers always apply the inset
+ * and the hide setting removes it together with the reply bar.
+ */
+internal enum class InsetApplicationKind {
+    GATED,
+    UNCONDITIONAL,
+}
+
+private const val INSET_GATE_LOOKBACK = 16
+private const val INSET_MERGE_LOOKBACK = 5
+
+private val BRANCH_OPCODES =
+    CONDITIONAL_BRANCH_OPCODES +
+        setOf(
+            Opcode.GOTO,
+            Opcode.GOTO_16,
+            Opcode.GOTO_32,
+            Opcode.PACKED_SWITCH,
+            Opcode.SPARSE_SWITCH,
+        )
+
+private val READ_ONLY_REGISTER_A_OPCODES =
+    CONDITIONAL_BRANCH_OPCODES +
+        setOf(
+            Opcode.GOTO,
+            Opcode.GOTO_16,
+            Opcode.GOTO_32,
+            Opcode.PACKED_SWITCH,
+            Opcode.SPARSE_SWITCH,
+            Opcode.NOP,
+            Opcode.RETURN_VOID,
+            Opcode.RETURN,
+            Opcode.RETURN_WIDE,
+            Opcode.RETURN_OBJECT,
+            Opcode.THROW,
+            Opcode.MONITOR_ENTER,
+            Opcode.MONITOR_EXIT,
+        )
+
+/**
+ * Classifies the navigation-insets application at [callIndex]. A GATED application is a diamond: a
+ * conditional skip branch jumps past the insets call while the fall-through arm applies it
+ * straight-line and rejoins through a goto, and the skip arm leaves the modifier register
+ * untouched. A gated application must keep running when the setting hides the reply bar: it is the
+ * app's own gesture-area reservation, and deleting it drops the action bar into the navigation pill.
+ */
+internal fun Method.classifyInsetApplication(callIndex: Int): InsetApplicationKind {
+    val instructions = implementation?.instructions?.toList().orEmpty()
+    val resultIndex = callIndex + 1
+    val destinationRegister =
+        (instructions.getOrNull(resultIndex) as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException(
+                "NewX navigation-insets application is not followed by move-result in $this",
+            )
+    val gate =
+        requireAtMostOne(
+            label = "NewX navigation-insets application gate before $callIndex in $this",
+            candidates = (maxOf(0, callIndex - INSET_GATE_LOOKBACK) until callIndex).filter { index ->
+                val instruction = instructions[index]
+                if (instruction.opcode !in CONDITIONAL_BRANCH_OPCODES) return@filter false
+                val skipTarget =
+                    (instruction as? BuilderOffsetInstruction)?.target?.location?.index
+                        ?: return@filter false
+                skipTarget > resultIndex &&
+                    (index + 1 until callIndex).none { candidate ->
+                        instructions[candidate].opcode in BRANCH_OPCODES
+                    }
+            },
+        ) ?: return InsetApplicationKind.UNCONDITIONAL
+    val skipTarget = (instructions[gate] as BuilderOffsetInstruction).target.location.index
+    val mergeIndex =
+        ((resultIndex + 1)..(resultIndex + INSET_MERGE_LOOKBACK)).firstNotNullOfOrNull { index ->
+            val instruction = instructions.getOrNull(index) ?: return@firstNotNullOfOrNull null
+            if (instruction.opcode !in setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)) {
+                return@firstNotNullOfOrNull null
+            }
+            (instruction as? BuilderOffsetInstruction)?.target?.location?.index
+        }
+            ?: throw PatchException(
+                "NewX gated navigation-insets application has no merge goto after $callIndex in $this",
+            )
+    if (skipTarget >= mergeIndex) {
+        throw PatchException(
+            "NewX gated navigation-insets application has an empty skip arm in $this",
+        )
+    }
+    val skipArmWrites =
+        (skipTarget until mergeIndex).filter { index ->
+            instructions[index].writesTo(destinationRegister)
+        }
+    if (skipArmWrites.isNotEmpty()) {
+        throw PatchException(
+            "NewX gated navigation-insets application skip arm writes v$destinationRegister at " +
+                "$skipArmWrites in $this",
+        )
+    }
+    return InsetApplicationKind.GATED
+}
+
+private fun Instruction.writesTo(register: Int): Boolean {
+    val destination = this as? OneRegisterInstruction ?: return false
+    return destination.registerA == register && opcode !in READ_ONLY_REGISTER_A_OPCODES
+}
+
 private fun Method.isPostDetailReplyBarRenderer(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
     return parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
@@ -664,6 +771,9 @@ val newXHidePostReplyBarPatch =
             val photoViewerNavigationFallbackHook =
                 resolvePhotoViewerNavigationFallbackHook(minimalContainer)
 
+            val postDetailInsetApplication =
+                postDetailSheetContainer.classifyInsetApplication(postDetailNavigationInsetsHook.callIndex)
+
             hidePostReplyBar.returnVoidIfEnabled(renderer.method, 0)
             hidePostReplyBar.returnVoidIfEnabled(minimalContainer, 0)
             hidePostReplyBar.branchIfEnabled(
@@ -671,14 +781,21 @@ val newXHidePostReplyBarPatch =
                 navigationInsetsHook.callIndex,
                 navigationInsetsHook.continuation,
             )
-            hidePostReplyBar.branchIfEnabled(
-                postDetailNavigationInsetsHook.method,
-                postDetailNavigationInsetsHook.callIndex,
-                postDetailNavigationInsetsHook.continuation,
-            )
+            // A gated inset is the app's own "this composition is bottom-anchored" signal (the
+            // fullscreen photo screen). Keep it applied: it reserves the gesture area once the
+            // composer is hidden, and `minimalContainer` already removes the reply bar, its
+            // gradient scrim, and the blur box. Only unconditional insets (legacy containers) are
+            // removed together with the reply bar as before.
+            if (postDetailInsetApplication == InsetApplicationKind.UNCONDITIONAL) {
+                hidePostReplyBar.branchIfEnabled(
+                    postDetailNavigationInsetsHook.method,
+                    postDetailNavigationInsetsHook.callIndex,
+                    postDetailNavigationInsetsHook.continuation,
+                )
+                hidePostReplyBar.returnVoidIfEnabled(postDetailSheetContainer, 0)
+            }
             photoViewerNavigationFallbackHook.let { hook ->
                 hidePostReplyBar.branchIfEnabled(hook.method, hook.gateIndex, hook.fallback)
             }
-            hidePostReplyBar.returnVoidIfEnabled(postDetailSheetContainer, 0)
         }
     }

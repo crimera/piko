@@ -50,3 +50,14 @@ The exact 12.20.5 and 12.21.1 APKM inputs were merged before patching. Final DEX
 spacer while the original boolean/null gates remain as the disabled-setting control path. The
 same semantic resolver tolerated owner churn from `com/x/media/h1;->a` in 12.20.5 to
 `com/x/media/e1;->a` in 12.25.0.
+
+## 12.29 correction
+
+The composer→nav-spacer fallback above applies to the *media-controls* viewer path (legacy
+`com/x/media/` controls). On 12.29's "new look" fullscreen photo screen the bottom row belongs to
+the post-detail reply-bar container (`postdetailsheet/a->a`), whose navigation inset is gated by a
+composition-local flag; hiding the reply bar must keep that gated reservation rather than branch
+media gates to fallback spacers. Forcing the fallback unconditionally (`b46d10dc`, reverted) added
+a gap below timeline media and did not fix the photo screen. Evidence and the shape contract live
+in `docs/newx-resolver-linter/incidents/2026-09-24-12-29-hide-reply-bar-inset-and-gap.md` and
+`docs/newx-hide-post-reply-bar.md`.

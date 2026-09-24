@@ -60,3 +60,20 @@ optional classes, so the successful validation runs used the normal non-verifyin
 
 The same patch also applied to the declared `12.25.0-alpha.01` target. Runtime installation was
 not performed during this change.
+
+## Inset policy (12.29 immersive photo screen correction)
+
+The post-detail reply-bar container applies its local navigation-bar inset in one of two ways:
+
+- **Gated** (verified 12.27/12.28/12.29): a composition-local flag selects the inset, so only
+  bottom-anchored immersive compositions (the fullscreen photo screen) reserve the gesture area.
+  The patch must not touch the container here: `composer/minimal/b;->h`'s guard already hides the
+  reply bar, its gradient scrim, and the blur box, while the gated inset keeps the inline action
+  bar above the gesture pill.
+- **Unconditional** (legacy containers): the inset is part of the reply bar's "empty inset space"
+  and is removed together with the bar, as in `98ee98c8`.
+
+`HidePostReplyBarPatch.classifyInsetApplication` distinguishes the shapes at patch time and fails
+closed on anything else. Deleting the container guards unconditionally is what dropped the 12.29
+photo screen's action bar into the gesture pill; see
+`docs/newx-resolver-linter/incidents/2026-09-24-12-29-hide-reply-bar-inset-and-gap.md`.
