@@ -47,6 +47,8 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val PROFILE_HEADER_SCOPE = "Lcom/x/profile/header/"
 private const val URI = "Landroid/net/Uri;"
 private const val CANONICAL_URL_RESOLVER =
     "Lapp/morphe/extension/newx/misc/CanonicalUrlResolver;"
@@ -798,10 +800,12 @@ private fun patchProfileLinkValues(
 ) {
     val match =
         Fingerprint(
-            // The profile-link builder moved from `telemetry` to `lifecycle` in
-            // newer builds. Keep the semantic field-pair anchor and only scope
-            // it to the stable image-loader package.
-            definingClass = "Lcom/x/media/imageloader/",
+            // The profile-link builder is an R8-merged class whose owner moved from
+            // `Lcom/x/media/imageloader/telemetry` (through 12.28) to `Lcom/x/media/playback`
+            // (12.29), so the owner is not a stable scope. Anchor on the `(Object) -> Object`
+            // shape, the URL-entity field pair, and the profile-header model construction.
+            returnType = OBJECT_DESCRIPTOR,
+            parameters = listOf(OBJECT_DESCRIPTOR),
             filters = listOf(
                 fieldAccess(
                     opcode = Opcode.IGET_OBJECT,
@@ -812,6 +816,7 @@ private fun patchProfileLinkValues(
                     reference = urlEntityFields.url,
                 ),
             ),
+            custom = { method, _ -> method.constructsProfileHeaderModel() },
         ).requireSingleMatch("profile link values")
 
     // The injected branch widens each matched read; patch the later read first so the earlier
@@ -828,6 +833,20 @@ private fun patchProfileLinkValues(
         urlEntityFields.expandedUrl,
         setting,
     )
+}
+
+/**
+ * Proves the URL-entity reads feed a profile-header entry rather than a text-entity copy or rich
+ * text builder. The profile-header leaf classes churn, but the `Lcom/x/profile/header/` package is
+ * the stable semantic scope.
+ */
+internal fun Method.constructsProfileHeaderModel(): Boolean {
+    val methodInstructions = implementation?.instructions?.toList() ?: return false
+    return methodInstructions.any { instruction ->
+        instruction.opcode == Opcode.NEW_INSTANCE &&
+            (instruction.getReference<TypeReference>()?.toString() ?: "")
+                .startsWith(PROFILE_HEADER_SCOPE)
+    }
 }
 
 context(_: BytecodePatchContext)

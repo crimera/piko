@@ -1,5 +1,6 @@
 package app.crimera.tools.newx
 
+import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.morphe.patcher.util.smali.toInstruction
@@ -428,6 +429,17 @@ class NewXResolverLinterTest {
         assertEquals(listOf(10), selected)
     }
 
+    @Test
+    fun `profile link resolver accepts profile-header construction and rejects URL-entity copies`() {
+        val profileHeader = profileLinkFixture(constructsProfileHeader = true)
+        val urlEntityCopy = profileLinkFixture(constructsProfileHeader = false)
+
+        assertEquals(
+            listOf(true, false),
+            listOf(profileHeader, urlEntityCopy).map(Method::constructsProfileHeaderModel),
+        )
+    }
+
     private fun moduleDividerBuilderFixture(): List<Instruction> =
         listOf(
             // Divider item: a non-foundation adapter discriminator whose case block draws a divider.
@@ -472,6 +484,34 @@ class NewXResolverLinterTest {
                 )
             else -> listOf("return-void".toInstruction())
         }
+
+    private fun profileLinkFixture(constructsProfileHeader: Boolean): Method {
+        val implementation = MethodImplementationBuilder(4)
+        implementation.addInstruction(
+            "iget-object v0, v1, Lfixture/UrlEntity;->displayUrl:Ljava/lang/String;".toInstruction(),
+        )
+        implementation.addInstruction(
+            if (constructsProfileHeader) {
+                "new-instance v2, Lcom/x/profile/header/Fixture;".toInstruction()
+            } else {
+                "new-instance v2, Lfixture/UrlEntityCopy;".toInstruction()
+            },
+        )
+        implementation.addInstruction(
+            "iget-object v0, v1, Lfixture/UrlEntity;->url:Ljava/lang/String;".toInstruction(),
+        )
+        implementation.addInstruction("return-void".toInstruction())
+        return ImmutableMethod(
+            "Lfixture/ProfileLink;",
+            "build",
+            emptyList<ImmutableMethodParameter>(),
+            "Ljava/lang/Object;",
+            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+            emptySet<ImmutableAnnotation>(),
+            emptySet<HiddenApiRestriction>(),
+            implementation.methodImplementation,
+        )
+    }
 
     private fun lint(source: String): List<NewXResolverLinter.Finding> =
         NewXResolverLinter.lintSource("Fixture.kt", source)
