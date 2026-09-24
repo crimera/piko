@@ -1,4 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="piko_title_piko_patches">Piko 补丁</string>
+    <string name="piko_shared_object_browser_null">空对象没有可查看的内容</string>
+    <string name="piko_shared_object_browser_open_failed">数据对象查看器打开失败</string>
+    <string name="piko_shared_object_browser_type">类型：%1$s</string>
+    <string name="piko_shared_object_browser_search">搜索字段和方法…</string>
+    <string name="piko_shared_object_browser_class_failed">类解析失败：%1$s</string>
+    <string name="piko_shared_object_browser_fields">━━ 字段 ━━</string>
+    <string name="piko_shared_object_browser_methods">━━ 方法 ━━</string>
+    <string name="piko_shared_object_browser_field_failed">字段读取失败：%1$s</string>
+    <string name="piko_shared_object_browser_method_failed">方法读取失败：%1$s</string>
+    <string name="piko_shared_object_browser_copied">已复制：%1$s</string>
+    <string name="piko_shared_object_browser_executed">已执行：%1$s()</string>
+    <string name="piko_shared_object_browser_error">错误：%1$s</string>
+    <string name="piko_shared_object_browser_list_title">%1$s（项目数：%2$d）</string>
+    <string name="piko_shared_object_browser_array_title">%1$s（数组）</string>
+    <string name="piko_shared_object_browser_search_items">搜索项目…</string>
+    <string name="piko_shared_object_browser_close">关闭</string>
 </resources>
