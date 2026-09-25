@@ -11,11 +11,11 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -26,14 +26,19 @@ import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21s
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
-import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val INLINE_ACTION_BAR_SPACING_DESCRIPTOR =
     "$EXTENSION_PACKAGE/misc/InlineActionBarSpacing;"
+private const val CLASSIC_GAP_DP_DESCRIPTOR =
+    "$INLINE_ACTION_BAR_SPACING_DESCRIPTOR->classicGapDp()F"
+private const val APPLY_CLASSIC_SPACING_DESCRIPTOR =
+    "$INLINE_ACTION_BAR_SPACING_DESCRIPTOR->applyClassicSpacing(Ljava/util/List;IIII)V"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
 /** Setting that keeps the app's own packed-slot spacing instead of the classic spacing. */
 internal const val NATIVE_INLINE_ACTION_SPACING_SETTING =
@@ -221,27 +226,47 @@ private fun patchClassicInlineActionSpacing(layout: ResolvedNewXInlineActionBarL
     // Insertions run from the highest index down so every index still refers to the instruction
     // list they were derived from. The floor local is seeded at the method head because it has to
     // be initialized on every path into the fitting loop.
-    method.addInstructions(
-        injectionIndex,
-        """
-            move-object/from16 v$scratchBase, v$slotsListRegister
-            move/from16 v${scratchBase + 1}, v$availableRegister
-            move/from16 v${scratchBase + 2}, v$minGapRegister
-            move/from16 v${scratchBase + 3}, v$countedFloorScratch
-            move-object/from16 v${scratchBase + 4}, v${densityCall.second}
-            invoke-static {}, $INLINE_ACTION_BAR_SPACING_DESCRIPTOR->classicGapDp()F
-            move-result v${scratchBase + 5}
-            invoke-interface/range {v${scratchBase + 4} .. v${scratchBase + 5}}, ${densityCall.first}
-            move-result v${scratchBase + 5}
-            move/from16 v${scratchBase + 4}, v${scratchBase + 5}
-            invoke-static/range {v$scratchBase .. v${scratchBase + 4}}, $INLINE_ACTION_BAR_SPACING_DESCRIPTOR->applyClassicSpacing(Ljava/util/List;IIII)V
-        """.trimIndent(),
-    )
-    method.addInstructions(
-        countedFloorRead,
-        "move/from16 v$countedFloorScratch, v$countedFloorRegister",
-    )
-    method.addInstructions(0, "const/16 v$countedFloorScratch, -1")
+    //
+    // The hook sits on the fitting loop head, so the loop's back edge reaches it as well. Every
+    // operand it reads (the slot list, the row width, the gap floor, the lifted counted floor and
+    // the density) is loop invariant, and the rewrite is a fixpoint, so the extra passes cannot
+    // change the layout.
+    method.insertHook(
+        index = injectionIndex,
+        // The insertion point is the fitting-loop head and the loop's back edge targets it. The
+        // spacing setup below must run once, before the loop, so the back edge has to keep jumping
+        // to the original instruction instead of re-running the block on every iteration.
+        relocateBranchTargets = false,
+    ) {
+        // The scratch locals come from the frame growth above rather than the scratch pool, so the
+        // block addresses them by their reserved numbers.
+        move(scratchBase, slotsListRegister, OBJECT_DESCRIPTOR)
+        move(scratchBase + 1, availableRegister, "I")
+        move(scratchBase + 2, minGapRegister, "I")
+        move(scratchBase + 3, countedFloorScratch, "I")
+        move(scratchBase + 4, densityCall.second, OBJECT_DESCRIPTOR)
+        invokeStatic(methodReference(CLASSIC_GAP_DP_DESCRIPTOR))
+        moveResult(scratchBase + 5, "F")
+        invokeInterface(densityCall.first, scratchBase + 4, scratchBase + 5)
+        moveResult(scratchBase + 5, "I")
+        move(scratchBase + 4, scratchBase + 5, "I")
+        invokeStatic(
+            methodReference(APPLY_CLASSIC_SPACING_DESCRIPTOR),
+            scratchBase,
+            scratchBase + 1,
+            scratchBase + 2,
+            scratchBase + 3,
+            scratchBase + 4,
+        )
+    }
+    method.insertHook(countedFloorRead, relocateBranchTargets = false) {
+        move(countedFloorScratch, countedFloorRegister, "I")
+    }
+    // The sentinel needs an 8-bit register, so it cannot come from `constInt`: `-1` would select
+    // `const/4`, whose four-bit register field cannot address the scratch local.
+    method.insertHook(0, relocateBranchTargets = false) {
+        add(BuilderInstruction21s(Opcode.CONST_16, countedFloorScratch, -1))
+    }
 }
 
 /**

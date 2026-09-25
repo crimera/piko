@@ -9,15 +9,16 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
+import app.crimera.bytecode.insertHook
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
@@ -177,27 +178,17 @@ val hidePremiumUpsellPatch =
             val composeMatch = NewXHomeNavUpsellComposableFingerprint.matchOrNull()
             if (composeMatch != null) {
                 composeMatch.method.apply {
-                    val p4Reg = p0Register + 4
-                    val originalFirstInstruction = instructions.first()
+                    val p4Register = p0Register + 4
                     val read =
                         hidePremiumUpsell.injectRead(
                             method = this,
                             index = 0,
                             registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                         )
-                    val overrideInstructions =
-                        """
-                            if-eqz v${read.register}, :piko_newx_premium_upsell_continue
-                            const/16 v$p4Reg, 0x0
-                        """.trimIndent()
-                    addInstructionsWithLabels(
-                        read.nextIndex,
-                        overrideInstructions,
-                        ExternalLabel(
-                            "piko_newx_premium_upsell_continue",
-                            originalFirstInstruction,
-                        ),
-                    )
+                    insertHook(index = read.nextIndex, relocateBranchTargets = false) {
+                        ifEqz(read.register, Target.Original)
+                        constInt(p4Register, 0)
+                    }
                 }
                 return@execute
             }
@@ -214,7 +205,6 @@ val hidePremiumUpsellPatch =
 
             val match = matches.single()
             match.method.apply {
-                val originalFirstInstruction = instructions.first()
                 val disabledFieldDescriptor =
                     if (match in typeMatches) {
                         disabledUpsellField(match.instructionMatches.first().index).let { field ->
@@ -229,28 +219,18 @@ val hidePremiumUpsellPatch =
                         index = 0,
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
-                val overrideInstructions =
-                    if (disabledFieldDescriptor != null) {
-                        """
-                            if-eqz v${read.register}, :piko_newx_premium_upsell_continue
-                            sget-object v${read.register}, $disabledFieldDescriptor
-                            return-object v${read.register}
-                        """.trimIndent()
+                val disabledField =
+                    disabledFieldDescriptor?.let { descriptor -> fieldReference(descriptor) }
+                insertHook(index = read.nextIndex, relocateBranchTargets = false) {
+                    ifEqz(read.register, Target.Original)
+                    if (disabledField != null) {
+                        sget(read.register, disabledField)
+                        returnObject(read.register)
                     } else {
-                        """
-                            if-eqz v${read.register}, :piko_newx_premium_upsell_continue
-                            const/4 v${read.register}, 0x0
-                            return v${read.register}
-                        """.trimIndent()
+                        constInt(read.register, 0)
+                        returnValue(read.register)
                     }
-                addInstructionsWithLabels(
-                    read.nextIndex,
-                    overrideInstructions,
-                    ExternalLabel(
-                        "piko_newx_premium_upsell_continue",
-                        originalFirstInstruction,
-                    ),
-                )
+                }
             }
         }
     }

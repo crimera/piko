@@ -12,14 +12,15 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.POLL_RESULTS_FORMATTER_DESCRIPTOR
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 
@@ -65,29 +66,33 @@ val newXShowPollResultsPatch =
             }
 
             val method = matches.single().method
-            val originalFirstInstruction =
-                method.instructions.firstOrNull()
-                    ?: throw PatchException(
-                        "NewX poll binding-value helper has no instructions: ${matches.single().originalMethod}",
-                    )
+            if (method.instructions.isEmpty()) {
+                throw PatchException(
+                    "NewX poll binding-value helper has no instructions: ${matches.single().originalMethod}",
+                )
+            }
             if (method.p0Register == 0) {
                 throw PatchException(
                     "NewX poll binding-value helper has no local scratch register: ${matches.single().originalMethod}",
                 )
             }
 
-            method.addInstructionsWithLabels(
-                0,
-                """
-                    invoke-static/range {p0 .. p2}, $POLL_RESULTS_FORMATTER_DESCRIPTOR->formatLabel(ILjava/lang/String;Ljava/util/Map;)Ljava/lang/String;
-                    move-result-object v0
-                    if-eqz v0, :piko_newx_show_poll_results_original
-                    return-object v0
-                """.trimIndent(),
-                ExternalLabel(
-                    "piko_newx_show_poll_results_original",
-                    originalFirstInstruction,
-                ),
-            )
+            // v0 holds the formatted label, `p0..p2` are the three helper parameters. The old plain
+            // insert kept incoming labels on the original first instruction, so a path that branched
+            // to it still skipped the whole block.
+            method.insertHook(
+                index = 0,
+                relocateBranchTargets = false,
+            ) {
+                invokeStatic(
+                    methodReference("$POLL_RESULTS_FORMATTER_DESCRIPTOR->formatLabel(ILjava/lang/String;Ljava/util/Map;)Ljava/lang/String;"),
+                    method.p0Register,
+                    method.p0Register + 1,
+                    method.p0Register + 2,
+                )
+                moveResult(0, STRING_DESCRIPTOR)
+                ifEqz(0, Target.Original)
+                returnObject(0)
+            }
         }
     }

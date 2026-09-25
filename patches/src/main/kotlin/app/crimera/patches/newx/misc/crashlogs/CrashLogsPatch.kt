@@ -12,7 +12,8 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
@@ -85,11 +86,17 @@ val newXCrashLogsPatch =
                 val superIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
                 val contextRegister = getInstruction(superIndex).registersUsed[0]
 
-                addInstruction(
-                    superIndex + 1,
-                    "invoke-static {v$contextRegister}, " +
-                        "$CRASH_HANDLER_DESCRIPTOR->install(Landroid/content/Context;)V",
-                )
+                insertHook(
+                    index = superIndex + 1,
+                    // The old plain insertion left an incoming label on the instruction after the
+                    // hook, so it stays on that instruction.
+                    relocateBranchTargets = false,
+                ) {
+                    invokeStatic(
+                        methodReference("$CRASH_HANDLER_DESCRIPTOR->install(Landroid/content/Context;)V"),
+                        contextRegister,
+                    )
+                }
             }
         }
     }

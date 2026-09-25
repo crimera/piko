@@ -4,19 +4,25 @@ import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.models.newXTimelineModelAdapterPatch
 import app.crimera.patches.newx.models.patchBridge
 import app.crimera.patches.newx.models.patchObjectAccessorGetter
-import app.crimera.patches.newx.models.readObject
+import app.crimera.patches.newx.models.readModelAccessor
+import app.crimera.patches.newx.models.requireBridge
 import app.crimera.patches.newx.models.requireSingle
 import app.crimera.patches.newx.models.resolveFieldAccessor
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.bytecode.Target
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.util.p0Register
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
+
+/** Label the promoted-metadata bodies jump to when the nested model is absent. */
+private const val NULL_RESULT_LABEL = "cond_null"
 
 private object TimelineRtbImageAdModelFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/timelines/items/",
@@ -79,12 +85,13 @@ internal val newXTimelineAdModelAdapterPatch =
 context(context: BytecodePatchContext)
 private fun patchAdModelBridges(adDescriptor: String) {
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
-    filterClass.patchBridge(
-        "isTimelineRtbImageAd",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        "instance-of p0, p0, $adDescriptor\nreturn p0",
-    )
+    val isTimelineRtbImageAd =
+        filterClass.requireBridge("isTimelineRtbImageAd", OBJECT_DESCRIPTOR, "Z")
+    isTimelineRtbImageAd.patchBridge {
+        val receiver = isTimelineRtbImageAd.p0Register
+        instanceOf(receiver, receiver, adDescriptor)
+        returnValue(receiver)
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -127,12 +134,12 @@ private fun patchExploreAdModelBridges() {
 
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
 
-    filterClass.patchBridge(
-        "isTimelineTrend",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        "instance-of p0, p0, ${urtTrendClass.type}\nreturn p0",
-    )
+    val isTimelineTrend = filterClass.requireBridge("isTimelineTrend", OBJECT_DESCRIPTOR, "Z")
+    isTimelineTrend.patchBridge {
+        val receiver = isTimelineTrend.p0Register
+        instanceOf(receiver, receiver, urtTrendClass.type)
+        returnValue(receiver)
+    }
     filterClass.patchObjectAccessorGetter(
         "getTrendEntryId",
         urtTrendClass.type,
@@ -144,45 +151,42 @@ private fun patchExploreAdModelBridges() {
         urtTrendClass.type,
         trendClientEventInfoAccessor,
     )
-    filterClass.patchBridge(
-        "getTrendPromotedMetadata",
-        OBJECT_DESCRIPTOR,
-        OBJECT_DESCRIPTOR,
-        """
-            check-cast p0, ${urtTrendClass.type}
-            ${timelineTrendAccessor.readObject("p0")}
-            if-eqz p0, :cond_null
-            check-cast p0, ${trendClass.type}
-            ${trendPromotedMetadataAccessor.readObject("p0")}
-            return-object p0
-            :cond_null
-            const/4 p0, 0x0
-            return-object p0
-        """.trimIndent(),
-    )
-    filterClass.patchBridge(
-        "getTrendPromotedDescription",
-        OBJECT_DESCRIPTOR,
-        STRING_DESCRIPTOR,
-        """
-            check-cast p0, ${urtTrendClass.type}
-            ${timelineTrendAccessor.readObject("p0")}
-            if-eqz p0, :cond_null
-            check-cast p0, ${trendClass.type}
-            ${trendPromotedDescAccessor.readObject("p0")}
-            return-object p0
-            :cond_null
-            const/4 p0, 0x0
-            return-object p0
-        """.trimIndent(),
-    )
+    val getTrendPromotedMetadata =
+        filterClass.requireBridge("getTrendPromotedMetadata", OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
+    getTrendPromotedMetadata.patchBridge {
+        val receiver = getTrendPromotedMetadata.p0Register
+        checkCast(receiver, urtTrendClass.type)
+        readModelAccessor(timelineTrendAccessor, receiver)
+        ifEqz(receiver, Target.Local(NULL_RESULT_LABEL))
+        checkCast(receiver, trendClass.type)
+        readModelAccessor(trendPromotedMetadataAccessor, receiver)
+        returnObject(receiver)
+        label(NULL_RESULT_LABEL)
+        constInt(receiver, 0)
+        returnObject(receiver)
+    }
+    val getTrendPromotedDescription =
+        filterClass.requireBridge("getTrendPromotedDescription", OBJECT_DESCRIPTOR, STRING_DESCRIPTOR)
+    getTrendPromotedDescription.patchBridge {
+        val receiver = getTrendPromotedDescription.p0Register
+        checkCast(receiver, urtTrendClass.type)
+        readModelAccessor(timelineTrendAccessor, receiver)
+        ifEqz(receiver, Target.Local(NULL_RESULT_LABEL))
+        checkCast(receiver, trendClass.type)
+        readModelAccessor(trendPromotedDescAccessor, receiver)
+        returnObject(receiver)
+        label(NULL_RESULT_LABEL)
+        constInt(receiver, 0)
+        returnObject(receiver)
+    }
 
-    filterClass.patchBridge(
-        "isTimelineEventSummary",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        "instance-of p0, p0, ${urtEventClass.type}\nreturn p0",
-    )
+    val isTimelineEventSummary =
+        filterClass.requireBridge("isTimelineEventSummary", OBJECT_DESCRIPTOR, "Z")
+    isTimelineEventSummary.patchBridge {
+        val receiver = isTimelineEventSummary.p0Register
+        instanceOf(receiver, receiver, urtEventClass.type)
+        returnValue(receiver)
+    }
     filterClass.patchObjectAccessorGetter(
         "getEventSummaryEntryId",
         urtEventClass.type,
@@ -194,21 +198,23 @@ private fun patchExploreAdModelBridges() {
         urtEventClass.type,
         eventClientEventInfoAccessor,
     )
-    filterClass.patchBridge(
-        "getEventSummaryPromotedMetadata",
-        OBJECT_DESCRIPTOR,
-        OBJECT_DESCRIPTOR,
-        """
-            check-cast p0, ${urtEventClass.type}
-            ${eventSummaryAccessor.readObject("p0")}
-            if-eqz p0, :cond_null
-            check-cast p0, ${eventClass.type}
-            ${eventPromotedMetadataAccessor.readObject("p0")}
-            return-object p0
-            :cond_null
-            const/4 p0, 0x0
-            return-object p0
-        """.trimIndent(),
-    )
+    val getEventSummaryPromotedMetadata =
+        filterClass.requireBridge(
+            "getEventSummaryPromotedMetadata",
+            OBJECT_DESCRIPTOR,
+            OBJECT_DESCRIPTOR,
+        )
+    getEventSummaryPromotedMetadata.patchBridge {
+        val receiver = getEventSummaryPromotedMetadata.p0Register
+        checkCast(receiver, urtEventClass.type)
+        readModelAccessor(eventSummaryAccessor, receiver)
+        ifEqz(receiver, Target.Local(NULL_RESULT_LABEL))
+        checkCast(receiver, eventClass.type)
+        readModelAccessor(eventPromotedMetadataAccessor, receiver)
+        returnObject(receiver)
+        label(NULL_RESULT_LABEL)
+        constInt(receiver, 0)
+        returnObject(receiver)
+    }
 }
 

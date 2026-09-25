@@ -12,11 +12,12 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSingleChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.MEDIA_TAB_RESOLVER_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -30,6 +31,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+
+/** `MediaTabResolver.getEnumDefault`: returns the configured default for a media sub-tab enum. */
+private const val MEDIA_TAB_RESOLVER_METHOD_DESCRIPTOR =
+    "$MEDIA_TAB_RESOLVER_DESCRIPTOR->getEnumDefault($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
 
 /**
  * Targets the NewX combined profile timeline component constructor
@@ -113,10 +120,9 @@ private fun singleArgumentRegister(instruction: Instruction): Int? =
 /** Uses `/range` when the selected register cannot be encoded by the 35c invoke form. */
 private fun resolverInvoke(register: Int) =
     if (register <= 15) {
-        "invoke-static {v$register}, $MEDIA_TAB_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Object;)Ljava/lang/Object;"
+        "invoke-static {v$register}, $MEDIA_TAB_RESOLVER_METHOD_DESCRIPTOR"
     } else {
-        "invoke-static/range {v$register .. v$register}, " +
-            "$MEDIA_TAB_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Object;)Ljava/lang/Object;"
+        "invoke-static/range {v$register .. v$register}, $MEDIA_TAB_RESOLVER_METHOD_DESCRIPTOR"
     }
 
 /** The combined component seeds its selected-sub-tab flow from the initial-sub-tab parameter. */
@@ -215,25 +221,30 @@ val newXDefaultMediaTabPatch =
                         )
                 val pendingValueRegister = pendingStoreInstruction.registerA
                 val pendingObjectRegister = pendingStoreInstruction.registerB
-                val pendingFieldDescriptor =
-                    "${pendingField.definingClass}->${pendingField.name}:${pendingField.type}"
 
-                method.addInstructions(
-                    pendingStore.index + 1,
-                    """
-                        iget-object v$pendingValueRegister, v$pendingObjectRegister, $pendingFieldDescriptor
-                        ${resolverInvoke(pendingValueRegister)}
-                        move-result-object v$pendingValueRegister
-                        check-cast v$pendingValueRegister, $tabTypeDescriptor
-                        iput-object v$pendingValueRegister, v$pendingObjectRegister, $pendingFieldDescriptor
-                    """.trimIndent(),
-                )
+                method.insertHook(
+                    index = pendingStore.index + 1,
+                    // The old plain insertion left any incoming label on the instruction behind the
+                    // store, so a branch that targeted it kept skipping the rewrite.
+                    relocateBranchTargets = false,
+                ) {
+                    iget(pendingValueRegister, pendingObjectRegister, pendingField)
+                    invokeStatic(
+                        methodReference(MEDIA_TAB_RESOLVER_METHOD_DESCRIPTOR),
+                        pendingValueRegister,
+                    )
+                    moveResult(pendingValueRegister, OBJECT_DESCRIPTOR)
+                    checkCast(pendingValueRegister, tabTypeDescriptor)
+                    iput(pendingValueRegister, pendingObjectRegister, pendingField)
+                }
             }
 
             // The 12.29 seed instruction is the `:cond_3` branch target for the "initial sub-tab
             // is in the tab list" path, so a plain insert would land before the label and be
             // bypassed. Inject at the control-flow label so both the branch and the fall-through
-            // reach the resolver.
+            // reach the resolver. The typed hook's label relocation is unreliable here (it left a
+            // label unplaced on 12.28.0-prod.01, see docs/newx-typed-api-port.md), so this one site
+            // keeps the library helper that is proven in production.
             method.addInstructionsAtControlFlowLabel(
                 seedInvokeIndex,
                 """

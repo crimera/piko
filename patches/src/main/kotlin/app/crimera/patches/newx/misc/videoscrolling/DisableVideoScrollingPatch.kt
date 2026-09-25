@@ -13,18 +13,19 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
 import app.crimera.patches.newx.utils.requireExactlyOne
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction23x
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
@@ -117,9 +118,9 @@ private fun patchVerticalPager(
     setting: ToggleSettingDefinition,
 ) {
     val method = match.method
-    val originalFirstInstruction =
-        method.instructions.firstOrNull()
-            ?: throw PatchException("NewX VerticalPager target has no instructions: ${match.originalMethod}")
+    if (method.instructions.isEmpty()) {
+        throw PatchException("NewX VerticalPager target has no instructions: ${match.originalMethod}")
+    }
     val p0Register = method.p0Register
     val booleanParamIndex = requireExactlyOne(
         "NewX VerticalPager userScrollEnabled parameter",
@@ -146,19 +147,28 @@ private fun patchVerticalPager(
         )
     }
 
-    method.addInstructionsWithLabels(
-        read.nextIndex,
-        """
-            if-eqz v${read.register}, :piko_newx_video_scrolling_continue
-            const/16 v$userScrollEnabledRegister, 0x0
-            const/16 v${read.register}, -0x101
-            and-int v$defaultMaskRegister, v$defaultMaskRegister, v${read.register}
-        """.trimIndent(),
-        ExternalLabel(
-            "piko_newx_video_scrolling_continue",
-            originalFirstInstruction,
-        ),
-    )
+    // The old external label was anchored on the method's original first instruction, which is
+    // exactly the instruction the injected read left behind its own block, so
+    // `Target.Original` addresses it. The plain insertion kept incoming labels on that
+    // instruction, so the branch policy stays `false`.
+    method.insertHook(
+        index = read.nextIndex,
+        relocateBranchTargets = false,
+    ) {
+        ifEqz(read.register, Target.Original)
+        // Clears `userScrollEnabled` and drops the `UserScrollEnabled` bit (0x100) from the
+        // Compose default-parameter mask of the trailing parameters.
+        constInt(userScrollEnabledRegister, 0)
+        constInt(read.register, -0x101)
+        add(
+            BuilderInstruction23x(
+                Opcode.AND_INT,
+                defaultMaskRegister,
+                defaultMaskRegister,
+                read.register,
+            ),
+        )
+    }
 }
 
 @Suppress("unused")

@@ -16,11 +16,12 @@ import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.REPLY_SORTING_RESOLVER_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
@@ -87,15 +88,23 @@ private fun MutableMethod.insertReplySortingDefault(
     register: Int,
     enumClass: String,
 ) {
-    addInstructions(
-        sgetIndex + 1,
-        """
-            const-class v$register, $enumClass
-            invoke-static/range {v$register .. v$register}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
-            move-result-object v$register
-            check-cast v$register, $enumClass
-        """.trimIndent(),
-    )
+    insertHook(
+        index = sgetIndex + 1,
+        // The old plain insertion left any incoming label on the instruction behind the seed, so a
+        // branch that targeted it kept skipping the rewrite. Keep that policy rather than making
+        // those paths run the hook.
+        relocateBranchTargets = false,
+    ) {
+        constClass(register, enumClass)
+        invokeStatic(
+            methodReference(
+                "$REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;",
+            ),
+            register,
+        )
+        moveResult(register, "Ljava/lang/Object;")
+        checkCast(register, enumClass)
+    }
 }
 
 /**
@@ -391,12 +400,18 @@ val newXDefaultReplySortingPatch =
             }
             val selectedRegister = checkCastInstruction.registerA
 
-            selectionMethod.addInstructions(
-                checkCastIndex + 1,
-                """
-                    invoke-static/range {v$selectedRegister .. v$selectedRegister}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->remember(Ljava/lang/Object;)V
-                """.trimIndent(),
-            )
+            selectionMethod.insertHook(
+                index = checkCastIndex + 1,
+                // The check-cast is the only producer of the selected ranking mode, so a branch
+                // that targeted the instruction behind it must keep skipping the remember call,
+                // exactly as the plain insertion did.
+                relocateBranchTargets = false,
+            ) {
+                invokeStatic(
+                    methodReference("$REPLY_SORTING_RESOLVER_DESCRIPTOR->remember(Ljava/lang/Object;)V"),
+                    selectedRegister,
+                )
+            }
 
             // Patch the Compose reply sorting UI state initializer so the button label
             // and sheet selection reflect the configured default instead of Relevance.

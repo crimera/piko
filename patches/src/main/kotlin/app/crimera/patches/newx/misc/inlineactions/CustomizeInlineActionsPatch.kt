@@ -15,8 +15,9 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -25,6 +26,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -134,18 +136,24 @@ val customizeNewXInlineActionsPatch =
             // is what the app itself does for an action a post does not offer, so the surviving
             // slots redistribute exactly like a native bar. Evidence and measurements:
             // docs/newx-resolver-linter/incidents/2026-09-25-inline-action-hidden-slot.md.
-            method.addInstructions(
-                read.nextIndex,
-                """
-                    invoke-static/range {v${read.register} .. v${read.register}}, $INLINE_ACTION_FILTER_DESCRIPTOR->prepareHiddenActions(Ljava/util/Set;)V
-                    invoke-static/range {p0 .. p0}, $INLINE_ACTION_FILTER_DESCRIPTOR->preparePresenter(Ljava/lang/Object;)V
-                    move-object/from16 v$listRegister, v$resultRegister
-                    invoke-static/range {v$listRegister .. v$listRegister}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;
-                    move-result-object v$resultRegister
-                    invoke-static/range {v$resultRegister .. v$resultRegister}, $conversionReference
-                    move-result-object v$resultRegister
-                """.trimIndent(),
-            )
+            method.insertHook(read.nextIndex, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->prepareHiddenActions(Ljava/util/Set;)V"),
+                    read.register,
+                )
+                invokeStatic(
+                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->preparePresenter(Ljava/lang/Object;)V"),
+                    method.p0Register,
+                )
+                move(listRegister, resultRegister, inlineActionListType)
+                invokeStatic(
+                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;"),
+                    listRegister,
+                )
+                moveResult(resultRegister, "Ljava/util/List;")
+                invokeStatic(conversionReference, resultRegister)
+                moveResult(resultRegister, conversionReference.returnType)
+            }
         }
     }
 
@@ -162,14 +170,13 @@ private fun patchActionNameBridge(models: app.crimera.patches.newx.models.Resolv
                         method.returnType == models.postActionTypeDescriptor
                 },
         )
-    val actionTypeRead =
-        if (actionTypeGetter != null) {
-            // Prefer the generated getter when the model exposes one.
-            "invoke-virtual {p0}, $actionTypeGetter\nmove-result-object p0"
-        } else {
-            // Otherwise require the obfuscated field to remain public before reading it directly.
-            inlineActionEntryClass.requirePublicFields(listOf(models.inlineActionTypeField))
-            "iget-object p0, p0, ${models.inlineActionTypeField}"
+    // Prefer the generated getter when the model exposes one. Otherwise the obfuscated field has
+    // to remain public before it can be read directly.
+    val actionTypeField =
+        models.inlineActionTypeField.also { field ->
+            if (actionTypeGetter == null) {
+                inlineActionEntryClass.requirePublicFields(listOf(field))
+            }
         }
     val extensionClass = context.mutableClassDefBy(INLINE_ACTION_FILTER_DESCRIPTOR)
     val helpers = extensionClass.methods.filter { method ->
@@ -183,14 +190,20 @@ private fun patchActionNameBridge(models: app.crimera.patches.newx.models.Resolv
                 helpers.joinToString(),
         )
     }
-    helpers.single().addInstructions(
-        0,
-        """
-            check-cast p0, ${models.inlineActionEntryDescriptor}
-            $actionTypeRead
-            invoke-virtual {p0}, Ljava/lang/Enum;->name()Ljava/lang/String;
-            move-result-object p0
-            return-object p0
-        """.trimIndent(),
-    )
+    val helper = helpers.single()
+    // `p0` is the entry passed to the bridge: cast it, read its action type and return the enum
+    // name of that type.
+    val entryRegister = helper.p0Register
+    helper.insertHook(0, relocateBranchTargets = false) {
+        checkCast(entryRegister, models.inlineActionEntryDescriptor)
+        if (actionTypeGetter != null) {
+            invokeVirtual(actionTypeGetter, entryRegister)
+            moveResult(entryRegister, actionTypeGetter.returnType)
+        } else {
+            iget(entryRegister, entryRegister, actionTypeField)
+        }
+        invokeVirtual(methodReference("Ljava/lang/Enum;->name()Ljava/lang/String;"), entryRegister)
+        moveResult(entryRegister, "Ljava/lang/String;")
+        returnObject(entryRegister)
+    }
 }

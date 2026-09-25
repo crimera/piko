@@ -12,10 +12,11 @@ import app.crimera.patches.newx.settings.newXSingleChoice
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.PROFILE_POST_SORTING_RESOLVER_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -105,12 +106,21 @@ val newXDefaultProfilePostSortingPatch =
                 throw PatchException("Profile post sorting Boolean.FALSE seed is not consumed by a flow factory")
             }
 
-            method.addInstructions(
-                seedIndex + 1,
-                """
-                    invoke-static {}, $PROFILE_POST_SORTING_RESOLVER_DESCRIPTOR->getDefault()Ljava/lang/Boolean;
-                    move-result-object v${falseSgetInstruction.registerA}
-                """.trimIndent(),
-            )
+            method.insertHook(
+                index = seedIndex + 1,
+                // The old plain insertion left any incoming label on the flow seed behind the
+                // rewrite, so a branch targeting it kept skipping the replacement. Keep that
+                // policy instead of making those paths run the hook.
+                relocateBranchTargets = false,
+            ) {
+                invokeStatic(
+                    methodReference(
+                        "$PROFILE_POST_SORTING_RESOLVER_DESCRIPTOR->getDefault()Ljava/lang/Boolean;",
+                    ),
+                )
+                // The seed register feeds the flow factory behind the seed, so the replacement has
+                // to land in the same register rather than a scratch one.
+                moveResult(falseSgetInstruction.registerA, "Ljava/lang/Boolean;")
+            }
         }
     }

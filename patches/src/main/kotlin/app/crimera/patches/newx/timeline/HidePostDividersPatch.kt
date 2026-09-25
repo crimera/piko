@@ -7,18 +7,18 @@ import app.crimera.patches.newx.settings.injectReadWithDefault
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.newx.utils.resolveConstantOnCurrentPath
 import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
@@ -436,10 +436,6 @@ private fun patchReplyFacepileDivider(
     owner.methods.add(method)
 
     val drawCall = resolveReplyFacepileDrawCall(method)
-    val continuation =
-        method.instructions.getOrNull(drawCall.index + 2)
-            ?: throw PatchException("NewX reply facepile draw call has no continuation")
-    val drawInstruction = method.instructions[drawCall.index]
     val settingRegister = originalRegisterCount
     val read =
         setting.injectReadWithDefault(
@@ -448,18 +444,13 @@ private fun patchReplyFacepileDivider(
             defaultValue = false,
             registerRange = settingRegister..settingRegister + 1,
         )
-    val drawLabel = "piko_newx_hide_post_dividers_reply_facepile_draw"
-    val continuationLabel = "piko_newx_hide_post_dividers_reply_facepile_continue"
-    method.addInstructionsWithLabels(
-        read.nextIndex,
-        """
-            if-eqz v${read.register}, :$drawLabel
-            move-object/from16 v${drawCall.resultRegister}, v${drawCall.inputModifierRegister}
-            goto :$continuationLabel
-        """.trimIndent(),
-        ExternalLabel(drawLabel, drawInstruction),
-        ExternalLabel(continuationLabel, continuation),
-    )
+    method.insertHook(index = read.nextIndex, relocateBranchTargets = false) {
+        // Draw the native modifier when the setting is off, otherwise skip the draw call and keep
+        // the modifier the caller passed (two instructions past the call).
+        ifEqz(read.register, Target.Original)
+        move(drawCall.resultRegister, drawCall.inputModifierRegister, OBJECT_DESCRIPTOR)
+        goto(Target.AfterOriginal(2))
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -497,10 +488,6 @@ private fun patchTimelineModuleDividers(
     owner.methods.add(method)
 
     val callIndex = resolveTimelineModuleDividerCallIndex(method)
-    val continuation =
-        method.instructions.getOrNull(callIndex + 1)
-            ?: throw PatchException("NewX timeline module divider call is at the end of the method")
-
     val settingRegister = originalRegisterCount
     val read =
         setting.injectReadWithDefault(
@@ -509,14 +496,10 @@ private fun patchTimelineModuleDividers(
             defaultValue = false,
             registerRange = settingRegister..settingRegister + 1,
         )
-    val label = "piko_newx_hide_post_dividers_module_divider"
-    method.addInstructionsWithLabels(
-        read.nextIndex,
-        """
-            if-nez v${read.register}, :$label
-        """.trimIndent(),
-        ExternalLabel(label, continuation),
-    )
+    method.insertHook(index = read.nextIndex, relocateBranchTargets = false) {
+        // Skip the divider call (the original instruction) when the setting is enabled.
+        ifNez(read.register, Target.AfterOriginal(1))
+    }
 }
 
 @Suppress("unused")
@@ -571,7 +554,6 @@ val newXHidePostDividersPatch =
                 )
             }
             calls.sortedByDescending(PostDividerCall::index).forEachIndexed { ordinal, call ->
-                val continuation = method.instructions[call.index]
                 val settingRegister = originalRegisterCount + ordinal * 2
                 val read =
                     hidePostDividers.injectReadWithDefault(
@@ -580,15 +562,12 @@ val newXHidePostDividersPatch =
                         defaultValue = false,
                         registerRange = settingRegister..settingRegister + 1,
                     )
-                val label = "piko_newx_hide_post_dividers_continue_$ordinal"
-                method.addInstructionsWithLabels(
-                    read.nextIndex,
-                    """
-                        if-eqz v${read.register}, :$label
-                        const/16 v${call.booleanRegister}, 0x0
-                    """.trimIndent(),
-                    ExternalLabel(label, continuation),
-                )
+                // The old continuation label was the divider call itself, which is now the
+                // instruction directly behind the hook, so it is `Target.Original`.
+                method.insertHook(index = read.nextIndex, relocateBranchTargets = false) {
+                    ifEqz(read.register, Target.Original)
+                    constInt(call.booleanRegister, 0)
+                }
             }
 
             patchReplyFacepileDivider(hidePostDividers)

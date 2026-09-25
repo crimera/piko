@@ -9,19 +9,19 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -773,20 +773,23 @@ internal fun applyImmersiveActionBarSafeAreaHook(
             excludedRegisters = listOf(hook.modifierRegister, hook.composerRegister),
             registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
         )
-    val scratchRegister = settingRead.register
-    val continuationLabel = "piko_newx_immersive_action_bar_${hook.actionBarCallIndex}"
-    hook.method.addInstructionsWithLabels(
-        settingRead.nextIndex,
-        """
-            if-eqz v$scratchRegister, :$continuationLabel
-            invoke-static/range {v${hook.composerRegister} .. v${hook.composerRegister}}, ${hook.windowInsetsHolderProvider}
-            move-result-object v$scratchRegister
-            iget-object v$scratchRegister, v$scratchRegister, ${hook.navigationBarsField}
-            invoke-static {v${hook.modifierRegister}, v$scratchRegister}, ${hook.insetsPaddingCall}
-            move-result-object v${hook.modifierRegister}
-        """.trimIndent(),
-        ExternalLabel(continuationLabel, hook.actionBarCall),
-    )
+    hook.method.insertHook(
+        index = settingRead.nextIndex,
+        // The old plain insertion left incoming labels on the action-bar call, so a path that
+        // branched straight to it still skips the padding block.
+        relocateBranchTargets = false,
+    ) {
+        // The toggle register doubles as the insets scratch: `if-eqz` consumed it and the
+        // setting-off path skips the block that overwrites it.
+        ifEqz(settingRead.register, Target.Original)
+        // The old smali hardcoded `invoke-static/range {vC .. vC}`; the typed API emits the 35c
+        // form while the Composer register fits four bits and that same range form when it does not.
+        invokeStatic(hook.windowInsetsHolderProvider, hook.composerRegister)
+        moveResult(settingRead.register, hook.windowInsetsHolderProvider.returnType.toString())
+        iget(settingRead.register, settingRead.register, hook.navigationBarsField)
+        invokeStatic(hook.insetsPaddingCall, hook.modifierRegister, settingRead.register)
+        moveResult(hook.modifierRegister, hook.insetsPaddingCall.returnType.toString())
+    }
 }
 
 /**

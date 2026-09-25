@@ -7,10 +7,10 @@
 package app.crimera.patches.newx.premium
 
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -122,13 +122,18 @@ private fun unlockColorCustomization(match: Match) {
     }
 
     val stateWriteIndex = stateWriteIndices.single()
-    val constantOpcode = if (resultRegister <= 15) "const/4" else "const/16"
 
     // Override the value immediately before it is stored; never split invoke/move-result.
-    match.method.addInstruction(
-        stateWriteIndex,
-        "$constantOpcode v$resultRegister, 0x1",
-    )
+    // `constInt` is register-aware, so it picks the same encoding the old `const/4`-vs-`const/16`
+    // choice produced. `relocateBranchTargets = false` keeps the plain-insertion semantics of the
+    // previous `addInstruction`: an incoming label stays on the store, so a path that branched
+    // straight to it still skips the override.
+    match.method.insertHook(
+        index = stateWriteIndex,
+        relocateBranchTargets = false,
+    ) {
+        constInt(resultRegister, 1)
+    }
 }
 
 @Suppress("unused")

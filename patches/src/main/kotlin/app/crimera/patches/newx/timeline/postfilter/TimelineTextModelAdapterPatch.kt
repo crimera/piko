@@ -1,29 +1,31 @@
 package app.crimera.patches.newx.timeline.postfilter
 
+import app.crimera.patches.newx.models.ModelFieldAccessor
 import app.crimera.patches.newx.models.ResolvedNewXPostModels
 import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.models.newXPostModelResolutionPatch
 import app.crimera.patches.newx.models.newXTimelineModelAdapterPatch
-import app.crimera.patches.newx.models.patchBridge
-import app.crimera.patches.newx.models.readObject
 import app.crimera.patches.newx.models.requirePublicFields
 import app.crimera.patches.newx.models.requireSingle
 import app.crimera.patches.newx.models.resolveFieldAccessor
 import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.resolvedNewXTimelineModels
-import app.crimera.patches.newx.models.smaliReference
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
 import com.android.tools.smali.dexlib2.iface.Method
@@ -42,6 +44,34 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val INTEGER_DESCRIPTOR = "I"
 private const val LONG_OBJECT_DESCRIPTOR = "Ljava/lang/Long;"
+private const val OBJECT_TO_STRING_DESCRIPTOR = "Ljava/lang/Object;->toString()Ljava/lang/String;"
+
+/** Release stubs the timeline filter declares for the post-filter bridges. */
+private const val POST_TEXT_BRIDGE = "getPostText"
+private const val REPLIED_POST_ID_BRIDGE = "getPostRepliedPostId"
+private const val POST_MENTIONS_BRIDGE = "getPostMentions"
+private const val MENTION_START_IDX_BRIDGE = "getMentionStartIdx"
+private const val MENTION_END_IDX_BRIDGE = "getMentionEndIdx"
+private const val MENTION_SCREEN_NAME_BRIDGE = "getMentionScreenName"
+private const val POST_AUTHOR_SCREEN_NAME_BRIDGE = "getPostAuthorScreenName"
+private const val POST_AUTHOR_VERIFIED_TYPE_BRIDGE = "getPostAuthorVerifiedType"
+private const val POST_AUTHOR_ID_BRIDGE = "getPostAuthorId"
+
+private const val REPLIED_POST_ID_NO_CONTEXTUAL_RESULT_LABEL =
+    "piko_newx_post_replied_id_no_contextual_result"
+private const val POST_MENTIONS_NO_CONTEXTUAL_RESULT_LABEL =
+    "piko_newx_post_mentions_no_contextual_result"
+private const val POST_MENTIONS_NULL_LABEL = "piko_newx_post_mentions_null"
+private const val POST_AUTHOR_NO_CONTEXTUAL_RESULT_LABEL =
+    "piko_newx_post_author_no_contextual_result"
+private const val POST_AUTHOR_NULL_LABEL = "piko_newx_post_author_null"
+private const val POST_AUTHOR_VERIFIED_TYPE_NO_CONTEXTUAL_RESULT_LABEL =
+    "piko_newx_post_author_verified_type_no_contextual_result"
+private const val POST_AUTHOR_VERIFIED_TYPE_NULL_LABEL =
+    "piko_newx_post_author_verified_type_null"
+private const val POST_AUTHOR_ID_NO_CONTEXTUAL_RESULT_LABEL =
+    "piko_newx_post_author_id_no_contextual_result"
+private const val POST_AUTHOR_ID_NULL_LABEL = "piko_newx_post_author_id_null"
 
 private object CanonicalPostModelFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/",
@@ -79,7 +109,7 @@ private object MinimalUserModelFingerprint : Fingerprint(
 private data class ResolvedPostTextModels(
     val postResultField: FieldReference,
     val contextualPostDescriptor: String,
-    val contextualCanonicalPostRead: String,
+    val contextualCanonicalPost: ModelFieldAccessor,
     val canonicalPostDescriptor: String,
     val repliedPostIdField: FieldReference,
     val entityListField: FieldReference,
@@ -197,7 +227,7 @@ private fun resolvePostTextModels(
     return ResolvedPostTextModels(
         postResultField = postResultField,
         contextualPostDescriptor = postModels.contextualPostDescriptor,
-        contextualCanonicalPostRead = contextualCanonicalPostAccessor.readObject("v0"),
+        contextualCanonicalPost = contextualCanonicalPostAccessor,
         canonicalPostDescriptor = canonicalPostDescriptor,
         repliedPostIdField = repliedPostIdField,
         entityListField = entityListField,
@@ -421,198 +451,282 @@ private fun patchPostTextBridges(
     postTextModels: ResolvedPostTextModels,
 ) {
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
-    filterClass.patchBridge(
-        "getPostText",
-        OBJECT_DESCRIPTOR,
-        STRING_DESCRIPTOR,
-        """
-            check-cast p0, $postDescriptor
-            invoke-virtual {p0}, ${textGetter.smaliReference()}
-            move-result-object p0
-            return-object p0
-        """.trimIndent(),
-    )
-    filterClass.replaceContextualPostBridge(
-        name = "getPostRepliedPostId",
-        returnType = OBJECT_DESCRIPTOR,
-        instructions =
-            """
-                move-object/from16 v0, p0
-                check-cast v0, $postDescriptor
-                iget-object v0, v0, ${postTextModels.postResultField}
-                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
-                if-eqz v1, :piko_newx_post_replied_id_no_contextual_result
-                check-cast v0, ${postTextModels.contextualPostDescriptor}
-                ${postTextModels.contextualCanonicalPostRead}
-                check-cast v0, ${postTextModels.canonicalPostDescriptor}
-                iget-object v0, v0, ${postTextModels.repliedPostIdField}
-                return-object v0
-                :piko_newx_post_replied_id_no_contextual_result
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent(),
-    )
-    filterClass.replaceContextualPostBridge(
-        name = "getPostMentions",
-        returnType = LIST_DESCRIPTOR,
-        instructions =
-            """
-                move-object/from16 v0, p0
-                check-cast v0, $postDescriptor
-                iget-object v0, v0, ${postTextModels.postResultField}
-                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
-                if-eqz v1, :piko_newx_post_mentions_no_contextual_result
-                check-cast v0, ${postTextModels.contextualPostDescriptor}
-                ${postTextModels.contextualCanonicalPostRead}
-                check-cast v0, ${postTextModels.canonicalPostDescriptor}
-                iget-object v0, v0, ${postTextModels.entityListField}
-                if-eqz v0, :piko_newx_post_mentions_null
-                check-cast v0, ${postTextModels.entityListField.type}
-                iget-object v0, v0, ${postTextModels.mentionsField}
-                return-object v0
-                :piko_newx_post_mentions_no_contextual_result
-                :piko_newx_post_mentions_null
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent(),
-    )
-    filterClass.patchBridge(
-        "getMentionStartIdx",
-        OBJECT_DESCRIPTOR,
-        INTEGER_DESCRIPTOR,
-        """
-            check-cast p0, ${postTextModels.mentionDescriptor}
-            iget p0, p0, ${postTextModels.mentionStartIdxField}
-            return p0
-        """.trimIndent(),
-    )
-    filterClass.patchBridge(
-        "getMentionEndIdx",
-        OBJECT_DESCRIPTOR,
-        INTEGER_DESCRIPTOR,
-        """
-            check-cast p0, ${postTextModels.mentionDescriptor}
-            iget p0, p0, ${postTextModels.mentionEndIdxField}
-            return p0
-        """.trimIndent(),
-    )
-    filterClass.patchBridge(
-        "getMentionScreenName",
-        OBJECT_DESCRIPTOR,
-        STRING_DESCRIPTOR,
-        """
-            check-cast p0, ${postTextModels.mentionDescriptor}
-            iget-object p0, p0, ${postTextModels.mentionScreenNameField}
-            return-object p0
-        """.trimIndent(),
-    )
-    filterClass.replaceContextualPostBridge(
-        name = "getPostAuthorScreenName",
-        returnType = STRING_DESCRIPTOR,
-        instructions =
-            """
-                move-object/from16 v0, p0
-                check-cast v0, $postDescriptor
-                iget-object v0, v0, ${postTextModels.postResultField}
-                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
-                if-eqz v1, :piko_newx_post_author_no_contextual_result
-                check-cast v0, ${postTextModels.contextualPostDescriptor}
-                ${postTextModels.contextualCanonicalPostRead}
-                check-cast v0, ${postTextModels.canonicalPostDescriptor}
-                iget-object v0, v0, ${postTextModels.authorField}
-                if-eqz v0, :piko_newx_post_author_null
-                check-cast v0, ${postTextModels.authorField.type}
-                invoke-interface {v0}, ${postTextModels.authorScreenNameGetter.smaliReference()}
-                move-result-object v0
-                return-object v0
-                :piko_newx_post_author_no_contextual_result
-                :piko_newx_post_author_null
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent(),
-    )
-    filterClass.replaceContextualPostBridge(
-        name = "getPostAuthorVerifiedType",
-        returnType = OBJECT_DESCRIPTOR,
-        instructions =
-            """
-                move-object/from16 v0, p0
-                check-cast v0, $postDescriptor
-                iget-object v0, v0, ${postTextModels.postResultField}
-                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
-                if-eqz v1, :piko_newx_post_author_verified_type_no_contextual_result
-                check-cast v0, ${postTextModels.contextualPostDescriptor}
-                ${postTextModels.contextualCanonicalPostRead}
-                check-cast v0, ${postTextModels.canonicalPostDescriptor}
-                iget-object v0, v0, ${postTextModels.authorField}
-                if-eqz v0, :piko_newx_post_author_verified_type_null
-                check-cast v0, ${postTextModels.authorField.type}
-                invoke-interface {v0}, ${postTextModels.authorVerifiedTypeGetter.smaliReference()}
-                move-result-object v0
-                return-object v0
-                :piko_newx_post_author_verified_type_no_contextual_result
-                :piko_newx_post_author_verified_type_null
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent(),
-    )
-    filterClass.replaceContextualPostBridge(
-        name = "getPostAuthorId",
-        returnType = STRING_DESCRIPTOR,
-        instructions =
-            """
-                move-object/from16 v0, p0
-                check-cast v0, $postDescriptor
-                iget-object v0, v0, ${postTextModels.postResultField}
-                instance-of v1, v0, ${postTextModels.contextualPostDescriptor}
-                if-eqz v1, :piko_newx_post_author_id_no_contextual_result
-                check-cast v0, ${postTextModels.contextualPostDescriptor}
-                ${postTextModels.contextualCanonicalPostRead}
-                check-cast v0, ${postTextModels.canonicalPostDescriptor}
-                iget-object v0, v0, ${postTextModels.authorField}
-                if-eqz v0, :piko_newx_post_author_id_null
-                check-cast v0, ${postTextModels.authorField.type}
-                invoke-interface {v0}, ${postTextModels.authorIdGetter.smaliReference()}
-                move-result-object v0
-                if-eqz v0, :piko_newx_post_author_id_null
-                invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
-                move-result-object v0
-                return-object v0
-                :piko_newx_post_author_id_no_contextual_result
-                :piko_newx_post_author_id_null
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent(),
-    )
+
+    /**
+     * Resolves the single NewX timeline bridge [name] and prepares it for injection: a bridge that
+     * needs local register headroom is cloned with [additionalRegisters] registers added on top of
+     * its parameter registers, and [replaceBody] empties the release stub before the injected block.
+     */
+    fun resolveBridge(
+        name: String,
+        parameters: String,
+        returnType: String,
+        additionalRegisters: Int = 0,
+        replaceBody: Boolean = false,
+    ): MutableMethod {
+        val matches =
+            filterClass.methods.filter { method ->
+                method.name == name &&
+                    method.parameterTypes.joinToString("") == parameters &&
+                    method.returnType == returnType
+            }
+        if (matches.size != 1) {
+            throw PatchException(
+                "Expected one NewX timeline bridge $name($parameters)$returnType, found " +
+                    "${matches.size}: ${matches.joinToString()}",
+            )
+        }
+
+        val originalMethod = matches.single()
+        val method =
+            if (additionalRegisters == 0) {
+                originalMethod
+            } else {
+                val clonedMethod =
+                    originalMethod.cloneMutable(
+                        additionalRegisters = originalMethod.numberOfParameterRegisters + additionalRegisters,
+                    )
+                filterClass.methods.remove(originalMethod)
+                filterClass.methods.add(clonedMethod)
+                clonedMethod
+            }
+        if (replaceBody) {
+            val implementation =
+                method.implementation
+                    ?: throw PatchException("NewX timeline bridge $name has no implementation")
+            while (implementation.instructions.isNotEmpty()) {
+                implementation.removeInstruction(implementation.instructions.lastIndex)
+            }
+        }
+        return method
+    }
+
+    // A prepended bridge returns in front of the release stub, so the stub body stays behind it as
+    // dead code and a branch into the method head keeps skipping the bridge, exactly as the plain
+    // smali insertion did.
+    val postTextBridge = resolveBridge(POST_TEXT_BRIDGE, OBJECT_DESCRIPTOR, STRING_DESCRIPTOR)
+    postTextBridge.insertHook(index = 0, relocateBranchTargets = false) {
+        val receiverRegister = postTextBridge.p0Register
+        checkCast(receiverRegister, postDescriptor)
+        invokeVirtual(textGetter, receiverRegister)
+        moveResult(receiverRegister, STRING_DESCRIPTOR)
+        returnObject(receiverRegister)
+    }
+
+    val mentionStartIdxBridge =
+        resolveBridge(MENTION_START_IDX_BRIDGE, OBJECT_DESCRIPTOR, INTEGER_DESCRIPTOR)
+    mentionStartIdxBridge.insertHook(index = 0, relocateBranchTargets = false) {
+        val receiverRegister = mentionStartIdxBridge.p0Register
+        checkCast(receiverRegister, postTextModels.mentionDescriptor)
+        iget(receiverRegister, receiverRegister, postTextModels.mentionStartIdxField)
+        returnValue(receiverRegister)
+    }
+
+    val mentionEndIdxBridge =
+        resolveBridge(MENTION_END_IDX_BRIDGE, OBJECT_DESCRIPTOR, INTEGER_DESCRIPTOR)
+    mentionEndIdxBridge.insertHook(index = 0, relocateBranchTargets = false) {
+        val receiverRegister = mentionEndIdxBridge.p0Register
+        checkCast(receiverRegister, postTextModels.mentionDescriptor)
+        iget(receiverRegister, receiverRegister, postTextModels.mentionEndIdxField)
+        returnValue(receiverRegister)
+    }
+
+    val mentionScreenNameBridge =
+        resolveBridge(MENTION_SCREEN_NAME_BRIDGE, OBJECT_DESCRIPTOR, STRING_DESCRIPTOR)
+    mentionScreenNameBridge.insertHook(index = 0, relocateBranchTargets = false) {
+        val receiverRegister = mentionScreenNameBridge.p0Register
+        checkCast(receiverRegister, postTextModels.mentionDescriptor)
+        iget(receiverRegister, receiverRegister, postTextModels.mentionScreenNameField)
+        returnObject(receiverRegister)
+    }
+
+    // The contextual-post bridges replace the release stub body, so the block runs in the local
+    // registers the extra registers keep below the parameter block (v0/v1) and p0 is the release
+    // union result.
+    val repliedPostIdBridge =
+        resolveBridge(
+            REPLIED_POST_ID_BRIDGE,
+            OBJECT_DESCRIPTOR,
+            OBJECT_DESCRIPTOR,
+            additionalRegisters = 1,
+            replaceBody = true,
+        )
+    repliedPostIdBridge.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        readContextualCanonicalPost(
+            receiverRegister = repliedPostIdBridge.p0Register,
+            workRegister = workRegister,
+            typeCheckRegister = 1,
+            postDescriptor = postDescriptor,
+            postTextModels = postTextModels,
+            noContextualResultLabel = REPLIED_POST_ID_NO_CONTEXTUAL_RESULT_LABEL,
+        )
+        iget(workRegister, workRegister, postTextModels.repliedPostIdField)
+        returnObject(workRegister)
+        label(REPLIED_POST_ID_NO_CONTEXTUAL_RESULT_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
+    }
+
+    val postMentionsBridge =
+        resolveBridge(
+            POST_MENTIONS_BRIDGE,
+            OBJECT_DESCRIPTOR,
+            LIST_DESCRIPTOR,
+            additionalRegisters = 1,
+            replaceBody = true,
+        )
+    postMentionsBridge.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        readContextualCanonicalPost(
+            receiverRegister = postMentionsBridge.p0Register,
+            workRegister = workRegister,
+            typeCheckRegister = 1,
+            postDescriptor = postDescriptor,
+            postTextModels = postTextModels,
+            noContextualResultLabel = POST_MENTIONS_NO_CONTEXTUAL_RESULT_LABEL,
+        )
+        iget(workRegister, workRegister, postTextModels.entityListField)
+        ifEqz(workRegister, Target.Local(POST_MENTIONS_NULL_LABEL))
+        checkCast(workRegister, postTextModels.entityListField.type)
+        iget(workRegister, workRegister, postTextModels.mentionsField)
+        returnObject(workRegister)
+        label(POST_MENTIONS_NO_CONTEXTUAL_RESULT_LABEL)
+        label(POST_MENTIONS_NULL_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
+    }
+
+    val authorScreenNameBridge =
+        resolveBridge(
+            POST_AUTHOR_SCREEN_NAME_BRIDGE,
+            OBJECT_DESCRIPTOR,
+            STRING_DESCRIPTOR,
+            additionalRegisters = 1,
+            replaceBody = true,
+        )
+    authorScreenNameBridge.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        readContextualCanonicalPost(
+            receiverRegister = authorScreenNameBridge.p0Register,
+            workRegister = workRegister,
+            typeCheckRegister = 1,
+            postDescriptor = postDescriptor,
+            postTextModels = postTextModels,
+            noContextualResultLabel = POST_AUTHOR_NO_CONTEXTUAL_RESULT_LABEL,
+        )
+        iget(workRegister, workRegister, postTextModels.authorField)
+        ifEqz(workRegister, Target.Local(POST_AUTHOR_NULL_LABEL))
+        checkCast(workRegister, postTextModels.authorField.type)
+        invokeInterface(postTextModels.authorScreenNameGetter, workRegister)
+        moveResult(workRegister, STRING_DESCRIPTOR)
+        returnObject(workRegister)
+        label(POST_AUTHOR_NO_CONTEXTUAL_RESULT_LABEL)
+        label(POST_AUTHOR_NULL_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
+    }
+
+    val authorVerifiedTypeBridge =
+        resolveBridge(
+            POST_AUTHOR_VERIFIED_TYPE_BRIDGE,
+            OBJECT_DESCRIPTOR,
+            OBJECT_DESCRIPTOR,
+            additionalRegisters = 1,
+            replaceBody = true,
+        )
+    authorVerifiedTypeBridge.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        readContextualCanonicalPost(
+            receiverRegister = authorVerifiedTypeBridge.p0Register,
+            workRegister = workRegister,
+            typeCheckRegister = 1,
+            postDescriptor = postDescriptor,
+            postTextModels = postTextModels,
+            noContextualResultLabel = POST_AUTHOR_VERIFIED_TYPE_NO_CONTEXTUAL_RESULT_LABEL,
+        )
+        iget(workRegister, workRegister, postTextModels.authorField)
+        ifEqz(workRegister, Target.Local(POST_AUTHOR_VERIFIED_TYPE_NULL_LABEL))
+        checkCast(workRegister, postTextModels.authorField.type)
+        invokeInterface(postTextModels.authorVerifiedTypeGetter, workRegister)
+        moveResult(workRegister, OBJECT_DESCRIPTOR)
+        returnObject(workRegister)
+        label(POST_AUTHOR_VERIFIED_TYPE_NO_CONTEXTUAL_RESULT_LABEL)
+        label(POST_AUTHOR_VERIFIED_TYPE_NULL_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
+    }
+
+    val authorIdBridge =
+        resolveBridge(
+            POST_AUTHOR_ID_BRIDGE,
+            OBJECT_DESCRIPTOR,
+            STRING_DESCRIPTOR,
+            additionalRegisters = 1,
+            replaceBody = true,
+        )
+    authorIdBridge.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        readContextualCanonicalPost(
+            receiverRegister = authorIdBridge.p0Register,
+            workRegister = workRegister,
+            typeCheckRegister = 1,
+            postDescriptor = postDescriptor,
+            postTextModels = postTextModels,
+            noContextualResultLabel = POST_AUTHOR_ID_NO_CONTEXTUAL_RESULT_LABEL,
+        )
+        iget(workRegister, workRegister, postTextModels.authorField)
+        ifEqz(workRegister, Target.Local(POST_AUTHOR_ID_NULL_LABEL))
+        checkCast(workRegister, postTextModels.authorField.type)
+        invokeInterface(postTextModels.authorIdGetter, workRegister)
+        moveResult(workRegister, OBJECT_DESCRIPTOR)
+        ifEqz(workRegister, Target.Local(POST_AUTHOR_ID_NULL_LABEL))
+        invokeVirtual(methodReference(OBJECT_TO_STRING_DESCRIPTOR), workRegister)
+        moveResult(workRegister, STRING_DESCRIPTOR)
+        returnObject(workRegister)
+        label(POST_AUTHOR_ID_NO_CONTEXTUAL_RESULT_LABEL)
+        label(POST_AUTHOR_ID_NULL_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
+    }
 }
 
-private fun MutableClass.replaceContextualPostBridge(
-    name: String,
-    returnType: String,
-    instructions: String,
+/**
+ * Emits the prologue the contextual-post bridges shared: copies the release union result from
+ * [receiverRegister] into [workRegister], jumps to [noContextualResultLabel] when it is not a
+ * contextual post, and leaves the canonical post in [workRegister].
+ */
+private fun Block.readContextualCanonicalPost(
+    receiverRegister: Int,
+    workRegister: Int,
+    typeCheckRegister: Int,
+    postDescriptor: String,
+    postTextModels: ResolvedPostTextModels,
+    noContextualResultLabel: String,
 ) {
-    val matches = methods.filter { method ->
-        method.name == name &&
-            method.parameterTypes.joinToString("") == OBJECT_DESCRIPTOR &&
-            method.returnType == returnType
-    }
-    if (matches.size != 1) {
-        throw PatchException(
-            "Expected one NewX contextual-post bridge $name($OBJECT_DESCRIPTOR)$returnType in $this, found " +
-                "${matches.size}: ${matches.joinToString()}",
-        )
-    }
+    move(workRegister, receiverRegister, OBJECT_DESCRIPTOR)
+    checkCast(workRegister, postDescriptor)
+    iget(workRegister, workRegister, postTextModels.postResultField)
+    instanceOf(typeCheckRegister, workRegister, postTextModels.contextualPostDescriptor)
+    ifEqz(typeCheckRegister, Target.Local(noContextualResultLabel))
+    checkCast(workRegister, postTextModels.contextualPostDescriptor)
+    readModelAccessor(postTextModels.contextualCanonicalPost, workRegister)
+    checkCast(workRegister, postTextModels.canonicalPostDescriptor)
+}
 
-    val originalMethod = matches.single()
-    val method = originalMethod.cloneMutable(
-        additionalRegisters = originalMethod.numberOfParameterRegisters + 1,
-    )
-    methods.remove(originalMethod)
-    methods.add(method)
-    val implementation = method.implementation
-        ?: throw PatchException("NewX contextual-post bridge $name has no implementation")
-    while (implementation.instructions.isNotEmpty()) {
-        implementation.removeInstruction(implementation.instructions.lastIndex)
+/**
+ * Emits the model read the previous smali strings described: the generated getter when the model
+ * exposes one, otherwise a direct field access.
+ */
+private fun Block.readModelAccessor(
+    accessor: ModelFieldAccessor,
+    register: Int,
+) {
+    val getter = accessor.getter
+    if (getter == null) {
+        iget(register, register, accessor.field)
+        return
     }
-    method.addInstructions(0, instructions.trimIndent())
+    invokeVirtual(getter, register)
+    moveResult(register, accessor.field.type)
 }

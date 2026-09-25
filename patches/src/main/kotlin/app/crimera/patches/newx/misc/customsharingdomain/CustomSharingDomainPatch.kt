@@ -5,19 +5,22 @@ import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXTextInput
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.getReference
+import app.morphe.util.addInstructionsAtControlFlowLabel
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -327,13 +330,16 @@ private fun hookShareSheetCopyCallbacks() {
             label = "NewX share-sheet copy callback variant",
             candidates = matches,
         )
-    selectedMatch.method.addInstructions(
-        0,
-        """
-        invoke-static {p1}, $CHANGE_DOMAIN_METHOD
-        move-result-object p1
-        """.trimIndent(),
-    )
+    val method = selectedMatch.method
+    // `p1` is the callback's single String parameter (the URL to rewrite in place).
+    val urlRegister = method.p0Register + 1
+    method.insertHook(
+        index = 0,
+        // The old plain insert kept incoming labels on the original first instruction.
+        relocateBranchTargets = false,
+    ) {
+        rewriteDomain(urlRegister)
+    }
 }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
@@ -543,19 +549,45 @@ private fun MethodReference.matches(method: MutableMethod): Boolean =
         returnType == method.returnType &&
         parameterTypes.map(CharSequence::toString) == method.parameterTypes.map(CharSequence::toString)
 
+/**
+ * Rewrites the URL held in [register] through the custom-domain resolver, in place.
+ *
+ * The API lowers the call to `invoke-static/range` by itself when [register] is above `v15`,
+ * which is what the old hand written opcode choice did.
+ */
+private fun Block.rewriteDomain(register: Int) {
+    invokeStatic(methodReference(CHANGE_DOMAIN_METHOD), register)
+    moveResult(register, STRING_DESCRIPTOR)
+}
+
+/**
+ * Rewrites the URL in front of [instructionIndex] keeping every incoming branch on the original
+ * instruction, which is what the plain `addInstructions` this replaces did.
+ */
 private fun MutableMethod.addDomainRewrite(instructionIndex: Int, register: Int) {
-    addInstructions(instructionIndex, domainRewriteInstructions(register))
+    insertHook(index = instructionIndex, relocateBranchTargets = false) { rewriteDomain(register) }
 }
 
+/**
+ * Rewrites the URL at the control-flow label: the labels of [instructionIndex] move onto the
+ * rewrite, so every path that reached the original instruction runs it first (the behaviour of
+ * `addInstructionsAtControlFlowLabel`).
+ */
+/**
+ * The field store is the merge point of every URL branch, and those branches have to run the
+ * rewrite, so their labels must move onto the injected block. The typed hook's relocation left a
+ * label unplaced on 12.28.0-prod.01 (see docs/newx-typed-api-port.md), so this one site keeps the
+ * library helper that is proven in production until that is fixed.
+ */
 private fun MutableMethod.addDomainRewriteAtControlFlowLabel(instructionIndex: Int, register: Int) {
-    addInstructionsAtControlFlowLabel(instructionIndex, domainRewriteInstructions(register))
+    addInstructionsAtControlFlowLabel(
+        instructionIndex,
+        rewriteDomainInstructions(register),
+    )
 }
 
-private fun domainRewriteInstructions(register: Int): String {
-    val invokeOpcode = if (register <= 15) "invoke-static" else "invoke-static/range"
-    val registerRange = if (register <= 15) "{v$register}" else "{v$register .. v$register}"
-    return """
-        $invokeOpcode $registerRange, $CHANGE_DOMAIN_METHOD
+private fun rewriteDomainInstructions(register: Int): String =
+    """
+        invoke-static {v$register}, $CHANGE_DOMAIN_METHOD
         move-result-object v$register
-        """.trimIndent()
-}
+    """.trimIndent()

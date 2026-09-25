@@ -344,6 +344,97 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `typed hook without an explicit branch policy is reported`() {
+        // Regression for the 12.29.0-alpha.04 inline-download-button abort: the fail-closed guard
+        // stayed silent on 12.28.0-prod.01, so the omission only surfaced on the newer APK.
+        val findings =
+            lint(
+                """
+                method.insertHook(
+                    index = 0,
+                ) {
+                    returnVoid()
+                }
+                """.trimIndent(),
+            )
+
+        assertEquals(
+            listOf(NewXResolverLinter.Rule.TYPED_HOOK_POLICY),
+            findings.map { it.rule },
+        )
+        assertEquals(1, findings.single().line)
+    }
+
+    @Test
+    fun `typed hook with an explicit branch policy is accepted`() {
+        val findings =
+            lint(
+                """
+                method.insertHook(index = 0, relocateBranchTargets = false) {
+                    returnVoid()
+                }
+                method.insertHook(
+                    index = 1,
+                    relocateBranchTargets = true,
+                ) {
+                    returnVoid()
+                }
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `typed hook policy finding can be suppressed with a directive`() {
+        val findings =
+            lint(
+                """
+                // newx-resolver-lint: allow typed-hook-policy because the guard is exercised here
+                method.insertHook(0) {
+                    returnVoid()
+                }
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `typed hook declaration and mentions are not call sites`() {
+        val findings =
+            lint(
+                """
+                // insertHook(0) without the policy is a call, not this comment.
+                val documentation = "insertHook(index = 0)"
+                internal fun MutableMethod.insertHook(
+                    index: Int,
+                    block: Block.() -> Unit,
+                ): Insertion = error("fixture")
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `typed hook policy is matched inside a nested argument list`() {
+        val findings =
+            lint(
+                """
+                method.insertHook(index = helper.resolve(0, 1)) {
+                    returnVoid()
+                }
+                """.trimIndent(),
+            )
+
+        assertEquals(
+            listOf(NewXResolverLinter.Rule.TYPED_HOOK_POLICY),
+            findings.map { it.rule },
+        )
+    }
+
+    @Test
     fun `lintDirectory is deterministic and only scans Kotlin files`() {
         val root = Files.createTempDirectory("newx-resolver-linter")
         try {

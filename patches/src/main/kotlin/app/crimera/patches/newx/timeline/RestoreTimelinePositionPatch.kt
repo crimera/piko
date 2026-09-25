@@ -6,12 +6,12 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -21,11 +21,10 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -37,9 +36,30 @@ import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val CONCURRENT_HASH_MAP_DESCRIPTOR = "Ljava/util/concurrent/ConcurrentHashMap;"
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineScrollPositionStore;"
+private const val MAP_GET_DESCRIPTOR = "$CONCURRENT_HASH_MAP_DESCRIPTOR->get($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
+private const val MAP_REMOVE_DESCRIPTOR =
+    "$CONCURRENT_HASH_MAP_DESCRIPTOR->remove($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
+private const val MAP_PUT_DESCRIPTOR =
+    "$CONCURRENT_HASH_MAP_DESCRIPTOR->put($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
+private const val HAS_IN_MEMORY_POSITION_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->useInMemoryPosition($ENUM_DESCRIPTOR)Z"
+private const val RESTORE_POSITION_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR})[I"
+private const val SAVE_POSITION_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}II)V"
+private const val SETTING_READ_DESCRIPTOR =
+    "Lapp/morphe/extension/newx/settings/SettingsRegistry;->getBooleanOrDefault($STRING_DESCRIPTOR)Z"
+
+/**
+ * Branch destination that skips the in-memory restore attempt. The other two smali labels are gone:
+ * both pointed at the instruction sitting at their insertion index, which `Target.Original`
+ * addresses without an instruction object.
+ */
+private const val IGNORE_NATIVE_POSITION_LABEL = "piko_newx_restore_position_ignore_native"
 private const val RESTORE_TEMPORARY_REGISTER_COUNT = 2
 private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 3
 
@@ -310,9 +330,10 @@ val restoreTimelinePositionPatch =
                 throw PatchException("NewX timeline-position map field is not public: $mapField")
             }
 
-            val originalContinuation =
-                getterMethod.instructions.getOrNull(timelineResultIndex + 1)
-                    ?: throw PatchException("NewX scroll-position getter continuation was not found")
+            // `Target.Original` needs no anchor instruction, but the continuation still has to exist.
+            if (timelineResultIndex + 1 >= getterMethod.instructions.size) {
+                throw PatchException("NewX scroll-position getter continuation was not found")
+            }
             val timelineGetterInstruction =
                 getterMethod.instructions.getOrNull(timelineResultIndex - 1)
                     ?: throw PatchException("NewX timeline-type getter call was not found")
@@ -349,7 +370,6 @@ val restoreTimelinePositionPatch =
             if (!AccessFlags.PUBLIC.isSet(timelineIdentityField.accessFlags)) {
                 throw PatchException("NewX timeline identity field is not public: $timelineIdentityField")
             }
-            val timelineIdentityFieldReference = timelineIdentityField.toString()
             val repositoryField =
                 requireExactlyOne(
                     "NewX timeline repository field",
@@ -377,47 +397,54 @@ val restoreTimelinePositionPatch =
             val mapRegister = restoreRegisters.last
             val indexRegister = mapRegister
             val offsetRegister = timelineRegister
-            getterMethod.addInstructionsWithLabels(
-                timelineResultIndex + 1,
-                """
-                    move-object/from16 v$mapOwnerRegister, p0
-                    iget-object v$mapOwnerRegister, v$mapOwnerRegister, $componentField
-                    iget-object v$mapRegister, v$mapOwnerRegister, $mapField
-                    invoke-virtual {v$mapRegister, v$timelineRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->get(Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$positionsRegister
-                    invoke-static {v$timelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->useInMemoryPosition($ENUM_DESCRIPTOR)Z
-                    move-result v$mapRegister
-                    if-eqz v$mapRegister, :piko_newx_restore_position_ignore_native
-                    if-nez v$positionsRegister, :piko_newx_restore_position_continue
-                    :piko_newx_restore_position_ignore_native
-                    const/4 v$positionsRegister, 0x0
-                    move-object/from16 v$mapOwnerRegister, p0
-                    iget-object v$mapOwnerRegister, v$mapOwnerRegister, $componentField
-                    iget-object v$mapRegister, v$mapOwnerRegister, $mapField
-                    invoke-virtual {v$mapRegister, v$timelineRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->remove(Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$mapRegister
-                    invoke-interface {v$timelineGetterReceiverRegister}, $timelineIdentityGetterReference
-                    move-result-object v$mapRegister
-                    iget-object v$mapRegister, v$mapRegister, $timelineIdentityFieldReference
-                    invoke-static {v$timelineRegister, v$mapRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}Ljava/lang/String;)[I
-                    move-result-object v$positionsRegister
-                    if-eqz v$positionsRegister, :piko_newx_restore_position_continue
-                    const/4 v$indexRegister, 0x0
-                    aget v$indexRegister, v$positionsRegister, v$indexRegister
-                    const/4 v$offsetRegister, 0x1
-                    aget v$offsetRegister, v$positionsRegister, v$offsetRegister
-                    new-instance v$positionsRegister, $holderDescriptor
-                    invoke-direct {v$positionsRegister, v$indexRegister, v$offsetRegister}, $holderConstructorReference
-                    invoke-interface {v$timelineGetterReceiverRegister}, $timelineGetterReference
-                    move-result-object v$timelineRegister
-                    move-object/from16 v$mapRegister, p0
-                    iget-object v$mapRegister, v$mapRegister, $componentField
-                    iget-object v$mapRegister, v$mapRegister, $mapField
-                    invoke-virtual {v$mapRegister, v$timelineRegister, v$positionsRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$mapRegister
-                """.trimIndent(),
-                ExternalLabel("piko_newx_restore_position_continue", originalContinuation),
-            )
+            // The old `continue` label sat on the instruction after the enum result, so the block's
+            // jumps have to land on that original instruction: `Target.Original` with the
+            // insertion point's labels left in place, exactly like `addInstructionsWithLabels`.
+            getterMethod.insertHook(
+                index = timelineResultIndex + 1,
+                relocateBranchTargets = false,
+            ) {
+                move(mapOwnerRegister, getterMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(mapOwnerRegister, mapOwnerRegister, componentField)
+                iget(mapRegister, mapOwnerRegister, mapField)
+                invokeVirtual(methodReference(MAP_GET_DESCRIPTOR), mapRegister, timelineRegister)
+                moveResult(positionsRegister, OBJECT_DESCRIPTOR)
+                invokeStatic(methodReference(HAS_IN_MEMORY_POSITION_DESCRIPTOR), timelineRegister)
+                moveResult(mapRegister, "Z")
+                ifEqz(mapRegister, Target.Local(IGNORE_NATIVE_POSITION_LABEL))
+                ifNez(positionsRegister, Target.Original)
+                label(IGNORE_NATIVE_POSITION_LABEL)
+                constInt(positionsRegister, 0)
+                move(mapOwnerRegister, getterMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(mapOwnerRegister, mapOwnerRegister, componentField)
+                iget(mapRegister, mapOwnerRegister, mapField)
+                invokeVirtual(methodReference(MAP_REMOVE_DESCRIPTOR), mapRegister, timelineRegister)
+                moveResult(mapRegister, OBJECT_DESCRIPTOR)
+                invokeInterface(methodReference(timelineIdentityGetterReference), timelineGetterReceiverRegister)
+                moveResult(mapRegister, OBJECT_DESCRIPTOR)
+                iget(mapRegister, mapRegister, timelineIdentityField)
+                invokeStatic(methodReference(RESTORE_POSITION_DESCRIPTOR), timelineRegister, mapRegister)
+                moveResult(positionsRegister, "[I")
+                ifEqz(positionsRegister, Target.Original)
+                constInt(indexRegister, 0)
+                aget(indexRegister, positionsRegister, indexRegister)
+                constInt(offsetRegister, 1)
+                aget(offsetRegister, positionsRegister, offsetRegister)
+                newInstance(positionsRegister, holderDescriptor)
+                invokeDirect(
+                    methodReference(holderConstructorReference),
+                    positionsRegister,
+                    indexRegister,
+                    offsetRegister,
+                )
+                invokeInterface(timelineGetterReference, timelineGetterReceiverRegister)
+                moveResult(timelineRegister, OBJECT_DESCRIPTOR)
+                move(mapRegister, getterMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(mapRegister, mapRegister, componentField)
+                iget(mapRegister, mapRegister, mapField)
+                invokeVirtual(methodReference(MAP_PUT_DESCRIPTOR), mapRegister, timelineRegister, positionsRegister)
+                moveResult(mapRegister, OBJECT_DESCRIPTOR)
+            }
 
             val fallbackHolderCandidates =
                 getterMethod.instructions.withIndex().filter { indexedInstruction ->
@@ -458,41 +485,59 @@ val restoreTimelinePositionPatch =
             val fallbackRepositoryRegister = fallbackRegisters.first
             val fallbackTimelineRegister = fallbackRegisters.first + 1
             val fallbackPositionsRegister = fallbackRegisters.last
+            // Raw smali replacement: the typed API has no in-place replace primitive, and this slot is
+            // the one the surrounding getter branches into for a missing position. `replaceInstruction`
+            // writes into the existing location, so the labels already on it keep pointing here (and run
+            // the read below); a typed insertion would leave them on the holder allocation instead.
             getterMethod.replaceInstruction(
                 fallbackHolderCandidate.index,
                 "const-string v${fallbackRead.register}, \"newx.timeline.restore_position\"",
             )
-            getterMethod.addInstruction(
-                fallbackHolderCandidate.index + 1,
-                "new-instance v$fallbackHolderRegister, $holderDescriptor",
-            )
-            val nativeFallbackInstruction = getterMethod.instructions[fallbackHolderCandidate.index + 1]
-            getterMethod.addInstructionsWithLabels(
-                fallbackHolderCandidate.index + 1,
-                """
-                    invoke-static {v${fallbackRead.register}}, Lapp/morphe/extension/newx/settings/SettingsRegistry;->getBooleanOrDefault(Ljava/lang/String;)Z
-                    move-result v${fallbackRead.register}
-                    if-eqz v${fallbackRead.register}, :piko_newx_restore_position_fallback
-                    move-object/from16 v$fallbackRepositoryRegister, p0
-                    iget-object v$fallbackRepositoryRegister, v$fallbackRepositoryRegister, $repositoryField
-                    invoke-interface {v$fallbackRepositoryRegister}, $timelineGetterReference
-                    move-result-object v$fallbackTimelineRegister
-                    invoke-interface {v$fallbackRepositoryRegister}, $timelineIdentityGetterReference
-                    move-result-object v$fallbackRepositoryRegister
-                    iget-object v$fallbackRepositoryRegister, v$fallbackRepositoryRegister, $timelineIdentityFieldReference
-                    invoke-static {v$fallbackTimelineRegister, v$fallbackRepositoryRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}Ljava/lang/String;)[I
-                    move-result-object v$fallbackPositionsRegister
-                    if-eqz v$fallbackPositionsRegister, :piko_newx_restore_position_fallback
-                    const/4 v${fallbackRead.register}, 0x0
-                    aget v${fallbackRead.register}, v$fallbackPositionsRegister, v${fallbackRead.register}
-                    const/4 v$fallbackTimelineRegister, 0x1
-                    aget v$fallbackTimelineRegister, v$fallbackPositionsRegister, v$fallbackTimelineRegister
-                    new-instance v$fallbackRepositoryRegister, $holderDescriptor
-                    invoke-direct {v$fallbackRepositoryRegister, v${fallbackRead.register}, v$fallbackTimelineRegister}, $holderConstructorReference
-                    return-object v$fallbackRepositoryRegister
-                """.trimIndent(),
-                ExternalLabel("piko_newx_restore_position_fallback", nativeFallbackInstruction),
-            )
+            // The holder allocation is the instruction both guard jumps below land on, and
+            // `Target.Original` addresses the instruction already sitting at the hook index, so the
+            // allocation is inserted first - into the same slot the smali `addInstruction` used.
+            getterMethod.insertHook(
+                index = fallbackHolderCandidate.index + 1,
+                relocateBranchTargets = false,
+            ) {
+                newInstance(fallbackHolderRegister, holderDescriptor)
+            }
+            // The old `fallback` label sat on the freshly allocated holder, which is the instruction at the
+            // insertion index, so `Target.Original` makes both guard jumps land there again.
+            getterMethod.insertHook(
+                index = fallbackHolderCandidate.index + 1,
+                relocateBranchTargets = false,
+            ) {
+                invokeStatic(methodReference(SETTING_READ_DESCRIPTOR), fallbackRead.register)
+                moveResult(fallbackRead.register, "Z")
+                ifEqz(fallbackRead.register, Target.Original)
+                move(fallbackRepositoryRegister, getterMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(fallbackRepositoryRegister, fallbackRepositoryRegister, repositoryField)
+                invokeInterface(timelineGetterReference, fallbackRepositoryRegister)
+                moveResult(fallbackTimelineRegister, OBJECT_DESCRIPTOR)
+                invokeInterface(methodReference(timelineIdentityGetterReference), fallbackRepositoryRegister)
+                moveResult(fallbackRepositoryRegister, OBJECT_DESCRIPTOR)
+                iget(fallbackRepositoryRegister, fallbackRepositoryRegister, timelineIdentityField)
+                invokeStatic(
+                    methodReference(RESTORE_POSITION_DESCRIPTOR),
+                    fallbackTimelineRegister,
+                    fallbackRepositoryRegister,
+                )
+                moveResult(fallbackPositionsRegister, "[I")
+                ifEqz(fallbackPositionsRegister, Target.Original)
+                constInt(fallbackRead.register, 0)
+                aget(fallbackRead.register, fallbackPositionsRegister, fallbackRead.register)
+                constInt(fallbackTimelineRegister, 1)
+                aget(fallbackTimelineRegister, fallbackPositionsRegister, fallbackTimelineRegister)
+                newInstance(fallbackRepositoryRegister, holderDescriptor)
+                invokeDirect(
+                    methodReference(holderConstructorReference),
+                    fallbackRepositoryRegister,
+                    fallbackRead.register,
+                    fallbackTimelineRegister,
+                )
+                returnObject(fallbackRepositoryRegister)
+            }
 
             val saveMatch =
                 requireExactlyOne(
@@ -579,27 +624,7 @@ val restoreTimelinePositionPatch =
                         }
                 },
             )
-            val saveRegisters =
-                try {
-                    saveMethod
-                        .getFreeRegisterProvider(
-                            mapPutIndex,
-                            3,
-                            saveTimelineRegister,
-                            saveHolderRegister,
-                            saveMapRegister,
-                        ).let { provider ->
-                            List(3) { provider.getFreeRegister4Bit() }
-                        }
-                } catch (exception: RuntimeException) {
-                    throw PatchException(
-                        "Could not allocate NewX timeline-position save registers",
-                        exception,
-                    )
-                }
-            val saveIdentityRegister = saveRegisters[0]
-            val saveIndexRegister = saveRegisters[1]
-            val saveOffsetRegister = saveRegisters[2]
+            // The scratch pool now hands out the three staging registers inside the hook below.
 
             // Ranked Following uses the same shared save method as Latest Following, but
             // its Compose scroll policy has `a == false`. The original method branches
@@ -619,24 +644,48 @@ val restoreTimelinePositionPatch =
                     "NewX Ranked Following save-policy gate",
                     layoutPolicyGateCandidates,
                 ).index
+            // Raw smali replacement: the typed API only emits through hooks, so the standalone `nop`
+            // that neutralizes the gate branch has no typed primitive - `insertHook` here would
+            // leave the branch in place and put the nop in front of it instead.
             saveMethod.replaceInstruction(
                 layoutPolicyGateIndex + 1,
                 "nop",
             )
-            saveMethod.addInstructions(
-                mapPutIndex,
-                (
-                    """
-                    move-object/from16 v$saveIdentityRegister, p0
-                    iget-object v$saveIdentityRegister, v$saveIdentityRegister, $repositoryField
-                    invoke-interface {v$saveIdentityRegister}, $timelineIdentityGetterReference
-                    move-result-object v$saveIdentityRegister
-                    iget-object v$saveIdentityRegister, v$saveIdentityRegister, $timelineIdentityFieldReference
-                    iget v$saveIndexRegister, v$saveHolderRegister, ${holderPositionFields[0]}
-                    iget v$saveOffsetRegister, v$saveHolderRegister, ${holderPositionFields[1]}
-                    invoke-static {v$saveTimelineRegister, v$saveIdentityRegister, v$saveIndexRegister, v$saveOffsetRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}Ljava/lang/String;II)V
-                    """.trimIndent()
-                ),
-            )
+            saveMethod.insertHook(
+                index = mapPutIndex,
+                // The three registers the original call reads are live here and must stay untouched.
+                excludedRegisters = listOf(saveTimelineRegister, saveHolderRegister, saveMapRegister),
+                // Plain insertion used to leave an incoming branch on the map write, which keeps skipping
+                // the hook exactly as before.
+                relocateBranchTargets = false,
+            ) {
+                val saveIdentityRegister = scratchRegister()
+                val saveIndexRegister = scratchRegister()
+                val saveOffsetRegister = scratchRegister()
+                move(saveIdentityRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(saveIdentityRegister, saveIdentityRegister, repositoryField)
+                invokeInterface(methodReference(timelineIdentityGetterReference), saveIdentityRegister)
+                moveResult(saveIdentityRegister, OBJECT_DESCRIPTOR)
+                iget(saveIdentityRegister, saveIdentityRegister, timelineIdentityField)
+                // The resolver already proved the holder has exactly these two public int fields;
+                // destructure instead of indexing so the cardinality stays explicit here too.
+                val (positionIndexField, positionOffsetField) =
+                    holderPositionFields.also { fields ->
+                        if (fields.size != 2) {
+                            throw PatchException(
+                                "Expected two NewX scroll-position holder fields, found ${fields.size}",
+                            )
+                        }
+                    }
+                iget(saveIndexRegister, saveHolderRegister, positionIndexField)
+                iget(saveOffsetRegister, saveHolderRegister, positionOffsetField)
+                invokeStatic(
+                    methodReference(SAVE_POSITION_DESCRIPTOR),
+                    saveTimelineRegister,
+                    saveIdentityRegister,
+                    saveIndexRegister,
+                    saveOffsetRegister,
+                )
+            }
         }
     }

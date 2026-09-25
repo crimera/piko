@@ -31,13 +31,14 @@ import app.crimera.patches.newx.settings.singleChoice
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
@@ -46,12 +47,11 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.cloneMutable
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
@@ -71,6 +71,7 @@ private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val RESOURCES_DESCRIPTOR = "Landroid/content/res/Resources;"
 private const val EXTENSION = "Lapp/morphe/extension/newx/misc/InlineDownloadButton;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val PRESENTER_POST_HELPER = "getPresenterPost"
 private const val CANONICAL_POST_HELPER = "getCanonicalPost"
 private const val POST_MEDIA_HELPER = "getPostMedia"
@@ -82,19 +83,6 @@ private fun MutableMethod.requireStatic(label: String) {
     if (AccessFlags.STATIC.isSet(accessFlags)) return
     throw PatchException("$label is no longer static: $this")
 }
-
-private fun MutableMethod.freeRegisters4Bit(
-    index: Int,
-    count: Int,
-    excludedRegisters: Collection<Int> = emptyList(),
-): List<Int> =
-    try {
-        getFreeRegisterProvider(index, count, *excludedRegisters.toIntArray()).let { provider ->
-            List(count) { provider.getFreeRegister4Bit() }
-        }
-    } catch (exception: RuntimeException) {
-        throw PatchException("No free 4-bit registers at $this index $index", exception)
-    }
 
 @Suppress("unused")
 val newXInlineDownloadButtonPatch =
@@ -269,10 +257,13 @@ val newXInlineDownloadButtonPatch =
             if (kindOverrideModels != null) {
                 patchInlineActionKindOverride(entryModels, kindOverrideModels)
             }
-            newXInitHook.fingerprint.method.addInstruction(
-                0,
-                "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
-            )
+            val applicationOnCreate = newXInitHook.fingerprint.method
+            applicationOnCreate.insertHook(0, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference("$EXTENSION->initialize(Landroid/content/Context;)V"),
+                    applicationOnCreate.p0Register,
+                )
+            }
 
             val inlineRenderer = requireExactlyOne(
                 "NewX inline-action entry renderer",
@@ -296,19 +287,22 @@ val newXInlineDownloadButtonPatch =
             )
             inlineRenderer.method.apply {
                 requireStatic("NewX inline-action entry renderer")
-                // Icon-size float slot; Compose inserts auxiliary params between releases.
-                val sizeSlot = firstParameterSlot("F")
-                val (entryRegister, sizeRegister) = freeRegisters4Bit(index = 0, count = 2)
-                addInstructions(
-                    0,
-                    """
-                        move-object/from16 v$entryRegister, p0
-                        move/from16 v$sizeRegister, p$sizeSlot
-                        invoke-static {v$entryRegister, v$sizeRegister}, $EXTENSION->markIconSize(Ljava/lang/Object;F)F
-                        move-result v$sizeRegister
-                        move/from16 p$sizeSlot, v$sizeRegister
-                    """.trimIndent(),
-                )
+                // Icon-size float slot; Compose inserts auxiliary params between releases. The
+                // helper returns a p-index, so the absolute register is p0 plus that slot.
+                val sizeRegister = p0Register + firstParameterSlot("F")
+                insertHook(0, relocateBranchTargets = false) {
+                    val entryRegister = scratchRegister()
+                    val workRegister = scratchRegister()
+                    move(entryRegister, p0Register, OBJECT_DESCRIPTOR)
+                    move(workRegister, sizeRegister, "F")
+                    invokeStatic(
+                        methodReference("$EXTENSION->markIconSize(Ljava/lang/Object;F)F"),
+                        entryRegister,
+                        workRegister,
+                    )
+                    moveResult(workRegister, "F")
+                    move(sizeRegister, workRegister, "F")
+                }
             }
 
             // The injected entry deliberately carries TwitterShare, which maps to exactly this
@@ -410,39 +404,36 @@ val newXInlineDownloadButtonPatch =
                         (parameterRegisterStart + numberOfParameterRegisters)
 
                 // Mutate from the higher index first so the earlier size-modifier index remains valid.
-                val (incomingIconRegister,) =
-                    freeRegisters4Bit(
-                        index = iconAccess.index + 1,
-                        count = 1,
-                        excludedRegisters = parameterRegisters + iconRegister,
+                insertHook(
+                    index = iconAccess.index + 1,
+                    excludedRegisters = parameterRegisters + iconRegister,
+                    relocateBranchTargets = false,
+                ) {
+                    val incomingIconRegister = scratchRegister()
+                    sget(incomingIconRegister, incomingIconField)
+                    invokeStatic(
+                        methodReference("$EXTENSION->selectIcon(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"),
+                        iconRegister,
+                        incomingIconRegister,
                     )
+                    moveResult(iconRegister, OBJECT_DESCRIPTOR)
+                    checkCast(iconRegister, shareIconField.type)
+                }
 
-                addInstructions(
-                    iconAccess.index + 1,
-                    """
-                        sget-object v$incomingIconRegister, $incomingIconField
-                        invoke-static {v$iconRegister, v$incomingIconRegister}, $EXTENSION->selectIcon(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-                        move-result-object v$iconRegister
-                        check-cast v$iconRegister, ${shareIconField.type}
-                    """.trimIndent(),
-                )
-
-                val (displaySizeRegister,) =
-                    freeRegisters4Bit(
-                        index = sizeModifierCall.first,
-                        count = 1,
-                        excludedRegisters = parameterRegisters + sizeRegister,
+                insertHook(
+                    index = sizeModifierCall.first,
+                    excludedRegisters = parameterRegisters + sizeRegister,
+                    relocateBranchTargets = false,
+                ) {
+                    val displaySizeRegister = scratchRegister()
+                    move(displaySizeRegister, sizeRegister, "F")
+                    invokeStatic(
+                        methodReference("$EXTENSION->displayIconSize(F)F"),
+                        displaySizeRegister,
                     )
-
-                addInstructions(
-                    sizeModifierCall.first,
-                    """
-                        move/from16 v$displaySizeRegister, v$sizeRegister
-                        invoke-static {v$displaySizeRegister}, $EXTENSION->displayIconSize(F)F
-                        move-result v$displaySizeRegister
-                        move/from16 v$sizeRegister, v$displaySizeRegister
-                    """.trimIndent(),
-                )
+                    moveResult(displaySizeRegister, "F")
+                    move(sizeRegister, displaySizeRegister, "F")
+                }
             }
 
             val inlinePresenterType = barModels.inlineActionBarDescriptor
@@ -480,25 +471,30 @@ val newXInlineDownloadButtonPatch =
                     parameterTypes.dropLast(1).sumOf { type ->
                         if (type.toString() == "J" || type.toString() == "D") 2 else 1
                     }
+                val eventRegister = p0Register + eventParameter
                 // The presenter receives a distinct event type for long press, but it carries the
                 // same action entry. Classify the gesture from that native event identity so the
                 // extension can download every media item without opening the picker.
-                val (presenterRegister, eventRegister, longPressRegister) =
-                    freeRegisters4Bit(index = 0, count = 3)
-                val nativeStart = instructions.first()
-                addInstructionsWithLabels(
-                    0,
-                    """
-                        move-object/from16 v$presenterRegister, p0
-                        move-object/from16 v$eventRegister, p$eventParameter
-                        instance-of v$longPressRegister, v$eventRegister, $longPressEventType
-                        invoke-static {v$presenterRegister, v$eventRegister, v$longPressRegister}, $EXTENSION->handleEvent(Ljava/lang/Object;Ljava/lang/Object;Z)Z
-                        move-result v$presenterRegister
-                        if-eqz v$presenterRegister, :piko_newx_inline_download_continue
-                        return-void
-                    """.trimIndent(),
-                    ExternalLabel("piko_newx_inline_download_continue", nativeStart),
-                )
+                insertHook(0, relocateBranchTargets = false) {
+                    val presenterRegister = scratchRegister()
+                    val eventScratch = scratchRegister()
+                    move(presenterRegister, p0Register, OBJECT_DESCRIPTOR)
+                    move(eventScratch, eventRegister, OBJECT_DESCRIPTOR)
+                    // `instance-of` needs both a four-bit destination and a four-bit reference.
+                    val longPressRegister = scratchRegister()
+                    instanceOf(longPressRegister, eventScratch, longPressEventType)
+                    invokeStatic(
+                        methodReference(
+                            "$EXTENSION->handleEvent(Ljava/lang/Object;Ljava/lang/Object;Z)Z",
+                        ),
+                        presenterRegister,
+                        eventScratch,
+                        longPressRegister,
+                    )
+                    moveResult(presenterRegister, "Z")
+                    ifEqz(presenterRegister, Target.Original)
+                    returnVoid()
+                }
             }
         }
     }
@@ -588,23 +584,21 @@ private fun patchInlineActionKindOverride(
 
     val parameterRegisters = layoutMethod.p0Register until
         (layoutMethod.p0Register + layoutMethod.numberOfParameterRegisters)
-    val (scratchRegister,) = layoutMethod.freeRegisters4Bit(
+    layoutMethod.insertHook(
         index = constructorIndex,
-        count = 1,
         excludedRegisters = parameterRegisters + entryRegister + kindRegister,
-    )
-    val continueTarget = layoutMethod.instructions[constructorIndex]
-    layoutMethod.addInstructionsWithLabels(
-        constructorIndex,
-        """
-            move-object/from16 v$scratchRegister, v$entryRegister
-            invoke-static {v$scratchRegister}, $EXTENSION->isDownloadAction(Ljava/lang/Object;)Z
-            move-result v$scratchRegister
-            if-eqz v$scratchRegister, :piko_newx_inline_download_kind_keep
-            sget-object v$kindRegister, ${kindModels.iconOnlyField}
-        """.trimIndent(),
-        ExternalLabel("piko_newx_inline_download_kind_keep", continueTarget),
-    )
+        relocateBranchTargets = false,
+    ) {
+        val scratchRegister = scratchRegister()
+        move(scratchRegister, entryRegister, OBJECT_DESCRIPTOR)
+        invokeStatic(
+            methodReference("$EXTENSION->isDownloadAction(Ljava/lang/Object;)Z"),
+            scratchRegister,
+        )
+        moveResult(scratchRegister, "Z")
+        ifEqz(scratchRegister, Target.Original)
+        sget(kindRegister, kindModels.iconOnlyField)
+    }
 }
 
 /**
@@ -670,48 +664,35 @@ private fun patchPostModelBridges(
     presenterClass.requirePublicFields(listOf(presenterPostField))
 
     val extensionClass = context.mutableClassDefBy(EXTENSION)
-    extensionClass.requireHelper(PRESENTER_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
-        0,
-        """
-            check-cast p0, ${barModels.inlineActionBarDescriptor}
-            iget-object p0, p0, $presenterPostField
-            return-object p0
-        """.trimIndent(),
+    extensionClass.portHelperBody(
+        PRESENTER_POST_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        barModels.inlineActionBarDescriptor,
+        presenterPostField,
     )
-    extensionClass.requireHelper(CANONICAL_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
-        0,
-        """
-            check-cast p0, ${postModels.contextualPostDescriptor}
-            iget-object p0, p0, $contextualCanonicalPostField
-            return-object p0
-        """.trimIndent(),
+    extensionClass.portHelperBody(
+        CANONICAL_POST_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.contextualPostDescriptor,
+        contextualCanonicalPostField,
     )
-    extensionClass.requireHelper(POST_MEDIA_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
-        0,
-        """
-            check-cast p0, ${postModels.canonicalPostDescriptor}
-            iget-object p0, p0, $canonicalPostMediaField
-            return-object p0
-        """.trimIndent(),
+    extensionClass.portHelperBody(
+        POST_MEDIA_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.canonicalPostDescriptor,
+        canonicalPostMediaField,
     )
-    extensionClass.requireHelper(REPOSTED_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
-        0,
-        """
-            check-cast p0, ${postModels.contextualPostDescriptor}
-            iget-object p0, p0, $contextualRepostedPostField
-            return-object p0
-        """.trimIndent(),
+    extensionClass.portHelperBody(
+        REPOSTED_POST_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.contextualPostDescriptor,
+        contextualRepostedPostField,
     )
-    extensionClass.requireHelper(
+    extensionClass.portHelperBody(
         REPOSTED_CANONICAL_POST_HELPER,
-        listOf("Ljava/lang/Object;"),
-    ).addInstructions(
-        0,
-        """
-            check-cast p0, ${postModels.contextualRepostedPostField.type}
-            iget-object p0, p0, $repostedCanonicalPostField
-            return-object p0
-        """.trimIndent(),
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.contextualRepostedPostField.type,
+        repostedCanonicalPostField,
     )
 
     val entryClass = context.mutableClassDefBy(entryModels.inlineActionEntryDescriptor)
@@ -739,20 +720,36 @@ private fun patchPostModelBridges(
                 extensionClass.methods.add(expanded)
             }
         }
-    createActionHelper.addInstructions(
-        0,
-        """
-            new-instance v0, ${entryModels.inlineActionEntryDescriptor}
-            sget-object v1, $carrierField
-            const/4 v2, 0x0
-            const/4 v3, 0x1
-            invoke-direct {v0, v1, v2, v3}, $actionConstructor
-            return-object v0
-        """.trimIndent(),
-    )
+    createActionHelper.insertHook(0, relocateBranchTargets = false) {
+        newInstance(0, entryModels.inlineActionEntryDescriptor)
+        sget(1, carrierField)
+        constInt(2, 0)
+        constInt(3, 1)
+        invokeDirect(actionConstructor, 0, 1, 2, 3)
+        returnObject(0)
+    }
 }
 
-private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.requireHelper(
+/**
+ * Fills an extension helper stub with `check-cast`, the field read and `return-object` on `p0`.
+ * The stub keeps its own trailing return; the injected body runs before it.
+ */
+private fun MutableClass.portHelperBody(
+    name: String,
+    parameters: List<String>,
+    type: String,
+    field: FieldReference,
+) {
+    val helper = requireHelper(name, parameters)
+    helper.insertHook(0, relocateBranchTargets = false) {
+        val value = helper.p0Register
+        checkCast(value, type)
+        iget(value, value, field)
+        returnObject(value)
+    }
+}
+
+private fun MutableClass.requireHelper(
     name: String,
     parameters: List<String>,
 ): MutableMethod =

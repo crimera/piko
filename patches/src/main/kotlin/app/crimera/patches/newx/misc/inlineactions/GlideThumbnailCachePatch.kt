@@ -1,6 +1,11 @@
 package app.crimera.patches.newx.misc.inlineactions
 
 import app.crimera.patches.newx.utils.Constants.MEDIA_THUMBNAIL_LOADER_DESCRIPTOR
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
@@ -9,10 +14,10 @@ import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
@@ -40,6 +45,40 @@ private const val CACHED_THUMBNAIL_HELPER = "getCachedThumbnail"
 private const val GLIDE_DIAGNOSTICS_HELPER = "logGlideLookupDiagnostics"
 private const val BITMAP_CONVERTER_HELPER = "bitmapFromGlideResource"
 private const val CACHED_THUMBNAIL_LOCAL_REGISTER_COUNT = 14
+
+// Descriptors and branch targets of the typed Glide lookup body.
+private const val LINKED_HASH_MAP_DESCRIPTOR = "Ljava/util/LinkedHashMap;"
+private const val ITERATOR_DESCRIPTOR = "Ljava/util/Iterator;"
+private const val CHAR_SEQUENCE_DESCRIPTOR = "Ljava/lang/CharSequence;"
+private const val BITMAP_DESCRIPTOR = "Landroid/graphics/Bitmap;"
+private const val LINKED_HASH_MAP_CONSTRUCTOR_DESCRIPTOR =
+    "$LINKED_HASH_MAP_DESCRIPTOR-><init>($MAP_DESCRIPTOR)V"
+private const val HASH_MAP_CONSTRUCTOR_DESCRIPTOR = "$HASH_MAP_DESCRIPTOR-><init>($MAP_DESCRIPTOR)V"
+private const val MAP_KEY_SET_DESCRIPTOR = "$MAP_DESCRIPTOR->keySet()$SET_DESCRIPTOR"
+private const val MAP_GET_DESCRIPTOR = "$MAP_DESCRIPTOR->get($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
+private const val SET_SIZE_DESCRIPTOR = "$SET_DESCRIPTOR->size()$INTEGER_DESCRIPTOR"
+private const val SET_ITERATOR_DESCRIPTOR = "$SET_DESCRIPTOR->iterator()$ITERATOR_DESCRIPTOR"
+private const val ITERATOR_HAS_NEXT_DESCRIPTOR = "$ITERATOR_DESCRIPTOR->hasNext()$BOOLEAN_DESCRIPTOR"
+private const val ITERATOR_NEXT_DESCRIPTOR = "$ITERATOR_DESCRIPTOR->next()$OBJECT_DESCRIPTOR"
+private const val STRING_VALUE_OF_DESCRIPTOR =
+    "Ljava/lang/String;->valueOf($OBJECT_DESCRIPTOR)$STRING_DESCRIPTOR"
+private const val STRING_CONTAINS_DESCRIPTOR =
+    "Ljava/lang/String;->contains($CHAR_SEQUENCE_DESCRIPTOR)$BOOLEAN_DESCRIPTOR"
+private const val REFERENCE_GET_DESCRIPTOR = "Ljava/lang/ref/Reference;->get()$OBJECT_DESCRIPTOR"
+private const val GLIDE_DIAGNOSTICS_DESCRIPTOR =
+    "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$GLIDE_DIAGNOSTICS_HELPER" +
+        "($STRING_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR" +
+        "$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR)V"
+private const val GLIDE_BITMAP_CONVERTER_DESCRIPTOR =
+    "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$BITMAP_CONVERTER_HELPER" +
+        "($OBJECT_DESCRIPTOR)$BITMAP_DESCRIPTOR"
+private const val COIL_CACHED_THUMBNAIL_DESCRIPTOR =
+    "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$COIL_CACHED_THUMBNAIL_HELPER" +
+        "($OBJECT_DESCRIPTOR$STRING_DESCRIPTOR)$OBJECT_DESCRIPTOR"
+private const val NO_CACHE_LABEL = "piko_newx_glide_cached_thumbnail_none"
+private const val ACTIVE_START_LABEL = "piko_newx_glide_cached_thumbnail_active_start"
+private const val MEMORY_LOOP_LABEL = "piko_newx_glide_cached_thumbnail_memory_loop"
+private const val ACTIVE_LOOP_LABEL = "piko_newx_glide_cached_thumbnail_active_loop"
 
 /** Resolves Glide's process-wide singleton factory from the stable library ABI. */
 private object GlideProviderFingerprint : Fingerprint(
@@ -147,127 +186,154 @@ private fun patchGlideThumbnailBridge(runtime: GlideThumbnailRuntime) {
             }
         }
 
-    helper.addInstructions(
-        0,
-        """
-            const/4 v5, 0x0
-            const/4 v6, 0x0
-            const/4 v7, 0x0
-            const/4 v8, 0x0
-            const/4 v9, 0x0
-            if-eqz p0, :piko_newx_glide_cached_thumbnail_none
-            if-eqz p1, :piko_newx_glide_cached_thumbnail_none
-            check-cast p0, $CONTEXT_DESCRIPTOR
-            invoke-static {p0}, ${runtime.provider}
-            move-result-object v0
-            if-eqz v0, :piko_newx_glide_cached_thumbnail_none
-            iget-object v0, v0, ${runtime.engineField}
-            if-eqz v0, :piko_newx_glide_cached_thumbnail_none
+    // The stub body is replaced wholesale: the injected block returns on every path, so the
+    // original `return null` is never reached. The frame growth above reserved `v0`, `v4`..`v13`
+    // and the two parameter registers the block uses.
+    val contextRegister = helper.p0Register
+    helper.insertHook(
+        index = 0,
+        // The old smali insertion left every label on the original instruction, which is what
+        // `false` keeps doing; the stub body carries none today.
+        relocateBranchTargets = false,
+    ) {
+        glideThumbnailLookup(runtime, contextRegister, contextRegister + 1)
+    }
+}
 
-            iget-object v10, v0, ${runtime.memoryCacheField}
-            if-eqz v10, :piko_newx_glide_cached_thumbnail_active_start
-            iget-object v10, v10, ${runtime.memoryMapField}
-            if-eqz v10, :piko_newx_glide_cached_thumbnail_active_start
-            new-instance v11, Ljava/util/LinkedHashMap;
-            check-cast v10, $MAP_DESCRIPTOR
-            invoke-direct {v11, v10}, Ljava/util/LinkedHashMap;-><init>($MAP_DESCRIPTOR)V
-            invoke-interface {v11}, Ljava/util/Map;->keySet()$SET_DESCRIPTOR
-            move-result-object v10
-            invoke-interface {v10}, Ljava/util/Set;->size()$INTEGER_DESCRIPTOR
-            move-result v5
-            invoke-interface {v10}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
-            move-result-object v10
+/**
+ * Emits the Glide cache lookup that replaces the `getCachedThumbnail` stub body.
+ *
+ * The registers are the ones the previous smali body used and the frame growth in
+ * [patchGlideThumbnailBridge] reserved: `v0`, `v4`..`v13` plus the two parameter registers. `v5`..`v9`
+ * carry the counters handed to `logGlideLookupDiagnostics`, `v4` stages the key argument of its
+ * `invoke-static/range`, and the remaining registers are lookup temporaries. The memory-cache loop
+ * falls through to the active-resource lookup when its iterator is exhausted; the active-resource
+ * loop and every null check fall through to the Coil bridge.
+ */
+private fun Block.glideThumbnailLookup(
+    runtime: GlideThumbnailRuntime,
+    contextRegister: Int,
+    urlRegister: Int,
+) {
+    // The only runtime-resolved call target of the block; both lookup paths use it.
+    val resourceGet = methodReference("${runtime.resourceInterfaceDescriptor}->get()$OBJECT_DESCRIPTOR")
 
-            :piko_newx_glide_cached_thumbnail_memory_loop
-            invoke-interface {v10}, Ljava/util/Iterator;->hasNext()$BOOLEAN_DESCRIPTOR
-            move-result v12
-            if-eqz v12, :piko_newx_glide_cached_thumbnail_active_start
-            invoke-interface {v10}, Ljava/util/Iterator;->next()$OBJECT_DESCRIPTOR
-            move-result-object v12
-            check-cast v12, ${runtime.keyDescriptor}
-            iget-object v13, v12, ${runtime.keyModelField}
-            invoke-static {v13}, Ljava/lang/String;->valueOf($OBJECT_DESCRIPTOR)$STRING_DESCRIPTOR
-            move-result-object v13
-            invoke-virtual {v13, p1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)$BOOLEAN_DESCRIPTOR
-            move-result v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_memory_loop
-            add-int/lit8 v7, v7, 1
-            invoke-interface {v11, v12}, Ljava/util/Map;->get($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR
-            move-result-object v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_memory_loop
-            check-cast v13, ${runtime.memoryEntryDescriptor}
-            iget-object v13, v13, ${runtime.memoryEntryResourceField}
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_memory_loop
-            check-cast v13, ${runtime.resourceInterfaceDescriptor}
-            invoke-interface {v13}, ${runtime.resourceInterfaceDescriptor}->get()$OBJECT_DESCRIPTOR
-            move-result-object v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_memory_loop
-            add-int/lit8 v8, v8, 1
-            invoke-static {v13}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$BITMAP_CONVERTER_HELPER($OBJECT_DESCRIPTOR)Landroid/graphics/Bitmap;
-            move-result-object v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_memory_loop
-            add-int/lit8 v9, v9, 1
-            move-object v4, p1
-            invoke-static/range {v4 .. v9}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$GLIDE_DIAGNOSTICS_HELPER($STRING_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR)V
-            return-object v13
+    constInt(5, 0)
+    constInt(6, 0)
+    constInt(7, 0)
+    constInt(8, 0)
+    constInt(9, 0)
+    ifEqz(contextRegister, Target.Local(NO_CACHE_LABEL))
+    ifEqz(urlRegister, Target.Local(NO_CACHE_LABEL))
+    checkCast(contextRegister, CONTEXT_DESCRIPTOR)
+    invokeStatic(methodReference(runtime.provider), contextRegister)
+    moveResult(0, OBJECT_DESCRIPTOR)
+    ifEqz(0, Target.Local(NO_CACHE_LABEL))
+    iget(0, 0, fieldReference(runtime.engineField))
+    ifEqz(0, Target.Local(NO_CACHE_LABEL))
 
-            :piko_newx_glide_cached_thumbnail_active_start
-            iget-object v10, v0, ${runtime.activeResourcesField}
-            if-eqz v10, :piko_newx_glide_cached_thumbnail_none
-            iget-object v10, v10, ${runtime.activeMapField}
-            if-eqz v10, :piko_newx_glide_cached_thumbnail_none
-            new-instance v11, Ljava/util/HashMap;
-            check-cast v10, $MAP_DESCRIPTOR
-            invoke-direct {v11, v10}, Ljava/util/HashMap;-><init>($MAP_DESCRIPTOR)V
-            invoke-interface {v11}, Ljava/util/Map;->keySet()$SET_DESCRIPTOR
-            move-result-object v10
-            invoke-interface {v10}, Ljava/util/Set;->size()$INTEGER_DESCRIPTOR
-            move-result v6
-            invoke-interface {v10}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
-            move-result-object v10
+    iget(10, 0, fieldReference(runtime.memoryCacheField))
+    ifEqz(10, Target.Local(ACTIVE_START_LABEL))
+    iget(10, 10, fieldReference(runtime.memoryMapField))
+    ifEqz(10, Target.Local(ACTIVE_START_LABEL))
+    newInstance(11, LINKED_HASH_MAP_DESCRIPTOR)
+    checkCast(10, MAP_DESCRIPTOR)
+    invokeDirect(methodReference(LINKED_HASH_MAP_CONSTRUCTOR_DESCRIPTOR), 11, 10)
+    invokeInterface(methodReference(MAP_KEY_SET_DESCRIPTOR), 11)
+    moveResult(10, SET_DESCRIPTOR)
+    invokeInterface(methodReference(SET_SIZE_DESCRIPTOR), 10)
+    moveResult(5, INTEGER_DESCRIPTOR)
+    invokeInterface(methodReference(SET_ITERATOR_DESCRIPTOR), 10)
+    moveResult(10, ITERATOR_DESCRIPTOR)
 
-            :piko_newx_glide_cached_thumbnail_active_loop
-            invoke-interface {v10}, Ljava/util/Iterator;->hasNext()$BOOLEAN_DESCRIPTOR
-            move-result v12
-            if-eqz v12, :piko_newx_glide_cached_thumbnail_none
-            invoke-interface {v10}, Ljava/util/Iterator;->next()$OBJECT_DESCRIPTOR
-            move-result-object v12
-            check-cast v12, ${runtime.keyDescriptor}
-            iget-object v13, v12, ${runtime.keyModelField}
-            invoke-static {v13}, Ljava/lang/String;->valueOf($OBJECT_DESCRIPTOR)$STRING_DESCRIPTOR
-            move-result-object v13
-            invoke-virtual {v13, p1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)$BOOLEAN_DESCRIPTOR
-            move-result v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_active_loop
-            add-int/lit8 v7, v7, 1
-            invoke-interface {v11, v12}, Ljava/util/Map;->get($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR
-            move-result-object v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_active_loop
-            check-cast v13, ${runtime.activeEntryDescriptor}
-            invoke-virtual {v13}, Ljava/lang/ref/Reference;->get()$OBJECT_DESCRIPTOR
-            move-result-object v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_active_loop
-            check-cast v13, ${runtime.resourceDescriptor}
-            invoke-interface {v13}, ${runtime.resourceInterfaceDescriptor}->get()$OBJECT_DESCRIPTOR
-            move-result-object v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_active_loop
-            add-int/lit8 v8, v8, 1
-            invoke-static {v13}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$BITMAP_CONVERTER_HELPER($OBJECT_DESCRIPTOR)Landroid/graphics/Bitmap;
-            move-result-object v13
-            if-eqz v13, :piko_newx_glide_cached_thumbnail_active_loop
-            add-int/lit8 v9, v9, 1
-            move-object v4, p1
-            invoke-static/range {v4 .. v9}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$GLIDE_DIAGNOSTICS_HELPER($STRING_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR)V
-            return-object v13
+    label(MEMORY_LOOP_LABEL)
+    invokeInterface(methodReference(ITERATOR_HAS_NEXT_DESCRIPTOR), 10)
+    moveResult(12, BOOLEAN_DESCRIPTOR)
+    ifEqz(12, Target.Local(ACTIVE_START_LABEL))
+    invokeInterface(methodReference(ITERATOR_NEXT_DESCRIPTOR), 10)
+    moveResult(12, OBJECT_DESCRIPTOR)
+    checkCast(12, runtime.keyDescriptor)
+    iget(13, 12, fieldReference(runtime.keyModelField))
+    invokeStatic(methodReference(STRING_VALUE_OF_DESCRIPTOR), 13)
+    moveResult(13, STRING_DESCRIPTOR)
+    invokeVirtual(methodReference(STRING_CONTAINS_DESCRIPTOR), 13, urlRegister)
+    moveResult(13, BOOLEAN_DESCRIPTOR)
+    ifEqz(13, Target.Local(MEMORY_LOOP_LABEL))
+    intAddLiteral8(7, 7, 1)
+    invokeInterface(methodReference(MAP_GET_DESCRIPTOR), 11, 12)
+    moveResult(13, OBJECT_DESCRIPTOR)
+    ifEqz(13, Target.Local(MEMORY_LOOP_LABEL))
+    checkCast(13, runtime.memoryEntryDescriptor)
+    iget(13, 13, fieldReference(runtime.memoryEntryResourceField))
+    ifEqz(13, Target.Local(MEMORY_LOOP_LABEL))
+    checkCast(13, runtime.resourceInterfaceDescriptor)
+    invokeInterface(resourceGet, 13)
+    moveResult(13, OBJECT_DESCRIPTOR)
+    ifEqz(13, Target.Local(MEMORY_LOOP_LABEL))
+    intAddLiteral8(8, 8, 1)
+    invokeStatic(methodReference(GLIDE_BITMAP_CONVERTER_DESCRIPTOR), 13)
+    moveResult(13, BITMAP_DESCRIPTOR)
+    ifEqz(13, Target.Local(MEMORY_LOOP_LABEL))
+    intAddLiteral8(9, 9, 1)
+    move(4, urlRegister, OBJECT_DESCRIPTOR)
+    invokeStatic(methodReference(GLIDE_DIAGNOSTICS_DESCRIPTOR), 4, 5, 6, 7, 8, 9)
+    returnObject(13)
 
-            :piko_newx_glide_cached_thumbnail_none
-            move-object v4, p1
-            invoke-static/range {v4 .. v9}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$GLIDE_DIAGNOSTICS_HELPER($STRING_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR)V
-            invoke-static {p0, p1}, $MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$COIL_CACHED_THUMBNAIL_HELPER($OBJECT_DESCRIPTOR$STRING_DESCRIPTOR)$OBJECT_DESCRIPTOR
-            move-result-object v0
-            return-object v0
-        """.trimIndent(),
-    )
+    label(ACTIVE_START_LABEL)
+    iget(10, 0, fieldReference(runtime.activeResourcesField))
+    ifEqz(10, Target.Local(NO_CACHE_LABEL))
+    iget(10, 10, fieldReference(runtime.activeMapField))
+    ifEqz(10, Target.Local(NO_CACHE_LABEL))
+    newInstance(11, HASH_MAP_DESCRIPTOR)
+    checkCast(10, MAP_DESCRIPTOR)
+    invokeDirect(methodReference(HASH_MAP_CONSTRUCTOR_DESCRIPTOR), 11, 10)
+    invokeInterface(methodReference(MAP_KEY_SET_DESCRIPTOR), 11)
+    moveResult(10, SET_DESCRIPTOR)
+    invokeInterface(methodReference(SET_SIZE_DESCRIPTOR), 10)
+    moveResult(6, INTEGER_DESCRIPTOR)
+    invokeInterface(methodReference(SET_ITERATOR_DESCRIPTOR), 10)
+    moveResult(10, ITERATOR_DESCRIPTOR)
+
+    label(ACTIVE_LOOP_LABEL)
+    invokeInterface(methodReference(ITERATOR_HAS_NEXT_DESCRIPTOR), 10)
+    moveResult(12, BOOLEAN_DESCRIPTOR)
+    ifEqz(12, Target.Local(NO_CACHE_LABEL))
+    invokeInterface(methodReference(ITERATOR_NEXT_DESCRIPTOR), 10)
+    moveResult(12, OBJECT_DESCRIPTOR)
+    checkCast(12, runtime.keyDescriptor)
+    iget(13, 12, fieldReference(runtime.keyModelField))
+    invokeStatic(methodReference(STRING_VALUE_OF_DESCRIPTOR), 13)
+    moveResult(13, STRING_DESCRIPTOR)
+    invokeVirtual(methodReference(STRING_CONTAINS_DESCRIPTOR), 13, urlRegister)
+    moveResult(13, BOOLEAN_DESCRIPTOR)
+    ifEqz(13, Target.Local(ACTIVE_LOOP_LABEL))
+    intAddLiteral8(7, 7, 1)
+    invokeInterface(methodReference(MAP_GET_DESCRIPTOR), 11, 12)
+    moveResult(13, OBJECT_DESCRIPTOR)
+    ifEqz(13, Target.Local(ACTIVE_LOOP_LABEL))
+    checkCast(13, runtime.activeEntryDescriptor)
+    invokeVirtual(methodReference(REFERENCE_GET_DESCRIPTOR), 13)
+    moveResult(13, OBJECT_DESCRIPTOR)
+    ifEqz(13, Target.Local(ACTIVE_LOOP_LABEL))
+    checkCast(13, runtime.resourceDescriptor)
+    invokeInterface(resourceGet, 13)
+    moveResult(13, OBJECT_DESCRIPTOR)
+    ifEqz(13, Target.Local(ACTIVE_LOOP_LABEL))
+    intAddLiteral8(8, 8, 1)
+    invokeStatic(methodReference(GLIDE_BITMAP_CONVERTER_DESCRIPTOR), 13)
+    moveResult(13, BITMAP_DESCRIPTOR)
+    ifEqz(13, Target.Local(ACTIVE_LOOP_LABEL))
+    intAddLiteral8(9, 9, 1)
+    move(4, urlRegister, OBJECT_DESCRIPTOR)
+    invokeStatic(methodReference(GLIDE_DIAGNOSTICS_DESCRIPTOR), 4, 5, 6, 7, 8, 9)
+    returnObject(13)
+
+    label(NO_CACHE_LABEL)
+    move(4, urlRegister, OBJECT_DESCRIPTOR)
+    invokeStatic(methodReference(GLIDE_DIAGNOSTICS_DESCRIPTOR), 4, 5, 6, 7, 8, 9)
+    invokeStatic(methodReference(COIL_CACHED_THUMBNAIL_DESCRIPTOR), contextRegister, urlRegister)
+    moveResult(0, OBJECT_DESCRIPTOR)
+    returnObject(0)
 }
 
 context(context: BytecodePatchContext)

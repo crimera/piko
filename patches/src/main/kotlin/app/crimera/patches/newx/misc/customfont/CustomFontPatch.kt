@@ -15,15 +15,17 @@ import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.FONT_CLASS
 import app.crimera.patches.newx.utils.Constants.FONT_UPDATE_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -75,6 +77,9 @@ private object ComposeSpanTypefaceFingerprint : Fingerprint(
 
 private const val CHAR_SEQUENCE_DESCRIPTOR = "Ljava/lang/CharSequence;"
 
+private const val PROCESS_COMPOSE_EMOJI_DESCRIPTOR =
+    "$FONT_UPDATE_DESCRIPTOR->processComposeEmoji($CHAR_SEQUENCE_DESCRIPTOR)$CHAR_SEQUENCE_DESCRIPTOR"
+
 private fun isComposeEmojiProcessingCall(instruction: Instruction): Boolean {
     if (instruction.opcode != Opcode.INVOKE_VIRTUAL) return false
     val reference =
@@ -92,6 +97,24 @@ private fun isListEmptyCall(instruction: Instruction): Boolean {
         reference.name == "isEmpty" &&
         reference.parameterTypes.isEmpty() &&
         reference.returnType == "Z"
+}
+
+/**
+ * Rewrites the register holding the Compose emoji text through the extension's
+ * `processComposeEmoji`.
+ *
+ * This replaces a plain `addInstructions` insertion, which left incoming branches on the
+ * original instruction: the labels stay there, so a path branching to that instruction keeps
+ * skipping the hook exactly as before.
+ */
+private fun MutableMethod.insertEmojiProcessingHook(
+    index: Int,
+    resultRegister: Int,
+) {
+    insertHook(index = index, relocateBranchTargets = false) {
+        invokeStatic(methodReference(PROCESS_COMPOSE_EMOJI_DESCRIPTOR), resultRegister)
+        moveResult(resultRegister, CHAR_SEQUENCE_DESCRIPTOR)
+    }
 }
 
 @Suppress("unused")
@@ -175,6 +198,8 @@ val customFontPatch =
                         "constructor: ${paragraphMethod}",
                 )
             }
+            val applyTypefaceReference =
+                methodReference("$FONT_UPDATE_DESCRIPTOR->applyTypeface(Landroid/graphics/Paint;Landroid/graphics/Typeface;)V")
             val setTypefaceIndex = paragraphMatch.instructionMatches.last().index
             val setTypeface = paragraphMethod.instructions.getOrNull(setTypefaceIndex)
             if (setTypeface?.opcode != Opcode.INVOKE_VIRTUAL) {
@@ -256,12 +281,9 @@ val customFontPatch =
                 )
             }
             val bypassIndex = bypassCandidates.single().index
-            val processEmojiInstructions =
-                """
-                invoke-static {v$emojiResultRegister}, $FONT_UPDATE_DESCRIPTOR->processComposeEmoji(Ljava/lang/CharSequence;)Ljava/lang/CharSequence;
-                move-result-object v$emojiResultRegister
-                """.trimIndent()
-            paragraphMethod.addInstructions(bypassIndex + 1, processEmojiInstructions)
-            paragraphMethod.addInstructions(emojiIndex + 2, processEmojiInstructions)
+            // Both hooks rewrite the same emoji-result register at two points on the merge path.
+            // The later index is inserted first: the earlier insertion would shift it by two.
+            paragraphMethod.insertEmojiProcessingHook(bypassIndex + 1, emojiResultRegister)
+            paragraphMethod.insertEmojiProcessingHook(emojiIndex + 2, emojiResultRegister)
         }
     }

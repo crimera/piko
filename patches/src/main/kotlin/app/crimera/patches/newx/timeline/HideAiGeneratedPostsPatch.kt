@@ -3,8 +3,7 @@ package app.crimera.patches.newx.timeline
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.choice
 import app.crimera.patches.newx.settings.multiChoice
-import app.crimera.patches.newx.models.readBoolean
-import app.crimera.patches.newx.models.readObject
+import app.crimera.patches.newx.models.ModelFieldAccessor
 import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.resolveFieldAccessor
 import app.crimera.patches.newx.models.resolvedNewXTimelineModels
@@ -14,20 +13,23 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import com.android.tools.smali.dexlib2.AccessFlags
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
-import app.morphe.util.numberOfParameterRegistersLogical
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 @Suppress("unused")
@@ -68,6 +70,7 @@ private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val CONTENT_DISCLOSURE_HELPER = "getContentDisclosure"
 private const val HAS_AI_DISCLOSURE_HELPER = "hasAiGeneratedDisclosure"
 private const val SOURCE_HELPER = "getAiDetectionSource"
+private const val NO_CONTEXTUAL_POST_RESULT_LABEL = "piko_newx_no_contextual_post_result"
 
 private object ContentDisclosureModelFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/",
@@ -79,13 +82,13 @@ private object ContentDisclosureModelFingerprint : Fingerprint(
 
 private data class AiDisclosureAccessors(
     val timelinePostDescriptor: String,
-    val timelinePostResultRead: String,
+    val timelinePostResult: ModelFieldAccessor,
     val contextualPostDescriptor: String,
-    val contextualCanonicalPostRead: String,
-    val canonicalContentDisclosureRead: String,
+    val contextualCanonicalPost: ModelFieldAccessor,
+    val canonicalContentDisclosure: ModelFieldAccessor,
     val contentDisclosureDescriptor: String,
-    val hasAiDisclosureRead: String,
-    val sourceRead: String,
+    val hasAiDisclosure: ModelFieldAccessor,
+    val source: ModelFieldAccessor,
 )
 
 context(context: BytecodePatchContext)
@@ -159,13 +162,13 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
     }
     return AiDisclosureAccessors(
         timelinePostDescriptor = timelineModels.postDescriptor,
-        timelinePostResultRead = timelinePostResultAccessor.readObject("v0"),
+        timelinePostResult = timelinePostResultAccessor,
         contextualPostDescriptor = postModels.contextualPostDescriptor,
-        contextualCanonicalPostRead = contextualCanonicalPostAccessor.readObject("v0"),
-        canonicalContentDisclosureRead = canonicalContentDisclosureAccessor.readObject("v0"),
+        contextualCanonicalPost = contextualCanonicalPostAccessor,
+        canonicalContentDisclosure = canonicalContentDisclosureAccessor,
         contentDisclosureDescriptor = contentDisclosureDescriptor,
-        hasAiDisclosureRead = hasAiDisclosureAccessor.readBoolean("p0"),
-        sourceRead = sourceAccessor.readObject("p0"),
+        hasAiDisclosure = hasAiDisclosureAccessor,
+        source = sourceAccessor,
     )
 }
 
@@ -173,14 +176,18 @@ context(context: BytecodePatchContext)
 private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
 
-    fun patchHelper(
+    /**
+     * Resolves the single NewX timeline helper [name] and prepares it for injection: a helper that
+     * needs register headroom is cloned with [additionalRegisters] registers added on top of its
+     * parameter registers, and [replaceBody] empties the release stub before the injected block.
+     */
+    fun resolveHelper(
         name: String,
         parameters: String,
         returnType: String,
         additionalRegisters: Int = 0,
         replaceBody: Boolean = false,
-        instructions: String,
-    ) {
+    ): MutableMethod {
         val matches =
             filterClass.methods.filter { method ->
                 method.name == name &&
@@ -214,60 +221,80 @@ private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
             while (implementation.instructions.isNotEmpty()) {
                 implementation.removeInstruction(implementation.instructions.lastIndex)
             }
-            method.addInstructions(0, instructions.trimIndent())
-            return
         }
-
-        val insertionIndex =
-            if (additionalRegisters == 0) 0 else originalMethod.numberOfParameterRegistersLogical
-        method.addInstructions(insertionIndex, instructions.trimIndent())
+        return method
     }
 
-    patchHelper(
-        name = CONTENT_DISCLOSURE_HELPER,
-        parameters = OBJECT_DESCRIPTOR,
-        returnType = OBJECT_DESCRIPTOR,
-        additionalRegisters = 1,
-        replaceBody = true,
-        instructions =
-            """
-                # Timeline post results are a sealed union; tombstones have no disclosure.
-                move-object/from16 v0, p0
-                check-cast v0, ${accessors.timelinePostDescriptor}
-                ${accessors.timelinePostResultRead}
-                instance-of v1, v0, ${accessors.contextualPostDescriptor}
-                if-eqz v1, :piko_newx_no_contextual_post_result
-                check-cast v0, ${accessors.contextualPostDescriptor}
-                ${accessors.contextualCanonicalPostRead}
-                ${accessors.canonicalContentDisclosureRead}
-                return-object v0
-                :piko_newx_no_contextual_post_result
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent(),
-    )
-    patchHelper(
-        name = HAS_AI_DISCLOSURE_HELPER,
-        parameters = OBJECT_DESCRIPTOR,
-        returnType = "Z",
-        instructions =
-            """
-                check-cast p0, ${accessors.contentDisclosureDescriptor}
-                ${accessors.hasAiDisclosureRead}
-                return p0
-            """.trimIndent(),
-    )
-    patchHelper(
-        name = SOURCE_HELPER,
-        parameters = OBJECT_DESCRIPTOR,
-        returnType = OBJECT_DESCRIPTOR,
-        instructions =
-            """
-                check-cast p0, ${accessors.contentDisclosureDescriptor}
-                ${accessors.sourceRead}
-                return-object p0
-            """.trimIndent(),
-    )
+    // Timeline post results are a sealed union; tombstones have no disclosure. The stub body is
+    // replaced wholesale, so the block runs in the two locals the extra registers keep below the
+    // parameter registers.
+    val contentDisclosureHelper =
+        resolveHelper(
+            name = CONTENT_DISCLOSURE_HELPER,
+            parameters = OBJECT_DESCRIPTOR,
+            returnType = OBJECT_DESCRIPTOR,
+            additionalRegisters = 1,
+            replaceBody = true,
+        )
+    contentDisclosureHelper.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        val typeCheckRegister = 1
+        move(workRegister, contentDisclosureHelper.p0Register, OBJECT_DESCRIPTOR)
+        checkCast(workRegister, accessors.timelinePostDescriptor)
+        readModelAccessor(accessors.timelinePostResult, workRegister)
+        instanceOf(typeCheckRegister, workRegister, accessors.contextualPostDescriptor)
+        ifEqz(typeCheckRegister, Target.Local(NO_CONTEXTUAL_POST_RESULT_LABEL))
+        checkCast(workRegister, accessors.contextualPostDescriptor)
+        readModelAccessor(accessors.contextualCanonicalPost, workRegister)
+        readModelAccessor(accessors.canonicalContentDisclosure, workRegister)
+        returnObject(workRegister)
+        label(NO_CONTEXTUAL_POST_RESULT_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
+    }
+
+    val hasAiDisclosureHelper =
+        resolveHelper(
+            name = HAS_AI_DISCLOSURE_HELPER,
+            parameters = OBJECT_DESCRIPTOR,
+            returnType = "Z",
+        )
+    hasAiDisclosureHelper.insertHook(0, relocateBranchTargets = false) {
+        val parameterRegister = hasAiDisclosureHelper.p0Register
+        checkCast(parameterRegister, accessors.contentDisclosureDescriptor)
+        readModelAccessor(accessors.hasAiDisclosure, parameterRegister)
+        returnValue(parameterRegister)
+    }
+
+    val sourceHelper =
+        resolveHelper(
+            name = SOURCE_HELPER,
+            parameters = OBJECT_DESCRIPTOR,
+            returnType = OBJECT_DESCRIPTOR,
+        )
+    sourceHelper.insertHook(0, relocateBranchTargets = false) {
+        val parameterRegister = sourceHelper.p0Register
+        checkCast(parameterRegister, accessors.contentDisclosureDescriptor)
+        readModelAccessor(accessors.source, parameterRegister)
+        returnObject(parameterRegister)
+    }
+}
+
+/**
+ * Emits the model read the previous smali strings described: the generated getter when the model
+ * exposes one, otherwise a direct field access.
+ */
+private fun Block.readModelAccessor(
+    accessor: ModelFieldAccessor,
+    register: Int,
+) {
+    val getter = accessor.getter
+    if (getter == null) {
+        iget(register, register, accessor.field)
+        return
+    }
+    invokeVirtual(getter, register)
+    moveResult(register, accessor.field.type)
 }
 
 private fun Match.instanceFieldsRead(type: String): List<FieldReference> =

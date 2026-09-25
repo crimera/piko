@@ -15,33 +15,32 @@ import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.FOR_YOU_TOPIC_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.numberOfParameterRegistersLogical
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
-import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
+import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -71,6 +70,18 @@ private const val FOR_YOU_REFRESH_TARGET_DESCRIPTOR =
 private const val FOR_YOU_REFRESH_BRIDGE_NAME = "pikoRefreshForYouTopicFilter"
 private const val TIMELINE_REFRESH_GATE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineRefreshGate;"
+private const val FOR_YOU_TOPIC_FILTER_INITIALIZE_DESCRIPTOR =
+    "$FOR_YOU_TOPIC_FILTER_DESCRIPTOR->initialize(Landroid/content/Context;)V"
+private const val FOR_YOU_TOPIC_FILTER_SHOW_SHEET_DESCRIPTOR =
+    "$FOR_YOU_TOPIC_FILTER_DESCRIPTOR->showForYouTopicSheet($FOR_YOU_REFRESH_TARGET_DESCRIPTOR)Z"
+private const val FOR_YOU_TOPIC_FILTER_RESOLVE_TOPIC_IDS_DESCRIPTOR =
+    "$FOR_YOU_TOPIC_FILTER_DESCRIPTOR->resolveForYouTopicIds($LIST_DESCRIPTOR)$LIST_DESCRIPTOR"
+private const val FOR_YOU_TOPIC_FILTER_CAPTURE_OPTIONS_DESCRIPTOR =
+    "$FOR_YOU_TOPIC_FILTER_DESCRIPTOR->captureTopicOptions($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)V"
+private const val INTRINSICS_ARE_EQUAL_DESCRIPTOR =
+    "$INTRINSICS_DESCRIPTOR->areEqual($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)Z"
+private const val FOR_YOU_REFRESH_GATE_MARK_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->markForYouFilterRefresh()V"
 
 private object HomeFilterGroupFingerprint : Fingerprint(
     definingClass = HOME_MODELS_PACKAGE,
@@ -170,15 +181,17 @@ val newXForYouTopicFilterPatch =
             val tabHook = resolveForYouTabHook(scrollToTopEvent)
             val requestTarget = resolveForYouRequestTarget()
 
-            newXInitHook.fingerprint.method.addInstruction(
-                0,
-                "invoke-static/range {p0 .. p0}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->initialize(Landroid/content/Context;)V",
-            )
+            val applicationOnCreate = newXInitHook.fingerprint.method
+            applicationOnCreate.insertHook(0, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference(FOR_YOU_TOPIC_FILTER_INITIALIZE_DESCRIPTOR),
+                    applicationOnCreate.p0Register,
+                )
+            }
 
             patchHomeFilterGroupConstructor()
 
             installForYouRefreshBridge(tabHook, clearAndRefreshEvent, scrollToTopEvent)
-            val continuation = tabHook.method.instructions[tabHook.insertionIndex]
             val hookEnabledRead =
                 forYouTabHookEnabled.injectRead(
                     method = tabHook.method,
@@ -196,10 +209,10 @@ val newXForYouTopicFilterPatch =
                         "${scratchRegisters.joinToString { "v$it" }} of $registerCount",
                 )
             }
+            // The identity guard keeps every register it touches inside the byte range.
             if (pageRegister > 255) {
                 throw PatchException(
-                    "NewX For You page register is not encodable in a move-object/from16: " +
-                        "v$pageRegister",
+                    "NewX For You page register is outside the identity guard's range: v$pageRegister",
                 )
             }
             val additionalRegisters = scratchRegisters
@@ -213,25 +226,32 @@ val newXForYouTopicFilterPatch =
                         "page=v$forYouPageComparisonRegister, singleton=v$forYouSingletonRegister",
                 )
             }
-            val forYouIdentityGuard = """
-                move-object/from16 v$forYouPageComparisonRegister, v$pageRegister
-                sget-object v$forYouSingletonRegister, ${singletonField.smaliReference()}
-                invoke-static/range {v$forYouPageComparisonRegister .. v$forYouSingletonRegister}, $INTRINSICS_DESCRIPTOR->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
-                move-result v$forYouPageComparisonRegister
-                if-eqz v$forYouPageComparisonRegister, :piko_newx_for_you_topic_sheet_continue
-            """.trimIndent()
-            tabHook.method.addInstructionsWithLabels(
-                hookEnabledRead.nextIndex,
-                """
-                    if-eqz v${hookEnabledRead.register}, :piko_newx_for_you_topic_sheet_continue
-                    $forYouIdentityGuard
-                    invoke-static/range {p0 .. p0}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->showForYouTopicSheet($FOR_YOU_REFRESH_TARGET_DESCRIPTOR)Z
-                    move-result v$sheetResultRegister
-                    if-eqz v$sheetResultRegister, :piko_newx_for_you_topic_sheet_continue
-                    return-void
-                """.trimIndent(),
-                ExternalLabel("piko_newx_for_you_topic_sheet_continue", continuation),
-            )
+            // The old external label pointed at the original instruction at the insertion index, so
+            // `Original` is the fall-through target: a path that reached the tab handler without the
+            // sheet keeps skipping it, and branches into the handler stay on the original code.
+            val receiverRegister = tabHook.method.p0Register
+            tabHook.method.insertHook(
+                index = hookEnabledRead.nextIndex,
+                relocateBranchTargets = false,
+            ) {
+                ifEqz(hookEnabledRead.register, Target.Original)
+                move(forYouPageComparisonRegister, pageRegister, OBJECT_DESCRIPTOR)
+                sget(forYouSingletonRegister, singletonField)
+                invokeStatic(
+                    methodReference(INTRINSICS_ARE_EQUAL_DESCRIPTOR),
+                    forYouPageComparisonRegister,
+                    forYouSingletonRegister,
+                )
+                moveResult(forYouPageComparisonRegister, "Z")
+                ifEqz(forYouPageComparisonRegister, Target.Original)
+                invokeStatic(
+                    methodReference(FOR_YOU_TOPIC_FILTER_SHOW_SHEET_DESCRIPTOR),
+                    receiverRegister,
+                )
+                moveResult(sheetResultRegister, "Z")
+                ifEqz(sheetResultRegister, Target.Original)
+                returnVoid()
+            }
 
             val matches = requestTarget.requestFingerprint.scopedMatchAll()
             if (matches.size != 1) {
@@ -260,13 +280,14 @@ val newXForYouTopicFilterPatch =
                 requestTarget.queryConstructor,
                 requestTarget.topicParameterIndex,
             )
-            method.addInstructions(
-                constructorIndex,
-                """
-                    invoke-static/range {v$topicRegister .. v$topicRegister}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->resolveForYouTopicIds(Ljava/util/List;)Ljava/util/List;
-                    move-result-object v$topicRegister
-                """.trimIndent(),
-            )
+            // The old insertion left incoming labels on the constructor call.
+            method.insertHook(
+                index = constructorIndex,
+                relocateBranchTargets = false,
+            ) {
+                invokeStatic(methodReference(FOR_YOU_TOPIC_FILTER_RESOLVE_TOPIC_IDS_DESCRIPTOR), topicRegister)
+                moveResult(topicRegister, LIST_DESCRIPTOR)
+            }
         }
     }
 
@@ -563,9 +584,9 @@ private fun installForYouRefreshBridge(
         )
     }
 
-    val implementation = MethodImplementationBuilder(4).apply {
-        addInstruction("return-void".toInstruction())
-    }.methodImplementation
+    // A typed hook needs an existing implementation, so the bridge starts as an empty four-register
+    // body (v0/v1 locals, p0 the tab handler) that the typed block below fills in.
+    val implementation = MutableMethodImplementation(4)
     val bridgeMethod = MutableMethod(
         ImmutableMethod(
             classDef.type,
@@ -580,17 +601,14 @@ private fun installForYouRefreshBridge(
     )
     classDef.methods.add(bridgeMethod)
 
-    val placeholderImplementation = bridgeMethod.implementation
-        ?: throw PatchException("NewX For You refresh bridge has no implementation")
-    placeholderImplementation.removeInstruction(placeholderImplementation.instructions.lastIndex)
-    val bridgeSmali = tabHook.refreshBridge.toSmali(
-        clearAndRefreshEvent.field,
-        scrollToTopEvent.field,
-    )
-    bridgeMethod.addInstructionsWithLabels(
-        0,
-        bridgeSmali,
-    )
+    bridgeMethod.insertHook(0, relocateBranchTargets = false) {
+        emitForYouCurrentPageRefresh(
+            bridge = tabHook.refreshBridge,
+            receiverRegister = bridgeMethod.p0Register,
+            clearAndRefreshField = clearAndRefreshEvent.field,
+            scrollToTopField = scrollToTopEvent.field,
+        )
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -807,39 +825,47 @@ private fun Method.tryResolveForYouCurrentPageRefreshBridge(
     )
 }
 
-private fun ResolvedForYouCurrentPageRefreshBridge.toSmali(
+/**
+ * Re-dispatches a refresh of the For You page that is currently shown.
+ *
+ * The bridge method is created with four registers: v0/v1 are its locals and [receiverRegister] is
+ * the receiver (the tab handler that owns the live page list). The done label keeps the block
+ * falling through to `return-void` when the shown page is not a For You page or has no controller.
+ */
+private fun Block.emitForYouCurrentPageRefresh(
+    bridge: ResolvedForYouCurrentPageRefreshBridge,
+    receiverRegister: Int,
     clearAndRefreshField: FieldReference,
     scrollToTopField: FieldReference,
-): String =
-    """
-        iget-object v0, p0, ${stateField.smaliReference()}
-        invoke-virtual {v0}, ${stateGetter.smaliReference()}
-        move-result-object v1
-        check-cast v1, $pagesType
-        iget-object v1, v1, ${pagesListField.smaliReference()}
-        invoke-virtual {v0}, ${stateGetter.smaliReference()}
-        move-result-object v0
-        check-cast v0, $pagesType
-        iget v0, v0, ${pagesIndexField.smaliReference()}
-        invoke-interface {v1, v0}, ${pageLookup.smaliReference()}
-        move-result-object v0
-        check-cast v0, $componentType
-        invoke-virtual {v0}, ${componentGetter.smaliReference()}
-        move-result-object v0
-        instance-of v1, v0, $forYouComponentType
-        if-eqz v1, :piko_for_you_refresh_current_page_done
-        check-cast v0, $forYouComponentType
-        iget-object v1, v0, ${forYouControllerField.smaliReference()}
-        if-eqz v1, :piko_for_you_refresh_current_page_done
-        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markForYouFilterRefresh()V
-        sget-object v0, ${clearAndRefreshField.smaliReference()}
-        invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
-        sget-object v0, ${scrollToTopField.smaliReference()}
-        invoke-interface {v1, v0}, ${refreshDispatch.smaliReference()}
-
-        :piko_for_you_refresh_current_page_done
-        return-void
-    """.trimIndent()
+) {
+    val doneLabel = "piko_for_you_refresh_current_page_done"
+    iget(0, receiverRegister, bridge.stateField)
+    invokeVirtual(bridge.stateGetter, 0)
+    moveResult(1, bridge.pagesType)
+    checkCast(1, bridge.pagesType)
+    iget(1, 1, bridge.pagesListField)
+    invokeVirtual(bridge.stateGetter, 0)
+    moveResult(0, bridge.pagesType)
+    checkCast(0, bridge.pagesType)
+    iget(0, 0, bridge.pagesIndexField)
+    invokeInterface(bridge.pageLookup, 1, 0)
+    moveResult(0, bridge.componentType)
+    checkCast(0, bridge.componentType)
+    invokeVirtual(bridge.componentGetter, 0)
+    moveResult(0, OBJECT_DESCRIPTOR)
+    instanceOf(1, 0, bridge.forYouComponentType)
+    ifEqz(1, Target.Local(doneLabel))
+    checkCast(0, bridge.forYouComponentType)
+    iget(1, 0, bridge.forYouControllerField)
+    ifEqz(1, Target.Local(doneLabel))
+    invokeStatic(methodReference(FOR_YOU_REFRESH_GATE_MARK_DESCRIPTOR))
+    sget(0, clearAndRefreshField)
+    invokeInterface(bridge.refreshDispatch, 1, 0)
+    sget(0, scrollToTopField)
+    invokeInterface(bridge.refreshDispatch, 1, 0)
+    label(doneLabel)
+    returnVoid()
+}
 
 context(context: BytecodePatchContext)
 private fun patchHomeFilterGroupConstructor() {
@@ -899,10 +925,20 @@ private fun patchHomeFilterGroupConstructor() {
     }
     val superIndex = superCandidates.single().index
 
-    constructor.addInstructions(
-        superIndex + 1,
-        "invoke-static {p1, p4}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->captureTopicOptions(Ljava/lang/Object;Ljava/lang/Object;)V",
-    )
+    // `p1` is the filter type and `p4` the options list; both parameters are single-word on this
+    // constructor, so the slots are plain receiver offsets. The old insertion left incoming labels
+    // on the instruction after the super call.
+    val receiverRegister = constructor.p0Register
+    constructor.insertHook(
+        index = superIndex + 1,
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(
+            methodReference(FOR_YOU_TOPIC_FILTER_CAPTURE_OPTIONS_DESCRIPTOR),
+            receiverRegister + 1,
+            receiverRegister + 4,
+        )
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -1151,12 +1187,3 @@ private fun FieldReference.matches(reference: FieldReference): Boolean =
     definingClass == reference.definingClass &&
         name == reference.name &&
         type == reference.type
-
-private fun Method.smaliReference(): String =
-    "$definingClass->$name(${parameterTypes.joinToString(separator = "") { it.toString() }})$returnType"
-
-private fun MethodReference.smaliReference(): String =
-    "$definingClass->$name(${parameterTypes.joinToString(separator = "") { it.toString() }})$returnType"
-
-private fun FieldReference.smaliReference(): String =
-    "$definingClass->$name:$type"

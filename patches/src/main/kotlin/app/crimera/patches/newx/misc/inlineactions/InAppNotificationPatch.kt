@@ -2,18 +2,20 @@ package app.crimera.patches.newx.misc.inlineactions
 
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
@@ -37,6 +39,7 @@ private const val VOID_DESCRIPTOR = "V"
 private const val SEND_HELPER = "send"
 private const val LOCAL_REGISTER_COUNT = 12
 private const val DEFAULT_ARGUMENT_MASK = 0x3fe
+private const val UNAVAILABLE_LABEL = "piko_newx_in_app_notification_unavailable"
 
 private data class FacadeCandidate(
     val classDef: ClassDef,
@@ -245,10 +248,19 @@ private fun patchFacadeConstructor(runtime: ResolvedNotificationRuntime) {
             index.takeIf { instruction.opcode == Opcode.RETURN_VOID }
         },
     )
-    constructor.addInstruction(
-        exitIndex,
-        "invoke-static/range {p0 .. p0}, $BRIDGE_DESCRIPTOR->capture($OBJECT_DESCRIPTOR)V",
-    )
+    // `p0` is the receiver; `insertHook` emits `invoke-static/range` itself when the
+    // receiver does not fit the four-bit operand of `invoke-static`.
+    constructor.insertHook(
+        index = exitIndex,
+        // The old insertion left every label on the constructor's return, so a branch that reaches
+        // the exit directly keeps bypassing the capture, exactly as before.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(
+            methodReference("$BRIDGE_DESCRIPTOR->capture($OBJECT_DESCRIPTOR)V"),
+            constructor.p0Register,
+        )
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -281,35 +293,42 @@ private fun patchBridge(runtime: ResolvedNotificationRuntime) {
             }
         }
 
-    helper.addInstructions(0, notificationInstructions(runtime))
+    helper.insertHook(0, relocateBranchTargets = false) {
+        notificationInstructions(runtime, helper.p0Register)
+    }
 }
 
-private fun notificationInstructions(runtime: ResolvedNotificationRuntime): String =
-    """
-        sget-object v0, $BRIDGE_FACADE_FIELD
-        if-eqz v0, :piko_newx_in_app_notification_unavailable
-        check-cast v0, ${runtime.facadeDescriptor}
-        new-instance v1, ${runtime.apiDescriptor}
-        new-instance v2, ${runtime.literalDescriptor}
-        invoke-direct {v2, p0}, ${runtime.literalConstructor.smaliReference()}
-        const/4 v3, 0x0
-        const/4 v4, 0x0
-        const/4 v5, 0x0
-        const/4 v6, 0x0
-        const/4 v7, 0x0
-        const/4 v8, 0x0
-        const/4 v9, 0x0
-        const/4 v10, 0x0
-        const/16 v11, ${DEFAULT_ARGUMENT_MASK.toString(16).let { "0x$it" }}
-        invoke-direct/range {v1 .. v11}, ${runtime.apiConstructor.smaliReference()}
-        invoke-static {v0, v1}, ${runtime.sender.smaliReference()}
-        const/4 v0, 0x1
-        return v0
+/**
+ * Emits the bridge body into the twelve locals the frame growth above reserved: the facade captured
+ * by [patchFacadeConstructor], one API model around the `p0` message, and the facade's generic
+ * sender. Both paths return a boolean, so the stub's own trailing return is never reached.
+ *
+ * The receiver and the literal constructor argument are the only non-zero operands; the remaining
+ * model and collection parameters stay null and the priority uses the default argument mask.
+ */
+private fun Block.notificationInstructions(
+    runtime: ResolvedNotificationRuntime,
+    messageRegister: Int,
+) {
+    sget(0, fieldReference(BRIDGE_FACADE_FIELD))
+    ifEqz(0, Target.Local(UNAVAILABLE_LABEL))
+    checkCast(0, runtime.facadeDescriptor)
+    newInstance(1, runtime.apiDescriptor)
+    newInstance(2, runtime.literalDescriptor)
+    invokeDirect(runtime.literalConstructor, 2, messageRegister)
+    (3..10).forEach { register -> constInt(register, 0) }
+    constInt(11, DEFAULT_ARGUMENT_MASK)
+    // Eleven operand words: the receiver v1 plus the ten constructor parameters v2..v11, which the
+    // typed invoke lowers to the `invoke-direct/range {v1 .. v11}` this block has always emitted.
+    invokeDirect(runtime.apiConstructor, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+    invokeStatic(runtime.sender, 0, 1)
+    constInt(0, 1)
+    returnValue(0)
 
-        :piko_newx_in_app_notification_unavailable
-        const/4 v0, 0x0
-        return v0
-    """.trimIndent()
+    label(UNAVAILABLE_LABEL)
+    constInt(0, 0)
+    returnValue(0)
+}
 
 private fun Method.hasStringAnchors(vararg anchors: String): Boolean {
     if (name != "toString" || returnType != STRING_DESCRIPTOR || parameterTypes.isNotEmpty()) return false
@@ -326,6 +345,3 @@ private fun Method.matches(reference: MethodReference): Boolean =
         name == reference.name &&
         returnType.toString() == reference.returnType.toString() &&
         parameterTypes.map(CharSequence::toString) == reference.parameterTypes.map(CharSequence::toString)
-
-private fun MethodReference.smaliReference(): String =
-    "$definingClass->$name(${parameterTypes.joinToString("") { it.toString() }})$returnType"

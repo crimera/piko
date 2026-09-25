@@ -12,15 +12,20 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -614,17 +619,16 @@ private fun patchPagingEventBridge(event: ResolvedPagingEvent) {
     while (helperImplementation.instructions.isNotEmpty()) {
         helperImplementation.removeInstruction(helperImplementation.instructions.lastIndex)
     }
-    helper.addInstructions(
-        0,
-        """
-            sget-object v0, ${event.eventKindField}
-            new-instance v1, ${event.eventType}
-            const/4 v2, 0x0
-            const/4 v3, 0x0
-            invoke-direct {v1, v0, v2, v3}, ${event.constructorReference}
-            return-object v1
-        """.trimIndent(),
-    )
+    // The stub body is replaced wholesale, so the block runs in the four registers the frame
+    // growth above reserves below the parameter block.
+    helper.insertHook(0, relocateBranchTargets = false) {
+        sget(0, fieldReference(event.eventKindField))
+        newInstance(1, event.eventType)
+        constInt(2, 0)
+        constInt(3, 0)
+        invokeDirect(methodReference(event.constructorReference), 1, 0, 2, 3)
+        returnObject(1)
+    }
     patchPagingStateBridge(event)
     patchBottomPaginatorClassBridge(event.paginatorClassName)
 }
@@ -664,39 +668,39 @@ private fun patchPagingStateBridge(event: ResolvedPagingEvent) {
         helperImplementation.removeInstruction(helperImplementation.instructions.lastIndex)
     }
     val state = event.state
-    helper.addInstructions(
-        0,
-        """
-            move-object/from16 v0, p0
-            check-cast v0, ${event.paginatorType}
-            ${state.stateFlowGetter.opcode} {v0}, ${state.stateFlowGetter.descriptor}
-            move-result-object v1
-            ${state.stateValueGetter.opcode} {v1}, ${state.stateValueGetter.descriptor}
-            move-result-object v0
-            check-cast v0, ${state.stateType}
-            ${state.needsMore.opcode} {v0}, ${state.needsMore.descriptor}
-            move-result v1
-            ${state.terminated.opcode} {v0}, ${state.terminated.descriptor}
-            move-result v2
-            ${state.threshold.opcode} {v0}, ${state.threshold.descriptor}
-            move-result v3
-            const/4 v5, 0x3
-            new-array v4, v5, $OBJECT_ARRAY
-            invoke-static {v1}, $BOOLEAN->valueOf(Z)$BOOLEAN
-            move-result-object v6
-            const/4 v5, 0x0
-            aput-object v6, v4, v5
-            invoke-static {v2}, $BOOLEAN->valueOf(Z)$BOOLEAN
-            move-result-object v6
-            const/4 v5, 0x1
-            aput-object v6, v4, v5
-            invoke-static {v3}, $INTEGER->valueOf(I)$INTEGER
-            move-result-object v6
-            const/4 v5, 0x2
-            aput-object v6, v4, v5
-            return-object v4
-        """.trimIndent(),
-    )
+    // The stub body is replaced wholesale; all registers are explicit because the frame growth
+    // above reserved them below the parameter block (`helper.p0Register` stays the paginator).
+    helper.insertHook(0, relocateBranchTargets = false) {
+        move(0, helper.p0Register, OBJECT)
+        checkCast(0, event.paginatorType)
+        invoke(state.stateFlowGetter.opcode, methodReference(state.stateFlowGetter.descriptor), listOf(0))
+        moveResult(1, OBJECT)
+        invoke(state.stateValueGetter.opcode, methodReference(state.stateValueGetter.descriptor), listOf(1))
+        moveResult(0, OBJECT)
+        checkCast(0, state.stateType)
+        invoke(state.needsMore.opcode, methodReference(state.needsMore.descriptor), listOf(0))
+        moveResult(1, "Z")
+        invoke(state.terminated.opcode, methodReference(state.terminated.descriptor), listOf(0))
+        moveResult(2, "Z")
+        invoke(state.threshold.opcode, methodReference(state.threshold.descriptor), listOf(0))
+        moveResult(3, INT_DESCRIPTOR)
+        // Three boxed values in the fixed (needs-more, terminated, threshold) order.
+        constInt(5, 3)
+        newArray(4, 5, OBJECT_ARRAY)
+        invokeStatic(methodReference("$BOOLEAN->valueOf(Z)$BOOLEAN"), 1)
+        moveResult(6, OBJECT)
+        constInt(5, 0)
+        aputObject(6, 4, 5)
+        invokeStatic(methodReference("$BOOLEAN->valueOf(Z)$BOOLEAN"), 2)
+        moveResult(6, OBJECT)
+        constInt(5, 1)
+        aputObject(6, 4, 5)
+        invokeStatic(methodReference("$INTEGER->valueOf(I)$INTEGER"), 3)
+        moveResult(6, OBJECT)
+        constInt(5, 2)
+        aputObject(6, 4, 5)
+        returnObject(4)
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -730,13 +734,11 @@ private fun patchBottomPaginatorClassBridge(className: String) {
     while (helperImplementation.instructions.isNotEmpty()) {
         helperImplementation.removeInstruction(helperImplementation.instructions.lastIndex)
     }
-    helper.addInstructions(
-        0,
-        """
-            const-string v0, "$className"
-            return-object v0
-        """.trimIndent(),
-    )
+    // The stub body is replaced wholesale with the release-specific paginator class name.
+    helper.insertHook(0, relocateBranchTargets = false) {
+        constString(0, className)
+        returnObject(0)
+    }
 }
 
 private fun isMoveObject(instruction: Instruction): Boolean =
@@ -893,7 +895,7 @@ private fun resolveTimelineItemCallbackIndex(method: Method): Int {
 
 private data class NativeMethodCall(
     val descriptor: String,
-    val opcode: String,
+    val opcode: Opcode,
 )
 
 private data class NativePhotoViewerTarget(
@@ -925,12 +927,12 @@ private data class ItemMediaDelegate(
 )
 
 context(context: BytecodePatchContext)
-private fun invocationOpcode(owner: String): String {
+private fun invocationOpcode(owner: String): Opcode {
     val classDef = runCatching { context.mutableClassDefBy(owner) }.getOrNull()
     return if (classDef != null && AccessFlags.INTERFACE.isSet(classDef.accessFlags)) {
-        "invoke-interface"
+        Opcode.INVOKE_INTERFACE
     } else {
-        "invoke-virtual"
+        Opcode.INVOKE_VIRTUAL
     }
 }
 
@@ -1276,104 +1278,115 @@ private fun receiverRegister(method: Method): Int {
     return implementation.registerCount - parameterWidth - 1
 }
 
-private fun itemClickViewerInstructions(
+/**
+ * Diverts a gallery tap before the item-event consumer runs: a tap whose item carries a pending
+ * gallery photo index opens the viewer here, every other item falls through to the original body.
+ *
+ * The block runs in the caller's frame growth (v0..v7). The event parameter sits above them and is
+ * copied down first, because `instance-of` is format 22c and encodes both operands in four bits;
+ * the tail keeps the consecutive v0..v7 run the viewer constructors are invoked with.
+ */
+private fun Block.itemClickViewerInstructions(
     event: NativePhotoViewerTarget,
     target: ItemClickViewerTarget,
     delegates: List<ItemMediaDelegate>,
     eventRegister: Int,
     receiverRegister: Int,
-): String {
+) {
     val mediaOwner = event.mediaGetter.descriptor.substringBefore("->")
-    // Per item type: narrow to the model, resolve its media holder, stash it, then
-    // hunt the post model for the viewer post context (holder first, then the item
-    // fields that can hold it). Every miss falls through with the pending entry
-    // intact, so the Java side degrades to the deep-link fallback. Register plan:
-    // v0 work, v1 flags, v2 item, v4 holder, v5 w0; the tail reuses v0..v7 for the
-    // consecutive range invokes below.
-    val delegateCascade = delegates.mapIndexed { index, delegate ->
-        val holderRead = delegate.holderField?.let { "iget-object v0, v0, $it" }.orEmpty()
-        val postHunt = delegate.postFields.mapIndexed { fieldIndex, postField ->
-            """
-            iget-object v0, v2, $postField
-            instance-of v1, v0, ${event.postType}
-            if-eqz v1, :piko_newx_gallery_qh_${index}_$fieldIndex
-            iget-object v5, v2, ${delegate.w0Field}
-            goto :piko_newx_gallery_have_q1
-            :piko_newx_gallery_qh_${index}_$fieldIndex
-            """.trimIndent()
-        }.joinToString("\n")
-        """
-            instance-of v1, v0, ${delegate.itemType}
-            if-eqz v1, :piko_newx_gallery_next_$index
-            check-cast v0, ${delegate.itemType}
-            check-cast v2, ${delegate.itemType}
-            $holderRead
-            check-cast v0, $mediaOwner
-            move-object v4, v0
-            instance-of v1, v0, ${event.postType}
-            if-eqz v1, :piko_newx_gallery_qh_${index}_holder
-            iget-object v5, v2, ${delegate.w0Field}
-            goto :piko_newx_gallery_have_q1
-            :piko_newx_gallery_qh_${index}_holder
-            $postHunt
-            goto :piko_newx_gallery_original
-            :piko_newx_gallery_next_$index
-        """.trimIndent()
-    }.joinToString("\n")
-    // NOTE: instance-of is format 22c (both registers 4-bit). The event parameter
-    // lives in a high register, so it must be copied down with move-object/from16
-    // first; referencing it directly drops the instruction at assembly time and
-    // breaks verification (if-eqz on an undefined register). The same applies to
-    // the range invokes below: all argument registers stay within v0..v7.
-    return """
-        move-object/from16 v0, v$eventRegister
-        instance-of v1, v0, ${target.itemEventType}
-        if-eqz v1, :piko_newx_gallery_original
-        check-cast v0, ${target.itemEventType}
-        iget-object v0, v0, ${target.itemEventField}
-        move-object v2, v0
-        $delegateCascade
-        goto :piko_newx_gallery_original
-        :piko_newx_gallery_have_q1
-        invoke-static {v2}, $GALLERY_EXTENSION->takePendingPhotoIndex(Ljava/lang/Object;)I
-        move-result v1
-        if-ltz v1, :piko_newx_gallery_original
-        ${event.mediaGetter.opcode} {v4}, ${event.mediaGetter.descriptor}
-        move-result-object v2
-        invoke-interface {v2}, $JAVA_LIST->size()I
-        move-result v3
-        invoke-static {v3, v1}, $GALLERY_EXTENSION->reportGalleryTap(II)V
-        if-ltz v1, :piko_newx_gallery_clear
-        if-ge v1, v3, :piko_newx_gallery_clear
-        move v6, v1
-        move-object v7, v2
-        move-object v1, v0
-        check-cast v1, ${event.postType}
-        move-object v4, v5
-        new-instance v0, ${event.ebClass}
-        const/16 v2, 0x0
-        const/16 v3, 0x0
-        const/16 v5, 0x0
-        invoke-direct/range {v0 .. v5}, ${event.ebConstructor.descriptor}
-        move-object v3, v0
-        new-instance v0, ${event.routeClass}
-        move-object v1, v7
-        move v2, v6
-        const/16 v4, 0x0
-        const/16 v5, 0x0
-        const/16 v6, 0x0
-        const/16 v7, 0x${event.viewerFlags.toString(16)}
-        invoke-direct/range {v0 .. v7}, ${event.routeConstructor.descriptor}
-        move-object v5, v0
-        move-object/from16 v7, v$receiverRegister
-        iget-object v6, v7, ${target.navigationField}
-        const/4 v7, 0
-        ${event.navigationCall.opcode} {v6, v5, v7}, ${event.navigationCall.descriptor}
-        return-void
-        :piko_newx_gallery_clear
-        invoke-static {}, $GALLERY_EXTENSION->clearPendingPhoto()V
-        :piko_newx_gallery_original
-    """.trimIndent()
+    val havePostContext = "piko_newx_gallery_have_q1"
+    val clearPending = "piko_newx_gallery_clear"
+
+    move(0, eventRegister, OBJECT)
+    instanceOf(1, 0, target.itemEventType)
+    ifEqz(1, Target.Original)
+    checkCast(0, target.itemEventType)
+    iget(0, 0, fieldReference(target.itemEventField))
+    move(2, 0, OBJECT)
+
+    // Per item type: narrow to the model, resolve its media holder into v4, then hunt the post
+    // model for the viewer post context into v5 (the holder first, then the item fields that can
+    // hold it). Every miss falls through with the pending entry intact, so the Java side degrades
+    // to the deep-link fallback. v0 work, v1 flags, v2 item, v4 holder, v5 w0.
+    delegates.forEachIndexed { index, delegate ->
+        val nextType = "piko_newx_gallery_next_$index"
+        val postContextOnHolder = "piko_newx_gallery_qh_${index}_holder"
+
+        instanceOf(1, 0, delegate.itemType)
+        ifEqz(1, Target.Local(nextType))
+        checkCast(0, delegate.itemType)
+        checkCast(2, delegate.itemType)
+        delegate.holderField?.let { holderField ->
+            iget(0, 0, fieldReference(holderField))
+        }
+        checkCast(0, mediaOwner)
+        move(4, 0, OBJECT)
+        instanceOf(1, 0, event.postType)
+        ifEqz(1, Target.Local(postContextOnHolder))
+        iget(5, 2, fieldReference(delegate.w0Field))
+        goto(Target.Local(havePostContext))
+        label(postContextOnHolder)
+
+        delegate.postFields.forEachIndexed { fieldIndex, postField ->
+            val postContextOnField = "piko_newx_gallery_qh_${index}_$fieldIndex"
+            iget(0, 2, fieldReference(postField))
+            instanceOf(1, 0, event.postType)
+            ifEqz(1, Target.Local(postContextOnField))
+            iget(5, 2, fieldReference(delegate.w0Field))
+            goto(Target.Local(havePostContext))
+            label(postContextOnField)
+        }
+
+        goto(Target.Original)
+        label(nextType)
+    }
+    goto(Target.Original)
+
+    label(havePostContext)
+    invokeStatic(
+        methodReference("$GALLERY_EXTENSION->takePendingPhotoIndex(Ljava/lang/Object;)I"),
+        2,
+    )
+    moveResult(1, INT_DESCRIPTOR)
+    ifLtz(1, Target.Original)
+    invoke(event.mediaGetter.opcode, methodReference(event.mediaGetter.descriptor), listOf(4))
+    moveResult(2, OBJECT)
+    invokeInterface(methodReference("$JAVA_LIST->size()I"), 2)
+    moveResult(3, INT_DESCRIPTOR)
+    invokeStatic(methodReference("$GALLERY_EXTENSION->reportGalleryTap(II)V"), 3, 1)
+    ifLtz(1, Target.Local(clearPending))
+    ifGe(1, 3, Target.Local(clearPending))
+    move(6, 1, INT_DESCRIPTOR)
+    move(7, 2, OBJECT)
+    move(1, 0, OBJECT)
+    checkCast(1, event.postType)
+    move(4, 5, OBJECT)
+    newInstance(0, event.ebClass)
+    constInt(2, 0)
+    constInt(3, 0)
+    constInt(5, 0)
+    invokeDirect(methodReference(event.ebConstructor.descriptor), 0, 1, 2, 3, 4, 5)
+    move(3, 0, OBJECT)
+    newInstance(0, event.routeClass)
+    move(1, 7, OBJECT)
+    move(2, 6, INT_DESCRIPTOR)
+    constInt(4, 0)
+    constInt(5, 0)
+    constInt(6, 0)
+    constInt(7, event.viewerFlags)
+    invokeDirect(methodReference(event.routeConstructor.descriptor), 0, 1, 2, 3, 4, 5, 6, 7)
+    move(5, 0, OBJECT)
+    move(7, receiverRegister, OBJECT)
+    iget(6, 7, fieldReference(target.navigationField))
+    constInt(7, 0)
+    invoke(
+        event.navigationCall.opcode,
+        methodReference(event.navigationCall.descriptor),
+        listOf(6, 5, 7),
+    )
+    returnVoid()
+    label(clearPending)
+    invokeStatic(methodReference("$GALLERY_EXTENSION->clearPendingPhoto()V"))
 }
 
 context(context: BytecodePatchContext)
@@ -1550,20 +1563,58 @@ private fun patchItemClickPhotoViewer() {
         val expanded = method.cloneMutable(additionalRegisters = 8)
         owner.methods.remove(method)
         owner.methods.add(expanded)
-        expanded.addInstructions(
-            0,
+        // The block is a one-time entry decision that returns to the caller only by falling into
+        // the original body, so any label the method head carries stays on the original
+        // instruction (what the plain insertion did): a branch to the head keeps running the
+        // native handler instead of re-running the divert.
+        expanded.insertHook(index = 0, relocateBranchTargets = false) {
             itemClickViewerInstructions(
                 event = event,
                 target = target,
                 delegates = delegates,
                 eventRegister = parameterRegister(expanded, 0),
                 receiverRegister = receiverRegister(expanded),
-            ),
-        )
+            )
+        }
     }
 }
 
-private fun galleryInstructions(
+/**
+ * Emits one gallery factory call: the media list, both item callbacks and the two padding values
+ * in the consecutive v0..v4 run the invoke reads, with the factory landing in [resultRegister].
+ */
+private fun Block.emitGalleryFactory(
+    compose: ResolvedComposeContracts,
+    factoryDescriptor: String,
+    listRegister: Int,
+    callbackRegister: Int,
+    itemClickCallbackRegister: Int,
+    paddingValuesRegister: Int,
+    resultRegister: Int,
+) {
+    move(0, listRegister, OBJECT)
+    move(1, callbackRegister, OBJECT)
+    move(2, itemClickCallbackRegister, OBJECT)
+    move(6, paddingValuesRegister, OBJECT)
+    invokeInterface(methodReference(compose.paddingTop.smaliReference()), 6)
+    moveResult(3, "F")
+    invokeInterface(methodReference(compose.paddingBottom.smaliReference()), 6)
+    moveResult(4, "F")
+    invokeStatic(methodReference(factoryDescriptor), 0, 1, 2, 3, 4)
+    moveResult(resultRegister, FUNCTION1)
+}
+
+/**
+ * Replaces the native Photos timeline body with the gallery: the two extension factories are built
+ * from the media list, both item callbacks and the caller's padding values, then handed to the
+ * androidView composable.
+ *
+ * v0..v4 are the androidView operand run and v6 the padding holder; parameters above v15 are copied
+ * down first, because the range invoke reads one contiguous run. [factoryRegister] is the register
+ * the caller's frame growth reserved below the parameter block: it keeps the first factory alive
+ * across the second call.
+ */
+private fun Block.galleryInstructions(
     timeline: ResolvedTimelineType,
     compose: ResolvedComposeContracts,
     listRegister: Int,
@@ -1573,50 +1624,52 @@ private fun galleryInstructions(
     paddingValuesRegister: Int,
     modifierRegister: Int,
     composerRegister: Int,
-    scratchRegister: Int,
-): String {
+    factoryRegister: Int,
+) {
     val androidViewParameters = compose.androidView.parameterTypes
     val androidViewLastRegister = androidViewParameters.lastIndex
-    val androidViewFlags =
-        androidViewParameters.drop(4).indices.joinToString("\n") { index ->
-            "const/4 v${4 + index}, 0"
-        }
-    return """
-        sget-object v0, ${timeline.photosField}
-        move-object/from16 v1, v$timelineTypeRegister
-        if-ne v1, v0, :piko_newx_photos_original
-        invoke-static {}, $GALLERY_EXTENSION->isEnabled()Z
-        move-result v0
-        if-eqz v0, :piko_newx_photos_original
-        move-object/from16 v0, v$listRegister
-        move-object/from16 v1, v$callbackRegister
-        move-object/from16 v2, v$itemClickCallbackRegister
-        move-object/from16 v6, v$paddingValuesRegister
-        invoke-interface {v6}, ${compose.paddingTop.smaliReference()}
-        move-result v3
-        invoke-interface {v6}, ${compose.paddingBottom.smaliReference()}
-        move-result v4
-        invoke-static/range {v0 .. v4}, $GALLERY_EXTENSION->createFactory(Ljava/util/List;Ljava/lang/Object;Ljava/lang/Object;FF)$FUNCTION1
-        move-result-object v0
-        move-object v$scratchRegister, v0
-        move-object/from16 v0, v$listRegister
-        move-object/from16 v1, v$callbackRegister
-        move-object/from16 v2, v$itemClickCallbackRegister
-        move-object/from16 v6, v$paddingValuesRegister
-        invoke-interface {v6}, ${compose.paddingTop.smaliReference()}
-        move-result v3
-        invoke-interface {v6}, ${compose.paddingBottom.smaliReference()}
-        move-result v4
-        invoke-static/range {v0 .. v4}, $GALLERY_EXTENSION->createUpdater(Ljava/util/List;Ljava/lang/Object;Ljava/lang/Object;FF)$FUNCTION1
-        move-result-object v2
-        move-object v0, v$scratchRegister
-        move-object/from16 v1, v$modifierRegister
-        move-object/from16 v3, v$composerRegister
-        $androidViewFlags
-        invoke-static/range {v0 .. v$androidViewLastRegister}, ${compose.androidView.smaliReference()}
-        return-void
-        :piko_newx_photos_original
-    """.trimIndent()
+    // The flag slots the androidView composable reads after the composer; they stay at zero so the
+    // composable applies its own defaults.
+    val androidViewFlagSlots = androidViewParameters.drop(4).indices
+    val androidViewRegisters = IntArray(androidViewLastRegister + 1) { index -> index }
+
+    sget(0, fieldReference(timeline.photosField))
+    move(1, timelineTypeRegister, OBJECT)
+    ifNe(1, 0, Target.Original)
+    invokeStatic(methodReference("$GALLERY_EXTENSION->isEnabled()Z"))
+    moveResult(0, "Z")
+    ifEqz(0, Target.Original)
+
+    emitGalleryFactory(
+        compose = compose,
+        factoryDescriptor =
+            "$GALLERY_EXTENSION->createFactory(Ljava/util/List;Ljava/lang/Object;Ljava/lang/Object;FF)$FUNCTION1",
+        listRegister = listRegister,
+        callbackRegister = callbackRegister,
+        itemClickCallbackRegister = itemClickCallbackRegister,
+        paddingValuesRegister = paddingValuesRegister,
+        resultRegister = 0,
+    )
+    move(factoryRegister, 0, OBJECT)
+    emitGalleryFactory(
+        compose = compose,
+        factoryDescriptor =
+            "$GALLERY_EXTENSION->createUpdater(Ljava/util/List;Ljava/lang/Object;Ljava/lang/Object;FF)$FUNCTION1",
+        listRegister = listRegister,
+        callbackRegister = callbackRegister,
+        itemClickCallbackRegister = itemClickCallbackRegister,
+        paddingValuesRegister = paddingValuesRegister,
+        resultRegister = 2,
+    )
+    move(0, factoryRegister, OBJECT)
+    move(1, modifierRegister, OBJECT)
+    move(3, composerRegister, OBJECT)
+    androidViewFlagSlots.forEach { index -> constInt(4 + index, 0) }
+    invokeStatic(
+        methodReference(compose.androidView.smaliReference()),
+        *androidViewRegisters,
+    )
+    returnVoid()
 }
 
 @Suppress("unused")
@@ -1684,10 +1737,12 @@ val newXProfilePhotosGalleryPatch =
                 )
             }
 
-            val scratchRegister =
+            // The register the frame growth below the parameter block reserves for the first
+            // factory: the block keeps it alive across the second factory call.
+            val factoryRegister =
                 maxOf(8, compose.androidView.parameterTypes.size + 1)
             val method = originalMethod.cloneMutable(
-                additionalRegisters = scratchRegister + 1,
+                additionalRegisters = factoryRegister + 1,
             ).also { expanded ->
                 match.classDef.methods.remove(originalMethod)
                 match.classDef.methods.add(expanded)
@@ -1699,8 +1754,11 @@ val newXProfilePhotosGalleryPatch =
             val paddingValuesRegister = parameterRegister(method, paddingValuesIndex)
             val modifierRegister = parameterRegister(method, modifierIndex)
             val composerRegister = parameterRegister(method, composerIndex)
-            method.addInstructions(
-                0,
+            // The block is the method's one-time replacement preamble: it either returns into the
+            // gallery or falls into the native body, so a label on the method head stays on the
+            // original instruction (what the plain insertion did) and a branch to the head keeps
+            // rendering the native timeline instead of re-running the preamble.
+            method.insertHook(index = 0, relocateBranchTargets = false) {
                 galleryInstructions(
                     timeline = timelineType,
                     compose = compose,
@@ -1711,9 +1769,9 @@ val newXProfilePhotosGalleryPatch =
                     paddingValuesRegister = paddingValuesRegister,
                     modifierRegister = modifierRegister,
                     composerRegister = composerRegister,
-                    scratchRegister = scratchRegister,
-                ),
-            )
+                    factoryRegister = factoryRegister,
+                )
+            }
             patchPagingEventBridge(pagingEvent)
             patchItemClickPhotoViewer()
         }

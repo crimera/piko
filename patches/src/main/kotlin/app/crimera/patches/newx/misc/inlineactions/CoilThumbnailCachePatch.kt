@@ -1,15 +1,19 @@
 package app.crimera.patches.newx.misc.inlineactions
 
 import app.crimera.patches.newx.utils.Constants.MEDIA_THUMBNAIL_LOADER_DESCRIPTOR
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.util.cloneMutable
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Field
@@ -133,78 +137,82 @@ private fun patchCoilThumbnailBridge(
             }
         }
 
-    helper.addInstructions(
-        0,
-        """
-            const/4 v5, 0x0
-            const/4 v6, 0x0
-            const/4 v7, 0x0
-            const/4 v8, 0x0
-            const/4 v9, 0x0
-            if-eqz p0, :piko_newx_cached_thumbnail_none
-            if-eqz p1, :piko_newx_cached_thumbnail_none
-            check-cast p0, Landroid/content/Context;
-            invoke-static {p0}, ${runtime.provider}
-            move-result-object v0
-            check-cast v0, ${runtime.loaderOwner}
-            invoke-virtual {v0}, ${runtime.loader}
-            move-result-object v0
-            if-eqz v0, :piko_newx_cached_thumbnail_none
+    val diagnosticsReference =
+        methodReference(
+            "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$CACHED_THUMBNAIL_DIAGNOSTICS_HELPER" +
+                "(Ljava/lang/String;IIIII)V",
+        )
+    val messageRegister = helper.p0Register + 1
+    helper.insertHook(
+        index = 0,
+        // Plain insertion semantics: a branch into the stub head keeps skipping the bridge, exactly
+        // as it did when this block was a smali string.
+        relocateBranchTargets = false,
+    ) {
+        // The stub body (a plain return) stays behind the block as dead code, as before.
+        val noneLabel = "piko_newx_cached_thumbnail_none"
+        val loopLabel = "piko_newx_cached_thumbnail_loop"
+        (5..9).forEach { register -> constInt(register, 0) }
+        ifEqz(helper.p0Register, Target.Local(noneLabel))
+        ifEqz(messageRegister, Target.Local(noneLabel))
+        checkCast(helper.p0Register, "Landroid/content/Context;")
+        invokeStatic(methodReference(runtime.provider), helper.p0Register)
+        moveResult(0, OBJECT_DESCRIPTOR)
+        checkCast(0, runtime.loaderOwner)
+        invokeVirtual(methodReference(runtime.loader), 0)
+        moveResult(0, OBJECT_DESCRIPTOR)
+        ifEqz(0, Target.Local(noneLabel))
 
-            iget-object v1, v0, ${runtime.strongCacheField}
-            invoke-interface {v1}, ${runtime.cacheKeys}
-            move-result-object v1
-            new-instance v2, Ljava/util/LinkedHashSet;
-            invoke-direct {v2, v1}, Ljava/util/LinkedHashSet;-><init>(Ljava/util/Collection;)V
-            iget-object v1, v0, ${runtime.weakCacheField}
-            iget-object v1, v1, ${runtime.mapBackingField}
-            check-cast v1, Ljava/util/LinkedHashMap;
-            invoke-virtual {v1}, Ljava/util/LinkedHashMap;->keySet()Ljava/util/Set;
-            move-result-object v1
-            invoke-interface {v2, v1}, Ljava/util/Set;->addAll(Ljava/util/Collection;)Z
-            invoke-interface {v2}, Ljava/util/Set;->size()I
-            move-result v5
-            const/4 v6, 0x0
-            const/4 v7, 0x0
-            const/4 v8, 0x0
-            const/4 v9, 0x0
-            invoke-interface {v2}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
-            move-result-object v1
+        iget(1, 0, fieldReference(runtime.strongCacheField))
+        invokeInterface(methodReference(runtime.cacheKeys), 1)
+        moveResult(1, OBJECT_DESCRIPTOR)
+        newInstance(2, "Ljava/util/LinkedHashSet;")
+        invokeDirect(methodReference("Ljava/util/LinkedHashSet;-><init>(Ljava/util/Collection;)V"), 2, 1)
+        iget(1, 0, fieldReference(runtime.weakCacheField))
+        iget(1, 1, fieldReference(runtime.mapBackingField))
+        checkCast(1, "Ljava/util/LinkedHashMap;")
+        invokeVirtual(methodReference("Ljava/util/LinkedHashMap;->keySet()Ljava/util/Set;"), 1)
+        moveResult(1, OBJECT_DESCRIPTOR)
+        invokeInterface(methodReference("Ljava/util/Set;->addAll(Ljava/util/Collection;)Z"), 2, 1)
+        invokeInterface(methodReference("Ljava/util/Set;->size()I"), 2)
+        moveResult(5, "I")
+        (6..9).forEach { register -> constInt(register, 0) }
+        invokeInterface(methodReference("Ljava/util/Set;->iterator()Ljava/util/Iterator;"), 2)
+        moveResult(1, OBJECT_DESCRIPTOR)
 
-            :piko_newx_cached_thumbnail_loop
-            invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
-            move-result v2
-            if-eqz v2, :piko_newx_cached_thumbnail_none
-            invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
-            move-result-object v2
-            check-cast v2, ${runtime.keyDescriptor}
-            iget-object v3, v2, ${runtime.keyStringField}
-            invoke-virtual {v3, p1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
-            move-result v3
-            if-eqz v3, :piko_newx_cached_thumbnail_loop
-            add-int/lit8 v6, v6, 1
-            invoke-virtual {v0, v2}, ${runtime.memoryLookup}
-            move-result-object v2
-            if-eqz v2, :piko_newx_cached_thumbnail_loop
-            add-int/lit8 v7, v7, 1
-            iget-object v2, v2, ${runtime.imageField}
-            if-eqz v2, :piko_newx_cached_thumbnail_loop
-            add-int/lit8 v8, v8, 1
-            invoke-static {v2}, ${runtime.converter}
-            move-result-object v2
-            if-eqz v2, :piko_newx_cached_thumbnail_none
-            add-int/lit8 v9, v9, 1
-            move-object v4, p1
-            invoke-static/range {v4 .. v9}, ${MEDIA_THUMBNAIL_LOADER_DESCRIPTOR}->${CACHED_THUMBNAIL_DIAGNOSTICS_HELPER}(Ljava/lang/String;IIIII)V
-            return-object v2
+        label(loopLabel)
+        invokeInterface(methodReference("Ljava/util/Iterator;->hasNext()Z"), 1)
+        moveResult(2, "Z")
+        ifEqz(2, Target.Local(noneLabel))
+        invokeInterface(methodReference("Ljava/util/Iterator;->next()Ljava/lang/Object;"), 1)
+        moveResult(2, OBJECT_DESCRIPTOR)
+        checkCast(2, runtime.keyDescriptor)
+        iget(3, 2, fieldReference(runtime.keyStringField))
+        invokeVirtual(methodReference("Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z"), 3, messageRegister)
+        moveResult(3, "Z")
+        ifEqz(3, Target.Local(loopLabel))
+        intAddLiteral8(6, 6, 1)
+        invokeVirtual(methodReference(runtime.memoryLookup), 0, 2)
+        moveResult(2, OBJECT_DESCRIPTOR)
+        ifEqz(2, Target.Local(loopLabel))
+        intAddLiteral8(7, 7, 1)
+        iget(2, 2, fieldReference(runtime.imageField))
+        ifEqz(2, Target.Local(loopLabel))
+        intAddLiteral8(8, 8, 1)
+        invokeStatic(methodReference(runtime.converter), 2)
+        moveResult(2, OBJECT_DESCRIPTOR)
+        ifEqz(2, Target.Local(noneLabel))
+        intAddLiteral8(9, 9, 1)
+        move(4, messageRegister, OBJECT_DESCRIPTOR)
+        invokeStatic(diagnosticsReference, 4, 5, 6, 7, 8, 9)
+        returnObject(2)
 
-            :piko_newx_cached_thumbnail_none
-            move-object v4, p1
-            invoke-static/range {v4 .. v9}, ${MEDIA_THUMBNAIL_LOADER_DESCRIPTOR}->${CACHED_THUMBNAIL_DIAGNOSTICS_HELPER}(Ljava/lang/String;IIIII)V
-            const/4 v0, 0x0
-            return-object v0
-        """.trimIndent(),
-    )
+        label(noneLabel)
+        move(4, messageRegister, OBJECT_DESCRIPTOR)
+        invokeStatic(diagnosticsReference, 4, 5, 6, 7, 8, 9)
+        constInt(0, 0)
+        returnObject(0)
+    }
 }
 
 context(context: BytecodePatchContext)

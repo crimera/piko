@@ -11,15 +11,17 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
+import app.crimera.bytecode.RegisterLimit
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.instanceOf
 import app.morphe.patcher.methodCall
@@ -28,10 +30,8 @@ import app.morphe.patcher.string
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -54,6 +54,8 @@ private const val CANONICAL_URL_RESOLVER =
     "Lapp/morphe/extension/newx/misc/CanonicalUrlResolver;"
 private const val CANONICAL_URL_RESOLVE_METHOD =
     "$CANONICAL_URL_RESOLVER->resolve(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;"
+private const val SETTINGS_GET_BOOLEAN_DESCRIPTOR =
+    "$SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault(Ljava/lang/String;)Z"
 private const val POST_URL_FIELD_FILTER_INDEX = 3
 private const val TEXT_ENTITY_URL_FIELD_FILTER_INDEX = 5
 private const val RICH_TEXT_DISPLAY_URL_FIELD_FILTER_INDEX = 1
@@ -111,7 +113,7 @@ private data class InlinedUrlPickerSite(
     val gateIndex: Int,
     val selectedRegister: Int,
     val expandedRegister: Int,
-    val continuation: Instruction,
+    val continuationIndex: Int,
 )
 
 private data class InlinedUrlPickerNormalization(
@@ -555,7 +557,7 @@ private fun resolveInlinedUrlPickerSite(
         gateIndex = gateIndex,
         selectedRegister = selectedRegister,
         expandedRegister = expandedRegister,
-        continuation = consumer,
+        continuationIndex = continuationIndex,
     )
 }
 
@@ -679,40 +681,31 @@ private fun replaceUrlEntityFieldRead(
             "URL-entity field read at instruction $fieldReadIndex already uses the replacement field",
         )
     }
-    val continuation = method.instructions.getOrNull(fieldReadIndex + 1)
-        ?: throw PatchException(
+    // The entry instruction is kept as the setting-off path and the hook jumps past it, so it
+    // needs an instruction behind it to land on.
+    if (fieldReadIndex + 1 !in method.instructions.indices) {
+        throw PatchException(
             "URL-entity field read at instruction $fieldReadIndex has no continuation",
         )
-    // const-string, invoke-static/range, move-result, and if-eqz all support byte-addressable
-    // registers, which avoids rejecting valid high-register Compose methods under register
-    // pressure. The field access itself keeps its original four-bit operands.
-    val settingRegister =
-        method.getFreeRegisterProvider(
-            fieldReadIndex,
-            1,
-            fieldRead.registerA,
-            fieldRead.registerB,
-        ).getFreeRegister()
-    val originalLabel = "piko_canonical_url_original_$fieldReadIndex"
-    val continuationLabel = "piko_canonical_url_continue_$fieldReadIndex"
-    // Replace the entry instruction itself so existing branch labels land on the setting check.
-    method.replaceInstruction(
-        fieldReadIndex,
-        "const-string v$settingRegister, \"${setting.id}\"",
-    )
-    method.addInstructionsWithLabels(
-        fieldReadIndex + 1,
-        """
-            invoke-static/range {v$settingRegister .. v$settingRegister}, $SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault(Ljava/lang/String;)Z
-            move-result v$settingRegister
-            if-eqz v$settingRegister, :$originalLabel
-            iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $replacement
-            goto :$continuationLabel
-            :$originalLabel
-            iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $originalField
-        """.trimIndent(),
-        ExternalLabel(continuationLabel, continuation),
-    )
+    }
+    // const-string, invoke-static and if-eqz all support byte-addressable registers, which avoids
+    // rejecting valid high-register Compose methods under register pressure. The field access
+    // itself keeps its original four-bit operands.
+    method.insertHook(
+        index = fieldReadIndex,
+        excludedRegisters = listOf(fieldRead.registerA, fieldRead.registerB),
+        // The old patch replaced the read with the setting check, so every path that used to
+        // reach the read - the branches labelled on it included - has to run the check first.
+        relocateBranchTargets = true,
+    ) {
+        val settingRegister = scratchRegister(RegisterLimit.BYTE)
+        constString(settingRegister, setting.id)
+        invokeStatic(methodReference(SETTINGS_GET_BOOLEAN_DESCRIPTOR), settingRegister)
+        moveResult(settingRegister, "Z")
+        ifEqz(settingRegister, Target.Original)
+        iget(fieldRead.registerA, fieldRead.registerB, replacement)
+        goto(Target.AfterOriginal(1))
+    }
 }
 
 private fun preferExpandedUrlInUrlPicker(
@@ -739,7 +732,6 @@ private fun patchExtractedUrlPicker(
     val expandedRegister = baseRegister + 1
 
     // Use the raw expanded URL whenever it is available, preserving the established behavior.
-    val firstInstruction = method.instructions.first()
     val settingRead =
         setting.injectRead(
             method = method,
@@ -747,15 +739,16 @@ private fun patchExtractedUrlPicker(
             excludedRegisters = listOf(baseRegister, expandedRegister),
             registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
         )
-    method.addInstructionsWithLabels(
-        settingRead.nextIndex,
-        """
-        if-eqz v${settingRead.register}, :piko_canonical_url_picker_original
-        if-eqz v$expandedRegister, :piko_canonical_url_picker_original
-        return-object v$expandedRegister
-        """.trimIndent(),
-        ExternalLabel("piko_canonical_url_picker_original", firstInstruction),
-    )
+    // The original first instruction now sits directly behind the hook, and the old insertion
+    // left incoming labels on it: a path that re-entered the method head kept skipping the guard.
+    method.insertHook(
+        index = settingRead.nextIndex,
+        relocateBranchTargets = false,
+    ) {
+        ifEqz(settingRead.register, Target.Original)
+        ifEqz(expandedRegister, Target.Original)
+        returnObject(expandedRegister)
+    }
 }
 
 private fun patchInlinedUrlPickerSite(
@@ -769,8 +762,10 @@ private fun patchInlinedUrlPickerSite(
                 "selected=v${site.selectedRegister}, expanded=v${site.expandedRegister}",
         )
     }
-    val originalGate = method.instructions.getOrNull(site.gateIndex)
-        ?: throw PatchException("Inlined URL picker has no expanded-URL gate")
+    // The gate is the original instruction at the hook index, so it has to exist.
+    if (site.gateIndex !in method.instructions.indices) {
+        throw PatchException("Inlined URL picker has no expanded-URL gate")
+    }
     val settingRead =
         setting.injectRead(
             method = method,
@@ -778,19 +773,19 @@ private fun patchInlinedUrlPickerSite(
             excludedRegisters = listOf(site.selectedRegister, site.expandedRegister),
             registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
         )
-    val originalLabel = "piko_canonical_inline_original_${site.gateIndex}"
-    val continuationLabel = "piko_canonical_inline_continue_${site.gateIndex}"
-    method.addInstructionsWithLabels(
-        settingRead.nextIndex,
-        """
-        if-eqz v${settingRead.register}, :$originalLabel
-        if-eqz v${site.expandedRegister}, :$originalLabel
-        move-object v${site.selectedRegister}, v${site.expandedRegister}
-        goto :$continuationLabel
-        """.trimIndent(),
-        ExternalLabel(originalLabel, originalGate),
-        ExternalLabel(continuationLabel, site.continuation),
-    )
+    // The setting read was inserted in front of the gate, so the gate is the original instruction
+    // at the hook index and the URL consumer keeps its old distance behind the gate. Both old
+    // labels targeted instructions the hook does not move, so incoming labels stay where they are.
+    val continuationOffset = site.continuationIndex - site.gateIndex
+    method.insertHook(
+        index = settingRead.nextIndex,
+        relocateBranchTargets = false,
+    ) {
+        ifEqz(settingRead.register, Target.Original)
+        ifEqz(site.expandedRegister, Target.Original)
+        move(site.selectedRegister, site.expandedRegister, OBJECT_DESCRIPTOR)
+        goto(Target.AfterOriginal(continuationOffset))
+    }
 }
 
 context(_: BytecodePatchContext)
@@ -977,8 +972,10 @@ private fun patchCardUrl(
     }
 
     val method = match.method
-    val continuation = method.instructions.getOrNull(insertionIndex)
-        ?: throw PatchException("Card URL resolver has no continuation instruction")
+    // The URL getter's result handling is the original instruction at the hook index.
+    if (insertionIndex !in method.instructions.indices) {
+        throw PatchException("Card URL resolver has no continuation instruction")
+    }
     val settingRead =
         setting.injectRead(
             method = method,
@@ -986,15 +983,16 @@ private fun patchCardUrl(
             excludedRegisters = listOf(postRegister, urlRegister),
             registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
         )
-    method.addInstructionsWithLabels(
-        settingRead.nextIndex,
-        """
-        if-eqz v${settingRead.register}, :piko_canonical_card_url_continue
-        invoke-static {v$postRegister, v$urlRegister}, $CANONICAL_URL_RESOLVE_METHOD
-        move-result-object v$urlRegister
-        """.trimIndent(),
-        ExternalLabel("piko_canonical_card_url_continue", continuation),
-    )
+    // The old insertion left incoming labels on the result handling, so a path that branched
+    // straight to it kept skipping the resolver.
+    method.insertHook(
+        index = settingRead.nextIndex,
+        relocateBranchTargets = false,
+    ) {
+        ifEqz(settingRead.register, Target.Original)
+        invokeStatic(methodReference(CANONICAL_URL_RESOLVE_METHOD), postRegister, urlRegister)
+        moveResult(urlRegister, STRING_DESCRIPTOR)
+    }
 }
 
 context(context: BytecodePatchContext)

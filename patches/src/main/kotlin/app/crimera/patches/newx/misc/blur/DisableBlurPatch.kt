@@ -13,15 +13,14 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -133,9 +132,6 @@ private fun patchHazeBlurSetter(
     method: MutableMethod,
     disableBlur: ToggleSettingDefinition,
 ) {
-    val originalFirstInstruction =
-        method.instructions.firstOrNull()
-            ?: throw PatchException("NewX Haze blur setter has no instructions: $method")
     val receiverRegister = method.p0Register
     val inputRegister = receiverRegister + 1
     if (inputRegister > 255) {
@@ -157,17 +153,17 @@ private fun patchHazeBlurSetter(
         )
     }
 
-    method.addInstructionsWithLabels(
-        read.nextIndex,
-        """
-            if-eqz v${read.register}, :piko_newx_disable_blur_continue
-            const/4 v$inputRegister, 0x0
-        """.trimIndent(),
-        ExternalLabel(
-            "piko_newx_disable_blur_continue",
-            originalFirstInstruction,
-        ),
-    )
+    // The old external label was anchored on the setter's original first instruction, which is
+    // exactly the instruction the injected read left behind its own block, so
+    // `Target.Original` addresses it. The plain insertion kept incoming labels on that
+    // instruction, so the branch policy stays `false`.
+    method.insertHook(
+        index = read.nextIndex,
+        relocateBranchTargets = false,
+    ) {
+        ifEqz(read.register, Target.Original)
+        constInt(inputRegister, 0)
+    }
 }
 
 @Suppress("unused")

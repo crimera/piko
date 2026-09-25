@@ -32,6 +32,11 @@ import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_TAB_OPENER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
@@ -42,8 +47,6 @@ import app.crimera.patches.newx.utils.writesObjectRegister
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.methodCall
@@ -55,9 +58,7 @@ import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
@@ -75,6 +76,8 @@ import org.w3c.dom.Element
 
 private const val DRAWER_RESOURCE_ITEM_ID_PREFIX = "RESOURCE_NAME_"
 private const val DRAWER_RESOURCE_TYPE = "string"
+/** Skip target of the replaced `DrawerTabOpener` shortcut bodies: the component was never captured. */
+private const val DRAWER_TAB_DONE_LABEL = "piko_drawer_tab_done"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
@@ -316,17 +319,15 @@ private fun MutableMethod.injectDrawerItemGuard(hiddenItems: MultiChoiceSettingD
             if (type == "J" || type == "D") 2 else 1
         }
     val titleParameterRegister = p0Register + precedingRegisters
-    val titleRegister =
-        getFreeRegisterProvider(0, 1, titleParameterRegister)
-            .getFreeRegister4Bit()
     injectDrawerGuard(
         hiddenItems = hiddenItems,
-        titleRegister = titleRegister,
-        titleInstruction = "move-object/from16 v$titleRegister, v$titleParameterRegister",
         predicateMethod = "shouldHide",
-        labelSuffix = "${parameterTypes.size}_$stringParamIndex",
-        excludedRegisters = listOf(titleParameterRegister, titleRegister),
-    )
+        // The title is loaded from the parameter, so neither injected register may reuse it.
+        readExcludedRegisters = listOf(titleParameterRegister),
+        scratchExcludedRegisters = listOf(titleParameterRegister),
+    ) { titleRegister ->
+        move(titleRegister, titleParameterRegister, "Ljava/lang/String;")
+    }
 }
 
 // ID-based filtering for title-less buttons (Grok, theme toggle).
@@ -336,50 +337,66 @@ private fun MutableMethod.injectFixedDrawerItemGuard(
 ) {
     val parameterRegisterCount =
         parameterTypes.sumOf { type -> if (type == "J" || type == "D") 2 else 1 }
-    val titleRegister =
-        getFreeRegisterProvider(0, 1, *(0 until parameterRegisterCount).toList().toIntArray())
-            .getFreeRegister4Bit()
     injectDrawerGuard(
         hiddenItems = hiddenItems,
-        titleRegister = titleRegister,
-        titleInstruction = "const-string v$titleRegister, \"$itemId\"",
         predicateMethod = "shouldHideId",
-        labelSuffix = "fixed_$itemId",
-        excludedRegisters = listOf(titleRegister),
-    )
+        // The title is a literal, so no app register has to survive the read; the scratch
+        // register below keeps the exclusion list of the lookup it replaces.
+        readExcludedRegisters = emptyList(),
+        scratchExcludedRegisters = (0 until parameterRegisterCount).toList(),
+    ) { titleRegister ->
+        constString(titleRegister, itemId)
+    }
 }
 
+/**
+ * Hides the rendered row when [predicateMethod] classifies it as hidden. The setting read and the
+ * guard both sit in front of the renderer's first instruction; [titleLoader] loads the row title
+ * into the scratch register the guard allocated for it.
+ *
+ * @param readExcludedRegisters registers the setting read must leave alone, because the guard
+ *   still reads them.
+ * @param scratchExcludedRegisters registers the guard's scratch register must avoid, in addition
+ *   to the read's register and the registers the liveness search reports as free.
+ */
 private fun MutableMethod.injectDrawerGuard(
     hiddenItems: MultiChoiceSettingDefinition,
-    titleRegister: Int,
-    titleInstruction: String,
     predicateMethod: String,
-    labelSuffix: String,
-    excludedRegisters: List<Int>,
+    readExcludedRegisters: List<Int>,
+    scratchExcludedRegisters: List<Int>,
+    titleLoader: Block.(titleRegister: Int) -> Unit,
 ) {
-    val originalInstruction =
-        instructions.firstOrNull()
-            ?: throw PatchException("NewX drawer item renderer has no instructions")
+    if (instructions.isEmpty()) {
+        throw PatchException("NewX drawer item renderer has no instructions: $this")
+    }
     val read =
         hiddenItems.injectRead(
             method = this,
             index = 0,
-            excludedRegisters = excludedRegisters,
+            excludedRegisters = readExcludedRegisters,
             registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
         )
-    val continueLabel = "piko_newx_drawer_item_continue_$labelSuffix"
-
-    addInstructionsWithLabels(
-        read.nextIndex,
-        """
-            $titleInstruction
-            invoke-static {v$titleRegister, v${read.register}}, $DRAWER_ITEM_FILTER_DESCRIPTOR->$predicateMethod(Ljava/lang/String;Ljava/util/Set;)Z
-            move-result v$titleRegister
-            if-eqz v$titleRegister, :$continueLabel
-            return-void
-        """.trimIndent(),
-        ExternalLabel(continueLabel, originalInstruction),
-    )
+    insertHook(
+        index = read.nextIndex,
+        // The read's set is live across the guard, so the scratch register must not reuse it.
+        excludedRegisters = scratchExcludedRegisters + read.register,
+        // The guard consumes the set the read block produced, so a branch that reaches the
+        // original first instruction keeps jumping to it instead of into the guard.
+        relocateBranchTargets = false,
+    ) {
+        val titleRegister = scratchRegister()
+        titleLoader(titleRegister)
+        invokeStatic(
+            methodReference(
+                "$DRAWER_ITEM_FILTER_DESCRIPTOR->$predicateMethod(Ljava/lang/String;Ljava/util/Set;)Z",
+            ),
+            titleRegister,
+            read.register,
+        )
+        moveResult(titleRegister, "Z")
+        ifEqz(titleRegister, Target.Original)
+        returnVoid()
+    }
 }
 
 private data class DrawerFooterTarget(
@@ -528,6 +545,10 @@ private fun resourceDrawerOptionId(resourceId: Int): String =
 
 // Catalog ids for the editor shortcuts. Mirrors DrawerEditorFragment.SHORTCUTS.
 private const val DRAWER_SHORTCUT_PIKO = "DRAWER_SHORTCUT_PIKO"
+private const val DRAWER_REGISTER_ITEM_DESCRIPTOR =
+    "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V"
+private const val SETTINGS_REGISTER_CHOICE_OPTION_RESOURCE_DESCRIPTOR =
+    "$SETTINGS_REGISTRY_DESCRIPTOR->registerChoiceOptionResource(Ljava/lang/String;Ljava/lang/String;IZ)V"
 private const val DRAWER_SHORTCUT_MESSAGES = "DRAWER_SHORTCUT_MESSAGES"
 private const val DRAWER_SHORTCUT_GROK = "DRAWER_SHORTCUT_GROK"
 private const val DRAWER_SHORTCUT_NOTIFICATIONS = "DRAWER_SHORTCUT_NOTIFICATIONS"
@@ -579,48 +600,29 @@ private fun injectDrawerCatalog(
             shortcutIcons.values + settingsIconField)
             .distinctBy(FieldReference::toString)
     val drawables = resolveIconDrawables(iconFields)
-    val instructions = buildString {
+    SettingsRegistrationState.inject(context) {
         nativeEntries.forEach { entry ->
             val drawable = entry.iconField?.let { drawables[it.toString()] } ?: 0
-            appendLine("const-string v0, \"${entry.optionId}\"")
-            appendLine("const v1, ${drawable.toDrawerSmaliLiteral()}")
-            appendLine(
-                "invoke-static {v0, v1}, " +
-                    "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
-            )
+            emitDrawerCatalogEntry(entry.optionId, drawable)
         }
         shortcutIcons.forEach { (optionId, iconField) ->
-            val drawable = drawables.getValue(iconField.toString()).toDrawerSmaliLiteral()
-            appendLine("const-string v0, \"$optionId\"")
-            appendLine("const v1, $drawable")
-            appendLine(
-                "invoke-static {v0, v1}, " +
-                    "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
-            )
+            emitDrawerCatalogEntry(optionId, drawables.getValue(iconField.toString()))
         }
-        appendLine("const-string v0, \"$DRAWER_SHORTCUT_PIKO\"")
-        appendLine(
-            "const v1, " +
-                drawables.getValue(settingsIconField.toString()).toDrawerSmaliLiteral(),
-        )
-        appendLine(
-            "invoke-static {v0, v1}, " +
-                "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
+        emitDrawerCatalogEntry(
+            DRAWER_SHORTCUT_PIKO,
+            drawables.getValue(settingsIconField.toString()),
         )
         listOf("GROK", "THEME_TOGGLE").forEach { optionId ->
-            appendLine("const-string v0, \"$optionId\"")
-            appendLine("const v1, 0x0")
-            appendLine(
-                "invoke-static {v0, v1}, " +
-                    "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V",
-            )
+            emitDrawerCatalogEntry(optionId, 0)
         }
     }
-    SettingsRegistrationState.inject(context, instructions)
 }
 
-private fun Int.toDrawerSmaliLiteral(): String =
-    if (this < 0) "-0x${(-this).toString(16)}" else "0x${toString(16)}"
+private fun Block.emitDrawerCatalogEntry(optionId: String, drawable: Int) {
+    constString(0, optionId)
+    constInt(1, drawable)
+    invokeStatic(methodReference(DRAWER_REGISTER_ITEM_DESCRIPTOR), 0, 1)
+}
 
 context(context: BytecodePatchContext)
 private fun injectDynamicDrawerOptions(
@@ -630,17 +632,21 @@ private fun injectDynamicDrawerOptions(
     if (resourceIds.isEmpty()) {
         throw PatchException("Expected at least one dynamic NewX drawer title resource")
     }
-    val instructions = resourceIds.distinct().joinToString("\n") { resourceId ->
-        val optionId = resourceDrawerOptionId(resourceId)
-        """
-            const-string v0, "${hiddenItems.id}"
-            const-string v1, "$optionId"
-            const v2, ${resourceId.toDrawerSmaliLiteral()}
-            const/4 v3, 0x0
-            invoke-static/range {v0 .. v3}, $SETTINGS_REGISTRY_DESCRIPTOR->registerChoiceOptionResource(Ljava/lang/String;Ljava/lang/String;IZ)V
-        """.trimIndent()
+    SettingsRegistrationState.inject(context) {
+        resourceIds.distinct().forEach { resourceId ->
+            constString(0, hiddenItems.id)
+            constString(1, resourceDrawerOptionId(resourceId))
+            constInt(2, resourceId)
+            constInt(3, 0)
+            invokeStatic(
+                methodReference(SETTINGS_REGISTER_CHOICE_OPTION_RESOURCE_DESCRIPTOR),
+                0,
+                1,
+                2,
+                3,
+            )
+        }
     }
-    SettingsRegistrationState.inject(context, instructions)
 }
 
 private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Boolean {
@@ -825,14 +831,13 @@ private fun MutableMethod.injectPikoSettingsDrawerItem(
         toggle = showPikoSettingsInDrawer,
         titleDescriptor = "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsTitle()Ljava/lang/String;",
         clickDescriptor = "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()$FUNCTION0_DESCRIPTOR",
-        labelSuffix = "settings_drawer_continue",
     )
 }
 
 /**
  * Emits one extra drawer row after an executed row call, reusing its registers for the
- * shared parameters. Each injection captures the instruction currently following the call as
- * its skip target, so sequential injections chain correctly.
+ * shared parameters. Each injection branches to the instruction that currently follows the call
+ * (`Target.Original`), so sequential injections chain correctly.
  */
 private fun MutableMethod.injectAdditionalDrawerRow(
     target: DrawerFooterTarget,
@@ -841,7 +846,6 @@ private fun MutableMethod.injectAdditionalDrawerRow(
     toggle: ToggleSettingDefinition?,
     titleDescriptor: String,
     clickDescriptor: String,
-    labelSuffix: String,
     registerConstraint: SettingReadRegisterConstraint = SettingReadRegisterConstraint.FOUR_BIT,
 ) {
     injectSnapshotDrawerRow(
@@ -853,7 +857,6 @@ private fun MutableMethod.injectAdditionalDrawerRow(
         toggle = toggle,
         titleDescriptor = titleDescriptor,
         clickDescriptor = clickDescriptor,
-        labelSuffix = labelSuffix,
         registerConstraint = registerConstraint,
     )
 }
@@ -873,7 +876,6 @@ private fun MutableMethod.injectSnapshotDrawerRow(
     toggle: ToggleSettingDefinition?,
     titleDescriptor: String,
     clickDescriptor: String,
-    labelSuffix: String,
     registerConstraint: SettingReadRegisterConstraint = SettingReadRegisterConstraint.FOUR_BIT,
 ) {
     val parameters = renderer.parameterTypes.map(CharSequence::toString)
@@ -908,9 +910,9 @@ private fun MutableMethod.injectSnapshotDrawerRow(
         )
     }
 
-    val continuationInstruction =
-        instructions.getOrNull(callIndex + 1)
-            ?: throw PatchException("NewX drawer row injection point has no continuation: $this")
+    if (callIndex + 1 >= instructions.size) {
+        throw PatchException("NewX drawer row injection point has no continuation: $this")
+    }
     // A null toggle skips the setting read entirely: the title provider returns null while
     // disabled, and the null title skips the row. Dense call sites may have no free register.
     val settingRead =
@@ -921,30 +923,26 @@ private fun MutableMethod.injectSnapshotDrawerRow(
             registerConstraint = registerConstraint,
         )
     val insertionIndex = settingRead?.nextIndex ?: (callIndex + 1)
-    val rowDescriptor = renderer.toSmaliDescriptor()
     val titleRegister = startRegister + titleIndex
     val iconRegister = startRegister + iconIndex
     val clickRegister = startRegister + clickIndex
-    val continueLabel = "piko_newx_${labelSuffix}"
-    val toggleGuard =
-        if (settingRead == null) {
-            ""
-        } else {
-            "if-eqz v${settingRead.register}, :$continueLabel\n"
+    insertHook(
+        index = insertionIndex,
+        // The block renders with the anchor call's register window, so a branch that skipped the
+        // anchor has to keep jumping to the original instruction instead of into the block.
+        relocateBranchTargets = false,
+    ) {
+        if (settingRead != null) {
+            ifEqz(settingRead.register, Target.Original)
         }
-    addInstructionsWithLabels(
-        insertionIndex,
-        """
-            ${toggleGuard}invoke-static {}, $titleDescriptor
-            move-result-object v$titleRegister
-            if-eqz v$titleRegister, :$continueLabel
-            sget-object v$iconRegister, $iconField
-            invoke-static {}, $clickDescriptor
-            move-result-object v$clickRegister
-            invoke-static/range {v$startRegister .. v$endRegister}, $rowDescriptor
-        """.trimIndent(),
-        ExternalLabel(continueLabel, continuationInstruction),
-    )
+        invokeStatic(methodReference(titleDescriptor))
+        moveResult(titleRegister, "Ljava/lang/String;")
+        ifEqz(titleRegister, Target.Original)
+        sget(iconRegister, iconField)
+        invokeStatic(methodReference(clickDescriptor))
+        moveResult(clickRegister, FUNCTION0_DESCRIPTOR)
+        invokeStatic(renderer, *(startRegister..endRegister).toList().toIntArray())
+    }
 }
 
 /**
@@ -1266,11 +1264,17 @@ private fun hookDrawerTabComponent(componentClass: String) {
         if (superCallIndex < 0) {
             throw PatchException("NewX tab component constructor has no super call: $constructor")
         }
-        constructor.addInstructions(
-            superCallIndex + 1,
-            "invoke-static/range {p0 .. p0}, " +
-                "$DRAWER_TAB_OPENER_DESCRIPTOR->setComponent(Ljava/lang/Object;)V",
-        )
+        constructor.insertHook(
+            index = superCallIndex + 1,
+            // Every path that reaches the end of the super call must capture the component. The
+            // block only reads p0, so relocating a branch onto it cannot run with undefined state.
+            relocateBranchTargets = true,
+        ) {
+            invokeStatic(
+                methodReference("$DRAWER_TAB_OPENER_DESCRIPTOR->setComponent($OBJECT_DESCRIPTOR)V"),
+                constructor.p0Register,
+            )
+        }
     }
 }
 
@@ -1308,33 +1312,40 @@ private fun replaceDrawerTabOpenerBody(
     while (implementation.instructions.isNotEmpty()) {
         implementation.removeInstruction(implementation.instructions.lastIndex)
     }
-    val tabChange =
-        navigation.tabChangeDescriptor?.let { descriptor ->
-            "invoke-virtual {v1, v0}, $descriptor"
-        } ?: run {
-            val field = navigation.tabChangeFunctionField
-                ?: throw PatchException(
-                    "Drawer tab change is missing on ${navigation.componentClass}",
-                )
-            "iget-object v2, v1, $field\n" +
-                "invoke-interface {v2, v0}, " +
-                "$FUNCTION1_DESCRIPTOR->invoke(Ljava/lang/Object;)Ljava/lang/Object;"
+    expanded.insertHook(
+        // The body was emptied above, so index 0 sits at the end of the instruction list and no
+        // branch label can be attached to it.
+        index = 0,
+        relocateBranchTargets = false,
+    ) {
+        sget(0, fieldReference("${navigation.enumType}->$enumEntry:${navigation.enumType}"))
+        sget(1, fieldReference("$DRAWER_TAB_OPENER_DESCRIPTOR->component:$OBJECT_DESCRIPTOR"))
+        ifEqz(1, Target.Local(DRAWER_TAB_DONE_LABEL))
+        checkCast(1, navigation.componentClass)
+        val tabChangeDescriptor = navigation.tabChangeDescriptor
+        if (tabChangeDescriptor != null) {
+            invokeVirtual(methodReference(tabChangeDescriptor), 1, 0)
+        } else {
+            val field =
+                navigation.tabChangeFunctionField
+                    ?: throw PatchException(
+                        "Drawer tab change is missing on ${navigation.componentClass}",
+                    )
+            iget(2, 1, field)
+            invokeInterface(
+                methodReference(
+                    "$FUNCTION1_DESCRIPTOR->invoke($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR",
+                ),
+                2,
+                0,
+            )
         }
-    expanded.addInstructions(
-        0,
-        """
-            sget-object v0, ${navigation.enumType}->$enumEntry:${navigation.enumType}
-            sget-object v1, $DRAWER_TAB_OPENER_DESCRIPTOR->component:Ljava/lang/Object;
-            if-eqz v1, :piko_drawer_tab_done
-            check-cast v1, ${navigation.componentClass}
-            $tabChange
-            sget-object v0, ${navigation.closerArgField}
-            iget-object v2, v1, ${navigation.closerField}
-            invoke-interface {v2, v0}, ${navigation.closerMethod.toSmaliDescriptor()}
-            :piko_drawer_tab_done
-            return-void
-        """.trimIndent(),
-    )
+        sget(0, navigation.closerArgField)
+        iget(2, 1, navigation.closerField)
+        invokeInterface(navigation.closerMethod, 2, 0)
+        label(DRAWER_TAB_DONE_LABEL)
+        returnVoid()
+    }
 }
 
 @Suppress("unused")
@@ -1539,7 +1550,6 @@ val customizeNewXDrawerPatch =
                 toggle = null,
                 titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsTitle()Ljava/lang/String;",
                 clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsClickHandler()$FUNCTION0_DESCRIPTOR",
-                labelSuffix = "notifications_drawer_continue",
             )
             footerTarget.method.injectAdditionalDrawerRow(
                 target = profileAnchor.target,
@@ -1548,7 +1558,6 @@ val customizeNewXDrawerPatch =
                 toggle = null,
                 titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokTitle()Ljava/lang/String;",
                 clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokClickHandler()$FUNCTION0_DESCRIPTOR",
-                labelSuffix = "grok_drawer_continue",
             )
             footerTarget.method.injectAdditionalDrawerRow(
                 target = profileAnchor.target,
@@ -1557,7 +1566,6 @@ val customizeNewXDrawerPatch =
                 toggle = null,
                 titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesTitle()Ljava/lang/String;",
                 clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesClickHandler()$FUNCTION0_DESCRIPTOR",
-                labelSuffix = "messages_drawer_continue",
             )
 
             // THEME PATH: sun/moon toggle button; skip when the release has no theme toggle.

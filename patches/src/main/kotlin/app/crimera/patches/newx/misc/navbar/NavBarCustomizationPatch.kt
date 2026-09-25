@@ -12,25 +12,25 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.NAV_BAR_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
+import app.crimera.bytecode.RegisterLimit
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.newx.utils.valueReachesRegister
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.patches.all.misc.resources.hasResourceId
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
@@ -57,6 +57,7 @@ private const val NAV_BAR_EDITOR_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/NavBarEditorFragment;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val INT_DESCRIPTOR = "I"
 
 private const val OPEN_REPLACEMENT_DESCRIPTOR =
     "$NAV_BAR_REPLACEMENT_DESCRIPTOR->openReplacementFor($OBJECT_DESCRIPTOR)Z"
@@ -67,11 +68,14 @@ private const val OVERRIDE_LABEL_DESCRIPTOR =
 private const val SHOULD_CLEAR_BADGE_DESCRIPTOR =
     "$NAV_BAR_REPLACEMENT_DESCRIPTOR->shouldClearBadge($OBJECT_DESCRIPTOR)Z"
 private const val REGISTER_DESTINATION_DESCRIPTOR =
-    "$NAV_BAR_CATALOG_DESCRIPTOR->registerDestination($STRING_DESCRIPTOR I$OBJECT_DESCRIPTOR I)V"
+    "$NAV_BAR_CATALOG_DESCRIPTOR->registerDestination($STRING_DESCRIPTOR$INT_DESCRIPTOR$OBJECT_DESCRIPTOR$INT_DESCRIPTOR)V"
 private const val REGISTER_TAB_DESCRIPTOR =
-    "$NAV_BAR_CATALOG_DESCRIPTOR->registerTab($STRING_DESCRIPTOR I$STRING_DESCRIPTOR)V"
+    "$NAV_BAR_CATALOG_DESCRIPTOR->registerTab($STRING_DESCRIPTOR$INT_DESCRIPTOR$STRING_DESCRIPTOR)V"
 private const val SET_DESTINATION_CLICK_DESCRIPTOR =
     "$NAV_BAR_REPLACEMENT_DESCRIPTOR->setDestinationClick($STRING_DESCRIPTOR$FUNCTION0_DESCRIPTOR)V"
+private const val TAB_DATA_FILTER_DESCRIPTOR =
+    "$NAV_BAR_FILTER_DESCRIPTOR->filter(Ljava/util/Map;)Ljava/util/Map;"
+private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
 
 private data class NavBarDestinationSpec(
     val id: String,
@@ -178,29 +182,18 @@ val customizeNewXNavBarPatch =
  */
 private fun injectNavBarFilter(match: Match) {
     val target = resolveNewXNavBarFilterTarget(match)
-    val workRegister =
-        try {
-            target.method
-                .getFreeRegisterProvider(target.insertionIndex, 1, target.tabDataRegister)
-                .getFreeRegister4Bit()
-        } catch (exception: RuntimeException) {
-            throw PatchException(
-                "No safe low register available for NewX tabData filtering: ${exception.message}",
-            )
-        }
-    if (workRegister !in 0..15) {
-        throw PatchException("NewX tabData work register is not 4-bit: v$workRegister")
+    target.method.insertHook(
+        index = target.insertionIndex,
+        excludedRegisters = listOf(target.tabDataRegister),
+        relocateBranchTargets = false,
+    ) {
+        val workRegister = scratchRegister()
+        move(workRegister, target.tabDataRegister, OBJECT_DESCRIPTOR)
+        invokeStatic(methodReference(TAB_DATA_FILTER_DESCRIPTOR), workRegister)
+        moveResult(workRegister, MAP_DESCRIPTOR)
+        checkCast(workRegister, target.resultType)
+        move(target.tabDataRegister, workRegister, OBJECT_DESCRIPTOR)
     }
-    target.method.addInstructions(
-        target.insertionIndex,
-        """
-            move-object/from16 v$workRegister, v${target.tabDataRegister}
-            invoke-static {v$workRegister}, $NAV_BAR_FILTER_DESCRIPTOR->filter(Ljava/util/Map;)Ljava/util/Map;
-            move-result-object v$workRegister
-            check-cast v$workRegister, ${target.resultType}
-            move-object/16 v${target.tabDataRegister}, v$workRegister
-        """.trimIndent(),
-    )
 }
 
 /**
@@ -208,36 +201,25 @@ private fun injectNavBarFilter(match: Match) {
  * keeps the original tab change behavior.
  */
 private fun MutableMethod.injectReplacementGuard() {
-    val firstInstruction = instructions.firstOrNull()
-        ?: throw PatchException("NewX tab change method has no instructions: $this")
+    if (instructions.isEmpty()) {
+        throw PatchException("NewX tab change method has no instructions: $this")
+    }
     val receiverRegister = p0Register
     val tabRegister = p0Register + 1
-    val workRegister =
-        try {
-            getFreeRegisterProvider(0, 1, receiverRegister, tabRegister).getFreeRegister()
-        } catch (exception: RuntimeException) {
-            throw PatchException("No safe register for the NewX tab replacement guard: ${exception.message}")
-        }
-    val continueLabel = "piko_newx_replace_continue"
-    addInstructionsWithLabels(
-        0,
-        """
-            ${invokeStaticSingle(tabRegister, OPEN_REPLACEMENT_DESCRIPTOR)}
-            move-result v$workRegister
-            if-eqz v$workRegister, :$continueLabel
-            return-void
-        """.trimIndent(),
-        ExternalLabel(continueLabel, firstInstruction),
-    )
+    insertHook(
+        index = 0,
+        excludedRegisters = listOf(receiverRegister, tabRegister),
+        relocateBranchTargets = false,
+    ) {
+        // `if-eqz` is format 21t, which encodes a byte register, so a byte scratch register is enough.
+        val workRegister = scratchRegister(RegisterLimit.BYTE)
+        invokeStatic(methodReference(OPEN_REPLACEMENT_DESCRIPTOR), tabRegister)
+        moveResult(workRegister, "Z")
+        ifEqz(workRegister, Target.Original)
+        returnVoid()
+    }
 }
 
-/**
- * Substitutes the rendered icon and label of the configured navigation bar item. Runs before the
- * resource lookup so the app still localizes the replacement label.
- *
- * The receiver cannot be read at the convergence point: the compiler reuses parameter registers
- * for the icon and label there. It is preserved in an unused local at method entry instead.
- */
 /**
  * Substitutes the rendered icon and label of the configured navigation bar item.
  *
@@ -253,54 +235,49 @@ private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor
         throw PatchException("NewX tab data replacement does not support wide parameters")
     }
 
-    val provider =
-        try {
-            method.getFreeRegisterProvider(
-                rendererCallIndex,
-                2,
-                iconRegister,
-                labelRegister,
-                tabDataValueRegister,
-                thisRegister,
-            )
-        } catch (exception: RuntimeException) {
-            throw PatchException("No safe register for the NewX navigation bar replacement: ${exception.message}")
-        }
-    val instanceRegister = provider.getFreeRegister4Bit()
-    val workRegister = provider.getFreeRegister4Bit()
-    
-    val paramRegisters = tabDataConstructor.parameterTypes.joinToString("") { ", v$workRegister" }
-    val endLabel = "piko_newx_replace_badge_end"
+    val paramTypes = tabDataConstructor.parameterTypes.map(CharSequence::toString)
+    method.insertHook(
+        index = rendererCallIndex,
+        excludedRegisters = listOf(iconRegister, labelRegister, tabDataValueRegister, thisRegister),
+        // The label switch jumps straight at the renderer call, so every case has to run the hook.
+        relocateBranchTargets = true,
+    ) {
+        val instanceRegister = scratchRegister()
+        val workRegister = scratchRegister()
 
-    method.addInstructionsWithLabels(
-        rendererCallIndex,
-        """
-            move-object/from16 v$workRegister, v$thisRegister
-            iget-object v$workRegister, v$workRegister, $navigationField
-            invoke-static {v$workRegister, v$iconRegister}, $OVERRIDE_ICON_DESCRIPTOR
-            move-result-object v$workRegister
-            check-cast v$workRegister, $iconType
-            move-object/from16 v$iconRegister, v$workRegister
-            
-            move-object/from16 v$workRegister, v$thisRegister
-            iget-object v$workRegister, v$workRegister, $navigationField
-            invoke-static {v$workRegister, v$labelRegister}, $OVERRIDE_LABEL_DESCRIPTOR
-            move-result-object v$labelRegister
-            
-            move-object/from16 v$workRegister, v$thisRegister
-            iget-object v$workRegister, v$workRegister, $navigationField
-            invoke-static {v$workRegister}, $SHOULD_CLEAR_BADGE_DESCRIPTOR
-            move-result v$workRegister
-            if-eqz v$workRegister, :$endLabel
-            new-instance v$instanceRegister, ${tabDataConstructor.definingClass}
-            const/4 v$workRegister, 0
-            invoke-direct {v$instanceRegister$paramRegisters}, ${tabDataConstructor.toSmaliDescriptor()}
-            move-object/from16 v$tabDataValueRegister, v$instanceRegister
-        """.trimIndent(),
-        ExternalLabel(endLabel, method.instructions.getOrNull(rendererCallIndex) 
-            ?: throw PatchException("NewX tab replacement renderer call is missing"))
-    )
-    method.addInstructions(0, "move-object/from16 v$thisRegister, p0")
+        // The receiver is preserved in a local above the original frame, so it is moved into the
+        // four-bit work register before every field read (format 22c cannot encode the receiver).
+        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
+        iget(workRegister, workRegister, navigationField)
+        invokeStatic(methodReference(OVERRIDE_ICON_DESCRIPTOR), workRegister, iconRegister)
+        moveResult(workRegister, iconType)
+        checkCast(workRegister, iconType)
+        move(iconRegister, workRegister, OBJECT_DESCRIPTOR)
+
+        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
+        iget(workRegister, workRegister, navigationField)
+        invokeStatic(methodReference(OVERRIDE_LABEL_DESCRIPTOR), workRegister, labelRegister)
+        moveResult(labelRegister, STRING_DESCRIPTOR)
+
+        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
+        iget(workRegister, workRegister, navigationField)
+        invokeStatic(methodReference(SHOULD_CLEAR_BADGE_DESCRIPTOR), workRegister)
+        moveResult(workRegister, "Z")
+        ifEqz(workRegister, Target.Original)
+
+        newInstance(instanceRegister, tabDataConstructor.definingClass)
+        constInt(workRegister, 0)
+        invokeDirect(
+            tabDataConstructor,
+            instanceRegister,
+            *IntArray(paramTypes.size) { workRegister },
+        )
+        move(tabDataValueRegister, instanceRegister, OBJECT_DESCRIPTOR)
+    }
+
+    // Preserve the receiver before the compiler reuses the parameter registers for the icon and
+    // the resolved label. Inserted last so the renderer call index above stayed valid.
+    method.insertHook(index = 0, relocateBranchTargets = false) { move(thisRegister, method.p0Register, OBJECT_DESCRIPTOR) }
 }
 
 private data class DrawerRowCall(
@@ -438,31 +415,23 @@ private fun injectSettingsRegistrations(
     tabIconFields: Map<String, FieldReference>,
     iconDrawables: Map<String, Int>,
 ) {
-    val destinationInstructions =
-        destinations.joinToString("\n") { destination ->
-            """
-                const-string v0, "${destination.spec.id}"
-                const v1, ${destination.titleResourceId.toSmaliLiteral()}
-                sget-object v2, ${destination.iconField}
-                const v3, ${iconDrawables.getValue(destination.iconField.toString()).toSmaliLiteral()}
-                invoke-static {v0, v1, v2, v3}, $REGISTER_DESTINATION_DESCRIPTOR
-            """.trimIndent()
+    val registerDestination = methodReference(REGISTER_DESTINATION_DESCRIPTOR)
+    val registerTab = methodReference(REGISTER_TAB_DESCRIPTOR)
+    SettingsRegistrationState.inject(context) {
+        destinations.forEach { destination ->
+            constString(0, destination.spec.id)
+            constInt(1, destination.titleResourceId.toInt())
+            sget(2, destination.iconField)
+            constInt(3, iconDrawables.getValue(destination.iconField.toString()))
+            invokeStatic(registerDestination, 0, 1, 2, 3)
         }
-    val tabInstructions =
-        NAV_BAR_NATIVE_TAB_OPTIONS.joinToString("\n") { (name, labelResourceName) ->
-            val drawableResource =
-                iconDrawables.getValue(tabIconFields.getValue(name).toString()).toSmaliLiteral()
-            """
-                const-string v0, "$name"
-                const v1, $drawableResource
-                const-string v2, "$labelResourceName"
-                invoke-static {v0, v1, v2}, $REGISTER_TAB_DESCRIPTOR
-            """.trimIndent()
+        NAV_BAR_NATIVE_TAB_OPTIONS.forEach { (name, labelResourceName) ->
+            constString(0, name)
+            constInt(1, iconDrawables.getValue(tabIconFields.getValue(name).toString()))
+            constString(2, labelResourceName)
+            invokeStatic(registerTab, 0, 1, 2)
         }
-    SettingsRegistrationState.inject(
-        context,
-        destinationInstructions + "\n" + tabInstructions,
-    )
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -567,33 +536,23 @@ private fun injectDestinationClickCaptures(destinations: List<ResolvedNavBarDest
             bridgeMethod.implementation
                 ?: throw PatchException("NewX destination click bridge has no implementation")
         placeholderImplementation.removeInstruction(placeholderImplementation.instructions.lastIndex)
-        bridgeMethod.addInstructions(
-            0,
-            """
-                const-string v0, "${destination.spec.id}"
-                invoke-static {v0, p0}, $SET_DESTINATION_CLICK_DESCRIPTOR
-                return-void
-            """.trimIndent(),
-        )
+        bridgeMethod.insertHook(0, relocateBranchTargets = false) {
+            constString(0, destination.spec.id)
+            invokeStatic(methodReference(SET_DESTINATION_CLICK_DESCRIPTOR), 0, bridgeMethod.p0Register)
+            returnVoid()
+        }
 
-        destination.method.addInstructions(
-            destination.callIndex,
-            invokeStaticSingle(
+        destination.method.insertHook(destination.callIndex, relocateBranchTargets = false) {
+            invokeStatic(
+                ImmutableMethodReference(
+                    NAV_BAR_REPLACEMENT_DESCRIPTOR,
+                    bridgeName,
+                    listOf(FUNCTION0_DESCRIPTOR),
+                    "V",
+                ),
                 destination.clickRegister,
-                "$NAV_BAR_REPLACEMENT_DESCRIPTOR->$bridgeName($FUNCTION0_DESCRIPTOR)V",
-            ),
-        )
+            )
+        }
     }
 }
-
-private fun invokeStaticSingle(register: Int, target: String): String =
-    if (register in 0..15) {
-        "invoke-static {v$register}, $target"
-    } else {
-        "invoke-static/range {v$register .. v$register}, $target"
-    }
-
-private fun Long.toSmaliLiteral(): String = "0x${toString(16)}"
-
-private fun Int.toSmaliLiteral(): String = "0x${toString(16)}"
 

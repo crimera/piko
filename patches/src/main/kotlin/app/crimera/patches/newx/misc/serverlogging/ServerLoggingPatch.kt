@@ -12,14 +12,16 @@ import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
@@ -247,11 +249,14 @@ private fun patchServerErrorConstructors() {
             )
         }
 
-        constructor.addInstructions(
-            returnIndices.single(),
-            "invoke-static/range {p0 .. p0}, " +
-                "$LOGGER_DESCRIPTOR->captureServerError($THROWABLE_DESCRIPTOR)V",
-        )
+        // `p0` is the receiver; `insertHook` emits `invoke-static/range` itself when the
+        // receiver does not fit the four-bit operand of `invoke-static`.
+        constructor.insertHook(returnIndices.single(), relocateBranchTargets = false) {
+            invokeStatic(
+                methodReference("$LOGGER_DESCRIPTOR->captureServerError($THROWABLE_DESCRIPTOR)V"),
+                constructor.p0Register,
+            )
+        }
     }
 }
 
@@ -359,11 +364,17 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
         )
     }
 
-    method.addInstructions(
-        throwableRead.index + 1,
-        "invoke-static {v${throwableRead.register}, v$operationRegister}, " +
-            "$LOGGER_DESCRIPTOR->captureSubmitFailure(${THROWABLE_DESCRIPTOR}Ljava/lang/Object;)V",
-    )
+    // Both registers were validated to fit `invoke-static`, so the typed call keeps the exact
+    // registers the scan resolved instead of allocating scratch ones.
+    method.insertHook(throwableRead.index + 1, relocateBranchTargets = false) {
+        invokeStatic(
+            methodReference(
+                "$LOGGER_DESCRIPTOR->captureSubmitFailure(${THROWABLE_DESCRIPTOR}Ljava/lang/Object;)V",
+            ),
+            throwableRead.register,
+            operationRegister,
+        )
+    }
 }
 
 private data class EventField(

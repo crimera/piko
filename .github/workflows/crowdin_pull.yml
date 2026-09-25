@@ -38,6 +38,7 @@ jobs:
     needs: pull
     permissions:
       contents: write
+      packages: read
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout crowdin branch to run checks on it

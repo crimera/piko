@@ -15,26 +15,27 @@ import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.newx.utils.INTEGER_MOVE_OPCODES
+import app.crimera.bytecode.RegisterLimit
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.cloneMutable
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -68,6 +69,18 @@ private const val PALETTE_CONSTRUCTOR_REGISTER_COUNT = 36
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val DYNAMIC_COLOR_PALETTE_DESCRIPTOR =
     "$EXTENSION_PACKAGE/theme/DynamicColorPalette;"
+private const val INLINE_ACTION_TINT_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionTint(J)J"
+private const val INLINE_ACTION_ACTIVE_TINT_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionActiveTint(J)J"
+private const val INLINE_LIKE_ANIMATION_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineLikeAnimation(Z)Z"
+private const val XDS_CHROME_BACKGROUND_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J"
+private const val PALETTE_IS_ENABLED_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z"
+private const val PALETTE_IS_AMOLED_BLACK_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isAmoledBlack()Z"
 
 private val AMOLED_BACKGROUND_COLORS = mapOf(
     7 to 0xFF00000000000000UL.toLong(),
@@ -965,19 +978,23 @@ private fun patchInlineActionTints() {
         requireExactlyOne("NewX like icon composable constructor", likeComposableConstructors)
 
     // First wide long slot (the tint timestamp); Compose inserts auxiliary params between
-    // releases, so resolve the slot instead of hardcoding p2.
+    // releases, so resolve the slot instead of hardcoding p2. The renderer is static, so the
+    // parameter slot is `p0` plus the slot index.
     if (!AccessFlags.STATIC.isSet(entryMethod.accessFlags)) {
         throw PatchException("NewX inline action entry renderer is unexpectedly instance: $entryMethod")
     }
     val tintSlot = entryMethod.firstParameterSlot("J")
+    val tintRegister = entryMethod.p0Register + tintSlot
 
-    entryMethod.addInstructions(
-        0,
-        """
-        invoke-static/range {p$tintSlot .. p${tintSlot + 1}}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionTint(J)J
-        move-result-wide p$tintSlot
-        """.trimIndent(),
-    )
+    entryMethod.insertHook(
+        index = 0,
+        // The old insertion never moved labels off the first instruction, so a branch that
+        // reached the method head kept skipping the tint and has to keep doing so.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(methodReference(INLINE_ACTION_TINT_METHOD), tintRegister, tintRegister + 1)
+        moveResult(tintRegister, "J")
+    }
     val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteRead.index)
     patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
 }
@@ -1233,13 +1250,19 @@ private fun patchXdsChromeBackground() {
             darkSchemeConstructions,
         )
 
-    classInitializer.addInstructions(
-        darkConstruction.index,
-        """
-            invoke-static/range {v${darkConstruction.colorRegister} .. v${darkConstruction.colorRegister + 1}}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J
-            move-result-wide v${darkConstruction.colorRegister}
-        """.trimIndent(),
-    )
+    classInitializer.insertHook(
+        index = darkConstruction.index,
+        // The old insertion left every incoming label on the dark scheme constructor, so the
+        // hook only replaces the color for the paths that already reached it.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(
+            methodReference(XDS_CHROME_BACKGROUND_METHOD),
+            darkConstruction.colorRegister,
+            darkConstruction.colorRegister + 1,
+        )
+        moveResult(darkConstruction.colorRegister, "J")
+    }
 }
 
 private data class XdsDarkConstruction(
@@ -1720,13 +1743,15 @@ private fun MutableMethod.injectTabSlotTints(horizon: String) {
         val colorRegister =
             (read.value as? OneRegisterInstruction)?.registerA
                 ?: throw PatchException("NewX tab slot color has no register: $this")
-        addInstructions(
-            read.index + 1,
-            """
-            invoke-static/range {v$colorRegister .. v${colorRegister + 1}}, $tintMethod
-            move-result-wide v$colorRegister
-            """.trimIndent(),
-        )
+        insertHook(
+            index = read.index + 1,
+            // The old insertion left labels on the color read, so only the paths that read the
+            // slot color are tinted, exactly as before.
+            relocateBranchTargets = false,
+        ) {
+            invokeStatic(methodReference(tintMethod), colorRegister, colorRegister + 1)
+            moveResult(colorRegister, "J")
+        }
     }
 }
 
@@ -1739,13 +1764,16 @@ private fun MutableMethod.injectTabIndicatorTint() {
     parameterTypes.take(colorParam).forEach { parameter ->
         colorRegister += if (parameter == "J" || parameter == "D") 2 else 1
     }
-    addInstructionsAtControlFlowLabel(
-        0,
-        """
-        invoke-static/range {p$colorRegister .. p${colorRegister + 1}}, $TAB_TINT_METHOD
-        move-result-wide p$colorRegister
-        """.trimIndent(),
-    )
+    val tintRegister = p0Register + colorRegister
+    // `addInstructionsAtControlFlowLabel` moved every incoming label onto the guard so that the
+    // parameter is tinted once, before its first read, on all paths reaching the method head.
+    insertHook(
+        index = 0,
+        relocateBranchTargets = true,
+    ) {
+        invokeStatic(methodReference(TAB_TINT_METHOD), tintRegister, tintRegister + 1)
+        moveResult(tintRegister, "J")
+    }
 }
 
 private fun MutableMethod.injectProfileTabIndicatorTint(horizon: String) {
@@ -1766,13 +1794,15 @@ private fun MutableMethod.injectProfileTabIndicatorTint(horizon: String) {
     val colorRegister =
         (brandSite.value as? OneRegisterInstruction)?.registerA
             ?: throw PatchException("NewX profile tab indicator has no color register: $this")
-    addInstructions(
-        brandSite.index + 1,
-        """
-        invoke-static/range {v$colorRegister .. v${colorRegister + 1}}, $TAB_TINT_METHOD
-        move-result-wide v$colorRegister
-        """.trimIndent(),
-    )
+    insertHook(
+        index = brandSite.index + 1,
+        // The old insertion left labels on the brand color read: a branch that reached the read
+        // directly was not tinted before and is not tinted now.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(methodReference(TAB_TINT_METHOD), colorRegister, colorRegister + 1)
+        moveResult(colorRegister, "J")
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -1936,13 +1966,19 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldRe
         ?: throw PatchException("NewX activated-like tint field is missing: $this")
     val colorRegister = (colorLoad.value as? OneRegisterInstruction)?.registerA
         ?: throw PatchException("NewX activated-like tint is not a one-register wide load: $this")
-    addInstructions(
-        colorLoad.index + 1,
-        """
-        invoke-static/range {v$colorRegister .. v${colorRegister + 1}}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionActiveTint(J)J
-        move-result-wide v$colorRegister
-        """.trimIndent(),
-    )
+    insertHook(
+        index = colorLoad.index + 1,
+        // The old insertion left labels on the active-branch color load, so the tint still covers
+        // exactly the paths that load the field.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(
+            methodReference(INLINE_ACTION_ACTIVE_TINT_METHOD),
+            colorRegister,
+            colorRegister + 1,
+        )
+        moveResult(colorRegister, "J")
+    }
     return activeLikeField
 }
 
@@ -2002,13 +2038,15 @@ private fun patchLikeIconComposable(
         ?: throw PatchException("NewX like Lottie renderer is not an invoke-range: $composable")
     val animationRegister = rangeInstruction.startRegister + 2
 
-    composable.addInstructions(
-        lottieRenderer.index,
-        """
-        invoke-static/range {v$animationRegister .. v$animationRegister}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineLikeAnimation(Z)Z
-        move-result v$animationRegister
-        """.trimIndent(),
-    )
+    composable.insertHook(
+        index = lottieRenderer.index,
+        // The old insertion left labels on the renderer call: a branch straight to the call keeps
+        // its untinted animation flag, matching the previous behavior.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(methodReference(INLINE_LIKE_ANIMATION_METHOD), animationRegister)
+        moveResult(animationRegister, "Z")
+    }
     lottieRenderer.method.injectLottieFallbackTint(activeLikeField)
 }
 
@@ -2021,13 +2059,19 @@ private fun MutableMethod.injectLottieFallbackTint(activeLikeField: FieldReferen
     val colorLoad = requireExactlyOne("NewX Lottie fallback tint", colorLoads)
     val colorRegister = (colorLoad.value as? OneRegisterInstruction)?.registerA
         ?: throw PatchException("NewX Lottie fallback tint has no wide register: $this")
-    addInstructions(
-        colorLoad.index + 1,
-        """
-        invoke-static/range {v$colorRegister .. v${colorRegister + 1}}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionActiveTint(J)J
-        move-result-wide v$colorRegister
-        """.trimIndent(),
-    )
+    insertHook(
+        index = colorLoad.index + 1,
+        // The old insertion left labels on the fallback color load, so the tint still covers
+        // exactly the paths that load it.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(
+            methodReference(INLINE_ACTION_ACTIVE_TINT_METHOD),
+            colorRegister,
+            colorRegister + 1,
+        )
+        moveResult(colorRegister, "J")
+    }
 }
 
 private fun MutableMethod.injectDynamicAccentTones(
@@ -2072,13 +2116,15 @@ private fun MutableMethod.injectDynamicAccentTones(
     }
 
     val firstToneIndex = toneLoads.minOf { (index, _, _) -> index }
-    addInstructions(
-        firstToneIndex,
-        """
-            invoke-static {}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z
-            move-result v$enabledRegister
-        """.trimIndent(),
-    )
+    insertHook(
+        index = firstToneIndex,
+        // The old insertion left labels on the first tone load, so a branch straight to that load
+        // keeps reading the snapshot register without the settings refresh, as before.
+        relocateBranchTargets = false,
+    ) {
+        invokeStatic(methodReference(PALETTE_IS_ENABLED_METHOD))
+        moveResult(enabledRegister, "Z")
+    }
 
     toneLoads.asReversed().forEach { (index, instruction, tone) ->
         val colorRegister =
@@ -2089,14 +2135,21 @@ private fun MutableMethod.injectDynamicAccentTones(
                 "NewX accent color needs a low wide register, found v$colorRegister: $this",
             )
         }
-        addInstructions(
-            index + ACCENT_SETTINGS_SNAPSHOT_INSTRUCTION_COUNT + 1,
-            """
-            move-wide/from16 v$scratchRegisterStart, v$colorRegister
-            invoke-static/range {v$scratchRegisterStart .. v$enabledRegister}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->accentTone$tone(JZ)J
-            move-result-wide v$colorRegister
-            """.trimIndent(),
-        )
+        insertHook(
+            index = index + ACCENT_SETTINGS_SNAPSHOT_INSTRUCTION_COUNT + 1,
+            // The old insertion left labels on the instruction after the tone load, so only the
+            // paths that load the tone get the settings-aware value.
+            relocateBranchTargets = false,
+        ) {
+            move(scratchRegisterStart, colorRegister, "J")
+            invokeStatic(
+                methodReference("$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->accentTone$tone(JZ)J"),
+                scratchRegisterStart,
+                scratchRegisterStart + 1,
+                enabledRegister,
+            )
+            moveResult(colorRegister, "J")
+        }
     }
 }
 
@@ -2130,12 +2183,58 @@ private fun MutableMethod.injectDynamicPalette(
         )
     }
 
-    // This helper moves all incoming labels from the original new-instance to the API guard.
-    // API < 31 falls through a no-op into the byte-for-byte original allocation sequence.
-    addInstructionsAtControlFlowLabel(
-        allocation.index,
-        kind.dynamicPaletteInstructions(paletteDescriptor, constructorReference),
+    // The typed hook relocates every incoming label from the original new-instance onto the API
+    // guard, exactly like the helper it replaces: every path that reached the allocation runs the
+    // guard first. Its trailing no-op falls through into the byte-for-byte original allocation
+    // sequence, so API < 31 and dynamic-off keep allocating the native palette.
+    insertHook(
+        index = allocation.index,
+        relocateBranchTargets = true,
+    ) {
+        emitDynamicPaletteGuard(kind, paletteDescriptor, constructorReference)
+    }
+}
+
+private fun Block.emitDynamicPaletteGuard(
+    kind: PaletteKind,
+    paletteDescriptor: String,
+    constructorReference: String,
+) {
+    val originalLabel = "piko_newx_dynamic_color_original_${kind.name.lowercase()}"
+    invokeStatic(methodReference(PALETTE_IS_ENABLED_METHOD))
+    moveResult(36, "Z")
+    ifEqz(36, Target.Local(originalLabel))
+    if (kind == PaletteKind.LIGHTS_OUT) {
+        invokeStatic(methodReference(PALETTE_IS_AMOLED_BLACK_METHOD))
+        moveResult(36, "Z")
+    }
+    newInstance(0, paletteDescriptor)
+    constInt(1, if (kind.isLight) 1 else 0)
+    repeat(PALETTE_COLOR_COUNT) { token ->
+        val colorRegister = 2 + token * 2
+        constInt(colorRegister, token)
+        if (kind == PaletteKind.LIGHTS_OUT) {
+            move(colorRegister + 1, 36, "Z")
+            invokeStatic(
+                methodReference("$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->${kind.helperMethod}(IZ)J"),
+                colorRegister,
+                colorRegister + 1,
+            )
+        } else {
+            invokeStatic(
+                methodReference("$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->${kind.helperMethod}(I)J"),
+                colorRegister,
+            )
+        }
+        moveResult(colorRegister, "J")
+    }
+    invokeDirect(
+        methodReference(constructorReference),
+        *IntArray(PALETTE_CONSTRUCTOR_REGISTER_COUNT) { register -> register },
     )
+    returnObject(0)
+    label(originalLabel)
+    nop()
 }
 
 /**
@@ -2145,91 +2244,35 @@ private fun MutableMethod.injectDynamicPalette(
  * its independent pure-black behavior.
  */
 private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor) {
+    // The AMOLED flag must not live in the constructor's argument registers: the block rewrites
+    // the color arguments of the call it sits in front of.
     val constructorRegisters =
         (constructor.instruction.startRegister until
             constructor.instruction.startRegister + constructor.instruction.registerCount).toList()
-    val scratchRegister =
-        try {
-            getFreeRegisterProvider(
-                constructor.index,
-                1,
-                *constructorRegisters.toIntArray(),
-            ).getFreeRegister()
-        } catch (exception: RuntimeException) {
-            throw PatchException(
-                "NewX dark palette background override has no free scratch register: $this",
-            )
-        }
-    if (scratchRegister !in 0..255) {
-        throw PatchException(
-            "NewX dark palette background override scratch register v$scratchRegister " +
-                "cannot be encoded: $this",
-        )
-    }
-
-    val originalLabel = "piko_newx_original_lights_out_backgrounds"
-    val overrides = buildString {
-        appendLine("invoke-static {}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isAmoledBlack()Z")
-        appendLine("move-result v$scratchRegister")
+    insertHook(
+        index = constructor.index,
+        excludedRegisters = constructorRegisters,
+        // The old insertion kept incoming labels on the constructor call: a branch that reached
+        // the call straight away kept the native surfaces and must keep them.
+        relocateBranchTargets = false,
+    ) {
+        // `move-result` (11x) and `if-eqz` (21t) both encode a byte register.
+        val amoledRegister = scratchRegister(RegisterLimit.BYTE)
+        invokeStatic(methodReference(PALETTE_IS_AMOLED_BLACK_METHOD))
+        moveResult(amoledRegister, "Z")
         appendBackgroundColors(constructor, DIM_BACKGROUND_COLORS)
-        appendLine("if-eqz v$scratchRegister, :$originalLabel")
+        // Not AMOLED: keep the dim surfaces and fall through into the untouched constructor call.
+        ifEqz(amoledRegister, Target.Original)
         appendBackgroundColors(constructor, AMOLED_BACKGROUND_COLORS)
     }
-    addInstructionsWithLabels(
-        constructor.index,
-        overrides,
-        ExternalLabel(originalLabel, constructor.instruction),
-    )
 }
 
-private fun StringBuilder.appendBackgroundColors(
+private fun Block.appendBackgroundColors(
     constructor: PaletteConstructor,
     colors: Map<Int, Long>,
 ) {
     colors.toSortedMap().forEach { (token, color) ->
         val colorRegister = constructor.instruction.startRegister + 2 + token * 2
-        appendLine("const-wide v$colorRegister, ${wideLiteral(color)}")
+        constLong(colorRegister, color)
     }
 }
-
-private fun PaletteKind.dynamicPaletteInstructions(
-    paletteDescriptor: String,
-    constructorReference: String,
-): String {
-    val originalLabel = "piko_newx_dynamic_color_original_${name.lowercase()}"
-    return buildString {
-        appendLine("invoke-static {}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z")
-        appendLine("move-result v36")
-        appendLine("if-eqz v36, :$originalLabel")
-        if (this@dynamicPaletteInstructions == PaletteKind.LIGHTS_OUT) {
-            appendLine("invoke-static {}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isAmoledBlack()Z")
-            appendLine("move-result v36")
-        }
-        appendLine("new-instance v0, $paletteDescriptor")
-        appendLine("const/4 v1, ${if (isLight) "0x1" else "0x0"}")
-        repeat(PALETTE_COLOR_COUNT) { token ->
-            val colorRegister = 2 + token * 2
-            appendLine("const/16 v$colorRegister, 0x${token.toString(16)}")
-            if (this@dynamicPaletteInstructions == PaletteKind.LIGHTS_OUT) {
-                appendLine("move/from16 v${colorRegister + 1}, v36")
-                appendLine(
-                    "invoke-static/range {v$colorRegister .. v${colorRegister + 1}}, " +
-                        "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->$helperMethod(IZ)J",
-                )
-            } else {
-                appendLine(
-                    "invoke-static/range {v$colorRegister .. v$colorRegister}, " +
-                        "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->$helperMethod(I)J",
-                )
-            }
-            appendLine("move-result-wide v$colorRegister")
-        }
-        appendLine("invoke-direct/range {v0 .. v35}, $constructorReference")
-        appendLine("return-object v0")
-        appendLine(":$originalLabel")
-        append("nop")
-    }
-}
-
-private fun wideLiteral(value: Long): String =
-    "0x${value.toULong().toString(16).padStart(16, '0')}L"

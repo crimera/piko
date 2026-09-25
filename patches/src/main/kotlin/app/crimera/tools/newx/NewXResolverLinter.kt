@@ -31,6 +31,10 @@ internal object NewXResolverLinter {
         NULLABLE_SINGLE("nullable-single", "singleOrNull() can hide zero or ambiguous candidates"),
         NULLABLE_INDEX("nullable-index", "a nullable indexed lookup can silently skip a candidate"),
         MAP_NOT_NULL("map-not-null", "mapNotNull can drop candidates before selection"),
+        TYPED_HOOK_POLICY(
+            "typed-hook-policy",
+            "insertHook must pass relocateBranchTargets explicitly",
+        ),
         ;
 
         override fun toString(): String = "$id: $description"
@@ -63,12 +67,20 @@ internal object NewXResolverLinter {
         val variable: String?,
     )
 
+    private data class HookSite(
+        val start: Int,
+        val arguments: String,
+    )
+
     private val selectionPattern =
         Regex(
             """\.\s*(singleOrNull|firstOrNull|lastOrNull|elementAtOrNull|getOrNull|single|first|last|find)\s*(?=\(|\{)""",
         )
     private val indexedAccessPattern = Regex("""\[\s*0\s*\]""")
     private val mapNotNullPattern = Regex("""\.\s*mapNotNull\s*(?=\{)""")
+    private val hookCallPattern = Regex("""\binsertHook(?=[ \t]*\()""")
+    private val hookPolicyArgumentPattern = Regex("""\brelocateBranchTargets\b""")
+    private val hookReceiverPattern = Regex("""[ \t]*[A-Za-z_][A-Za-z0-9_.<>?,]*[ \t]*\.[ \t]*""")
     private val identifierPattern = Regex("""[A-Za-z_][A-Za-z0-9_]*""")
     private val functionPattern = Regex("""\bfun\b""")
     private val directivePattern =
@@ -191,6 +203,7 @@ internal object NewXResolverLinter {
                     variable = assignedVariableBefore(masked, start),
                 )
             }.toList()
+        val hookSites = findHookSites(masked)
 
         val findings = mutableListOf<Finding>()
         selections.forEach { selection ->
@@ -292,6 +305,24 @@ internal object NewXResolverLinter {
                     )
                 }
             }
+        }
+
+        hookSites.forEach { site ->
+            if (hookPolicyArgumentPattern.containsMatchIn(site.arguments)) return@forEach
+            if (isSuppressed(source, lineOf(source, site.start), Rule.TYPED_HOOK_POLICY)) {
+                return@forEach
+            }
+            findings +=
+                finding(
+                    path = path,
+                    source = source,
+                    index = site.start,
+                    rule = Rule.TYPED_HOOK_POLICY,
+                    message =
+                        "insertHook does not pass relocateBranchTargets; the fail-closed guard " +
+                            "only fires when the APK under test already labels this instruction, so " +
+                            "state the branch policy from the replaced call's semantics",
+                )
         }
 
         return findings
@@ -693,6 +724,46 @@ internal object NewXResolverLinter {
 
     private fun indexedAccessEnd(masked: String, start: Int): Int =
         matchingDelimiter(masked, start, '[', ']')
+
+    /**
+     * Finds `insertHook(...)` calls and keeps only their argument list. [maskKotlin] has
+     * already blanked comments and literals and the paren scan tracks nesting, so text that merely
+     * mentions the call (documentation, the declaration itself) is not a site.
+     */
+    private fun findHookSites(masked: String): List<HookSite> =
+        hookCallPattern.findAll(masked).mapNotNull { match ->
+            val identifierStart = match.range.first
+            if (isHookDeclaration(masked, identifierStart)) return@mapNotNull null
+            var openParen = match.range.last + 1
+            while (openParen < masked.length && masked[openParen] != '(') openParen++
+            if (openParen >= masked.length) return@mapNotNull null
+            val callEnd = matchingDelimiter(masked, openParen, '(', ')')
+            val argumentEnd =
+                if (callEnd > openParen && masked[callEnd - 1] == ')') callEnd - 1 else callEnd
+            HookSite(
+                start = identifierStart,
+                arguments = masked.substring(openParen + 1, argumentEnd),
+            )
+        }.toList()
+
+    /**
+     * A declaration such as `internal fun MutableMethod.insertHook(` defines the API and has no
+     * branch policy to pass; only call sites are findings. The receiver spelling is what separates
+     * the declaration from `receiver.insertHook(`.
+     */
+    private fun isHookDeclaration(masked: String, identifierStart: Int): Boolean {
+        val before = (identifierStart - 1).coerceAtLeast(0)
+        val boundary =
+            maxOf(
+                masked.lastIndexOf(';', before),
+                masked.lastIndexOf('{', before),
+                masked.lastIndexOf('}', before),
+            ) + 1
+        val prefix = masked.substring(boundary.coerceAtLeast(0), identifierStart)
+        val funMatch = functionPattern.findAll(prefix).lastOrNull() ?: return false
+        val receiver = prefix.substring(funMatch.range.last + 1)
+        return receiver.isBlank() || hookReceiverPattern.matches(receiver)
+    }
 
     private fun matchingDelimiter(masked: String, start: Int, opening: Char, closing: Char): Int {
         var depth = 0

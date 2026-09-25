@@ -4,13 +4,13 @@ import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.newXSettingsPatch
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
@@ -20,11 +20,10 @@ import app.morphe.patcher.patch.BytecodePatchBuilder
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
@@ -39,6 +38,16 @@ private const val POST_OPTIONS_STATE_PREFIX = "PostOptionsState(showOptionsDialo
 private const val POST_OPTIONS_LIST_PREFIX = ", options="
 private const val CONTEXT = "Landroid/content/Context;"
 private const val NEWX_UTILS = "Lapp/morphe/extension/newx/utils/NewXUtils;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val LIST_DESCRIPTOR = "Ljava/util/List;"
+private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
+private const val ADD_OPTION_SIGNATURE = "addOption($LIST_DESCRIPTOR)$LIST_DESCRIPTOR"
+private const val LABEL_FOR_SIGNATURE = "labelFor($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)$STRING_DESCRIPTOR"
+private const val USES_ICON_SIGNATURE = "usesIcon($OBJECT_DESCRIPTOR)Z"
+private const val HANDLE_OPTION_ACTION_SIGNATURE = "handleOptionAction($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)Z"
+
+/** The options list is the third declared parameter of the state constructor, so it lives in `p3`. */
+private const val OPTIONS_LIST_PARAMETER_REGISTER_OFFSET = 3
 
 internal const val BROWSE_OBJECT_ACTION = "None"
 internal const val SHARE_IMAGE_ACTION = "ViewDebugDialog"
@@ -153,10 +162,14 @@ private val newXPostOptionsPatch =
 
         execute {
             PostOptionContributionIndex.clear(this)
-            newXInitHook.fingerprint.method.addInstruction(
-                0,
-                "invoke-static/range {p0 .. p0}, $NEWX_UTILS->initialize(Landroid/content/Context;)V",
-            )
+            val applicationOnCreate = newXInitHook.fingerprint.method
+            // The Application is a Context, so its receiver is the only argument.
+            applicationOnCreate.insertHook(0, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference("$NEWX_UTILS->initialize($CONTEXT)V"),
+                    applicationOnCreate.p0Register,
+                )
+            }
         }
 
         finalize {
@@ -198,15 +211,18 @@ private fun validateActionCarriers(contributions: List<PostOptionContribution>) 
 
 context(_: BytecodePatchContext)
 private fun injectOptionList(contributions: List<PostOptionContribution>) {
-    val stateConstructor = resolveStateConstructor()
-    val instructions =
-        contributions.joinToString("\n") { contribution ->
-            """
-            invoke-static {p3}, ${contribution.handlerDescriptor}->addOption(Ljava/util/List;)Ljava/util/List;
-            move-result-object p3
-            """.trimIndent()
+    val stateConstructor = resolveStateConstructor().method
+    // Handler calls are chained on the options-list parameter, in registration order.
+    val listRegister = stateConstructor.p0Register + OPTIONS_LIST_PARAMETER_REGISTER_OFFSET
+    stateConstructor.insertHook(0, relocateBranchTargets = false) {
+        contributions.forEach { contribution ->
+            invokeStatic(
+                methodReference("${contribution.handlerDescriptor}->$ADD_OPTION_SIGNATURE"),
+                listRegister,
+            )
+            moveResult(listRegister, LIST_DESCRIPTOR)
         }
-    stateConstructor.method.addInstructions(0, instructions)
+    }
 }
 
 context(_: BytecodePatchContext)
@@ -268,7 +284,6 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         ?: throw PatchException("NewX post-options Map.get has no object result register")
     val actionRegister = mapGet.registersUsed.getOrNull(1)
         ?: throw PatchException("NewX post-options Map.get has no action register")
-    requireFourBitRegisters("label", actionRegister, labelResult.registerA)
 
     val iconAssignmentCandidates =
         renderer.method.instructions.withIndex().filter { (index, instruction) ->
@@ -304,57 +319,52 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
             candidates = iconAssignments.map { assignment -> assignment.field.type }.distinct(),
         )
 
-    // Compose keeps the lambda receiver/state in low registers; a Boolean result must not
-    // overwrite a live object register such as v0.
-    val tempRegister =
-        try {
-            renderer.method
-                .getFreeRegisterProvider(
-                    renderer.instructionMatches[1].index,
-                    1,
-                    actionRegister,
-                    labelResult.registerA,
-                    iconResultRegister,
-                ).getFreeRegister4Bit()
-        } catch (exception: RuntimeException) {
-            throw PatchException(
-                "No safe low register available for NewX post-options icon checks: " +
-                    exception.message,
-            )
-        }
-    requireFourBitRegisters("icon", actionRegister, tempRegister)
-
     val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, iconType) }
 
-    var insertionIndex = renderer.instructionMatches[2].index + 1
-    contributions.forEach { contribution ->
-        renderer.method.addInstructions(
-            insertionIndex,
-            """
-                invoke-static {v$actionRegister, v${labelResult.registerA}}, ${contribution.handlerDescriptor}->labelFor(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;
-                move-result-object v${labelResult.registerA}
-            """.trimIndent(),
-        )
-        insertionIndex += 2
-    }
+    // The label and icon rewrites land in front of the instruction that consumes the resolved
+    // label, so they run with both the action and the original label live.
+    val insertionIndex = renderer.instructionMatches[2].index + 1
+    renderer.method.insertHook(
+        index = insertionIndex,
+        excludedRegisters = listOf(actionRegister, labelResult.registerA, iconResultRegister),
+        // A branch into the label lookup must run the rewrite too, or the custom options keep
+        // their upstream label and icon.
+        relocateBranchTargets = true,
+    ) {
+        contributions.forEach { contribution ->
+            invokeStatic(
+                methodReference("${contribution.handlerDescriptor}->$LABEL_FOR_SIGNATURE"),
+                actionRegister,
+                labelResult.registerA,
+            )
+            moveResult(labelResult.registerA, STRING_DESCRIPTOR)
+        }
 
-    var iconContinuation = renderer.method.instructions[insertionIndex]
-    contributions.asReversed().forEachIndexed { index, contribution ->
-        val currentIndex = renderer.method.instructions.indexOf(iconContinuation)
-        val label = "piko_newx_post_option_icon_$index"
-        renderer.method.addInstructionsWithLabels(
-            currentIndex,
-            """
-                invoke-static {v$actionRegister}, ${contribution.handlerDescriptor}->usesIcon(Ljava/lang/Object;)Z
-                move-result v$tempRegister
-                if-eqz v$tempRegister, :$label
-                sget-object v$iconResultRegister, ${iconFields.getValue(contribution)}
-            """.trimIndent(),
-            ExternalLabel(label, iconContinuation),
-        )
-        iconContinuation = renderer.method.instructions[currentIndex]
+        // The icon checks run in registration order and share one dead low register; the
+        // emitted formats (`if-eqz` 21t, `move-result` 11x, `sget-object` 21c) all encode it.
+        val iconCheckRegister = scratchRegister()
+        contributions.forEachIndexed { index, contribution ->
+            if (index > 0) label(iconContinuationLabel(index))
+            invokeStatic(
+                methodReference("${contribution.handlerDescriptor}->$USES_ICON_SIGNATURE"),
+                actionRegister,
+            )
+            moveResult(iconCheckRegister, "Z")
+            ifEqz(
+                iconCheckRegister,
+                if (index == contributions.lastIndex) {
+                    Target.Original
+                } else {
+                    Target.Local(iconContinuationLabel(index + 1))
+                },
+            )
+            sget(iconResultRegister, iconFields.getValue(contribution))
+        }
     }
 }
+
+/** Name of the label that starts the icon check of the contribution at [index]. */
+private fun iconContinuationLabel(index: Int): String = "piko_newx_post_option_icon_$index"
 
 context(_: BytecodePatchContext)
 private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
@@ -400,42 +410,45 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
     val ordinalInstruction = eventHandler.method.instructions[ordinalIndex]
     val clickActionRegister = ordinalInstruction.registersUsed.singleOrNull()
         ?: throw PatchException("NewX confirmed post-option action has no register")
-
-    // The action result is Boolean, so choose a register that is dead at this insertion point.
-    val tempRegister =
-        try {
-            eventHandler.method
-                .getFreeRegisterProvider(ordinalIndex, 1, clickActionRegister)
-                .getFreeRegister4Bit()
-        } catch (exception: RuntimeException) {
-            throw PatchException(
-                "No safe low register available for NewX post-options action checks: " +
-                    exception.message,
-            )
-        }
-    requireFourBitRegisters("action", clickActionRegister, tempRegister)
     val unitField = resolveKotlinUnitField()
+    val handler = eventHandler.method
+    val receiverRegister = handler.p0Register
 
-    var actionContinuation = ordinalInstruction
-    contributions.asReversed().forEachIndexed { index, contribution ->
-        val insertionIndex = eventHandler.method.instructions.indexOf(actionContinuation)
-        val label = "piko_newx_post_option_action_$index"
-        eventHandler.method.addInstructionsWithLabels(
-            insertionIndex,
-            """
-                move-object/from16 v$tempRegister, p0
-                iget-object v$tempRegister, v$tempRegister, $presenterField
-                invoke-static {v$tempRegister, v$clickActionRegister}, ${contribution.handlerDescriptor}->handleOptionAction(Ljava/lang/Object;Ljava/lang/Object;)Z
-                move-result v$tempRegister
-                if-eqz v$tempRegister, :$label
-                sget-object v$tempRegister, $unitField
-                return-object v$tempRegister
-            """.trimIndent(),
-            ExternalLabel(label, actionContinuation),
-        )
-        actionContinuation = eventHandler.method.instructions[insertionIndex]
+    handler.insertHook(
+        index = ordinalIndex,
+        excludedRegisters = listOf(clickActionRegister),
+        // A branch that lands on the action dispatch must run the check too, or the custom
+        // options fall through to the original handler and do nothing.
+        relocateBranchTargets = true,
+    ) {
+        // One dead register carries the presenter, the Boolean result and the Unit return value.
+        val checkRegister = scratchRegister()
+        contributions.forEachIndexed { index, contribution ->
+            if (index > 0) label(actionContinuationLabel(index))
+            move(checkRegister, receiverRegister, OBJECT_DESCRIPTOR)
+            iget(checkRegister, checkRegister, presenterField)
+            invokeStatic(
+                methodReference("${contribution.handlerDescriptor}->$HANDLE_OPTION_ACTION_SIGNATURE"),
+                checkRegister,
+                clickActionRegister,
+            )
+            moveResult(checkRegister, "Z")
+            ifEqz(
+                checkRegister,
+                if (index == contributions.lastIndex) {
+                    Target.Original
+                } else {
+                    Target.Local(actionContinuationLabel(index + 1))
+                },
+            )
+            sget(checkRegister, unitField)
+            returnObject(checkRegister)
+        }
     }
 }
+
+/** Name of the label that starts the action check of the contribution at [index]. */
+private fun actionContinuationLabel(index: Int): String = "piko_newx_post_option_action_$index"
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String, iconType: String): FieldReference {
@@ -544,9 +557,4 @@ private fun requireSingleMatch(label: String, matches: Collection<Match>): Match
         "Expected one $label match, found ${matches.size}: " +
             matches.joinToString { it.originalMethod.toString() },
     )
-}
-
-private fun requireFourBitRegisters(label: String, vararg registers: Int) {
-    if (registers.all { it in 0..15 }) return
-    throw PatchException("NewX post-options $label registers exceed 4-bit encoding: ${registers.joinToString()}")
 }

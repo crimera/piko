@@ -2,6 +2,7 @@ package app.crimera.patches.newx.models
 
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -10,6 +11,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -360,77 +362,81 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
         )
 
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
-    filterClass.patchBridge(
-        "immutableList",
-        LIST_DESCRIPTOR,
-        OBJECT_DESCRIPTOR,
-        "check-cast p0, $ITERABLE_DESCRIPTOR\n" +
-            "invoke-static {p0}, ${immutableListConverter.smaliReference()}\n" +
-            "move-result-object p0\nreturn-object p0",
-    )
-    filterClass.patchBridge(
-        "isTimelineModuleItem",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        "instance-of p0, p0, ${models.moduleItemDescriptor}\nreturn p0",
-    )
-    filterClass.patchBridge(
-        "isTimelinePost",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        "instance-of p0, p0, ${models.postDescriptor}\nreturn p0",
-    )
-    filterClass.patchBridge(
-        "isTimelineModule",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        "instance-of p0, p0, ${models.moduleDescriptor}\nreturn p0",
-    )
-    filterClass.patchBridge(
-        "isPromotedClientEventInfo",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        """
-            check-cast p0, ${models.clientEventInfoDescriptor}
-            ${clientEventInfoComponentAccessor.readObject("p0")}
-            invoke-static {p0}, $TIMELINE_FILTER_DESCRIPTOR->hasPromotedClientEventInfoComponent(Ljava/lang/String;)Z
-            move-result p0
-            return p0
-        """.trimIndent(),
-    )
-    filterClass.patchBridge(
-        "getPostId",
-        OBJECT_DESCRIPTOR,
-        OBJECT_DESCRIPTOR,
-        """
-            check-cast p0, ${models.postDescriptor}
-            invoke-virtual {p0}, ${models.postIdGetter.smaliReference()}
-            move-result-object p0
-            return-object p0
-        """.trimIndent(),
-    )
-    filterClass.patchBridge(
-        "isVerticalConversation",
-        OBJECT_DESCRIPTOR,
-        "Z",
-        "instance-of p0, p0, ${models.verticalConversationDescriptor}\nreturn p0",
-    )
+    val immutableListBridge =
+        filterClass.requireBridge("immutableList", LIST_DESCRIPTOR, OBJECT_DESCRIPTOR)
+    immutableListBridge.patchBridge {
+        val receiver = immutableListBridge.p0Register
+        checkCast(receiver, ITERABLE_DESCRIPTOR)
+        invokeStatic(immutableListConverter, receiver)
+        moveResult(receiver, immutableListConverter.returnType)
+        returnObject(receiver)
+    }
+    val isTimelineModuleItem =
+        filterClass.requireBridge("isTimelineModuleItem", OBJECT_DESCRIPTOR, "Z")
+    isTimelineModuleItem.patchBridge {
+        val receiver = isTimelineModuleItem.p0Register
+        instanceOf(receiver, receiver, models.moduleItemDescriptor)
+        returnValue(receiver)
+    }
+    val isTimelinePost = filterClass.requireBridge("isTimelinePost", OBJECT_DESCRIPTOR, "Z")
+    isTimelinePost.patchBridge {
+        val receiver = isTimelinePost.p0Register
+        instanceOf(receiver, receiver, models.postDescriptor)
+        returnValue(receiver)
+    }
+    val isTimelineModule = filterClass.requireBridge("isTimelineModule", OBJECT_DESCRIPTOR, "Z")
+    isTimelineModule.patchBridge {
+        val receiver = isTimelineModule.p0Register
+        instanceOf(receiver, receiver, models.moduleDescriptor)
+        returnValue(receiver)
+    }
+    val isPromotedClientEventInfo =
+        filterClass.requireBridge("isPromotedClientEventInfo", OBJECT_DESCRIPTOR, "Z")
+    isPromotedClientEventInfo.patchBridge {
+        val receiver = isPromotedClientEventInfo.p0Register
+        val componentCheck = methodReference(
+            "$TIMELINE_FILTER_DESCRIPTOR->hasPromotedClientEventInfoComponent" +
+                "(Ljava/lang/String;)Z",
+        )
+        checkCast(receiver, models.clientEventInfoDescriptor)
+        readModelAccessor(clientEventInfoComponentAccessor, receiver)
+        invokeStatic(componentCheck, receiver)
+        moveResult(receiver, componentCheck.returnType)
+        returnValue(receiver)
+    }
+    val getPostId = filterClass.requireBridge("getPostId", OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
+    getPostId.patchBridge {
+        val receiver = getPostId.p0Register
+        checkCast(receiver, models.postDescriptor)
+        invokeVirtual(models.postIdGetter, receiver)
+        moveResult(receiver, models.postIdGetter.returnType)
+        returnObject(receiver)
+    }
+    val isVerticalConversation =
+        filterClass.requireBridge("isVerticalConversation", OBJECT_DESCRIPTOR, "Z")
+    isVerticalConversation.patchBridge {
+        val receiver = isVerticalConversation.p0Register
+        instanceOf(receiver, receiver, models.verticalConversationDescriptor)
+        returnValue(receiver)
+    }
     filterClass.patchObjectAccessorGetter(
         "getVerticalConversationPostIds",
         models.verticalConversationDescriptor,
         verticalConversationPostIdsAccessor,
         LIST_DESCRIPTOR,
     )
-    filterClass.patchBridge(
-        "copyVerticalConversation",
-        "$OBJECT_DESCRIPTOR$LIST_DESCRIPTOR",
-        OBJECT_DESCRIPTOR,
-        """
-            new-instance p0, ${models.verticalConversationDescriptor}
-            invoke-direct {p0, p1}, ${models.verticalConversationConstructor.smaliReference()}
-            return-object p0
-        """.trimIndent(),
-    )
+    val copyVerticalConversation =
+        filterClass.requireBridge(
+            "copyVerticalConversation",
+            "$OBJECT_DESCRIPTOR$LIST_DESCRIPTOR",
+            OBJECT_DESCRIPTOR,
+        )
+    copyVerticalConversation.patchBridge {
+        val receiver = copyVerticalConversation.p0Register
+        newInstance(receiver, models.verticalConversationDescriptor)
+        invokeDirect(models.verticalConversationConstructor, receiver, receiver + 1)
+        returnObject(receiver)
+    }
     filterClass.patchObjectAccessorGetter(
         "getModuleItem",
         models.moduleItemDescriptor,
@@ -441,17 +447,19 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
         models.moduleItemDescriptor,
         moduleItemDispensableAccessor,
     )
-    filterClass.patchBridge(
-        "copyModuleItem",
-        "$OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR" + "Z",
-        OBJECT_DESCRIPTOR,
-        """
-            check-cast p1, ${models.moduleItemField.type}
-            new-instance p0, ${models.moduleItemDescriptor}
-            invoke-direct {p0, p1, p2}, ${models.moduleItemConstructor.smaliReference()}
-            return-object p0
-        """.trimIndent(),
-    )
+    val copyModuleItem =
+        filterClass.requireBridge(
+            "copyModuleItem",
+            "$OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR" + "Z",
+            OBJECT_DESCRIPTOR,
+        )
+    copyModuleItem.patchBridge {
+        val receiver = copyModuleItem.p0Register
+        checkCast(receiver + 1, models.moduleItemField.type)
+        newInstance(receiver, models.moduleItemDescriptor)
+        invokeDirect(models.moduleItemConstructor, receiver, receiver + 1, receiver + 2)
+        returnObject(receiver)
+    }
     filterClass.patchObjectAccessorGetter(
         "getModuleInnerContent",
         models.moduleDescriptor,
@@ -505,22 +513,35 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
         models.postDescriptor,
         postPromotedMetadataAccessor,
     )
-    filterClass.patchBridge(
-        "copyModule",
-        "$OBJECT_DESCRIPTOR$LIST_DESCRIPTOR$OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR" +
-            "$OBJECT_DESCRIPTOR" + "J$STRING_DESCRIPTOR$OBJECT_DESCRIPTOR",
-        OBJECT_DESCRIPTOR,
-        """
-            check-cast p1, ${models.moduleInnerContentField.type}
-            check-cast p2, ${models.moduleHeaderField.type}
-            check-cast p3, ${models.moduleFooterField.type}
-            check-cast p4, ${models.moduleDisplayTypeField.type}
-            check-cast p8, ${models.moduleClientEventInfoField.type}
-            new-instance p0, ${models.moduleDescriptor}
-            invoke-direct/range {p0 .. p8}, ${models.moduleConstructor.smaliReference()}
-            return-object p0
-        """.trimIndent(),
-    )
+    val copyModule =
+        filterClass.requireBridge(
+            "copyModule",
+            "$OBJECT_DESCRIPTOR$LIST_DESCRIPTOR$OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR" +
+                "$OBJECT_DESCRIPTOR" + "J$STRING_DESCRIPTOR$OBJECT_DESCRIPTOR",
+            OBJECT_DESCRIPTOR,
+        )
+    copyModule.patchBridge {
+        val receiver = copyModule.p0Register
+        checkCast(receiver + 1, models.moduleInnerContentField.type)
+        checkCast(receiver + 2, models.moduleHeaderField.type)
+        checkCast(receiver + 3, models.moduleFooterField.type)
+        checkCast(receiver + 4, models.moduleDisplayTypeField.type)
+        checkCast(receiver + 8, models.moduleClientEventInfoField.type)
+        newInstance(receiver, models.moduleDescriptor)
+        invokeDirect(
+            models.moduleConstructor,
+            receiver,
+            receiver + 1,
+            receiver + 2,
+            receiver + 3,
+            receiver + 4,
+            receiver + 5,
+            receiver + 6,
+            receiver + 7,
+            receiver + 8,
+        )
+        returnObject(receiver)
+    }
 }
 
 context(context: BytecodePatchContext)

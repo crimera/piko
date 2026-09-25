@@ -6,12 +6,14 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
@@ -19,9 +21,8 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -33,6 +34,25 @@ private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineScrollPositionStore;"
 private const val TIMELINE_REFRESH_GATE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineRefreshGate;"
+private const val INTENT_DESCRIPTOR = "Landroid/content/Intent;"
+private const val LIST_DESCRIPTOR = "Ljava/util/List;"
+private const val GET_INTENT_DESCRIPTOR = "Landroid/app/Activity;->getIntent()$INTENT_DESCRIPTOR"
+private const val MARK_POST_DEEP_LINK_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->markPostDeepLink($INTENT_DESCRIPTOR)V"
+private const val CONSUME_POST_DEEP_LINK_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->consumePostDeepLink()Z"
+private const val CONSUME_FOR_YOU_FILTER_REFRESH_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->consumeForYouFilterRefresh()Z"
+private const val IS_POST_DEEP_LINK_PENDING_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isPostDeepLinkPending()Z"
+private const val IS_FOR_YOU_FILTER_REFRESH_PENDING_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isForYouFilterRefreshPending()Z"
+private const val IS_TIMELINE_DATA_EMPTY_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty($LIST_DESCRIPTOR)Z"
+private const val RESTORE_TIMELINE_POSITION_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I"
+private const val URT_SUPPRESS_LABEL = "piko_newx_refresh_urt_suppress"
+private const val URT_CHECK_POSITION_LABEL = "piko_newx_refresh_urt_check_position"
 
 private object NewXMainActivityOnCreateFingerprint : Fingerprint(
     definingClass = "Lcom/x/android/main/MainActivity;",
@@ -146,15 +166,18 @@ val disableTimelineRefreshPatch =
                 )
             }
             mainActivityOnCreateMatches.single().method.apply {
-                val intentRegister = getFreeRegisterProvider(0, 1).getFreeRegister4Bit()
-                addInstructions(
-                    0,
-                    """
-                        invoke-virtual {p0}, Landroid/app/Activity;->getIntent()Landroid/content/Intent;
-                        move-result-object v$intentRegister
-                        invoke-static {v$intentRegister}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markPostDeepLink(Landroid/content/Intent;)V
-                    """.trimIndent(),
-                )
+                val method = this
+                // The mark arms the gate for the intent this activity was created with. It is entry
+                // state, so a path that re-enters the first instruction has to keep skipping it.
+                method.insertHook(
+                    index = 0,
+                    relocateBranchTargets = false,
+                ) {
+                    val intentRegister = scratchRegister()
+                    invokeVirtual(methodReference(GET_INTENT_DESCRIPTOR), method.p0Register)
+                    moveResult(intentRegister, INTENT_DESCRIPTOR)
+                    invokeStatic(methodReference(MARK_POST_DEEP_LINK_DESCRIPTOR), intentRegister)
+                }
             }
 
             val mainActivityOnNewIntentMatches = NewXMainActivityOnNewIntentFingerprint.scopedMatchAll()
@@ -165,10 +188,16 @@ val disableTimelineRefreshPatch =
                         mainActivityOnNewIntentMatches.joinToString { it.originalMethod.toString() },
                 )
             }
-            mainActivityOnNewIntentMatches.single().method.addInstructions(
-                0,
-                "invoke-static {p1}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->markPostDeepLink(Landroid/content/Intent;)V",
-            )
+            mainActivityOnNewIntentMatches.single().method.apply {
+                val method = this
+                // Same entry mark as onCreate: the delivered intent (p1) is what gets armed.
+                method.insertHook(
+                    index = 0,
+                    relocateBranchTargets = false,
+                ) {
+                    invokeStatic(methodReference(MARK_POST_DEEP_LINK_DESCRIPTOR), method.p0Register + 1)
+                }
+            }
 
             val homeMatches = NewXHomeReselectFingerprint.scopedMatchAll()
             if (homeMatches.size != 1) {
@@ -178,22 +207,23 @@ val disableTimelineRefreshPatch =
                 )
             }
             homeMatches.single().method.apply {
-                val originalFirstInstruction = instructions.first()
+                val method = this
                 val read =
                     disableTimelineRefresh.injectRead(
                         method = this,
                         index = 0,
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
-                addInstructionsWithLabels(
-                    read.nextIndex,
-                    """
-                        if-eqz v${read.register}, :piko_newx_refresh_home_continue
-                        const/4 v${read.register}, 0x0
-                        return v${read.register}
-                    """.trimIndent(),
-                    ExternalLabel("piko_newx_refresh_home_continue", originalFirstInstruction),
-                )
+                // Every path into the handler has to pass the toggle check: a branch that used to
+                // land on the first instruction would otherwise bypass the guard.
+                method.insertHook(
+                    index = read.nextIndex,
+                    relocateBranchTargets = true,
+                ) {
+                    ifEqz(read.register, Target.Original)
+                    constInt(read.register, 0)
+                    returnValue(read.register)
+                }
             }
 
             val autoRefreshEventMatches = NewXUrtAutoRefreshEventFingerprint.scopedMatchAll()
@@ -372,7 +402,7 @@ val disableTimelineRefreshPatch =
             val repositoryViewportAwareAutoRefreshFieldReference =
                 "$requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor"
             urtRepoMatch.method.apply {
-                val originalFirstInstruction = instructions.first()
+                val method = this
                 val read =
                     disableTimelineRefresh.injectRead(
                         method = this,
@@ -380,58 +410,66 @@ val disableTimelineRefreshPatch =
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
                 val settingRegister = read.register
-                val timelineRegister =
-                    getFreeRegisterProvider(
-                        0,
-                        1,
-                        settingRegister,
-                    ).getFreeRegister4Bit()
+                val requestRegister = method.p0Register + 1
+                val cursorRegister = method.p0Register + 2
                 // A null cursor is also used by the first request on a fresh install. Suppress
                 // populated-timeline refreshes, but keep an empty initial load alive. A saved
                 // position changes that load to viewport-aware refresh so it cannot jump to top.
-                addInstructionsWithLabels(
-                    read.nextIndex,
-                    """
-                        if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
-                        if-nez p2, :piko_newx_refresh_urt_continue
-                        sget-object v$settingRegister, $repositoryAutoRefreshFieldReference
-                        if-ne p1, v$settingRegister, :piko_newx_refresh_urt_continue
-                        invoke-virtual {p0}, $repositoryTimelineGetterReference
-                        move-result-object v$timelineRegister
-                        sget-object v$settingRegister, $timelineEnumDescriptor->FOR_YOU:$timelineEnumDescriptor
-                        if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_suppress
-                        sget-object v$settingRegister, $timelineEnumDescriptor->FOLLOWING:$timelineEnumDescriptor
-                        if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_suppress
-                        sget-object v$settingRegister, $timelineEnumDescriptor->RANKED_FOLLOWING:$timelineEnumDescriptor
-                        if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_suppress
-                        goto :piko_newx_refresh_urt_continue
-                        :piko_newx_refresh_urt_suppress
-                        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->consumePostDeepLink()Z
-                        move-result v$settingRegister
-                        if-nez v$settingRegister, :piko_newx_refresh_urt_continue
-                        invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->consumeForYouFilterRefresh()Z
-                        move-result v$settingRegister
-                        if-nez v$settingRegister, :piko_newx_refresh_urt_continue
-                        invoke-virtual {p0}, $repositoryTimelineDataGetterReference
-                        move-result-object v$settingRegister
-                        invoke-interface {v$settingRegister}, $timelineDataFlowListGetterReference
-                        move-result-object v$settingRegister
-                        invoke-static {v$settingRegister}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty(Ljava/util/List;)Z
-                        move-result v$settingRegister
-                        if-nez v$settingRegister, :piko_newx_refresh_urt_check_position
-                        return-void
-                        :piko_newx_refresh_urt_check_position
-                        invoke-static {v$timelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I
-                        move-result-object v$settingRegister
-                        if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
-                        sget-object p1, $repositoryViewportAwareAutoRefreshFieldReference
-                        goto :piko_newx_refresh_urt_continue
-                    """.trimIndent(),
-                    ExternalLabel(
-                        "piko_newx_refresh_urt_continue",
-                        originalFirstInstruction,
-                    ),
-                )
+                method.insertHook(
+                    index = read.nextIndex,
+                    // The setting read sits in front of the hook, so the pool must not hand its
+                    // register out again for the timeline value.
+                    excludedRegisters = listOf(settingRegister),
+                    // The guard gates the request handler itself, so a branch onto the original
+                    // first instruction has to run it instead of bypassing the toggle.
+                    relocateBranchTargets = true,
+                ) {
+                    // The timeline value stays live across the enum comparisons.
+                    val timelineRegister = scratchRegister()
+                    ifEqz(settingRegister, Target.Original)
+                    ifNez(cursorRegister, Target.Original)
+                    sget(settingRegister, fieldReference(repositoryAutoRefreshFieldReference))
+                    ifNe(requestRegister, settingRegister, Target.Original)
+                    invokeVirtual(methodReference(repositoryTimelineGetterReference), method.p0Register)
+                    moveResult(timelineRegister, timelineEnumDescriptor)
+                    sget(
+                        settingRegister,
+                        fieldReference("$timelineEnumDescriptor->FOR_YOU:$timelineEnumDescriptor"),
+                    )
+                    ifEq(timelineRegister, settingRegister, Target.Local(URT_SUPPRESS_LABEL))
+                    sget(
+                        settingRegister,
+                        fieldReference("$timelineEnumDescriptor->FOLLOWING:$timelineEnumDescriptor"),
+                    )
+                    ifEq(timelineRegister, settingRegister, Target.Local(URT_SUPPRESS_LABEL))
+                    sget(
+                        settingRegister,
+                        fieldReference("$timelineEnumDescriptor->RANKED_FOLLOWING:$timelineEnumDescriptor"),
+                    )
+                    ifEq(timelineRegister, settingRegister, Target.Local(URT_SUPPRESS_LABEL))
+                    goto(Target.Original)
+                    label(URT_SUPPRESS_LABEL)
+                    invokeStatic(methodReference(CONSUME_POST_DEEP_LINK_DESCRIPTOR))
+                    moveResult(settingRegister, "Z")
+                    ifNez(settingRegister, Target.Original)
+                    invokeStatic(methodReference(CONSUME_FOR_YOU_FILTER_REFRESH_DESCRIPTOR))
+                    moveResult(settingRegister, "Z")
+                    ifNez(settingRegister, Target.Original)
+                    invokeVirtual(methodReference(repositoryTimelineDataGetterReference), method.p0Register)
+                    moveResult(settingRegister, timelineDataFlowDescriptor)
+                    invokeInterface(methodReference(timelineDataFlowListGetterReference), settingRegister)
+                    moveResult(settingRegister, LIST_DESCRIPTOR)
+                    invokeStatic(methodReference(IS_TIMELINE_DATA_EMPTY_DESCRIPTOR), settingRegister)
+                    moveResult(settingRegister, "Z")
+                    ifNez(settingRegister, Target.Local(URT_CHECK_POSITION_LABEL))
+                    returnVoid()
+                    label(URT_CHECK_POSITION_LABEL)
+                    invokeStatic(methodReference(RESTORE_TIMELINE_POSITION_DESCRIPTOR), timelineRegister)
+                    moveResult(settingRegister, "[I")
+                    ifEqz(settingRegister, Target.Original)
+                    sget(requestRegister, fieldReference(repositoryViewportAwareAutoRefreshFieldReference))
+                    goto(Target.Original)
+                }
             }
 
             val settingRead =
@@ -465,32 +503,27 @@ val disableTimelineRefreshPatch =
                         "v${settingRead.register}",
                 )
             }
-            val originalRequestCall =
-                autoRefreshEventMethod.instructions.getOrNull(shiftedAutoRefreshFieldIndex + 1)
-                    ?: throw PatchException("NewX URT automatic-refresh request call continuation was not found")
-            autoRefreshEventMethod.addInstructionsWithLabels(
-                shiftedAutoRefreshFieldIndex + 1,
-                """
-                    if-eqz v${settingRead.register}, :piko_newx_refresh_event_continue
-                    invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isPostDeepLinkPending()Z
-                    move-result v${settingRead.register}
-                    if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
-                    invoke-static {}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isForYouFilterRefreshPending()Z
-                    move-result v${settingRead.register}
-                    if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
-                    invoke-interface {v$repositoryReceiverRegister}, $eventTimelineDataGetterReference
-                    move-result-object v${settingRead.register}
-                    invoke-interface {v${settingRead.register}}, $timelineDataFlowListGetterReference
-                    move-result-object v${settingRead.register}
-                    invoke-static {v${settingRead.register}}, $TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty(Ljava/util/List;)Z
-                    move-result v${settingRead.register}
-                    if-nez v${settingRead.register}, :piko_newx_refresh_event_continue
-                    return-void
-                """.trimIndent(),
-                ExternalLabel(
-                    "piko_newx_refresh_event_continue",
-                    originalRequestCall,
-                ),
-            )
+            // The setting read sits directly in front of the request call, and the guard has to run
+            // for every path into it, so a branch onto the call runs the guard instead of bypassing it.
+            autoRefreshEventMethod.insertHook(
+                index = shiftedAutoRefreshFieldIndex + 1,
+                relocateBranchTargets = true,
+            ) {
+                ifEqz(settingRead.register, Target.Original)
+                invokeStatic(methodReference(IS_POST_DEEP_LINK_PENDING_DESCRIPTOR))
+                moveResult(settingRead.register, "Z")
+                ifNez(settingRead.register, Target.Original)
+                invokeStatic(methodReference(IS_FOR_YOU_FILTER_REFRESH_PENDING_DESCRIPTOR))
+                moveResult(settingRead.register, "Z")
+                ifNez(settingRead.register, Target.Original)
+                invokeInterface(methodReference(eventTimelineDataGetterReference), repositoryReceiverRegister)
+                moveResult(settingRead.register, timelineDataFlowDescriptor)
+                invokeInterface(methodReference(timelineDataFlowListGetterReference), settingRead.register)
+                moveResult(settingRead.register, LIST_DESCRIPTOR)
+                invokeStatic(methodReference(IS_TIMELINE_DATA_EMPTY_DESCRIPTOR), settingRead.register)
+                moveResult(settingRead.register, "Z")
+                ifNez(settingRead.register, Target.Original)
+                returnVoid()
+            }
         }
     }

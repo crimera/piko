@@ -110,7 +110,7 @@ class SettingsContributionPatchTest {
         val method = mutableMethod(registerCount = 1, "return-void")
 
         val exception =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<PatchException> {
                 toggle.injectRead(
                     method = method,
                     index = 0,
@@ -119,7 +119,7 @@ class SettingsContributionPatchTest {
                 )
             }
 
-        assertContains(exception.message.orEmpty(), "register available for NewX setting read")
+        assertContains(exception.message.orEmpty(), "no 4-bit scratch register available")
         assertEquals(listOf(Opcode.RETURN_VOID), method.instructions.map(Instruction::getOpcode))
     }
 

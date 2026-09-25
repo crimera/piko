@@ -10,9 +10,10 @@ import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.singleChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.TIMELINE_TAB_FILTER_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -35,6 +36,8 @@ private const val HOME_TABBED_SCOPE = "Lcom/x/home/tabbed/"
 private const val OBJECT_ARRAY_DESCRIPTOR = "[Ljava/lang/Object;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val TOPIC_FILTER_FLAG = "co_timeline_topic_filter_enabled"
+private const val TIMELINE_TAB_FILTER_METHOD =
+    "$TIMELINE_TAB_FILTER_DESCRIPTOR->filter($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
 
 private object HomeTabbedComponentFingerprint : Fingerprint(
     definingClass = HOME_TABBED_SCOPE,
@@ -97,21 +100,17 @@ val customizeNewXTimelineTabsPatch =
             val match = matches.single()
             val creation = match.method.resolveHomeTabRouteCreation()
             val register = creation.arrayResultRegister
-            val invoke =
-                if (register in 0..15) {
-                    "invoke-static {v$register}, "
-                } else {
-                    "invoke-static/range {v$register .. v$register}, "
-                }
 
-            match.method.addInstructions(
-                creation.arrayIndex + 2,
-                """
-                    ${invoke}$TIMELINE_TAB_FILTER_DESCRIPTOR->filter(Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$register
-                    check-cast v$register, $OBJECT_ARRAY_DESCRIPTOR
-                """.trimIndent(),
-            )
+            match.method.insertHook(
+                index = creation.arrayIndex + 2,
+                // The old plain insertion never moved labels off the list factory call, so any
+                // branch that reached it kept skipping the filter and has to keep doing so.
+                relocateBranchTargets = false,
+            ) {
+                invokeStatic(methodReference(TIMELINE_TAB_FILTER_METHOD), register)
+                moveResult(register, OBJECT_DESCRIPTOR)
+                checkCast(register, OBJECT_ARRAY_DESCRIPTOR)
+            }
         }
     }
 

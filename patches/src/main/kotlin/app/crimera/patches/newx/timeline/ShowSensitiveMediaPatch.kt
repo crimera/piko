@@ -7,16 +7,16 @@ import app.crimera.patches.newx.settings.injectReadWithDefault
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
@@ -125,7 +125,6 @@ val newXShowSensitiveMediaPatch =
                                 "NewX media-visibility field write has no two-register layout: " +
                                     "${method.instructions[writeIndex]}",
                             )
-                    val continuation = method.instructions[writeIndex]
                     // cloneMutable reserves these locals before the shifted parameter registers.
                     val settingRegister = originalRegisterCount + ordinal * 2
                     val defaultRegister = settingRegister + 1
@@ -136,15 +135,17 @@ val newXShowSensitiveMediaPatch =
                             defaultValue = true,
                             registerRange = settingRegister..defaultRegister,
                         )
-                    val keepOriginalLabel = "piko_newx_keep_media_visibility_write_$ordinal"
-                    method.addInstructionsWithLabels(
-                        settingRead.nextIndex,
-                        """
-                            if-eqz v${settingRead.register}, :$keepOriginalLabel
-                            const/16 v${fieldWrite.registerA}, 0x0
-                        """.trimIndent(),
-                        ExternalLabel(keepOriginalLabel, continuation),
-                    )
+                    // The old external label sat on the field write, which the injected read leaves
+                    // directly behind the hook, so the branch skips the guard via
+                    // `Target.Original`. Labels that reached the write stay there: the previous
+                    // plain insertion never moved them either.
+                    method.insertHook(
+                        index = settingRead.nextIndex,
+                        relocateBranchTargets = false,
+                    ) {
+                        ifEqz(settingRead.register, Target.Original)
+                        constInt(fieldWrite.registerA, 0)
+                    }
                 }
             }
         }

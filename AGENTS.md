@@ -28,6 +28,21 @@ NewX is an obfuscated app under active refactoring. A patch must survive ordinar
 - Keep compile-time model contracts separate from release bytecode. Stable models may be `compileOnly`; unstable owners, methods, enums, and descriptors belong in patch-time resolution and direct smali injection, never runtime reflection.
 - Preserve old targets. A resilience improvement must keep the old path's behavior unchanged and must be checked against at least one older declared target.
 
+### Typed bytecode emission
+
+NewX hooks are emitted through the [`crimera:morphe-bytecode`](https://github.com/crimera/morphe-bytecode)
+library, never by assembling smali strings:
+
+- `method.insertHook(index, relocateBranchTargets = …) { … }` with `Block` emitters (`move`, `iget`,
+  `sput`, `invoke*`, `constInt`, `label`) and `Target.Local` / `Target.Original` as branch targets.
+- State the branch policy whenever the insertion point carries labels. Try-block boundaries, handler
+  labels and switch/payload labels are never relocated, and scratch registers are bounded by
+  `RegisterLimit` and fail closed instead of emitting an instruction the verifier rejects.
+- Do not reimplement the layer here, and do not add new smali string templates for NewX hooks. A
+  layer fix belongs in the library repository (tag `vX.Y.Z` publishes to GitHub Packages), followed
+  by a version bump in `patches/build.gradle.kts`. The library's `docs/what-this-prevents.md` lists the
+  device-side failures each guard replaces.
+
 ### Runtime API compatibility
 
 Patch code can execute in-process on Android, with API 29 as the compatibility floor. Avoid

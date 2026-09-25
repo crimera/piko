@@ -1,12 +1,11 @@
 package app.crimera.patches.newx.premium
 
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -40,20 +39,23 @@ private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
         if (resultInstruction.opcode != Opcode.MOVE_RESULT) return@forEach
 
         val resultRegister = resultInstruction.registersUsed[0]
-        addInstruction(resultIndex + 1, "const/16 v$resultRegister, 0x1")
+        // The old insertion left every label on the instruction after move-result, so a branch
+        // that reaches it directly keeps skipping the hook, exactly as before.
+        insertHook(resultIndex + 1, relocateBranchTargets = false) {
+            constInt(resultRegister, 1)
+        }
         patchedResults++
     }
     return patchedResults
 }
 
 private fun forceBooleanResult(match: Match) {
-    match.method.addInstructions(
-        0,
-        """
-            const/4 v0, 0x1
-            return v0
-        """.trimIndent(),
-    )
+    // The old insertion left every label on the method's first instruction, so a branch that
+    // reaches it directly keeps skipping the hook, exactly as before.
+    match.method.insertHook(0, relocateBranchTargets = false) {
+        constInt(0, 1)
+        returnValue(0)
+    }
 }
 
 private fun forceMediaClassDownloadable(match: Match) {
@@ -92,7 +94,11 @@ private fun forceMediaClassDownloadable(match: Match) {
                     ?: throw PatchException(
                         "NewX downloadable field write has an unexpected instruction shape: $iput",
                     )
-            constructor.addInstruction(iput.location.index, "const/4 v$register, 0x1")
+            // The old insertion left every label on the field write, so a branch that reaches it
+            // directly keeps skipping the hook, exactly as before.
+            constructor.insertHook(iput.location.index, relocateBranchTargets = false) {
+                constInt(register, 1)
+            }
             patchedConstructorWrites++
         }
     }

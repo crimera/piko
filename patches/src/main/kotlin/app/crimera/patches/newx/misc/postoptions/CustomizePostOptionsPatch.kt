@@ -11,10 +11,11 @@ import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.POST_OPTIONS_FILTER_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -30,6 +31,8 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 private const val POST_OPTIONS_STATE_PREFIX = "PostOptionsState(showOptionsDialog="
 private const val POST_OPTIONS_LIST_PREFIX = ", options="
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
+private const val POST_OPTIONS_FILTER_METHOD =
+    "$POST_OPTIONS_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;"
 
 private object CustomizePostOptionsStateFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
@@ -198,13 +201,20 @@ private fun injectPostOptionsFilter(hiddenItems: MultiChoiceSettingDefinition) {
         )
     }
 
-    method.addInstructions(
-        read.nextIndex,
-        """
-            invoke-static {v$optionsRegister, v${read.register}}, $POST_OPTIONS_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;
-            move-result-object v$optionsRegister
-        """.trimIndent(),
-    )
+    method.insertHook(
+        index = read.nextIndex,
+        // The old plain insertion left incoming labels on the original instruction.
+        relocateBranchTargets = false,
+    ) {
+        // The list register is four-bit checked above and the setting register is four-bit by
+        // constraint, so this stays `invoke-static` in format 35c, exactly like the smali it replaces.
+        invokeStatic(
+            methodReference(POST_OPTIONS_FILTER_METHOD),
+            optionsRegister,
+            read.register,
+        )
+        moveResult(optionsRegister, LIST_DESCRIPTOR)
+    }
 }
 
 private fun MutableMethod.postOptionsListValueRegister(storeIndex: Int): Int {

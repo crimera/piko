@@ -7,17 +7,19 @@ import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -26,8 +28,11 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION1 = "Lkotlin/jvm/functions/Function1;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val POINTER_INPUT_HANDLER = "Landroidx/compose/ui/input/pointer/PointerInputEventHandler;"
 private const val SHARE_IMAGE_HANDLER = "Lapp/morphe/extension/newx/misc/NewXShareImageHandler;"
+private const val POSITION_CALLBACK_DESCRIPTOR =
+    "$SHARE_IMAGE_HANDLER->positionCallbackFromIdentifier($OBJECT_DESCRIPTOR)$FUNCTION1"
 
 private object TimelinePostStateFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/items/post/",
@@ -140,16 +145,20 @@ val newXShareImagePatch =
             ) {
                 throw PatchException("NewX post pointer modifier signature changed")
             }
-            renderedPostMethod.method.addInstructions(
-                renderedPostMethod.instructionMatches[1].index + 1,
-                """
-                    move-object/from16 v$callbackRegister, p0
-                    iget-object v$callbackRegister, v$callbackRegister, $postIdentifierField
-                    invoke-static {v$callbackRegister}, $SHARE_IMAGE_HANDLER->positionCallbackFromIdentifier(Ljava/lang/Object;)$FUNCTION1
-                    move-result-object v$callbackRegister
-                    invoke-static {v${modifierResult.registerA}, v$callbackRegister}, $onPositionedReference
-                    move-result-object v${modifierResult.registerA}
-                """.trimIndent(),
-            )
+            // The callback register is dead once the pointer modifier consumed it, so it carries the
+            // identifier, the new callback and the result, exactly as the smali hook did.
+            renderedPostMethod.method.insertHook(
+                index = renderedPostMethod.instructionMatches[1].index + 1,
+                // The hook sits after the pointer modifier's `move-result-object`, so a label on the
+                // following instruction stays there: the old plain insertion did not move it either.
+                relocateBranchTargets = false,
+            ) {
+                move(callbackRegister, renderedPostMethod.method.p0Register, OBJECT_DESCRIPTOR)
+                iget(callbackRegister, callbackRegister, postIdentifierField)
+                invokeStatic(methodReference(POSITION_CALLBACK_DESCRIPTOR), callbackRegister)
+                moveResult(callbackRegister, FUNCTION1)
+                invokeStatic(onPositionedReference, modifierResult.registerA, callbackRegister)
+                moveResult(modifierResult.registerA, MODIFIER)
+            }
         }
     }

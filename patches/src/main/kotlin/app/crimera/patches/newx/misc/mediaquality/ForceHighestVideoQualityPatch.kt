@@ -12,13 +12,14 @@ import app.crimera.patches.newx.settings.injectReadWithDefault
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
@@ -27,8 +28,6 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
@@ -340,7 +339,18 @@ private fun patchAudioTrackOverride(
     }
     val newInstanceRegexIndex = regexAllocationCandidate.allocationIndex
 
-    val regexInstruction = instructionsList[newInstanceRegexIndex]
+    // The old injection carried two external labels: the bitrate branch that the read block is
+    // inserted in front of (the typed `Original` target) and the Regex allocation further down the
+    // method. Both indices come from the analysis snapshot, and the distance between them is
+    // unaffected by the read block that the hook index then sits behind.
+    val overrideDistance = newInstanceRegexIndex - branchInstructionIndex
+    if (overrideDistance <= 0) {
+        throw PatchException(
+            "Audio bitrate Regex allocation does not follow the bitrate branch in onTracksChanged: " +
+                "branch=$branchInstructionIndex, regex=$newInstanceRegexIndex",
+        )
+    }
+
     val settingRegister = originalRegisterCount
     val defaultRegister = settingRegister + 1
     val read =
@@ -350,16 +360,17 @@ private fun patchAudioTrackOverride(
             defaultValue = true,
             registerRange = settingRegister..defaultRegister,
         )
-    val label = "piko_audio_quality_check_$branchInstructionIndex"
-    method.addInstructionsWithLabels(
-        read.nextIndex,
-        """
-        if-eqz v${read.register}, :$label
-        goto :piko_force_audio_override
-        """.trimIndent(),
-        ExternalLabel(label, instructionsList[branchInstructionIndex]),
-        ExternalLabel("piko_force_audio_override", regexInstruction),
-    )
+    method.insertHook(
+        index = read.nextIndex,
+        // The old insertion left every label on the bitrate branch, so a branch that reaches it
+        // directly still evaluates the native condition without running the hook.
+        relocateBranchTargets = false,
+    ) {
+        // Keep the native bitrate decision when the setting is off, otherwise jump straight to the
+        // audio override path past the "bitrates are known" early exit.
+        ifEqz(read.register, Target.Original)
+        goto(Target.AfterOriginal(overrideDistance))
+    }
 }
 
 context(context: BytecodePatchContext)
@@ -398,6 +409,12 @@ private fun patchBitrateLimiter(
     }
 
     val resultRegister = moveResult.registerA
+    // The hook targets the instruction after the clamp result (the typed `Original`), so it must
+    // exist for the fall-through path to stay reachable.
+    if (moveResultIndex + 1 >= instructionsList.size) {
+        throw PatchException("No instruction after move-result in bitrate limiter")
+    }
+
     val settingRegister = originalRegisterCount
     val defaultRegister = settingRegister + 1
     val read =
@@ -407,16 +424,15 @@ private fun patchBitrateLimiter(
             defaultValue = true,
             registerRange = settingRegister..defaultRegister,
         )
-    val label = "piko_bitrate_limiter_skip"
-    val nextInstruction = instructionsList.getOrNull(moveResultIndex + 1)
-        ?: throw PatchException("No instruction after move-result in bitrate limiter")
-
-    method.addInstructionsWithLabels(
-        read.nextIndex,
-        """
-        if-eqz v${read.register}, :$label
-        const v$resultRegister, 0x${MAXIMUM_VIDEO_BITRATE.toString(16)}
-        """.trimIndent(),
-        ExternalLabel(label, nextInstruction),
-    )
+    method.insertHook(
+        index = read.nextIndex,
+        // The old insertion left every label on the clamp's continuation, so a branch that reaches
+        // it directly keeps skipping the hook, exactly as before.
+        relocateBranchTargets = false,
+    ) {
+        // Keep the clamped Math.min result when the setting is off, otherwise replace the network
+        // bitrate cap with the maximum.
+        ifEqz(read.register, Target.Original)
+        constInt(resultRegister, MAXIMUM_VIDEO_BITRATE)
+    }
 }

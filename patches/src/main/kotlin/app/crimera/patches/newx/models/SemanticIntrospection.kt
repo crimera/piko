@@ -1,17 +1,19 @@
 package app.crimera.patches.newx.models
 
+import app.crimera.bytecode.Block
+import app.crimera.bytecode.insertHook
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -192,145 +194,195 @@ internal fun MutableClass.requireGetter(
 ): MethodReference = resolveFieldAccessor(field, semanticName).getter
     ?: throw PatchException("NewX $semanticName has no getter: $field in $this")
 
-internal fun ModelFieldAccessor.readObject(register: String): String =
-    getter?.let { getter ->
-        "invoke-virtual {$register}, ${getter.smaliReference()}\nmove-result-object $register"
-    } ?: "iget-object $register, $register, $field"
+/** The wide accessor bodies keep their result in `v0`, the lowest local the release stub reserves. */
+private const val WIDE_RESULT_REGISTER = 0
 
-internal fun ModelFieldAccessor.readBoolean(register: String): String =
-    getter?.let { getter ->
-        "invoke-virtual {$register}, ${getter.smaliReference()}\nmove-result $register"
-    } ?: "iget-boolean $register, $register, $field"
-
-internal fun ModelFieldAccessor.readWide(receiver: String, destination: String): String =
-    getter?.let { getter ->
-        "invoke-virtual {$receiver}, ${getter.smaliReference()}\nmove-result-wide $destination"
-    } ?: "iget-wide $destination, $receiver, $field"
+/**
+ * Emits the model read the replaced smali strings hard-coded: the generated getter when the model
+ * exposes one, otherwise a direct field access.
+ *
+ * [ModelFieldAccessor.field]'s type picks both operands - `iget-object`/`iget-boolean`/`iget-wide`
+ * and `move-result-object`/`move-result`/`move-result-wide` - so the read follows the resolved
+ * release field instead of a spelling a caller could get wrong. [destination] defaults to
+ * [receiver] because every replaced accessor read into the register it read from; only the wide
+ * bodies used [WIDE_RESULT_REGISTER].
+ */
+internal fun Block.readModelAccessor(
+    accessor: ModelFieldAccessor,
+    receiver: Int,
+    destination: Int = receiver,
+) {
+    val getter = accessor.getter
+    if (getter == null) {
+        iget(destination, receiver, accessor.field)
+        return
+    }
+    invokeVirtual(getter, receiver)
+    moveResult(destination, accessor.field.type)
+}
 
 internal fun MutableClass.patchObjectFieldGetter(
     name: String,
     ownerDescriptor: String,
     field: FieldReference,
     returnType: String = OBJECT_DESCRIPTOR,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    returnType,
-    "check-cast p0, $ownerDescriptor\niget-object p0, p0, $field\nreturn-object p0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, returnType)
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        iget(receiver, receiver, field)
+        returnObject(receiver)
+    }
+}
 
 internal fun MutableClass.patchObjectMethodGetter(
     name: String,
     ownerDescriptor: String,
     getter: MethodReference,
     returnType: String = OBJECT_DESCRIPTOR,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    returnType,
-    "check-cast p0, $ownerDescriptor\n" +
-        "invoke-virtual {p0}, ${getter.smaliReference()}\n" +
-        "move-result-object p0\nreturn-object p0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, returnType)
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        invokeVirtual(getter, receiver)
+        moveResult(receiver, getter.returnType)
+        returnObject(receiver)
+    }
+}
 
 internal fun MutableClass.patchObjectAccessorGetter(
     name: String,
     ownerDescriptor: String,
     accessor: ModelFieldAccessor,
     returnType: String = OBJECT_DESCRIPTOR,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    returnType,
-    "check-cast p0, $ownerDescriptor\n" +
-        "${accessor.readObject("p0")}\nreturn-object p0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, returnType)
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        readModelAccessor(accessor, receiver)
+        returnObject(receiver)
+    }
+}
 
 internal fun MutableClass.patchBooleanFieldGetter(
     name: String,
     ownerDescriptor: String,
     field: FieldReference,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    "Z",
-    "check-cast p0, $ownerDescriptor\niget-boolean p0, p0, $field\nreturn p0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, "Z")
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        iget(receiver, receiver, field)
+        returnValue(receiver)
+    }
+}
 
 internal fun MutableClass.patchBooleanMethodGetter(
     name: String,
     ownerDescriptor: String,
     getter: MethodReference,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    "Z",
-    "check-cast p0, $ownerDescriptor\n" +
-        "invoke-virtual {p0}, ${getter.smaliReference()}\n" +
-        "move-result p0\nreturn p0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, "Z")
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        invokeVirtual(getter, receiver)
+        moveResult(receiver, getter.returnType)
+        returnValue(receiver)
+    }
+}
 
 internal fun MutableClass.patchBooleanAccessorGetter(
     name: String,
     ownerDescriptor: String,
     accessor: ModelFieldAccessor,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    "Z",
-    "check-cast p0, $ownerDescriptor\n" +
-        "${accessor.readBoolean("p0")}\nreturn p0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, "Z")
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        readModelAccessor(accessor, receiver)
+        returnValue(receiver)
+    }
+}
 
 internal fun MutableClass.patchWideFieldGetter(
     name: String,
     ownerDescriptor: String,
     field: FieldReference,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    "J",
-    "check-cast p0, $ownerDescriptor\niget-wide v0, p0, $field\nreturn-wide v0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, "J")
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        iget(WIDE_RESULT_REGISTER, receiver, field)
+        returnWide(WIDE_RESULT_REGISTER)
+    }
+}
 
 internal fun MutableClass.patchWideMethodGetter(
     name: String,
     ownerDescriptor: String,
     getter: MethodReference,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    "J",
-    "check-cast p0, $ownerDescriptor\n" +
-        "invoke-virtual {p0}, ${getter.smaliReference()}\n" +
-        "move-result-wide v0\nreturn-wide v0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, "J")
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        invokeVirtual(getter, receiver)
+        moveResult(WIDE_RESULT_REGISTER, getter.returnType)
+        returnWide(WIDE_RESULT_REGISTER)
+    }
+}
 
 internal fun MutableClass.patchWideAccessorGetter(
     name: String,
     ownerDescriptor: String,
     accessor: ModelFieldAccessor,
-) = patchBridge(
-    name,
-    OBJECT_DESCRIPTOR,
-    "J",
-    "check-cast p0, $ownerDescriptor\n" +
-        "${accessor.readWide("p0", "v0")}\nreturn-wide v0",
-)
+) {
+    val bridge = requireBridge(name, OBJECT_DESCRIPTOR, "J")
+    bridge.patchBridge {
+        val receiver = bridge.p0Register
+        checkCast(receiver, ownerDescriptor)
+        readModelAccessor(accessor, receiver, WIDE_RESULT_REGISTER)
+        returnWide(WIDE_RESULT_REGISTER)
+    }
+}
 
-internal fun MutableClass.patchBridge(
+/**
+ * Resolves the single bridge method the extension declares as `name(parameters)returnType`.
+ *
+ * The compiled extension fixes the stub's register layout, so a caller resolves the bridge first
+ * and addresses its parameters through [MutableMethod.p0Register] - the absolute register the
+ * release body's `p0` alias refers to.
+ */
+internal fun MutableClass.requireBridge(
     name: String,
     parameters: String,
     returnType: String,
-    instructions: String,
-) {
+): MutableMethod {
     val matches = methods.filter { method ->
         method.name == name &&
             method.parameterTypes.joinToString("") == parameters &&
             method.returnType == returnType
     }
-    requireExactlyOne("NewX bridge $name($parameters)$returnType in $this", matches)
-        .addInstructions(0, instructions.trimIndent())
+    return requireExactlyOne("NewX bridge $name($parameters)$returnType in $this", matches)
+}
+
+/**
+ * Replaces the whole body of a resolved bridge stub.
+ *
+ * The block is inserted in front of the stub's first instruction, keeping the previous prepend
+ * emission's semantics: the release body stays behind it as dead code and a branch to the method
+ * head keeps skipping the bridge, because [insertHook] leaves the labels that sit on that first
+ * instruction in place (`relocateBranchTargets = false`).
+ */
+internal fun MutableMethod.patchBridge(block: Block.() -> Unit) {
+    insertHook(index = 0, relocateBranchTargets = false, block = block)
 }
 
 context(context: BytecodePatchContext)
@@ -354,9 +406,6 @@ private fun MethodReference.matches(method: Method): Boolean =
     method.name == name &&
         method.returnType == returnType &&
         method.parameterTypes.map(CharSequence::toString) == parameterTypes.map(CharSequence::toString)
-
-internal fun MethodReference.smaliReference(): String =
-    "$definingClass->$name(${parameterTypes.joinToString("")})$returnType"
 
 private fun MethodReference.isStringBuilderLabelConsumer(): Boolean =
     definingClass == "Ljava/lang/StringBuilder;" &&
