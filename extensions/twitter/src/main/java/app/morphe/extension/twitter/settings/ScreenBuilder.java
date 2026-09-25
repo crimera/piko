@@ -28,6 +28,14 @@ import app.morphe.extension.twitter.Pref;
 public class ScreenBuilder {
     private static final SettingsSection[] SETTINGS_SECTIONS = new SettingsSection[]{
             new SettingsSection(
+                    "piko_title_wireguard",
+                    null,
+                    Settings.WIREGUARD_SECTION,
+                    "ic_vector_settings_stroke",
+                    () -> SettingsStatus.wireguard,
+                    ScreenBuilder::buildWireGuardSection
+            ),
+            new SettingsSection(
                     "piko_title_premium",
                     null,
                     Settings.PREMIUM_SECTION,
@@ -138,6 +146,13 @@ public class ScreenBuilder {
 
     private void addPreference(Preference pref){
         preferenceTarget.addPreference(null, pref);
+    }
+
+    public void buildWireGuardSection(boolean buildCategory) {
+        if (!SettingsStatus.wireguard) return;
+        addPreference(helper.buttonPreference(str("piko_title_wireguard"),
+                str("piko_wireguard_description"), Settings.WIREGUARD_SECTION,
+                "ic_vector_settings_stroke", null));
     }
     private void addPreference(@Nullable LegacyTwitterPreferenceCategory category,Preference pref){
         preferenceTarget.addPreference(category, pref);

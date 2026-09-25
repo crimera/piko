@@ -86,6 +86,8 @@ public class ActivityHook {
             fragment = new FeatureFlagsFragment();
         } else if (Settings.PATCH_INFO.equals(activity_name)) {
             fragment = new SettingsAboutFragment();
+        } else if (Settings.WIREGUARD_SECTION.equals(activity_name)) {
+            fragment = new app.morphe.extension.twitter.wireguard.WireGuardFragment();
         } else if (Settings.READER_MODE_KEY.equals(activity_name)) {
             fragment = new ReaderModeFragment();
         } else {

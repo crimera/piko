@@ -1,0 +1,33 @@
+Piko embedded WireGuard
+
+WireGuard Android tunnel library 1.0.20260102
+Copyright 2017-2025 WireGuard LLC. All Rights Reserved.
+https://git.zx2c4.com/wireguard-android/
+Apache License 2.0: Apache-2.0.txt
+The upstream library and native binaries are used without modification.
+
+wireguard-go f333402bd9cb (as embedded by the upstream Android artifact)
+Copyright 2017-2025 WireGuard LLC. All Rights Reserved.
+https://git.zx2c4.com/wireguard-go/
+MIT license: MIT-wireguard-go.txt
+
+Go 1.24.3 and native dependencies
+Copyright The Go Authors. All rights reserved.
+https://go.dev/
+Go-BSD.txt
+golang.org/x/crypto v0.38.0: Go-crypto-BSD.txt
+golang.org/x/net v0.40.0: Go-net-BSD.txt
+golang.org/x/sys v0.33.0: Go-sys-BSD.txt
+
+AndroidX Collection and Annotation
+Copyright The Android Open Source Project.
+https://android.googlesource.com/platform/frameworks/support/
+Apache License 2.0: AndroidX-Apache-2.0.txt
+
+Kotlin standard library (transitive dependency of AndroidX Collection)
+Copyright JetBrains s.r.o. and Kotlin Programming Language contributors.
+https://github.com/JetBrains/kotlin
+Apache License 2.0: Kotlin-Apache-2.0.txt
+
+Full license texts are bundled beside this notice in assets/piko-wireguard/.
+The Piko integration is covered by Piko's existing GPLv3 and NOTICE terms.

@@ -13,6 +13,9 @@ import app.morphe.extension.crimera.settings.StringSetting;
 public class Settings {
     public static final String SHARED_PREF_NAME = "piko_settings";
     public static final String ACT_NAME = "activity_name";
+    public static final String WIREGUARD_SECTION = "wireguard";
+    public static final BooleanSetting WIREGUARD_ENABLED = new BooleanSetting("wireguard_enabled", false);
+    public static final BooleanSetting WIREGUARD_AUTO_CONNECT = new BooleanSetting("wireguard_auto_connect", false);
 
     public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);
 

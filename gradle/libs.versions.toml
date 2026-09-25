@@ -6,6 +6,7 @@ smali = "d92701d947"
 gson = "2.14.0"
 annotation = "1.9.1"
 appcompat = "1.7.1"
+wireguard = "1.0.20260102"
 
 [libraries]
 morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }
@@ -13,6 +14,7 @@ morphe-extensions-library = { module = "app.morphe:morphe-extensions-library", v
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+wireguard = { module = "com.wireguard.android:tunnel", version.ref = "wireguard" }
 
 [plugins]
 android-library = { id = "com.android.library" }

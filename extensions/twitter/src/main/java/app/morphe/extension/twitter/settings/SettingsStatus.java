@@ -10,6 +10,11 @@ import android.os.Build;
 import app.morphe.extension.twitter.patches.FeatureSwitchPatch;
 
 public class SettingsStatus {
+    public static boolean wireguard = false;
+
+    public static void wireguard() {
+        wireguard = true;
+    }
 
     public static boolean showChangelogsPatchEnabled = false;
 
