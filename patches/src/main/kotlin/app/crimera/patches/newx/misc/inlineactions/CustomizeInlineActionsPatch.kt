@@ -125,6 +125,15 @@ val customizeNewXInlineActionsPatch =
 
             // Loop exits target the immutable conversion. Hook its result, then restore the
             // exact immutable representation before the consumer sees it.
+            //
+            // Hidden actions must stay *removed* from the list. The bar measures one packed slot
+            // per entry (Compose measure policy, `f1` kinds CountedPill/Countless/IconOnly) and
+            // every kind floors at style width + icon size, so an entry that is kept and merely
+            // rendered invisible still reserves its slot and one gap: that leaves a hole at the
+            // action's position and pushes the trailing icon-only group to the right edge. Removal
+            // is what the app itself does for an action a post does not offer, so the surviving
+            // slots redistribute exactly like a native bar. Evidence and measurements:
+            // docs/newx-resolver-linter/incidents/2026-09-25-inline-action-hidden-slot.md.
             method.addInstructions(
                 read.nextIndex,
                 """

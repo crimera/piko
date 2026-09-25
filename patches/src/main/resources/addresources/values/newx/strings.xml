@@ -242,6 +242,9 @@
     <string name="piko_newx_inline_action_bookmark">Bookmark</string>
     <string name="piko_newx_inline_action_share">Share</string>
 
+    <string name="piko_newx_native_inline_action_spacing_title">Native action bar spacing</string>
+    <string name="piko_newx_native_inline_action_spacing_summary">On: NewX\'s packed action spacing (12.28.0-alpha.04 and newer). Off: the even spacing older NewX releases used, where hiding an action leaves no gap.</string>
+
     <string name="piko_newx_nav_bar_home">Home</string>
     <string name="piko_newx_nav_bar_explore">Explore</string>
     <string name="piko_newx_nav_bar_grok">Grok</string>

@@ -27,7 +27,7 @@ import java.util.WeakHashMap
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val COMPOSE_MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
-private const val INLINE_ACTION_BAR_SCOPE = "Lcom/x/inlineactionbar/"
+internal const val INLINE_ACTION_BAR_SCOPE = "Lcom/x/inlineactionbar/"
 private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
 private const val ITERATOR_DESCRIPTOR = "Ljava/util/Iterator;"
 private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
@@ -725,22 +725,10 @@ private fun resolveInlineDownloadModels(
 }
 
 context(context: BytecodePatchContext)
-private fun resolveInlineActionKindOverride(
+private fun resolveInlineActionKindLayoutLambda(
     entryModels: ResolvedNewXInlineActionModels,
-): ResolvedNewXInlineActionKindOverride? {
-    // The download action is injected with the TwitterShare carrier so it keeps the native share
-    // slot's icon/click wiring. 12.29's action-bar layout classifies TwitterShare as Countless
-    // because its kind switch has no entry for it, which reserves a wider slot than the icon-only
-    // layout. Resolve the shared layout lambda and the kind model it constructs so the patch can
-    // rewrite only the injected action's kind. The action-type field read grounds the lambda as
-    // the one that consumes the inline-action entries.
-    //
-    // Older targets keep a boolean-only kind model with no IconOnly enum to rewrite:
-    // 12.27/12.28-alpha.01 use `(Z)`, 12.28-alpha.04/prod use `(ZZZ)`. Those releases worked
-    // without the override, so a validated legacy shape returns null and the patch skips the
-    // rewrite. Any other shape (no recognized kind constructor, or an ambiguous enum match)
-    // still fails closed.
-    val layoutLambda = requireExactlyOne(
+): Method =
+    requireExactlyOne(
         "NewX inline-action kind layout lambda",
         Fingerprint(
             definingClass = INLINE_ACTION_BAR_SCOPE,
@@ -756,41 +744,30 @@ private fun resolveInlineActionKindOverride(
         ).scopedMatchAll(),
     ).originalMethod
 
-    val kindConstructors = layoutLambda.implementation
-        ?.instructions
-        ?.toList()
-        .orEmpty()
-        .mapIndexedNotNull { index, instruction ->
-            index.takeIf {
-                isInlineActionKindModelConstructor(instruction) { type ->
-                    context.classDefByOrNull(type)?.let { kindClass ->
-                        AccessFlags.ENUM.isSet(kindClass.accessFlags)
-                    } == true
-                }
-            }?.let { constructorIndex -> constructorIndex to instruction }
+context(context: BytecodePatchContext)
+private fun resolveInlineActionKindOverride(
+    entryModels: ResolvedNewXInlineActionModels,
+): ResolvedNewXInlineActionKindOverride? {
+    // The download action is injected with the TwitterShare carrier so it keeps the native share
+    // slot's icon/click wiring. 12.29's action-bar layout classifies TwitterShare as Countless
+    // because its kind switch has no entry for it, which reserves a wider slot than the icon-only
+    // layout. Resolve the shared layout lambda and the kind model it constructs so the patch can
+    // rewrite only the injected action's kind. The action-type field read grounds the lambda as
+    // the one that consumes the inline-action entries.
+    //
+    // Older targets keep a boolean-only kind model with no IconOnly enum to rewrite:
+    // 12.27/12.28-alpha.01 use `(Z)`, 12.28-alpha.04/prod use `(ZZZ)`. Those releases worked
+    // without the override, so a validated legacy shape returns null and the patch skips the
+    // rewrite. Any other shape (no recognized kind constructor, or an ambiguous enum match)
+    // still fails closed.
+    val layoutLambda = resolveInlineActionKindLayoutLambda(entryModels)
+
+    val kindConstructor = resolveInlineActionEnumKindConstructor(layoutLambda)
+        ?: run {
+            // Boolean-only kind model: no IconOnly enum to rewrite. Validated shapes only.
+            resolveInlineActionBooleanKindConstructor(layoutLambda)
+            return null
         }
-    val kindCandidate = requireAtMostOne(
-        "NewX inline-action kind model constructor",
-        kindConstructors,
-    )
-    if (kindCandidate == null) {
-        val legacyConstructors = layoutLambda.implementation
-            ?.instructions
-            ?.toList()
-            .orEmpty()
-            .mapIndexedNotNull { index, instruction ->
-                index.takeIf { isLegacyInlineActionKindModelConstructor(instruction) }
-            }
-        requireExactlyOne(
-            "NewX legacy inline-action boolean kind model constructor",
-            legacyConstructors,
-        )
-        return null
-    }
-    val kindConstructor = kindCandidate.second.let { instruction ->
-        instruction.getReference<MethodReference>()
-            ?: throw PatchException("NewX inline-action kind model constructor has no reference")
-    }
     val kindEnumDescriptor = kindConstructor.parameterTypes.last().toString()
     val kindEnumClass = context.classDefByOrNull(kindEnumDescriptor)
         ?: throw PatchException("NewX inline-action kind enum was not found: $kindEnumDescriptor")
@@ -811,6 +788,127 @@ private fun resolveInlineActionKindOverride(
         kindModelConstructor = kindConstructor,
         iconOnlyField = iconOnlyField,
     )
+}
+
+/**
+ * Inline-action bar kind model shape. The bar's measure policy changed between 12.28.0-alpha.01 and
+ * 12.28.0-alpha.04: the older releases gave every counted action an equal share of the row
+ * ("classic" spacing), the newer ones give every child its own packed slot and distribute the
+ * leftover width into every gap.
+ */
+internal enum class NewXInlineActionKindShape {
+    /** One kind enum per child (`CountedPill` / `Countless` / `IconOnly`), packed-slot bar. */
+    ENUM,
+
+    /** Three booleans per child, packed-slot bar (12.28.0-alpha.04, 12.28.0-prod.01). */
+    BOOLEAN_FLAGS,
+
+    /** One boolean per child, classic weighted bar (12.27.0-prod.01, 12.28.0-alpha.01). */
+    BOOLEAN_CLASSIC,
+}
+
+internal data class ResolvedNewXInlineActionBarLayout(
+    val shape: NewXInlineActionKindShape,
+    val layoutLambda: MethodReference,
+    val kindModelConstructor: MethodReference,
+    /** Declaring class of the kind model: the bar's per-child parent data. */
+    val kindModelDescriptor: String,
+    /** Kind enum type, for [NewXInlineActionKindShape.ENUM]. */
+    val kindEnumDescriptor: String?,
+    /** Enum-typed parent-data field holding the child's kind, for [NewXInlineActionKindShape.ENUM]. */
+    val kindField: FieldReference?,
+)
+
+/**
+ * Resolves the bar's parent-data shape so callers can tell which layout the target ships. Targets
+ * with [NewXInlineActionKindShape.BOOLEAN_CLASSIC] already render the classic spacing.
+ */
+context(context: BytecodePatchContext)
+internal fun resolvedNewXInlineActionBarLayout(): ResolvedNewXInlineActionBarLayout {
+    val layoutLambda = resolveInlineActionKindLayoutLambda(resolvedNewXInlineActionModels())
+    val enumConstructor = resolveInlineActionEnumKindConstructor(layoutLambda)
+    if (enumConstructor != null) {
+        val kindEnumDescriptor = enumConstructor.parameterTypes.last().toString()
+        val kindModelDescriptor = enumConstructor.definingClass
+        val kindModelClass = context.classDefByOrNull(kindModelDescriptor)
+            ?: throw PatchException("NewX inline-action kind model was not found: $kindModelDescriptor")
+        val kindField = requireExactlyOne(
+            "NewX inline-action kind field in $kindModelDescriptor",
+            kindModelClass.fields.filter { field -> field.type == kindEnumDescriptor },
+        )
+        return ResolvedNewXInlineActionBarLayout(
+            shape = NewXInlineActionKindShape.ENUM,
+            layoutLambda = layoutLambda,
+            kindModelConstructor = enumConstructor,
+            kindModelDescriptor = kindModelDescriptor,
+            kindEnumDescriptor = kindEnumDescriptor,
+            kindField = kindField,
+        )
+    }
+    val booleanConstructor = resolveInlineActionBooleanKindConstructor(layoutLambda)
+    val shape =
+        if (booleanConstructor.parameterTypes.size == 1) {
+            NewXInlineActionKindShape.BOOLEAN_CLASSIC
+        } else {
+            NewXInlineActionKindShape.BOOLEAN_FLAGS
+        }
+    return ResolvedNewXInlineActionBarLayout(
+        shape = shape,
+        layoutLambda = layoutLambda,
+        kindModelConstructor = booleanConstructor,
+        kindModelDescriptor = booleanConstructor.definingClass,
+        kindEnumDescriptor = null,
+        kindField = null,
+    )
+}
+
+context(context: BytecodePatchContext)
+private fun resolveInlineActionEnumKindConstructor(
+    layoutLambda: Method,
+): MethodReference? {
+    val kindConstructors = layoutLambda.implementation
+        ?.instructions
+        ?.toList()
+        .orEmpty()
+        .mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                isInlineActionKindModelConstructor(instruction) { type ->
+                    context.classDefByOrNull(type)?.let { kindClass ->
+                        AccessFlags.ENUM.isSet(kindClass.accessFlags)
+                    } == true
+                }
+            }?.let { constructorIndex -> constructorIndex to instruction }
+        }
+    val candidate = requireAtMostOne(
+        "NewX inline-action kind model constructor",
+        kindConstructors,
+    ) ?: return null
+    return candidate.second.getReference<MethodReference>()
+        ?: throw PatchException(
+            "NewX inline-action kind model constructor has no reference: ${candidate.second}",
+        )
+}
+
+context(context: BytecodePatchContext)
+private fun resolveInlineActionBooleanKindConstructor(
+    layoutLambda: Method,
+): MethodReference {
+    val legacyConstructors = layoutLambda.implementation
+        ?.instructions
+        ?.toList()
+        .orEmpty()
+        .mapIndexedNotNull { index, instruction ->
+            index.takeIf { isLegacyInlineActionKindModelConstructor(instruction) }
+        }
+    val constructorIndex = requireExactlyOne(
+        "NewX legacy inline-action boolean kind model constructor",
+        legacyConstructors,
+    )
+    return layoutLambda.implementation?.instructions?.toList()?.get(constructorIndex)
+        ?.getReference<MethodReference>()
+        ?: throw PatchException(
+            "NewX legacy inline-action boolean kind model constructor has no reference: ${layoutLambda}",
+        )
 }
 
 /**

@@ -3050,6 +3050,56 @@
       "options": []
     },
     {
+      "name": "NewX: Classic inline action spacing",
+      "description": "Lays out post action bars with the spacing NewX used before 12.28.0-alpha.04: counted actions share the row width and icon-only actions keep their intrinsic size, so hiding an action never leaves a gap.",
+      "default": false,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "NewX",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.27.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.28.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.28.0-alpha.01",
+              "versionCodes": null,
+              "isExperimental": true,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.28.0-alpha.04",
+              "versionCodes": null,
+              "isExperimental": true,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "NewX: Crash logs",
       "description": "Saves crash logs and shows a notification with share and copy actions.",
       "default": true,
@@ -3312,6 +3362,7 @@
       "description": "Reorder, hide, and replace NewX bottom navigation bar items.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -4357,7 +4408,7 @@
     },
     {
       "name": "NewX: Hide timeline tabs bar",
-      "description": "Removes the For You and Following tabs bar from NewX home timelines.",
+      "description": "Removes the For You and Following tabs bar from NewX home timelines, with an option to hide the add-tab (+) button.",
       "default": true,
       "dependencies": [
         "BytecodePatch"

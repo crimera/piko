@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Patch Twitter/X with the unified NewX patch bundle.
 set -euo pipefail
 
@@ -52,6 +51,7 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar ../piko/morphe-desktop-1.11.0-all.jar pa
   -e "NewX: Browse tweet object" \
   -e "NewX: Share post as image" \
   -e "NewX: Customize inline actions" \
+  -e "NewX: Classic inline action spacing" \
   -e "NewX: Unlock downloads" \
   -e "NewX: Hide new posts pill" \
   -e "NewX: Customize navigation bar" \
