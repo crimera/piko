@@ -67,7 +67,6 @@ public final class MediaMerger {
     ) {
         List<File> tempFiles = new ArrayList<>();
         try {
-            // Step 1: Download each slice into a temporary cache file
             File cacheDir = context.getCacheDir();
             for (int i = 0; i < items.size(); i++) {
                 InlineDownloadButton.DownloadItem item = items.get(i);
@@ -83,7 +82,6 @@ public final class MediaMerger {
                 }
             }
 
-            // Step 2: Read dimensions of all slices without loading full bitmaps
             int count = tempFiles.size();
             int[] widths = new int[count];
             int[] heights = new int[count];
@@ -104,7 +102,6 @@ public final class MediaMerger {
                 }
             }
 
-            // Step 3: Compute scaled width for each slice to normalize all to maxHeight
             int[] scaledWidths = new int[count];
             int totalWidth = 0;
             for (int i = 0; i < count; i++) {
@@ -134,7 +131,6 @@ public final class MediaMerger {
                 }
             }
 
-            // Step 5: Allocate canvas and stitch slices horizontally 1-2-3-4
             Bitmap mergedBitmap;
             try {
                 mergedBitmap = Bitmap.createBitmap(totalWidth, maxHeight, Bitmap.Config.ARGB_8888);
@@ -167,7 +163,6 @@ public final class MediaMerger {
                 currentX += scaledWidths[i];
             }
 
-            // Step 6: Determine output format and file name
             boolean isAllPng = true;
             for (InlineDownloadButton.DownloadItem item : items) {
                 if (item.extension == null || !item.extension.equalsIgnoreCase("png")) {
@@ -180,8 +175,7 @@ public final class MediaMerger {
             String mimeType = isAllPng ? "image/png" : "image/jpeg";
             Bitmap.CompressFormat format = isAllPng ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG;
 
-            // A merge is one output for the whole action, so it renders the template without a
-            // media index rather than inheriting the index of the last slice.
+            // One output for the whole action, so render without a media index.
             String fileName = DownloadFileName.render(
                     DownloadSettings.filenameTemplate(),
                     postContext,
@@ -190,8 +184,7 @@ public final class MediaMerger {
                     extension
             );
 
-            // Step 7: Reserve the destination document before encoding, so a skipped merge costs
-            // no work and the file lands where the user configured.
+            // Reserve before encoding so a skipped merge costs no work.
             final DownloadDestination.Target target;
             try {
                 target = DownloadDestination.reserve(
@@ -204,7 +197,17 @@ public final class MediaMerger {
             } catch (IOException | RuntimeException exception) {
                 mergedBitmap.recycle();
                 NewXLogger.printException(() -> LOG_PREFIX + "Failed to create merged image document", exception);
-                NewXInAppNotification.showForUser("Failed to save merged image: " + fileName, username);
+                if (DownloadDestination.isDestinationLoss(exception)) {
+                    InlineDownloadButton.reportDownloadStatus(
+                            InlineDownloadButton.FOLDER_LOST_MESSAGE,
+                            username
+                    );
+                } else {
+                    InlineDownloadButton.reportDownloadStatus(
+                            "Failed to save merged image: " + fileName,
+                            username
+                    );
+                }
                 return;
             }
             if (target == null) {
@@ -217,19 +220,17 @@ public final class MediaMerger {
             mergedBitmap.recycle();
 
             if (saved) {
-                // MediaMerger streams the slices itself rather than going through the URL-based
-                // DownloadDestination transfer, so retain its merge-specific completion feedback.
-                NewXInAppNotification.showForUser("Merged image saved: " + target.fileName(), username);
                 NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + target.fileName());
+                InlineDownloadButton.reportDownloadStatus(
+                        "Merged image saved: " + target.fileName(), username);
             } else {
-                NewXInAppNotification.showForUser("Failed to save merged image: " + fileName, username);
+                InlineDownloadButton.reportDownloadStatus("Failed to save merged image: " + fileName, username);
             }
 
         } catch (Throwable t) {
             NewXLogger.printException(() -> LOG_PREFIX + "Failed to merge images", t);
             NewXInAppNotification.showForUser("Failed to merge images", username);
         } finally {
-            // Step 8: Clean up all temporary files from cache
             for (File tempFile : tempFiles) {
                 try {
                     if (tempFile.exists()) {

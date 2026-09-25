@@ -2,6 +2,8 @@ package app.morphe.extension.newx.settings;
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -127,6 +129,19 @@ public final class NewXLogger {
         return SERVER_LOG_BUFFER.snapshot();
     }
 
+    /**
+     * Records download outcome for diagnostics. Device state (missing grant, refused
+     * provider, blocked notifications) cannot be reproduced from a verbal report.
+     */
+    public static void captureDownloadFailure(String detail, @Nullable Throwable throwable) {
+        try {
+            if (!isServerLoggingEnabled()) return;
+            recordEntry(formatErrorEntry("download_failure", detail, throwable));
+        } catch (Throwable ignored) {
+            // Diagnostics must never turn a handled download failure into an app crash.
+        }
+    }
+
     private static void recordEntry(String entry) {
         SERVER_LOG_BUFFER.add(entry);
         if (isLoggingEnabled()) {
@@ -142,7 +157,7 @@ public final class NewXLogger {
     private static String formatErrorEntry(
             String event,
             String operation,
-            Throwable throwable
+            @Nullable Throwable throwable
     ) {
         String timestamp = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss.SSS",
@@ -151,17 +166,15 @@ public final class NewXLogger {
         String operationSuffix = operation == null
                 ? ""
                 : " operation=" + sanitizeText(operation);
-        String throwableText = boundText(
-                sanitizeText(throwable.toString()),
-                MAX_THROWABLE_TEXT_CHARS
-        );
-        String stackTrace = boundText(
-                sanitizeText(Log.getStackTraceString(throwable)),
-                MAX_STACK_TRACE_CHARS
-        );
+        String throwableText = throwable == null
+                ? "none"
+                : boundText(sanitizeText(throwable.toString()), MAX_THROWABLE_TEXT_CHARS);
+        String stackTrace = throwable == null
+                ? "none"
+                : boundText(sanitizeText(Log.getStackTraceString(throwable)), MAX_STACK_TRACE_CHARS);
         return "[" + timestamp + "] event=" + event + operationSuffix
                 + " thread=" + Thread.currentThread().getName()
-                + " type=" + throwable.getClass().getName() + "\n"
+                + " type=" + (throwable == null ? "none" : throwable.getClass().getName()) + "\n"
                 + "error=" + throwableText + "\n"
                 + "stacktrace=\n" + stackTrace;
     }

@@ -30,8 +30,7 @@ public final class DownloadFolderPickerActivity extends Activity {
 
         kind = kindFrom(getIntent());
         if (kind == null) {
-            // No usable request means something launched this without a destination, so close
-            // rather than silently writing the pick into the images destination.
+            // Avoid storing an unspecified pick as the images destination.
             NewXLogger.printException(
                     () -> "Download folder picker started without a media kind",
                     new IllegalArgumentException("Missing " + KIND_EXTRA)
@@ -67,15 +66,25 @@ public final class DownloadFolderPickerActivity extends Activity {
             return;
         }
 
+        boolean persisted = true;
         try {
             getContentResolver().takePersistableUriPermission(
                     treeUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             );
-        } catch (SecurityException exception) {
-            // Some providers hand out a tree without a persistable grant. The URI is still usable
-            // for this process, so record it and let DownloadDestination report the missing grant.
+        } catch (RuntimeException exception) {
+            // Some providers hand out a tree they refuse to persist; the pick still works
+            // until this process ends, so keep it and say what to expect.
+            persisted = false;
             NewXLogger.printException(() -> "Could not persist NewX download folder permission", exception);
+        }
+
+        if (!persisted && !DownloadDestination.hasLiveTreeAccess(getContentResolver(), treeUri)) {
+            // Nothing writable; keeping it would only replace a working folder with failures.
+            DownloadDestination.captureDestination(this, kind, "folder-picked/unwritable");
+            Utils.showToastShort(StringRef.str("piko_newx_download_options_folder_unwritable"));
+            finish();
+            return;
         }
 
         DownloadDestination.store(
@@ -84,7 +93,10 @@ public final class DownloadFolderPickerActivity extends Activity {
                 treeUri,
                 DownloadDestination.displayPathFor(treeUri)
         );
-        Utils.showToastShort(StringRef.str("piko_newx_download_options_changed"));
+        DownloadDestination.captureDestination(this, kind, "folder-picked");
+        Utils.showToastShort(StringRef.str(persisted
+                ? "piko_newx_download_options_changed"
+                : "piko_newx_download_options_folder_session"));
         finish();
     }
 

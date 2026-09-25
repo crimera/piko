@@ -14,6 +14,7 @@ import android.provider.DocumentsContract;
 import androidx.annotation.Nullable;
 
 import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,6 +38,7 @@ public final class DownloadDestination {
     private static final int READ_TIMEOUT_MS = 30_000;
     private static final int MAX_REDIRECTS = 5;
     private static final int MAX_NAME_ATTEMPTS = 32;
+    private static final int MAX_CAUSE_DEPTH = 16;
     private static final String USER_AGENT =
             "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36";
 
@@ -117,14 +119,37 @@ public final class DownloadDestination {
                 : DownloadSettings.IMAGES_DISPLAY_PATH;
     }
 
-    /**
-     * True when this media type has a folder whose read/write grant is still persisted. A restored
-     * backup carries the URI string but not the grant, so this must be re-checked before writing.
-     */
+    /** Persisted grant, live-but-unpersisted access, or unusable. Restored backups keep the
+     * URI string without the grant, so stored != writable. */
+    public enum DestinationState {
+        /** No folder stored for this media type. */
+        UNSET,
+        /** Stored folder with a persisted write grant. */
+        PERSISTED,
+        /** Stored folder usable this process only; the provider refused persistence. */
+        LIVE,
+        /** Stored folder is revoked, deleted, or from another device. */
+        UNUSABLE,
+    }
+
+    public static boolean isUsable(@Nullable DestinationState state) {
+        return state == DestinationState.PERSISTED || state == DestinationState.LIVE;
+    }
+
+    /** True when this media type has a currently usable folder. */
     public static boolean isConfigured(Context context, MediaKind kind) {
+        return isUsable(destinationState(context, kind));
+    }
+
+    public static DestinationState destinationState(Context context, MediaKind kind) {
         Uri tree = treeUri(kind);
-        if (tree == null || context == null) return false;
-        return hasPersistedWritePermission(context.getContentResolver(), tree);
+        if (tree == null || context == null) return DestinationState.UNSET;
+
+        ContentResolver resolver = context.getContentResolver();
+        if (hasPersistedWritePermission(resolver, tree)) return DestinationState.PERSISTED;
+
+        // Persisted grants cannot show transient access from providers that refuse persistence.
+        return hasLiveTreeAccess(resolver, tree) ? DestinationState.LIVE : DestinationState.UNUSABLE;
     }
 
     public static boolean hasPersistedWritePermission(ContentResolver resolver, Uri tree) {
@@ -135,10 +160,80 @@ public final class DownloadDestination {
             Uri granted = permission.getUri();
             if (granted.equals(tree)) return true;
 
+            // Providers may normalize the uri, so compare document ids too. Authority must
+            // match so a grant from another device with the same id cannot validate this tree.
+            if (!sameAuthority(granted, tree)) continue;
             String grantedDocumentId = treeDocumentIdOf(granted);
             if (treeDocumentId != null && treeDocumentId.equals(grantedDocumentId)) return true;
         }
         return false;
+    }
+
+    private static boolean sameAuthority(Uri left, Uri right) {
+        String authority = left.getAuthority();
+        return authority != null && authority.equals(right.getAuthority());
+    }
+
+    /** Whether the tree answers right now. Not gated on advertised flags: some writable
+     * providers omit the create flag, and honoring it would leave no pickable folder. */
+    public static boolean hasLiveTreeAccess(ContentResolver resolver, Uri tree) {
+        try {
+            String[] projection = {DocumentsContract.Document.COLUMN_DOCUMENT_ID};
+            try (Cursor cursor = resolver.query(directoryUri(tree), projection, null, null, null)) {
+                return cursor != null && cursor.moveToFirst();
+            }
+        } catch (RuntimeException exception) {
+            return false;
+        }
+    }
+
+    /** Drops an unwritable folder so the next tap re-prompts instead of failing the same way. */
+    public static void invalidate(MediaKind kind) {
+        try {
+            DownloadSettings.setString(treeSettingId(kind), "");
+            DownloadSettings.setString(displayPathSettingId(kind), "");
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to clear the unusable NewX download folder", exception);
+        }
+    }
+
+    /** True when the destination itself is gone (revoked, deleted, unrecognized tree).
+     * Network and HTTP errors must never clear the picked folder. */
+    public static boolean isDestinationLoss(@Nullable Throwable failure) {
+        // Bounded walk: cause chains can cycle, so never loop unbounded on a download thread.
+        Throwable current = failure;
+        for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
+            // IllegalArgumentException is the shape of a foreign or hand-edited tree uri
+            // rejected by the tree helpers.
+            if (current instanceof SecurityException
+                    || current instanceof FileNotFoundException
+                    || current instanceof IllegalArgumentException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    /** Logs destination state for diagnostics. Call before clearing so the stored value is kept. */
+    public static void captureDestination(Context context, MediaKind kind, String event) {
+        try {
+            StringBuilder detail = new StringBuilder(kind.name())
+                    .append(" event=").append(event)
+                    .append(" state=").append(destinationState(context, kind).name());
+            Uri tree = treeUri(kind);
+            if (tree == null) {
+                detail.append(" tree=unset");
+            } else {
+                detail.append(" authority=").append(tree.getAuthority());
+                String documentId = treeDocumentIdOf(tree);
+                detail.append(" treeId=").append(documentId == null ? "unknown" : documentId);
+            }
+            detail.append(" notifications=").append(notificationsEnabled(context) ? "enabled" : "blocked");
+            NewXLogger.captureDownloadFailure(detail.toString(), null);
+        } catch (RuntimeException ignored) {
+            // Diagnostics must never affect download behaviour.
+        }
     }
 
     @Nullable
@@ -151,19 +246,10 @@ public final class DownloadDestination {
         }
     }
 
-    /**
-     * Creates the destination document, applying the conflict policy before any network work so a
-     * skipped download costs nothing.
+    /** Creates the destination before network work, so a skipped download costs nothing.
+     * Probes path-encoded ids first, listing only when an opaque-id provider renames on create.
      *
-     * <p>Collision detection deliberately avoids listing the whole directory. A chosen folder can
-     * hold thousands of files, and an unindexed {@code /children} query costs a full provider
-     * round-trip of every row. Existence is instead probed with a single-document query built from
-     * the folder's document id, which local providers answer in constant time. Only when that
-     * lookup misses and the provider nevertheless renames on create (the collision signal for
-     * opaque document ids) does the code pay for one listing.
-     *
-     * @return the reserved document, or {@code null} when the conflict policy is
-     *         {@link ConflictPolicy#SKIP} and the name is already taken.
+     * @return the reserved document, or {@code null} when {@link ConflictPolicy#SKIP} collides.
      */
     @Nullable
     public static Target reserve(
@@ -177,64 +263,72 @@ public final class DownloadDestination {
             throw new IOException("Unknown download conflict policy");
         }
         ContentResolver resolver = context.getContentResolver();
-        Uri directory = directoryUri(kind);
+        final Uri directory;
+        try {
+            directory = directoryUri(kind);
+        } catch (RuntimeException exception) {
+            captureDestination(context, kind, "reserve/invalid-tree");
+            invalidate(kind);
+            throw new IOException("Stored download folder is not a usable tree", exception);
+        }
         String requested = fileName;
 
         String candidate = requested;
         int suffix = 0;
-        for (int attempt = 0; attempt < MAX_NAME_ATTEMPTS; attempt++) {
-            Uri existing = findDocumentByPath(context, directory, candidate);
-            if (existing != null) {
-                if (policy == ConflictPolicy.SKIP) return null;
-                if (policy == ConflictPolicy.RENAME) {
-                    candidate = appendSuffix(requested, ++suffix);
-                    continue;
-                }
-                // OVERWRITE reuses the occupant document in place, so the tap path performs no
-                // delete or create; save() opens the existing document for writing at transfer time.
-                return new Target(existing, candidate, kind);
-            }
-
-            Uri created = DocumentsContract.createDocument(resolver, directory, mimeType, candidate);
-            if (created == null) {
-                throw new IOException("Could not create download file " + candidate);
-            }
-
-            String actualName = displayNameOf(resolver, created);
-            if (actualName == null) {
-                DocumentsContract.deleteDocument(resolver, created);
-                throw new IOException("Could not read the created download name for " + candidate);
-            }
-
-            if (candidate.equals(actualName)) {
-                return new Target(created, actualName, kind);
-            }
-
-            // The provider renamed the document on create, so the name was occupied even though
-            // the probe missed, which means it uses opaque document ids.
-            DocumentsContract.deleteDocument(resolver, created);
-            if (policy == ConflictPolicy.SKIP) return null;
-            if (policy == ConflictPolicy.OVERWRITE) {
-                Uri occupant = findChildDocument(resolver, directory, candidate);
-                if (occupant != null) {
-                    if (!DocumentsContract.deleteDocument(resolver, occupant)) {
-                        throw new IOException("Could not replace existing file " + candidate);
+        try {
+            for (int attempt = 0; attempt < MAX_NAME_ATTEMPTS; attempt++) {
+                Uri existing = findDocumentByPath(context, directory, candidate);
+                if (existing != null) {
+                    if (policy == ConflictPolicy.SKIP) return null;
+                    if (policy == ConflictPolicy.RENAME) {
+                        candidate = appendSuffix(requested, ++suffix);
+                        continue;
                     }
-                    continue;
+                    // OVERWRITE reuses the occupant; save() truncates it at transfer time.
+                    return new Target(existing, candidate, kind);
                 }
-            }
 
-            candidate = appendSuffix(requested, ++suffix);
+                Uri created = DocumentsContract.createDocument(resolver, directory, mimeType, candidate);
+                if (created == null) {
+                    throw new IOException("Could not create download file " + candidate);
+                }
+
+                String actualName = displayNameOf(resolver, created);
+                if (actualName == null) {
+                    DocumentsContract.deleteDocument(resolver, created);
+                    throw new IOException("Could not read the created download name for " + candidate);
+                }
+
+                if (candidate.equals(actualName)) {
+                    return new Target(created, actualName, kind);
+                }
+
+                // Provider renamed on create: name was taken but probe missed (opaque ids).
+                DocumentsContract.deleteDocument(resolver, created);
+                if (policy == ConflictPolicy.SKIP) return null;
+                if (policy == ConflictPolicy.OVERWRITE) {
+                    Uri occupant = findChildDocument(resolver, directory, candidate);
+                    if (occupant != null) {
+                        if (!DocumentsContract.deleteDocument(resolver, occupant)) {
+                            throw new IOException("Could not replace existing file " + candidate);
+                        }
+                        continue;
+                    }
+                }
+
+                candidate = appendSuffix(requested, ++suffix);
+            }
+        } catch (SecurityException | FileNotFoundException | IllegalArgumentException exception) {
+            captureDestination(context, kind, "reserve/refused");
+            invalidate(kind);
+            NewXLogger.captureDownloadFailure(kind.name() + " event=reserve/refused file=" + requested, exception);
+            throw exception;
         }
 
         throw new IOException("Could not find an unused name for " + requested);
     }
 
-    /**
-     * The persisted conflict policy. Resolved once per download action, and unlike a display
-     * read it fails closed: a value the settings screen cannot produce (hand-edited or foreign
-     * backup) must not silently pick a policy that overwrites the user's files.
-     */
+    /** Resolves the persisted policy, failing closed on foreign or hand-edited values. */
     public static ConflictPolicy conflictPolicy() {
         String value = DownloadSettings.conflictPolicy();
         if (DownloadSettings.CONFLICT_OVERWRITE.equals(value)) return ConflictPolicy.OVERWRITE;
@@ -243,45 +337,68 @@ public final class DownloadDestination {
         throw new IllegalStateException("Unknown download conflict policy: " + value);
     }
 
-    /**
-     * Reserves a progress notification for a queued transfer. The caller posts it at enqueue
-     * time, before the transfer is scheduled, so the notification no longer waits behind the
-     * shared transfer queue and the previous download's entire byte copy.
-     */
+    /** Reserves a progress notification before the transfer is scheduled. */
     static int beginDownloadNotification(Context context, String fileName) {
         return beginNotification(context, fileName);
     }
 
-    /**
-     * Streams a URL into a reserved document. Retries once with the larger image variant, and
-     * re-uses the same notification for the retry so a failed first attempt is not silent.
-     */
-    public static boolean save(Context context, Target target, String url, int notificationId) {
-        if (saveOnce(context, target, url, notificationId)) return true;
-
-        String retryUrl = largerVariantUrl(url);
-        if (retryUrl != null && saveOnce(context, target, retryUrl, notificationId)) return true;
-
-        cancelNotification(context, notificationId);
-        discard(context, target);
-        return false;
+    /** A dead folder is a different failure from a dead link. */
+    public enum SaveState {
+        SAVED,
+        /** Stored folder can no longer be written; the setting was cleared. */
+        DESTINATION_LOST,
+        FAILED,
     }
 
-    /**
-     * Writes produced content into a reserved document, used by the merged-image path so a merge
-     * streams from the encoder instead of materializing a second copy in memory.
-     */
+    /** Streams a URL into a reserved document, retrying once with the larger image variant. */
+    public static SaveState save(Context context, Target target, String url, int notificationId) {
+        Failure failure = new Failure();
+        if (saveOnce(context, target, url, notificationId, failure)) return SaveState.SAVED;
+        boolean lost = isDestinationLoss(failure.cause);
+
+        String retryUrl = largerVariantUrl(url);
+        if (retryUrl != null) {
+            Failure retryFailure = new Failure();
+            if (saveOnce(context, target, retryUrl, notificationId, retryFailure)) {
+                return SaveState.SAVED;
+            }
+            lost = lost || isDestinationLoss(retryFailure.cause);
+            if (retryFailure.cause != null) failure.cause = retryFailure.cause;
+        }
+
+        boolean destinationLost = lost;
+        captureDestination(context, target.kind, destinationLost ? "transfer/folder-lost" : "transfer/failed");
+        if (destinationLost) invalidate(target.kind);
+        discard(context, target);
+        NewXLogger.captureDownloadFailure(
+                target.kind.name() + " event=transfer file=" + target.fileName(),
+                failure.cause
+        );
+        // Replace the progress notification in place; cancelling alone leaves no trace when
+        // the in-app host is not showing.
+        notifyFailure(context, notificationId, target.fileName(), destinationLost);
+        return destinationLost ? SaveState.DESTINATION_LOST : SaveState.FAILED;
+    }
+
+    /** Last transfer exception. */
+    private static final class Failure {
+        Throwable cause;
+    }
+
+    /** Streams produced merge output without an in-memory copy. */
     public static boolean save(Context context, Target target, ContentWriter writer) {
-        // "wt" truncates explicitly: plain "w" is provider-defined truncation and has not
-        // truncated on Android 10+, which would leave stale trailing bytes when overwriting
-        // a longer occupant in place. Harmless for freshly created (empty) documents.
+        // "wt" truncates explicitly; plain "w" left stale trailing bytes on overwrite.
         try (OutputStream output = context.getContentResolver().openOutputStream(target.documentUri, "wt")) {
             if (output == null) throw new IOException("Could not open " + target.fileName);
             writer.write(output);
             output.flush();
             return true;
         } catch (IOException | RuntimeException exception) {
+            boolean destinationLost = isDestinationLoss(exception);
             NewXLogger.printException(() -> "Failed to write " + target.fileName, exception);
+            captureDestination(context, target.kind,
+                    destinationLost ? "write/folder-lost" : "write/failed");
+            if (destinationLost) invalidate(target.kind);
             discard(context, target);
             return false;
         }
@@ -305,7 +422,13 @@ public final class DownloadDestination {
         }
     }
 
-    private static boolean saveOnce(Context context, Target target, String url, int notificationId) {
+    private static boolean saveOnce(
+            Context context,
+            Target target,
+            String url,
+            int notificationId,
+            Failure failure
+    ) {
         HttpURLConnection connection = null;
         if (notificationId > 0) showIndeterminate(context, notificationId, target.fileName);
         try {
@@ -340,6 +463,7 @@ public final class DownloadDestination {
             if (notificationId > 0) completeNotification(context, notificationId, target.fileName);
             return true;
         } catch (IOException | RuntimeException exception) {
+            failure.cause = exception;
             NewXLogger.printException(() -> "Failed to download " + target.fileName, exception);
             return false;
         } finally {
@@ -357,6 +481,14 @@ public final class DownloadDestination {
         if (tree == null) {
             throw new IOException("No download folder selected for " + kind.name().toLowerCase());
         }
+        return directoryUri(tree);
+    }
+
+    /**
+     * The tree's root document. Throws when the stored value is not a tree uri, as after a
+     * hand-edited or foreign restore.
+     */
+    private static Uri directoryUri(Uri tree) {
         return DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree));
     }
 
@@ -387,10 +519,8 @@ public final class DownloadDestination {
     }
 
     /**
-     * O(1) lookup of a child document for providers whose document ids encode the path (the local
-     * external-storage provider does), avoiding the full {@code /children} enumeration. Returns
-     * null when nothing is there or the provider uses opaque ids, so callers must not treat null
-     * alone as "the name is free".
+     * Child lookup for path-encoded providers, avoiding a full /children enumeration.
+     * Null means "not found or opaque ids"; callers must not treat it as "name is free".
      */
     @Nullable
     private static Uri findDocumentByPath(Context context, Uri directory, String displayName) {
@@ -422,11 +552,7 @@ public final class DownloadDestination {
         }
     }
 
-    /**
-     * Reads back the name the provider actually assigned, which may differ from the request.
-     * Queries the document itself, not its parent's children, so the cost is one document lookup
-     * regardless of how many files the folder holds.
-     */
+    /** Provider-assigned name via one document lookup. */
     @Nullable
     private static String displayNameOf(ContentResolver resolver, Uri documentUri) {
         try (Cursor cursor = resolver.query(
@@ -450,7 +576,7 @@ public final class DownloadDestination {
         return fileName.substring(0, dot) + "_" + suffix + fileName.substring(dot);
     }
 
-    /** The existing one-shot retry for images whose {@code name=orig} variant is unavailable. */
+    /** Image retry for unavailable {@code name=orig} variants. */
     @Nullable
     static String largerVariantUrl(String url) {
         if (url == null || !url.contains("name=orig")) return null;
@@ -557,6 +683,49 @@ public final class DownloadDestination {
             manager.notify(id, builder.build());
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to complete download notification", exception);
+        }
+    }
+
+    /** Replaces the progress notification with a failure notice. */
+    private static void notifyFailure(Context context, int id, String fileName, boolean destinationLost) {
+        if (id <= 0 || !notificationsEnabled(context)) return;
+        try {
+            NotificationManager manager = notificationManager(context);
+            if (manager == null) return;
+
+            Notification.Builder builder = notificationBuilder(context);
+            builder.setSmallIcon(android.R.drawable.stat_sys_warning)
+                    .setContentTitle(fileName)
+                    .setContentText(destinationLost
+                            ? "Download folder is no longer available"
+                            : "Download failed")
+                    .setAutoCancel(true)
+                    .setOngoing(false)
+                    .setProgress(0, 0, false);
+            manager.notify(id, builder.build());
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to post download failure notification", exception);
+        }
+    }
+
+    /** Whether app permission and the download channel let notifications through. */
+    public static boolean notificationsEnabled(Context context) {
+        NotificationManager manager = notificationManager(context);
+        if (manager == null) return false;
+
+        try {
+            if (!manager.areNotificationsEnabled()) return false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Only an explicitly muted channel hides notifications; a missing one is
+                // created on the next post.
+                NotificationChannel channel = manager.getNotificationChannel(NOTIFICATION_CHANNEL_ID);
+                if (channel != null && channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (RuntimeException exception) {
+            return false;
         }
     }
 

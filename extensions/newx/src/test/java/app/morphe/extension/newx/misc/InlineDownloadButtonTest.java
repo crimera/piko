@@ -16,6 +16,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -707,6 +709,32 @@ public final class InlineDownloadButtonTest {
         } catch (IllegalArgumentException expected) {
             // Expected.
         }
+    }
+
+    @Test
+    public void destinationLossClearsOnlyUnusableFolders() {
+        // A revoked grant, a folder the provider deleted, and a stored uri the tree helpers cannot
+        // parse are all destinations that can never serve a download again.
+        assertTrue(DownloadDestination.isDestinationLoss(new SecurityException("Permission Denial")));
+        assertTrue(DownloadDestination.isDestinationLoss(
+                new FileNotFoundException("primary:Download/Piko")));
+        assertTrue(DownloadDestination.isDestinationLoss(new IOException(
+                "Stored download folder is not a usable tree",
+                new IllegalArgumentException("Unsupported Uri"))));
+
+        // Transfer failures must keep the stored folder: clearing it on a network error would make
+        // the user pick their folder again for nothing.
+        assertFalse(DownloadDestination.isDestinationLoss(
+                new IOException("HTTP 503 for https://pbs.twimg.com/media.jpg")));
+        assertFalse(DownloadDestination.isDestinationLoss(
+                new IOException("Could not find an unused name for jack_1.jpg")));
+        assertFalse(DownloadDestination.isDestinationLoss(null));
+
+        Throwable first = new IOException("cycle A");
+        Throwable second = new IOException("cycle B");
+        first.initCause(second);
+        second.initCause(first);
+        assertFalse(DownloadDestination.isDestinationLoss(first));
     }
 
     @SuppressWarnings("unchecked")

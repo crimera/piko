@@ -23,18 +23,26 @@ public final class NewXInAppNotification {
 
     /** Shows a status message in NewX, falling back to the existing short Toast. */
     public static void show(String message) {
-        boolean sent = false;
+        if (!tryShow(message)) Utils.showToastShort(message);
+    }
+
+    /** Shows a status message; reports whether the in-app host took it. */
+    public static boolean tryShow(String message) {
         try {
-            sent = send(message);
+            return send(message);
         } catch (Throwable ignored) {
-            // A target-specific bridge failure must not remove the status notification entirely.
+            return false;
         }
-        if (!sent) Utils.showToastShort(message);
     }
 
     /** Shows a status message while identifying the post's author. */
     public static void showForUser(String message, String username) {
         show(formatForUser(message, username));
+    }
+
+    /** Shows a post-author message; reports whether the in-app host took it. */
+    public static boolean tryShowForUser(String message, String username) {
+        return tryShow(formatForUser(message, username));
     }
 
     static String formatForUser(String message, String username) {

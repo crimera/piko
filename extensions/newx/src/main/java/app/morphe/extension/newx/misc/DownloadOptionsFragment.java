@@ -129,18 +129,22 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
     ) {
         String path = DownloadDestination.displayPath(kind);
         if (path == null) {
-            // A restored backup can carry the URI without the display path, so keep the row
-            // useful instead of showing "not set" for a folder that is actually configured.
+            // Restore the display label from the saved URI when backups omit it.
             android.net.Uri tree = DownloadDestination.treeUri(kind);
             path = tree == null ? null : DownloadDestination.displayPathFor(tree);
         }
         if (path == null) {
             return StringRef.str("piko_newx_download_options_folder_not_set");
         }
-        if (!DownloadDestination.isConfigured(context, kind)) {
-            return path + " \u2014 " + StringRef.str("piko_newx_download_options_folder_denied");
+        switch (DownloadDestination.destinationState(context, kind)) {
+            case LIVE:
+                // The temporary grant may stop working after a restart.
+                return path + " \u2014 " + StringRef.str("piko_newx_download_options_folder_session");
+            case UNUSABLE:
+                return path + " \u2014 " + StringRef.str("piko_newx_download_options_folder_denied");
+            default:
+                return path;
         }
-        return path;
     }
 
     private void openPicker(DownloadDestination.MediaKind kind) {
@@ -229,7 +233,6 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
             String value = input.getText().toString();
             String error = DownloadFileName.validationError(value);
             if (error != null) {
-                // Keep the dialog open so the template can be corrected in place.
                 Utils.showToastShort(error);
                 return;
             }
@@ -260,7 +263,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
         return chips;
     }
 
-    /** Inserts at the caret so chips compose a template instead of replacing it. */
+    /** Inserts the token at the selection. */
     private static void insertToken(EditText input, String token) {
         String text = input.getText().toString();
         int start = Math.max(input.getSelectionStart(), 0);
