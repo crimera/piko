@@ -16,6 +16,7 @@ import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.REPLY_SORTING_RESOLVER_DESCRIPTOR
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -25,6 +26,7 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -74,6 +76,27 @@ private fun isComposeStateInitializer(instructions: List<Instruction>, sgetIndex
 }
 
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
+
+/**
+ * Replaces the resolved `Relevance` seed in [register] with the configured default ranking mode
+ * after [sgetIndex]. The register keeps its original type, so the consuming instruction range is
+ * unchanged.
+ */
+private fun MutableMethod.insertReplySortingDefault(
+    sgetIndex: Int,
+    register: Int,
+    enumClass: String,
+) {
+    addInstructions(
+        sgetIndex + 1,
+        """
+            const-class v$register, $enumClass
+            invoke-static/range {v$register .. v$register}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
+            move-result-object v$register
+            check-cast v$register, $enumClass
+        """.trimIndent(),
+    )
+}
 
 /**
  * Targets the NewX Compose post-detail timeline repository initialization that seeds
@@ -146,6 +169,21 @@ private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
     },
 )
 
+/**
+ * Targets the post-detail conversation prefetch seed added in 12.29. The ViewModel constructor
+ * issues the initial conversation request with `TimelineRankingMode.Relevance` before the timeline
+ * repository exists, so the repository seed is not authoritative on the first load. The capability
+ * is identified by its feature-switch name rather than by an obfuscated owner.
+ */
+private object NewXComposeReplySortingPrefetchFingerprint : Fingerprint(
+    name = "<init>",
+    returnType = "V",
+    filters =
+        listOf(
+            string("x_android_conversation_prefetch_enabled"),
+        ),
+)
+
 @Suppress("unused")
 val newXDefaultReplySortingPatch =
     bytecodePatch(
@@ -213,15 +251,52 @@ val newXDefaultReplySortingPatch =
                 )
             }
 
-            method.addInstructions(
-                targetSgetIndex + 1,
-                """
-                    const-class v$sortRegister, $enumClass
-                    invoke-static/range {v$sortRegister .. v$sortRegister}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
-                    move-result-object v$sortRegister
-                    check-cast v$sortRegister, $enumClass
-                """.trimIndent(),
-            )
+            method.insertReplySortingDefault(targetSgetIndex, sortRegister, enumClass)
+
+            // Patch the 12.29 conversation prefetch seed when the capability is present. Older
+            // releases issue the initial conversation request through the repository seed alone.
+            val prefetchMatch =
+                requireAtMostOne(
+                    label = "NewX Compose reply sorting conversation prefetch method",
+                    candidates = NewXComposeReplySortingPrefetchFingerprint
+                        .scopedMatchAllOrNull()
+                        .orEmpty(),
+                )
+            if (prefetchMatch != null) {
+                val prefetchMethod = prefetchMatch.method
+                val prefetchSeeds =
+                    prefetchMethod.instructions.withIndex().filter { (_, instruction) ->
+                        val field = instruction.getReference<FieldReference>()
+                        field?.definingClass == enumClass && isRelevanceSget(instruction)
+                    }
+                val prefetchSeed =
+                    requireExactlyOne(
+                        label = "NewX Compose reply sorting conversation prefetch seed for $enumClass",
+                        candidates = prefetchSeeds,
+                    )
+                val prefetchSget = prefetchSeed.value as? OneRegisterInstruction
+                    ?: throw PatchException("Reply sorting conversation prefetch seed has no register")
+                val prefetchRegister = prefetchSget.registerA
+                val feedsPrefetchRequest =
+                    prefetchMethod.instructions.any { instruction ->
+                        val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                            ?: return@any false
+                        reference.parameterTypes.contains(enumClass) &&
+                            instruction.registersUsed.contains(prefetchRegister)
+                    }
+                if (!feedsPrefetchRequest) {
+                    throw PatchException(
+                        "Reply sorting conversation prefetch seed v$prefetchRegister does not feed a " +
+                            "request whose parameters include $enumClass",
+                    )
+                }
+
+                prefetchMethod.insertReplySortingDefault(
+                    prefetchSeed.index,
+                    prefetchRegister,
+                    enumClass,
+                )
+            }
 
             // Patch the Compose reply-sorting selection handler to remember the last choice.
             val selectionMatch =
@@ -361,14 +436,6 @@ val newXDefaultReplySortingPatch =
                 )
             }
 
-            uiStateMethod.addInstructions(
-                uiStateIndex + 1,
-                """
-                    const-class v$uiStateRegister, $enumClass
-                    invoke-static/range {v$uiStateRegister .. v$uiStateRegister}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
-                    move-result-object v$uiStateRegister
-                    check-cast v$uiStateRegister, $enumClass
-                """.trimIndent(),
-            )
+            uiStateMethod.insertReplySortingDefault(uiStateIndex, uiStateRegister, enumClass)
         }
     }
