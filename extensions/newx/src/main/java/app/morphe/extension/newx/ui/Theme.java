@@ -14,10 +14,16 @@ import app.morphe.extension.newx.theme.TwitterTheme;
  */
 public final class Theme {
     private static final String DYNAMIC_COLOR_SETTING = "newx.theme.dynamic_color";
-    private static final String AMOLED_BLACK_SETTING = "newx.theme.amoled_black";
-    // Keep elevated surfaces visible against the AMOLED base surface. Kept as a literal so the
-    // class has no Android calls during static initialization and stays unit-testable.
-    private static final int AMOLED_ELEVATED_SURFACE = 0xFF13181D;
+    private static final String DARK_STYLE_SETTING = "newx.theme.dark_style";
+    private static final String DARK_STYLE_AMOLED = "amoled";
+    private static final String DARK_STYLE_DIM = "dim";
+    // Keep elevated surfaces visible against the AMOLED base surface. Mirrors the host's
+    // LIGHTS_OUT highlight background so extension dialogs match the app's own popups. Kept as a
+    // literal so the class has no Android calls during static initialization and stays
+    // unit-testable.
+    private static final int AMOLED_ELEVATED_SURFACE = 0xFF121314;
+    // Mirrors the host's LIGHTS_OUT container surface (#15181c) for chips and badges.
+    private static final int AMOLED_SURFACE_VARIANT = 0xFF15181C;
     // Classic X "Dim" surfaces. NewX routes every dark mode to its LIGHTS_OUT palette, so the
     // extension-owned screens mirror the dim tokens the patch restores for the Compose palette.
     private static final int DIM_SURFACE = 0xFF15202B;
@@ -54,14 +60,14 @@ public final class Theme {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                         && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
         boolean amoledBlack = resolveAmoledBlack(
-                SettingsRegistry.isRegistered(AMOLED_BLACK_SETTING),
-                SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false)
+                SettingsRegistry.isRegistered(DARK_STYLE_SETTING),
+                SettingsRegistry.getStringOrDefault(DARK_STYLE_SETTING, DARK_STYLE_AMOLED)
         );
         return new SettingsSnapshot(dynamicColors, amoledBlack);
     }
 
     public static int surface(Context context) {
-        return surfaceColor(context, usesDynamicColors());
+        return surfaceColor(context, usesDynamicColors(), useAmoledBlack(context));
     }
 
     public static int surfaceContainer(Context context) {
@@ -73,12 +79,12 @@ public final class Theme {
     }
 
     public static int surfaceVariant(Context context) {
-        return surfaceVariantColor(context, usesDynamicColors());
+        return surfaceVariantColor(context, usesDynamicColors(), useAmoledBlack(context));
     }
 
-    private static int surfaceColor(Context context, boolean dynamicColors) {
-        int fallback = isDark(context) ? DIM_SURFACE : Color.rgb(254, 247, 255);
-        return dynamicColor(context, "surface", fallback, dynamicColors);
+    private static int surfaceColor(Context context, boolean dynamicColors, boolean amoledBlack) {
+        if (isDark(context)) return amoledBlack ? Color.BLACK : DIM_SURFACE;
+        return dynamicColor(context, "surface", Color.rgb(254, 247, 255), dynamicColors);
     }
 
     private static int surfaceContainerColor(
@@ -86,9 +92,8 @@ public final class Theme {
             boolean dynamicColors,
             boolean amoledBlack
     ) {
-        if (amoledBlack && isDark(context)) return Color.BLACK;
-        int fallback = isDark(context) ? DIM_SURFACE : Color.WHITE;
-        return dynamicColor(context, "surface", fallback, dynamicColors);
+        // The chooser owns the dark surface family, so dynamic colors only tint the accents here.
+        return surfaceColor(context, dynamicColors, amoledBlack);
     }
 
     private static int surfaceContainerHighColor(
@@ -96,16 +101,31 @@ public final class Theme {
             boolean dynamicColors,
             boolean amoledBlack
     ) {
-        int fallback = isDark(context)
-                ? DIM_SURFACE_CONTAINER_HIGH
-                : Color.rgb(243, 237, 247);
-        if (amoledBlack && isDark(context)) fallback = AMOLED_ELEVATED_SURFACE;
-        return dynamicColor(context, "surface_container_high", fallback, dynamicColors);
+        if (isDark(context)) {
+            return amoledBlack ? AMOLED_ELEVATED_SURFACE : DIM_SURFACE_CONTAINER_HIGH;
+        }
+        return dynamicColor(
+                context,
+                "surface_container_high",
+                Color.rgb(243, 237, 247),
+                dynamicColors
+        );
     }
 
-    private static int surfaceVariantColor(Context context, boolean dynamicColors) {
-        int fallback = isDark(context) ? DIM_SURFACE_VARIANT : Color.rgb(231, 224, 236);
-        return dynamicColor(context, "surface_container_high", fallback, dynamicColors);
+    private static int surfaceVariantColor(
+            Context context,
+            boolean dynamicColors,
+            boolean amoledBlack
+    ) {
+        if (isDark(context)) {
+            return amoledBlack ? AMOLED_SURFACE_VARIANT : DIM_SURFACE_VARIANT;
+        }
+        return dynamicColor(
+                context,
+                "surface_container_high",
+                Color.rgb(231, 224, 236),
+                dynamicColors
+        );
     }
 
     public static int primaryText(Context context) {
@@ -251,20 +271,21 @@ public final class Theme {
 
     private static boolean useAmoledBlack(Context context) {
         return isDark(context) && resolveAmoledBlack(
-                SettingsRegistry.isRegistered(AMOLED_BLACK_SETTING),
-                SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false)
+                SettingsRegistry.isRegistered(DARK_STYLE_SETTING),
+                SettingsRegistry.getStringOrDefault(DARK_STYLE_SETTING, DARK_STYLE_AMOLED)
         );
     }
 
     /**
-     * Whether dark surfaces should resolve to pure black. The AMOLED toggle is contributed by the
-     * NewX dynamic color patch, which also injects the dim palette into the host. When that patch
-     * is absent the toggle is unregistered and X renders its native LIGHTS_OUT near-black palette
-     * for every dark mode, so extension-owned surfaces must stay black instead of falling back to
-     * the dim tokens used to mirror the patched host palette.
+     * Whether dark surfaces should resolve to pure black. The dark style chooser is contributed by
+     * the NewX dynamic color patch, which also injects the dim palette into the host. When that
+     * patch is absent the chooser is unregistered and X renders its native LIGHTS_OUT near-black
+     * palette for every dark mode, so extension-owned surfaces must stay black instead of falling
+     * back to the dim tokens used to mirror the patched host palette. Unknown stored values also
+     * resolve to black so a corrupted preference never turns dark surfaces dim blue.
      */
-    static boolean resolveAmoledBlack(boolean settingRegistered, boolean settingValue) {
-        return !settingRegistered || settingValue;
+    static boolean resolveAmoledBlack(boolean settingRegistered, String settingValue) {
+        return !settingRegistered || !DARK_STYLE_DIM.equals(settingValue);
     }
 
     private static int checkboxChecked(Context context, boolean dynamicColors) {
@@ -297,7 +318,7 @@ public final class Theme {
         }
 
         public int surface(Context context) {
-            return Theme.surfaceColor(context, dynamicColors);
+            return Theme.surfaceColor(context, dynamicColors, amoledBlack);
         }
 
         public int surfaceContainer(Context context) {
@@ -309,7 +330,7 @@ public final class Theme {
         }
 
         public int surfaceVariant(Context context) {
-            return Theme.surfaceVariantColor(context, dynamicColors);
+            return Theme.surfaceVariantColor(context, dynamicColors, amoledBlack);
         }
 
         public int primaryText(Context context) {

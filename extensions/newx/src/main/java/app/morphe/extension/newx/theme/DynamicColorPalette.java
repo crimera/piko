@@ -29,7 +29,9 @@ public final class DynamicColorPalette {
 
     private static final String DYNAMIC_COLOR_SETTING = "newx.theme.dynamic_color";
     private static final String DYNAMIC_LIKE_SETTING = "newx.theme.dynamic_like";
-    private static final String AMOLED_BLACK_SETTING = "newx.theme.amoled_black";
+    private static final String DARK_STYLE_SETTING = "newx.theme.dark_style";
+    private static final String DARK_STYLE_AMOLED = "amoled";
+    private static final String DARK_STYLE_DIM = "dim";
     private static final String LIGHT_PRIMARY = "m3_sys_color_dynamic_light_primary";
     private static final String LIGHT_ON_PRIMARY = "m3_sys_color_dynamic_light_on_primary";
     private static final String LIGHT_PRIMARY_CONTAINER = "m3_sys_color_dynamic_light_primary_container";
@@ -57,6 +59,16 @@ public final class DynamicColorPalette {
     private static final int ALPHA_DARK_GLASS_SHADOW = 0x50;
     private static final int DIM_XDS_BACKGROUND = 0xFF15202B;
     private static final int BLACK_XDS_BACKGROUND = 0xFF000000;
+    // The app's own LIGHTS_OUT elevated surfaces. The AMOLED style keeps them so popups, dialogs,
+    // sheets, and glass panels stay visible against the pure-black base surface instead of
+    // disappearing into it.
+    private static final int AMOLED_HIGHLIGHT_BACKGROUND = 0xFF121314;
+    private static final int AMOLED_GLASS_BACKGROUND = 0xCC242424;
+    // Classic X Dim surfaces, mirrored from NewX's own DIM palette.
+    private static final int DIM_CELL_BACKGROUND = 0xFF15202B;
+    private static final int DIM_TRANSLUCENT_CELL_BACKGROUND = 0xBF15202B;
+    private static final int DIM_HIGHLIGHT_BACKGROUND = 0xFF101922;
+    private static final int DIM_GLASS_BACKGROUND = 0xCC15202B;
 
     private DynamicColorPalette() {
     }
@@ -69,8 +81,17 @@ public final class DynamicColorPalette {
         return isSupported() && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
     }
 
-    public static boolean isAmoledBlack() {
-        return SettingsRegistry.getBooleanOrDefault(AMOLED_BLACK_SETTING, false);
+    /**
+     * Whether the dark style chooser selected the AMOLED style. Unknown or unset values resolve to
+     * the AMOLED default so dark surfaces never silently fall back to the dim family.
+     */
+    public static boolean useAmoledBlack() {
+        return DARK_STYLE_AMOLED.equals(darkStyle());
+    }
+
+    static String darkStyle() {
+        String style = SettingsRegistry.getStringOrDefault(DARK_STYLE_SETTING, DARK_STYLE_AMOLED);
+        return DARK_STYLE_DIM.equals(style) ? DARK_STYLE_DIM : DARK_STYLE_AMOLED;
     }
 
     /** Supplies the XDS dark-surface color used by transparent chrome and its haze tint. */
@@ -80,50 +101,67 @@ public final class DynamicColorPalette {
             throw new IllegalStateException("NewX XDS colors need the initialized host context");
         }
 
-        TwitterTheme theme = TwitterTheme.fromContext(context);
-        if (theme == TwitterTheme.STANDARD) return originalColor;
-        boolean dynamicEnabled = isEnabled();
-        boolean amoledBlack = theme == TwitterTheme.LIGHTS_OUT && isAmoledBlack();
-        long dynamicSurface = dynamicEnabled && !amoledBlack ? color(DARK_SURFACE) : 0L;
         return resolveXdsChromeBackground(
-                theme,
-                dynamicEnabled,
-                amoledBlack,
-                originalColor,
-                dynamicSurface
+                TwitterTheme.fromContext(context),
+                useAmoledBlack(),
+                originalColor
         );
     }
 
+    /**
+     * The chrome background always matches the base surface of the selected dark style: AMOLED
+     * chrome is pure black and Dim chrome is the classic dim blue.
+     */
     static long resolveXdsChromeBackground(
             TwitterTheme theme,
-            boolean dynamicEnabled,
             boolean amoledBlack,
-            long originalColor,
-            long dynamicSurface
+            long originalColor
     ) {
         if (theme == TwitterTheme.STANDARD) return originalColor;
-        if (theme == TwitterTheme.LIGHTS_OUT && amoledBlack) {
-            return pack(BLACK_XDS_BACKGROUND);
-        }
-        if (dynamicEnabled) return dynamicSurface;
-        return pack(DIM_XDS_BACKGROUND);
+        return pack(amoledBlack ? BLACK_XDS_BACKGROUND : DIM_XDS_BACKGROUND);
     }
 
     public static long light(int token) {
         requireSupported();
-        return paletteColor(token, false, false, false);
+        return paletteColor(token, false);
     }
 
-    /** DIM only calls this API; it has no path to the AMOLED preference. */
+    /** The DIM factory has no separate AMOLED decision: the chooser owns the surface family. */
     public static long dark(int token) {
         requireSupported();
-        return paletteColor(token, true, false, false);
+        return darkStyleColor(token, useAmoledBlack());
     }
 
-    /** LIGHTS_OUT supplies the one AMOLED decision made by its injected factory. */
+    /** LIGHTS_OUT supplies the one dark-style decision made by its injected factory. */
     public static long lightsOut(int token, boolean amoledBlack) {
         requireSupported();
-        return paletteColor(token, true, true, amoledBlack);
+        return darkStyleColor(token, amoledBlack);
+    }
+
+    /**
+     * Resolves the background family of the selected dark style. NewX routes both "Dim" and
+     * "Lights out" to the LIGHTS_OUT factory, so AMOLED keeps pure-black base surfaces with the
+     * app's own lights-out elevated surfaces, while Dim restores the classic blue-gray dim family.
+     * Every other token keeps the Material You role it has on the dark palette.
+     */
+    static long darkStyleColor(int token, boolean amoledBlack) {
+        return switch (token) {
+            case CELL_BACKGROUND, APP_BACKGROUND ->
+                    amoledBlack ? black(0xFF) : pack(DIM_CELL_BACKGROUND);
+            case CELL_BACKGROUND_TRANSLUCENT ->
+                    amoledBlack
+                            ? black(ALPHA_LIGHTS_OUT_TRANSLUCENT)
+                            : pack(DIM_TRANSLUCENT_CELL_BACKGROUND);
+            case HIGHLIGHT_BACKGROUND ->
+                    amoledBlack
+                            ? pack(AMOLED_HIGHLIGHT_BACKGROUND)
+                            : pack(DIM_HIGHLIGHT_BACKGROUND);
+            case GLASS_BACKGROUND ->
+                    amoledBlack
+                            ? pack(AMOLED_GLASS_BACKGROUND)
+                            : pack(DIM_GLASS_BACKGROUND);
+            default -> paletteColor(token, true);
+        };
     }
 
     /** Uses Material 3's lower-emphasis on-surface-variant role for normal action icons. */
@@ -245,12 +283,7 @@ public final class DynamicColorPalette {
         return color(resourceName);
     }
 
-    private static long paletteColor(
-            int token,
-            boolean dark,
-            boolean lightsOut,
-            boolean amoledBlack
-    ) {
+    private static long paletteColor(int token, boolean dark) {
         return switch (token) {
             case PRIMARY, LINK -> dynamicColor(dark, LIGHT_PRIMARY, DARK_PRIMARY);
             case PRIMARY_TEXT -> dynamicColor(dark, LIGHT_ON_SURFACE, DARK_ON_SURFACE);
@@ -264,36 +297,27 @@ public final class DynamicColorPalette {
             );
             case ON_PRIMARY -> dynamicColor(dark, LIGHT_ON_PRIMARY, DARK_ON_PRIMARY);
             case DIVIDER, BORDER -> dynamicColor(dark, LIGHT_OUTLINE_VARIANT, DARK_OUTLINE_VARIANT);
+            // Surfaces on the dark paths come from the dark style chooser; only the light palette
+            // reads the Material You surface roles here.
             case CELL_BACKGROUND, APP_BACKGROUND ->
-                    amoledBlack ? black(0xFF) : dynamicColor(dark, LIGHT_SURFACE, DARK_SURFACE);
-            case CELL_BACKGROUND_TRANSLUCENT -> translucentCellColor(dark, lightsOut, amoledBlack);
-            case HIGHLIGHT_BACKGROUND -> amoledBlack
-                    ? black(0xFF)
-                    : dynamicColor(dark, LIGHT_SURFACE_CONTAINER_HIGH, DARK_SURFACE_CONTAINER_HIGH);
+                    dynamicColor(dark, LIGHT_SURFACE, DARK_SURFACE);
+            case CELL_BACKGROUND_TRANSLUCENT -> colorWithAlpha(
+                    dark ? DARK_SURFACE_CONTAINER_LOW : LIGHT_SURFACE_CONTAINER_LOW,
+                    ALPHA_STANDARD_DIM_TRANSLUCENT
+            );
+            case HIGHLIGHT_BACKGROUND ->
+                    dynamicColor(dark, LIGHT_SURFACE_CONTAINER_HIGH, DARK_SURFACE_CONTAINER_HIGH);
             case UNREAD -> dynamicColor(dark, LIGHT_PRIMARY_CONTAINER, DARK_PRIMARY_CONTAINER);
             case GLASS_BORDER -> dynamicColor(dark, LIGHT_OUTLINE, DARK_OUTLINE);
-            case GLASS_BACKGROUND -> amoledBlack
-                    ? black(ALPHA_GLASS_BACKGROUND)
-                    : colorWithAlpha(
-                            dark ? DARK_SURFACE : LIGHT_SURFACE,
-                            ALPHA_GLASS_BACKGROUND
-                    );
+            case GLASS_BACKGROUND -> colorWithAlpha(
+                    dark ? DARK_SURFACE : LIGHT_SURFACE,
+                    ALPHA_GLASS_BACKGROUND
+            );
             case GLASS_SHADOW -> black(
                     dark ? ALPHA_DARK_GLASS_SHADOW : ALPHA_LIGHT_GLASS_SHADOW
             );
             default -> throw new IllegalArgumentException("Unknown NewX dynamic color token: " + token);
         };
-    }
-
-    private static long translucentCellColor(boolean dark, boolean lightsOut, boolean amoledBlack) {
-        int alpha = lightsOut
-                ? ALPHA_LIGHTS_OUT_TRANSLUCENT
-                : ALPHA_STANDARD_DIM_TRANSLUCENT;
-        if (amoledBlack) return black(alpha);
-        return colorWithAlpha(
-                dark ? DARK_SURFACE_CONTAINER_LOW : LIGHT_SURFACE_CONTAINER_LOW,
-                alpha
-        );
     }
 
     private static boolean isLikeThemingEnabled() {

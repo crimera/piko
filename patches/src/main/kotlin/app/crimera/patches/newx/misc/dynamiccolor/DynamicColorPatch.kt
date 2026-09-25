@@ -2,8 +2,10 @@ package app.crimera.patches.newx.misc.dynamiccolor
 
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
+import app.crimera.patches.newx.settings.choice
 import app.crimera.patches.newx.settings.group
 import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.newx.settings.singleChoice
 import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
@@ -79,22 +81,29 @@ private const val XDS_CHROME_BACKGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J"
 private const val PALETTE_IS_ENABLED_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z"
-private const val PALETTE_IS_AMOLED_BLACK_METHOD =
-    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isAmoledBlack()Z"
+private const val PALETTE_USE_AMOLED_BLACK_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->useAmoledBlack()Z"
 
+/**
+ * The AMOLED dark style. Only the base surfaces drop to pure black; the elevated surfaces keep
+ * NewX's own LIGHTS_OUT family, so popups, dialogs, sheets, and glass panels stay visible against
+ * the black background instead of disappearing into it. Every supported target
+ * (12.27.0-prod.01 through 12.29.0-alpha.04) carries `ff121314` (highlight background) and
+ * `cc242424` (glass background) exactly once, in the LIGHTS_OUT palette factory.
+ */
 private val AMOLED_BACKGROUND_COLORS = mapOf(
     7 to 0xFF00000000000000UL.toLong(),
     8 to 0x8000000000000000UL.toLong(),
-    9 to 0xFF00000000000000UL.toLong(),
-    13 to 0xCC00000000000000UL.toLong(),
+    9 to 0xFF12131400000000UL.toLong(),
+    13 to 0xCC24242400000000UL.toLong(),
     15 to 0xFF00000000000000UL.toLong(),
 )
 
 /**
- * The classic Twitter dim surfaces, taken from NewX's own DIM palette. NewX routes both "Dim"
- * and "Lights out" to the LIGHTS_OUT factory, so the blue DIM palette is unreachable and dark
- * mode shows the near-black LIGHTS_OUT surfaces instead. These values restore the old dim look
- * for the shared dark palette when dynamic color is off and AMOLED is off.
+ * The Dim dark style: the classic Twitter dim surfaces, taken from NewX's own DIM palette. NewX
+ * routes both "Dim" and "Lights out" to the LIGHTS_OUT factory, so the blue DIM palette is
+ * unreachable and dark mode shows the near-black LIGHTS_OUT surfaces instead. These values
+ * restore the old dim look for the shared dark palette.
  */
 private val DIM_BACKGROUND_COLORS = mapOf(
     7 to 0xFF15202B00000000UL.toLong(),
@@ -103,6 +112,9 @@ private val DIM_BACKGROUND_COLORS = mapOf(
     13 to 0xCC15202B00000000UL.toLong(),
     15 to 0xFF15202B00000000UL.toLong(),
 )
+
+private const val DARK_STYLE_AMOLED = "amoled"
+private const val DARK_STYLE_DIM = "dim"
 
 private enum class PaletteKind(
     val helperMethod: String,
@@ -156,7 +168,7 @@ val dynamicColorPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
 
-        val useAmoledBlack =
+        val darkStyle =
             newXSettings {
                 category(Categories.APPEARANCE) {
                     group(Groups.DYNAMIC_COLORS) {
@@ -167,14 +179,18 @@ val dynamicColorPatch =
                             defaultValue = true,
                             rebootApp = true,
                         )
-                        val amoledBlack =
-                            toggle(
-                                id = "newx.theme.amoled_black",
-                                strings = settingStrings("piko_newx_dynamic_color_amoled"),
-                                order = 200,
-                                defaultValue = true,
-                                rebootApp = true,
-                            )
+                        singleChoice(
+                            id = "newx.theme.dark_style",
+                            strings = settingStrings("piko_newx_dark_style"),
+                            order = 200,
+                            defaultValue = DARK_STYLE_AMOLED,
+                            rebootApp = true,
+                            options =
+                                listOf(
+                                    choice(DARK_STYLE_AMOLED, "piko_newx_dark_style_amoled"),
+                                    choice(DARK_STYLE_DIM, "piko_newx_dark_style_dim"),
+                                ),
+                        )
                         toggle(
                             id = "newx.theme.dynamic_like",
                             strings = settingStrings("piko_newx_dynamic_color_like"),
@@ -182,7 +198,6 @@ val dynamicColorPatch =
                             defaultValue = true,
                             rebootApp = true,
                         )
-                        amoledBlack
                     }
                 }
             }
@@ -2177,7 +2192,11 @@ private fun MutableMethod.injectDynamicPalette(
         )
     }
 
-    if (kind == PaletteKind.LIGHTS_OUT) {
+    if (!kind.isLight) {
+        // Both dark factories own the same background family. The DIM palette stays reachable
+        // from the app's own "dim" appearance paths, so the chooser must cover it too; otherwise
+        // a dim-resolved surface keeps its blue-grey background while the rest of the app is
+        // already on the selected style.
         injectDarkBackgrounds(
             resolvePaletteConstructor(allocation, constructorReference),
         )
@@ -2205,7 +2224,8 @@ private fun Block.emitDynamicPaletteGuard(
     moveResult(36, "Z")
     ifEqz(36, Target.Local(originalLabel))
     if (kind == PaletteKind.LIGHTS_OUT) {
-        invokeStatic(methodReference(PALETTE_IS_AMOLED_BLACK_METHOD))
+        // The dark style chooser owns the whole background family of the LIGHTS_OUT palette.
+        invokeStatic(methodReference(PALETTE_USE_AMOLED_BLACK_METHOD))
         moveResult(36, "Z")
     }
     newInstance(0, paletteDescriptor)
@@ -2238,14 +2258,13 @@ private fun Block.emitDynamicPaletteGuard(
 }
 
 /**
- * Runs only on the original dark palette path, which dynamic color bypasses with an early
- * `return-object`. Defaults the shared dark surfaces to the classic dim values and lets AMOLED
- * overwrite them with pure black, so dynamic-off + AMOLED-off restores dim while AMOLED keeps
- * its independent pure-black behavior.
+ * Runs on the original dark palette paths (DIM and LIGHTS_OUT), which dynamic color bypasses with
+ * an early `return-object`. Writes the Dim surfaces first and lets the AMOLED style overwrite the
+ * same tokens, so the chooser selects the whole background family on this path too.
  */
 private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor) {
-    // The AMOLED flag must not live in the constructor's argument registers: the block rewrites
-    // the color arguments of the call it sits in front of.
+    // The dark style flag must not live in the constructor's argument registers: the block
+    // rewrites the color arguments of the call it sits in front of.
     val constructorRegisters =
         (constructor.instruction.startRegister until
             constructor.instruction.startRegister + constructor.instruction.registerCount).toList()
@@ -2258,10 +2277,10 @@ private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor)
     ) {
         // `move-result` (11x) and `if-eqz` (21t) both encode a byte register.
         val amoledRegister = scratchRegister(RegisterLimit.BYTE)
-        invokeStatic(methodReference(PALETTE_IS_AMOLED_BLACK_METHOD))
+        invokeStatic(methodReference(PALETTE_USE_AMOLED_BLACK_METHOD))
         moveResult(amoledRegister, "Z")
         appendBackgroundColors(constructor, DIM_BACKGROUND_COLORS)
-        // Not AMOLED: keep the dim surfaces and fall through into the untouched constructor call.
+        // Dim: keep the dim surfaces and fall through into the untouched constructor call.
         ifEqz(amoledRegister, Target.Original)
         appendBackgroundColors(constructor, AMOLED_BACKGROUND_COLORS)
     }

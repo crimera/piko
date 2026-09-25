@@ -145,8 +145,10 @@
     <string name="piko_newx_group_dynamic_colors_summary">Customize Material You colors and themed accent behavior</string>
     <string name="piko_newx_dynamic_color_title">Use dynamic colors</string>
     <string name="piko_newx_dynamic_color_summary">Uses your system Material You colors throughout NewX and Piko settings.</string>
-    <string name="piko_newx_dynamic_color_amoled_title">AMOLED black</string>
-    <string name="piko_newx_dynamic_color_amoled_summary">Uses pure black backgrounds in lights-out mode.</string>
+    <string name="piko_newx_dark_style_title">Dark mode background</string>
+    <string name="piko_newx_dark_style_summary">AMOLED keeps dark surfaces pure black; Dim restores X\'s classic blue-gray dim background.</string>
+    <string name="piko_newx_dark_style_amoled">AMOLED</string>
+    <string name="piko_newx_dark_style_dim">Dim</string>
     <string name="piko_newx_dynamic_color_like_title">Theme liked-post icon</string>
     <string name="piko_newx_dynamic_color_like_summary">Uses the dynamic accent for liked posts. Warning: This disables the heart Lottie animation.</string>
     <string name="piko_newx_disable_blur_title">Disable Compose blur</string>
