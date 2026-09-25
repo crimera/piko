@@ -547,7 +547,6 @@ public class ScreenBuilder {
             addPreference(
                     helper.switchPreference(
                             str("piko_disable_discover_people"),
-                            str("piko_disable_discover_people_desc"),
                             Settings.DISABLE_DISCOVER_PEOPLE
                     )
             );
