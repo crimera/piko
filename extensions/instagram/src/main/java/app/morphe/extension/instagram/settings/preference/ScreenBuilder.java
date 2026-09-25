@@ -547,6 +547,7 @@ public class ScreenBuilder {
             addPreference(
                     helper.switchPreference(
                             str("piko_disable_discover_people"),
+                            "",
                             Settings.DISABLE_DISCOVER_PEOPLE
                     )
             );
@@ -1061,7 +1062,7 @@ public class ScreenBuilder {
                     )
             );
         }
-                if (SettingsStatus.customiseStoryTimestamp) {
+        if (SettingsStatus.customiseStoryTimestamp) {
             addPreference(
                     helper.listPreference(
                             str("piko_customise_story_timestamp"),
