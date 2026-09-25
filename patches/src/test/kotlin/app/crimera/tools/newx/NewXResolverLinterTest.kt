@@ -2,9 +2,11 @@ package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
 import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
+import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
+import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
+import app.crimera.patches.newx.models.isLegacyInlineActionKindModelConstructor
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
-import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.morphe.patcher.patch.PatchException
@@ -494,6 +496,25 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `media tab pending sub-tab store matches only the tab-type field write`() {
+        val tabType = "Lcom/x/profile/s;"
+        val pendingStore =
+            "iput-object v6, v4, Lcom/x/profile/timeline/d;->r:Lcom/x/profile/s;".toInstruction()
+        val sortingSeedStore =
+            "iput-object v6, v4, Lcom/x/profile/timeline/d;->s:Lkotlinx/coroutines/flow/w2;"
+                .toInstruction()
+        val tabListStore =
+            "iput-object v5, v4, Lcom/x/profile/timeline/d;->a:Ljava/util/List;".toInstruction()
+
+        assertEquals(
+            listOf(true, false, false),
+            listOf(pendingStore, sortingSeedStore, tabListStore).map { instruction ->
+                isPendingSubTabStore(instruction, tabType)
+            },
+        )
+    }
+
+    @Test
     fun `inline-action kind model constructor is the three-parameter enum model`() {
         val kindConstructor =
             "invoke-direct {v3, v12, v4, v13}, Lcom/x/inlineactionbar/d1;-><init>(ZZLcom/x/inlineactionbar/f1;)V"
@@ -511,6 +532,39 @@ class NewXResolverLinterTest {
             listOf(true, false, false),
             listOf(kindConstructor, layoutConstructor, objectConstructor).map { instruction ->
                 isInlineActionKindModelConstructor(instruction, ::isKindEnum)
+            },
+        )
+    }
+
+    @Test
+    fun `inline-action legacy boolean kind model does not match the enum model`() {
+        // Regression for the 12.29 IconOnly fix breaking 12.28 prod: 12.27/12.28-alpha.01 use
+        // `(Z)` and 12.28-alpha.04/prod use `(ZZZ)`. The enum resolver must ignore both, and the
+        // legacy resolver must accept both while rejecting the enum and layout constructors.
+        val singleBoolean =
+            "invoke-direct {v3, v9}, Lcom/x/inlineactionbar/v0;-><init>(Z)V".toInstruction()
+        val threeBoolean =
+            "invoke-direct {v1, v11, v3, v13}, Lcom/x/inlineactionbar/y0;-><init>(ZZZ)V"
+                .toInstruction()
+        val enumModel =
+            "invoke-direct {v3, v12, v4, v13}, Lcom/x/inlineactionbar/d1;-><init>(ZZLcom/x/inlineactionbar/f1;)V"
+                .toInstruction()
+        val layoutConstructor =
+            "invoke-direct {v3, v4, v5, v4, v15}, Landroidx/compose/foundation/layout/b3;-><init>(FFFF)V"
+                .toInstruction()
+
+        fun isKindEnum(descriptor: String) = descriptor == "Lcom/x/inlineactionbar/f1;"
+
+        assertEquals(
+            listOf(false, false, true, false),
+            listOf(singleBoolean, threeBoolean, enumModel, layoutConstructor).map { instruction ->
+                isInlineActionKindModelConstructor(instruction, ::isKindEnum)
+            },
+        )
+        assertEquals(
+            listOf(true, true, false, false),
+            listOf(singleBoolean, threeBoolean, enumModel, layoutConstructor).map { instruction ->
+                isLegacyInlineActionKindModelConstructor(instruction)
             },
         )
     }

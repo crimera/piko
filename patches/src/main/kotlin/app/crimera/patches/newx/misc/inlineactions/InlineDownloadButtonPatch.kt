@@ -264,7 +264,11 @@ val newXInlineDownloadButtonPatch =
                 mediaModels,
                 downloadModels,
             )
-            patchInlineActionKindOverride(entryModels, kindOverrideModels)
+            // Null on validated legacy targets whose boolean-only kind model has no IconOnly
+            // enum to rewrite (12.27/12.28). Only the 12.29 enum contract needs the override.
+            if (kindOverrideModels != null) {
+                patchInlineActionKindOverride(entryModels, kindOverrideModels)
+            }
             newXInitHook.fingerprint.method.addInstruction(
                 0,
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
