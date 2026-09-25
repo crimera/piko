@@ -136,3 +136,6 @@ bin/
 /local.properties
 
 .direnv
+
+# Local working notes, kept on disk for reference and never published
+docs/
