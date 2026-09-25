@@ -141,8 +141,8 @@
     <string name="piko_newx_media_tab_videos">Videos</string>
     <string name="piko_newx_hide_premium_upsell_title">Hide premium upsell</string>
     <string name="piko_newx_hide_premium_upsell_summary">Hides the premium upgrade chip from the home top bar</string>
-    <string name="piko_newx_group_dynamic_colors_title">Dynamic colors</string>
-    <string name="piko_newx_group_dynamic_colors_summary">Customize Material You colors and themed accent behavior</string>
+    <string name="piko_newx_group_theme_title">Theme</string>
+    <string name="piko_newx_group_theme_summary">Customize Material You colors, the dark background style, and themed accent behavior</string>
     <string name="piko_newx_dynamic_color_title">Use dynamic colors</string>
     <string name="piko_newx_dynamic_color_summary">Uses your system Material You colors throughout NewX and Piko settings.</string>
     <string name="piko_newx_dark_style_title">Dark mode background</string>

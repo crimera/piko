@@ -109,11 +109,11 @@ internal object Groups {
             order = 200,
         )
 
-    val DYNAMIC_COLORS =
+    val THEME =
         SettingsGroupMetadata(
-            id = "newx.appearance.dynamic_colors",
-            titleResourceName = "piko_newx_group_dynamic_colors_title",
-            summaryResourceName = "piko_newx_group_dynamic_colors_summary",
+            id = "newx.appearance.theme",
+            titleResourceName = "piko_newx_group_theme_title",
+            summaryResourceName = "piko_newx_group_theme_summary",
             iconResourceName = "ic_vector_paintbrush_box",
             order = 100,
         )

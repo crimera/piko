@@ -162,8 +162,10 @@ private data class ResolvedLottieRenderer(
 @Suppress("unused")
 val dynamicColorPatch =
     bytecodePatch(
-        name = "NewX: Dynamic color",
-        description = "Applies the system Material You palette to NewX.",
+        name = "NewX: Theme",
+        description =
+            "Applies the system Material You palette and the AMOLED/dim dark background " +
+                "styles to NewX.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
@@ -171,7 +173,7 @@ val dynamicColorPatch =
         val darkStyle =
             newXSettings {
                 category(Categories.APPEARANCE) {
-                    group(Groups.DYNAMIC_COLORS) {
+                    group(Groups.THEME) {
                         toggle(
                             id = "newx.theme.dynamic_color",
                             strings = settingStrings("piko_newx_dynamic_color"),
