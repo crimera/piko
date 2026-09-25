@@ -45,6 +45,7 @@ public class UI {
     public static final String DRAWABLE_GHOST_ICON = "piko_ghost_icon";
     public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
     public static final String DRAWABLE_HISTORY_ICON = "instagram_history_outline_24";
+    public static final String DRAWABLE_STORY_ICON = "instagram_story_outline_24";
     public static final String DRAWABLE_SHAPES_ICON = "fb_ic_more_shapes_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
