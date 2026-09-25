@@ -6,6 +6,7 @@ android {
 
 dependencies {
     implementation(libs.wireguard)
+    testImplementation("junit:junit:4.13.2")
     compileOnly(project(":extensions:shared:library"))
     compileOnly(project(":extensions:twitter:stub"))
     compileOnly(libs.morphe.extensions.library)

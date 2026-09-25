@@ -34,6 +34,8 @@ patches {
 
 dependencies {
     compileOnly("com.github.REAndroid:ARSCLib:a28c6fb2a7")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     // Used by JsonGenerator.
     implementation(libs.gson)
