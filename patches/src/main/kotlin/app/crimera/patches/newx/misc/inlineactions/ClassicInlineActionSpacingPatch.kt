@@ -67,7 +67,7 @@ val classicInlineActionSpacingPatch =
             "Lays out post action bars with the spacing NewX used before 12.28.0-alpha.04: " +
                 "counted actions share the row width and icon-only actions keep their intrinsic " +
                 "size, so hiding an action never leaves a gap.",
-        default = false,
+        default = true,
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
