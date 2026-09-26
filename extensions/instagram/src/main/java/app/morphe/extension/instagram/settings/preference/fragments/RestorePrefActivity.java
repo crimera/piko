@@ -49,7 +49,7 @@ public class RestorePrefActivity extends AppCompatActivity {
                 destinationFile = new File(context.getFilesDir()+ "/mobileconfig","id_name_mapping.json");
             } else if (args.containsKey("piko_import_pref")) {
                 // Importing an older settings file would drop an active Focus Lock.
-                if (FocusLock.isLocked()) {
+                if (FocusLock.isActive()) {
                     toast(str("piko_focus_lock_blocked_action"));
                     finish();
                     return;
