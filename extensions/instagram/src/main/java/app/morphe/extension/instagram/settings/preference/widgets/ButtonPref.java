@@ -26,6 +26,7 @@ import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
+import app.morphe.extension.instagram.patches.focusLock.FocusLockDialogs;
 import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
 
 public class ButtonPref extends Preference {
@@ -70,6 +71,9 @@ public class ButtonPref extends Preference {
                     } else if (key.equals("piko_reset_pref")) {
                         InstaUtils.showResetSettingsDialog(context);
 
+                    } else if (key.equals("piko_focus_lock_action")) {
+                        FocusLockDialogs.onActionPressed(context, ButtonPref.this);
+
                     } else if (key.equals("piko_delete_analytics_cache")) {
                         Block.deleteAnalyticsCacheFolder();
 
@@ -83,7 +87,7 @@ public class ButtonPref extends Preference {
                         DownloadMapping.downloadMapping();
 
                     } else if (key.equals("view_deleted_messages")) {
-                        SavedMessagesHook.openDeletedMessages(context, false);
+                        SavedMessagesHook.openDeletedMessages(context);
 
                     } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
@@ -145,6 +149,7 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_pref")
                 || key.equals("piko_import_pref")
                 || key.equals("piko_reset_pref")
+                || key.equals("piko_focus_lock_action")
                 || key.equals("piko_download_set_path")
                 || key.equals("piko_delete_analytics_cache")
                 || key.equals("piko_export_experiment_list")
@@ -164,10 +169,10 @@ public class ButtonPref extends Preference {
             return null;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_ADS)){
-            return UI.DRAWABLE_SHEILD_ICON;
+            return UI.DRAWABLE_ADS_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
-            return UI.DRAWABLE_SNAPCHAT_ICON;
+            return UI.DRAWABLE_GHOST_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
             return UI.DRAWABLE_LINK_ICON;
@@ -176,10 +181,10 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_FRAME_CROSSED_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
-            return UI.DRAWABLE_CODE_ICON;
+            return UI.DRAWABLE_SHAPES_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
-            return UI.DRAWABLE_FB_DOWNLOAD_ICON;
+            return UI.DRAWABLE_DOWNLOAD_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
             return UI.DRAWABLE_STACK_ICON;

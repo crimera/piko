@@ -26,6 +26,7 @@ import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.patches.Links;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -198,26 +199,6 @@ public class ScreenBuilder {
     public void dmSection() {
         if (!(SettingsStatus.dmSection())) return;
 
-        if (SettingsStatus.disableTypingStatus) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_typing_status"),
-                            "",
-                            Settings.DISABLE_TYPING_STATUS
-                    )
-            );
-        }
-
-        if (SettingsStatus.viewDmAnonymously) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_view_dm_anonymously"),
-                            "",
-                            Settings.VIEW_DM_ANONYMOUSLY
-                    )
-            );
-        }
-
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(
                     helper.switchPreference(
@@ -311,7 +292,7 @@ public class ScreenBuilder {
             addPreference(
                     helper.switchPreference(
                             str("piko_view_dm_anonymously"),
-                            "",
+                            str("piko_view_dm_anonymously_desc"),
                             Settings.VIEW_DM_ANONYMOUSLY
                     )
             );
@@ -357,6 +338,10 @@ public class ScreenBuilder {
 
         // PreferenceCategory category= addCategory(str("piko_category_distraction_free"));
 
+        if (SettingsStatus.focusLock) {
+            buildFocusLockPreferences();
+        }
+
         if (SettingsStatus.disableStories) {
             addPreference(
                     helper.switchPreference(
@@ -395,10 +380,12 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.disableExplore) {
             addPreference(
-                    helper.switchPreference(
+                    helper.forcedSwitchPreference(
                             str("piko_disable_explore"),
                             "",
-                            Settings.DISABLE_EXPLORE
+                            Settings.DISABLE_EXPLORE,
+                            FocusLock.blocksExplore(),
+                            str("piko_focus_lock_enforced")
                     )
             );
         }
@@ -422,11 +409,13 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.disableReelsScrolling) {
             addPreference(
-                    helper.switchPreference(
+                    helper.forcedSwitchPreference(
                             str("piko_disable_reels_scrolling"),
                             str("piko_disable_reels_scrolling_desc"),
-                            Settings.DISABLE_REELS_SCROLLING
-                )
+                            Settings.DISABLE_REELS_SCROLLING,
+                            FocusLock.blocksReels(),
+                            str("piko_focus_lock_enforced")
+                    )
             );
         }
         if (SettingsStatus.disableSwipeToCreate) {
@@ -444,6 +433,15 @@ public class ScreenBuilder {
                             str("piko_hide_group_creation_button_on_sharesheet"),
                             "",
                             Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET
+                    )
+            );
+        }
+        if (SettingsStatus.hideReelsFollowButton) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_reels_follow_button"),
+                            str("piko_hide_reels_follow_button_desc"),
+                            Settings.HIDE_REELS_FOLLOW_BUTTON
                     )
             );
         }
@@ -481,6 +479,46 @@ public class ScreenBuilder {
                     )
             );
         }
+    }
+
+    /**
+     * Focus Lock. The switches that the lock enforces are greyed out while it is active so the
+     * commitment cannot be undone from the settings screen.
+     */
+    private void buildFocusLockPreferences() {
+        boolean locked = FocusLock.isLocked();
+
+        addPreference(
+                helper.buttonPreference(
+                        FocusLock.buttonTitle(),
+                        FocusLock.statusSummary(),
+                        "piko_focus_lock_action"
+                )
+        );
+
+        Preference blockReels = helper.switchPreference(
+                str("piko_focus_lock_block_reels"),
+                str("piko_focus_lock_block_reels_desc"),
+                Settings.FOCUS_LOCK_BLOCK_REELS
+        );
+        Preference blockExplore = helper.switchPreference(
+                str("piko_focus_lock_block_explore"),
+                str("piko_focus_lock_block_explore_desc"),
+                Settings.FOCUS_LOCK_BLOCK_EXPLORE
+        );
+        Preference duration = helper.listPreference(
+                str("piko_focus_lock_duration"),
+                str("piko_focus_lock_duration_desc"),
+                Settings.FOCUS_LOCK_DURATION_DAYS
+        );
+        if (locked) {
+            ((SwitchPref) blockReels).setSwitchInteractionEnabled(false);
+            ((SwitchPref) blockExplore).setSwitchInteractionEnabled(false);
+            duration.setEnabled(false);
+        }
+        addPreference(blockReels);
+        addPreference(blockExplore);
+        addPreference(duration);
     }
 
     public void buildMiscSection() {
@@ -557,20 +595,11 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.storiesAudioAutoplay) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_stories_audio_autoplay"),
-                            "",
-                            Settings.STORIES_AUDIO_AUTOPLAY
-                    )
-            );
-        }
         if (SettingsStatus.disableDiscoverPeople) {
             addPreference(
                     helper.switchPreference(
                             str("piko_disable_discover_people"),
-                            str("piko_disable_discover_people_desc"),
+                            "",
                             Settings.DISABLE_DISCOVER_PEOPLE
                     )
             );
@@ -716,6 +745,22 @@ public class ScreenBuilder {
         );
 
         addPreference(
+                helper.switchPreference(
+                        str("piko_embed_download_metadata"),
+                        str("piko_embed_download_metadata_desc"),
+                        Settings.EMBED_DOWNLOAD_METADATA
+                )
+        );
+
+        addPreference(
+                helper.downloadFileNameTemplatePreference(
+                        str("piko_download_file_name_template"),
+                        Pref.downloadFileNameTemplate(),
+                        Settings.DOWNLOAD_FILE_NAME_TEMPLATE
+                )
+        );
+
+        addPreference(
                 helper.buttonPreference(
                         str("piko_download_set_path"),
                         StorageUtils.getCustomPathForDisplay(),
@@ -824,45 +869,17 @@ public class ScreenBuilder {
     public void buildNavigationSection() {
         if (!(SettingsStatus.hideNavigationButtons)) return;
 
-        //  PreferenceCategory category = addCategory(str("piko_category_hide_navigation_buttons"));
-
         addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_feed"),
-                        "",
-                        Settings.HIDE_NAVIGATION_FEED
+                helper.navigationBarPreference(
+                        str("piko_navigation_tabs_title"),
+                        str("piko_navigation_tabs_summary")
                 )
         );
 
         addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_reels"),
-                        "",
-                        Settings.HIDE_NAVIGATION_REELS
-                )
-        );
-
-        addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_direct"),
-                        "",
-                        Settings.HIDE_NAVIGATION_DIRECT
-                )
-        );
-
-        addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_search"),
-                        "",
-                        Settings.HIDE_NAVIGATION_SEARCH
-                )
-        );
-
-        addPreference(
-                helper.switchPreference(
-                        str("piko_hide_navigation_create"),
-                        "",
-                        Settings.HIDE_NAVIGATION_CREATE
+                helper.navigationStartupPreference(
+                        str("piko_navigation_startup_tab"),
+                        str("piko_navigation_startup_tab_summary")
                 )
         );
     }
@@ -891,13 +908,23 @@ public class ScreenBuilder {
         // rather than triggering new build
         // for every a new flag.
         for(Flag flag : recFlags) {
-            addPreference(
-                    helper.listPreference(
-                            flag.getName(),
-                            flag.getDesc(),
-                            flag.getCode()
-                    )
-            );
+            if (flag.isLongType()) {
+                addPreference(
+                        helper.editTextNumPreference(
+                                flag.getName(),
+                                flag.getDesc(),
+                                flag.getCode()
+                        )
+                );
+            } else {
+                addPreference(
+                        helper.listPreference(
+                                flag.getName(),
+                                flag.getDesc(),
+                                flag.getCode()
+                        )
+                );
+            }
         }
     }
 
@@ -1048,7 +1075,7 @@ public class ScreenBuilder {
         if (SettingsStatus.downloadSection()){
             addPreference(
                     helper.buttonPreference(
-                            str("piko_category_download_media"),
+                            str("piko_category_downloads"),
                             "",
                             Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA
                     )
@@ -1066,7 +1093,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideNavigationButtons){
             addPreference(
                     helper.buttonPreference(
-                            str("piko_category_hide_navigation_buttons"),
+                            str("piko_category_navigation_tabs"),
                             "",
                             Constants.PIKO_FRAGMENT_NAV_BTNS
                     )

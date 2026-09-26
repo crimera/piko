@@ -15,6 +15,7 @@ import app.morphe.extension.crimera.ObjectBrowser;
 
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.shared.MarkChatAsReadScope;
 
 import com.instagram.model.direct.DirectThreadKey;
 import com.instagram.common.session.UserSession;
@@ -88,16 +89,13 @@ public class MarkChatAsRead {
 
     private static void markAsRead(UserSession userSession, Object unknown, DirectThreadKey directThreadKey){
         try{
-            Pref.setMarkChatAsReadIndicator(true);
+            MarkChatAsReadScope.run(() -> {
+                String threadId = directThreadKey.A00;
+                String messageId = MarkChatAsRead.getMessageCursorId(unknown);
+                String senderId = directThreadKey.A02.get(0).toString();
 
-            String threadId = directThreadKey.A00;
-            String messageId = MarkChatAsRead.getMessageCursorId(unknown);
-            String senderId = directThreadKey.A02.get(0).toString();
-
-            markAsSeenAPICall(userSession, threadId, messageId, senderId);
-
-            Pref.setMarkChatAsReadIndicator(false);
-
+                markAsSeenAPICall(userSession, threadId, messageId, senderId);
+            });
         } catch (Exception e) {
             PikoUtils.logger(e);
         }
