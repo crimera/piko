@@ -3,6 +3,7 @@ package app.morphe.extension.newx.misc;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.UriPermission;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
@@ -36,7 +38,9 @@ import app.morphe.extension.newx.settings.NewXLogger;
 public final class DownloadDestination {
     private static final String NOTIFICATION_CHANNEL_ID = "piko_newx_downloads";
     private static final int CONNECT_TIMEOUT_MS = 15_000;
-    private static final int READ_TIMEOUT_MS = 30_000;
+    // Per-read stall budget, not a total deadline. Large transfers on mobile routinely stall
+    // for seconds at a time; 30s killed 20MB-class downloads on fluctuating connections.
+    private static final int READ_TIMEOUT_MS = 60_000;
     private static final int MAX_REDIRECTS = 5;
     private static final int MAX_NAME_ATTEMPTS = 32;
     private static final int MAX_CAUSE_DEPTH = 16;
@@ -64,11 +68,13 @@ public final class DownloadDestination {
         final Uri documentUri;
         final String fileName;
         final MediaKind kind;
+        final String mimeType;
 
-        Target(Uri documentUri, String fileName, MediaKind kind) {
+        Target(Uri documentUri, String fileName, MediaKind kind, String mimeType) {
             this.documentUri = documentUri;
             this.fileName = fileName;
             this.kind = kind;
+            this.mimeType = mimeType;
         }
 
         public Uri documentUri() {
@@ -81,6 +87,10 @@ public final class DownloadDestination {
 
         public MediaKind kind() {
             return kind;
+        }
+
+        public String mimeType() {
+            return mimeType;
         }
     }
 
@@ -296,7 +306,7 @@ public final class DownloadDestination {
                         continue;
                     }
                     // OVERWRITE reuses the occupant; save() truncates it at transfer time.
-                    return new Target(existing, candidate, kind);
+                    return new Target(existing, candidate, kind, mimeType);
                 }
 
                 Uri created = DocumentsContract.createDocument(resolver, directory, mimeType, candidate);
@@ -311,7 +321,7 @@ public final class DownloadDestination {
                 }
 
                 if (candidate.equals(actualName)) {
-                    return new Target(created, actualName, kind);
+                    return new Target(created, actualName, kind, mimeType);
                 }
 
                 // Provider renamed on create: name was taken but probe missed (opaque ids).
@@ -363,8 +373,26 @@ public final class DownloadDestination {
 
     /** Streams a URL into a reserved document, retrying once with the larger image variant. */
     public static SaveState save(Context context, Target target, String url, int notificationId) {
+        return save(context, target, url, notificationId, null);
+    }
+
+    /** Streams a URL into a reserved document, wiring the failure notice to a retry. */
+    public static SaveState save(
+            Context context, Target target, String url, int notificationId, String username) {
         Failure failure = new Failure();
         if (saveOnce(context, target, url, notificationId, failure)) return SaveState.SAVED;
+
+        // A stall partway through a large transfer fails after minutes of progress. One
+        // immediate same-URL retry recovers transient stalls; a repeat failure still
+        // surfaces the failure notice with its manual retry button.
+        if (failure.cause instanceof SocketTimeoutException) {
+            NewXLogger.printInfo(() -> "Retrying stalled download " + target.fileName());
+            Failure stalledRetry = new Failure();
+            if (saveOnce(context, target, url, notificationId, stalledRetry)) {
+                return SaveState.SAVED;
+            }
+            if (stalledRetry.cause != null) failure.cause = stalledRetry.cause;
+        }
         boolean lost = isDestinationLoss(failure.cause);
 
         String retryUrl = largerVariantUrl(url);
@@ -387,7 +415,8 @@ public final class DownloadDestination {
         );
         // Replace the progress notification in place; cancelling alone leaves no trace when
         // the in-app host is not showing.
-        notifyFailure(context, notificationId, target.fileName(), destinationLost);
+        notifyFailure(context, notificationId, target.fileName(), target.kind(), target.mimeType(),
+                url, username, destinationLost);
         return destinationLost ? SaveState.DESTINATION_LOST : SaveState.FAILED;
     }
 
@@ -444,7 +473,8 @@ public final class DownloadDestination {
         if (notificationId > 0) showIndeterminate(context, notificationId, target.fileName);
         try {
             connection = openConnection(url);
-            int contentLength = connection.getContentLength();
+            long contentLength = connection.getContentLengthLong();
+            long total = 0;
 
             try (InputStream input = new BufferedInputStream(connection.getInputStream());
                  OutputStream output = context.getContentResolver()
@@ -452,7 +482,6 @@ public final class DownloadDestination {
                 if (output == null) throw new IOException("Could not open " + target.fileName);
 
                 byte[] buffer = new byte[64 * 1024];
-                long total = 0;
                 long lastUpdate = 0;
                 int read;
                 while ((read = input.read(buffer)) != -1) {
@@ -469,6 +498,13 @@ public final class DownloadDestination {
                     }
                 }
                 output.flush();
+            }
+
+            // A cleanly-closed short stream used to report success, leaving a truncated
+            // file behind. Fail closed so the notice offers a retry instead.
+            if (contentLength > 0 && total != contentLength) {
+                throw new IOException("Short read for " + target.fileName()
+                        + ": got " + total + " of " + contentLength + " bytes");
             }
 
             if (notificationId > 0) completeNotification(context, notificationId, target.fileName);
@@ -638,7 +674,7 @@ public final class DownloadDestination {
                 || status == 308;
     }
 
-    private static int progressOf(long total, int contentLength) {
+    private static int progressOf(long total, long contentLength) {
         int percent = (int) (total * 100 / contentLength);
         return Math.min(percent, 99);
     }
@@ -649,7 +685,7 @@ public final class DownloadDestination {
         return id;
     }
 
-    private static void showIndeterminate(Context context, int id, String fileName) {
+    static void showIndeterminate(Context context, int id, String fileName) {
         try {
             NotificationManager manager = notificationManager(context);
             if (manager == null) return;
@@ -697,8 +733,20 @@ public final class DownloadDestination {
         }
     }
 
-    /** Replaces the progress notification with a failure notice. */
-    private static void notifyFailure(Context context, int id, String fileName, boolean destinationLost) {
+    /**
+     * Replaces the progress notification with a failure notice carrying a retry button.
+     * The retry reserves a fresh destination for the same name and streams the URL again.
+     */
+    static void notifyFailure(
+            Context context,
+            int id,
+            String fileName,
+            MediaKind kind,
+            String mimeType,
+            String url,
+            String username,
+            boolean destinationLost
+    ) {
         if (id <= 0 || !notificationsEnabled(context)) return;
         try {
             NotificationManager manager = notificationManager(context);
@@ -713,6 +761,11 @@ public final class DownloadDestination {
                     .setAutoCancel(true)
                     .setOngoing(false)
                     .setProgress(0, 0, false);
+            PendingIntent retry = DownloadRetryReceiver.retryPendingIntent(
+                    context, fileName, kind, mimeType, url, username, id);
+            if (retry != null) {
+                builder.addAction(android.R.drawable.stat_sys_download, "Retry", retry);
+            }
             manager.notify(id, builder.build());
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to post download failure notification", exception);

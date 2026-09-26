@@ -47,6 +47,8 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.resourcePatch
+import org.w3c.dom.Element
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patches.all.misc.resources.ResourceType
@@ -84,6 +86,24 @@ private fun MutableMethod.requireStatic(label: String) {
     throw PatchException("$label is no longer static: $this")
 }
 
+private val newXInlineDownloadRetryResourcePatch =
+    resourcePatch(
+        description = "Adds the NewX download retry receiver to the Android manifest.",
+    ) {
+        finalize {
+            document("AndroidManifest.xml").use { document ->
+                val application = document.getElementsByTagName("application").item(0) as Element
+                val receiver = document.createElement("receiver")
+                receiver.setAttribute(
+                    "android:name",
+                    "app.morphe.extension.newx.misc.DownloadRetryReceiver",
+                )
+                receiver.setAttribute("android:exported", "false")
+                application.appendChild(receiver)
+            }
+        }
+    }
+
 @Suppress("unused")
 val newXInlineDownloadButtonPatch =
     bytecodePatch(
@@ -99,6 +119,7 @@ val newXInlineDownloadButtonPatch =
             newXInlineDownloadModelResolutionPatch,
             newXThumbnailCachePatch,
             newXInAppNotificationPatch,
+            newXInlineDownloadRetryResourcePatch,
             newXExtensionPatch,
         )
 

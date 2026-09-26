@@ -1204,13 +1204,19 @@ public final class InlineDownloadButton {
         DOWNLOAD_EXECUTOR.execute(() -> {
             DownloadDestination.SaveState state;
             try {
-                state = DownloadDestination.save(context, target, url, notificationId);
+                state = DownloadDestination.save(context, target, url, notificationId, username);
             } catch (RuntimeException exception) {
                 // save() handles its own failures; this covers throws before it could clean up.
                 NewXLogger.printException(() -> "Failed to download " + target.fileName(), exception);
-                DownloadDestination.cancelNotification(context, notificationId);
+                boolean lost = DownloadDestination.isDestinationLoss(exception);
+                if (lost) DownloadDestination.invalidate(target.kind());
                 DownloadDestination.discard(context, target);
-                state = DownloadDestination.SaveState.FAILED;
+                // Keep the OS trace with a retry instead of cancelling it silently.
+                DownloadDestination.notifyFailure(context, notificationId, target.fileName(),
+                        target.kind(), target.mimeType(), url, username, lost);
+                state = lost
+                        ? DownloadDestination.SaveState.DESTINATION_LOST
+                        : DownloadDestination.SaveState.FAILED;
             }
 
             switch (state) {
