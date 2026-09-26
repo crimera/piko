@@ -25,7 +25,9 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
@@ -38,6 +40,8 @@ import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
 @SuppressWarnings("deprecation")
 public final class FeatureSwitchFragment extends NewXCustomScreenFragment implements FeatureSwitchAdapter.Listener {
     private final FeatureSwitchStore store = FeatureSwitchStore.shared();
+    private final Set<String> sessionNewKeys = new HashSet<>();
+    private boolean sessionInitialized;
     private FeatureSwitchAdapter adapter;
     private EditText search;
     private TextView emptyState;
@@ -48,6 +52,15 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState
     ) {
+        if (!sessionInitialized) {
+            if (!store.isBaselineEstablished()) {
+                store.establishBaseline();
+            } else {
+                sessionNewKeys.addAll(store.getUnseenKeys());
+            }
+            sessionInitialized = true;
+        }
+
         Context context = requireContext();
         FrameLayout root = new FrameLayout(context);
         root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
@@ -129,6 +142,12 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
             settingsActivity.setPageTitle(StringRef.str("piko_newx_feature_switches_title"));
         }
         refresh();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        store.markAllAsSeen();
     }
 
     @Override
@@ -348,6 +367,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         try {
             Object value = parseValue(featureType, booleanValue, textValue);
             store.setOverride(featureKey, featureType, value);
+            sessionNewKeys.remove(featureKey);
             refresh();
             dialog.dismiss();
         } catch (IllegalArgumentException exception) {
@@ -440,8 +460,11 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
 
     private void refresh() {
         if (adapter == null || emptyState == null) return;
+        if (sessionInitialized && store.isBaselineEstablished()) {
+            sessionNewKeys.addAll(store.getUnseenKeys());
+        }
         String query = search == null ? "" : search.getText().toString();
-        List<FeatureSwitchStore.Entry> entries = store.snapshot(query);
+        List<FeatureSwitchStore.Entry> entries = store.snapshot(query, sessionNewKeys);
         adapter.submit(entries, query);
         emptyState.setText(StringRef.str(query.trim().isEmpty()
                 ? "piko_newx_feature_switch_empty"

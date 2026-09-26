@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -130,6 +131,17 @@ final class FeatureSwitchAdapter extends BaseAdapter {
         );
         row.key.setText(highlightedKey(entry.getKey()));
         row.value.setText(valueText(entry.getEffectiveValue()));
+
+        if (entry.isNew()) {
+            row.newDot.setVisibility(View.VISIBLE);
+            GradientDrawable dotBg = (GradientDrawable) row.newDot.getBackground();
+            if (dotBg != null) {
+                dotBg.setColor(Theme.primaryAccent(context));
+            }
+        } else {
+            row.newDot.setVisibility(View.GONE);
+        }
+
         reusableView.setOnClickListener(ignored -> listener.edit(entry));
         return reusableView;
     }
@@ -190,6 +202,17 @@ final class FeatureSwitchAdapter extends BaseAdapter {
         );
         NewXSettingsUi.applyRippleBackground(root);
 
+        View newDot = new View(context);
+        int dotSize = Theme.dpToPx(context, 7f);
+        LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dotSize, dotSize);
+        dotParams.setMarginEnd(Theme.dpToPx(context, 8f));
+        dotParams.gravity = Gravity.CENTER_VERTICAL;
+        GradientDrawable dotBg = new GradientDrawable();
+        dotBg.setShape(GradientDrawable.OVAL);
+        dotBg.setColor(Theme.primaryAccent(context));
+        newDot.setBackground(dotBg);
+        root.addView(newDot, dotParams);
+
         TextView key = NewXSettingsUi.titleText(context);
         key.setSingleLine(true);
         key.setEllipsize(TextUtils.TruncateAt.END);
@@ -210,7 +233,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
-        return new Row(root, key, value, key.getTypeface(), value.getTypeface());
+        return new Row(root, newDot, key, value, key.getTypeface(), value.getTypeface());
     }
 
     private CharSequence highlightedKey(String key) {
@@ -351,6 +374,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
 
     private static final class Row {
         final LinearLayout root;
+        final View newDot;
         final TextView key;
         final TextView value;
         final Typeface keyTypeface;
@@ -358,12 +382,14 @@ final class FeatureSwitchAdapter extends BaseAdapter {
 
         Row(
                 LinearLayout root,
+                View newDot,
                 TextView key,
                 TextView value,
                 Typeface keyTypeface,
                 Typeface valueTypeface
         ) {
             this.root = root;
+            this.newDot = newDot;
             this.key = key;
             this.value = value;
             this.keyTypeface = keyTypeface;

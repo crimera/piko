@@ -7,12 +7,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.newx.settings.NewXLogger;
@@ -21,6 +24,7 @@ import app.morphe.extension.shared.settings.StringSetting;
 public final class FeatureSwitchStore {
     private static final int SCHEMA_VERSION = 1;
     private static final String PERSISTENCE_KEY = "newx.advanced.feature_switches.overrides";
+    private static final String SEEN_PERSISTENCE_KEY = "newx.advanced.feature_switches.seen";
 
     public enum ValueType {
         BOOLEAN,
@@ -38,19 +42,22 @@ public final class FeatureSwitchStore {
         @Nullable private final Object observedValue;
         @Nullable private final Object effectiveValue;
         private final boolean overridden;
+        private final boolean isNew;
 
         private Entry(
                 String key,
                 ValueType type,
                 @Nullable Object observedValue,
                 @Nullable Object effectiveValue,
-                boolean overridden
+                boolean overridden,
+                boolean isNew
         ) {
             this.key = key;
             this.type = type;
             this.observedValue = copyValue(observedValue);
             this.effectiveValue = copyValue(effectiveValue);
             this.overridden = overridden;
+            this.isNew = isNew;
         }
 
         public String getKey() {
@@ -73,6 +80,10 @@ public final class FeatureSwitchStore {
 
         public boolean isOverridden() {
             return overridden;
+        }
+
+        public boolean isNew() {
+            return isNew;
         }
     }
 
@@ -108,13 +119,23 @@ public final class FeatureSwitchStore {
 
     private final Object loadLock = new Object();
     private final Object persistenceLock = new Object();
+    private final Object seenLock = new Object();
     private final Persistence persistence;
+    private final Persistence seenPersistence;
     private final Map<String, Observation> observations = new ConcurrentHashMap<>();
     private final Map<String, OverrideValue> overrides = new ConcurrentHashMap<>();
+    private final Set<String> seenKeys = ConcurrentHashMap.newKeySet();
     private volatile boolean loaded;
+    private volatile boolean seenLoaded;
+    private volatile boolean baselineEstablished;
 
     FeatureSwitchStore(Persistence persistence) {
+        this(persistence, new MemoryPersistence());
+    }
+
+    FeatureSwitchStore(Persistence persistence, Persistence seenPersistence) {
         this.persistence = persistence;
+        this.seenPersistence = seenPersistence;
     }
 
     public static FeatureSwitchStore shared() {
@@ -155,7 +176,12 @@ public final class FeatureSwitchStore {
     }
 
     public List<Entry> snapshot(String query) {
+        return snapshot(query, null);
+    }
+
+    public List<Entry> snapshot(String query, @Nullable Set<String> sessionNewKeys) {
         ensureLoaded();
+        ensureSeenLoaded();
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
         List<Entry> entries = new ArrayList<>();
         observations.forEach((key, observation) -> {
@@ -163,23 +189,90 @@ public final class FeatureSwitchStore {
             OverrideValue override = overrides.get(key);
             boolean overridden = override != null && override.type == observation.type;
             Object effective = overridden ? override.value : observation.value;
+            boolean isNew = sessionNewKeys != null ? sessionNewKeys.contains(key) : isKeyNew(key);
             entries.add(new Entry(
                     key,
                     observation.type,
                     observation.value,
                     effective,
-                    overridden
+                    overridden,
+                    isNew
             ));
         });
         overrides.forEach((key, override) -> {
             if (observations.containsKey(key) || !matchesQuery(key, normalizedQuery)) return;
-            entries.add(new Entry(key, override.type, null, override.value, true));
+            boolean isNew = sessionNewKeys != null ? sessionNewKeys.contains(key) : isKeyNew(key);
+            entries.add(new Entry(key, override.type, null, override.value, true, isNew));
         });
         entries.sort(
                 Comparator.comparing(Entry::isOverridden).reversed()
+                        .thenComparing(Comparator.comparing(Entry::isNew).reversed())
                         .thenComparing(Entry::getKey)
         );
         return Collections.unmodifiableList(entries);
+    }
+
+    public boolean isBaselineEstablished() {
+        ensureSeenLoaded();
+        return baselineEstablished;
+    }
+
+    public void establishBaseline() {
+        ensureLoaded();
+        ensureSeenLoaded();
+        synchronized (seenLock) {
+            baselineEstablished = true;
+            seenKeys.addAll(observations.keySet());
+            seenKeys.addAll(overrides.keySet());
+            persistSeen();
+        }
+    }
+
+    public Set<String> getUnseenKeys() {
+        ensureLoaded();
+        ensureSeenLoaded();
+        if (!baselineEstablished) return Collections.emptySet();
+        Set<String> unseen = new HashSet<>();
+        observations.keySet().forEach(key -> {
+            if (!seenKeys.contains(key)) unseen.add(key);
+        });
+        overrides.keySet().forEach(key -> {
+            if (!seenKeys.contains(key)) unseen.add(key);
+        });
+        return Collections.unmodifiableSet(unseen);
+    }
+
+    public boolean isKeyNew(String key) {
+        ensureSeenLoaded();
+        return baselineEstablished && !seenKeys.contains(key);
+    }
+
+    public void markAllAsSeen() {
+        ensureLoaded();
+        ensureSeenLoaded();
+        if (!baselineEstablished) {
+            establishBaseline();
+            return;
+        }
+        synchronized (seenLock) {
+            seenKeys.addAll(observations.keySet());
+            seenKeys.addAll(overrides.keySet());
+            persistSeen();
+        }
+    }
+
+    public void markKeysAsSeen(Collection<String> keys) {
+        if (keys == null || keys.isEmpty()) return;
+        ensureLoaded();
+        ensureSeenLoaded();
+        if (!baselineEstablished) {
+            establishBaseline();
+            return;
+        }
+        synchronized (seenLock) {
+            seenKeys.addAll(keys);
+            persistSeen();
+        }
     }
 
     public boolean hasEntry(String key) {
@@ -392,13 +485,86 @@ public final class FeatureSwitchStore {
         return Collections.unmodifiableList(new ArrayList<>(list));
     }
 
+    static final class MemoryPersistence implements Persistence {
+        private String value = "";
+
+        MemoryPersistence() {
+        }
+
+        MemoryPersistence(String initialValue) {
+            this.value = initialValue == null ? "" : initialValue;
+        }
+
+        @Override
+        public String read() {
+            return value;
+        }
+
+        @Override
+        public void write(String updatedValue) {
+            this.value = updatedValue == null ? "" : updatedValue;
+        }
+    }
+
+    private void ensureSeenLoaded() {
+        if (seenLoaded) return;
+        synchronized (seenLock) {
+            if (seenLoaded) return;
+            String serialized = seenPersistence.read();
+            if (serialized != null && !serialized.isEmpty()) {
+                try {
+                    JSONObject root = new JSONObject(serialized);
+                    baselineEstablished = root.optBoolean("baseline", false);
+                    JSONArray array = root.optJSONArray("seen");
+                    if (array != null) {
+                        for (int i = 0; i < array.length(); i++) {
+                            seenKeys.add(array.getString(i));
+                        }
+                    }
+                } catch (JSONException | IllegalArgumentException exception) {
+                    NewXLogger.printException(
+                            () -> "Failed to read NewX seen feature switches",
+                            exception
+                    );
+                }
+            }
+            seenLoaded = true;
+        }
+    }
+
+    private void persistSeen() {
+        synchronized (seenLock) {
+            try {
+                JSONObject root = new JSONObject();
+                root.put("version", SCHEMA_VERSION);
+                root.put("baseline", baselineEstablished);
+                JSONArray array = new JSONArray();
+                seenKeys.stream().sorted().forEach(array::put);
+                root.put("seen", array);
+                seenPersistence.write(root.toString());
+            } catch (JSONException exception) {
+                NewXLogger.printException(
+                        () -> "Failed to persist NewX seen feature switches",
+                        exception
+                );
+            }
+        }
+    }
+
     private static final class Holder {
         private static final FeatureSwitchStore INSTANCE =
-                new FeatureSwitchStore(new SettingPersistence());
+                new FeatureSwitchStore(
+                        new SettingPersistence(PERSISTENCE_KEY),
+                        new SettingPersistence(SEEN_PERSISTENCE_KEY)
+                );
     }
 
     private static final class SettingPersistence implements Persistence {
-        private final StringSetting setting = new StringSetting(PERSISTENCE_KEY, "");
+        private final StringSetting setting;
+
+        SettingPersistence(String key) {
+            this.setting = new StringSetting(key, "");
+        }
 
         @Override
         public String read() {

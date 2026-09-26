@@ -140,6 +140,93 @@ public final class FeatureSwitchStoreTest {
                 "enabled", FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class));
     }
 
+    @Test
+    public void initialVisitEstablishesBaselineAndDoesNotMarkEntriesAsNew() {
+        MemoryPersistence overrides = new MemoryPersistence();
+        MemoryPersistence seen = new MemoryPersistence();
+        FeatureSwitchStore store = new FeatureSwitchStore(overrides, seen);
+
+        store.resolve("flag_one", FeatureSwitchStore.ValueType.BOOLEAN, true, Boolean.class);
+        store.resolve("flag_two", FeatureSwitchStore.ValueType.INT, 10, Integer.class);
+
+        assertFalse(store.isBaselineEstablished());
+        store.establishBaseline();
+        assertTrue(store.isBaselineEstablished());
+
+        List<FeatureSwitchStore.Entry> entries = store.snapshot("");
+        assertEquals(2, entries.size());
+        assertFalse(entries.get(0).isNew());
+        assertFalse(entries.get(1).isNew());
+    }
+
+    @Test
+    public void subsequentFlagObservationsAreMarkedAsNewUntilMarkedAsSeen() {
+        MemoryPersistence overrides = new MemoryPersistence();
+        MemoryPersistence seen = new MemoryPersistence();
+        FeatureSwitchStore store = new FeatureSwitchStore(overrides, seen);
+
+        store.resolve("flag_old", FeatureSwitchStore.ValueType.BOOLEAN, true, Boolean.class);
+        store.establishBaseline();
+
+        store.resolve("flag_new", FeatureSwitchStore.ValueType.STRING, "val", String.class);
+
+        assertTrue(store.isKeyNew("flag_new"));
+        assertFalse(store.isKeyNew("flag_old"));
+
+        List<FeatureSwitchStore.Entry> entries = store.snapshot("flag_new");
+        assertEquals(1, entries.size());
+        assertTrue(entries.get(0).isNew());
+
+        store.markAllAsSeen();
+
+        assertFalse(store.isKeyNew("flag_new"));
+        assertFalse(store.snapshot("flag_new").get(0).isNew());
+    }
+
+    @Test
+    public void seenKeysPersistAcrossStoreInstances() {
+        MemoryPersistence overrides = new MemoryPersistence();
+        MemoryPersistence seen = new MemoryPersistence();
+        FeatureSwitchStore first = new FeatureSwitchStore(overrides, seen);
+
+        first.resolve("flag_one", FeatureSwitchStore.ValueType.BOOLEAN, true, Boolean.class);
+        first.establishBaseline();
+        first.resolve("flag_two", FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class);
+        assertTrue(first.isKeyNew("flag_two"));
+        first.markAllAsSeen();
+
+        FeatureSwitchStore restored = new FeatureSwitchStore(overrides, seen);
+        assertTrue(restored.isBaselineEstablished());
+        assertFalse(restored.isKeyNew("flag_one"));
+        assertFalse(restored.isKeyNew("flag_two"));
+
+        restored.resolve("flag_three", FeatureSwitchStore.ValueType.INT, 42, Integer.class);
+        assertTrue(restored.isKeyNew("flag_three"));
+    }
+
+    @Test
+    public void newEntriesSortToTheTopWithinTheirSection() {
+        MemoryPersistence overrides = new MemoryPersistence();
+        MemoryPersistence seen = new MemoryPersistence();
+        FeatureSwitchStore store = new FeatureSwitchStore(overrides, seen);
+
+        store.resolve("alpha_old", FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class);
+        store.resolve("beta_old", FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class);
+        store.establishBaseline();
+
+        // Add a new flag starting with 'z' (alphabetically last)
+        store.resolve("zeta_new", FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class);
+
+        List<FeatureSwitchStore.Entry> entries = store.snapshot("");
+        assertEquals(3, entries.size());
+        assertEquals("zeta_new", entries.get(0).getKey());
+        assertTrue(entries.get(0).isNew());
+        assertEquals("alpha_old", entries.get(1).getKey());
+        assertFalse(entries.get(1).isNew());
+        assertEquals("beta_old", entries.get(2).getKey());
+        assertFalse(entries.get(2).isNew());
+    }
+
     private static final class MemoryPersistence implements FeatureSwitchStore.Persistence {
         private String value = "";
 
