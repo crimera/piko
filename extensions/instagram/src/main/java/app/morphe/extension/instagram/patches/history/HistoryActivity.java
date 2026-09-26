@@ -27,6 +27,7 @@ import android.widget.TextView;
 import java.util.Date;
 import java.util.List;
 
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.db.PikoHistoryDb;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
@@ -174,14 +175,35 @@ public class HistoryActivity extends Activity {
         return str("piko_history_type_post");
     }
 
-    private void openPermalink(String permalink) {
-        if (permalink == null || permalink.isEmpty()) return;
+    private void openEntry(PikoHistoryDb.Entry entry) {
+        if (openPermalink(entry.permalink)) return;
+        String webLink = webStoryLink(entry);
+        if (webLink != null) openPermalink(webLink);
+    }
+
+    /**
+     * Stories are stored as an internal {@code instagram://stories} link. If Instagram stops
+     * handling it, fall back to the web link, which at least opens the owner's profile.
+     */
+    private static String webStoryLink(PikoHistoryDb.Entry entry) {
+        if (entry.permalink == null || !entry.permalink.startsWith("instagram://stories")) return null;
+        String mediaId = Uri.parse(entry.permalink).getQueryParameter("media_id");
+        if (mediaId == null || entry.ownerUsername == null || entry.ownerUsername.isEmpty()) return null;
+        return String.format(Constants.INSTAGRAM_SHARE_LINK, "stories", entry.ownerUsername) + mediaId;
+    }
+
+    /** Returns false if Instagram has no screen for this link. */
+    private boolean openPermalink(String permalink) {
+        if (permalink == null || permalink.isEmpty()) return false;
         try {
-            Uri uri = Uri.parse(permalink);
-            startActivity(new Intent(Intent.ACTION_VIEW, uri)
-                    .setPackage(getPackageName()));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(permalink))
+                    .setPackage(getPackageName());
+            if (intent.resolveActivity(getPackageManager()) == null) return false;
+            startActivity(intent);
+            return true;
         } catch (Exception e) {
             Logger.printException(() -> "Failed to open " + permalink, e);
+            return false;
         }
     }
 
@@ -257,7 +279,7 @@ public class HistoryActivity extends Activity {
         card.addView(thumb);
         card.addView(textBlock);
 
-        card.setOnClickListener(v -> openPermalink(entry.permalink));
+        card.setOnClickListener(v -> openEntry(entry));
 
         boolean placeLeft = leftHeightEstimate <= rightHeightEstimate;
         LinearLayout targetColumn = placeLeft ? leftColumn : rightColumn;
