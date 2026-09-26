@@ -70,6 +70,17 @@ public class HookFlags {
         }
     }
 
+    private static void hdrFlags() {
+        // ig_android_uhdr_always_on::is_enabled - forces Ultra HDR photos to always render at
+        // full boosted brightness instead of respecting the device's own HDR/ambient-light
+        // handling. Reported in #1817 as causing eye strain, especially in dark rooms.
+        BOOL_FLAGS.put("109125::0", false);
+        // ig_android_clips_sdr_super_white_on_hdr_content::is_enabled - boosts SDR Reels/video
+        // brightness above the normal 1.0 nits ceiling ("super white") on HDR-capable screens.
+        // Same complaint as above, but for video instead of photos.
+        BOOL_FLAGS.put("68885::0", false);
+    }
+
     private static void employeeOptionsFlags() {
         if(Pref.enableEmployeeOptions()){
             BOOL_FLAGS.put("28538::0", true); //ig_android_employee_options::is_enabled
