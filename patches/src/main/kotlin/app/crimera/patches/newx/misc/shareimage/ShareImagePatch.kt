@@ -9,8 +9,10 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -159,6 +161,139 @@ val newXShareImagePatch =
                 moveResult(callbackRegister, FUNCTION1)
                 invokeStatic(onPositionedReference, modifierResult.registerA, callbackRegister)
                 moveResult(modifierResult.registerA, MODIFIER)
+            }
+            // Detail rows reuse the same timeline-post state but render through wider composables
+            // (thread view in 12.27, post view in 12.29, both with follow affordances). Timeline-only
+            // tracking leaves their bounds stale, which captures the wrong post at the stale
+            // position. Hooking each detail renderer keeps the same postId key fresh for all
+            // screens; the runtime keeps the largest rect per composition burst (outer over inner)
+            // and the most recent across screens.
+            val detailThreadRenderer =
+                requireAtMostOne(
+                    "NewX post-detail thread renderer",
+                    Fingerprint(
+                        returnType = "V",
+                        parameters =
+                            listOf(
+                                timelinePostStateType,
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "Z",
+                                "Z",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "Z",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                MODIFIER,
+                                COMPOSER,
+                                "I",
+                            ),
+                        filters =
+                            listOf(
+                                methodCall(
+                                    opcode = Opcode.INVOKE_STATIC,
+                                    parameters = listOf(COMPOSER, MODIFIER),
+                                    returnType = MODIFIER,
+                                ),
+                                opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+                            ),
+                    ).scopedMatchAllOrNull().orEmpty().filter { match ->
+                        match.originalMethod.toString() != renderedPostMethod.originalMethod.toString()
+                    },
+                )
+            val detailPostRenderer =
+                requireAtMostOne(
+                    "NewX post-detail post renderer",
+                    Fingerprint(
+                        returnType = "V",
+                        parameters =
+                            listOf(
+                                timelinePostStateType,
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "Z",
+                                "Z",
+                                "Z",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "Z",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                MODIFIER,
+                                COMPOSER,
+                                "I",
+                            ),
+                        filters =
+                            listOf(
+                                methodCall(
+                                    opcode = Opcode.INVOKE_STATIC,
+                                    parameters = listOf(COMPOSER, MODIFIER),
+                                    returnType = MODIFIER,
+                                ),
+                                opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+                            ),
+                    ).scopedMatchAllOrNull().orEmpty().filter { match ->
+                        match.originalMethod.toString() != renderedPostMethod.originalMethod.toString()
+                    },
+                )
+            listOfNotNull(detailThreadRenderer, detailPostRenderer).forEach { detailRenderer ->
+                val detailSites = detailRenderer.instructionMatches
+                if (detailSites.isEmpty() || detailSites.size % 2 != 0) {
+                    throw PatchException(
+                        "NewX post-detail renderer has ${detailSites.size} composer modifier matches, " +
+                            "expected call/result pairs"
+                    )
+                }
+                detailSites.chunked(2).forEach { (callMatch, resultMatch) ->
+                    val callReference =
+                        callMatch.instruction.getReference<MethodReference>()
+                            ?: throw PatchException("NewX post-detail composer modifier has no method reference")
+                    if (callReference.parameterTypes.map { it.toString() } != listOf(COMPOSER, MODIFIER) ||
+                        callReference.returnType != MODIFIER
+                    ) {
+                        throw PatchException("NewX post-detail composer modifier signature changed")
+                    }
+                    val modifierResult =
+                        resultMatch.instruction as? OneRegisterInstruction
+                            ?: throw PatchException("NewX post-detail composer modifier has no result register")
+                    if (modifierResult.registerA !in 0..15) {
+                        throw PatchException("NewX post-detail capture register exceeds 4-bit encoding")
+                    }
+                    detailRenderer.method.insertHook(
+                        index = resultMatch.index + 1,
+                        relocateBranchTargets = false,
+                    ) {
+                        val identifierRegister = scratchRegister()
+                        move(identifierRegister, detailRenderer.method.p0Register, OBJECT_DESCRIPTOR)
+                        iget(identifierRegister, identifierRegister, postIdentifierField)
+                        invokeStatic(methodReference(POSITION_CALLBACK_DESCRIPTOR), identifierRegister)
+                        moveResult(identifierRegister, FUNCTION1)
+                        invokeStatic(onPositionedReference, modifierResult.registerA, identifierRegister)
+                        moveResult(modifierResult.registerA, MODIFIER)
+                    }
+                }
             }
         }
     }

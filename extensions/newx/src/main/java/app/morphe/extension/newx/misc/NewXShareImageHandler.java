@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -51,13 +52,24 @@ public final class NewXShareImageHandler {
     private static final int MAX_RENDERED_BOUNDS = 128;
     private static volatile Handler mainHandler;
     private static final Object RENDERED_BOUNDS_LOCK = new Object();
-    private static final Map<String, Rect> RENDERED_BOUNDS =
-            new LinkedHashMap<String, Rect>(MAX_RENDERED_BOUNDS, 0.75f, true) {
+    private static final long BURST_WINDOW_MS = 800L;
+    private static final Map<String, TimedBounds> RENDERED_BOUNDS =
+            new LinkedHashMap<String, TimedBounds>(MAX_RENDERED_BOUNDS, 0.75f, true) {
                 @Override
-                protected boolean removeEldestEntry(Map.Entry<String, Rect> eldest) {
+                protected boolean removeEldestEntry(Map.Entry<String, TimedBounds> eldest) {
                     return size() > MAX_RENDERED_BOUNDS;
                 }
             };
+
+    private static final class TimedBounds {
+        private final Rect bounds;
+        private final long timeMs;
+
+        private TimedBounds(Rect bounds, long timeMs) {
+            this.bounds = bounds;
+            this.timeMs = timeMs;
+        }
+    }
     private static final Map<Class<?>, BoundsReader> BOUNDS_READERS = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Field[]> RECTANGLE_FIELDS = new ConcurrentHashMap<>();
     private static final Function1<Object, Object> NO_POSITION_CALLBACK = coordinates -> null;
@@ -194,11 +206,15 @@ public final class NewXShareImageHandler {
                         " parentId=" + parent.parentId + " path=" + parent.path
         );
         Rect parentBounds = renderedBounds(parent.parentId);
+        long selectedAgeMs = renderedBoundsAgeMs(postId);
+        long parentAgeMs = renderedBoundsAgeMs(parent.parentId);
         NewXLogger.printInfo(
                 () -> DEBUG_TAG + ": map size=" + renderedBoundsSize() +
                         " selectedBounds=" + boundsDescription(selectedBounds) +
+                        " selectedAgeMs=" + selectedAgeMs +
                 " parentKey=" + parent.parentId +
-                " parentBounds=" + boundsDescription(parentBounds)
+                " parentBounds=" + boundsDescription(parentBounds) +
+                " parentAgeMs=" + parentAgeMs
         );
         int adjacencySlop = adjacencySlopPx(decorView);
         int overlap = horizontalOverlap(parentBounds, selectedBounds);
@@ -292,8 +308,17 @@ public final class NewXShareImageHandler {
         String normalizedPostId = normalizePostId(postId);
         if (normalizedPostId == null) return null;
         synchronized (RENDERED_BOUNDS_LOCK) {
-            Rect bounds = RENDERED_BOUNDS.get(normalizedPostId);
-            return bounds == null ? null : new Rect(bounds);
+            TimedBounds timed = RENDERED_BOUNDS.get(normalizedPostId);
+            return timed == null ? null : new Rect(timed.bounds);
+        }
+    }
+
+    private static long renderedBoundsAgeMs(String postId) {
+        String normalizedPostId = normalizePostId(postId);
+        if (normalizedPostId == null) return -1L;
+        synchronized (RENDERED_BOUNDS_LOCK) {
+            TimedBounds timed = RENDERED_BOUNDS.get(normalizedPostId);
+            return timed == null ? -1L : SystemClock.uptimeMillis() - timed.timeMs;
         }
     }
 
@@ -507,10 +532,22 @@ public final class NewXShareImageHandler {
     private static void registerRenderedBounds(String postId, Rect bounds) {
         String normalizedPostId = normalizePostId(postId);
         if (normalizedPostId == null || bounds == null) return;
+        if (bounds.width() <= 0 || bounds.height() <= 0) return;
+        long nowMs = SystemClock.uptimeMillis();
         synchronized (RENDERED_BOUNDS_LOCK) {
-            Rect previous = RENDERED_BOUNDS.get(normalizedPostId);
-            if (bounds.equals(previous)) return;
-            RENDERED_BOUNDS.put(normalizedPostId, new Rect(bounds));
+            TimedBounds previous = RENDERED_BOUNDS.get(normalizedPostId);
+            if (previous != null && bounds.equals(previous.bounds)) return;
+            if (previous == null || nowMs - previous.timeMs > BURST_WINDOW_MS) {
+                RENDERED_BOUNDS.put(normalizedPostId, new TimedBounds(new Rect(bounds), nowMs));
+                return;
+            }
+            long previousArea = (long) previous.bounds.width() * previous.bounds.height();
+            long nextArea = (long) bounds.width() * bounds.height();
+            if (nextArea > previousArea) {
+                RENDERED_BOUNDS.put(normalizedPostId, new TimedBounds(new Rect(bounds), nowMs));
+            } else if (nextArea == previousArea && !bounds.equals(previous.bounds)) {
+                RENDERED_BOUNDS.put(normalizedPostId, new TimedBounds(new Rect(bounds), nowMs));
+            }
         }
     }
 
