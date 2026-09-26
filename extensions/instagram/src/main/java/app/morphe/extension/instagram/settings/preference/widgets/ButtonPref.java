@@ -26,6 +26,7 @@ import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
+import app.morphe.extension.instagram.patches.focusLock.FocusLockDialogs;
 import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
 
 public class ButtonPref extends Preference {
@@ -69,6 +70,9 @@ public class ButtonPref extends Preference {
                         
                     } else if (key.equals("piko_reset_pref")) {
                         InstaUtils.showResetSettingsDialog(context);
+
+                    } else if (key.equals("piko_focus_lock_action")) {
+                        FocusLockDialogs.onActionPressed(context, ButtonPref.this);
 
                     } else if (key.equals("piko_delete_analytics_cache")) {
                         Block.deleteAnalyticsCacheFolder();
@@ -145,6 +149,7 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_pref")
                 || key.equals("piko_import_pref")
                 || key.equals("piko_reset_pref")
+                || key.equals("piko_focus_lock_action")
                 || key.equals("piko_download_set_path")
                 || key.equals("piko_delete_analytics_cache")
                 || key.equals("piko_export_experiment_list")

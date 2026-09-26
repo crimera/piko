@@ -26,6 +26,7 @@ import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.patches.Links;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -337,6 +338,10 @@ public class ScreenBuilder {
 
         // PreferenceCategory category= addCategory(str("piko_category_distraction_free"));
 
+        if (SettingsStatus.focusLock) {
+            buildFocusLockPreferences();
+        }
+
         if (SettingsStatus.disableStories) {
             addPreference(
                     helper.switchPreference(
@@ -375,10 +380,12 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.disableExplore) {
             addPreference(
-                    helper.switchPreference(
+                    helper.forcedSwitchPreference(
                             str("piko_disable_explore"),
                             "",
-                            Settings.DISABLE_EXPLORE
+                            Settings.DISABLE_EXPLORE,
+                            FocusLock.blocksExplore(),
+                            str("piko_focus_lock_enforced")
                     )
             );
         }
@@ -402,11 +409,13 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.disableReelsScrolling) {
             addPreference(
-                    helper.switchPreference(
+                    helper.forcedSwitchPreference(
                             str("piko_disable_reels_scrolling"),
                             str("piko_disable_reels_scrolling_desc"),
-                            Settings.DISABLE_REELS_SCROLLING
-                )
+                            Settings.DISABLE_REELS_SCROLLING,
+                            FocusLock.blocksReels(),
+                            str("piko_focus_lock_enforced")
+                    )
             );
         }
         if (SettingsStatus.disableSwipeToCreate) {
@@ -470,6 +479,46 @@ public class ScreenBuilder {
                     )
             );
         }
+    }
+
+    /**
+     * Focus Lock. The switches that the lock enforces are greyed out while it is active so the
+     * commitment cannot be undone from the settings screen.
+     */
+    private void buildFocusLockPreferences() {
+        boolean locked = FocusLock.isLocked();
+
+        addPreference(
+                helper.buttonPreference(
+                        FocusLock.buttonTitle(),
+                        FocusLock.statusSummary(),
+                        "piko_focus_lock_action"
+                )
+        );
+
+        Preference blockReels = helper.switchPreference(
+                str("piko_focus_lock_block_reels"),
+                str("piko_focus_lock_block_reels_desc"),
+                Settings.FOCUS_LOCK_BLOCK_REELS
+        );
+        Preference blockExplore = helper.switchPreference(
+                str("piko_focus_lock_block_explore"),
+                str("piko_focus_lock_block_explore_desc"),
+                Settings.FOCUS_LOCK_BLOCK_EXPLORE
+        );
+        Preference duration = helper.listPreference(
+                str("piko_focus_lock_duration"),
+                str("piko_focus_lock_duration_desc"),
+                Settings.FOCUS_LOCK_DURATION_DAYS
+        );
+        if (locked) {
+            ((SwitchPref) blockReels).setSwitchInteractionEnabled(false);
+            ((SwitchPref) blockExplore).setSwitchInteractionEnabled(false);
+            duration.setEnabled(false);
+        }
+        addPreference(blockReels);
+        addPreference(blockExplore);
+        addPreference(duration);
     }
 
     public void buildMiscSection() {

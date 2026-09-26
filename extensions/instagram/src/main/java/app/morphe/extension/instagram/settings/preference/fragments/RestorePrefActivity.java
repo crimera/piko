@@ -25,6 +25,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 
 public class RestorePrefActivity extends AppCompatActivity {
 
@@ -47,6 +48,12 @@ public class RestorePrefActivity extends AppCompatActivity {
             } else if (args.containsKey("piko_import_id_mapping")) {
                 destinationFile = new File(context.getFilesDir()+ "/mobileconfig","id_name_mapping.json");
             } else if (args.containsKey("piko_import_pref")) {
+                // Importing an older settings file would drop an active Focus Lock.
+                if (FocusLock.isLocked()) {
+                    toast(str("piko_focus_lock_blocked_action"));
+                    finish();
+                    return;
+                }
                 destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Constants.PIKO_SETTINGS+".xml");
             }
             if (destinationFile != null) {

@@ -59,6 +59,13 @@ public class Settings {
     public static final BooleanSetting HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = new BooleanSetting("hide_group_creation_button_on_sharesheet", true);
     public static final BooleanSetting DISABLE_REELS_SCROLLING = new BooleanSetting("disable_reels_scrolling", false);
     public static final BooleanSetting DISABLE_SWIPE_TO_CREATE = new BooleanSetting("disable_swipe_to_create", false);
+    public static final BooleanSetting FOCUS_LOCK_BLOCK_REELS = new BooleanSetting("focus_lock_block_reels", true);
+    public static final BooleanSetting FOCUS_LOCK_BLOCK_EXPLORE = new BooleanSetting("focus_lock_block_explore", false);
+    public static final StringSetting FOCUS_LOCK_DURATION_DAYS = new StringSetting("focus_lock_duration_days", "7");
+    // Epoch millis. "0" means not locked.
+    public static final StringSetting FOCUS_LOCK_UNTIL = new StringSetting("focus_lock_until", "0");
+    // Epoch millis of the pending unlock request. "0" means none.
+    public static final StringSetting FOCUS_LOCK_UNLOCK_REQUESTED_AT = new StringSetting("focus_lock_unlock_requested_at", "0");
     public static final BooleanSetting REMOVE_EMPTY_BOTTOM_SPACE = new BooleanSetting("remove_empty_bottom_space", true);
     public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", false);
     public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", false);
