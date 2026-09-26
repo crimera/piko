@@ -53,6 +53,10 @@ public class FeatureSwitchPatch {
         addFlag("explore_relaunch_enable_immersive_player_across_twitter", Pref.hideImmersivePlayer());
     }
 
+    private static void restoreLegacyFollowerLists() {
+        addFlag("android_follower_timelines_stack_enabled", false);
+    }
+
     public static void getFeatureFlagSearchItems() {
         FLAGS_SEARCH = Utils.getStringPref(Settings.MISC_FEATURE_FLAGS_SEARCH);
     }

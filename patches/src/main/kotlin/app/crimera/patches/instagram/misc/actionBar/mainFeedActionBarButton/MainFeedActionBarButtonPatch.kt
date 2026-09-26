@@ -12,16 +12,54 @@ import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 object BindMainFeedActionBarFingerprint : Fingerprint(
     strings = listOf("BindMainFeedActionBar"),
     returnType = "Ljava/lang/Object;",
 )
+
+private object HomeActionModelFingerprint : Fingerprint(
+    name = "<init>",
+    strings = listOf("share", "news", "quick_snap", "manage_feeds"),
+)
+
+val hideHomeActionButtonsPatch = bytecodePatch {
+    execute {
+        val method = HomeActionModelFingerprint.matchAll(0..Int.MAX_VALUE)
+            .singleOrNull()?.method
+            ?: throw PatchException("Expected one home action model builder")
+        val callIndex = method.instructions.withIndex().filter { (_, instruction) ->
+            val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+            reference?.parameterTypes?.map(CharSequence::toString) ==
+                listOf("Lcom/instagram/common/session/UserSession;", "I") &&
+                reference.returnType == "Ljava/lang/String;"
+        }.singleOrNull()?.index
+            ?: throw PatchException("Expected one home action name lookup")
+        val result = method.getInstruction(callIndex + 1)
+        val nullCheck = method.getInstruction(callIndex + 2)
+        if (result.opcode != Opcode.MOVE_RESULT_OBJECT ||
+            result.registersUsed.size != 1 || nullCheck.opcode != Opcode.IF_EQZ ||
+            nullCheck.registersUsed.singleOrNull() != result.registersUsed.single()
+        ) throw PatchException("Expected home action name null guard")
+        val register = result.registersUsed.single()
+        method.addInstructions(
+            callIndex + 2,
+            """
+            invoke-static/range {v$register .. v$register}, $ACTIONBAR_DESCRIPTOR->filterHomeAction(Ljava/lang/String;)Ljava/lang/String;
+            move-result-object v$register
+            """.trimIndent(),
+        )
+    }
+}
 
 val mainFeedActionBarButtonPatch =
     bytecodePatch(

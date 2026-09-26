@@ -63,6 +63,9 @@ public class ListPref extends ListPreference {
             } else if (key == Settings.CHANGE_LIKE_ANIMATION.key) {
                 entries = ResourceUtils.getStringArray("piko_array_change_like_animation");
                 entriesValues = ResourceUtils.getStringArray("piko_array_change_like_animation_val");
+            } else if (key == Settings.FOCUS_LOCK_DURATION_DAYS.key) {
+                entries = ResourceUtils.getStringArray("piko_array_focus_lock_duration");
+                entriesValues = ResourceUtils.getStringArray("piko_array_focus_lock_duration_val");
             }
         } else {
             entries = ResourceUtils.getStringArray("piko_array_recmd_flag_states");

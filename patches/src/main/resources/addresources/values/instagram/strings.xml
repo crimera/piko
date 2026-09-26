@@ -40,6 +40,7 @@
     <string name="piko_disable_typing_status">Disable typing status</string>
     <string name="piko_disable_screenshot_detection">Disable screenshot detection</string>
     <string name="piko_view_dm_anonymously">View direct messages anonymously</string>
+    <string name="piko_view_dm_anonymously_desc">When enabled, others can\'t see when you\'ve read their messages. When both this setting and Turn on all ghost modes are disabled, Instagram\'s Show read receipts setting is used</string>
     <string name="piko_turn_on_all_ghost_modes">Turn on all ghost modes</string>
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
@@ -54,6 +55,31 @@
     <string name="piko_disable_comments">Disable comments</string>
     <string name="piko_limit_following_feed">Limit feed to following profiles</string>
     <string name="piko_limit_following_feed_desc">Filters the home feed to display only content from profiles you follow.</string>
+    <string name="piko_focus_lock">Focus Lock</string>
+    <string name="piko_focus_lock_block_reels">Focus Lock: block Reels</string>
+    <string name="piko_focus_lock_block_reels_desc">While locked, removes the Reels tab and disables Reels scrolling. Reels shared with you still open.</string>
+    <string name="piko_focus_lock_block_explore">Focus Lock: block Explore</string>
+    <string name="piko_focus_lock_block_explore_desc">While locked, disables the Explore page.</string>
+    <string name="piko_focus_lock_duration">Focus Lock duration</string>
+    <string name="piko_focus_lock_duration_desc">How long the lock stays active once enabled.</string>
+    <string name="piko_focus_lock_enforced">Forced on by Focus Lock.</string>
+    <string name="piko_focus_lock_button_lock">Lock now</string>
+    <string name="piko_focus_lock_button_request_unlock">Request unlock</string>
+    <string name="piko_focus_lock_button_cancel_unlock">Cancel unlock request</string>
+    <string name="piko_focus_lock_button_unlock">Unlock</string>
+    <string name="piko_focus_lock_status_unlocked">Not locked. Choose what to block and a duration, then lock. The selected switches cannot be turned off until the lock expires.</string>
+    <string name="piko_focus_lock_status_locked">Locked until %1$s. Unlocking early requires a 24 hour cooling-off period.</string>
+    <string name="piko_focus_lock_status_unlock_pending">Unlock available at %1$s (lock expires %2$s). Tap to cancel the request.</string>
+    <string name="piko_focus_lock_status_unlock_ready">Cooling-off period is over. Tap to unlock.</string>
+    <string name="piko_focus_lock_nothing_selected">Select at least one thing to block first.</string>
+    <string name="piko_focus_lock_confirm_lock">Enable Focus Lock?</string>
+    <string name="piko_focus_lock_confirm_lock_desc">The selected protections will be forced on for %1$s day(s). To unlock early you must request an unlock and wait %2$d hours. Reset and import of settings are disabled while locked. The app will restart.</string>
+    <string name="piko_focus_lock_confirm_request_unlock">Request unlock?</string>
+    <string name="piko_focus_lock_confirm_request_unlock_desc">The lock stays active for another %1$d hours. After that, come back here and confirm the unlock.</string>
+    <string name="piko_focus_lock_confirm_unlock">Unlock now?</string>
+    <string name="piko_focus_lock_confirm_unlock_desc">This ends Focus Lock. The app will restart.</string>
+    <string name="piko_focus_lock_locked_toast">Focus Lock enabled.</string>
+    <string name="piko_focus_lock_blocked_action">Not available while Focus Lock is active.</string>
     <string name="piko_disable_reels_scrolling">Disable Reels scrolling</string>
     <string name="piko_disable_reels_scrolling_desc">Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the \'Tip\' animation may appear but will stop on its own after a few seconds.</string>
     <string name="piko_disable_swipe_to_create">Disable swipe to create</string>
@@ -63,6 +89,8 @@
     <string name="piko_hide_notes_tray">Hide notes tray</string>
     <string name="piko_hide_notes_tray_desc">Hides notes tray in DM section</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Hide group creation button on sharesheet</string>
+    <string name="piko_hide_reels_follow_button">Hide Reels follow button</string>
+    <string name="piko_hide_reels_follow_button_desc">Removes the follow button from the Reels author row</string>
     <string name="piko_disable_double_tap_like_post">Disable double tap like on post</string>
     <string name="piko_disable_double_tap_like_reel">Disable double tap like on reel</string>
     <string name="piko_disable_double_tap_like_comment">Disable double tap like on comment</string>
@@ -75,9 +103,8 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytic cache</string>
-    <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers.</string>
-    <string name="piko_disable_discover_people">Disable discover people</string>
-    <string name="piko_disable_discover_people_desc">Disables discover people section on user profile</string>
+    <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers</string>
+    <string name="piko_disable_discover_people">Hide suggested accounts</string>
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
     <string name="piko_follow_back_indicator_desc">Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click</string>
     <string name="piko_fbi_color_indicator">Enable colored friendship status indicator</string>
@@ -94,7 +121,6 @@
     <string name="piko_loop_story">Loop story</string>
     <string name="piko_loop_story_desc">Replay the current story when it ends</string>
     <string name="piko_disable_video_autoplay">Disable video autoplay</string>
-    <string name="piko_stories_audio_autoplay">Stories audio autoplay</string>
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
     <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
@@ -129,15 +155,30 @@
     <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
+    <string name="piko_category_downloads">Downloads</string>
     <string name="piko_enable_download">Enable download</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
     <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
     <string name="piko_download_username_folder">Split media by username</string>
     <string name="piko_download_username_folder_desc">Creates subfolders based on username</string>
+    <string name="piko_embed_download_metadata">Embed video metadata</string>
+    <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
+    <string name="piko_download_file_name_template">Filename format</string>
+    <string name="piko_download_file_name_template_invalid">Invalid filename</string>
+    <string name="piko_download_file_name_insert_token">Insert %1$s</string>
+    <string name="piko_download_file_name_variables">Variables</string>
+    <string name="piko_download_file_name_token_username">Username</string>
+    <string name="piko_download_file_name_token_media_id">Media ID</string>
+    <string name="piko_download_file_name_token_shortcode">Shortcode</string>
+    <string name="piko_download_file_name_token_upload_date">Date</string>
+    <string name="piko_download_file_name_token_upload_time">Time</string>
+    <string name="piko_download_file_name_token_type">Type</string>
+    <string name="piko_download_file_name_token_carousel_index">Carousel</string>
+    <string name="piko_download_file_name_token_variant_suffix">Variant</string>
     <string name="piko_download_current_media">Download current media</string>
     <string name="piko_download_as_image">Download as image</string>
     <string name="piko_video_variants">Video variants</string>
@@ -149,7 +190,6 @@
     <string name="piko_download_all">Download all</string>
     <string name="piko_downloading_media">Downloading: </string>
     <string name="piko_downloaded_media">Downloaded: </string>
-    <string name="piko_media_exists">Media exists</string>
     <string name="piko_download_failed_media">Download failed : </string>
     <string name="piko_download_set_path">Choose download folder</string>
     <string name="piko_download_set_path_success">Download directory updated!</string>
@@ -180,11 +220,25 @@
     <string name="piko_hide_navigation_direct">Hide Direct button</string>
     <string name="piko_hide_navigation_search">Hide Search button</string>
     <string name="piko_hide_navigation_create">Hide Create button</string>
+    <string name="piko_category_navigation_tabs">Navigation bar</string>
+    <string name="piko_navigation_tabs_title">Show and reorder tabs</string>
+    <string name="piko_navigation_tabs_summary">Choose visible bottom tabs and drag to reorder them</string>
+    <string name="piko_navigation_startup_tab">App startup tab</string>
+    <string name="piko_navigation_startup_tab_summary">Choose which tab opens when the app starts</string>
+    <string name="piko_navigation_tab_home">Home</string>
+    <string name="piko_navigation_tab_reels">Reels</string>
+    <string name="piko_navigation_tab_messages">Messages</string>
+    <string name="piko_navigation_tab_search">Search</string>
+    <string name="piko_navigation_tab_profile">Profile</string>
+    <string name="piko_navigation_tab_notifications">Notifications</string>
+    <string name="piko_navigation_tab_create">Create</string>
+    <string name="piko_navigation_settings_lockout_title">No Piko settings button</string>
+    <string name="piko_navigation_settings_lockout_message">This setup removes every Piko settings entry from the visible tabs. You can still open Piko settings by long-pressing the app icon and selecting Piko settings.</string>
 
     <!-- Information Section -->
     <string name="piko_category_about">About</string>
-    <string name="piko_export_pref">Export Piko preferences</string>
-    <string name="piko_import_pref">Import Piko preferences</string>
+    <string name="piko_export_pref">Export Piko settings</string>
+    <string name="piko_import_pref">Import Piko settings</string>
     <string name="piko_reset_pref">Reset Piko settings</string>
     <string name="piko_reset_pref_confirm">Reset Piko settings?</string>
     <string name="piko_reset_pref_success">Piko settings reset</string>
@@ -203,7 +257,9 @@
     <string name="piko_import_success">Imported successfully</string>
     <string name="piko_import_fail">Import failed</string>
     <string name="piko_restart_app">The app needs to be restarted for the changes to reflect</string>
+    <string name="piko_close">Close</string>
     <string name="piko_ok">OK</string>
+    <string name="piko_reset">Reset</string>
     <string name="piko_cancel">Cancel</string>
     <string name="piko_deleted">Deleted</string>
     <string name="piko_debug">Piko debug</string>
@@ -239,7 +295,7 @@
     <string name="piko_tap_here">Tap here !!</string>
 
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">Action bar customisation</string>
+    <string name="piko_category_action_bar">Action bar</string>
     <string name="piko_action_bar_main_feed">Main feed action bar icons</string>
     <string name="piko_action_bar_user_profile">User profile action bar icons</string>
     <string name="piko_action_bar_chat">Chat action bar icons</string>
@@ -249,6 +305,8 @@
     <string name="piko_action_bar_button_settings_icon">Settings icon</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
     <string name="piko_action_bar_button_profile_info_icon">Profile info icon</string>
+    <string name="piko_action_bar_button_create_icon">Create icon</string>
+    <string name="piko_action_bar_button_notifications_icon">Notifications icon</string>
 
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
@@ -263,7 +321,7 @@
 
 
     <!-- Story filters -->
-    <string name="piko_category_filter_content">Filter content</string>
+    <string name="piko_category_filter_content">Content filters</string>
 
     <string name="piko_filter_story">Filter Story</string>
 
@@ -332,13 +390,11 @@
     <string name="piko_save_deleted_messages">Save deleted messages</string>
     <string name="piko_save_deleted_messages_desc">Captures incoming DMs locally as they arrive from the server. Marks messages as deleted when unsent, so you can view them even after the sender deletes them.</string>
     <string name="piko_view_deleted_messages">View deleted messages</string>
-    <string name="piko_deleted_in_chat">Deleted in this chat</string>
     <string name="piko_all_deleted_messages">All deleted messages</string>
-    <string name="piko_clear">Clear</string>
-    <string name="piko_clear_chat_confirm">Clear deleted messages for this chat?</string>
-    <string name="piko_clear_all_confirm">Clear ALL saved deleted messages?</string>
     <string name="piko_no_deleted_messages">No deleted messages captured yet.\nEnable the feature and messages will be saved as they arrive.</string>
-    <string name="piko_delete_saved_confirm">Delete this saved message?</string>
+    <string name="piko_all">All</string>
+    <string name="piko_selected_count">%d selected</string>
+    <string name="piko_delete_selected_confirm">Delete %d selected messages?</string>
     <string name="piko_delete">Delete</string>
     <string name="piko_unknown">Unknown</string>
     <string name="piko_tap_to_view">tap to view</string>
@@ -363,4 +419,7 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">activity</string>
+    <string name="piko_mark_story_seen">Mark as seen</string>
+    <string name="piko_story_seen_pending">Marking as seen</string>
+    <string name="piko_story_seen_sent">Marked as seen</string>
 </resources>
