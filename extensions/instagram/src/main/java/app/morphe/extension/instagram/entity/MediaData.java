@@ -84,8 +84,6 @@ public class MediaData extends Entity {
     public PostType getPostType() {
         try{
             String postType = this.getPostTypeKey().toLowerCase();
-            //TODO: for some reason clips are not recogonised.
-            // Need to fix it later.
             if(postType.equals("clips")){
                 return PostType.REEL;
             }
