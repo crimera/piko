@@ -128,5 +128,10 @@
     "name" : "Add Meta AI reels description pills",
     "desc" : "",
     "code" : "80654"
+  },
+  {
+    "name" : "Disable DM reply reminder",
+    "desc" : "Fixes a background-job crash reported a few days after patching (#1902)",
+    "code" : "85985"
   }
 ]
