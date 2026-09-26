@@ -180,5 +180,10 @@
     "name" : "Disable forced brightness boost on Reels/video",
     "desc" : "Turns off the SDR 'super white' brightness boost on HDR-capable screens",
     "code" : "68885"
+  },
+  {
+    "name" : "Remember auto-scroll state across restarts",
+    "desc" : "Disable to keep auto-scroll in whatever state you left it in, instead of resetting to off every time Instagram is closed",
+    "code" : "83371::10"
   }
 ]
