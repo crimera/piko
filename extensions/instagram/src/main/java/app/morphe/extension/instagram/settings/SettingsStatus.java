@@ -209,6 +209,11 @@ public class SettingsStatus {
     public static void markChatAsRead() { markChatAsRead = true; }
     public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages ;}
 
+    //History section.
+    public static boolean saveViewHistory = false;
+    public static void saveViewHistory() { saveViewHistory = true; }
+    public static boolean historySection(){ return saveViewHistory; }
+
     //Download section.
     public static boolean downloadMedia = false;
     public static void downloadMedia() {downloadMedia = true;}

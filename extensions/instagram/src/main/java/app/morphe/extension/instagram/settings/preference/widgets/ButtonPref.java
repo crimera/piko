@@ -27,6 +27,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
+import app.morphe.extension.instagram.patches.history.ViewHistoryHook;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -84,6 +85,9 @@ public class ButtonPref extends Preference {
 
                     } else if (key.equals("view_deleted_messages")) {
                         SavedMessagesHook.openDeletedMessages(context);
+
+                    } else if (key.equals("view_history")) {
+                        ViewHistoryHook.openHistory(context);
 
                     } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
@@ -151,7 +155,8 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")
                 || key.equals("piko_rec_flags_refresh_file")
-                || key.equals("view_deleted_messages")));
+                || key.equals("view_deleted_messages")
+                || key.equals("view_history")));
     }
 
     private static boolean hasPressedHighlight(String key) {
@@ -195,6 +200,9 @@ public class ButtonPref extends Preference {
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DM)){
             return UI.DRAWABLE_SHARE_TO_DIRECT;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_HISTORY)){
+            return UI.DRAWABLE_HISTORY_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
             return UI.DRAWABLE_SHARE_TO_REEL;

@@ -396,4 +396,16 @@
     <string name="piko_mark_story_seen">Mark as seen</string>
     <string name="piko_story_seen_pending">Marking as seen</string>
     <string name="piko_story_seen_sent">Marked as seen</string>
+
+    <!-- View history -->
+    <string name="piko_category_history">History</string>
+    <string name="piko_save_view_history">Save view history</string>
+    <string name="piko_save_view_history_desc">Keeps a local list of the last 2000 feed posts, Reels and Stories you\'ve viewed, so you can find them again.</string>
+    <string name="piko_view_history">View history</string>
+    <string name="piko_no_view_history">Nothing here yet.\nPosts, Reels and Stories you view will show up here.</string>
+    <string name="piko_clear_view_history_confirm">Clear your entire view history?</string>
+    <string name="piko_delete_view_history_confirm">Remove this item from your view history?</string>
+    <string name="piko_history_type_post">Post</string>
+    <string name="piko_history_type_reel">Reel</string>
+    <string name="piko_history_type_story">Story</string>
 </resources>

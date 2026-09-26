@@ -221,6 +221,8 @@ public class SettingsActivity extends Activity {
                 screenBuilder.buildActionBarSection();
             } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_DM)) {
                 screenBuilder.dmSection();
+            } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_HISTORY)) {
+                screenBuilder.historySection();
             } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)) {
                 screenBuilder.filterContentSection();
             } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_REC_FLAGS)) {

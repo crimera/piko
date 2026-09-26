@@ -58,6 +58,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.SAVE_DELETED_MESSAGES);
     }
 
+    public static boolean saveViewHistory() {
+        return SharedPref.getBooleanPref(Settings.SAVE_VIEW_HISTORY);
+    }
+
     public static boolean openLinksExternally() {
         return SharedPref.getBooleanPref(Settings.OPEN_LINKS_EXTERNALLY);
     }
