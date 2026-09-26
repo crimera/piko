@@ -95,7 +95,7 @@ public class HistoryActivity extends Activity {
         toolbar.addView(title);
 
         TextView clear = new TextView(this);
-        clear.setText(str("piko_clear"));
+        clear.setText(str("piko_clear_view_history"));
         clear.setTextSize(TypedValue.COMPLEX_UNIT_PX, PikoUtils.spToPixels(16));
         clear.setTextColor(InstagramPreferenceStyle.primaryTextColor());
         clear.setPadding(Dim.dp8, Dim.dp8, Dim.dp8, Dim.dp8);
@@ -107,7 +107,7 @@ public class HistoryActivity extends Activity {
         clear.setLayoutParams(clearParams);
         clear.setOnClickListener(v -> new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
             .setMessage(str("piko_clear_view_history_confirm"))
-            .setPositiveButton(str("piko_clear"), (d, w) -> {
+            .setPositiveButton(str("piko_clear_view_history"), (d, w) -> {
                 PikoHistoryDb.getInstance(this).clearAll();
                 recreate();
             })

@@ -403,6 +403,7 @@
     <string name="piko_save_view_history_desc">Keeps a local list of the last 2000 feed posts, Reels and Stories you\'ve viewed, so you can find them again.</string>
     <string name="piko_view_history">View history</string>
     <string name="piko_no_view_history">Nothing here yet.\nPosts, Reels and Stories you view will show up here.</string>
+    <string name="piko_clear_view_history">Clear</string>
     <string name="piko_clear_view_history_confirm">Clear your entire view history?</string>
     <string name="piko_delete_view_history_confirm">Remove this item from your view history?</string>
     <string name="piko_history_type_post">Post</string>
