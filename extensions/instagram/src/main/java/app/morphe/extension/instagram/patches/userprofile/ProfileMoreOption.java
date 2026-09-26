@@ -23,9 +23,7 @@ import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.settings.ActivityHook;
-import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
@@ -46,12 +44,9 @@ public class ProfileMoreOption {
 
             ArrayList<String> options = new ArrayList<>();
             options.add(str("piko_view_profile_picture"));
-            options.add(str("piko_download_profile_picture"));
             options.add(str("piko_copy_username"));
             options.add(str("piko_copy_full_name"));
             options.add(str("piko_copy_user_id"));
-            options.add(str("piko_copy_profile_link"));
-            options.add(str("piko_share_this_profile"));
             options.add(str("piko_copy_bio"));
             options.add(str("piko_copy_links_from_bio"));
             if (DEBUG) options.add(str("piko_debug"));
@@ -83,13 +78,6 @@ public class ProfileMoreOption {
                             text = userData.getBio();
                             toCopy = true;
 
-                        } else if (selectedOption.equals(str("piko_copy_profile_link"))) {
-                            text = userData.getProfileLink();
-                            toCopy = true;
-
-                        } else if (selectedOption.equals(str("piko_share_this_profile"))) {
-                            PikoUtils.shareText(userData.getProfileLink());
-
                         } else if (selectedOption.equals(str("piko_copy_links_from_bio"))) {
                             // Links live in the bio as plain text; the profile object
                             // carries no separate list of them.
@@ -103,14 +91,6 @@ public class ProfileMoreOption {
 
                         } else if (selectedOption.equals(str("piko_view_profile_picture"))) {
                             ProfilePictureViewer.show(context, userData);
-
-                        } else if (selectedOption.equals(str("piko_download_profile_picture"))) {
-                            String url = userData.getProfilePictureUrl();
-                            String username = userData.getUsername();
-                            String downloadFilename = username+"_dp.jpg";
-                            String subFolder = DownloadUtils.getSubfolderName(username);
-                            DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
-                            toCopy = false;
 
                         } else if (selectedOption.equals(str("piko_debug"))) {
                             // Using userData as it will be easier to debug known functions.
@@ -129,6 +109,7 @@ public class ProfileMoreOption {
                 }
             });
             dialog.setTitle(str("piko_more_profile_options"));
+            dialog.setNegativeButton(str("piko_close"), (d, which) -> d.dismiss());
             dialog.setCancelable(true);
             dialog.setCanceledOnTouchOutside(true);
 
