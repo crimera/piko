@@ -10,16 +10,20 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+
+import app.morphe.extension.shared.Logger;
 
 /** Feed posts, Reels and Stories the user has viewed, newest kept up to {@link #MAX_ROWS}. */
 public class PikoHistoryDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_view_history.db";
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 1;
     private static final String TABLE = "view_history";
 
     private static final int MAX_ROWS = 2000;
@@ -37,8 +41,11 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
         return instance;
     }
 
+    private final Context context;
+
     private PikoHistoryDb(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+        this.context = context;
     }
 
     @Override
@@ -55,30 +62,38 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
             "viewed_at INTEGER NOT NULL" +
             ")"
         );
-        db.execSQL("CREATE INDEX IF NOT EXISTS idx_viewed_at ON " + TABLE + "(viewed_at)");
+        db.execSQL("CREATE INDEX idx_viewed_at ON " + TABLE + "(viewed_at)");
     }
 
-    /**
-     * Version 1 databases can hold a table from a pre-release build of this screen with other
-     * columns, which fails every write. Keep the table only if it has all current columns.
-     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (hasColumns(db, "id", "media_pk", "post_type", "owner_username", "thumb_url",
-                "caption", "permalink", "viewed_at")) return;
+        recreate(db);
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        recreate(db);
+    }
+
+    /** History is disposable: start fresh instead of migrating. */
+    private void recreate(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE);
         onCreate(db);
     }
 
-    private static boolean hasColumns(SQLiteDatabase db, String... columns) {
-        List<String> existing = new ArrayList<>();
-        try (Cursor c = db.rawQuery("PRAGMA table_info(" + TABLE + ")", null)) {
-            while (c.moveToNext()) existing.add(c.getString(c.getColumnIndexOrThrow("name")));
+    /**
+     * Runs {@code query}, and if the database doesn't match what this build expects (e.g. a
+     * table left by an older build), deletes it and runs {@code query} once more on a fresh one.
+     */
+    private <T> T withFreshFallback(Function<SQLiteDatabase, T> query) {
+        try {
+            return query.apply(getWritableDatabase());
+        } catch (SQLiteException | IllegalArgumentException e) {
+            Logger.printException(() -> "View history database unusable, starting fresh", e);
+            close();
+            context.deleteDatabase(DB_NAME);
+            return query.apply(getWritableDatabase());
         }
-        for (String column : columns) {
-            if (!existing.contains(column)) return false;
-        }
-        return true;
     }
 
     /** Adds a viewed item, or moves an already logged one to the top. */
@@ -93,19 +108,25 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
         cv.put("permalink", permalink);
         cv.put("viewed_at", System.currentTimeMillis());
 
-        SQLiteDatabase db = getWritableDatabase();
-        db.insertWithOnConflict(TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-        db.execSQL(
-            "DELETE FROM " + TABLE + " WHERE id IN (" +
-            "SELECT id FROM " + TABLE + " ORDER BY viewed_at DESC LIMIT -1 OFFSET " + MAX_ROWS +
-            ")"
-        );
+        withFreshFallback(db -> {
+            db.insertWithOnConflict(TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+            db.execSQL(
+                "DELETE FROM " + TABLE + " WHERE id IN (" +
+                "SELECT id FROM " + TABLE + " ORDER BY viewed_at DESC LIMIT -1 OFFSET " + MAX_ROWS +
+                ")"
+            );
+            return null;
+        });
     }
 
     /** All entries, newest first. */
     public List<Entry> getHistory() {
+        return withFreshFallback(PikoHistoryDb::readHistory);
+    }
+
+    private static List<Entry> readHistory(SQLiteDatabase db) {
         List<Entry> result = new ArrayList<>();
-        try (Cursor c = getReadableDatabase().query(TABLE, null, null, null, null, null, "viewed_at DESC")) {
+        try (Cursor c = db.query(TABLE, null, null, null, null, null, "viewed_at DESC")) {
             while (c.moveToNext()) {
                 result.add(new Entry(
                     c.getLong(c.getColumnIndexOrThrow("id")),
@@ -122,11 +143,11 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
     }
 
     public void deleteEntry(long id) {
-        getWritableDatabase().delete(TABLE, "id = ?", new String[]{String.valueOf(id)});
+        withFreshFallback(db -> db.delete(TABLE, "id = ?", new String[]{String.valueOf(id)}));
     }
 
     public void clearAll() {
-        getWritableDatabase().delete(TABLE, null, null);
+        withFreshFallback(db -> db.delete(TABLE, null, null));
     }
 
     public static final class Entry {
