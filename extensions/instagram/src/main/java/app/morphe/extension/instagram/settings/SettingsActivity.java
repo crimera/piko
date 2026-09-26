@@ -12,14 +12,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.ImageView;
@@ -89,22 +87,10 @@ public class SettingsActivity extends Activity {
 
         // ---------- Toolbar ----------
         toolbar = new LinearLayout(this);
-        toolbar.setOrientation(LinearLayout.HORIZONTAL);
-        toolbar.setGravity(android.view.Gravity.CENTER_VERTICAL);
         toolbar.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
-
-        int toolbarPadding = InstagramPreferenceStyle.dp(this, 15);
-        toolbar.setPadding(toolbarPadding, InstagramPreferenceStyle.dp(this, 10), toolbarPadding, InstagramPreferenceStyle.dp(this, 8));
-
-        int iconSize = InstagramPreferenceStyle.dp(this, 44);
 
         ImageView back = new ImageView(this);
         UI.setThemedIcon(back, UI.DRAWABLE_ARROW_BACK);
-        back.setScaleType(ImageView.ScaleType.CENTER);
-        back.setPaddingRelative(0, 0, InstagramPreferenceStyle.dp(this, 16), 0);
-        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(iconSize, iconSize);
-        backParams.gravity = android.view.Gravity.CENTER_VERTICAL;
-        back.setLayoutParams(backParams);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,27 +100,8 @@ public class SettingsActivity extends Activity {
 
         titleTextView = new TextView(this);
         titleTextView.setText(displayTitle); // Dynamically bound from intent data
-        int titleTextSize = isRootSettings ? 25 : 20;
-        titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, titleTextSize);
-        titleTextView.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
-        titleTextView.setIncludeFontPadding(false);
-        titleTextView.setMaxLines(1);
-        if (!isRootSettings) {
-            titleTextView.setAutoSizeTextTypeUniformWithConfiguration(
-                    18,
-                    20,
-                    1,
-                    TypedValue.COMPLEX_UNIT_SP
-            );
-        }
-        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1.0f
-        );
-        titleParams.gravity = android.view.Gravity.CENTER_VERTICAL;
-        titleParams.leftMargin = InstagramPreferenceStyle.dp(this, 7);
-        titleTextView.setLayoutParams(titleParams);
+        InstagramPreferenceStyle.applyToolbarLayout(
+                this, toolbar, back, titleTextView, isRootSettings);
         titleTextView.setTextColor(InstagramPreferenceStyle.primaryTextColor());
 
         toolbar.addView(back);
@@ -145,7 +112,7 @@ public class SettingsActivity extends Activity {
         customContainer.setOrientation(LinearLayout.VERTICAL);
         customContainer.setBackgroundColor(Color.TRANSPARENT);
 
-        root.addView(toolbar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, InstagramPreferenceStyle.dp(this, 70)));
+        root.addView(toolbar);
         root.addView(customContainer, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         // ---------- Content ----------

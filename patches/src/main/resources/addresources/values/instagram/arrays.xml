@@ -15,6 +15,22 @@
         <item>timeleft</item>
     </string-array>
 
+    <string-array name="piko_array_focus_lock_duration">
+        <item>1 day</item>
+        <item>3 days</item>
+        <item>1 week</item>
+        <item>2 weeks</item>
+        <item>1 month</item>
+        <item>3 months</item>
+    </string-array>
+    <string-array name="piko_array_focus_lock_duration_val">
+        <item>1</item>
+        <item>3</item>
+        <item>7</item>
+        <item>14</item>
+        <item>30</item>
+        <item>90</item>
+    </string-array>
     <string-array name="piko_array_change_like_animation">
         <item>@string/piko_array_default</item>
         <item>Anyway like activation</item>
@@ -76,23 +92,29 @@
     <string-array name="piko_array_action_bar_main_feed">
         <item>@string/piko_action_bar_button_settings_icon</item>
         <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+        <item>@string/piko_action_bar_button_create_icon</item>
+        <item>@string/piko_action_bar_button_notifications_icon</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_main_feed_val">
         <item>SETTINGS_ICON</item>
         <item>GHOST_MODE_ICON</item>
+        <item>CREATE</item>
+        <item>NOTIFICATIONS</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_user_profile">
         <item>@string/piko_action_bar_button_settings_icon</item>
         <item>@string/piko_action_bar_button_profile_info_icon</item>
         <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+        <item>@string/piko_action_bar_button_create_icon</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_user_profile_val">
         <item>SETTINGS_ICON</item>
         <item>PROFILE_INFO_ICON</item>
         <item>GHOST_MODE_ICON</item>
+        <item>CREATE</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_chat">

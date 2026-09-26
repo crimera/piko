@@ -24,6 +24,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.requests.Requester;
@@ -77,6 +78,10 @@ public class InstaUtils {
     }
 
     public static void showResetSettingsDialog(Context context) {
+        if (FocusLock.isLocked()) {
+            PikoUtils.toast(str("piko_focus_lock_blocked_action"));
+            return;
+        }
         new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(context))
                 .setTitle(str("piko_reset_pref_confirm"))
                 .setNegativeButton(str("piko_cancel"), null)

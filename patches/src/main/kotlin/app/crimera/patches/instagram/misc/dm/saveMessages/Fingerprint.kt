@@ -6,14 +6,23 @@
 
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
+import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+
+private const val SAVED_MESSAGES_HOOK_CLASS = "$PATCHES_DESCRIPTOR/dm/SavedMessagesHook;"
+
+internal object DeltaThreadIdFieldExtensionFingerprint : Fingerprint(
+    definingClass = SAVED_MESSAGES_HOOK_CLASS,
+    name = "deltaThreadIdFieldName",
+    returnType = "Ljava/lang/String;",
+)
 
 // returnType omitted: v426 returns Z, v433+ returns V. Only classDef is used, not the method directly.
 internal object DirectItemFieldParserFingerprint : Fingerprint(
     strings = listOf("item_id", "hide_in_thread"),
 )
 
-// MQTT post-processing step (not on REST path). returnType omitted to avoid hardcoding the obfuscated class name.
+// MQTT post-processing step (not on REST path). Its return type varies between app versions.
 internal object DirectItemPostprocessFingerprint : Fingerprint(
     strings = listOf("DirectMessage.postprocess.%s", "Encountered DirectMessage with null type"),
 )

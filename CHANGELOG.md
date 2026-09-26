@@ -1,3 +1,84 @@
+## [3.10.0-dev.8](https://github.com/crimera/piko/compare/v3.10.0-dev.7...v3.10.0-dev.8) (2026-09-14)
+
+### 🐛 Bug Fixes
+
+* **ci:** Import Crowdin translations onto the latest dev ([#1890](https://github.com/crimera/piko/issues/1890)) ([385a8d1](https://github.com/crimera/piko/commit/385a8d1852434f0529d4a017f723ccc5cae4e0b8))
+* **Twitter:** Preserve links when applying custom fonts ([#1889](https://github.com/crimera/piko/issues/1889)) ([f5d1db8](https://github.com/crimera/piko/commit/f5d1db88cb2e1782436604168903347b43d3743c))
+
+### ✨ New Features
+
+* **Instagram:** Update the Direct icon in settings and in the navigation customization window. ([#1888](https://github.com/crimera/piko/issues/1888)) ([7e50716](https://github.com/crimera/piko/commit/7e507162e87e8ac586216fa7562add6bac355d28))
+
+## [3.10.0-dev.7](https://github.com/crimera/piko/compare/v3.10.0-dev.6...v3.10.0-dev.7) (2026-09-13)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Keep settings switch animations consistent after shortcut launch ([#1883](https://github.com/crimera/piko/issues/1883)) ([6ffb046](https://github.com/crimera/piko/commit/6ffb046f68cf0d82c36d9c9837d695d259838331))
+* **Instagram:** Preserve the startup tab while editing navigation ([#1880](https://github.com/crimera/piko/issues/1880)) ([cb1241f](https://github.com/crimera/piko/commit/cb1241f236801e8b5d58722e7db0b6d12680d08d))
+* **Instagram:** Preserve unobserved theme state ([#1872](https://github.com/crimera/piko/issues/1872)) ([cf7cd66](https://github.com/crimera/piko/commit/cf7cd668dfe554a3a2de016524c88f92e7fb6303))
+* **Instagram:** Skip event dispatch when analytics are disabled ([#1877](https://github.com/crimera/piko/issues/1877)) ([7a44c6d](https://github.com/crimera/piko/commit/7a44c6d8306a1c2ca32502b3497308af8e1677b0))
+* **Instagram:** Sync ghost mode icons when settings change ([#1875](https://github.com/crimera/piko/issues/1875)) ([dc12da8](https://github.com/crimera/piko/commit/dc12da8f03703fb6fa50ce11d009e32754c0761b))
+* **Twitter:** avoid copying editor spans in custom font hook ([c6deb8d](https://github.com/crimera/piko/commit/c6deb8daa5cd1f41a3a368802cf87c6f5dbf2749))
+
+### ✨ New Features
+
+* **Instagram:** Add startup tab selection ([#1869](https://github.com/crimera/piko/issues/1869)) ([d284f62](https://github.com/crimera/piko/commit/d284f629056344bec9351fe86afd73f07ef25818))
+* **Instagram:** Add story seen button ([#1884](https://github.com/crimera/piko/issues/1884)) ([c39e122](https://github.com/crimera/piko/commit/c39e122dbce23d9d603bc73010e0aeaccdfe88bd))
+* **Instagram:** Add visibility controls for create and notification buttons ([#1870](https://github.com/crimera/piko/issues/1870)) ([a1c0866](https://github.com/crimera/piko/commit/a1c0866824ef72cd40b5d03d3ec2a46bf5f8cdaf))
+* **Instagram:** Customize navigation bar ([#1867](https://github.com/crimera/piko/issues/1867)) ([bbd335c](https://github.com/crimera/piko/commit/bbd335ca7764ec99c3c9936e0ffd71723699e627))
+
+## [3.10.0-dev.6](https://github.com/crimera/piko/compare/v3.10.0-dev.5...v3.10.0-dev.6) (2026-09-10)
+
+### 🐛 Bug Fixes
+
+* **Twitter - Show changelogs:** Error message is shown with changelog dialog ([e1238c3](https://github.com/crimera/piko/commit/e1238c3ffd38b1573a11a411000080f825f79583))
+* **Twitter:** Restore timeline position on startup ([ae231c5](https://github.com/crimera/piko/commit/ae231c596bf9b7d3b1f2a1cff9ef5e74151cd6b9))
+
+### ✨ New Features
+
+* **Twitter:** Add bulk feature flag selection and validation ([#1846](https://github.com/crimera/piko/issues/1846)) ([7b92ac8](https://github.com/crimera/piko/commit/7b92ac8626b2ff907769503ae85b688fd2471c36))
+
+## [3.10.0-dev.5](https://github.com/crimera/piko/compare/v3.10.0-dev.4...v3.10.0-dev.5) (2026-09-07)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** restore relationship actions in user lists ([854f5e2](https://github.com/crimera/piko/commit/854f5e26831c997e376a7b68094a7fbde89fc790))
+
+## [3.10.0-dev.4](https://github.com/crimera/piko/compare/v3.10.0-dev.3...v3.10.0-dev.4) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Add missing entity dependencies ([#1833](https://github.com/crimera/piko/issues/1833)) ([a19b255](https://github.com/crimera/piko/commit/a19b255eccd3b2fed5474bc481ab7f3ae6640be9))
+
+## [3.10.0-dev.3](https://github.com/crimera/piko/compare/v3.10.0-dev.2...v3.10.0-dev.3) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* Revert "fix(twitter - `Bring Back Twitter`): support to new versions" ([df9b407](https://github.com/crimera/piko/commit/df9b4079d33aea17dcda5e4ebacd7bc4307421b9))
+
+## [3.10.0-dev.2](https://github.com/crimera/piko/compare/v3.10.0-dev.1...v3.10.0-dev.2) (2026-09-04)
+
+### 🐛 Bug Fixes
+
+* **github:** use existing enhancement label and add missing twitter label ([6337845](https://github.com/crimera/piko/commit/63378453c020ce89f490e802356418816be6820a))
+* **twitter - `Bring Back Twitter`:** support to new versions ([ff97563](https://github.com/crimera/piko/commit/ff975634c0e30b87fbb06cdcae556ff00f351a7a))
+
+### ✨ New Features
+
+* **Instagram:** Embed metadata in downloaded videos ([#1828](https://github.com/crimera/piko/issues/1828)) ([9493252](https://github.com/crimera/piko/commit/949325266af15c51477101be81ad8692bb439557))
+
+## [3.10.0-dev.1](https://github.com/crimera/piko/compare/v3.9.0...v3.10.0-dev.1) (2026-09-03)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Prevent newlines in text preferences ([#1811](https://github.com/crimera/piko/issues/1811)) ([2cb1faa](https://github.com/crimera/piko/commit/2cb1faa3e18a7e99a5271957803cc5e6c278692e))
+* **Instagram:** Recover settings after crash ([#1822](https://github.com/crimera/piko/issues/1822)) ([8391a5b](https://github.com/crimera/piko/commit/8391a5b6817289307eb2fef96837c2055eebea99))
+* **Twitter:** guard null ShareTarget in modern share sheet link hook ([5066035](https://github.com/crimera/piko/commit/5066035bc43b7c27f7e13248f0edec5afa7be85a))
+
+### ✨ New Features
+
+* **Instagram:** Integrate `Disable onboarding permission prompts` patch into `Disable analytics` ([#1771](https://github.com/crimera/piko/issues/1771)) ([a7974cd](https://github.com/crimera/piko/commit/a7974cd4c66dff557c2905ea92ad73741b46fa44))
+
 ## [3.9.0](https://github.com/crimera/piko/compare/v3.8.0...v3.9.0) (2026-08-31)
 
 ### 🐛 Bug Fixes

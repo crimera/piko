@@ -27,6 +27,8 @@ public class Constants {
     public static final String PIKO_MAPPINGS_PATH = "https://github.com/crimera/piko/raw/refs/heads/dev/docs/mappings/";
 
     public static final String AB_SETTINGS_ICON = "SETTINGS_ICON";
+    public static final String AB_CREATE = "CREATE";
+    public static final String AB_NOTIFICATIONS = "NOTIFICATIONS";
     public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
     public static final String AB_PROFILE_INFO_ICON = "PROFILE_INFO_ICON";
 
@@ -53,7 +55,6 @@ public class Constants {
         ExtensionStrings.setDownloadOngoing(str("piko_downloading_media"));
         ExtensionStrings.setDownloadCompleted(str("piko_downloaded_media"));
         ExtensionStrings.setDownloadError(str("piko_download_failed_media"));
-        ExtensionStrings.setDownloadMediaExists(str("piko_media_exists"));
         ExtensionStrings.setDownloadSetPathFailed(str("piko_download_set_path_failed"));
         ExtensionStrings.setDownloadSetPathSuccess(str("piko_download_set_path_success"));
         ExtensionStrings.setDownloadGrantPermission(str("piko_download_choose_folder"));

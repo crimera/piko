@@ -16,15 +16,22 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -35,6 +42,8 @@ import app.morphe.extension.shared.Utils;
 
 public class MediaDownloader {
     private static final String CHANNEL_ID = "media_download_channel";
+    // Separate downloader instances must reserve names before another request can choose them.
+    private static final Object CREATE_DOCUMENT_LOCK = new Object();
     private final Context context;
     private final NotificationManager notificationManager;
     private final LinkedBlockingQueue<DownloadRequest> queue = new LinkedBlockingQueue<>();
@@ -85,6 +94,7 @@ public class MediaDownloader {
     private void runDownloadTask(DownloadRequest request) {
         int notificationId = (int) System.currentTimeMillis();
         Uri outputDocumentUri = null;
+        File cacheFile = null;
         boolean downloadCompleted = false;
         Notification.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -92,32 +102,33 @@ public class MediaDownloader {
         } else {
             builder = new Notification.Builder(context);
         }
-        String downloadStartString = ExtensionStrings.DOWNLOAD_ONGOING + request.fileName;
         builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                .setContentTitle(downloadStartString)
+                .setContentTitle(ExtensionStrings.DOWNLOAD_ONGOING + request.fileName)
                 .setOngoing(true) // Keeps notification un-swipable during download execution.
                 .setProgress(100, 0, false);
 
         notificationManager.notify(notificationId, builder.build());
 
         try {
-            Uri targetDirectoryUri = getTargetDirectoryUri(request);
-            if (findChildDocument(targetDirectoryUri, request.fileName, null) != null) {
-                showToast(ExtensionStrings.DOWNLOAD_MEDIA_EXISTS);
-                notificationManager.cancel(notificationId);
-                return;
+            synchronized (CREATE_DOCUMENT_LOCK) {
+                Uri targetDirectoryUri = getTargetDirectoryUri(request);
+                request.fileName = DownloadFileNames.findAvailable(
+                        request.fileName, getChildNames(targetDirectoryUri)
+                );
+                outputDocumentUri = DocumentsContract.createDocument(
+                        context.getContentResolver(),
+                        targetDirectoryUri,
+                        getMimeType(request.fileName),
+                        request.fileName
+                );
             }
-
-            outputDocumentUri = DocumentsContract.createDocument(
-                    context.getContentResolver(),
-                    targetDirectoryUri,
-                    getMimeType(request.fileName),
-                    request.fileName
-            );
             if (outputDocumentUri == null) {
                 throw new IOException("Could not create download file");
             }
 
+            String downloadStartString = ExtensionStrings.DOWNLOAD_ONGOING + request.fileName;
+            builder.setContentTitle(downloadStartString);
+            notificationManager.notify(notificationId, builder.build());
             showToast(downloadStartString);
             HttpURLConnection conn = null;
             try {
@@ -126,36 +137,27 @@ public class MediaDownloader {
                 conn.connect();
 
                 int length = conn.getContentLength();
-                try (InputStream input = new BufferedInputStream(conn.getInputStream());
-                     OutputStream output = context.getContentResolver().openOutputStream(outputDocumentUri)) {
-                    if (output == null) {
-                        throw new IOException("Could not open download file");
-                    }
-
-                    byte[] buffer = new byte[8192];
-                    long total = 0;
-                    int count;
-                    long lastUpdateTime = 0;
-                    while ((count = input.read(buffer)) != -1) {
-                        total += count;
-                        output.write(buffer, 0, count);
-
-                        if (length > 0) {
-                            int per = (int) (total * 100 / length);
-
-                            // Cap the percentage at 99 inside the loop so it NEVER shows 100% until it actually completes
-                            if (per >= 100) per = 99;
-
-                            // Performance optimization: Only notify the system every 200ms to avoid clogging the OS thread
-                            long currentTime = System.currentTimeMillis();
-                            if (currentTime - lastUpdateTime > 200) {
-                                builder.setProgress(100, per, false);
-                                notificationManager.notify(notificationId, builder.build());
-                                lastUpdateTime = currentTime;
-                            }
+                if (request.metadata == null) {
+                    try (InputStream input = new BufferedInputStream(conn.getInputStream());
+                         OutputStream output = context.getContentResolver().openOutputStream(outputDocumentUri)) {
+                        if (output == null) {
+                            throw new IOException("Could not open download file");
                         }
+                        copyDownload(input, output, length, builder, notificationId);
                     }
-                    output.flush();
+                } else {
+                    cacheFile = File.createTempFile("piko-download-", ".mp4", context.getCacheDir());
+                    try (InputStream input = new BufferedInputStream(conn.getInputStream());
+                         OutputStream output = new BufferedOutputStream(new FileOutputStream(cacheFile))) {
+                        copyDownload(input, output, length, builder, notificationId);
+                    }
+
+                    try {
+                        writeMetadata(cacheFile, outputDocumentUri, request.metadata);
+                    } catch (Exception | LinkageError remuxException) {
+                        PikoUtils.logger(remuxException);
+                        copyRawFile(cacheFile, outputDocumentUri);
+                    }
                 }
             } finally {
                 if (conn != null) {
@@ -191,8 +193,75 @@ public class MediaDownloader {
             notificationManager.cancel(notificationId);
             PikoUtils.logger(e);
         } finally {
+            if (cacheFile != null && cacheFile.exists() && !cacheFile.delete()) {
+                PikoUtils.logger(new IOException("Could not delete download cache file"));
+            }
             isDownloading = false;
             processNext();
+        }
+    }
+
+    private void copyDownload(
+            InputStream input,
+            OutputStream output,
+            int length,
+            Notification.Builder builder,
+            int notificationId
+    ) throws IOException {
+        byte[] buffer = new byte[8192];
+        long total = 0;
+        int count;
+        long lastUpdateTime = 0;
+        while ((count = input.read(buffer)) != -1) {
+            total += count;
+            output.write(buffer, 0, count);
+
+            if (length > 0) {
+                int percent = (int) (total * 100 / length);
+                if (percent >= 100) percent = 99;
+
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastUpdateTime > 200) {
+                    builder.setProgress(100, percent, false);
+                    notificationManager.notify(notificationId, builder.build());
+                    lastUpdateTime = currentTime;
+                }
+            }
+        }
+        output.flush();
+    }
+
+    private void writeMetadata(File inputFile, Uri outputUri, DownloadMetadata metadata)
+            throws IOException {
+        ParcelFileDescriptor descriptor = context.getContentResolver()
+                .openFileDescriptor(outputUri, "rwt");
+        if (descriptor == null) {
+            throw new IOException("Could not open download file");
+        }
+        MetadataMuxer.write(
+                inputFile,
+                new ParcelFileDescriptor.AutoCloseOutputStream(descriptor),
+                metadata
+        );
+    }
+
+    private void copyRawFile(File inputFile, Uri outputUri) throws IOException {
+        try (InputStream input = new BufferedInputStream(new FileInputStream(inputFile))) {
+            ParcelFileDescriptor descriptor = context.getContentResolver()
+                    .openFileDescriptor(outputUri, "rwt");
+            if (descriptor == null) {
+                throw new IOException("Could not reopen download file");
+            }
+            try (OutputStream output = new BufferedOutputStream(
+                    new ParcelFileDescriptor.AutoCloseOutputStream(descriptor)
+            )) {
+                byte[] buffer = new byte[8192];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    output.write(buffer, 0, count);
+                }
+                output.flush();
+            }
         }
     }
 
@@ -241,6 +310,19 @@ public class MediaDownloader {
         }
 
         return directoryUri;
+    }
+
+    private Set<String> getChildNames(Uri parentUri) throws IOException {
+        Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+                parentUri, DocumentsContract.getDocumentId(parentUri)
+        );
+        String[] projection = {DocumentsContract.Document.COLUMN_DISPLAY_NAME};
+        Set<String> names = new HashSet<>();
+        try (Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null)) {
+            if (cursor == null) throw new IOException("Could not read download folder");
+            while (cursor.moveToNext()) names.add(cursor.getString(0));
+        }
+        return names;
     }
 
     private Uri findChildDocument(Uri parentUri, String displayName, String mimeType) {
