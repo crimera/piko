@@ -410,7 +410,11 @@ internal fun Method.hasStackNavigationCall(): Boolean {
 
 context(context: BytecodePatchContext)
 internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemContentTarget {
+    // Single traversal collects both the item renderer and the content class: the two
+    // predicates are disjoint method shapes, so merging the passes preserves the exact
+    // candidate sets of the former separate scans.
     val rendererCandidates = mutableListOf<ImmutableMethodReference>()
+    val contentClasses = mutableListOf<String>()
     context.classDefForEach { classDef ->
         classDef.methods.forEach { method ->
             if (method.implementation == null) return@forEach
@@ -432,6 +436,19 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
                     )
             }
         }
+        val constructors =
+            classDef.methods.filter { method ->
+                method.returnType.toString() == "V" &&
+                    method.parameterTypes.map(CharSequence::toString) ==
+                    listOf("Z", tabData.navigationType, tabData.tabDataValueType)
+            }
+        if (constructors.isNotEmpty()) {
+            requireExactlyOne(
+                "NewX navigation bar item content constructor in ${classDef.type}",
+                constructors,
+            ) { it.toString() }
+            contentClasses += classDef.type.toString()
+        }
     }
     val renderer =
         requireExactlyOne("NewX navigation bar item renderer", rendererCandidates) { it.toString() }
@@ -441,23 +458,6 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
     // constructor is the stable identity.
     // This is a read-only discovery pass. Converting every class to a mutable proxy here keeps
     // the whole APK alive and can exceed the manager's 512 MB minimum heap on large NewX builds.
-    val contentClasses = mutableListOf<String>()
-    context.classDefForEach { classDef ->
-        val constructors =
-            classDef.methods.filter { method ->
-                method.returnType.toString() == "V" &&
-                    method.parameterTypes.map(CharSequence::toString) ==
-                    listOf("Z", tabData.navigationType, tabData.tabDataValueType)
-            }
-        if (constructors.isNotEmpty()) {
-            val constructor =
-                requireExactlyOne(
-                    "NewX navigation bar item content constructor in ${classDef.type}",
-                    constructors,
-                ) { it.toString() }
-            contentClasses += classDef.type.toString()
-        }
-    }
     val consumerClass = requireExactlyOne("NewX navigation bar item content class", contentClasses)
     val consumerClassDef = context.mutableClassDefBy(consumerClass)
     val contentConstructor =
@@ -483,7 +483,7 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
             ?: throw PatchException("NewX navigation bar item tab field has no field reference")
 
     val rendererCallerMethods = mutableListOf<MutableMethod>()
-    context.mutableClassDefBy(consumerClass).methods.forEach { method ->
+    consumerClassDef.methods.forEach { method ->
         if (method.implementation == null) return@forEach
         if (method.instructions.any { instruction -> instruction.referencesMethod(rendererDescriptor) }) {
             rendererCallerMethods += method

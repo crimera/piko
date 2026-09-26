@@ -176,9 +176,15 @@ val newXForYouTopicFilterPatch =
             }
 
         execute {
-            val clearAndRefreshEvent = resolveSingletonTimelineEvent(CLEAR_AND_REFRESH_TIMELINE)
-            val scrollToTopEvent = resolveSingletonTimelineEvent(REQUEST_SCROLL_TO_TOP)
-            val tabHook = resolveForYouTabHook(scrollToTopEvent)
+            // One shared snapshot feeds the discovery passes below (two singleton scans,
+            // page target, reselected type, tab hook) instead of five dex traversals.
+            // Resolutions run before any mutation, so the snapshot cannot go stale.
+            val classDefs = allForYouClassDefs()
+            val clearAndRefreshEvent = resolveSingletonTimelineEvent(CLEAR_AND_REFRESH_TIMELINE, classDefs)
+            val scrollToTopEvent = resolveSingletonTimelineEvent(REQUEST_SCROLL_TO_TOP, classDefs)
+            val forYouPageTarget = resolveForYouPageTarget(classDefs)
+            val reselectedEventType = resolveForYouReselectedEventType(classDefs)
+            val tabHook = resolveForYouTabHook(scrollToTopEvent, classDefs, forYouPageTarget, reselectedEventType)
             val requestTarget = resolveForYouRequestTarget()
 
             val applicationOnCreate = newXInitHook.fingerprint.method
@@ -292,13 +298,20 @@ val newXForYouTopicFilterPatch =
     }
 
 context(context: BytecodePatchContext)
+private fun allForYouClassDefs(): List<com.android.tools.smali.dexlib2.iface.ClassDef> =
+    buildList {
+        context.classDefForEach { add(it) }
+    }
+
+context(context: BytecodePatchContext)
 private fun resolveForYouTabHook(
     currentPageRefreshEvent: ResolvedTimelineEvent,
+    classDefs: List<com.android.tools.smali.dexlib2.iface.ClassDef>,
+    forYouPageTarget: ResolvedForYouPageTarget,
+    reselectedEventType: String?,
 ): ResolvedForYouTabHook {
     val candidates = mutableListOf<ResolvedForYouTabHook>()
-    val forYouPageTarget = resolveForYouPageTarget()
-    val reselectedEventType = resolveForYouReselectedEventType()
-    context.classDefForEach { classDef ->
+    classDefs.forEach { classDef ->
         classDef.methods.toList().forEach { originalMethod ->
             if (originalMethod.returnType != "V" || originalMethod.parameterTypes.size != 1) return@forEach
             val modernHookCandidate = reselectedEventType?.let { eventType ->
@@ -354,9 +367,11 @@ private fun resolveForYouTabHook(
 }
 
 context(context: BytecodePatchContext)
-private fun resolveForYouReselectedEventType(): String? {
+private fun resolveForYouReselectedEventType(
+    classDefs: List<com.android.tools.smali.dexlib2.iface.ClassDef>,
+): String? {
     val candidates = buildList {
-        context.classDefForEach { classDef ->
+        classDefs.forEach { classDef ->
             val matchingToStringMethods = classDef.methods.filter { method ->
                 method.name == "toString" &&
                     method.returnType == STRING_DESCRIPTOR &&
@@ -376,10 +391,9 @@ private fun resolveForYouReselectedEventType(): String? {
 }
 
 context(context: BytecodePatchContext)
-private fun resolveForYouPageTarget(): ResolvedForYouPageTarget {
-    val classDefs = buildList {
-        context.classDefForEach { add(it) }
-    }
+private fun resolveForYouPageTarget(
+    classDefs: List<com.android.tools.smali.dexlib2.iface.ClassDef>,
+): ResolvedForYouPageTarget {
     val classesByType = classDefs.associateBy { it.type }
     val candidates = classDefs.flatMap { classDef ->
         val toStringMethods = classDef.methods.filter { method ->
@@ -612,9 +626,12 @@ private fun installForYouRefreshBridge(
 }
 
 context(context: BytecodePatchContext)
-private fun resolveSingletonTimelineEvent(eventLabel: String): ResolvedTimelineEvent {
+private fun resolveSingletonTimelineEvent(
+    eventLabel: String,
+    classDefs: List<com.android.tools.smali.dexlib2.iface.ClassDef>,
+): ResolvedTimelineEvent {
     val eventClasses = mutableListOf<com.android.tools.smali.dexlib2.iface.ClassDef>()
-    context.classDefForEach { classDef ->
+    classDefs.forEach { classDef ->
         val matchingToStringMethods = classDef.methods.filter { method ->
             method.name == "toString" &&
                 method.returnType == STRING_DESCRIPTOR &&

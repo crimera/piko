@@ -197,15 +197,16 @@ private fun parameterRegister(method: Method, index: Int): Int {
     return register
 }
 
-private fun allClassDefs(context: BytecodePatchContext): List<ClassDef> =
+context(context: BytecodePatchContext)
+private fun allClassDefs(): List<ClassDef> =
     buildList {
         context.classDefForEach { add(it) }
     }
 
 context(context: BytecodePatchContext)
-private fun resolveTimelineType(): ResolvedTimelineType {
+private fun resolveTimelineType(classDefs: List<ClassDef>): ResolvedTimelineType {
     val candidates = buildList {
-        allClassDefs(context)
+        classDefs
             .filter { classDef ->
                 isDirectDescriptorInScope(classDef.type.toString(), TIMELINE_MODEL_SCOPE) &&
                     classDef.superclass?.toString() == ENUM_DESCRIPTOR
@@ -226,8 +227,8 @@ private fun resolveTimelineType(): ResolvedTimelineType {
 }
 
 context(context: BytecodePatchContext)
-private fun resolveTimelineListDescriptor(): String {
-    val candidates = allClassDefs(context).filter { classDef ->
+private fun resolveTimelineListDescriptor(classDefs: List<ClassDef>): String {
+    val candidates = classDefs.filter { classDef ->
         isDirectDescriptorInScope(classDef.type.toString(), IMMUTABLE_LIST_SCOPE) &&
             AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
             classDef.interfaces.any { it.toString() == LIST_DESCRIPTOR } &&
@@ -241,8 +242,9 @@ private fun resolveTimelineListDescriptor(): String {
 }
 
 context(context: BytecodePatchContext)
-private fun resolveComposeContracts(): ResolvedComposeContracts {
-    val classDefs = allClassDefs(context)
+private fun resolveComposeContracts(classDefs: List<ClassDef>): ResolvedComposeContracts {
+    // Callers share one class snapshot per execute phase; the four sub-resolvers below
+    // already reuse it, so no additional traversal happens here.
     // LayoutDirection is the Compose ui.unit enum exposing Ltr/Rtl. Its obfuscated
     // descriptor is not stable, so resolve it from its (preserved) enum members.
     val layoutDirection = requireExactlyOne(
@@ -385,8 +387,7 @@ private fun resolveComposeContracts(): ResolvedComposeContracts {
 
 
 context(context: BytecodePatchContext)
-private fun resolvePagingEvent(): ResolvedPagingEvent {
-    val classDefs = allClassDefs(context)
+private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
     val classByType = classDefs.associateBy { it.type.toString() }
     val dispatchCandidates = classDefs.flatMap { classDef ->
         if (!classDef.type.toString().startsWith(BOTTOM_PAGING_SCOPE)) {
@@ -809,10 +810,9 @@ private fun argumentRegister(
 }
 
 context(context: BytecodePatchContext)
-private fun resolveTimelineItemCallbackIndex(method: Method): Int {
+private fun resolveTimelineItemCallbackIndex(method: Method, timelineListDescriptor: String): Int {
     val instructions = method.implementation?.instructions?.toList()
         ?: throw PatchException("Photos timeline renderer has no implementation: $method")
-    val timelineListDescriptor = resolveTimelineListDescriptor()
     fun isTimelineStateConstructor(reference: MethodReference): Boolean {
         val parameters = reference.parameterTypes.map(CharSequence::toString)
         return reference.name == "<init>" &&
@@ -1019,13 +1019,16 @@ private fun classImplements(classType: String, target: String, seen: Set<String>
 }
 
 context(context: BytecodePatchContext)
-private fun resolveNativePhotoViewerTarget(): NativePhotoViewerTarget {
-    val timelineListDescriptor = resolveTimelineListDescriptor()
+private fun resolveNativePhotoViewerTarget(
+    classDefs: List<ClassDef>,
+    timelineListDescriptor: String,
+): NativePhotoViewerTarget {
+    // Read-only discovery over the shared snapshot: mutable proxies are materialized
+    // only for the resolved winners below, not for every class in URT_POST_SCOPE.
     val dispatchCandidates = buildList {
-        context.classDefForEach { classDef ->
-            if (!classDef.type.startsWith(URT_POST_SCOPE)) return@classDefForEach
-            val mutableClass = context.mutableClassDefBy(classDef.type)
-            mutableClass.methods
+        classDefs.forEach { classDef ->
+            if (!classDef.type.startsWith(URT_POST_SCOPE)) return@forEach
+            classDef.methods
                 .filter {
                     it.name == "invoke" &&
                         it.returnType.toString() == OBJECT &&
@@ -1392,6 +1395,7 @@ private fun Block.itemClickViewerInstructions(
 context(context: BytecodePatchContext)
 private fun resolveItemClickViewerTargets(
     event: NativePhotoViewerTarget,
+    classDefs: List<ClassDef>,
 ): Pair<List<ItemClickViewerTarget>, List<ItemMediaDelegate>> {
     // The gallery tap invokes the timeline item-click callback, which wraps the item
     // in an item-click event (x0 wrapping the o0 item) and dispatches it to the URT
@@ -1399,7 +1403,6 @@ private fun resolveItemClickViewerTargets(
     // so the divert moves to the item-event consumers instead.
     val mediaOwner = event.mediaGetter.descriptor.substringBefore("->")
     val navigationOwner = event.navigationCall.descriptor.substringBefore("->")
-    val classDefs = allClassDefs(context)
     val classByType = classDefs.associateBy { it.type.toString() }
 
     val closures = mutableMapOf<String, Set<String>>()
@@ -1415,6 +1418,18 @@ private fun resolveItemClickViewerTargets(
         return result
     }
     fun implements(classType: String, target: String): Boolean = target in closure(classType)
+
+    // Precomputed once: concrete types carrying the media contract. The candidate scan
+    // below used to re-walk every class for every event-shaped class (quadratic); the
+    // holder set is far smaller, and the per-candidate check is unchanged.
+    val mediaHolders = classDefs.mapNotNull { candidate ->
+        val candidateType = candidate.type.toString()
+        candidateType.takeIf {
+            !AccessFlags.INTERFACE.isSet(candidate.accessFlags) &&
+                !AccessFlags.ABSTRACT.isSet(candidate.accessFlags) &&
+                implements(candidateType, mediaOwner)
+        }
+    }.toSet()
 
     // Item-click event fields: the single instance field of a final event class whose type
     // is an interface that a media holder also implements. On this target that is x0.a:o0
@@ -1435,13 +1450,7 @@ private fun resolveItemClickViewerTargets(
         if (!itemType.startsWith(TIMELINE_MODEL_SCOPE)) return@mapNotNull null
         val itemClass = classByType[itemType] ?: return@mapNotNull null
         if (!AccessFlags.INTERFACE.isSet(itemClass.accessFlags)) return@mapNotNull null
-        val heldByMediaHolder = classDefs.any { candidate ->
-            val candidateType = candidate.type.toString()
-            !AccessFlags.INTERFACE.isSet(candidate.accessFlags) &&
-                !AccessFlags.ABSTRACT.isSet(candidate.accessFlags) &&
-                implements(candidateType, itemType) &&
-                implements(candidateType, mediaOwner)
-        }
+        val heldByMediaHolder = mediaHolders.any { holder -> implements(holder, itemType) }
         if (!heldByMediaHolder) return@mapNotNull null
         ItemEvent(field.toSmaliDescriptor(), type, itemType)
     }
@@ -1548,9 +1557,12 @@ private fun resolveItemClickViewerTargets(
 }
 
 context(context: BytecodePatchContext)
-private fun patchItemClickPhotoViewer() {
-    val event = resolveNativePhotoViewerTarget()
-    val (targets, delegates) = resolveItemClickViewerTargets(event)
+private fun patchItemClickPhotoViewer(timelineListDescriptor: String) {
+    // Fresh snapshot: the timeline body and paging bridge above already mutated the dex,
+    // so the pre-mutation snapshot from execute must not be reused here.
+    val classDefs = allClassDefs()
+    val event = resolveNativePhotoViewerTarget(classDefs, timelineListDescriptor)
+    val (targets, delegates) = resolveItemClickViewerTargets(event, classDefs)
     targets.forEach { target ->
         val owner = context.mutableClassDefBy(target.ownerType)
         val method = requireExactlyOne(
@@ -1705,10 +1717,13 @@ val newXProfilePhotosGalleryPatch =
         }
 
         execute {
-            val timelineType = resolveTimelineType()
-            val timelineListDescriptor = resolveTimelineListDescriptor()
-            val compose = resolveComposeContracts()
-            val pagingEvent = resolvePagingEvent()
+            // One shared snapshot for the pre-mutation resolvers below; the item-click
+            // phase takes its own fresh snapshot after these mutations.
+            val classDefs = allClassDefs()
+            val timelineType = resolveTimelineType(classDefs)
+            val timelineListDescriptor = resolveTimelineListDescriptor(classDefs)
+            val compose = resolveComposeContracts(classDefs)
+            val pagingEvent = resolvePagingEvent(classDefs)
 
             val match = requireExactlyOne(
                 label = "NewX profile Photos timeline body",
@@ -1719,7 +1734,7 @@ val newXProfilePhotosGalleryPatch =
             val listIndex = parameters.indexOf(timelineListDescriptor)
             val timelineTypeIndex = parameters.indexOf(timelineType.descriptor)
             val callbackIndex = parameters.indexOf(FUNCTION1)
-            val itemClickCallbackIndex = resolveTimelineItemCallbackIndex(originalMethod)
+            val itemClickCallbackIndex = resolveTimelineItemCallbackIndex(originalMethod, timelineListDescriptor)
             val paddingValuesIndex = parameters.indexOf(compose.paddingValuesDescriptor)
             val modifierIndex = parameters.indexOf(MODIFIER)
             val composerIndex = parameters.indexOf(COMPOSER)
@@ -1773,6 +1788,6 @@ val newXProfilePhotosGalleryPatch =
                 )
             }
             patchPagingEventBridge(pagingEvent)
-            patchItemClickPhotoViewer()
+            patchItemClickPhotoViewer(timelineListDescriptor)
         }
     }

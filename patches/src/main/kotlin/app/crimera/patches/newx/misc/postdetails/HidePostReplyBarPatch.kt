@@ -447,15 +447,17 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
     // The reply text field test tag moved one hop down: the renderer no longer contains
     // it directly (alpha.04 hosts it in a Function2 lambda instantiated by a helper).
     // Resolve owner -> instantiator -> direct caller instead of hardcoding any of them.
-    val anchorOwners = buildList {
-        context.classDefForEach { classDef ->
-            if (classDef.methods.any { method ->
-                    method.implementation?.instructions?.any { instruction ->
-                        instruction.getReference<StringReference>()?.string ==
-                            "post-detail-reply-text-field"
-                    } == true
-                }) {
-                add(classDef.type)
+    // One shared snapshot feeds both passes below instead of two full dex traversals.
+    val classDefs = buildList {
+        context.classDefForEach { add(it) }
+    }
+    val anchorOwners = classDefs.mapNotNull { classDef ->
+        classDef.type.takeIf {
+            classDef.methods.any { method ->
+                method.implementation?.instructions?.any { instruction ->
+                    instruction.getReference<StringReference>()?.string ==
+                        "post-detail-reply-text-field"
+                } == true
             }
         }
     }
@@ -465,7 +467,7 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
             candidates = anchorOwners,
         )
     val instantiators = buildList {
-        context.classDefForEach { classDef ->
+        classDefs.forEach { classDef ->
             classDef.methods.forEach { method ->
                 if (method.implementation?.instructions?.any { instruction ->
                         instruction.opcode == Opcode.NEW_INSTANCE &&
