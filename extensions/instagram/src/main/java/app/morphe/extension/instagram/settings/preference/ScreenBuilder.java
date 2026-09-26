@@ -209,6 +209,16 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.notesCustomTextColor) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_enable_notes_custom_text_color"),
+                            str("piko_enable_notes_custom_text_color_desc"),
+                            Settings.ENABLE_NOTES_CUSTOM_TEXT_COLOR
+                    )
+            );
+        }
+        
         if (SettingsStatus.markChatAsRead) {
             addPreference(
                     helper.switchPreference(
@@ -235,7 +245,6 @@ public class ScreenBuilder {
                     )
             );
         }
-
 
     }
 
