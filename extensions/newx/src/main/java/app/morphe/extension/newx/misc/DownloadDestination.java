@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import app.morphe.extension.newx.settings.NewXLogger;
@@ -203,16 +204,26 @@ public final class DownloadDestination {
         // Bounded walk: cause chains can cycle, so never loop unbounded on a download thread.
         Throwable current = failure;
         for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
-            // IllegalArgumentException is the shape of a foreign or hand-edited tree uri
-            // rejected by the tree helpers.
             if (current instanceof SecurityException
-                    || current instanceof FileNotFoundException
-                    || current instanceof IllegalArgumentException) {
+                    || current instanceof FileNotFoundException) {
+                return true;
+            }
+            // Only tree-uri rejections count: a generic IllegalArgumentException
+            // (bad filename, bad mime) must never clear the picked folder.
+            if (current instanceof IllegalArgumentException
+                    && isTreeUriError((IllegalArgumentException) current)) {
                 return true;
             }
             current = current.getCause();
         }
         return false;
+    }
+
+    private static boolean isTreeUriError(IllegalArgumentException exception) {
+        String message = exception.getMessage();
+        if (message == null) return false;
+        String lower = message.toLowerCase(Locale.ROOT);
+        return lower.contains("uri") || lower.contains("tree") || lower.contains("document");
     }
 
     /** Logs destination state for diagnostics. Call before clearing so the stored value is kept. */
@@ -386,13 +397,13 @@ public final class DownloadDestination {
     }
 
     /** Streams produced merge output without an in-memory copy. */
-    public static boolean save(Context context, Target target, ContentWriter writer) {
+    public static SaveState save(Context context, Target target, ContentWriter writer) {
         // "wt" truncates explicitly; plain "w" left stale trailing bytes on overwrite.
         try (OutputStream output = context.getContentResolver().openOutputStream(target.documentUri, "wt")) {
             if (output == null) throw new IOException("Could not open " + target.fileName);
             writer.write(output);
             output.flush();
-            return true;
+            return SaveState.SAVED;
         } catch (IOException | RuntimeException exception) {
             boolean destinationLost = isDestinationLoss(exception);
             NewXLogger.printException(() -> "Failed to write " + target.fileName, exception);
@@ -400,12 +411,12 @@ public final class DownloadDestination {
                     destinationLost ? "write/folder-lost" : "write/failed");
             if (destinationLost) invalidate(target.kind);
             discard(context, target);
-            return false;
+            return destinationLost ? SaveState.DESTINATION_LOST : SaveState.FAILED;
         }
     }
 
     /** Writes an in-memory payload into a reserved document. */
-    public static boolean save(Context context, Target target, byte[] data) {
+    public static SaveState save(Context context, Target target, byte[] data) {
         return save(context, target, output -> output.write(data));
     }
 

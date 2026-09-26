@@ -729,6 +729,9 @@ public final class InlineDownloadButtonTest {
         assertFalse(DownloadDestination.isDestinationLoss(
                 new IOException("Could not find an unused name for jack_1.jpg")));
         assertFalse(DownloadDestination.isDestinationLoss(null));
+        // A generic IllegalArgumentException (bad filename, bad mime) must not clear the folder.
+        assertFalse(DownloadDestination.isDestinationLoss(
+                new IllegalArgumentException("bad filename")));
 
         Throwable first = new IOException("cycle A");
         Throwable second = new IOException("cycle B");

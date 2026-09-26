@@ -216,15 +216,19 @@ public final class MediaMerger {
                 return;
             }
 
-            boolean saved = saveMergedBitmap(context, mergedBitmap, target, format);
+            DownloadDestination.SaveState saveState = saveMergedBitmap(context, mergedBitmap, target, format);
             mergedBitmap.recycle();
 
-            if (saved) {
-                NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + target.fileName());
-                InlineDownloadButton.reportDownloadStatus(
-                        "Merged image saved: " + target.fileName(), username);
-            } else {
-                InlineDownloadButton.reportDownloadStatus("Failed to save merged image: " + fileName, username);
+            switch (saveState) {
+                case SAVED -> {
+                    NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + target.fileName());
+                    InlineDownloadButton.reportDownloadStatus(
+                            "Merged image saved: " + target.fileName(), username);
+                }
+                case DESTINATION_LOST -> InlineDownloadButton.reportDownloadStatus(
+                        InlineDownloadButton.FOLDER_LOST_MESSAGE, username);
+                case FAILED -> InlineDownloadButton.reportDownloadStatus(
+                        "Failed to save merged image: " + fileName, username);
             }
 
         } catch (Throwable t) {
@@ -285,7 +289,7 @@ public final class MediaMerger {
         }
     }
 
-    private static boolean saveMergedBitmap(
+    private static DownloadDestination.SaveState saveMergedBitmap(
             Context context,
             Bitmap bitmap,
             DownloadDestination.Target target,

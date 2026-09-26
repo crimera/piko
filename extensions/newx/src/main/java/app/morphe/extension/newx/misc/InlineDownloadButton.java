@@ -1348,8 +1348,9 @@ public final class InlineDownloadButton {
 
     /** In-app message plus toast fallback, so outcomes never depend on the host being ready. */
     static void reportDownloadStatus(String message, String username) {
-        NewXInAppNotification.tryShowForUser(message, username);
-        Utils.showToastShort(message);
+        String formatted = NewXInAppNotification.formatForUser(message, username);
+        NewXInAppNotification.tryShow(formatted);
+        Utils.showToastShort(formatted);
     }
 
     private static void reportEnqueueResult(EnqueueState state, String username) {
