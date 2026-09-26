@@ -16,6 +16,8 @@ import app.morphe.extension.crimera.settings.StringSetting;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
+
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.shared.MarkChatAsReadScope;
 
@@ -28,6 +30,8 @@ public class Pref {
     }
 
     public static boolean clearAllPreferences() {
+        // Resetting settings would silently drop an active Focus Lock.
+        if (FocusLock.isLocked()) return false;
         return SharedPref.clearAll();
     }
     
@@ -157,11 +161,39 @@ public class Pref {
     }
 
     public static boolean disableReelsScrolling() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
+        return (SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) || FocusLock.blocksReels()) && SettingsStatus.disableReelsScrolling;
     }
 
     public static boolean disableSwipeToCreate() {
         return SharedPref.getBooleanPref(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
+    }
+
+    public static boolean focusLockBlockReels() {
+        return SharedPref.getBooleanPref(Settings.FOCUS_LOCK_BLOCK_REELS);
+    }
+
+    public static boolean focusLockBlockExplore() {
+        return SharedPref.getBooleanPref(Settings.FOCUS_LOCK_BLOCK_EXPLORE);
+    }
+
+    public static String focusLockDurationDays() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_DURATION_DAYS);
+    }
+
+    public static String focusLockUntil() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_UNTIL);
+    }
+
+    public static boolean setFocusLockUntil(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNTIL.key, value);
+    }
+
+    public static String focusLockUnlockRequestedAt() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT);
+    }
+
+    public static boolean setFocusLockUnlockRequestedAt(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT.key, value);
     }
 
     public static boolean makeEphemeralMediaPermanent() {

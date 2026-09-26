@@ -8,6 +8,7 @@ package app.morphe.extension.instagram.patches.navigation;
 
 import android.content.Intent;
 
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.SettingsRestart;
 import app.morphe.extension.instagram.utils.Pref;
 
@@ -205,6 +206,20 @@ public final class NavigationBarPatch {
         return config;
     }
 
+    /**
+     * Focus Lock hides the Reels tab regardless of the stored config.
+     *
+     * Applied only where tabs are rendered, never inside {@link #loadConfig()}: the navigation
+     * editor loads the config too, so filtering there would let pressing OK save the filtered
+     * layout permanently. The user's own layout stays stored and returns once the lock ends.
+     */
+    private static Config applyFocusLock(Config config) {
+        if (!FocusLock.blocksReels() || !config.visible().contains(Tab.REELS)) return config;
+        EnumSet<Tab> visible = EnumSet.copyOf(config.visible());
+        visible.remove(Tab.REELS);
+        return normalize(config.order(), visible, config.startup());
+    }
+
     public static boolean saveConfig(List<Tab> order, Set<Tab> visible, Tab startup) {
         Config normalized = normalize(order, visible, startup);
         String previous = Pref.navigationTabs();
@@ -245,7 +260,8 @@ public final class NavigationBarPatch {
             List<Candidate> candidates = classify(allCandidates);
             List<Candidate> output = new ArrayList<>();
             int knownCapacity = Math.max(0, MAX_TABS - unknown.size());
-            Config config = loadConfig(find(current, Tab.CREATE, new IdentityHashMap<>()) != null);
+            Config config = applyFocusLock(
+                    loadConfig(find(current, Tab.CREATE, new IdentityHashMap<>()) != null));
             for (Tab tab : config.order()) {
                 if (output.size() == knownCapacity) break;
                 if (!config.visible().contains(tab)) continue;
@@ -295,7 +311,7 @@ public final class NavigationBarPatch {
         try {
             if (intent.hasExtra(STARTUP_TAB_EXTRA)) return;
             List<Candidate> candidates = classify(allCandidates);
-            Config config = loadConfig();
+            Config config = applyFocusLock(loadConfig());
             Tab[] choices = startupChoices(config);
             for (Tab tab : choices) {
                 Candidate candidate = find(candidates, tab, new IdentityHashMap<>());

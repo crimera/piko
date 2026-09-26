@@ -131,6 +131,10 @@ public class SettingsStatus {
     public static void disableSwipeToCreate() {
         disableSwipeToCreate = true;
     }
+    public static boolean focusLock = false;
+    public static void focusLock() {
+        focusLock = true;
+    }
     public static boolean disableDoubleTapLike = false;
     public static void disableDoubleTapLike() {
         disableDoubleTapLike = true;
@@ -140,7 +144,7 @@ public class SettingsStatus {
         hideReelsFollowButton = true;
     }
     public static boolean distractionFreeSection() {
-        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling || disableSwipeToCreate);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
     //Misc section.
@@ -269,6 +273,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_highlights"),SettingsStatus.disableHighlights);
         FLAGS.put(str("piko_disable_stories"),SettingsStatus.disableStories);
         FLAGS.put(str("piko_disable_swipe_to_create"), SettingsStatus.disableSwipeToCreate);
+        FLAGS.put(str("piko_focus_lock"), SettingsStatus.focusLock);
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
         FLAGS.put(str("piko_save_deleted_messages"),SettingsStatus.saveDeletedMessages);

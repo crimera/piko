@@ -20,6 +20,7 @@ import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
+import android.util.Log;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ShareLinkSanitizer;
 import app.morphe.extension.shared.Utils;
@@ -28,6 +29,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.story.StorySeenRequestScope;
 import app.morphe.extension.crimera.PikoUtils;
 
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.ActivityHook;
 
 @SuppressWarnings("unused")
@@ -139,7 +141,9 @@ public class Links {
                         || path.contains("/discover/topical_explore_stream")
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/recent_searches/"))
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/top_serp/"))) {
-                    shouldBlockUri = DISABLE_EXPLORE;
+                    // Focus Lock is read per request, not from the cached field: a lock that
+                    // expires while the process is alive must release explore without a restart.
+                    shouldBlockUri = DISABLE_EXPLORE || FocusLock.blocksExplore();
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
                     shouldBlockUri = DISABLE_COMMENTS;
                 } else if (path.contains("/discover/ayml") || path.contains("/discover/chaining")) { // Thanks to  @brosssh
@@ -159,6 +163,9 @@ public class Links {
             Logger.printException(() -> "intercept URI failed: ", ex);
         }
         // Exception is hanndled at call.
+        if (shouldBlockUri && Pref.pikoDebug()) {
+            Log.d("piko", "blocked uri: " + uri);
+        }
         if(shouldBlockUri) {
             throw new IOException("Block uri");
         }
