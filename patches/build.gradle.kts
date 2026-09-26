@@ -19,6 +19,11 @@ dependencies {
     implementation(libs.gson)
 
     implementation(libs.morphe.patches.library)
+
+    // Typed Dalvik emission (https://github.com/crimera/morphe-bytecode).
+    implementation("crimera:morphe-bytecode:0.1.3")
+
+    testImplementation(kotlin("test"))
 }
 
 tasks {
@@ -29,6 +34,41 @@ tasks {
 
         classpath = sourceSets["main"].runtimeClasspath
         mainClass.set("app.morphe.util.resource.CheckStringKt")
+    }
+
+    register<JavaExec>("lintNewxResolvers") {
+        description = "Checks NewX resolvers for unsafe candidate selection and nullable fallthrough"
+        group = "verification"
+
+        dependsOn(classes)
+
+        classpath = sourceSets["main"].runtimeClasspath
+        mainClass.set("app.crimera.tools.newx.NewXResolverLinterKt")
+        args(
+            providers.gradleProperty("newxResolverSourceRoot").orElse(
+                rootProject.projectDir.resolve("patches/src/main/kotlin/app/crimera/patches/newx").absolutePath,
+            ).get(),
+        )
+        if (providers.gradleProperty("newxResolverLintReportOnly").isPresent) {
+            args("--report-only")
+        }
+    }
+
+    register<JavaExec>("checkExtensionDescriptors") {
+        description = "Checks patch-side extension descriptors against the built extension dex files"
+        group = "verification"
+
+        dependsOn(classes)
+
+        classpath = sourceSets["main"].runtimeClasspath
+        mainClass.set("app.crimera.tools.newx.ExtensionDescriptorLinterKt")
+        args(
+            "--extensions=${layout.buildDirectory.dir("resources/main/extensions").get().asFile.absolutePath}",
+            "--sources=${projectDir.resolve("src/main/kotlin").absolutePath}",
+        )
+        if (providers.gradleProperty("extensionDescriptorReportOnly").isPresent) {
+            args("--report-only")
+        }
     }
 
     register<JavaExec>("generatePatchesList") {

@@ -1,0 +1,558 @@
+package app.crimera.patches.newx.misc.navbar
+
+import app.crimera.patches.newx.misc.drawer.isDrawerRowRenderer
+import app.crimera.patches.newx.misc.drawer.isStringResourceLookup
+import app.crimera.patches.newx.misc.extension.newXExtensionPatch
+import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.SettingsRegistrationState
+import app.crimera.patches.newx.settings.choice
+import app.crimera.patches.newx.settings.newXCustomScreen
+import app.crimera.patches.newx.settings.newXMultiChoice
+import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.Constants.NAV_BAR_FILTER_DESCRIPTOR
+import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
+import app.crimera.bytecode.RegisterLimit
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
+import app.crimera.patches.newx.utils.destinationRegisterOrNull
+import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
+import app.crimera.patches.newx.utils.valueReachesRegister
+import app.crimera.patches.utils.scopedMatchAll
+import app.morphe.patcher.Match
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.smali.toInstruction
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patches.all.misc.resources.hasResourceId
+import app.morphe.util.getReference
+import app.morphe.util.p0Register
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
+
+private const val NAV_BAR_REPLACEMENT_DESCRIPTOR =
+    "Lapp/morphe/extension/newx/misc/NavBarReplacement;"
+private const val NAV_BAR_CATALOG_DESCRIPTOR =
+    "Lapp/morphe/extension/newx/misc/NavBarCatalog;"
+private const val NAV_BAR_EDITOR_DESCRIPTOR =
+    "Lapp/morphe/extension/newx/misc/NavBarEditorFragment;"
+private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val INT_DESCRIPTOR = "I"
+
+private const val OPEN_REPLACEMENT_DESCRIPTOR =
+    "$NAV_BAR_REPLACEMENT_DESCRIPTOR->openReplacementFor($OBJECT_DESCRIPTOR)Z"
+private const val OVERRIDE_ICON_DESCRIPTOR =
+    "$NAV_BAR_REPLACEMENT_DESCRIPTOR->overrideIcon($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
+private const val OVERRIDE_LABEL_DESCRIPTOR =
+    "$NAV_BAR_REPLACEMENT_DESCRIPTOR->overrideLabel($OBJECT_DESCRIPTOR$STRING_DESCRIPTOR)$STRING_DESCRIPTOR"
+private const val SHOULD_CLEAR_BADGE_DESCRIPTOR =
+    "$NAV_BAR_REPLACEMENT_DESCRIPTOR->shouldClearBadge($OBJECT_DESCRIPTOR)Z"
+private const val REGISTER_DESTINATION_DESCRIPTOR =
+    "$NAV_BAR_CATALOG_DESCRIPTOR->registerDestination($STRING_DESCRIPTOR$INT_DESCRIPTOR$OBJECT_DESCRIPTOR$INT_DESCRIPTOR)V"
+private const val REGISTER_TAB_DESCRIPTOR =
+    "$NAV_BAR_CATALOG_DESCRIPTOR->registerTab($STRING_DESCRIPTOR$INT_DESCRIPTOR$STRING_DESCRIPTOR)V"
+private const val SET_DESTINATION_CLICK_DESCRIPTOR =
+    "$NAV_BAR_REPLACEMENT_DESCRIPTOR->setDestinationClick($STRING_DESCRIPTOR$FUNCTION0_DESCRIPTOR)V"
+private const val TAB_DATA_FILTER_DESCRIPTOR =
+    "$NAV_BAR_FILTER_DESCRIPTOR->filter(Ljava/util/Map;)Ljava/util/Map;"
+private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
+
+private data class NavBarDestinationSpec(
+    val id: String,
+    val titleResourceName: String,
+    val optional: Boolean = false,
+    val alternateTitleResourceName: String? = null,
+)
+
+private val NAV_BAR_DESTINATIONS =
+    listOf(
+        NavBarDestinationSpec("BOOKMARKS", "bookmarks_title"),
+        NavBarDestinationSpec("PROFILE", "drawer_profile_title"),
+        NavBarDestinationSpec("LISTS", "drawer_lists"),
+        NavBarDestinationSpec(
+            "COMMUNITIES",
+            "drawer_communities_title",
+        ),
+        NavBarDestinationSpec(
+            "HISTORY",
+            "drawer_history_title",
+            optional = true,
+            alternateTitleResourceName = "bookmarks_title",
+        ),
+        NavBarDestinationSpec("SPACES", "spaces_tab_name"),
+        NavBarDestinationSpec(
+            "CREATOR_STUDIO",
+            "creator_studio_drawer_menu_title",
+        ),
+    )
+
+private data class ResolvedNavBarDestination(
+    val spec: NavBarDestinationSpec,
+    val titleResourceId: Long,
+    val iconField: FieldReference,
+    val method: MutableMethod,
+    val callIndex: Int,
+    val clickRegister: Int,
+)
+
+@Suppress("unused")
+val customizeNewXNavBarPatch =
+    bytecodePatch(
+        name = "NewX: Customize navigation bar",
+        description = "Reorder, hide, and replace NewX bottom navigation bar items.",
+    ) {
+        compatibleWith(COMPATIBILITY_NEW_X)
+        dependsOn(newXExtensionPatch)
+
+        newXCustomScreen(
+            id = "newx.navigation.editor",
+            category = Categories.NAVIGATION,
+            strings = settingStrings("piko_newx_nav_editor"),
+            order = 100,
+            fragmentClassDescriptor = NAV_BAR_EDITOR_DESCRIPTOR,
+            iconResourceName = "ic_vector_bulleted_list",
+        )
+
+        newXMultiChoice(
+            id = "newx.content.hidden_navbar_badges",
+            category = Categories.NAVIGATION,
+            strings = settingStrings("piko_newx_nav_badges"),
+            order = 110,
+            defaultValue = emptySet(),
+            visible = false,
+            options = NAV_BAR_NATIVE_TAB_OPTIONS.map { (name, labelResourceName) -> choice(name, labelResourceName) },
+        )
+
+        execute {
+            val tabDataMatches = NewXTabDataFingerprint.scopedMatchAll()
+            val tabDataMatch = requireExactlyOne("NewX tabData builder", tabDataMatches)
+            val tabData = validateNewXNavBarTabData(tabDataMatch)
+
+            injectNavBarFilter(tabDataMatch)
+
+            val drawerRows = resolveDrawerRowCalls()
+            val destinations =
+                NAV_BAR_DESTINATIONS.mapNotNull { spec ->
+                    if (!hasResourceId(ResourceType.STRING, spec.titleResourceName)) {
+                        if (spec.optional) return@mapNotNull null
+                        throw PatchException(
+                            "NewX required navigation destination title resource is missing: " +
+                                spec.titleResourceName,
+                        )
+                    }
+                    resolveNavBarDestination(spec, drawerRows)
+                }
+            val contentTarget = resolveNavBarItemContent(tabData)
+            val iconFields = destinations.map { it.iconField } + contentTarget.tabIconFields.values
+            val iconDrawables = resolveIconDrawables(iconFields)
+
+            injectSettingsRegistrations(destinations, contentTarget.tabIconFields, iconDrawables)
+            injectDestinationClickCaptures(destinations)
+
+            val tabDataConstructor = resolveTabDataValueConstructor(tabData.tabDataValueType)
+
+            resolveTabChangeMethods(tabData).forEach { it.injectReplacementGuard() }
+            contentTarget.injectReplacementOverride(tabDataConstructor)
+        }
+    }
+
+/**
+ * Filters and reorders the tab map before the landing component consumes it. The extension reads
+ * the editor-managed order and hidden items from its own settings.
+ */
+private fun injectNavBarFilter(match: Match) {
+    val target = resolveNewXNavBarFilterTarget(match)
+    target.method.insertHook(
+        index = target.insertionIndex,
+        excludedRegisters = listOf(target.tabDataRegister),
+        relocateBranchTargets = false,
+    ) {
+        val workRegister = scratchRegister()
+        move(workRegister, target.tabDataRegister, OBJECT_DESCRIPTOR)
+        invokeStatic(methodReference(TAB_DATA_FILTER_DESCRIPTOR), workRegister)
+        moveResult(workRegister, MAP_DESCRIPTOR)
+        checkCast(workRegister, target.resultType)
+        move(target.tabDataRegister, workRegister, OBJECT_DESCRIPTOR)
+    }
+}
+
+/**
+ * Redirects the configured navigation bar item to the captured drawer click. Every other tab
+ * keeps the original tab change behavior.
+ */
+private fun MutableMethod.injectReplacementGuard() {
+    if (instructions.isEmpty()) {
+        throw PatchException("NewX tab change method has no instructions: $this")
+    }
+    val receiverRegister = p0Register
+    val tabRegister = p0Register + 1
+    insertHook(
+        index = 0,
+        excludedRegisters = listOf(receiverRegister, tabRegister),
+        relocateBranchTargets = false,
+    ) {
+        // `if-eqz` is format 21t, which encodes a byte register, so a byte scratch register is enough.
+        val workRegister = scratchRegister(RegisterLimit.BYTE)
+        invokeStatic(methodReference(OPEN_REPLACEMENT_DESCRIPTOR), tabRegister)
+        moveResult(workRegister, "Z")
+        ifEqz(workRegister, Target.Original)
+        returnVoid()
+    }
+}
+
+/**
+ * Substitutes the rendered icon and label of the configured navigation bar item.
+ *
+ * The hook must sit at the renderer call: the label switch's internal jump target is the
+ * conversion instruction, so any earlier insertion is skipped by every case but the fall-through
+ * one. The label is therefore replaced after localization instead of via its resource id.
+ *
+ * The receiver cannot be read at the render call either: the compiler reuses parameter registers
+ * for the icon and label there, so it is preserved in an unused local at method entry.
+ */
+private fun NavBarItemContentTarget.injectReplacementOverride(tabDataConstructor: MethodReference) {
+    if (tabDataConstructor.parameterTypes.any { it == "J" || it == "D" }) {
+        throw PatchException("NewX tab data replacement does not support wide parameters")
+    }
+
+    val paramTypes = tabDataConstructor.parameterTypes.map(CharSequence::toString)
+    method.insertHook(
+        index = rendererCallIndex,
+        excludedRegisters = listOf(iconRegister, labelRegister, tabDataValueRegister, thisRegister),
+        // The label switch jumps straight at the renderer call, so every case has to run the hook.
+        relocateBranchTargets = true,
+    ) {
+        val instanceRegister = scratchRegister()
+        val workRegister = scratchRegister()
+
+        // The receiver is preserved in a local above the original frame, so it is moved into the
+        // four-bit work register before every field read (format 22c cannot encode the receiver).
+        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
+        iget(workRegister, workRegister, navigationField)
+        invokeStatic(methodReference(OVERRIDE_ICON_DESCRIPTOR), workRegister, iconRegister)
+        moveResult(workRegister, iconType)
+        checkCast(workRegister, iconType)
+        move(iconRegister, workRegister, OBJECT_DESCRIPTOR)
+
+        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
+        iget(workRegister, workRegister, navigationField)
+        invokeStatic(methodReference(OVERRIDE_LABEL_DESCRIPTOR), workRegister, labelRegister)
+        moveResult(labelRegister, STRING_DESCRIPTOR)
+
+        move(workRegister, thisRegister, OBJECT_DESCRIPTOR)
+        iget(workRegister, workRegister, navigationField)
+        invokeStatic(methodReference(SHOULD_CLEAR_BADGE_DESCRIPTOR), workRegister)
+        moveResult(workRegister, "Z")
+        ifEqz(workRegister, Target.Original)
+
+        newInstance(instanceRegister, tabDataConstructor.definingClass)
+        constInt(workRegister, 0)
+        invokeDirect(
+            tabDataConstructor,
+            instanceRegister,
+            *IntArray(paramTypes.size) { workRegister },
+        )
+        move(tabDataValueRegister, instanceRegister, OBJECT_DESCRIPTOR)
+    }
+
+    // Preserve the receiver before the compiler reuses the parameter registers for the icon and
+    // the resolved label. Inserted last so the renderer call index above stayed valid.
+    method.insertHook(index = 0, relocateBranchTargets = false) { move(thisRegister, method.p0Register, OBJECT_DESCRIPTOR) }
+}
+
+private data class DrawerRowCall(
+    val method: Method,
+    val callIndex: Int,
+    val call: Instruction3rc,
+    val titleResourceId: Int,
+    val iconField: FieldReference,
+)
+
+/**
+ * Collects every title-based drawer row renderer call. Rows can live in a lazy row lambda outside
+ * the drawer package, so no package scope is assumed.
+ */
+context(context: BytecodePatchContext)
+private fun resolveDrawerRowCalls(): List<DrawerRowCall> {
+    val rows = mutableListOf<DrawerRowCall>()
+    // Keep this APK-wide scan immutable. Calling mutableClassDefBy for every class materializes a
+    // mutable proxy for the entire APK and is the source of patch-time OOMs on manager-sized heaps.
+    context.classDefForEach { classDef ->
+        classDef.methods.forEach { method ->
+            if (method.implementation == null) return@forEach
+            val methodInstructions = method.implementation?.instructions?.toList() ?: return@forEach
+            methodInstructions.forEachIndexed { index, instruction ->
+                if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@forEachIndexed
+                val call = instruction as? Instruction3rc ?: return@forEachIndexed
+                val renderer = instruction.getReference<MethodReference>() ?: return@forEachIndexed
+                if (!renderer.isDrawerRowRenderer()) return@forEachIndexed
+                val titleRegister = call.startRegister
+                val titleResourceId =
+                    methodInstructions.resolveTitleResourceIdAtRowCall(index, titleRegister)
+                        ?: return@forEachIndexed
+                val iconField =
+                    methodInstructions.resolveIconField(index, titleRegister + 1)
+                        ?: return@forEachIndexed
+                rows +=
+                    DrawerRowCall(
+                        method = method,
+                        callIndex = index,
+                        call = call,
+                        titleResourceId = titleResourceId,
+                        iconField = iconField,
+                    )
+            }
+        }
+    }
+    return rows
+}
+
+context(context: BytecodePatchContext)
+private fun resolveNavBarDestination(
+    spec: NavBarDestinationSpec,
+    rows: List<DrawerRowCall>,
+): ResolvedNavBarDestination {
+    val titleResourceId = getResourceId(ResourceType.STRING, spec.titleResourceName)
+    val alternateTitleResourceId =
+        spec.alternateTitleResourceName?.let { getResourceId(ResourceType.STRING, it) }
+    val titleResourceIds = listOfNotNull(titleResourceId, alternateTitleResourceId).toSet()
+    val matches = rows.filter { it.titleResourceId.toLong() in titleResourceIds }
+    val row =
+        requireExactlyOne(
+            "NewX drawer row for ${spec.titleResourceName}",
+            matches,
+        ) { "${it.method} @ ${it.callIndex}" }
+    val mutableMethodCandidates =
+        context.mutableClassDefBy(row.method.definingClass).methods.filter { method ->
+            method.name == row.method.name &&
+                method.returnType.toString() == row.method.returnType.toString() &&
+                method.parameterTypes.map(CharSequence::toString) ==
+                row.method.parameterTypes.map(CharSequence::toString)
+        }
+    val mutableMethod =
+        requireExactlyOne(
+            "NewX mutable drawer row method ${row.method}",
+            mutableMethodCandidates,
+        ) { it.toString() }
+    return ResolvedNavBarDestination(
+        spec = spec,
+        titleResourceId = titleResourceId.toLong(),
+        iconField = row.iconField,
+        method = mutableMethod,
+        callIndex = row.callIndex,
+        clickRegister = row.call.startRegister + 2,
+    )
+}
+
+internal fun List<Instruction>.resolveTitleResourceIdAtRowCall(
+    callIndex: Int,
+    titleRegister: Int,
+): Int? {
+    for (index in callIndex - 1 downTo 0) {
+        val instruction = this[index]
+        if (instruction.opcode != Opcode.MOVE_RESULT_OBJECT) continue
+        val resultRegister = (instruction as? OneRegisterInstruction)?.registerA ?: continue
+        if (!valueReachesRegister(index, resultRegister, callIndex, titleRegister)) continue
+        val conversionIndex = index - 1
+        val conversion = getOrNull(conversionIndex) ?: continue
+        val conversionReference = conversion.getReference<MethodReference>() ?: continue
+        if (!conversionReference.isStringResourceLookup()) continue
+        val registers = conversion.registersUsed
+        if (registers.size != 2) continue
+        return resolveIntegerLiteralOnCurrentPath(conversionIndex, registers[1])
+    }
+    return null
+}
+
+internal fun List<Instruction>.resolveIconField(
+    callIndex: Int,
+    iconRegister: Int,
+): FieldReference? {
+    var register = iconRegister
+    for (index in callIndex - 1 downTo 0) {
+        val instruction = this[index]
+        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction ?: return null
+            if (move.registerA == register) {
+                register = move.registerB
+            }
+            continue
+        }
+        if (instruction.opcode == Opcode.SGET_OBJECT) {
+            if ((instruction as? OneRegisterInstruction)?.registerA == register) {
+                return instruction.getReference<FieldReference>()
+            }
+            continue
+        }
+        if (instruction.destinationRegisterOrNull() == register) return null
+    }
+    return null
+}
+
+context(context: BytecodePatchContext)
+private fun injectSettingsRegistrations(
+    destinations: List<ResolvedNavBarDestination>,
+    tabIconFields: Map<String, FieldReference>,
+    iconDrawables: Map<String, Int>,
+) {
+    val registerDestination = methodReference(REGISTER_DESTINATION_DESCRIPTOR)
+    val registerTab = methodReference(REGISTER_TAB_DESCRIPTOR)
+    SettingsRegistrationState.inject(context) {
+        destinations.forEach { destination ->
+            constString(0, destination.spec.id)
+            constInt(1, destination.titleResourceId.toInt())
+            sget(2, destination.iconField)
+            constInt(3, iconDrawables.getValue(destination.iconField.toString()))
+            invokeStatic(registerDestination, 0, 1, 2, 3)
+        }
+        NAV_BAR_NATIVE_TAB_OPTIONS.forEach { (name, labelResourceName) ->
+            constString(0, name)
+            constInt(1, iconDrawables.getValue(tabIconFields.getValue(name).toString()))
+            constString(2, labelResourceName)
+            invokeStatic(registerTab, 0, 1, 2)
+        }
+    }
+}
+
+context(context: BytecodePatchContext)
+internal fun resolveIconDrawables(fields: Collection<FieldReference>): Map<String, Int> {
+    val drawables = mutableMapOf<String, Int>()
+    fields.groupBy { field -> field.definingClass.toString() }.forEach { (classType, classFields) ->
+        val iconClass = context.mutableClassDefBy(classType)
+        val initializers =
+            iconClass.methods.filter { method ->
+                method.name == "<clinit>" && method.parameterTypes.isEmpty() && method.returnType == "V"
+            }
+        val initializer =
+            requireExactlyOne("NewX icon initializer for $classType", initializers) { it.toString() }
+        val iconTypes = classFields.map { field -> field.type.toString() }.distinct()
+        val iconType = requireExactlyOne("NewX icon type for $classType", iconTypes)
+        val available = initializer.resolveIconDrawableMap(iconType)
+        classFields.forEach { field ->
+            drawables[field.toString()] =
+                available[field.toString()]
+                    ?: throw PatchException("NewX icon drawable was not resolved for $field")
+        }
+    }
+    return drawables
+}
+
+/** Maps each resolved static icon field to its drawable resource id. */
+internal fun MutableMethod.resolveIconDrawableMap(iconType: String): Map<String, Int> {
+    val drawables = linkedMapOf<String, Int>()
+    var allocationRegister: Int? = null
+    var drawableResource: Int? = null
+    instructions.forEachIndexed { index, instruction ->
+        if (instruction.opcode == Opcode.NEW_INSTANCE &&
+            instruction.getReference<TypeReference>()?.toString() == iconType
+        ) {
+            allocationRegister = (instruction as? OneRegisterInstruction)?.registerA
+            drawableResource = null
+            return@forEachIndexed
+        }
+        if (instruction.opcode == Opcode.INVOKE_DIRECT) {
+            val reference = instruction.getReference<MethodReference>()
+            val registers = instruction.registersUsed
+            if (reference?.definingClass?.toString() == iconType &&
+                reference.name == "<init>" &&
+                reference.parameterTypes.map { it.toString() } == listOf("I") &&
+                registers.size == 2 &&
+                registers[0] == allocationRegister
+            ) {
+                drawableResource = instructions.resolveIntegerLiteralOnCurrentPath(index, registers[1])
+            }
+            return@forEachIndexed
+        }
+        if (instruction.opcode != Opcode.SPUT_OBJECT) return@forEachIndexed
+        val field = instruction.getReference<FieldReference>()
+        val register = (instruction as? OneRegisterInstruction)?.registerA
+        val resource = drawableResource
+        if (field != null && register != null && resource != null &&
+            field.type.toString() == iconType && register == allocationRegister
+        ) {
+            drawables[field.toString()] = resource
+            allocationRegister = null
+            drawableResource = null
+        }
+    }
+    return drawables
+}
+
+context(context: BytecodePatchContext)
+private fun injectDestinationClickCaptures(destinations: List<ResolvedNavBarDestination>) {
+    val classDef = context.mutableClassDefBy(NAV_BAR_REPLACEMENT_DESCRIPTOR)
+    destinations.sortedByDescending { it.callIndex }.forEach { destination ->
+        val destinationIndex =
+            NAV_BAR_DESTINATIONS.indexOfFirst { spec -> spec.id == destination.spec.id }
+        if (destinationIndex < 0) {
+            throw PatchException("NewX destination is not registered: ${destination.spec.id}")
+        }
+        val bridgeName = "captureDestinationClick$destinationIndex"
+        if (classDef.methods.any { method -> method.name == bridgeName }) {
+            throw PatchException("NewX destination click bridge already exists: $bridgeName")
+        }
+
+        // The row call site has no spare low register for the destination id string, so the id is
+        // baked into a one-argument bridge method that the row can call with the click alone.
+        val implementation =
+            MethodImplementationBuilder(2).apply {
+                addInstruction("return-void".toInstruction())
+            }.methodImplementation
+        val bridgeMethod =
+            MutableMethod(
+                ImmutableMethod(
+                    classDef.type,
+                    bridgeName,
+                    listOf(ImmutableMethodParameter(FUNCTION0_DESCRIPTOR, emptySet(), null)),
+                    "V",
+                    AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                    emptySet(),
+                    emptySet(),
+                    implementation,
+                ),
+            )
+        classDef.methods.add(bridgeMethod)
+        val placeholderImplementation =
+            bridgeMethod.implementation
+                ?: throw PatchException("NewX destination click bridge has no implementation")
+        placeholderImplementation.removeInstruction(placeholderImplementation.instructions.lastIndex)
+        bridgeMethod.insertHook(0, relocateBranchTargets = false) {
+            constString(0, destination.spec.id)
+            invokeStatic(methodReference(SET_DESTINATION_CLICK_DESCRIPTOR), 0, bridgeMethod.p0Register)
+            returnVoid()
+        }
+
+        destination.method.insertHook(destination.callIndex, relocateBranchTargets = false) {
+            invokeStatic(
+                ImmutableMethodReference(
+                    NAV_BAR_REPLACEMENT_DESCRIPTOR,
+                    bridgeName,
+                    listOf(FUNCTION0_DESCRIPTOR),
+                    "V",
+                ),
+                destination.clickRegister,
+            )
+        }
+    }
+}
+
