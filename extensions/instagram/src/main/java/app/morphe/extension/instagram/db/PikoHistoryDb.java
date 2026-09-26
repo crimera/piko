@@ -23,7 +23,7 @@ import app.morphe.extension.shared.Logger;
 public class PikoHistoryDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_view_history.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
     private static final String TABLE = "view_history";
 
     private static final int MAX_ROWS = 2000;
@@ -56,6 +56,7 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
             "media_pk TEXT NOT NULL UNIQUE," +
             "post_type TEXT NOT NULL," +
             "owner_username TEXT," +
+            "owner_id TEXT," +
             "thumb_url TEXT," +
             "caption TEXT," +
             "permalink TEXT NOT NULL," +
@@ -97,12 +98,13 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
     }
 
     /** Adds a viewed item, or moves an already logged one to the top. */
-    public void logView(String mediaPk, String postType, String ownerUsername, String thumbUrl,
-                        String caption, String permalink) {
+    public void logView(String mediaPk, String postType, String ownerUsername, String ownerId,
+                        String thumbUrl, String caption, String permalink) {
         ContentValues cv = new ContentValues();
         cv.put("media_pk", mediaPk);
         cv.put("post_type", postType);
         cv.put("owner_username", ownerUsername);
+        cv.put("owner_id", ownerId);
         cv.put("thumb_url", thumbUrl);
         cv.put("caption", caption);
         cv.put("permalink", permalink);
@@ -130,8 +132,10 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
             while (c.moveToNext()) {
                 result.add(new Entry(
                     c.getLong(c.getColumnIndexOrThrow("id")),
+                    c.getString(c.getColumnIndexOrThrow("media_pk")),
                     c.getString(c.getColumnIndexOrThrow("post_type")),
                     c.getString(c.getColumnIndexOrThrow("owner_username")),
+                    c.getString(c.getColumnIndexOrThrow("owner_id")),
                     c.getString(c.getColumnIndexOrThrow("thumb_url")),
                     c.getString(c.getColumnIndexOrThrow("caption")),
                     c.getString(c.getColumnIndexOrThrow("permalink")),
@@ -152,18 +156,22 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
 
     public static final class Entry {
         public final long id;
+        public final String mediaPk;
         public final String postType;
         public final String ownerUsername;
+        public final String ownerId;
         public final String thumbUrl;
         public final String caption;
         public final String permalink;
         public final long viewedAt;
 
-        Entry(long id, String postType, String ownerUsername, String thumbUrl, String caption,
-              String permalink, long viewedAt) {
+        Entry(long id, String mediaPk, String postType, String ownerUsername, String ownerId,
+              String thumbUrl, String caption, String permalink, long viewedAt) {
             this.id = id;
+            this.mediaPk = mediaPk;
             this.postType = postType;
             this.ownerUsername = ownerUsername;
+            this.ownerId = ownerId;
             this.thumbUrl = thumbUrl;
             this.caption = caption;
             this.permalink = permalink;

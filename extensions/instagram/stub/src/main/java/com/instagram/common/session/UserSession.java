@@ -4,4 +4,8 @@ public class UserSession {
     public String getUserId() {
         return "";
     }
+
+    public String getToken() {
+        return "";
+    }
 }

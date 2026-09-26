@@ -31,6 +31,9 @@ public class ViewHistoryHook {
     private static final int THUMBNAIL_MIN_WIDTH = 360;
     private static final ExecutorService DB_WRITER = Executors.newSingleThreadExecutor();
 
+    /** The logged-in session's token, which Instagram's in-app story opener requires. */
+    static volatile String sessionToken;
+
     public static void openHistory(Context ctx) {
         try {
             if (ctx == null) ctx = PikoUtils.getContext();
@@ -46,6 +49,7 @@ public class ViewHistoryHook {
     /** Records a viewed item. Injected into the feed, Reels and Stories viewers. */
     public static void logMediaView(Object mediaObject, UserSession userSession, int carouselIndex) {
         try {
+            if (userSession != null) sessionToken = userSession.getToken();
             if (mediaObject == null || !Pref.saveViewHistory()) return;
 
             MediaData mediaData = new MediaData(mediaObject, userSession);
@@ -55,6 +59,7 @@ public class ViewHistoryHook {
 
             UserData user = orNull(mediaData::getUserData);
             String ownerUsername = user != null ? orNull(user::getUsername) : null;
+            String ownerId = user != null ? orNull(user::getUserId) : null;
             String thumbUrl = orNull(() -> thumbnailUrl(mediaData));
             String caption = orNull(mediaData::getDescriptionText);
             String permalink = Links.generatePostLink(mediaData, carouselIndex);
@@ -62,7 +67,8 @@ public class ViewHistoryHook {
             DB_WRITER.execute(() -> {
                 try {
                     PikoHistoryDb.getInstance(PikoUtils.getContext())
-                            .logView(mediaPk, postType, ownerUsername, thumbUrl, caption, permalink);
+                            .logView(mediaPk, postType, ownerUsername, ownerId, thumbUrl,
+                                    caption, permalink);
                 } catch (Exception e) {
                     Logger.printException(() -> "View history write failure", e);
                 }

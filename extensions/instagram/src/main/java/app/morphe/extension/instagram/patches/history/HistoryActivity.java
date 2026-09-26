@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.db.PikoHistoryDb;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
@@ -45,6 +44,8 @@ import app.morphe.extension.shared.ui.Dim;
 public class HistoryActivity extends Activity {
 
     private static final int PAGE_SIZE = 40;
+    private static final String STORIES_URL_HANDLER =
+            "com.instagram.urlhandlers.stories.StoriesUrlHandlerActivity";
 
     private List<PikoHistoryDb.Entry> history;
     private int renderedCount;
@@ -178,6 +179,7 @@ public class HistoryActivity extends Activity {
     }
 
     private void openEntry(PikoHistoryDb.Entry entry) {
+        if ("STORY".equals(entry.postType) && openStory(entry)) return;
         String link = webLink(entry);
         if (link == null) return;
         try {
@@ -185,6 +187,29 @@ public class HistoryActivity extends Activity {
                     .setPackage(getPackageName()));
         } catch (Exception e) {
             Logger.printException(() -> "Failed to open " + link, e);
+        }
+    }
+
+    /**
+     * Opens a story in Instagram's story viewer, the way a story shared in a chat opens. The web
+     * story link only reaches the owner's profile, and Instagram's router drops
+     * {@code instagram://stories} links, so start the (non-exported) handler behind it directly.
+     */
+    private boolean openStory(PikoHistoryDb.Entry entry) {
+        String token = ViewHistoryHook.sessionToken;
+        if (token == null || entry.ownerId == null || entry.mediaPk == null) return false;
+        try {
+            Bundle extras = new Bundle();
+            extras.putString("original_url", "instagram://stories?user_id=" + entry.ownerId
+                    + "&media_id=" + entry.mediaPk);
+            extras.putString("IgSessionManager.SESSION_TOKEN_KEY", token);
+            startActivity(new Intent()
+                    .setClassName(getPackageName(), STORIES_URL_HANDLER)
+                    .putExtra("com.instagram.url.extra.BUNDLE", extras));
+            return true;
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed to open story " + entry.mediaPk, e);
+            return false;
         }
     }
 
@@ -212,18 +237,10 @@ public class HistoryActivity extends Activity {
             .show();
     }
 
-    /**
-     * The instagram.com link. Stories logged by 3.10.0-personal.2 hold an internal
-     * {@code instagram://stories?user_id=..&media_id=..} link, which Instagram ignores, so
-     * rebuild those from the owner's username.
-     */
+    /** The instagram.com link. */
     private static String webLink(PikoHistoryDb.Entry entry) {
         String permalink = entry.permalink;
-        if (permalink == null || permalink.isEmpty()) return null;
-        if (!permalink.startsWith("instagram://stories")) return permalink;
-        String mediaId = Uri.parse(permalink).getQueryParameter("media_id");
-        if (mediaId == null || entry.ownerUsername == null || entry.ownerUsername.isEmpty()) return null;
-        return String.format(Constants.INSTAGRAM_SHARE_LINK, "stories", entry.ownerUsername) + mediaId;
+        return permalink == null || permalink.isEmpty() ? null : permalink;
     }
 
     private void confirmDelete(long id, View card, LinearLayout column) {
