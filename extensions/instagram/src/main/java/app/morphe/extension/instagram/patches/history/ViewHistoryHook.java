@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.constants.PostType;
 import app.morphe.extension.instagram.db.PikoHistoryDb;
 import app.morphe.extension.instagram.entity.ImageData;
 import app.morphe.extension.instagram.entity.MediaData;
@@ -57,7 +58,9 @@ public class ViewHistoryHook {
             String ownerUsername = user != null ? orNull(user::getUsername) : null;
             String thumbUrl = orNull(() -> thumbnailUrl(mediaData));
             String caption = orNull(mediaData::getDescriptionText);
-            String permalink = Links.generatePostLink(mediaData, carouselIndex);
+            String permalink = mediaData.getPostType() == PostType.STORY
+                    ? storyLink(mediaData, mediaPk, carouselIndex)
+                    : Links.generatePostLink(mediaData, carouselIndex);
 
             DB_WRITER.execute(() -> {
                 try {
@@ -70,6 +73,16 @@ public class ViewHistoryHook {
         } catch (Exception e) {
             Logger.printException(() -> "logMediaView failure", e);
         }
+    }
+
+    /**
+     * The web link for a story only opens the owner's profile and leaves the story ring
+     * loading forever. The internal link goes straight to the story viewer at this item.
+     */
+    private static String storyLink(MediaData mediaData, String mediaPk, int carouselIndex) throws Exception {
+        String ownerId = mediaData.getOwnerID();
+        if (ownerId == null) return Links.generatePostLink(mediaData, carouselIndex);
+        return "instagram://stories?user_id=" + ownerId + "&media_id=" + mediaPk;
     }
 
     private static <T> T orNull(Callable<T> getter) {
