@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import app.morphe.extension.instagram.db.PikoHistoryDb;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
 
 /**
@@ -214,6 +216,31 @@ public class HistoryActivity extends Activity {
         }
     }
 
+    private void showEntryMenu(PikoHistoryDb.Entry entry, View card, LinearLayout column) {
+        String webLink = webLink(entry);
+        List<String> items = new ArrayList<>();
+        if (webLink != null) items.add(str("piko_history_copy_link"));
+        items.add(str("piko_delete"));
+        new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
+            .setItems(items.toArray(new String[0]), (d, which) -> {
+                if (webLink != null && which == 0) {
+                    Utils.setClipboard(webLink);
+                    Utils.showToastShort(str("piko_copied"));
+                } else {
+                    confirmDelete(entry.id, card, column);
+                }
+            })
+            .show();
+    }
+
+    /** The shareable instagram.com link, never the internal {@code instagram://} one. */
+    private static String webLink(PikoHistoryDb.Entry entry) {
+        String permalink = entry.permalink;
+        if (permalink == null || permalink.isEmpty()) return null;
+        if (permalink.startsWith("http")) return permalink;
+        return webStoryLink(entry);
+    }
+
     private void confirmDelete(long id, View card, LinearLayout column) {
         new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
             .setMessage(str("piko_delete_view_history_confirm"))
@@ -284,7 +311,7 @@ public class HistoryActivity extends Activity {
         boolean placeLeft = leftHeightEstimate <= rightHeightEstimate;
         LinearLayout targetColumn = placeLeft ? leftColumn : rightColumn;
         card.setOnLongClickListener(v -> {
-            confirmDelete(entry.id, card, targetColumn);
+            showEntryMenu(entry, card, targetColumn);
             return true;
         });
 
