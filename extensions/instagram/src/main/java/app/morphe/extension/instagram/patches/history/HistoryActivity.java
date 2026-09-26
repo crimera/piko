@@ -178,34 +178,13 @@ public class HistoryActivity extends Activity {
     }
 
     private void openEntry(PikoHistoryDb.Entry entry) {
-        if (openPermalink(entry.permalink)) return;
-        String webLink = webStoryLink(entry);
-        if (webLink != null) openPermalink(webLink);
-    }
-
-    /**
-     * Stories are stored as an internal {@code instagram://stories} link. If Instagram stops
-     * handling it, fall back to the web link, which at least opens the owner's profile.
-     */
-    private static String webStoryLink(PikoHistoryDb.Entry entry) {
-        if (entry.permalink == null || !entry.permalink.startsWith("instagram://stories")) return null;
-        String mediaId = Uri.parse(entry.permalink).getQueryParameter("media_id");
-        if (mediaId == null || entry.ownerUsername == null || entry.ownerUsername.isEmpty()) return null;
-        return String.format(Constants.INSTAGRAM_SHARE_LINK, "stories", entry.ownerUsername) + mediaId;
-    }
-
-    /** Returns false if Instagram has no screen for this link. */
-    private boolean openPermalink(String permalink) {
-        if (permalink == null || permalink.isEmpty()) return false;
+        String link = webLink(entry);
+        if (link == null) return;
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(permalink))
-                    .setPackage(getPackageName());
-            if (intent.resolveActivity(getPackageManager()) == null) return false;
-            startActivity(intent);
-            return true;
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                    .setPackage(getPackageName()));
         } catch (Exception e) {
-            Logger.printException(() -> "Failed to open " + permalink, e);
-            return false;
+            Logger.printException(() -> "Failed to open " + link, e);
         }
     }
 
@@ -233,12 +212,18 @@ public class HistoryActivity extends Activity {
             .show();
     }
 
-    /** The shareable instagram.com link, never the internal {@code instagram://} one. */
+    /**
+     * The instagram.com link. Stories logged by 3.10.0-personal.2 hold an internal
+     * {@code instagram://stories?user_id=..&media_id=..} link, which Instagram ignores, so
+     * rebuild those from the owner's username.
+     */
     private static String webLink(PikoHistoryDb.Entry entry) {
         String permalink = entry.permalink;
         if (permalink == null || permalink.isEmpty()) return null;
-        if (permalink.startsWith("http")) return permalink;
-        return webStoryLink(entry);
+        if (!permalink.startsWith("instagram://stories")) return permalink;
+        String mediaId = Uri.parse(permalink).getQueryParameter("media_id");
+        if (mediaId == null || entry.ownerUsername == null || entry.ownerUsername.isEmpty()) return null;
+        return String.format(Constants.INSTAGRAM_SHARE_LINK, "stories", entry.ownerUsername) + mediaId;
     }
 
     private void confirmDelete(long id, View card, LinearLayout column) {

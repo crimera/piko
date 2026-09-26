@@ -81,16 +81,6 @@ public class MediaData extends Entity {
         return "0";
     }
 
-    /** The owner's user id: media ids have the form {@code <pk>_<ownerId>}. */
-    public String getOwnerID() {
-        try {
-            String[] parts = ((String) super.getMethod(this.getExtendedData(), "getId")).split("_");
-            return parts.length > 1 ? parts[1] : null;
-        } catch (Exception e) {
-        }
-        return null;
-    }
-
     public PostType getPostType() {
         try{
             String postType = this.getPostTypeKey().toLowerCase();
