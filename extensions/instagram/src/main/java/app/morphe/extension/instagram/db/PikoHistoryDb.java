@@ -19,7 +19,7 @@ import java.util.List;
 public class PikoHistoryDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_view_history.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
     private static final String TABLE = "view_history";
 
     private static final int MAX_ROWS = 2000;
@@ -55,11 +55,30 @@ public class PikoHistoryDb extends SQLiteOpenHelper {
             "viewed_at INTEGER NOT NULL" +
             ")"
         );
-        db.execSQL("CREATE INDEX idx_viewed_at ON " + TABLE + "(viewed_at)");
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_viewed_at ON " + TABLE + "(viewed_at)");
     }
 
+    /**
+     * Version 1 databases can hold a table from a pre-release build of this screen with other
+     * columns, which fails every write. Keep the table only if it has all current columns.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (hasColumns(db, "id", "media_pk", "post_type", "owner_username", "thumb_url",
+                "caption", "permalink", "viewed_at")) return;
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+        onCreate(db);
+    }
+
+    private static boolean hasColumns(SQLiteDatabase db, String... columns) {
+        List<String> existing = new ArrayList<>();
+        try (Cursor c = db.rawQuery("PRAGMA table_info(" + TABLE + ")", null)) {
+            while (c.moveToNext()) existing.add(c.getString(c.getColumnIndexOrThrow("name")));
+        }
+        for (String column : columns) {
+            if (!existing.contains(column)) return false;
+        }
+        return true;
     }
 
     /** Adds a viewed item, or moves an already logged one to the top. */
