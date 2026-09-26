@@ -63,8 +63,6 @@
     <string name="piko_category_misc">其他</string>
     <string name="piko_disable_analytics">停用資料分析</string>
     <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
-    <string name="piko_disable_discover_people">停用「為你推薦」功能</string>
-    <string name="piko_disable_discover_people_desc">在個人檔案頁面中停用「為你推薦」功能</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
     <string name="piko_follow_back_indicator_desc">在個人檔案頁面中新增「已追蹤你」狀態標籤，並在點擊時顯示詳細的好友關係狀態</string>
     <string name="piko_fbi_follows_you">已追蹤你</string>
@@ -119,7 +117,6 @@
     <string name="piko_download_all">下載全部</string>
     <string name="piko_downloading_media">下載中： </string>
     <string name="piko_downloaded_media">已下載： </string>
-    <string name="piko_media_exists">媒體已存在</string>
     <string name="piko_download_failed_media">下載失敗： </string>
     <string name="piko_download_set_path_success">下載路徑已更新！</string>
     <string name="piko_download_with_external_downloader">使用外部下載程式下載</string>

@@ -60,6 +60,8 @@
     <string name="piko_hide_notes_tray">Masquer le bandeau des notes</string>
     <string name="piko_hide_notes_tray_desc">Masque le bandeau des notes dans la section des messages privés</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Masquer le bouton de création de groupe dans le panneau de partage</string>
+    <string name="piko_hide_reels_follow_button">Masquer le bouton \"Suivre\" des Reels</string>
+    <string name="piko_hide_reels_follow_button_desc">Supprime le bouton \"Suivre\" de la ligne de l\'auteur des Reels</string>
     <string name="piko_disable_double_tap_like_post">Désactiver le double appui pour liker sur une publication</string>
     <string name="piko_disable_double_tap_like_reel">Désactiver le double appui pour liker sur un reel</string>
     <string name="piko_disable_double_tap_like_comment">Désactiver le double appui pour liker sur un commentaire</string>
@@ -72,8 +74,7 @@
     <string name="piko_disable_analytics">Désactiver les analyses</string>
     <string name="piko_delete_analytics_cache">Supprimer le cache des analyses</string>
     <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs d\'Instagram/Facebook</string>
-    <string name="piko_disable_discover_people">Désactiver “Découvrir des personnes”</string>
-    <string name="piko_disable_discover_people_desc">Désactive la section “Découvrir des personnes” sur le profil utilisateur</string>
+    <string name="piko_disable_discover_people">Masquer les comptes suggérés</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>
     <string name="piko_follow_back_indicator_desc">Ajoute un libellé indiquant qu\'un utilisateur vous suit en retour sur sa page de profil et affiche un aperçu détaillé du statut de votre relation lorsqu\'on clique dessus</string>
     <string name="piko_fbi_color_indicator">Activer l\'indicateur de statut d\'amitié coloré</string>
@@ -134,6 +135,18 @@
     <string name="piko_download_username_folder_desc">Crée des sous-dossiers en fonction du nom d\'utilisateur</string>
     <string name="piko_embed_download_metadata">Intégrer les métadonnées de la vidéo</string>
     <string name="piko_embed_download_metadata_desc">Ajoute les sous-titres, le lien de la publication, le créateur et la date de mise en ligne aux fichiers MP4 téléchargés.</string>
+    <string name="piko_download_file_name_template">Format du nom du fichier</string>
+    <string name="piko_download_file_name_template_invalid">Nom de fichier invalide</string>
+    <string name="piko_download_file_name_insert_token">Insérer %1$s</string>
+    <string name="piko_download_file_name_variables">Variables</string>
+    <string name="piko_download_file_name_token_username">Nom d\'utilisateur</string>
+    <string name="piko_download_file_name_token_media_id">ID du média</string>
+    <string name="piko_download_file_name_token_shortcode">Code de remplacement</string>
+    <string name="piko_download_file_name_token_upload_date">Date</string>
+    <string name="piko_download_file_name_token_upload_time">Temps</string>
+    <string name="piko_download_file_name_token_type">Type</string>
+    <string name="piko_download_file_name_token_carousel_index">Carrousel</string>
+    <string name="piko_download_file_name_token_variant_suffix">Variante</string>
     <string name="piko_download_current_media">Télécharger le média actuel</string>
     <string name="piko_download_as_image">Télécharger en tant qu\'image</string>
     <string name="piko_video_variants">Variantes vidéo</string>
@@ -145,7 +158,6 @@
     <string name="piko_download_all">Tout télécharger</string>
     <string name="piko_downloading_media">Téléchargement: </string>
     <string name="piko_downloaded_media">Téléchargé: </string>
-    <string name="piko_media_exists">Le média existe</string>
     <string name="piko_download_failed_media">Échec du téléchargement : </string>
     <string name="piko_download_set_path">Choisir le dossier de téléchargement</string>
     <string name="piko_download_set_path_success">Répertoire de téléchargement mis à jour!</string>

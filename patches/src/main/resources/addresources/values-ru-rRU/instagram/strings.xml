@@ -60,6 +60,8 @@
     <string name="piko_hide_notes_tray">Скрыть панель заметок</string>
     <string name="piko_hide_notes_tray_desc">Скрывает панель заметок в разделе сообщений</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Скрыть кнопку создания группы в меню отправки</string>
+    <string name="piko_hide_reels_follow_button">Скрыть кнопку подписчики в Reels</string>
+    <string name="piko_hide_reels_follow_button_desc">Удаляет кнопку «Подписаться» из строки автора в Reels</string>
     <string name="piko_disable_double_tap_like_post">Отключить двойное нажатие для отметки «Нравится» на публикации</string>
     <string name="piko_disable_double_tap_like_reel">Отключить двойное нажатие для отметки «Нравится» на Reels</string>
     <string name="piko_disable_double_tap_like_comment">Отключить двойное нажатие для отметки «Нравится» на комментарии</string>
@@ -72,8 +74,7 @@
     <string name="piko_disable_analytics">Отключить аналитику</string>
     <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
     <string name="piko_disable_analytics_desc">Блокирует аналитику, отправляемую на сервера Instagram/Facebook</string>
-    <string name="piko_disable_discover_people">Отключить раздел «Возможные знакомые»</string>
-    <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
+    <string name="piko_disable_discover_people">Скрыть рекомендованные аккаунты</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
     <string name="piko_follow_back_indicator_desc">Добавляет на страницу профиля метку «Подписан(а) на вас» и показывает подробную информацию о статусе дружбы при нажатии</string>
     <string name="piko_fbi_color_indicator">Включить цветной индикатор статуса дружбы</string>
@@ -134,6 +135,18 @@
     <string name="piko_download_username_folder_desc">Создаёт подпапки по имени пользователя</string>
     <string name="piko_embed_download_metadata">Встраивать метаданные видео</string>
     <string name="piko_embed_download_metadata_desc">Добавляет подпись, ссылку на публикацию, автора и дату загрузки в скачанные файлы MP4</string>
+    <string name="piko_download_file_name_template">Формат имени файла</string>
+    <string name="piko_download_file_name_template_invalid">Недопустимое имя файла</string>
+    <string name="piko_download_file_name_insert_token">Вставить %1$s</string>
+    <string name="piko_download_file_name_variables">Переменные</string>
+    <string name="piko_download_file_name_token_username">Имя пользователя</string>
+    <string name="piko_download_file_name_token_media_id">ID медиафайла</string>
+    <string name="piko_download_file_name_token_shortcode">Короткий код (Shortcode)</string>
+    <string name="piko_download_file_name_token_upload_date">Дата</string>
+    <string name="piko_download_file_name_token_upload_time">Время</string>
+    <string name="piko_download_file_name_token_type">Тип</string>
+    <string name="piko_download_file_name_token_carousel_index">Карусель</string>
+    <string name="piko_download_file_name_token_variant_suffix">Вариант</string>
     <string name="piko_download_current_media">Скачать текущее медиа</string>
     <string name="piko_download_as_image">Скачать как изображение</string>
     <string name="piko_video_variants">Варианты видео</string>
@@ -145,7 +158,6 @@
     <string name="piko_download_all">Скачать всё</string>
     <string name="piko_downloading_media">Скачивание: </string>
     <string name="piko_downloaded_media">Скачано: </string>
-    <string name="piko_media_exists">Медиа уже существует</string>
     <string name="piko_download_failed_media">Ошибка скачивания: </string>
     <string name="piko_download_set_path">Выбрать папку загрузки</string>
     <string name="piko_download_set_path_success">Папка для скачиваний обновлена!</string>
@@ -354,4 +366,7 @@
     <string name="piko_media_like">лайк</string>
     <string name="piko_media_link">ссылка</string>
     <string name="piko_media_activity">активность</string>
+    <string name="piko_mark_story_seen">Отметить как просмотренное</string>
+    <string name="piko_story_seen_pending">Отметка о просмотре</string>
+    <string name="piko_story_seen_sent">Отмечено как просмотренное</string>
 </resources>

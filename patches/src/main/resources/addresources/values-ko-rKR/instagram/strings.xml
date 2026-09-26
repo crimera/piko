@@ -60,6 +60,8 @@
     <string name="piko_hide_notes_tray">메모 선반 숨기기</string>
     <string name="piko_hide_notes_tray_desc">메시지 섹션에서 메모 선반을 숨깁니다</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">공유 시트에서 그룹 만들기 버튼 숨기기</string>
+    <string name="piko_hide_reels_follow_button">릴스 팔로우 버튼 숨기기</string>
+    <string name="piko_hide_reels_follow_button_desc">릴스 작성자 행에서 팔로우 버튼을 제거합니다</string>
     <string name="piko_disable_double_tap_like_post">게시물 두 번 탭하여 좋아요 비활성화</string>
     <string name="piko_disable_double_tap_like_reel">릴스 두 번 탭하여 좋아요 비활성화</string>
     <string name="piko_disable_double_tap_like_comment">댓글 두 번 탭하여 좋아요 비활성화</string>
@@ -72,8 +74,7 @@
     <string name="piko_disable_analytics">분석 비활성화</string>
     <string name="piko_delete_analytics_cache">분석 캐시 삭제</string>
     <string name="piko_disable_analytics_desc">Instagram/Facebook 서버로 전송되는 분석을 차단합니다</string>
-    <string name="piko_disable_discover_people">사람 찾아보기 비활성화</string>
-    <string name="piko_disable_discover_people_desc">프로필에서 사람 찾아보기 섹션을 비활성화합니다</string>
+    <string name="piko_disable_discover_people">추천 계정 숨기기</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
     <string name="piko_follow_back_indicator_desc">프로필 페이지에 맞팔 상태를 표시하는 라벨을 추가하고, 그 라벨을 탭하는 경우에 상세한 관계 상태 분석을 표시합니다</string>
     <string name="piko_fbi_color_indicator">색상이 있는 관계 상태 표시기 활성화</string>
@@ -133,7 +134,19 @@
     <string name="piko_download_username_folder">사용자 이름별로 미디어 분류</string>
     <string name="piko_download_username_folder_desc">사용자 이름 기준으로 하위 폴더를 생성합니다</string>
     <string name="piko_embed_download_metadata">동영상 메타데이터 삽입</string>
-    <string name="piko_embed_download_metadata_desc">다운로드한 MP4 파일에 자막, 게시물 링크, 제작자 및 업로드 날짜를 추가합니다</string>
+    <string name="piko_embed_download_metadata_desc">다운로드한 MP4 파일에 자막, 게시물 링크, 크리에이터 및 업로드 날짜를 추가합니다</string>
+    <string name="piko_download_file_name_template">파일 이름 형식</string>
+    <string name="piko_download_file_name_template_invalid">잘못된 파일 이름</string>
+    <string name="piko_download_file_name_insert_token">%1$s 삽입</string>
+    <string name="piko_download_file_name_variables">변수</string>
+    <string name="piko_download_file_name_token_username">사용자 이름</string>
+    <string name="piko_download_file_name_token_media_id">미디어 ID</string>
+    <string name="piko_download_file_name_token_shortcode">Shortcode</string>
+    <string name="piko_download_file_name_token_upload_date">날짜</string>
+    <string name="piko_download_file_name_token_upload_time">시간</string>
+    <string name="piko_download_file_name_token_type">유형</string>
+    <string name="piko_download_file_name_token_carousel_index">캐러셀</string>
+    <string name="piko_download_file_name_token_variant_suffix">변형</string>
     <string name="piko_download_current_media">현재 미디어 다운로드</string>
     <string name="piko_download_as_image">이미지로 다운로드</string>
     <string name="piko_video_variants">동영상 변형</string>
@@ -145,7 +158,6 @@
     <string name="piko_download_all">모두 다운로드</string>
     <string name="piko_downloading_media">다운로드 중: </string>
     <string name="piko_downloaded_media">다운로드 완료: </string>
-    <string name="piko_media_exists">이미 존재하는 미디어입니다</string>
     <string name="piko_download_failed_media">다운로드 실패: </string>
     <string name="piko_download_set_path">다운로드 폴더 선택</string>
     <string name="piko_download_set_path_success">다운로드 디렉터리를 업데이트하였습니다!</string>
@@ -176,9 +188,9 @@
     <string name="piko_hide_navigation_create">만들기 버튼 숨기기</string>
     <string name="piko_category_navigation_tabs">하단바</string>
     <string name="piko_navigation_tabs_title">탭 표시 및 순서 변경</string>
-    <string name="piko_navigation_tabs_summary">표시할 하단바 탭을 선택하고 드래그하여 순서를 변경하세요</string>
+    <string name="piko_navigation_tabs_summary">표시할 하단바 탭을 선택하고 드래그하여 순서를 변경할 수 있습니다</string>
     <string name="piko_navigation_startup_tab">앱 시작 탭</string>
-    <string name="piko_navigation_startup_tab_summary">앱 시작 시 열리는 탭을 선택하세요</string>
+    <string name="piko_navigation_startup_tab_summary">앱 시작 시 열리는 탭을 선택할 수 있습니다</string>
     <string name="piko_navigation_tab_home">홈</string>
     <string name="piko_navigation_tab_reels">릴스</string>
     <string name="piko_navigation_tab_messages">메시지</string>
@@ -187,7 +199,7 @@
     <string name="piko_navigation_tab_notifications">알림</string>
     <string name="piko_navigation_tab_create">만들기</string>
     <string name="piko_navigation_settings_lockout_title">Piko 설정 버튼 없음</string>
-    <string name="piko_navigation_settings_lockout_message">이 설정은 표시되는 탭에서 모든 Piko 설정 항목을 제거합니다. 앱 아이콘을 길게 탭하여 Piko 설정을 선택하면 Piko 설정을 계속 열 수 있습니다</string>
+    <string name="piko_navigation_settings_lockout_message">이 설정은 표시되는 탭에서 모든 Piko 설정 항목을 제거합니다. 런처에 있는 앱 아이콘을 길게 탭하면 표시되는 메뉴에서 Piko 설정을 선택하면 Piko 설정을 계속 열 수 있습니다</string>
     <!-- Information Section -->
     <string name="piko_category_about">정보</string>
     <string name="piko_export_pref">Piko 설정 내보내기</string>
@@ -240,7 +252,7 @@
     <string name="piko_no_internet">인터넷에 연결해 주세요</string>
     <string name="piko_tap_here">여기를 탭하세요 !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">액션 바</string>
+    <string name="piko_category_action_bar">액션바</string>
     <string name="piko_action_bar_main_feed">메인 피드 액션바 아이콘</string>
     <string name="piko_action_bar_user_profile">사용자 프로필 액션바 아이콘</string>
     <string name="piko_action_bar_chat">채팅 액션바 아이콘</string>
@@ -249,7 +261,7 @@
     <string name="piko_action_bar_button_settings_icon">설정 아이콘</string>
     <string name="piko_action_bar_button_ghost_mode_icon">고스트 모드 아이콘</string>
     <string name="piko_action_bar_button_profile_info_icon">프로필 정보 아이콘</string>
-    <string name="piko_action_bar_button_create_icon">아이콘 만들기</string>
+    <string name="piko_action_bar_button_create_icon">만들기 아이콘</string>
     <string name="piko_action_bar_button_notifications_icon">알림 아이콘</string>
     <string name="piko_settings_on_action_bar">Piko 설정을 액션바로 이동</string>
     <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 액션바로 이동합니다</string>

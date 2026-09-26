@@ -60,6 +60,8 @@
     <string name="piko_hide_notes_tray">Приховати панель нотаток</string>
     <string name="piko_hide_notes_tray_desc">Сховує панель нотаток у розділі повідомлень</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Приховати кнопку створення групи в меню поширення</string>
+    <string name="piko_hide_reels_follow_button">Приховати кнопку підписки в Reels</string>
+    <string name="piko_hide_reels_follow_button_desc">Видаляє кнопку підписки з рядка автора Reels</string>
     <string name="piko_disable_double_tap_like_post">Вимкнути like подвійним дотиком на дописах</string>
     <string name="piko_disable_double_tap_like_reel">Вимкнути like подвійним дотиком на (Reels)</string>
     <string name="piko_disable_double_tap_like_comment">Вимкнути like подвійним дотиком на коментарях</string>
@@ -72,8 +74,7 @@
     <string name="piko_disable_analytics">Вимкнути аналітику</string>
     <string name="piko_delete_analytics_cache">Очистити кеш аналітики</string>
     <string name="piko_disable_analytics_desc">Блокувати надсилання аналітики на сервери Instagram/Facebook</string>
-    <string name="piko_disable_discover_people">Вимкнути розділ «Можливі знайомі»</string>
-    <string name="piko_disable_discover_people_desc">Вимикає розділ рекомендацій людей у профілі користувача</string>
+    <string name="piko_disable_discover_people">Приховати рекомендовані акаунти</string>
     <string name="piko_follow_back_indicator">Увімкнути індикатор взаємної підписки</string>
     <string name="piko_follow_back_indicator_desc">Додає позначку «Стежить за вами» на сторінці профілю та показує детальну інформацію про статус дружби після натискання</string>
     <string name="piko_fbi_color_indicator">Увімкнути кольоровий індикатор статусу дружби</string>
@@ -134,6 +135,18 @@
     <string name="piko_download_username_folder_desc">Створює підпапки на основі імені користувача</string>
     <string name="piko_embed_download_metadata">Вбудовувати метадані відео</string>
     <string name="piko_embed_download_metadata_desc">Додає підпис, посилання на допис, автора та дату вивантаження до завантажених файлів MP4</string>
+    <string name="piko_download_file_name_template">Формат імені файлу</string>
+    <string name="piko_download_file_name_template_invalid">Недійсне ім\'я файлу</string>
+    <string name="piko_download_file_name_insert_token">Вставити %1$s</string>
+    <string name="piko_download_file_name_variables">Змінні</string>
+    <string name="piko_download_file_name_token_username">Ім\'я користувача</string>
+    <string name="piko_download_file_name_token_media_id">ID медіа</string>
+    <string name="piko_download_file_name_token_shortcode">Шорткод</string>
+    <string name="piko_download_file_name_token_upload_date">Дата</string>
+    <string name="piko_download_file_name_token_upload_time">Час</string>
+    <string name="piko_download_file_name_token_type">Тип</string>
+    <string name="piko_download_file_name_token_carousel_index">Карусель</string>
+    <string name="piko_download_file_name_token_variant_suffix">Варіант</string>
     <string name="piko_download_current_media">Завантажити поточне медіа</string>
     <string name="piko_download_as_image">Завантажити як зображення</string>
     <string name="piko_video_variants">Варіанти відео</string>
@@ -145,7 +158,6 @@
     <string name="piko_download_all">Завантажити все</string>
     <string name="piko_downloading_media">Завантаження: </string>
     <string name="piko_downloaded_media">Завантажено: </string>
-    <string name="piko_media_exists">Медіа вже існує</string>
     <string name="piko_download_failed_media">Помилка завантаження: </string>
     <string name="piko_download_set_path">Вибрати папку для завантаження</string>
     <string name="piko_download_set_path_success">Папку для завантаження оновлено!</string>
@@ -354,4 +366,7 @@
     <string name="piko_media_like">подобається</string>
     <string name="piko_media_link">посилання</string>
     <string name="piko_media_activity">активність</string>
+    <string name="piko_mark_story_seen">Позначити як переглянуте</string>
+    <string name="piko_story_seen_pending">Позначається як переглянуте…</string>
+    <string name="piko_story_seen_sent">Позначено як переглянуте</string>
 </resources>
