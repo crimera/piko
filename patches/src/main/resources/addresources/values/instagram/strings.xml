@@ -257,6 +257,7 @@
     <string name="piko_import_success">Imported successfully</string>
     <string name="piko_import_fail">Import failed</string>
     <string name="piko_restart_app">The app needs to be restarted for the changes to reflect</string>
+    <string name="piko_close">Close</string>
     <string name="piko_ok">OK</string>
     <string name="piko_reset">Reset</string>
     <string name="piko_cancel">Cancel</string>
