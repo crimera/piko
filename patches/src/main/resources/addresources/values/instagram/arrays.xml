@@ -16,6 +16,14 @@
     </string-array>
 
     <string-array name="piko_array_focus_lock_duration">
+        <item>1 minute</item>
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
         <item>1 day</item>
         <item>3 days</item>
         <item>1 week</item>
@@ -25,11 +33,19 @@
     </string-array>
     <string-array name="piko_array_focus_lock_duration_val">
         <item>1</item>
-        <item>3</item>
-        <item>7</item>
-        <item>14</item>
+        <item>5</item>
+        <item>10</item>
         <item>30</item>
-        <item>90</item>
+        <item>60</item>
+        <item>120</item>
+        <item>360</item>
+        <item>720</item>
+        <item>1440</item>
+        <item>4320</item>
+        <item>10080</item>
+        <item>20160</item>
+        <item>43200</item>
+        <item>129600</item>
     </string-array>
     <string-array name="piko_array_change_like_animation">
         <item>@string/piko_array_default</item>
