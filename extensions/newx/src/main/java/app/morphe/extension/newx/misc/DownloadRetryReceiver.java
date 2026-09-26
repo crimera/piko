@@ -157,7 +157,7 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
             // reserve() clears refused folders itself; the retry notice carries a fresh
             // retry button so the user can tap again after fixing the folder.
             DownloadDestination.notifyFailure(
-                    context, notificationId, fileName, kind, mimeType, url, username, lost);
+                    context, notificationId, fileName, kind, mimeType, url, username, lost, false);
             NewXUtils.runOnUiThread(() -> InlineDownloadButton.reportDownloadStatus(
                     lost ? InlineDownloadButton.FOLDER_LOST_MESSAGE
                             : "Could not start download",
@@ -178,7 +178,8 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
             NewXLogger.printException(() -> "Failed to retry download " + target.fileName(), exception);
             DownloadDestination.discard(context, target);
             DownloadDestination.notifyFailure(
-                    context, notificationId, target.fileName(), kind, mimeType, url, username, false);
+                    context, notificationId, target.fileName(), kind, mimeType, url, username,
+                    false, DownloadDestination.isNoConnection(exception));
             state = DownloadDestination.SaveState.FAILED;
         }
 
@@ -195,6 +196,11 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
             case FAILED -> NewXUtils.runOnUiThread(() ->
                     InlineDownloadButton.reportDownloadStatus(
                             "Could not save " + target.fileName(), username));
+            case CANCELLED -> NewXUtils.runOnUiThread(() ->
+                    NewXInAppNotification.showForUser("Download cancelled", username));
+            case NO_CONNECTION -> NewXUtils.runOnUiThread(() ->
+                    InlineDownloadButton.reportDownloadStatus(
+                            "No connection — tap Retry when online", username));
         }
     }
 }

@@ -227,7 +227,9 @@ public final class MediaMerger {
                 }
                 case DESTINATION_LOST -> InlineDownloadButton.reportDownloadStatus(
                         InlineDownloadButton.FOLDER_LOST_MESSAGE, username);
-                case FAILED -> InlineDownloadButton.reportDownloadStatus(
+                // Merges never go through the cancellable transfer path; CANCELLED and
+                // NO_CONNECTION are unreachable here but required for an exhaustive switch.
+                case FAILED, CANCELLED, NO_CONNECTION -> InlineDownloadButton.reportDownloadStatus(
                         "Failed to save merged image: " + fileName, username);
             }
 

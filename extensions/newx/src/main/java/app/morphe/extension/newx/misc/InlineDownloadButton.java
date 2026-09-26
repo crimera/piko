@@ -1213,7 +1213,8 @@ public final class InlineDownloadButton {
                 DownloadDestination.discard(context, target);
                 // Keep the OS trace with a retry instead of cancelling it silently.
                 DownloadDestination.notifyFailure(context, notificationId, target.fileName(),
-                        target.kind(), target.mimeType(), url, username, lost);
+                        target.kind(), target.mimeType(), url, username, lost,
+                        DownloadDestination.isNoConnection(exception));
                 state = lost
                         ? DownloadDestination.SaveState.DESTINATION_LOST
                         : DownloadDestination.SaveState.FAILED;
@@ -1231,6 +1232,10 @@ public final class InlineDownloadButton {
                         reportDownloadStatus(FOLDER_LOST_MESSAGE, username));
                 case FAILED -> NewXUtils.runOnUiThread(() ->
                         reportDownloadStatus("Could not save " + target.fileName(), username));
+                case CANCELLED -> NewXUtils.runOnUiThread(() ->
+                        NewXInAppNotification.showForUser("Download cancelled", username));
+                case NO_CONNECTION -> NewXUtils.runOnUiThread(() ->
+                        reportDownloadStatus("No connection — tap Retry when online", username));
             }
         });
     }

@@ -86,20 +86,22 @@ private fun MutableMethod.requireStatic(label: String) {
     throw PatchException("$label is no longer static: $this")
 }
 
-private val newXInlineDownloadRetryResourcePatch =
+private val newXInlineDownloadNotificationResourcePatch =
     resourcePatch(
-        description = "Adds the NewX download retry receiver to the Android manifest.",
+        description = "Adds the NewX download notification receivers to the Android manifest.",
     ) {
         finalize {
             document("AndroidManifest.xml").use { document ->
                 val application = document.getElementsByTagName("application").item(0) as Element
-                val receiver = document.createElement("receiver")
-                receiver.setAttribute(
-                    "android:name",
+                listOf(
                     "app.morphe.extension.newx.misc.DownloadRetryReceiver",
-                )
-                receiver.setAttribute("android:exported", "false")
-                application.appendChild(receiver)
+                    "app.morphe.extension.newx.misc.DownloadCancelReceiver",
+                ).forEach { receiverName ->
+                    val receiver = document.createElement("receiver")
+                    receiver.setAttribute("android:name", receiverName)
+                    receiver.setAttribute("android:exported", "false")
+                    application.appendChild(receiver)
+                }
             }
         }
     }
@@ -119,7 +121,7 @@ val newXInlineDownloadButtonPatch =
             newXInlineDownloadModelResolutionPatch,
             newXThumbnailCachePatch,
             newXInAppNotificationPatch,
-            newXInlineDownloadRetryResourcePatch,
+            newXInlineDownloadNotificationResourcePatch,
             newXExtensionPatch,
         )
 

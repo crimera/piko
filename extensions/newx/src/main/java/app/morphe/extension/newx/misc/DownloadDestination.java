@@ -6,11 +6,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.UriPermission;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Build;
+import android.os.SystemClock;
 import android.provider.DocumentsContract;
+import android.provider.OpenableColumns;
 
 import androidx.annotation.Nullable;
 
@@ -20,10 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.net.URLConnection;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import app.morphe.extension.newx.settings.NewXLogger;
@@ -42,12 +50,75 @@ public final class DownloadDestination {
     // for seconds at a time; 30s killed 20MB-class downloads on fluctuating connections.
     private static final int READ_TIMEOUT_MS = 60_000;
     private static final int MAX_REDIRECTS = 5;
+    /** No HttpURLConnection constant exists for 416. */
+    private static final int HTTP_RANGE_NOT_SATISFIABLE = 416;
+    // Full passes over one URL: the first streams from zero, later ones resume from the
+    // bytes already on disk. Large video variants (50-300MB) otherwise die on the first
+    // reset and restart from zero on manual retry.
+    // Backoff between attempts; DNS/link flaps that outlast fixed 1-2s delays used to
+    // fail downloads that the next minute would have completed.
+    private static final long[] RETRY_DELAYS_MS = {0, 2_000, 5_000, 15_000, 30_000, 60_000};
+    private static final int MAX_ATTEMPTS = RETRY_DELAYS_MS.length;
+    /** Total window an invocation keeps riding out flaps before failing closed. */
+    private static final long RETRY_WINDOW_MS = 10 * 60 * 1_000;
     private static final int MAX_NAME_ATTEMPTS = 32;
     private static final int MAX_CAUSE_DEPTH = 16;
     private static final String USER_AGENT =
             "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36";
 
     private static final AtomicInteger NEXT_NOTIFICATION_ID = new AtomicInteger(1);
+    /** Cancel flags per in-flight transfer, keyed by notification id. */
+    private static final ConcurrentHashMap<Integer, AtomicBoolean> CANCEL_FLAGS =
+            new ConcurrentHashMap<>();
+    /** Live connections per in-flight transfer, so cancel unblocks a stalled read. */
+    private static final ConcurrentHashMap<Integer, HttpURLConnection> ACTIVE_CONNECTIONS =
+            new ConcurrentHashMap<>();
+
+    /**
+     * Marks an in-flight transfer cancelled. The stream loop aborts on its next chunk;
+     * a stalled socket read is unblocked immediately via disconnect.
+     */
+    static void requestCancel(Context context, int id) {
+        if (id <= 0) return;
+        AtomicBoolean flag = CANCEL_FLAGS.get(id);
+        if (flag != null) {
+            flag.set(true);
+        } else {
+            // No active transfer: just dismiss whatever notice is showing.
+            cancelNotification(context, id);
+            return;
+        }
+        HttpURLConnection connection = ACTIVE_CONNECTIONS.get(id);
+        if (connection != null) {
+            try {
+                connection.disconnect();
+            } catch (RuntimeException ignored) {
+            }
+        }
+    }
+
+    private static boolean isCancelled(int id) {
+        AtomicBoolean flag = CANCEL_FLAGS.get(id);
+        return flag != null && flag.get();
+    }
+
+    private static void clearCancelFlag(int id) {
+        CANCEL_FLAGS.remove(id);
+    }
+
+    /**
+     * Discards a cancelled transfer without a failure notice. Non-null when cancelled.
+     */
+    @Nullable
+    private static SaveState cancelledResult(Context context, Target target, int notificationId) {
+        if (notificationId > 0 && isCancelled(notificationId)) {
+            discard(context, target);
+            cancelNotification(context, notificationId);
+            clearCancelFlag(notificationId);
+            return SaveState.CANCELLED;
+        }
+        return null;
+    }
 
     private DownloadDestination() {
     }
@@ -206,6 +277,16 @@ public final class DownloadDestination {
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to clear the unusable NewX download folder", exception);
         }
+    }
+
+    /** True when DNS/connectivity was down (bounded cause walk, like below). */
+    static boolean isNoConnection(@Nullable Throwable failure) {
+        Throwable current = failure;
+        for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
+            if (current instanceof java.net.UnknownHostException) return true;
+            current = current.getCause();
+        }
+        return false;
     }
 
     /** True when the destination itself is gone (revoked, deleted, unrecognized tree).
@@ -369,9 +450,13 @@ public final class DownloadDestination {
         /** Stored folder can no longer be written; the setting was cleared. */
         DESTINATION_LOST,
         FAILED,
+        /** The user cancelled the transfer; never shown as a failure. */
+        CANCELLED,
+        /** DNS/connectivity was down; the transfer never started. Retriable. */
+        NO_CONNECTION,
     }
 
-    /** Streams a URL into a reserved document, retrying once with the larger image variant. */
+    /** Streams a URL into a reserved document, resuming across resets, then the larger image variant. */
     public static SaveState save(Context context, Target target, String url, int notificationId) {
         return save(context, target, url, notificationId, null);
     }
@@ -379,31 +464,38 @@ public final class DownloadDestination {
     /** Streams a URL into a reserved document, wiring the failure notice to a retry. */
     public static SaveState save(
             Context context, Target target, String url, int notificationId, String username) {
-        Failure failure = new Failure();
-        if (saveOnce(context, target, url, notificationId, failure)) return SaveState.SAVED;
-
-        // A stall partway through a large transfer fails after minutes of progress. One
-        // immediate same-URL retry recovers transient stalls; a repeat failure still
-        // surfaces the failure notice with its manual retry button.
-        if (failure.cause instanceof SocketTimeoutException) {
-            NewXLogger.printInfo(() -> "Retrying stalled download " + target.fileName());
-            Failure stalledRetry = new Failure();
-            if (saveOnce(context, target, url, notificationId, stalledRetry)) {
-                return SaveState.SAVED;
-            }
-            if (stalledRetry.cause != null) failure.cause = stalledRetry.cause;
+        if (notificationId > 0) {
+            CANCEL_FLAGS.putIfAbsent(notificationId, new AtomicBoolean(false));
         }
+        // Cancel tapped while queued: never hit the network.
+        SaveState cancelled = cancelledResult(context, target, notificationId);
+        if (cancelled != null) return cancelled;
+
+        Failure failure = new Failure();
+        if (saveWithAttempts(context, target, url, notificationId, failure)) {
+            clearCancelFlag(notificationId);
+            return SaveState.SAVED;
+        }
+        cancelled = cancelledResult(context, target, notificationId);
+        if (cancelled != null) return cancelled;
+
         boolean lost = isDestinationLoss(failure.cause);
 
         String retryUrl = largerVariantUrl(url);
         if (retryUrl != null) {
+            cancelled = cancelledResult(context, target, notificationId);
+            if (cancelled != null) return cancelled;
             Failure retryFailure = new Failure();
-            if (saveOnce(context, target, retryUrl, notificationId, retryFailure)) {
+            if (saveAttempt(context, target, retryUrl, notificationId, 0, new TransferState(), retryFailure)) {
+                clearCancelFlag(notificationId);
                 return SaveState.SAVED;
             }
             lost = lost || isDestinationLoss(retryFailure.cause);
             if (retryFailure.cause != null) failure.cause = retryFailure.cause;
         }
+
+        cancelled = cancelledResult(context, target, notificationId);
+        if (cancelled != null) return cancelled;
 
         boolean destinationLost = lost;
         captureDestination(context, target.kind, destinationLost ? "transfer/folder-lost" : "transfer/failed");
@@ -413,11 +505,17 @@ public final class DownloadDestination {
                 target.kind.name() + " event=transfer file=" + target.fileName(),
                 failure.cause
         );
+        // Offline looks identical to a broken download unless named: DNS never resolved,
+        // so the transfer never started and Retry is the whole fix.
+        boolean noConnection = !destinationLost && isNoConnection(failure.cause);
         // Replace the progress notification in place; cancelling alone leaves no trace when
         // the in-app host is not showing.
         notifyFailure(context, notificationId, target.fileName(), target.kind(), target.mimeType(),
-                url, username, destinationLost);
-        return destinationLost ? SaveState.DESTINATION_LOST : SaveState.FAILED;
+                url, username, destinationLost, noConnection);
+        clearCancelFlag(notificationId);
+        if (destinationLost) return SaveState.DESTINATION_LOST;
+        if (noConnection) return SaveState.NO_CONNECTION;
+        return SaveState.FAILED;
     }
 
     /** Last transfer exception. */
@@ -462,64 +560,278 @@ public final class DownloadDestination {
         }
     }
 
-    private static boolean saveOnce(
+    /** Bytes already written, kept across attempts so a reset resumes instead of restarting. */
+    private static final class TransferState {
+        long expectedTotal = -1;
+    }
+
+    /** HTTP status failures, so retries distinguish dead links (4xx) from sick servers (5xx). */
+    static final class HttpStatusException extends IOException {
+        private final int status;
+
+        HttpStatusException(int status, String url) {
+            super("HTTP " + status + " for " + url);
+            this.status = status;
+        }
+
+        int status() {
+            return status;
+        }
+    }
+
+    /**
+     * Streams the URL with resume across transient resets. Later attempts continue from the
+     * bytes already on disk via Range; servers without range support restart from zero.
+     */
+    private static boolean saveWithAttempts(
             Context context,
             Target target,
             String url,
             int notificationId,
             Failure failure
     ) {
+        TransferState state = new TransferState();
+        long deadline = SystemClock.elapsedRealtime() + RETRY_WINDOW_MS;
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            final int attemptNumber = attempt;
+            if (notificationId > 0 && isCancelled(notificationId)) return false;
+            if (attempt > 1 && !sleepCancellable(RETRY_DELAYS_MS[attempt - 1], notificationId)) {
+                return false;
+            }
+            // Flap riding: wait for a validated path instead of burning an attempt
+            // into a dead link. Offline-at-tap lands here too, not in instant failure.
+            if (!waitForOnline(context, notificationId, target.fileName(), deadline)) {
+                if (failure.cause == null) {
+                    failure.cause = new UnknownHostException("No validated network");
+                }
+                return false;
+            }
+            if (notificationId > 0 && isCancelled(notificationId)) return false;
+            long resumeFrom = attempt == 1 ? 0 : currentSize(context, target);
+            if (state.expectedTotal > 0 && resumeFrom >= state.expectedTotal) {
+                if (resumeFrom == state.expectedTotal) {
+                    if (notificationId > 0) completeNotification(context, notificationId, target);
+                    return true;
+                }
+                resumeFrom = 0;
+            }
+            Failure attemptFailure = new Failure();
+            if (saveAttempt(context, target, url, notificationId, resumeFrom, state, attemptFailure)) {
+                return true;
+            }
+            failure.cause = attemptFailure.cause;
+            if (!isRetryable(attemptFailure.cause)) return false;
+            NewXLogger.printInfo(() -> "Retrying download " + target.fileName()
+                    + " (attempt " + attemptNumber + ")");
+        }
+        return false;
+    }
+
+    /** Chunked sleep that stays responsive to Cancel. False when cancelled. */
+    private static boolean sleepCancellable(long totalMs, int notificationId) {
+        long end = SystemClock.elapsedRealtime() + totalMs;
+        while (true) {
+            if (notificationId > 0 && isCancelled(notificationId)) return false;
+            long remaining = end - SystemClock.elapsedRealtime();
+            if (remaining <= 0) return true;
+            try {
+                Thread.sleep(Math.min(remaining, 1_000));
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Validated internet path. Fail-open (assume online) when the service is missing,
+     * so the attempt itself becomes the probe.
+     */
+    private static boolean isOnline(Context context) {
+        try {
+            ConnectivityManager manager = (ConnectivityManager)
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (manager == null) return true;
+            Network active = manager.getActiveNetwork();
+            if (active == null) return false;
+            NetworkCapabilities caps = manager.getNetworkCapabilities(active);
+            return caps != null
+                    && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        } catch (RuntimeException ignored) {
+            return true;
+        }
+    }
+
+    /**
+     * Waits for a validated path until the deadline, so transient DNS/link flaps ride
+     * out instead of failing. False on cancel or deadline expiry.
+     */
+    private static boolean waitForOnline(
+            Context context, int notificationId, String fileName, long deadline) {
+        if (isOnline(context)) return true;
+        if (notificationId > 0) showWaiting(context, notificationId, fileName);
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (notificationId > 0 && isCancelled(notificationId)) return false;
+            try {
+                Thread.sleep(1_000);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+            if (isOnline(context)) return true;
+        }
+        return isOnline(context);
+    }
+
+    /** Transient network failures resume; dead links and lost folders fail closed. */
+    static boolean isRetryable(@Nullable Throwable cause) {
+        if (cause == null) return false;
+        if (isDestinationLoss(cause)) return false;
+        if (cause instanceof HttpStatusException http) {
+            int status = http.status();
+            return status == HTTP_RANGE_NOT_SATISFIABLE
+                    || status == 429
+                    || status >= 500;
+        }
+        return cause instanceof IOException;
+    }
+
+    private static boolean saveAttempt(
+            Context context,
+            Target target,
+            String url,
+            int notificationId,
+            long resumeFrom,
+            TransferState state,
+            Failure failure
+    ) {
         HttpURLConnection connection = null;
         if (notificationId > 0) showIndeterminate(context, notificationId, target.fileName);
         try {
-            connection = openConnection(url);
-            long contentLength = connection.getContentLengthLong();
-            long total = 0;
+            connection = openConnection(url, resumeFrom);
+            trackConnection(notificationId, connection);
+            int status = connection.getResponseCode();
+            boolean resumed = resumeFrom > 0 && status == HttpURLConnection.HTTP_PARTIAL;
+            long base = resumed ? resumeFrom : 0;
+            long remaining = connection.getContentLengthLong();
+            if (remaining >= 0) {
+                state.expectedTotal = base + remaining;
+            } else if (base == 0) {
+                state.expectedTotal = -1;
+            }
 
-            try (InputStream input = new BufferedInputStream(connection.getInputStream());
-                 OutputStream output = context.getContentResolver()
-                         .openOutputStream(target.documentUri, "wt")) {
-                if (output == null) throw new IOException("Could not open " + target.fileName);
+            OutputStream output;
+            if (resumed) {
+                try {
+                    output = context.getContentResolver().openOutputStream(target.documentUri, "wa");
+                } catch (IOException | RuntimeException appendFailure) {
+                    // Provider cannot append: redo this attempt from zero on a fresh connection.
+                    untrackConnection(notificationId, connection);
+                    connection.disconnect();
+                    connection = openConnection(url, 0);
+                    trackConnection(notificationId, connection);
+                    remaining = connection.getContentLengthLong();
+                    state.expectedTotal = remaining >= 0 ? remaining : -1;
+                    output = context.getContentResolver().openOutputStream(target.documentUri, "wt");
+                }
+            } else {
+                output = context.getContentResolver().openOutputStream(target.documentUri, "wt");
+            }
+            if (output == null) throw new IOException("Could not open " + target.fileName);
 
+            final HttpURLConnection finalConnection = connection;
+            long total = base;
+            try (InputStream input = new BufferedInputStream(finalConnection.getInputStream());
+                 OutputStream body = output) {
                 byte[] buffer = new byte[64 * 1024];
                 long lastUpdate = 0;
                 int read;
                 while ((read = input.read(buffer)) != -1) {
-                    output.write(buffer, 0, read);
+                    if (notificationId > 0 && isCancelled(notificationId)) return false;
+                    body.write(buffer, 0, read);
                     total += read;
 
-                    if (notificationId > 0 && contentLength > 0) {
+                    if (notificationId > 0 && state.expectedTotal > 0) {
                         long now = System.currentTimeMillis();
                         if (now - lastUpdate > 200) {
                             updateNotification(context, notificationId, target.fileName,
-                                    progressOf(total, contentLength));
+                                    progressOf(total, state.expectedTotal));
                             lastUpdate = now;
                         }
                     }
                 }
-                output.flush();
+                body.flush();
             }
 
             // A cleanly-closed short stream used to report success, leaving a truncated
-            // file behind. Fail closed so the notice offers a retry instead.
-            if (contentLength > 0 && total != contentLength) {
+            // file behind. Fail closed so the next attempt resumes instead.
+            if (state.expectedTotal > 0 && total != state.expectedTotal) {
                 throw new IOException("Short read for " + target.fileName()
-                        + ": got " + total + " of " + contentLength + " bytes");
+                        + ": got " + total + " of " + state.expectedTotal + " bytes");
             }
 
-            if (notificationId > 0) completeNotification(context, notificationId, target.fileName);
+            if (notificationId > 0) completeNotification(context, notificationId, target);
             return true;
         } catch (IOException | RuntimeException exception) {
+            if (exception instanceof HttpStatusException http
+                    && http.status() == HTTP_RANGE_NOT_SATISFIABLE) {
+                if (state.expectedTotal > 0
+                        && currentSize(context, target) >= state.expectedTotal) {
+                    // Stale size finished the file between attempts.
+                    if (notificationId > 0) completeNotification(context, notificationId, target);
+                    return true;
+                }
+                // Server file shrank: drop the stale partial so the retry restarts fresh.
+                truncate(context, target);
+                state.expectedTotal = -1;
+            }
             failure.cause = exception;
             NewXLogger.printException(() -> "Failed to download " + target.fileName, exception);
             return false;
         } finally {
+            untrackConnection(notificationId, connection);
             if (connection != null) {
                 try {
                     connection.disconnect();
                 } catch (RuntimeException ignored) {
                 }
             }
+        }
+    }
+
+    /** Bytes already stored in the reserved document; zero when the provider stays silent. */
+    private static long currentSize(Context context, Target target) {
+        try (Cursor cursor = context.getContentResolver().query(
+                target.documentUri, new String[]{OpenableColumns.SIZE}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                return Math.max(0, cursor.getLong(0));
+            }
+        } catch (RuntimeException ignored) {
+            // Unknown size restarts from zero; never fail the transfer on a probe.
+        }
+        return 0;
+    }
+
+    /** Empties a reserved document so a stale partial cannot poison the next attempt. */
+    private static void truncate(Context context, Target target) {
+        try (OutputStream output = context.getContentResolver()
+                .openOutputStream(target.documentUri, "wt")) {
+            // Opening with "wt" truncates; nothing to write.
+        } catch (IOException | RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to truncate " + target.fileName, exception);
+        }
+    }
+
+    private static void trackConnection(int notificationId, HttpURLConnection connection) {
+        if (notificationId > 0 && connection != null) {
+            ACTIVE_CONNECTIONS.put(notificationId, connection);
+        }
+    }
+
+    private static void untrackConnection(int notificationId, HttpURLConnection connection) {
+        if (notificationId > 0 && connection != null) {
+            ACTIVE_CONNECTIONS.remove(notificationId, connection);
         }
     }
 
@@ -630,15 +942,15 @@ public final class DownloadDestination {
         return url.replace("name=orig", "name=4096x4096");
     }
 
-    private static HttpURLConnection openConnection(String address) throws IOException {
+    private static HttpURLConnection openConnection(String address, long resumeFrom) throws IOException {
         String current = address;
         for (int redirect = 0; redirect <= MAX_REDIRECTS; redirect++) {
-            HttpURLConnection connection = openSingleConnection(current);
+            HttpURLConnection connection = openSingleConnection(current, resumeFrom);
             int status = connection.getResponseCode();
             if (!isRedirect(status)) {
                 if (status < 200 || status >= 300) {
                     connection.disconnect();
-                    throw new IOException("HTTP " + status + " for " + current);
+                    throw new HttpStatusException(status, current);
                 }
                 return connection;
             }
@@ -653,7 +965,7 @@ public final class DownloadDestination {
         throw new IOException("Too many redirects for " + address);
     }
 
-    private static HttpURLConnection openSingleConnection(String address) throws IOException {
+    private static HttpURLConnection openSingleConnection(String address, long resumeFrom) throws IOException {
         URLConnection connection = new URL(address).openConnection();
         if (!(connection instanceof HttpURLConnection httpConnection)) {
             throw new IOException("Unsupported download URL " + address);
@@ -662,6 +974,9 @@ public final class DownloadDestination {
         httpConnection.setConnectTimeout(CONNECT_TIMEOUT_MS);
         httpConnection.setReadTimeout(READ_TIMEOUT_MS);
         httpConnection.setRequestProperty("User-Agent", USER_AGENT);
+        if (resumeFrom > 0) {
+            httpConnection.setRequestProperty("Range", "bytes=" + resumeFrom + "-");
+        }
         httpConnection.connect();
         return httpConnection;
     }
@@ -685,6 +1000,29 @@ public final class DownloadDestination {
         return id;
     }
 
+    /** Indeterminate notice while waiting for a validated path. Keeps the Cancel action. */
+    static void showWaiting(Context context, int id, String fileName) {
+        try {
+            NotificationManager manager = notificationManager(context);
+            if (manager == null) return;
+
+            Notification.Builder builder = notificationBuilder(context);
+            builder.setSmallIcon(android.R.drawable.stat_sys_download)
+                    .setContentTitle(fileName)
+                    .setContentText("Waiting for connection")
+                    .setOngoing(true)
+                    .setProgress(100, 0, true);
+            PendingIntent cancel = DownloadCancelReceiver.cancelPendingIntent(context, id);
+            if (cancel != null) {
+                builder.addAction(
+                        android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancel);
+            }
+            manager.notify(id, builder.build());
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to post download waiting notification", exception);
+        }
+    }
+
     static void showIndeterminate(Context context, int id, String fileName) {
         try {
             NotificationManager manager = notificationManager(context);
@@ -695,6 +1033,11 @@ public final class DownloadDestination {
                     .setContentTitle(fileName)
                     .setOngoing(true)
                     .setProgress(100, 0, true);
+            PendingIntent cancel = DownloadCancelReceiver.cancelPendingIntent(context, id);
+            if (cancel != null) {
+                builder.addAction(
+                        android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancel);
+            }
             manager.notify(id, builder.build());
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to post download notification", exception);
@@ -711,25 +1054,56 @@ public final class DownloadDestination {
                     .setContentTitle(fileName)
                     .setOngoing(true)
                     .setProgress(100, progress, false);
+            PendingIntent cancel = DownloadCancelReceiver.cancelPendingIntent(context, id);
+            if (cancel != null) {
+                builder.addAction(
+                        android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancel);
+            }
             manager.notify(id, builder.build());
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to update download notification", exception);
         }
     }
 
-    private static void completeNotification(Context context, int id, String fileName) {
+    private static void completeNotification(Context context, int id, Target target) {
         try {
             NotificationManager manager = notificationManager(context);
             if (manager == null) return;
 
             Notification.Builder builder = notificationBuilder(context);
             builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
-                    .setContentTitle(fileName)
+                    .setContentTitle(target.fileName())
+                    .setContentText("Download Completed")
                     .setOngoing(false)
                     .setProgress(0, 0, false);
+            PendingIntent share = shareIntent(context, target, id);
+            if (share != null) {
+                builder.addAction(android.R.drawable.ic_menu_share, "Share", share);
+            }
             manager.notify(id, builder.build());
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to complete download notification", exception);
+        }
+    }
+
+    /** Shares the downloaded document; null when there is nothing shareable. */
+    @Nullable
+    private static PendingIntent shareIntent(Context context, Target target, int id) {
+        if (target.documentUri() == null) return null;
+        try {
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType(target.mimeType() != null ? target.mimeType() : "*/*");
+            share.putExtra(Intent.EXTRA_STREAM, target.documentUri());
+            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent chooser = Intent.createChooser(share, "Share " + target.fileName());
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            return PendingIntent.getActivity(context, id, chooser, flags);
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to build download share intent", exception);
+            return null;
         }
     }
 
@@ -745,7 +1119,8 @@ public final class DownloadDestination {
             String mimeType,
             String url,
             String username,
-            boolean destinationLost
+            boolean destinationLost,
+            boolean noConnection
     ) {
         if (id <= 0 || !notificationsEnabled(context)) return;
         try {
@@ -757,7 +1132,9 @@ public final class DownloadDestination {
                     .setContentTitle(fileName)
                     .setContentText(destinationLost
                             ? "Download folder is no longer available"
-                            : "Download failed")
+                            : noConnection
+                                    ? "No connection — tap Retry when online"
+                                    : "Download failed")
                     .setAutoCancel(true)
                     .setOngoing(false)
                     .setProgress(0, 0, false);
