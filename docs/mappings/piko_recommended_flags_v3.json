@@ -128,5 +128,15 @@
     "name" : "Add Meta AI reels description pills",
     "desc" : "",
     "code" : "80654"
+  },
+  {
+    "name" : "Disable forced HDR brightness on photos",
+    "desc" : "Turns off Ultra HDR, which always renders photos at boosted brightness",
+    "code" : "109125"
+  },
+  {
+    "name" : "Disable forced brightness boost on Reels/video",
+    "desc" : "Turns off the SDR 'super white' brightness boost on HDR-capable screens",
+    "code" : "68885"
   }
 ]
