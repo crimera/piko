@@ -994,8 +994,18 @@ public final class DownloadDestination {
         return Math.min(percent, 99);
     }
 
+    /**
+     * Allocates a notification id. Terminal (completed/failed) notices must use a fresh id:
+     * the platform sheds updates to an existing key while the package exceeds its enqueue rate,
+     * and {@code setProgress(0, 0, false)} does not count as a completed progress notification,
+     * so reusing the progress id can silently leave the ongoing progress notice stuck.
+     */
+    private static int newNotificationId() {
+        return NEXT_NOTIFICATION_ID.getAndIncrement();
+    }
+
     private static int beginNotification(Context context, String fileName) {
-        int id = NEXT_NOTIFICATION_ID.getAndIncrement();
+        int id = newNotificationId();
         showIndeterminate(context, id, fileName);
         return id;
     }
@@ -1070,17 +1080,20 @@ public final class DownloadDestination {
             NotificationManager manager = notificationManager(context);
             if (manager == null) return;
 
+            int terminalId = newNotificationId();
             Notification.Builder builder = notificationBuilder(context);
             builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
                     .setContentTitle(target.fileName())
                     .setContentText("Download Completed")
                     .setOngoing(false)
                     .setProgress(0, 0, false);
-            PendingIntent share = shareIntent(context, target, id);
+            PendingIntent share = shareIntent(context, target, terminalId);
             if (share != null) {
                 builder.addAction(android.R.drawable.ic_menu_share, "Share", share);
             }
-            manager.notify(id, builder.build());
+            manager.notify(terminalId, builder.build());
+            // The progress notice is ongoing, which users cannot dismiss before Android 14.
+            cancelNotification(context, id);
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to complete download notification", exception);
         }
@@ -1127,6 +1140,7 @@ public final class DownloadDestination {
             NotificationManager manager = notificationManager(context);
             if (manager == null) return;
 
+            int terminalId = newNotificationId();
             Notification.Builder builder = notificationBuilder(context);
             builder.setSmallIcon(android.R.drawable.stat_sys_warning)
                     .setContentTitle(fileName)
@@ -1139,11 +1153,13 @@ public final class DownloadDestination {
                     .setOngoing(false)
                     .setProgress(0, 0, false);
             PendingIntent retry = DownloadRetryReceiver.retryPendingIntent(
-                    context, fileName, kind, mimeType, url, username, id);
+                    context, fileName, kind, mimeType, url, username, terminalId);
             if (retry != null) {
                 builder.addAction(android.R.drawable.stat_sys_download, "Retry", retry);
             }
-            manager.notify(id, builder.build());
+            manager.notify(terminalId, builder.build());
+            // The progress notice is ongoing, which users cannot dismiss before Android 14.
+            cancelNotification(context, id);
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to post download failure notification", exception);
         }
