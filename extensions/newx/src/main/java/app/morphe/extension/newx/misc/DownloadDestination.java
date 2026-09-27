@@ -1135,7 +1135,13 @@ public final class DownloadDestination {
             boolean destinationLost,
             boolean noConnection
     ) {
-        if (id <= 0 || !notificationsEnabled(context)) return;
+        if (id <= 0) return;
+        if (!notificationsEnabled(context)) {
+            // The channel is muted, so no failure notice can show, but a progress notice may
+            // already be posted; cancel it instead of leaving an ongoing notice behind.
+            cancelNotification(context, id);
+            return;
+        }
         try {
             NotificationManager manager = notificationManager(context);
             if (manager == null) return;
