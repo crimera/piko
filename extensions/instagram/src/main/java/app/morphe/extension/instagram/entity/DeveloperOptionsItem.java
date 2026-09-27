@@ -35,8 +35,18 @@ public class DeveloperOptionsItem {
         this.paramId = this.getParamId(mobileConfigSpecifier);
     }
 
+    // This class is instantiated for every single MobileConfig flag check hooked by HookFlags
+    // (every feature-flag/A-B-test read anywhere in the app), so Class.forName is cached here -
+    // the class name is fixed, so re-resolving it fresh on every check is pure waste.
+    private static volatile Class<?> universalIdHelperClassCache;
+
     private Class<?> getUniversalIdHelperClass() throws Exception {
-        return Class.forName("X.0B3D");
+        Class<?> cached = universalIdHelperClassCache;
+        if (cached != null) return cached;
+
+        Class<?> resolved = Class.forName("X.0B3D");
+        universalIdHelperClassCache = resolved;
+        return resolved;
     }
 
     public String getUniversalId(long mobileConfigSpecifier) {
