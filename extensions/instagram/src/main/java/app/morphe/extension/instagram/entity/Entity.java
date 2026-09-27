@@ -60,16 +60,20 @@ public class Entity {
 
     public Object getMethod(Object clsObj, String methodName, Class<?>[] paramTypes, Object... params) throws Exception {
         Class<?> clazz;
+        Object receiver;
         if (clsObj instanceof Class<?>) {
+            // clsObj is already the class to call a static method on - there's no instance to invoke on.
             clazz = (Class<?>) clsObj;
+            receiver = null;
         } else {
             clazz = clsObj.getClass();
+            receiver = clsObj;
         }
 
         Method method = clazz.getDeclaredMethod(methodName, paramTypes);
         method.setAccessible(true);
 
-        return method.invoke(null, params);
+        return method.invoke(receiver, params);
     }
 
     public Object getMethod(Object clsObj, String methodName, Object... params) throws Exception {
