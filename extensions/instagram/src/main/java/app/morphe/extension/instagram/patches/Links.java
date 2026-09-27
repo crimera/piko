@@ -104,6 +104,15 @@ public class Links {
                 String actualUrl = Uri.parse(url).getQueryParameter("u");
                 if (actualUrl != null) {
                     String sanitizedUrl = sanitizeUrl(actualUrl);
+                    // actualUrl comes from a bio/DM/comment/caption link anyone can put on
+                    // Instagram - without this check a crafted intent:// (or other dangerous
+                    // scheme) link would reach ACTION_VIEW unfiltered and could launch an
+                    // arbitrary exported component on the device with attacker-chosen extras.
+                    String scheme = Uri.parse(sanitizedUrl).getScheme();
+                    if (scheme == null
+                            || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+                        return false;
+                    }
                     PikoUtils.openUrl(sanitizedUrl,false);
                     return true;
                 }
