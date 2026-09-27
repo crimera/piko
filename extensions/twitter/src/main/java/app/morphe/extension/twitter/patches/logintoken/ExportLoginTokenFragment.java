@@ -64,9 +64,6 @@ public class ExportLoginTokenFragment extends Fragment {
             try {
                 Account account = (Account) spinner.getSelectedItem();
                 String jsonString = ImportExportLoginTokenPatch.createAccountJsonText(account);
-                // This is a full account OAuth token + secret - a plain Utils.setClipboard()
-                // would leave it as an unmarked clip, readable by any foreground app and
-                // eligible for cross-device clipboard sync. Mark it sensitive instead.
                 copySensitiveTextToClipboard(jsonString);
                 Utils.showToastShort(str("copied_to_clipboard"));
             } catch (Exception e) {
@@ -121,8 +118,7 @@ public class ExportLoginTokenFragment extends Fragment {
         accountToSaveToFile = null;
     }
 
-    /** Copies text to the clipboard flagged as sensitive (Android 13+ hides previews and
-     *  excludes it from cross-device clipboard sync); falls back to a plain clip below that. */
+    /** Copies text flagged as sensitive, which hides it from the clipboard preview on Android 13+. */
     private void copySensitiveTextToClipboard(String text) {
         ClipboardManager clipboard =
                 (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
