@@ -12,9 +12,14 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +64,10 @@ public class ExportLoginTokenFragment extends Fragment {
             try {
                 Account account = (Account) spinner.getSelectedItem();
                 String jsonString = ImportExportLoginTokenPatch.createAccountJsonText(account);
-                Utils.setClipboard(jsonString);
+                // This is a full account OAuth token + secret - a plain Utils.setClipboard()
+                // would leave it as an unmarked clip, readable by any foreground app and
+                // eligible for cross-device clipboard sync. Mark it sensitive instead.
+                copySensitiveTextToClipboard(jsonString);
                 Utils.showToastShort(str("copied_to_clipboard"));
             } catch (Exception e) {
                 Utils.showToastLong(str("piko_pref_export_failed", str("accounts_title")));
@@ -111,6 +119,20 @@ public class ExportLoginTokenFragment extends Fragment {
             }
         }
         accountToSaveToFile = null;
+    }
+
+    /** Copies text to the clipboard flagged as sensitive (Android 13+ hides previews and
+     *  excludes it from cross-device clipboard sync); falls back to a plain clip below that. */
+    private void copySensitiveTextToClipboard(String text) {
+        ClipboardManager clipboard =
+                (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("piko_account_token", text);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            PersistableBundle extras = new PersistableBundle();
+            extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
+            clip.getDescription().setExtras(extras);
+        }
+        clipboard.setPrimaryClip(clip);
     }
 
     /**
