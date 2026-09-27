@@ -78,7 +78,7 @@ public class InstaUtils {
     }
 
     public static void showResetSettingsDialog(Context context) {
-        if (FocusLock.isLocked()) {
+        if (FocusLock.isActive()) {
             PikoUtils.toast(str("piko_focus_lock_blocked_action"));
             return;
         }

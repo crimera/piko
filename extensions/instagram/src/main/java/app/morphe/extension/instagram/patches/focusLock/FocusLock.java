@@ -12,6 +12,8 @@ import android.text.format.DateFormat;
 
 import java.util.Date;
 
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
 
 /**
@@ -22,7 +24,17 @@ import app.morphe.extension.instagram.utils.Pref;
 @SuppressWarnings("unused")
 public class FocusLock {
     public static final long COOLING_OFF_MS = 24L * 60 * 60 * 1000;
-    private static final long DAY_MS = 24L * 60 * 60 * 1000;
+    /** Prefix for the per target "lock this" preferences. */
+    public static final String SELECTION_PREFIX = "focus_lock_sel_";
+
+    /**
+     * Layout of the stored lock.
+     *
+     * A lock records what it holds and how long for. When that layout changes, an existing lock
+     * no longer means what it says, so it is retired rather than enforced against values it was
+     * never written for. Bump this whenever the stored shape changes.
+     */
+    private static final String FORMAT = "2";
 
     private static long parseLong(String value) {
         try {
@@ -46,34 +58,83 @@ public class FocusLock {
         return System.currentTimeMillis() < lockedUntil();
     }
 
-    /** True while an unlock request is pending its cooling-off period. */
-    public static boolean isUnlockPending() {
-        return isLocked() && unlockRequestedAt() > 0;
+    /**
+     * Whether the running lock was written before this layout existed.
+     *
+     * Such a lock is still honoured, through the keys it was written with. Releasing it on update
+     * would turn updating piko into a way out of a lock, which is the one thing the feature is
+     * supposed to prevent. It is read rather than rewritten, so nothing is persisted behind the
+     * user's back; the next lock they set is written in the current layout.
+     */
+    private static boolean isLegacyLock() {
+        return !FORMAT.equals(Pref.focusLockFormat());
     }
 
+    /**
+     * Whether the lock is actually holding something.
+     *
+     * A lock with nothing selected enforces nothing, so it must not gate the settings UI or
+     * block resetting either, otherwise it just locks the user out for no reason. This is what
+     * everything outside of enforcement should ask.
+     */
+    public static boolean isActive() {
+        return isLocked() && hasSelection();
+    }
+
+    /** True while an unlock request is pending its cooling-off period. */
+    public static boolean isUnlockPending() {
+        return isActive() && unlockRequestedAt() > 0;
+    }
+
+    /** Waiting longer than the lock itself would be pointless, so it is capped at the end. */
     public static long unlockAvailableAt() {
-        return unlockRequestedAt() + COOLING_OFF_MS;
+        return Math.min(unlockRequestedAt() + COOLING_OFF_MS, lockedUntil());
     }
 
     public static boolean canUnlockNow() {
         return isUnlockPending() && System.currentTimeMillis() >= unlockAvailableAt();
     }
 
-    // Enforcement helpers. These are OR-ed into the regular preference getters in Pref,
-    // so the underlying switches keep their stored value and simply cannot take effect.
-    public static boolean blocksReels() {
-        return isLocked() && Pref.focusLockBlockReels();
+    // Enforcement. These are OR-ed in where the setting is read, so the underlying switch keeps
+    // its stored value and simply cannot take effect while the lock is on.
+
+    /** Whether the lock currently forces {@code setting} on. */
+    public static boolean isForced(BooleanSetting setting) {
+        return isForced(setting.key);
     }
 
-    public static boolean blocksExplore() {
-        return isLocked() && Pref.focusLockBlockExplore();
+    public static boolean isForced(String key) {
+        if (!isLocked()) return false;
+        return isLegacyLock() ? legacySelected(key) : Pref.focusLockSelected(key);
+    }
+
+    /** The first released version held exactly these two things. */
+    private static boolean legacySelected(String key) {
+        if (FocusLockTargets.REELS_TAB_KEY.equals(key)) return Pref.legacyFocusLockBlockReels();
+        if (Settings.DISABLE_EXPLORE.key.equals(key)) return Pref.legacyFocusLockBlockExplore();
+        return false;
+    }
+
+    /** The Reels navigation tab, which is not a switch of its own. */
+    public static boolean blocksReels() {
+        return isForced(FocusLockTargets.REELS_TAB_KEY);
+    }
+
+    /** True when at least one target is picked, so there is something to lock. */
+    public static boolean hasSelection() {
+        if (isLegacyLock() && isLocked()) {
+            return Pref.legacyFocusLockBlockReels() || Pref.legacyFocusLockBlockExplore();
+        }
+        for (FocusLockTargets.Target target : FocusLockTargets.available()) {
+            if (Pref.focusLockSelected(target.key)) return true;
+        }
+        return false;
     }
 
     public static boolean lock() {
-        long days = parseLong(Pref.focusLockDurationDays());
-        if (days <= 0) days = 7;
-        long until = System.currentTimeMillis() + days * DAY_MS;
-        return Pref.setFocusLockUntil(String.valueOf(until))
+        long until = System.currentTimeMillis() + FocusLockDuration.millis();
+        return Pref.setFocusLockFormat(FORMAT)
+                && Pref.setFocusLockUntil(String.valueOf(until))
                 && Pref.setFocusLockUnlockRequestedAt("0");
     }
 
@@ -97,7 +158,7 @@ public class FocusLock {
 
     /** Summary shown under the lock/unlock button. */
     public static String statusSummary() {
-        if (!isLocked()) {
+        if (!isActive()) {
             return str("piko_focus_lock_status_unlocked");
         }
         String until = formatDate(lockedUntil());
@@ -111,7 +172,7 @@ public class FocusLock {
     }
 
     public static String buttonTitle() {
-        if (!isLocked()) return str("piko_focus_lock_button_lock");
+        if (!isActive()) return str("piko_focus_lock_button_lock");
         if (canUnlockNow()) return str("piko_focus_lock_button_unlock");
         if (isUnlockPending()) return str("piko_focus_lock_button_cancel_unlock");
         return str("piko_focus_lock_button_request_unlock");
