@@ -17,8 +17,17 @@ public class UserData extends Entity {
         this.obj = obj;
     }
 
+    // Read by 7 different getters per instance (username, bio, verified, etc.), and this.obj
+    // never changes, so the underlying field is only read once per instance.
+    private Object additionalUserInfo;
+    private boolean additionalUserInfoResolved;
+
     private Object getAdditionalUserInfo() throws Exception {
-        return super.getField(this.obj, "fieldName");
+        if (additionalUserInfoResolved) return additionalUserInfo;
+
+        additionalUserInfo = super.getField(this.obj, "fieldName");
+        additionalUserInfoResolved = true;
+        return additionalUserInfo;
     }
 
     public Boolean isVerified() throws Exception {
