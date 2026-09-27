@@ -12,10 +12,18 @@ import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.settings.Settings;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FeatureSwitchPatch {
     public static String FLAGS_SEARCH = "";
+    // Membership check for addFeatureFlagSearchItem() below, which runs on every single Boolean
+    // feature flag read anywhere in the app - a String.contains() scan over the whole
+    // (unbounded, ever-growing) FLAGS_SEARCH string on every call was the actual cost there.
+    // Kept alongside FLAGS_SEARCH itself since FeatureFlagCatalog reads that field directly.
+    private static final Set<String> FLAGS_SEARCH_SET = new HashSet<>();
 
     private static final HashMap<String, Object> FLAGS = new HashMap<>();
 
@@ -59,10 +67,14 @@ public class FeatureSwitchPatch {
 
     public static void getFeatureFlagSearchItems() {
         FLAGS_SEARCH = Utils.getStringPref(Settings.MISC_FEATURE_FLAGS_SEARCH);
+        FLAGS_SEARCH_SET.clear();
+        if (!FLAGS_SEARCH.isEmpty()) {
+            FLAGS_SEARCH_SET.addAll(Arrays.asList(FLAGS_SEARCH.split(",")));
+        }
     }
 
     public static void addFeatureFlagSearchItem(String flag) {
-        if (FLAGS_SEARCH.contains(flag)) {
+        if (!FLAGS_SEARCH_SET.add(flag)) {
             return;
         }
 
