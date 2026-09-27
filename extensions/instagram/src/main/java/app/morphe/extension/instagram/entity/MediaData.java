@@ -40,15 +40,29 @@ public class MediaData extends Entity {
         return Class.forName("className");
     }
 
+    // getExtendedData()/getMoreExtendedData() are each called from several getters per instance,
+    // and this.obj never changes, so the lookup only needs to happen once per instance. On current
+    // app versions the wrapper field is gone (see below), so every uncached call threw and caught
+    // a NoSuchFieldException just to fall back to this.obj.
+    private Object extendedData;
+    private boolean extendedDataResolved;
+
     private Object getExtendedData() throws Exception {
+        if (extendedDataResolved) return extendedData;
+
+        Object result;
         try {
-            Object extendedData = super.getField("fieldName");
-            if (extendedData != null) return extendedData;
+            result = super.getField("fieldName");
+            if (result == null) result = this.obj;
         } catch (Exception ignored) {
             // v441 folded the mutable media dict into Media itself, so there is no wrapper field to
             // hop through and the getters sit directly on the media object.
+            result = this.obj;
         }
-        return this.obj;
+
+        extendedData = result;
+        extendedDataResolved = true;
+        return result;
     }
 
     public String getShortcode() {
@@ -219,8 +233,15 @@ public class MediaData extends Entity {
         return mediaList.get(safePosition);
     }
 
+    private Object moreExtendedData;
+    private boolean moreExtendedDataResolved;
+
     private Object getMoreExtendedData() throws Exception {
-        return super.getField(this.getExtendedData(), "fieldName");
+        if (moreExtendedDataResolved) return moreExtendedData;
+
+        moreExtendedData = super.getField(this.getExtendedData(), "fieldName");
+        moreExtendedDataResolved = true;
+        return moreExtendedData;
     }
 
     private List getVideoVariantsV1() throws Exception {
