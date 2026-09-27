@@ -13,7 +13,6 @@ import android.content.Context;
 import android.preference.Preference;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.shared.Utils;
 
@@ -21,7 +20,7 @@ import app.morphe.extension.shared.Utils;
 public class FocusLockDialogs {
 
     public static void onActionPressed(Context context, Preference button) {
-        if (!FocusLock.isLocked()) {
+        if (!FocusLock.isActive()) {
             confirmLock(context);
         } else if (FocusLock.canUnlockNow()) {
             confirmUnlock(context);
@@ -39,16 +38,13 @@ public class FocusLockDialogs {
     }
 
     private static void confirmLock(Context context) {
-        boolean reels = Pref.focusLockBlockReels();
-        boolean explore = Pref.focusLockBlockExplore();
-        if (!reels && !explore) {
+        if (!FocusLock.hasSelection()) {
             PikoUtils.toast(str("piko_focus_lock_nothing_selected"));
             return;
         }
-        String days = Pref.focusLockDurationDays();
         String message = String.format(
                 str("piko_focus_lock_confirm_lock_desc"),
-                days,
+                FocusLockDuration.summary(),
                 FocusLock.COOLING_OFF_MS / (60 * 60 * 1000)
         );
         new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(context))

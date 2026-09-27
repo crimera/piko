@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.HashSet;
 import android.content.Context;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 
 import app.morphe.extension.instagram.settings.Settings;
@@ -31,7 +32,7 @@ public class Pref {
 
     public static boolean clearAllPreferences() {
         // Resetting settings would silently drop an active Focus Lock.
-        if (FocusLock.isLocked()) return false;
+        if (FocusLock.isActive()) return false;
         return SharedPref.clearAll();
     }
     
@@ -153,31 +154,63 @@ public class Pref {
     }
 
     public static boolean hideStoriesTray() {
-        return SharedPref.getBooleanPref(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+        return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }
 
     public static boolean hideNotesTray() {
-        return SharedPref.getBooleanPref(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
+        return lockable(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
 
     public static boolean disableReelsScrolling() {
-        return (SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) || FocusLock.blocksReels()) && SettingsStatus.disableReelsScrolling;
+        return lockable(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
 
     public static boolean disableSwipeToCreate() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
+        return lockable(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
     }
 
-    public static boolean focusLockBlockReels() {
-        return SharedPref.getBooleanPref(Settings.FOCUS_LOCK_BLOCK_REELS);
+    /**
+     * A switch that Focus Lock can hold on: the stored value, or true while the lock forces it.
+     *
+     * Read per call rather than cached, so a lock that expires releases the setting without
+     * needing a restart.
+     */
+    private static boolean lockable(BooleanSetting setting) {
+        return SharedPref.getBooleanPref(setting) || FocusLock.isForced(setting);
     }
 
-    public static boolean focusLockBlockExplore() {
-        return SharedPref.getBooleanPref(Settings.FOCUS_LOCK_BLOCK_EXPLORE);
+    /** Whether the target behind {@code key} is one of the things Focus Lock holds on. */
+    public static boolean focusLockSelected(String key) {
+        return SharedPref.getBooleanPref(focusLockSelection(key));
     }
 
-    public static String focusLockDurationDays() {
-        return SharedPref.getStringPref(Settings.FOCUS_LOCK_DURATION_DAYS);
+    public static BooleanSetting focusLockSelection(String key) {
+        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false);
+    }
+
+    public static String focusLockDurationMinutes() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_DURATION_MINUTES);
+    }
+
+    public static boolean setFocusLockDurationMinutes(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_DURATION_MINUTES.key, value);
+    }
+
+    /** Keys of the first released Focus Lock, read so a lock it wrote still counts. */
+    public static boolean legacyFocusLockBlockReels() {
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false));
+    }
+
+    public static boolean legacyFocusLockBlockExplore() {
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false));
+    }
+
+    public static String focusLockFormat() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_FORMAT);
+    }
+
+    public static boolean setFocusLockFormat(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_FORMAT.key, value);
     }
 
     public static String focusLockUntil() {
@@ -205,11 +238,11 @@ public class Pref {
     }
 
     public static boolean hideGroupCreationOnSharesheet() {
-        return SharedPref.getBooleanPref(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
+        return lockable(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
     }
 
        public static boolean showReelsFollowButton(boolean original) {
-        boolean hide = SharedPref.getBooleanPref(Settings.HIDE_REELS_FOLLOW_BUTTON) && SettingsStatus.hideReelsFollowButton;
+        boolean hide = lockable(Settings.HIDE_REELS_FOLLOW_BUTTON) && SettingsStatus.hideReelsFollowButton;
         return original && !hide;
     }
 
@@ -358,16 +391,16 @@ public class Pref {
     }
 
     public static boolean disableDoubleTapPost() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_POST);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_POST);
     }
     public static boolean disableDoubleTapReel() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_REEL);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_REEL);
     }
     public static boolean disableDoubleTapComment() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT);
     }
     public static boolean disableDoubleTapMessage() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
     }
     public static boolean moreOptionsOnPost() {
         return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST) && SettingsStatus.moreOptionsOnPost;

@@ -27,7 +27,9 @@ import  app.morphe.extension.instagram.patches.devFlags.Flag;
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
+import app.morphe.extension.instagram.patches.focusLock.FocusLockTargets;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
@@ -339,154 +341,144 @@ public class ScreenBuilder {
         // PreferenceCategory category= addCategory(str("piko_category_distraction_free"));
 
         if (SettingsStatus.focusLock) {
-            buildFocusLockPreferences();
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_focus_lock"),
+                            FocusLock.statusSummary(),
+                            Constants.PIKO_FRAGMENT_FOCUS_LOCK
+                    )
+            );
         }
 
         if (SettingsStatus.disableStories) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_stories"),
-                            "",
-                            Settings.DISABLE_STORIES
-                    )
+            addLockableSwitch(
+                    str("piko_disable_stories"),
+                    "",
+                    Settings.DISABLE_STORIES
             );
         }
         if (SettingsStatus.hideStoriesTray) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_hide_stories_tray"),
-                            str("piko_hide_stories_tray_desc"),
-                            Settings.HIDE_STORIES_TRAY
-                    )
+            addLockableSwitch(
+                    str("piko_hide_stories_tray"),
+                    str("piko_hide_stories_tray_desc"),
+                    Settings.HIDE_STORIES_TRAY
             );
         }
         if (SettingsStatus.disableHighlights) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_highlights"),
-                            "",
-                            Settings.DISABLE_HIGHLIGHTS
-                    )
+            addLockableSwitch(
+                    str("piko_disable_highlights"),
+                    "",
+                    Settings.DISABLE_HIGHLIGHTS
             );
         }
         if (SettingsStatus.hideNotesTray) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_hide_notes_tray"),
-                            str("piko_hide_notes_tray_desc"),
-                            Settings.HIDE_NOTES_TRAY
-                    )
+            addLockableSwitch(
+                    str("piko_hide_notes_tray"),
+                    str("piko_hide_notes_tray_desc"),
+                    Settings.HIDE_NOTES_TRAY
             );
         }
         if (SettingsStatus.disableExplore) {
-            addPreference(
-                    helper.forcedSwitchPreference(
-                            str("piko_disable_explore"),
-                            "",
-                            Settings.DISABLE_EXPLORE,
-                            FocusLock.blocksExplore(),
-                            str("piko_focus_lock_enforced")
-                    )
+            addLockableSwitch(
+                    str("piko_disable_explore"),
+                    "",
+                    Settings.DISABLE_EXPLORE
             );
         }
         if (SettingsStatus.disableComments) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_comments"),
-                            "",
-                            Settings.DISABLE_COMMENTS
-                    )
+            addLockableSwitch(
+                    str("piko_disable_comments"),
+                    "",
+                    Settings.DISABLE_COMMENTS
             );
         }
         if (SettingsStatus.limitFollowingFeed) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_limit_following_feed"),
-                            str("piko_limit_following_feed_desc"),
-                            Settings.LIMIT_FOLLOWING_FEED
-                    )
+            addLockableSwitch(
+                    str("piko_limit_following_feed"),
+                    str("piko_limit_following_feed_desc"),
+                    Settings.LIMIT_FOLLOWING_FEED
             );
         }
         if (SettingsStatus.disableReelsScrolling) {
-            addPreference(
-                    helper.forcedSwitchPreference(
-                            str("piko_disable_reels_scrolling"),
-                            str("piko_disable_reels_scrolling_desc"),
-                            Settings.DISABLE_REELS_SCROLLING,
-                            FocusLock.blocksReels(),
-                            str("piko_focus_lock_enforced")
-                    )
+            addLockableSwitch(
+                    str("piko_disable_reels_scrolling"),
+                    str("piko_disable_reels_scrolling_desc"),
+                    Settings.DISABLE_REELS_SCROLLING
             );
         }
         if (SettingsStatus.disableSwipeToCreate) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_swipe_to_create"),
-                            str("piko_disable_swipe_to_create_desc"),
-                            Settings.DISABLE_SWIPE_TO_CREATE
-                    )
+            addLockableSwitch(
+                    str("piko_disable_swipe_to_create"),
+                    str("piko_disable_swipe_to_create_desc"),
+                    Settings.DISABLE_SWIPE_TO_CREATE
             );
         }
         if (SettingsStatus.hideGroupCreationOnSharesheet) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_hide_group_creation_button_on_sharesheet"),
-                            "",
-                            Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET
-                    )
+            addLockableSwitch(
+                    str("piko_hide_group_creation_button_on_sharesheet"),
+                    "",
+                    Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET
             );
         }
         if (SettingsStatus.hideReelsFollowButton) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_hide_reels_follow_button"),
-                            str("piko_hide_reels_follow_button_desc"),
-                            Settings.HIDE_REELS_FOLLOW_BUTTON
-                    )
+            addLockableSwitch(
+                    str("piko_hide_reels_follow_button"),
+                    str("piko_hide_reels_follow_button_desc"),
+                    Settings.HIDE_REELS_FOLLOW_BUTTON
             );
         }
 
         if (SettingsStatus.disableDoubleTapLike) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_double_tap_like_post"),
-                            "",
-                            Settings.DISABLE_DOUBLE_TAP_LIKE_POST
-                    )
+            addLockableSwitch(
+                    str("piko_disable_double_tap_like_post"),
+                    "",
+                    Settings.DISABLE_DOUBLE_TAP_LIKE_POST
             );
 
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_double_tap_like_reel"),
-                            "",
-                            Settings.DISABLE_DOUBLE_TAP_LIKE_REEL
-                    )
+            addLockableSwitch(
+                    str("piko_disable_double_tap_like_reel"),
+                    "",
+                    Settings.DISABLE_DOUBLE_TAP_LIKE_REEL
             );
 
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_double_tap_like_comment"),
-                            "",
-                            Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT
-                    )
+            addLockableSwitch(
+                    str("piko_disable_double_tap_like_comment"),
+                    "",
+                    Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT
             );
 
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_double_tap_like_message"),
-                            "",
-                            Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE
-                    )
+            addLockableSwitch(
+                    str("piko_disable_double_tap_like_message"),
+                    "",
+                    Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE
             );
         }
     }
 
+    /** Adds a Distraction free switch, shown forced on while Focus Lock holds it. */
+    private void addLockableSwitch(String title, String summary, BooleanSetting setting) {
+        addPreference(
+                helper.forcedSwitchPreference(
+                        title,
+                        summary,
+                        setting,
+                        FocusLock.isForced(setting),
+                        str("piko_focus_lock_enforced")
+                )
+        );
+    }
+
     /**
-     * Focus Lock. The switches that the lock enforces are greyed out while it is active so the
-     * commitment cannot be undone from the settings screen.
+     * The Focus Lock screen: what to hold, for how long, and the lock itself.
+     *
+     * The picker lists the same settings as the Distraction free screen, by the same names, so
+     * it is obvious what each entry will do. Everything except the action row is disabled while
+     * the lock is on, since changing it then would defeat the point.
      */
-    private void buildFocusLockPreferences() {
-        boolean locked = FocusLock.isLocked();
+    public void buildFocusLockSection() {
+        if (!SettingsStatus.focusLock) return;
+
+        boolean locked = FocusLock.isActive();
 
         addPreference(
                 helper.buttonPreference(
@@ -496,29 +488,23 @@ public class ScreenBuilder {
                 )
         );
 
-        Preference blockReels = helper.switchPreference(
-                str("piko_focus_lock_block_reels"),
-                str("piko_focus_lock_block_reels_desc"),
-                Settings.FOCUS_LOCK_BLOCK_REELS
-        );
-        Preference blockExplore = helper.switchPreference(
-                str("piko_focus_lock_block_explore"),
-                str("piko_focus_lock_block_explore_desc"),
-                Settings.FOCUS_LOCK_BLOCK_EXPLORE
-        );
-        Preference duration = helper.listPreference(
-                str("piko_focus_lock_duration"),
-                str("piko_focus_lock_duration_desc"),
-                Settings.FOCUS_LOCK_DURATION_DAYS
-        );
-        if (locked) {
-            ((SwitchPref) blockReels).setSwitchInteractionEnabled(false);
-            ((SwitchPref) blockExplore).setSwitchInteractionEnabled(false);
-            duration.setEnabled(false);
-        }
-        addPreference(blockReels);
-        addPreference(blockExplore);
+        FocusLockDurationPreference duration = new FocusLockDurationPreference(context);
+        duration.setTitle(str("piko_focus_lock_duration"));
+        duration.setEnabled(!locked);
         addPreference(duration);
+
+        PreferenceCategory targets = addCategory(str("piko_focus_lock_targets"));
+        for (FocusLockTargets.Target target : FocusLockTargets.available()) {
+            Preference pref = helper.switchPreference(
+                    str(target.titleKey),
+                    target.summaryKey == null ? "" : str(target.summaryKey),
+                    Pref.focusLockSelection(target.key)
+            );
+            if (locked && pref instanceof SwitchPref) {
+                ((SwitchPref) pref).setSwitchInteractionEnabled(false);
+            }
+            addPreference(targets, pref);
+        }
     }
 
     public void buildMiscSection() {

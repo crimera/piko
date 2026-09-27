@@ -31,6 +31,7 @@ import app.morphe.extension.crimera.PikoUtils;
 
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.settings.Settings;
 
 @SuppressWarnings("unused")
 public class Links {
@@ -136,16 +137,17 @@ public class Links {
                         || path.contains("direct_v2/pending_inbox/?visual_message")
                         || path.contains("stories/hallpass/")
                         || path.contains("/api/v1/feed/reels_media_stream/")) {
-                    shouldBlockUri = DISABLE_STORIES;
+                    shouldBlockUri = DISABLE_STORIES || FocusLock.isForced(Settings.DISABLE_STORIES);
                 } else if (path.contains("/discover/topical_explore")
                         || path.contains("/discover/topical_explore_stream")
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/recent_searches/"))
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/top_serp/"))) {
-                    // Focus Lock is read per request, not from the cached field: a lock that
-                    // expires while the process is alive must release explore without a restart.
-                    shouldBlockUri = DISABLE_EXPLORE || FocusLock.blocksExplore();
+                    // Focus Lock is read per request, not from the cached fields above: a lock
+                    // that expires while the process is alive has to release the setting without
+                    // waiting for a restart.
+                    shouldBlockUri = DISABLE_EXPLORE || FocusLock.isForced(Settings.DISABLE_EXPLORE);
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
-                    shouldBlockUri = DISABLE_COMMENTS;
+                    shouldBlockUri = DISABLE_COMMENTS || FocusLock.isForced(Settings.DISABLE_COMMENTS);
                 } else if (path.contains("/discover/ayml") || path.contains("/discover/chaining")) { // Thanks to  @brosssh
                     shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
                 } else if (path.contains("profile_ads/get_profile_ads/")
@@ -154,7 +156,7 @@ public class Links {
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
                 } else if (path.contains("/highlights_tray")) {
-                    shouldBlockUri = DISABLE_HIGHLIGHTS;
+                    shouldBlockUri = DISABLE_HIGHLIGHTS || FocusLock.isForced(Settings.DISABLE_HIGHLIGHTS);
                 }
 
             }
