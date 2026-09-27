@@ -25,6 +25,22 @@ public class DirectItem extends Entity {
         this.obj = obj;
     }
 
+    // getBaseClassName()/mediaClassName() are patch-time constants, the same for every instance,
+    // so the classes they name are resolved once per name and reused across all DirectItems -
+    // every reflective read below (one per message, per field, in every open chat) otherwise
+    // repeated Class.forName() for a class already resolved.
+    private static final java.util.concurrent.ConcurrentHashMap<String, Class<?>> CLASS_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static Class<?> resolveClass(String className) throws ClassNotFoundException {
+        Class<?> cached = CLASS_CACHE.get(className);
+        if (cached != null) return cached;
+
+        Class<?> resolved = Class.forName(className);
+        CLASS_CACHE.putIfAbsent(className, resolved);
+        return CLASS_CACHE.get(className);
+    }
+
     /** Binary name of the DirectItem base class (patched, e.g. {@code X.9ZA}). */
     private String getBaseClassName() {
         return "className";
@@ -32,7 +48,7 @@ public class DirectItem extends Entity {
 
     /** Loads the base class via the app classloader. */
     private Class<?> baseClass() throws Exception {
-        return Class.forName(this.getBaseClassName());
+        return resolveClass(this.getBaseClassName());
     }
 
     /** Reads a base-class field, bypassing MQTT subclass field shadowing. */
@@ -186,7 +202,7 @@ public class DirectItem extends Entity {
     /** Binary name of the concrete item class (e.g. X/6fW) that declares the media fields. */
     private String mediaClassName() { return "mediaClassName"; }
 
-    private Class<?> mediaClass() throws Exception { return Class.forName(this.mediaClassName()); }
+    private Class<?> mediaClass() throws Exception { return resolveClass(this.mediaClassName()); }
 
     // Field-name providers — one placeholder each, rewritten at patch time via changeFirstString.
     private String fieldMedia()        { return "fieldName"; } // media        -> Media
