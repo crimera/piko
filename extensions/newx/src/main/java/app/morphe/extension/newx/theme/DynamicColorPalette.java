@@ -363,7 +363,7 @@ public final class DynamicColorPalette {
     }
 
     private static boolean isLikeThemingEnabled() {
-        return isEnabled() && SettingsRegistry.getBooleanOrDefault(DYNAMIC_LIKE_SETTING, true);
+        return isEnabled() && SettingsRegistry.getBooleanOrDefault(DYNAMIC_LIKE_SETTING, false);
     }
 
     private static long dynamicColor(boolean dark, String lightName, String darkName) {

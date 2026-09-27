@@ -196,7 +196,7 @@ val dynamicColorPatch =
                             id = "newx.theme.dynamic_like",
                             strings = settingStrings("piko_newx_dynamic_color_like"),
                             order = 200,
-                            defaultValue = true,
+                            defaultValue = false,
                             rebootApp = true,
                         )
                     }
