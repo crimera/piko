@@ -140,10 +140,12 @@ fun Fingerprint.changeStringAt(
     index: Int,
     value: String,
 ) {
-    method.instructions.filter { it.opcode == Opcode.CONST_STRING }[index].let { instruction ->
-        val register = (instruction as BuilderInstruction21c).registerA
-        method.replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
-    }
+    val matches = method.instructions.filter { it.opcode == Opcode.CONST_STRING }
+    val instruction =
+        matches.getOrNull(index)
+            ?: throw PatchException("Expected at least ${index + 1} CONST_STRING instruction(s), found ${matches.size}")
+    val register = (instruction as BuilderInstruction21c).registerA
+    method.replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
 }
 
 /** Rewrites the placeholder equal to [sentinel], so slot order can shift without breaking. */
@@ -153,10 +155,10 @@ fun Fingerprint.changeString(
     value: String,
 ) {
     val instruction =
-        method.instructions.first {
+        method.instructions.firstOrNull {
             (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
                 it.getReference<StringReference>()?.string == sentinel
-        }
+        } ?: throw PatchException("Expected a CONST_STRING/CONST_STRING_JUMBO instruction with sentinel \"$sentinel\"")
     val register = instruction.registersUsed[0]
     method.replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
 }
