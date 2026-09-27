@@ -13,17 +13,19 @@ import app.morphe.extension.newx.theme.TwitterTheme;
  * host's selected Twitter accent; dynamic accent colors remain limited to the patched Blue palette.
  */
 public final class Theme {
-    private static final String DYNAMIC_COLOR_SETTING = "newx.theme.dynamic_color";
-    private static final String DARK_STYLE_SETTING = "newx.theme.dark_style";
-    private static final String DARK_STYLE_AMOLED = "amoled";
-    private static final String DARK_STYLE_DIM = "dim";
-    // Keep elevated surfaces visible against the AMOLED base surface. Mirrors the host's
+    private static final String THEME_SETTING = "newx.theme.dark_style";
+    private static final String THEME_MATERIAL = "material";
+    private static final String THEME_CONTRAST = "contrast";
+    private static final String THEME_DIM = "dim";
+    // Keep elevated surfaces visible against the darkest base surface. Mirrors the host's
     // LIGHTS_OUT highlight background so extension dialogs match the app's own popups. Kept as a
     // literal so the class has no Android calls during static initialization and stays
     // unit-testable.
-    private static final int AMOLED_ELEVATED_SURFACE = 0xFF121314;
+    private static final int DARK_ELEVATED_SURFACE = 0xFF121314;
     // Mirrors the host's LIGHTS_OUT container surface (#15181c) for chips and badges.
-    private static final int AMOLED_SURFACE_VARIANT = 0xFF15181C;
+    private static final int DARK_SURFACE_VARIANT = 0xFF15181C;
+    // High-contrast light elevation: light gray panels stay visible against the white base.
+    private static final int LIGHT_ELEVATED_SURFACE = 0xFFEEEEEE;
     // Classic X "Dim" surfaces. NewX routes every dark mode to its LIGHTS_OUT palette, so the
     // extension-owned screens mirror the dim tokens the patch restores for the Compose palette.
     private static final int DIM_SURFACE = 0xFF15202B;
@@ -56,76 +58,115 @@ public final class Theme {
     }
 
     public static SettingsSnapshot snapshot() {
+        String theme = themeStyle();
         boolean dynamicColors =
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                        && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
-        boolean amoledBlack = resolveAmoledBlack(
-                SettingsRegistry.isRegistered(DARK_STYLE_SETTING),
-                SettingsRegistry.getStringOrDefault(DARK_STYLE_SETTING, DARK_STYLE_AMOLED)
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !THEME_DIM.equals(theme);
+        return new SettingsSnapshot(dynamicColors, theme);
+    }
+
+    static String themeStyle() {
+        return resolveThemeStyle(
+                SettingsRegistry.isRegistered(THEME_SETTING),
+                SettingsRegistry.getStringOrDefault(THEME_SETTING, THEME_CONTRAST)
         );
-        return new SettingsSnapshot(dynamicColors, amoledBlack);
+    }
+
+    /**
+     * Maps the stored chooser value to a known theme. Unregistered (patch absent), legacy
+     * AMOLED, and unknown values resolve to high contrast, which keeps the previous pure-black
+     * dark surfaces.
+     */
+    static String resolveThemeStyle(boolean settingRegistered, String settingValue) {
+        if (!settingRegistered) return THEME_CONTRAST;
+        if (THEME_MATERIAL.equals(settingValue)) return THEME_MATERIAL;
+        if (THEME_DIM.equals(settingValue)) return THEME_DIM;
+        return THEME_CONTRAST;
     }
 
     public static int surface(Context context) {
-        return surfaceColor(context, usesDynamicColors(), useAmoledBlack(context));
+        return surfaceColor(context, usesDynamicColors(), themeStyle());
     }
 
     public static int surfaceContainer(Context context) {
-        return surfaceContainerColor(context, usesDynamicColors(), useAmoledBlack(context));
+        return surfaceContainerColor(context, usesDynamicColors(), themeStyle());
     }
 
     public static int surfaceContainerHigh(Context context) {
-        return surfaceContainerHighColor(context, usesDynamicColors(), useAmoledBlack(context));
+        return surfaceContainerHighColor(context, usesDynamicColors(), themeStyle());
     }
 
     public static int surfaceVariant(Context context) {
-        return surfaceVariantColor(context, usesDynamicColors(), useAmoledBlack(context));
+        return surfaceVariantColor(context, usesDynamicColors(), themeStyle());
     }
 
-    private static int surfaceColor(Context context, boolean dynamicColors, boolean amoledBlack) {
-        if (isDark(context)) return amoledBlack ? Color.BLACK : DIM_SURFACE;
-        return dynamicColor(context, "surface", Color.rgb(254, 247, 255), dynamicColors);
+    private static int surfaceColor(Context context, boolean dynamicColors, String theme) {
+        if (isDark(context)) {
+            if (THEME_DIM.equals(theme)) return DIM_SURFACE;
+            if (THEME_MATERIAL.equals(theme) && dynamicColors) {
+                return dynamicColor(context, "surface", Color.BLACK, true);
+            }
+            return Color.BLACK;
+        }
+        if (THEME_MATERIAL.equals(theme)) {
+            return dynamicColor(context, "surface", Color.rgb(254, 247, 255), dynamicColors);
+        }
+        // High contrast and the classic Dim theme both use a neutral white light base.
+        return Color.WHITE;
     }
 
     private static int surfaceContainerColor(
             Context context,
             boolean dynamicColors,
-            boolean amoledBlack
+            String theme
     ) {
         // The chooser owns the dark surface family, so dynamic colors only tint the accents here.
-        return surfaceColor(context, dynamicColors, amoledBlack);
+        return surfaceColor(context, dynamicColors, theme);
     }
 
     private static int surfaceContainerHighColor(
             Context context,
             boolean dynamicColors,
-            boolean amoledBlack
+            String theme
     ) {
         if (isDark(context)) {
-            return amoledBlack ? AMOLED_ELEVATED_SURFACE : DIM_SURFACE_CONTAINER_HIGH;
+            if (THEME_DIM.equals(theme)) return DIM_SURFACE_CONTAINER_HIGH;
+            if (THEME_MATERIAL.equals(theme) && dynamicColors) {
+                return dynamicColor(context, "surface_container_high", DARK_ELEVATED_SURFACE, true);
+            }
+            return DARK_ELEVATED_SURFACE;
         }
-        return dynamicColor(
-                context,
-                "surface_container_high",
-                Color.rgb(243, 237, 247),
-                dynamicColors
-        );
+        if (THEME_MATERIAL.equals(theme)) {
+            return dynamicColor(
+                    context,
+                    "surface_container_high",
+                    Color.rgb(243, 237, 247),
+                    dynamicColors
+            );
+        }
+        return LIGHT_ELEVATED_SURFACE;
     }
 
     private static int surfaceVariantColor(
             Context context,
             boolean dynamicColors,
-            boolean amoledBlack
+            String theme
     ) {
         if (isDark(context)) {
-            return amoledBlack ? AMOLED_SURFACE_VARIANT : DIM_SURFACE_VARIANT;
+            if (THEME_DIM.equals(theme)) return DIM_SURFACE_VARIANT;
+            if (THEME_MATERIAL.equals(theme) && dynamicColors) {
+                return dynamicColor(context, "surface_container", DARK_SURFACE_VARIANT, true);
+            }
+            return DARK_SURFACE_VARIANT;
         }
-        return dynamicColor(
-                context,
-                "surface_container_high",
-                Color.rgb(231, 224, 236),
-                dynamicColors
-        );
+        if (THEME_MATERIAL.equals(theme)) {
+            return dynamicColor(
+                    context,
+                    "surface_container_high",
+                    Color.rgb(231, 224, 236),
+                    dynamicColors
+            );
+        }
+        return LIGHT_ELEVATED_SURFACE;
     }
 
     public static int primaryText(Context context) {
@@ -266,26 +307,7 @@ public final class Theme {
 
     public static boolean usesDynamicColors() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
-    }
-
-    private static boolean useAmoledBlack(Context context) {
-        return isDark(context) && resolveAmoledBlack(
-                SettingsRegistry.isRegistered(DARK_STYLE_SETTING),
-                SettingsRegistry.getStringOrDefault(DARK_STYLE_SETTING, DARK_STYLE_AMOLED)
-        );
-    }
-
-    /**
-     * Whether dark surfaces should resolve to pure black. The dark style chooser is contributed by
-     * the NewX dynamic color patch, which also injects the dim palette into the host. When that
-     * patch is absent the chooser is unregistered and X renders its native LIGHTS_OUT near-black
-     * palette for every dark mode, so extension-owned surfaces must stay black instead of falling
-     * back to the dim tokens used to mirror the patched host palette. Unknown stored values also
-     * resolve to black so a corrupted preference never turns dark surfaces dim blue.
-     */
-    static boolean resolveAmoledBlack(boolean settingRegistered, String settingValue) {
-        return !settingRegistered || !DARK_STYLE_DIM.equals(settingValue);
+                && !THEME_DIM.equals(themeStyle());
     }
 
     private static int checkboxChecked(Context context, boolean dynamicColors) {
@@ -302,11 +324,11 @@ public final class Theme {
 
     public static final class SettingsSnapshot {
         private final boolean dynamicColors;
-        private final boolean amoledBlack;
+        private final String theme;
 
-        private SettingsSnapshot(boolean dynamicColors, boolean amoledBlack) {
+        private SettingsSnapshot(boolean dynamicColors, String theme) {
             this.dynamicColors = dynamicColors;
-            this.amoledBlack = amoledBlack;
+            this.theme = theme;
         }
 
         public boolean usesDynamicColors() {
@@ -318,19 +340,19 @@ public final class Theme {
         }
 
         public int surface(Context context) {
-            return Theme.surfaceColor(context, dynamicColors, amoledBlack);
+            return Theme.surfaceColor(context, dynamicColors, theme);
         }
 
         public int surfaceContainer(Context context) {
-            return Theme.surfaceContainerColor(context, dynamicColors, amoledBlack);
+            return Theme.surfaceContainerColor(context, dynamicColors, theme);
         }
 
         public int surfaceContainerHigh(Context context) {
-            return Theme.surfaceContainerHighColor(context, dynamicColors, amoledBlack);
+            return Theme.surfaceContainerHighColor(context, dynamicColors, theme);
         }
 
         public int surfaceVariant(Context context) {
-            return Theme.surfaceVariantColor(context, dynamicColors, amoledBlack);
+            return Theme.surfaceVariantColor(context, dynamicColors, theme);
         }
 
         public int primaryText(Context context) {

@@ -81,17 +81,17 @@ private const val XDS_CHROME_BACKGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J"
 private const val PALETTE_IS_ENABLED_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z"
-private const val PALETTE_USE_AMOLED_BLACK_METHOD =
-    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->useAmoledBlack()Z"
+private const val PALETTE_USE_MATERIAL_BACKGROUND_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->useMaterialBackground()Z"
+private const val PALETTE_USE_DIM_THEME_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->useDimTheme()Z"
 
 /**
- * The AMOLED dark style. Only the base surfaces drop to pure black; the elevated surfaces keep
- * NewX's own LIGHTS_OUT family, so popups, dialogs, sheets, and glass panels stay visible against
- * the black background instead of disappearing into it. Every supported target
- * (12.27.0-prod.01 through 12.29.0-alpha.04) carries `ff121314` (highlight background) and
- * `cc242424` (glass background) exactly once, in the LIGHTS_OUT palette factory.
+ * The high-contrast dark style. Base surfaces drop to pure black; the elevated surfaces keep
+ * NewX's own LIGHTS_OUT family, so popups, dialogs, sheets, and glass panels stay visible
+ * against the black background instead of disappearing into it.
  */
-private val AMOLED_BACKGROUND_COLORS = mapOf(
+private val CONTRAST_BACKGROUND_COLORS = mapOf(
     7 to 0xFF00000000000000UL.toLong(),
     8 to 0x8000000000000000UL.toLong(),
     9 to 0xFF12131400000000UL.toLong(),
@@ -113,8 +113,9 @@ private val DIM_BACKGROUND_COLORS = mapOf(
     15 to 0xFF15202B00000000UL.toLong(),
 )
 
-private const val DARK_STYLE_AMOLED = "amoled"
-private const val DARK_STYLE_DIM = "dim"
+private const val THEME_MATERIAL = "material"
+private const val THEME_CONTRAST = "contrast"
+private const val THEME_DIM = "dim"
 
 private enum class PaletteKind(
     val helperMethod: String,
@@ -164,39 +165,32 @@ val dynamicColorPatch =
     bytecodePatch(
         name = "NewX: Theme",
         description =
-            "Applies the system Material You palette and the AMOLED/dim dark background " +
-                "styles to NewX.",
+            "Applies the Material You, high-contrast, and Dim themes to NewX.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
 
-        val darkStyle =
+        val theme =
             newXSettings {
                 category(Categories.APPEARANCE) {
                     group(Groups.THEME) {
-                        toggle(
-                            id = "newx.theme.dynamic_color",
-                            strings = settingStrings("piko_newx_dynamic_color"),
-                            order = 100,
-                            defaultValue = true,
-                            rebootApp = true,
-                        )
                         singleChoice(
                             id = "newx.theme.dark_style",
-                            strings = settingStrings("piko_newx_dark_style"),
-                            order = 200,
-                            defaultValue = DARK_STYLE_AMOLED,
+                            strings = settingStrings("piko_newx_theme"),
+                            order = 100,
+                            defaultValue = THEME_CONTRAST,
                             rebootApp = true,
                             options =
                                 listOf(
-                                    choice(DARK_STYLE_AMOLED, "piko_newx_dark_style_amoled"),
-                                    choice(DARK_STYLE_DIM, "piko_newx_dark_style_dim"),
+                                    choice(THEME_MATERIAL, "piko_newx_theme_material"),
+                                    choice(THEME_CONTRAST, "piko_newx_theme_contrast"),
+                                    choice(THEME_DIM, "piko_newx_theme_dim"),
                                 ),
                         )
                         toggle(
                             id = "newx.theme.dynamic_like",
                             strings = settingStrings("piko_newx_dynamic_color_like"),
-                            order = 300,
+                            order = 200,
                             defaultValue = true,
                             rebootApp = true,
                         )
@@ -2225,29 +2219,15 @@ private fun Block.emitDynamicPaletteGuard(
     invokeStatic(methodReference(PALETTE_IS_ENABLED_METHOD))
     moveResult(36, "Z")
     ifEqz(36, Target.Local(originalLabel))
-    if (kind == PaletteKind.LIGHTS_OUT) {
-        // The dark style chooser owns the whole background family of the LIGHTS_OUT palette.
-        invokeStatic(methodReference(PALETTE_USE_AMOLED_BLACK_METHOD))
-        moveResult(36, "Z")
-    }
     newInstance(0, paletteDescriptor)
     constInt(1, if (kind.isLight) 1 else 0)
     repeat(PALETTE_COLOR_COUNT) { token ->
         val colorRegister = 2 + token * 2
         constInt(colorRegister, token)
-        if (kind == PaletteKind.LIGHTS_OUT) {
-            move(colorRegister + 1, 36, "Z")
-            invokeStatic(
-                methodReference("$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->${kind.helperMethod}(IZ)J"),
-                colorRegister,
-                colorRegister + 1,
-            )
-        } else {
-            invokeStatic(
-                methodReference("$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->${kind.helperMethod}(I)J"),
-                colorRegister,
-            )
-        }
+        invokeStatic(
+            methodReference("$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->${kind.helperMethod}(I)J"),
+            colorRegister,
+        )
         moveResult(colorRegister, "J")
     }
     invokeDirect(
@@ -2260,9 +2240,11 @@ private fun Block.emitDynamicPaletteGuard(
 }
 
 /**
- * Runs on the original dark palette paths (DIM and LIGHTS_OUT), which dynamic color bypasses with
- * an early `return-object`. Writes the Dim surfaces first and lets the AMOLED style overwrite the
- * same tokens, so the chooser selects the whole background family on this path too.
+ * Runs on the original dark palette paths (DIM and LIGHTS_OUT) when the dynamic theme is off.
+ * Writes the high-contrast black surfaces first and lets the Dim theme overwrite the same
+ * tokens, so the chooser selects the whole background family on this path too. The Material You
+ * theme needs the dynamic palette, so it keeps the native surfaces here instead of inventing
+ * fixed colors.
  */
 private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor) {
     // The dark style flag must not live in the constructor's argument registers: the block
@@ -2278,13 +2260,18 @@ private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor)
         relocateBranchTargets = false,
     ) {
         // `move-result` (11x) and `if-eqz` (21t) both encode a byte register.
-        val amoledRegister = scratchRegister(RegisterLimit.BYTE)
-        invokeStatic(methodReference(PALETTE_USE_AMOLED_BLACK_METHOD))
-        moveResult(amoledRegister, "Z")
-        appendBackgroundColors(constructor, DIM_BACKGROUND_COLORS)
+        val materialRegister = scratchRegister(RegisterLimit.BYTE)
+        invokeStatic(methodReference(PALETTE_USE_MATERIAL_BACKGROUND_METHOD))
+        moveResult(materialRegister, "Z")
+        ifNez(materialRegister, Target.Original)
+        // `move-result` (11x) and `if-eqz` (21t) both encode a byte register.
+        val dimRegister = scratchRegister(RegisterLimit.BYTE)
+        invokeStatic(methodReference(PALETTE_USE_DIM_THEME_METHOD))
+        moveResult(dimRegister, "Z")
+        appendBackgroundColors(constructor, CONTRAST_BACKGROUND_COLORS)
         // Dim: keep the dim surfaces and fall through into the untouched constructor call.
-        ifEqz(amoledRegister, Target.Original)
-        appendBackgroundColors(constructor, AMOLED_BACKGROUND_COLORS)
+        ifEqz(dimRegister, Target.Original)
+        appendBackgroundColors(constructor, DIM_BACKGROUND_COLORS)
     }
 }
 

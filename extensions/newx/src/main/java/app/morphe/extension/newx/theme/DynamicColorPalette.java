@@ -27,11 +27,11 @@ public final class DynamicColorPalette {
     public static final int APP_BACKGROUND = 15;
     public static final int BORDER = 16;
 
-    private static final String DYNAMIC_COLOR_SETTING = "newx.theme.dynamic_color";
     private static final String DYNAMIC_LIKE_SETTING = "newx.theme.dynamic_like";
-    private static final String DARK_STYLE_SETTING = "newx.theme.dark_style";
-    private static final String DARK_STYLE_AMOLED = "amoled";
-    private static final String DARK_STYLE_DIM = "dim";
+    private static final String THEME_SETTING = "newx.theme.dark_style";
+    private static final String THEME_MATERIAL = "material";
+    private static final String THEME_CONTRAST = "contrast";
+    private static final String THEME_DIM = "dim";
     private static final String LIGHT_PRIMARY = "m3_sys_color_dynamic_light_primary";
     private static final String LIGHT_ON_PRIMARY = "m3_sys_color_dynamic_light_on_primary";
     private static final String LIGHT_PRIMARY_CONTAINER = "m3_sys_color_dynamic_light_primary_container";
@@ -53,23 +53,23 @@ public final class DynamicColorPalette {
     private static final String DARK_OUTLINE = "m3_sys_color_dynamic_dark_outline";
     private static final String DARK_OUTLINE_VARIANT = "m3_sys_color_dynamic_dark_outline_variant";
     private static final int ALPHA_STANDARD_DIM_TRANSLUCENT = 0xBF;
-    private static final int ALPHA_LIGHTS_OUT_TRANSLUCENT = 0x80;
     private static final int ALPHA_GLASS_BACKGROUND = 0xCC;
     private static final int ALPHA_LIGHT_GLASS_SHADOW = 0x26;
     private static final int ALPHA_DARK_GLASS_SHADOW = 0x50;
     private static final int DIM_XDS_BACKGROUND = 0xFF15202B;
     private static final int BLACK_XDS_BACKGROUND = 0xFF000000;
-    // The app's own LIGHTS_OUT elevated surfaces. The AMOLED style keeps them so popups, dialogs,
-    // sheets, and glass panels stay visible against the pure-black base surface instead of
-    // disappearing into it.
-    private static final int AMOLED_HIGHLIGHT_BACKGROUND = 0xFF121314;
-    private static final int AMOLED_GLASS_BACKGROUND = 0xCC242424;
-    // Classic X Dim surfaces, mirrored from NewX's own DIM palette.
-    private static final int DIM_CELL_BACKGROUND = 0xFF15202B;
-    private static final int DIM_TRANSLUCENT_CELL_BACKGROUND = 0xBF15202B;
-    private static final int DIM_HIGHLIGHT_BACKGROUND = 0xFF101922;
-    private static final int DIM_GLASS_BACKGROUND = 0xCC15202B;
-
+    // High-contrast light surfaces: base surfaces are pure white, elevated surfaces keep a
+    // light gray so popups, dialogs, and sheets stay visible against the white base.
+    private static final int CONTRAST_LIGHT_BACKGROUND = 0xFFFFFFFF;
+    private static final int CONTRAST_LIGHT_TRANSLUCENT_BACKGROUND = 0x80FFFFFF;
+    private static final int CONTRAST_LIGHT_ELEVATED_BACKGROUND = 0xFFEEEEEE;
+    private static final int CONTRAST_LIGHT_GLASS_BACKGROUND = 0xCCEEEEEE;
+    // High-contrast dark surfaces: base surfaces are pure black, elevated surfaces keep the
+    // app's own LIGHTS_OUT family so popups, dialogs, sheets, and glass panels stay visible
+    // against the black base.
+    private static final int CONTRAST_DARK_TRANSLUCENT_BACKGROUND = 0x80000000;
+    private static final int CONTRAST_DARK_ELEVATED_BACKGROUND = 0xFF121314;
+    private static final int CONTRAST_DARK_GLASS_BACKGROUND = 0xCC242424;
     private DynamicColorPalette() {
     }
 
@@ -78,88 +78,122 @@ public final class DynamicColorPalette {
     }
 
     public static boolean isEnabled() {
-        return isSupported() && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
+        return isSupported() && !useDimTheme();
+    }
+
+    /** Whether the theme chooser selected Material You system surfaces. */
+    public static boolean useMaterialBackground() {
+        return THEME_MATERIAL.equals(themeStyle());
+    }
+
+    /** Whether the theme chooser selected the classic static Dim theme. */
+    public static boolean useDimTheme() {
+        return THEME_DIM.equals(themeStyle());
+    }
+
+    static String themeStyle() {
+        return normalizeThemeStyle(
+                SettingsRegistry.getStringOrDefault(THEME_SETTING, THEME_CONTRAST)
+        );
     }
 
     /**
-     * Whether the dark style chooser selected the AMOLED style. Unknown or unset values resolve to
-     * the AMOLED default so dark surfaces never silently fall back to the dim family.
+     * Maps the stored chooser value to a known theme. The legacy AMOLED value and unknown
+     * values resolve to high contrast, which keeps their pure-black dark backgrounds.
      */
-    public static boolean useAmoledBlack() {
-        return DARK_STYLE_AMOLED.equals(darkStyle());
+    static String normalizeThemeStyle(String style) {
+        if (THEME_MATERIAL.equals(style)) return THEME_MATERIAL;
+        if (THEME_DIM.equals(style)) return THEME_DIM;
+        return THEME_CONTRAST;
     }
 
-    static String darkStyle() {
-        String style = SettingsRegistry.getStringOrDefault(DARK_STYLE_SETTING, DARK_STYLE_AMOLED);
-        return DARK_STYLE_DIM.equals(style) ? DARK_STYLE_DIM : DARK_STYLE_AMOLED;
-    }
-
-    /** Supplies the XDS dark-surface color used by transparent chrome and its haze tint. */
+    /**
+     * Supplies the XDS dark-surface color used by transparent chrome and its haze tint. Material
+     * You follows the dynamic surface, high contrast is pure black, and Dim keeps the classic
+     * dim blue. With dynamic colors off there is no system surface to resolve, so Material You
+     * keeps the native chrome.
+     */
     public static long xdsChromeBackground(long originalColor) {
         Context context = Utils.getContext();
         if (context == null) {
             throw new IllegalStateException("NewX XDS colors need the initialized host context");
         }
 
+        if (useMaterialBackground()) {
+            if (!isEnabled()) return originalColor;
+            return color(DARK_SURFACE);
+        }
         return resolveXdsChromeBackground(
                 TwitterTheme.fromContext(context),
-                useAmoledBlack(),
+                themeStyle(),
                 originalColor
         );
     }
 
     /**
-     * The chrome background always matches the base surface of the selected dark style: AMOLED
-     * chrome is pure black and Dim chrome is the classic dim blue.
+     * The chrome background always matches the base surface of the selected fixed theme:
+     * high-contrast chrome is pure black and Dim chrome is the classic dim blue.
      */
     static long resolveXdsChromeBackground(
             TwitterTheme theme,
-            boolean amoledBlack,
+            String themeStyle,
             long originalColor
     ) {
         if (theme == TwitterTheme.STANDARD) return originalColor;
-        return pack(amoledBlack ? BLACK_XDS_BACKGROUND : DIM_XDS_BACKGROUND);
+        return pack(THEME_DIM.equals(themeStyle) ? DIM_XDS_BACKGROUND : BLACK_XDS_BACKGROUND);
     }
 
     public static long light(int token) {
         requireSupported();
+        requireDynamicTheme();
+        if (!useMaterialBackground()) return contrastLightColor(token);
         return paletteColor(token, false);
     }
 
-    /** The DIM factory has no separate AMOLED decision: the chooser owns the surface family. */
+    /**
+     * The DIM factory resolves through the same chooser-owned background family as LIGHTS_OUT.
+     * The static Dim theme never reaches this method: its guard keeps the native palette.
+     */
     public static long dark(int token) {
         requireSupported();
-        return darkStyleColor(token, useAmoledBlack());
+        requireDynamicTheme();
+        if (useMaterialBackground()) return paletteColor(token, true);
+        return contrastDarkColor(token);
     }
 
-    /** LIGHTS_OUT supplies the one dark-style decision made by its injected factory. */
-    public static long lightsOut(int token, boolean amoledBlack) {
+    /** LIGHTS_OUT resolves through the same chooser-owned background family as the DIM factory. */
+    public static long lightsOut(int token) {
         requireSupported();
-        return darkStyleColor(token, amoledBlack);
+        requireDynamicTheme();
+        if (useMaterialBackground()) return paletteColor(token, true);
+        return contrastDarkColor(token);
     }
 
     /**
-     * Resolves the background family of the selected dark style. NewX routes both "Dim" and
-     * "Lights out" to the LIGHTS_OUT factory, so AMOLED keeps pure-black base surfaces with the
-     * app's own lights-out elevated surfaces, while Dim restores the classic blue-gray dim family.
-     * Every other token keeps the Material You role it has on the dark palette.
+     * High-contrast light backgrounds are pure white with light-gray elevation; every other
+     * token keeps the Material You role it has on the light palette.
      */
-    static long darkStyleColor(int token, boolean amoledBlack) {
+    static long contrastLightColor(int token) {
         return switch (token) {
-            case CELL_BACKGROUND, APP_BACKGROUND ->
-                    amoledBlack ? black(0xFF) : pack(DIM_CELL_BACKGROUND);
-            case CELL_BACKGROUND_TRANSLUCENT ->
-                    amoledBlack
-                            ? black(ALPHA_LIGHTS_OUT_TRANSLUCENT)
-                            : pack(DIM_TRANSLUCENT_CELL_BACKGROUND);
-            case HIGHLIGHT_BACKGROUND ->
-                    amoledBlack
-                            ? pack(AMOLED_HIGHLIGHT_BACKGROUND)
-                            : pack(DIM_HIGHLIGHT_BACKGROUND);
-            case GLASS_BACKGROUND ->
-                    amoledBlack
-                            ? pack(AMOLED_GLASS_BACKGROUND)
-                            : pack(DIM_GLASS_BACKGROUND);
+            case CELL_BACKGROUND, APP_BACKGROUND -> pack(CONTRAST_LIGHT_BACKGROUND);
+            case CELL_BACKGROUND_TRANSLUCENT -> pack(CONTRAST_LIGHT_TRANSLUCENT_BACKGROUND);
+            case HIGHLIGHT_BACKGROUND -> pack(CONTRAST_LIGHT_ELEVATED_BACKGROUND);
+            case GLASS_BACKGROUND -> pack(CONTRAST_LIGHT_GLASS_BACKGROUND);
+            default -> paletteColor(token, false);
+        };
+    }
+
+    /**
+     * High-contrast dark backgrounds are pure black with LIGHTS_OUT elevation; every other
+     * token keeps the Material You role it has on the dark palette. The Material You theme
+     * bypasses this method and resolves every token from the dynamic dark palette.
+     */
+    static long contrastDarkColor(int token) {
+        return switch (token) {
+            case CELL_BACKGROUND, APP_BACKGROUND -> pack(BLACK_XDS_BACKGROUND);
+            case CELL_BACKGROUND_TRANSLUCENT -> pack(CONTRAST_DARK_TRANSLUCENT_BACKGROUND);
+            case HIGHLIGHT_BACKGROUND -> pack(CONTRAST_DARK_ELEVATED_BACKGROUND);
+            case GLASS_BACKGROUND -> pack(CONTRAST_DARK_GLASS_BACKGROUND);
             default -> paletteColor(token, true);
         };
     }
@@ -348,6 +382,15 @@ public final class DynamicColorPalette {
 
     private static long black(int alpha) {
         return pack(alpha << 24);
+    }
+
+    /**
+     * Guards the dynamic palette entry points. The static Dim theme keeps the native palette,
+     * so reaching them means the injected guard failed closed.
+     */
+    private static void requireDynamicTheme() {
+        if (!useDimTheme()) return;
+        throw new IllegalStateException("NewX dynamic palette requires a dynamic theme");
     }
 
     private static int requiredColor(String resourceName) {

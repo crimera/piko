@@ -6,111 +6,119 @@ import org.junit.Test;
 
 public final class DynamicColorPaletteTest {
     private static final long ORIGINAL_SURFACE = 0xFF03030300000000L;
-    private static final long DIM_SURFACE = 0xFF15202B00000000L;
     private static final long BLACK_SURFACE = 0xFF00000000000000L;
+    private static final long WHITE_SURFACE = 0xFFFFFFFF00000000L;
+    private static final long DIM_SURFACE = 0xFF15202B00000000L;
+
+    @Test
+    public void themeNormalizationRecognizesAllChooserOptions() {
+        assertEquals("material", DynamicColorPalette.normalizeThemeStyle("material"));
+        assertEquals("contrast", DynamicColorPalette.normalizeThemeStyle("contrast"));
+        assertEquals("dim", DynamicColorPalette.normalizeThemeStyle("dim"));
+    }
+
+    @Test
+    public void legacyAmoledValueMigratesToHighContrast() {
+        assertEquals("contrast", DynamicColorPalette.normalizeThemeStyle("amoled"));
+    }
+
+    @Test
+    public void unknownThemeFallsBackToHighContrast() {
+        assertEquals("contrast", DynamicColorPalette.normalizeThemeStyle("unexpected"));
+        assertEquals("contrast", DynamicColorPalette.normalizeThemeStyle(""));
+        assertEquals("contrast", DynamicColorPalette.normalizeThemeStyle(null));
+    }
 
     @Test
     public void standardThemeKeepsTheOriginalSurface() {
         assertEquals(ORIGINAL_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
                 TwitterTheme.STANDARD,
-                true,
+                "contrast",
                 ORIGINAL_SURFACE
         ));
     }
 
     @Test
-    public void lightsOutAmoledUsesBlackChrome() {
+    public void highContrastChromeIsPureBlack() {
         assertEquals(BLACK_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
                 TwitterTheme.LIGHTS_OUT,
-                true,
+                "contrast",
+                ORIGINAL_SURFACE
+        ));
+        assertEquals(BLACK_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
+                TwitterTheme.DIM,
+                "contrast",
+                ORIGINAL_SURFACE
+        ));
+    }
+
+    @Test
+    public void dimThemeKeepsTheClassicDimChrome() {
+        assertEquals(DIM_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
+                TwitterTheme.LIGHTS_OUT,
+                "dim",
+                ORIGINAL_SURFACE
+        ));
+        assertEquals(DIM_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
+                TwitterTheme.DIM,
+                "dim",
                 ORIGINAL_SURFACE
         ));
     }
 
     /*
-     * Guards issue #80: the app's own "Dim" appearance resolves the dark palette for some
-     * surfaces, so chrome and popups stayed blue-grey while the rest of the app was already pure
-     * black. The chosen style owns that family now, in either direction.
+     * Pins the high-contrast background contract: base surfaces are pure black/white with
+     * kept elevation, so panels stay visible against the base while accents stay dynamic.
      */
     @Test
-    public void dimAppearanceFollowsTheSelectedDarkStyle() {
-        assertEquals(DIM_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
-                TwitterTheme.DIM,
-                false,
-                ORIGINAL_SURFACE
-        ));
-        assertEquals(BLACK_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
-                TwitterTheme.DIM,
-                true,
-                ORIGINAL_SURFACE
-        ));
-    }
-
-    @Test
-    public void dimStyleKeepsTheClassicDimChrome() {
-        assertEquals(DIM_SURFACE, DynamicColorPalette.resolveXdsChromeBackground(
-                TwitterTheme.LIGHTS_OUT,
-                false,
-                ORIGINAL_SURFACE
-        ));
-    }
-
-    /*
-     * Pins the palette contract of both styles. AMOLED must keep the app's lights-out elevated
-     * surfaces instead of painting popups, dialogs, and glass panels pure black on a black base,
-     * and must never fall back to the dim blue-grey family.
-     */
-    @Test
-    public void amoledStyleOwnsPureBlackBaseSurfacesAndLightsOutElevation() {
+    public void highContrastDarkBackgroundsArePureBlack() {
         assertEquals(
-                0xFF00000000000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.CELL_BACKGROUND, true)
+                BLACK_SURFACE,
+                DynamicColorPalette.contrastDarkColor(DynamicColorPalette.CELL_BACKGROUND)
         );
         assertEquals(
-                0xFF00000000000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.APP_BACKGROUND, true)
+                BLACK_SURFACE,
+                DynamicColorPalette.contrastDarkColor(DynamicColorPalette.APP_BACKGROUND)
         );
         assertEquals(
                 0x8000000000000000L,
-                DynamicColorPalette.darkStyleColor(
-                        DynamicColorPalette.CELL_BACKGROUND_TRANSLUCENT,
-                        true
+                DynamicColorPalette.contrastDarkColor(
+                        DynamicColorPalette.CELL_BACKGROUND_TRANSLUCENT
                 )
         );
         assertEquals(
                 0xFF12131400000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.HIGHLIGHT_BACKGROUND, true)
+                DynamicColorPalette.contrastDarkColor(DynamicColorPalette.HIGHLIGHT_BACKGROUND)
         );
         assertEquals(
                 0xCC24242400000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.GLASS_BACKGROUND, true)
+                DynamicColorPalette.contrastDarkColor(DynamicColorPalette.GLASS_BACKGROUND)
         );
     }
 
     @Test
-    public void dimStyleRestoresTheClassicDimFamily() {
+    public void highContrastLightBackgroundsArePureWhite() {
         assertEquals(
-                0xFF15202B00000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.CELL_BACKGROUND, false)
+                WHITE_SURFACE,
+                DynamicColorPalette.contrastLightColor(DynamicColorPalette.CELL_BACKGROUND)
         );
         assertEquals(
-                0xFF15202B00000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.APP_BACKGROUND, false)
+                WHITE_SURFACE,
+                DynamicColorPalette.contrastLightColor(DynamicColorPalette.APP_BACKGROUND)
         );
         assertEquals(
-                0xBF15202B00000000L,
-                DynamicColorPalette.darkStyleColor(
-                        DynamicColorPalette.CELL_BACKGROUND_TRANSLUCENT,
-                        false
+                0x80FFFFFF00000000L,
+                DynamicColorPalette.contrastLightColor(
+                        DynamicColorPalette.CELL_BACKGROUND_TRANSLUCENT
                 )
         );
         assertEquals(
-                0xFF10192200000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.HIGHLIGHT_BACKGROUND, false)
+                0xFFEEEEEE00000000L,
+                DynamicColorPalette.contrastLightColor(DynamicColorPalette.HIGHLIGHT_BACKGROUND)
         );
         assertEquals(
-                0xCC15202B00000000L,
-                DynamicColorPalette.darkStyleColor(DynamicColorPalette.GLASS_BACKGROUND, false)
+                0xCCEEEEEE00000000L,
+                DynamicColorPalette.contrastLightColor(DynamicColorPalette.GLASS_BACKGROUND)
         );
     }
 }
