@@ -142,9 +142,10 @@
     <string name="piko_newx_hide_premium_upsell_title">Hide premium upsell</string>
     <string name="piko_newx_hide_premium_upsell_summary">Hides the premium upgrade chip from the home top bar</string>
     <string name="piko_newx_group_theme_title">Theme</string>
-    <string name="piko_newx_group_theme_summary">Choose the Material You, Material You (High Contrast), or Dim theme</string>
+    <string name="piko_newx_group_theme_summary">Choose the Default, Material You, Material You (High Contrast), or Dim theme</string>
     <string name="piko_newx_theme_title">Theme</string>
-    <string name="piko_newx_theme_summary">Material You follows your wallpaper colors; Material You (High Contrast) uses white and black backgrounds; Dim restores the classic static look.</string>
+    <string name="piko_newx_theme_summary">Default keeps the original NewX colors; Material You follows your wallpaper colors; Material You (High Contrast) uses white and black backgrounds; Dim restores the classic static look.</string>
+    <string name="piko_newx_theme_default">Default</string>
     <string name="piko_newx_theme_material">Material You</string>
     <string name="piko_newx_theme_contrast">Material You (High Contrast)</string>
     <string name="piko_newx_theme_dim">Dim</string>

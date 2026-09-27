@@ -29,6 +29,7 @@ public final class DynamicColorPalette {
 
     private static final String DYNAMIC_LIKE_SETTING = "newx.theme.dynamic_like";
     private static final String THEME_SETTING = "newx.theme.dark_style";
+    private static final String THEME_DEFAULT = "default";
     private static final String THEME_MATERIAL = "material";
     private static final String THEME_CONTRAST = "contrast";
     private static final String THEME_DIM = "dim";
@@ -78,7 +79,7 @@ public final class DynamicColorPalette {
     }
 
     public static boolean isEnabled() {
-        return isSupported() && !useDimTheme();
+        return isSupported() && !useDimTheme() && !useDefaultTheme();
     }
 
     /** Whether the theme chooser selected Material You system surfaces. */
@@ -89,6 +90,11 @@ public final class DynamicColorPalette {
     /** Whether the theme chooser selected the classic static Dim theme. */
     public static boolean useDimTheme() {
         return THEME_DIM.equals(themeStyle());
+    }
+
+    /** Whether the theme chooser selected the unmodified original NewX colors. */
+    public static boolean useDefaultTheme() {
+        return THEME_DEFAULT.equals(themeStyle());
     }
 
     static String themeStyle() {
@@ -102,6 +108,7 @@ public final class DynamicColorPalette {
      * values resolve to high contrast, which keeps their pure-black dark backgrounds.
      */
     static String normalizeThemeStyle(String style) {
+        if (THEME_DEFAULT.equals(style)) return THEME_DEFAULT;
         if (THEME_MATERIAL.equals(style)) return THEME_MATERIAL;
         if (THEME_DIM.equals(style)) return THEME_DIM;
         return THEME_CONTRAST;
@@ -119,6 +126,7 @@ public final class DynamicColorPalette {
             throw new IllegalStateException("NewX XDS colors need the initialized host context");
         }
 
+        if (useDefaultTheme()) return originalColor;
         if (useMaterialBackground()) {
             if (!isEnabled()) return originalColor;
             return color(DARK_SURFACE);
@@ -385,11 +393,11 @@ public final class DynamicColorPalette {
     }
 
     /**
-     * Guards the dynamic palette entry points. The static Dim theme keeps the native palette,
-     * so reaching them means the injected guard failed closed.
+     * Guards the dynamic palette entry points. The static Dim and Default themes keep the
+     * native palette, so reaching them means the injected guard failed closed.
      */
     private static void requireDynamicTheme() {
-        if (!useDimTheme()) return;
+        if (!useDimTheme() && !useDefaultTheme()) return;
         throw new IllegalStateException("NewX dynamic palette requires a dynamic theme");
     }
 

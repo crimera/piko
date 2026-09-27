@@ -85,6 +85,8 @@ private const val PALETTE_USE_MATERIAL_BACKGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->useMaterialBackground()Z"
 private const val PALETTE_USE_DIM_THEME_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->useDimTheme()Z"
+private const val PALETTE_USE_DEFAULT_THEME_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->useDefaultTheme()Z"
 
 /**
  * The high-contrast dark style. Base surfaces drop to pure black; the elevated surfaces keep
@@ -113,6 +115,7 @@ private val DIM_BACKGROUND_COLORS = mapOf(
     15 to 0xFF15202B00000000UL.toLong(),
 )
 
+private const val THEME_DEFAULT = "default"
 private const val THEME_MATERIAL = "material"
 private const val THEME_CONTRAST = "contrast"
 private const val THEME_DIM = "dim"
@@ -165,7 +168,8 @@ val dynamicColorPatch =
     bytecodePatch(
         name = "NewX: Theme",
         description =
-            "Applies the Material You, high-contrast, and Dim themes to NewX.",
+            "Chooses between the original NewX colors and the Material You, high-contrast, " +
+                "and Dim themes.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
@@ -182,6 +186,7 @@ val dynamicColorPatch =
                             rebootApp = true,
                             options =
                                 listOf(
+                                    choice(THEME_DEFAULT, "piko_newx_theme_default"),
                                     choice(THEME_MATERIAL, "piko_newx_theme_material"),
                                     choice(THEME_CONTRAST, "piko_newx_theme_contrast"),
                                     choice(THEME_DIM, "piko_newx_theme_dim"),
@@ -2243,8 +2248,8 @@ private fun Block.emitDynamicPaletteGuard(
  * Runs on the original dark palette paths (DIM and LIGHTS_OUT) when the dynamic theme is off.
  * Writes the high-contrast black surfaces first and lets the Dim theme overwrite the same
  * tokens, so the chooser selects the whole background family on this path too. The Material You
- * theme needs the dynamic palette, so it keeps the native surfaces here instead of inventing
- * fixed colors.
+ * theme needs the dynamic palette, and the Default theme keeps the native surfaces, so both
+ * skip this rewrite instead of inventing fixed colors.
  */
 private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor) {
     // The dark style flag must not live in the constructor's argument registers: the block
@@ -2264,6 +2269,10 @@ private fun MutableMethod.injectDarkBackgrounds(constructor: PaletteConstructor)
         invokeStatic(methodReference(PALETTE_USE_MATERIAL_BACKGROUND_METHOD))
         moveResult(materialRegister, "Z")
         ifNez(materialRegister, Target.Original)
+        val defaultRegister = scratchRegister(RegisterLimit.BYTE)
+        invokeStatic(methodReference(PALETTE_USE_DEFAULT_THEME_METHOD))
+        moveResult(defaultRegister, "Z")
+        ifNez(defaultRegister, Target.Original)
         // `move-result` (11x) and `if-eqz` (21t) both encode a byte register.
         val dimRegister = scratchRegister(RegisterLimit.BYTE)
         invokeStatic(methodReference(PALETTE_USE_DIM_THEME_METHOD))

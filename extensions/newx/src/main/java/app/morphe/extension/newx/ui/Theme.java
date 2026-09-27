@@ -14,6 +14,7 @@ import app.morphe.extension.newx.theme.TwitterTheme;
  */
 public final class Theme {
     private static final String THEME_SETTING = "newx.theme.dark_style";
+    private static final String THEME_DEFAULT = "default";
     private static final String THEME_MATERIAL = "material";
     private static final String THEME_CONTRAST = "contrast";
     private static final String THEME_DIM = "dim";
@@ -60,7 +61,9 @@ public final class Theme {
     public static SettingsSnapshot snapshot() {
         String theme = themeStyle();
         boolean dynamicColors =
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !THEME_DIM.equals(theme);
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                        && !THEME_DIM.equals(theme)
+                        && !THEME_DEFAULT.equals(theme);
         return new SettingsSnapshot(dynamicColors, theme);
     }
 
@@ -74,10 +77,11 @@ public final class Theme {
     /**
      * Maps the stored chooser value to a known theme. Unregistered (patch absent), legacy
      * AMOLED, and unknown values resolve to high contrast, which keeps the previous pure-black
-     * dark surfaces.
+     * dark surfaces. The Default theme shares those fixed surfaces with static accents.
      */
     static String resolveThemeStyle(boolean settingRegistered, String settingValue) {
         if (!settingRegistered) return THEME_CONTRAST;
+        if (THEME_DEFAULT.equals(settingValue)) return THEME_DEFAULT;
         if (THEME_MATERIAL.equals(settingValue)) return THEME_MATERIAL;
         if (THEME_DIM.equals(settingValue)) return THEME_DIM;
         return THEME_CONTRAST;
@@ -307,7 +311,8 @@ public final class Theme {
 
     public static boolean usesDynamicColors() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                && !THEME_DIM.equals(themeStyle());
+                && !THEME_DIM.equals(themeStyle())
+                && !THEME_DEFAULT.equals(themeStyle());
     }
 
     private static int checkboxChecked(Context context, boolean dynamicColors) {

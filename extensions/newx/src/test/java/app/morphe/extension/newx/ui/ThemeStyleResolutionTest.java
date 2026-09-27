@@ -20,6 +20,7 @@ public final class ThemeStyleResolutionTest {
 
     @Test
     public void registeredThemeFollowsTheUserChoice() {
+        assertEquals("default", Theme.resolveThemeStyle(true, "default"));
         assertEquals("contrast", Theme.resolveThemeStyle(true, "contrast"));
         assertEquals("material", Theme.resolveThemeStyle(true, "material"));
         assertEquals("dim", Theme.resolveThemeStyle(true, "dim"));
