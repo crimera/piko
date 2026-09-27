@@ -133,6 +133,7 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             String messageId = resolveAndMergeMessageId(db, normalizedServer, normalizedClient);
+            boolean freshInsert = false;
             if (messageId == null) {
                 ContentValues values = new ContentValues();
                 values.put("message_id", canonicalId);
@@ -146,22 +147,31 @@ public class PikoMessageDb extends SQLiteOpenHelper {
                 values.put("timestamp", timestamp);
                 long inserted = db.insertWithOnConflict(
                         TABLE, null, values, SQLiteDatabase.CONFLICT_IGNORE);
-                messageId = inserted == -1
-                        ? resolveAndMergeMessageId(db, normalizedServer, normalizedClient)
-                        : canonicalId;
+                if (inserted != -1) {
+                    messageId = canonicalId;
+                    freshInsert = true;
+                } else {
+                    messageId = resolveAndMergeMessageId(db, normalizedServer, normalizedClient);
+                }
             }
 
             if (messageId == null) return null;
-            fillIfEmpty(db, messageId, "server_id", normalizedServer);
-            fillIfEmpty(db, messageId, "client_context", normalizedClient);
-            fillIfEmpty(db, messageId, "thread_id", threadId);
-            fillIfEmpty(db, messageId, "sender_id", senderId);
-            fillIfEmpty(db, messageId, "sender_username", senderUsername);
-            fillIfEmpty(db, messageId, "message_type", type);
-            if (content != null && content.startsWith("http")) {
-                upgradeContentToUrl(db, messageId, content);
-            } else {
-                fillIfEmpty(db, messageId, "content", content);
+
+            // Skip re-checking columns the INSERT above just set from these same values - only an
+            // existing row (from a concurrent insert or an earlier partial capture) can be missing
+            // fields this call has.
+            if (!freshInsert) {
+                fillIfEmpty(db, messageId, "server_id", normalizedServer);
+                fillIfEmpty(db, messageId, "client_context", normalizedClient);
+                fillIfEmpty(db, messageId, "thread_id", threadId);
+                fillIfEmpty(db, messageId, "sender_id", senderId);
+                fillIfEmpty(db, messageId, "sender_username", senderUsername);
+                fillIfEmpty(db, messageId, "message_type", type);
+                if (content != null && content.startsWith("http")) {
+                    upgradeContentToUrl(db, messageId, content);
+                } else {
+                    fillIfEmpty(db, messageId, "content", content);
+                }
             }
             db.setTransactionSuccessful();
             return messageId;
