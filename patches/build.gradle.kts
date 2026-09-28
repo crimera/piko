@@ -1,3 +1,7 @@
+plugins {
+    id("ru.vyarus.animalsniffer")
+}
+
 group = "crimera"
 
 patches {
@@ -13,6 +17,11 @@ patches {
 }
 
 dependencies {
+    // Patch code runs inside Morphe Manager on the devices that can run the supported X builds,
+    // whose oldest supported minSdkVersion is 29. The Gummy Bears signature describes that
+    // runtime: Android 29 plus D8 backports.
+    add("signature", "com.toasttab.android:gummy-bears-api-29:0.15.0@signature")
+
     compileOnly("com.github.REAndroid:ARSCLib:a28c6fb2a7")
 
     // Used by JsonGenerator.
@@ -27,6 +36,10 @@ dependencies {
 }
 
 tasks {
+    matching { it.name == "check" || it.name == "buildAndroid" || it.name == "jar" }.configureEach {
+        dependsOn("animalsnifferMain")
+    }
+
     register<JavaExec>("checkStringResources") {
         description = "Checks resource strings for invalid formatting"
 
