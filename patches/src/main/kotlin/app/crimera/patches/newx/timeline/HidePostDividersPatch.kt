@@ -15,6 +15,8 @@ import app.crimera.patches.newx.utils.destinationRegisterOrNull
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.newx.utils.resolveConstantOnCurrentPath
 import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
+import app.crimera.patches.newx.utils.hasComposeShape
+import app.crimera.patches.newx.utils.parameterDescriptors
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -65,9 +67,13 @@ private object NewXPostDividerRendererFingerprint : Fingerprint(
 
 /** The reply facepile draws another connector behind the stacked reply avatars. */
 private object NewXReplyFacepileDividerFingerprint : Fingerprint(
-    parameters = listOf("L", "L", MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR, INSETS_DESCRIPTOR),
     returnType = "V",
-    custom = { method, _ -> method.hasReplyFacepileDividerFlow() },
+    custom = { method, _ ->
+        method.parameterDescriptors().hasComposeShape(
+            required = listOf(MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR),
+            last = INSETS_DESCRIPTOR,
+        ) && method.hasReplyFacepileDividerFlow()
+    },
 )
 
 /** The URT timeline content builder that adds timeline items and inter-module divider separators. */

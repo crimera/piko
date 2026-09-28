@@ -32,6 +32,8 @@ import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_TAB_OPENER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
+import app.crimera.patches.newx.utils.hasComposeShape
+import app.crimera.patches.newx.utils.parameterDescriptors
 import app.crimera.bytecode.Block
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
@@ -264,13 +266,17 @@ private object NewXDrawerSharedFooterItemFingerprint : Fingerprint(
 private object NewXDrawerThemeToggleFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
-    parameters =
-        listOf(
-            "I",
-            "Landroidx/compose/runtime/Composer;",
-            "Landroidx/compose/ui/Modifier;",
-            "Lkotlin/jvm/functions/Function0;",
-        ),
+    custom = { method, _ ->
+        method.parameterDescriptors().hasComposeShape(
+            required =
+                listOf(
+                    COMPOSER_DESCRIPTOR,
+                    "Landroidx/compose/ui/Modifier;",
+                    FUNCTION0_DESCRIPTOR,
+                ),
+            first = "I",
+        )
+    },
     filters =
         listOf(
             methodCall(
@@ -299,6 +305,9 @@ private object NewXDrawerThemeToggleFingerprint : Fingerprint(
 private object NewXDrawerGrokButtonFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
+    // The 4-parameter no-title ABI is the only discriminator for this optional row; widening the
+    // shape matched six sibling composables on 12.29.1.
+    // newx-resolver-lint: allow rigid-signature
     parameters =
         listOf(
             "L",

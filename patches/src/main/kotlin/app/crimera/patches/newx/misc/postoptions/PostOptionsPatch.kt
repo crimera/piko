@@ -7,6 +7,8 @@ import app.crimera.patches.newx.settings.newXSettingsPatch
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.newx.utils.isObjectDescriptor
+import app.crimera.patches.newx.utils.parameterDescriptors
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -234,17 +236,20 @@ private fun resolveStateConstructor(): Match {
             classFingerprint = PostOptionsStateFingerprint,
             name = "<init>",
             returnType = "V",
-            parameters =
-                listOf(
-                    "Z",
-                    "L",
-                    "Ljava/util/List;",
-                    "Ljava/util/Map;",
-                    "Lkotlinx/coroutines/flow/",
-                    "Lkotlin/jvm/functions/Function1;",
-                    "L",
-                    "L",
-                ),
+            custom = { method, _ ->
+                val parameters = method.parameterDescriptors()
+                parameters.firstOrNull() == "Z" &&
+                    parameters.containsAll(
+                        listOf(
+                            LIST_DESCRIPTOR,
+                            "Ljava/util/Map;",
+                            "Lkotlin/jvm/functions/Function1;",
+                        ),
+                    ) &&
+                    parameters.any { descriptor ->
+                        descriptor.startsWith("Lkotlinx/coroutines/flow/")
+                    }
+            },
         ).matchAll(),
     ).also {
         check(it.originalClassDef.type == stateMatch.originalClassDef.type)
@@ -375,7 +380,12 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
             Fingerprint(
                 name = "<init>",
                 returnType = "V",
-                parameters = listOf(presenter.originalClassDef.type, "L", "L", "L", "L", "L"),
+                custom = { method, _ ->
+                    val parameters = method.parameterDescriptors()
+                    parameters.size == 6 &&
+                        parameters.firstOrNull() == presenter.originalClassDef.type &&
+                        parameters.drop(1).all(String::isObjectDescriptor)
+                },
             ).matchAll(),
         )
     val eventHandler =

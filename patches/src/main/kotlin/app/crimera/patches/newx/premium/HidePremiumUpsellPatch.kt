@@ -6,6 +6,8 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.hasComposeShape
+import app.crimera.patches.newx.utils.parameterDescriptors
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -106,19 +108,18 @@ private object NewXHomeTabbedScaffoldClassFingerprint : Fingerprint(
 private object NewXHomeNavUpsellComposableFingerprint : Fingerprint(
     classFingerprint = NewXHomeTabbedScaffoldClassFingerprint,
     returnType = "V",
-    parameters =
-        listOf(
-            "L",
-            "Lkotlin/jvm/functions/Function0;",
-            "Lkotlin/jvm/functions/Function0;",
-            "Z",
-            "L",
-            "Lkotlin/jvm/functions/Function0;",
-            "Lkotlin/jvm/functions/Function0;",
-            "Landroidx/compose/ui/Modifier;",
-            "Landroidx/compose/runtime/Composer;",
-            "I",
-        ),
+    custom = { method, _ ->
+        val parameters = method.parameterDescriptors()
+        parameters.hasComposeShape(
+            required =
+                listOf(
+                    "Landroidx/compose/ui/Modifier;",
+                    "Landroidx/compose/runtime/Composer;",
+                ),
+            last = "I",
+            objectFirst = true,
+        ) && parameters.count { descriptor -> descriptor == "Lkotlin/jvm/functions/Function0;" } >= 4
+    },
 )
 
 private fun MutableMethod.disabledUpsellField(startIndex: Int): FieldReference {

@@ -5,6 +5,8 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.hasComposeShape
+import app.crimera.patches.newx.utils.parameterDescriptors
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -37,33 +39,28 @@ private fun newPostButtonVisibilityFilter() =
     )
 
 private object NewXNewPostButtonCandidateFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            "I",
-            COMPOSER_DESCRIPTOR,
-            MODIFIER_DESCRIPTOR,
-            FUNCTION_ZERO_DESCRIPTOR,
-        ),
     returnType = "V",
     filters = listOf(newPostButtonVisibilityFilter()),
-    custom = { method, _ -> method.isNewPostButtonRendererCandidate() },
+    custom = { method, _ ->
+        method.parameterDescriptors().hasComposeShape(
+            required = listOf(COMPOSER_DESCRIPTOR, MODIFIER_DESCRIPTOR, FUNCTION_ZERO_DESCRIPTOR),
+            first = "I",
+        ) && method.isNewPostButtonRendererCandidate()
+    },
 )
 
 // 12.29 relocated the renderer and lowered its Compose ABI to (Modifier, Function0, Composer, I, I):
 // content parameters first, then Composer and the two changed/default bitmasks. Resolve both shapes
 // and share the common mutation below.
 private object NewXNewPostButtonComposeFlagCandidateFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            MODIFIER_DESCRIPTOR,
-            FUNCTION_ZERO_DESCRIPTOR,
-            COMPOSER_DESCRIPTOR,
-            "I",
-            "I",
-        ),
     returnType = "V",
     filters = listOf(newPostButtonVisibilityFilter()),
-    custom = { method, _ -> method.isNewPostButtonRendererCandidate() },
+    custom = { method, _ ->
+        method.parameterDescriptors().hasComposeShape(
+            required = listOf(MODIFIER_DESCRIPTOR, FUNCTION_ZERO_DESCRIPTOR, COMPOSER_DESCRIPTOR),
+            last = "I",
+        ) && method.isNewPostButtonRendererCandidate()
+    },
 )
 
 private val OBJECT_MOVE_OPCODES =

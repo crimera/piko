@@ -40,17 +40,14 @@ internal object NewXResolverLinter {
         RIGID_SIGNATURE(
             "rigid-signature",
             "an exact fingerprint parameter list pins synthetic R8/Compose lowering",
-            advisory = true,
         ),
         EXACT_INTERFACE_TYPE(
             "exact-interface-type",
             "exact equality on a collection interface descriptor rejects subtype overrides",
-            advisory = true,
         ),
         SINGLE_HOP_REGISTER(
             "single-hop-register",
             "register containment proves one hop only; moved or range-passed values are missed",
-            advisory = true,
         ),
         ;
 
@@ -427,6 +424,11 @@ internal object NewXResolverLinter {
 
     private fun findRigidSignatures(masked: String, source: String): List<Int> =
         rigidSignaturePattern.findAll(masked).mapNotNull { match ->
+            // Ordered filter arguments such as methodCall(parameters = listOf(...)) describe a real
+            // method contract; only the Fingerprint's own parameter list pins a synthetic shape.
+            if (enclosingCallName(masked, match.range.first) != "Fingerprint") {
+                return@mapNotNull null
+            }
             val openParen = match.range.last
             val closeParen = matchingDelimiter(masked, openParen, '(', ')')
             if (closeParen <= openParen + 1) return@mapNotNull null
@@ -439,6 +441,32 @@ internal object NewXResolverLinter {
                 }
             match.range.first.takeIf { entries.size >= 4 || pinsComposeLowering }
         }.toList()
+
+    /** Name of the call whose argument list contains [position], or null for a top-level match. */
+    private fun enclosingCallName(masked: String, position: Int): String? {
+        var depth = 0
+        var index = position - 1
+        while (index >= 0) {
+            when (masked[index]) {
+                ')', ']', '}' -> depth++
+                '(', '[', '{' -> {
+                    if (depth == 0) {
+                        var nameStart = index - 1
+                        while (
+                            nameStart >= 0 &&
+                            (masked[nameStart].isLetterOrDigit() || masked[nameStart] == '_')
+                        ) {
+                            nameStart--
+                        }
+                        return masked.substring(nameStart + 1, index)
+                    }
+                    depth--
+                }
+            }
+            index--
+        }
+        return null
+    }
 
     private fun splitTopLevelArguments(body: String): List<String> {
         val arguments = mutableListOf<String>()

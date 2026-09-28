@@ -6,6 +6,7 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.isAssignableTo
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
@@ -355,7 +356,7 @@ val disableTimelineRefreshPatch =
                     val listGetters =
                         flowClass.methods.filter { candidate ->
                             candidate.parameterTypes.isEmpty() &&
-                                candidate.returnType.toString() == "Ljava/util/List;"
+                                isAssignableTo(candidate.returnType.toString(), LIST_DESCRIPTOR)
                         }
                     val listGetter =
                         requireAtMostOne(

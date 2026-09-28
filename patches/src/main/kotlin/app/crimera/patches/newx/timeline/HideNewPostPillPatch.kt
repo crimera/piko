@@ -5,6 +5,8 @@ import app.crimera.patches.newx.settings.returnVoidIfEnabled
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.hasComposeShape
+import app.crimera.patches.newx.utils.parameterDescriptors
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
@@ -13,17 +15,19 @@ import app.morphe.patcher.patch.bytecodePatch
 
 private object NewXNewPostsPillFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/instructions/",
-    parameters =
-        listOf(
-            "L",
-            "L",
-            "Landroidx/compose/ui/Modifier;",
-            "Lkotlin/jvm/functions/Function0;",
-            "Landroidx/compose/runtime/Composer;",
-            "I",
-        ),
     returnType = "V",
     filters = listOf(string("ntp")),
+    custom = { method, _ ->
+        method.parameterDescriptors().hasComposeShape(
+            required =
+                listOf(
+                    "Landroidx/compose/ui/Modifier;",
+                    "Lkotlin/jvm/functions/Function0;",
+                    "Landroidx/compose/runtime/Composer;",
+                ),
+            last = "I",
+        )
+    },
 )
 
 @Suppress("unused")

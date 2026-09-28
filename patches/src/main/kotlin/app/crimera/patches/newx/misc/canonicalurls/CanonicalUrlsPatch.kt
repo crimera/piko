@@ -15,6 +15,8 @@ import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.newx.utils.isObjectDescriptor
+import app.crimera.patches.newx.utils.parameterDescriptors
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
@@ -208,15 +210,11 @@ private fun resolveCanonicalUrlMatches(urlEntityFields: UrlEntityFields): Canoni
         Fingerprint(
             definingClass = "Lcom/x/urt/items/post/",
             returnType = "V",
-            parameters = listOf(
-                "L",
-                postModels.contextualPostDescriptor,
-                "L",
-                "L",
-                "L",
-                "L",
-                "L",
-            ),
+            custom = { method, _ ->
+                val parameters = method.parameterDescriptors()
+                parameters.getOrNull(1) == postModels.contextualPostDescriptor &&
+                    parameters.all(String::isObjectDescriptor)
+            },
             filters =
                 listOf(
                     fieldAccess(

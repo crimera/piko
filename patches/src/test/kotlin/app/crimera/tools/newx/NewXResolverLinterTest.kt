@@ -435,7 +435,7 @@ class NewXResolverLinterTest {
     }
 
     @Test
-    fun `rigid fingerprint parameter list is advisory`() {
+    fun `rigid fingerprint parameter list is reported`() {
         val findings =
             lint(
                 """
@@ -453,7 +453,7 @@ class NewXResolverLinterTest {
             )
 
         assertEquals(listOf(NewXResolverLinter.Rule.RIGID_SIGNATURE), findings.map { it.rule })
-        assertTrue(NewXResolverLinter.Rule.RIGID_SIGNATURE.advisory)
+        assertTrue(!NewXResolverLinter.Rule.RIGID_SIGNATURE.advisory)
     }
 
     @Test
@@ -480,14 +480,14 @@ class NewXResolverLinterTest {
     }
 
     @Test
-    fun `exact interface descriptor equality is advisory`() {
+    fun `exact interface descriptor equality is reported`() {
         val findings = lint("""if (method.returnType == "Ljava/util/Set;") return candidate""")
 
         assertEquals(
             listOf(NewXResolverLinter.Rule.EXACT_INTERFACE_TYPE),
             findings.map { it.rule },
         )
-        assertTrue(NewXResolverLinter.Rule.EXACT_INTERFACE_TYPE.advisory)
+        assertTrue(!NewXResolverLinter.Rule.EXACT_INTERFACE_TYPE.advisory)
     }
 
     @Test
@@ -505,14 +505,14 @@ class NewXResolverLinterTest {
     }
 
     @Test
-    fun `single-hop register containment is advisory`() {
+    fun `single-hop register containment is reported`() {
         val findings = lint("val feeds = instruction.registersUsed.contains(prefetchRegister)")
 
         assertEquals(
             listOf(NewXResolverLinter.Rule.SINGLE_HOP_REGISTER),
             findings.map { it.rule },
         )
-        assertTrue(NewXResolverLinter.Rule.SINGLE_HOP_REGISTER.advisory)
+        assertTrue(!NewXResolverLinter.Rule.SINGLE_HOP_REGISTER.advisory)
     }
 
     @Test

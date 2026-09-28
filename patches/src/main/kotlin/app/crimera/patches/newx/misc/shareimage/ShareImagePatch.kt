@@ -181,6 +181,8 @@ val newXShareImagePatch =
                     "NewX post-detail thread renderer",
                     Fingerprint(
                         returnType = "V",
+                        // The wide detail-Composable ABI is the discriminator and this hook is optional.
+                        // newx-resolver-lint: allow rigid-signature
                         parameters =
                             listOf(
                                 timelinePostStateType,
@@ -225,6 +227,8 @@ val newXShareImagePatch =
                     "NewX post-detail post renderer",
                     Fingerprint(
                         returnType = "V",
+                        // The wide detail-Composable ABI is the discriminator and this hook is optional.
+                        // newx-resolver-lint: allow rigid-signature
                         parameters =
                             listOf(
                                 timelinePostStateType,
