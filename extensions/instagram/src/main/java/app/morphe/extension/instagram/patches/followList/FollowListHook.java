@@ -57,7 +57,12 @@ public class FollowListHook {
                 if (existingBadge != null) badgeContainer.removeView(existingBadge);
                 return;
             }
-            if (existingBadge != null) return;
+            if (existingBadge != null) {
+                // Row was recycled from a different user; the old listener still closes over
+                // their UserFriendshipStatus, so it has to be rebound to this one.
+                FriendshipStatusIndicator.setStatusClickListener((TextView) existingBadge, friendshipStatus);
+                return;
+            }
 
             // Same badge style as the profile-page friendship status indicator, for consistency.
             TextView badge = FriendshipStatusIndicator.createStatusTextView(

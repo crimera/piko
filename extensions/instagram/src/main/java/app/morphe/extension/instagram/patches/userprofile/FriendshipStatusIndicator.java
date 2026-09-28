@@ -142,14 +142,20 @@ public class FriendshipStatusIndicator {
                 Typeface.NORMAL
         ));
 
-        friendshipStatusTextView.setOnClickListener(new View.OnClickListener() {
+        setStatusClickListener(friendshipStatusTextView, userFriendshipStatus);
+
+        return friendshipStatusTextView;
+    }
+
+    // Split out so a recycled badge's listener can be refreshed for its new row without
+    // rebuilding the whole view.
+    public static void setStatusClickListener(TextView statusTextView, UserFriendshipStatus userFriendshipStatus) {
+        statusTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 friendshipStatusDialogBox(v.getContext(), userFriendshipStatus);
             }
         });
-
-        return friendshipStatusTextView;
     }
 
     private static void addFriendshipTextView(
