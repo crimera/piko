@@ -13,6 +13,7 @@ import java.util.Set;
 
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
+import app.morphe.extension.instagram.settings.preference.widgets.LikeAnimationPreference;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.DownloadFileNameTemplatePref;
@@ -81,7 +82,8 @@ public class Helper {
     }
 
     public Preference listPreference(String title, String summary, StringSetting setting) {
-        ListPref preference = new ListPref(context);
+        ListPref preference = setting == Settings.CHANGE_LIKE_ANIMATION
+                ? new LikeAnimationPreference(context) : new ListPref(context);
         String key = setting.key;
         preference.setTitle(title);
         preference.setDialogTitle(title);

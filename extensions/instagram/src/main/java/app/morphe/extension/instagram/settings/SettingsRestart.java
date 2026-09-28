@@ -7,6 +7,7 @@
 
 package app.morphe.extension.instagram.settings;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -29,11 +30,15 @@ public final class SettingsRestart {
     }
 
     public static void markChanged(Object previousValue, Object newValue) {
-        if (Objects.equals(previousValue, newValue) || !requestTaskServiceStart()) {
-            return;
+        if (!Objects.equals(previousValue, newValue)) {
+            requestRestartOnTaskRemoved();
         }
+    }
 
-        startTaskService();
+    public static void requestRestartOnTaskRemoved() {
+        if (requestTaskServiceStart()) {
+            startTaskService();
+        }
     }
 
     static void onTaskRemoved() {
@@ -43,11 +48,21 @@ public final class SettingsRestart {
             }
         }
 
+        new Handler(Looper.getMainLooper()).post(SettingsRestart::restartIfTaskRemoved);
+    }
+
+    private static void restartIfTaskRemoved() {
         try {
+            Context context = Utils.getContext();
+            if (context == null) return;
+            ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            if (manager == null || !manager.getAppTasks().isEmpty()) return;
+
             flushPreferences();
-            new Handler(Looper.getMainLooper()).post(
-                    () -> Process.killProcess(Process.myPid())
-            );
+            // A delayed task-removal callback must not terminate an app that was reopened.
+            if (manager.getAppTasks().isEmpty()) {
+                Process.killProcess(Process.myPid());
+            }
         } catch (RuntimeException exception) {
             Log.e(TAG, "Failed to prepare the process restart; keeping it pending", exception);
         }
