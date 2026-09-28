@@ -19,9 +19,14 @@ import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
@@ -358,7 +363,7 @@ public class DownloadUtils {
             "row_feed_view_group_social_ufi_buttons",
             "row_feed_view_group_buttons",
     };
-    private static boolean feedDownloadButtonLogged;
+    private static final Set<String> feedDownloadButtonLogs = new HashSet<>();
 
     /**
      * Adds a download button immediately beside the save/bookmark button of a feed post row.
@@ -367,31 +372,41 @@ public class DownloadUtils {
     public static void addFeedDownloadButton(View rootView, Object mediaObject, UserSession userSession) {
         try {
             if (rootView == null || mediaObject == null) return;
+            Context context = rootView.getContext();
+            logFeedDownloadButton(
+                    context,
+                    "hook fired on " + context.getClass().getName() + " row=" + rootView.getClass().getName());
             // The patch is opt-in, so read the download toggles directly instead of the
             // settings-status-gated Pref helper.
             if (!SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
                     || !SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON)) {
+                logFeedDownloadButton(context, "disabled by settings");
                 removeFeedDownloadButton(rootView);
                 return;
             }
 
-            Context context = rootView.getContext();
             int saveButtonId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
-            if (saveButtonId == 0) return;
+            if (saveButtonId == 0) {
+                logFeedDownloadButton(context, "row_feed_button_save id unresolved");
+                return;
+            }
 
             View saveButton = rootView.findViewById(saveButtonId);
-            if (saveButton == null) return;
+            if (saveButton == null) {
+                logFeedDownloadButton(context, "save button missing in row");
+                return;
+            }
 
             ViewGroup buttonGroup = resolveFeedButtonGroup(rootView, saveButton);
             if (buttonGroup == null) {
-                logFeedDownloadButton("feed download button: no UFI button group");
+                logFeedDownloadButton(context, "no UFI button group");
                 return;
             }
 
             ImageView button = buttonGroup.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
             if (button == null) {
                 button = createFeedDownloadButton(context, saveButton, buttonGroup);
-                logFeedDownloadButton("feed download button attached");
+                logFeedDownloadButton(context, "attached");
             }
             if (button == null) return;
 
@@ -482,11 +497,21 @@ public class DownloadUtils {
         }
     }
 
-    /** One-shot diagnostic so a device test shows whether the hook reached a feed row. */
-    private static void logFeedDownloadButton(String message) {
-        if (feedDownloadButtonLogged) return;
-        feedDownloadButtonLogged = true;
-        Logger.printInfo(() -> message);
+    /**
+     * One-shot per message diagnostic. Some devices suppress app logcat output, so the same line
+     * is appended to a cache file that can be pulled with root (piko-feed-download.log).
+     */
+    private static void logFeedDownloadButton(Context context, String message) {
+        if (!feedDownloadButtonLogs.add(message)) return;
+        Logger.printInfo(() -> "feed download button: " + message);
+        try {
+            File file = new File(context.getCacheDir(), "piko-feed-download.log");
+            if (file.length() > 64 * 1024) return;
+            try (FileWriter writer = new FileWriter(file, true)) {
+                writer.append(new Date().toString()).append(' ').append(message).append('\n');
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     private static void enqueueDownload(Context context, DownloadRequest request) {
