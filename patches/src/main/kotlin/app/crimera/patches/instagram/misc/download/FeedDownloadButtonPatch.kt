@@ -57,6 +57,16 @@ private const val VIEW_UFI_VARIANT = "view"
 
 private const val LITHO_UFI_VARIANT = "litho"
 
+/** Profile post viewers choose their UFI variant through a separate profile module chooser. */
+private val PROFILE_MODULES =
+    listOf(
+        "feed_contextual_self_profile",
+        "feed_contextual_profile",
+        "feed_contextual_group_profile",
+    )
+
+private const val PROFILE_VIEW_LABEL = "piko_profile_view"
+
 private fun <T> requireOne(
     label: String,
     candidates: Collection<T>,
@@ -362,6 +372,60 @@ val feedDownloadButtonPatch =
                     val variant = scratchRegister()
                     sget(variant, viewVariantField)
                     returnObject(variant)
+                }
+            }
+
+            // Profile post viewers build their UFI through a component builder that consults a
+            // profile module chooser instead of the feed selector. Pin the profile module set to
+            // the same view variant there. The feed selector gate above stays untouched for these
+            // modules: it only decides the row-type registration path, and forcing it on the
+            // contextual modules drops the whole UFI row.
+            val profileSelectorMatches =
+                Fingerprint(
+                    returnType = INTEGER_DESCRIPTOR,
+                    strings = PROFILE_MODULES,
+                ).matchAll()
+
+            if (profileSelectorMatches.isEmpty() || profileSelectorMatches.size > 2) {
+                throw PatchException(
+                    "Expected one or two profile UFI variant selectors, found ${profileSelectorMatches.size}: " +
+                        profileSelectorMatches.joinToString { it.originalMethod.toString() },
+                )
+            }
+
+            profileSelectorMatches.forEach { selectorMatch ->
+                val selectorMethod = selectorMatch.method
+                val moduleRegister = selectorMethod.registerOfParameter(STRING_DESCRIPTOR)
+                val selectorThisRegister = selectorMethod.parameterRegisterStart()
+
+                val mutableSelector =
+                    mutableClassDefBy(selectorMethod.definingClass)
+                        .methods
+                        .first { it.sameSignatureAs(selectorMethod) }
+
+                mutableSelector.insertHook(
+                    index = 0,
+                    excludedRegisters =
+                        (selectorThisRegister until selectorThisRegister + selectorMethod.parameterWords()).toList(),
+                    relocateBranchTargets = false,
+                ) {
+                    // The module parameter sits above v15, so copy it into a low scratch register
+                    // and keep the comparison at 35c instead of forcing a /range invoke, which
+                    // would need a contiguous scratch span this method does not have.
+                    val module = scratchRegister()
+                    move(module, moduleRegister, STRING_DESCRIPTOR)
+                    val comparison = scratchRegister()
+                    PROFILE_MODULES.forEach { profileModule ->
+                        constString(comparison, profileModule)
+                        invokeVirtual(methodReference(STRING_EQUALS), module, comparison)
+                        moveResult(comparison, "Z")
+                        ifNez(comparison, Target.Local(PROFILE_VIEW_LABEL))
+                    }
+                    goto(Target.Original)
+
+                    label(PROFILE_VIEW_LABEL)
+                    sget(comparison, viewVariantField)
+                    returnObject(comparison)
                 }
             }
         }
