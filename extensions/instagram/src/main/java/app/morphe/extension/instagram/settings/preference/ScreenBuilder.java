@@ -607,6 +607,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.followListNonFollowerBadge) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_follow_list_non_follower_badge"),
+                            str("piko_follow_list_non_follower_badge_desc"),
+                            Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE
+                    )
+            );
+        }
         if (SettingsStatus.viewStoryMentions) {
             addPreference(
                     helper.switchPreference(

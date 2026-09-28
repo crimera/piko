@@ -278,6 +278,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.FOLLOW_BACK_COLOR_INDICATOR);
     }
 
+    public static boolean followListNonFollowerBadge() {
+        return SharedPref.getBooleanPref(Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE);
+    }
+
     public static boolean disableStoryFlipping() {
         return SharedPref.getBooleanPref(Settings.DISABLE_STORY_FLIPPING);
     }
