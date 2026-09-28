@@ -13,10 +13,12 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
@@ -28,11 +30,15 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val HAZE_SCOPE = "Ldev/chrisbanes/haze/"
 private const val HAZE_UPDATE_EFFECT_MARKER = "HazeEffectNode-updateEffect"
 private const val BOOLEAN_DESCRIPTOR = "Z"
+private const val BOOLEAN_VALUE_OF_DESCRIPTOR = "Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;"
+private const val COLLECTION_DESCRIPTOR = "Ljava/util/Collection;"
 
 /**
  * Haze keeps its node owner and setter name obfuscated, but the updateEffect diagnostic marker is
@@ -128,6 +134,57 @@ private fun Method.isHazeBlurEnabledSetter(owner: String): Boolean {
     return invalidationWriteCount == 1 && instructions.count { it.opcode == Opcode.RETURN_VOID } == 1
 }
 
+/**
+ * 12.30 moved blur configuration off the Haze node property into the new effect-scope recorder:
+ * the scope lambda is invoked on a class that appends `(overrideKey, value)` entries to a list
+ * instead of writing a node field. The boolean override is the only `(Z)V` method in the Haze
+ * scope that boxes its parameter for an entry and appends the entry to the scope list; the node
+ * no longer has a boolean setter at all, so this is the path every `blurEnabled = ...` write takes.
+ */
+private fun Method.isHazeBlurEnabledRecorder(): Boolean {
+    if (AccessFlags.STATIC.isSet(accessFlags) || !AccessFlags.PUBLIC.isSet(accessFlags)) return false
+    if (returnType != "V" || parameterTypes.map(CharSequence::toString) != listOf(BOOLEAN_DESCRIPTOR)) {
+        return false
+    }
+
+    val instructions = implementation?.instructions?.toList() ?: return false
+    val inputRegister = p0Register + 1
+    val boxCalls =
+        instructions.filter { instruction ->
+            instruction.opcode == Opcode.INVOKE_STATIC &&
+                instruction.getReference<MethodReference>()?.toString() == BOOLEAN_VALUE_OF_DESCRIPTOR
+        }
+    if (boxCalls.size != 1) return false
+    if ((boxCalls.single() as? Instruction35c)?.registerC != inputRegister) return false
+
+    return instructions.any { instruction ->
+        instruction.opcode == Opcode.INVOKE_INTERFACE &&
+            instruction.getReference<MethodReference>()?.let { reference ->
+                reference.definingClass.toString() == COLLECTION_DESCRIPTOR && reference.name == "add"
+            } == true
+    }
+}
+
+context(context: BytecodePatchContext)
+private fun resolveHazeBlurEnabledRecorder(): MutableMethod {
+    val recorderClasses = mutableListOf<String>()
+    context.classDefForEach { classDef ->
+        if (!classDef.type.toString().startsWith(HAZE_SCOPE)) return@classDefForEach
+        if (classDef.methods.any { method -> method.implementation != null && method.isHazeBlurEnabledRecorder() }) {
+            recorderClasses += classDef.type.toString()
+        }
+    }
+    val recorderClass =
+        requireExactlyOne("NewX Haze blur override recorder class", recorderClasses) { it }
+    val recorderMethods =
+        context.mutableClassDefBy(recorderClass).methods.filter { method ->
+            method.isHazeBlurEnabledRecorder()
+        }
+    return requireExactlyOne("NewX Haze blur override recorder setter", recorderMethods) {
+        it.toString()
+    }
+}
+
 private fun patchHazeBlurSetter(
     method: MutableMethod,
     disableBlur: ToggleSettingDefinition,
@@ -196,15 +253,18 @@ val newXDisableBlurPatch =
 
             val ownerDescriptor = nodeMatches.single().originalClassDef.type
             val owner = mutableClassDefBy(ownerDescriptor)
-            val setters = owner.methods.filter { method ->
-                method.isHazeBlurEnabledSetter(ownerDescriptor)
-            }
-            if (setters.size != 1) {
-                throw PatchException(
-                    "Expected one NewX Haze blur-enabled setter in $ownerDescriptor, found " +
-                        "${setters.size}: ${setters.joinToString()}",
-                )
-            }
-            patchHazeBlurSetter(setters.single(), disableBlur)
+            val nodeSetters =
+                owner.methods.filter { method -> method.isHazeBlurEnabledSetter(ownerDescriptor) }
+            val setter =
+                if (nodeSetters.isNotEmpty()) {
+                    requireExactlyOne(
+                        "NewX Haze blur-enabled setter in $ownerDescriptor",
+                        nodeSetters,
+                    ) { it.toString() }
+                } else {
+                    // 12.30+ has no node boolean setter; the scope recorder owns blurEnabled.
+                    resolveHazeBlurEnabledRecorder()
+                }
+            patchHazeBlurSetter(setter, disableBlur)
         }
     }
