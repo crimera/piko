@@ -40,29 +40,25 @@ public class MediaData extends Entity {
         return Class.forName("className");
     }
 
-    // getExtendedData()/getMoreExtendedData() are each called from several getters per instance,
-    // and this.obj never changes, so the lookup only needs to happen once per instance. On current
-    // app versions the wrapper field is gone (see below), so every uncached call threw and caught
-    // a NoSuchFieldException just to fall back to this.obj.
-    private Object extendedData;
-    private boolean extendedDataResolved;
+    // MediaData instances can outlive a single call (e.g. captured in a download dialog's click
+    // listener), so only whether the wrapper field exists is cached, not its value - the value is
+    // still re-read fresh every call. On current app versions the field is gone (see below), so
+    // this only saves the repeated NoSuchFieldException on every uncached call.
+    private Boolean extendedDataFieldExists;
 
     private Object getExtendedData() throws Exception {
-        if (extendedDataResolved) return extendedData;
+        if (Boolean.FALSE.equals(extendedDataFieldExists)) return this.obj;
 
-        Object result;
         try {
-            result = super.getField("fieldName");
-            if (result == null) result = this.obj;
+            Object result = super.getField("fieldName");
+            extendedDataFieldExists = true;
+            return result != null ? result : this.obj;
         } catch (Exception ignored) {
             // v441 folded the mutable media dict into Media itself, so there is no wrapper field to
             // hop through and the getters sit directly on the media object.
-            result = this.obj;
+            extendedDataFieldExists = false;
+            return this.obj;
         }
-
-        extendedData = result;
-        extendedDataResolved = true;
-        return result;
     }
 
     public String getShortcode() {
@@ -233,15 +229,10 @@ public class MediaData extends Entity {
         return mediaList.get(safePosition);
     }
 
-    private Object moreExtendedData;
-    private boolean moreExtendedDataResolved;
-
     private Object getMoreExtendedData() throws Exception {
-        if (moreExtendedDataResolved) return moreExtendedData;
-
-        moreExtendedData = super.getField(this.getExtendedData(), "fieldName");
-        moreExtendedDataResolved = true;
-        return moreExtendedData;
+        // This field always exists (unlike getExtendedData()'s), so there's no exception overhead
+        // to save here - always read fresh since the instance can outlive a single call.
+        return super.getField(this.getExtendedData(), "fieldName");
     }
 
     private List getVideoVariantsV1() throws Exception {
