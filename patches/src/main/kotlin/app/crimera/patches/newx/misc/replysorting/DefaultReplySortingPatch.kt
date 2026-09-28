@@ -193,6 +193,40 @@ private object NewXComposeReplySortingPrefetchFingerprint : Fingerprint(
         ),
 )
 
+private val OBJECT_MOVE_OPCODES =
+    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
+
+/**
+ * The 12.30 prefetch request runs through a coroutine worker lambda: the seed enum is copied into
+ * a parameter register with `move-object/from16` before the range constructor call, so the request
+ * invoke no longer consumes the seed register directly. Propagate object moves from the seed and
+ * accept a request that consumes any propagated register.
+ */
+private fun seedFeedsRequest(
+    method: MutableMethod,
+    seedIndex: Int,
+    seedRegister: Int,
+    enumClass: String,
+): Boolean {
+    val seededRegisters = mutableSetOf(seedRegister)
+    method.instructions.drop(seedIndex + 1).forEach { instruction ->
+        val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+        if (reference != null &&
+            reference.parameterTypes.any { it.toString() == enumClass } &&
+            instruction.registersUsed.any { register -> register in seededRegisters }
+        ) {
+            return true
+        }
+        if (instruction.opcode in OBJECT_MOVE_OPCODES) {
+            val move = instruction as? TwoRegisterInstruction
+            if (move != null && move.registerB in seededRegisters) {
+                seededRegisters += move.registerA
+            }
+        }
+    }
+    return false
+}
+
 @Suppress("unused")
 val newXDefaultReplySortingPatch =
     bytecodePatch(
@@ -287,12 +321,12 @@ val newXDefaultReplySortingPatch =
                     ?: throw PatchException("Reply sorting conversation prefetch seed has no register")
                 val prefetchRegister = prefetchSget.registerA
                 val feedsPrefetchRequest =
-                    prefetchMethod.instructions.any { instruction ->
-                        val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
-                            ?: return@any false
-                        reference.parameterTypes.contains(enumClass) &&
-                            instruction.registersUsed.contains(prefetchRegister)
-                    }
+                    seedFeedsRequest(
+                        method = prefetchMethod,
+                        seedIndex = prefetchSeed.index,
+                        seedRegister = prefetchRegister,
+                        enumClass = enumClass,
+                    )
                 if (!feedsPrefetchRequest) {
                     throw PatchException(
                         "Reply sorting conversation prefetch seed v$prefetchRegister does not feed a " +
