@@ -435,6 +435,125 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `rigid fingerprint parameter list is advisory`() {
+        val findings =
+            lint(
+                """
+                Fingerprint(
+                    parameters = listOf(
+                        "Lcom/x/urt/items/post/j5;",
+                        "Landroidx/compose/foundation/layout/b3;",
+                        "Lcom/x/urt/items/post/p5;",
+                        "Landroidx/compose/ui/Modifier;",
+                        "Landroidx/compose/runtime/Composer;",
+                        "I",
+                    ),
+                )
+                """.trimIndent(),
+            )
+
+        assertEquals(listOf(NewXResolverLinter.Rule.RIGID_SIGNATURE), findings.map { it.rule })
+        assertTrue(NewXResolverLinter.Rule.RIGID_SIGNATURE.advisory)
+    }
+
+    @Test
+    fun `short parameter list without compose descriptors is not rigid`() {
+        val findings =
+            lint(
+                """val fingerprint = Fingerprint(parameters = listOf("Z", navigationType, tabType))""",
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `fingerprint documentation example is not a rigid finding`() {
+        val findings =
+            lint(
+                """
+                // parameters = listOf("Landroidx/compose/ui/Modifier;", "I", "I", "I")
+                val doc = "parameters = listOf(\"L\", \"L\", \"L\", \"L\")"
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `exact interface descriptor equality is advisory`() {
+        val findings = lint("""if (method.returnType == "Ljava/util/Set;") return candidate""")
+
+        assertEquals(
+            listOf(NewXResolverLinter.Rule.EXACT_INTERFACE_TYPE),
+            findings.map { it.rule },
+        )
+        assertTrue(NewXResolverLinter.Rule.EXACT_INTERFACE_TYPE.advisory)
+    }
+
+    @Test
+    fun `assignability checks are not exact-interface findings`() {
+        val findings =
+            lint(
+                """
+                val setLike = descriptor == SET_DESCRIPTOR ||
+                    classDef.interfaces.any { it.toString() == SET_DESCRIPTOR }
+                classDef.methods.filter { method -> method.returnType.toString() != OBJECT_DESCRIPTOR }
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `single-hop register containment is advisory`() {
+        val findings = lint("val feeds = instruction.registersUsed.contains(prefetchRegister)")
+
+        assertEquals(
+            listOf(NewXResolverLinter.Rule.SINGLE_HOP_REGISTER),
+            findings.map { it.rule },
+        )
+        assertTrue(NewXResolverLinter.Rule.SINGLE_HOP_REGISTER.advisory)
+    }
+
+    @Test
+    fun `literal register containment is not a single-hop finding`() {
+        val findings = lint("val usesFirst = instruction.registersUsed.contains(0)")
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `propagated register sets are not single-hop findings`() {
+        val findings =
+            lint(
+                """
+                val feeds = instruction.registersUsed.any { register -> register in seededRegisters }
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `anchor finding can be suppressed`() {
+        val findings =
+            lint(
+                """
+                // newx-resolver-lint: allow rigid-signature because this fingerprint pins the ABI on purpose
+                val fingerprint = Fingerprint(parameters = listOf("L", "L", "L", "L"))
+                """.trimIndent(),
+            )
+
+        assertTrue(findings.isEmpty(), findings.toString())
+    }
+
+    @Test
+    fun `existing cardinality rules remain gating`() {
+        assertTrue(!NewXResolverLinter.Rule.RAW_FIRST.advisory)
+        assertTrue(!NewXResolverLinter.Rule.TYPED_HOOK_POLICY.advisory)
+    }
+
+    @Test
     fun `lintDirectory is deterministic and only scans Kotlin files`() {
         val root = Files.createTempDirectory("newx-resolver-linter")
         try {

@@ -20,6 +20,8 @@ internal object NewXResolverLinter {
     enum class Rule(
         val id: String,
         private val description: String,
+        /** Advisory rules report on every lint run but do not fail the build yet. */
+        val advisory: Boolean = false,
     ) {
         RAW_FIRST("raw-first", "first() selects one candidate without proving uniqueness"),
         RAW_LAST("raw-last", "last() selects one candidate without proving uniqueness"),
@@ -34,6 +36,21 @@ internal object NewXResolverLinter {
         TYPED_HOOK_POLICY(
             "typed-hook-policy",
             "insertHook must pass relocateBranchTargets explicitly",
+        ),
+        RIGID_SIGNATURE(
+            "rigid-signature",
+            "an exact fingerprint parameter list pins synthetic R8/Compose lowering",
+            advisory = true,
+        ),
+        EXACT_INTERFACE_TYPE(
+            "exact-interface-type",
+            "exact equality on a collection interface descriptor rejects subtype overrides",
+            advisory = true,
+        ),
+        SINGLE_HOP_REGISTER(
+            "single-hop-register",
+            "register containment proves one hop only; moved or range-passed values are missed",
+            advisory = true,
         ),
         ;
 
@@ -78,6 +95,27 @@ internal object NewXResolverLinter {
         )
     private val indexedAccessPattern = Regex("""\[\s*0\s*\]""")
     private val mapNotNullPattern = Regex("""\.\s*mapNotNull\s*(?=\{)""")
+    private val rigidSignaturePattern = Regex("""\bparameters\s*=\s*listOf\s*\(""")
+    private val interfaceDescriptorPattern =
+        Regex("\"(L(?:java/util/(?:Set|List|Map|Collection)|java/lang/Iterable);)\"")
+    private val typeComparisonPattern = Regex("""\breturnType\b|\.type\b""")
+    private val singleHopContainsPattern =
+        Regex("""\bregistersUsed\s*\.\s*contains\s*\(\s*[A-Za-z_][A-Za-z0-9_]*\s*\)""")
+    private val singleHopAnyPattern =
+        Regex(
+            """\bregistersUsed\s*\.\s*any\s*\{[^{}\n]{0,140}?\b(?:it|[a-z][A-Za-z0-9_]*)\b\s*==\s*\b[a-z][A-Za-z0-9_]*\b""",
+        )
+    private val composeSignatureDescriptors =
+        listOf(
+            "Landroidx/compose/runtime/Composer;",
+            "Landroidx/compose/ui/Modifier;",
+            "Landroidx/compose/runtime/internal/",
+            "Lkotlin/jvm/functions/Function0;",
+            "Lkotlin/jvm/functions/Function1;",
+            "Lkotlin/jvm/functions/Function2;",
+            "Lkotlin/jvm/functions/Function3;",
+            "Lkotlin/jvm/functions/Function4;",
+        )
     private val hookCallPattern = Regex("""\binsertHook(?=[ \t]*\()""")
     private val hookPolicyArgumentPattern = Regex("""\brelocateBranchTargets\b""")
     private val hookReceiverPattern = Regex("""[ \t]*[A-Za-z_][A-Za-z0-9_.<>?,]*[ \t]*\.[ \t]*""")
@@ -325,6 +363,44 @@ internal object NewXResolverLinter {
                 )
         }
 
+        findRigidSignatures(masked, source).forEach { index ->
+            addAnchorFinding(
+                findings = findings,
+                path = path,
+                source = source,
+                index = index,
+                rule = Rule.RIGID_SIGNATURE,
+                message =
+                    "exact parameter list encodes synthetic R8/Compose lowering; match a semantic " +
+                        "shape (first/trailing parameters, object-only middle) instead",
+            )
+        }
+        findExactInterfaceTypes(masked, source).forEach { index ->
+            addAnchorFinding(
+                findings = findings,
+                path = path,
+                source = source,
+                index = index,
+                rule = Rule.EXACT_INTERFACE_TYPE,
+                message =
+                    "exact interface descriptor equality rejects concrete overrides (HashSet for " +
+                        "Set) and relocated types; use an assignability check",
+            )
+        }
+        findSingleHopRegisters(masked).forEach { index ->
+            addAnchorFinding(
+                findings = findings,
+                path = path,
+                source = source,
+                index = index,
+                rule = Rule.SINGLE_HOP_REGISTER,
+                message =
+                    "register containment proves one hop only; a value copied with " +
+                        "move-object/from16 or passed through an invoke-range is missed. " +
+                        "Propagate object moves or resolve the producer instruction",
+            )
+        }
+
         return findings
             .distinctBy { Triple(it.path, it.line to it.column, it.rule) }
             .sortedWith(compareBy<Finding> { it.line }.thenBy { it.column }.thenBy { it.rule.id })
@@ -348,6 +424,65 @@ internal object NewXResolverLinter {
             lintSource(relativePath, file.readText())
         }
     }
+
+    private fun findRigidSignatures(masked: String, source: String): List<Int> =
+        rigidSignaturePattern.findAll(masked).mapNotNull { match ->
+            val openParen = match.range.last
+            val closeParen = matchingDelimiter(masked, openParen, '(', ')')
+            if (closeParen <= openParen + 1) return@mapNotNull null
+            // The structure is code (so it is visible in the mask); the entries are read from the
+            // raw source at the same offsets so descriptor literals keep their text.
+            val entries = splitTopLevelArguments(source.substring(openParen + 1, closeParen - 1))
+            val pinsComposeLowering =
+                entries.any { entry ->
+                    composeSignatureDescriptors.any { descriptor -> entry.contains(descriptor) }
+                }
+            match.range.first.takeIf { entries.size >= 4 || pinsComposeLowering }
+        }.toList()
+
+    private fun splitTopLevelArguments(body: String): List<String> {
+        val arguments = mutableListOf<String>()
+        var depth = 0
+        var start = 0
+        body.forEachIndexed { index, character ->
+            when (character) {
+                '(', '[', '{' -> depth++
+                ')', ']', '}' -> if (depth > 0) depth--
+                ',' ->
+                    if (depth == 0) {
+                        arguments += body.substring(start, index).trim()
+                        start = index + 1
+                    }
+            }
+        }
+        arguments += body.substring(start).trim()
+        return arguments.filter { argument -> argument.isNotEmpty() }
+    }
+
+    private fun findExactInterfaceTypes(masked: String, source: String): List<Int> =
+        interfaceDescriptorPattern.findAll(source).mapNotNull { match ->
+            // The descriptor literal only exists in the raw source; the comparison operators and
+            // receiver name must exist in code, so they are checked on the masked line.
+            val lineStart =
+                masked.lastIndexOf('\n', match.range.first).let { previous ->
+                    if (previous < 0) 0 else previous + 1
+                }
+            val lineEnd =
+                masked.indexOf('\n', match.range.last).let { next ->
+                    if (next < 0) masked.length else next
+                }
+            val line = masked.substring(lineStart, lineEnd)
+            val comparesDescriptor = "==" in line || "!=" in line
+            match.range.first.takeIf {
+                comparesDescriptor && typeComparisonPattern.containsMatchIn(line)
+            }
+        }.toList()
+
+    private fun findSingleHopRegisters(masked: String): List<Int> =
+        (
+            singleHopContainsPattern.findAll(masked).map { match -> match.range.first } +
+                singleHopAnyPattern.findAll(masked).map { match -> match.range.first }
+        ).toList()
 
     private fun selectionRule(operation: String): Rule? =
         when (operation) {
@@ -395,6 +530,20 @@ internal object NewXResolverLinter {
                     "mapNotNull result is later selected with ${rule.id}; dropped values must be " +
                         "represented by an explicit candidate/cardinality decision",
             )
+    }
+
+    private fun addAnchorFinding(
+        findings: MutableList<Finding>,
+        path: String,
+        source: String,
+        index: Int,
+        rule: Rule,
+        message: String,
+    ) {
+        val line = lineOf(source, index)
+        if (isSuppressed(source, line, rule)) return
+        if (findings.any { it.path == path && it.line == line && it.rule == rule }) return
+        findings += finding(path, source, index, rule, message)
     }
 
     private fun finding(
@@ -946,7 +1095,13 @@ fun main(args: Array<String>) {
         return
     }
 
-    findings.forEach { finding -> System.err.println(finding) }
-    System.err.println("NewX resolver lint found ${findings.size} issue(s) in $sourceRoot")
-    if (!reportOnly) exitProcess(1)
+    val gating = findings.filterNot { finding -> finding.rule.advisory }
+    val advisory = findings.filter { finding -> finding.rule.advisory }
+    advisory.forEach { finding -> System.err.println("[advisory] $finding") }
+    gating.forEach { finding -> System.err.println(finding) }
+    System.err.println(
+        "NewX resolver lint found ${gating.size} gating issue(s) and ${advisory.size} " +
+            "advisory finding(s) in $sourceRoot",
+    )
+    if (!reportOnly && gating.isNotEmpty()) exitProcess(1)
 }
