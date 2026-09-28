@@ -16,9 +16,10 @@ import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundD
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
 import app.crimera.patches.instagram.entity.videoData.videoDataEntity
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
-import app.crimera.patches.instagram.misc.settings.addSettingsActivityPatch
+import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.PatchException
@@ -183,16 +184,22 @@ val feedDownloadButtonPatch =
             trackDataIntfEntity,
             decoderEntity,
             resourceMappingPatch,
-            // Download folder selection runs through the shared FolderPickerActivity, which has
-            // to be declared in the manifest, and every dialog/toast label uses the bundled piko
-            // string resources. Neither bootstrap is part of the base extension patch.
-            addSettingsActivityPatch,
+            // `settingsPatch` is what injects `SettingsStatus.load()` at app startup, declares
+            // `FolderPickerActivity` in the manifest and adds the settings entry point. Without
+            // it the download toggle, folder picker and filename options below never load.
+            settingsPatch,
             addResourcesPatch,
         )
 
         execute {
             addAppResources("shared")
             addAppResources("instagram")
+
+            // The feed button is a download entry point of its own: mark the download settings
+            // section so folder and filename customization stay available without the full
+            // "Download media" patch, and flag this patch's own settings toggle.
+            enableSettings("downloadMedia")
+            enableSettings("feedDownloadButton")
 
             val saveButtonId = getResourceId(ResourceType.ID, "row_feed_button_save")
 

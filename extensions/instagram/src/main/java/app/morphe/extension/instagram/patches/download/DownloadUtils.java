@@ -367,9 +367,13 @@ public class DownloadUtils {
     public static void addFeedDownloadButton(View rootView, Object mediaObject, UserSession userSession) {
         try {
             if (rootView == null || mediaObject == null) return;
-            // The patch is opt-in and can run without the settings suite, so read the download
-            // toggle directly instead of the settings-status-gated Pref helper.
-            if (!SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)) return;
+            // The patch is opt-in, so read the download toggles directly instead of the
+            // settings-status-gated Pref helper.
+            if (!SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
+                    || !SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON)) {
+                removeFeedDownloadButton(rootView);
+                return;
+            }
 
             Context context = rootView.getContext();
             int saveButtonId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
@@ -395,6 +399,14 @@ public class DownloadUtils {
         } catch (Exception e) {
             Logger.printException(() -> "addFeedDownloadButton failure", e);
         }
+    }
+
+    /** Drops the button on rebind so turning the toggle off takes effect without recreating the row. */
+    private static void removeFeedDownloadButton(View rootView) {
+        View existing = rootView.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
+        if (!(existing instanceof ImageView)) return;
+        ViewParent parent = existing.getParent();
+        if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(existing);
     }
 
     /**
