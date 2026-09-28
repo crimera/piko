@@ -21,6 +21,8 @@ import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 
+import com.instagram.common.session.UserSession;
+
 /** Runtime hook for "Show non-followers in Following list". Field names resolved at patch time. */
 public class FollowListHook {
 
@@ -36,6 +38,13 @@ public class FollowListHook {
             Object listTypeObj = binderEntity.getField("fieldName");
             String listType = (String) new Entity(listTypeObj).getField("fieldName2");
             if (!"following".equals(listType)) return;
+
+            Object listConfigObj = binderEntity.getField("fieldName3");
+            Object followListDataObj = new Entity(listConfigObj).getField("fieldName4");
+            String targetUserId = (String) new Entity(followListDataObj).getField("fieldName5");
+            UserSession session = (UserSession) binderEntity.getField("fieldName6");
+            if (!targetUserId.equals(session.getUserId())) return;
+
             if (!(row instanceof ViewGroup)) return;
 
             ViewGroup badgeContainer = findBadgeContainer((ViewGroup) row);

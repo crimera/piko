@@ -8,7 +8,9 @@ package app.crimera.patches.instagram.misc.followList
 
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.FOLLOW_LIST_DATA_CLASS
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.changeString
 import app.morphe.patcher.Fingerprint
@@ -18,6 +20,9 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.addInstructionsAtControlFlowLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val EXTENSION_CLASS = "$PATCHES_DESCRIPTOR/followList/FollowListHook;"
 
@@ -59,10 +64,42 @@ val followListRowBadgePatch =
                 field.type == "Ljava/lang/String;" && !AccessFlags.STATIC.isSet(field.accessFlags)
             } ?: throw PatchException("Expected the follow list type enum to have a String value field")
 
+            // The binder also holds the FollowListData it was built with, nested inside a small
+            // config object - that's where the profile whose list this is comes from, needed to
+            // tell "my own Following list" apart from someone else's.
+            val listConfigClass = Fingerprint(
+                returnType = "V",
+                name = "<init>",
+                parameters = listOf("Landroid/os/Bundle;", USER_SESSION_CLASS, FOLLOW_LIST_DATA_CLASS),
+            ).classDef
+            val listConfigField = binderClass.fields.first { it.type == listConfigClass.type }
+            val followListDataField = listConfigClass.fields.first { it.type == FOLLOW_LIST_DATA_CLASS }
+
+            val sessionField = binderClass.fields.firstOrNull { it.type == USER_SESSION_CLASS }
+                ?: throw PatchException("Expected the follow list binder to hold a UserSession")
+
+            // FollowListData's own factory assigns its params straight to fields - the field
+            // written from the first String param is the target user id.
+            val followListDataFactory = mutableClassDefBy(FOLLOW_LIST_DATA_CLASS).methods.first { method ->
+                method.returnType == FOLLOW_LIST_DATA_CLASS &&
+                    method.parameterTypes == listOf(listTypeEnumClass.type, "Ljava/lang/String;", "Ljava/lang/String;", "Z")
+            }
+            val firstStringParamRegister = followListDataFactory.implementation!!.registerCount -
+                followListDataFactory.parameterTypes.size + 1
+            val targetUserIdField = followListDataFactory.instructions.firstOrNull { instruction ->
+                instruction.opcode == Opcode.IPUT_OBJECT &&
+                    (instruction as TwoRegisterInstruction).registerA == firstStringParamRegister
+            }?.let { (it as ReferenceInstruction).reference as FieldReference }
+                ?: throw PatchException("Expected an iput-object writing the first String parameter")
+
             // changeString matches by text rather than position, since R8 can reorder the
             // extension's own string constants.
             OnRowBoundExtensionFingerprint.changeString("fieldName", listTypeField.name)
             OnRowBoundExtensionFingerprint.changeString("fieldName2", listTypeValueField.name)
+            OnRowBoundExtensionFingerprint.changeString("fieldName3", listConfigField.name)
+            OnRowBoundExtensionFingerprint.changeString("fieldName4", followListDataField.name)
+            OnRowBoundExtensionFingerprint.changeString("fieldName5", targetUserIdField.name)
+            OnRowBoundExtensionFingerprint.changeString("fieldName6", sessionField.name)
 
             // bindView's "model" parameter is already the row's User.
             FollowListBindViewFingerprint.method.apply {
