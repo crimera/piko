@@ -6,9 +6,6 @@
 
 package app.morphe.extension.instagram.patches.followList;
 
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -18,6 +15,8 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.entity.UserFriendshipStatus;
+import app.morphe.extension.instagram.patches.userprofile.FriendshipStatusIndicator;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 
@@ -51,8 +50,8 @@ public class FollowListHook {
             View existingBadge = badgeContainer.findViewWithTag(BADGE_TAG);
 
             UserData userData = new UserData(userObj);
-            boolean doesntFollowBack = Boolean.FALSE.equals(
-                    userData.getUserFriendshipStatus().getFollowBackStatus());
+            UserFriendshipStatus friendshipStatus = userData.getUserFriendshipStatus();
+            boolean doesntFollowBack = Boolean.FALSE.equals(friendshipStatus.getFollowBackStatus());
 
             if (!doesntFollowBack) {
                 if (existingBadge != null) badgeContainer.removeView(existingBadge);
@@ -60,23 +59,13 @@ public class FollowListHook {
             }
             if (existingBadge != null) return;
 
-            Context context = badgeContainer.getContext();
-            float density = context.getResources().getDisplayMetrics().density;
-
-            TextView badge = new TextView(context);
+            // Same badge style as the profile-page friendship status indicator, for consistency.
+            TextView badge = FriendshipStatusIndicator.createStatusTextView(
+                    badgeContainer.getContext(), friendshipStatus,
+                    str("piko_fbi_doesnt_follows_you"), "#EB4941", "fb_ic_friend_remove_outline_20");
             badge.setTag(BADGE_TAG);
-            badge.setText(str("piko_fbi_doesnt_follows_you"));
-            badge.setTextSize(11);
-            badge.setTextColor(Color.WHITE);
-            int paddingH = Math.round(6 * density);
-            int paddingV = Math.round(2 * density);
-            badge.setPadding(paddingH, paddingV, paddingH, paddingV);
 
-            GradientDrawable background = new GradientDrawable();
-            background.setColor(Color.parseColor("#E53935"));
-            background.setCornerRadius(4 * density);
-            badge.setBackground(background);
-
+            float density = badgeContainer.getContext().getResources().getDisplayMetrics().density;
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.topMargin = Math.round(4 * density);

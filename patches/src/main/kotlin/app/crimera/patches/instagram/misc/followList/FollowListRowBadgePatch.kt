@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.misc.followList
 
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
+import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.FOLLOW_LIST_DATA_CLASS
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -49,7 +50,7 @@ val followListRowBadgePatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(userDataEntity)
+        dependsOn(settingsPatch, userDataEntity)
 
         execute {
             // One binder instance per list type, with the type baked in as a final field.
