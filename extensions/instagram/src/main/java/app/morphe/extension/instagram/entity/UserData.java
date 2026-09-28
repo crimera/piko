@@ -17,17 +17,11 @@ public class UserData extends Entity {
         this.obj = obj;
     }
 
-    // Read by 7 different getters per instance (username, bio, verified, etc.), and this.obj
-    // never changes, so the underlying field is only read once per instance.
-    private Object additionalUserInfo;
-    private boolean additionalUserInfoResolved;
-
     private Object getAdditionalUserInfo() throws Exception {
-        if (additionalUserInfoResolved) return additionalUserInfo;
-
-        additionalUserInfo = super.getField(this.obj, "fieldName");
-        additionalUserInfoResolved = true;
-        return additionalUserInfo;
+        // Not cached: a UserData can outlive a single call (e.g. ProfileMoreOption's dialog
+        // captures the same instance across button clicks), and this field always exists, so
+        // there's no exception overhead to save by caching it - only a staleness risk to add.
+        return super.getField(this.obj, "fieldName");
     }
 
     public Boolean isVerified() throws Exception {
