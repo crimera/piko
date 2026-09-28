@@ -12,13 +12,22 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
 
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
@@ -27,6 +36,8 @@ import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
 import app.morphe.extension.instagram.entity.MediaInterface;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.patches.Links;
@@ -340,6 +351,130 @@ public class DownloadUtils {
 
     public static void downloadMediaUrl(Context context, String mediaUrl, String subFolder, String fileName) throws Exception {
         enqueueDownload(context, new DownloadRequest(mediaUrl, subFolder, fileName));
+    }
+
+    private static final Object FEED_DOWNLOAD_BUTTON_TAG = new Object();
+    private static final String[] FEED_BUTTON_GROUP_IDS = {
+            "row_feed_view_group_social_ufi_buttons",
+            "row_feed_view_group_buttons",
+    };
+    private static boolean feedDownloadButtonLogged;
+
+    /**
+     * Adds a download button immediately beside the save/bookmark button of a feed post row.
+     * Called from the patched feed UFI row binder, so every rebind refreshes the captured media.
+     */
+    public static void addFeedDownloadButton(View rootView, Object mediaObject, UserSession userSession) {
+        try {
+            if (rootView == null || mediaObject == null) return;
+            // The patch is opt-in and can run without the settings suite, so read the download
+            // toggle directly instead of the settings-status-gated Pref helper.
+            if (!SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)) return;
+
+            Context context = rootView.getContext();
+            int saveButtonId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
+            if (saveButtonId == 0) return;
+
+            View saveButton = rootView.findViewById(saveButtonId);
+            if (saveButton == null) return;
+
+            ViewGroup buttonGroup = resolveFeedButtonGroup(rootView, saveButton);
+            if (buttonGroup == null) {
+                logFeedDownloadButton("feed download button: no UFI button group");
+                return;
+            }
+
+            ImageView button = buttonGroup.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
+            if (button == null) {
+                button = createFeedDownloadButton(context, saveButton, buttonGroup);
+                logFeedDownloadButton("feed download button attached");
+            }
+            if (button == null) return;
+
+            button.setOnClickListener(v -> downloadPost(context, userSession, mediaObject, 0));
+        } catch (Exception e) {
+            Logger.printException(() -> "addFeedDownloadButton failure", e);
+        }
+    }
+
+    /**
+     * Resolves the horizontal button row that hosts the save button. The save button's parent is the
+     * only correct insert target: `row_feed_view_group_buttons` is an outer frame around the whole
+     * UFI area on current releases, while `row_feed_view_group_social_ufi_buttons` is the row itself.
+     * The id lookups remain as a fallback for layouts where the parent is not a plain ViewGroup.
+     */
+    private static ViewGroup resolveFeedButtonGroup(View rootView, View saveButton) {
+        ViewParent parent = saveButton.getParent();
+        if (parent instanceof ViewGroup) return (ViewGroup) parent;
+
+        for (String idName : FEED_BUTTON_GROUP_IDS) {
+            int buttonGroupId = ResourceUtils.getIdentifier(rootView.getContext(), ResourceType.ID, idName);
+            if (buttonGroupId == 0) continue;
+            View candidate = rootView.findViewById(buttonGroupId);
+            if (candidate instanceof ViewGroup) return (ViewGroup) candidate;
+        }
+        return null;
+    }
+
+    private static ImageView createFeedDownloadButton(Context context, View saveButton, ViewGroup buttonGroup) {
+        ImageView button = new ImageView(context);
+        button.setTag(FEED_DOWNLOAD_BUTTON_TAG);
+        button.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        applyFeedDownloadIcon(button, context);
+        button.setPadding(
+                saveButton.getPaddingLeft(),
+                saveButton.getPaddingTop(),
+                saveButton.getPaddingRight(),
+                saveButton.getPaddingBottom());
+
+        int insertIndex = buttonGroup.indexOfChild(saveButton);
+        if (insertIndex < 0) insertIndex = buttonGroup.getChildCount();
+        buttonGroup.addView(button, insertIndex, cloneLayoutParams(saveButton));
+        return button;
+    }
+
+    /** Copies the save button's slot so the download icon matches its size and spacing. */
+    private static ViewGroup.LayoutParams cloneLayoutParams(View saveButton) {
+        ViewGroup.LayoutParams saveParams = saveButton.getLayoutParams();
+        if (saveParams instanceof LinearLayout.LayoutParams) {
+            return new LinearLayout.LayoutParams((LinearLayout.LayoutParams) saveParams);
+        }
+        if (saveParams instanceof ViewGroup.MarginLayoutParams) {
+            return new ViewGroup.MarginLayoutParams((ViewGroup.MarginLayoutParams) saveParams);
+        }
+        if (saveParams != null) {
+            return new ViewGroup.LayoutParams(saveParams.width, saveParams.height);
+        }
+        return new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    /**
+     * Resolves the icon and its tint against the row context. The global application context
+     * cannot resolve activity scoped theme attributes such as `igds_color_primary_icon`.
+     */
+    private static void applyFeedDownloadIcon(ImageView button, Context context) {
+        int drawableId = ResourceUtils.getIdentifier(context, ResourceType.DRAWABLE, UI.DRAWABLE_DOWNLOAD_ICON);
+        if (drawableId == 0) return;
+        button.setImageDrawable(context.getDrawable(drawableId));
+
+        try {
+            TypedValue typedValue = new TypedValue();
+            int attrId = ResourceUtils.getAttrIdentifier("igds_color_primary_icon");
+            if (attrId != 0
+                    && context.getTheme().resolveAttribute(attrId, typedValue, true)
+                    && typedValue.resourceId != 0) {
+                button.setColorFilter(context.getColor(typedValue.resourceId));
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** One-shot diagnostic so a device test shows whether the hook reached a feed row. */
+    private static void logFeedDownloadButton(String message) {
+        if (feedDownloadButtonLogged) return;
+        feedDownloadButtonLogged = true;
+        Logger.printInfo(() -> message);
     }
 
     private static void enqueueDownload(Context context, DownloadRequest request) {

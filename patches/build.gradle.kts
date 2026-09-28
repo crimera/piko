@@ -19,6 +19,9 @@ dependencies {
     implementation(libs.gson)
 
     implementation(libs.morphe.patches.library)
+
+    // Typed Dalvik emission (https://github.com/crimera/morphe-bytecode).
+    implementation("crimera:morphe-bytecode:0.1.3")
 }
 
 tasks {
