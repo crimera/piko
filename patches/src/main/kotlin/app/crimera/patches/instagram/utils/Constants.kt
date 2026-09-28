@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.utils
 import app.morphe.patcher.patch.ApkFileType
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
+import app.morphe.patcher.patch.SupportedAbi.ARMEABI_V7A
 import app.morphe.patcher.patch.SupportedAbi.ARM64_V8A
 
 object Constants {
@@ -26,6 +27,7 @@ object Constants {
                         versionCodes =
                             mapOf(
                                 ARM64_V8A to 384510827,
+                                ARMEABI_V7A to 384510826,
                             ),
                     ),
                 ),
