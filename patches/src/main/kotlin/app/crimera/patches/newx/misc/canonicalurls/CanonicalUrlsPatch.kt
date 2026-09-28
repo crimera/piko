@@ -972,7 +972,7 @@ private fun patchCardUrl(
     }
 
     val method = match.method
-    // The URL getter's result handling is the original instruction at the hook index.
+    // The card navigation call that consumes the URL is the original instruction at the hook index.
     if (insertionIndex !in method.instructions.indices) {
         throw PatchException("Card URL resolver has no continuation instruction")
     }
@@ -1001,7 +1001,32 @@ private fun patchCardNavigation(
     contextualPostType: String,
     setting: ToggleSettingDefinition,
 ) {
-    val match =
+    // The URL handed to the card navigation call is either a no-arg getter result (pre-12.30) or
+    // the card URL field read directly (12.30 inlines the getter into the callback). The two
+    // shapes share the same downstream mutation; the tail anchors keep the match on the card
+    // path even when the callback contains other navigation calls.
+    val tailFilters =
+        listOf(
+            methodCall(
+                opcode = Opcode.INVOKE_STATIC,
+                definingClass = "Lcom/x/navigation/",
+                parameters = listOf(STRING_DESCRIPTOR, "L"),
+                returnType = STRING_DESCRIPTOR,
+            ),
+            methodCall(
+                opcode = Opcode.INVOKE_INTERFACE,
+                name = "getId",
+                parameters = emptyList(),
+                returnType = "L",
+            ),
+            fieldAccess(opcode = Opcode.IGET_WIDE, type = "J"),
+            methodCall(
+                definingClass = "Lcom/x/urt/items/post/",
+                parameters = listOf(STRING_DESCRIPTOR, "J", "L", STRING_DESCRIPTOR),
+                returnType = "L",
+            ),
+        )
+    val legacyMatches =
         Fingerprint(
             definingClass = "Landroidx/compose/animation/core/",
             parameters = listOf("Ljava/lang/Object;"),
@@ -1014,50 +1039,138 @@ private fun patchCardNavigation(
                         parameters = emptyList(),
                         returnType = STRING_DESCRIPTOR,
                     ),
-                    methodCall(
-                        opcode = Opcode.INVOKE_STATIC,
-                        definingClass = "Lcom/x/navigation/",
-                        parameters = listOf(STRING_DESCRIPTOR, "L"),
-                        returnType = STRING_DESCRIPTOR,
-                    ),
-                    methodCall(
-                        opcode = Opcode.INVOKE_INTERFACE,
-                        name = "getId",
-                        parameters = emptyList(),
-                        returnType = "L",
-                    ),
-                    fieldAccess(opcode = Opcode.IGET_WIDE, type = "J"),
-                    methodCall(
-                        definingClass = "Lcom/x/urt/items/post/",
-                        parameters = listOf(STRING_DESCRIPTOR, "J", "L", STRING_DESCRIPTOR),
-                        returnType = "L",
-                    ),
-                ),
-        ).requireSingleMatch("card navigation callback")
+                ) + tailFilters,
+        ).scopedMatchAllOrNull()
+    val inlinedMatches =
+        Fingerprint(
+            definingClass = "Landroidx/compose/animation/core/",
+            parameters = listOf("Ljava/lang/Object;"),
+            returnType = "Ljava/lang/Object;",
+            filters =
+                listOf(
+                    instanceOf(cardUrlActionType),
+                    fieldAccess(opcode = Opcode.IGET_OBJECT, type = STRING_DESCRIPTOR),
+                ) + tailFilters,
+        ).scopedMatchAllOrNull()
 
-    val urlGetterIndex = match.instructionMatches.first().index
-    val urlResultIndex = urlGetterIndex + 1
-    val urlResult = match.method.instructions.getOrNull(urlResultIndex)
-        as? OneRegisterInstruction
-        ?: throw PatchException("Card URL getter has no move-result-object")
-    if (match.method.instructions[urlResultIndex].opcode != Opcode.MOVE_RESULT_OBJECT) {
-        throw PatchException("Card URL getter is not followed by move-result-object")
+    val shapes = mutableListOf<CardNavigationShape>()
+    legacyMatches?.let { matches ->
+        val match =
+            requireExactlyOne(
+                "card navigation callback",
+                matches.distinctBy { it.originalMethod.toString() },
+            ) { it.originalMethod.toString() }
+        shapes += resolveLegacyCardNavigationShape(match, cardUrlActionType)
     }
-
-    val getIdIndex = match.instructionMatches[2].index
-    val postRegister = resolveContextualPostRegister(
-        match.method,
-        urlResultIndex + 1,
-        getIdIndex,
-        contextualPostType,
-    )
+    inlinedMatches?.let { matches ->
+        val match =
+            requireExactlyOne(
+                "inlined card navigation callback",
+                matches.distinctBy { it.originalMethod.toString() },
+            ) { it.originalMethod.toString() }
+        shapes += resolveInlinedCardNavigationShape(match, cardUrlActionType)
+    }
+    val shape = requireExactlyOne("card navigation shape", shapes) { it.variant }
+    val postRegister =
+        resolveContextualPostRegister(
+            shape.match.method,
+            shape.navigationIndex + 1,
+            shape.getIdIndex,
+            contextualPostType,
+        )
     patchCardUrl(
-        match,
-        urlResultIndex + 1,
+        shape.match,
+        shape.navigationIndex,
         postRegister,
-        urlResult.registerA,
+        shape.urlRegister,
         setting,
     )
+}
+
+private data class CardNavigationShape(
+    val match: Match,
+    val navigationIndex: Int,
+    val urlRegister: Int,
+    val getIdIndex: Int,
+    val variant: String,
+)
+
+private fun resolveLegacyCardNavigationShape(
+    match: Match,
+    cardUrlActionType: String,
+): CardNavigationShape {
+    val instructions = match.method.instructions.toList()
+    val getterIndex = match.instructionMatches[0].index
+    val getter = instructions.getOrNull(getterIndex)
+        ?: throw PatchException("Card URL getter call is missing")
+    val reference = getter.getReference<MethodReference>()
+    if (getter.opcode != Opcode.INVOKE_VIRTUAL ||
+        reference?.definingClass?.toString() != cardUrlActionType ||
+        reference.parameterTypes.isNotEmpty() ||
+        reference.returnType.toString() != STRING_DESCRIPTOR
+    ) {
+        throw PatchException("Card URL getter call is not the card URL accessor: $getter")
+    }
+    val result = instructions.getOrNull(getterIndex + 1)
+    if (result?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+        throw PatchException("Card URL getter is not followed by move-result-object")
+    }
+    val urlRegister =
+        (result as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException("Card URL getter result has no register")
+    val navigationIndex = match.instructionMatches[1].index
+    verifyCardNavigationConsumes(instructions, navigationIndex, urlRegister)
+    return CardNavigationShape(
+        match = match,
+        navigationIndex = navigationIndex,
+        urlRegister = urlRegister,
+        getIdIndex = match.instructionMatches[2].index,
+        variant = "getter",
+    )
+}
+
+private fun resolveInlinedCardNavigationShape(
+    match: Match,
+    cardUrlActionType: String,
+): CardNavigationShape {
+    val instructions = match.method.instructions.toList()
+    val readIndex = match.instructionMatches[1].index
+    val read = instructions.getOrNull(readIndex)
+        ?: throw PatchException("Card URL field read is missing")
+    val field = read.getReference<FieldReference>()
+    if (read.opcode != Opcode.IGET_OBJECT ||
+        field?.definingClass?.toString() != cardUrlActionType ||
+        field.type.toString() != STRING_DESCRIPTOR
+    ) {
+        throw PatchException("Card URL field read is not the card URL field: $read")
+    }
+    val urlRegister =
+        (read as? TwoRegisterInstruction)?.registerA
+            ?: throw PatchException("Card URL field read has no destination register")
+    val navigationIndex = match.instructionMatches[2].index
+    verifyCardNavigationConsumes(instructions, navigationIndex, urlRegister)
+    return CardNavigationShape(
+        match = match,
+        navigationIndex = navigationIndex,
+        urlRegister = urlRegister,
+        getIdIndex = match.instructionMatches[3].index,
+        variant = "inlined",
+    )
+}
+
+private fun verifyCardNavigationConsumes(
+    instructions: List<Instruction>,
+    navigationIndex: Int,
+    urlRegister: Int,
+) {
+    val navigation = instructions.getOrNull(navigationIndex)
+        ?: throw PatchException("Card navigation call is missing")
+    val consumed = navigation.registersUsed.firstOrNull()
+    if (consumed != urlRegister) {
+        throw PatchException(
+            "Card navigation call consumes v$consumed; expected the URL register v$urlRegister",
+        )
+    }
 }
 
 private fun resolveContextualPostRegister(
