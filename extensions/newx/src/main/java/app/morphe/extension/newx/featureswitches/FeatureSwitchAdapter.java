@@ -26,6 +26,7 @@ import java.util.Locale;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsUi;
 import app.morphe.extension.newx.ui.Theme;
+import app.morphe.extension.newx.utils.NewXUtils;
 
 final class FeatureSwitchAdapter extends BaseAdapter {
     interface Listener {
@@ -254,9 +255,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
         if (value == null) return StringRef.str("piko_newx_feature_switch_null").toString();
         if (value instanceof List<?> list) {
             if (list.isEmpty()) return "[]";
-            return "[" + String.join(", ", list.stream()
-                    .map(String::valueOf)
-                    .toList()) + "]";
+            return "[" + NewXUtils.joinValues(list, ", ") + "]";
         }
         if (value instanceof String string && string.isEmpty()) return "\"\"";
         return String.valueOf(value);

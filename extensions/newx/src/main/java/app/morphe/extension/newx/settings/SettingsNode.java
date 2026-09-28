@@ -2,6 +2,7 @@ package app.morphe.extension.newx.settings;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +47,7 @@ public abstract class SettingsNode {
         ) {
             super(id, title, summary, order, true);
             this.iconResourceName = iconResourceName;
-            this.children = Collections.unmodifiableList(List.copyOf(children));
+            this.children = Collections.unmodifiableList(new ArrayList<>(children));
         }
     }
 
@@ -152,7 +153,7 @@ public abstract class SettingsNode {
                 boolean visible
         ) {
             super(id, title, summary, order, setting, visible);
-            this.options = Collections.unmodifiableList(List.copyOf(options));
+            this.options = Collections.unmodifiableList(new ArrayList<>(options));
         }
     }
 
@@ -169,7 +170,7 @@ public abstract class SettingsNode {
                 boolean visible
         ) {
             super(id, title, summary, order, setting, visible);
-            this.options = Collections.unmodifiableList(List.copyOf(options));
+            this.options = Collections.unmodifiableList(new ArrayList<>(options));
         }
     }
 

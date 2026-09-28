@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -145,7 +146,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         addSection(
                 StringRef.str("piko_newx_gallery_cache_disk_title"),
                 diskRows.isEmpty()
-                        ? List.of(StringRef.str("piko_newx_gallery_cache_empty"))
+                        ? Collections.singletonList(StringRef.str("piko_newx_gallery_cache_empty"))
                         : diskRows
         );
         addSection(
@@ -154,7 +155,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         );
         addSection(
                 StringRef.str("piko_newx_gallery_cache_limits_title"),
-                List.of(StringRef.str(
+                Collections.singletonList(StringRef.str(
                         "piko_newx_gallery_cache_limits",
                         formatBytes(MediaDiskCache.MAX_DISK_CACHE_BYTES),
                         formatBytes(MediaDiskCache.MAX_DISK_ENTRY_BYTES),

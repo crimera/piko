@@ -36,6 +36,7 @@ import app.morphe.extension.newx.ui.ButtonView;
 import app.morphe.extension.newx.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.newx.utils.NewXUtils;
 
 @SuppressWarnings("deprecation")
 public final class FeatureSwitchFragment extends NewXCustomScreenFragment implements FeatureSwitchAdapter.Listener {
@@ -443,7 +444,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
     private String editorValue(@Nullable Object value) {
         if (value == null) return "";
         if (!(value instanceof List<?> list)) return String.valueOf(value);
-        return String.join("\n", list.stream().map(String::valueOf).toList());
+        return NewXUtils.joinValues(list, "\n");
     }
 
     private int inputType(FeatureSwitchStore.ValueType type) {

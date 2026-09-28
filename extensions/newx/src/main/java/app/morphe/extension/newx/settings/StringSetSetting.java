@@ -64,11 +64,11 @@ public final class StringSetSetting extends Setting<Set<String>> {
     }
 
     private static Set<String> parse(String value) {
-        if (value.isBlank()) return Collections.emptySet();
+        if (value.trim().isEmpty()) return Collections.emptySet();
 
         return immutableCopy(
                 Arrays.stream(value.split(","))
-                        .filter(item -> !item.isBlank())
+                        .filter(item -> !item.trim().isEmpty())
                         .collect(Collectors.toCollection(LinkedHashSet::new))
         );
     }

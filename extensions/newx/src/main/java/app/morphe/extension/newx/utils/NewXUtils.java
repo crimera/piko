@@ -151,6 +151,16 @@ public final class NewXUtils {
         return true;
     }
 
+    /** Joins list values with {@code delimiter}; avoids {@code Stream.toList()} (API 34+). */
+    public static String joinValues(List<?> values, CharSequence delimiter) {
+        StringBuilder result = new StringBuilder();
+        for (int index = 0; index < values.size(); index++) {
+            if (index > 0) result.append(delimiter);
+            result.append(String.valueOf(values.get(index)));
+        }
+        return result.toString();
+    }
+
     /** Case-insensitive ASCII substring search without allocating. Needle must be lowercase. */
     public static boolean containsIgnoreCaseAscii(String text, String lowerNeedle) {
         int limit = text.length() - lowerNeedle.length();
