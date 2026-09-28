@@ -57,31 +57,6 @@ private const val VIEW_UFI_VARIANT = "view"
 
 private const val LITHO_UFI_VARIANT = "litho"
 
-/** Profile post surfaces that render the same view based UFI row as the main feed. */
-private val PROFILE_MODULES =
-    listOf(
-        "feed_contextual_self_profile",
-        "feed_contextual_profile",
-        "feed_contextual_group_profile",
-    )
-
-private const val PROFILE_VIEW_LABEL = "piko_profile_view"
-
-private const val CONTEXTUAL_VIEW_LABEL = "piko_contextual_view"
-
-/**
- * Modules whose UFI row is pinned to the view renderer: the main feed plus the profile post
- * viewers (`feed_contextual_*`) opened from a profile. `LX/00SX` returns null for every other
- * module, and a null result makes the binder group build the row without the view holder.
- */
-private val VIEW_UFI_MODULES =
-    listOf(
-        MAIN_FEED_MODULE,
-        "feed_contextual_self_profile",
-        "feed_contextual_profile",
-        "feed_contextual_group_profile",
-    )
-
 private fun <T> requireOne(
     label: String,
     candidates: Collection<T>,
@@ -334,11 +309,14 @@ val feedDownloadButtonPatch =
 
             // The same feed post can render its UFI row as a view, a Litho component or a Compose
             // component, selected by a MobileConfig value. Only the view renderer creates the
-            // feed row holder extended above, so pin the main feed and the profile contextual
-            // viewers to it. Other modules keep the original selector result. On 439 the selector
-            // is split into a static variant used by `FeedItemBinderGroup` and an instance
-            // variant used by `VowelBinderGroup`/`FeedFullHeightMediaBinderGroup`; both decide
-            // the same contract and both are pinned.
+            // feed row holder extended above, so pin the main feed to it. Modules other than the
+            // main feed keep the original selector result. On 439 the selector is split into a
+            // static variant used by `FeedItemBinderGroup` and an instance variant used by
+            // `VowelBinderGroup`/`FeedFullHeightMediaBinderGroup`; both decide the same contract
+            // and both are pinned.
+            //
+            // Forcing the view variant on the contextual profile modules (`feed_contextual_*`)
+            // leaves the whole UFI row unbound there, so that surface keeps its original result.
             val variantSelectorMatches =
                 Fingerprint(
                     returnType = INTEGER_DESCRIPTOR,
@@ -358,21 +336,6 @@ val feedDownloadButtonPatch =
                     variantSelectorMatches.map { it.method.resolveViewVariantField() }.distinctBy { it.toString() },
                 )
 
-            // Resolve the profile choosers before the feed selector hooks below add the profile
-            // module strings to their bodies, otherwise this fingerprint matches them too.
-            val profileSelectorMatches =
-                Fingerprint(
-                    returnType = INTEGER_DESCRIPTOR,
-                    strings = PROFILE_MODULES,
-                ).matchAll()
-
-            if (profileSelectorMatches.isEmpty() || profileSelectorMatches.size > 2) {
-                throw PatchException(
-                    "Expected one or two profile UFI variant selectors, found ${profileSelectorMatches.size}: " +
-                        profileSelectorMatches.joinToString { it.originalMethod.toString() },
-                )
-            }
-
             variantSelectorMatches.forEach { selectorMatch ->
                 val selectorMethod = selectorMatch.method
                 val moduleRegister = selectorMethod.registerOfParameter(STRING_DESCRIPTOR)
@@ -390,59 +353,15 @@ val feedDownloadButtonPatch =
                     relocateBranchTargets = false,
                 ) {
                     val expectedModule = scratchRegister()
-                    val isPinnedModule = scratchRegister()
-                    VIEW_UFI_MODULES.forEach { module ->
-                        constString(expectedModule, module)
-                        invokeVirtual(methodReference(STRING_EQUALS), moduleRegister, expectedModule)
-                        moveResult(isPinnedModule, "Z")
-                        ifNez(isPinnedModule, Target.Local(CONTEXTUAL_VIEW_LABEL))
-                    }
-                    goto(Target.Original)
+                    constString(expectedModule, MAIN_FEED_MODULE)
+                    val isMainFeed = scratchRegister()
+                    invokeVirtual(methodReference(STRING_EQUALS), moduleRegister, expectedModule)
+                    moveResult(isMainFeed, "Z")
+                    ifEqz(isMainFeed, Target.Original)
 
-                    label(CONTEXTUAL_VIEW_LABEL)
                     val variant = scratchRegister()
                     sget(variant, viewVariantField)
                     returnObject(variant)
-                }
-            }
-
-            // Profile posts choose their UFI variant through a profile module chooser instead of
-            // the feed selector above (`LX/00SX` returns null for non-feed modules). Pin the
-            // profile module set to the same view variant so the row holder extended above is
-            // also created on profile post viewers.
-            profileSelectorMatches.forEach { selectorMatch ->
-                val selectorMethod = selectorMatch.method
-                val moduleRegister = selectorMethod.registerOfParameter(STRING_DESCRIPTOR)
-                val selectorThisRegister = selectorMethod.parameterRegisterStart()
-
-                val mutableSelector =
-                    mutableClassDefBy(selectorMethod.definingClass)
-                        .methods
-                        .first { it.sameSignatureAs(selectorMethod) }
-
-                mutableSelector.insertHook(
-                    index = 0,
-                    excludedRegisters =
-                        (selectorThisRegister until selectorThisRegister + selectorMethod.parameterWords()).toList(),
-                    relocateBranchTargets = false,
-                ) {
-                    // The module parameter sits above v15, so copy it into a low scratch register
-                    // and keep the comparison at 35c instead of forcing a /range invoke, which
-                    // would need a contiguous scratch span this method does not have.
-                    val module = scratchRegister()
-                    move(module, moduleRegister, STRING_DESCRIPTOR)
-                    val comparison = scratchRegister()
-                    PROFILE_MODULES.forEach { profileModule ->
-                        constString(comparison, profileModule)
-                        invokeVirtual(methodReference(STRING_EQUALS), module, comparison)
-                        moveResult(comparison, "Z")
-                        ifNez(comparison, Target.Local(PROFILE_VIEW_LABEL))
-                    }
-                    goto(Target.Original)
-
-                    label(PROFILE_VIEW_LABEL)
-                    sget(comparison, viewVariantField)
-                    returnObject(comparison)
                 }
             }
         }
