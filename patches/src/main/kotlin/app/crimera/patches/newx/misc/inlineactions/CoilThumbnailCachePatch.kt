@@ -26,6 +26,19 @@ private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
 private const val SET_DESCRIPTOR = "Ljava/util/Set;"
+
+/** Set implementations from the platform classpath, which is not part of the app dex files. */
+private val SET_IMPLEMENTATION_DESCRIPTORS =
+    setOf(
+        "Ljava/util/AbstractSet;",
+        "Ljava/util/HashSet;",
+        "Ljava/util/LinkedHashSet;",
+        "Ljava/util/SortedSet;",
+        "Ljava/util/NavigableSet;",
+        "Ljava/util/TreeSet;",
+        "Ljava/util/concurrent/ConcurrentSkipListSet;",
+        "Ljava/util/concurrent/CopyOnWriteArraySet;",
+    )
 private const val INTEGER_DESCRIPTOR = "I"
 private const val BOOLEAN_DESCRIPTOR = "Z"
 private const val BITMAP_DESCRIPTOR = "Landroid/graphics/Bitmap;"
@@ -94,6 +107,7 @@ private data class CoilThumbnailRuntime(
     val loaderOwner: String,
     val loader: String,
     val cacheKeys: String,
+    val cacheKeysInterface: Boolean,
     val memoryLookup: String,
     val strongCacheField: String,
     val weakCacheField: String,
@@ -164,7 +178,11 @@ private fun patchCoilThumbnailBridge(
         ifEqz(0, Target.Local(noneLabel))
 
         iget(1, 0, fieldReference(runtime.strongCacheField))
-        invokeInterface(methodReference(runtime.cacheKeys), 1)
+        if (runtime.cacheKeysInterface) {
+            invokeInterface(methodReference(runtime.cacheKeys), 1)
+        } else {
+            invokeVirtual(methodReference(runtime.cacheKeys), 1)
+        }
         moveResult(1, OBJECT_DESCRIPTOR)
         newInstance(2, "Ljava/util/LinkedHashSet;")
         invokeDirect(methodReference("Ljava/util/LinkedHashSet;-><init>(Ljava/util/Collection;)V"), 2, 1)
@@ -283,9 +301,16 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
         strongCacheClass.methods.filter { method ->
             !AccessFlags.STATIC.isSet(method.accessFlags) &&
                 method.parameterTypes.isEmpty() &&
-                method.returnType.toString() == SET_DESCRIPTOR
+                context.isSetAccessorReturnType(method.returnType.toString())
         },
     )
+    val cacheKeysClass =
+        context.classDefByOrNull(cacheKeys.definingClass.toString())
+            ?: throw PatchException(
+                "NewX Coil memory-cache key accessor owner has no class definition: " +
+                    cacheKeys.definingClass,
+            )
+    val cacheKeysInterface = AccessFlags.INTERFACE.isSet(cacheKeysClass.accessFlags)
     val converterMatch = requireExactlyOne(
         "Coil image-to-Bitmap converter",
         coilBitmapConverterFingerprint(imageField.type.toString())
@@ -298,6 +323,7 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
         loaderOwner = loader.definingClass.toString(),
         loader = loader.toString(),
         cacheKeys = cacheKeys.toString(),
+        cacheKeysInterface = cacheKeysInterface,
         memoryLookup = memoryLookup.toString(),
         strongCacheField = strongCacheField.toString(),
         weakCacheField = weakCacheField.toString(),
@@ -325,8 +351,22 @@ private fun BytecodePatchContext.hasCacheKeyAccessor(descriptor: String): Boolea
     return classDef.methods.count { method ->
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
             method.parameterTypes.isEmpty() &&
-            method.returnType.toString() == SET_DESCRIPTOR
+            isSetAccessorReturnType(method.returnType.toString())
     } == 1
+}
+
+/**
+ * Coil declares the strong-cache keys accessor as `Set`, but R8 can elide the interface it belongs
+ * to and keep only the concrete override, whose return type is a Set implementation such as
+ * `HashSet`. Accept any return type assignable to `Set`, including platform types that are not in
+ * the dex class map and dex-local subtypes reached through their superclass chain.
+ */
+private fun BytecodePatchContext.isSetAccessorReturnType(descriptor: String): Boolean {
+    if (descriptor == SET_DESCRIPTOR || descriptor in SET_IMPLEMENTATION_DESCRIPTORS) return true
+    val classDef = classDefByOrNull(descriptor) ?: return false
+    if (classDef.interfaces.any { it.toString() == SET_DESCRIPTOR }) return true
+    val superclass = classDef.superclass?.toString() ?: return false
+    return isSetAccessorReturnType(superclass)
 }
 
 private fun BytecodePatchContext.hasWeakCacheBackingShape(descriptor: String): Boolean {
