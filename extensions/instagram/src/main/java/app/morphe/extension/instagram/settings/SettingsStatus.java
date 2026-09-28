@@ -206,7 +206,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || followListNonFollowerBadge || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton);}
+    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || followListNonFollowerBadge || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton || customFont);}
 
     //DM section
     public static boolean unlimitedReplaysOnEphemeralMedia = false;
@@ -231,6 +231,11 @@ public class SettingsStatus {
     public static boolean storyFilters = false;
     public static void storyFilters(){storyFilters = true;}
     public static boolean filterContentSection(){return storyFilters; }
+
+    // Font section.
+    public static boolean customFont = false;
+    public static void customFont() { customFont = true; }
+    public static boolean fontSection(){ return customFont; }
 
 
         public static void loadStatusMap(){
@@ -306,6 +311,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_enable_mark_chat_as_read"),SettingsStatus.markChatAsRead);
         FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
         FLAGS.put(str("piko_category_rec_flags"),SettingsStatus.recommendedFlags);
+        FLAGS.put(str("piko_custom_font"),SettingsStatus.customFont);
 
     }
 
