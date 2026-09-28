@@ -29,8 +29,9 @@ public class TrackDataIntf extends Entity implements AudioMediaInterface {
 
     // getValue() below routes every song getter (id, name, artist, url, thumbnail) through this,
     // each re-walking getMusicInfo() -> getTrackData() -> getMappings() from scratch - a 3-hop
-    // reflective chain repeated up to 6 times for the same instance. Cached since this.obj never
-    // changes, so the mappings are the same every time.
+    // reflective chain repeated up to 6 times for the same instance. Cached since TrackDataIntf
+    // is only ever built, used, and dropped within a single synchronous call, so there's no
+    // window for the mappings to change under the cache.
     private Map mappings;
     private boolean mappingsResolved;
 
