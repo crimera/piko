@@ -49,6 +49,8 @@ val downloadMediaPatch =
             hookOverflowMenuButton,
             debugOverflowMenuButtonPatch,
             hookReelOverflowMenuButton,
+            // Hidden component: adds the download button beside the save icon on feed posts.
+            feedDownloadButtonPatch,
         )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 

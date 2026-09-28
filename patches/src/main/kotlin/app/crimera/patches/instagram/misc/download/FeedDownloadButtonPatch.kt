@@ -165,11 +165,9 @@ private class UserSessionSource(
     val field: FieldReference,
 )
 
-@Suppress("unused")
 val feedDownloadButtonPatch =
     bytecodePatch(
-        name = "Download button on feed posts",
-        description = "Adds a download button beside the save icon on feed posts.",
+        description = "Hooks the feed UFI row binder to add a download button beside the save icon.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(
@@ -195,10 +193,8 @@ val feedDownloadButtonPatch =
             addAppResources("shared")
             addAppResources("instagram")
 
-            // The feed button is a download entry point of its own: mark the download settings
-            // section so folder and filename customization stay available without the full
-            // "Download media" patch, and flag this patch's own settings toggle.
-            enableSettings("downloadMedia")
+            // Only applied as a dependency of "Download media", which already enables the
+            // download settings section. Flag this component's own settings toggle.
             enableSettings("feedDownloadButton")
 
             val saveButtonId = getResourceId(ResourceType.ID, "row_feed_button_save")

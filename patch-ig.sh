@@ -1,4 +1,4 @@
-# Patch Instagram with the Download button on feed posts patch.
+# Patch Instagram with all default patches and install on the primary user.
 set -euo pipefail
 
 ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -23,7 +23,7 @@ if [[ ! -f "$MPP" ]]; then
 fi
 
 DEFAULT_APK="./apks/439.0.0.37.89.apk"
-OUTPUT_APK="${OUTPUT_APK:-$HOME/Downloads/piko-instagram-439-download-button.apk}"
+OUTPUT_APK="${OUTPUT_APK:-$HOME/Downloads/piko-instagram-439-patched.apk}"
 APK="$DEFAULT_APK"
 FLAGS=()
 for arg in "$@"; do
@@ -44,8 +44,6 @@ echo "Patcher JVM heap limit: ${PATCHER_MAX_HEAP_MB} MB"
 java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -p "$MPP" \
   --keystore Morphe.keystore \
-  --exclusive \
-  -e "Download button on feed posts" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \
@@ -106,7 +104,7 @@ if [[ "$ADB_VERSION" != "$FASTDEPLOY_PLATFORM_TOOLS_VERSION" ]]; then
 fi
 
 echo "Checking fast deploy support"
-FASTDEPLOY_PROBE=$("$ADB_BIN" install --fastdeploy -r "${OUTPUT_APK}.probe.apk" 2>&1 || true)
+FASTDEPLOY_PROBE=$("$ADB_BIN" install --fastdeploy -r --user 0 "${OUTPUT_APK}.probe.apk" 2>&1 || true)
 if grep -Eq 'Fast Deploy .*ignoring|fastdeploy is disabled' <<<"$FASTDEPLOY_PROBE"; then
   printf '%s\n' "$FASTDEPLOY_PROBE" >&2
   echo "This adb cannot use fast deploy; refusing a full APK transfer." >&2
@@ -114,4 +112,4 @@ if grep -Eq 'Fast Deploy .*ignoring|fastdeploy is disabled' <<<"$FASTDEPLOY_PROB
 fi
 
 echo "Installing APK with fast deploy: $OUTPUT_APK"
-"$ADB_BIN" install --fastdeploy -r "$OUTPUT_APK"
+"$ADB_BIN" install --fastdeploy -r --user 0 "$OUTPUT_APK"
