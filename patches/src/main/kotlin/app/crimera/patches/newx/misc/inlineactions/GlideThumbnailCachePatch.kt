@@ -46,6 +46,13 @@ private const val GLIDE_DIAGNOSTICS_HELPER = "logGlideLookupDiagnostics"
 private const val BITMAP_CONVERTER_HELPER = "bitmapFromGlideResource"
 private const val CACHED_THUMBNAIL_LOCAL_REGISTER_COUNT = 14
 
+/**
+ * Glide's LRU cache stores its backing map in a `Serializable` field. R8 widens the field to
+ * `Object` once every access goes through `Map`/`LinkedHashMap` operations, so both descriptors
+ * identify the same cache-map slot.
+ */
+private val LRU_MAP_FIELD_TYPES = setOf(SERIALIZABLE_DESCRIPTOR, OBJECT_DESCRIPTOR)
+
 // Descriptors and branch targets of the typed Glide lookup body.
 private const val LINKED_HASH_MAP_DESCRIPTOR = "Ljava/util/LinkedHashMap;"
 private const val ITERATOR_DESCRIPTOR = "Ljava/util/Iterator;"
@@ -398,7 +405,7 @@ private fun resolveGlideThumbnailRuntime(): GlideThumbnailRuntime {
         "Glide memory-cache map field",
         memoryCacheSuperclassDef.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                field.type.toString() == SERIALIZABLE_DESCRIPTOR
+                field.type.toString() in LRU_MAP_FIELD_TYPES
         },
     )
 
@@ -570,7 +577,7 @@ private fun BytecodePatchContext.hasGlideMemoryCacheShape(descriptor: String): B
     val superclass = this.classDefByOrNull(superclassDescriptor) ?: return false
     val mapFields = superclass.fields.filter { field ->
         !AccessFlags.STATIC.isSet(field.accessFlags) &&
-            field.type.toString() == SERIALIZABLE_DESCRIPTOR
+            field.type.toString() in LRU_MAP_FIELD_TYPES
     }
     val lruPutMethods = superclass.methods.filter { method ->
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
