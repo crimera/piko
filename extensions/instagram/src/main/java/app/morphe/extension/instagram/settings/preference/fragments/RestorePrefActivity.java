@@ -28,6 +28,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 
 public class RestorePrefActivity extends AppCompatActivity {
 
@@ -61,6 +62,12 @@ public class RestorePrefActivity extends AppCompatActivity {
             } else if (args.containsKey("piko_import_id_mapping")) {
                 destinationFile = new File(context.getFilesDir()+ "/mobileconfig","id_name_mapping.json");
             } else if (args.containsKey("piko_import_pref")) {
+                // Importing an older settings file would drop an active Focus Lock.
+                if (FocusLock.isActive()) {
+                    toast(str("piko_focus_lock_blocked_action"));
+                    finish();
+                    return;
+                }
                 destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Constants.PIKO_SETTINGS+".xml");
             } else if (args.containsKey("piko_pref_add_font")) {
                 // FontStorage decides where the font goes, and validates it first.

@@ -27,10 +27,21 @@ public class TrackDataIntf extends Entity implements AudioMediaInterface {
         return super.getMethod(this.getMusicInfo(), "CJN");
     }
 
+    // getValue() below routes every song getter (id, name, artist, url, thumbnail) through this,
+    // each re-walking getMusicInfo() -> getTrackData() -> getMappings() from scratch - a 3-hop
+    // reflective chain repeated up to 6 times for the same instance. Cached since TrackDataIntf
+    // is only ever built, used, and dropped within a single synchronous call, so there's no
+    // window for the mappings to change under the cache.
+    private Map mappings;
+    private boolean mappingsResolved;
+
     public Map getMappings() throws Exception {
+        if (mappingsResolved) return mappings;
+
         Object trackData = this.getTrackData();
-        Map trackMap = (Map) super.getMethod(trackData, "Gkh");
-        return trackMap;
+        mappings = (Map) super.getMethod(trackData, "Gkh");
+        mappingsResolved = true;
+        return mappings;
     }
 
     private Object getValue(String key) throws Exception {

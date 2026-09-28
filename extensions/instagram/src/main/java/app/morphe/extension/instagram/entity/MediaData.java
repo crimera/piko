@@ -40,15 +40,25 @@ public class MediaData extends Entity {
         return Class.forName("className");
     }
 
+    // MediaData instances can outlive a single call (e.g. captured in a download dialog's click
+    // listener), so only whether the wrapper field exists is cached, not its value - the value is
+    // still re-read fresh every call. On current app versions the field is gone (see below), so
+    // this only saves the repeated NoSuchFieldException on every uncached call.
+    private Boolean extendedDataFieldExists;
+
     private Object getExtendedData() throws Exception {
+        if (Boolean.FALSE.equals(extendedDataFieldExists)) return this.obj;
+
         try {
-            Object extendedData = super.getField("fieldName");
-            if (extendedData != null) return extendedData;
+            Object result = super.getField("fieldName");
+            extendedDataFieldExists = true;
+            return result != null ? result : this.obj;
         } catch (Exception ignored) {
             // v441 folded the mutable media dict into Media itself, so there is no wrapper field to
             // hop through and the getters sit directly on the media object.
+            extendedDataFieldExists = false;
+            return this.obj;
         }
-        return this.obj;
     }
 
     public String getShortcode() {
@@ -220,6 +230,8 @@ public class MediaData extends Entity {
     }
 
     private Object getMoreExtendedData() throws Exception {
+        // This field always exists (unlike getExtendedData()'s), so there's no exception overhead
+        // to save here - always read fresh since the instance can outlive a single call.
         return super.getField(this.getExtendedData(), "fieldName");
     }
 
