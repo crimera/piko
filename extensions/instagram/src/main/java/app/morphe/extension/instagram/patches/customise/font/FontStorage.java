@@ -8,16 +8,13 @@ package app.morphe.extension.instagram.patches.customise.font;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.graphics.fonts.Font;
 import android.net.Uri;
-import android.os.Build;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
@@ -108,12 +105,11 @@ public final class FontStorage {
         if (!hasFile()) {
             return null;
         }
-        try {
-            return Typeface.createFromFile(file());
-        } catch (Exception e) {
-            Logger.printException(() -> "Failed to load the custom font", e);
-            return null;
+        Typeface typeface = parse(file());
+        if (typeface == null) {
+            Logger.printException(() -> "Failed to load the custom font");
         }
+        return typeface;
     }
 
     /**
@@ -175,7 +171,7 @@ public final class FontStorage {
                 }
             }
 
-            if (!isValidFont(temp)) {
+            if (parse(temp) == null) {
                 return ImportResult.NOT_A_FONT;
             }
 
@@ -222,79 +218,15 @@ public final class FontStorage {
     }
 
     /**
-     * Whether the file is a font - {@link Typeface#createFromFile} can silently return the default
-     * typeface instead. {@link Font.Builder} parses it from API 29; earlier APIs only get the sfnt
-     * table directory checked.
+     * The font in the file, or null when it isn't one. {@link Typeface#createFromFile} falls back
+     * to the default typeface instead; {@link Typeface.Builder} without a fallback family returns
+     * null when the font can't be parsed or has no usable character map.
      */
-    private static boolean isValidFont(File file) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            try {
-                new Font.Builder(file).build();
-                return true;
-            } catch (IOException | IllegalArgumentException e) {
-                // Invalid font data is reported as IllegalArgumentException, not IOException.
-                return false;
-            }
+    private static Typeface parse(File file) {
+        try {
+            return new Typeface.Builder(file).build();
+        } catch (RuntimeException e) {
+            return null;
         }
-        return hasValidFontTableDirectory(file);
-    }
-
-    private static boolean hasValidFontTableDirectory(File file) {
-        try (RandomAccessFile in = new RandomAccessFile(file, "r")) {
-            long length = in.length();
-            if (length < 12) {
-                return false;
-            }
-
-            byte[] header = new byte[4];
-            in.readFully(header);
-            long tableDirectory = 0;
-
-            if (new String(header, 0, 4, StandardCharsets.ISO_8859_1).equals("ttcf")) {
-                // A TrueType collection points at its first font's own table directory.
-                if (length < 16) {
-                    return false;
-                }
-                in.seek(8);
-                if (readUnsignedInt(in) < 1) {
-                    return false;
-                }
-                tableDirectory = readUnsignedInt(in);
-            }
-
-            if (tableDirectory + 12 > length) {
-                return false;
-            }
-            in.seek(tableDirectory + 4);
-            int numTables = in.readUnsignedShort();
-            if (numTables < 1 || numTables > 64) {
-                return false;
-            }
-
-            long directoryEnd = tableDirectory + 12 + (long) numTables * 16;
-            if (directoryEnd > length) {
-                return false;
-            }
-
-            in.seek(tableDirectory + 12);
-            for (int i = 0; i < numTables; i++) {
-                in.skipBytes(8); // Tag and checksum.
-                long tableOffset = readUnsignedInt(in);
-                long tableLength = readUnsignedInt(in);
-                if (tableOffset + tableLength > length) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private static long readUnsignedInt(RandomAccessFile in) throws IOException {
-        return ((long) in.readUnsignedByte() << 24)
-                | (in.readUnsignedByte() << 16)
-                | (in.readUnsignedByte() << 8)
-                | in.readUnsignedByte();
     }
 }
