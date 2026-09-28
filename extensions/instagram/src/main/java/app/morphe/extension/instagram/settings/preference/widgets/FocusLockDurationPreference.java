@@ -84,9 +84,9 @@ public class FocusLockDurationPreference extends Preference {
         seekBar = new SeekBar(context);
         seekBar.setMax(FocusLockDuration.stepCount() - 1);
         seekBar.setPadding(
-                InstagramPreferenceStyle.dp(context, 4),
+                seekBar.getPaddingLeft(),
                 InstagramPreferenceStyle.dp(context, 10),
-                InstagramPreferenceStyle.dp(context, 4),
+                seekBar.getPaddingRight(),
                 0
         );
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

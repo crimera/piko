@@ -161,6 +161,7 @@ public class ButtonPref extends Preference {
 
     private static boolean hasPressedHighlight(String key) {
         return isFragmentNavigation(key)
+                && !Constants.PIKO_FRAGMENT_FOCUS_LOCK.equals(key)
                 && !Constants.PIKO_FRAGMENT_REC_FLAGS.equals(key);
     }
 
