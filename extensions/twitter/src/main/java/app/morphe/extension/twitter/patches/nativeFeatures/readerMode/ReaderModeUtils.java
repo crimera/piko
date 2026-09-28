@@ -210,6 +210,9 @@ public class ReaderModeUtils {
         String html = "";
 
         try {
+            if (tweetId == null || !tweetId.matches("\\d+")) {
+                throw new IllegalArgumentException("Invalid tweet id");
+            }
             html = readCacheFile(tweetId);
             if (html == null) {
                 JSONObject threadInfo = getThreadInfo(tweetId);
