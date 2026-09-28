@@ -2,7 +2,9 @@ package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.misc.navbar.packedSwitchCases
 import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
 import app.crimera.patches.newx.settings.ToggleSettingDefinition
+import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.injectReadWithDefault
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.settingStrings
@@ -22,6 +24,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -82,11 +85,6 @@ private object NewXTimelineModuleBuilderFingerprint : Fingerprint(
             } &&
             method.instructions.toList().hasZeroKeyLazyItem()
     },
-)
-
-private data class PostDividerCall(
-    val index: Int,
-    val booleanRegister: Int,
 )
 
 private data class ReplyFacepileDrawCall(
@@ -351,28 +349,64 @@ private fun Instruction.isMaterial3DividerCall(): Boolean {
         MODIFIER_DESCRIPTOR in parameters
 }
 
-private fun resolvePostDividerCalls(method: Method): List<PostDividerCall> {
+private fun resolvePostDividerHelper(method: Method): MethodReference {
     val helperReferences =
         method.instructions
             .mapNotNull { instruction ->
                 if (!instruction.isPostDividerCall()) return@mapNotNull null
                 instruction.getReference<MethodReference>()
             }.distinctBy(MethodReference::toString)
-    requireExactlyOne(
+    return requireExactlyOne(
         label = "NewX post divider helper",
         candidates = helperReferences,
     )
+}
 
-    return method.instructions.mapIndexedNotNull { index, instruction ->
-        if (!instruction.isPostDividerCall()) return@mapIndexedNotNull null
-        val registers = instruction.registersUsed
-        if (registers.size != 6) {
-            throw PatchException(
-                "NewX post divider call has ${registers.size} registers; expected " +
-                    "6: $instruction",
-            )
-        }
-        PostDividerCall(index = index, booleanRegister = registers[1])
+/**
+ * Every post, reply and other timeline item divider is drawn by one shared "content + optional
+ * divider" composable. Forcing its boolean parameter off covers the item wrappers whose call
+ * sites change between releases, instead of hooking individual calls in one renderer.
+ */
+context(context: BytecodePatchContext)
+private fun patchPostDividerHelper(
+    helper: MethodReference,
+    setting: ToggleSettingDefinition,
+) {
+    val helperClass = context.mutableClassDefBy(helper.definingClass.toString())
+    val parameterTypes = helper.parameterTypes.map(CharSequence::toString)
+    val method =
+        requireExactlyOne(
+            "NewX post divider helper method",
+            helperClass.methods.filter { candidate ->
+                candidate.name == helper.name &&
+                    candidate.parameterTypes.map(CharSequence::toString) == parameterTypes
+            },
+        ) { it.toString() }
+    val modifierRegister = method.p0Register
+    val showDividerRegister = modifierRegister + 1
+    if (modifierRegister > 255 || showDividerRegister > 255) {
+        throw PatchException(
+            "NewX post divider helper parameters exceed bytecode register limits: " +
+                "v$modifierRegister, v$showDividerRegister",
+        )
+    }
+    val read =
+        setting.injectRead(
+            method = method,
+            index = 0,
+            excludedRegisters = listOf(modifierRegister, showDividerRegister),
+            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+        )
+    if (read.register == modifierRegister || read.register == showDividerRegister) {
+        throw PatchException(
+            "NewX post divider setting register aliases a helper parameter: v${read.register}",
+        )
+    }
+    // The helper's original first instruction sits directly behind the injected read, so
+    // `Target.Original` keeps a disabled setting on the unmodified path.
+    method.insertHook(index = read.nextIndex, relocateBranchTargets = false) {
+        ifEqz(read.register, Target.Original)
+        constInt(showDividerRegister, 0)
     }
 }
 
@@ -530,49 +564,8 @@ val newXHidePostDividersPatch =
                     label = "NewX post divider renderer",
                     candidates = NewXPostDividerRendererFingerprint.scopedMatchAllOrNull().orEmpty(),
                 )
-            val originalMethod = renderer.method
-            val originalCalls = resolvePostDividerCalls(originalMethod)
-            if (originalCalls.size !in 1..2) {
-                throw PatchException(
-                    "Expected one or two NewX post divider calls, found ${originalCalls.size}: " +
-                        "${originalMethod}",
-                )
-            }
-            val originalRegisterCount =
-                originalMethod.implementation?.registerCount
-                    ?: throw PatchException("NewX post divider renderer has no implementation")
-            val owner = mutableClassDefBy(renderer.originalClassDef.type)
-            val method =
-                originalMethod.cloneMutable(
-                    additionalRegisters =
-                        originalMethod.numberOfParameterRegisters + originalCalls.size * 2,
-                )
-            owner.methods.remove(originalMethod)
-            owner.methods.add(method)
-
-            val calls = resolvePostDividerCalls(method)
-            if (calls.size != originalCalls.size) {
-                throw PatchException(
-                    "NewX post divider call count changed while preparing the patch: " +
-                        "before=${originalCalls.size}, after=${calls.size}",
-                )
-            }
-            calls.sortedByDescending(PostDividerCall::index).forEachIndexed { ordinal, call ->
-                val settingRegister = originalRegisterCount + ordinal * 2
-                val read =
-                    hidePostDividers.injectReadWithDefault(
-                        method = method,
-                        index = call.index,
-                        defaultValue = false,
-                        registerRange = settingRegister..settingRegister + 1,
-                    )
-                // The old continuation label was the divider call itself, which is now the
-                // instruction directly behind the hook, so it is `Target.Original`.
-                method.insertHook(index = read.nextIndex, relocateBranchTargets = false) {
-                    ifEqz(read.register, Target.Original)
-                    constInt(call.booleanRegister, 0)
-                }
-            }
+            val dividerHelper = resolvePostDividerHelper(renderer.method)
+            patchPostDividerHelper(dividerHelper, hidePostDividers)
 
             patchReplyFacepileDivider(hidePostDividers)
             patchTimelineModuleDividers(hidePostDividers)
