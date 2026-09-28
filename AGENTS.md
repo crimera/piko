@@ -66,16 +66,6 @@ Jetpack Compose and R8 introduce continuous bytecode churn across app versions:
   string/lambda parameters, presence of `Composer`), and dynamically inspect and adapt to
   auxiliary parameters (such as `Modifier` or extra change flags) at patch time.
 
-### Resolver anchors
-
-- Load `~/.agents/skills/morphe-resolver-anchors/SKILL.md` before writing, porting, or repairing a
-  resolver, and before triaging a patch that failed after an app version bump.
-- The linter's advisory rules (`rigid-signature`, `exact-interface-type`, `single-hop-register`)
-  report the mechanically detectable anchor drift on every `:patches:lintNewxResolvers` run. They
-  are advisory until their backlog is zero; do not add new findings in changed code.
-- Prefer one deep semantic resolver plus validated shape adapters over release-specific owner
-  branches; keep the downstream mutation shared.
-
 ### Resolver cardinality helpers
 
 Use the shared helpers for NewX resolver candidate collections:
