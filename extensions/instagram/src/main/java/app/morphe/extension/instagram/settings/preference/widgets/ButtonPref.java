@@ -69,7 +69,7 @@ public class ButtonPref extends Preference {
                             || key.equals("piko_export_pref") || key.equals("piko_import_pref")
                             || key.equals("piko_download_set_path") || key.equals("piko_pref_add_font")) {
                         ActivityHook.launchFragment((Activity) context, key);
-
+                        
                     } else if (key.equals("piko_reset_pref")) {
                         InstaUtils.showResetSettingsDialog(context);
 

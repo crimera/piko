@@ -8,7 +8,9 @@ package app.morphe.extension.instagram.patches.customise.font;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.fonts.Font;
 import android.net.Uri;
+import android.os.Build;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,8 +62,8 @@ public final class FontStorage {
     /** Only one font can ever be stored, so there is nothing to name it but this. */
     private static final String FILE_NAME = "custom_font.ttf";
 
-    /** Room for any real font, and far too little for a file picked by mistake. */
-    private static final long MAX_SIZE_BYTES = 8L * 1024 * 1024;
+    /** Room for full CJK fonts, and still too little for most files picked by mistake. */
+    private static final long MAX_SIZE_BYTES = 32L * 1024 * 1024;
 
     private FontStorage() {
     }
@@ -220,11 +222,24 @@ public final class FontStorage {
     }
 
     /**
-     * Whether the file holds a real sfnt table directory, with every table's offset and length
-     * inside the file - checked instead of trusting {@link Typeface#createFromFile}, which can
-     * silently return the default typeface for a file that fails to parse.
+     * Whether the file is a font - {@link Typeface#createFromFile} can silently return the default
+     * typeface instead. {@link Font.Builder} parses it from API 29; earlier APIs only get the sfnt
+     * table directory checked.
      */
     private static boolean isValidFont(File file) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                new Font.Builder(file).build();
+                return true;
+            } catch (IOException | IllegalArgumentException e) {
+                // Invalid font data is reported as IllegalArgumentException, not IOException.
+                return false;
+            }
+        }
+        return hasValidFontTableDirectory(file);
+    }
+
+    private static boolean hasValidFontTableDirectory(File file) {
         try (RandomAccessFile in = new RandomAccessFile(file, "r")) {
             long length = in.length();
             if (length < 12) {

@@ -15,8 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import app.morphe.extension.instagram.patches.customise.font.CustomFont;
-
 public class CategoryPref extends PreferenceCategory {
     private boolean firstCategory;
 
@@ -41,7 +39,6 @@ public class CategoryPref extends PreferenceCategory {
         TextView title = new TextView(getContext());
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        CustomFont.applyTo(title);
         applyCategoryStyle(title);
         title.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -54,11 +51,9 @@ public class CategoryPref extends PreferenceCategory {
     protected void onBindView(View view) {
         TextView title = (TextView) view;
         title.setText(getTitle());
-        title.setTextColor(super.isEnabled()
-                ? InstagramPreferenceStyle.primaryTextColor()
-                : InstagramPreferenceStyle.disabledTextColor());
+        title.setTextColor(InstagramPreferenceStyle.primaryTextColor());
         applyCategoryStyle(title);
-        title.setEnabled(super.isEnabled());
+        title.setEnabled(isEnabled());
     }
 
     private void applyCategoryStyle(TextView title) {

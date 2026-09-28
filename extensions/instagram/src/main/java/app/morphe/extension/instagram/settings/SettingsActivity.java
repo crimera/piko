@@ -30,7 +30,6 @@ import java.util.function.Supplier;
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.patches.customise.font.CustomFont;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
@@ -103,7 +102,6 @@ public class SettingsActivity extends Activity {
         titleTextView.setText(displayTitle); // Dynamically bound from intent data
         InstagramPreferenceStyle.applyToolbarLayout(
                 this, toolbar, back, titleTextView, isRootSettings);
-        CustomFont.applyTo(titleTextView);
         titleTextView.setTextColor(InstagramPreferenceStyle.primaryTextColor());
 
         toolbar.addView(back);
@@ -151,6 +149,7 @@ public class SettingsActivity extends Activity {
         return customContainer;
     }
 
+    // (Keep the nested static SettingsFragment class unchanged)
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
@@ -168,7 +167,6 @@ public class SettingsActivity extends Activity {
         @Override
         public void onResume() {
             super.onResume();
-
             refreshPreferenceSummary(
                     "piko_download_set_path",
                     StorageUtils::getCustomPathForDisplay

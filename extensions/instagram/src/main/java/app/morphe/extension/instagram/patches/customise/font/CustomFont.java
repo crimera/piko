@@ -9,14 +9,12 @@ package app.morphe.extension.instagram.patches.customise.font;
 
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.SystemClock;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import app.morphe.extension.shared.Logger;
 
@@ -24,18 +22,14 @@ import app.morphe.extension.shared.Logger;
  * Replaces the typefaces the app hands out for its own interface with either a font file the
  * user added from their device storage, or the device's own system font.
  *
- * Every piece of text the app draws passes through {@link #apply}, so the work here is arranged
- * around one fact: a font file only reaches the screen after a restart, which makes a file-based
- * choice constant for the life of the process. That request is therefore settled once, cached by
- * {@link #descriptorSubstitutions} and {@link #typefaceSubstitutions}, and costs a single map
- * lookup afterwards.
+ * Every typeface the app sets on a view or paint passes through {@link #assign}, so the work here
+ * is arranged around one fact: a font file only reaches the screen after a restart, which makes a
+ * file-based choice constant for the life of the process. That request is therefore settled once,
+ * cached by {@link #typefaceSubstitutions}, and costs a single map lookup afterwards.
  *
  * The system font is the exception: what "sans-serif" resolves to can depend on a device font
- * override that attaches to the process some time after it starts, rather than on anything
- * {@link #load} settles up front. Caching its answer the first time it is asked would risk
- * freezing every interface font on whatever that override had - or had not - applied yet, for the
- * rest of the process. So a system-font request is re-derived every time instead of cached; see
- * {@link #replacementFor} and {@link #apply(Object, Typeface)}.
+ * override that attaches to the process some time after it starts. Its answers are cached too,
+ * but dropped whenever "sans-serif" resolves to a different family; see {@link #refreshSystemFamily}.
  */
 public class CustomFont {
 
@@ -66,25 +60,33 @@ public class CustomFont {
     /** Enough for every typeface the app hands out, and a ceiling if one ever hands out more. */
     private static final int MAX_CACHED_SUBSTITUTIONS = 256;
 
-    /** Stands in the descriptor cache for a font that must keep the face it asked for. */
-    private static final Object KEEP_ORIGINAL = new Object();
+    /** How often the system font's family is checked for a device font override. */
+    private static final long SYSTEM_FAMILY_RECHECK_MS = 1000;
 
     /**
-     * What to hand back for a font descriptor: the replacement typeface, or {@link #KEEP_ORIGINAL}.
-     * Keyed by the descriptor's class because each font has a descriptor class of its own, and the
-     * repository holds one typeface per descriptor - so both the answer and the replacement are
-     * settled the first time a font is seen. Not consulted at all for the system font; see the
-     * class-level note on why its answer is re-derived every time instead.
+     * Whether a font descriptor names an interface font, keyed by the descriptor's class since
+     * each font has a descriptor class of its own.
      */
-    private static final Map<Class<?>, Object> descriptorSubstitutions = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Boolean> interfaceDescriptors = new ConcurrentHashMap<>();
 
-    /**
-     * Replacements for typefaces that arrive without a descriptor, keyed by the typeface they
-     * replace. {@link Typeface} does not define equality, so this is keyed by identity. Not
-     * consulted at all for the system font; see the class-level note on why its answer is
-     * re-derived every time instead.
-     */
+    /** Replacements keyed by the typeface they replace. */
     private static final Map<Typeface, Typeface> typefaceSubstitutions = new ConcurrentHashMap<>();
+
+    // Lock-free rather than weak: assign() reads these while text is drawn, and they only ever
+    // hold fonts the app itself keeps for the life of the process.
+
+    /** Typefaces resolved for content, which {@link #assign} leaves alone wherever they are set. */
+    private static final Set<Typeface> contentTypefaces = ConcurrentHashMap.newKeySet();
+
+    /** The copy handed to content for each typeface, so the shared original is never marked. */
+    private static final Map<Typeface, Typeface> contentCopies = new ConcurrentHashMap<>();
+
+    /** Content font resolvers running on any thread, so the thread-local is only read when some are. */
+    private static final AtomicInteger resolversRunning = new AtomicInteger();
+
+    /** What "sans-serif" resolved to when last checked, and when that was. */
+    private static volatile Typeface systemFamily;
+    private static volatile long systemFamilyCheckedAt;
 
     /** How deep into the resolvers of a font the user picked in the app this thread is. */
     private static final ThreadLocal<ContentRequest> contentRequest =
@@ -156,31 +158,18 @@ public class CustomFont {
         }
 
         try {
-            Object replacement;
-            if (systemFontSelected) {
-                // Never cached - see the class-level note on why a system-font answer cannot be
-                // trusted to stay right for the life of the process.
-                replacement = isInterfaceFontName(String.valueOf(descriptor))
-                        ? replacementFor(original)
-                        : KEEP_ORIGINAL;
-            } else {
-                Class<?> descriptorClass = descriptor.getClass();
-                replacement = descriptorSubstitutions.get(descriptorClass);
-                if (replacement == null) {
-                    replacement = isInterfaceFontName(String.valueOf(descriptor))
-                            ? replacementFor(original)
-                            : KEEP_ORIGINAL;
-                    descriptorSubstitutions.put(descriptorClass, replacement);
-                }
-            }
-
-            if (replacement == KEEP_ORIGINAL) {
-                return original;
+            Boolean isInterface = interfaceDescriptors.get(descriptor.getClass());
+            if (isInterface == null) {
+                isInterface = isInterfaceFontName(String.valueOf(descriptor));
+                interfaceDescriptors.put(descriptor.getClass(), isInterface);
             }
 
             // A handful of interface fonts double as story and note text styles, and those are
             // told apart by who asked rather than by name.
-            return inContentResolver() ? original : (Typeface) replacement;
+            if (!isInterface || isResolvingContent()) {
+                return keepAsContent(original);
+            }
+            return replacementFor(original);
         } catch (Exception e) {
             Logger.printException(() -> "Failed to apply the custom font", e);
             return original;
@@ -188,57 +177,80 @@ public class CustomFont {
     }
 
     /**
-     * Injected wherever the app hands out a typeface for its own interface without saying which
-     * font it is: the IGDS font helper, and Compose, which resolves fonts on its own.
+     * Injected where Compose and React Native hand out a typeface, which they resolve on their own
+     * without saying which font it is.
      *
      * @param original the typeface the app resolved.
      * @return the custom font in the same weight and slant, or {@code original} when the request
      * must keep the face it asked for.
      */
     public static Typeface apply(Typeface original) {
-        if (!active || original == null || inContentResolver()) {
+        if (!active || original == null) {
+            return original;
+        }
+        if (isResolvingContent()) {
+            return keepAsContent(original);
+        }
+        // Compose is also handed ready-made content typefaces, such as the story text style previews.
+        if (contentTypefaces.contains(original)) {
             return original;
         }
         return replacementFor(original);
     }
 
     /**
-     * Applies the custom font to a view piko built itself. Piko's own views are plain
-     * {@link TextView}s, so they never reach the app's typeface repository, and they are never
-     * app content - so unlike {@link #apply(Typeface)} this asks no questions about the caller.
+     * Injected wherever the app sets a typeface on its text views, paints and platform spans.
+     * {@code null} draws in the platform default, so it is substituted as that.
      */
-    public static void applyTo(TextView view) {
-        if (!active || view == null) {
-            return;
+    public static Typeface assign(Typeface typeface) {
+        if (!active) {
+            return typeface;
         }
-
-        Typeface current = view.getTypeface();
-        if (current == null) {
-            return;
+        Typeface current = typeface != null ? typeface : Typeface.DEFAULT;
+        if (isResolvingContent()) {
+            return typeface;
         }
-
-        Typeface replacement = replacementFor(current);
-        if (replacement != current) {
-            view.setTypeface(replacement);
+        // Content copies are never substituted, so a cached answer is safe to hand out first.
+        Typeface cached = cachedReplacement(current);
+        if (cached != null) {
+            return cached;
         }
+        if (contentTypefaces.contains(current)) {
+            return typeface;
+        }
+        return replacementFor(current);
     }
 
-    /** Applies the custom font to every {@link TextView} nested under a view piko built itself. */
-    public static void applyToTree(View root) {
-        if (!active || root == null) {
-            return;
-        }
-
-        if (root instanceof TextView) {
-            applyTo((TextView) root);
-        }
-
-        if (root instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) root;
-            for (int i = 0; i < group.getChildCount(); i++) {
-                applyToTree(group.getChildAt(i));
+    /**
+     * Marks a typeface as content and returns the one content should use. The repository and
+     * ResourcesCompat share one object per font with the interface, so content gets its own copy.
+     */
+    private static Typeface keepAsContent(Typeface typeface) {
+        Typeface content = typeface;
+        if (!contentTypefaces.contains(typeface)) {
+            content = contentCopies.get(typeface);
+            if (content == null) {
+                content = Typeface.create(typeface, typeface.getWeight(), typeface.isItalic());
+                contentCopies.put(typeface, content);
             }
         }
+        contentTypefaces.add(content);
+        return content;
+    }
+
+    static boolean isActive() {
+        return active;
+    }
+
+    /**
+     * The font for a view piko built itself. Those are never app content, so unlike
+     * {@link #assign(Typeface)} this asks no questions about the caller.
+     */
+    static Typeface forPikoView(Typeface typeface) {
+        if (!active) {
+            return typeface;
+        }
+        return replacementFor(typeface == null ? Typeface.DEFAULT : typeface);
     }
 
     /**
@@ -252,20 +264,28 @@ public class CustomFont {
         }
 
         ContentRequest current = contentRequest.get();
-        current.depth = hasExpired(current) ? 1 : current.depth + 1;
+        if (hasExpired(current)) {
+            resolversRunning.addAndGet(1 - current.depth);
+            current.depth = 1;
+        } else {
+            current.depth++;
+            resolversRunning.incrementAndGet();
+        }
         current.updatedAt = SystemClock.uptimeMillis();
     }
 
-    /** Injected at every return of a content font resolver. */
-    public static void endContentFontRequest() {
+    /** Injected at every return of a content font resolver, which keeps the typeface it returns. */
+    public static Typeface endContentFontRequest(Typeface returned) {
         if (!active) {
-            return;
+            return returned;
         }
 
         ContentRequest current = contentRequest.get();
         if (current.depth > 0) {
             current.depth--;
+            resolversRunning.decrementAndGet();
         }
+        return returned != null ? keepAsContent(returned) : null;
     }
 
     /**
@@ -284,8 +304,13 @@ public class CustomFont {
             return true;
         }
 
+        resolversRunning.addAndGet(-current.depth);
         current.depth = 0;
         return false;
+    }
+
+    private static boolean isResolvingContent() {
+        return resolversRunning.get() > 0 && inContentResolver();
     }
 
     private static boolean hasExpired(ContentRequest current) {
@@ -304,49 +329,22 @@ public class CustomFont {
      * has no such name to begin with, so it is asked for the ordinary way, by instance.
      */
     private static Typeface derive(Typeface original) {
+        Typeface family = customTypeface;
         if (systemFontSelected) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                Typeface family = Typeface.create(FontStorage.SYSTEM_FONT_FAMILY, Typeface.NORMAL);
-                return Typeface.create(family, original.getWeight(), original.isItalic());
-            }
-            return Typeface.create(FontStorage.SYSTEM_FONT_FAMILY, styleOf(original));
+            family = systemFamily != null
+                    ? systemFamily
+                    : Typeface.create(FontStorage.SYSTEM_FONT_FAMILY, Typeface.NORMAL);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            return Typeface.create(customTypeface, original.getWeight(), original.isItalic());
-        }
-        return Typeface.create(customTypeface, original.getStyle());
-    }
-
-    /** `original`'s weight and slant, folded down to the four styles {@link Typeface#create} takes. */
-    private static int styleOf(Typeface original) {
-        boolean bold;
-        boolean italic;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            bold = original.getWeight() >= 600;
-            italic = original.isItalic();
-        } else {
-            bold = (original.getStyle() & Typeface.BOLD) != 0;
-            italic = (original.getStyle() & Typeface.ITALIC) != 0;
-        }
-        if (bold && italic) {
-            return Typeface.BOLD_ITALIC;
-        }
-        return bold ? Typeface.BOLD : italic ? Typeface.ITALIC : Typeface.NORMAL;
+        return Typeface.create(family, original.getWeight(), original.isItalic());
     }
 
     /**
      * What to draw in place of a typeface: the custom font in the same weight and slant, or the
-     * typeface itself when it is not one the app writes text in. Settled once per typeface and
-     * cached - except for the system font, which is re-derived on every call; see the class-level
-     * note on why its answer is not trusted to stay right for the life of the process.
+     * typeface itself when it is not one the app writes text in. Settled once per typeface.
      */
     private static Typeface replacementFor(Typeface original) {
         try {
-            if (systemFontSelected) {
-                return drawsText(original) ? derive(original) : original;
-            }
-
-            Typeface cached = typefaceSubstitutions.get(original);
+            Typeface cached = cachedReplacement(original);
             if (cached != null) {
                 return cached;
             }
@@ -367,6 +365,31 @@ public class CustomFont {
         } catch (Exception e) {
             Logger.printException(() -> "Failed to derive the custom font", e);
             return original;
+        }
+    }
+
+    private static Typeface cachedReplacement(Typeface original) {
+        if (systemFontSelected) {
+            refreshSystemFamily();
+        }
+        return typefaceSubstitutions.get(original);
+    }
+
+    /**
+     * Drops the system font's cached answers once "sans-serif" resolves to a different family - a
+     * device font override attaches by replacing it, possibly after the process has started.
+     * Checked at most once a second, since resolving the family takes a platform lock.
+     */
+    private static void refreshSystemFamily() {
+        long now = SystemClock.uptimeMillis();
+        if (now - systemFamilyCheckedAt < SYSTEM_FAMILY_RECHECK_MS) {
+            return;
+        }
+        systemFamilyCheckedAt = now;
+        Typeface family = Typeface.create(FontStorage.SYSTEM_FONT_FAMILY, Typeface.NORMAL);
+        if (family != systemFamily) {
+            systemFamily = family;
+            typefaceSubstitutions.clear();
         }
     }
 
@@ -391,9 +414,18 @@ public class CustomFont {
      * picture font never does.
      */
     private static boolean drawsText(Typeface typeface) {
+        // Cached since assign() runs while text is drawn, and the answer never changes.
+        Boolean cached = drawsTextCache.get(typeface);
+        if (cached != null) {
+            return cached;
+        }
         Paint paint = new Paint();
         paint.setTypeface(typeface);
-        return (paint.hasGlyph("A") && paint.hasGlyph("a"))
+        boolean result = (paint.hasGlyph("A") && paint.hasGlyph("a"))
                 || (paint.hasGlyph("0") && paint.hasGlyph("9"));
+        drawsTextCache.put(typeface, result);
+        return result;
     }
+
+    private static final Map<Typeface, Boolean> drawsTextCache = new ConcurrentHashMap<>();
 }

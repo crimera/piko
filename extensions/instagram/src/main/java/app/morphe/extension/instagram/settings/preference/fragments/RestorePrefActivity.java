@@ -63,8 +63,7 @@ public class RestorePrefActivity extends AppCompatActivity {
             } else if (args.containsKey("piko_import_pref")) {
                 destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Constants.PIKO_SETTINGS+".xml");
             } else if (args.containsKey("piko_pref_add_font")) {
-                // A font keeps the name the user picked it by, so where it is written is only
-                // known once they have picked it.
+                // FontStorage decides where the font goes, and validates it first.
                 isFontImport = true;
             }
             if (destinationFile != null || isFontImport) {
@@ -89,13 +88,8 @@ public class RestorePrefActivity extends AppCompatActivity {
 
 
     /**
-     * Copies a picked font into piko's own fonts directory. Reading the file, checking that it is
-     * a font and cleaning up after a copy that went wrong all belong together, so the whole of it
-     * lives in {@link FontStorage}.
-     *
-     * Run off the main thread: a font can be several megabytes and is often picked from a
-     * cloud-backed provider whose reads carry real network latency, which would otherwise risk an
-     * ANR right here.
+     * Imports a picked font through {@link FontStorage}, off the main thread: a font can be several
+     * megabytes and often comes from a cloud-backed provider, which could otherwise cause an ANR.
      */
     private void receiveFont(Context ctx, Uri uri) {
         new Thread(() -> {
@@ -122,36 +116,28 @@ public class RestorePrefActivity extends AppCompatActivity {
     }
 
 
-    /** Also run off the main thread, for the same reason as {@link #receiveFont}. */
     private void receiveFileForRestore(Context ctx, Uri uri) {
-        new Thread(() -> {
-            boolean success = false;
-            try (InputStream in = ctx.getContentResolver().openInputStream(uri)) {
-                if (in != null) {
-                    try (FileOutputStream out = new FileOutputStream(destinationFile)) {
-                        byte[] buffer = new byte[4096];
-                        int read;
-                        while ((read = in.read(buffer)) != -1) {
-                            out.write(buffer, 0, read);
-                        }
-                        success = true;
-                    }
-                }
-            } catch (Exception e) {
-                Logger.printException(() -> "import failure", e);
+        try {
+            InputStream in = ctx.getContentResolver().openInputStream(uri);
+
+            FileOutputStream out = new FileOutputStream(destinationFile);
+
+            byte[] buffer = new byte[4096];
+            int read;
+
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
             }
 
-            boolean restored = success;
-            mainHandler.post(() -> {
-                if (restored) {
-                    toast(str("piko_import_success"));
-                    Utils.restartApp(ctx);
-                } else {
-                    toast(str("piko_import_fail"));
-                }
-                finish();
-            });
-        }).start();
+            in.close();
+            out.close();
+            toast(str("piko_import_success"));
+            Utils.restartApp(ctx);
+
+        } catch (Exception e) {
+            toast(str("piko_import_fail"));
+            Logger.printException(() -> "import failure", e);
+        }
     }
 
 
@@ -159,20 +145,20 @@ public class RestorePrefActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == READ_REQUEST_CODE && resultCode == RESULT_OK && intent != null) {
+        if (requestCode == READ_REQUEST_CODE && resultCode == RESULT_OK) {
             Uri uri = intent.getData();
 
             if (uri == null) {
                 toast(str("piko_fail_no_path"));
-                finish();
             } else if (isFontImport) {
+                // Finishes itself once the font is imported off the main thread.
                 receiveFont(this, uri);
+                return;
             } else {
                 receiveFileForRestore(this, uri);
             }
-        } else {
-            finish();
         }
+        finish();
     }
 
 

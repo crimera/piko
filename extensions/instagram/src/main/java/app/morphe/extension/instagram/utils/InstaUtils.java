@@ -89,8 +89,7 @@ public class InstaUtils {
     }
 
     public static void deletePref(){
-        // The preferences are wiped either way; the added font file is a separate concern the
-        // preference wipe knows nothing about, so a failure there must not mask a real reset.
+        // The font file lives outside the preferences, so a reset removes it separately.
         FontStorage.delete();
         if(Pref.clearAllPreferences()){
             PikoUtils.toast(str("piko_reset_pref_success"));

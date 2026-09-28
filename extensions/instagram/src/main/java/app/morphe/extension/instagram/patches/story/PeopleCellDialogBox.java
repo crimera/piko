@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import com.instagram.igds.components.peoplecell.IgdsPeopleCell;
 
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.patches.customise.font.CustomFont;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.ui.CustomDialog;
 import app.morphe.extension.shared.ui.Dim;
@@ -93,9 +92,6 @@ public class PeopleCellDialogBox {
         // since message/editText were both null) -- insert our content at index 1, right
         // after the title and before the buttons.
         mainLayout.addView(listView, 1);
-
-        // CustomDialog is a shared builder with no notion of Instagram's own custom font.
-        CustomFont.applyToTree(mainLayout);
 
         // Explicitly cap the window width -- don't rely on CustomDialog's own window sizing.
         constrainWindowWidth(dialog);

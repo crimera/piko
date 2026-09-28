@@ -14,12 +14,19 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
 internal const val TYPEFACE_CLASS = "Landroid/graphics/Typeface;"
 
@@ -35,37 +42,17 @@ private const val BEGIN_CONTENT_FONT_REQUEST =
     "$CUSTOM_FONT_DESCRIPTOR->beginContentFontRequest()V"
 
 private const val END_CONTENT_FONT_REQUEST =
-    "$CUSTOM_FONT_DESCRIPTOR->endContentFontRequest()V"
+    "$CUSTOM_FONT_DESCRIPTOR->endContentFontRequest($TYPEFACE_CLASS)$TYPEFACE_CLASS"
 
-/**
- * Replaces every typeface a method hands back with the custom font.
- *
- * The return instruction itself is replaced rather than instructions being inserted before it,
- * because a return is often a branch target: instructions inserted in front of it are skipped by
- * every branch that jumps straight to the return.
- *
- * @param hook the extension method to hand the typeface to.
- * @param leadingArgument a register passed ahead of the typeface, empty for none.
- */
-internal fun MutableMethod.hookReturnedTypefaces(
-    hook: String = APPLY_CUSTOM_FONT,
-    leadingArgument: String = "",
-) {
-    returnIndices().forEach { index ->
-        val register = getInstruction(index).registersUsed[0]
-        val arguments =
-            if (leadingArgument.isEmpty()) "v$register" else "$leadingArgument, v$register"
+private const val ASSIGN_CUSTOM_FONT =
+    "$CUSTOM_FONT_DESCRIPTOR->assign($TYPEFACE_CLASS)$TYPEFACE_CLASS"
 
-        replaceInstruction(index, "invoke-static {$arguments}, $hook")
-        addInstructions(
-            index + 1,
-            """
-            move-result-object v$register
-            return-object v$register
-            """.trimIndent(),
-        )
-    }
-}
+/** The platform text widgets whose direct subclasses get [overrideTypefaceAssignment]. */
+internal val PLATFORM_TEXT_WIDGETS =
+    listOf(
+        "TextView", "EditText", "Button", "RadioButton", "CheckBox", "CheckedTextView",
+        "AutoCompleteTextView", "MultiAutoCompleteTextView", "Switch", "ToggleButton",
+    ).map { "Landroid/widget/$it;" }.toSet()
 
 /**
  * Hooks the typeface repository, whose first parameter describes the font being resolved. The
@@ -75,6 +62,8 @@ internal fun MutableMethod.hookReturnedTypefaces(
  * being put on record when the method is entered - which saves a call and a thread local write on
  * every single piece of text the app draws. That only holds while nothing writes over the register
  * on the way there, so it is checked rather than assumed.
+ *
+ * Each return is replaced rather than preceded, since a return is often a branch target.
  */
 internal fun MutableMethod.hookResolvedTypefaces() {
     val descriptorRegister = declaredParameterRegister(this, 0)
@@ -84,7 +73,20 @@ internal fun MutableMethod.hookResolvedTypefaces() {
         )
     }
 
-    hookReturnedTypefaces(APPLY_CUSTOM_FONT_FOR_DESCRIPTOR, "v$descriptorRegister")
+    returnIndices().forEach { index ->
+        val register = getInstruction(index).registersUsed[0]
+        replaceInstruction(
+            index,
+            "invoke-static {v$descriptorRegister, v$register}, $APPLY_CUSTOM_FONT_FOR_DESCRIPTOR",
+        )
+        addInstructions(
+            index + 1,
+            """
+            move-result-object v$register
+            return-object v$register
+            """.trimIndent(),
+        )
+    }
 }
 
 /**
@@ -131,16 +133,177 @@ internal fun MutableMethod.hookWrappedTypeface() {
 
 /**
  * Marks a method as resolving a font the user picked inside the app, so the typefaces it asks the
- * repository for are left as they are.
+ * repository for, and the one it returns, are left as they are.
  */
 internal fun MutableMethod.markAsContentFontResolver() {
     returnIndices().forEach { index ->
         val register = getInstruction(index).registersUsed[0]
 
-        replaceInstruction(index, "invoke-static {}, $END_CONTENT_FONT_REQUEST")
-        addInstructions(index + 1, "return-object v$register")
+        replaceInstruction(index, "invoke-static/range {v$register .. v$register}, $END_CONTENT_FONT_REQUEST")
+        addInstructions(
+            index + 1,
+            """
+            move-result-object v$register
+            return-object v$register
+            """.trimIndent(),
+        )
     }
     addInstruction(0, "invoke-static {}, $BEGIN_CONTENT_FONT_REQUEST")
+}
+
+/**
+ * Overrides `setTypeface(Typeface)`, which every way a view gets its font ends in - XML,
+ * `setTextAppearance`, `setTypeface(null)` or a resolved typeface.
+ */
+internal fun MutableClass.overrideTypefaceAssignment() {
+    val existing = methods.firstOrNull {
+        it.name == "setTypeface" && it.returnType == "V" &&
+            it.parameterTypes.map(CharSequence::toString) == listOf(TYPEFACE_CLASS)
+    }
+    if (existing != null) {
+        if (existing.implementation != null) {
+            existing.addInstructions(
+                0,
+                """
+                invoke-static/range {p1 .. p1}, $ASSIGN_CUSTOM_FONT
+                move-result-object p1
+                """.trimIndent(),
+            )
+        }
+        return
+    }
+
+    // Registers: v0 is this, v1 the typeface.
+    val implementation = MethodImplementationBuilder(2).apply {
+        addInstruction("invoke-static {v1}, $ASSIGN_CUSTOM_FONT".toInstruction())
+        addInstruction("move-result-object v1".toInstruction())
+        addInstruction("invoke-super {v0, v1}, $superclass->setTypeface($TYPEFACE_CLASS)V".toInstruction())
+        addInstruction("return-void".toInstruction())
+    }.methodImplementation
+    methods.add(
+        MutableMethod(
+            ImmutableMethod(
+                type, "setTypeface", listOf(ImmutableMethodParameter(TYPEFACE_CLASS, null, null)),
+                "V", AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation,
+            ),
+        ),
+    )
+}
+
+/** A `Paint.setTypeface` call, where spans and custom-drawn text set their font. */
+internal fun Instruction.isPaintTypefaceCall() =
+    (opcode == Opcode.INVOKE_VIRTUAL || opcode == Opcode.INVOKE_VIRTUAL_RANGE) &&
+        getReference<MethodReference>()?.let { reference ->
+            reference.name == "setTypeface" &&
+                reference.definingClass in PAINT_CLASSES &&
+                reference.parameterTypes.map(CharSequence::toString) == listOf(TYPEFACE_CLASS)
+        } == true
+
+private val PAINT_CLASSES = setOf("Landroid/graphics/Paint;", "Landroid/text/TextPaint;")
+
+/** Passes the typeface of every `Paint.setTypeface` call the method makes through the custom font. */
+internal fun MutableMethod.hookPaintTypefaceCalls() {
+    // Last index first, so earlier indices stay valid while instructions are inserted.
+    instructions
+        .filter { it.isPaintTypefaceCall() }
+        .map { it.location.index }
+        .sortedDescending()
+        .forEach { callIndex ->
+            // The paint is the first register of the call, the typeface the second.
+            val register = getInstruction(callIndex).registersUsed[1]
+            addInstructions(
+                callIndex,
+                """
+                invoke-static/range {v$register .. v$register}, $ASSIGN_CUSTOM_FONT
+                move-result-object v$register
+                """.trimIndent(),
+            )
+        }
+}
+
+internal val FONT_EXTENSION_PACKAGE = CUSTOM_FONT_DESCRIPTOR.removeSuffix("CustomFont;")
+
+/** A platform class, the piko subclass that replaces it, and the constructors that subclass has. */
+internal typealias Replacements = Map<String, Pair<String, Set<List<String>>>>
+
+/** Platform spans that set their font inside the framework while drawing. */
+internal val PLATFORM_TYPEFACE_SPANS: Replacements =
+    mapOf(
+        "Landroid/text/style/TypefaceSpan;" to
+            ("${FONT_EXTENSION_PACKAGE}CustomFontTypefaceSpan;" to
+                setOf(listOf("Ljava/lang/String;"), listOf(TYPEFACE_CLASS))),
+        "Landroid/text/style/TextAppearanceSpan;" to
+            ("${FONT_EXTENSION_PACKAGE}CustomFontTextAppearanceSpan;" to
+                setOf(
+                    listOf("Landroid/content/Context;", "I"),
+                    listOf("Landroid/content/Context;", "I", "I"),
+                    listOf(
+                        "Ljava/lang/String;", "I", "I",
+                        "Landroid/content/res/ColorStateList;", "Landroid/content/res/ColorStateList;",
+                    ),
+                )),
+    )
+
+/** The platform text widgets piko's own code creates. */
+internal val PIKO_TEXT_WIDGETS: Replacements =
+    listOf("TextView", "Button", "CheckBox", "EditText").associate {
+        "Landroid/widget/$it;" to
+            ("${FONT_EXTENSION_PACKAGE}CustomFont$it;" to
+                setOf(
+                    listOf("Landroid/content/Context;"),
+                    listOf("Landroid/content/Context;", "Landroid/util/AttributeSet;", "I"),
+                ))
+    }
+
+/** A `new-instance` of one of the [replacements]. */
+internal fun Instruction.createsOneOf(replacements: Replacements) =
+    opcode == Opcode.NEW_INSTANCE &&
+        getReference<TypeReference>()?.type in replacements
+
+/**
+ * Creates piko's subclass wherever the method creates one of the [replacements], unless a
+ * constructor call there is one the subclass lacks.
+ */
+internal fun MutableMethod.replaceCreations(replacements: Replacements) {
+    val creations = instructions.filter { it.createsOneOf(replacements) }
+    val created = creations.map { it.registersUsed[0] }.toSet()
+    val constructions =
+        instructions.filter { instruction ->
+            (instruction.opcode == Opcode.INVOKE_DIRECT || instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
+                instruction.getReference<MethodReference>()?.let {
+                    it.name == "<init>" && it.definingClass in replacements
+                } == true &&
+                instruction.registersUsed[0] in created
+        }
+    val supported =
+        constructions.all {
+            val reference = it.getReference<MethodReference>()!!
+            reference.parameterTypes.map(CharSequence::toString) in
+                replacements.getValue(reference.definingClass).second
+        }
+    if (constructions.isEmpty() || !supported) return
+
+    // Last index first, so earlier indices stay valid while instructions are replaced.
+    (creations + constructions).sortedByDescending { it.location.index }.forEach { instruction ->
+        val index = instruction.location.index
+        val registers = instruction.registersUsed
+        if (instruction.opcode == Opcode.NEW_INSTANCE) {
+            val replacement = replacements.getValue(instruction.getReference<TypeReference>()!!.type).first
+            replaceInstruction(index, "new-instance v${registers[0]}, $replacement")
+        } else {
+            val reference = instruction.getReference<MethodReference>()!!
+            val replacement = replacements.getValue(reference.definingClass).first
+            val constructor = "$replacement-><init>(${reference.parameterTypes.joinToString("")})V"
+            replaceInstruction(
+                index,
+                if (instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) {
+                    "invoke-direct/range {v${registers.first()} .. v${registers.last()}}, $constructor"
+                } else {
+                    "invoke-direct {${registers.joinToString { "v$it" }}}, $constructor"
+                },
+            )
+        }
+    }
 }
 
 /**

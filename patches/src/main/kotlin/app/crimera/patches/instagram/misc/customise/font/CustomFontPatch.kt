@@ -15,8 +15,6 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getMutableMethod
 import com.android.tools.smali.dexlib2.iface.Method
 
-private val GET_FONT_PARAMETERS = listOf("Landroid/content/Context;", "I")
-
 @Suppress("unused")
 val customFontPatch =
     bytecodePatch(
@@ -34,57 +32,56 @@ val customFontPatch =
                 "invoke-static {}, $LOAD_CUSTOM_FONT",
             )
 
-            // The app resolves fonts through five independent paths, and text only changes
-            // consistently when all five are covered.
+            // The font is substituted where a typeface is assigned - on the app's text views, on
+            // paints and in platform spans - however it was resolved. Three resolvers are hooked as
+            // well: the repository, and Compose and React Native, which resolve fonts on their own.
 
-            // 1. The typeface repository, used by the classic views. It is handed a descriptor of
-            //    the font it is resolving, which is what tells the interface fonts apart from the
-            //    creative fonts of the story editor, notes and profile bios.
-            //
-            //    For some descriptors it resolves its own answer via path 4 (ResourcesCompat) and
-            //    caches whatever that returns, so it is marked as a resolver too: path 4 must not
-            //    substitute there, or the cache keeps the substituted value regardless of descriptor.
+            // The typeface repository. Its descriptor tells interface fonts apart from the creative
+            // fonts of the story editor, notes and bios, which are recorded and kept.
             val typefaceRepository = TypefaceRepositoryLoadFingerprint.classDef.type
-            TypefaceRepositoryLoadFingerprint.method.markAsContentFontResolver()
             TypefaceRepositoryLoadFingerprint.method.hookResolvedTypefaces()
 
-            // 2. The IGDS font helper, used by IgTextViews, Bloks mounted text, spans and paints.
-            //    It hands back the typeface it was given when the app's own font family is switched
-            //    off, so every typeface it returns is hooked.
-            IgdsFontHelperFingerprint.classDef.methods
-                .filter { it.returnsTypeface() }
-                .forEach { it.hookReturnedTypefaces() }
-
-            // 3. Compose, which resolves fonts on its own and never reaches the repository.
+            // Compose, which resolves fonts on its own and never reaches the repository.
             ComposePlatformTypefacesFingerprint.method.hookWrappedTypeface()
 
-            // 4. The font resources the app declares of its own, for whatever loads one without
-            //    going through Compose.
-            ResourcesCompatFontFingerprint.classDef.methods
-                .filter {
-                    it.returnsTypeface() &&
-                        it.parameterTypes.map(CharSequence::toString) == GET_FONT_PARAMETERS
-                }
-                .forEach { it.hookReturnedTypefaces() }
-
-            // 5. React Native's "Optimistic VF App Lite" variable font, resolved on its own and
-            //    never reaching the paths above.
+            // React Native's "Optimistic VF App Lite" variable font, resolved on its own.
             val registrationIndex = ReactNativeFontRegistrationFingerprint.stringMatches.single().index
             ReactNativeFontRegistrationFingerprint.method.hookReactNativeFontRegistration(registrationIndex)
 
-            // Fonts the user picks inside the app - story and reel stickers, note and profile bio
-            // styles - are resolved by handing the repository itself to a resolver along with the
-            // picked style. Those resolvers ask for fonts the interface uses as well, so they are
-            // marked to keep the font they asked for. Collected first and edited after, so the
-            // classes are not being rewritten while they are still being read.
+            // Collected in one pass and edited after, so classes are not rewritten while read:
+            // resolvers of fonts the user picks inside the app (they take the repository as their
+            // first parameter), the app's own text views, Paint.setTypeface calls, creations of
+            // platform spans that set their font inside the framework, and the plain text widgets
+            // piko's own code creates.
             val contentFontResolvers = mutableListOf<Method>()
+            val textViewClasses = mutableListOf<String>()
+            val paintTypefaceCallers = mutableListOf<Method>()
+            val platformSpanCreators = mutableListOf<Method>()
+            val pikoWidgetCreators = mutableListOf<Method>()
             classDefForEach { classDef ->
+                // The font classes call CustomFont and extend the widgets, so must not be hooked.
+                if (classDef.type.startsWith(FONT_EXTENSION_PACKAGE)) return@classDefForEach
+                val isPikoClass = classDef.type.startsWith(EXTENSION_PACKAGE)
+                if (classDef.superclass in PLATFORM_TEXT_WIDGETS) {
+                    textViewClasses += classDef.type
+                }
                 classDef.methods.forEach { method ->
                     if (method.returnsTypeface() &&
                         method.parameterTypes.firstOrNull() == typefaceRepository
                     ) {
                         contentFontResolvers += method
                     }
+                    var callsPaintTypeface = false
+                    var createsPlatformSpan = false
+                    var createsPikoWidget = false
+                    method.implementation?.instructions?.forEach {
+                        callsPaintTypeface = callsPaintTypeface || it.isPaintTypefaceCall()
+                        createsPlatformSpan = createsPlatformSpan || it.createsOneOf(PLATFORM_TYPEFACE_SPANS)
+                        createsPikoWidget = createsPikoWidget || (isPikoClass && it.createsOneOf(PIKO_TEXT_WIDGETS))
+                    }
+                    if (callsPaintTypeface) paintTypefaceCallers += method
+                    if (createsPlatformSpan) platformSpanCreators += method
+                    if (createsPikoWidget) pikoWidgetCreators += method
                 }
             }
             contentFontResolvers.forEach { it.getMutableMethod().markAsContentFontResolver() }
@@ -95,9 +92,25 @@ val customFontPatch =
                 .filter { it.returnsTypeface() }
                 .forEach { it.markAsContentFontResolver() }
 
+            textViewClasses.forEach { mutableClassDefBy(it).overrideTypefaceAssignment() }
+
+            // Creative text drawn by the content font resolvers themselves keeps its font.
+            val contentFontClasses =
+                contentFontResolvers.map { it.definingClass }.toSet() +
+                    LegacyStoryFontFingerprint.classDef.type
+            paintTypefaceCallers
+                .filter { it.definingClass !in contentFontClasses }
+                .forEach { it.getMutableMethod().hookPaintTypefaceCalls() }
+            platformSpanCreators
+                .filter { it.definingClass !in contentFontClasses }
+                .forEach { it.getMutableMethod().replaceCreations(PLATFORM_TYPEFACE_SPANS) }
+            pikoWidgetCreators.forEach { it.getMutableMethod().replaceCreations(PIKO_TEXT_WIDGETS) }
+
             enableSettings("customFont")
         }
     }
+
+private const val EXTENSION_PACKAGE = "Lapp/morphe/extension/"
 
 /** Abstract and native methods have no returns to hook, so they are never of interest. */
 private fun Method.returnsTypeface() = returnType == TYPEFACE_CLASS && implementation != null

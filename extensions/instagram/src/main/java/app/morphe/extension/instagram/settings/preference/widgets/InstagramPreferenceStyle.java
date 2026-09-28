@@ -36,7 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.patches.customise.font.CustomFont;
+import app.morphe.extension.instagram.patches.customise.font.CustomFontContext;
 import app.morphe.extension.instagram.settings.SettingsActivity;
 import app.morphe.extension.shared.ResourceUtils;
 
@@ -49,7 +49,6 @@ public final class InstagramPreferenceStyle {
     private static final String IGDS_SWITCH_CLASS_NAME =
             "com.instagram.igds.components.switchbutton.IgdsSwitch";
 
-    public static final int TRAILING_NONE = 0;
     public static final int TRAILING_SWITCH = 1;
     public static final int TRAILING_CHEVRON = 2;
     private static final int TRAILING_CHECK = 3;
@@ -120,7 +119,7 @@ public final class InstagramPreferenceStyle {
         int themeRes = UI.isDarkMode()
                 ? android.R.style.Theme_DeviceDefault
                 : android.R.style.Theme_DeviceDefault_Light;
-        return new android.view.ContextThemeWrapper(context, themeRes);
+        return new CustomFontContext(context, themeRes);
     }
 
     public static int backgroundColor() {
@@ -145,7 +144,7 @@ public final class InstagramPreferenceStyle {
     }
 
     public static int disabledTextColor() {
-        return UI.getThemedColour("igds_color_primary_text_disabled");
+        return UI.getThemedColour("igds_color_separator");
     }
 
     public static int selectionColor() {
@@ -167,11 +166,11 @@ public final class InstagramPreferenceStyle {
         activity.getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
-    public static LinearLayout createPreferenceView(Context context, int trailingType) {
+    public static View createPreferenceView(Context context, int trailingType) {
         return createPreferenceView(context,trailingType,null);
     }
 
-    public static LinearLayout createPreferenceView(Context context, int trailingType, String iconResName) {
+    public static View createPreferenceView(Context context, int trailingType, String iconResName) {
         PreferenceRow row = new PreferenceRow(context, trailingType);
         row.setOrientation(trailingType == TRAILING_SWITCH ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
@@ -203,7 +202,6 @@ public final class InstagramPreferenceStyle {
             title.setTextColor(primaryTextColor());
             title.setIncludeFontPadding(true);
             title.setSingleLine(false);
-            CustomFont.applyTo(title);
             LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                     0,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -225,7 +223,6 @@ public final class InstagramPreferenceStyle {
             summary.setTextColor(secondaryTextColor());
             summary.setLineSpacing(dp(context, 1), 1.0f);
             summary.setPadding(0, dp(context, 10), 0, 0);
-            CustomFont.applyTo(summary);
             row.addView(summary, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -252,7 +249,6 @@ public final class InstagramPreferenceStyle {
         title.setTextColor(primaryTextColor());
         title.setIncludeFontPadding(true);
         title.setSingleLine(false);
-        CustomFont.applyTo(title);
         textColumn.addView(title, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -264,7 +260,6 @@ public final class InstagramPreferenceStyle {
         summary.setTextColor(secondaryTextColor());
         summary.setLineSpacing(dp(context, 1), 1.0f);
         summary.setPadding(0, dp(context, 10), 0, 0);
-        CustomFont.applyTo(summary);
         textColumn.addView(summary, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -445,11 +440,6 @@ public final class InstagramPreferenceStyle {
                 && ((PreferenceRow) view).trailingType == TRAILING_CHECK) {
             ((PreferenceRow) view).setDragState(dragging, animate);
         }
-    }
-
-    /** The title of a row built by {@link #createPreferenceView}, for a row that styles its own. */
-    public static TextView findTitle(View view) {
-        return view.findViewWithTag(TAG_TITLE);
     }
 
     public static void setNativeSwitchChecked(
@@ -785,5 +775,4 @@ public final class InstagramPreferenceStyle {
             }
         }
     }
-
 }
