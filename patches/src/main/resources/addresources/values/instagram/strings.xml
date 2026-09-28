@@ -126,6 +126,8 @@
     <string name="piko_fbi_doesnt_follows_you">Does not follow you</string>
     <string name="piko_fbi_following_each_other">Following each other</string>
     <string name="piko_friendship_status">Friendship status</string>
+    <string name="piko_follow_list_non_follower_badge">Show non-followers in Following list</string>
+    <string name="piko_follow_list_non_follower_badge_desc">Adds a badge to rows in your own Following list for accounts that don\'t follow you back</string>
     <string name="piko_view_story_mentions">View story mentions</string>
     <string name="piko_vsm_title">Story mentions</string>
     <string name="piko_vsm_no_mentions">No mentions on this story</string>
