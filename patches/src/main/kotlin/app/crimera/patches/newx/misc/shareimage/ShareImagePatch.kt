@@ -92,15 +92,6 @@ val newXShareImagePatch =
                     "NewX individual post renderer",
                     Fingerprint(
                         returnType = "V",
-                        parameters =
-                            listOf(
-                                timelinePostStateType,
-                                "L",
-                                "L",
-                                "L",
-                                COMPOSER,
-                                "I",
-                            ),
                         filters =
                             listOf(
                                 methodCall(
@@ -115,6 +106,23 @@ val newXShareImagePatch =
                                     returnType = MODIFIER,
                                 ),
                             ),
+                        custom = { method, _ ->
+                            // The renderer takes the timeline-post state first, ends with the
+                            // Composer changed-flag int, and keeps every other parameter an
+                            // object. Auxiliary object parameters (12.30 added a Function0
+                            // ahead of the modifier) must not break the match, but primitive
+                            // parameters do select a different video-tab renderer.
+                            val parameters = method.parameterTypes.map(CharSequence::toString)
+                            parameters.firstOrNull() == timelinePostStateType &&
+                                COMPOSER in parameters &&
+                                parameters.lastOrNull() == "I" &&
+                                parameters
+                                    .drop(1)
+                                    .dropLast(2)
+                                    .all { parameter ->
+                                        parameter.startsWith("L") || parameter.startsWith("[")
+                                    }
+                        },
                     ).scopedMatchAll(),
                 )
             val pointerCallMatch = renderedPostMethod.instructionMatches[0]
