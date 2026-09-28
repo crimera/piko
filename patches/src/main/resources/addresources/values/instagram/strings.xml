@@ -290,6 +290,9 @@
     <string name="piko_change_like_animation">Change like animation</string>
     <string name="piko_change_like_animation_desc">Change the animation to one from existing Rings like animations</string>
     <string name="piko_available_like_animation">Available like animations</string>
+    <string name="piko_like_animation_random">Random</string>
+    <string name="piko_like_animation_preview">Animation preview</string>
+    <string name="piko_like_animation_preview_unavailable">Preview unavailable</string>
 
     <!-- For arrays -->
     <string name="piko_array_default">Default</string>

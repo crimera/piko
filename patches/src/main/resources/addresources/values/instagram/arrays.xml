@@ -49,6 +49,7 @@
     </string-array>
     <string-array name="piko_array_change_like_animation">
         <item>@string/piko_array_default</item>
+        <item>@string/piko_like_animation_random</item>
         <item>Anyway like activation</item>
         <item>Adrain</item>
         <item>Aki kochi</item>
@@ -78,6 +79,7 @@
 
     <string-array name="piko_array_change_like_animation_val">
         <item>ARES_LIKE_ACTIVATION</item>
+        <item>RANDOM</item>
         <item>ANYWAY_LIKE_ACTIVATION</item>
         <item>RINGS_LIKE_ADRIAN</item>
         <item>RINGS_LIKE_AKI_KOCHI</item>
