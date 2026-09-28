@@ -56,7 +56,7 @@ private object NewXPostDividerRendererFingerprint : Fingerprint(
         classDef.type.startsWith(ANDROID_SCOPE) &&
             !packageRelativeName.contains('/') &&
             classDef.methods.any(Method::isPostDividerWrapperConstructor) &&
-            method.instructions.count(Instruction::isPostDividerCall) == 2
+            method.instructions.count(Instruction::isPostDividerCall) in 1..2
     },
 )
 
@@ -95,15 +95,19 @@ private data class ReplyFacepileDrawCall(
     val resultRegister: Int,
 )
 
+/**
+ * The divider wrapper captures (modifier, boolean, post model, layout data) and, before 12.30, a
+ * trailing changed-flag int. R8 dropped the trailing int on 12.30, so accept either arity.
+ */
 private fun Method.isPostDividerWrapperConstructor(): Boolean =
     name == "<init>" &&
         parameterTypes.map(CharSequence::toString).let { parameters ->
-            parameters.size == 5 &&
+            (parameters.size == 4 || parameters.size == 5) &&
                 parameters[0] == MODIFIER_DESCRIPTOR &&
                 parameters[1] == "Z" &&
                 parameters[2].isObjectDescriptor() &&
                 parameters[3].isObjectDescriptor() &&
-                parameters[4] == INSETS_DESCRIPTOR
+                (parameters.size == 4 || parameters[4] == INSETS_DESCRIPTOR)
         }
 
 private fun Instruction.isPostDividerCall(): Boolean {
@@ -528,9 +532,9 @@ val newXHidePostDividersPatch =
                 )
             val originalMethod = renderer.method
             val originalCalls = resolvePostDividerCalls(originalMethod)
-            if (originalCalls.size != 2) {
+            if (originalCalls.size !in 1..2) {
                 throw PatchException(
-                    "Expected two NewX post divider calls, found ${originalCalls.size}: " +
+                    "Expected one or two NewX post divider calls, found ${originalCalls.size}: " +
                         "${originalMethod}",
                 )
             }
