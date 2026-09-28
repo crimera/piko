@@ -23,7 +23,7 @@ if [[ ! -f "$MPP" ]]; then
 fi
 
 DEFAULT_APK="./apks/439.0.0.37.89.apk"
-OUTPUT_APK="$HOME/Downloads/piko-instagram-439-download-button.apk"
+OUTPUT_APK="${OUTPUT_APK:-$HOME/Downloads/piko-instagram-439-download-button.apk}"
 APK="$DEFAULT_APK"
 FLAGS=()
 for arg in "$@"; do
