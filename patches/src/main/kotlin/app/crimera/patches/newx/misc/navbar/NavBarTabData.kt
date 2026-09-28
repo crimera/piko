@@ -408,6 +408,23 @@ internal fun Method.hasStackNavigationCall(): Boolean {
     }
 }
 
+/**
+ * The item content lambda captures (selected, navigation, tab data). R8 erases the captured types
+ * to Object and appends a merge discriminator when it folds several same-shaped lambdas into one
+ * shared synthetic class, so accept both the dedicated and the merged constructor shapes.
+ * Constructor parameter positions, not named types, are what the content field resolves from;
+ * the resolved renderer call is what proves the class identity.
+ */
+private fun Method.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean {
+    if (returnType.toString() != "V") return false
+    val parameters = parameterTypes.map(CharSequence::toString)
+    if (parameters == listOf("Z", tabData.navigationType, tabData.tabDataValueType)) return true
+    return parameters == MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS
+}
+
+private val MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS =
+    listOf("Z", "Ljava/lang/Object;", "Ljava/lang/Object;", "I")
+
 context(context: BytecodePatchContext)
 internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemContentTarget {
     // Single traversal collects both the item renderer and the content class: the two
@@ -436,17 +453,7 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
                     )
             }
         }
-        val constructors =
-            classDef.methods.filter { method ->
-                method.returnType.toString() == "V" &&
-                    method.parameterTypes.map(CharSequence::toString) ==
-                    listOf("Z", tabData.navigationType, tabData.tabDataValueType)
-            }
-        if (constructors.isNotEmpty()) {
-            requireExactlyOne(
-                "NewX navigation bar item content constructor in ${classDef.type}",
-                constructors,
-            ) { it.toString() }
+        if (classDef.methods.any { method -> method.isNavBarItemContentConstructor(tabData) }) {
             contentClasses += classDef.type.toString()
         }
     }
@@ -454,20 +461,27 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
         requireExactlyOne("NewX navigation bar item renderer", rendererCandidates) { it.toString() }
     val rendererDescriptor = renderer.toSmaliDescriptor()
 
-    // The item content lambda captures (selected, tab, badge); R8 erases its field types, so the
-    // constructor is the stable identity.
+    // The merged constructor shape is shared by unrelated lambdas, so the constructor alone is
+    // no longer unique. Keep only shape candidates that actually invoke the resolved renderer;
+    // the caller scan is scoped to those candidates rather than the whole dex.
+    val consumerClasses =
+        contentClasses.filter { classType ->
+            context.classDefByOrNull(classType)?.methods?.any { method ->
+                method.implementation != null &&
+                    method.instructions.any { instruction ->
+                        instruction.referencesMethod(rendererDescriptor)
+                    }
+            } == true
+        }
     // This is a read-only discovery pass. Converting every class to a mutable proxy here keeps
     // the whole APK alive and can exceed the manager's 512 MB minimum heap on large NewX builds.
-    val consumerClass = requireExactlyOne("NewX navigation bar item content class", contentClasses)
+    val consumerClass =
+        requireExactlyOne("NewX navigation bar item content class", consumerClasses)
     val consumerClassDef = context.mutableClassDefBy(consumerClass)
     val contentConstructor =
         requireExactlyOne(
             "NewX navigation bar item content constructor in $consumerClass",
-            consumerClassDef.methods.filter { method ->
-                method.returnType.toString() == "V" &&
-                    method.parameterTypes.map(CharSequence::toString) ==
-                    listOf("Z", tabData.navigationType, tabData.tabDataValueType)
-            },
+            consumerClassDef.methods.filter { method -> method.isNavBarItemContentConstructor(tabData) },
         ) { it.toString() }
 
     val tabParameterRegister = contentConstructor.p0Register + 2
