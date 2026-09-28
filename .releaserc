@@ -26,7 +26,7 @@
                     { "type": "fix", "section": "🐛 Bug Fixes", "hidden": false },
                     { "type": "feat", "section": "✨ New Features", "hidden": false },
                     { "type": "bump", "section": "🚀 Updated App Support", "hidden": false },
-                    { "type": "perf", "section": "🔧 Improvements",  "hidden": false },
+                    { "type": "improve", "section": "🔧 Improvements",  "hidden": false },
                     { "type": "build", "hidden": true }
                 ]
             }
