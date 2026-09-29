@@ -150,13 +150,13 @@ public class ProfileMoreOption {
             Context context = viewGroup.getContext();
             InstagramButton button = new InstagramButton(context);
             button.setText(str("piko_more_profile_options"));
-            button.setStyle(InstagramButtonStyleEnum.PRIMARY);
+            button.setStyle(InstagramButtonStyleEnum.SECONDARY);
             button.setOnClickListener(() ->
                     moreOptionsDailogueBox(context, userData)
             );
 
             int marginPx = Dim.dp12;
-            button.setMargins(marginPx, marginPx, marginPx, marginPx);
+            button.setMargins(marginPx, Dim.dp6, marginPx, Dim.dp8);
 
             IgdsButton igdsButton = button.getIgdsButton();
             viewGroup.addView(igdsButton);
