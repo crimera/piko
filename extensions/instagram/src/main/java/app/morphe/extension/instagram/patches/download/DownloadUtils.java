@@ -21,6 +21,8 @@ import android.widget.LinearLayout;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -364,6 +366,13 @@ public class DownloadUtils {
             "row_feed_view_group_buttons",
     };
     private static final Set<String> feedDownloadButtonLogs = new HashSet<>();
+    private static int parentRowFeedButtonSaveId;
+
+    /** Shared by the patch-time Litho component gate and the runtime view holder hook. */
+    public static boolean isFeedDownloadButtonEnabled() {
+        return Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD))
+                && Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON));
+    }
 
     /**
      * Adds a download button immediately beside the save/bookmark button of a feed post row.
@@ -371,36 +380,65 @@ public class DownloadUtils {
      */
     public static void addFeedDownloadButton(View rootView, Object mediaObject, UserSession userSession) {
         try {
-            if (rootView == null || mediaObject == null) return;
+            Object media = extractMedia(mediaObject);
+            attachFeedDownloadButton(rootView, media == null ? mediaObject : media, userSession);
+        } catch (Exception e) {
+            Logger.printException(() -> "addFeedDownloadButton failure", e);
+        }
+    }
+
+    /**
+     * @return true once the row's save button (and therefore the download button decision) was
+     * resolved, including when the toggle is off; false while the row is still mounting.
+     */
+    private static boolean attachFeedDownloadButton(
+            View rootView, Object mediaObject, UserSession userSession) {
+        try {
+            if (rootView == null || mediaObject == null) return false;
             Context context = rootView.getContext();
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            String caller = "?";
+            for (StackTraceElement element : stack) {
+                String name = element.getClassName();
+                if (name.startsWith("X.") && !name.contains("DownloadUtils")) {
+                    caller = name + "." + element.getMethodName();
+                    break;
+                }
+            }
             logFeedDownloadButton(
                     context,
-                    "hook fired on " + context.getClass().getName() + " row=" + rootView.getClass().getName());
+                    "hook fired via " + caller + " ctx=" + context.getClass().getName()
+                            + " row=" + rootView.getClass().getName()
+                            + " media=" + mediaObject.getClass().getName());
             // The patch is opt-in, so read the download toggles directly instead of the
             // settings-status-gated Pref helper.
-            if (!SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
-                    || !SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON)) {
+            if (!isFeedDownloadButtonEnabled()) {
                 logFeedDownloadButton(context, "disabled by settings");
                 removeFeedDownloadButton(rootView);
-                return;
+                return true;
             }
 
             int saveButtonId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
             if (saveButtonId == 0) {
                 logFeedDownloadButton(context, "row_feed_button_save id unresolved");
-                return;
+                return false;
             }
 
-            View saveButton = rootView.findViewById(saveButtonId);
+            View saveButton = findSaveButton(rootView, saveButtonId);
             if (saveButton == null) {
-                logFeedDownloadButton(context, "save button missing in row");
-                return;
+                logFeedDownloadButton(
+                        context,
+                        "save button missing in row row=" + rootView.getClass().getName()
+                                + " id=" + saveButtonId
+                                + " children=" + countViews(rootView, 0)
+                                + " ids=" + collectViewIds(rootView));
+                return false;
             }
 
             ViewGroup buttonGroup = resolveFeedButtonGroup(rootView, saveButton);
             if (buttonGroup == null) {
                 logFeedDownloadButton(context, "no UFI button group");
-                return;
+                return false;
             }
 
             ImageView button = buttonGroup.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
@@ -408,11 +446,128 @@ public class DownloadUtils {
                 button = createFeedDownloadButton(context, saveButton, buttonGroup);
                 logFeedDownloadButton(context, "attached");
             }
-            if (button == null) return;
+            if (button == null) return false;
 
             button.setOnClickListener(v -> downloadPost(context, userSession, mediaObject, 0));
+            return true;
         } catch (Exception e) {
             Logger.printException(() -> "addFeedDownloadButton failure", e);
+            return true;
+        }
+    }
+
+    static Object extractMedia(Object mediaObject) {
+        if (mediaObject == null) return null;
+        if ("com.instagram.feed.media.Media".equals(mediaObject.getClass().getName())) return mediaObject;
+        try {
+            for (Method method : mediaObject.getClass().getDeclaredMethods()) {
+                if (method.getParameterCount() != 0) continue;
+                if (!"com.instagram.feed.media.Media".equals(method.getReturnType().getName())) continue;
+                method.setAccessible(true);
+                Object result = method.invoke(mediaObject);
+                if (result != null) return result;
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            Object found = null;
+            for (Field field : mediaObject.getClass().getDeclaredFields()) {
+                if (!"com.instagram.feed.media.Media".equals(field.getType().getName())) continue;
+                field.setAccessible(true);
+                Object value = field.get(mediaObject);
+                if (value == null) continue;
+                if (found != null) return mediaObject;
+                found = value;
+            }
+            if (found != null) return found;
+        } catch (Exception ignored) {
+        }
+        return mediaObject;
+    }
+
+    /** Counts the views in a subtree (capped): 0 means an unmounted/detached container. */
+    private static int countViews(View view, int depth) {
+        if (view == null || depth > 8) return 0;
+        if (!(view instanceof ViewGroup)) return 1;
+        ViewGroup group = (ViewGroup) view;
+        int total = 1;
+        int children = group.getChildCount();
+        for (int i = 0; i < children && total < 500; i++) {
+            total += countViews(group.getChildAt(i), depth + 1);
+        }
+        return total;
+    }
+
+    /** Lists `package:id/name` entries in a subtree (capped): shows what IS mounted. */
+    private static String collectViewIds(View view) {
+        StringBuilder ids = new StringBuilder();
+        collectViewIdsInto(view, 0, ids);
+        return ids.toString();
+    }
+
+    private static void collectViewIdsInto(View view, int depth, StringBuilder ids) {
+        if (view == null || depth > 6 || ids.length() > 600) return;
+        try {
+            int id = view.getId();
+            if (id != View.NO_ID) {
+                if (ids.length() > 0) ids.append(',');
+                try {
+                    ids.append(view.getResources().getResourceName(id));
+                } catch (Exception ignored) {
+                    ids.append("#").append(Integer.toHexString(id));
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        if (!(view instanceof ViewGroup)) return;
+        ViewGroup group = (ViewGroup) view;
+        for (int i = 0; i < group.getChildCount() && ids.length() <= 600; i++) {
+            collectViewIdsInto(group.getChildAt(i), depth + 1, ids);
+        }
+    }
+
+    /**
+     * Finds the row's save button. Contextual (Litho) rows mount the UFI component as a child of
+     * the row container while the bind callback receives a leaf component view (media, header,
+     * footer) as its root. Search the root's subtree first, then walk up a bounded number of
+     * ancestors and take the first ancestor that contains exactly one save button; an ancestor
+     * with several belongs to the list, not to one row. When the UFI component subtree is known
+     * from the Litho props, ids are re-verified against the APK's resource ids, because cached
+     * ids from a different resource package silently miss.
+     */
+    private static View findSaveButton(View rootView, int saveButtonId) {
+        int verifiedSaveButtonId = verifyViewId(rootView.getContext(), saveButtonId);
+        return findDescendantBySaveId(rootView, verifiedSaveButtonId, saveButtonId);
+    }
+
+    private static View findDescendantBySaveId(View rootView, int verifiedSaveButtonId, int saveButtonId) {
+        if (verifiedSaveButtonId != 0) {
+            try {
+                View found = rootView.findViewById(verifiedSaveButtonId);
+                if (found != null) return found;
+            } catch (Exception ignored) {
+            }
+        }
+        if (saveButtonId != 0 && saveButtonId != verifiedSaveButtonId) {
+            try {
+                return rootView.findViewById(saveButtonId);
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Re-reads `row_feed_button_save` against the current resources. Instagram's release id
+     * mapping cannot be assumed stable across installs, so a stale cached id is refreshed
+     * instead of silently returning a missing save button.
+     */
+    private static int verifyViewId(Context context, int saveButtonId) {
+        try {
+            parentRowFeedButtonSaveId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
+            return parentRowFeedButtonSaveId;
+        } catch (Exception ignored) {
+            return saveButtonId;
         }
     }
 
@@ -428,11 +583,17 @@ public class DownloadUtils {
      * Resolves the horizontal button row that hosts the save button. The save button's parent is the
      * only correct insert target: `row_feed_view_group_buttons` is an outer frame around the whole
      * UFI area on current releases, while `row_feed_view_group_social_ufi_buttons` is the row itself.
-     * The id lookups remain as a fallback for layouts where the parent is not a plain ViewGroup.
+     * Litho component hosts reject manual child views; their download button is injected into the
+     * component builder at patch time instead. The id lookups remain as a fallback for layouts
+     * where the parent is not a plain ViewGroup.
      */
     private static ViewGroup resolveFeedButtonGroup(View rootView, View saveButton) {
         ViewParent parent = saveButton.getParent();
-        if (parent instanceof ViewGroup) return (ViewGroup) parent;
+        if (parent instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) parent;
+            if (group.getClass().getName().startsWith("com.facebook.litho.")) return null;
+            return group;
+        }
 
         for (String idName : FEED_BUTTON_GROUP_IDS) {
             int buttonGroupId = ResourceUtils.getIdentifier(rootView.getContext(), ResourceType.ID, idName);
@@ -505,7 +666,11 @@ public class DownloadUtils {
         if (!feedDownloadButtonLogs.add(message)) return;
         Logger.printInfo(() -> "feed download button: " + message);
         try {
-            File file = new File(context.getCacheDir(), "piko-feed-download.log");
+            // External cache first: on devices without root it can be pulled with
+            // `adb shell cat /sdcard/Android/data/com.instagram.android/cache/piko-feed-download.log`.
+            File dir = context.getExternalCacheDir();
+            if (dir == null) dir = context.getCacheDir();
+            File file = new File(dir, "piko-feed-download.log");
             if (file.length() > 64 * 1024) return;
             try (FileWriter writer = new FileWriter(file, true)) {
                 writer.append(new Date().toString()).append(' ').append(message).append('\n');
