@@ -384,6 +384,25 @@ public final class MediaThumbnailLoader {
         );
     }
 
+    /**
+     * Records why the patch-time Coil bridge stopped before producing a bitmap.
+     * Stages: 1 = request or loader missing, 2 = image-loader memory cache missing,
+     * 3 = key scan finished without a URL match. A sample key shows what the cache stores.
+     */
+    private static void logCoilLookupState(int stage, String sampleKey) {
+        NewXLogger.printInfo(() -> COIL_DIAGNOSTIC_LOG_PREFIX +
+                "state=" + coilStateName(stage) + " sampleKey=" + describeUrl(sampleKey));
+    }
+
+    private static String coilStateName(int stage) {
+        switch (stage) {
+            case 1: return "request-or-loader-missing";
+            case 2: return "memory-cache-missing";
+            case 3: return "no-key-match";
+            default: return "stage-" + stage;
+        }
+    }
+
     /** Receives counters from the patch-time Glide bridge for cache-path diagnostics. */
     private static void logGlideLookupDiagnostics(
             String cacheUrl,
@@ -402,6 +421,27 @@ public final class MediaThumbnailLoader {
                         " resources=" + resourceCount +
                         " bitmaps=" + bitmapCount
         );
+    }
+
+    /**
+     * Records why the patch-time Glide bridge stopped before producing a bitmap.
+     * Stages: 1 = request or engine missing, 2 = engine memory cache missing,
+     * 3 = active-resources cache missing, 4 = key scan finished without a URL match.
+     * A sample key shows what the cache stores.
+     */
+    private static void logGlideLookupState(int stage, String sampleKey) {
+        NewXLogger.printInfo(() -> GLIDE_DIAGNOSTIC_LOG_PREFIX +
+                "state=" + glideStateName(stage) + " sampleKey=" + describeUrl(sampleKey));
+    }
+
+    private static String glideStateName(int stage) {
+        switch (stage) {
+            case 1: return "request-or-engine-missing";
+            case 2: return "memory-cache-missing";
+            case 3: return "active-cache-missing";
+            case 4: return "no-key-match";
+            default: return "stage-" + stage;
+        }
     }
 
     /** Converts a cached Glide resource (normally a BitmapDrawable) into a bitmap. */

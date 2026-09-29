@@ -47,7 +47,10 @@ private const val ATOMIC_REFERENCE_DESCRIPTOR =
 private const val CACHED_THUMBNAIL_HELPER = "getCachedThumbnail"
 internal const val COIL_CACHED_THUMBNAIL_HELPER = "getCachedThumbnailCoil"
 private const val CACHED_THUMBNAIL_DIAGNOSTICS_HELPER = "logCoilLookupDiagnostics"
-private const val CACHED_THUMBNAIL_LOCAL_REGISTER_COUNT = 10
+private const val COIL_DIAGNOSTICS_STATE_DESCRIPTOR =
+    "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->logCoilLookupState" +
+        "($INTEGER_DESCRIPTOR$STRING_DESCRIPTOR)V"
+private const val CACHED_THUMBNAIL_LOCAL_REGISTER_COUNT = 12
 
 /** Finds Coil's process-wide image-loader factory without naming an obfuscated Coil class. */
 private object CoilImageLoaderProviderFingerprint : Fingerprint(
@@ -166,7 +169,10 @@ private fun patchCoilThumbnailBridge(
         // The stub body (a plain return) stays behind the block as dead code, as before.
         val noneLabel = "piko_newx_cached_thumbnail_none"
         val loopLabel = "piko_newx_cached_thumbnail_loop"
+        val sampleLabel = "piko_newx_cached_thumbnail_sample"
         (5..9).forEach { register -> constInt(register, 0) }
+        constInt(10, 1)
+        constInt(11, 0)
         ifEqz(helper.p0Register, Target.Local(noneLabel))
         ifEqz(messageRegister, Target.Local(noneLabel))
         checkCast(helper.p0Register, "Landroid/content/Context;")
@@ -175,6 +181,7 @@ private fun patchCoilThumbnailBridge(
         checkCast(0, runtime.loaderOwner)
         invokeVirtual(methodReference(runtime.loader), 0)
         moveResult(0, OBJECT_DESCRIPTOR)
+        constInt(10, 2)
         ifEqz(0, Target.Local(noneLabel))
 
         iget(1, 0, fieldReference(runtime.strongCacheField))
@@ -197,6 +204,7 @@ private fun patchCoilThumbnailBridge(
         (6..9).forEach { register -> constInt(register, 0) }
         invokeInterface(methodReference("Ljava/util/Set;->iterator()Ljava/util/Iterator;"), 2)
         moveResult(1, OBJECT_DESCRIPTOR)
+        constInt(10, 3)
 
         label(loopLabel)
         invokeInterface(methodReference("Ljava/util/Iterator;->hasNext()Z"), 1)
@@ -206,6 +214,9 @@ private fun patchCoilThumbnailBridge(
         moveResult(2, OBJECT_DESCRIPTOR)
         checkCast(2, runtime.keyDescriptor)
         iget(3, 2, fieldReference(runtime.keyStringField))
+        ifNez(11, Target.Local(sampleLabel))
+        move(11, 3, STRING_DESCRIPTOR)
+        label(sampleLabel)
         invokeVirtual(methodReference("Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z"), 3, messageRegister)
         moveResult(3, "Z")
         ifEqz(3, Target.Local(loopLabel))
@@ -226,6 +237,7 @@ private fun patchCoilThumbnailBridge(
         returnObject(2)
 
         label(noneLabel)
+        invokeStatic(methodReference(COIL_DIAGNOSTICS_STATE_DESCRIPTOR), 10, 11)
         move(4, messageRegister, OBJECT_DESCRIPTOR)
         invokeStatic(diagnosticsReference, 4, 5, 6, 7, 8, 9)
         constInt(0, 0)

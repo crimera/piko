@@ -76,6 +76,9 @@ private const val GLIDE_DIAGNOSTICS_DESCRIPTOR =
     "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$GLIDE_DIAGNOSTICS_HELPER" +
         "($STRING_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR" +
         "$INTEGER_DESCRIPTOR$INTEGER_DESCRIPTOR)V"
+private const val GLIDE_DIAGNOSTICS_STATE_DESCRIPTOR =
+    "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->logGlideLookupState" +
+        "($INTEGER_DESCRIPTOR$STRING_DESCRIPTOR)V"
 private const val GLIDE_BITMAP_CONVERTER_DESCRIPTOR =
     "$MEDIA_THUMBNAIL_LOADER_DESCRIPTOR->$BITMAP_CONVERTER_HELPER" +
         "($OBJECT_DESCRIPTOR)$BITMAP_DESCRIPTOR"
@@ -86,6 +89,8 @@ private const val NO_CACHE_LABEL = "piko_newx_glide_cached_thumbnail_none"
 private const val ACTIVE_START_LABEL = "piko_newx_glide_cached_thumbnail_active_start"
 private const val MEMORY_LOOP_LABEL = "piko_newx_glide_cached_thumbnail_memory_loop"
 private const val ACTIVE_LOOP_LABEL = "piko_newx_glide_cached_thumbnail_active_loop"
+private const val MEMORY_SAMPLE_LABEL = "piko_newx_glide_cached_thumbnail_memory_sample"
+private const val ACTIVE_SAMPLE_LABEL = "piko_newx_glide_cached_thumbnail_active_sample"
 
 /** Resolves Glide's process-wide singleton factory from the stable library ABI. */
 private object GlideProviderFingerprint : Fingerprint(
@@ -225,6 +230,8 @@ private fun Block.glideThumbnailLookup(
     // The only runtime-resolved call target of the block; both lookup paths use it.
     val resourceGet = methodReference("${runtime.resourceInterfaceDescriptor}->get()$OBJECT_DESCRIPTOR")
 
+    constInt(2, 1)
+    constInt(3, 0)
     constInt(5, 0)
     constInt(6, 0)
     constInt(7, 0)
@@ -239,8 +246,10 @@ private fun Block.glideThumbnailLookup(
     iget(0, 0, fieldReference(runtime.engineField))
     ifEqz(0, Target.Local(NO_CACHE_LABEL))
 
+    constInt(2, 2)
     iget(10, 0, fieldReference(runtime.memoryCacheField))
     ifEqz(10, Target.Local(ACTIVE_START_LABEL))
+    constInt(2, 2)
     iget(10, 10, fieldReference(runtime.memoryMapField))
     ifEqz(10, Target.Local(ACTIVE_START_LABEL))
     newInstance(11, LINKED_HASH_MAP_DESCRIPTOR)
@@ -263,6 +272,9 @@ private fun Block.glideThumbnailLookup(
     iget(13, 12, fieldReference(runtime.keyModelField))
     invokeStatic(methodReference(STRING_VALUE_OF_DESCRIPTOR), 13)
     moveResult(13, STRING_DESCRIPTOR)
+    ifNez(3, Target.Local(MEMORY_SAMPLE_LABEL))
+    move(3, 13, STRING_DESCRIPTOR)
+    label(MEMORY_SAMPLE_LABEL)
     invokeVirtual(methodReference(STRING_CONTAINS_DESCRIPTOR), 13, urlRegister)
     moveResult(13, BOOLEAN_DESCRIPTOR)
     ifEqz(13, Target.Local(MEMORY_LOOP_LABEL))
@@ -287,10 +299,13 @@ private fun Block.glideThumbnailLookup(
     returnObject(13)
 
     label(ACTIVE_START_LABEL)
+    constInt(2, 3)
     iget(10, 0, fieldReference(runtime.activeResourcesField))
     ifEqz(10, Target.Local(NO_CACHE_LABEL))
+    constInt(2, 3)
     iget(10, 10, fieldReference(runtime.activeMapField))
     ifEqz(10, Target.Local(NO_CACHE_LABEL))
+    constInt(2, 4)
     newInstance(11, HASH_MAP_DESCRIPTOR)
     checkCast(10, MAP_DESCRIPTOR)
     invokeDirect(methodReference(HASH_MAP_CONSTRUCTOR_DESCRIPTOR), 11, 10)
@@ -311,6 +326,9 @@ private fun Block.glideThumbnailLookup(
     iget(13, 12, fieldReference(runtime.keyModelField))
     invokeStatic(methodReference(STRING_VALUE_OF_DESCRIPTOR), 13)
     moveResult(13, STRING_DESCRIPTOR)
+    ifNez(3, Target.Local(ACTIVE_SAMPLE_LABEL))
+    move(3, 13, STRING_DESCRIPTOR)
+    label(ACTIVE_SAMPLE_LABEL)
     invokeVirtual(methodReference(STRING_CONTAINS_DESCRIPTOR), 13, urlRegister)
     moveResult(13, BOOLEAN_DESCRIPTOR)
     ifEqz(13, Target.Local(ACTIVE_LOOP_LABEL))
@@ -337,6 +355,7 @@ private fun Block.glideThumbnailLookup(
 
     label(NO_CACHE_LABEL)
     move(4, urlRegister, OBJECT_DESCRIPTOR)
+    invokeStatic(methodReference(GLIDE_DIAGNOSTICS_STATE_DESCRIPTOR), 2, 3)
     invokeStatic(methodReference(GLIDE_DIAGNOSTICS_DESCRIPTOR), 4, 5, 6, 7, 8, 9)
     invokeStatic(methodReference(COIL_CACHED_THUMBNAIL_DESCRIPTOR), contextRegister, urlRegister)
     moveResult(0, OBJECT_DESCRIPTOR)
