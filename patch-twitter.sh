@@ -74,6 +74,7 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar ../piko/morphe-desktop-1.11.0-all.jar pa
   -e "NewX: Custom font" \
   -e "NewX: Custom sharing domain" \
   -e "NewX: Inline download button" \
+  -e "NewX: Redirect downloads to chosen folder" \
   -e "NewX: Theme" \
   -e "NewX: Set default reply sorting" \
   -e "NewX: Server error logging" \

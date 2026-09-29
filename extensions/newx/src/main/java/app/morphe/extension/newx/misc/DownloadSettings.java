@@ -17,6 +17,7 @@ final class DownloadSettings {
     static final String VIDEOS_DISPLAY_PATH = "newx.content.inline_download.videos_display_path";
     static final String FILENAME_TEMPLATE = "newx.content.inline_download.filename_template";
     static final String CONFLICT_POLICY = "newx.content.inline_download_conflict";
+    static final String REDIRECT_NATIVE_DOWNLOADS = "newx.content.inline_download.redirect_native";
 
     static final String CONFLICT_OVERWRITE = "overwrite";
     static final String CONFLICT_RENAME = "rename";
@@ -62,6 +63,11 @@ final class DownloadSettings {
     static String conflictPolicy() {
         ensureLoaded();
         return SettingsRegistry.getStringOrDefault(CONFLICT_POLICY, CONFLICT_SKIP);
+    }
+
+    static boolean redirectNativeDownloads() {
+        ensureLoaded();
+        return SettingsRegistry.getBooleanOrDefault(REDIRECT_NATIVE_DOWNLOADS, true);
     }
 
     static void setString(String settingId, String value) {
