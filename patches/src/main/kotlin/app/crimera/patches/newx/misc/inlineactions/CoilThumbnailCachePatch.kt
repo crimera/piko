@@ -120,6 +120,7 @@ private data class CoilThumbnailRuntime(
     val cacheKeys: String?,
     val cacheKeysInterface: Boolean,
     val strongWrapperField: String?,
+    val strongWrapperDescriptor: String?,
     val strongMapField: String?,
     val memoryLookup: String,
     val strongCacheField: String,
@@ -198,8 +199,10 @@ private fun patchCoilThumbnailBridge(
         val strongWrapperField = runtime.strongWrapperField
         if (strongWrapperField != null) {
             // 12.30 merges splitcompat into the strong-cache class, so its no-arg Set method
-            // lists APK files instead of cache keys. Read the internal LinkedHashMapCache map.
+            // lists APK files instead of cache keys. Read the internal LinkedHashMapCache map;
+            // the wrapper cast is required because the wrapper field is dex-typed as Object.
             iget(1, 1, fieldReference(strongWrapperField))
+            checkCast(1, runtime.strongWrapperDescriptor!!)
             iget(1, 1, fieldReference(runtime.strongMapField!!))
             checkCast(1, MAP_DESCRIPTOR)
             invokeInterface(methodReference(MAP_KEY_SET_DESCRIPTOR), 1)
@@ -371,8 +374,9 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
         loader = loader.toString(),
         cacheKeys = cacheKeys?.toString(),
         cacheKeysInterface = cacheKeysInterface,
-        strongWrapperField = strongMapFields?.first,
-        strongMapField = strongMapFields?.second,
+        strongWrapperField = strongMapFields?.wrapperField,
+        strongWrapperDescriptor = strongMapFields?.wrapperDescriptor,
+        strongMapField = strongMapFields?.mapField,
         memoryLookup = memoryLookup.toString(),
         strongCacheField = strongCacheField.toString(),
         weakCacheField = weakCacheField.toString(),
@@ -400,12 +404,19 @@ private fun resolveMemoryLookup(memoryCacheClass: ClassDef): Method {
  * accessor. R8 can horizontally merge Play Core's splitcompat into Coil's strong-cache class on
  * 12.30, so that class's only no-arg Set method lists `verified-splits` APK files instead of
  * cache keys. The memory lookup still reads the real cache map, so follow its bytecode:
- * `strongField` -> wrapper field -> wrapper cast -> map field -> `Map` cast.
+ * `strongField` -> wrapper field -> wrapper cast -> map field -> `Map` cast. The wrapper cast
+ * descriptor is returned because the wrapper field is dex-typed as Object.
  */
+private data class CoilStrongMapFields(
+    val wrapperField: String,
+    val wrapperDescriptor: String,
+    val mapField: String,
+)
+
 private fun resolveCoilStrongMapFields(
     memoryLookup: Method,
     strongCacheField: String,
-): Pair<String, String>? {
+): CoilStrongMapFields? {
     val instructions = memoryLookup.implementation?.instructions?.toList() ?: return null
     for ((index, instruction) in instructions.withIndex()) {
         if (instruction.opcode != Opcode.IGET_OBJECT) continue
@@ -422,6 +433,7 @@ private fun resolveCoilStrongMapFields(
         val wrapperCast = instructions.getOrNull(index + 2) ?: continue
         if (wrapperCast.opcode != Opcode.CHECK_CAST) continue
         if ((wrapperCast as? OneRegisterInstruction)?.registerA != wrapperTarget) continue
+        val wrapperCastType = wrapperCast.getReference<TypeReference>()?.type?.toString() ?: continue
 
         val mapRead = instructions.getOrNull(index + 3) ?: continue
         if (mapRead.opcode != Opcode.IGET_OBJECT) continue
@@ -436,7 +448,11 @@ private fun resolveCoilStrongMapFields(
         val mapCastType = mapCast.getReference<TypeReference>()?.type?.toString() ?: continue
         if (mapCastType != MAP_DESCRIPTOR && mapCastType != LINKED_MAP_DESCRIPTOR) continue
 
-        return wrapperField.toString() to mapField.toString()
+        return CoilStrongMapFields(
+            wrapperField = wrapperField.toString(),
+            wrapperDescriptor = wrapperCastType,
+            mapField = mapField.toString(),
+        )
     }
     return null
 }
