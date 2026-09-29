@@ -77,8 +77,6 @@ public class FriendshipStatusIndicator {
         dlg.show();
     }
 
-    // Shared with FollowListHook, which shows the same "doesn't follow back" status per row in
-    // the account's own Following list instead of on the profile page.
     public static TextView createStatusTextView(
             Context context,
             UserFriendshipStatus userFriendshipStatus,
@@ -149,8 +147,8 @@ public class FriendshipStatusIndicator {
 
     // Split out so a recycled badge's listener can be refreshed for its new row without
     // rebuilding the whole view.
-    public static void setStatusClickListener(TextView statusTextView, UserFriendshipStatus userFriendshipStatus) {
-        statusTextView.setOnClickListener(new View.OnClickListener() {
+    public static void setStatusClickListener(View statusView, UserFriendshipStatus userFriendshipStatus) {
+        statusView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 friendshipStatusDialogBox(v.getContext(), userFriendshipStatus);
