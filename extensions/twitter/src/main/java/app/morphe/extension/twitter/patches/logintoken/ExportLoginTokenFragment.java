@@ -12,9 +12,14 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +64,7 @@ public class ExportLoginTokenFragment extends Fragment {
             try {
                 Account account = (Account) spinner.getSelectedItem();
                 String jsonString = ImportExportLoginTokenPatch.createAccountJsonText(account);
-                Utils.setClipboard(jsonString);
+                copySensitiveTextToClipboard(jsonString);
                 Utils.showToastShort(str("copied_to_clipboard"));
             } catch (Exception e) {
                 Utils.showToastLong(str("piko_pref_export_failed", str("accounts_title")));
@@ -111,6 +116,19 @@ public class ExportLoginTokenFragment extends Fragment {
             }
         }
         accountToSaveToFile = null;
+    }
+
+    /** Copies text flagged as sensitive, which hides it from the clipboard preview on Android 13+. */
+    private void copySensitiveTextToClipboard(String text) {
+        ClipboardManager clipboard =
+                (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("piko_account_token", text);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            PersistableBundle extras = new PersistableBundle();
+            extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
+            clip.getDescription().setExtras(extras);
+        }
+        clipboard.setPrimaryClip(clip);
     }
 
     /**

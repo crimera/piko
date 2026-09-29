@@ -8,6 +8,8 @@ package app.morphe.extension.twitter.patches.nativeFeatures.readerMode;
 
 import static app.morphe.extension.shared.StringRef.str;
 
+import android.text.TextUtils;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -320,9 +322,12 @@ public class ReaderModeTemplate {
 
     String tweetId = thread.getString("id");
     JSONObject author = thread.getJSONObject("author");
-    String name = author.getString("name");
-    String username = author.getString("username");
-    String profilepic = author.getString("profileImageUrl");
+    // The display name in particular is fully attacker-controlled (unlike username, Twitter
+    // doesn't restrict its characters) and lands straight in this HTML, so escape everything
+    // from the author object before it's substituted into the template.
+    String name = TextUtils.htmlEncode(author.getString("name"));
+    String username = TextUtils.htmlEncode(author.getString("username"));
+    String profilepic = TextUtils.htmlEncode(author.getString("profileImageUrl"));
     String postLink = "https://x.com/" + username + "/status/" + tweetId;
 
     long createdAt = thread.getLong("createdAt");
@@ -353,11 +358,11 @@ public class ReaderModeTemplate {
 
     // 0= img, 1 = vid
     if (type == 0) {
-      var src = media.getString("src");
+      var src = TextUtils.htmlEncode(media.getString("src"));
       mediaTag = "<img src=\"" + src + "\" alt=\"image.jpg\" /><br/>";
     } else {
-      var thumbnail = media.getString("posterUrl");
-      var videoUrl = media.getJSONArray("sources").getJSONObject(0).getString("url");
+      var thumbnail = TextUtils.htmlEncode(media.getString("posterUrl"));
+      var videoUrl = TextUtils.htmlEncode(media.getJSONArray("sources").getJSONObject(0).getString("url"));
       mediaTag = "   <video controls poster=\"{thumbnail}\"; width=\"320\">\n" +
           "     <source src=\"{videoUrl}\" type=\"video/mp4\" />\n" +
           " </video><br/>\n";
@@ -391,8 +396,8 @@ public class ReaderModeTemplate {
     if (quoted) {
       String tweetId = tweet.getString("id");
       JSONObject author = tweet.getJSONObject("author");
-      String name = author.getString("name");
-      String username = author.getString("username");
+      String name = TextUtils.htmlEncode(author.getString("name"));
+      String username = TextUtils.htmlEncode(author.getString("username"));
       html = "<div class=\"quoted-section\">\n" +
           "     <span class=\"quoted-author\">{name} (@{username})</span><br/>\n" +
           // "{text}\n" +
@@ -406,8 +411,9 @@ public class ReaderModeTemplate {
     }
 
     if (!tweet.isNull("text")) {
-
-      content = sanitizeText(tweet) + "<br/>";
+      // Tweet text is fully attacker-controlled and rendered in a WebView with JavaScript
+      // enabled and a JS-to-Java bridge (see WebAppInterface) - escape it before it becomes HTML.
+      content = TextUtils.htmlEncode(sanitizeText(tweet)) + "<br/>";
     }
 
     if (!tweet.isNull("photos")) {

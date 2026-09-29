@@ -400,6 +400,15 @@ public class DeletedMessagesActivity extends Activity {
                             Utils.showToastShort(str("piko_copied_media_link"));
                         } else {
                             android.net.Uri uri = android.net.Uri.parse(url);
+                            // The caller only checks url.startsWith("http"), which still lets a
+                            // scheme like "httpxyz" through - captured message content is from
+                            // the other party in the conversation, so validate the real scheme
+                            // before handing it to ACTION_VIEW rather than trusting the prefix.
+                            String scheme = uri.getScheme();
+                            if (scheme == null
+                                    || !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))) {
+                                return;
+                            }
                             // Reels/posts are stored as instagram.com permalinks — open them inside
                             // the Instagram app itself (setPackage) so they render natively; only fall
                             // back to a browser chooser if IG can't handle the link.

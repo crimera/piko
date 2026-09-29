@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -18,10 +19,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.findFreeRegister
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private object IgBloksFullScreenOpenFingerprint : Fingerprint(
     returnType = "V",
@@ -31,6 +36,18 @@ private object IgBloksFullScreenOpenFingerprint : Fingerprint(
             "Lcom/instagram/bloks/hosting/IgBloksScreenConfig;",
         ),
     strings = listOf("BKDataFetcher.fetch"),
+    custom = { method, _ ->
+        !AccessFlags.STATIC.isSet(method.accessFlags)
+    }
+)
+
+private object EventBuilderCommitFingerprint : Fingerprint(
+    returnType = "V",
+    parameters = emptyList(),
+    strings = listOf(
+        "EventBuilder was not acquired: BaseParameters null.",
+        "Must call ejectBaseParameters and ejectExtraParameters before release",
+    ),
     custom = { method, _ ->
         !AccessFlags.STATIC.isSet(method.accessFlags)
     }
@@ -83,5 +100,45 @@ val disableAnalyticsPatch =
                     )
                 }
             }
+
+            // Skip event dispatch when analytics are disabled.
+            // This prevents event delivery to the native logger queue.
+            EventBuilderCommitFingerprint.method.apply {
+                val serializerStringIndex = instructions.indexOfFirst {
+                    ((it as? ReferenceInstruction)?.reference as? StringReference)?.string == "Failed to serialize params"
+                }
+
+                if (serializerStringIndex == -1) {
+                    throw PatchException("EventBuilder serialization failure string not found")
+                }
+
+                val dispatchInstructionIndex = instructions.indices
+                    .filter { it > serializerStringIndex }
+                    .firstOrNull { idx ->
+                        val instruction = instructions[idx]
+                        if (instruction.opcode != Opcode.INVOKE_VIRTUAL && instruction.opcode != Opcode.INVOKE_INTERFACE) {
+                            return@firstOrNull false
+                        }
+                        val ref = (instruction as? ReferenceInstruction)?.reference as? MethodReference ?: return@firstOrNull false
+                        ref.returnType == "V" && ref.parameterTypes.size == 1 &&
+                            ref.parameterTypes.single() != "Ljava/lang/String;" &&
+                            ref.parameterTypes.single() != "Ljava/lang/Throwable;"
+                    } ?: throw PatchException("EventBuilder commit dispatch instruction not found")
+
+                val dispatchInstruction = getInstruction(dispatchInstructionIndex)
+                val freeRegister = findFreeRegister(dispatchInstructionIndex, dispatchInstruction.registersUsed)
+                val nextInstruction = getInstruction(dispatchInstructionIndex + 1)
+
+                addInstructionsWithLabels(
+                    dispatchInstructionIndex,
+                    """
+                    $PREF_CALL_DESCRIPTOR->disableAnalytics()Z
+                    move-result v$freeRegister
+                    if-nez v$freeRegister, :piko_skip_dispatch
+                    """.trimIndent(),
+                    ExternalLabel("piko_skip_dispatch", nextInstruction),
+                )
+            }
         }
     }
+
