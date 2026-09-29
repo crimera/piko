@@ -258,17 +258,17 @@ public class UI {
         dlg.show();
     }
 
-    public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
+    public static void pikoSettingsButton(ViewGroup viewGroup, int bottomMargin) throws Exception {
         boolean isFirstTime = Pref.firstTimePiko();
 
         Context context = viewGroup.getContext();
         InstagramButton button = new InstagramButton(context);
         button.setText(str("piko_title_settings"));
-        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
+        button.setStyle(InstagramButtonStyleEnum.SECONDARY);
         button.setOnClickListener(FragmentHook::startSettings);
 
         int marginPx = Dim.dp12;
-        button.setMargins(marginPx, marginPx, marginPx, marginPx);
+        button.setMargins(marginPx, Dim.dp8, marginPx, bottomMargin);
 
         viewGroup.addView(button.getIgdsButton());
         if(isFirstTime){
