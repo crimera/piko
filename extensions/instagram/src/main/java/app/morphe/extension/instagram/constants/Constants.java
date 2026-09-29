@@ -38,8 +38,10 @@ public class Constants {
     public static final String PIKO_FRAGMENT_SETTINGS = "piko_frag_settings";
     public static final String PIKO_FRAGMENT_ADS = "piko_frag_ads";
     public static final String PIKO_FRAGMENT_GHOST = "piko_frag_ghost";
+    public static final String PIKO_FRAGMENT_STORY = "piko_frag_story";
     public static final String PIKO_FRAGMENT_LINKS = "piko_frag_links";
     public static final String PIKO_FRAGMENT_DISTRACTION_FREE = "piko_frag_distraction_free";
+    public static final String PIKO_FRAGMENT_FOCUS_LOCK = "piko_frag_focus_lock";
     public static final String PIKO_FRAGMENT_MISC = "piko_frag_misc";
     public static final String PIKO_FRAGMENT_DOWNLOAD_MEDIA = "piko_frag_download_media";
     public static final String PIKO_FRAGMENT_NAV_BTNS = "piko_frag_nav_btns";
@@ -47,9 +49,9 @@ public class Constants {
     public static final String PIKO_FRAGMENT_ABOUT = "piko_frag_about";
     public static final String PIKO_FRAGMENT_ACTION_BAR = "piko_frag_action_bar";
     public static final String PIKO_FRAGMENT_DM = "piko_frag_dm";
-    public static final String PIKO_FRAGMENT_STORY = "piko_frag_story";
     public static final String PIKO_FRAGMENT_FILTER_CONTENT = "piko_frag_filter_content";
     public static final String PIKO_FRAGMENT_REC_FLAGS = "piko_frag_rec_flags";
+    public static final String PIKO_FRAGMENT_FONT = "piko_frag_font";
 
     public static void load() {
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);
