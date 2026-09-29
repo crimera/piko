@@ -7,9 +7,25 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
+import app.morphe.util.ResourceGroup
+import app.morphe.util.copyResources
 
 val addSettingsActivityPatch =
     resourcePatch(
         description = "Settings resource patch.",
     ) {
+        execute {
+            copyResources(
+                "instagram/settings",
+                ResourceGroup(
+                    "drawable",
+                    "piko_settings_shortcut_icon.xml",
+                    "piko_ghost_icon.xml",
+                ),
+                ResourceGroup(
+                    "raw",
+                    "piko_tabler_icons_license.txt",
+                ),
+            )
+        }
     }

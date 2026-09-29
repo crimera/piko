@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static app.morphe.extension.shared.StringRef.str;
 
@@ -48,6 +49,8 @@ public class Utils {
     private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
     private static final PikoSharedPrefCategory sp = new PikoSharedPrefCategory(Settings.SHARED_PREF_NAME);
     private static final PikoSharedPrefCategory defsp = new PikoSharedPrefCategory(ctx.getPackageName() + "_preferences");
+    private static final Pattern INVALID_FILENAME_CHARACTER = Pattern.compile("[\\\\/:*?\"<>|\\p{Cntrl}]");
+    private static final Pattern TRAILING_DOT_OR_SPACE = Pattern.compile("[. ]+$");
 
     private static void startActivity(Class cls) {
         Intent intent = new Intent(ctx, cls);
@@ -238,6 +241,12 @@ public class Utils {
         return publicFolder + "/" + subFolder + "/" + filename;
     }
 
+    private static String sanitizeFilename(String filename) {
+        return TRAILING_DOT_OR_SPACE.matcher(
+                INVALID_FILENAME_CHARACTER.matcher(filename).replaceAll("_")
+        ).replaceAll("");
+    }
+
     private static void postDownload(String filename, File tempFile, File file, Intent intent, long downloadId,
             BroadcastReceiver broadcastReceiver, String url, String mediaName, String ext) {
         long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
@@ -276,7 +285,7 @@ public class Utils {
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public static void downloadFile(String url, String mediaName, String ext) {
-        String filename = mediaName + "." + ext;
+        String filename = sanitizeFilename(mediaName + "." + ext);
         boolean isPhoto = ext.equals("jpg");
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));

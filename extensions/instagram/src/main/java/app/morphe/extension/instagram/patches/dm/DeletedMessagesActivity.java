@@ -107,7 +107,6 @@ public class DeletedMessagesActivity extends Activity {
             return false;
         }
     }
-
     private static String mediaLabel(String type) {
         if (type == null) return "[" + str("piko_media_unknown") + "]";
         String label;
@@ -466,6 +465,11 @@ public class DeletedMessagesActivity extends Activity {
                                 Utils.showToastShort(str("piko_copied_media_link"));
                             } else {
                                 Uri uri = Uri.parse(url);
+                                String scheme = uri.getScheme();
+                                if (scheme == null
+                                        || !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))) {
+                                    return;
+                                }
                                 boolean igLink = url.contains("instagram.com/reel/")
                                         || url.contains("instagram.com/p/")
                                         || url.contains("instagram.com/tv/");

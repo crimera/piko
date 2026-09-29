@@ -9,8 +9,9 @@ package app.morphe.extension.instagram.patches;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.io.File;
 
 import app.morphe.extension.instagram.utils.Pref;
@@ -21,7 +22,9 @@ import app.morphe.extension.shared.Utils;
 
 public class Block {
     private static boolean DISABLE_SUGGESTED_CONTENT;
-    private static List<String> SUGGESTED_CONTENT_KEY = Arrays.asList("clips_netego", "stories_netego", "in_feed_survey", "bloks_netego", "suggested_igd_channels", "suggested_top_accounts", "suggested_users");
+    // Checked against every JSON key parsed for every feed item (see replaceJsonParserKey below),
+    // so a hash lookup is used instead of the linear scan a List.contains() would do here.
+    private static final Set<String> SUGGESTED_CONTENT_KEY = new HashSet<>(Arrays.asList("clips_netego", "stories_netego", "in_feed_survey", "bloks_netego", "suggested_igd_channels", "suggested_top_accounts", "suggested_users"));
 
     static {
         DISABLE_SUGGESTED_CONTENT = Pref.hideSuggestedContent() && SettingsStatus.hideSuggestedContent;
