@@ -12,12 +12,18 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.util.cloneMutable
+import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Field
 import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val COIL_SCOPE = "Lcoil3/"
 private const val MEMORY_CACHE_SCOPE = "Lcoil3/memory/"
@@ -26,6 +32,8 @@ private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
 private const val SET_DESCRIPTOR = "Ljava/util/Set;"
+private const val LINKED_MAP_DESCRIPTOR = "Ljava/util/LinkedHashMap;"
+private const val MAP_KEY_SET_DESCRIPTOR = "$MAP_DESCRIPTOR->keySet()$SET_DESCRIPTOR"
 
 /** Set implementations from the platform classpath, which is not part of the app dex files. */
 private val SET_IMPLEMENTATION_DESCRIPTORS =
@@ -109,8 +117,10 @@ private data class CoilThumbnailRuntime(
     val provider: String,
     val loaderOwner: String,
     val loader: String,
-    val cacheKeys: String,
+    val cacheKeys: String?,
     val cacheKeysInterface: Boolean,
+    val strongWrapperField: String?,
+    val strongMapField: String?,
     val memoryLookup: String,
     val strongCacheField: String,
     val weakCacheField: String,
@@ -185,17 +195,30 @@ private fun patchCoilThumbnailBridge(
         ifEqz(0, Target.Local(noneLabel))
 
         iget(1, 0, fieldReference(runtime.strongCacheField))
-        if (runtime.cacheKeysInterface) {
-            invokeInterface(methodReference(runtime.cacheKeys), 1)
+        val strongWrapperField = runtime.strongWrapperField
+        if (strongWrapperField != null) {
+            // 12.30 merges splitcompat into the strong-cache class, so its no-arg Set method
+            // lists APK files instead of cache keys. Read the internal LinkedHashMapCache map.
+            iget(1, 1, fieldReference(strongWrapperField))
+            iget(1, 1, fieldReference(runtime.strongMapField!!))
+            checkCast(1, MAP_DESCRIPTOR)
+            invokeInterface(methodReference(MAP_KEY_SET_DESCRIPTOR), 1)
+            moveResult(1, SET_DESCRIPTOR)
         } else {
-            invokeVirtual(methodReference(runtime.cacheKeys), 1)
+            val cacheKeys = runtime.cacheKeys
+                ?: throw PatchException("NewX Coil strong-cache keys shape is unresolved")
+            if (runtime.cacheKeysInterface) {
+                invokeInterface(methodReference(cacheKeys), 1)
+            } else {
+                invokeVirtual(methodReference(cacheKeys), 1)
+            }
+            moveResult(1, OBJECT_DESCRIPTOR)
         }
-        moveResult(1, OBJECT_DESCRIPTOR)
         newInstance(2, "Ljava/util/LinkedHashSet;")
         invokeDirect(methodReference("Ljava/util/LinkedHashSet;-><init>(Ljava/util/Collection;)V"), 2, 1)
         iget(1, 0, fieldReference(runtime.weakCacheField))
         iget(1, 1, fieldReference(runtime.mapBackingField))
-        checkCast(1, "Ljava/util/LinkedHashMap;")
+        checkCast(1, LINKED_MAP_DESCRIPTOR)
         invokeVirtual(methodReference("Ljava/util/LinkedHashMap;->keySet()Ljava/util/Set;"), 1)
         moveResult(1, OBJECT_DESCRIPTOR)
         invokeInterface(methodReference("Ljava/util/Set;->addAll(Ljava/util/Collection;)Z"), 2, 1)
@@ -308,21 +331,33 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
     )
 
     val strongCacheClass = context.mutableClassDefBy(strongCacheField.type.toString())
-    val cacheKeys = requireExactlyOne(
-        "Coil memory-cache key accessor",
-        strongCacheClass.methods.filter { method ->
-            !AccessFlags.STATIC.isSet(method.accessFlags) &&
-                method.parameterTypes.isEmpty() &&
-                context.isSetAccessorReturnType(method.returnType.toString())
-        },
+    val strongMapFields = resolveCoilStrongMapFields(
+        memoryLookup,
+        strongCacheField.toString(),
     )
-    val cacheKeysClass =
-        context.classDefByOrNull(cacheKeys.definingClass.toString())
-            ?: throw PatchException(
-                "NewX Coil memory-cache key accessor owner has no class definition: " +
-                    cacheKeys.definingClass,
-            )
-    val cacheKeysInterface = AccessFlags.INTERFACE.isSet(cacheKeysClass.accessFlags)
+    val cacheKeys: Method?
+    val cacheKeysInterface: Boolean
+    if (strongMapFields != null) {
+        cacheKeys = null
+        cacheKeysInterface = false
+    } else {
+        val keyAccessor = requireExactlyOne(
+            "Coil memory-cache key accessor",
+            strongCacheClass.methods.filter { method ->
+                !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                    method.parameterTypes.isEmpty() &&
+                    context.isSetAccessorReturnType(method.returnType.toString())
+            },
+        )
+        val keyAccessorClass =
+            context.classDefByOrNull(keyAccessor.definingClass.toString())
+                ?: throw PatchException(
+                    "NewX Coil memory-cache key accessor owner has no class definition: " +
+                        keyAccessor.definingClass,
+                )
+        cacheKeys = keyAccessor
+        cacheKeysInterface = AccessFlags.INTERFACE.isSet(keyAccessorClass.accessFlags)
+    }
     val converterMatch = requireExactlyOne(
         "Coil image-to-Bitmap converter",
         coilBitmapConverterFingerprint(imageField.type.toString())
@@ -334,8 +369,10 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
         provider = provider.toString(),
         loaderOwner = loader.definingClass.toString(),
         loader = loader.toString(),
-        cacheKeys = cacheKeys.toString(),
+        cacheKeys = cacheKeys?.toString(),
         cacheKeysInterface = cacheKeysInterface,
+        strongWrapperField = strongMapFields?.first,
+        strongMapField = strongMapFields?.second,
         memoryLookup = memoryLookup.toString(),
         strongCacheField = strongCacheField.toString(),
         weakCacheField = weakCacheField.toString(),
@@ -356,6 +393,52 @@ private fun resolveMemoryLookup(memoryCacheClass: ClassDef): Method {
             context.isMemoryValueType(method.returnType.toString())
     }
     return requireExactlyOne("Coil memory-cache lookup", matches)
+}
+
+/**
+ * Resolves the strong cache's internal map when the cache class no longer exposes a keys
+ * accessor. R8 can horizontally merge Play Core's splitcompat into Coil's strong-cache class on
+ * 12.30, so that class's only no-arg Set method lists `verified-splits` APK files instead of
+ * cache keys. The memory lookup still reads the real cache map, so follow its bytecode:
+ * `strongField` -> wrapper field -> wrapper cast -> map field -> `Map` cast.
+ */
+private fun resolveCoilStrongMapFields(
+    memoryLookup: Method,
+    strongCacheField: String,
+): Pair<String, String>? {
+    val instructions = memoryLookup.implementation?.instructions?.toList() ?: return null
+    for ((index, instruction) in instructions.withIndex()) {
+        if (instruction.opcode != Opcode.IGET_OBJECT) continue
+        if (instruction.getReference<FieldReference>()?.toString() != strongCacheField) continue
+        val strongTarget = (instruction as? TwoRegisterInstruction)?.registerA ?: continue
+
+        val wrapperRead = instructions.getOrNull(index + 1) ?: continue
+        if (wrapperRead.opcode != Opcode.IGET_OBJECT) continue
+        val wrapperObject = wrapperRead as? TwoRegisterInstruction ?: continue
+        if (wrapperObject.registerB != strongTarget) continue
+        val wrapperField = wrapperRead.getReference<FieldReference>() ?: continue
+        val wrapperTarget = wrapperObject.registerA
+
+        val wrapperCast = instructions.getOrNull(index + 2) ?: continue
+        if (wrapperCast.opcode != Opcode.CHECK_CAST) continue
+        if ((wrapperCast as? OneRegisterInstruction)?.registerA != wrapperTarget) continue
+
+        val mapRead = instructions.getOrNull(index + 3) ?: continue
+        if (mapRead.opcode != Opcode.IGET_OBJECT) continue
+        val mapObject = mapRead as? TwoRegisterInstruction ?: continue
+        if (mapObject.registerB != wrapperTarget) continue
+        val mapField = mapRead.getReference<FieldReference>() ?: continue
+        val mapTarget = mapObject.registerA
+
+        val mapCast = instructions.getOrNull(index + 4) ?: continue
+        if (mapCast.opcode != Opcode.CHECK_CAST) continue
+        if ((mapCast as? OneRegisterInstruction)?.registerA != mapTarget) continue
+        val mapCastType = mapCast.getReference<TypeReference>()?.type?.toString() ?: continue
+        if (mapCastType != MAP_DESCRIPTOR && mapCastType != LINKED_MAP_DESCRIPTOR) continue
+
+        return wrapperField.toString() to mapField.toString()
+    }
+    return null
 }
 
 private fun BytecodePatchContext.hasCacheKeyAccessor(descriptor: String): Boolean {
