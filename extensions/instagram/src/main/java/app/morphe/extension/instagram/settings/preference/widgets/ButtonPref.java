@@ -34,6 +34,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 public class ButtonPref extends Preference {
     private final Context context;
+    private boolean pressedHighlightEnabled;
 
 
     public ButtonPref(Context context) {
@@ -142,7 +143,7 @@ public class ButtonPref extends Preference {
         InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(key));
         InstagramPreferenceStyle.setPressedHighlightEnabled(
                 view,
-                hasPressedHighlight(key)
+                pressedHighlightEnabled
         );
     }
 
@@ -171,10 +172,11 @@ public class ButtonPref extends Preference {
                 || key.equals("view_deleted_messages")));
     }
 
-    private static boolean hasPressedHighlight(String key) {
-        return isFragmentNavigation(key)
-                && !Constants.PIKO_FRAGMENT_FOCUS_LOCK.equals(key)
-                && !Constants.PIKO_FRAGMENT_REC_FLAGS.equals(key);
+    public void setPressedHighlightEnabled(boolean enabled) {
+        if (pressedHighlightEnabled != enabled) {
+            pressedHighlightEnabled = enabled;
+            notifyChanged();
+        }
     }
 
     private String getIconResourceName(String key) {
