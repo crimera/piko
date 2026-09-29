@@ -11,15 +11,25 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Xml;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 
@@ -124,26 +134,57 @@ public class RestorePrefActivity extends AppCompatActivity {
 
 
     private void receiveFileForRestore(Context ctx, Uri uri) {
+        File tempFile = new File(destinationFile.getPath() + ".tmp");
         try {
-            InputStream in = ctx.getContentResolver().openInputStream(uri);
-
-            FileOutputStream out = new FileOutputStream(destinationFile);
-
-            byte[] buffer = new byte[4096];
-            int read;
-
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            try (InputStream in = ctx.getContentResolver().openInputStream(uri)) {
+                if (in == null) throw new IOException("Could not open " + uri);
+                byte[] buffer = new byte[4096];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    data.write(buffer, 0, read);
+                }
             }
 
-            in.close();
-            out.close();
+            // Don't touch the current file unless the picked one looks like what we restore.
+            if (!isValidRestoreFile(data.toByteArray())) {
+                toast(str("piko_import_fail"));
+                return;
+            }
+
+            try (FileOutputStream out = new FileOutputStream(tempFile)) {
+                data.writeTo(out);
+            }
+            if (!tempFile.renameTo(destinationFile)) {
+                throw new IOException("Could not replace " + destinationFile);
+            }
+
             toast(str("piko_import_success"));
             Utils.restartApp(ctx);
 
         } catch (Exception e) {
+            tempFile.delete();
             toast(str("piko_import_fail"));
             Logger.printException(() -> "import failure", e);
+        }
+    }
+
+    private boolean isValidRestoreFile(byte[] data) {
+        try {
+            String content = new String(data, StandardCharsets.UTF_8);
+            if (destinationFile.getName().endsWith(".xml")) {
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(new StringReader(content));
+                int event = parser.getEventType();
+                while (event != XmlPullParser.START_TAG && event != XmlPullParser.END_DOCUMENT) {
+                    event = parser.next();
+                }
+                return event == XmlPullParser.START_TAG && "map".equals(parser.getName());
+            }
+            Object json = new JSONTokener(content).nextValue();
+            return json instanceof JSONObject || json instanceof JSONArray;
+        } catch (Exception e) {
+            return false;
         }
     }
 
