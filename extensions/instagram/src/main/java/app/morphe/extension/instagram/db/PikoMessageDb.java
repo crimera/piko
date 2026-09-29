@@ -133,6 +133,7 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             String messageId = resolveAndMergeMessageId(db, normalizedServer, normalizedClient);
+            boolean freshInsert = false;
             if (messageId == null) {
                 ContentValues values = new ContentValues();
                 values.put("message_id", canonicalId);
@@ -146,22 +147,31 @@ public class PikoMessageDb extends SQLiteOpenHelper {
                 values.put("timestamp", timestamp);
                 long inserted = db.insertWithOnConflict(
                         TABLE, null, values, SQLiteDatabase.CONFLICT_IGNORE);
-                messageId = inserted == -1
-                        ? resolveAndMergeMessageId(db, normalizedServer, normalizedClient)
-                        : canonicalId;
+                if (inserted != -1) {
+                    messageId = canonicalId;
+                    freshInsert = true;
+                } else {
+                    messageId = resolveAndMergeMessageId(db, normalizedServer, normalizedClient);
+                }
             }
 
             if (messageId == null) return null;
-            fillIfEmpty(db, messageId, "server_id", normalizedServer);
-            fillIfEmpty(db, messageId, "client_context", normalizedClient);
-            fillIfEmpty(db, messageId, "thread_id", threadId);
-            fillIfEmpty(db, messageId, "sender_id", senderId);
-            fillIfEmpty(db, messageId, "sender_username", senderUsername);
-            fillIfEmpty(db, messageId, "message_type", type);
-            if (content != null && content.startsWith("http")) {
-                upgradeContentToUrl(db, messageId, content);
-            } else {
-                fillIfEmpty(db, messageId, "content", content);
+
+            // Skip re-checking columns the INSERT above just set from these same values - only an
+            // existing row (from a concurrent insert or an earlier partial capture) can be missing
+            // fields this call has.
+            if (!freshInsert) {
+                fillIfEmpty(db, messageId, "server_id", normalizedServer);
+                fillIfEmpty(db, messageId, "client_context", normalizedClient);
+                fillIfEmpty(db, messageId, "thread_id", threadId);
+                fillIfEmpty(db, messageId, "sender_id", senderId);
+                fillIfEmpty(db, messageId, "sender_username", senderUsername);
+                fillIfEmpty(db, messageId, "message_type", type);
+                if (content != null && content.startsWith("http")) {
+                    upgradeContentToUrl(db, messageId, content);
+                } else {
+                    fillIfEmpty(db, messageId, "content", content);
+                }
             }
             db.setTransactionSuccessful();
             return messageId;
@@ -454,20 +464,34 @@ public class PikoMessageDb extends SQLiteOpenHelper {
     public List<String[]> getDeletedMessages() {
         List<String[]> result = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
+        // Load the whole sender_id -> username directory once instead of letting each row
+        // that lacks a stored username fall back to its own query - this list can grow to
+        // hundreds/thousands of rows over time, which turned that fallback into an N+1 query.
+        java.util.Map<String, String> directory = loadUsernameDirectory(db);
         Cursor c = db.query(TABLE, null, "is_deleted = 1" + HAS_CONTENT, null, null, null, "timestamp DESC");
         while (c.moveToNext()) {
-            result.add(rowToStringArray(c));
+            result.add(rowToStringArray(c, directory));
         }
         c.close();
         return result;
     }
 
-    private String[] rowToStringArray(Cursor c) {
+    private java.util.Map<String, String> loadUsernameDirectory(SQLiteDatabase db) {
+        java.util.Map<String, String> directory = new java.util.HashMap<>();
+        Cursor c = db.query(DIR_TABLE, new String[]{"sender_id", "username"}, null, null, null, null, null);
+        while (c.moveToNext()) {
+            directory.put(c.getString(0), c.getString(1));
+        }
+        c.close();
+        return directory;
+    }
+
+    private String[] rowToStringArray(Cursor c, java.util.Map<String, String> directory) {
         String senderId = c.getString(c.getColumnIndexOrThrow("sender_id"));
         return new String[]{
             c.getString(c.getColumnIndexOrThrow("message_id")),
             c.getString(c.getColumnIndexOrThrow("thread_id")),
-            resolveUsername(c.getString(c.getColumnIndexOrThrow("sender_username")), senderId),
+            resolveUsername(c.getString(c.getColumnIndexOrThrow("sender_username")), senderId, directory),
             c.getString(c.getColumnIndexOrThrow("content")),
             c.getString(c.getColumnIndexOrThrow("message_type")),
             String.valueOf(c.getLong(c.getColumnIndexOrThrow("timestamp"))),
@@ -481,10 +505,10 @@ public class PikoMessageDb extends SQLiteOpenHelper {
      * stored value (possibly empty) when the directory has no entry, so the caller's existing
      * numeric-id fallback still applies for a sender we have never seen named.
      */
-    private String resolveUsername(String storedUsername, String senderId) {
+    private String resolveUsername(String storedUsername, String senderId, java.util.Map<String, String> directory) {
         if (storedUsername != null && !storedUsername.isEmpty()) return storedUsername;
         if (senderId != null && !senderId.isEmpty()) {
-            String dir = getUsername(senderId);
+            String dir = directory.get(senderId);
             if (dir != null && !dir.isEmpty()) return dir;
         }
         return storedUsername;

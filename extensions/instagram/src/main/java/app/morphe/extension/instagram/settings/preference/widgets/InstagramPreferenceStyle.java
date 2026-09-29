@@ -36,6 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.patches.customise.font.CustomFontContext;
 import app.morphe.extension.instagram.settings.SettingsActivity;
 import app.morphe.extension.shared.ResourceUtils;
 
@@ -118,7 +119,7 @@ public final class InstagramPreferenceStyle {
         int themeRes = UI.isDarkMode()
                 ? android.R.style.Theme_DeviceDefault
                 : android.R.style.Theme_DeviceDefault_Light;
-        return new android.view.ContextThemeWrapper(context, themeRes);
+        return new CustomFontContext(context, themeRes);
     }
 
     public static int backgroundColor() {

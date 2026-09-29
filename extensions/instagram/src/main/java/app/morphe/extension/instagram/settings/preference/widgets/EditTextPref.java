@@ -14,8 +14,10 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import java.util.Arrays;
 import app.morphe.extension.instagram.patches.Links;
+import app.morphe.extension.instagram.patches.devFlags.FlagState;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.Helper;
 
@@ -26,6 +28,7 @@ public class EditTextPref extends EditTextPreference {
         return sanitized.contentEquals(input) ? null : sanitized;
     };
     private static Helper helper;
+    private boolean numericOnly;
 
     private static String removeLineBreaks(String value) {
         return value.replace("\r", "").replace("\n", "");
@@ -48,6 +51,7 @@ public class EditTextPref extends EditTextPreference {
         init();
     }
     public void setNumericOnly(boolean numericOnly) {
+        this.numericOnly = numericOnly;
         if (numericOnly) {
             getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
             getEditText().setSingleLine(true);
@@ -86,5 +90,16 @@ public class EditTextPref extends EditTextPreference {
     @Override
     protected void onBindView(View view) {
         InstagramPreferenceStyle.bindText(this, view);
+    }
+
+    @Override
+    protected void onAddEditTextToDialogView(View dialogView, EditText editText) {
+        super.onAddEditTextToDialogView(dialogView, editText);
+        // Numeric (long-typed) dev flags persist FlagState.DEFAULT ("default") as
+        // their "no override" sentinel; blank the field here so the number box
+        // shows empty instead of the literal word "default".
+        if (numericOnly && FlagState.DEFAULT.toString().equals(editText.getText().toString())) {
+            editText.setText("");
+        }
     }
 }

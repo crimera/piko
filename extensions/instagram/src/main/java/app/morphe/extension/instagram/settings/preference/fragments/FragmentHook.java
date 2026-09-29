@@ -27,6 +27,8 @@ public class FragmentHook {
             actionBarTitleKey = "piko_category_links";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)){
             actionBarTitleKey = "piko_category_distraction_free";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_FOCUS_LOCK)){
+            actionBarTitleKey = "piko_focus_lock";
         }else if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
             actionBarTitleKey = "piko_category_misc";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
@@ -45,6 +47,8 @@ public class FragmentHook {
             actionBarTitleKey = "piko_category_filter_content";
         }else if(key.equals(Constants.PIKO_FRAGMENT_REC_FLAGS)){
             actionBarTitleKey = "piko_category_rec_flags";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_FONT)){
+            actionBarTitleKey = "piko_category_font";
         }
 
         if(actionBarTitleKey!=null){

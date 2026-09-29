@@ -20,6 +20,7 @@ import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
+import android.util.Log;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ShareLinkSanitizer;
 import app.morphe.extension.shared.Utils;
@@ -28,7 +29,9 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.story.StorySeenRequestScope;
 import app.morphe.extension.crimera.PikoUtils;
 
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.settings.Settings;
 
 @SuppressWarnings("unused")
 public class Links {
@@ -102,6 +105,15 @@ public class Links {
                 String actualUrl = Uri.parse(url).getQueryParameter("u");
                 if (actualUrl != null) {
                     String sanitizedUrl = sanitizeUrl(actualUrl);
+                    // actualUrl comes from a bio/DM/comment/caption link anyone can put on
+                    // Instagram - without this check a crafted intent:// (or other dangerous
+                    // scheme) link would reach ACTION_VIEW unfiltered and could launch an
+                    // arbitrary exported component on the device with attacker-chosen extras.
+                    String scheme = Uri.parse(sanitizedUrl).getScheme();
+                    if (scheme == null
+                            || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+                        return false;
+                    }
                     PikoUtils.openUrl(sanitizedUrl,false);
                     return true;
                 }
@@ -134,14 +146,17 @@ public class Links {
                         || path.contains("direct_v2/pending_inbox/?visual_message")
                         || path.contains("stories/hallpass/")
                         || path.contains("/api/v1/feed/reels_media_stream/")) {
-                    shouldBlockUri = DISABLE_STORIES;
+                    shouldBlockUri = DISABLE_STORIES || FocusLock.isForced(Settings.DISABLE_STORIES);
                 } else if (path.contains("/discover/topical_explore")
                         || path.contains("/discover/topical_explore_stream")
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/recent_searches/"))
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/top_serp/"))) {
-                    shouldBlockUri = DISABLE_EXPLORE;
+                    // Focus Lock is read per request, not from the cached fields above: a lock
+                    // that expires while the process is alive has to release the setting without
+                    // waiting for a restart.
+                    shouldBlockUri = DISABLE_EXPLORE || FocusLock.isForced(Settings.DISABLE_EXPLORE);
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
-                    shouldBlockUri = DISABLE_COMMENTS;
+                    shouldBlockUri = DISABLE_COMMENTS || FocusLock.isForced(Settings.DISABLE_COMMENTS);
                 } else if (path.contains("/discover/ayml") || path.contains("/discover/chaining")) { // Thanks to  @brosssh
                     shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
                 } else if (path.contains("profile_ads/get_profile_ads/")
@@ -150,7 +165,7 @@ public class Links {
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
                 } else if (path.contains("/highlights_tray")) {
-                    shouldBlockUri = DISABLE_HIGHLIGHTS;
+                    shouldBlockUri = DISABLE_HIGHLIGHTS || FocusLock.isForced(Settings.DISABLE_HIGHLIGHTS);
                 }
 
             }
@@ -159,6 +174,9 @@ public class Links {
             Logger.printException(() -> "intercept URI failed: ", ex);
         }
         // Exception is hanndled at call.
+        if (shouldBlockUri && Pref.pikoDebug()) {
+            Log.d("piko", "blocked uri: " + uri);
+        }
         if(shouldBlockUri) {
             throw new IOException("Block uri");
         }

@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
 
 @SuppressWarnings("unused")
@@ -24,7 +26,13 @@ public final class LimitFeedToFollowingProfiles {
      * Injection point.
      */
     public static Map<String, String> setFollowingHeader(Map<String, String> requestHeaderMap) {
-        if (!LIMIT_FOLLOWING_FEED) return requestHeaderMap;
+        // The field is captured at class init, so Focus Lock is read per call: a lock that
+        // expires while the process is alive has to release the setting without a restart.
+        if (!LIMIT_FOLLOWING_FEED
+                && !(SettingsStatus.limitFollowingFeed
+                && FocusLock.isForced(Settings.LIMIT_FOLLOWING_FEED))) {
+            return requestHeaderMap;
+        }
 
         String paginationHeaderName = "pagination_source";
 
