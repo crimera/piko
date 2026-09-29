@@ -1041,7 +1041,7 @@ public class ScreenBuilder {
     public void buildSettingsPage() {
         if (SettingsStatus.adsSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_ads"),
                             "",
                             Constants.PIKO_FRAGMENT_ADS
@@ -1051,7 +1051,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.filterContentSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_filter_content"),
                             "",
                             Constants.PIKO_FRAGMENT_FILTER_CONTENT
@@ -1061,7 +1061,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.ghostSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_ghost"),
                             "",
                             Constants.PIKO_FRAGMENT_GHOST
@@ -1071,7 +1071,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.dmSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_dm"),
                             "",
                             Constants.PIKO_FRAGMENT_DM
@@ -1081,7 +1081,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.linksSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_links"),
                             "",
                             Constants.PIKO_FRAGMENT_LINKS
@@ -1091,7 +1091,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.distractionFreeSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_distraction_free"),
                             "",
                             Constants.PIKO_FRAGMENT_DISTRACTION_FREE
@@ -1101,7 +1101,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.miscSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_misc"),
                             "",
                             Constants.PIKO_FRAGMENT_MISC
@@ -1111,7 +1111,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.downloadSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_downloads"),
                             "",
                             Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA
@@ -1120,7 +1120,7 @@ public class ScreenBuilder {
         }
 
         addPreference(
-                helper.buttonPreference(
+                helper.categoryPreference(
                         str("piko_category_action_bar"),
                         "",
                         Constants.PIKO_FRAGMENT_ACTION_BAR
@@ -1129,7 +1129,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.hideNavigationButtons){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_navigation_tabs"),
                             "",
                             Constants.PIKO_FRAGMENT_NAV_BTNS
@@ -1139,7 +1139,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.developerOptionsSection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_dev_options"),
                             "",
                             Constants.PIKO_FRAGMENT_DEV_OPTIONS
@@ -1148,7 +1148,7 @@ public class ScreenBuilder {
         }
 
         addPreference(
-                helper.buttonPreference(
+                helper.categoryPreference(
                         str("piko_category_about"),
                         "",
                         Constants.PIKO_FRAGMENT_ABOUT

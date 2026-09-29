@@ -93,11 +93,19 @@ public class Helper {
         return preference;
     }
 
-    public Preference buttonPreference(String title, String summary, String setting) {
+    public ButtonPref buttonPreference(String title, String summary, String setting) {
         ButtonPref preference = new ButtonPref(context);
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
+        return preference;
+    }
+
+    public Preference categoryPreference(String title, String summary, String setting) {
+        ButtonPref preference = buttonPreference(title, summary, setting);
+        // Among rows with a chevron (>), only top-level Piko categories get a pressed highlight.
+        // Other chevron rows keep the chevron without a pressed highlight.
+        preference.setPressedHighlightEnabled(true);
         return preference;
     }
 
