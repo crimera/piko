@@ -18,13 +18,14 @@ import android.os.Looper;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,6 +46,7 @@ public class RestorePrefActivity extends AppCompatActivity {
     private static Context context = Utils.getContext();
 
     private static final int READ_REQUEST_CODE = 42;
+    private static final long MAX_RESTORE_BYTES = 16L * 1024 * 1024;
 
     private static final String[] FONT_MIME_TYPES = {
             "font/ttf",
@@ -136,24 +138,24 @@ public class RestorePrefActivity extends AppCompatActivity {
     private void receiveFileForRestore(Context ctx, Uri uri) {
         File tempFile = new File(destinationFile.getPath() + ".tmp");
         try {
-            ByteArrayOutputStream data = new ByteArrayOutputStream();
-            try (InputStream in = ctx.getContentResolver().openInputStream(uri)) {
+            long total = 0;
+            try (InputStream in = ctx.getContentResolver().openInputStream(uri);
+                 FileOutputStream out = new FileOutputStream(tempFile)) {
                 if (in == null) throw new IOException("Could not open " + uri);
-                byte[] buffer = new byte[4096];
+                byte[] buffer = new byte[8192];
                 int read;
                 while ((read = in.read(buffer)) != -1) {
-                    data.write(buffer, 0, read);
+                    total += read;
+                    if (total > MAX_RESTORE_BYTES) throw new IOException("File is too large to restore");
+                    out.write(buffer, 0, read);
                 }
             }
 
-            // Don't touch the current file unless the picked one looks like what we restore.
-            if (!isValidRestoreFile(data.toByteArray())) {
+            // Don't touch the current file unless the whole picked file is what we restore.
+            if (!isValidRestoreFile(tempFile)) {
+                tempFile.delete();
                 toast(str("piko_import_fail"));
                 return;
-            }
-
-            try (FileOutputStream out = new FileOutputStream(tempFile)) {
-                data.writeTo(out);
             }
             if (!tempFile.renameTo(destinationFile)) {
                 throw new IOException("Could not replace " + destinationFile);
@@ -169,23 +171,89 @@ public class RestorePrefActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isValidRestoreFile(byte[] data) {
+    private boolean isValidRestoreFile(File file) {
         try {
-            String content = new String(data, StandardCharsets.UTF_8);
             if (destinationFile.getName().endsWith(".xml")) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(new StringReader(content));
-                int event = parser.getEventType();
-                while (event != XmlPullParser.START_TAG && event != XmlPullParser.END_DOCUMENT) {
-                    event = parser.next();
+                try (InputStream in = new FileInputStream(file)) {
+                    return isValidPreferences(in);
                 }
-                return event == XmlPullParser.START_TAG && "map".equals(parser.getName());
             }
-            Object json = new JSONTokener(content).nextValue();
+            byte[] bytes = new byte[(int) file.length()];
+            try (InputStream in = new FileInputStream(file)) {
+                int offset = 0;
+                while (offset < bytes.length) {
+                    int read = in.read(bytes, offset, bytes.length - offset);
+                    if (read < 0) return false;
+                    offset += read;
+                }
+            }
+            JSONTokener tokener = new JSONTokener(new String(bytes, StandardCharsets.UTF_8));
+            Object json = tokener.nextValue();
+            if (tokener.nextClean() != 0) return false;
+            if (destinationFile.getName().equals("id_name_mapping.json")) {
+                if (!(json instanceof JSONArray) || ((JSONArray) json).length() == 0) return false;
+                JSONArray array = (JSONArray) json;
+                for (int i = 0; i < array.length(); i++) {
+                    if (!(array.get(i) instanceof String) || ((String) array.get(i)).isEmpty()) return false;
+                }
+                return true;
+            }
             return json instanceof JSONObject || json instanceof JSONArray;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /** Checks the whole SharedPreferences document: every entry, its type and its value. */
+    private static boolean isValidPreferences(InputStream in) throws Exception {
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(in, null);
+        Set<String> names = new HashSet<>();
+        String setName = null;
+        boolean sawRoot = false;
+        int depth = 0;
+        for (int event = parser.getEventType(); event != XmlPullParser.END_DOCUMENT; event = parser.next()) {
+            if (event == XmlPullParser.END_TAG) {
+                depth--;
+                continue;
+            }
+            if (event != XmlPullParser.START_TAG) continue;
+            depth++;
+            String tag = parser.getName();
+            if (depth == 1) {
+                if (sawRoot || !"map".equals(tag)) return false;
+                sawRoot = true;
+            } else if (depth == 2) {
+                String name = parser.getAttributeValue(null, "name");
+                if (name == null || name.isEmpty() || !names.add(name)) return false;
+                String value = parser.getAttributeValue(null, "value");
+                setName = null;
+                switch (tag) {
+                    case "boolean":
+                        if (!"true".equals(value) && !"false".equals(value)) return false;
+                        break;
+                    case "int":
+                        Integer.parseInt(value);
+                        break;
+                    case "long":
+                        Long.parseLong(value);
+                        break;
+                    case "float":
+                        if (!Float.isFinite(Float.parseFloat(value))) return false;
+                        break;
+                    case "string":
+                        break;
+                    case "set":
+                        setName = name;
+                        break;
+                    default:
+                        return false;
+                }
+            } else if (depth != 3 || setName == null || !"string".equals(tag)) {
+                return false;
+            }
+        }
+        return sawRoot && depth == 0;
     }
 
 
