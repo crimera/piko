@@ -8,6 +8,7 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.hasComposeShape
 import app.crimera.patches.newx.utils.parameterDescriptors
+import app.crimera.patches.newx.utils.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -29,6 +30,13 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val FEATURE_SWITCHES_SCOPE = "Lcom/x/featureswitches/"
 private const val SUBSCRIPTIONS_SCOPE = "Lcom/x/subscriptions/"
+
+/**
+ * The home-nav header's nullable state (p4) is both the sibling discriminator and the value the
+ * hook nulls to skip the upsell chip.
+ */
+private const val HOME_NAV_STATE_PARAMETER_INDEX = 4
+private const val HOME_NAV_STATE_DESCRIPTOR = "Lcom/x/home/c;"
 
 private object NewXHomeNavUpsellTypeFingerprint : Fingerprint(
     definingClass = SUBSCRIPTIONS_SCOPE,
@@ -104,7 +112,14 @@ private object NewXHomeTabbedScaffoldClassFingerprint : Fingerprint(
         ),
 )
 
-/** Top bar header composable in Compose home tabbed scaffold. */
+/**
+ * Top bar header composable in Compose home tabbed scaffold.
+ *
+ * The scaffold and tab bar siblings in the same class also satisfy the generic Compose shape, and
+ * the first dex-order match was silently the scaffold. The header's nullable home-nav state
+ * parameter is the discriminator, and nulling that parameter is the mutation contract: the
+ * header's only branch on it renders the upsell chip.
+ */
 private object NewXHomeNavUpsellComposableFingerprint : Fingerprint(
     classFingerprint = NewXHomeTabbedScaffoldClassFingerprint,
     returnType = "V",
@@ -118,7 +133,9 @@ private object NewXHomeNavUpsellComposableFingerprint : Fingerprint(
                 ),
             last = "I",
             objectFirst = true,
-        ) && parameters.count { descriptor -> descriptor == "Lkotlin/jvm/functions/Function0;" } >= 4
+        ) &&
+            parameters.count { descriptor -> descriptor == "Lkotlin/jvm/functions/Function0;" } >= 4 &&
+            parameters.getOrNull(HOME_NAV_STATE_PARAMETER_INDEX) == HOME_NAV_STATE_DESCRIPTOR
     },
 )
 
@@ -176,10 +193,16 @@ val hidePremiumUpsellPatch =
             )
 
         execute {
-            val composeMatch = NewXHomeNavUpsellComposableFingerprint.matchOrNull()
-            if (composeMatch != null) {
+            val composeMatches = NewXHomeNavUpsellComposableFingerprint.scopedMatchAllOrNull().orEmpty()
+            if (composeMatches.isNotEmpty()) {
+                val composeMatch =
+                    requireExactlyOne(
+                        label = "NewX home-nav upsell composable",
+                        candidates = composeMatches,
+                    )
                 composeMatch.method.apply {
-                    val p4Register = p0Register + 4
+                    // The fingerprint guarantees this register holds the nullable home-nav state.
+                    val stateRegister = p0Register + HOME_NAV_STATE_PARAMETER_INDEX
                     val read =
                         hidePremiumUpsell.injectRead(
                             method = this,
@@ -188,7 +211,7 @@ val hidePremiumUpsellPatch =
                         )
                     insertHook(index = read.nextIndex, relocateBranchTargets = false) {
                         ifEqz(read.register, Target.Original)
-                        constInt(p4Register, 0)
+                        constInt(stateRegister, 0)
                     }
                 }
                 return@execute
