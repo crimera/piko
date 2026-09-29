@@ -8,6 +8,7 @@ import app.crimera.patches.newx.models.isLegacyInlineActionKindModelConstructor
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
+import app.crimera.patches.newx.timeline.readsArrayListFromParameter
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.toInstruction
@@ -25,6 +26,7 @@ import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
@@ -644,6 +646,54 @@ class NewXResolverLinterTest {
             }
 
         assertEquals(listOf(10), selected)
+    }
+
+    @Test
+    fun `reply facepile list read must trace to a parameter`() {
+        // 12.30.0-prod.01 `Lcom/bumptech/glide/h;->a(...)`: the renderer aliases the post model
+        // parameter (v4) into v1 before reading its avatar list off the model.
+        val aliasedParameter =
+            listOf(
+                "move-object v1, v4".toInstruction(),
+                "iget-object v0, v1, Lfixture/PostState;->a:Ljava/util/ArrayList;".toInstruction(),
+            )
+        assertTrue(
+            aliasedParameter.readsArrayListFromParameter(
+                readIndex = 1,
+                firstParameterRegister = 4,
+                registerCount = 6,
+            ),
+        )
+
+        // A direct read off the parameter register is the same contract.
+        val directParameter =
+            listOf(
+                "iget-object v0, v4, Lfixture/PostState;->a:Ljava/util/ArrayList;".toInstruction(),
+            )
+        assertTrue(
+            directParameter.readsArrayListFromParameter(
+                readIndex = 0,
+                firstParameterRegister = 4,
+                registerCount = 6,
+            ),
+        )
+
+        // 12.30.0-prod.01's `Lcom/x/mlb/game/ui/stats/a;->r(...)` false positive: v1 once aliased a
+        // parameter, but an unrelated iterator result overwrites it before the local model read.
+        val overwrittenAlias =
+            listOf(
+                "move-object v1, v4".toInstruction(),
+                "invoke-interface {v2}, Lfixture/Replies;->iterator()Ljava/util/Iterator;".toInstruction(),
+                "move-result-object v1".toInstruction(),
+                "iget-object v3, v1, Lfixture/MlbModel;->a:Ljava/util/ArrayList;".toInstruction(),
+            )
+        assertFalse(
+            overwrittenAlias.readsArrayListFromParameter(
+                readIndex = 3,
+                firstParameterRegister = 4,
+                registerCount = 6,
+            ),
+        )
     }
 
     @Test

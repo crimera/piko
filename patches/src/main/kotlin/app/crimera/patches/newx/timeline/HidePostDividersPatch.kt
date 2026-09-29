@@ -17,6 +17,7 @@ import app.crimera.patches.newx.utils.resolveConstantOnCurrentPath
 import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.newx.utils.hasComposeShape
 import app.crimera.patches.newx.utils.parameterDescriptors
+import app.crimera.patches.newx.utils.valueReachesRegister
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -33,6 +34,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -50,6 +52,7 @@ private const val INSETS_DESCRIPTOR = "I"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val TIMELINE_HEADER_KEY_ANCHOR = "timeline_header_key"
+private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
 /** The synthetic Compose lambda wraps the post content in the optional divider container. */
 private object NewXPostDividerRendererFingerprint : Fingerprint(
     definingClass = ANDROID_SCOPE,
@@ -149,23 +152,58 @@ private fun Instruction.callsCollectionMethod(
         reference.returnType == returnType
 }
 
+/**
+ * True when [readIndex] is an `ArrayList` field read whose receiver still holds one of the
+ * method's parameters. The reply facepile renderer collects its avatar list from the post model
+ * it received, so a list built from a local or an unrelated model must not match the fingerprint.
+ */
+internal fun List<Instruction>.readsArrayListFromParameter(
+    readIndex: Int,
+    firstParameterRegister: Int,
+    registerCount: Int,
+): Boolean {
+    val read = getOrNull(readIndex) ?: return false
+    if (read.opcode != Opcode.IGET_OBJECT) return false
+    if (read.getReference<FieldReference>()?.type != ARRAY_LIST_DESCRIPTOR) return false
+    val instanceRegister = (read as? TwoRegisterInstruction)?.registerB ?: return false
+    if (firstParameterRegister !in 0 until registerCount) return false
+    return (firstParameterRegister until registerCount).any { parameterRegister ->
+        valueReachesRegister(
+            // Method entry is the only definition of a parameter register.
+            valueIndex = -1,
+            valueRegister = parameterRegister,
+            targetIndex = readIndex,
+            targetRegister = instanceRegister,
+        )
+    }
+}
+
 private fun Method.hasReplyFacepileDividerFlow(): Boolean {
     if (!AccessFlags.STATIC.isSet(accessFlags)) return false
-    val instructions = implementation?.instructions?.toList() ?: return false
+    val methodImplementation = implementation ?: return false
+    val instructions = methodImplementation.instructions.toList()
     if (instructions.count(Instruction::isDrawModifierCall) != 1) return false
 
+    val firstParameterRegister =
+        methodImplementation.registerCount - numberOfParameterRegisters
     val listFields =
-        instructions.mapNotNull { instruction ->
-            if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
-            instruction.getReference<FieldReference>()?.takeIf { field ->
-                field.type == "Ljava/util/ArrayList;"
+        instructions.mapIndexedNotNull { index, instruction ->
+            if (
+                !instructions.readsArrayListFromParameter(
+                    readIndex = index,
+                    firstParameterRegister = firstParameterRegister,
+                    registerCount = methodImplementation.registerCount,
+                )
+            ) {
+                return@mapIndexedNotNull null
             }
+            instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
         }.distinctBy(FieldReference::toString)
     if (listFields.size != 1) return false
 
     return instructions.any { instruction ->
         instruction.callsCollectionMethod(
-            definingClass = "Ljava/util/ArrayList;",
+            definingClass = ARRAY_LIST_DESCRIPTOR,
             name = "size",
             parameters = emptyList(),
             returnType = "I",
