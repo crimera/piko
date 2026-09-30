@@ -14,8 +14,12 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.ResourcePatchContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.util.*
+import app.morphe.util.ResourceGroup
+import app.morphe.util.copyResources
+import app.morphe.util.findElementByAttributeValue
+import app.morphe.util.getReference
 import app.morphe.util.inputStreamFromBundledResource
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderInstruction
@@ -26,14 +30,12 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.MethodImplementation
 import com.android.tools.smali.dexlib2.iface.MethodParameter
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
-import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import org.w3c.dom.Element
 
 fun ResourcePatchContext.replaceXmlResources(

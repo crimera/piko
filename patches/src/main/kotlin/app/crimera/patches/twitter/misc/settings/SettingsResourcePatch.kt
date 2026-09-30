@@ -7,7 +7,6 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.getNode
@@ -15,7 +14,6 @@ import org.w3c.dom.Element
 
 internal val settingsResourcePatch =
     resourcePatch {
-        dependsOn(resourceMappingPatch)
         execute {
             // replace the keyword `ripped` from version name back to original format.
             val versionName = packageMetadata.versionName

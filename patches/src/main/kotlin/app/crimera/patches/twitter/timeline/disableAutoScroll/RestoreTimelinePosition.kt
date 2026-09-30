@@ -117,7 +117,8 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
     home.methods.add(
         ImmutableMethod(home.type, scopeName, emptyList(), "Z", AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
             null, null, MutableMethodImplementation(3)).toMutable().apply {
-            addInstructions("""
+            addInstructions(0,
+                """
                 iget v0, p0, $timelineType
                 const/16 v1, $forYouType
                 if-ne v0, v1, :disabled

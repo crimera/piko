@@ -21,9 +21,8 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.resourceLiteral
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.util.findFreeRegister
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -139,10 +138,7 @@ val sensitiveMediaPatch =
         name = "Show sensitive media",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(
-            settingsPatch,
-            resourceMappingPatch
-        )
+        dependsOn(settingsPatch)
 
         execute {
             // region Override the sensitive media fields in API response

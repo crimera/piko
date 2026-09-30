@@ -16,7 +16,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -30,7 +29,7 @@ val hideStoriesTrayPatch =
         name = "Hide stories tray",
         description = "Hides stories tray from main feed.",
     ) {
-        dependsOn(settingsPatch, resourceMappingPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
