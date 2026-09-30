@@ -22,6 +22,11 @@ import kotlin.jvm.functions.Function1;
  * every low register is live, and the state's single `Media` field can only be read there with a
  * 4-bit `iget`. The handler unwraps it at click time instead.
  *
+ * <p>The row state also reaches the live view state the carousel mutates. The click handler reads
+ * the current carousel index from it on every click, so the download follows a swipe instead of
+ * saving the first item; the field names are injected into `DownloadUtils.currentMediaIndex` at
+ * patch time.
+ *
  * <p>{@code context} is the component's activity-scoped context. The shared application context
  * cannot host the download dialog (`WindowManager$BadTokenException`).
  */
@@ -43,7 +48,7 @@ public final class FeedDownloadClickFunction implements Function1<Object, Object
                 context,
                 userSession,
                 media == null ? mediaSource : media,
-                0);
+                DownloadUtils.currentMediaIndex(mediaSource));
         return Unit.INSTANCE;
     }
 }

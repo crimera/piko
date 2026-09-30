@@ -11,6 +11,8 @@ import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.instagram.entity.decoder.CURRENT_MEDIA_FIELD
+import app.crimera.patches.instagram.entity.decoder.MEDIA_ADD_INFO_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
@@ -22,6 +24,7 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.utils.changeString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.PatchException
@@ -53,7 +56,7 @@ private const val MEDIA_DESCRIPTOR = "Lcom/instagram/feed/media/Media;"
 private const val USER_SESSION_DESCRIPTOR = "Lcom/instagram/common/session/UserSession;"
 private const val EXTENSION_METHOD =
     "$DOWNLOAD_DESCRIPTOR/DownloadUtils;->addFeedDownloadButton" +
-        "(Landroid/view/View;Ljava/lang/Object;Lcom/instagram/common/session/UserSession;)V"
+        "(Landroid/view/View;Ljava/lang/Object;Lcom/instagram/common/session/UserSession;Ljava/lang/Object;)V"
 
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val INTEGER_DESCRIPTOR = "Ljava/lang/Integer;"
@@ -240,6 +243,15 @@ private class UserSessionSource(
     val field: FieldReference,
 )
 
+/**
+ * Extension method whose two placeholder constants are rewritten with the live-index field names.
+ * The click handlers call it at click time, so a carousel swipe after the bind is honored.
+ */
+private object CurrentMediaIndexFingerprint : Fingerprint(
+    definingClass = "$DOWNLOAD_DESCRIPTOR/DownloadUtils;",
+    name = "currentMediaIndex",
+)
+
 val feedDownloadButtonPatch =
     bytecodePatch(
         description = "Hooks the feed UFI row binder to add a download button beside the save icon.",
@@ -307,6 +319,23 @@ val feedDownloadButtonPatch =
 
             val stateClass: ClassDef = classDefBy(stateType)
             val mediaField = requireOne("Media field on $stateType", stateClass.fields.filter { it.type == MEDIA_DESCRIPTOR })
+
+            // The row state walks to the live view state the carousel mutates. Its current media
+            // index field is the same one the overflow-menu handler passes, so both feed download
+            // entry points report the carousel item currently on screen. The extension reads both
+            // fields at click time, after a swipe, instead of freezing the index at bind time.
+            val viewStateField =
+                requireOne(
+                    "feed view state field on $stateType",
+                    stateClass.fields.filter { it.type == MEDIA_ADD_INFO_CLASS_NAME },
+                )
+
+            // The click handlers resolve the live carousel index by walking the row state to the
+            // view state the carousel mutates. These are the same two fields the overflow-menu
+            // handler reads, injected into the extension so a swipe is honored instead of always
+            // saving the first item.
+            CurrentMediaIndexFingerprint.changeString("feedViewStateField", viewStateField.name)
+            CurrentMediaIndexFingerprint.changeString("feedCurrentMediaField", CURRENT_MEDIA_FIELD.name)
 
             // The binder method receives both the holder and the media state.
             val bindCandidates = mutableListOf<Method>()
@@ -379,7 +408,7 @@ val feedDownloadButtonPatch =
                 val userSession = scratchRegister()
                 iget(userSession, sessionOwner, userSessionSource.field)
 
-                invokeStatic(methodReference(EXTENSION_METHOD), rootView, media, userSession)
+                invokeStatic(methodReference(EXTENSION_METHOD), rootView, media, userSession, state)
             }
 
             // The same feed post can render its UFI row as a view, a Litho component or a Compose

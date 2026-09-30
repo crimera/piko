@@ -36,6 +36,7 @@ import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.VideoData;
@@ -374,17 +375,47 @@ public class DownloadUtils {
                 && Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON));
     }
 
+    // Rewritten at patch time with the field names that walk the feed row state to the live
+    // carousel index (the same field the overflow-menu handler passes). Compile-time constants so
+    // the patch replaces them inside `currentMediaIndex`'s bytecode and one extension build serves
+    // every release.
+    static final String FEED_VIEW_STATE_FIELD = "feedViewStateField";
+    static final String FEED_CURRENT_MEDIA_FIELD = "feedCurrentMediaField";
+
     /**
      * Adds a download button immediately beside the save/bookmark button of a feed post row.
      * Called from the patched feed UFI row binder, so every rebind refreshes the captured media.
+     *
+     * @param mediaState the feed row state (`LX/01Tx`); the click handler reads the live carousel
+     *     index from it, so a swipe after the bind still downloads the item on screen.
      */
-    public static void addFeedDownloadButton(View rootView, Object mediaObject, UserSession userSession) {
+    public static void addFeedDownloadButton(
+            View rootView, Object mediaObject, UserSession userSession, Object mediaState) {
         try {
             Object media = extractMedia(mediaObject);
-            attachFeedDownloadButton(rootView, media == null ? mediaObject : media, userSession);
+            attachFeedDownloadButton(
+                    rootView, media == null ? mediaObject : media, userSession, mediaState);
         } catch (Exception e) {
             Logger.printException(() -> "addFeedDownloadButton failure", e);
         }
+    }
+
+    /**
+     * Resolves the live carousel index at click time, walking the row state to the view state the
+     * carousel mutates (the overflow-menu handler reads the same field). The two field names are
+     * patch-injected placeholders, so the index follows a swipe instead of freezing at bind time.
+     */
+    static int currentMediaIndex(Object mediaState) {
+        if (mediaState == null) return 0;
+        try {
+            Object viewState = new Entity(mediaState).getField(FEED_VIEW_STATE_FIELD);
+            if (viewState == null) return 0;
+            Object index = new Entity(viewState).getField(FEED_CURRENT_MEDIA_FIELD);
+            if (index instanceof Integer) return (Integer) index;
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not read the current media index", e);
+        }
+        return 0;
     }
 
     /**
@@ -392,7 +423,10 @@ public class DownloadUtils {
      * resolved, including when the toggle is off; false while the row is still mounting.
      */
     private static boolean attachFeedDownloadButton(
-            View rootView, Object mediaObject, UserSession userSession) {
+            View rootView,
+            Object mediaObject,
+            UserSession userSession,
+            Object mediaState) {
         try {
             if (rootView == null || mediaObject == null) return false;
             Context context = rootView.getContext();
@@ -448,7 +482,8 @@ public class DownloadUtils {
             }
             if (button == null) return false;
 
-            button.setOnClickListener(v -> downloadPost(context, userSession, mediaObject, 0));
+            button.setOnClickListener(
+                    v -> downloadPost(context, userSession, mediaObject, currentMediaIndex(mediaState)));
             return true;
         } catch (Exception e) {
             Logger.printException(() -> "addFeedDownloadButton failure", e);
