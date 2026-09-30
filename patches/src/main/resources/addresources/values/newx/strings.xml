@@ -321,6 +321,25 @@
     <string name="piko_newx_post_option_boost">Boost</string>
     <string name="piko_newx_post_option_highlight">Highlight</string>
 
+    <string name="piko_newx_media_sheet_items_title">Media menu items to hide</string>
+    <string name="piko_newx_media_sheet_items_summary">Choose which items are hidden from the NewX photo and video long-press menu</string>
+    <string name="piko_newx_media_sheet_post_photo">Post photo</string>
+    <string name="piko_newx_media_sheet_post_gif">Post GIF</string>
+    <string name="piko_newx_media_sheet_post_video">Post video</string>
+    <string name="piko_newx_media_sheet_copy_gif_link">Copy GIF link</string>
+    <string name="piko_newx_media_sheet_copy_video_link">Copy video link</string>
+    <string name="piko_newx_media_sheet_copy_photo">Copy photo</string>
+    <string name="piko_newx_media_sheet_save">Save</string>
+    <string name="piko_newx_media_sheet_save_photo">Save photo</string>
+    <string name="piko_newx_media_sheet_save_video">Save video</string>
+    <string name="piko_newx_media_sheet_save_4k_photo">Save 4K photo</string>
+    <string name="piko_newx_media_sheet_share">Share</string>
+    <string name="piko_newx_media_sheet_make_video_with_grok">Make video with Grok</string>
+    <string name="piko_newx_media_sheet_edit_image_with_grok">Edit image with Grok</string>
+    <string name="piko_newx_media_sheet_add_to_offline_videos">Add to offline videos</string>
+    <string name="piko_newx_media_sheet_reload_to_offline_videos">Reload to offline videos</string>
+    <string name="piko_newx_media_sheet_remove_from_offline_videos">Remove from offline videos</string>
+
     <string name="piko_newx_post_filtering_title">Post filtering</string>
     <string name="piko_newx_post_filtering_summary">Hide posts containing user-defined words and phrases</string>
     <string name="piko_newx_post_filtering_enabled_title">Enable post filtering</string>

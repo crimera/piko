@@ -37,6 +37,7 @@ internal object Constants {
     const val DRAWER_CATALOG_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/DrawerCatalog;"
     const val DRAWER_EDITOR_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/DrawerEditorFragment;"
     const val POST_OPTIONS_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/PostOptionsFilter;"
+    const val MEDIA_SHEET_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/MediaSheetFilter;"
     const val REPLY_SORTING_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/ReplySortingResolver;"
     const val MEDIA_TAB_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/MediaTabResolver;"
     const val PROFILE_POST_SORTING_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/ProfilePostSortingResolver;"
