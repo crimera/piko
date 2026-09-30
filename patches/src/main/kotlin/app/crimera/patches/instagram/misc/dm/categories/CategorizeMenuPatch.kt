@@ -49,11 +49,9 @@ val categorizeMenuPatch =
             ThreadLongPressMenuFingerprint.method.apply {
                 // Inject once every native row is added, right before the sheet is created.
                 val allInstructions = instructions.toList()
-                val showInvokeIndex = allInstructions.indexOfFirst { instruction ->
+                val showInvokeIndex = allInstructions.indexOfLast { instruction ->
                     val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
-                    instruction.opcode.name.startsWith("invoke-direct") &&
-                        reference?.definingClass == "LX/0QcN;" &&
-                        reference.name == "<init>"
+                    instruction.opcode.name.startsWith("invoke-direct") && reference?.name == "<init>"
                 }
                 if (showInvokeIndex <= 0) {
                     throw PatchException("Thread long-press menu has no ActionSheet show call")
@@ -66,7 +64,7 @@ val categorizeMenuPatch =
                 }
                 val configRegister = showRegisters[1]
 
-                val paramBase = implementation!!.registerCount - 17
+                val paramBase = implementation!!.registerCount - parameters.size
                 val threadKeyRegister = paramBase + 8 // p8: the chat's DirectThreadKey
                 val rowViewRegister = paramBase + 1 // p1: the row's View
 

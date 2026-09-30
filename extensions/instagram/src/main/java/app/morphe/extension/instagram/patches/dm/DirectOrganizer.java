@@ -11,8 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
@@ -39,13 +38,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 
 /** Chat categories ("folders") for the DM inbox: storage, long-press menu row and dialogs. */
 @SuppressWarnings("unused")
 public final class DirectOrganizer {
-    private static final String PREFS_FILE = "piko_dm";
     private static final String KEY_CATEGORIES = "piko_chat_categories";
     private static final String KEY_ASSIGNMENTS = "piko_chat_category_assignments";
     private static final String KEY_ACTIVE_FOLDER = "piko_chat_active_folder";
@@ -56,14 +55,10 @@ public final class DirectOrganizer {
     private DirectOrganizer() {
     }
 
-    private static SharedPreferences prefs() {
-        return Utils.getContext().getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
-    }
-
     private static List<String> readLines(String key) {
         List<String> lines = new ArrayList<>();
-        String raw = prefs().getString(key, "");
-        if (raw == null || raw.isEmpty()) return lines;
+        String raw = DirectOrganizerPref.getStringPref(key);
+        if (raw.isEmpty()) return lines;
         for (String line : raw.split("\n")) {
             if (!line.isEmpty()) lines.add(line);
         }
@@ -71,7 +66,7 @@ public final class DirectOrganizer {
     }
 
     private static void writeLines(String key, Set<String> lines) {
-        prefs().edit().putString(key, String.join("\n", lines)).apply();
+        DirectOrganizerPref.setStringPref(key, String.join("\n", lines));
     }
 
     public static Set<String> getCategories() {
@@ -168,11 +163,11 @@ public final class DirectOrganizer {
 
     /** The selected folder, or an empty string for the main list. */
     public static String activeFolder() {
-        return prefs().getString(KEY_ACTIVE_FOLDER, "");
+        return DirectOrganizerPref.getStringPref(KEY_ACTIVE_FOLDER);
     }
 
     public static void setActiveFolder(String category) {
-        prefs().edit().putString(KEY_ACTIVE_FOLDER, category == null ? "" : category).apply();
+        DirectOrganizerPref.setStringPref(KEY_ACTIVE_FOLDER, category == null ? "" : category);
     }
 
     /** Thread keys of categorized chats last seen with unread messages. */
@@ -186,11 +181,11 @@ public final class DirectOrganizer {
 
     /** Difference between a row's adapter position and its index in the inbox item list. */
     public static int rowOffset() {
-        return prefs().getInt(KEY_ROW_OFFSET, 0);
+        return DirectOrganizerPref.getIntPref(KEY_ROW_OFFSET, 0);
     }
 
     public static void setRowOffset(int offset) {
-        prefs().edit().putInt(KEY_ROW_OFFSET, offset).apply();
+        DirectOrganizerPref.setIntPref(KEY_ROW_OFFSET, offset);
     }
 
     private static final class CategorizeClickListener implements View.OnClickListener {
@@ -259,14 +254,10 @@ public final class DirectOrganizer {
         }, null);
     }
 
-    private static boolean isDark(Context context) {
-        return (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
-                == Configuration.UI_MODE_NIGHT_YES;
-    }
-
-    private static GradientDrawable translucentBackground(boolean dark, float density) {
+    private static GradientDrawable translucentBackground(float density) {
+        int surface = UI.getThemedColour("igds_color_elevated_background");
         GradientDrawable background = new GradientDrawable();
-        background.setColor(dark ? 0x992C2C2E : 0x99F2F2F7);
+        background.setColor(Color.argb(0x99, Color.red(surface), Color.green(surface), Color.blue(surface)));
         background.setCornerRadius(14 * density);
         return background;
     }
@@ -274,7 +265,7 @@ public final class DirectOrganizer {
     private static TextView button(Context context, String text, boolean bold, int pad) {
         TextView view = new TextView(context);
         view.setText(text);
-        view.setTextColor(0xFF0A84FF);
+        view.setTextColor(UI.getThemedColour("igds_color_link"));
         view.setTextSize(17);
         view.setGravity(Gravity.CENTER);
         view.setPadding(0, pad, 0, pad);
@@ -293,15 +284,14 @@ public final class DirectOrganizer {
                                        String confirmText, Consumer<String> onConfirm,
                                        Consumer<String> onPickExisting) {
         try {
-            boolean dark = isDark(activity);
             float density = activity.getResources().getDisplayMetrics().density;
-            int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
-            int separator = dark ? 0x40FFFFFF : 0x33000000;
+            int textColor = UI.getThemedColour("igds_color_primary_text");
+            int separator = UI.getThemedColour("igds_color_separator");
             int pad = (int) (density * 16);
 
             LinearLayout card = new LinearLayout(activity);
             card.setOrientation(LinearLayout.VERTICAL);
-            card.setBackground(translucentBackground(dark, density));
+            card.setBackground(translucentBackground(density));
 
             TextView title = new TextView(activity);
             title.setText(titleText);
@@ -316,7 +306,7 @@ public final class DirectOrganizer {
             input.setInputType(InputType.TYPE_CLASS_TEXT);
             input.setSingleLine(true);
             input.setTextColor(textColor);
-            input.setHintTextColor(0xFF8E8E93);
+            input.setHintTextColor(UI.getThemedColour("igds_color_secondary_text"));
             input.setHint(str("piko_dm_category_hint"));
             input.setText(initial);
             input.setSelection(initial.length());
@@ -341,7 +331,7 @@ public final class DirectOrganizer {
             root.addView(card, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             Set<String> existing = getCategories();
             if (onPickExisting != null && !existing.isEmpty()) {
-                root.addView(buildCategoryList(activity, existing, dark, density, name -> {
+                root.addView(buildCategoryList(activity, existing, density, name -> {
                     dialogRef[0].dismiss();
                     onPickExisting.accept(name);
                 }));
@@ -376,18 +366,18 @@ public final class DirectOrganizer {
         }
     }
 
-    private static View buildCategoryList(Activity activity, Set<String> names, boolean dark, float density,
+    private static View buildCategoryList(Activity activity, Set<String> names, float density,
                                           Consumer<String> onPick) {
         int rowHeight = (int) (density * 46);
         LinearLayout list = new LinearLayout(activity);
         list.setOrientation(LinearLayout.VERTICAL);
         boolean first = true;
         for (String name : names) {
-            if (!first) list.addView(line(activity, 0x40FFFFFF, LayoutParams.MATCH_PARENT, Math.max(1, (int) (density * 0.5f))));
+            if (!first) list.addView(line(activity, UI.getThemedColour("igds_color_separator"), LayoutParams.MATCH_PARENT, Math.max(1, (int) (density * 0.5f))));
             first = false;
             TextView item = new TextView(activity);
             item.setText(name);
-            item.setTextColor(dark ? 0xFFFFFFFF : 0xFF000000);
+            item.setTextColor(UI.getThemedColour("igds_color_primary_text"));
             item.setTextSize(16);
             item.setSingleLine(true);
             item.setEllipsize(TextUtils.TruncateAt.END);
@@ -399,7 +389,7 @@ public final class DirectOrganizer {
         ScrollView scroll = new ScrollView(activity);
         scroll.setVerticalScrollBarEnabled(false);
         scroll.addView(list);
-        scroll.setBackground(translucentBackground(dark, density));
+        scroll.setBackground(translucentBackground(density));
         scroll.setClipToOutline(true);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, names.size() > 5 ? rowHeight * 5 : LayoutParams.WRAP_CONTENT);

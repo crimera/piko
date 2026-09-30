@@ -8,35 +8,27 @@ package app.crimera.patches.instagram.misc.dm.categories
 
 import app.morphe.patcher.Fingerprint
 
-// The inbox chat long-press menu builder.
+// The inbox chat long-press menu builder; only the parameters with real class names are matched.
 internal object ThreadLongPressMenuFingerprint : Fingerprint(
-    strings = listOf("DirectInboxThreadDialogController", "set_reminder_impression"),
-    parameters = listOf(
-        "Landroid/graphics/RectF;",
-        "Landroid/view/View;",
-        "LX/077r;",
-        "LX/08r4;",
-        "LX/0QAe;",
-        "LX/095y;",
-        "LX/0Qas;",
-        "Lcom/instagram/model/direct/DirectShareTarget;",
-        "Lcom/instagram/model/direct/DirectThreadKey;",
-        "LX/03sn;",
-        "Ljava/lang/Integer;",
-        "Ljava/lang/String;",
-        "Ljava/lang/String;",
-        "Ljava/util/List;",
-        "Z",
-        "Z",
-        "Z",
-    ),
     returnType = "V",
+    strings = listOf("DirectInboxThreadDialogController", "set_reminder_impression"),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 17 &&
+            methodDef.parameters[1].type == "Landroid/view/View;" &&
+            methodDef.parameters[8].type == "Lcom/instagram/model/direct/DirectThreadKey;"
+    },
 )
 
-// The inbox adapter's update method: every list Instagram shows goes through it.
+// The inbox adapter class, found by the error it throws for duplicate list items.
+internal object InboxAdapterFingerprint : Fingerprint(
+    strings = listOf("Seen duplicate model key for class "),
+)
+
+// The adapter's update method: every list Instagram shows goes through it.
 internal object InboxAdapterUpdateFingerprint : Fingerprint(
-    definingClass = "LX/018n;",
-    name = "A0e",
+    classFingerprint = InboxAdapterFingerprint,
     returnType = "V",
-    parameters = listOf("LX/01MK;", "LX/0Gzv;"),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 2 && methodDef.parameters.all { it.type.startsWith("L") }
+    },
 )

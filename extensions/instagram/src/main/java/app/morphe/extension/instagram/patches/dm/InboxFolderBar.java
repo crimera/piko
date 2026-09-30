@@ -11,13 +11,13 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.view.ContextThemeWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -50,6 +50,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 
 /**
@@ -61,6 +63,13 @@ public final class InboxFolderBar {
     private static final String LIST_ID = "inbox_refreshable_thread_list_recyclerview";
     private static final String LIST_CONTAINER_ID = "list_container";
     private static final String KEY_CLASS = "com.instagram.model.direct.DirectThreadKey";
+    // Obfuscated member names of Instagram 439, read by reflection; other versions need new ones.
+    private static final String BUILDER_ITEMS = "A00";
+    private static final String HOLDER_ADAPTER = "A09";
+    private static final String HOLDER_THREAD_KEY = "A03";
+    private static final String ADAPTER_SUBMIT = "A0g";
+    private static final String[] HOLDER_TO_ITEM_LIST = {HOLDER_ADAPTER, "A08", "A01"};
+    private static final String[] ITEM_TO_THREAD_KEY = {"A09", "A02", "A04"};
     private static final Pattern POSITION = Pattern.compile("position=(\\d+)");
     private static final int BAR_TAG = 0x50494B4F;
     private static final int BAR_HEIGHT_DP = 44;
@@ -302,7 +311,7 @@ public final class InboxFolderBar {
 
     /** Folder chip with an optional red dot for unread chats. */
     private static final class Chip extends TextView {
-        private final Paint dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Drawable dotDrawable = ResourceUtils.getDrawable("red_dot_medium");
         private final float density;
         final String folder;
         boolean dot;
@@ -311,13 +320,17 @@ public final class InboxFolderBar {
             super(new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault));
             this.folder = folder;
             density = context.getResources().getDisplayMetrics().density;
-            dotPaint.setColor(0xFFFF3B30);
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            if (dot) canvas.drawCircle(getWidth() - 7 * density, 7 * density, 4.5f * density, dotPaint);
+            if (!dot || dotDrawable == null) return;
+            int size = (int) (9 * density);
+            int right = getWidth() - (int) (2.5f * density);
+            int top = (int) (2.5f * density);
+            dotDrawable.setBounds(right - size, top, right, top + size);
+            dotDrawable.draw(canvas);
         }
     }
 
@@ -340,16 +353,17 @@ public final class InboxFolderBar {
     private static void addChip(Activity activity, ViewGroup list, View bar, String label, String folder,
                                 boolean selected) {
         float density = activity.getResources().getDisplayMetrics().density;
-        boolean dark = (activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
-                == Configuration.UI_MODE_NIGHT_YES;
         Chip chip = new Chip(activity, folder);
         chip.setText(label);
         chip.setTextSize(14);
         chip.setPadding((int) (14 * density), (int) (6 * density), (int) (14 * density), (int) (6 * density));
         GradientDrawable background = new GradientDrawable();
         background.setCornerRadius(20 * density);
-        background.setColor(selected ? (dark ? 0xFFFFFFFF : 0xFF000000) : (dark ? 0xFF2C2C2E : 0xFFEFEFEF));
-        chip.setTextColor(selected == dark ? 0xFF000000 : 0xFFFFFFFF);
+        background.setColor(selected
+                ? UI.getThemedColour("igds_color_inbox_filter_chip_selected_background")
+                : Color.TRANSPARENT);
+        background.setStroke(Math.max(1, (int) density), UI.getThemedColour("igds_color_inbox_filter_chip_outline"));
+        chip.setTextColor(UI.getThemedColour("igds_color_primary_text"));
         chip.setBackground(background);
         chip.setOnClickListener(v -> {
             lastLoadedCount = -1;
@@ -476,7 +490,7 @@ public final class InboxFolderBar {
     @SuppressWarnings("unchecked")
     public static void onAdapterUpdate(Object builder) {
         try {
-            Object raw = builder == null ? null : field(builder, "A00");
+            Object raw = builder == null ? null : field(builder, BUILDER_ITEMS);
             if (!(raw instanceof List) || assignments.isEmpty()) return;
             List<Object> items = (List<Object>) raw;
             Set<String> keys = new HashSet<>();
@@ -522,7 +536,7 @@ public final class InboxFolderBar {
             List<?> items = holder == null ? null : itemList(holder);
             if (items == null) continue;
             Snapshot snap = new Snapshot();
-            snap.adapter = field(holder, "A09");
+            snap.adapter = field(holder, HOLDER_ADAPTER);
             snap.items = items;
             for (int j = 0; j < items.size(); j++) {
                 String key = keyAt(items, j);
@@ -705,11 +719,11 @@ public final class InboxFolderBar {
         Method submit = null;
         for (Class<?> c = snap.adapter.getClass(); c != null && submit == null; c = c.getSuperclass()) {
             try {
-                submit = c.getDeclaredMethod("A0g", List.class);
+                submit = c.getDeclaredMethod(ADAPTER_SUBMIT, List.class);
             } catch (NoSuchMethodException ignored) {
             }
         }
-        if (submit == null) throw new NoSuchMethodException("A0g(List) not found on " + snap.adapter.getClass().getName());
+        if (submit == null) throw new NoSuchMethodException(ADAPTER_SUBMIT + "(List) not found on " + snap.adapter.getClass().getName());
         submit.setAccessible(true);
         List<Object> next = new ArrayList<>(snap.items);
         next.addAll(Math.min(snap.lastChatIndex + 1, next.size()), extra);
@@ -861,6 +875,14 @@ public final class InboxFolderBar {
         return null;
     }
 
+    private static Object follow(Object owner, String... path) throws Exception {
+        for (String name : path) {
+            if (owner == null) return null;
+            owner = field(owner, name);
+        }
+        return owner;
+    }
+
     /** The list's view holder for a child row; member names are obfuscated, so match by shape. */
     private static Object holderFor(ViewGroup list, View row) throws Exception {
         if (holderOf == null) {
@@ -883,18 +905,14 @@ public final class InboxFolderBar {
 
     /** The adapter's ordered item list; each item carries its chat's DirectThreadKey. */
     private static List<?> itemList(Object holder) throws Exception {
-        Object a09 = field(holder, "A09");
-        Object a08 = a09 == null ? null : field(a09, "A08");
-        Object a01 = a08 == null ? null : field(a08, "A01");
-        return a01 instanceof List ? (List<?>) a01 : null;
+        Object items = follow(holder, HOLDER_TO_ITEM_LIST);
+        return items instanceof List ? (List<?>) items : null;
     }
 
     private static String keyAt(List<?> items, int index) throws Exception {
         if (index < 0 || index >= items.size()) return null;
         Object item = items.get(index);
-        Object a09 = item == null ? null : field(item, "A09");
-        Object a02 = a09 == null ? null : field(a09, "A02");
-        Object key = a02 == null ? null : field(a02, "A04");
+        Object key = follow(item, ITEM_TO_THREAD_KEY);
         return key != null && key.getClass().getName().equals(KEY_CLASS) ? key.toString() : null;
     }
 
@@ -908,7 +926,7 @@ public final class InboxFolderBar {
         try {
             Object holder = holderFor(list, row);
             if (holder == null) return null;
-            Object own = field(holder, "A03");
+            Object own = field(holder, HOLDER_THREAD_KEY);
             if (own != null && own.getClass().getName().equals(KEY_CLASS)) return own.toString();
             List<?> items = itemList(holder);
             int position = positionOf(holder);
