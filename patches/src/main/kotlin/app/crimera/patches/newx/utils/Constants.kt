@@ -16,6 +16,7 @@ internal object Constants {
                 AppTarget(version = "12.28.0-prod.01"),
                 AppTarget(version = "12.29.1-prod.01"),
                 AppTarget(version = "12.30.0-prod.01", isExperimental = true),
+                AppTarget(version = "12.31.0-alpha.02", isExperimental = true),
             ),
         )
 
