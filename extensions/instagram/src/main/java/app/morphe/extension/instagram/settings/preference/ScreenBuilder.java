@@ -1085,7 +1085,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.storySection()){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_category_story"),
                             "",
                             Constants.PIKO_FRAGMENT_STORY
