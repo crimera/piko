@@ -107,12 +107,13 @@ val bringBackTwitterPatch =
                 }
             }
 
-            // Replace app icon background colors
-            val colorsXml = get("res").resolve("values/colors.xml")
-            if (colorsXml.exists()) {
-                document("res/values/colors.xml").use { document ->
-                    document.childNodes.findElementByAttributeValue("name", "ic_launcher_background")?.textContent = "@color/twitter_blue"
-                }
+            // Replace app icon background colors.
+            // AddResourcesPatch only overrides bring-back colors that already exist in the target
+            // app, so define them here for versions that renamed or dropped them. Otherwise the
+            // references below would dangle and the resource table would fail to encode.
+            ensureDefaultBrandingColors()
+            document("res/values/colors.xml").use { document ->
+                document.childNodes.findElementByAttributeValue("name", "ic_launcher_background")?.textContent = "@color/twitter_blue"
             }
 
             // endregion
@@ -197,6 +198,43 @@ val bringBackTwitterPatch =
             }
         }
     }
+
+private fun app.morphe.patcher.patch.ResourcePatchContext.ensureDefaultBrandingColors() {
+    val values = get("res/values")
+    if (!values.isDirectory) {
+        Files.createDirectories(values.toPath())
+    }
+
+    val colorsFile = values.resolve("colors.xml")
+    if (!colorsFile.exists()) {
+        FileWriter(colorsFile).use { writer ->
+            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
+        }
+    }
+
+    document("res/values/colors.xml").use { document ->
+        val colors = document.getElementsByTagName("color")
+        for ((name, value) in listOf(
+            "twitter_blue" to "#1d9bf0",
+            "twitter_splash_background" to "@color/twitter_blue",
+        )) {
+            val existing = (0 until colors.length)
+                .mapNotNull { colors.item(it) as? Element }
+                .firstOrNull { it.getAttribute("name") == name }
+            if (existing != null) {
+                existing.textContent = value
+                continue
+            }
+
+            document.documentElement.appendChild(
+                document.createElement("color").apply {
+                    setAttribute("name", name)
+                    textContent = value
+                },
+            )
+        }
+    }
+}
 
 private fun app.morphe.patcher.patch.ResourcePatchContext.ensureNightSplashBackground() {
     val valuesNight = get("res/values-night")
