@@ -121,6 +121,18 @@ private fun requireMatches(
     )
 }
 
+private fun requireMatches(
+    label: String,
+    matches: Collection<Match>,
+    expectedCounts: IntRange,
+): Collection<Match> {
+    if (matches.size in expectedCounts) return matches
+    throw PatchException(
+        "Expected ${expectedCounts.first}..${expectedCounts.last} $label matches, " +
+            "found ${matches.size}: " + matches.joinToString { it.originalMethod.toString() },
+    )
+}
+
 @Suppress("unused")
 val newXDownloadPatch =
     bytecodePatch(
@@ -136,7 +148,7 @@ val newXDownloadPatch =
                 requireMatches(
                     "NewX video download handler",
                     videoDownloadMatches,
-                    expectedCount = 2,
+                    expectedCounts = 1..2,
                 ).forEach { match ->
                     val patchedResults = match.method.forceSubscriptionFeatureResults()
                     if (patchedResults != VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT) {

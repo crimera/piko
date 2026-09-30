@@ -27,7 +27,7 @@ if [[ ! -f "$MPP" ]]; then
   exit 1
 fi
 
-DEFAULT_APK="./apks/12.30.0-prod.01.apk"
+DEFAULT_APK="./apks/12.31.0-alpha.02.apk"
 OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
 APK="$DEFAULT_APK"
 FLAGS=()

@@ -344,10 +344,12 @@ private fun resolveVideoTabHooks(
     downloader: ResolvedNewXNativeDownloader,
     postDescriptor: String,
 ): List<NativeDownloadHook> {
+    // The legacy video-tab implementation carries a second handler through 12.30; 12.31 removes
+    // that package, so a release has either the current handler alone or both surfaces.
     val handlers = NewXVideoTabDownloadHandlerFingerprint.scopedMatchAll()
-    if (handlers.size != 2) {
+    if (handlers.size !in 1..2) {
         throw PatchException(
-            "Expected two NewX video-tab download handlers, found ${handlers.size}: " +
+            "Expected one or two NewX video-tab download handlers, found ${handlers.size}: " +
                 handlers.joinToString { it.originalMethod.toString() },
         )
     }
