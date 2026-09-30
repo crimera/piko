@@ -7,7 +7,9 @@ class SettingsAggregateValidationTest {
     @Test
     fun `every discovered NewX contribution is valid together`() {
         val repositoryRoot = NewXValidationInputs.repositoryRoot()
-        val catalogs = NewXContributionDiscovery.discover()
+        val catalogs =
+            NewXContributionDiscovery.discover() +
+                NewXValidationInputs.builtInCatalog(repositoryRoot)
 
         assertTrue(catalogs.isNotEmpty())
         assertTrue(catalogs.any { catalog -> catalog.categories.any { it.children.isNotEmpty() } })

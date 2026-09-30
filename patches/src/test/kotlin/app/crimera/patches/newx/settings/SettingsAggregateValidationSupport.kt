@@ -289,6 +289,90 @@ internal object NewXValidationInputs {
         return reads
     }
 
+    private val javaStringConstantPattern =
+        Regex("""static\s+final\s+String\s+(\w+)\s*=\s*\"([^\"]+)\"\s*;""")
+
+    private val builtInRegistrationPattern =
+        Regex(
+            """(?:SettingsRegistry\.)?(registerCategory|registerGroup|registerToggle|registerAction)\(([^()]*)\)\s*;""",
+        )
+
+    /**
+     * Built-in settings are registered by `BuiltInSettings` at runtime rather than injected as
+     * patch contributions. Calls that use helper parameters cannot be resolved and are skipped, so
+     * only literal registrations reach the catalog.
+     */
+    fun builtInCatalog(repositoryRoot: Path): AggregateCatalog {
+        val settingsDirectory =
+            repositoryRoot.resolve(
+                "extensions/newx/src/main/java/app/morphe/extension/newx/settings",
+            )
+        val source = Files.readString(settingsDirectory.resolve("BuiltInSettings.java"))
+        val constants =
+            javaStringConstantPattern.findAll(source).associate {
+                it.groupValues[1] to it.groupValues[2]
+            }
+        val classConstants = settingsClassConstants(settingsDirectory)
+
+        fun resolveString(argument: String): String? {
+            val value = argument.trim()
+            if (value.startsWith('"') && value.endsWith('"')) {
+                return value.substring(1, value.length - 1)
+            }
+            return constants[value] ?: classConstants[value]
+        }
+
+        val nodes =
+            builtInRegistrationPattern.findAll(source).mapNotNull { match ->
+                builtInNode(
+                    kind = match.groupValues[1],
+                    arguments = match.groupValues[2].split(',').map(String::trim),
+                    resolveString = ::resolveString,
+                )
+            }.toList()
+        return assembleBuiltInCatalog(nodes)
+    }
+
+    private fun settingsClassConstants(settingsDirectory: Path): Map<String, String> {
+        val constants = mutableMapOf<String, String>()
+        Files.walk(settingsDirectory).use { paths ->
+            paths.filter { it.extension == "java" }.forEach { path ->
+                val className = path.fileName.toString().removeSuffix(".java")
+                javaStringConstantPattern.findAll(Files.readString(path)).forEach { match ->
+                    constants["$className.${match.groupValues[1]}"] = match.groupValues[2]
+                }
+            }
+        }
+        return constants
+    }
+
+    private fun builtInNode(
+        kind: String,
+        arguments: List<String>,
+        resolveString: (String) -> String?,
+    ): BuiltInNode? {
+        fun string(index: Int): String? =
+            if (arguments[index] == "null") null else resolveString(arguments[index])
+
+        val parentId =
+            when (kind) {
+                "registerCategory" -> null
+                "registerGroup", "registerToggle", "registerAction" -> string(0) ?: return null
+                else -> return null
+            }
+        val id = string(if (kind == "registerCategory") 0 else 1) ?: return null
+        val title = string(if (kind == "registerCategory") 1 else 2) ?: return null
+        val summary = string(if (kind == "registerCategory") 2 else 3)
+        val icon =
+            when (kind) {
+                "registerCategory" -> string(3)
+                "registerGroup" -> string(4)
+                else -> null
+            }
+        val order = arguments.last().toIntOrNull() ?: return null
+        return BuiltInNode(parentId, id, kind, title, summary, icon, order)
+    }
+
     private fun readerType(name: String) =
         when (name) {
             "Boolean" -> AggregateSettingType.BOOLEAN
@@ -297,3 +381,58 @@ internal object NewXValidationInputs {
             else -> error("Unknown NewX registry reader get$name")
         }
 }
+
+private data class BuiltInNode(
+    val parentId: String?,
+    val id: String,
+    val kind: String,
+    val titleResourceName: String,
+    val summaryResourceName: String?,
+    val iconResourceName: String?,
+    val order: Int,
+)
+
+private fun assembleBuiltInCatalog(nodes: List<BuiltInNode>): AggregateCatalog {
+    val childrenByParent = nodes.filter { node -> node.parentId != null }.groupBy(BuiltInNode::parentId)
+    return AggregateCatalog(
+        categories =
+            nodes.filter { node -> node.parentId == null }.map { node ->
+                builtInGroup(node, childrenByParent)
+            },
+    )
+}
+
+private fun builtInGroup(
+    node: BuiltInNode,
+    childrenByParent: Map<String?, List<BuiltInNode>>,
+): AggregateGroup =
+    AggregateGroup(
+        id = node.id,
+        titleResourceName = node.titleResourceName,
+        summaryResourceName = node.summaryResourceName,
+        iconResourceName = node.iconResourceName,
+        order = node.order,
+        children =
+            childrenByParent[node.id].orEmpty().map { child -> builtInChild(child, childrenByParent) },
+    )
+
+private fun builtInChild(
+    node: BuiltInNode,
+    childrenByParent: Map<String?, List<BuiltInNode>>,
+): AggregateNode =
+    when (node.kind) {
+        "registerGroup" -> AggregateGroupNode(builtInGroup(node, childrenByParent))
+        "registerToggle" ->
+            AggregateSettingNode(builtInSetting(node, AggregateSettingType.BOOLEAN))
+        "registerAction" ->
+            AggregateSettingNode(builtInSetting(node, AggregateSettingType.ACTION))
+        else -> error("Unsupported built-in NewX node ${node.kind}: ${node.id}")
+    }
+
+private fun builtInSetting(node: BuiltInNode, type: AggregateSettingType) =
+    AggregateSetting(
+        id = node.id,
+        titleResourceName = node.titleResourceName,
+        summaryResourceName = node.summaryResourceName,
+        type = type,
+    )
