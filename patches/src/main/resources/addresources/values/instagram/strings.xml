@@ -456,4 +456,17 @@
     <string name="piko_mark_story_seen">Mark as seen</string>
     <string name="piko_story_seen_pending">Marking as seen</string>
     <string name="piko_story_seen_sent">Marked as seen</string>
+    <string name="piko_dm_categorize">Categorize</string>
+    <string name="piko_dm_uncategorize">Uncategorize</string>
+    <string name="piko_dm_categorize_title">Categorize chat</string>
+    <string name="piko_dm_rename_title">Rename category</string>
+    <string name="piko_dm_category_hint">Category name</string>
+    <string name="piko_dm_create">Create</string>
+    <string name="piko_dm_save">Save</string>
+    <string name="piko_dm_all">All</string>
+    <string name="piko_dm_rename">Rename</string>
+    <string name="piko_dm_delete_category">Delete category</string>
+    <string name="piko_dm_chat_categorized">Chat categorized: %s</string>
+    <string name="piko_dm_chat_uncategorized">Chat uncategorized</string>
+    <string name="piko_dm_invalid_name">Invalid or duplicate name</string>
 </resources>
