@@ -1,13 +1,15 @@
 package app.crimera.patches.utils
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionFilter
 import app.morphe.patcher.Match
 import app.morphe.patcher.patch.BytecodePatchContext
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import java.util.WeakHashMap
 
-private data class MethodShape(
+internal data class MethodShape(
     val returnType: String,
     val parameterCount: Int,
 )
@@ -76,6 +78,39 @@ private fun String.isExactTypeDeclaration(): Boolean =
         startsWith('[') && endsWith(';')
 
 /**
+ * Fingerprint without an owner scope that records its exact method shape at declaration time.
+ *
+ * Morphe made `Fingerprint.returnType` and `Fingerprint.parameters` internal, so the scoped matcher
+ * cannot read the declaration from the [Fingerprint] instance anymore. Shape-only fingerprints must
+ * extend this class to keep using the shape index; plain [Fingerprint]s without an owner scope are
+ * still matched, but they fall back to the global matcher.
+ */
+internal open class ShapeFingerprint(
+    returnType: String? = null,
+    parameters: List<String>? = null,
+    name: String? = null,
+    accessFlags: List<AccessFlags>? = null,
+    filters: List<InstructionFilter>? = null,
+    strings: List<String>? = null,
+    custom: ((method: Method, classDef: ClassDef) -> Boolean)? = null,
+) : Fingerprint(
+    name = name,
+    accessFlags = accessFlags,
+    returnType = returnType,
+    parameters = parameters,
+    filters = filters,
+    strings = strings,
+    custom = custom,
+) {
+    internal val declaredShape: MethodShape? =
+        if (returnType == null || parameters == null) {
+            null
+        } else {
+            returnType.takeIf(String::isExactTypeDeclaration)?.let { MethodShape(it, parameters.size) }
+        }
+}
+
+/**
  * Matches every method while pre-scoping exact owners, preserved owner prefixes, and exact method
  * shapes. Unlike Morphe's global all-match path, owner scopes are resolved before method matching.
  */
@@ -95,14 +130,15 @@ internal fun Fingerprint.scopedMatchAllOrNull(): List<Match>? {
         return matches.ifEmpty { null }
     }
 
+    // Declared owner scope. Morphe hides the field but keeps a `getDefiningClass()` binary
+    // compatibility shim for bundles compiled against earlier patcher versions.
     val classScope = definingClass
     if (classScope == null) {
-        val exactReturnType = returnType?.takeIf(String::isExactTypeDeclaration)
-        val parameterCount = parameters?.size
-        if (exactReturnType == null || parameterCount == null) return matchAllOrNull()
+        // `returnType`/`parameters` are internal in current Morphe patchers, so the shape comes from
+        // the piko-owned declaration instead of a hidden patcher field.
+        val shape = (this as? ShapeFingerprint)?.declaredShape ?: return matchAllOrNull()
 
-        val candidates =
-            FingerprintCandidateCache.methods(context, MethodShape(exactReturnType, parameterCount))
+        val candidates = FingerprintCandidateCache.methods(context, shape)
         val matches = buildList {
             candidates.forEach { method ->
                 val classDef = context.classDefByOrNull(method.definingClass) ?: return@forEach

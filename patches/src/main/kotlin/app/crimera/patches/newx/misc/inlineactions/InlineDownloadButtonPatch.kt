@@ -36,6 +36,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.utils.ShapeFingerprint
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -789,7 +790,7 @@ context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String): FieldReference {
     val resourceId = getResourceId(ResourceType.DRAWABLE, resourceName)
     val fields =
-        Fingerprint(
+        ShapeFingerprint(
             name = "<clinit>",
             returnType = "V",
             parameters = emptyList(),

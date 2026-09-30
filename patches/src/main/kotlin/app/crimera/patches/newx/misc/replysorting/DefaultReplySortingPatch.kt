@@ -20,6 +20,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.utils.ShapeFingerprint
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -111,7 +112,7 @@ private fun MutableMethod.insertReplySortingDefault(
  * Targets the NewX Compose post-detail timeline repository initialization that seeds
  * TimelineRankingMode.Relevance before the repository factory call.
  */
-private object NewXComposeReplySortingFingerprint : Fingerprint(
+private object NewXComposeReplySortingFingerprint : ShapeFingerprint(
     name = "invokeSuspend",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
@@ -135,7 +136,7 @@ private object NewXComposeReplySortingFingerprint : Fingerprint(
  * The callback owner and package are release-specific; resolve it from the stable Kotlin
  * function-reference shape and the semantic branch strings instead.
  */
-private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
+private object NewXComposeReplySortingSelectionFingerprint : ShapeFingerprint(
     name = "invoke",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
@@ -158,7 +159,7 @@ private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
  * Targets the Compose state initializer that seeds the reply-sorting sheet with
  * `mutableStateOf(TimelineRankingMode.Relevance)`.
  */
-private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
+private object NewXComposeReplySortingUiStateFingerprint : ShapeFingerprint(
     name = "invoke",
     returnType = "Ljava/lang/Object;",
     parameters = emptyList(),

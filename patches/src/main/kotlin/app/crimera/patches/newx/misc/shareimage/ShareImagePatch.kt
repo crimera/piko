@@ -11,6 +11,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.utils.ShapeFingerprint
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -179,7 +180,7 @@ val newXShareImagePatch =
             val detailThreadRenderer =
                 requireAtMostOne(
                     "NewX post-detail thread renderer",
-                    Fingerprint(
+                    ShapeFingerprint(
                         returnType = "V",
                         // The wide detail-Composable ABI is the discriminator and this hook is optional.
                         // newx-resolver-lint: allow rigid-signature
@@ -225,7 +226,7 @@ val newXShareImagePatch =
             val detailPostRenderer =
                 requireAtMostOne(
                     "NewX post-detail post renderer",
-                    Fingerprint(
+                    ShapeFingerprint(
                         returnType = "V",
                         // The wide detail-Composable ABI is the discriminator and this hook is optional.
                         // newx-resolver-lint: allow rigid-signature

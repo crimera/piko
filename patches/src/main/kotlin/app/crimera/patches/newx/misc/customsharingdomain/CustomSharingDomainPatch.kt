@@ -10,6 +10,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.requireAtMostOne
 import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.utils.ShapeFingerprint
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -92,7 +93,7 @@ internal object ShareSheetCopyStubFingerprint : Fingerprint(
  * anchors on the construction contract instead: `(String, String) -> Intent` that seeds an
  * ACTION_SEND Intent and keys EXTRA_TEXT on it.
  */
-internal object MovedShareIntentBuilderFingerprint : Fingerprint(
+internal object MovedShareIntentBuilderFingerprint : ShapeFingerprint(
     parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
     returnType = INTENT_DESCRIPTOR,
     filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),

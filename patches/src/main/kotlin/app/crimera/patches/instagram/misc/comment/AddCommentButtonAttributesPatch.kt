@@ -95,7 +95,7 @@ fun addButtonAttribute(
             
             sget-object v$buttonStyleRegister, $buttonStyleClass->A00:$buttonStyleClass
             
-            new-instance v$bundleRegister, ${buttonInstanceFingerprint.definingClass}
+            new-instance v$bundleRegister, ${buttonInstanceFingerprint.classDef.type}
             invoke-direct {v$bundleRegister, v$buttonStyleRegister, v$drawableInitRegister, v$stringInitRegister, v$buttonInvokeRelatedRegister}, $bundleClass-><init>($buttonStyleParentClass $drawableInitClass $stringInitClass $buttonInvokeRelatedClass)V
             
             goto :array_add

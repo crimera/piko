@@ -8,6 +8,9 @@ INSTALL=false
 # Morphe Manager's adaptive default is higher, but 512 MB is its supported heap floor. Keeping
 # local patch runs at that floor catches memory regressions that a desktop-sized heap would hide.
 PATCHER_MAX_HEAP_MB="${PATCHER_MAX_HEAP_MB:-512}"
+# Overridable so the bundle can also be exercised against a pre-release/manager patcher build,
+# which is the ABI the shipped manager app actually executes.
+MORPHE_CLI_JAR="${MORPHE_CLI_JAR:-../piko/morphe-desktop-1.11.0-all.jar}"
 FASTDEPLOY_PLATFORM_TOOLS_VERSION="${FASTDEPLOY_PLATFORM_TOOLS_VERSION:-36.0.0}"
 FASTDEPLOY_PLATFORM_TOOLS_DIR="${FASTDEPLOY_PLATFORM_TOOLS_DIR:-${HOME}/.cache/piko/platform-tools-${FASTDEPLOY_PLATFORM_TOOLS_VERSION}}"
 
@@ -43,7 +46,7 @@ for arg in "$@"; do
 done
 
 echo "Patcher JVM heap limit: ${PATCHER_MAX_HEAP_MB} MB"
-java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
+java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -p "$MPP" \
   --keystore Morphe.keystore \
   --exclusive \
