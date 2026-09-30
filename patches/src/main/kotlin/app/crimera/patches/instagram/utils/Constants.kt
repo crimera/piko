@@ -41,6 +41,7 @@ object Constants {
     const val USER_DETAIL_VIEW_MODEL_CLASS = "Lcom/instagram/profile/fragment/UserDetailViewModel;"
     const val ORIGINAL_SOUND_DATA_INTF = "Lcom/instagram/api/schemas/OriginalSoundDataIntf;"
     const val MUSIC_INFO_CLASS = "Lcom/instagram/api/schemas/MusicInfo;"
+    const val FOLLOW_LIST_DATA_CLASS = "Lcom/instagram/follow/analytics/FollowListData;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
@@ -57,6 +58,7 @@ object Constants {
         move-result-object v%s"""
 
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
+    const val CUSTOM_FONT_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise/font/CustomFont;"
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
     const val ACTIONBAR_DESCRIPTOR = "$PATCHES_DESCRIPTOR/actionbar/ActionBarPatch;"
 

@@ -38,11 +38,9 @@ internal object ExtMediaGetImageMethodFinder : Fingerprint(
 
 // Also required for download patch.
 object MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/tweetview/core/ui/mediaoptionssheet/",
     returnType = "Z",
-    strings = listOf("url", "video_download"),
-    custom = { _, classDef ->
-        classDef.startsWith("Lcom/twitter/tweetview/core/ui/mediaoptionssheet/")
-    },
+    strings = listOf("url", "video_download")
 )
 
 internal object MediaResolutionToStringFingerprint : Fingerprint(
@@ -57,10 +55,8 @@ internal object MediaResolutionToStringFingerprint : Fingerprint(
 )
 
 internal object ExtMediaGetSensitiveMediaCategoriesFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/model/core/entity/",
     name = "getSensitiveMediaCategories",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
-    returnType = "Ljava/util/Set;",
-    custom = { _, classDef ->
-        classDef.type.startsWith("Lcom/twitter/model/core/entity/")
-    },
+    returnType = "Ljava/util/Set;"
 )

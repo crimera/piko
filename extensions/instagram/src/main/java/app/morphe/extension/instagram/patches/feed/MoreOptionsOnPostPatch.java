@@ -78,6 +78,7 @@ public class MoreOptionsOnPostPatch {
             });
 
             dialog.setTitle(str("piko_post_options"));
+            dialog.setNegativeButton(str("piko_close"), (d, which) -> d.dismiss());
             dialog.setCancelable(true);
             dialog.setCanceledOnTouchOutside(true);
 

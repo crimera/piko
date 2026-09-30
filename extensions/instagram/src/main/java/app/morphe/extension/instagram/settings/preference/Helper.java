@@ -13,8 +13,10 @@ import java.util.Set;
 
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
+import app.morphe.extension.instagram.settings.preference.widgets.LikeAnimationPreference;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
+import app.morphe.extension.instagram.settings.preference.widgets.DownloadFileNameTemplatePref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.NavigationBarPreference;
 import app.morphe.extension.instagram.settings.preference.widgets.NavigationStartupPreference;
@@ -51,8 +53,37 @@ public class Helper {
         return preference;
     }
 
+    /**
+     * A switch whose value is currently forced on by another feature.
+     *
+     * When {@code forced} the switch is shown checked and non-interactive with
+     * {@code forcedSummary}, without writing to the stored value, so the user's own choice
+     * returns once the feature releases it.
+     * Not specific to any patch: any feature that overrides a setting can use it.
+     */
+    public Preference forcedSwitchPreference(
+            String title,
+            String summary,
+            BooleanSetting setting,
+            boolean forced,
+            String forcedSummary
+    ) {
+        Preference preference = switchPreference(title, forced ? forcedSummary : summary, setting);
+        if (forced && preference instanceof SwitchPref) {
+            SwitchPref switchPreference = (SwitchPref) preference;
+            switchPreference.setPersistent(false);
+            // Attaching the preference initializes it from the default value, which would undo
+            // setChecked(true), so the default has to be true as well while it is forced.
+            switchPreference.setDefaultValue(Boolean.TRUE);
+            switchPreference.setChecked(true);
+            switchPreference.setSwitchInteractionEnabled(false);
+        }
+        return preference;
+    }
+
     public Preference listPreference(String title, String summary, StringSetting setting) {
-        ListPref preference = new ListPref(context);
+        ListPref preference = setting == Settings.CHANGE_LIKE_ANIMATION
+                ? new LikeAnimationPreference(context) : new ListPref(context);
         String key = setting.key;
         preference.setTitle(title);
         preference.setDialogTitle(title);
@@ -62,11 +93,19 @@ public class Helper {
         return preference;
     }
 
-    public Preference buttonPreference(String title, String summary, String setting) {
+    public ButtonPref buttonPreference(String title, String summary, String setting) {
         ButtonPref preference = new ButtonPref(context);
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
+        return preference;
+    }
+
+    public Preference categoryPreference(String title, String summary, String setting) {
+        ButtonPref preference = buttonPreference(title, summary, setting);
+        // Among rows with a chevron (>), only top-level Piko categories get a pressed highlight.
+        // Other chevron rows keep the chevron without a pressed highlight.
+        preference.setPressedHighlightEnabled(true);
         return preference;
     }
 
@@ -102,6 +141,21 @@ public class Helper {
         preference.setNumericOnly(true);
         return preference;
     }
+
+    public Preference downloadFileNameTemplatePreference(
+            String title,
+            String summary,
+            StringSetting setting
+    ) {
+        DownloadFileNameTemplatePref preference = new DownloadFileNameTemplatePref(context);
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setKey(setting.key);
+        preference.setDefaultValue(setting.defaultValue);
+        return preference;
+    }
+
     public Preference multiSelectListPref(String title, String summary, StringSetting setting) {
         MultiSelectListPref preference = new MultiSelectListPref(context);
         String key = setting.key;

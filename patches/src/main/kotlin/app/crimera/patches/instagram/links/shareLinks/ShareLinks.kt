@@ -18,6 +18,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.util.indexOfFirstInstructionOrThrow
+import app.morphe.util.matchSingle
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -80,7 +81,7 @@ internal fun hookShareLinks(
 
 context(patchContext: BytecodePatchContext)
 private fun hookAudioShareLink(hook: (Int) -> String) {
-    val audioUrlParserMatch = AudioUrlResponseJsonParserFingerprint.matchAll(1..1).single()
+    val audioUrlParserMatch = AudioUrlResponseJsonParserFingerprint.matchSingle()
     val audioUrlStringIndex = audioUrlParserMatch.stringMatches.single().index
 
     audioUrlParserMatch.method.apply {
@@ -105,7 +106,7 @@ private fun hookAudioShareLink(hook: (Int) -> String) {
 
 context(patchContext: BytecodePatchContext)
 private fun hookHighlightShareLink(hook: (Int) -> String) {
-    val highlightShareUrlRequestMatch = HighlightShareUrlRequestFingerprint.matchAll(1..1).single()
+    val highlightShareUrlRequestMatch = HighlightShareUrlRequestFingerprint.matchSingle()
     val highlightCallbackType =
         highlightShareUrlRequestMatch.method.instructions
             .mapNotNull { instruction ->

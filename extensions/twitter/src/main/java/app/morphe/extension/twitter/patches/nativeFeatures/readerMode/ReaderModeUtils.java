@@ -152,8 +152,13 @@ public class ReaderModeUtils {
         return threadsDir;
     }
 
+    // Bumped after fixing a stored-XSS bug (unescaped tweet/author text in the cached HTML) so
+    // caches written before the fix are never read back - they'd still contain the unescaped
+    // markup. Old "threads_<id>.html" files are simply orphaned, not migrated.
+    private static final String CACHE_FORMAT_VERSION = "v2";
+
     private static File cacheFileDir(String tweetId) {
-        return new File(cacheDir(), THREADS_KEY + "_" + tweetId + ".html");
+        return new File(cacheDir(), THREADS_KEY + "_" + CACHE_FORMAT_VERSION + "_" + tweetId + ".html");
     }
 
     public static void clearCache() {
@@ -205,6 +210,9 @@ public class ReaderModeUtils {
         String html = "";
 
         try {
+            if (tweetId == null || !tweetId.matches("\\d+")) {
+                throw new IllegalArgumentException("Invalid tweet id");
+            }
             html = readCacheFile(tweetId);
             if (html == null) {
                 JSONObject threadInfo = getThreadInfo(tweetId);
