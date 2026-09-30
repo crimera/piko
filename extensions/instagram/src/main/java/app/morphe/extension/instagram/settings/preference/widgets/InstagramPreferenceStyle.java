@@ -36,6 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.patches.customise.font.CustomFontContext;
 import app.morphe.extension.instagram.settings.SettingsActivity;
 import app.morphe.extension.shared.ResourceUtils;
 
@@ -118,7 +119,7 @@ public final class InstagramPreferenceStyle {
         int themeRes = UI.isDarkMode()
                 ? android.R.style.Theme_DeviceDefault
                 : android.R.style.Theme_DeviceDefault_Light;
-        return new android.view.ContextThemeWrapper(context, themeRes);
+        return new CustomFontContext(context, themeRes);
     }
 
     public static int backgroundColor() {
@@ -692,6 +693,8 @@ public final class InstagramPreferenceStyle {
                 return false;
             }
 
+            // Highlight the switch row when its text area is pressed, but never when the
+            // switch itself is tapped; the switch provides its own touch feedback.
             View excludedView = findViewWithTag(TAG_SWITCH);
             if (excludedView == null) {
                 return true;
