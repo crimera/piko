@@ -25,7 +25,6 @@ import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.download.DownloadMapping;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.instagram.patches.focusLock.FocusLockDialogs;
 import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
@@ -71,7 +70,7 @@ public class ButtonPref extends Preference {
                             || key.equals("piko_export_pref") || key.equals("piko_import_pref")
                             || key.equals("piko_download_set_path") || key.equals("piko_pref_add_font")) {
                         ActivityHook.launchFragment((Activity) context, key);
-                        
+
                     } else if (key.equals("piko_reset_pref")) {
                         InstaUtils.showResetSettingsDialog(context);
 
@@ -132,7 +131,7 @@ public class ButtonPref extends Preference {
 
     @Override
     protected View onCreateView(ViewGroup parent) {
-        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON,getIconResourceName(getKey()));
+        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON, getIconResourceName(getKey()));
     }
 
     @Override
@@ -178,47 +177,54 @@ public class ButtonPref extends Preference {
                 && !Constants.PIKO_FRAGMENT_REC_FLAGS.equals(key);
     }
 
+    public void setPressedHighlightEnabled(boolean enabled) {
+        if (pressedHighlightEnabled != enabled) {
+            pressedHighlightEnabled = enabled;
+            notifyChanged();
+        }
+    }
+
     private String getIconResourceName(String key) {
         if (key == null) {
             return null;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_ADS)){
+        if (key.equals(Constants.PIKO_FRAGMENT_ADS)) {
             return UI.DRAWABLE_ADS_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
+        if (key.equals(Constants.PIKO_FRAGMENT_GHOST)) {
             return UI.DRAWABLE_GHOST_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_STORY)){
+        if (key.equals(Constants.PIKO_FRAGMENT_STORY)) {
             return UI.DRAWABLE_STORY_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
+        if (key.equals(Constants.PIKO_FRAGMENT_LINKS)) {
             return UI.DRAWABLE_LINK_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)){
+        if (key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)) {
             return UI.DRAWABLE_FRAME_CROSSED_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
+        if (key.equals(Constants.PIKO_FRAGMENT_MISC)) {
             return UI.DRAWABLE_SHAPES_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
+        if (key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)) {
             return UI.DRAWABLE_DOWNLOAD_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
+        if (key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)) {
             return UI.DRAWABLE_STACK_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)){
+        if (key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)) {
             return UI.DRAWABLE_GEAR_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_ABOUT)){
+        if (key.equals(Constants.PIKO_FRAGMENT_ABOUT)) {
             return UI.DRAWABLE_DEBUG_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_ACTION_BAR)){
+        if (key.equals(Constants.PIKO_FRAGMENT_ACTION_BAR)) {
             return UI.DRAWABLE_COLLECTIONS_ICON;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_DM)){
+        if (key.equals(Constants.PIKO_FRAGMENT_DM)) {
             return UI.DRAWABLE_SHARE_TO_DIRECT;
         }
-        if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
+        if (key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)) {
             return UI.DRAWABLE_SHARE_TO_REEL;
         }
         return null;
