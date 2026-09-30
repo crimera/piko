@@ -212,11 +212,15 @@ public class RestorePrefActivity extends AppCompatActivity {
         String setName = null;
         boolean sawRoot = false;
         int depth = 0;
+        boolean inPrimitive = false;
         for (int event = parser.getEventType(); event != XmlPullParser.END_DOCUMENT; event = parser.next()) {
             if (event == XmlPullParser.END_TAG) {
+                if (depth == 2) inPrimitive = false;
                 depth--;
                 continue;
             }
+            // Android's reader throws on any text inside a primitive entry.
+            if (event == XmlPullParser.TEXT && inPrimitive) return false;
             if (event != XmlPullParser.START_TAG) continue;
             depth++;
             String tag = parser.getName();
@@ -249,6 +253,7 @@ public class RestorePrefActivity extends AppCompatActivity {
                     default:
                         return false;
                 }
+                inPrimitive = !"string".equals(tag) && !"set".equals(tag);
             } else if (depth != 3 || setName == null || !"string".equals(tag)) {
                 return false;
             }
