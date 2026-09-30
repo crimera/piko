@@ -37,13 +37,16 @@ internal object SetUserNameOnUserHeaderFingerprint : Fingerprint(
 )
 
 internal object SetTweetStatViewValueExtension : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/patches/",
     name = "setTweetStatViewValue",
 )
 
 internal object HeaderComponentViewFieldNameExtension : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/patches/",
     name = "headerComponentViewFieldName",
 )
 
 internal object HeaderComponentContextFieldNameExtension : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/patches/",
     name = "headerComponentContextFieldName",
 )

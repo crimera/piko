@@ -11,43 +11,55 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.findInstructionIndicesReversedOrThrow
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableField
-import com.android.tools.smali.dexlib2.Opcode
 
 private object DisableAutoScrollFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf(
-        "applicationManager", "releaseCompletable", "preferences", "twSystemClock",
-        "launchTracker", "cold_start_launch_time_millis",
-    ),
+    // Target method has a very large number of strings and resolves very slowly
+    // if unordered strings are declared due to out of order string matching.
+    filters = listOf(
+        string("applicationManager"),
+        string("releaseCompletable"),
+        string("preferences"),
+        string("twSystemClock"),
+        string("launchTracker"),
+        string("cold_start_launch_time_millis")
+    )
 )
 
 internal object HomeTimelineRestoreFingerprint : Fingerprint(
     returnType = "V",
     parameters = emptyList(),
-    strings = listOf("home_timeline_disable_home_scroll_position_restoration_on_cold_launch_enabled"),
+    filters = listOf(
+        string("home_timeline_disable_home_scroll_position_restoration_on_cold_launch_enabled")
+    )
 )
 
 private object HomeTimelineRenderFingerprint : Fingerprint(
@@ -70,7 +82,7 @@ val disableAutoScrollPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val coldStart = DisableAutoScrollFingerprint.matchAll(1..1).single().classDef.methods.singleOrNull {
+            val coldStart = DisableAutoScrollFingerprint.matchSingle().classDef.methods.singleOrNull {
                 it.returnType == "Z" && it.parameterTypes.isEmpty() &&
                     !AccessFlags.STATIC.isSet(it.accessFlags) && (it.implementation?.registerCount ?: 0) > 1
             } ?: throw PatchException("Could not uniquely resolve the home cold-start decision")
@@ -84,7 +96,7 @@ val disableAutoScrollPatch =
             """.trimIndent(), ExternalLabel("native", coldStart.getInstruction(0)))
 
             val (scope, forYouType) = preserveTimelinePosition()
-            HomeTimelineRenderFingerprint.matchAll(1..1).single().method.apply {
+            HomeTimelineRenderFingerprint.matchSingle().method.apply {
                 val scrollIndex = instructions.withIndex().filter { (_, instruction) ->
                     instruction.opcode == Opcode.INVOKE_VIRTUAL &&
                         instruction.getReference<MethodReference>()?.let {
@@ -136,23 +148,35 @@ val disableAutoScrollPatch =
     }
 
 private object HomeRequestFactoryFingerprint : Fingerprint(
-    strings = listOf("requestConfig", "urtCursorProvider", "home_timeline_send_seen_ids_ignore_network_state"),
+    filters = listOf(
+        string("requestConfig"),
+        string("urtCursorProvider"),
+        string("home_timeline_send_seen_ids_ignore_network_state")
+    )
 )
 
 private object TimelineResponseFingerprint : Fingerprint(
-    strings = listOf("globalObjects", "responseObjects", "urt_replace_entry"),
+    filters = listOf(
+        string("globalObjects"),
+        string("responseObjects"),
+        string("urt_replace_entry")
+    )
 )
 
 private object TimelineInstructionParserFingerprint : Fingerprint(
     name = "<clinit>",
-    strings = listOf("clearCache", "TimelineClearCache", "addEntries", "TimelineAddEntries"),
+    filters = listOf(
+        string("addEntries"),
+        string("TimelineAddEntries"),
+        string("clearCache")
+    )
 )
 
 context(context: BytecodePatchContext)
 internal fun preserveTimelineCache(forYouType: Int) {
-    val response = TimelineResponseFingerprint.matchAll(1..1).single()
-    val factory = HomeRequestFactoryFingerprint.matchAll(1..1).single().method
-    val parser = TimelineInstructionParserFingerprint.matchAll(1..1).single().method.instructions.toList()
+    val response = TimelineResponseFingerprint.matchSingle()
+    val factory = HomeRequestFactoryFingerprint.matchSingle().method
+    val parser = TimelineInstructionParserFingerprint.matchSingle().method.instructions.toList()
     val cacheName = parser.indexOfFirst { it.getReference<StringReference>()?.string == "clearCache" }
     val cacheClass = parser.take(cacheName).lastOrNull { it.opcode == Opcode.CONST_CLASS }
         ?.getReference<TypeReference>()?.type
@@ -262,16 +286,24 @@ internal fun preserveTimelineCache(forYouType: Int) {
 private object InitialTimelineLoadFingerprint : Fingerprint(
     returnType = "I",
     parameters = emptyList(),
-    strings = listOf("android_initial_timeline_load_count", "android_home_timeline_mark_as_unlimited_timeline"),
+    filters = listOf(
+        string("android_initial_timeline_load_count"),
+        string("android_home_timeline_mark_as_unlimited_timeline")
+    )
 )
 
 context(context: BytecodePatchContext)
 internal fun preserveInitialTimelineLoad(forYouType: Int) {
-    val method = InitialTimelineLoadFingerprint.matchAll(1..1).single().method
+    val method = InitialTimelineLoadFingerprint.matchSingle().method
     val code = method.instructions.toList()
-    val type = code.filter { it.opcode == Opcode.IGET }.mapNotNull { it.getReference<FieldReference>() }
-        .singleOrNull { it.definingClass == method.definingClass && it.type == "I" }
-        ?: throw PatchException("Could not resolve initial-load timeline type")
+    val typeIndex = method.findInstructionIndicesReversedOrThrow(
+        fieldAccess(
+            opcode = Opcode.IGET,
+            definingClass = "this",
+            type = "I"
+        )
+    ).singleOrNull() ?: throw PatchException("Could not resolve initial-load timeline type")
+    val type = method.getInstruction<ReferenceInstruction>(typeIndex).getReference<FieldReference>()!!
     val keyIndex = code.indexOfFirst {
         it.getReference<StringReference>()?.string == "android_initial_timeline_load_count"
     }
