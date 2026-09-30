@@ -19,9 +19,8 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction31i
 
@@ -39,7 +38,6 @@ val saveMediaCommentPatch =
             commentButtonClickCheckPatch,
             commentDataEntity,
             mediaDataEntity,
-            resourceMappingPatch,
             decoderEntity,
             debugCommentPatch,
         )
@@ -50,7 +48,7 @@ val saveMediaCommentPatch =
                 stringLateral = (instructions.last { it.opcode == Opcode.CONST } as Instruction31i).wideLiteral
             }
 
-            var drawableLateral: Long = getResourceId(ResourceType.DRAWABLE, "instagram_download_outline_24")
+            var drawableLateral: Long = resourceId(ResourceType.DRAWABLE, "instagram_download_outline_24")
 
             addButtonAttribute(
                 stringLateral,

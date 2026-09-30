@@ -8,14 +8,10 @@ package app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton
 
 import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.utils.getReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.string
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -30,8 +26,7 @@ val inboxActionBarButtonPatch =
         description = "This patch is adds support for adding buttons on Inbox action bar.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(resourceMappingPatch)
-
+        
         execute {
 
             InboxActionBarBuilderFingerprint.method.apply {

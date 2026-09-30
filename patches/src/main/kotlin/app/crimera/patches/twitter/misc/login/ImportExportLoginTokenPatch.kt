@@ -14,14 +14,12 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -36,7 +34,7 @@ private object OcfCtaStepDynamicLayoutInflateFingerprint : Fingerprint(
     returnType = "V",
     filters =
         listOf(
-            literal(getResourceId(ResourceType.LAYOUT, "ocf_cta_step_dynamic")),
+            resourceLiteral(ResourceType.LAYOUT, "ocf_cta_step_dynamic"),
             methodCall(definingClass = "Landroid/view/LayoutInflater;", name = "inflate"),
             opcode(Opcode.MOVE_RESULT_OBJECT, InstructionLocation.MatchAfterImmediately()),
         ),
@@ -78,7 +76,6 @@ val importExportLoginTokenPatch =
         compatibleWith(COMPATIBILITY_X)
 
         dependsOn(
-            resourceMappingPatch,
             settingsPatch,
             importExportLoginTokenResourcePatch,
         )

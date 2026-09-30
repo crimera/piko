@@ -17,10 +17,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
@@ -36,7 +38,9 @@ private object HomeTimelineSaveFingerprint : Fingerprint(
     classFingerprint = HomeTimelineRestoreFingerprint,
     returnType = "V",
     parameters = emptyList(),
-    strings = listOf("android_htl_position_metadata_capture_enabled"),
+    filters = listOf(
+        string("android_htl_position_metadata_capture_enabled")
+    )
 )
 
 private data class TimelineFields(
@@ -51,7 +55,7 @@ private data class TimelineFields(
 
 context(context: BytecodePatchContext)
 internal fun preserveTimelinePosition(): Pair<String, Int> {
-    val restore = HomeTimelineRestoreFingerprint.matchAll(1..1).single()
+    val restore = HomeTimelineRestoreFingerprint.matchSingle()
     val home = restore.classDef
     val restoreCode = restore.method.instructions.toList()
     val timelineType = restoreCode[0].getReference<FieldReference>()
@@ -68,7 +72,7 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
         throw PatchException("Timeline position helpers already exist")
     }
 
-    val save = HomeTimelineSaveFingerprint.matchAll(1..1).single().method
+    val save = HomeTimelineSaveFingerprint.matchSingle().method
     val captureReference = save.instructions.mapNotNull { it.getReference<MethodReference>() }
         .singleOrNull { it.parameterTypes.isEmpty() && it.returnType == "Ljava/util/List;" }
         ?: throw PatchException("Could not uniquely resolve native position capture")
@@ -117,7 +121,8 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
     home.methods.add(
         ImmutableMethod(home.type, scopeName, emptyList(), "Z", AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
             null, null, MutableMethodImplementation(3)).toMutable().apply {
-            addInstructions("""
+            addInstructions(0,
+                """
                 iget v0, p0, $timelineType
                 const/16 v1, $forYouType
                 if-ne v0, v1, :disabled
@@ -139,7 +144,8 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
             // Adapter positions can be NO_POSITION while an update awaits layout. The
             // native capture adds child indices to that value and saves unrelated rows.
             // Bound IDs and decorated offsets describe the items actually on screen.
-            addInstructions("""
+            addInstructions(0,
+                """
                 instance-of v0, p0, ${home.type}
                 if-eqz v0, :native
                 check-cast p0, ${home.type}
@@ -235,9 +241,12 @@ private fun preserveTimelineIdentity(
     } ?: throw PatchException("Could not resolve native timeline metadata")
     val constructorMethod = context.classDefBy(constructor.definingClass).methods.single { it.toString() == constructor.toString() }
     val receiver = constructorMethod.implementation!!.registerCount - 8
-    fun metadataField(parameter: Int, opcode: Opcode): FieldReference = constructorMethod.instructions.singleOrNull {
-        it.opcode == opcode && it.registersUsed == listOf(receiver + parameter, receiver)
-    }?.getReference<FieldReference>() ?: throw PatchException("Unexpected timeline metadata constructor")
+    fun metadataField(parameter: Int, opcode: Opcode): FieldReference {
+        val listOf = listOf(receiver + parameter, receiver)
+        return constructorMethod.instructions.singleOrNull {
+            it.opcode == opcode && it.registersUsed == listOf
+        }?.getReference<FieldReference>() ?: throw PatchException("Unexpected timeline metadata constructor")
+    }
     val metadata = code.filter { it.opcode == Opcode.IPUT_OBJECT }.mapNotNull { it.getReference<FieldReference>() }
         .singleOrNull { it.type == constructor.definingClass }
         ?: throw PatchException("Could not resolve serialized timeline metadata field")
@@ -402,9 +411,11 @@ private fun bindTimelineAccess(bindings: Map<String, String>) {
         val fingerprint = object : Fingerprint(
             definingClass = bindingClass,
             name = "<init>",
-            strings = listOf(placeholder),
+            filters = listOf(
+                string(placeholder)
+            )
         ) {}
-        fingerprint.matchAll(1..1)
+        fingerprint.matchSingle()
         fingerprint.changeString(placeholder, descriptor)
     }
 }

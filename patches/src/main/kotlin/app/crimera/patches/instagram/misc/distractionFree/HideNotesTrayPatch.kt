@@ -15,9 +15,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.resourceLiteral
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -34,7 +33,7 @@ val hideNotesTrayPatch =
         name = "Hide notes tray",
         description = "Hides notes tray in DM section",
     ) {
-        dependsOn(settingsPatch, resourceMappingPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
