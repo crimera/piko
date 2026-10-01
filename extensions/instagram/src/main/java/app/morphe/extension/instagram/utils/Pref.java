@@ -477,4 +477,12 @@ public class Pref {
     }
 
     //end
+
+    public static boolean inboxLock() {
+        return SharedPref.getBooleanPref(Settings.INBOX_LOCK);
+    }
+
+    public static boolean inboxLockNotifications() {
+        return SharedPref.getBooleanPref(Settings.INBOX_LOCK_NOTIFICATIONS);
+    }
 }

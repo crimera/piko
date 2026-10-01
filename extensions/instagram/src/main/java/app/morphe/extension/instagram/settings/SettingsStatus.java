@@ -152,6 +152,9 @@ public class SettingsStatus {
     }
 
     //Misc section.
+    public static boolean inboxLock = false;
+    public static void inboxLock() { inboxLock = true; }
+
     public static boolean unlockPlusBenefits = false;
     public static void unlockPlusBenefits() { unlockPlusBenefits = true; }
     public static boolean changeLikeAnimation = false;
@@ -210,7 +213,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || followListNonFollowerBadge || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton || customFont);}
+    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || inboxLock || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || followListNonFollowerBadge || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton || customFont);}
 
     //DM section
     public static boolean unlimitedReplaysOnEphemeralMedia = false;
@@ -273,6 +276,7 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_change_like_animation"),SettingsStatus.changeLikeAnimation);
         FLAGS.put(str("piko_unlock_plus_benefits"),SettingsStatus.unlockPlusBenefits);
+        FLAGS.put(str("piko_inbox_lock"),SettingsStatus.inboxLock);
 
         FLAGS.put(str("piko_disable_double_tap_to_like"),SettingsStatus.disableDoubleTapLike);
         FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);

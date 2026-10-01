@@ -571,6 +571,22 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.inboxLock) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_inbox_lock"),
+                            str("piko_inbox_lock_desc"),
+                            Settings.INBOX_LOCK
+                    )
+            );
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_inbox_lock_notifications"),
+                            str("piko_inbox_lock_notifications_desc"),
+                            Settings.INBOX_LOCK_NOTIFICATIONS
+                    )
+            );
+        }
         if (SettingsStatus.unlockPlusBenefits) {
             addPreference(
                     helper.switchPreference(
