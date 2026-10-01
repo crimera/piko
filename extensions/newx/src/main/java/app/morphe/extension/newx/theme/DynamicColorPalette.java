@@ -57,6 +57,7 @@ public final class DynamicColorPalette {
     private static final String DARK_ON_SURFACE_VARIANT = "m3_sys_color_dynamic_dark_on_surface_variant";
     private static final String DARK_OUTLINE = "m3_sys_color_dynamic_dark_outline";
     private static final String DARK_OUTLINE_VARIANT = "m3_sys_color_dynamic_dark_outline_variant";
+    private static final long COMPOSE_COLOR_SPACE_MASK = 0x3FL;
     private static final int ALPHA_STANDARD_DIM_TRANSLUCENT = 0xBF;
     private static final int ALPHA_GLASS_BACKGROUND = 0xCC;
     private static final int ALPHA_LIGHT_GLASS_SHADOW = 0x26;
@@ -229,6 +230,17 @@ public final class DynamicColorPalette {
     /** Uses Material 3's lower-emphasis on-surface-variant role for normal action icons. */
     public static long inlineActionTint(long originalColor) {
         if (!isEnabled()) return originalColor;
+        return dynamicColor(isDarkTheme(), LIGHT_ON_SURFACE_VARIANT, DARK_ON_SURFACE_VARIANT);
+    }
+
+    /**
+     * Action counts take an explicit content color only where the host overrides the default
+     * (the media viewer passes plain white); an unspecified color keeps the default, which
+     * already follows the tint. Only sRGB values are explicit: Compose encodes the unspecified
+     * color with a different color space.
+     */
+    public static long inlineActionContentTint(long originalColor) {
+        if (!isEnabled() || (originalColor & COMPOSE_COLOR_SPACE_MASK) != 0) return originalColor;
         return dynamicColor(isDarkTheme(), LIGHT_ON_SURFACE_VARIANT, DARK_ON_SURFACE_VARIANT);
     }
 

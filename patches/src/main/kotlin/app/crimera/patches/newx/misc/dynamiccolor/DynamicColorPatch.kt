@@ -73,6 +73,8 @@ private const val DYNAMIC_COLOR_PALETTE_DESCRIPTOR =
     "$EXTENSION_PACKAGE/theme/DynamicColorPalette;"
 private const val INLINE_ACTION_TINT_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionTint(J)J"
+private const val INLINE_ACTION_CONTENT_TINT_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionContentTint(J)J"
 private const val INLINE_ACTION_ACTIVE_TINT_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineActionActiveTint(J)J"
 private const val INLINE_LIKE_ANIMATION_METHOD =
@@ -1004,6 +1006,7 @@ private fun patchInlineActionTints() {
     }
     val tintSlot = entryMethod.firstParameterSlot("J")
     val tintRegister = entryMethod.p0Register + tintSlot
+    val contentRegister = entryMethod.resolveInlineActionContentRegister(tintRegister)
 
     entryMethod.insertHook(
         index = 0,
@@ -1014,8 +1017,87 @@ private fun patchInlineActionTints() {
         invokeStatic(methodReference(INLINE_ACTION_TINT_METHOD), tintRegister, tintRegister + 1)
         moveResult(tintRegister, "J")
     }
+    if (contentRegister != null) {
+        entryMethod.insertHook(index = 0, relocateBranchTargets = false) {
+            invokeStatic(
+                methodReference(INLINE_ACTION_CONTENT_TINT_METHOD),
+                contentRegister,
+                contentRegister + 1,
+            )
+            moveResult(contentRegister, "J")
+        }
+    }
     val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteRead.index)
     patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
+}
+
+/**
+ * The count color the host may override (the media viewer passes plain white), found by data
+ * flow: the pill call takes the tint as its first long and the count color as its third (the
+ * second is the count font size), and the renderer forwards each from one of its own long
+ * parameters. Releases whose renderer has
+ * no such call keep their original behavior.
+ */
+private fun MutableMethod.resolveInlineActionContentRegister(tintRegister: Int): Int? {
+    val methodInstructions = instructions.toList()
+    val longRegisters =
+        parameterTypes.map(CharSequence::toString).let { parameters ->
+            parameters.indices.filter { index -> parameters[index] == "J" }.map { index ->
+                p0Register + parameters.take(index).sumOf(String::registerWidth)
+            }
+        }
+    val calls = methodInstructions.withIndex().filter { (index, instruction) ->
+        if (instruction.opcode != Opcode.INVOKE_STATIC &&
+            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
+        ) {
+            return@filter false
+        }
+        val reference = instruction.getReference<MethodReference>() ?: return@filter false
+        val parameters = reference.parameterTypes.map(CharSequence::toString)
+        reference.returnType == "V" &&
+            COMPOSE_MODIFIER_DESCRIPTOR in parameters &&
+            COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR in parameters &&
+            parameters.count { parameter -> parameter == "J" } == 3 &&
+            methodInstructions.wideParameterSource(
+                index,
+                methodInstructions.invokeArgumentRegister(
+                    index,
+                    reference,
+                    parameters.indexOf("J"),
+                ) ?: return@filter false,
+            ) == tintRegister
+    }
+    val call = requireAtMostOne("NewX inline action pill call", calls) ?: return null
+    val reference =
+        call.value.getReference<MethodReference>()
+            ?: throw PatchException("NewX inline action pill call has no reference: $this")
+    val longIndices =
+        reference.parameterTypes.map(CharSequence::toString).let { parameters ->
+            parameters.indices.filter { index -> parameters[index] == "J" }
+        }
+    val countArgument =
+        methodInstructions.invokeArgumentRegister(call.index, reference, longIndices[2])
+            ?: throw PatchException("NewX inline action count color argument is missing: $this")
+    val source = methodInstructions.wideParameterSource(call.index, countArgument)
+    if (source !in longRegisters || source == tintRegister) {
+        throw PatchException(
+            "NewX inline action count color does not come from a renderer parameter: $this",
+        )
+    }
+    return source
+}
+
+/** Follows wide moves back from [register] before [callIndex] to the register that holds the value. */
+private fun List<Instruction>.wideParameterSource(callIndex: Int, register: Int): Int {
+    var current = register
+    var end = callIndex
+    while (true) {
+        val definition =
+            (end - 1 downTo 0).firstOrNull { index -> this[index].wideDestinationRegister() == current }
+                ?: return current
+        current = this[definition].wideSourceRegister() ?: return -1
+        end = definition
+    }
 }
 
 private const val TAB_TINT_METHOD = "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->tabTint(J)J"
