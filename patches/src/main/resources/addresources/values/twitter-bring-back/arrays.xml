@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- X 12.17 item counts/order preserved; corresponding labels restored from Twitter 9.98 -->
+    <string-array name="account_notif_confirmations">
+        <item>You\'ll get notifications for new Tweets.</item>
+        <item>You\'ll get notifications for new Tweets &amp; replies.</item>
+        <item>You\'ll get notifications for new Subscription Tweets.</item>
+        <item>You\'ll get notifications for new Live video Tweets.</item>
+        <item>You\'ll no longer get notifications for new Tweets.</item>
+    </string-array>
+    <string-array name="account_notif_options">
+        <item>All Tweets</item>
+        <item>All Tweets &amp; Replies</item>
+        <item>Only Subscription Tweets</item>
+        <item>Only live video</item>
+        <item>Off</item>
+    </string-array>
+    <string-array name="account_notif_subtitles">
+        <item>Get notifications for all of this account’s Tweets.</item>
+        <item>Get notifications for this account’s Tweets &amp; replies.</item>
+        <item>Get notifications only for Subscription Tweets.</item>
+        <item>Get notifications only for live broadcasts.</item>
+        <item>Turn off notifications for this account’s Tweets.</item>
+    </string-array>
+    <string-array name="card_long_press_options">
+        <item>Tweet link</item>
+        <item>Copy link</item>
+        <item>Send link</item>
+    </string-array>
+</resources>

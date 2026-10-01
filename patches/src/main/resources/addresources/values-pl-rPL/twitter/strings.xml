@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Nie udało się wyczyścić pamięci podręcznej</string>
     <string name="piko_title_native_share_menu">Natywne menu udostępniania</string>
     <string name="piko_native_share_menu_toggle">Włącz natywne menu udostępniania</string>
+    <string name="piko_native_share_menu_items_to_hide">Elementy natywnego menu udostępniania do ukrycia</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">Ukryj promowane wpisy</string>
@@ -139,12 +140,36 @@
     <string name="piko_pref_search_suggestion_desc">Ukrywa sugestie wyszukiwania w sekcji przeglądania</string>
     <string name="piko_legacy_share_link">Klasyczne linki udostępniania</string>
     <string name="piko_block_redirecting_to_x_lite">Zablokuj przekierowania do X Lite</string>
+    <string name="piko_pref_block_update_screen">Zablokuj ekran aktualizacji</string>
+    <string name="piko_pref_block_update_screen_desc">Blokuje wyświetlanie ekranu aktualizacji \"Twoja aplikacja jest nieaktualna\" podczas uruchamiania</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flagi</string>
     <string name="piko_pref_feature_flags">Zarządzaj flagami</string>
     <string name="piko_pref_edit_flag_title">Edytuj flagę</string>
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
     <string name="piko_pref_search_flags">Szukaj flagi</string>
+    <string name="piko_pref_add_selected_flags">Dodaj wybrane</string>
+    <string name="piko_pref_flag_name">Nazwa flagi</string>
+    <string name="piko_pref_flag_already_added">Już dodano</string>
+    <string name="piko_pref_flag_invalid_name">Wprowadź nazwę flagi bez spacji, przecinków i dwukropków.</string>
+    <string name="piko_pref_select_flags">Wybierz</string>
+    <string name="piko_pref_check_flags">Sprawdź flagi</string>
+    <string name="piko_pref_flags_enable">Włączone</string>
+    <string name="piko_pref_flags_disable">Wyłączone</string>
+    <string name="piko_pref_flags_remove_selected">Usunąć wybrane flagi?</string>
+    <string name="piko_pref_flag_verify_name">Sugerowane nazwy flag</string>
+    <string name="piko_pref_flags_selected">Wybrano %s</string>
+    <string name="piko_pref_flag_unknown">Nie znaleziono we wyszukiwarce flag. Może to być literówka lub flaga, której aplikacja jeszcze nie zebrała.</string>
+    <string name="piko_pref_flag_duplicates">Zduplikowane wpisy</string>
+    <string name="piko_pref_flag_unverified_short">Niezweryfikowana nazwa</string>
+    <string name="piko_pref_flag_typo_short">Możliwa literówka</string>
+    <string name="piko_pref_flag_merge_same">Te wpisy mają taką samą wartość. Scal je w jedną flagę i zachowaj tę wartość:</string>
+    <string name="piko_pref_flag_merge_conflict">Te wpisy mają różne wartości. Wybierz wartość do zachowania podczas scalania ich w jedną flagę.</string>
+    <string name="piko_pref_flag_merge">Scal w jedno</string>
+    <string name="piko_pref_flag_keep_on">Pozostaw włączone</string>
+    <string name="piko_pref_flag_keep_off">Pozostaw wyłączone</string>
+    <string name="piko_pref_flag_suggested_name">Sugerowana nazwa:</string>
+    <string name="piko_pref_flag_check_clear">Nie znaleziono zduplikowanych ani niezweryfikowanych nazw.</string>
     <string name="piko_pref_import_flags">Importuj flagi</string>
     <string name="piko_pref_export_flags">Eksportuj flagi</string>
     <string name="piko_pref_reset_flags">Zresetuj flagi</string>
@@ -165,10 +190,10 @@
     <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
     <string name="piko_pref_show_poll_result_desc">Pozwala zobaczyć wyniki ankiety bez oddawania głosu</string>
     <string name="piko_pref_hide_community_notes">Ukryj uwagi społeczności</string>
-    <string name="piko_pref_hide_immersive_player">Ukryj pełnoekranowy odtwarzacz</string>
-    <string name="piko_pref_hide_immersive_player_desc">Wyłącza gest przesuwania w górę dla kolejnych filmów</string>
+    <string name="piko_pref_hide_immersive_player">Wyłącz odtwarzacz immersyjny</string>
+    <string name="piko_pref_hide_immersive_player_desc">Wyłącza nowy odtwarzacz filmów, który pozwala oglądać kolejne filmy po przesunięciu w górę</string>
     <string name="piko_pref_enable_vid_auto_advance">Włącz auto-przewijanie filmów</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przechodzenie do kolejnego filmu w widoku pełnoekranowym</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przewijanie filmów w trybie immersyjnym</string>
     <string name="piko_pref_hide_hidden_replies">Ukryj ukryte odpowiedzi</string>
     <string name="piko_pref_force_hd">Wymuś jakość filmów w HD</string>
     <string name="piko_pref_force_hd_desc">Filmy będą zawsze odtwarzane w najwyższej dostępnej jakości</string>
@@ -201,12 +226,11 @@
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
     <string name="piko_pref_customisation_change_app_icon">Zmień ikonę aplikacji</string>
-    <string name="piko_pref_dynamic_color">Dynamiczny kolor</string>
-    <string name="piko_pref_dynamic_color_desc">Stosuje paletę Material You użytkownika do motywu całej aplikacji. Aby zastosować dynamiczne kolory do ikony aplikacji, przejdź do ustawień Piko &gt; Personalizacja &gt; Zmień ikonę aplikacji</string>
     <string name="piko_notifications_tab_priority">Priorytet</string>
     <string name="piko_pref_customisation_more_info_on_profile">Więcej informacji w profilu</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Dodaje więcej szczegółów na stronie profilu</string>
     <string name="piko_fast_follower">Szybki obserwujący</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Styl czcionki</string>
     <string name="piko_pref_add_font">Dodaj czcionkę</string>

@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Eliminazione della cache fallita</string>
     <string name="piko_title_native_share_menu">Menu di condivisione nativa</string>
     <string name="piko_native_share_menu_toggle">Abilita menu di condivisione nativo</string>
+    <string name="piko_native_share_menu_items_to_hide">Voci del menu di condivisione nativa da nascondere</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Annunci</string>
     <string name="piko_pref_hide_promoted_posts">Nascondi post sponsorizzati</string>
@@ -139,12 +140,36 @@
     <string name="piko_pref_search_suggestion_desc">Nascondi il suggerimento di ricerca nella sezione Esplora</string>
     <string name="piko_legacy_share_link">Condivisione dei link legacy</string>
     <string name="piko_block_redirecting_to_x_lite">Blocca reindirizzamento a X Lite</string>
+    <string name="piko_pref_block_update_screen">Blocca schermata di aggiornamento</string>
+    <string name="piko_pref_block_update_screen_desc">Blocca la schermata \'Questa app è obsoleta\' dall\'essere visualizzata al lancio</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flag di funzionalità</string>
     <string name="piko_pref_feature_flags">Aggiungi flag di funzionalità</string>
     <string name="piko_pref_edit_flag_title">Modifica flag</string>
     <string name="piko_pref_add_flag_title">Aggiungi flag</string>
     <string name="piko_pref_search_flags">Cerca flag</string>
+    <string name="piko_pref_add_selected_flags">Aggiungi selezionati</string>
+    <string name="piko_pref_flag_name">Nome del flag</string>
+    <string name="piko_pref_flag_already_added">Già aggiunto</string>
+    <string name="piko_pref_flag_invalid_name">Inserisci un nome di flag senza spazi, virgole o colonne.</string>
+    <string name="piko_pref_select_flags">Seleziona</string>
+    <string name="piko_pref_check_flags">Controlla flag</string>
+    <string name="piko_pref_flags_enable">On</string>
+    <string name="piko_pref_flags_disable">Off</string>
+    <string name="piko_pref_flags_remove_selected">Rimuovere i flag selezionati?</string>
+    <string name="piko_pref_flag_verify_name">Nomi di flag consigliati</string>
+    <string name="piko_pref_flags_selected">%s selezionato</string>
+    <string name="piko_pref_flag_unknown">Non trovato nei flag di ricerca. Potrebbe essere un errore di battitura o un flag che l\'app non ha ancora aggiunto.</string>
+    <string name="piko_pref_flag_duplicates">Duplica voci</string>
+    <string name="piko_pref_flag_unverified_short">Nome non verificato</string>
+    <string name="piko_pref_flag_typo_short">Possibile errore di battitura</string>
+    <string name="piko_pref_flag_merge_same">Queste voci hanno lo stesso valore. Uniscili in un flag e mantieni questo valore:</string>
+    <string name="piko_pref_flag_merge_conflict">Queste voci hanno valori diversi. Scegli il valore da mantenere quando si uniscono in un unico flag.</string>
+    <string name="piko_pref_flag_merge">Unisci in uno</string>
+    <string name="piko_pref_flag_keep_on">Mantieni attivo</string>
+    <string name="piko_pref_flag_keep_off">Mantieni disattivato</string>
+    <string name="piko_pref_flag_suggested_name">Nome suggerito:</string>
+    <string name="piko_pref_flag_check_clear">Nessun nome duplicato o non verificato trovato.</string>
     <string name="piko_pref_import_flags">Importa le flag</string>
     <string name="piko_pref_export_flags">Esporta le flag</string>
     <string name="piko_pref_reset_flags">Ripristina le flag</string>
@@ -165,8 +190,8 @@
     <string name="piko_pref_show_poll_result">Mostra risultati del sondaggio</string>
     <string name="piko_pref_show_poll_result_desc">Mostra i risultati del sondaggio senza votare</string>
     <string name="piko_pref_hide_community_notes">Nascondi le note della comunità</string>
-    <string name="piko_pref_hide_immersive_player">Nascondi lettore immersivo</string>
-    <string name="piko_pref_hide_immersive_player_desc">Rimuove lo scorrimento verso l\'alto per visualizzare altri video nel lettore video</string>
+    <string name="piko_pref_hide_immersive_player">Disattiva lettore immersivo</string>
+    <string name="piko_pref_hide_immersive_player_desc">Disabilita il nuovo lettore video che ti permette di guardare più video scorrendo verso l\'alto</string>
     <string name="piko_pref_enable_vid_auto_advance">Abilita scorrimento automatico video</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Abilita lo scorrimento automatico dei video nella visione immersiva</string>
     <string name="piko_pref_hide_hidden_replies">Nascondi le risposte nascoste</string>
@@ -205,6 +230,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Maggiori informazioni sul profilo</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Aggiunge ulteriori dettagli sulla pagina del profilo</string>
     <string name="piko_fast_follower">Seguace veloce</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Stile font</string>
     <string name="piko_pref_add_font">Aggiungi font</string>
@@ -283,6 +309,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Icona Legacy 4</string>
     <string name="piko_app_icon_name_legacy_blue">Blu Legacy</string>
     <string name="piko_app_icon_name_twitter_blue">Blu Twitter</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Terra</string>
     <string name="piko_app_icon_name_moon">Luna</string>
     <string name="piko_app_icon_name_mars">Marte</string>

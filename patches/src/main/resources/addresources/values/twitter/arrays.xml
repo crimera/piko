@@ -293,4 +293,31 @@
         <item>dim</item>
         <item>dark</item>
     </string-array>
+
+    <string-array name="piko_array_native_share_menu_items">
+        <item>@string/copy_tweet_link</item>
+        <item>@string/share_tweet_sheet_title</item>
+        <item>@string/label_chat</item>
+        <item>@string/piko_share_image_instagram_stories</item>
+        <item>@string/piko_pref_external_downloader_text</item>
+        <item>@string/piko_title_native_downloader</item>
+        <item>@string/piko_title_native_translator</item>
+        <item>@string/piko_title_native_reader_mode</item>
+        <item>@string/piko_share_image_title</item>
+        <item>@string/piko_debug</item>
+    </string-array>
+
+    <string-array name="piko_array_native_share_menu_items_val">
+        <item>copy_tweet_link</item>
+        <item>share_tweet_sheet_title</item>
+        <item>label_chat</item>
+        <item>piko_share_image_instagram_stories</item>
+        <item>piko_pref_external_downloader_text</item>
+        <item>piko_title_native_downloader</item>
+        <item>piko_title_native_translator</item>
+        <item>piko_title_native_reader_mode</item>
+        <item>piko_share_image_title</item>
+        <item>piko_debug</item>
+    </string-array>
+
 </resources>

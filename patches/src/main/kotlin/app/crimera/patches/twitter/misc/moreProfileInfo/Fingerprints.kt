@@ -7,8 +7,8 @@
 package app.crimera.patches.twitter.misc.moreProfileInfo
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.resourceLiteral
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 
 internal object ProfileStatViewFormerFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/app/profiles/header/components",
@@ -37,13 +37,16 @@ internal object SetUserNameOnUserHeaderFingerprint : Fingerprint(
 )
 
 internal object SetTweetStatViewValueExtension : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/patches/",
     name = "setTweetStatViewValue",
 )
 
 internal object HeaderComponentViewFieldNameExtension : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/patches/",
     name = "headerComponentViewFieldName",
 )
 
 internal object HeaderComponentContextFieldNameExtension : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/patches/",
     name = "headerComponentContextFieldName",
 )

@@ -6,12 +6,16 @@
 
 package app.morphe.extension.twitter;
 
-import android.os.Build;
+import static app.morphe.extension.shared.Utils.runOnMainThread;
+
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.settings.Settings;
 import app.morphe.extension.twitter.settings.SettingsStatus;
+
 import com.google.android.material.tabs.TabLayout$g;
 import java.util.*;
 
@@ -31,12 +35,6 @@ public class Pref {
 
     public static boolean pikoDebug() {
         return Utils.getBooleanPref(Settings.PIKO_DEBUG);
-    }
-
-    public static boolean dynamicColor() {
-        return SettingsStatus.dynamicColor
-                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                && Utils.getBooleanPref(Settings.DYNAMIC_COLOR);
     }
 
     public static String getLatestChangelogVersion(){
@@ -71,6 +69,11 @@ public class Pref {
     public static boolean showSourceLabel() {
         return Utils.getBooleanPref(Settings.TIMELINE_SHOW_SOURCE_LABEL);
     }
+
+    public static boolean disableAutoTimelineScroll() {
+        return Utils.getBooleanPref(Settings.TIMELINE_DISABLE_AUTO_SCROLL);
+    }
+
     public static boolean hideCommBadge() {
         return Utils.getBooleanPref(Settings.TIMELINE_HIDE_COMM_BADGE);
     }
@@ -146,6 +149,18 @@ public class Pref {
 
     public static boolean redirect(TabLayout$g g) {return Utils.redirect(g);}
 
+    public static void blockUpdateScreen(View view) {
+        if (Utils.getBooleanPref(Settings.MISC_BLOCK_UPDATE_SCREEN) && view != null) {
+            if (view.getParent() instanceof ViewGroup container &&
+                    container.getParent() instanceof ViewGroup scrollView) {
+                // Hide the alert dialog container first
+                scrollView.setVisibility(View.GONE);
+            }
+            // Click the dismiss button after the alert dialog shows (this button is hidden)
+            runOnMainThread(view::callOnClick);
+        }
+    }
+
     public static boolean isRoundOffNumbersEnabled() {
         return Utils.getBooleanPref(Settings.MISC_ROUND_OFF_NUMBERS);
     }
@@ -177,7 +192,10 @@ public class Pref {
         return 3;
     }
     public static String customSharingDomain() {
-        return Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+        if (SettingsStatus.customSharingDomainEnabled) {
+            return Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+        }
+        return "";
     }
 
     public static ArrayList hideRecommendedUsers(ArrayList users) {
@@ -468,6 +486,10 @@ public class Pref {
 
     public static boolean moreInfoOnProfile(){
         return Utils.getBooleanPref(Settings.MORE_INFO_ON_PROFILE) && SettingsStatus.moreInfoOnProfile;
+    }
+
+    public static ArrayList nativeShareMenuToHide() {
+        return getList(Settings.NATIVE_SHARE_MENU_ITEMS_TO_HIDE.key);
     }
 
     //end

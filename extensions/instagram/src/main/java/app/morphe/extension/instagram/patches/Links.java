@@ -7,26 +7,40 @@
 
 package app.morphe.extension.instagram.patches;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
+import android.util.Log;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ShareLinkSanitizer;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.PostType;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.patches.story.StorySeenRequestScope;
 import app.morphe.extension.crimera.PikoUtils;
 
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.settings.Settings;
 
 @SuppressWarnings("unused")
 public class Links {
+    private static final String NDX_CONTACT_IMPORT_SCREEN =
+            "com.bloks.www.bloks.ig.ndx.ci.entry.screen";
+    private static final String NDX_LOCATION_SERVICES_SCREEN =
+            "com.bloks.www.bloks.ig.ndx.ls.entry.screen";
+    private static final Pattern VALID_DOMAIN =
+            Pattern.compile("[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:\\d{1,5})?");
     private static final boolean DISABLE_ANALYTICS;
     private static final boolean DISABLE_STORIES;
     private static final boolean DISABLE_EXPLORE;
@@ -34,8 +48,12 @@ public class Links {
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
     private static final boolean DISABLE_HIGHLIGHTS;
-    private static final boolean DISABLE_ONBOARDING_PERMISSION_PROMPTS;
     private static final List<String> META_PACKAGES;
+    private static final ShareLinkSanitizer SHARE_LINK_SANITIZER = new ShareLinkSanitizer(
+            "instagram.com",
+            Arrays.asList("comment_id", "img_index", "open_comments", "story_media_id"),
+            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si", "stkn")
+    );
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
@@ -45,7 +63,6 @@ public class Links {
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
-        DISABLE_ONBOARDING_PERMISSION_PROMPTS = SettingsStatus.disableOnboardingPermissionPrompts;
 
         META_PACKAGES = Arrays.asList(
                 "com.instagram.android",      // Instagram
@@ -66,7 +83,19 @@ public class Links {
     }
 
     public static boolean setStorySeen(boolean seenStatus){
-        return Pref.viewStoriesAnonymously() ? true:seenStatus;
+        return StorySeenRequestScope.resolveSeenStatus(
+                seenStatus,
+                Pref.viewStoriesAnonymously()
+        );
+    }
+
+    public static boolean shouldBlockOnboardingScreen(String appId) {
+        if (!DISABLE_ANALYTICS || appId == null) {
+            return false;
+        }
+
+        return NDX_CONTACT_IMPORT_SCREEN.equals(appId)
+                || NDX_LOCATION_SERVICES_SCREEN.equals(appId);
     }
 
     public static boolean openExternally(String url) {
@@ -76,6 +105,15 @@ public class Links {
                 String actualUrl = Uri.parse(url).getQueryParameter("u");
                 if (actualUrl != null) {
                     String sanitizedUrl = sanitizeUrl(actualUrl);
+                    // actualUrl comes from a bio/DM/comment/caption link anyone can put on
+                    // Instagram - without this check a crafted intent:// (or other dangerous
+                    // scheme) link would reach ACTION_VIEW unfiltered and could launch an
+                    // arbitrary exported component on the device with attacker-chosen extras.
+                    String scheme = Uri.parse(sanitizedUrl).getScheme();
+                    if (scheme == null
+                            || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+                        return false;
+                    }
                     PikoUtils.openUrl(sanitizedUrl,false);
                     return true;
                 }
@@ -91,18 +129,16 @@ public class Links {
        boolean shouldBlockUri = false;
         try {
             if (uri != null && uri.getPath() != null) {
-                String host = uri.getHost();
+                String host = uri.getHost() != null ? uri.getHost() : "";
                 String path = uri.getPath();
 
                 if (host.contains("graph.instagram.com")
-                        || host.contains("graph.facebook.com")
-                        || path.contains("/logging_client_events")) {
+                        || host.contains("graph.facebook.com")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
-                } else if (path.contains("/consent/existing_user_flow/")
-                        || path.contains("/consent/new_user_flow/")) {
-                    shouldBlockUri = DISABLE_ONBOARDING_PERMISSION_PROMPTS;
                 } else if (path.contains("/api/v2/media/seen/")) {
-                    shouldBlockUri = Pref.viewStoriesAnonymously();
+                    shouldBlockUri = Pref.viewStoriesAnonymously()
+                            && !StorySeenRequestScope.isActive();
+                    StorySeenRequestScope.onStorySeenRequest(shouldBlockUri);
                 } else if (path.contains("/heartbeat_and_get_viewer_count/")) {
                     shouldBlockUri = Pref.viewLiveAnonymously();
                 } else if (path.contains("/feed/reels_tray/")
@@ -110,14 +146,17 @@ public class Links {
                         || path.contains("direct_v2/pending_inbox/?visual_message")
                         || path.contains("stories/hallpass/")
                         || path.contains("/api/v1/feed/reels_media_stream/")) {
-                    shouldBlockUri = DISABLE_STORIES;
+                    shouldBlockUri = DISABLE_STORIES || FocusLock.isForced(Settings.DISABLE_STORIES);
                 } else if (path.contains("/discover/topical_explore")
                         || path.contains("/discover/topical_explore_stream")
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/recent_searches/"))
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/top_serp/"))) {
-                    shouldBlockUri = DISABLE_EXPLORE;
+                    // Focus Lock is read per request, not from the cached fields above: a lock
+                    // that expires while the process is alive has to release the setting without
+                    // waiting for a restart.
+                    shouldBlockUri = DISABLE_EXPLORE || FocusLock.isForced(Settings.DISABLE_EXPLORE);
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
-                    shouldBlockUri = DISABLE_COMMENTS;
+                    shouldBlockUri = DISABLE_COMMENTS || FocusLock.isForced(Settings.DISABLE_COMMENTS);
                 } else if (path.contains("/discover/ayml") || path.contains("/discover/chaining")) { // Thanks to  @brosssh
                     shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
                 } else if (path.contains("profile_ads/get_profile_ads/")
@@ -126,7 +165,7 @@ public class Links {
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
                 } else if (path.contains("/highlights_tray")) {
-                    shouldBlockUri = DISABLE_HIGHLIGHTS;
+                    shouldBlockUri = DISABLE_HIGHLIGHTS || FocusLock.isForced(Settings.DISABLE_HIGHLIGHTS);
                 }
 
             }
@@ -135,6 +174,9 @@ public class Links {
             Logger.printException(() -> "intercept URI failed: ", ex);
         }
         // Exception is hanndled at call.
+        if (shouldBlockUri && Pref.pikoDebug()) {
+            Log.d("piko", "blocked uri: " + uri);
+        }
         if(shouldBlockUri) {
             throw new IOException("Block uri");
         }
@@ -142,16 +184,54 @@ public class Links {
 
     public static String sanitizeUrl(String url){
         try{
-            return url.replaceAll("([&?])igsh=[^&]*", "")
-                    .replaceAll("([&?])utm_source=[^&]*", "")
-                    .replaceAll("([&?])utm_medium=[^&]*", "")
-                    .replaceAll("([&?])utm_content=[^&]*", "")
-                    .replaceAll("([&?])fbclid=[^&]*", "")
-                    .replaceAll("([&?])si=[^&]*", "");
+            return SHARE_LINK_SANITIZER.sanitize(url, Pref.sanitizeShareLinks());
         } catch (Exception e) {
             Logger.printException(() -> "sanitizeUrl failed: ", e);
         }
         return url;
+    }
+
+    public static String changeDomain(String url) {
+        try {
+            String domain = normalizeCustomDomain(Pref.customSharingDomain());
+            if (domain.isEmpty()) return url;
+
+            Uri uri = Uri.parse(url);
+            String host = uri.getHost();
+
+            if (host == null
+                    || !(host.equalsIgnoreCase("instagram.com") || host.equalsIgnoreCase("www.instagram.com"))
+                    || host.equalsIgnoreCase(domain)) {
+                return url;
+            }
+
+            return uri.buildUpon().encodedAuthority(domain).build().toString();
+        } catch (Exception e) {
+            Logger.printException(() -> "changeDomain failed: ", e);
+        }
+        return url;
+    }
+
+    public static String customSharingDomainSummary(String customDomain) {
+        String domain = normalizeCustomDomain(customDomain);
+        return domain.isEmpty() ? str("piko_custom_sharing_domain_desc") : domain;
+    }
+
+    private static String normalizeCustomDomain(String customDomain) {
+        String domain = customDomain.trim()
+                .replaceFirst("^[^/?#]*://", "")
+                .replaceFirst("[/?#].*", "")
+                .replaceFirst("^[^@]*@", "");
+
+        int portStart = domain.lastIndexOf(':');
+        String host = portStart < 0 ? domain : domain.substring(0, portStart);
+        String port = portStart < 0 ? "" : domain.substring(portStart);
+
+        String bareHost = host.regionMatches(true, 0, "www.", 0, 4) ? host.substring(4) : host;
+        if (!bareHost.isEmpty() && bareHost.indexOf('.') < 0) host += ".com";
+
+        domain = host + port;
+        return VALID_DOMAIN.matcher(domain).matches() ? domain : "";
     }
 
     public static boolean signatureCheck(Object appIdentityObject){
@@ -177,8 +257,10 @@ public class Links {
     }
 
     public static String generatePostLink(Object mediaObject, int position) throws Exception {
-        MediaData mediaData = new MediaData(mediaObject);
+        return generatePostLink(new MediaData(mediaObject), position);
+    }
 
+    public static String generatePostLink(MediaData mediaData, int position) throws Exception {
         String postShortCode = mediaData.getShortcode();
         PostType postType = mediaData.getPostType();
 

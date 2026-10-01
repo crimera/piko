@@ -80,7 +80,7 @@ public class HandleCommentButton {
             } else if (button.equals(SaveMediaButton.A00)) {
                     CommentData commentData = new CommentData(commentObject);
 
-                    Context context = (Context) Utils.getActivity();
+                    Context context = Utils.getContext();
                     if (commentData.hasGifMedia()) {
                         String gifUrl = commentData.getGifUrl();
                         String fileName = commentData.getGifDownloadName();

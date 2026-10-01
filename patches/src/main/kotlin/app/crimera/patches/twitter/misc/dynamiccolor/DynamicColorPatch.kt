@@ -6,132 +6,107 @@
 
 package app.crimera.patches.twitter.misc.dynamiccolor
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.INTEGRATIONS_PACKAGE
-import app.crimera.patches.twitter.utils.enableSettings
-import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patcher.string
-import app.morphe.util.ResourceGroup
-import app.morphe.util.copyResources
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.Opcode
-
-private const val DYNAMIC_COLOR_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/DynamicColor;"
-private const val APP_DETAILS_ACTIVITY = "android.app.AppDetailsActivity"
-
-private object ThemeApplierClassFingerprint : Fingerprint(
-    name = "<init>",
-    returnType = "V",
-    filters =
-        listOf(
-            string("coreTheme"),
-        ),
-)
-
-private object ThemeApplierFingerprint : Fingerprint(
-    classFingerprint = ThemeApplierClassFingerprint,
-    returnType = "V",
-    filters =
-        listOf(
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = "Landroid/content/Context;",
-                name = "getTheme",
-                returnType = "Landroid/content/res/Resources\$Theme;",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = "Ljava/lang/Number;",
-                name = "intValue",
-                returnType = "I",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = "Landroid/content/res/Resources\$Theme;",
-                name = "applyStyle",
-                parameters = listOf("I", "Z"),
-                returnType = "V",
-            ),
-        ),
-    custom = { methodDef, _ ->
-        AccessFlags.STATIC.isSet(methodDef.accessFlags) &&
-            methodDef.parameters.size == 3 &&
-            methodDef.parameters.first().type == "Landroid/content/Context;"
-    },
-)
-
-private object ComponentFactoryActivityFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/app/di/ComponentFactory;",
-    parameters =
-        listOf(
-            "Ljava/lang/ClassLoader;",
-            "Ljava/lang/String;",
-            "Landroid/content/Intent;",
-        ),
-    returnType = "Landroid/app/Activity;",
-    custom = { methodDef, _ ->
-        !AccessFlags.STATIC.isSet(methodDef.accessFlags) &&
-            methodDef.implementation?.registerCount?.let { it >= 5 } == true
-    },
-)
-
-private val dynamicColorResourcePatch =
-    resourcePatch {
-        execute {
-            copyResources(
-                "twitter/dynamiccolor",
-                ResourceGroup("values-v31", "styles.xml"),
-            )
-        }
-    }
+import java.io.FileWriter
+import java.nio.file.Files
 
 @Suppress("unused")
 val dynamicColorPatch =
-    bytecodePatch(
+    resourcePatch(
         name = "Dynamic color",
-        description = "Adds an option to replace Twitter Blue with the user's Material You palette.",
-        default = true,
+        description = "Replaces the default Twitter Blue with the user's Material You palette.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, dynamicColorResourcePatch)
 
         execute {
-            ThemeApplierFingerprint.apply {
-                val intValueIndex = instructionMatches[1].index
-                val applyStyleIndex = instructionMatches[2].index
-                val styleRegister = method.getInstruction(intValueIndex + 1).registersUsed[0]
+            // For backward compatibility, add colors and styles into v31 res dir (A12+).
+            val valuesV31Directory = get("res/values-v31")
+            val valuesNightV31Directory = get("res/values-night-v31")
 
-                method.addInstructions(
-                    applyStyleIndex + 1,
-                    """
-                    invoke-static {p0, v$styleRegister}, $DYNAMIC_COLOR_DESCRIPTOR->applyThemeStyle(Landroid/content/res/Resources${'$'}Theme;I)V
-                    """.trimIndent(),
-                )
+            listOf(valuesV31Directory, valuesNightV31Directory).forEach { directory ->
+                if (!directory.isDirectory) Files.createDirectories(directory.toPath())
+
+                val colorsXml = directory.resolve("colors.xml")
+
+                if (!colorsXml.exists()) {
+                    FileWriter(colorsXml).use {
+                        it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
+                    }
+                }
             }
 
-            ComponentFactoryActivityFingerprint.apply {
-                method.addInstructions(
-                    0,
-                    """
-                    const-string v0, "$APP_DETAILS_ACTIVITY"
-                    invoke-virtual {v0, p2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-                    move-result v0
-                    if-eqz v0, :piko_component_factory_continue
-                    invoke-static {p1, p2, p3}, $DYNAMIC_COLOR_DESCRIPTOR->instantiateFrameworkActivity(Ljava/lang/ClassLoader;Ljava/lang/String;Landroid/content/Intent;)Landroid/app/Activity;
-                    move-result-object v0
-                    return-object v0
-                    :piko_component_factory_continue
-                    """.trimIndent(),
-                )
+            val stylesXml = valuesV31Directory.resolve("styles.xml")
+            if (!stylesXml.exists()) {
+                FileWriter(stylesXml).use {
+                    it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
+                }
             }
 
-            enableSettings("dynamicColor")
+            document("res/values-v31/colors.xml").use { document ->
+                val resourcesElement = document.documentElement
+                mapOf(
+                    "ps__twitter_blue" to "@color/twitter_blue",
+                    "twitter_blue" to "@color/m3_sys_color_dynamic_light_primary",
+                    "twitter_blue_fill_pressed" to "@color/m3_sys_color_dynamic_light_primary_container",
+                    "twitter_blue_opacity_30" to "@color/material_dynamic_primary95",
+                    "twitter_blue_opacity_50" to "@color/material_dynamic_primary90",
+                    "twitter_blue_opacity_58" to "@color/material_dynamic_primary80",
+                    "deep_transparent_twitter_blue" to "@color/material_dynamic_primary90",
+                ).forEach { (name, value) ->
+                    val colorElement = document.createElement("color")
+                    colorElement.setAttribute("name", name)
+                    colorElement.textContent = value
+                    resourcesElement.appendChild(colorElement)
+                }
+            }
+
+            document("res/values-night-v31/colors.xml").use { document ->
+                val resourcesElement = document.documentElement
+                mapOf(
+                    "twitter_blue" to "@color/m3_sys_color_dynamic_dark_primary",
+                    "twitter_blue_fill_pressed" to "@color/m3_sys_color_dynamic_dark_primary_container",
+                    "twitter_blue_opacity_30" to "@color/material_dynamic_primary30",
+                    "twitter_blue_opacity_50" to "@color/material_dynamic_primary40",
+                    "twitter_blue_opacity_58" to "@color/material_dynamic_primary50",
+                    "deep_transparent_twitter_blue" to "@color/m3_sys_color_dynamic_dark_primary_container",
+                ).forEach { (name, value) ->
+                    val colorElement = document.createElement("color")
+                    colorElement.setAttribute("name", name)
+                    colorElement.textContent = value
+                    resourcesElement.appendChild(colorElement)
+                }
+            }
+
+            document("res/values-v31/styles.xml").use { document ->
+                val standardStyle = document.createElement("style")
+                standardStyle.setAttribute("name", "PaletteStandard")
+                standardStyle.setAttribute("parent", "@style/HorizonColorPaletteLight")
+
+                mapOf(
+                    "abstractColorCellBackground" to "@color/m3_sys_color_dynamic_light_surface",
+                    "abstractColorCellBackgroundTranslucent" to "@color/m3_sys_color_dynamic_light_surface_container_low",
+                    "abstractColorDeepGray" to "@color/m3_sys_color_dynamic_light_on_surface_variant",
+                    "abstractColorDivider" to "@color/m3_sys_color_dynamic_light_outline_variant",
+                    "abstractColorFadedGray" to "@color/m3_sys_color_dynamic_light_surface_container",
+                    "abstractColorFaintGray" to "@color/m3_sys_color_dynamic_light_surface_container_low",
+                    "abstractColorHighlightBackground" to "@color/m3_sys_color_dynamic_light_surface_container_high",
+                    "abstractColorLightGray" to "@color/m3_sys_color_dynamic_light_outline_variant",
+                    "abstractColorLink" to "@color/twitter_blue",
+                    "abstractColorMediumGray" to "@color/m3_sys_color_dynamic_light_outline",
+                    "abstractColorText" to "@color/m3_sys_color_dynamic_light_on_surface",
+                    "abstractColorUnread" to "@color/m3_sys_color_dynamic_light_primary_container",
+                    "abstractElevatedBackground" to "@color/m3_sys_color_dynamic_light_surface_container_low",
+                    "abstractElevatedBackgroundShadow" to "@color/black_opacity_10",
+                ).forEach { (name, value) ->
+                    val styleElement = document.createElement("item")
+                    styleElement.setAttribute("name", name)
+                    styleElement.textContent = value
+                    standardStyle.appendChild(styleElement)
+                }
+
+                document.documentElement.appendChild(standardStyle)
+            }
         }
     }

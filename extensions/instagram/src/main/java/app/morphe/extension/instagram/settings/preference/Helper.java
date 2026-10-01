@@ -13,9 +13,16 @@ import java.util.Set;
 
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
+import app.morphe.extension.instagram.settings.preference.widgets.LikeAnimationPreference;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
+import app.morphe.extension.instagram.settings.preference.widgets.DownloadFileNameTemplatePref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
+import app.morphe.extension.instagram.settings.preference.widgets.NavigationBarPreference;
+import app.morphe.extension.instagram.settings.preference.widgets.NavigationStartupPreference;
+import app.morphe.extension.instagram.settings.SettingsRestart;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
@@ -38,27 +45,83 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
+        if (Settings.AMOLED_THEME.key.equals(setting.key)) {
+            preference.setSwitchInteractionEnabled(
+                    MaterialYouTheme.canEnableAmoled(context)
+            );
+        }
+        return preference;
+    }
+
+    /**
+     * A switch whose value is currently forced on by another feature.
+     *
+     * When {@code forced} the switch is shown checked and non-interactive with
+     * {@code forcedSummary}, without writing to the stored value, so the user's own choice
+     * returns once the feature releases it.
+     * Not specific to any patch: any feature that overrides a setting can use it.
+     */
+    public Preference forcedSwitchPreference(
+            String title,
+            String summary,
+            BooleanSetting setting,
+            boolean forced,
+            String forcedSummary
+    ) {
+        Preference preference = switchPreference(title, forced ? forcedSummary : summary, setting);
+        if (forced && preference instanceof SwitchPref) {
+            SwitchPref switchPreference = (SwitchPref) preference;
+            switchPreference.setPersistent(false);
+            // Attaching the preference initializes it from the default value, which would undo
+            // setChecked(true), so the default has to be true as well while it is forced.
+            switchPreference.setDefaultValue(Boolean.TRUE);
+            switchPreference.setChecked(true);
+            switchPreference.setSwitchInteractionEnabled(false);
+        }
         return preference;
     }
 
     public Preference listPreference(String title, String summary, StringSetting setting) {
-        ListPref preference = new ListPref(context);
+        ListPref preference = setting == Settings.CHANGE_LIKE_ANIMATION
+                ? new LikeAnimationPreference(context) : new ListPref(context);
         String key = setting.key;
         preference.setTitle(title);
         preference.setDialogTitle(title);
         preference.setSummary(summary);
         preference.setKey(key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
-    public Preference buttonPreference(String title, String summary, String setting) {
+    public ButtonPref buttonPreference(String title, String summary, String setting) {
         ButtonPref preference = new ButtonPref(context);
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
+        return preference;
+    }
+
+    public Preference categoryPreference(String title, String summary, String setting) {
+        ButtonPref preference = buttonPreference(title, summary, setting);
+        // Among rows with a chevron (>), only top-level Piko categories get a pressed highlight.
+        // Other chevron rows keep the chevron without a pressed highlight.
+        preference.setPressedHighlightEnabled(true);
+        return preference;
+    }
+
+    public Preference navigationBarPreference(String title, String summary) {
+        NavigationBarPreference preference = new NavigationBarPreference(context);
+        preference.setTitle(title);
+        preference.setSummary(summary);
+        preference.setSingleLineTitle(false);
+        return preference;
+    }
+
+    public Preference navigationStartupPreference(String title, String summary) {
+        NavigationStartupPreference preference = new NavigationStartupPreference(context);
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
         preference.setSingleLineTitle(false);
         return preference;
     }
@@ -70,16 +133,29 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
     public Preference editTextNumPreference(String title, String summary, StringSetting setting) {
         EditTextPref preference = (EditTextPref)editTextPreference(title,summary,setting);
         preference.setNumericOnly(true);
-        preference.setSingleLineTitle(false);
         return preference;
     }
+
+    public Preference downloadFileNameTemplatePreference(
+            String title,
+            String summary,
+            StringSetting setting
+    ) {
+        DownloadFileNameTemplatePref preference = new DownloadFileNameTemplatePref(context);
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setKey(setting.key);
+        preference.setDefaultValue(setting.defaultValue);
+        return preference;
+    }
+
     public Preference multiSelectListPref(String title, String summary, StringSetting setting) {
         MultiSelectListPref preference = new MultiSelectListPref(context);
         String key = setting.key;
@@ -88,33 +164,63 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(key);
         preference.setInitialValue(key);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
-    public void setValue(Preference preference, Object newValue) {
+    public boolean setValue(Preference preference, Object newValue) {
         String key = preference.getKey();
         try {
             if (newValue != null) {
+                Object previousValue = getValue(preference);
                 String newValClass = newValue.getClass().getSimpleName();
+                boolean saved = false;
 
                 if (newValClass.equals("Boolean")) {
                     Boolean val = (Boolean) newValue;
-                    if(key.contains("_")) {
-                        SharedPref.setBooleanPref(key, val);
-                    }else{
-                        FlagsSharedPref.setBooleanPref(key, val);
+                    if (Settings.AMOLED_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestAmoledChange(context, val);
                     }
+                    if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestMaterialYouChange(context, val);
+                    }
+                    saved = SharedPref.setBooleanPref(key, val);
                 } else if (newValClass.equals("String")) {
-                    SharedPref.setStringPref(key, (String) newValue);
+                    String val = (String) newValue;
+                    if(key.contains("_")) {
+                        saved = SharedPref.setStringPref(key, val);
+                    }else{
+                        saved = FlagsSharedPref.setStringPref(key, val);
+                    }
                 } else if (newValClass.equals("HashSet")) {
-                    SharedPref.setSetPref(key, (Set) newValue);
+                    saved = SharedPref.setSetPref(key, (Set) newValue);
                 }
-            }
 
+                if (saved) {
+                    SettingsRestart.markChanged(previousValue, newValue);
+                }
+                return saved;
+            }
+            return false;
         } catch (Exception ex) {
             Utils.showToastShort(ex.toString());
             Logger.printException(() -> "Failed setting pref: ", ex);
+            return false;
         }
+    }
+
+    private Object getValue(Preference preference) {
+        if (preference instanceof SwitchPref) {
+            return ((SwitchPref) preference).isChecked();
+        }
+        if (preference instanceof ListPref) {
+            return ((ListPref) preference).getValue();
+        }
+        if (preference instanceof EditTextPref) {
+            return ((EditTextPref) preference).getText();
+        }
+        if (preference instanceof MultiSelectListPref) {
+            return ((MultiSelectListPref) preference).getValues();
+        }
+        return null;
     }
 }

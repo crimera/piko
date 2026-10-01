@@ -8,25 +8,31 @@
 package app.morphe.extension.instagram.utils;
 
 import java.util.Set;
+import java.util.HashSet;
+import android.content.Context;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
+import app.morphe.extension.shared.MarkChatAsReadScope;
 
 @SuppressWarnings("unused")
 public class Pref {
     private static final int MAX_IMAGE_SIZE = 4096;
-    public static boolean SHOULD_MARK_CHAT_AS_READ;
-    static {
-        SHOULD_MARK_CHAT_AS_READ = false;
-    }
-    public static void setMarkChatAsReadIndicator(boolean bool) {
-        SHOULD_MARK_CHAT_AS_READ = bool;
+
+    private static String removeLineBreaks(String value) {
+        return value.replace("\r", "").replace("\n", "");
     }
 
     public static boolean clearAllPreferences() {
+        // Resetting settings would silently drop an active Focus Lock.
+        if (FocusLock.isActive()) return false;
         return SharedPref.clearAll();
     }
     
@@ -53,12 +59,20 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_SUGGESTED_CONTENT);
     }
 
+    public static boolean saveDeletedMessages() {
+        return SharedPref.getBooleanPref(Settings.SAVE_DELETED_MESSAGES);
+    }
+
     public static boolean openLinksExternally() {
         return SharedPref.getBooleanPref(Settings.OPEN_LINKS_EXTERNALLY);
     }
 
     public static boolean sanitizeShareLinks() {
         return SharedPref.getBooleanPref(Settings.SANITIZE_SHARE_LINKS);
+    }
+
+    public static String customSharingDomain() {
+        return removeLineBreaks(SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN));
     }
 
     public static boolean getTurnOnAllGhostModes() {
@@ -96,18 +110,26 @@ public class Pref {
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
-        if(enableMarkChatAsReadOption() && SHOULD_MARK_CHAT_AS_READ){
+        return shouldBlockDmSeen(
+                SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
+                Pref.getTurnOnAllGhostModes(),
+                enableMarkChatAsReadOption()
+        );
+    }
+
+    static boolean shouldBlockDmSeen(
+            boolean viewDmAnonymously,
+            boolean allGhostModes,
+            boolean manualReadOptionEnabled
+    ) {
+        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
-        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
+        return viewDmAnonymously || allGhostModes;
     }
 
     public static boolean disableVideoAutoplay() {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
-    }
-
-    public static boolean storiesAudioAutoplay() {
-        return SharedPref.getBooleanPref(Settings.STORIES_AUDIO_AUTOPLAY);
     }
 
     public
@@ -132,19 +154,79 @@ public class Pref {
     }
 
     public static boolean hideStoriesTray() {
-        return SharedPref.getBooleanPref(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+        return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }
 
     public static boolean hideNotesTray() {
-        return SharedPref.getBooleanPref(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
+        return lockable(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
 
     public static boolean disableReelsScrolling() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
+        return lockable(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
 
     public static boolean disableSwipeToCreate() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
+        return lockable(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
+    }
+
+    /**
+     * A switch that Focus Lock can hold on: the stored value, or true while the lock forces it.
+     *
+     * Read per call rather than cached, so a lock that expires releases the setting without
+     * needing a restart.
+     */
+    private static boolean lockable(BooleanSetting setting) {
+        return SharedPref.getBooleanPref(setting) || FocusLock.isForced(setting);
+    }
+
+    /** Whether the target behind {@code key} is one of the things Focus Lock holds on. */
+    public static boolean focusLockSelected(String key) {
+        return SharedPref.getBooleanPref(focusLockSelection(key));
+    }
+
+    public static BooleanSetting focusLockSelection(String key) {
+        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false);
+    }
+
+    public static String focusLockDurationMinutes() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_DURATION_MINUTES);
+    }
+
+    public static boolean setFocusLockDurationMinutes(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_DURATION_MINUTES.key, value);
+    }
+
+    /** Keys of the first released Focus Lock, read so a lock it wrote still counts. */
+    public static boolean legacyFocusLockBlockReels() {
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false));
+    }
+
+    public static boolean legacyFocusLockBlockExplore() {
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false));
+    }
+
+    public static String focusLockFormat() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_FORMAT);
+    }
+
+    public static boolean setFocusLockFormat(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_FORMAT.key, value);
+    }
+
+    public static String focusLockUntil() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_UNTIL);
+    }
+
+    public static boolean setFocusLockUntil(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNTIL.key, value);
+    }
+
+    public static String focusLockUnlockRequestedAt() {
+        return SharedPref.getStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT);
+    }
+
+    public static boolean setFocusLockUnlockRequestedAt(String value) {
+        return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT.key, value);
     }
 
     public static boolean makeEphemeralMediaPermanent() {
@@ -156,7 +238,12 @@ public class Pref {
     }
 
     public static boolean hideGroupCreationOnSharesheet() {
-        return SharedPref.getBooleanPref(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
+        return lockable(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
+    }
+
+       public static boolean showReelsFollowButton(boolean original) {
+        boolean hide = lockable(Settings.HIDE_REELS_FOLLOW_BUTTON) && SettingsStatus.hideReelsFollowButton;
+        return original && !hide;
     }
 
     public static boolean enableDevOptions() {
@@ -191,8 +278,16 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.FOLLOW_BACK_COLOR_INDICATOR);
     }
 
+    public static boolean followListNonFollowerBadge() {
+        return SharedPref.getBooleanPref(Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE);
+    }
+
     public static boolean disableStoryFlipping() {
         return SharedPref.getBooleanPref(Settings.DISABLE_STORY_FLIPPING);
+    }
+
+    public static boolean loopStory() {
+        return SharedPref.getBooleanPref(Settings.LOOP_STORY);
     }
 
     public static boolean viewStoryMentions() {
@@ -223,8 +318,24 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
+    public static boolean embedDownloadMetadata() {
+        return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
+    public static String downloadFileNameTemplate() {
+        return removeLineBreaks(SharedPref.getStringPref(Settings.DOWNLOAD_FILE_NAME_TEMPLATE));
+    }
+
     public static boolean hideNavigationFeed() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_FEED);
+    }
+
+    public static boolean getHideHomeCreateButton() {
+        return !mainFeedActionBarButtons().contains(Constants.AB_CREATE);
+    }
+
+    public static boolean getHideHomeNotificationsButton() {
+        return !mainFeedActionBarButtons().contains(Constants.AB_NOTIFICATIONS);
     }
 
     public static boolean hideNavigationReels() {
@@ -241,6 +352,22 @@ public class Pref {
 
     public static boolean hideNavigationCreate() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_CREATE);
+    }
+
+    public static boolean hasLegacyNavigationSettings() {
+        return SharedPref.hasKey(Settings.HIDE_NAVIGATION_FEED.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_REELS.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_DIRECT.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_SEARCH.key)
+                || SharedPref.hasKey(Settings.HIDE_NAVIGATION_CREATE.key);
+    }
+
+    public static String navigationTabs() {
+        return SharedPref.getStringPref(Settings.NAVIGATION_TABS);
+    }
+
+    public static boolean setNavigationTabs(String value) {
+        return SharedPref.setStringPref(Settings.NAVIGATION_TABS.key, value);
     }
 
     public static boolean removeEmptyBottomSpace() {
@@ -268,16 +395,16 @@ public class Pref {
     }
 
     public static boolean disableDoubleTapPost() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_POST);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_POST);
     }
     public static boolean disableDoubleTapReel() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_REEL);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_REEL);
     }
     public static boolean disableDoubleTapComment() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT);
     }
     public static boolean disableDoubleTapMessage() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
+        return lockable(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
     }
     public static boolean moreOptionsOnPost() {
         return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST) && SettingsStatus.moreOptionsOnPost;
@@ -287,15 +414,42 @@ public class Pref {
     }
 
     public static String externalDownloaderPackageName() {
-        return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+        return removeLineBreaks(SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME));
     }
 
     public static Set<String> mainFeedActionBarButtons() {
-        return SharedPref.getSetPref(Settings.ACTION_BAR_MAIN_FEED);
+        return loadAndMigrateActionBarButtons(Settings.ACTION_BAR_MAIN_FEED, true);
     }
 
     public static Set<String> userProfileActionBarButtons() {
-        return SharedPref.getSetPref(Settings.ACTION_BAR_USER_PROFILE);
+        return loadAndMigrateActionBarButtons(Settings.ACTION_BAR_USER_PROFILE, false);
+    }
+
+    private static Set<String> loadAndMigrateActionBarButtons(StringSetting setting, boolean home) {
+        Set<String> buttons = SharedPref.getSetPref(setting);
+        Context context = Utils.getContext();
+        var preferences = context == null ? null
+                : context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String migratedKey = setting.key + "_visibility_migrated";
+        if (preferences != null && preferences.getBoolean(migratedKey, false)) return buttons;
+
+        String createKey = Settings.HIDE_HOME_CREATE_BUTTON.key;
+        String notificationsKey = Settings.HIDE_HOME_NOTIFICATIONS_BUTTON.key;
+        buttons = new HashSet<>(buttons);
+        boolean hideCreate = buttons.remove("HIDE_CREATE");
+        if (home && preferences != null) hideCreate |= preferences.getBoolean(createKey, false);
+        if (!hideCreate) buttons.add(Constants.AB_CREATE);
+        if (home) {
+            boolean hideNotifications = buttons.remove("HIDE_NOTIFICATIONS");
+            if (preferences != null) hideNotifications |= preferences.getBoolean(notificationsKey, false);
+            if (!hideNotifications) buttons.add(Constants.AB_NOTIFICATIONS);
+        }
+        if (preferences != null) {
+            var editor = preferences.edit().putStringSet(setting.key, buttons).putBoolean(migratedKey, true);
+            if (home) editor.remove(createKey).remove(notificationsKey);
+            editor.apply();
+        }
+        return buttons;
     }
 
     public static Set<String> chatActionBarButtons() {
@@ -320,15 +474,6 @@ public class Pref {
 
     public static Integer filterStoryByMaxStoryItems() {
         return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
-    }
-
-    public static Long getLastRecommendedFlagDownloadTimestamp() {
-        return Long.valueOf(SharedPref.getStringPref(Settings.LAST_RECOMMENDED_FLAG_DOWNLOAD_TIMESTAMP));
-    }
-
-    public static void setLastRecommendedFlagDownloadTimestamp(Long timestamp) {
-        String ts = String.valueOf(timestamp);
-        SharedPref.setStringPref(Settings.LAST_RECOMMENDED_FLAG_DOWNLOAD_TIMESTAMP.key,ts);
     }
 
     //end

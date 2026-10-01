@@ -550,6 +550,14 @@ public class ScreenBuilder {
                             Settings.NATIVE_SHARE_MENU
                     )
             );
+
+            addPreference(category,
+                    helper.multiSelectListPref(
+                            str("piko_native_share_menu_items_to_hide"),
+                            "",
+                            Settings.NATIVE_SHARE_MENU_ITEMS_TO_HIDE
+                    )
+            );
         }
     }
 
@@ -560,6 +568,15 @@ public class ScreenBuilder {
         LegacyTwitterPreferenceCategory category = null;
         if(buildCategory)
             category = preferenceCategory(str("piko_title_misc"));
+        if (SettingsStatus.blockUpdateScreen) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_block_update_screen"),
+                            str("piko_pref_block_update_screen_desc"),
+                            Settings.MISC_BLOCK_UPDATE_SCREEN
+                    )
+            );
+        }
         if (SettingsStatus.enableFontMod) {
             addPreference(category,
                     helper.switchPreference(
@@ -844,16 +861,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.dynamicColor) {
-            addPreference(category,
-                    helper.switchPreference(
-                            str("piko_pref_dynamic_color"),
-                            str("piko_pref_dynamic_color_desc"),
-                            Settings.DYNAMIC_COLOR
-                    )
-            );
-        }
-      
         addPreference(category,
                 helper.switchPreference(
                         str("piko_pref_quick_settings"),

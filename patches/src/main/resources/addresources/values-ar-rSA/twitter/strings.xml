@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">فشل حذف ذاكرة التخزين المؤقت</string>
     <string name="piko_title_native_share_menu">قائمة المشاركة المحلية</string>
     <string name="piko_native_share_menu_toggle">تمكين قائمة المشاركة المحلية</string>
+    <string name="piko_native_share_menu_items_to_hide">عناصر قائمة المشاركة المحلية المراد إخفاؤها</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">إخفاء منشورات المحتوى المُروَّج</string>
@@ -139,12 +140,36 @@
     <string name="piko_pref_search_suggestion_desc">يخفي اقتراحات البحث في قسم استكشف</string>
     <string name="piko_legacy_share_link">روابط المشاركة الكلاسيكية</string>
     <string name="piko_block_redirecting_to_x_lite">منع التحويل التلقائي إلى X Lite</string>
+    <string name="piko_pref_block_update_screen">منع شاشة التحديث</string>
+    <string name="piko_pref_block_update_screen_desc">يمنع عرض شاشة التحديث \'هذا التطبيق قديم\' عند التشغيل</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature Flags</string>
     <string name="piko_pref_feature_flags">Feature Flags إضافة</string>
     <string name="piko_pref_edit_flag_title">Flag تعديل</string>
     <string name="piko_pref_add_flag_title">Flag إضافة</string>
     <string name="piko_pref_search_flags">Flags بحث</string>
+    <string name="piko_pref_add_selected_flags">إضافة المحدّد</string>
+    <string name="piko_pref_flag_name">اسم Flag</string>
+    <string name="piko_pref_flag_already_added">تمت الإضافة مسبقًا</string>
+    <string name="piko_pref_flag_invalid_name">أدخل اسم Flag بدون فراغات أو فواصل أو نقطتين.</string>
+    <string name="piko_pref_select_flags">اختيار</string>
+    <string name="piko_pref_check_flags">فحص Flags</string>
+    <string name="piko_pref_flags_enable">مفعل</string>
+    <string name="piko_pref_flags_disable">متوقف</string>
+    <string name="piko_pref_flags_remove_selected">إزالة Flags المحددة؟</string>
+    <string name="piko_pref_flag_verify_name">أسماء Flags مقترحة</string>
+    <string name="piko_pref_flags_selected">تم تحديد %s</string>
+    <string name="piko_pref_flag_unknown">لم يتم العثور عليه في بحث Flags. قد يكون هذا خطأ إملائيًا أو Flag لم يجمعه التطبيق بعد.</string>
+    <string name="piko_pref_flag_duplicates">إدخالات مكررة</string>
+    <string name="piko_pref_flag_unverified_short">اسم غير مُتحقق منه</string>
+    <string name="piko_pref_flag_typo_short">خطأ مطبعي محتمل</string>
+    <string name="piko_pref_flag_merge_same">هذه الإدخالات لها نفس القيمة. قم بدمجها في Flag واحد واحتفظ بهذه القيمة:</string>
+    <string name="piko_pref_flag_merge_conflict">تحتوي هذه الإدخالات على قيم مختلفة. اختر القيمة التي ترغب في الاحتفاظ بها عند دمجها في Flag واحد.</string>
+    <string name="piko_pref_flag_merge">دمج في واحد</string>
+    <string name="piko_pref_flag_keep_on">إبقاؤه مفعلًا</string>
+    <string name="piko_pref_flag_keep_off">إبقاؤه متوقف</string>
+    <string name="piko_pref_flag_suggested_name">اسم مقترح:</string>
+    <string name="piko_pref_flag_check_clear">لم يتم العثور على أسماء مكررة أو غير مُتحقق منها.</string>
     <string name="piko_pref_import_flags">استيراد Flags</string>
     <string name="piko_pref_export_flags">تصدير Flags</string>
     <string name="piko_pref_reset_flags">إعادة تعيين Flags</string>
@@ -165,10 +190,10 @@
     <string name="piko_pref_show_poll_result">عرض نتائج التصويت</string>
     <string name="piko_pref_show_poll_result_desc">عرض نتائج التصويت دون التصويت</string>
     <string name="piko_pref_hide_community_notes">إخفاء ملاحظات المجتمع</string>
-    <string name="piko_pref_hide_immersive_player">إخفاء مشغل Immersive</string>
-    <string name="piko_pref_hide_immersive_player_desc">يزيل التمرير السريع لمزيد من مقاطع الفيديو في مشغل الفيديو</string>
+    <string name="piko_pref_hide_immersive_player">تعطيل مشغل Immersive</string>
+    <string name="piko_pref_hide_immersive_player_desc">تعطيل مشغل الفيديو الجديد الذي يتيح مشاهدة المزيد من الفيديوهات بالتمرير للأعلى</string>
     <string name="piko_pref_enable_vid_auto_advance">تمكين تمرير الفيديو تلقائيًا</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">تمكين التمرير التلقائي للفيديو في العرض الشامل</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">تمكين التمرير التلقائي للفيديو في مشغل Immersive</string>
     <string name="piko_pref_hide_hidden_replies">إخفاء الردود المخفية</string>
     <string name="piko_pref_force_hd">فرض فيديوهات عالية الدقة HD</string>
     <string name="piko_pref_force_hd_desc">سيتم تشغيل الفيديوهات بأعلى جودة دائمًا</string>
@@ -201,12 +226,11 @@
     <string name="piko_pref_customisation_post_font_size">حجم خط المنشور</string>
     <string name="piko_pref_customisation_search_type_ahead">اقتراحات البحث المراد إخفاؤها</string>
     <string name="piko_pref_customisation_change_app_icon">تغيير أيقونة التطبيق</string>
-    <string name="piko_pref_dynamic_color">الألوان الديناميكية</string>
-    <string name="piko_pref_dynamic_color_desc">يطبّق لوحة ألوان Material You الخاصة بالمستخدم على مظهر التطبيق بالكامل. لتطبيق الألوان الديناميكية على أيقونة التطبيق، انتقل إلى إعدادات Piko &gt; التخصيص &gt; تغيير أيقونة التطبيق</string>
     <string name="piko_notifications_tab_priority">الأولوية</string>
     <string name="piko_pref_customisation_more_info_on_profile">المزيد من المعلومات في الملف الشخصي</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">يضيف المزيد من التفاصيل على صفحة الملف الشخصي</string>
     <string name="piko_fast_follower">متابِع سريع</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">نمط الخط</string>
     <string name="piko_pref_add_font">إضافة خط</string>

@@ -38,6 +38,7 @@ public class MultiSelectListPref extends MultiSelectListPreference {
     }
 
     private void init() {
+        setSingleLineTitle(false);
         setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -73,6 +74,9 @@ public class MultiSelectListPref extends MultiSelectListPreference {
         }else if (key == Settings.CUSTOM_NOTIFICATION_TABS.key) {
             entries = ResourceUtils.getStringArray("piko_array_notificationtabs");
             entriesValues = ResourceUtils.getStringArray("piko_array_notificationtabs_val");
+        }else if (key == Settings.NATIVE_SHARE_MENU_ITEMS_TO_HIDE.key) {
+            entries = ResourceUtils.getStringArray("piko_array_native_share_menu_items");
+            entriesValues = ResourceUtils.getStringArray("piko_array_native_share_menu_items_val");
         }
         setEntries(entries);
         setEntryValues(entriesValues);

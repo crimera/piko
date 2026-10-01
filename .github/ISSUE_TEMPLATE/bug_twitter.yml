@@ -1,0 +1,55 @@
+name: "🐞 Twitter bug"
+description: Report a reproducible Twitter/X bug.
+title: "bug(Twitter): "
+labels: ["bug", "twitter"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search open and closed issues first.
+        Report one bug per issue. Keep the title prefix unchanged.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include expected behavior, actual behavior, and steps to reproduce.
+      placeholder: |
+        Expected:
+        Actual:
+        Steps:
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Twitter/X version
+      description: Version of the patched app.
+    validations:
+      required: true
+
+  - type: input
+    id: patches-version
+    attributes:
+      label: Piko patch version
+      description: Version of the Piko patch bundle.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste relevant logs, if available.
+      render: shell
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Confirm
+      options:
+        - label: I searched open and closed issues; this is not a duplicate.
+          required: true
+        - label: I included all relevant details.
+          required: true

@@ -14,12 +14,10 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
-import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.Settings;
-import app.morphe.extension.instagram.utils.IgStr;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
@@ -29,13 +27,14 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 
 public final class MaterialYouTheme {
-    private static final int NATIVE_THEME_DARK = 2;
+    private static final String PIKO_SETTINGS_ACTIVITY_PACKAGE =
+            "app.morphe.extension.instagram.settings.";
     private static boolean initializationFailureLogged;
     private static boolean lifecycleCallbacksRegistered;
+    private static Boolean observedInstagramDark;
     private static final ActivityThemeGeneration ACTIVITY_GENERATIONS =
             new ActivityThemeGeneration();
     private static int themeTransitionDepth;
@@ -43,26 +42,7 @@ public final class MaterialYouTheme {
     private static boolean themeTransitionOverlayChanged;
     private static boolean themeTransitionPikoRecreate;
     private static int lastComposePrismOverrideArgb = Integer.MIN_VALUE;
-    private static int lastComposeSurfaceOverrideArgb = Integer.MIN_VALUE;
-
-    private static final Function1<Boolean, Unit> MATERIAL_YOU_TOGGLE_CALLBACK = value -> {
-        requestMaterialYouChange(Utils.getActivity(), Boolean.TRUE.equals(value));
-        return Unit.INSTANCE;
-    };
-
-    private static final CompoundButton.OnCheckedChangeListener LEGACY_MATERIAL_YOU_TOGGLE_LISTENER =
-            (buttonView, isChecked) -> {
-                if (!MaterialYouState.shouldRequestToggleChange(
-                        isChecked,
-                        isMaterialYouEnabled()
-                )) {
-                    return;
-                }
-                requestMaterialYouChange(
-                        getActivity(buttonView.getContext()),
-                        isChecked
-                );
-            };
+    private static int lastComposeSearchRowOverrideArgb = Integer.MIN_VALUE;
 
     private static final Application.ActivityLifecycleCallbacks ACTIVITY_CALLBACKS =
             new Application.ActivityLifecycleCallbacks() {
@@ -120,11 +100,11 @@ public final class MaterialYouTheme {
                 applicationContext = context;
             }
             MaterialYouThemeAPI31.initialize(applicationContext);
-            ThemeMode mode = availableModeOrFallback(currentMode());
+            ThemeMode mode = currentMode();
             // The first activity must refresh colors after attaching its overlay.
             lastComposePrismOverrideArgb = Integer.MIN_VALUE;
-            lastComposeSurfaceOverrideArgb =
-                    MaterialYouState.composeSurfaceOverrideArgb(mode, 0);
+            lastComposeSearchRowOverrideArgb =
+                    MaterialYouState.composeSearchRowOverrideArgb(mode, 0);
             registerActivityCallbacks(applicationContext);
         } catch (Exception exception) {
             logInitializationFailureOnce(exception);
@@ -139,23 +119,47 @@ public final class MaterialYouTheme {
         }
 
         ThemeMode persistedMode = currentMode();
-        ThemeMode mode = availableModeOrFallback(persistedMode);
-        int nativeMode = currentInstagramThemeMode();
-        int systemNightMask = getSystemUiMode();
-        boolean instagramDark = MaterialYouState.isEffectiveDark(
-                nativeMode,
-                systemNightMask
+        boolean instagramDark = resolveInstagramDark(activity);
+        ThemeMode requestedMode = availableRequestedModeOrFallback(
+                persistedMode,
+                instagramDark
         );
-        boolean resourcesApplied =
-                MaterialYouThemeAPI31.setResourcesMode(activity, mode, instagramDark);
-        // Compose caches must be refreshed independently of the resource overlay.
-        applyComposePrismMode(activity, mode);
-        if (resourcesApplied) {
-            if (mode != persistedMode) {
-                persistMode(mode);
+        ThemeMode previousEffectiveMode = MaterialYouState.modeForEffectiveTheme(
+                persistedMode,
+                instagramDark
+        );
+        ThemeMode requestedEffectiveMode = MaterialYouState.modeForEffectiveTheme(
+                requestedMode,
+                instagramDark
+        );
+        boolean resourcesChanged = previousEffectiveMode != requestedEffectiveMode;
+        if (!MaterialYouThemeAPI31.setResourcesMode(
+                activity,
+                requestedEffectiveMode,
+                instagramDark
+        )) {
+            if (resourcesChanged) {
+                MaterialYouThemeAPI31.setResourcesMode(
+                        activity,
+                        previousEffectiveMode,
+                        instagramDark
+                );
             }
-            ACTIVITY_GENERATIONS.recordCreated(activity);
+            return;
         }
+        if (requestedMode != persistedMode && !persistMode(requestedMode)) {
+            if (resourcesChanged) {
+                MaterialYouThemeAPI31.setResourcesMode(
+                        activity,
+                        previousEffectiveMode,
+                        instagramDark
+                );
+            }
+            persistMode(persistedMode);
+            return;
+        }
+        applyComposePrismMode(activity, requestedEffectiveMode);
+        ACTIVITY_GENERATIONS.recordCreated(activity);
     }
 
     public static int getSystemUiMode() {
@@ -181,28 +185,29 @@ public final class MaterialYouTheme {
         return Build.VERSION.SDK_INT >= 31 && MaterialYouThemeAPI31.isReady(ThemeMode.AMOLED);
     }
 
+    public static boolean canEnableAmoled(Context context) {
+        Activity activity = getActivity(context);
+        boolean available = isAmoledAvailable();
+        boolean instagramDark = resolveInstagramDark(activity);
+        return available && instagramDark;
+    }
+
     public static boolean isMaterialYouEnabled() {
         return isMaterialYouAvailable()
-                && MaterialYouState.hasMaterialYou(availableModeOrFallback(currentMode()));
+                && MaterialYouState.hasMaterialYou(currentMode());
     }
 
     public static boolean isAmoledEnabled() {
         return isAmoledAvailable()
-                && MaterialYouState.hasAmoled(availableModeOrFallback(currentMode()));
-    }
-
-    public static Function1<Boolean, Unit> getMaterialYouToggleCallback() {
-        return MATERIAL_YOU_TOGGLE_CALLBACK;
-    }
-
-    public static CompoundButton.OnCheckedChangeListener getLegacyMaterialYouToggleListener() {
-        return LEGACY_MATERIAL_YOU_TOGGLE_LISTENER;
+                && MaterialYouState.hasAmoled(currentMode());
     }
 
     public static Function1<Integer, Unit> wrapNativeThemeCallback(
             Function1<Integer, Unit> callback
     ) {
-        if (!isAmoledAvailable() || callback instanceof NativeThemeCallback) {
+        if (Build.VERSION.SDK_INT < 31
+                || callback == null
+                || callback instanceof NativeThemeCallback) {
             return callback;
         }
         return new NativeThemeCallback(callback);
@@ -210,54 +215,48 @@ public final class MaterialYouTheme {
 
     public static void observeComposeNativeThemeMode(int nativeMode) {
         int observedMode = MaterialYouState.sanitizeNativeThemeMode(nativeMode);
-        if (currentInstagramThemeMode() != observedMode) {
+        if (MaterialYouState.shouldPersistObservedNativeMode(
+                currentInstagramThemeMode(),
+                observedMode,
+                isInstagramThemeModeSynchronized()
+        )) {
             persistInstagramThemeMode(observedMode);
         }
-    }
-
-    public static Function0<Unit> getAmoledRadioCallback(
-            Function1<Integer, Unit> callback
-    ) {
-        Function1<Integer, Unit> nativeCallback = unwrapNativeThemeCallback(callback);
-        return () -> {
-            ThemeMode targetMode = MaterialYouState.modeForAmoledToggle(
-                    true,
-                    currentModeForRequest()
-            );
-            requestNativeThemeChange(
-                    Utils.getActivity(),
-                    targetMode,
-                    NATIVE_THEME_DARK,
-                    () -> nativeCallback.invoke(NATIVE_THEME_DARK)
-            );
-            return Unit.INSTANCE;
-        };
     }
 
     public static RadioGroup.OnCheckedChangeListener wrapLegacyNativeThemeListener(
             RadioGroup.OnCheckedChangeListener listener,
             int packedIds
     ) {
-        if (!isAmoledAvailable()) {
+        if (Build.VERSION.SDK_INT < 31
+                || listener == null
+                || listener instanceof LegacyNativeThemeController) {
             return listener;
         }
         return new LegacyNativeThemeController(
                 listener,
                 MaterialYouState.unpackLegacyRadioId(packedIds, 0),
                 MaterialYouState.unpackLegacyRadioId(packedIds, 1),
-                MaterialYouState.unpackLegacyRadioId(packedIds, 2),
-                MaterialYouState.unpackLegacyRadioId(packedIds, 3)
+                MaterialYouState.unpackLegacyRadioId(packedIds, 2)
         );
     }
 
     public static String getLegacySelectedRadioId(String nativeId, int packedIds) {
-        String amoledId = Integer.toString(
-                MaterialYouState.unpackLegacyRadioId(packedIds, 0)
-        );
         Integer observedNativeMode =
                 MaterialYouState.nativeModeForLegacySelectionId(nativeId, packedIds);
-        if (observedNativeMode != null
-                && currentInstagramThemeMode() != observedNativeMode) {
+        if (observedNativeMode != null) {
+            int currentNativeMode = currentInstagramThemeMode();
+            if (!MaterialYouState.shouldPersistObservedNativeMode(
+                    currentNativeMode,
+                    observedNativeMode,
+                    isInstagramThemeModeSynchronized()
+            )) {
+                return nativeId;
+            }
+            if (currentNativeMode == observedNativeMode) {
+                persistInstagramThemeMode(observedNativeMode);
+                return nativeId;
+            }
             Activity activity = Utils.getActivity();
             if (Build.VERSION.SDK_INT >= 31
                     && activity != null
@@ -272,63 +271,57 @@ public final class MaterialYouTheme {
                 persistInstagramThemeMode(observedNativeMode);
             }
         }
-        return isAmoledEnabled() ? amoledId : nativeId;
+        return nativeId;
     }
 
-    public static String getLegacyRadioTitle(
-            String itemId,
-            String amoledId,
-            String nativeTitle
-    ) {
-        return resolveLegacyRadioTitle(
-                itemId,
-                amoledId,
-                nativeTitle,
-                getAmoledTitle()
-        );
+    public static boolean requestMaterialYouChange(Context context, boolean enabled) {
+        return requestMaterialYouChange(getActivity(context), enabled);
     }
 
-    public static String getAmoledTitle() {
-        return "AMOLED";
+    public static boolean requestAmoledChange(Context context, boolean enabled) {
+        return requestAmoledChange(getActivity(context), enabled);
     }
 
-    public static String resolveLegacyRadioTitle(
-            String itemId,
-            String amoledId,
-            String nativeTitle,
-            String amoledTitle
-    ) {
-        if (itemId != null && itemId.equals(amoledId) && amoledTitle != null) {
-            return amoledTitle;
+    private static boolean requestAmoledChange(Activity activity, boolean enabled) {
+        if (enabled && !canEnableAmoled(activity)) {
+            return false;
         }
-        return nativeTitle;
-    }
-
-    public static boolean shouldSelectNativeDark(boolean nativeDarkSelected) {
-        return MaterialYouState.shouldSelectNativeDark(
-                nativeDarkSelected,
-                isAmoledEnabled()
+        return requestNativeThemeChange(
+                activity,
+                MaterialYouState.modeForAmoledToggle(
+                        enabled,
+                        currentModeForRequest()
+                ),
+                null,
+                null
         );
     }
 
-    public static boolean isAvailable() {
-        return isMaterialYouAvailable();
+    private static boolean isActivityDark(Activity activity) {
+        return activity != null && MaterialYouState.isActivityUiModeDark(
+                activity.getResources().getConfiguration().uiMode
+        );
     }
 
-    public static boolean isEnabled() {
-        return isMaterialYouEnabled();
+    private static boolean resolveInstagramDark(Activity activity) {
+        boolean activityDark = isActivityDark(activity);
+        boolean pikoSettingsActivity = activity == null
+                || activity.getClass().getName().startsWith(PIKO_SETTINGS_ACTIVITY_PACKAGE);
+        observedInstagramDark = MaterialYouState.updateObservedInstagramDark(
+                observedInstagramDark,
+                pikoSettingsActivity,
+                activityDark
+        );
+        return MaterialYouState.resolveInstagramDark(
+                observedInstagramDark,
+                currentInstagramThemeMode(),
+                isInstagramThemeModeSynchronized(),
+                getSystemUiMode()
+        );
     }
 
-    public static Function1<Boolean, Unit> getToggleCallback() {
-        return getMaterialYouToggleCallback();
-    }
-
-    public static CompoundButton.OnCheckedChangeListener getLegacyToggleListener() {
-        return getLegacyMaterialYouToggleListener();
-    }
-
-    private static void requestMaterialYouChange(Activity activity, boolean enabled) {
-        requestNativeThemeChange(
+    private static boolean requestMaterialYouChange(Activity activity, boolean enabled) {
+        return requestNativeThemeChange(
                 activity,
                 MaterialYouState.modeForMaterialYouToggle(
                         enabled,
@@ -339,7 +332,7 @@ public final class MaterialYouTheme {
         );
     }
 
-    private static void requestNativeThemeChange(
+    private static boolean requestNativeThemeChange(
             Activity activity,
             ThemeMode mode,
             Integer nativeMode,
@@ -348,125 +341,147 @@ public final class MaterialYouTheme {
         if (Build.VERSION.SDK_INT < 31
                 || activity == null
                 || Looper.myLooper() != Looper.getMainLooper()) {
-            return;
+            return false;
         }
 
-        applyMode(
+        return applyMode(
                 activity,
-                availableModeOrFallback(mode),
+                mode,
                 nativeMode,
                 nativeAction
         );
     }
 
-    private static ThemeMode availableModeOrFallback(ThemeMode mode) {
-        return MaterialYouState.availableModeOrFallback(
+    private static ThemeMode availableRequestedModeOrFallback(
+            ThemeMode mode,
+            boolean instagramDark
+    ) {
+        return MaterialYouState.availableRequestedModeOrFallback(
                 mode,
+                instagramDark,
                 isMaterialYouAvailable(),
                 isAmoledAvailable(),
                 MaterialYouThemeAPI31.isReady(ThemeMode.AMOLED_MATERIAL_YOU)
         );
     }
 
-    private static void applyMode(
+    private static boolean applyMode(
             Activity activity,
             ThemeMode requestedMode,
             Integer nativeMode,
             Runnable nativeAction
     ) {
-        ThemeMode previousMode = availableModeOrFallback(currentMode());
+        ThemeMode persistedPreviousMode = currentMode();
         int previousNativeMode = currentInstagramThemeMode();
         int requestedNativeMode = nativeMode == null
                 ? previousNativeMode
                 : MaterialYouState.sanitizeNativeThemeMode(nativeMode);
         int systemNightMask = getSystemUiMode();
-        boolean previousInstagramDark = MaterialYouState.isEffectiveDark(
-                previousNativeMode,
-                systemNightMask
-        );
-        boolean requestedInstagramDark = MaterialYouState.isEffectiveDark(
-                requestedNativeMode,
-                systemNightMask
-        );
         int currentNightMask = activity.getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK;
+        boolean previousInstagramDark = resolveInstagramDark(activity);
+        boolean requestedInstagramDark = nativeMode == null
+                ? previousInstagramDark
+                : MaterialYouState.isEffectiveDark(
+                        requestedNativeMode,
+                        systemNightMask
+                );
+        ThemeMode previousRequestedMode = availableRequestedModeOrFallback(
+                persistedPreviousMode,
+                previousInstagramDark
+        );
+        requestedMode = availableRequestedModeOrFallback(
+                requestedMode,
+                requestedInstagramDark
+        );
+        ThemeMode previousEffectiveMode = MaterialYouState.modeForEffectiveTheme(
+                previousRequestedMode,
+                previousInstagramDark
+        );
+        ThemeMode requestedEffectiveMode = MaterialYouState.modeForEffectiveTheme(
+                requestedMode,
+                requestedInstagramDark
+        );
         int targetNightMask = MaterialYouState.targetNightMask(
                 requestedNativeMode,
                 systemNightMask
         );
-        boolean overlayChanged = previousMode != requestedMode
+        boolean overlayChanged = previousEffectiveMode != requestedEffectiveMode
                 || previousInstagramDark != requestedInstagramDark;
         boolean pikoRecreate = MaterialYouState.shouldPikoRecreate(
-                previousMode,
-                requestedMode,
+                previousEffectiveMode,
+                requestedEffectiveMode,
                 nativeAction != null,
                 currentNightMask,
                 targetNightMask
         );
         if (!MaterialYouThemeAPI31.setResourcesMode(
                 activity,
-                requestedMode,
+                requestedEffectiveMode,
                 requestedInstagramDark
         )) {
-            MaterialYouThemeAPI31.setResourcesMode(
-                    activity,
-                    previousMode,
-                    previousInstagramDark
-            );
-            persistMode(previousMode);
-            return;
+            if (overlayChanged) {
+                MaterialYouThemeAPI31.setResourcesMode(
+                        activity,
+                        previousEffectiveMode,
+                        previousInstagramDark
+                );
+            }
+            return false;
         }
-
-        if (previousMode != requestedMode && !persistMode(requestedMode)) {
-            MaterialYouThemeAPI31.setResourcesMode(
-                    activity,
-                    previousMode,
-                    previousInstagramDark
-            );
-            persistMode(previousMode);
-            return;
+        boolean requestedStateCommitted =
+                (previousRequestedMode == requestedMode || persistMode(requestedMode))
+                        && (!MaterialYouState.shouldPersistNativeThemeBeforeAction(
+                                nativeMode != null,
+                                nativeAction != null
+                        ) || persistInstagramThemeMode(requestedNativeMode));
+        if (!requestedStateCommitted) {
+            if (overlayChanged) {
+                MaterialYouThemeAPI31.setResourcesMode(
+                        activity,
+                        previousEffectiveMode,
+                        previousInstagramDark
+                );
+            }
+            persistMode(persistedPreviousMode);
+            if (nativeMode != null) {
+                persistInstagramThemeMode(previousNativeMode);
+            }
+            return false;
         }
-
-        if (MaterialYouState.shouldPersistNativeThemeBeforeAction(
-                nativeMode != null,
-                nativeAction != null
-        ) && !persistInstagramThemeMode(requestedNativeMode)) {
-            MaterialYouThemeAPI31.setResourcesMode(
-                    activity,
-                    previousMode,
-                    previousInstagramDark
-            );
-            persistMode(previousMode);
-            persistInstagramThemeMode(previousNativeMode);
-            return;
-        }
-
-        applyComposePrismMode(activity, requestedMode);
+        applyComposePrismMode(activity, requestedEffectiveMode);
         runThemeTransition(
                 activity,
                 nativeAction,
                 pikoRecreate,
                 overlayChanged
         );
+        observedInstagramDark =
+                MaterialYouState.updateObservedInstagramDarkForNativeMode(
+                        observedInstagramDark,
+                        nativeMode,
+                        requestedInstagramDark
+                );
         if (MaterialYouState.shouldPersistNativeThemeAfterAction(
                 nativeMode != null,
                 nativeAction != null
         )) {
-            persistInstagramThemeMode(requestedNativeMode);
+            return persistInstagramThemeMode(requestedNativeMode);
         }
+        return true;
     }
 
     private static void applyComposePrismMode(Context context, ThemeMode mode) {
         int materialYouBackgroundArgb = 0;
         if (MaterialYouState.hasMaterialYou(mode)) {
-            int resourceId = ResourceUtils.getIdentifier(
+            int backgroundResourceId = ResourceUtils.getIdentifier(
                     context,
                     ResourceType.COLOR,
                     "igds_primary_background"
             );
-            if (resourceId != 0) {
+            if (backgroundResourceId != 0) {
                 try {
-                    materialYouBackgroundArgb = context.getColor(resourceId);
+                    materialYouBackgroundArgb = context.getColor(backgroundResourceId);
                 } catch (Resources.NotFoundException ignored) {
                 }
             }
@@ -479,8 +494,8 @@ public final class MaterialYouTheme {
         boolean changed = overrideArgb != lastComposePrismOverrideArgb;
         applyComposePrismColor(overrideArgb, changed);
         lastComposePrismOverrideArgb = overrideArgb;
-        lastComposeSurfaceOverrideArgb =
-                MaterialYouState.composeSurfaceOverrideArgb(
+        lastComposeSearchRowOverrideArgb =
+                MaterialYouState.composeSearchRowOverrideArgb(
                         mode,
                         materialYouBackgroundArgb
                 );
@@ -492,13 +507,9 @@ public final class MaterialYouTheme {
     );
 
     public static long resolveComposeSearchRowBackground(long nativePackedColor) {
-        return resolveComposeSurfaceBackground(nativePackedColor);
-    }
-
-    public static long resolveComposeSurfaceBackground(long nativePackedColor) {
         return MaterialYouState.composeSearchRowBackground(
                 nativePackedColor,
-                lastComposeSurfaceOverrideArgb
+                lastComposeSearchRowOverrideArgb
         );
     }
 
@@ -541,16 +552,6 @@ public final class MaterialYouTheme {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static Function1<Integer, Unit> unwrapNativeThemeCallback(
-            Function1<Integer, Unit> callback
-    ) {
-        if (callback instanceof NativeThemeCallback) {
-            return ((NativeThemeCallback) callback).delegate;
-        }
-        return callback;
-    }
-
     private static ThemeMode currentMode() {
         return MaterialYouState.resolveMode(
                 Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.MATERIAL_YOU_THEME)),
@@ -559,7 +560,7 @@ public final class MaterialYouTheme {
     }
 
     private static ThemeMode currentModeForRequest() {
-        return availableModeOrFallback(currentMode());
+        return currentMode();
     }
 
     private static boolean persistMode(ThemeMode mode) {
@@ -584,12 +585,27 @@ public final class MaterialYouTheme {
         }
     }
 
+    private static boolean isInstagramThemeModeSynchronized() {
+        return Boolean.TRUE.equals(
+                SharedPref.getBooleanPref(Settings.INSTAGRAM_THEME_MODE_SYNCHRONIZED)
+        );
+    }
+
     private static boolean persistInstagramThemeMode(int nativeMode) {
         int sanitizedMode = MaterialYouState.sanitizeNativeThemeMode(nativeMode);
-        return Boolean.TRUE.equals(
+        boolean modeWritten = Boolean.TRUE.equals(
                 SharedPref.setStringPref(
                         Settings.INSTAGRAM_THEME_MODE.key,
                         Integer.toString(sanitizedMode)
+                )
+        );
+        if (!modeWritten) {
+            return false;
+        }
+        return Boolean.TRUE.equals(
+                SharedPref.setBooleanPref(
+                        Settings.INSTAGRAM_THEME_MODE_SYNCHRONIZED.key,
+                        true
                 )
         );
     }
@@ -683,20 +699,17 @@ public final class MaterialYouTheme {
     private static final class LegacyNativeThemeController
             implements RadioGroup.OnCheckedChangeListener {
         private final RadioGroup.OnCheckedChangeListener delegate;
-        private final int amoledId;
         private final int lightId;
         private final int darkId;
         private final int systemId;
 
         private LegacyNativeThemeController(
                 RadioGroup.OnCheckedChangeListener delegate,
-                int amoledId,
                 int lightId,
                 int darkId,
                 int systemId
         ) {
             this.delegate = delegate;
-            this.amoledId = amoledId;
             this.lightId = lightId;
             this.darkId = darkId;
             this.systemId = systemId;
@@ -705,28 +718,21 @@ public final class MaterialYouTheme {
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
             ThemeMode currentMode = currentModeForRequest();
-            boolean selectAmoled = checkedId == amoledId;
-            int nativeId = selectAmoled ? darkId : checkedId;
-            Integer nativeMode = selectAmoled
-                    ? NATIVE_THEME_DARK
-                    : MaterialYouState.nativeModeForLegacySelection(
-                            checkedId,
-                            lightId,
-                            darkId,
-                            systemId
-                    );
+            Integer nativeMode = MaterialYouState.nativeModeForLegacySelection(
+                    checkedId,
+                    lightId,
+                    darkId,
+                    systemId
+            );
             if (nativeMode == null) {
                 delegate.onCheckedChanged(group, checkedId);
                 return;
             }
-            ThemeMode targetMode = selectAmoled
-                    ? MaterialYouState.modeForAmoledToggle(true, currentMode)
-                    : MaterialYouState.modeForNativeThemeSelection(currentMode);
             requestNativeThemeChange(
                     getActivity(group.getContext()),
-                    targetMode,
+                    MaterialYouState.modeForNativeThemeSelection(currentMode),
                     nativeMode,
-                    () -> delegate.onCheckedChanged(group, nativeId)
+                    () -> delegate.onCheckedChanged(group, checkedId)
             );
         }
     }

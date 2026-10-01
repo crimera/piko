@@ -86,8 +86,6 @@
     <string name="piko_pref_hide_quick_promote_desc">Ẩn các nút quảng bá trong mọi bài đăng của chính mình</string>
     <string name="piko_pref_show_poll_result">Hiện thị lượt bình chọn </string>
     <string name="piko_pref_show_poll_result_desc">Không bình chọn nhưng vẫn xem được lượt bình chọn</string>
-    <string name="piko_pref_hide_immersive_player_desc">Loại bỏ tính năng lướt để xem thêm trong trình phát video</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Tự động cuộn video khi kết thúc trong chế độ toàn màn hình</string>
     <string name="piko_pref_force_hd_desc">Videos sẽ được phát lại ở chất lượng cao nhất</string>
     <string name="piko_pref_hide_nudge_button">Ẩn nút theo dõi</string>
     <string name="piko_pref_hide_nudge_button_desc">Ẩn những nút Theo dõi/Dăng kí/Theo dõi lại trong post</string>

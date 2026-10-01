@@ -35,7 +35,7 @@ public class SwitchPref extends SwitchPreference {
     }
 
     private void init() {
-        // Set the OnPreferenceChangeListener
+        setSingleLineTitle(false);
         setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {

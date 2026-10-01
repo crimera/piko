@@ -7,6 +7,7 @@ package app.morphe.extension.instagram.settings;
 
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.patches.download.DownloadFileNameFormatter;
 
 public class Settings {
     public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);
@@ -14,13 +15,15 @@ public class Settings {
     public static final BooleanSetting AMOLED_THEME = new BooleanSetting("amoled_theme", false);
     public static final StringSetting INSTAGRAM_THEME_MODE =
             new StringSetting("instagram_theme_mode", "-1");
+    public static final BooleanSetting INSTAGRAM_THEME_MODE_SYNCHRONIZED =
+            new BooleanSetting("instagram_theme_mode_synchronized", false);
     // It should be true always. It will be handled upon opening the piko settings for the first time.
     public static final BooleanSetting FIRST_TIME_PIKO = new BooleanSetting("first_time_piko", true);
-    public static final StringSetting LAST_RECOMMENDED_FLAG_DOWNLOAD_TIMESTAMP = new StringSetting("last_recommended_flag_download_timestamp", "0");
 
     public static final BooleanSetting DISABLE_ADS = new BooleanSetting("disable_ads", true);
     public static final BooleanSetting OPEN_LINKS_EXTERNALLY = new BooleanSetting("open_links_externally", true);
     public static final BooleanSetting SANITIZE_SHARE_LINKS = new BooleanSetting("sanitize_share_links", true);
+    public static final StringSetting CUSTOM_SHARING_DOMAIN = new StringSetting("custom_sharing_domain", "");
     public static final BooleanSetting HIDE_SUGGESTED_CONTENT = new BooleanSetting("hide_suggested_content", true);
     public static final BooleanSetting DEVELOPER_OPTIONS = new BooleanSetting("enable_developer_options", true);
     public static final BooleanSetting DIRECTLY_OPEN_METACONFIG = new BooleanSetting("directly_open_metaconfig",false);
@@ -29,12 +32,14 @@ public class Settings {
     public static final BooleanSetting DISABLE_DISCOVER_PEOPLE = new BooleanSetting("disable_discover_people", true);
     public static final BooleanSetting LIMIT_FOLLOWING_FEED = new BooleanSetting("limit_following_feed", false);
     public static final BooleanSetting REMOVE_BUILD_EXPIRE_POPUP = new BooleanSetting("remove_build_expire_popup", true);
-    public static final BooleanSetting DISABLE_ANALYTICS = new BooleanSetting("disable_analytics", true);
+    public static final BooleanSetting DISABLE_ANALYTICS = new BooleanSetting("disable_analytics", false);
     public static final BooleanSetting TURN_ON_ALL_GHOST_MODES = new BooleanSetting("turn_on_all_ghost_modes", false);
     public static final BooleanSetting VIEW_STORIES_ANONYMOUSLY = new BooleanSetting("view_stories_anonymously", false);
     public static final BooleanSetting VIEW_LIVE_ANONYMOUSLY = new BooleanSetting("view_live_anonymously", true);
     public static final BooleanSetting DISABLE_SCREENSHOT_DETECTION = new BooleanSetting("disable_screenshot_detection", true);
     public static final BooleanSetting VIEW_DM_ANONYMOUSLY = new BooleanSetting("view_dm_anonymously", false);
+    public static final BooleanSetting INSTANTS_DOWNLOAD = new BooleanSetting("instants_download", false);
+    public static final BooleanSetting SAVE_DELETED_MESSAGES = new BooleanSetting("save_deleted_messages", true);
     public static final BooleanSetting DISABLE_STORIES = new BooleanSetting("disable_stories", false);
     public static final BooleanSetting DISABLE_HIGHLIGHTS = new BooleanSetting("disable_highlights", false);
     public static final BooleanSetting HIDE_STORIES_TRAY = new BooleanSetting("hide_stories_tray", false);
@@ -42,26 +47,36 @@ public class Settings {
     public static final BooleanSetting DISABLE_COMMENTS = new BooleanSetting("disable_comments", false);
     public static final BooleanSetting FOLLOW_BACK_INDICATOR = new BooleanSetting("follow_back_indicator", true);
     public static final BooleanSetting FOLLOW_BACK_COLOR_INDICATOR = new BooleanSetting("follow_back_color_indicator", true);
+    public static final BooleanSetting FOLLOW_LIST_NON_FOLLOWER_BADGE = new BooleanSetting("follow_list_non_follower_badge", true);
     public static final BooleanSetting VIEW_STORY_MENTIONS = new BooleanSetting("view_story_mentions", true);
     public static final BooleanSetting DISABLE_STORY_FLIPPING = new BooleanSetting("disable_story_flipping", false);
+    public static final BooleanSetting LOOP_STORY = new BooleanSetting("loop_story", false);
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default");
     public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", true);
     public static final BooleanSetting HIDE_RESHARE_BUTTON = new BooleanSetting("hide_reshare_button", false);
+    public static final BooleanSetting HIDE_REELS_FOLLOW_BUTTON = new BooleanSetting("hide_reels_follow_button", false);
     public static final BooleanSetting IMPROVE_IMAGE_VIEWING = new BooleanSetting("improve_image_viewing", false);
     public static final BooleanSetting COMMENT_COPY_BUTTON = new BooleanSetting("comment_copy_button", true);
     public static final BooleanSetting COMMENT_SAVE_MEDIA_BUTTON = new BooleanSetting("comment_save_media_button", true);
     public static final BooleanSetting HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = new BooleanSetting("hide_group_creation_button_on_sharesheet", true);
     public static final BooleanSetting DISABLE_REELS_SCROLLING = new BooleanSetting("disable_reels_scrolling", false);
     public static final BooleanSetting DISABLE_SWIPE_TO_CREATE = new BooleanSetting("disable_swipe_to_create", false);
+    public static final StringSetting FOCUS_LOCK_DURATION_MINUTES = new StringSetting("focus_lock_duration_minutes", "10080");
+    // Epoch millis. "0" means not locked.
+    public static final StringSetting FOCUS_LOCK_UNTIL = new StringSetting("focus_lock_until", "0");
+    // Layout the stored lock was written with, so an older one can be retired. See FocusLock.
+    public static final StringSetting FOCUS_LOCK_FORMAT = new StringSetting("focus_lock_format", "");
+    // Epoch millis of the pending unlock request. "0" means none.
+    public static final StringSetting FOCUS_LOCK_UNLOCK_REQUESTED_AT = new StringSetting("focus_lock_unlock_requested_at", "0");
     public static final BooleanSetting REMOVE_EMPTY_BOTTOM_SPACE = new BooleanSetting("remove_empty_bottom_space", true);
     public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", false);
     public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", false);
     public static final BooleanSetting DISABLE_VIDEO_AUTOPLAY = new BooleanSetting("disable_video_autoplay", false);
-    public static final BooleanSetting STORIES_AUDIO_AUTOPLAY = new BooleanSetting("stories_audio_autoplay", false);
     public static final BooleanSetting UNLOCK_PLUS_BENEFITS = new BooleanSetting("unlock_plus_benefits", false);
     public static final StringSetting CHANGE_LIKE_ANIMATION = new StringSetting("change_like_animation", "ARES_LIKE_ACTIVATION");
     public static final StringSetting CUSTOMISE_STORY_RING_SIZE = new StringSetting("customise_story_ring_size", "100");
     public static final BooleanSetting ENABLE_MORE_OPTIONS_ON_POST = new BooleanSetting("enable_more_option_on_post", true);
+    public static final BooleanSetting USE_SYSTEM_FONT = new BooleanSetting("use_system_font", false);
 
     public static final BooleanSetting DISABLE_DOUBLE_TAP_LIKE_POST = new BooleanSetting("disable_double_tap_like_post", false);
     public static final BooleanSetting DISABLE_DOUBLE_TAP_LIKE_REEL = new BooleanSetting("disable_double_tap_like_reel", false);
@@ -71,6 +86,9 @@ public class Settings {
     public static final BooleanSetting ENABLE_DOWNLOAD = new BooleanSetting("enable_download", true);
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false);
+    public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false);
+    public static final StringSetting DOWNLOAD_FILE_NAME_TEMPLATE =
+            new StringSetting("download_file_name_template", DownloadFileNameFormatter.DEFAULT_TEMPLATE);
     // Should be kept empty by default as its handled in `StorageUtils.java`
     public static final StringSetting CUSTOM_DOWNLOAD_PATH = new StringSetting("custom_download_path", "");
     public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");
@@ -81,6 +99,9 @@ public class Settings {
     public static final BooleanSetting HIDE_NAVIGATION_DIRECT = new BooleanSetting("hide_navigation_direct", false);
     public static final BooleanSetting HIDE_NAVIGATION_SEARCH = new BooleanSetting("hide_navigation_search", false);
     public static final BooleanSetting HIDE_NAVIGATION_CREATE = new BooleanSetting("hide_navigation_create", false);
+    public static final StringSetting NAVIGATION_TABS = new StringSetting("navigation_tabs", "");
+    public static final BooleanSetting HIDE_HOME_CREATE_BUTTON = new BooleanSetting("hide_home_create_button", false);
+    public static final BooleanSetting HIDE_HOME_NOTIFICATIONS_BUTTON = new BooleanSetting("hide_home_notifications_button", false);
 
     public static final StringSetting ACTION_BAR_MAIN_FEED = new StringSetting("action_bar_main_feed", "");
     public static final StringSetting ACTION_BAR_USER_PROFILE = new StringSetting("action_bar_user_profile", "");

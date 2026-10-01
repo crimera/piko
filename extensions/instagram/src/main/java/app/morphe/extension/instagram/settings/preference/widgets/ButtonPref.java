@@ -13,20 +13,28 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.ref.WeakReference;
+
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.instagram.patches.Block;
+import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.download.DownloadMapping;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
+import app.morphe.extension.instagram.patches.focusLock.FocusLockDialogs;
+import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
+
+import static app.morphe.extension.instagram.utils.IgStr.str;
 
 public class ButtonPref extends Preference {
     private final Context context;
+    private boolean pressedHighlightEnabled;
 
 
     public ButtonPref(Context context) {
@@ -61,14 +69,24 @@ public class ButtonPref extends Preference {
 
                     if (key.equals("piko_export_dev_overrides") || key.equals("piko_import_dev_overrides") || key.equals("piko_import_id_mapping")
                             || key.equals("piko_export_pref") || key.equals("piko_import_pref")
-                            || key.equals("piko_download_set_path")) {
+                            || key.equals("piko_download_set_path") || key.equals("piko_pref_add_font")) {
                         ActivityHook.launchFragment((Activity) context, key);
                         
                     } else if (key.equals("piko_reset_pref")) {
-                        InstaUtils.deletePref();
+                        InstaUtils.showResetSettingsDialog(context);
+
+                    } else if (key.equals("piko_focus_lock_action")) {
+                        FocusLockDialogs.onActionPressed(context, ButtonPref.this);
 
                     } else if (key.equals("piko_delete_analytics_cache")) {
                         Block.deleteAnalyticsCacheFolder();
+
+                    } else if (key.equals("piko_pref_delete_font")) {
+                        FontStorage.DeleteResult result = FontStorage.delete();
+                        Utils.showToastShort(str(
+                                result == FontStorage.DeleteResult.DELETED ? "piko_pref_delete_font_success" :
+                                result == FontStorage.DeleteResult.NOT_FOUND ? "piko_pref_delete_font_warn" :
+                                        "piko_pref_delete_font_fail"));
 
                     } else if (key.equals("piko_export_experiment_list")) {
                         InstaUtils.decompileExperiments(false);
@@ -79,11 +97,20 @@ public class ButtonPref extends Preference {
                     } else if (key.equals("piko_download_id_mapping")) {
                         DownloadMapping.downloadMapping();
 
-                    } else if (key.startsWith("piko_frag_")) {
+                    } else if (key.equals("piko_view_saved_instants")) {
+                        ActivityHook.launchActivity(context,
+                                app.morphe.extension.instagram.patches.instants.InstantsVaultActivity.class);
+
+                    } else if (key.equals("view_deleted_messages")) {
+                        SavedMessagesHook.openDeletedMessages(context);
+
+                    } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
 
                     } else if (key.equals("piko_rec_flags_refresh_file")) {
-                        RecommendedFlags.downloadRecommendedFlagsFile();
+                        RecommendedFlags.downloadRecommendedFlagsFile(
+                                recreateActivityOnComplete(context)
+                        );
                     }
                 } catch (Exception e) {
                     Utils.showToastShort(e.getMessage());
@@ -94,6 +121,19 @@ public class ButtonPref extends Preference {
         });
     }
 
+    private static Runnable recreateActivityOnComplete(Context context) {
+        if (!(context instanceof Activity)) {
+            return null;
+        }
+        WeakReference<Activity> activityReference = new WeakReference<>((Activity) context);
+        return () -> {
+            Activity activity = activityReference.get();
+            if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
+                activity.recreate();
+            }
+        };
+    }
+
     @Override
     protected View onCreateView(ViewGroup parent) {
         return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON,getIconResourceName(getKey()));
@@ -101,32 +141,58 @@ public class ButtonPref extends Preference {
 
     @Override
     protected void onBindView(View view) {
+        String key = getKey();
         InstagramPreferenceStyle.bindText(this, view);
-        InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(getKey()));
+        InstagramPreferenceStyle.bindIcon(view, getIconResourceName(key));
+        InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(key));
+        InstagramPreferenceStyle.setPressedHighlightEnabled(
+                view,
+                pressedHighlightEnabled
+        );
     }
 
-    private boolean hasVisibleTrail(String key) {
-        return key != null
+    private static boolean isFragmentNavigation(String key) {
+        return key != null && key.startsWith("piko_frag_");
+    }
+
+    private static boolean hasVisibleTrail(String key) {
+        return isFragmentNavigation(key)
+                || (key != null
                 && (key.equals("piko_export_dev_overrides")
                 || key.equals("piko_import_dev_overrides")
                 || key.equals("piko_import_id_mapping")
                 || key.equals("piko_export_pref")
                 || key.equals("piko_import_pref")
                 || key.equals("piko_reset_pref")
+                || key.equals("piko_focus_lock_action")
                 || key.equals("piko_download_set_path")
                 || key.equals("piko_delete_analytics_cache")
                 || key.equals("piko_export_experiment_list")
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")
-                || key.equals("piko_rec_flags_refresh_file"));
+                || key.equals("piko_rec_flags_refresh_file")
+                || key.equals("piko_view_saved_instants")
+                || key.equals("piko_pref_add_font")
+                || key.equals("piko_pref_delete_font")
+                || key.equals("view_deleted_messages")));
+    }
+
+    public void setPressedHighlightEnabled(boolean enabled) {
+        if (pressedHighlightEnabled != enabled) {
+            pressedHighlightEnabled = enabled;
+            notifyChanged();
+        }
     }
 
     private String getIconResourceName(String key) {
+        if (key == null) {
+            return null;
+        }
         if(key.equals(Constants.PIKO_FRAGMENT_ADS)){
-            return UI.DRAWABLE_SHEILD_ICON;
+            return UI.DRAWABLE_ADS_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
-            return UI.DRAWABLE_SNAPCHAT_ICON;
+            return UI.DRAWABLE_GHOST_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
             return UI.DRAWABLE_LINK_ICON;
@@ -135,10 +201,10 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_FRAME_CROSSED_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
-            return UI.DRAWABLE_CODE_ICON;
+            return UI.DRAWABLE_SHAPES_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
-            return UI.DRAWABLE_FB_DOWNLOAD_ICON;
+            return UI.DRAWABLE_DOWNLOAD_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
             return UI.DRAWABLE_STACK_ICON;
@@ -157,6 +223,9 @@ public class ButtonPref extends Preference {
         }
         if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
             return UI.DRAWABLE_SHARE_TO_REEL;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_INSTANTS)){
+            return UI.DRAWABLE_EYE_ICON;
         }
         return null;
     }

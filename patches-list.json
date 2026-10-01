@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.9.0-dev.4",
+  "version": "3.10.0-dev.9",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -19,7 +19,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -37,6 +37,12 @@
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -118,7 +124,36 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Block update screen",
+      "description": "Blocks the 'This app is out of date' update screen from being shown on launch",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -146,7 +181,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -175,7 +210,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -231,7 +266,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -291,7 +326,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -368,7 +403,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -432,7 +467,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -461,8 +496,38 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Custom font",
+      "description": "Adds an option to replace the app font with a font file from the device storage.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -490,7 +555,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -522,8 +587,38 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Custom sharing domain",
+      "description": "Allows for using custom domains when sharing posts, reels and stories.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -550,7 +645,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -578,7 +673,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -667,7 +762,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -696,7 +791,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -724,7 +819,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -752,8 +847,38 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Customize navigation bar",
+      "description": "Choose which tabs appear in the bottom navigation bar and reorder them",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -780,7 +905,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -808,7 +933,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -836,7 +961,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -864,7 +989,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -892,7 +1017,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -920,7 +1045,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -948,7 +1073,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1066,7 +1191,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1095,7 +1220,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1139,7 +1264,7 @@
     },
     {
       "name": "Disable discover people",
-      "description": "Disables discover people section on user profile",
+      "description": "Hides suggested accounts",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1236,37 +1361,6 @@
     {
       "name": "Disable highlights",
       "description": null,
-      "default": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable onboarding permission prompts",
-      "description": "Prevents contacts and location permission onboarding prompts from appearing on launch.",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1495,6 +1589,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1537,7 +1632,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1581,12 +1676,9 @@
     },
     {
       "name": "Dynamic color",
-      "description": "Adds an option to replace Twitter Blue with the user's Material You palette.",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
-      ],
+      "description": "Replaces the default Twitter Blue with the user's Material You palette.",
+      "default": false,
+      "dependencies": [],
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1597,7 +1689,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1625,7 +1717,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1653,7 +1745,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1682,7 +1774,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1711,7 +1803,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1737,7 +1829,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1753,6 +1845,7 @@
       "description": "Adds support to share post links directly to external downloader",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -1814,6 +1907,40 @@
       "options": []
     },
     {
+      "name": "Focus Lock",
+      "description": "Commitment mode for cutting down on Instagram. Pick what to block (Reels, Explore) and a duration; once locked those protections are forced on and cannot be switched off. Reels shared with you still open. Unlocking early requires a 24 hour cooling-off period, and resetting or importing settings is blocked while locked.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Force enable translate",
       "description": "Get translate option for all posts",
       "default": true,
@@ -1831,7 +1958,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1847,6 +1974,7 @@
       "description": "Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -1891,7 +2019,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1945,7 +2073,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1974,7 +2102,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2002,7 +2130,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2031,7 +2159,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2059,7 +2187,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2087,8 +2215,38 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide Reels follow button",
+      "description": "Removes the follow button from Reels.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2115,7 +2273,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2144,7 +2302,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2172,7 +2330,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2200,7 +2358,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2258,7 +2416,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2287,38 +2445,8 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Hide navigation buttons",
-      "description": "Hides navigation bar buttons, such as the Reels and Create button.",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2376,7 +2504,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2404,7 +2532,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2433,7 +2561,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2462,7 +2590,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2583,7 +2711,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2613,7 +2741,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2672,7 +2800,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2730,8 +2858,38 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Loop story",
+      "description": "Replay the current story when it ends",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2824,7 +2982,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2840,6 +2998,7 @@
       "description": "Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -2874,6 +3033,8 @@
       "description": "Adds a new button to handle user related data like copy handle, download profile picture etc",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -2923,7 +3084,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2956,7 +3117,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2988,7 +3149,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -5644,7 +5805,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -5702,8 +5863,40 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Recommended flags",
+      "description": "Developer flags suggested by the community",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -5731,7 +5924,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -5819,7 +6012,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -5847,7 +6040,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -5876,7 +6069,36 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Restore legacy follower lists",
+      "description": "Restores the legacy follower and following list screen.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -5905,7 +6127,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -5947,10 +6169,43 @@
       "options": []
     },
     {
+      "name": "Save deleted messages",
+      "description": "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Save media comment",
       "description": "Adds a button to save media comments on posts and reels.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -6000,7 +6255,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -6032,7 +6287,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -6060,7 +6315,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -6088,7 +6343,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -6116,7 +6371,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -6132,7 +6387,8 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch"
+        "BytecodePatch",
+        "ResourcePatch"
       ],
       "compatiblePackages": [
         {
@@ -6144,38 +6400,8 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Stories audio autoplay",
-      "description": null,
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -6205,7 +6431,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.19.1-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -6218,7 +6444,7 @@
     },
     {
       "name": "Theme",
-      "description": "Adds Material You and AMOLED options to Instagram's Dark mode settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme.",
+      "description": "Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme.",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -6251,7 +6477,7 @@
         {
           "key": "amoled",
           "title": "Pure-black AMOLED theme for Android 8–11",
-          "description": "Use a fixed pure-black AMOLED theme instead of the fixed Material You-style theme on Android 8–11. On Android 12 and later, select AMOLED in Instagram's Dark mode settings.",
+          "description": "Use a fixed pure-black AMOLED theme instead of the fixed Material You-style theme on Android 8–11. On Android 12 and later, use the AMOLED control in Piko settings.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,

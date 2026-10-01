@@ -18,7 +18,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -34,7 +33,7 @@ val moreProfileInfoPatch =
         description = "Adds more details on the profile page",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, resourceMappingPatch, moreProfileInfoResourcePatch, twitterUserEntity, decoderEntity)
+        dependsOn(settingsPatch, moreProfileInfoResourcePatch, twitterUserEntity, decoderEntity)
         execute {
 
             var setTweetViewStatMethodCall: MethodReference

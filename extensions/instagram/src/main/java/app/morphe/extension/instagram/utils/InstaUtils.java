@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.utils;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
@@ -21,7 +22,10 @@ import java.net.HttpURLConnection;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.patches.customise.font.FontStorage;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.requests.Requester;
@@ -74,7 +78,24 @@ public class InstaUtils {
         PikoUtils.toast(fileName + fileDoneTxt);
     }
 
+    public static void showResetSettingsDialog(Context context) {
+        if (FocusLock.isActive()) {
+            PikoUtils.toast(str("piko_focus_lock_blocked_action"));
+            return;
+        }
+        new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(context))
+                .setTitle(str("piko_reset_pref_confirm"))
+                .setNegativeButton(str("piko_cancel"), null)
+                .setPositiveButton(
+                        str("piko_ok"),
+                        (dialogInterface, which) -> deletePref()
+                )
+                .show();
+    }
+
     public static void deletePref(){
+        // The font file lives outside the preferences, so a reset removes it separately.
+        FontStorage.delete();
         if(Pref.clearAllPreferences()){
             PikoUtils.toast(str("piko_reset_pref_success"));
             Utils.restartApp(Utils.getContext());
@@ -83,7 +104,7 @@ public class InstaUtils {
         }
     }
 
-    public static void downloadFile(String host, String endpoint, File outputFile, boolean restartAfterDownload) {
+    public static void downloadFile(String host, String endpoint, File outputFile, Runnable onComplete) {
         Context context = Utils.getContext();
 
         if (!Utils.isNetworkConnected()) {
@@ -96,11 +117,18 @@ public class InstaUtils {
                 HttpURLConnection connection = Requester.getConnectionFromRoute(host, route);
                 String response = Requester.parseString(connection);
 
-                PikoUtils.writeFile(outputFile, response.getBytes(), false);
+                boolean fileWritten = PikoUtils.writeFile(outputFile, response.getBytes(), false);
 
                 new Handler(Looper.getMainLooper()).post(() -> {
+                    if (!fileWritten) {
+                        PikoUtils.toast(str("piko_download_failed_media") + outputFile.getName());
+                        return;
+                    }
                     PikoUtils.toast(str("piko_downloaded_media") + outputFile.getName());
-                    if (restartAfterDownload) Utils.restartApp(context);
+
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
                 });
 
             } catch (Exception e) {
@@ -108,6 +136,5 @@ public class InstaUtils {
                 PikoUtils.toast(str("piko_download_failed_media") + outputFile.getName());
             }
         });
-
     }
 }

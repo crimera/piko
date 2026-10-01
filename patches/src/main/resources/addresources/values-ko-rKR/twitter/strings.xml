@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">기본 다운로더</string>
     <string name="piko_title_native_downloader_toggle">기본 다운로더 활성화하기</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">최고 화질 동영상 자동 다운로드</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">단일 동영상은 화질 선택 다이얼로그를 건너뛰고, 사용 가능한 가장 높은 화질으로 즉시 다운로드합니다</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">단일 동영상은 화질 선택 대화 상자를 건너뛰고, 사용 가능한 가장 높은 화질으로 즉시 다운로드합니다</string>
     <string name="piko_pref_native_downloader_show_download_icon">다운로드 아이콘 표시</string>
     <string name="piko_pref_native_downloader_show_copy_icon">복사 아이콘 표시</string>
     <string name="piko_pref_native_downloader_show_variants_icon">변형 아이콘 표시</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">캐시를 삭제할 수 없습니다</string>
     <string name="piko_title_native_share_menu">기본 공유 메뉴</string>
     <string name="piko_native_share_menu_toggle">기본 공유 메뉴 활성화하기</string>
+    <string name="piko_native_share_menu_items_to_hide">숨겨질 기본 공유 메뉴 항목</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물 숨기기</string>
@@ -139,12 +140,36 @@
     <string name="piko_pref_search_suggestion_desc">탐색 영역에서 검색어 추천을 숨길 수 있습니다</string>
     <string name="piko_legacy_share_link">이전 공유 링크</string>
     <string name="piko_block_redirecting_to_x_lite">X Lite로 리디렉션 차단하기</string>
+    <string name="piko_pref_block_update_screen">업데이트 화면 차단하기</string>
+    <string name="piko_pref_block_update_screen_desc">앱 실행 시 ‘이 앱은 이전 버전입니다’ 업데이트 화면이 표시되지 않도록 차단합니다</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
     <string name="piko_pref_feature_flags">플래그 추가하기</string>
     <string name="piko_pref_edit_flag_title">플래그 수정하기</string>
     <string name="piko_pref_add_flag_title">플래그 추가하기</string>
     <string name="piko_pref_search_flags">플래그 검색하기</string>
+    <string name="piko_pref_add_selected_flags">선택 추가</string>
+    <string name="piko_pref_flag_name">플래그 이름</string>
+    <string name="piko_pref_flag_already_added">이미 추가됨</string>
+    <string name="piko_pref_flag_invalid_name">공백, 쉼표 또는 콜론 없이 플래그 이름을 입력하세요.</string>
+    <string name="piko_pref_select_flags">선택</string>
+    <string name="piko_pref_check_flags">플래그 확인</string>
+    <string name="piko_pref_flags_enable">켜기</string>
+    <string name="piko_pref_flags_disable">끄기</string>
+    <string name="piko_pref_flags_remove_selected">선택한 플래그를 제거하시겠습니까?</string>
+    <string name="piko_pref_flag_verify_name">추천 플래그 이름</string>
+    <string name="piko_pref_flags_selected">%s 선택됨</string>
+    <string name="piko_pref_flag_unknown">플래그 검색에서 찾을 수 없습니다. 오타이거나 앱에서 아직 수집하지 않은 플래그일 수 있습니다.</string>
+    <string name="piko_pref_flag_duplicates">중복 항목</string>
+    <string name="piko_pref_flag_unverified_short">확인되지 않은 이름</string>
+    <string name="piko_pref_flag_typo_short">오타 가능성</string>
+    <string name="piko_pref_flag_merge_same">이 항목들은 동일한 값을 가지고 있습니다. 하나의 플래그로 병합하고 이 값을 유지하세요:</string>
+    <string name="piko_pref_flag_merge_conflict">이 항목들은 서로 다른 값을 가지고 있습니다. 하나의 플래그로 병합할 때 유지할 값을 선택하세요.</string>
+    <string name="piko_pref_flag_merge">하나로 병합</string>
+    <string name="piko_pref_flag_keep_on">계속 켜짐</string>
+    <string name="piko_pref_flag_keep_off">계속 꺼짐</string>
+    <string name="piko_pref_flag_suggested_name">추천 이름:</string>
+    <string name="piko_pref_flag_check_clear">중복되거나 확인되지 않은 이름이 없습니다.</string>
     <string name="piko_pref_import_flags">플래그 가져오기</string>
     <string name="piko_pref_export_flags">플래그 내보내기</string>
     <string name="piko_pref_reset_flags">플래그 초기화하기</string>
@@ -165,10 +190,10 @@
     <string name="piko_pref_show_poll_result">투표 결과 표시하기</string>
     <string name="piko_pref_show_poll_result_desc">투표 없이 투표 결과를 볼 수 있습니다</string>
     <string name="piko_pref_hide_community_notes">커뮤니티 메모 숨기기</string>
-    <string name="piko_pref_hide_immersive_player">몰입형 플레이어 숨기기</string>
-    <string name="piko_pref_hide_immersive_player_desc">동영상 플레이어에서 위로 스와이프하여 다음 동영상을 볼 수 없습니다</string>
+    <string name="piko_pref_hide_immersive_player">몰입형 플레이어 비활성화하기</string>
+    <string name="piko_pref_hide_immersive_player_desc">위로 스와이프하여 더 많은 동영상을 시청할 수 있는 새로운 동영상 플레이어를 비활성화합니다</string>
     <string name="piko_pref_enable_vid_auto_advance">동영상 자동 스크롤 활성화하기</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">몰입형 뷰에서 동영상을 자동 스크롤을 할 수 있습니다</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">몰입형 플레이어에서 동영상 자동 스크롤을 활성화합니다</string>
     <string name="piko_pref_hide_hidden_replies">숨겨진 답글 숨기기</string>
     <string name="piko_pref_force_hd">HD 동영상 강제 활성화하기</string>
     <string name="piko_pref_force_hd_desc">동영상을 항상 높은 화질로 재생할 수 있습니다</string>
@@ -201,12 +226,11 @@
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">숨겨질 검색어 추천</string>
     <string name="piko_pref_customisation_change_app_icon">앱 아이콘 변경하기</string>
-    <string name="piko_pref_dynamic_color">동적 색상</string>
-    <string name="piko_pref_dynamic_color_desc">사용자의 Material You 팔레트를 앱 전체 테마에 적용합니다. 앱 아이콘에도 동적 색상을 적용하려면 \'Piko 설정 &gt; 사용자 정의 &gt; 앱 아이콘 변경하기\'로 이동하세요</string>
     <string name="piko_notifications_tab_priority">우선순위</string>
     <string name="piko_pref_customisation_more_info_on_profile">프로필 정보 더보기</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">프로필 페이지에 더 자세한 정보를 추가합니다</string>
     <string name="piko_fast_follower">빠른 팔로워</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">폰트 스타일</string>
     <string name="piko_pref_add_font">폰트 추가하기</string>

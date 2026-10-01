@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Exact Twitter 9.98 plural values -->
+    <plurals name="community_navigation_new_unread_tweets_label">
+        <item quantity="one">새 트윗 %s개</item>
+        <item quantity="other">새 트윗 %s개</item>
+    </plurals>
+    <plurals name="media_alt_text_prompt_dialog_message">
+        <item quantity="one">이미지 설명은 간결하지만 상세한 것이 좋습니다. 이미지에 문구가 있으면 요약하거나 작성해 주세요.\n\n설명을 추가하면 장애가 있는 사람과 추가적인 배경 정보를 찾는 모든 사람이 Twitter를 이용할 수 있습니다.\n\n접근성 설정에서 이 알림을 끌 수 있습니다.</item>
+        <item quantity="other">이미지 설명은 간결하지만 상세한 것이 좋습니다. 이미지에 문구가 있으면 요약하거나 작성해 주세요.\n\n설명을 추가하면 장애가 있는 사람과 추가적인 배경 정보를 찾는 모든 사람이 Twitter를 이용할 수 있습니다.\n\n접근성 설정에서 이 알림을 끌 수 있습니다.</item>
+    </plurals>
+    <plurals name="profile_toolbar_subtitle_timeline">
+        <item quantity="one">트윗 %s개</item>
+        <item quantity="other">트윗 %s개</item>
+    </plurals>
+    <plurals name="retweets">
+        <item quantity="one">%d개의 리트윗</item>
+        <item quantity="other">%d개의 리트윗</item>
+    </plurals>
+    <plurals name="stat_label_retweets_sentence_case">
+        <item quantity="one">리트윗</item>
+        <item quantity="other">리트윗</item>
+    </plurals>
+
+    <!-- X 12.17-only plurals with terminology restored -->
+    <plurals name="notification_description_after_sending_posts">
+        <item quantity="other">트윗 {total}개 보냄</item>
+    </plurals>
+    <plurals name="notification_description_before_sending_posts">
+        <item quantity="other">트윗 {total}개 전송 준비 중...</item>
+    </plurals>
+    <plurals name="notification_description_editable_posts">
+        <item quantity="other">편집 가능한 트윗 삭제 중...({current}/{total})</item>
+    </plurals>
+    <plurals name="notification_description_sending_posts">
+        <item quantity="other">트윗 전송 중...({current}/{total})</item>
+    </plurals>
+    <plurals name="notification_title_after_sending_posts">
+        <item quantity="other">트윗 보냄</item>
+    </plurals>
+    <plurals name="notification_title_before_sending_posts">
+        <item quantity="other">트윗 전송 준비 중</item>
+    </plurals>
+    <plurals name="notification_title_deleting_editable_posts">
+        <item quantity="other">편집 가능한 트윗 삭제 중</item>
+    </plurals>
+    <plurals name="notification_title_sending_posts">
+        <item quantity="other">트윗 전송 중</item>
+    </plurals>
+    <plurals name="thread_draft_more_post">
+        <item quantity="other">+{num}개의 추가 트윗</item>
+    </plurals>
+    <plurals name="undo_nudge_message">
+        <item quantity="other">트윗이 %d 초 후 전송됩니다.</item>
+    </plurals>
+    <plurals name="upload_progress_sending_posts">
+        <item quantity="one">트윗 전송 중</item>
+        <item quantity="other">트윗 %d개 전송 중</item>
+    </plurals>
+</resources>

@@ -1,16 +1,14 @@
 <div align="center">
 
-<p align="center">
-    <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
-</p>
+<img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
 
-<h1 align="center">
+<h1>
     Morphe patches focused on Twitter/X & Instagram<br>
     <a href="https://t.me/pikopatches">
-        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"/>
     </a>
     <a href="https://crowdin.com/project/piko">
-        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white" alt="Crowdin"/>
     </a>
 </h1>
 
@@ -18,39 +16,36 @@
 
 ## 🕹️ Usage
 
-> Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
+Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
 
-**Morphe Manager**
+### Morphe Manager
 
-<details>
-<summary>Show steps</summary>
+Tap the link to add Piko as a patch source in Morphe Manager:
 
-Use the deep link to add Piko as a patch source in Morphe Manager:
-
-[➕ Add Piko to Morphe](https://morphe.software/add-source?github=crimera/piko)
+[**➕ Add Piko to Morphe**](https://morphe.software/add-source?github=crimera/piko)
 
 Then patch Twitter/X or Instagram:
 1. Tap X or Instagram app icon in Morphe
 2. Download original APKM file from ApkMirror. Do _not_ unspilt or modify the file, Morphe patches APKM directly
 3. Wait for patching to complete, install
 
-
-
-</details>
-
-**Morphe CLI**
+### Morphe CLI
 
 ```sh
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
-
-**X-Shim**
+### X-Shim
 
 Starting `12.5.0-release.0` **you need not** apply X-Shim along with Piko patches. X login and XChat will work fine without X-Shim patches.
 
+<details>
+
+<summary>Open old information</summary>
+
 <del>
-To patch with Twitter/X version 11.88 and above, you must include patches from another repo/project called [Piko-Shim](https://gitlab.com/inotia00/piko-shim/) developed by [@inotia00](https://github.com/inotia00)
+
+To patch with Twitter/X version 11.88 to 12.4, you must include patches from another repo/project called [X-Shim](https://gitlab.com/inotia00/x-shim) developed by [@inotia00](https://github.com/inotia00)
 
 [➕ Add X-Shim to Morphe](https://morphe.software/add-source?gitlab=inotia00/x-shim)
 
@@ -69,23 +64,26 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 
 </del>
 
+</details>
+
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.9.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;128 patches total
+> **[v3.10.0-dev.9](https://github.com/crimera/piko/releases/tag/v3.10.0-dev.9)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;135 patches total
 <details>
-<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;73 patches</summary>
+<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 12.11.0-release.0 |
+| 12.19.1-release.0 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
 | [Add ability to copy media link](#add-ability-to-copy-media-link) |  |  |
 | [Block redirecting to X Lite](#block-redirecting-to-x-lite) | Blocks redirecting to the new X Android UI on launch |  |
+| [Block update screen](#block-update-screen) | Blocks the 'This app is out of date' update screen from being shown on launch |  |
 | [Bring back twitter](#bring-back-twitter) | Bring back old twitter logo and name |  |
 | [Change app icon](#change-app-icon) |  |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
@@ -111,7 +109,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Disable auto timeline scroll on launch](#disable-auto-timeline-scroll-on-launch) |  |  |
 | [Disable chirp font](#disable-chirp-font) |  |  |
 | [Download patch](#download-patch) | Unlocks the ability to download videos and gifs from Twitter/X |  |
-| [Dynamic color](#dynamic-color) | Adds an option to replace Twitter Blue with the user's Material You palette. |  |
+| [Dynamic color](#dynamic-color) | Replaces the default Twitter Blue with the user's Material You palette. |  |
 | [Enable PiP mode automatically](#enable-pip-mode-automatically) | Enables PiP mode when you close the app |  |
 | [Enable Undo Posts](#enable-undo-posts) | Enables ability to undo posts before posting |  |
 | [Enable debug menu for posts](#enable-debug-menu-for-posts) |  |  |
@@ -149,6 +147,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Remove premium upsell](#remove-premium-upsell) | Removes premium upsells |  |
 | [Remove search suggestions](#remove-search-suggestions) | Hide/Remove search suggestion in explore section |  |
 | [Remove view count](#remove-view-count) | Removes the view count from the bottom of tweets |  |
+| [Restore legacy follower lists](#restore-legacy-follower-lists) | Restores the legacy follower and following list screen. |  |
 | [Round off numbers](#round-off-numbers) | Enable or disable rounding off numbers |  |
 | [Selectable Text](#selectable-text) | Makes bio and username selectable |  |
 | [Share Tweet as Image](#share-tweet-as-image) | Share tweets as rendered image. Requires X 11.0.0-release.0 or higher. |  |
@@ -161,7 +160,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;55 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;60 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -177,17 +176,19 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.<br>Caution: Do not select the official Morphe's "Change package name" universal patch. | • Package name<br>• App name |
 | [Copy comment](#copy-comment) | Adds a button to copy comments on posts and reels. |  |
+| [Custom font](#custom-font) | Adds an option to replace the app font with a font file from the device storage. |  |
+| [Custom sharing domain](#custom-sharing-domain) | Allows for using custom domains when sharing posts, reels and stories. |  |
 | [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
+| [Customize navigation bar](#customize-navigation-bar) | Choose which tabs appear in the bottom navigation bar and reorder them |  |
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
 | [Disable ads](#disable-ads) |  |  |
 | [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
 | [Disable comments](#disable-comments) |  |  |
-| [Disable discover people](#disable-discover-people) | Disables discover people section on user profile |  |
+| [Disable discover people](#disable-discover-people) | Hides suggested accounts |  |
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
-| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing on launch. |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
@@ -198,26 +199,29 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Download voice message](#download-voice-message) | Enables ability to download voice messages |  |
 | [External downloader](#external-downloader) | Adds support to share post links directly to external downloader |  |
 | [Filter stories](#filter-stories) | Filter stories to hide based on different categories |  |
+| [Focus Lock](#focus-lock) | Commitment mode for cutting down on Instagram. Pick what to block (Reels, Explore) and a duration; once locked those protections are forced on and cannot be switched off. Reels shared with you still open. Unlocking early requires a 24 hour cooling-off period, and resetting or importing settings is blocked while locked. |  |
 | [Friendship status indicator](#friendship-status-indicator) | Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click |  |
+| [Hide Reels follow button](#hide-reels-follow-button) | Removes the follow button from Reels. |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
-| [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |
 | [Hide notes tray](#hide-notes-tray) | Hides notes tray in DM section |  |
 | [Hide reshare button](#hide-reshare-button) | Hides the reshare button from both posts and reels. |  |
 | [Hide stories tray](#hide-stories-tray) | Hides stories tray from main feed. |  |
 | [Hide suggested content](#hide-suggested-content) | Hides suggested stories, reels, threads (Suggested posts will still be shown). |  |
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
 | [Limit feed to following profiles](#limit-feed-to-following-profiles) | Filters the home feed to display only content from profiles you follow. |  |
+| [Loop story](#loop-story) | Replay the current story when it ends |  |
 | [Make ephemeral media permanent](#make-ephemeral-media-permanent) | Changes unexpired view once, view twice media to permanent view. |  |
 | [Mark chat as read manually](#mark-chat-as-read-manually) | Adds option to mark a thread aka message as read manually |  |
 | [More options on post](#more-options-on-post) | Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc |  |
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
+| [Recommended flags](#recommended-flags) | Developer flags suggested by the community |  |
 | [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
 | [Remove empty bottom space](#remove-empty-bottom-space) | Removes empty space below bottom navigation bar |  |
 | [Sanitize share links](#sanitize-share-links) |  |  |
+| [Save deleted messages](#save-deleted-messages) | Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them. |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
-| [Stories audio autoplay](#stories-audio-autoplay) |  |  |
-| [Theme](#theme) | Adds Material You and AMOLED options to Instagram's Dark mode settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
+| [Theme](#theme) | Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
 | [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |

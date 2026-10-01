@@ -11,8 +11,13 @@ import app.crimera.patches.twitter.utils.Constants
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
 private object MainActivityFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/app/main/MainActivity;",
@@ -28,18 +33,34 @@ val changelogsPatch =
         dependsOn(settingsPatch)
 
         execute {
+            MainActivityFingerprint.classDef.apply {
+                require(methods.none { it.name == "onCreate" }) {
+                    "Main activity already has an onCreate method"
+                }
 
-            val superClassName = MainActivityFingerprint.classDef.superclass!!
+                // Add missing method. Could override superclass onCreate but
+                // then extension hook is called multiple times by unrealted activities.
+                methods += ImmutableMethod(
+                    type,
+                    "onCreate",
+                    listOf(ImmutableMethodParameter("Landroid/os/Bundle;", null, null)),
+                    "V",
+                    AccessFlags.PUBLIC.value,
+                    null,
+                    null,
+                    MutableMethodImplementation(3)
+                ).toMutable().apply {
+                    addInstructions(
+                        0,
+                        """
+                            invoke-super {p0, p1}, ${superclass}->onCreate(Landroid/os/Bundle;)V
+                            invoke-static {p0}, ${Constants.PATCHES_DESCRIPTOR}/Changelogs;->showChangelog(Landroid/app/Activity;)V
+                            return-void
+                        """
+                    )
+                }
+            }
 
-            val superclassOnCreateMethod =
-                mutableClassDefBy(superClassName)
-                    .methods
-                    .first { it.name == "onCreate" }
-
-            superclassOnCreateMethod.addInstruction(
-                0,
-                "invoke-static {p0}, ${Constants.PATCHES_DESCRIPTOR}/Changelogs;->showChangelog(Landroid/app/Activity;)V",
-            )
             enableSettings("showChangelogsPatchEnabled")
         }
     }

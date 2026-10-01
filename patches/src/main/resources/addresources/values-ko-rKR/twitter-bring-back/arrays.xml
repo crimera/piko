@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- X 12.17 item counts/order preserved; corresponding labels restored from Twitter 9.98 -->
+    <string-array name="account_notif_confirmations">
+        <item>새 트윗 관련 알림을 받게 됩니다.</item>
+        <item>새 트윗 및 답글에 대한 알림을 받습니다.</item>
+        <item>새 구독자용 트윗에 대한 알림을 받습니다.</item>
+        <item>새 실시간 동영상 트윗에 대한 알림을 받습니다.</item>
+        <item>새 트윗에 대한 알림을 더 이상 받지 않습니다.</item>
+    </string-array>
+    <string-array name="account_notif_options">
+        <item>모든 트윗</item>
+        <item>모든 트윗과 답글</item>
+        <item>구독자용 트윗만</item>
+        <item>실시간 동영상만</item>
+        <item>끄기</item>
+    </string-array>
+    <string-array name="account_notif_subtitles">
+        <item>이 계정의 모든 트윗에 대한 알림을 받습니다.</item>
+        <item>이 계정의 트윗과 답글에 대한 알림을 받습니다.</item>
+        <item>구독자용 트윗에 대해서만 알림을 받습니다.</item>
+        <item>실시간 생방송에 대해서만 알림을 받습니다.</item>
+        <item>이 계정의 트윗에 대한 알림을 받지 않습니다.</item>
+    </string-array>
+    <string-array name="card_long_press_options">
+        <item>링크 트윗하기</item>
+        <item>링크 복사하기</item>
+        <item>링크 보내기</item>
+    </string-array>
+</resources>

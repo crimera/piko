@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Exact Twitter 9.98 plural values -->
+    <plurals name="community_navigation_new_unread_tweets_label">
+        <item quantity="one">%s new Tweet</item>
+        <item quantity="other">%s new Tweets</item>
+    </plurals>
+    <plurals name="media_alt_text_prompt_dialog_message">
+        <item quantity="one">Good image descriptions are concise yet detailed. Be sure to summarize or write out any text in the image itself.\n\nYour description makes Twitter accessible to people with disabilities, and everyone who wants more context.\n\nYou can turn off this reminder in Accessibility Settings.</item>
+        <item quantity="other">Good image descriptions are concise yet detailed. Be sure to summarize or write out any text in the image itself.\n\nYour descriptions make Twitter accessible to people with disabilities, and everyone who wants more context.\n\nYou can turn off this reminder in Accessibility Settings.</item>
+    </plurals>
+    <plurals name="profile_toolbar_subtitle_timeline">
+        <item quantity="one">%s Tweet</item>
+        <item quantity="other">%s Tweets</item>
+    </plurals>
+    <plurals name="retweets">
+        <item quantity="one">%d retweet</item>
+        <item quantity="other">%d retweets</item>
+    </plurals>
+    <plurals name="stat_label_retweets_sentence_case">
+        <item quantity="one">Retweet</item>
+        <item quantity="other">Retweets</item>
+    </plurals>
+
+    <!-- X 12.17-only plurals with terminology restored -->
+    <plurals name="notification_description_after_sending_posts">
+        <item quantity="one">Sent Tweet</item>
+        <item quantity="other">Sent {total} Tweets</item>
+    </plurals>
+    <plurals name="notification_description_before_sending_posts">
+        <item quantity="one">Preparing to send Tweet…</item>
+        <item quantity="other">Preparing to send {total} Tweets…</item>
+    </plurals>
+    <plurals name="notification_description_editable_posts">
+        <item quantity="one">Deleting editable Tweet…</item>
+        <item quantity="other">Deleting editable Tweet {current} of {total}…</item>
+    </plurals>
+    <plurals name="notification_description_sending_posts">
+        <item quantity="one">Sending Tweet…</item>
+        <item quantity="other">Sending Tweets {current} of {total}…</item>
+    </plurals>
+    <plurals name="notification_title_after_sending_posts">
+        <item quantity="one">Sent Tweet</item>
+        <item quantity="other">Sent Tweets</item>
+    </plurals>
+    <plurals name="notification_title_before_sending_posts">
+        <item quantity="one">Preparing to send Tweet</item>
+        <item quantity="other">Preparing to send Tweets</item>
+    </plurals>
+    <plurals name="notification_title_deleting_editable_posts">
+        <item quantity="one">Deleting editable Tweet</item>
+        <item quantity="other">Deleting editable Tweets</item>
+    </plurals>
+    <plurals name="notification_title_sending_posts">
+        <item quantity="one">Sending Tweet</item>
+        <item quantity="other">Sending Tweets</item>
+    </plurals>
+    <plurals name="thread_draft_more_post">
+        <item quantity="one">+{num} more Tweet</item>
+        <item quantity="other">+{num} more Tweets</item>
+    </plurals>
+    <plurals name="undo_nudge_message">
+        <item quantity="one">Your Tweet will be in sent in %d second.</item>
+        <item quantity="other">Your Tweet will be in sent in %d seconds.</item>
+    </plurals>
+    <plurals name="upload_progress_sending_posts">
+        <item quantity="one">Sending Tweet…</item>
+        <item quantity="other">Sending %d Tweets…</item>
+    </plurals>
+</resources>

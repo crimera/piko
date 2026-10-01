@@ -12,9 +12,9 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.string
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
@@ -77,7 +77,7 @@ fun setButtonIcon(
     val iconAdditionStart = method.indexOfFirstInstructionOrThrow(Opcode.MOVE_RESULT_OBJECT) + 1
     val iconAdditionEnd = iconAdditionStart + 4
 
-    val iconId = getResourceId(ResourceType.DRAWABLE, iconStr)
+    val iconId = resourceId(ResourceType.DRAWABLE, iconStr)
 
     val buttonInitInstructions =
         method

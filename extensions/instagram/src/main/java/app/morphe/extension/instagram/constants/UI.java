@@ -11,6 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -26,7 +27,6 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
@@ -37,29 +37,65 @@ import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 public class UI {
 
     public static final String DRAWABLE_DOWNLOAD_ICON = "instagram_download_outline_24";
-    public static final String DRAWABLE_FB_DOWNLOAD_ICON = "fb_ic_download_filled_24";
     public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
     public static final String DRAWABLE_GEAR_ICON = "instagram_settings_pano_filled_24";
-    public static final String DRAWABLE_SHEILD_ICON = "fb_ic_badge_admin_filled_32";
-    public static final String DRAWABLE_SNAPCHAT_ICON = "fb_ic_app_snapchat_filled_16";
+    public static final String DRAWABLE_ADS_ICON = "instagram_shield_outline_24";
+    public static final String DRAWABLE_GHOST_ICON = "piko_ghost_icon";
     public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
-    public static final String DRAWABLE_CODE_ICON = "fb_ic_code_outline_24";
+    public static final String DRAWABLE_HISTORY_ICON = "instagram_history_outline_24";
+    public static final String DRAWABLE_SHAPES_ICON = "fb_ic_more_shapes_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
     public static final String DRAWABLE_COLLECTIONS_ICON = "instagram_collections_pano_outline_24";
     public static final String DRAWABLE_EYE_STROKE_ICON = "design_ic_visibility_off";
     public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
-    public static final String DRAWABLE_SHARE_TO_DIRECT = "gallery_share_to_direct_button";
+    public static final String DRAWABLE_SHARE_TO_DIRECT = "tab_prism_direct_drawable";
     public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
+    public static final String DRAWABLE_ARROW_BACK =
+            "instagram_arrow_left_pano_outline_24";
+    public static final String DRAWABLE_CHEVRON_RIGHT =
+            "instagram_chevron_right_outline_16";
+    public static final String DRAWABLE_CHEVRON_RIGHT_RTL =
+            "instagram_chevron_right_outline_rtl_16";
 
     public static int getThemedColour(String attrName) {
         Context context = Utils.getContext();
+        boolean dark = (context.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        int fallback = themedColourFallback(attrName, dark);
         TypedValue typedValue = new TypedValue();
-        int attrId = ResourceUtils.getAttrIdentifier(attrName);
-        boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
-        return context.getColor(typedValue.resourceId);
+        try {
+            int attrId = ResourceUtils.getAttrIdentifier(attrName);
+            boolean resolved = attrId != 0
+                    && context.getTheme().resolveAttribute(attrId, typedValue, true);
+            if (!resolved) return fallback;
+            if (typedValue.resourceId != 0) return context.getColor(typedValue.resourceId);
+            if (typedValue.type >= TypedValue.TYPE_FIRST_COLOR_INT
+                    && typedValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                return typedValue.data;
+            }
+            return fallback;
+        } catch (RuntimeException ignored) {
+            return fallback;
+        }
+    }
+
+    private static int themedColourFallback(String attrName, boolean dark) {
+        if (attrName != null && attrName.contains("secondary_background")) {
+            return dark ? 0xff262626 : 0xfff2f2f2;
+        }
+        if (attrName != null && attrName.contains("background")) {
+            return dark ? Color.BLACK : Color.WHITE;
+        }
+        if (attrName != null && attrName.contains("separator")) {
+            return dark ? 0xff363636 : 0xffdbdbdb;
+        }
+        if (attrName != null && attrName.contains("secondary_text")) {
+            return dark ? 0xffb3b3b3 : 0xff737373;
+        }
+        return dark ? Color.WHITE : Color.BLACK;
     }
 
     public static boolean isDarkMode() {
@@ -67,10 +103,21 @@ public class UI {
     }
 
     public static void setThemedIcon(ImageView imageView, String drawableAttr) {
+        setThemedIcon(imageView, drawableAttr, "igds_color_primary_icon");
+    }
+
+    public static void setThemedIcon(
+            ImageView imageView,
+            String drawableAttr,
+            String colorAttr
+    ) {
         try {
             Drawable drawable = ResourceUtils.getDrawable(drawableAttr);
             imageView.setImageDrawable(drawable);
-            imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour("igds_color_primary_icon"), PorterDuff.Mode.SRC_ATOP));
+            imageView.setColorFilter(new PorterDuffColorFilter(
+                    getThemedColour(colorAttr),
+                    PorterDuff.Mode.SRC_ATOP
+            ));
 
         } catch (Exception ex) {
             Logger.printException(() -> "Failed setThemedIcon: ", ex);
@@ -211,17 +258,17 @@ public class UI {
         dlg.show();
     }
 
-    public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
+    public static void pikoSettingsButton(ViewGroup viewGroup, int bottomMargin) throws Exception {
         boolean isFirstTime = Pref.firstTimePiko();
 
         Context context = viewGroup.getContext();
         InstagramButton button = new InstagramButton(context);
         button.setText(str("piko_title_settings"));
-        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
+        button.setStyle(InstagramButtonStyleEnum.SECONDARY);
         button.setOnClickListener(FragmentHook::startSettings);
 
         int marginPx = Dim.dp12;
-        button.setMargins(marginPx, marginPx, marginPx, marginPx);
+        button.setMargins(marginPx, Dim.dp8, marginPx, bottomMargin);
 
         viewGroup.addView(button.getIgdsButton());
         if(isFirstTime){

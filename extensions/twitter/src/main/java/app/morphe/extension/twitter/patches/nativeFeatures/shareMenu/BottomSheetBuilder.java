@@ -33,36 +33,56 @@ public class BottomSheetBuilder {
     private static List<BottomSheetAction<Tweet>> actionList(Context context, Tweet tweet) throws Exception{
         Object tweetObject = tweet.getObject();
         List<BottomSheetAction<Tweet>> actions = new ArrayList<>();
+        ArrayList itemsToHide = Pref.nativeShareMenuToHide();
 
-        actions.add(new BottomSheetAction<Tweet>("ic_vector_link",str("copy_tweet_link"),t -> copyLink(context, t)));
-        actions.add(new BottomSheetAction<>("ic_vector_share_android",str("share_tweet_sheet_title"),t -> shareVia(context, t)));
-
-        actions.add(new BottomSheetAction<>("ic_vector_compose_dm",str("label_chat"),t -> shareToDM(context, t)));
-
-        actions.add(new BottomSheetAction<>("ic_vector_logo_instagram",str("piko_share_image_instagram_stories"),t -> ShareImageHandler.shareAsImage(context, tweetObject,1)));
-
-        if(Pref.enableExternalDownloader()){
-            actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_pref_external_downloader_text"),t -> ExternalDownloader.sendToExternalDownloader(tweetObject)));
+        String itemKey = "copy_tweet_link";
+        if(!itemsToHide.contains(itemKey)) {
+            actions.add(new BottomSheetAction<Tweet>("ic_vector_link", str(itemKey), t -> copyLink(context, t)));
         }
 
-        if(Pref.enableNativeDownloader()){
-            actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_title_native_downloader"),t -> NativeDownloader.downloader(context, tweetObject)));
+        itemKey = "share_tweet_sheet_title";
+        if(!itemsToHide.contains(itemKey)) {
+            actions.add(new BottomSheetAction<>("ic_vector_share_android", str(itemKey), t -> shareVia(context, t)));
         }
 
-        if(Pref.enableNativeTranslator()){
-            actions.add(new BottomSheetAction<>("ic_vector_sparkle",str("piko_title_native_translator"),t -> NativeTranslator.translate(context, tweetObject)));
+        itemKey = "label_chat";
+        if(!itemsToHide.contains(itemKey)) {
+            actions.add(new BottomSheetAction<>("ic_vector_compose_dm", str(itemKey), t -> shareToDM(context, t)));
         }
 
-        if(Pref.enableNativeReaderMode()){
-            actions.add(new BottomSheetAction<>("ic_vector_book_stroke_on",str("piko_title_native_reader_mode"),t -> ReaderModeUtils.launchReaderMode(context, tweetObject)));
+        itemKey = "piko_share_image_instagram_stories";
+        if(!itemsToHide.contains(itemKey)) {
+            actions.add(new BottomSheetAction<>("ic_vector_logo_instagram", str(itemKey), t -> ShareImageHandler.shareAsImage(context, tweetObject, 1)));
         }
 
-        if(Pref.enableShareImage()){
-            actions.add(new BottomSheetAction<>("ic_vector_share",str("piko_share_image_title"),t -> ShareImageHandler.shareAsImage(context, tweetObject,0)));
+        itemKey = "piko_pref_external_downloader_text";
+        if(Pref.enableExternalDownloader() && !itemsToHide.contains(itemKey)){
+            actions.add(new BottomSheetAction<>("ic_vector_incoming",str(itemKey),t -> ExternalDownloader.sendToExternalDownloader(tweetObject)));
         }
 
-        if(Pref.pikoDebug()){
-            actions.add(new BottomSheetAction<>("ic_vector_flask_stroke",str("piko_debug"),t -> ObjectBrowser.browseObject(context, tweet)));
+        itemKey = "piko_title_native_downloader";
+        if(Pref.enableNativeDownloader() && !itemsToHide.contains(itemKey)){
+            actions.add(new BottomSheetAction<>("ic_vector_incoming",str(itemKey),t -> NativeDownloader.downloader(context, tweetObject)));
+        }
+
+        itemKey = "piko_title_native_translator";
+        if(Pref.enableNativeTranslator() && !itemsToHide.contains(itemKey)){
+            actions.add(new BottomSheetAction<>("ic_vector_sparkle",str(itemKey),t -> NativeTranslator.translate(context, tweetObject)));
+        }
+
+        itemKey = "piko_title_native_reader_mode";
+        if(Pref.enableNativeReaderMode() && !itemsToHide.contains(itemKey)){
+            actions.add(new BottomSheetAction<>("ic_vector_book_stroke_on",str(itemKey),t -> ReaderModeUtils.launchReaderMode(context, tweetObject)));
+        }
+
+        itemKey = "piko_share_image_title";
+        if(Pref.enableShareImage() && !itemsToHide.contains(itemKey)){
+            actions.add(new BottomSheetAction<>("ic_vector_share",str(itemKey),t -> ShareImageHandler.shareAsImage(context, tweetObject,0)));
+        }
+
+        itemKey = "piko_debug";
+        if(Pref.pikoDebug() && !itemsToHide.contains(itemKey)){
+            actions.add(new BottomSheetAction<>("ic_vector_flask_stroke",str(itemKey),t -> ObjectBrowser.browseObject(context, tweet)));
         }
 
         Collections.reverse(actions);

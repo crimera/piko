@@ -30,20 +30,6 @@ internal object CurrentSystemUiModeFingerprint : Fingerprint(
     },
 )
 
-internal object SwitchItemConstructorFingerprint : Fingerprint(
-    name = "<init>",
-    returnType = "V",
-    parameters =
-        listOf(
-            "Landroid/widget/CompoundButton${'$'}OnCheckedChangeListener;",
-            "Ljava/lang/CharSequence;",
-            "Z",
-        ),
-    custom = { _, classDef ->
-        classDef.fields.count { it.type == "Ljava/lang/CharSequence;" } == 2
-    },
-)
-
 internal object DarkModeSectionFingerprint : Fingerprint(
     returnType = "V",
     strings =
@@ -58,20 +44,5 @@ internal object DarkModeSectionFingerprint : Fingerprint(
         method.parameterTypes.count {
             it == "Lkotlin/jvm/functions/Function1;"
         } == 1
-    },
-)
-
-internal object ReduceMotionToggleFingerprint : Fingerprint(
-    returnType = "V",
-    strings =
-        listOf(
-            "com.instagram.settings.impl.accessibility.ReduceMotionToggle " +
-                "(AccessibilityOptionsComposeFragment.kt:313)",
-        ),
-    custom = { method, _ ->
-        method.parameterTypes.size == 4 &&
-            method.parameterTypes[1] == "Lkotlin/jvm/functions/Function1;" &&
-            method.parameterTypes[2] == "I" &&
-            method.parameterTypes[3] == "Z"
     },
 )
