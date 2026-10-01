@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.navbar
 
+import app.crimera.patches.utils.classDefFlatMap
 import app.crimera.patches.newx.misc.drawer.isDrawerRowRenderer
 import app.crimera.patches.newx.misc.drawer.isStringResourceLookup
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
@@ -294,37 +295,34 @@ private data class DrawerRowCall(
  */
 context(context: BytecodePatchContext)
 private fun resolveDrawerRowCalls(): List<DrawerRowCall> {
-    val rows = mutableListOf<DrawerRowCall>()
     // Keep this APK-wide scan immutable. Calling mutableClassDefBy for every class materializes a
     // mutable proxy for the entire APK and is the source of patch-time OOMs on manager-sized heaps.
-    context.classDefForEach { classDef ->
-        classDef.methods.forEach { method ->
-            if (method.implementation == null) return@forEach
-            val methodInstructions = method.implementation?.instructions?.toList() ?: return@forEach
-            methodInstructions.forEachIndexed { index, instruction ->
-                if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@forEachIndexed
-                val call = instruction as? Instruction3rc ?: return@forEachIndexed
-                val renderer = instruction.getReference<MethodReference>() ?: return@forEachIndexed
-                if (!renderer.isDrawerRowRenderer()) return@forEachIndexed
+    return classDefFlatMap { classDef ->
+        classDef.methods.flatMap { method ->
+            if (method.implementation == null) return@flatMap emptyList()
+            val methodInstructions = method.implementation?.instructions?.toList() ?: return@flatMap emptyList()
+            methodInstructions.mapIndexedNotNull { index, instruction ->
+                if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@mapIndexedNotNull null
+                val call = instruction as? Instruction3rc ?: return@mapIndexedNotNull null
+                val renderer = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+                if (!renderer.isDrawerRowRenderer()) return@mapIndexedNotNull null
                 val titleRegister = call.startRegister
                 val titleResourceId =
                     methodInstructions.resolveTitleResourceIdAtRowCall(index, titleRegister)
-                        ?: return@forEachIndexed
+                        ?: return@mapIndexedNotNull null
                 val iconField =
                     methodInstructions.resolveIconField(index, titleRegister + 1)
-                        ?: return@forEachIndexed
-                rows +=
-                    DrawerRowCall(
-                        method = method,
-                        callIndex = index,
-                        call = call,
-                        titleResourceId = titleResourceId,
-                        iconField = iconField,
-                    )
+                        ?: return@mapIndexedNotNull null
+                DrawerRowCall(
+                    method = method,
+                    callIndex = index,
+                    call = call,
+                    titleResourceId = titleResourceId,
+                    iconField = iconField,
+                )
             }
         }
     }
-    return rows
 }
 
 context(context: BytecodePatchContext)

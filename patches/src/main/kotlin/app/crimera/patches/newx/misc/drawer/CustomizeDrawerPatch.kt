@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.drawer
 
+import app.crimera.patches.utils.classDefFlatMap
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.MultiChoiceSettingDefinition
 import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
@@ -497,10 +498,22 @@ private fun resolveDrawerRendererCalls(renderer: MethodReference): List<DrawerRe
     val expectedRegisterCount = renderer.parameterTypes.sumOf { type ->
         if (type.toString() == "J" || type.toString() == "D") 2 else 1
     }
+    val rendererDescriptor = renderer.toSmaliDescriptor()
+    // Immutable prefilter: only classes that actually call the renderer are turned into mutable
+    // proxies below.
+    val callerClasses = classDefFlatMap { classDef ->
+        if (!classDef.type.startsWith(DRAWER_SCOPE)) return@classDefFlatMap emptyList()
+        val callsRenderer = classDef.methods.any { method ->
+            method.implementation?.instructions?.any { instruction ->
+                instruction.opcode == Opcode.INVOKE_STATIC_RANGE &&
+                    instruction.getReference<MethodReference>()?.toSmaliDescriptor() == rendererDescriptor
+            } == true
+        }
+        if (callsRenderer) listOf(classDef.type) else emptyList()
+    }
     val calls = buildList {
-        context.classDefForEach { classDef ->
-            if (!classDef.type.startsWith(DRAWER_SCOPE)) return@classDefForEach
-            val mutableClass = context.mutableClassDefBy(classDef.type)
+        callerClasses.forEach { classType ->
+            val mutableClass = context.mutableClassDefBy(classType)
             mutableClass.methods.forEach { method ->
                 method.instructions.forEachIndexed { index, instruction ->
                     if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@forEachIndexed
@@ -1063,15 +1076,14 @@ private fun resolveDrawerTabNavigation(
 ): DrawerTabNavigation {
     val communitiesField = "${tabData.navigationType}->COMMUNITIES:${tabData.navigationType}"
     // Read-only discovery pass; see the navigation bar patch for why mutable proxies are avoided.
-    val dispatcherClasses = mutableListOf<String>()
-    context.classDefForEach { classDef ->
-        classDef.methods.forEach { method ->
+    val dispatcherClasses = classDefFlatMap { classDef ->
+        classDef.methods.filter { method ->
             if (method.name != "invoke" ||
                 method.returnType.toString() != OBJECT_DESCRIPTOR ||
                 method.parameterTypes.isNotEmpty() ||
                 method.implementation == null
-            ) return@forEach
-            val methodInstructions = method.implementation?.instructions?.toList() ?: return@forEach
+            ) return@filter false
+            val methodInstructions = method.implementation?.instructions?.toList() ?: return@filter false
             val readsCommunities =
                 methodInstructions.any { instruction ->
                     instruction.opcode == Opcode.SGET_OBJECT &&
@@ -1079,8 +1091,8 @@ private fun resolveDrawerTabNavigation(
                 }
             val hasSwitch =
                 methodInstructions.any { instruction -> instruction.opcode == Opcode.PACKED_SWITCH }
-            if (readsCommunities && hasSwitch) dispatcherClasses += classDef.type.toString()
-        }
+            readsCommunities && hasSwitch
+        }.map { classDef.type.toString() }
     }
     val dispatcherClass = requireExactlyOne("NewX drawer click dispatcher", dispatcherClasses)
     val dispatcher =

@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.navbar
 
+import app.crimera.patches.utils.classDefFlatMap
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -314,19 +315,19 @@ private fun MutableMethod.findTabDataWrapperInitIndex(
  */
 context(context: BytecodePatchContext)
 internal fun resolveTabChangeMethods(tabData: NewXNavBarTabData): List<MutableMethod> {
-    val matches = mutableListOf<TabChangeMethodKey>()
-    context.classDefForEach { classDef ->
-        classDef.methods.forEach { method ->
-            if (method.implementation == null) return@forEach
-            if (method.returnType.toString() != "V") return@forEach
-            if (method.parameterTypes.size !in 1..2) return@forEach
-            val parameters = method.parameterTypes.map(CharSequence::toString)
-            if (parameters.firstOrNull() != tabData.navigationType) return@forEach
-            if (!parameters.isTabChangeSignature()) return@forEach
-            if (!method.hasStackNavigationCall()) return@forEach
-            matches += TabChangeMethodKey(classDef.type.toString(), method.name, parameters)
+    val matches =
+        classDefFlatMap { classDef ->
+            classDef.methods.mapNotNull { method ->
+                if (method.implementation == null) return@mapNotNull null
+                if (method.returnType.toString() != "V") return@mapNotNull null
+                if (method.parameterTypes.size !in 1..2) return@mapNotNull null
+                val parameters = method.parameterTypes.map(CharSequence::toString)
+                if (parameters.firstOrNull() != tabData.navigationType) return@mapNotNull null
+                if (!parameters.isTabChangeSignature()) return@mapNotNull null
+                if (!method.hasStackNavigationCall()) return@mapNotNull null
+                TabChangeMethodKey(classDef.type.toString(), method.name, parameters)
+            }
         }
-    }
     if (matches.isEmpty()) {
         throw PatchException(
             "Expected at least one NewX tab change method for ${tabData.navigationType}, found 0",
@@ -337,6 +338,12 @@ internal fun resolveTabChangeMethods(tabData: NewXNavBarTabData): List<MutableMe
 
 private fun List<String>.isTabChangeSignature(): Boolean =
     size == 1 || (size == 2 && this[1] == FUNCTION0_DESCRIPTOR)
+
+private class NavBarItemScanHit(
+    val classType: String,
+    val renderers: List<ImmutableMethodReference>,
+    val contentClass: Boolean,
+)
 
 internal data class TabChangeMethodKey(
     val definingClass: String,
@@ -432,35 +439,41 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
     // Single traversal collects both the item renderer and the content class: the two
     // predicates are disjoint method shapes, so merging the passes preserves the exact
     // candidate sets of the former separate scans.
-    val rendererCandidates = mutableListOf<ImmutableMethodReference>()
-    val contentClasses = mutableListOf<String>()
-    context.classDefForEach { classDef ->
-        var contentClass = false
-        classDef.methods.forEach { method ->
-            if (method.returnType.toString() != "V") return@forEach
-            // The item renderer takes five parameters; the content constructors take three or four.
-            if (method.parameterTypes.size !in 3..5) return@forEach
-            val parameters = method.parameterTypes.map(CharSequence::toString)
-            if (method.implementation != null &&
-                parameters.size == 5 &&
-                parameters[0].startsWith(ICONS_DESCRIPTOR_PREFIX) &&
-                parameters[1] == STRING_DESCRIPTOR &&
-                parameters[2] == tabData.tabDataValueType &&
-                parameters[3] == COMPOSER_DESCRIPTOR &&
-                parameters[4] == "I"
-            ) {
-                rendererCandidates +=
-                    ImmutableMethodReference(
-                        classDef.type.toString(),
-                        method.name,
-                        parameters,
-                        "V",
-                    )
+    val scan =
+        classDefFlatMap { classDef ->
+            var contentClass = false
+            val renderers = mutableListOf<ImmutableMethodReference>()
+            classDef.methods.forEach { method ->
+                if (method.returnType.toString() != "V") return@forEach
+                // The item renderer takes five parameters; the content constructors take three or four.
+                if (method.parameterTypes.size !in 3..5) return@forEach
+                val parameters = method.parameterTypes.map(CharSequence::toString)
+                if (method.implementation != null &&
+                    parameters.size == 5 &&
+                    parameters[0].startsWith(ICONS_DESCRIPTOR_PREFIX) &&
+                    parameters[1] == STRING_DESCRIPTOR &&
+                    parameters[2] == tabData.tabDataValueType &&
+                    parameters[3] == COMPOSER_DESCRIPTOR &&
+                    parameters[4] == "I"
+                ) {
+                    renderers +=
+                        ImmutableMethodReference(
+                            classDef.type.toString(),
+                            method.name,
+                            parameters,
+                            "V",
+                        )
+                }
+                if (parameters.isNavBarItemContentConstructor(tabData)) contentClass = true
             }
-            if (parameters.isNavBarItemContentConstructor(tabData)) contentClass = true
+            if (renderers.isEmpty() && !contentClass) {
+                emptyList()
+            } else {
+                listOf(NavBarItemScanHit(classDef.type.toString(), renderers, contentClass))
+            }
         }
-        if (contentClass) contentClasses += classDef.type.toString()
-    }
+    val rendererCandidates = scan.flatMap { it.renderers }
+    val contentClasses = scan.filter { it.contentClass }.map { it.classType }
     val renderer =
         requireExactlyOne("NewX navigation bar item renderer", rendererCandidates) { it.toString() }
     val rendererDescriptor = renderer.toSmaliDescriptor()

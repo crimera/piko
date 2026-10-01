@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.utils.flatMapParallel
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.settings.Categories
@@ -313,23 +314,23 @@ private class ForYouClassScan(
 private fun scanForYouClasses(
     classDefs: List<com.android.tools.smali.dexlib2.iface.ClassDef>,
 ): List<ForYouClassScan> =
-    buildList {
-        classDefs.forEach { classDef ->
-            val toStringMethods = mutableListOf<Method>()
-            val oneParameterVoidMethods = mutableListOf<Method>()
-            classDef.methods.forEach { method ->
-                when {
-                    method.returnType == STRING_DESCRIPTOR &&
-                        method.name == "toString" &&
-                        method.parameterTypes.isEmpty() -> toStringMethods += method
+    classDefs.flatMapParallel { classDef ->
+        val toStringMethods = mutableListOf<Method>()
+        val oneParameterVoidMethods = mutableListOf<Method>()
+        classDef.methods.forEach { method ->
+            when {
+                method.returnType == STRING_DESCRIPTOR &&
+                    method.name == "toString" &&
+                    method.parameterTypes.isEmpty() -> toStringMethods += method
 
-                    method.returnType == "V" && method.parameterTypes.size == 1 ->
-                        oneParameterVoidMethods += method
-                }
+                method.returnType == "V" && method.parameterTypes.size == 1 ->
+                    oneParameterVoidMethods += method
             }
-            if (toStringMethods.isNotEmpty() || oneParameterVoidMethods.isNotEmpty()) {
-                add(ForYouClassScan(classDef, toStringMethods, oneParameterVoidMethods))
-            }
+        }
+        if (toStringMethods.isNotEmpty() || oneParameterVoidMethods.isNotEmpty()) {
+            listOf(ForYouClassScan(classDef, toStringMethods, oneParameterVoidMethods))
+        } else {
+            emptyList()
         }
     }
 

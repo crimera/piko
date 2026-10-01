@@ -2,6 +2,7 @@ package app.crimera.patches.newx.misc.mediatab
 
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.inlineactions.newXThumbnailCachePatch
+import app.crimera.patches.utils.flatMapParallel
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.newx.settings.customScreen
@@ -515,9 +516,10 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
         resolveStateValueGetter(stateFlowGetter.returnType.toString(), classByType)
     val stateFlowGetterCall = stateFlowGetter.toNativeCall()
 
-    val nativeTriggerCandidates = classDefs.flatMap { classDef ->
+    val nativeTriggerCandidates = classDefs.flatMapParallel { classDef ->
         classDef.methods.filter { method ->
             if (!AccessFlags.STATIC.isSet(method.accessFlags)) return@filter false
+            if (method.parameterTypes.size != 5) return@filter false
             if (method.returnType.toString() != VOID_DESCRIPTOR) return@filter false
             // The scroll state (LazyListState) is obfuscated too; match it by the
             // stable lazy scope instead of its release-specific short name. The
@@ -1434,19 +1436,23 @@ private fun resolveItemClickViewerTargets(
     // is an interface that a media holder also implements. On this target that is x0.a:o0
     // with the j1 timeline item delegating its u5 media contract to its o6 holder field.
     data class ItemEvent(val field: String, val eventType: String, val itemType: String)
-    val itemEvents = classDefs.mapNotNull { classDef ->
-        val type = classDef.type.toString()
-        if (!AccessFlags.FINAL.isSet(classDef.accessFlags)) return@mapNotNull null
-        if (AccessFlags.INTERFACE.isSet(classDef.accessFlags)) return@mapNotNull null
-        if (AccessFlags.ABSTRACT.isSet(classDef.accessFlags)) return@mapNotNull null
+    // The structural prefilter is pure and runs in parallel; the closure checks below use the
+    // memoized (single-threaded) closure map, so they stay serial over the few survivors.
+    val itemEventShapes = classDefs.flatMapParallel { classDef ->
+        if (!AccessFlags.FINAL.isSet(classDef.accessFlags)) return@flatMapParallel emptyList()
+        if (AccessFlags.INTERFACE.isSet(classDef.accessFlags)) return@flatMapParallel emptyList()
+        if (AccessFlags.ABSTRACT.isSet(classDef.accessFlags)) return@flatMapParallel emptyList()
         val instanceFields = classDef.fields.filter { !AccessFlags.STATIC.isSet(it.accessFlags) }
-        if (instanceFields.size != 1) return@mapNotNull null
+        if (instanceFields.size != 1) return@flatMapParallel emptyList()
         val field = instanceFields[0]
         val itemType = field.type.toString()
-        if (!itemType.startsWith("L")) return@mapNotNull null
+        if (!itemType.startsWith("L")) return@flatMapParallel emptyList()
         // The gallery tap wraps a timeline item model (o0 in the timelines scope),
         // not a bare media holder (o6 is also wrapped elsewhere, e.g. NFL events).
-        if (!itemType.startsWith(TIMELINE_MODEL_SCOPE)) return@mapNotNull null
+        if (!itemType.startsWith(TIMELINE_MODEL_SCOPE)) return@flatMapParallel emptyList()
+        listOf(Triple(classDef.type.toString(), field, itemType))
+    }
+    val itemEvents = itemEventShapes.mapNotNull { (type, field, itemType) ->
         val itemClass = classByType[itemType] ?: return@mapNotNull null
         if (!AccessFlags.INTERFACE.isSet(itemClass.accessFlags)) return@mapNotNull null
         val heldByMediaHolder = mediaHolders.any { holder -> implements(holder, itemType) }
@@ -1509,24 +1515,26 @@ private fun resolveItemClickViewerTargets(
     // by the event class, reading the item field. The gallery tap reaches them through
     // the item-click callback; without a pending entry the preamble falls through, so
     // hooking every consumer is behavior-preserving.
-    val targets = mutableListOf<ItemClickViewerTarget>()
-    classDefs.forEach { classDef ->
+    // The event closure is the only memoized lookup the scan needs; resolve it up front so the
+    // class scan itself only reads immutable state and can run in parallel.
+    val eventClosure = closure(itemEvent.eventType)
+    val targets = classDefs.flatMapParallel { classDef ->
         val ownerType = classDef.type.toString()
-        classDef.methods.forEach methodLoop@{ method ->
-            if (AccessFlags.STATIC.isSet(method.accessFlags)) return@methodLoop
-            if (method.returnType.toString() != VOID_DESCRIPTOR) return@methodLoop
-            if (method.parameterTypes.size != 1) return@methodLoop
+        classDef.methods.mapNotNull { method ->
+            if (AccessFlags.STATIC.isSet(method.accessFlags)) return@mapNotNull null
+            if (method.returnType.toString() != VOID_DESCRIPTOR) return@mapNotNull null
+            if (method.parameterTypes.size != 1) return@mapNotNull null
             val parameterType = method.parameterTypes.single().toString()
-            if (!parameterType.startsWith("L")) return@methodLoop
-            val parameterClass = classByType[parameterType] ?: return@methodLoop
-            if (!AccessFlags.INTERFACE.isSet(parameterClass.accessFlags)) return@methodLoop
-            if (!implements(itemEvent.eventType, parameterType)) return@methodLoop
-            val instructions = method.implementation?.instructions?.toList() ?: return@methodLoop
+            if (!parameterType.startsWith("L")) return@mapNotNull null
+            val parameterClass = classByType[parameterType] ?: return@mapNotNull null
+            if (!AccessFlags.INTERFACE.isSet(parameterClass.accessFlags)) return@mapNotNull null
+            if (parameterType !in eventClosure) return@mapNotNull null
+            val instructions = method.implementation?.instructions?.toList() ?: return@mapNotNull null
             val readsItem = instructions.any { instruction ->
                 if (instruction.opcode != Opcode.IGET_OBJECT) return@any false
                 (instruction as? ReferenceInstruction)?.reference?.toString() == itemEvent.field
             }
-            if (!readsItem) return@methodLoop
+            if (!readsItem) return@mapNotNull null
             val navigationFields = classDef.fields.filter { field ->
                 !AccessFlags.STATIC.isSet(field.accessFlags) &&
                     field.type.toString() == navigationOwner
@@ -1535,15 +1543,13 @@ private fun resolveItemClickViewerTargets(
                 "NewX gallery item-click navigation field in $ownerType",
                 navigationFields,
             )
-            targets.add(
-                ItemClickViewerTarget(
-                    ownerType = ownerType,
-                    methodName = method.name.toString(),
-                    parameterTypes = method.parameterTypes.map(CharSequence::toString),
-                    itemEventType = itemEvent.eventType,
-                    itemEventField = itemEvent.field,
-                    navigationField = navigationField.toSmaliDescriptor(),
-                ),
+            ItemClickViewerTarget(
+                ownerType = ownerType,
+                methodName = method.name.toString(),
+                parameterTypes = method.parameterTypes.map(CharSequence::toString),
+                itemEventType = itemEvent.eventType,
+                itemEventField = itemEvent.field,
+                navigationField = navigationField.toSmaliDescriptor(),
             )
         }
     }
