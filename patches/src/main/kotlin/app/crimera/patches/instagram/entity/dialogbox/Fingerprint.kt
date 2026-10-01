@@ -44,6 +44,11 @@ internal object GetDialogExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
+internal object ClearMenuBottomCornersExtensionFingerprint : Fingerprint(
+    name = "clearMenuBottomCorners",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
 internal object SetCancelableExtensionFingerprint : Fingerprint(
     name = "setCancelable",
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
