@@ -7,6 +7,7 @@
 package app.crimera.patches.newx.misc.bringbacktwitter
 
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.requireAtMostOne
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
@@ -213,14 +214,20 @@ private fun app.morphe.patcher.patch.ResourcePatchContext.ensureDefaultBrandingC
     }
 
     document("res/values/colors.xml").use { document ->
-        val colors = document.getElementsByTagName("color")
+        val colorElements = document.getElementsByTagName("color")
         for ((name, value) in listOf(
             "twitter_blue" to "#1d9bf0",
             "twitter_splash_background" to "@color/twitter_blue",
         )) {
-            val existing = (0 until colors.length)
-                .mapNotNull { colors.item(it) as? Element }
-                .firstOrNull { it.getAttribute("name") == name }
+            val existing =
+                requireAtMostOne(
+                    label = "res/values/colors.xml color '$name'",
+                    candidates =
+                        (0 until colorElements.length)
+                            .mapNotNull { colorElements.item(it) as? Element }
+                            .filter { it.getAttribute("name") == name },
+                    describe = { "${it.getAttribute("name")}=${it.textContent}" },
+                )
             if (existing != null) {
                 existing.textContent = value
                 continue
