@@ -18,6 +18,7 @@ import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.newInstance
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -34,7 +35,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val COMPOSER_MINIMAL_SCOPE = "Lcom/x/composer/minimal/"
 private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
@@ -447,41 +447,21 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
     // The reply text field test tag moved one hop down: the renderer no longer contains
     // it directly (alpha.04 hosts it in a Function2 lambda instantiated by a helper).
     // Resolve owner -> instantiator -> direct caller instead of hardcoding any of them.
-    // One shared snapshot feeds both passes below instead of two full dex traversals.
-    val classDefs = buildList {
-        context.classDefForEach { add(it) }
-    }
-    val anchorOwners = classDefs.mapNotNull { classDef ->
-        classDef.type.takeIf {
-            classDef.methods.any { method ->
-                method.implementation?.instructions?.any { instruction ->
-                    instruction.getReference<StringReference>()?.string ==
-                        "post-detail-reply-text-field"
-                } == true
-            }
-        }
-    }
     val anchorOwner =
         requireExactlyOne(
             label = "NewX reply text field lambda owner",
-            candidates = anchorOwners,
+            candidates = context.classDefByStrings("post-detail-reply-text-field").map { it.type },
         )
-    val instantiators = buildList {
-        classDefs.forEach { classDef ->
-            classDef.methods.forEach { method ->
-                if (method.implementation?.instructions?.any { instruction ->
-                        instruction.opcode == Opcode.NEW_INSTANCE &&
-                            instruction.getReference<TypeReference>()?.type == anchorOwner
-                    } == true) {
-                    add(method)
-                }
-            }
-        }
-    }
+    // `newInstance` still means exactly the old scan: `new-array` stores the array descriptor,
+    // so a class descriptor cannot match it.
     val instantiator =
         requireExactlyOne(
             label = "NewX reply text field lambda instantiator",
-            candidates = instantiators,
+            candidates =
+                Fingerprint(filters = listOf(newInstance(anchorOwner)))
+                    .matchAllOrNull()
+                    .orEmpty()
+                    .map(Match::originalMethod),
             describe = { "$it" },
         )
     return requireExactlyOne(

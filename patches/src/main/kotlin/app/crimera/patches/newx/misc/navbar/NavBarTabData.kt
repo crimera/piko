@@ -319,6 +319,7 @@ internal fun resolveTabChangeMethods(tabData: NewXNavBarTabData): List<MutableMe
         classDef.methods.forEach { method ->
             if (method.implementation == null) return@forEach
             if (method.returnType.toString() != "V") return@forEach
+            if (method.parameterTypes.size !in 1..2) return@forEach
             val parameters = method.parameterTypes.map(CharSequence::toString)
             if (parameters.firstOrNull() != tabData.navigationType) return@forEach
             if (!parameters.isTabChangeSignature()) return@forEach
@@ -415,12 +416,13 @@ internal fun Method.hasStackNavigationCall(): Boolean {
  * Constructor parameter positions, not named types, are what the content field resolves from;
  * the resolved renderer call is what proves the class identity.
  */
-private fun Method.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean {
-    if (returnType.toString() != "V") return false
-    val parameters = parameterTypes.map(CharSequence::toString)
-    if (parameters == listOf("Z", tabData.navigationType, tabData.tabDataValueType)) return true
-    return parameters == MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS
-}
+private fun Method.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean =
+    returnType.toString() == "V" &&
+        parameterTypes.map(CharSequence::toString).isNavBarItemContentConstructor(tabData)
+
+private fun List<String>.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean =
+    this == listOf("Z", tabData.navigationType, tabData.tabDataValueType) ||
+        this == MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS
 
 private val MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS =
     listOf("Z", "Ljava/lang/Object;", "Ljava/lang/Object;", "I")
@@ -433,10 +435,13 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
     val rendererCandidates = mutableListOf<ImmutableMethodReference>()
     val contentClasses = mutableListOf<String>()
     context.classDefForEach { classDef ->
+        var contentClass = false
         classDef.methods.forEach { method ->
-            if (method.implementation == null) return@forEach
+            if (method.returnType.toString() != "V") return@forEach
+            // The item renderer takes five parameters; the content constructors take three or four.
+            if (method.parameterTypes.size !in 3..5) return@forEach
             val parameters = method.parameterTypes.map(CharSequence::toString)
-            if (method.returnType.toString() == "V" &&
+            if (method.implementation != null &&
                 parameters.size == 5 &&
                 parameters[0].startsWith(ICONS_DESCRIPTOR_PREFIX) &&
                 parameters[1] == STRING_DESCRIPTOR &&
@@ -452,10 +457,9 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
                         "V",
                     )
             }
+            if (parameters.isNavBarItemContentConstructor(tabData)) contentClass = true
         }
-        if (classDef.methods.any { method -> method.isNavBarItemContentConstructor(tabData) }) {
-            contentClasses += classDef.type.toString()
-        }
+        if (contentClass) contentClasses += classDef.type.toString()
     }
     val renderer =
         requireExactlyOne("NewX navigation bar item renderer", rendererCandidates) { it.toString() }

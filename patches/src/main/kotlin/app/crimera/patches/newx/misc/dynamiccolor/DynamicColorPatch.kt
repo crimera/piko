@@ -1167,28 +1167,36 @@ private fun patchTabTints(horizon: String) {
     )
 }
 
+/** The J field read is the indexable anchor; [isComposeModifierBackground] stays the shape check. */
+private object XdsChromeBackgroundFingerprint : Fingerprint(
+    filters = listOf(fieldAccess(opcode = Opcode.IGET_WIDE, type = "J")),
+    custom = { method, _ -> method.isComposeModifierBackground() },
+)
+
 context(context: BytecodePatchContext)
 private fun patchXdsChromeBackground(): MutableMethod {
-    val backgroundFields = buildList<FieldReference> {
-        context.classDefForEach { classDef ->
-            for (method in classDef.methods) {
-                if (!method.isComposeModifierBackground()) continue
-                val instructions = method.implementation?.instructions?.toList() ?: continue
-                for ((index, instruction) in instructions.withIndex()) {
-                    if (instruction.opcode != Opcode.IGET_WIDE) continue
-                    val field = instruction.getReference<FieldReference>() ?: continue
-                    if (field.type != "J") continue
+    val backgroundFields =
+        XdsChromeBackgroundFingerprint
+            .matchAllOrNull()
+            .orEmpty()
+            .flatMap { match ->
+                val instructions =
+                    match.originalMethod.implementation?.instructions?.toList() ?: return@flatMap emptyList()
+                buildList {
+                    for ((index, instruction) in instructions.withIndex()) {
+                        if (instruction.opcode != Opcode.IGET_WIDE) continue
+                        val field = instruction.getReference<FieldReference>() ?: continue
+                        if (field.type != "J") continue
 
-                    val colorRegister =
-                        (instruction as? TwoRegisterInstruction)?.registerA
-                            ?: throw PatchException(
-                                "NewX XDS background field read has no destination: $instruction",
-                            )
-                    if (instructions.hasComposeBackgroundUse(index, colorRegister)) add(field)
+                        val colorRegister =
+                            (instruction as? TwoRegisterInstruction)?.registerA
+                                ?: throw PatchException(
+                                    "NewX XDS background field read has no destination: $instruction",
+                                )
+                        if (instructions.hasComposeBackgroundUse(index, colorRegister)) add(field)
+                    }
                 }
-            }
-        }
-    }.distinctBy(FieldReference::toString)
+            }.distinctBy(FieldReference::toString)
 
     val schemeResolution = mutableListOf<String>()
     val schemeBackgroundFields = backgroundFields.filter { field ->

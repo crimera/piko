@@ -21,6 +21,7 @@ import app.crimera.patches.newx.utils.valueReachesRegister
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -71,6 +72,9 @@ private object NewXPostDividerRendererFingerprint : Fingerprint(
 /** The reply facepile draws another connector behind the stacked reply avatars. */
 private object NewXReplyFacepileDividerFingerprint : Fingerprint(
     returnType = "V",
+    // The predicate below always reads an ArrayList field, so the patcher can index candidates
+    // by field type instead of scanning every class.
+    filters = listOf(fieldAccess(opcode = Opcode.IGET_OBJECT, type = ARRAY_LIST_DESCRIPTOR)),
     custom = { method, _ ->
         method.parameterDescriptors().hasComposeShape(
             required = listOf(MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR),

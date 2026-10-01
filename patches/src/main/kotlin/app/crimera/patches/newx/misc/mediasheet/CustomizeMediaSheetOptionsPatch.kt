@@ -17,13 +17,13 @@ import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.literal
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.resourceLiteral
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -84,7 +84,12 @@ private val MEDIA_SHEET_OPTIONS =
 
 private object MediaSheetBuilderFingerprint : Fingerprint(
     returnType = "V",
-    filters = MEDIA_SHEET_BUILDER_ANCHORS.map { name -> resourceLiteral(ResourceType.STRING, name) },
+    // The patches library's resourceLiteral is not in the patcher's bundled-filter set, so it cannot
+    // use the literal index; the lazy patcher literal resolves the same id at match time.
+    filters =
+        MEDIA_SHEET_BUILDER_ANCHORS.map { name ->
+            literal({ getResourceId(ResourceType.STRING, name) })
+        },
 )
 
 /** Release-specific access paths for one media sheet row. */

@@ -353,10 +353,9 @@ private fun resolveComposeContracts(classDefs: List<ClassDef>): ResolvedComposeC
     val paddingTop = resolveAccessor(fieldsByParameter.getValue(1), "top")
     val paddingBottom = resolveAccessor(fieldsByParameter.getValue(3), "bottom")
 
-    val androidViewCandidates = classDefs.flatMap { classDef ->
+    val androidViewCandidates = classDefs.filter { it.type.startsWith(VIEW_INTEROP_SCOPE) }.flatMap { classDef ->
         classDef.methods.filter { method ->
             AccessFlags.STATIC.isSet(method.accessFlags) &&
-                classDef.type.toString().startsWith(VIEW_INTEROP_SCOPE) &&
                 method.returnType.toString() == VOID_DESCRIPTOR &&
                 method.parameterDescriptors().let { parameters ->
                     val functionCount = parameters.count { it == FUNCTION1 }
@@ -1521,8 +1520,8 @@ private fun resolveItemClickViewerTargets(
             if (!parameterType.startsWith("L")) return@methodLoop
             val parameterClass = classByType[parameterType] ?: return@methodLoop
             if (!AccessFlags.INTERFACE.isSet(parameterClass.accessFlags)) return@methodLoop
-            val instructions = method.implementation?.instructions?.toList() ?: return@methodLoop
             if (!implements(itemEvent.eventType, parameterType)) return@methodLoop
+            val instructions = method.implementation?.instructions?.toList() ?: return@methodLoop
             val readsItem = instructions.any { instruction ->
                 if (instruction.opcode != Opcode.IGET_OBJECT) return@any false
                 (instruction as? ReferenceInstruction)?.reference?.toString() == itemEvent.field
