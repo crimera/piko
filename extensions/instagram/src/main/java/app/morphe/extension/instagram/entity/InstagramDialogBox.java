@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.entity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.widget.ListView;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -20,6 +21,8 @@ public class InstagramDialogBox{
 
     private Object igdsDialog;
     private Class<?> igdsClass;
+    private boolean hasPositiveButton;
+    private boolean hasNegativeButton;
 
     public InstagramDialogBox(Context context){
         try {
@@ -44,7 +47,30 @@ public class InstagramDialogBox{
     }
 
     public Dialog getDialog() {
-        return (Dialog) invoke("A02", null);
+        Dialog dialog = (Dialog) invoke("A02", null);
+        if (hasPositiveButton || hasNegativeButton) {
+            updateMenuCorners(dialog);
+        }
+        return dialog;
+    }
+
+    private static void updateMenuCorners(Dialog dialog) {
+        try {
+            // Titled dialogs rebuild the menu, so use the returned dialog's list.
+            ListView menu = dialog.findViewById(android.R.id.list);
+            if (menu != null && menu.getAdapter() != null) {
+                clearMenuBottomCorners(menu.getAdapter());
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+    }
+
+    private static void clearMenuBottomCorners(Object adapter) throws ReflectiveOperationException {
+        // The native builder rounds the last menu row even when buttons follow it.
+        Field field = adapter.getClass().getDeclaredField("menuBottomCornersField");
+        field.setAccessible(true);
+        field.setBoolean(adapter, false);
     }
 
     public void setCancelable(boolean value) {
@@ -69,6 +95,7 @@ public class InstagramDialogBox{
                 listener,
                 text
         );
+        hasNegativeButton = text != null && !text.isEmpty();
     }
 
     public void setOnDismissListener(
@@ -91,6 +118,7 @@ public class InstagramDialogBox{
                 listener,
                 text
         );
+        hasPositiveButton = text != null && !text.isEmpty();
     }
 
     public void setTitle(String title) {
