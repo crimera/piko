@@ -465,12 +465,57 @@ public final class InlineDownloadButton {
         throw unpatchedBridge("getPresenterPost");
     }
 
+    /** Contextual post of a timeline post item, or null when its result is not a post. */
+    private static Object getContextualPost(Object timelinePost) {
+        throw unpatchedBridge("getContextualPost");
+    }
+
     private static IllegalStateException unpatchedBridge(String bridgeName) {
         return new IllegalStateException("NewX inline download bridge was not patched: " + bridgeName);
     }
 
     private static Object postFor(Object presenter) {
         return getPresenterPost(presenter);
+    }
+
+    /**
+     * Returns {@code {index, count}} of {@code url} among the media of a timeline post item, or
+     * null if absent.
+     */
+    static int[] mediaPosition(Object timelinePost, String url) {
+        String key = urlKey(url);
+        if (key == null) return null;
+
+        Object post = getContextualPost(timelinePost);
+        if (post == null) {
+            NewXLogger.logger("media position: timeline post has no contextual post");
+            return null;
+        }
+
+        List<DownloadItem> downloads = downloadItems(mediaFor(post));
+        for (int index = 0; index < downloads.size(); index++) {
+            DownloadItem download = downloads.get(index);
+            if (key.equals(urlKey(download.url))) return new int[] {index, downloads.size()};
+            for (DownloadItem option : download.resolutionOptions) {
+                if (key.equals(urlKey(option.url))) return new int[] {index, downloads.size()};
+            }
+        }
+        NewXLogger.logger("media position: no match for " + url + " among " + downloads.size()
+                + " items, first=" + (downloads.isEmpty() ? null : downloads.get(0).url));
+        return null;
+    }
+
+    private static String urlKey(String url) {
+        if (url == null) return null;
+        int cut = url.length();
+        int query = url.indexOf('?');
+        if (query >= 0) cut = query;
+        int fragment = url.indexOf('#');
+        if (fragment >= 0 && fragment < cut) cut = fragment;
+        int slash = url.lastIndexOf('/', cut - 1);
+        int dot = url.lastIndexOf('.', cut - 1);
+        if (dot > slash && slash >= 0) cut = dot;
+        return url.substring(0, cut);
     }
 
     private static List<?> mediaFor(Object post) {

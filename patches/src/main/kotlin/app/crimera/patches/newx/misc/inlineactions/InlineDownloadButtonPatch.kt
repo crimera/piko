@@ -10,7 +10,11 @@ import app.crimera.patches.newx.models.ResolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.ResolvedNewXPostModels
 import app.crimera.patches.newx.models.firstParameterSlot
 import app.crimera.patches.newx.models.isInlineActionEntryRenderer
+import app.crimera.patches.newx.models.ResolvedNewXTimelineModels
+import app.crimera.patches.newx.models.newXTimelineModelResolutionPatch
 import app.crimera.patches.newx.models.requirePublicFields
+import app.crimera.patches.newx.models.resolveFieldAccessor
+import app.crimera.patches.newx.models.resolvedNewXTimelineModels
 import app.crimera.patches.newx.models.resolveMutableMethodOwner
 import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
 import app.crimera.patches.newx.models.resolvedNewXInlineActionKindOverride
@@ -77,6 +81,8 @@ private const val EXTENSION = "Lapp/morphe/extension/newx/misc/InlineDownloadBut
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val PRESENTER_POST_HELPER = "getPresenterPost"
 private const val CANONICAL_POST_HELPER = "getCanonicalPost"
+private const val CONTEXTUAL_POST_HELPER = "getContextualPost"
+private const val NO_CONTEXTUAL_POST_LABEL = "no_contextual_post"
 private const val POST_MEDIA_HELPER = "getPostMedia"
 private const val REPOSTED_POST_HELPER = "getRepostedPost"
 private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
@@ -119,6 +125,7 @@ val newXInlineDownloadButtonPatch =
         dependsOn(
             customizeNewXInlineActionsPatch,
             newXPostMediaModelResolutionPatch,
+            newXTimelineModelResolutionPatch,
             newXInlineDownloadModelResolutionPatch,
             newXThumbnailCachePatch,
             newXInAppNotificationPatch,
@@ -275,6 +282,7 @@ val newXInlineDownloadButtonPatch =
                 barModels,
                 mediaModels,
                 downloadModels,
+                resolvedNewXTimelineModels(),
             )
             // Null on validated legacy targets whose boolean-only kind model has no IconOnly
             // enum to rewrite (12.27/12.28). Only the 12.29 enum contract needs the override.
@@ -671,6 +679,7 @@ private fun patchPostModelBridges(
     barModels: ResolvedNewXInlineActionBarModels,
     mediaModels: ResolvedNewXPostMediaModels,
     downloadModels: ResolvedNewXInlineDownloadModels,
+    timelineModels: ResolvedNewXTimelineModels,
 ) {
     val contextualCanonicalPostField = postModels.contextualCanonicalPostField
     val contextualRepostedPostField = postModels.contextualRepostedPostField
@@ -694,6 +703,7 @@ private fun patchPostModelBridges(
         barModels.inlineActionBarDescriptor,
         presenterPostField,
     )
+    patchContextualPostHelper(extensionClass, postModels, timelineModels)
     extensionClass.portHelperBody(
         CANONICAL_POST_HELPER,
         listOf(OBJECT_DESCRIPTOR),
@@ -751,6 +761,49 @@ private fun patchPostModelBridges(
         constInt(3, 1)
         invokeDirect(actionConstructor, 0, 1, 2, 3)
         returnObject(0)
+    }
+}
+
+/**
+ * Unwraps a timeline post item to its contextual post. The item's result is a union, so anything
+ * that is not a contextual post yields null.
+ */
+context(context: BytecodePatchContext)
+private fun patchContextualPostHelper(
+    extensionClass: MutableClass,
+    postModels: ResolvedNewXPostModels,
+    timelineModels: ResolvedNewXTimelineModels,
+) {
+    val resultAccessor =
+        context.mutableClassDefBy(timelineModels.postDescriptor)
+            .resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
+    val stub = extensionClass.requireHelper(CONTEXTUAL_POST_HELPER, listOf(OBJECT_DESCRIPTOR))
+    val helper =
+        stub.cloneMutable(additionalRegisters = stub.numberOfParameterRegisters + 1).also { expanded ->
+            extensionClass.methods.remove(stub)
+            extensionClass.methods.add(expanded)
+        }
+    val post = helper.p0Register
+    if (post < 2) {
+        throw PatchException("NewX contextual-post helper has no spare registers: $helper")
+    }
+    helper.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        val typeCheckRegister = 1
+        checkCast(post, timelineModels.postDescriptor)
+        val getter = resultAccessor.getter
+        if (getter == null) {
+            iget(post, post, resultAccessor.field)
+        } else {
+            invokeVirtual(getter, post)
+            moveResult(post, resultAccessor.field.type)
+        }
+        instanceOf(typeCheckRegister, post, postModels.contextualPostDescriptor)
+        ifEqz(typeCheckRegister, Target.Local(NO_CONTEXTUAL_POST_LABEL))
+        returnObject(post)
+        label(NO_CONTEXTUAL_POST_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
     }
 }
 

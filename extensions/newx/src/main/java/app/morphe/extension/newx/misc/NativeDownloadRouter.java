@@ -77,11 +77,23 @@ public final class NativeDownloadRouter {
         String username = NewXUtils.sourceUsername(postText);
         String template = DownloadSettings.filenameTemplate();
         DownloadFileName.PostContext postContext = DownloadFileName.PostContext.fromText(postText);
+        int index = 0;
+        int mediaCount = 1;
+        try {
+            int[] position = InlineDownloadButton.mediaPosition(post, url);
+            if (position != null) {
+                index = position[0];
+                mediaCount = position[1];
+            }
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(
+                    () -> "Failed to resolve the NewX native download media position", exception);
+        }
         String fileName = DownloadFileName.render(
                 template,
                 postContext,
-                0,
-                1,
+                index,
+                mediaCount,
                 extensionFor(mimeType, url)
         );
 
