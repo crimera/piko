@@ -35,6 +35,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val COMPOSER_MINIMAL_SCOPE = "Lcom/x/composer/minimal/"
 private const val POST_DETAIL_SHEET_SCOPE = "Lcom/x/postdetailsheet/"
@@ -593,7 +594,7 @@ private fun resolvePostDetailNavigationInsetsHook(
     return requireNavigationInsetsHook(postDetailContainer, "NewX post-detail")
 }
 
-private fun Method.isImmersiveMediaControlsRenderer(minimalContainer: Method): Boolean {
+private fun Method.isImmersiveMediaControlsShape(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
     return AccessFlags.STATIC.isSet(accessFlags) &&
         returnType == "V" &&
@@ -604,9 +605,32 @@ private fun Method.isImmersiveMediaControlsRenderer(minimalContainer: Method): B
         parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
         parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
         inlineActionBarRenderCallIndices().size == 1 &&
-        callSiteIndices(minimalContainer).size == 1 &&
         navigationInsetsCallIndices().size == 1
 }
+
+/**
+ * Where the renderer decides whether the reply composer is present. Older releases call the
+ * minimal-composer container directly; 12.31.0-alpha.04 hands it to an animated-visibility
+ * content lambda instantiated in the renderer, so a `new-instance` of a class that calls the
+ * container is the same anchor one hop down.
+ */
+private fun Method.replyComposerAnchorIndices(
+    minimalContainer: Method,
+    hostsComposer: (String) -> Boolean,
+): List<Int> =
+    implementation?.instructions?.mapIndexedNotNull { index, instruction ->
+        when {
+            instruction.isStaticInvocation() ->
+                index.takeIf {
+                    instruction.getReference<MethodReference>()?.matches(minimalContainer) == true
+                }
+            instruction.opcode == Opcode.NEW_INSTANCE ->
+                index.takeIf {
+                    instruction.getReference<TypeReference>()?.type?.let(hostsComposer) == true
+                }
+            else -> null
+        }
+    }.orEmpty()
 
 private fun Instruction.argumentRegister(
     reference: MethodReference,
@@ -628,6 +652,14 @@ context(context: BytecodePatchContext)
 private fun resolveImmersiveActionBarSafeAreaHook(
     minimalContainer: MutableMethod,
 ): ImmersiveActionBarSafeAreaHook? {
+    val composerHosts = mutableMapOf<String, Boolean>()
+    val hostsComposer = { type: String ->
+        composerHosts.getOrPut(type) {
+            context.classDefByOrNull(type)?.methods?.any { host ->
+                host.callSiteIndices(minimalContainer).isNotEmpty()
+            } == true
+        }
+    }
     val originalMethod =
         requireAtMostOne(
             label = "NewX immersive-media action-bar renderer",
@@ -635,7 +667,7 @@ private fun resolveImmersiveActionBarSafeAreaHook(
                 context.classDefForEach { classDef ->
                     if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
                     classDef.methods.forEach { method ->
-                        if (method.isImmersiveMediaControlsRenderer(minimalContainer)) add(method)
+                        if (method.isImmersiveMediaControlsShape()) add(method)
                     }
                 }
             },
@@ -658,8 +690,8 @@ private fun resolveImmersiveActionBarSafeAreaHook(
         )
     val minimalComposerCallIndex =
         requireExactlyOne(
-            label = "NewX immersive-media reply-composer call in $method",
-            candidates = method.callSiteIndices(minimalContainer),
+            label = "NewX immersive-media reply-composer anchor in $method",
+            candidates = method.replyComposerAnchorIndices(minimalContainer, hostsComposer),
         )
     val navigationInsetsCallIndex =
         requireExactlyOne(
