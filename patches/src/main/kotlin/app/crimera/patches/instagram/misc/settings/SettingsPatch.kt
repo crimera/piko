@@ -64,11 +64,12 @@ val settingsPatch =
             addAppResources("shared")
             addAppResources("instagram")
 
-            IgFragmentActivityOnCreate.method.apply {
+            // Returning from a modal must restore the activity used for native themes.
+            for (method in listOf(IgFragmentActivityOnCreate.method, IgFragmentActivityOnResume.method)) {
 
-                val returnVoidIndex = indexOfFirstInstruction(Opcode.RETURN_VOID)
+                val returnVoidIndex = method.indexOfFirstInstruction(Opcode.RETURN_VOID)
 
-                addInstruction(
+                method.addInstruction(
                     returnVoidIndex,
                     """
                     invoke-static {p0}, Lapp/morphe/extension/shared/Utils;->setActivity(Landroid/app/Activity;)V
