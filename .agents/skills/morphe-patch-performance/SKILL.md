@@ -42,11 +42,14 @@ Exact APK path:
 MPP path/version:
 Morphe patcher version:
 Selected patch set and order:
+Heap limit (parallel dex compression needs at least 1 GB):
 Profiling enabled:
 Cold or warmed process:
 ```
 
 Run the sequential bundle before isolated diagnostics. Static fingerprint, class-scope, method-index, dependency, and mutable-proxy caches make later runs artificially fast.
+
+Optimize a patch's own execution (its body without dependencies). The `Applied:` log line prints when a patch finishes, so a time gap belongs to the patch before it, and unnamed `BytecodePatch@...` rows are dependencies that ran inside a public patch's window. Build the baseline from the same checkout as the change; an older bundle may predate other commits.
 
 Report these separately:
 
@@ -91,7 +94,8 @@ For current Morphe versions, verify these implementation paths rather than assum
 - `matchAllOrNull()` may not pre-scope from `definingClass`; it can still iterate global candidates and reject each method.
 - Exact built-in `string(...)` filters may use a global opcode-string index.
 - Legacy `strings = ...` uses partial `contains` matching and may inspect every class containing strings.
-- Non-built-in/custom filters can disable indexed candidate selection.
+- Non-built-in/custom filters can disable indexed candidate selection. The patches library's `resourceLiteral(...)` is not built in; the patcher's `literal({ getResourceId(...) })` selects the same instructions and stays indexable.
+- A fingerprint whose only criterion is a `custom` predicate scans every class. Which filter kinds can narrow candidates (exact strings, literals, types, member names, field types) depends on the patcher build.
 - Multiple exact strings may produce duplicate candidates that the patcher later deduplicates.
 - First construction of a global string/method index can dominate the patch row that happens to trigger it.
 - Accessing mutable `classDef`/`method` can materialize proxies; `original*` access avoids that when only reading.
@@ -151,6 +155,43 @@ Prefer stable caller evidence over a release-obfuscated callee owner:
 4. Match locally and assert cardinality.
 
 Never persist the observed obfuscated descriptor as a production constant.
+
+#### Replace a hand-written scan with an indexed lookup
+
+A loop over every class that checks one string, then looks for `new-instance` of the owner, is two indexed lookups:
+
+```kotlin
+val owner = requireExactlyOne("lambda owner", context.classDefByStrings("tag").map { it.type })
+val creators = Fingerprint(filters = listOf(newInstance(owner))).matchAllOrNull().orEmpty()
+```
+
+Both select exactly what the loop selected: `classDefByStrings` is an exact `const-string` match, and `newInstance` also covers `new-array`, whose operand is an array descriptor that can never equal a class descriptor.
+
+#### Give a custom-predicate fingerprint an indexable anchor
+
+Add a filter the predicate already requires; keep the predicate as the final check:
+
+```kotlin
+private object Target : Fingerprint(
+    returnType = "V",
+    filters = listOf(fieldAccess(opcode = Opcode.IGET_OBJECT, type = ARRAY_LIST_DESCRIPTOR)),
+    custom = { method, _ -> method.matchesTheContract() },
+)
+```
+
+Add an anchor only when the predicate cannot return true without it. Read the predicate and state the implication; the match set must not change.
+
+#### Reject cheaply before decoding
+
+Decoding class members and descriptors is the cost, not the comparison. In every whole-app loop:
+
+- test the class descriptor prefix before reading `classDef.methods`;
+- compare `parameterTypes.size` before mapping parameter descriptors to strings;
+- run pure predicates (`implements`, descriptor equality) before `implementation?.instructions?.toList()`;
+- decode a method's descriptors once and share them between predicates, and merge passes over the same classes;
+- collect the shapes several resolver passes need in one scan instead of rescanning per pass.
+
+These reorderings cannot change the match set, so they need no behavioral proof beyond the output hash (section 8).
 
 ### 5. Preserve correctness while optimizing
 
@@ -222,6 +263,17 @@ Slow patch row
 
 Order effects matter. The first public patch often absorbs extension, settings, resource, and timeline dependencies. Report dependency-own time and bundle-incremental time, not only the public row.
 
+Traps measured on the NewX bundle:
+
+- A shared one-time index moves its cost to the next user. Converting one `ShapeFingerprint` to a plain `Fingerprint` made a different patch pay for the all-shapes index. Compare the sum over the bundle, not the patch you changed.
+- A lazy per-shape index costs one whole-app scan per shape (about 0.5 s each). With several shapes it loses to one all-shapes map built once.
+- Do not share one scan result between patches that mutate. A resolver that clones and replaces a method hands the second patch stale objects, and either patch can be deselected.
+- A whole-app instruction walk costs about 1.5 s on the current APK (instruction materialization, not descriptor decoding). A resolver already at that floor needs an index, not a cheaper filter.
+- Narrowing the search by where a target lives in one release, such as a package prefix, changes behavior. Keep it only with identical output on every declared target; otherwise drop it.
+- Drop guards that measure within noise. Do not guess an anchor: a guessed `checkCast` that never matched failed closed and wasted the work.
+- Patches compile against the public Morphe patcher API. Faster internals in a local patcher are invisible to the bundle; do not depend on them.
+- Concurrent builds distort timings. Alternate before and after back to back and report the median.
+
 ### 8. Validate
 
 After each optimization group:
@@ -233,10 +285,20 @@ After each optimization group:
 5. Exclusively patch the exact APK for changed behavior paths.
 6. Stop after successful build/exclusive patch and ask the user to test unless deeper verification was requested.
 
+#### Output-identity oracle
+
+The patched APK is deterministic for a fixed bundle, APK, keystore, and patcher. A change that only affects how targets are found must not change the injected bytecode, so the output must be byte-identical:
+
+1. Build the baseline bundle from the unmodified checkout and record the sha256 of the patched APK.
+2. Build the optimized bundle, patch the same APK, and require the same sha256. A difference is a behavior change: fix it, or explain it exactly.
+3. Patch every older declared target with the baseline and the optimized bundle. Require the same hash for each success and the same failure for each failure.
+4. Take timings with a heap of at least 1 GB, and confirm the hash at 512 MB too.
+
 Reject an optimization if it is faster only because it:
 
 - silently matches zero targets,
 - patches fewer targets,
+- narrows the search on one release's layout without proof on every declared target,
 - relies on a release-obfuscated symbol,
 - measures a warmed cache,
 - shifts work into an unmeasured dependency,
@@ -275,6 +337,8 @@ Build command/result, exclusive patch result, output path, user test requested
 [ ] Decode, dependency, search, mutation, and bundle time separated
 [ ] Every changed lookup preserves asserted cardinality
 [ ] Match descriptors unchanged or intentionally documented
+[ ] Patched APK hash identical to the baseline built from the same checkout
+[ ] Older declared APKs patched with both bundles: same hash or same failure
 [ ] No new obfuscated production names
 [ ] Descriptor scopes cached per context; mutable classes not cached
 [ ] Profiling disabled by default
