@@ -15,6 +15,7 @@ private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val FUNCTION_ZERO_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION_ONE_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
+private const val FUNCTION_TWO_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 
 private object NewXSpacesBarFingerprint : Fingerprint(
     definingClass = "Lcom/x/spaces/ui/home/",
@@ -27,51 +28,37 @@ private object NewXSpacesBarFingerprint : Fingerprint(
     },
 )
 
-private val SPACES_BAR_PARAMETER_SUFFIXES =
+private val SPACES_BAR_PREFIX =
     listOf(
-        listOf(
-            FUNCTION_ONE_DESCRIPTOR,
-            MODIFIER_DESCRIPTOR,
-            "Z",
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ZERO_DESCRIPTOR,
-            COMPOSER_DESCRIPTOR,
-            "I",
-            "I",
-        ),
-        listOf(
-            FUNCTION_ONE_DESCRIPTOR,
-            MODIFIER_DESCRIPTOR,
-            "Z",
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ZERO_DESCRIPTOR,
-            COMPOSER_DESCRIPTOR,
-            "I",
-            "I",
-        ),
-        listOf(
-            FUNCTION_ONE_DESCRIPTOR,
-            MODIFIER_DESCRIPTOR,
-            "Z",
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ONE_DESCRIPTOR,
-            FUNCTION_ZERO_DESCRIPTOR,
-            COMPOSER_DESCRIPTOR,
-            "I",
-            "I",
-        ),
+        FUNCTION_ONE_DESCRIPTOR,
+        MODIFIER_DESCRIPTOR,
+        "Z",
     )
+private val SPACES_BAR_TAIL =
+    listOf(
+        FUNCTION_ZERO_DESCRIPTOR,
+        COMPOSER_DESCRIPTOR,
+        "I",
+        "I",
+    )
+private val SPACES_BAR_CALLBACK_DESCRIPTORS =
+    setOf(FUNCTION_ONE_DESCRIPTOR, FUNCTION_TWO_DESCRIPTOR)
+
+// Callback band between the prefix and the trailing (Function0, Composer, Int, Int) group.
+// Releases gained slots (12.26 alpha) and widened one to Function2 (12.31 alpha.04), so treat
+// the band as a family instead of enumerating tested shapes.
+private val SPACES_BAR_CALLBACK_COUNT_RANGE = 2..4
 
 private fun Method.hasKnownSpacesBarSignature(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
-    val stateFlowParameter = parameters.firstOrNull() ?: return false
-    if (!stateFlowParameter.isObjectDescriptor()) return false
-    return parameters.drop(1) in SPACES_BAR_PARAMETER_SUFFIXES
+    if (!parameters.firstOrNull().orEmpty().isObjectDescriptor()) return false
+
+    val callbackStart = 1 + SPACES_BAR_PREFIX.size
+    val callbackEnd = parameters.size - SPACES_BAR_TAIL.size
+    if (callbackEnd - callbackStart !in SPACES_BAR_CALLBACK_COUNT_RANGE) return false
+    if (parameters.subList(1, callbackStart) != SPACES_BAR_PREFIX) return false
+    if (parameters.subList(callbackStart, callbackEnd).any { it !in SPACES_BAR_CALLBACK_DESCRIPTORS }) return false
+    return parameters.subList(callbackEnd, parameters.size) == SPACES_BAR_TAIL
 }
 
 private fun String.isObjectDescriptor(): Boolean = startsWith('L') && endsWith(';')

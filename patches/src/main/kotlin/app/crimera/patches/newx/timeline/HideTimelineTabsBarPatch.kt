@@ -29,22 +29,33 @@ private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val COMMON_TABS_SCOPE = "Lcom/x/ui/common/tabs/"
 private const val INTEGER_DESCRIPTOR = "I"
+private const val BOOLEAN_DESCRIPTOR = "Z"
 
 // android.R.string "add_tab" ("Add tab"): the content description only the home timeline
 // add-tab button carries. The resource id is stable across the declared NewX targets.
 private const val ADD_TAB_STRING_RESOURCE_ID = 0x7f14006d
 
-private val TIMELINE_TABS_COMMON_PARAMETERS =
+private val TIMELINE_TABS_CALLBACK_PREFIX =
     listOf(
         FUNCTION_ONE_DESCRIPTOR,
         FUNCTION_ONE_DESCRIPTOR,
-        "Z",
-        "Z",
+    )
+private val TIMELINE_TABS_TAIL =
+    listOf(
         FUNCTION_ZERO_DESCRIPTOR,
         MODIFIER_DESCRIPTOR,
         COMPOSER_DESCRIPTOR,
-        "I",
+        INTEGER_DESCRIPTOR,
     )
+
+// Leading page parameters. The two renderer variants differ only by the presence of the pager
+// state, so this count is the variant key instead of the total parameter size, which now
+// overlaps between variants after the flag band widened.
+private val TIMELINE_TABS_LEADING_OBJECT_COUNTS = 1..2
+
+// Boolean flag slots between the callback prefix and the trailing group. Declared targets carry
+// two (through 12.31 alpha.02) or three (12.31 alpha.04), so match the band, not one shape.
+private val TIMELINE_TABS_FLAG_COUNT_RANGE = 2..3
 
 private val TIMELINE_ADD_TAB_PARAMETERS =
     listOf(
@@ -134,21 +145,38 @@ private fun Method.isTimelineTabsRenderer(): Boolean {
     if (!AccessFlags.STATIC.isSet(accessFlags)) return false
 
     val parameters = parameterTypes.map(CharSequence::toString)
-    if (!hasTimelineTabsParameters(parameters)) return false
+    if (timelineTabsLeadingObjectCount(parameters) == null) return false
 
     val methodInstructions = implementation?.instructions ?: return false
     return methodInstructions.count(Instruction::isTimelineTabsComposeCall) == 1
 }
 
-private fun hasTimelineTabsParameters(parameters: List<String>): Boolean {
-    if (parameters.size == TIMELINE_TABS_COMMON_PARAMETERS.size + 1) {
-        return parameters[0].isObjectDescriptor() &&
-            parameters.drop(1) == TIMELINE_TABS_COMMON_PARAMETERS
+/**
+ * Returns the leading page parameter count when [parameters] matches a timeline tabs renderer
+ * shape, or null. Each declared variant is tried explicitly: callback parameters are object
+ * descriptors too, so a leading run of object descriptors cannot separate the variants.
+ */
+private fun timelineTabsLeadingObjectCount(parameters: List<String>): Int? {
+    for (leadingObjects in TIMELINE_TABS_LEADING_OBJECT_COUNTS) {
+        if (hasTimelineTabsParameters(parameters, leadingObjects)) return leadingObjects
     }
-    if (parameters.size != TIMELINE_TABS_COMMON_PARAMETERS.size + 2) return false
-    if (!parameters[0].isObjectDescriptor()) return false
-    if (!parameters[1].isObjectDescriptor()) return false
-    return parameters.drop(2) == TIMELINE_TABS_COMMON_PARAMETERS
+    return null
+}
+
+private fun hasTimelineTabsParameters(
+    parameters: List<String>,
+    leadingObjects: Int,
+): Boolean {
+    if (leadingObjects > parameters.size) return false
+    if ((0 until leadingObjects).any { !parameters[it].isObjectDescriptor() }) return false
+
+    val callbackStart = leadingObjects
+    val flagStart = callbackStart + TIMELINE_TABS_CALLBACK_PREFIX.size
+    val tailStart = parameters.size - TIMELINE_TABS_TAIL.size
+    if (tailStart - flagStart !in TIMELINE_TABS_FLAG_COUNT_RANGE) return false
+    if (parameters.subList(callbackStart, flagStart) != TIMELINE_TABS_CALLBACK_PREFIX) return false
+    if (parameters.subList(flagStart, tailStart).any { it != BOOLEAN_DESCRIPTOR }) return false
+    return parameters.subList(tailStart, parameters.size) == TIMELINE_TABS_TAIL
 }
 
 private fun Instruction.isTimelineTabsComposeCall(): Boolean {
@@ -170,12 +198,14 @@ private fun Instruction.isTimelineTabsComposeCall(): Boolean {
 private fun String.isObjectDescriptor(): Boolean = startsWith('L') && endsWith(';')
 
 private fun List<Match>.requireTimelineTabsRenderers() {
-    val expectedVariantCounts =
-        mapOf(
-            TIMELINE_TABS_COMMON_PARAMETERS.size + 1 to 1,
-            TIMELINE_TABS_COMMON_PARAMETERS.size + 2 to 1,
-        )
-    val actualVariantCounts = groupingBy { it.method.parameterTypes.size }.eachCount()
+    val expectedVariantCounts = TIMELINE_TABS_LEADING_OBJECT_COUNTS.associateWith { 1 }
+    val actualVariantCounts =
+        groupingBy { match ->
+            timelineTabsLeadingObjectCount(match.method.parameterTypes.map(CharSequence::toString))
+                ?: throw PatchException(
+                    "Matched timeline tabs renderer lost its parameter shape: ${match.method}",
+                )
+        }.eachCount()
     val owners = map { it.originalMethod.definingClass }.distinct()
     val pagesDescriptors =
         mapNotNull { it.method.parameterTypes.firstOrNull()?.toString() }.distinct()
