@@ -282,6 +282,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE);
     }
 
+    public static boolean profileCover() {
+        return SharedPref.getBooleanPref(Settings.PROFILE_COVER);
+    }
+
     public static boolean disableStoryFlipping() {
         return SharedPref.getBooleanPref(Settings.DISABLE_STORY_FLIPPING);
     }

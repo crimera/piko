@@ -48,6 +48,7 @@ public class Settings {
     public static final BooleanSetting FOLLOW_BACK_INDICATOR = new BooleanSetting("follow_back_indicator", true);
     public static final BooleanSetting FOLLOW_BACK_COLOR_INDICATOR = new BooleanSetting("follow_back_color_indicator", true);
     public static final BooleanSetting FOLLOW_LIST_NON_FOLLOWER_BADGE = new BooleanSetting("follow_list_non_follower_badge", true);
+    public static final BooleanSetting PROFILE_COVER = new BooleanSetting("profile_cover", true);
     public static final BooleanSetting VIEW_STORY_MENTIONS = new BooleanSetting("view_story_mentions", true);
     public static final BooleanSetting DISABLE_STORY_FLIPPING = new BooleanSetting("disable_story_flipping", false);
     public static final BooleanSetting LOOP_STORY = new BooleanSetting("loop_story", false);
