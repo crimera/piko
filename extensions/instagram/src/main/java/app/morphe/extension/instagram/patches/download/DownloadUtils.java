@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
@@ -357,38 +356,51 @@ public class DownloadUtils {
     }
 
     private static final Object FEED_DOWNLOAD_BUTTON_TAG = new Object();
-    private static final String[] FEED_BUTTON_GROUP_IDS = {
-            "row_feed_view_group_social_ufi_buttons",
-            "row_feed_view_group_buttons",
-    };
-    private static int parentRowFeedButtonSaveId;
+    private static final String MEDIA_CLASS_NAME = "com.instagram.feed.media.Media";
 
-    /** Shared by the patch-time Litho component gate and the runtime view holder hook. */
+    /** Shared by the injected Litho component and the view holder hook. */
     public static boolean isFeedDownloadButtonEnabled() {
         return Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD))
                 && Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON));
     }
 
     // Rewritten at patch time with the field names that walk the feed row state to the live
-    // carousel index (the same field the overflow-menu handler passes). Compile-time constants so
-    // the patch replaces them inside `currentMediaIndex`'s bytecode and one extension build serves
-    // every release.
+    // carousel index. Compile-time constants, so the patch replaces them inside
+    // `currentMediaIndex` and one extension build serves every release.
     static final String FEED_VIEW_STATE_FIELD = "feedViewStateField";
     static final String FEED_CURRENT_MEDIA_FIELD = "feedCurrentMediaField";
 
     /**
-     * Adds a download button immediately beside the save/bookmark button of a feed post row.
-     * Called from the patched feed UFI row binder, so every rebind refreshes the captured media.
+     * Adds a download button beside the save button of a feed post row. Called from the patched
+     * feed UFI row binder, so every rebind refreshes the captured media.
      *
-     * @param mediaState the feed row state (`LX/01Tx`); the click handler reads the live carousel
-     *     index from it, so a swipe after the bind still downloads the item on screen.
+     * @param mediaState the feed row state; read at click time for the live carousel index.
      */
     public static void addFeedDownloadButton(
-            View rootView, Object mediaObject, UserSession userSession, Object mediaState) {
+            View rootView, Object media, UserSession userSession, Object mediaState) {
         try {
-            Object media = extractMedia(mediaObject);
-            attachFeedDownloadButton(
-                    rootView, media == null ? mediaObject : media, userSession, mediaState);
+            if (rootView == null || media == null) return;
+            if (!isFeedDownloadButtonEnabled()) {
+                removeFeedDownloadButton(rootView);
+                return;
+            }
+
+            Context context = rootView.getContext();
+            int saveButtonId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
+            View saveButton = saveButtonId == 0 ? null : rootView.findViewById(saveButtonId);
+            if (saveButton == null || !(saveButton.getParent() instanceof ViewGroup)) return;
+
+            // The save button's parent is the row itself; Litho hosts reject manually added views,
+            // so their button is built into the component at patch time instead.
+            ViewGroup buttonGroup = (ViewGroup) saveButton.getParent();
+            if (buttonGroup.getClass().getName().startsWith("com.facebook.litho.")) return;
+
+            ImageView button = buttonGroup.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
+            if (button == null) {
+                button = createFeedDownloadButton(context, saveButton, buttonGroup);
+            }
+            button.setOnClickListener(
+                    v -> downloadPost(context, userSession, media, currentMediaIndex(mediaState)));
         } catch (Exception e) {
             Logger.printException(() -> "addFeedDownloadButton failure", e);
         }
@@ -396,8 +408,7 @@ public class DownloadUtils {
 
     /**
      * Resolves the live carousel index at click time, walking the row state to the view state the
-     * carousel mutates (the overflow-menu handler reads the same field). The two field names are
-     * patch-injected placeholders, so the index follows a swipe instead of freezing at bind time.
+     * carousel mutates, so the download follows a swipe instead of freezing the index at bind time.
      */
     static int currentMediaIndex(Object mediaState) {
         if (mediaState == null) return 0;
@@ -412,154 +423,28 @@ public class DownloadUtils {
         return 0;
     }
 
-    /**
-     * @return true once the row's save button (and therefore the download button decision) was
-     * resolved, including when the toggle is off; false while the row is still mounting.
-     */
-    private static boolean attachFeedDownloadButton(
-            View rootView,
-            Object mediaObject,
-            UserSession userSession,
-            Object mediaState) {
+    /** Unwraps a feed row state to the single `Media` it holds; anything else is returned as is. */
+    static Object extractMedia(Object source) {
+        if (source == null || MEDIA_CLASS_NAME.equals(source.getClass().getName())) return source;
         try {
-            if (rootView == null || mediaObject == null) return false;
-            Context context = rootView.getContext();
-            // The patch is opt-in, so read the download toggles directly instead of the
-            // settings-status-gated Pref helper.
-            if (!isFeedDownloadButtonEnabled()) {
-                removeFeedDownloadButton(rootView);
-                return true;
-            }
-
-            int saveButtonId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
-            if (saveButtonId == 0) return false;
-
-            View saveButton = findSaveButton(rootView, saveButtonId);
-            if (saveButton == null) return false;
-
-            ViewGroup buttonGroup = resolveFeedButtonGroup(rootView, saveButton);
-            if (buttonGroup == null) return false;
-
-            ImageView button = buttonGroup.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
-            if (button == null) {
-                button = createFeedDownloadButton(context, saveButton, buttonGroup);
-            }
-            if (button == null) return false;
-
-            button.setOnClickListener(
-                    v -> downloadPost(context, userSession, mediaObject, currentMediaIndex(mediaState)));
-            return true;
-        } catch (Exception e) {
-            Logger.printException(() -> "addFeedDownloadButton failure", e);
-            return true;
-        }
-    }
-
-    static Object extractMedia(Object mediaObject) {
-        if (mediaObject == null) return null;
-        if ("com.instagram.feed.media.Media".equals(mediaObject.getClass().getName())) return mediaObject;
-        try {
-            for (Method method : mediaObject.getClass().getDeclaredMethods()) {
-                if (method.getParameterCount() != 0) continue;
-                if (!"com.instagram.feed.media.Media".equals(method.getReturnType().getName())) continue;
-                method.setAccessible(true);
-                Object result = method.invoke(mediaObject);
-                if (result != null) return result;
-            }
-        } catch (Exception ignored) {
-        }
-        try {
-            Object found = null;
-            for (Field field : mediaObject.getClass().getDeclaredFields()) {
-                if (!"com.instagram.feed.media.Media".equals(field.getType().getName())) continue;
+            for (Field field : source.getClass().getDeclaredFields()) {
+                if (!MEDIA_CLASS_NAME.equals(field.getType().getName())) continue;
                 field.setAccessible(true);
-                Object value = field.get(mediaObject);
-                if (value == null) continue;
-                if (found != null) return mediaObject;
-                found = value;
+                Object media = field.get(source);
+                if (media != null) return media;
             }
-            if (found != null) return found;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not extract the media from the feed row state", e);
         }
-        return mediaObject;
-    }
-
-    /**
-     * Finds the row's save button. Contextual (Litho) rows mount the UFI component as a child of
-     * the row container while the bind callback receives a leaf component view (media, header,
-     * footer) as its root. Search the root's subtree first, then walk up a bounded number of
-     * ancestors and take the first ancestor that contains exactly one save button; an ancestor
-     * with several belongs to the list, not to one row. When the UFI component subtree is known
-     * from the Litho props, ids are re-verified against the APK's resource ids, because cached
-     * ids from a different resource package silently miss.
-     */
-    private static View findSaveButton(View rootView, int saveButtonId) {
-        int verifiedSaveButtonId = verifyViewId(rootView.getContext(), saveButtonId);
-        return findDescendantBySaveId(rootView, verifiedSaveButtonId, saveButtonId);
-    }
-
-    private static View findDescendantBySaveId(View rootView, int verifiedSaveButtonId, int saveButtonId) {
-        if (verifiedSaveButtonId != 0) {
-            try {
-                View found = rootView.findViewById(verifiedSaveButtonId);
-                if (found != null) return found;
-            } catch (Exception ignored) {
-            }
-        }
-        if (saveButtonId != 0 && saveButtonId != verifiedSaveButtonId) {
-            try {
-                return rootView.findViewById(saveButtonId);
-            } catch (Exception ignored) {
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Re-reads `row_feed_button_save` against the current resources. Instagram's release id
-     * mapping cannot be assumed stable across installs, so a stale cached id is refreshed
-     * instead of silently returning a missing save button.
-     */
-    private static int verifyViewId(Context context, int saveButtonId) {
-        try {
-            parentRowFeedButtonSaveId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
-            return parentRowFeedButtonSaveId;
-        } catch (Exception ignored) {
-            return saveButtonId;
-        }
+        return source;
     }
 
     /** Drops the button on rebind so turning the toggle off takes effect without recreating the row. */
     private static void removeFeedDownloadButton(View rootView) {
         View existing = rootView.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
-        if (!(existing instanceof ImageView)) return;
+        if (existing == null) return;
         ViewParent parent = existing.getParent();
         if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(existing);
-    }
-
-    /**
-     * Resolves the horizontal button row that hosts the save button. The save button's parent is the
-     * only correct insert target: `row_feed_view_group_buttons` is an outer frame around the whole
-     * UFI area on current releases, while `row_feed_view_group_social_ufi_buttons` is the row itself.
-     * Litho component hosts reject manual child views; their download button is injected into the
-     * component builder at patch time instead. The id lookups remain as a fallback for layouts
-     * where the parent is not a plain ViewGroup.
-     */
-    private static ViewGroup resolveFeedButtonGroup(View rootView, View saveButton) {
-        ViewParent parent = saveButton.getParent();
-        if (parent instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) parent;
-            if (group.getClass().getName().startsWith("com.facebook.litho.")) return null;
-            return group;
-        }
-
-        for (String idName : FEED_BUTTON_GROUP_IDS) {
-            int buttonGroupId = ResourceUtils.getIdentifier(rootView.getContext(), ResourceType.ID, idName);
-            if (buttonGroupId == 0) continue;
-            View candidate = rootView.findViewById(buttonGroupId);
-            if (candidate instanceof ViewGroup) return (ViewGroup) candidate;
-        }
-        return null;
     }
 
     private static ImageView createFeedDownloadButton(Context context, View saveButton, ViewGroup buttonGroup) {
@@ -572,10 +457,7 @@ public class DownloadUtils {
                 saveButton.getPaddingTop(),
                 saveButton.getPaddingRight(),
                 saveButton.getPaddingBottom());
-
-        int insertIndex = buttonGroup.indexOfChild(saveButton);
-        if (insertIndex < 0) insertIndex = buttonGroup.getChildCount();
-        buttonGroup.addView(button, insertIndex, cloneLayoutParams(saveButton));
+        buttonGroup.addView(button, buttonGroup.indexOfChild(saveButton), cloneLayoutParams(saveButton));
         return button;
     }
 
@@ -596,7 +478,7 @@ public class DownloadUtils {
     }
 
     /**
-     * Resolves the icon and its tint against the row context. The global application context
+     * Resolves the icon and its tint against the row context; the global application context
      * cannot resolve activity scoped theme attributes such as `igds_color_primary_icon`.
      */
     private static void applyFeedDownloadIcon(ImageView button, Context context) {
@@ -604,15 +486,12 @@ public class DownloadUtils {
         if (drawableId == 0) return;
         button.setImageDrawable(context.getDrawable(drawableId));
 
-        try {
-            TypedValue typedValue = new TypedValue();
-            int attrId = ResourceUtils.getAttrIdentifier("igds_color_primary_icon");
-            if (attrId != 0
-                    && context.getTheme().resolveAttribute(attrId, typedValue, true)
-                    && typedValue.resourceId != 0) {
-                button.setColorFilter(context.getColor(typedValue.resourceId));
-            }
-        } catch (Exception ignored) {
+        int attrId = ResourceUtils.getAttrIdentifier("igds_color_primary_icon");
+        TypedValue typedValue = new TypedValue();
+        if (attrId != 0
+                && context.getTheme().resolveAttribute(attrId, typedValue, true)
+                && typedValue.resourceId != 0) {
+            button.setColorFilter(context.getColor(typedValue.resourceId));
         }
     }
 

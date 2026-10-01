@@ -14,21 +14,16 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
 /**
- * Litho `onClick` handler for the feed download button injected into the UFI component at patch
- * time. Instagram wraps the `ON_CLICK` prop as a Kotlin {@link Function1}
- * (`LX/01kJ;->A0N`), so the injected component installs this implementation.
+ * Click handler of the feed download button the patch builds into the Litho UFI component.
+ * Instagram wraps the `ON_CLICK` prop as a Kotlin {@link Function1}, so the injected component
+ * installs this implementation.
  *
- * <p>{@code mediaSource} is the row state (`LX/01Tx`), not a `Media`: at the component builder
- * every low register is live, and the state's single `Media` field can only be read there with a
- * 4-bit `iget`. The handler unwraps it at click time instead.
+ * <p>{@code mediaSource} is the feed row state rather than a `Media`: the builder only has a
+ * 4-bit `iget` there, so the handler unwraps it at click time. The same state also yields the live
+ * carousel index, so the download follows a swipe.
  *
- * <p>The row state also reaches the live view state the carousel mutates. The click handler reads
- * the current carousel index from it on every click, so the download follows a swipe instead of
- * saving the first item; the field names are injected into `DownloadUtils.currentMediaIndex` at
- * patch time.
- *
- * <p>{@code context} is the component's activity-scoped context. The shared application context
- * cannot host the download dialog (`WindowManager$BadTokenException`).
+ * <p>{@code context} must be the component's activity-scoped context; the application context
+ * cannot host the download dialog.
  */
 public final class FeedDownloadClickFunction implements Function1<Object, Object> {
     private final Context context;
@@ -43,11 +38,10 @@ public final class FeedDownloadClickFunction implements Function1<Object, Object
 
     @Override
     public Object invoke(Object clickEvent) {
-        Object media = DownloadUtils.extractMedia(mediaSource);
         DownloadUtils.downloadPost(
                 context,
                 userSession,
-                media == null ? mediaSource : media,
+                DownloadUtils.extractMedia(mediaSource),
                 DownloadUtils.currentMediaIndex(mediaSource));
         return Unit.INSTANCE;
     }
