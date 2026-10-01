@@ -79,6 +79,8 @@ private const val INLINE_LIKE_ANIMATION_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->inlineLikeAnimation(Z)Z"
 private const val XDS_CHROME_BACKGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J"
+private const val XDS_FOREGROUND_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsForeground(IZJ)J"
 private const val PALETTE_IS_ENABLED_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z"
 private const val PALETTE_USE_MATERIAL_BACKGROUND_METHOD =
@@ -259,7 +261,8 @@ val dynamicColorPatch =
             patchDynamicAccentPalettes()
             patchInlineActionTints()
             patchTabTints(paletteDescriptor)
-            patchXdsChromeBackground()
+            val xdsSchemeConstructor = patchXdsChromeBackground()
+            patchXdsForegroundColors(xdsSchemeConstructor)
         }
     }
 
@@ -1165,7 +1168,7 @@ private fun patchTabTints(horizon: String) {
 }
 
 context(context: BytecodePatchContext)
-private fun patchXdsChromeBackground() {
+private fun patchXdsChromeBackground(): MutableMethod {
     val backgroundFields = buildList<FieldReference> {
         context.classDefForEach { classDef ->
             for (method in classDef.methods) {
@@ -1279,6 +1282,146 @@ private fun patchXdsChromeBackground() {
         )
         moveResult(darkConstruction.colorRegister, "J")
     }
+    return constructor
+}
+
+/** [role] mirrors `DynamicColorPalette.XDS_FOREGROUND_*`. */
+private enum class XdsForegroundRole(val propertyName: String, val role: Int) {
+    PRIMARY("foregroundPrimary", 0),
+    SECONDARY("foregroundSecondary", 1),
+    TERTIARY("foregroundTertiary", 2),
+}
+
+private data class XdsSchemeFields(
+    val foreground: Map<XdsForegroundRole, FieldReference>,
+    val isLight: FieldReference,
+)
+
+private val XDS_PROPERTY_NAME = Regex("([A-Za-z0-9]+)=$")
+
+/**
+ * Themes the XDS text roles at the end of the scheme constructor, which both the light and dark
+ * schemes run through. Fields are matched by the property names `toString` prints, not by R8
+ * names: the n-th color read there is the n-th property name.
+ */
+context(context: BytecodePatchContext)
+private fun patchXdsForegroundColors(constructor: MutableMethod) {
+    val schemeDescriptor = constructor.definingClass
+    val schemeToString =
+        requireExactlyOne(
+            "NewX XDS scheme toString",
+            context.mutableClassDefBy(schemeDescriptor).methods.filter { method ->
+                method.name == "toString" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.returnType == "Ljava/lang/String;"
+            },
+        )
+    val fields = schemeToString.resolveXdsSchemeFields(schemeDescriptor)
+
+    val constructorInstructions = constructor.instructions.toList()
+    val storedFields =
+        constructorInstructions.mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.IPUT_WIDE && instruction.opcode != Opcode.IPUT_BOOLEAN) {
+                return@mapNotNull null
+            }
+            instruction.getReference<FieldReference>()?.toString()
+        }
+    (fields.foreground.values + fields.isLight).forEach { field ->
+        if (storedFields.count { stored -> stored == field.toString() } != 1) {
+            throw PatchException(
+                "NewX XDS scheme field $field is not assigned exactly once in $constructor",
+            )
+        }
+    }
+    val returnIndex =
+        requireExactlyOne(
+            "NewX XDS scheme constructor return",
+            constructorInstructions.withIndex().filter { (_, instruction) ->
+                instruction.opcode == Opcode.RETURN_VOID
+            },
+        ).index
+    // Field accesses need a 4-bit instance register, so the receiver is copied out of its
+    // parameter slot; that is only sound while the constructor never rewrites the slot.
+    val selfRegister = constructor.p0Register
+    if (constructorInstructions.any { instruction -> instruction.writesRegister(selfRegister) }) {
+        throw PatchException("NewX XDS scheme constructor rewrites its receiver: $constructor")
+    }
+
+    constructor.insertHook(
+        index = returnIndex,
+        relocateBranchTargets = true,
+    ) {
+        val self = scratchRegister(RegisterLimit.FOUR_BIT)
+        val isLight = scratchRegister(RegisterLimit.FOUR_BIT)
+        val role = scratchRegister(RegisterLimit.FOUR_BIT)
+        val color = scratchRegister(RegisterLimit.FOUR_BIT)
+        val colorHigh = scratchRegister(RegisterLimit.FOUR_BIT)
+        if (colorHigh != color + 1) {
+            throw PatchException("NewX XDS foreground scratch registers are not a pair: $constructor")
+        }
+        move(self, selfRegister, "Ljava/lang/Object;")
+        iget(isLight, self, fields.isLight)
+        fields.foreground.forEach { (xdsRole, field) ->
+            iget(color, self, field)
+            constInt(role, xdsRole.role)
+            invokeStatic(methodReference(XDS_FOREGROUND_METHOD), role, isLight, color, colorHigh)
+            moveResult(color, "J")
+            iput(color, self, field)
+        }
+    }
+}
+
+private fun MutableMethod.resolveXdsSchemeFields(schemeDescriptor: String): XdsSchemeFields {
+    val methodInstructions = instructions.toList()
+    val colorFields =
+        methodInstructions.mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.IGET_WIDE) return@mapNotNull null
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.definingClass == schemeDescriptor && field.type == "J"
+            }
+        }
+    val lightFields =
+        methodInstructions.mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.IGET_BOOLEAN) return@mapNotNull null
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.definingClass == schemeDescriptor
+            }
+        }.distinctBy(FieldReference::toString)
+    val isLight = requireExactlyOne("NewX XDS scheme isLight field", lightFields)
+    val propertyNames =
+        methodInstructions.mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.CONST_STRING &&
+                instruction.opcode != Opcode.CONST_STRING_JUMBO
+            ) {
+                return@mapNotNull null
+            }
+            instruction.getReference<StringReference>()?.string
+                ?.let { text -> XDS_PROPERTY_NAME.find(text)?.groupValues?.get(1) }
+        }.filter { name -> name != "isLight" }
+    if (colorFields.distinctBy(FieldReference::toString).size != colorFields.size ||
+        propertyNames.distinct().size != propertyNames.size ||
+        propertyNames.size != colorFields.size
+    ) {
+        throw PatchException(
+            "NewX XDS scheme toString does not pair ${propertyNames.size} property names with " +
+                "${colorFields.size} color fields: $this",
+        )
+    }
+
+    val foreground =
+        XdsForegroundRole.values().associateWith { role ->
+            val index = propertyNames.indexOf(role.propertyName)
+            if (index < 0) {
+                throw PatchException("NewX XDS scheme property ${role.propertyName} not found: $this")
+            }
+            index
+        }
+    // The text roles are declared back to back; anything else means the pairing above is off.
+    val indices = XdsForegroundRole.values().map(foreground::getValue)
+    if (indices.zipWithNext().any { (first, second) -> second != first + 1 }) {
+        throw PatchException("NewX XDS foreground roles are not adjacent: $indices in $this")
+    }
+    return XdsSchemeFields(foreground.mapValues { (_, index) -> colorFields[index] }, isLight)
 }
 
 private data class XdsDarkConstruction(
@@ -1450,14 +1593,23 @@ private fun Method.assignsFirstColorParameter(field: FieldReference): Boolean {
         move.registerB == firstParameterRegister
 }
 
-private fun Instruction.writesWideRegisterPair(register: Int): Boolean {
-    if (!opcode.setsRegister()) return false
-    val destination = when (this) {
+private fun Instruction.destinationRegister(): Int? =
+    when (this) {
         is OneRegisterInstruction -> registerA
         is TwoRegisterInstruction -> registerA
         is ThreeRegisterInstruction -> registerA
-        else -> return false
+        else -> null
     }
+
+private fun Instruction.writesRegister(register: Int): Boolean {
+    if (!opcode.setsRegister()) return false
+    val destination = destinationRegister() ?: return false
+    return destination == register || (opcode.setsWideRegister() && destination + 1 == register)
+}
+
+private fun Instruction.writesWideRegisterPair(register: Int): Boolean {
+    if (!opcode.setsRegister()) return false
+    val destination = destinationRegister() ?: return false
     val destinationRegisters =
         if (opcode.setsWideRegister()) listOf(destination, destination + 1) else listOf(destination)
     return destinationRegisters.any { writtenRegister -> writtenRegister in register..register + 1 }

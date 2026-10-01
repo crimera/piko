@@ -27,6 +27,10 @@ public final class DynamicColorPalette {
     public static final int APP_BACKGROUND = 15;
     public static final int BORDER = 16;
 
+    public static final int XDS_FOREGROUND_PRIMARY = 0;
+    public static final int XDS_FOREGROUND_SECONDARY = 1;
+    public static final int XDS_FOREGROUND_TERTIARY = 2;
+
     private static final String DYNAMIC_LIKE_SETTING = "newx.theme.dynamic_like";
     private static final String THEME_SETTING = "newx.theme.dark_style";
     private static final String THEME_DEFAULT = "default";
@@ -203,6 +207,22 @@ public final class DynamicColorPalette {
             case HIGHLIGHT_BACKGROUND -> pack(CONTRAST_DARK_ELEVATED_BACKGROUND);
             case GLASS_BACKGROUND -> pack(CONTRAST_DARK_GLASS_BACKGROUND);
             default -> paletteColor(token, true);
+        };
+    }
+
+    /**
+     * XDS components such as nested quote bodies read text colors straight from the XDS scheme,
+     * bypassing the Horizon palette. The scheme builds once per variant, so light/dark comes
+     * from the scheme, not the current system theme.
+     */
+    public static long xdsForeground(int role, boolean isLight, long originalColor) {
+        if (!isEnabled()) return originalColor;
+        return switch (role) {
+            case XDS_FOREGROUND_PRIMARY ->
+                    dynamicColor(!isLight, LIGHT_ON_SURFACE, DARK_ON_SURFACE);
+            case XDS_FOREGROUND_SECONDARY, XDS_FOREGROUND_TERTIARY ->
+                    dynamicColor(!isLight, LIGHT_ON_SURFACE_VARIANT, DARK_ON_SURFACE_VARIANT);
+            default -> throw new IllegalArgumentException("Unknown NewX XDS foreground role: " + role);
         };
     }
 
