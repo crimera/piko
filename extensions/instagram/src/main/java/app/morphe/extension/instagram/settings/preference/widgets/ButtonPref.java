@@ -225,7 +225,7 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_SHARE_TO_REEL;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_INSTANTS)){
-            return UI.DRAWABLE_EYE_ICON;
+            return UI.DRAWABLE_INSTANTS_ICON;
         }
         return null;
     }

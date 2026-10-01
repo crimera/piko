@@ -1140,7 +1140,7 @@ public class ScreenBuilder {
 
         if (SettingsStatus.instantsDownload){
             addPreference(
-                    helper.buttonPreference(
+                    helper.categoryPreference(
                             str("piko_instants_title"),
                             "",
                             Constants.PIKO_FRAGMENT_INSTANTS
