@@ -130,6 +130,22 @@ val dynamicColorPatch =
             }
 
             val dark = "@color/m3_sys_color_dynamic_dark_"
+
+            // Dim's translucent cell background is its cell background at 75% alpha (#bf15202b).
+            // Resource references can't carry alpha, so wrap the dynamic color in a color state
+            // list that applies the same alpha.
+            val translucentDimBackground = "piko_dynamic_dark_surface_container_translucent"
+            val colorV31Directory = get("res/color-v31")
+            if (!colorV31Directory.isDirectory) Files.createDirectories(colorV31Directory.toPath())
+            FileWriter(colorV31Directory.resolve("$translucentDimBackground.xml")).use {
+                it.write(
+                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                        "<selector xmlns:android=\"http://schemas.android.com/apk/res/android\">" +
+                        "<item android:color=\"${dark}surface_container\" android:alpha=\"0.75\"/>" +
+                        "</selector>",
+                )
+            }
+
             val sharedDarkPalette =
                 mapOf(
                     "abstractColorDeepGray" to "${dark}on_surface_variant",
@@ -152,7 +168,7 @@ val dynamicColorPatch =
                         sharedDarkPalette +
                             mapOf(
                                 "abstractColorCellBackground" to "${dark}surface_container",
-                                "abstractColorCellBackgroundTranslucent" to "${dark}surface_container_low",
+                                "abstractColorCellBackgroundTranslucent" to "@color/$translucentDimBackground",
                                 "abstractColorFadedGray" to "${dark}surface",
                                 "abstractColorFaintGray" to "${dark}surface_container_high",
                                 "abstractColorHighlightBackground" to "${dark}surface_container_low",
