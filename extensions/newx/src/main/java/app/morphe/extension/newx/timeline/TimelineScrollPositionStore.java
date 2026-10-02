@@ -21,6 +21,7 @@ public final class TimelineScrollPositionStore {
     private static final String INDEX_SUFFIX = ".index";
     private static final String OFFSET_SUFFIX = ".offset";
     private static final String PROFILE_KEY_PREFIX = "profile.";
+    private static final String TIMELINE_KEY_PREFIX = "timeline.";
     private static final Object SAVE_LOCK = new Object();
     private static volatile SharedPreferences cachedPreferences;
     private static SharedPreferences lastSavedPreferences;
@@ -287,17 +288,27 @@ public final class TimelineScrollPositionStore {
      * Returns whether X's process-local position map should be trusted for this timeline type.
      *
      * <p>X keys the map by timeline type only, so per-profile timelines must use the persistent
-     * store instead. Every other type must keep its native holder: deleting it breaks in-session
-     * back navigation (for example CONVERSATION threads) because the persistent store has no
-     * entry to replace it with, and X then rebuilds the list at index 0.
+     * store instead. The same holds for per-id timelines (lists, topics, communities) while their
+     * persistent restore is enabled: two pinned lists would otherwise share one LIST_POSTS slot.
+     * Every other type must keep its native holder: deleting it breaks in-session back navigation
+     * (for example CONVERSATION threads) because the persistent store has no entry to replace it
+     * with, and X then rebuilds the list at index 0.
      */
     public static boolean useInMemoryPosition(Enum<?> timeline) {
         String timelineName = timeline == null ? null : timeline.name();
-        boolean useInMemory = timelineName != null && !timelineName.startsWith("USER_PROFILE_");
+        // Only per-id types depend on the toggle, so other timelines skip the settings read.
+        boolean restoreTimelinePosition = timelineName != null && isPerIdTimeline(timelineName)
+                && SettingsRegistry.getBooleanOrDefault(RESTORE_TIMELINE_POSITION_SETTING, true);
+        boolean useInMemory = useInMemoryPosition(timelineName, restoreTimelinePosition);
         if (NewXLogger.isLoggingEnabled()) {
             NewXLogger.logger("NewX in-memory timeline=" + timelineName + " useInMemory=" + useInMemory);
         }
         return useInMemory;
+    }
+
+    static boolean useInMemoryPosition(@Nullable String timelineName, boolean restoreTimelinePosition) {
+        if (timelineName == null || timelineName.startsWith("USER_PROFILE_")) return false;
+        return !(restoreTimelinePosition && isPerIdTimeline(timelineName));
     }
 
     static String storageKey(
@@ -310,6 +321,15 @@ public final class TimelineScrollPositionStore {
         if (isHomeTimeline(timelineName)) {
             return restoreTimelinePosition ? timelineName : null;
         }
+        if (isPerIdTimeline(timelineName)) {
+            // X builds these identities as the type name plus the list/topic/community id, so a
+            // bare type name means no id was available and every timeline of the type would
+            // collide on one key.
+            if (!restoreTimelinePosition || profileId == null) return null;
+            String identity = profileId.trim();
+            if (identity.isEmpty() || identity.equals(timelineName)) return null;
+            return TIMELINE_KEY_PREFIX + identity;
+        }
         if (!restoreProfilePosition || !timelineName.startsWith("USER_PROFILE_")) return null;
         if (profileId == null) return null;
         String trimmedProfileId = profileId.trim();
@@ -320,6 +340,12 @@ public final class TimelineScrollPositionStore {
     private static boolean isHomeTimeline(String timelineName) {
         return "FOR_YOU".equals(timelineName) || "FOLLOWING".equals(timelineName)
                 || "RANKED_FOLLOWING".equals(timelineName);
+    }
+
+    /** Timelines that can be pinned as home tabs, each keyed by its own list/topic/community id. */
+    private static boolean isPerIdTimeline(String timelineName) {
+        return "LIST_POSTS".equals(timelineName) || "TOPIC".equals(timelineName)
+                || "COMMUNITY_DETAIL_POSTS".equals(timelineName);
     }
 
     @Nullable

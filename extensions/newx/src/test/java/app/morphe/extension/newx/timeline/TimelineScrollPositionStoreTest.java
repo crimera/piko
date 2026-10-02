@@ -43,6 +43,30 @@ public final class TimelineScrollPositionStoreTest {
         // Conversation threads have no persistent key, so the native holder must survive.
         assertTrue(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.CONVERSATION));
         assertFalse(TimelineScrollPositionStore.useInMemoryPosition(TimelineType.USER_PROFILE_POSTS_ONLY));
+        // X shares one in-memory slot across all lists, so restored lists must bypass it; with
+        // restore off the native holder is the only in-session position and must survive.
+        assertFalse(TimelineScrollPositionStore.useInMemoryPosition("LIST_POSTS", true));
+        assertTrue(TimelineScrollPositionStore.useInMemoryPosition("LIST_POSTS", false));
+    }
+
+    @Test
+    public void perIdTimelineKeysRequireTheTimelineToggleAndAnId() {
+        assertEquals(
+                "timeline.LIST_POSTS123",
+                TimelineScrollPositionStore.storageKey("LIST_POSTS", " LIST_POSTS123 ", true, false)
+        );
+        assertEquals(
+                "timeline.TOPIC456",
+                TimelineScrollPositionStore.storageKey("TOPIC", "TOPIC456", true, false)
+        );
+        assertNull(
+                TimelineScrollPositionStore.storageKey("LIST_POSTS", "LIST_POSTS123", false, true)
+        );
+        // A bare type name carries no id and would make every list share one position.
+        assertNull(
+                TimelineScrollPositionStore.storageKey("LIST_POSTS", "LIST_POSTS", true, false)
+        );
+        assertNull(TimelineScrollPositionStore.storageKey("LIST_POSTS", null, true, false));
     }
 
     @Test
