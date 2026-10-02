@@ -62,7 +62,7 @@ public class ViewStoryMentionsPatch {
         }
     }
 
-    // The patch injects calls to the native methods resolved from the target APK.
+    // The patch injects calls to the native methods resolved from the target apk.
     private static void setPrimaryText(IgdsPeopleCell cell, CharSequence text, boolean verified) {}
 
     private static void setSupportingText(IgdsPeopleCell cell, CharSequence text) {}
