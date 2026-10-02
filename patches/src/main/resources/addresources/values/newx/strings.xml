@@ -26,6 +26,8 @@
     <string name="piko_newx_restore_timeline_position_summary">Returns to saved For You, Following, list, topic and community positions after the app restarts</string>
     <string name="piko_newx_restore_profile_position_title">Restore profile scroll position</string>
     <string name="piko_newx_restore_profile_position_summary">Restores each profile tab to its own saved position, keyed by profile</string>
+    <string name="piko_newx_restore_pinned_tab_title">Reopen last pinned tab</string>
+    <string name="piko_newx_restore_pinned_tab_summary">Starts on the pinned list, topic or community tab you last viewed instead of the default home tab</string>
     <string name="piko_newx_hide_spaces_bar_title">Hide Spaces bar</string>
     <string name="piko_newx_hide_spaces_bar_summary">Hides the Spaces bar above NewX timelines</string>
     <string name="piko_newx_hide_new_post_pill_title">Hide new posts pill</string>
