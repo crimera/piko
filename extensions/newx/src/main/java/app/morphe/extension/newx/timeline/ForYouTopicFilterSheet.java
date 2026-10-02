@@ -121,8 +121,8 @@ final class ForYouTopicFilterSheet {
     private static void updateActionButton(ButtonView button, int selectedCount) {
         if (selectedCount > 0) {
             button.setText(selectedCount == 1
-                    ? "Snooze 1 topic"
-                    : "Snooze " + selectedCount + " topics");
+                    ? "Show only 1 topic"
+                    : "Show only " + selectedCount + " topics");
             button.setButtonStyle(ButtonView.ButtonStyle.FILLED);
         } else {
             button.setText("Reset");
