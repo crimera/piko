@@ -89,7 +89,7 @@ internal val newXSettingsPatch =
                                 "layout: ${originalMethod.parameterTypes}",
                         )
                 val iconType = originalMethod.parameterTypes[layout.iconParameterIndex].toString()
-                val settingsIconField = resolveSettingsIconField(iconType)
+                val pikoSettingsIcon = pikoSettingsIconGetter(iconType)
                 val rendererDescriptor =
                     "${originalMethod.definingClass}->${originalMethod.name}(" +
                         originalMethod.parameterTypes.joinToString("") +
@@ -127,7 +127,8 @@ internal val newXSettingsPatch =
                     invokeStatic(methodReference(GET_SETTINGS_TITLE_DESCRIPTOR))
                     moveResult(titleParameter, STRING_DESCRIPTOR)
                     constInt(summaryParameter, 0)
-                    sget(iconParameter, settingsIconField)
+                    invokeStatic(pikoSettingsIcon)
+                    moveResult(iconParameter, iconType)
                     invokeStatic(methodReference(GET_SETTINGS_CLICK_HANDLER_DESCRIPTOR))
                     moveResult(clickParameter, FUNCTION0_DESCRIPTOR)
                     invokeStatic(

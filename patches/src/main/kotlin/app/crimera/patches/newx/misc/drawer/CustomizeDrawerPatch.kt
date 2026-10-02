@@ -11,6 +11,7 @@ import app.crimera.patches.newx.settings.injectRead
 import app.crimera.patches.newx.settings.newXCustomScreen
 import app.crimera.patches.newx.settings.newXSettingsPatch
 import app.crimera.patches.newx.settings.newXToggle
+import app.crimera.patches.newx.settings.pikoSettingsIconGetter
 import app.crimera.patches.newx.settings.resolveSettingsIconField
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXMultiChoice
@@ -31,6 +32,7 @@ import app.crimera.patches.newx.utils.Constants.DRAWER_CATALOG_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_EDITOR_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.DRAWER_TAB_OPENER_DESCRIPTOR
+import app.crimera.patches.newx.utils.Constants.PIKO_SETTINGS_ICON_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
 import app.crimera.patches.newx.utils.hasComposeShape
@@ -567,6 +569,8 @@ private fun resourceDrawerOptionId(resourceId: Int): String =
 
 // Catalog ids for the editor shortcuts. Mirrors DrawerEditorFragment.SHORTCUTS.
 private const val DRAWER_SHORTCUT_PIKO = "DRAWER_SHORTCUT_PIKO"
+private const val PIKO_SETTINGS_ICON_DRAWABLE_ID_DESCRIPTOR =
+    "$PIKO_SETTINGS_ICON_DESCRIPTOR->getDrawableId()I"
 private const val DRAWER_REGISTER_ITEM_DESCRIPTOR =
     "$DRAWER_CATALOG_DESCRIPTOR->registerItem(Ljava/lang/String;I)V"
 private const val SETTINGS_REGISTER_CHOICE_OPTION_RESOURCE_DESCRIPTOR =
@@ -615,11 +619,9 @@ context(context: BytecodePatchContext)
 private fun injectDrawerCatalog(
     nativeEntries: List<DrawerCatalogEntry>,
     shortcutIcons: Map<String, FieldReference>,
-    settingsIconField: FieldReference,
 ) {
     val iconFields =
-        (nativeEntries.mapNotNull { it.iconField } +
-            shortcutIcons.values + settingsIconField)
+        (nativeEntries.mapNotNull { it.iconField } + shortcutIcons.values)
             .distinctBy(FieldReference::toString)
     val drawables = resolveIconDrawables(iconFields)
     SettingsRegistrationState.inject(context) {
@@ -630,10 +632,11 @@ private fun injectDrawerCatalog(
         shortcutIcons.forEach { (optionId, iconField) ->
             emitDrawerCatalogEntry(optionId, drawables.getValue(iconField.toString()))
         }
-        emitDrawerCatalogEntry(
-            DRAWER_SHORTCUT_PIKO,
-            drawables.getValue(settingsIconField.toString()),
-        )
+        // The Piko drawable is added by the patch, so its id only exists at runtime.
+        constString(0, DRAWER_SHORTCUT_PIKO)
+        invokeStatic(methodReference(PIKO_SETTINGS_ICON_DRAWABLE_ID_DESCRIPTOR))
+        moveResult(1, "I")
+        invokeStatic(methodReference(DRAWER_REGISTER_ITEM_DESCRIPTOR), 0, 1)
         listOf("GROK", "THEME_TOGGLE").forEach { optionId ->
             emitDrawerCatalogEntry(optionId, 0)
         }
@@ -840,16 +843,17 @@ private fun resolveDrawerFooterTarget(
 private fun MethodReference.toSmaliDescriptor(): String =
     "${definingClass}->${name}(${parameterTypes.joinToString("")})${returnType}"
 
+context(_: BytecodePatchContext)
 private fun MutableMethod.injectPikoSettingsDrawerItem(
     target: DrawerFooterTarget,
     renderer: MethodReference,
-    settingsIconField: FieldReference,
+    settingsIconType: String,
     showPikoSettingsInDrawer: ToggleSettingDefinition,
 ) {
     injectAdditionalDrawerRow(
         target = target,
         renderer = renderer,
-        iconField = settingsIconField,
+        icon = DrawerRowIcon.Accessor(pikoSettingsIconGetter(settingsIconType)),
         toggle = showPikoSettingsInDrawer,
         titleDescriptor = "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsTitle()Ljava/lang/String;",
         clickDescriptor = "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()$FUNCTION0_DESCRIPTOR",
@@ -864,7 +868,7 @@ private fun MutableMethod.injectPikoSettingsDrawerItem(
 private fun MutableMethod.injectAdditionalDrawerRow(
     target: DrawerFooterTarget,
     renderer: MethodReference,
-    iconField: FieldReference,
+    icon: DrawerRowIcon,
     toggle: ToggleSettingDefinition?,
     titleDescriptor: String,
     clickDescriptor: String,
@@ -875,12 +879,25 @@ private fun MutableMethod.injectAdditionalDrawerRow(
         startRegister = target.call.startRegister,
         registerCount = target.call.registerCount,
         renderer = renderer,
-        iconField = iconField,
+        icon = icon,
         toggle = toggle,
         titleDescriptor = titleDescriptor,
         clickDescriptor = clickDescriptor,
         registerConstraint = registerConstraint,
     )
+}
+
+/** Where an injected drawer row reads its icon: an app icon field or a static icon accessor. */
+private sealed interface DrawerRowIcon {
+    val type: String
+
+    data class Field(val reference: FieldReference) : DrawerRowIcon {
+        override val type: String get() = reference.type.toString()
+    }
+
+    data class Accessor(val getter: MethodReference) : DrawerRowIcon {
+        override val type: String get() = getter.returnType.toString()
+    }
 }
 
 /**
@@ -894,7 +911,7 @@ private fun MutableMethod.injectSnapshotDrawerRow(
     startRegister: Int,
     registerCount: Int,
     renderer: MethodReference,
-    iconField: FieldReference,
+    icon: DrawerRowIcon,
     toggle: ToggleSettingDefinition?,
     titleDescriptor: String,
     clickDescriptor: String,
@@ -912,10 +929,10 @@ private fun MutableMethod.injectSnapshotDrawerRow(
     val titleIndex = titleIndices.single()
     val clickIndex = clickIndices.single()
     val iconIndex = iconIndices.single()
-    if (iconField.type.toString() != parameters[iconIndex]) {
+    if (icon.type != parameters[iconIndex]) {
         throw PatchException(
             "NewX drawer icon type changed: renderer=${parameters[iconIndex]}, " +
-                "field=${iconField.type}",
+                "icon=$icon",
         )
     }
 
@@ -960,7 +977,13 @@ private fun MutableMethod.injectSnapshotDrawerRow(
         invokeStatic(methodReference(titleDescriptor))
         moveResult(titleRegister, "Ljava/lang/String;")
         ifEqz(titleRegister, Target.Original)
-        sget(iconRegister, iconField)
+        when (icon) {
+            is DrawerRowIcon.Field -> sget(iconRegister, icon.reference)
+            is DrawerRowIcon.Accessor -> {
+                invokeStatic(icon.getter)
+                moveResult(iconRegister, icon.type)
+            }
+        }
         invokeStatic(methodReference(clickDescriptor))
         moveResult(clickRegister, FUNCTION0_DESCRIPTOR)
         invokeStatic(renderer, *(startRegister..endRegister).toList().toIntArray())
@@ -1544,7 +1567,6 @@ val customizeNewXDrawerPatch =
                         DRAWER_SHORTCUT_GROK to grokIcon,
                         DRAWER_SHORTCUT_NOTIFICATIONS to notificationsIcon,
                     ),
-                settingsIconField = settingsIconField,
             )
             val tabNavigation = resolveDrawerTabNavigation(tabData)
             hookDrawerTabComponent(tabNavigation.componentClass)
@@ -1559,7 +1581,7 @@ val customizeNewXDrawerPatch =
             footerTarget.method.injectPikoSettingsDrawerItem(
                 target = footerTarget,
                 renderer = footerTarget.renderer,
-                settingsIconField = settingsIconField,
+                settingsIconType = settingsIconType,
                 showPikoSettingsInDrawer = showPikoSettingsInDrawer,
             )
             // Null toggle: the title provider returns null while disabled, so no setting
@@ -1567,7 +1589,7 @@ val customizeNewXDrawerPatch =
             footerTarget.method.injectAdditionalDrawerRow(
                 target = profileAnchor.target,
                 renderer = profileAnchor.renderer,
-                iconField = notificationsIcon,
+                icon = DrawerRowIcon.Field(notificationsIcon),
                 toggle = null,
                 titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsTitle()Ljava/lang/String;",
                 clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getNotificationsClickHandler()$FUNCTION0_DESCRIPTOR",
@@ -1575,7 +1597,7 @@ val customizeNewXDrawerPatch =
             footerTarget.method.injectAdditionalDrawerRow(
                 target = profileAnchor.target,
                 renderer = profileAnchor.renderer,
-                iconField = grokIcon,
+                icon = DrawerRowIcon.Field(grokIcon),
                 toggle = null,
                 titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokTitle()Ljava/lang/String;",
                 clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getGrokClickHandler()$FUNCTION0_DESCRIPTOR",
@@ -1583,7 +1605,7 @@ val customizeNewXDrawerPatch =
             footerTarget.method.injectAdditionalDrawerRow(
                 target = profileAnchor.target,
                 renderer = profileAnchor.renderer,
-                iconField = messagesIcon,
+                icon = DrawerRowIcon.Field(messagesIcon),
                 toggle = null,
                 titleDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesTitle()Ljava/lang/String;",
                 clickDescriptor = "$DRAWER_TAB_OPENER_DESCRIPTOR->getMessagesClickHandler()$FUNCTION0_DESCRIPTOR",

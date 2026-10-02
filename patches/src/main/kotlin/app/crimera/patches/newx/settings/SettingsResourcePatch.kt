@@ -2,6 +2,8 @@ package app.crimera.patches.newx.settings
 
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.util.ResourceGroup
+import app.morphe.util.copyResources
 import org.w3c.dom.Element
 
 internal val newXSettingsResourcePatch =
@@ -44,5 +46,10 @@ internal val newXSettingsResourcePatch =
                     }
                 application.appendChild(folderPicker)
             }
+
+            copyResources(
+                "newx/settings",
+                ResourceGroup("drawable", "$PIKO_SETTINGS_ICON_DRAWABLE.xml"),
+            )
         }
     }

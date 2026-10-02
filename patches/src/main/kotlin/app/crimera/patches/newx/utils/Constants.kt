@@ -25,6 +25,7 @@ internal object Constants {
     const val SETTINGS_PACKAGE = "$EXTENSION_PACKAGE/settings"
     const val SETTINGS_REGISTRY_DESCRIPTOR = "$SETTINGS_PACKAGE/SettingsRegistry;"
     const val COMPOSE_SETTINGS_HOOK_DESCRIPTOR = "$SETTINGS_PACKAGE/ComposeSettingsHook;"
+    const val PIKO_SETTINGS_ICON_DESCRIPTOR = "$SETTINGS_PACKAGE/PikoSettingsIcon;"
     const val TIMELINE_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/NewXTimelineFilter;"
     const val FOR_YOU_TOPIC_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/ForYouTopicFilter;"
     const val TIMELINE_TAB_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/TimelineTabFilter;"
