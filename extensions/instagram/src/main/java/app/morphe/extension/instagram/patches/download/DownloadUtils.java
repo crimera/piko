@@ -12,14 +12,25 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import java.lang.reflect.Field;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
 
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.VideoData;
@@ -27,6 +38,8 @@ import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
 import app.morphe.extension.instagram.entity.MediaInterface;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.patches.Links;
@@ -340,6 +353,132 @@ public class DownloadUtils {
 
     public static void downloadMediaUrl(Context context, String mediaUrl, String subFolder, String fileName) throws Exception {
         enqueueDownload(context, new DownloadRequest(mediaUrl, subFolder, fileName));
+    }
+
+    private static final Object FEED_DOWNLOAD_BUTTON_TAG = new Object();
+    private static final String MEDIA_CLASS_NAME = "com.instagram.feed.media.Media";
+
+    /** Shared by the injected Litho component and the view holder hook. */
+    public static boolean isFeedDownloadButtonEnabled() {
+        return Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD))
+                && Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON));
+    }
+
+    // Placeholders the patch rewrites inside `currentMediaIndex` with the live-index field names.
+    static final String FEED_VIEW_STATE_FIELD = "feedViewStateField";
+    static final String FEED_CURRENT_MEDIA_FIELD = "feedCurrentMediaField";
+
+    /** Adds a download button beside the save button; called from the patched row binder on every bind. */
+    public static void addFeedDownloadButton(
+            View rootView, Object media, UserSession userSession, Object mediaState) {
+        try {
+            if (rootView == null || media == null) return;
+            if (!isFeedDownloadButtonEnabled()) {
+                removeFeedDownloadButton(rootView);
+                return;
+            }
+
+            Context context = rootView.getContext();
+            int saveButtonId = ResourceUtils.getIdentifier(context, ResourceType.ID, "row_feed_button_save");
+            View saveButton = saveButtonId == 0 ? null : rootView.findViewById(saveButtonId);
+            if (saveButton == null || !(saveButton.getParent() instanceof ViewGroup)) return;
+
+            // Litho hosts reject added views; their button is built into the component instead.
+            ViewGroup buttonGroup = (ViewGroup) saveButton.getParent();
+            if (buttonGroup.getClass().getName().startsWith("com.facebook.litho.")) return;
+
+            ImageView button = buttonGroup.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
+            if (button == null) {
+                button = createFeedDownloadButton(context, saveButton, buttonGroup);
+            }
+            button.setOnClickListener(
+                    v -> downloadPost(context, userSession, media, currentMediaIndex(mediaState)));
+        } catch (Exception e) {
+            Logger.printException(() -> "addFeedDownloadButton failure", e);
+        }
+    }
+
+    /** Reads the live carousel index at click time, so the download follows a swipe. */
+    static int currentMediaIndex(Object mediaState) {
+        if (mediaState == null) return 0;
+        try {
+            Object viewState = new Entity(mediaState).getField(FEED_VIEW_STATE_FIELD);
+            if (viewState == null) return 0;
+            Object index = new Entity(viewState).getField(FEED_CURRENT_MEDIA_FIELD);
+            if (index instanceof Integer) return (Integer) index;
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not read the current media index", e);
+        }
+        return 0;
+    }
+
+    /** Unwraps a feed row state to the single `Media` it holds; anything else is returned as is. */
+    static Object extractMedia(Object source) {
+        if (source == null || MEDIA_CLASS_NAME.equals(source.getClass().getName())) return source;
+        try {
+            for (Field field : source.getClass().getDeclaredFields()) {
+                if (!MEDIA_CLASS_NAME.equals(field.getType().getName())) continue;
+                field.setAccessible(true);
+                Object media = field.get(source);
+                if (media != null) return media;
+            }
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not extract the media from the feed row state", e);
+        }
+        return source;
+    }
+
+    /** Drops the button on rebind so turning the toggle off takes effect without recreating the row. */
+    private static void removeFeedDownloadButton(View rootView) {
+        View existing = rootView.findViewWithTag(FEED_DOWNLOAD_BUTTON_TAG);
+        if (existing == null) return;
+        ViewParent parent = existing.getParent();
+        if (parent instanceof ViewGroup) ((ViewGroup) parent).removeView(existing);
+    }
+
+    private static ImageView createFeedDownloadButton(Context context, View saveButton, ViewGroup buttonGroup) {
+        ImageView button = new ImageView(context);
+        button.setTag(FEED_DOWNLOAD_BUTTON_TAG);
+        button.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        applyFeedDownloadIcon(button, context);
+        button.setPadding(
+                saveButton.getPaddingLeft(),
+                saveButton.getPaddingTop(),
+                saveButton.getPaddingRight(),
+                saveButton.getPaddingBottom());
+        buttonGroup.addView(button, buttonGroup.indexOfChild(saveButton), cloneLayoutParams(saveButton));
+        return button;
+    }
+
+    /** Copies the save button's slot so the download icon matches its size and spacing. */
+    private static ViewGroup.LayoutParams cloneLayoutParams(View saveButton) {
+        ViewGroup.LayoutParams saveParams = saveButton.getLayoutParams();
+        if (saveParams instanceof LinearLayout.LayoutParams) {
+            return new LinearLayout.LayoutParams((LinearLayout.LayoutParams) saveParams);
+        }
+        if (saveParams instanceof ViewGroup.MarginLayoutParams) {
+            return new ViewGroup.MarginLayoutParams((ViewGroup.MarginLayoutParams) saveParams);
+        }
+        if (saveParams != null) {
+            return new ViewGroup.LayoutParams(saveParams.width, saveParams.height);
+        }
+        return new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    /** Uses the row context: the application context cannot resolve activity scoped theme attributes. */
+    private static void applyFeedDownloadIcon(ImageView button, Context context) {
+        int drawableId = ResourceUtils.getIdentifier(context, ResourceType.DRAWABLE, UI.DRAWABLE_DOWNLOAD_ICON);
+        if (drawableId == 0) return;
+        button.setImageDrawable(context.getDrawable(drawableId));
+
+        int attrId = ResourceUtils.getAttrIdentifier("igds_color_primary_icon");
+        TypedValue typedValue = new TypedValue();
+        if (attrId != 0
+                && context.getTheme().resolveAttribute(attrId, typedValue, true)
+                && typedValue.resourceId != 0) {
+            button.setColorFilter(context.getColor(typedValue.resourceId));
+        }
     }
 
     private static void enqueueDownload(Context context, DownloadRequest request) {

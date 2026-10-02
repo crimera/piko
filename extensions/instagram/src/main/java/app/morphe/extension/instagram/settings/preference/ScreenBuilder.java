@@ -784,6 +784,16 @@ public class ScreenBuilder {
                 )
         );
 
+        if (SettingsStatus.feedDownloadButton) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_feed_download_button"),
+                            str("piko_feed_download_button_desc"),
+                            Settings.FEED_DOWNLOAD_BUTTON
+                    )
+            );
+        }
+
         addPreference(
                 helper.switchPreference(
                         str("piko_enable_direct_download"),

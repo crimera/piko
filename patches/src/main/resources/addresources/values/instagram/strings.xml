@@ -176,6 +176,8 @@
     <string name="piko_category_download_media">Download media</string>
     <string name="piko_category_downloads">Downloads</string>
     <string name="piko_enable_download">Enable download</string>
+    <string name="piko_feed_download_button">Download button on feed posts</string>
+    <string name="piko_feed_download_button_desc">Adds a download icon beside the save button on feed posts</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
     <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
     <string name="piko_download_username_folder">Split media by username</string>
