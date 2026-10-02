@@ -112,11 +112,16 @@ public final class InboxLock {
 
     private static void check(Activity activity) {
         try {
+            View decor = activity.getWindow().getDecorView();
             if (unlocked || !Pref.inboxLock()) {
                 removeCovers();
+                // The recents snapshot is taken after the app is left, too late for a cover, so an open chat is kept out of it.
+                if (Build.VERSION.SDK_INT >= 33) {
+                    activity.setRecentsScreenshotEnabled(!(unlocked && (isVisible(decor, LIST_ID) || isVisible(decor, THREAD_ID))));
+                }
                 return;
             }
-            View decor = activity.getWindow().getDecorView();
+            if (Build.VERSION.SDK_INT >= 33) activity.setRecentsScreenshotEnabled(true);
             cover(activity, decor, LIST_ID, LIST_CONTAINER_ID);
             cover(activity, decor, THREAD_ID, THREAD_CONTAINER_ID);
 
@@ -125,7 +130,7 @@ public final class InboxLock {
                 autoPrompted = false;
             } else if (!autoPrompted) {
                 autoPrompted = true;
-                authenticate(activity);
+                authenticate(activity, null);
             }
         } catch (Throwable t) {
             Logger.printException(() -> "InboxLock check failed", t);
@@ -136,6 +141,16 @@ public final class InboxLock {
     private static boolean onScreen(View view) {
         Rect visible = new Rect();
         return view.isShown() && view.getGlobalVisibleRect(visible) && visible.width() * 2 > view.getWidth();
+    }
+
+    private static boolean isVisible(View decor, String id) {
+        View view = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, id));
+        return view != null && partlyVisible(view);
+    }
+
+    // Any visible pixel counts, so a screen swiped in is covered before its first half shows.
+    private static boolean partlyVisible(View view) {
+        return view.isShown() && view.getGlobalVisibleRect(new Rect());
     }
 
     private static boolean anyCoverShown() {
@@ -149,7 +164,7 @@ public final class InboxLock {
     /** Puts a cover over the container of the screen found by anchorId; true if one was added now. */
     private static boolean cover(Activity activity, View decor, String anchorId, String containerId) {
         View anchor = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, anchorId));
-        if (anchor == null || !onScreen(anchor)) return false;
+        if (anchor == null || !partlyVisible(anchor)) return false;
         View container = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, containerId));
         if (!(container instanceof FrameLayout)) return false;
         FrameLayout host = (FrameLayout) container;
@@ -193,7 +208,7 @@ public final class InboxLock {
         unlock.setTextSize(16);
         unlock.setGravity(Gravity.CENTER);
         unlock.setPadding(Dim.dp24, Dim.dp16, Dim.dp24, Dim.dp16);
-        unlock.setOnClickListener(v -> authenticate(activity));
+        unlock.setOnClickListener(v -> authenticate(activity, null));
         column.addView(unlock, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         return root;
@@ -208,13 +223,24 @@ public final class InboxLock {
         autoPrompted = false;
     }
 
-    private static void authenticate(Activity activity) {
+    /** True while the lock is up, so turning it off in the settings has to be confirmed first. */
+    public static boolean mustConfirmToDisable() {
+        return initialized && !unlocked;
+    }
+
+    /** Asks for the device lock and runs afterUnlock once it is confirmed. */
+    public static void confirm(Activity activity, Runnable afterUnlock) {
+        authenticate(activity, afterUnlock);
+    }
+
+    private static void authenticate(Activity activity, Runnable afterUnlock) {
         if (prompting) return;
         KeyguardManager keyguard = (KeyguardManager) activity.getSystemService(Activity.KEYGUARD_SERVICE);
         // Without a screen lock there is nothing to check against, and locking would only trap the user.
         if (Build.VERSION.SDK_INT < 29 || keyguard == null || !keyguard.isDeviceSecure()) {
             PikoUtils.toast(str("piko_inbox_lock_no_lock"));
             unlock();
+            if (afterUnlock != null) afterUnlock.run();
             return;
         }
 
@@ -235,6 +261,7 @@ public final class InboxLock {
                     public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
                         prompting = false;
                         unlock();
+                        if (afterUnlock != null) afterUnlock.run();
                     }
 
                     @Override
