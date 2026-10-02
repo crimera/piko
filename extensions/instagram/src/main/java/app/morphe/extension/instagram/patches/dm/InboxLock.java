@@ -66,7 +66,7 @@ public final class InboxLock {
 
     /** Called once from the application init hook. */
     public static synchronized void init() {
-        if (initialized) return;
+        if (initialized || !Pref.inboxLock()) return;
         initialized = true;
         try {
             Application app = (Application) Utils.getContext().getApplicationContext();
@@ -249,7 +249,7 @@ public final class InboxLock {
      */
     public static Notification hideNotification(Notification original) {
         try {
-            if (original == null || unlocked || !Pref.inboxLock() || !Pref.inboxLockNotifications()) return original;
+            if (!initialized || original == null || unlocked || !Pref.inboxLockNotifications()) return original;
             if (!Notification.CATEGORY_MESSAGE.equals(original.category) && !MESSAGE_CHANNEL.equals(original.getChannelId())) {
                 return original;
             }
@@ -289,7 +289,7 @@ public final class InboxLock {
     public static void updateBanner() {
         View banner = bannerWindow.get();
         if (banner == null) return;
-        boolean hide = !unlocked && Pref.inboxLock() && Pref.inboxLockNotifications();
+        boolean hide = initialized && !unlocked && Pref.inboxLockNotifications();
         banner.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
     }
 

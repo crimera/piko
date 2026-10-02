@@ -23,7 +23,7 @@ import com.android.tools.smali.dexlib2.Opcode
 private const val EXTENSION_CLASS = "$PATCHES_DESCRIPTOR/dm/InboxLock;"
 
 // NotificationManagerCompat.notify(tag, id, notification), which Instagram posts its notifications through.
-internal object NotifyFingerprint : Fingerprint(
+private object NotifyFingerprint : Fingerprint(
     returnType = "V",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
     parameters = listOf("Ljava/lang/String;", "I", "Landroid/app/Notification;"),
@@ -34,7 +34,7 @@ internal object NotifyFingerprint : Fingerprint(
 )
 
 // The banner Instagram shows over the app for a message that arrives while it is open; it lives in its own window.
-internal object InAppNotificationFingerprint : Fingerprint(
+private object InAppNotificationFingerprint : Fingerprint(
     returnType = "V",
     filters =
         listOf(
@@ -43,7 +43,7 @@ internal object InAppNotificationFingerprint : Fingerprint(
 )
 
 // Runs every time a banner is about to be shown; the banner window itself is created only once and reused.
-internal object InAppNotificationShowFingerprint : Fingerprint(
+private object InAppNotificationShowFingerprint : Fingerprint(
     returnType = "V",
     filters =
         listOf(
@@ -56,7 +56,7 @@ val inboxLockPatch =
     bytecodePatch(
         name = "Inbox lock",
         description = "Asks for your fingerprint, face or screen lock before the inbox is shown.",
-        default = false,
+        default = true,
     ) {
         dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -69,8 +69,7 @@ val inboxLockPatch =
 
             NotifyFingerprint.method.apply {
                 // Parameter positions are found by type because Meta reorders them between builds.
-                val thisOffset = if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1
-                val notification = parameters.indexOfFirst { it.type == "Landroid/app/Notification;" } + thisOffset
+                val notification = parameters.indexOfFirst { it.type == "Landroid/app/Notification;" } + 1
                 addInstructions(
                     0,
                     """

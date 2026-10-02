@@ -163,7 +163,7 @@
     <string name="piko_inbox_lock">Inbox lock</string>
     <string name="piko_inbox_lock_desc">Hides your inbox behind your fingerprint, face or screen lock every time you open the app</string>
     <string name="piko_inbox_lock_notifications">Block notifications</string>
-    <string name="piko_inbox_lock_notifications_desc">While Inbox lock is up, message notifications only say 'New message' and the in-app message banner stays hidden</string>
+    <string name="piko_inbox_lock_notifications_desc">While Inbox lock is up, message notifications only say \'New message\' and the in-app message banner stays hidden</string>
     <string name="piko_inbox_lock_notification">New message</string>
     <string name="piko_inbox_lock_unlock">Unlock</string>
     <string name="piko_inbox_lock_prompt">Unlock your messages</string>
