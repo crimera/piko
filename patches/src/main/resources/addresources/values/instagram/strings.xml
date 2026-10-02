@@ -128,6 +128,15 @@
     <string name="piko_friendship_status">Friendship status</string>
     <string name="piko_follow_list_non_follower_badge">Show non-followers in Following list</string>
     <string name="piko_follow_list_non_follower_badge_desc">Adds a badge to rows in your own Following list for accounts that don\'t follow you back</string>
+    <string name="piko_profile_cover">Profile cover</string>
+    <string name="piko_profile_cover_desc">Adds an image button beside your account name to set an image or GIF behind your own profile header, a different one for each account. Only you can see it. Tap the button to choose, long press it to remove, and drag and pinch with two fingers to adjust</string>
+    <string name="piko_pref_pick_profile_cover">Choose profile cover</string>
+    <string name="piko_pref_pick_profile_cover_success">Profile cover added</string>
+    <string name="piko_pref_pick_profile_cover_invalid">That file is not an image or GIF</string>
+    <string name="piko_pref_pick_profile_cover_too_large">That file is too large</string>
+    <string name="piko_pref_pick_profile_cover_fail">Could not add the profile cover</string>
+    <string name="piko_pref_delete_profile_cover_success">Profile cover removed</string>
+    <string name="piko_pref_delete_profile_cover_none">There is no profile cover to remove</string>
     <string name="piko_view_story_mentions">View story mentions</string>
     <string name="piko_vsm_title">Story mentions</string>
     <string name="piko_vsm_no_mentions">No mentions on this story</string>

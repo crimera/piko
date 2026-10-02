@@ -37,6 +37,7 @@ import android.content.Context;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
+import app.morphe.extension.instagram.patches.userprofile.ProfileCoverStorage;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
@@ -61,6 +62,10 @@ public class RestorePrefActivity extends AppCompatActivity {
 
     private boolean isFontImport;
 
+    private boolean isCoverImport;
+
+    private String coverAccountId;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,8 +89,11 @@ public class RestorePrefActivity extends AppCompatActivity {
             } else if (args.containsKey("piko_pref_add_font")) {
                 // FontStorage decides where the font goes, and validates it first.
                 isFontImport = true;
+            } else if (args.containsKey("piko_pref_pick_profile_cover")) {
+                coverAccountId = args.getString("piko_profile_cover_account");
+                isCoverImport = coverAccountId != null;
             }
-            if (destinationFile != null || isFontImport) {
+            if (destinationFile != null || isFontImport || isCoverImport) {
                 requestFileForRestore();
             } else {
                 toast(str("piko_export_fail"));
@@ -101,6 +109,8 @@ public class RestorePrefActivity extends AppCompatActivity {
         intent.setType("*/*");
         if (isFontImport) {
             intent.putExtra(Intent.EXTRA_MIME_TYPES, FONT_MIME_TYPES);
+        } else if (isCoverImport) {
+            intent.setType("image/*");
         }
         startActivityForResult(intent,READ_REQUEST_CODE);
     }
@@ -110,6 +120,30 @@ public class RestorePrefActivity extends AppCompatActivity {
      * Imports a picked font through {@link FontStorage}, off the main thread: a font can be several
      * megabytes and often comes from a cloud-backed provider, which could otherwise cause an ANR.
      */
+    private void receiveCover(Context ctx, Uri uri) {
+        new Thread(() -> {
+            ProfileCoverStorage.ImportResult result = ProfileCoverStorage.importFrom(ctx, uri, coverAccountId);
+
+            mainHandler.post(() -> {
+                switch (result) {
+                    case ADDED:
+                        toast(str("piko_pref_pick_profile_cover_success"));
+                        break;
+                    case NOT_AN_IMAGE:
+                        toast(str("piko_pref_pick_profile_cover_invalid"));
+                        break;
+                    case TOO_LARGE:
+                        toast(str("piko_pref_pick_profile_cover_too_large"));
+                        break;
+                    default:
+                        toast(str("piko_pref_pick_profile_cover_fail"));
+                        break;
+                }
+                finish();
+            });
+        }).start();
+    }
+
     private void receiveFont(Context ctx, Uri uri) {
         new Thread(() -> {
             FontStorage.ImportResult result = FontStorage.importFrom(ctx, uri);
@@ -274,6 +308,9 @@ public class RestorePrefActivity extends AppCompatActivity {
             } else if (isFontImport) {
                 // Finishes itself once the font is imported off the main thread.
                 receiveFont(this, uri);
+                return;
+            } else if (isCoverImport) {
+                receiveCover(this, uri);
                 return;
             } else {
                 receiveFileForRestore(this, uri);
