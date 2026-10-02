@@ -39,6 +39,7 @@ import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -220,7 +221,7 @@ private fun hookFeedRowBinder(saveButtonId: Long): String {
             returnType = "V",
             parameters = listOf(VIEW_DESCRIPTOR),
             filters = listOf(literal(saveButtonId)),
-        ).matchAll(1..1).single()
+        ).matchSingle()
     val holderClass = holderMatch.classDef
     val holderType = holderClass.type
 
