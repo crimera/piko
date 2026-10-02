@@ -7,9 +7,13 @@
 
 package app.morphe.extension.instagram.settings.preference;
 
+import android.app.Activity;
 import android.content.Context;
 import android.preference.Preference;
+import android.preference.SwitchPreference;
 import java.util.Set;
+
+import app.morphe.extension.instagram.patches.dm.InboxLock;
 
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
@@ -182,6 +186,15 @@ public class Helper {
                     }
                     if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
                         return MaterialYouTheme.requestMaterialYouChange(context, val);
+                    }
+                    boolean inboxLockKey = Settings.INBOX_LOCK.key.equals(key)
+                            || Settings.INBOX_LOCK_NOTIFICATIONS.key.equals(key);
+                    if (inboxLockKey && !val && InboxLock.mustConfirmToDisable() && context instanceof Activity) {
+                        // Reject for now; the switch turns off once the device lock confirms it, so cancelling can't bypass the lock.
+                        InboxLock.confirm((Activity) context, () -> {
+                            if (setValue(preference, newValue)) ((SwitchPreference) preference).setChecked(false);
+                        });
+                        return false;
                     }
                     saved = SharedPref.setBooleanPref(key, val);
                 } else if (newValClass.equals("String")) {

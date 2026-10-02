@@ -160,6 +160,14 @@
     <string name="piko_copied">Copied</string>
     <string name="piko_more_profile_options">More profile options</string>
     <string name="piko_remove_empty_bottom_space">Remove empty bottom space</string>
+    <string name="piko_inbox_lock">Inbox lock</string>
+    <string name="piko_inbox_lock_desc">Hides your inbox behind your fingerprint, face or screen lock every time you open the app</string>
+    <string name="piko_inbox_lock_notifications">Block notifications</string>
+    <string name="piko_inbox_lock_notifications_desc">While Inbox lock is up, message notifications only say \'New message\' and the in-app message banner stays hidden</string>
+    <string name="piko_inbox_lock_notification">New message</string>
+    <string name="piko_inbox_lock_unlock">Unlock</string>
+    <string name="piko_inbox_lock_prompt">Unlock your messages</string>
+    <string name="piko_inbox_lock_no_lock">Set a screen lock on your device to use Inbox lock</string>
     <string name="piko_unlock_plus_benefits">Unlock Plus benefits</string>
     <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
     <string name="piko_customise_story_ring_size">Customise story ring size</string>

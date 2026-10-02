@@ -217,7 +217,9 @@ public class SettingsStatus {
     public static void unlimitedReplaysOnEphemeralMedia() {unlimitedReplaysOnEphemeralMedia = true;}
     public static boolean markChatAsRead = false;
     public static void markChatAsRead() { markChatAsRead = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages ;}
+    public static boolean inboxLock = false;
+    public static void inboxLock() { inboxLock = true; }
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock ;}
 
     //Download section.
     public static boolean downloadMedia = false;
@@ -276,6 +278,7 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_change_like_animation"),SettingsStatus.changeLikeAnimation);
         FLAGS.put(str("piko_unlock_plus_benefits"),SettingsStatus.unlockPlusBenefits);
+        FLAGS.put(str("piko_inbox_lock"),SettingsStatus.inboxLock);
 
         FLAGS.put(str("piko_disable_double_tap_to_like"),SettingsStatus.disableDoubleTapLike);
         FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);

@@ -39,6 +39,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.patches.dm.InboxLock;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 
 public class RestorePrefActivity extends AppCompatActivity {
@@ -86,7 +87,12 @@ public class RestorePrefActivity extends AppCompatActivity {
                 isFontImport = true;
             }
             if (destinationFile != null || isFontImport) {
-                requestFileForRestore();
+                // An imported file can turn Inbox lock off, so it has to be confirmed first while the lock is up.
+                if (args.containsKey("piko_import_pref")) {
+                    InboxLock.confirmIfLocked(this, this::requestFileForRestore, this::finish);
+                } else {
+                    requestFileForRestore();
+                }
             } else {
                 toast(str("piko_export_fail"));
                 finish();
