@@ -28,6 +28,14 @@ plugins {
 dependencyResolutionManagement {
     repositories {
         maven {
+            name = "PikoGitHubPackages"
+            url = uri("https://maven.pkg.github.com/crimera/piko-patches-library")
+            credentials {
+                username = providers.gradleProperty("gpr.user").getOrElse(System.getenv("GITHUB_ACTOR") ?: "")
+                password = providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN") ?: "")
+            }
+        }
+        maven {
             name = "BytecodeGitHubPackages"
             url = uri("https://maven.pkg.github.com/crimera/morphe-bytecode")
             credentials {
@@ -57,4 +65,18 @@ val bytecodeBuild = listOf("../morphe-bytecode", "morphe-bytecode-lib")
     .firstOrNull { it.resolve("settings.gradle.kts").exists() }
 if (bytecodeBuild != null) {
     includeBuild(bytecodeBuild)
+}
+
+// Shared in-app code (logging) lives in piko-patches-library and is consumed as
+// app.crimera:piko-extension-library from GitHub Packages. A sibling checkout substitutes the
+// published artifact so library changes can be tested without publishing first.
+val pikoLibraryBuild = listOf("../piko-patches-library", "piko-patches-library-lib")
+    .map { rootDir.resolve(it) }
+    .firstOrNull { it.resolve("settings.gradle.kts").exists() }
+if (pikoLibraryBuild != null) {
+    includeBuild(pikoLibraryBuild) {
+        dependencySubstitution {
+            substitute(module("app.crimera:piko-extension-library")).using(project(":extension"))
+        }
+    }
 }

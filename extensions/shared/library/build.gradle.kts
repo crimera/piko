@@ -17,6 +17,8 @@ android {
 }
 
 dependencies {
+    // Shared in-app logging. `api` so app extension modules compile against it through this module.
+    api(libs.piko.extension.library)
     implementation(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
     compileOnly(libs.appcompat)
