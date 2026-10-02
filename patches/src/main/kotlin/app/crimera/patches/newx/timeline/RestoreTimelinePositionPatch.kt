@@ -60,6 +60,7 @@ private const val SETTING_READ_DESCRIPTOR =
  * addresses without an instruction object.
  */
 private const val IGNORE_NATIVE_POSITION_LABEL = "piko_newx_restore_position_ignore_native"
+private const val SAVE_LOADED_POSITION_LABEL = "piko_newx_restore_position_save_loaded"
 private const val RESTORE_TEMPORARY_REGISTER_COUNT = 2
 private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 3
 
@@ -626,6 +627,67 @@ val restoreTimelinePositionPatch =
             )
             // The scratch pool now hands out the three staging registers inside the hook below.
 
+            // A timeline page that is created next to the visible one and removed before its posts
+            // load still reports its list position, which Compose has reset to 0,0 on an empty list.
+            // Saving that clobbers the real position in both the persistent store and X's in-memory
+            // map, so the hook only saves while the timeline state is Success. The save method reads
+            // that state itself: `iget stateFlow; check-cast; getValue; move-result; check-cast State`.
+            val stateRead =
+                requireExactlyOne(
+                    "NewX save-scroll-position timeline state read",
+                    saveMethod.instructions.indices.mapNotNull { index ->
+                        val flowRead = saveMethod.instructions[index]
+                        if (flowRead.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+                        val flowField = flowRead.getReference<FieldReference>() ?: return@mapNotNull null
+                        if (flowField.definingClass.toString() != componentDescriptor) return@mapNotNull null
+                        val flowCast = saveMethod.instructions.getOrNull(index + 1)
+                        val getValue = saveMethod.instructions.getOrNull(index + 2)
+                        val result = saveMethod.instructions.getOrNull(index + 3)
+                        val stateCast = saveMethod.instructions.getOrNull(index + 4)
+                        if (flowCast?.opcode != Opcode.CHECK_CAST ||
+                            getValue?.opcode != Opcode.INVOKE_VIRTUAL ||
+                            result?.opcode != Opcode.MOVE_RESULT_OBJECT ||
+                            stateCast?.opcode != Opcode.CHECK_CAST
+                        ) {
+                            return@mapNotNull null
+                        }
+                        val getValueReference = getValue.getReference<MethodReference>() ?: return@mapNotNull null
+                        val flowType = flowCast.getReference<TypeReference>()?.type ?: return@mapNotNull null
+                        if (getValueReference.definingClass.toString() != flowType ||
+                            getValueReference.name != "getValue" ||
+                            getValueReference.parameterTypes.isNotEmpty() ||
+                            getValueReference.returnType.toString() != OBJECT_DESCRIPTOR
+                        ) {
+                            return@mapNotNull null
+                        }
+                        val stateType = stateCast.getReference<TypeReference>()?.type ?: return@mapNotNull null
+                        if (!stateType.startsWith("Lcom/x/urt/")) return@mapNotNull null
+                        Triple(flowField, getValueReference, stateType)
+                    }.distinctBy { (field, getter, state) -> "$field|$getter|$state" },
+                )
+            val (stateFlowField, stateGetValueReference, stateInterface) = stateRead
+            val timelineTypeDescriptor = timelineGetterReference.returnType.toString()
+            // Success is the one state checked in this method that carries the timeline type.
+            val successStateType =
+                requireExactlyOne(
+                    "NewX timeline Success state",
+                    saveMethod.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.INSTANCE_OF) return@mapNotNull null
+                        instruction.getReference<TypeReference>()?.type
+                    }.distinct().filter { stateType ->
+                        val stateClass = mutableClassDefBy(stateType)
+                        stateClass.interfaces.contains(stateInterface) &&
+                            stateClass.fields.any { field ->
+                                !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                                    field.type.toString() == timelineTypeDescriptor
+                            }
+                    },
+                )
+            // Returning before the map write must skip only that write.
+            if (saveMethod.instructions.getOrNull(mapPutIndex + 1)?.opcode != Opcode.RETURN_VOID) {
+                throw PatchException("NewX timeline-position map write is not the save branch's last action")
+            }
+
             // Ranked Following uses the same shared save method as Latest Following, but
             // its Compose scroll policy has `a == false`. The original method branches
             // around the map write in that case, so the persistent store hook below never
@@ -662,6 +724,15 @@ val restoreTimelinePositionPatch =
                 val saveIdentityRegister = scratchRegister()
                 val saveIndexRegister = scratchRegister()
                 val saveOffsetRegister = scratchRegister()
+                move(saveIdentityRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(saveIdentityRegister, saveIdentityRegister, stateFlowField)
+                checkCast(saveIdentityRegister, stateGetValueReference.definingClass.toString())
+                invokeVirtual(stateGetValueReference, saveIdentityRegister)
+                moveResult(saveIdentityRegister, OBJECT_DESCRIPTOR)
+                instanceOf(saveIndexRegister, saveIdentityRegister, successStateType)
+                ifNez(saveIndexRegister, Target.Local(SAVE_LOADED_POSITION_LABEL))
+                returnVoid()
+                label(SAVE_LOADED_POSITION_LABEL)
                 move(saveIdentityRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
                 iget(saveIdentityRegister, saveIdentityRegister, repositoryField)
                 invokeInterface(methodReference(timelineIdentityGetterReference), saveIdentityRegister)
