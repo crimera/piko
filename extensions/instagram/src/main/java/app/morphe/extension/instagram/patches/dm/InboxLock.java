@@ -209,7 +209,7 @@ public final class InboxLock {
 
     private static View buildCover(Activity activity) {
         FrameLayout root = new FrameLayout(activity);
-        root.setBackgroundColor(UI.getThemedColour("igds_color_primary_background"));
+        root.setBackgroundColor(UI.getBackgroundColor());
         root.setClickable(true);
         root.setFocusableInTouchMode(true);
 

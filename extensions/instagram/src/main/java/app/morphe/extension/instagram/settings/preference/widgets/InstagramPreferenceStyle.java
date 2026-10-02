@@ -123,11 +123,7 @@ public final class InstagramPreferenceStyle {
     }
 
     public static int backgroundColor() {
-        int primaryBackground = UI.getThemedColour("igds_color_primary_background");
-
-        return UI.isDarkMode()
-                ? ResourceUtils.getColor("igds_prism_black", primaryBackground)
-                : primaryBackground;
+        return UI.getBackgroundColor();
     }
 
     public static int pressedBackgroundColor() {

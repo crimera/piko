@@ -37,7 +37,7 @@ import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 public class UI {
 
     public static final String DRAWABLE_DOWNLOAD_ICON = "instagram_download_outline_24";
-    public static final String DRAWABLE_LOCK_ICON = "instagram_lock_pano_filled_24";
+    public static final String DRAWABLE_LOCK_ICON = "instagram_lock_pano_outline_24";
     public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
@@ -98,6 +98,13 @@ public class UI {
             return dark ? 0xffb3b3b3 : 0xff737373;
         }
         return dark ? Color.WHITE : Color.BLACK;
+    }
+
+    public static int getBackgroundColor() {
+        int primaryBackground = getThemedColour("igds_color_primary_background");
+        return isDarkMode()
+                ? ResourceUtils.getColor("igds_prism_black", primaryBackground)
+                : primaryBackground;
     }
 
     public static boolean isDarkMode() {
