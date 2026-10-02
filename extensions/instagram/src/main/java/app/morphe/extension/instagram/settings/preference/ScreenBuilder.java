@@ -254,16 +254,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.saveDeletedMessages) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_save_deleted_messages"),
-                            str("piko_save_deleted_messages_desc"),
-                            Settings.SAVE_DELETED_MESSAGES
-                    )
-            );
-        }
-
         if (SettingsStatus.inboxLock) {
             addPreference(
                     helper.switchPreference(
@@ -282,6 +272,13 @@ public class ScreenBuilder {
         }
 
         if (SettingsStatus.saveDeletedMessages) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_save_deleted_messages"),
+                            str("piko_save_deleted_messages_desc"),
+                            Settings.SAVE_DELETED_MESSAGES
+                    )
+            );
             addPreference(
                     helper.buttonPreference(
                             str("piko_view_deleted_messages"),
