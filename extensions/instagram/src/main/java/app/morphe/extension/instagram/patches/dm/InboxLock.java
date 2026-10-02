@@ -205,6 +205,7 @@ public final class InboxLock {
             if (view != null && view.getParent() instanceof ViewGroup) ((ViewGroup) view.getParent()).removeView(view);
         }
         covers.clear();
+        autoPrompted = false;
     }
 
     private static void authenticate(Activity activity) {
