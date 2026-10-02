@@ -23,6 +23,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -30,7 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.utils.Pref;
@@ -55,6 +60,8 @@ public final class InboxLock {
     private static boolean unlocked;
     private static boolean prompting;
     private static boolean autoPrompted;
+    private static Runnable cancelAction;
+    private static final Set<Activity> secured = Collections.newSetFromMap(new WeakHashMap<>());
     private static int startedActivities;
     private static WeakReference<Activity> watched = new WeakReference<>(null);
     private static ViewTreeObserver.OnPreDrawListener drawListener;
@@ -115,13 +122,10 @@ public final class InboxLock {
             View decor = activity.getWindow().getDecorView();
             if (unlocked || !Pref.inboxLock()) {
                 removeCovers();
-                // The recents snapshot is taken after the app is left, too late for a cover, so an open chat is kept out of it.
-                if (Build.VERSION.SDK_INT >= 33) {
-                    activity.setRecentsScreenshotEnabled(!(unlocked && (isVisible(decor, LIST_ID) || isVisible(decor, THREAD_ID))));
-                }
+                hideFromRecents(activity, unlocked && (isVisible(decor, LIST_ID) || isVisible(decor, THREAD_ID)));
                 return;
             }
-            if (Build.VERSION.SDK_INT >= 33) activity.setRecentsScreenshotEnabled(true);
+            hideFromRecents(activity, false);
             cover(activity, decor, LIST_ID, LIST_CONTAINER_ID);
             cover(activity, decor, THREAD_ID, THREAD_CONTAINER_ID);
 
@@ -141,6 +145,23 @@ public final class InboxLock {
     private static boolean onScreen(View view) {
         Rect visible = new Rect();
         return view.isShown() && view.getGlobalVisibleRect(visible) && visible.width() * 2 > view.getWidth();
+    }
+
+    // The recents snapshot is taken after the app is left, too late for a cover, so an open inbox or chat is kept out of it.
+    private static void hideFromRecents(Activity activity, boolean hide) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            activity.setRecentsScreenshotEnabled(!hide);
+            return;
+        }
+        // Android 12 and older can't turn the snapshot off, so the window is marked secure instead.
+        Window window = activity.getWindow();
+        if (hide) {
+            if (secured.contains(activity) || (window.getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) != 0) return;
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            secured.add(activity);
+        } else if (secured.remove(activity)) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
     }
 
     private static boolean isVisible(View decor, String id) {
@@ -233,6 +254,16 @@ public final class InboxLock {
         authenticate(activity, afterUnlock);
     }
 
+    /** Runs the action now, or after the device lock confirms it while the lock is up; onCancel runs if it isn't confirmed. */
+    public static void confirmIfLocked(Activity activity, Runnable action, Runnable onCancel) {
+        if (!mustConfirmToDisable()) {
+            action.run();
+            return;
+        }
+        cancelAction = onCancel;
+        authenticate(activity, action);
+    }
+
     private static void authenticate(Activity activity, Runnable afterUnlock) {
         if (prompting) return;
         KeyguardManager keyguard = (KeyguardManager) activity.getSystemService(Activity.KEYGUARD_SERVICE);
@@ -260,6 +291,7 @@ public final class InboxLock {
                     @Override
                     public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
                         prompting = false;
+                        cancelAction = null;
                         unlock();
                         if (afterUnlock != null) afterUnlock.run();
                     }
@@ -267,6 +299,9 @@ public final class InboxLock {
                     @Override
                     public void onAuthenticationError(int errorCode, CharSequence errString) {
                         prompting = false;
+                        Runnable cancelled = cancelAction;
+                        cancelAction = null;
+                        if (cancelled != null) cancelled.run();
                     }
                 });
     }
