@@ -1,0 +1,209 @@
+package app.crimera.patches.newx.misc.inlineactions
+
+import app.crimera.patches.newx.models.requirePublicFields
+import app.crimera.patches.newx.models.resolveMutableMethodOwner
+import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
+import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
+import app.crimera.patches.newx.models.newXInlineActionBarModelResolutionPatch
+import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
+import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.choice
+import app.crimera.patches.newx.settings.group
+import app.crimera.patches.newx.settings.injectReadWithRegister
+import app.crimera.patches.newx.settings.multiChoice
+import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.newx.settings.newXSettings
+import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.patches.newx.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
+import app.crimera.patches.newx.utils.requireAtMostOne
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.cloneMutable
+import app.morphe.util.getReference
+import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.p0Register
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+
+@Suppress("unused")
+val customizeNewXInlineActionsPatch =
+    bytecodePatch(
+        name = "NewX: Customize inline actions",
+        description = "Lets you hide selected actions from NewX post action bars.",
+    ) {
+        compatibleWith(COMPATIBILITY_NEW_X)
+        dependsOn(newXInlineActionModelResolutionPatch, newXInlineActionBarModelResolutionPatch)
+
+        val hiddenInlineActions =
+            newXSettings {
+                category(Categories.POST_ACTIONS_MEDIA) {
+                    multiChoice(
+                        id = "newx.content.hidden_inline_actions",
+                        strings = settingStrings("piko_newx_inline_actions"),
+                        order = 100,
+                        defaultValue = emptySet(),
+                        options =
+                            listOf(
+                                choice("Reply", "piko_newx_inline_action_reply"),
+                                choice("Retweet", "piko_newx_inline_action_repost"),
+                                choice("Favorite", "piko_newx_inline_action_like"),
+                                choice("Dislike", "piko_newx_inline_action_dislike"),
+                                choice("ViewCount", "piko_newx_inline_action_view_count"),
+                                choice("AddRemoveBookmarks", "piko_newx_inline_action_bookmark"),
+                                choice("TwitterShare", "piko_newx_inline_action_share"),
+                            ),
+                    )
+                }
+            }
+
+        execute {
+            val entryModels = resolvedNewXInlineActionModels()
+            val barModels = resolvedNewXInlineActionBarModels()
+            patchActionNameBridge(entryModels)
+
+            val (inlineActionBarClass, originalMethod) =
+                barModels.inlineActionStateBuilder.resolveMutableMethodOwner(
+                    "inline action state builder",
+                )
+            // m0->d() is a dense Compose presenter: every low register is live at the
+            // conversion hook, so liveness-based allocation finds no free register. Reserve two
+            // fresh locals below the parameter block and address them explicitly.
+            val originalRegisterCount =
+                originalMethod.implementation?.registerCount
+                    ?: throw PatchException("NewX inline action state builder has no implementation: $originalMethod")
+            val method =
+                originalMethod.cloneMutable(
+                    additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
+                )
+            inlineActionBarClass.methods.remove(originalMethod)
+            inlineActionBarClass.methods.add(method)
+            if (AccessFlags.STATIC.isSet(method.accessFlags)) {
+                throw PatchException("NewX inline action state builder is unexpectedly static: $method")
+            }
+
+            val inlineActionListType = barModels.canonicalPostInlineActionEntryField.type
+            val conversionInstruction =
+                method.instructions
+                    .mapIndexedNotNull { index, instruction ->
+                        val reference = instruction.getReference<MethodReference>()
+                            ?: return@mapIndexedNotNull null
+                        if (instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) {
+                            return@mapIndexedNotNull null
+                        }
+                        if (reference.returnType != inlineActionListType) return@mapIndexedNotNull null
+                        index to reference
+                    }.singleOrNull()
+                    ?: throw PatchException("Expected one NewX inline action list conversion in $method")
+            val conversionIndex = conversionInstruction.first
+            val conversionReference = conversionInstruction.second
+            val resultIndex = conversionIndex + 1
+            val resultInstruction = method.getInstruction<OneRegisterInstruction>(resultIndex)
+            if (resultInstruction.opcode != Opcode.MOVE_RESULT_OBJECT) {
+                throw PatchException("NewX inline action list conversion result not found in $method")
+            }
+            val resultRegister = resultInstruction.registerA
+            // Explicit scratch locals: setting (byte/range) + list copy (byte/range). Both are fresh
+            // locals created by the clone above, so no liveness search is needed.
+            val settingRegister = originalRegisterCount
+            val listRegister = originalRegisterCount + 1
+            if (listRegister > 255) {
+                throw PatchException(
+                    "NewX inline action scratch registers exceed v255 in $method: v$settingRegister, v$listRegister",
+                )
+            }
+            val read =
+                hiddenInlineActions.injectReadWithRegister(
+                    method = method,
+                    index = resultIndex + 1,
+                    register = settingRegister,
+                )
+
+            // Loop exits target the immutable conversion. Hook its result, then restore the
+            // exact immutable representation before the consumer sees it.
+            //
+            // Hidden actions must stay *removed* from the list. The bar measures one packed slot
+            // per entry (Compose measure policy, `f1` kinds CountedPill/Countless/IconOnly) and
+            // every kind floors at style width + icon size, so an entry that is kept and merely
+            // rendered invisible still reserves its slot and one gap: that leaves a hole at the
+            // action's position and pushes the trailing icon-only group to the right edge. Removal
+            // is what the app itself does for an action a post does not offer, so the surviving
+            // slots redistribute exactly like a native bar. Evidence and measurements:
+            // docs/newx-resolver-linter/incidents/2026-09-25-inline-action-hidden-slot.md.
+            method.insertHook(read.nextIndex, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->prepareHiddenActions(Ljava/util/Set;)V"),
+                    read.register,
+                )
+                invokeStatic(
+                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->preparePresenter(Ljava/lang/Object;)V"),
+                    method.p0Register,
+                )
+                move(listRegister, resultRegister, inlineActionListType)
+                invokeStatic(
+                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;"),
+                    listRegister,
+                )
+                moveResult(resultRegister, "Ljava/util/List;")
+                invokeStatic(conversionReference, resultRegister)
+                moveResult(resultRegister, conversionReference.returnType)
+            }
+        }
+    }
+
+context(context: BytecodePatchContext)
+private fun patchActionNameBridge(models: app.crimera.patches.newx.models.ResolvedNewXInlineActionModels) {
+    val inlineActionEntryClass = context.mutableClassDefBy(models.inlineActionEntryDescriptor)
+    val actionTypeGetter =
+        requireAtMostOne(
+            label = "NewX inline-action getActionType getter in ${inlineActionEntryClass.type}",
+            candidates =
+                inlineActionEntryClass.methods.filter { method ->
+                    method.name == "getActionType" &&
+                        method.parameterTypes.isEmpty() &&
+                        method.returnType == models.postActionTypeDescriptor
+                },
+        )
+    // Prefer the generated getter when the model exposes one. Otherwise the obfuscated field has
+    // to remain public before it can be read directly.
+    val actionTypeField =
+        models.inlineActionTypeField.also { field ->
+            if (actionTypeGetter == null) {
+                inlineActionEntryClass.requirePublicFields(listOf(field))
+            }
+        }
+    val extensionClass = context.mutableClassDefBy(INLINE_ACTION_FILTER_DESCRIPTOR)
+    val helpers = extensionClass.methods.filter { method ->
+        method.name == "getActionName" &&
+            method.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
+            method.returnType == "Ljava/lang/String;"
+    }
+    if (helpers.size != 1) {
+        throw PatchException(
+            "Expected one NewX inline-action name bridge, found ${helpers.size}: " +
+                helpers.joinToString(),
+        )
+    }
+    val helper = helpers.single()
+    // `p0` is the entry passed to the bridge: cast it, read its action type and return the enum
+    // name of that type.
+    val entryRegister = helper.p0Register
+    helper.insertHook(0, relocateBranchTargets = false) {
+        checkCast(entryRegister, models.inlineActionEntryDescriptor)
+        if (actionTypeGetter != null) {
+            invokeVirtual(actionTypeGetter, entryRegister)
+            moveResult(entryRegister, actionTypeGetter.returnType)
+        } else {
+            iget(entryRegister, entryRegister, actionTypeField)
+        }
+        invokeVirtual(methodReference("Ljava/lang/Enum;->name()Ljava/lang/String;"), entryRegister)
+        moveResult(entryRegister, "Ljava/lang/String;")
+        returnObject(entryRegister)
+    }
+}

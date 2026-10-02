@@ -42,6 +42,7 @@ jobs:
     needs: pull
     permissions:
       contents: write
+      packages: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout dev
