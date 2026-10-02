@@ -33,7 +33,6 @@ private const val COMPONENT_DESCRIPTOR = "LX/03Wk;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val CONTEXT_DESCRIPTOR = "Landroid/content/Context;"
 
-/** View class the UFI icon builder mounts; precedes the save icon's setters. */
 private const val BUTTON_VIEW_CLASS = "android.widget.Button"
 
 private const val DOWNLOAD_CONTENT_DESCRIPTION = "Download"
@@ -48,20 +47,14 @@ private const val CLICK_HANDLER_CONSTRUCTOR =
     "$CLICK_HANDLER_DESCRIPTOR-><init>($CONTEXT_DESCRIPTOR$USER_SESSION_DESCRIPTOR$OBJECT_DESCRIPTOR)V"
 private const val FEED_DOWNLOAD_ENABLED = "$DOWNLOAD_UTILS_DESCRIPTOR->isFeedDownloadButtonEnabled()Z"
 
-/** The Litho image wrapper the UFI icon builder passes its node through. */
 private val ICON_WRAPPER_PARAMETERS =
     listOf("Landroid/widget/ImageView\$ScaleType;", NODE_DESCRIPTOR, INTEGER_DESCRIPTOR, "I", "I")
 
 /**
- * Surfaces such as the contextual profile feed render the UFI as a Litho component, which rejects
- * views added by hand. The download icon is built into the component tree instead: the UFI builder
- * gets a second icon node, set up exactly like the save icon, in front of it.
- *
- * Every obfuscated member is resolved from the instructions that build the save icon. The save
- * icon's consecutive component-call registers are rebuilt right after the injection point, so the
- * block reuses them to stage every invoke instead of searching for a free span in a dense method.
- *
- * @param stateType the feed row state the builder casts its input to.
+ * Litho UFI surfaces (e.g. the contextual profile feed) reject views added by hand, so the
+ * download icon is built into the component tree as a second icon node ahead of the save icon.
+ * Every obfuscated member is resolved from the instructions that build the save icon, and the
+ * save icon's component-call registers, rebuilt right after the injection point, stage every invoke.
  */
 context(patchContext: BytecodePatchContext)
 internal fun injectLithoDownloadButton(
@@ -118,9 +111,8 @@ internal fun injectLithoDownloadButton(
     val onClickIndex = setterIndex(FUNCTION1_DESCRIPTOR)
     val onClickSetter = instructions[onClickIndex].methodRef()!!
 
-    // The save icon sets its content description two instructions before it loads the button view
-    // class. The node handed to its ON_CLICK call has no click props yet, so deriving the download
-    // node from it does not inherit the save behaviour.
+    // The content description is set two instructions before the button view class is loaded. The
+    // node passed to ON_CLICK has no click props yet, so the download node does not inherit them.
     val viewClassIndex =
         (saveIndex - 1 downTo 0).firstOrNull { instructions[it].getReference<StringReference>()?.string == BUTTON_VIEW_CLASS }
             ?: throw PatchException("No \"$BUTTON_VIEW_CLASS\" before the save literal in $builder")
@@ -131,8 +123,8 @@ internal fun injectLithoDownloadButton(
         instructions[onClickIndex].registers().firstOrNull()
             ?: throw PatchException("ON_CLICK call at $onClickIndex has no node in $builder")
 
-    // The component factory call that follows the wrapper construction takes seven consecutive
-    // registers. Its last five arguments are staged by the moves right before it.
+    // The factory call takes seven consecutive registers; the last five are staged by the moves
+    // right before it.
     val wrapperIndex =
         indexAfterSave("icon wrapper construction", after = onClickIndex) {
             it.definingClass == iconWrapperClass && it.name == "<init>"
@@ -150,7 +142,6 @@ internal fun injectLithoDownloadButton(
                     (instructions[index] as? TwoRegisterInstruction)?.takeIf { it.registerA == destination }?.registerB
                 } ?: throw PatchException("No source move for component argument v$destination in $builder")
         }
-    // The third argument is the `UserSession` the click handler needs.
     val userSessionRegister = sources[2]
 
     val listAddIndex =
@@ -167,8 +158,7 @@ internal fun injectLithoDownloadButton(
             ?.let { (it as OneRegisterInstruction).registerA }
             ?: throw PatchException("No check-cast to $stateType in $builder")
 
-    // The save icon resolves its size and tint through two theme attribute lookups right before
-    // the wrapper is built; the same lookups supply the download icon's values.
+    // The save icon's size and tint come from two theme attribute lookups; reuse them.
     val themeCalls =
         (saveIndex until factoryIndex).mapNotNull { index ->
             val reference = instructions[index].methodRef() ?: return@mapNotNull null
@@ -196,7 +186,6 @@ internal fun injectLithoDownloadButton(
     val dimensionAttribute = attributeLiteral(themeCalls[0].first)
     val tintAttribute = attributeLiteral(themeCalls[1].first)
 
-    // The builder's only parameter is the component context, still intact at the injection point.
     if (builder.parameterTypes.size != 1) throw PatchException("Expected one parameter on $builder")
     val componentContext = declaredParameterRegister(builder, 0)
     val contextGetter =

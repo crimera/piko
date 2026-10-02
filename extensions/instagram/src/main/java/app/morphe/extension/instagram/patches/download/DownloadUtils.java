@@ -364,18 +364,11 @@ public class DownloadUtils {
                 && Boolean.TRUE.equals(SharedPref.getBooleanPref(Settings.FEED_DOWNLOAD_BUTTON));
     }
 
-    // Rewritten at patch time with the field names that walk the feed row state to the live
-    // carousel index. Compile-time constants, so the patch replaces them inside
-    // `currentMediaIndex` and one extension build serves every release.
+    // Placeholders the patch rewrites inside `currentMediaIndex` with the live-index field names.
     static final String FEED_VIEW_STATE_FIELD = "feedViewStateField";
     static final String FEED_CURRENT_MEDIA_FIELD = "feedCurrentMediaField";
 
-    /**
-     * Adds a download button beside the save button of a feed post row. Called from the patched
-     * feed UFI row binder, so every rebind refreshes the captured media.
-     *
-     * @param mediaState the feed row state; read at click time for the live carousel index.
-     */
+    /** Adds a download button beside the save button; called from the patched row binder on every bind. */
     public static void addFeedDownloadButton(
             View rootView, Object media, UserSession userSession, Object mediaState) {
         try {
@@ -390,8 +383,7 @@ public class DownloadUtils {
             View saveButton = saveButtonId == 0 ? null : rootView.findViewById(saveButtonId);
             if (saveButton == null || !(saveButton.getParent() instanceof ViewGroup)) return;
 
-            // The save button's parent is the row itself; Litho hosts reject manually added views,
-            // so their button is built into the component at patch time instead.
+            // Litho hosts reject added views; their button is built into the component instead.
             ViewGroup buttonGroup = (ViewGroup) saveButton.getParent();
             if (buttonGroup.getClass().getName().startsWith("com.facebook.litho.")) return;
 
@@ -406,10 +398,7 @@ public class DownloadUtils {
         }
     }
 
-    /**
-     * Resolves the live carousel index at click time, walking the row state to the view state the
-     * carousel mutates, so the download follows a swipe instead of freezing the index at bind time.
-     */
+    /** Reads the live carousel index at click time, so the download follows a swipe. */
     static int currentMediaIndex(Object mediaState) {
         if (mediaState == null) return 0;
         try {
@@ -477,10 +466,7 @@ public class DownloadUtils {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
-    /**
-     * Resolves the icon and its tint against the row context; the global application context
-     * cannot resolve activity scoped theme attributes such as `igds_color_primary_icon`.
-     */
+    /** Uses the row context: the application context cannot resolve activity scoped theme attributes. */
     private static void applyFeedDownloadIcon(ImageView button, Context context) {
         int drawableId = ResourceUtils.getIdentifier(context, ResourceType.DRAWABLE, UI.DRAWABLE_DOWNLOAD_ICON);
         if (drawableId == 0) return;

@@ -70,7 +70,6 @@ private const val MAIN_FEED_MODULE = "feed_timeline"
 private const val LITHO_UFI_VARIANT = "litho"
 private const val VIEW_UFI_VARIANT = "view"
 
-/** Throws unless [candidates] holds exactly one element. */
 internal fun <T> requireOne(
     label: String,
     candidates: Collection<T>,
@@ -107,7 +106,6 @@ internal fun MutableMethod.parameterRegister(descriptor: String): Int {
     return declaredParameterRegister(this, index)
 }
 
-/** The register block holding `this` and every parameter. */
 internal fun MutableMethod.parameterBlock(): List<Int> =
     (parameterRegisterStart(this) until (implementation?.registerCount ?: 0)).toList()
 
@@ -153,10 +151,7 @@ internal fun registerRange(
     last: Int = first,
 ) = "{v$first .. v$last}"
 
-/**
- * Extension method whose two placeholder constants are rewritten with the live-index field names.
- * The click handlers call it at click time, so a carousel swipe after the bind is honored.
- */
+/** Extension method whose two placeholder constants are rewritten with the live-index field names. */
 private object CurrentMediaIndexFingerprint : Fingerprint(
     definingClass = DOWNLOAD_UTILS_DESCRIPTOR,
     name = "currentMediaIndex",
@@ -206,10 +201,8 @@ val feedDownloadButtonPatch =
     }
 
 /**
- * The feed post action row is a view holder whose constructor resolves `row_feed_button_save`.
- * Matching that literal finds the holder without depending on obfuscated names. Its binder gets a
- * hook that hands the extension the row root, the post `Media`, the `UserSession` and the row
- * state, so the extension can add the button next to the save icon.
+ * Finds the feed row view holder through the `row_feed_button_save` literal and hooks its binder to
+ * hand the extension the row root, `Media`, `UserSession` and row state.
  *
  * @return the type of the row state the binder receives.
  */
@@ -240,7 +233,6 @@ private fun hookFeedRowBinder(saveButtonId: Long): String {
                 }.distinctBy { it.toString() },
         )
 
-    // The row state is the holder field type that exposes exactly one `Media`.
     val stateType =
         requireOne(
             "feed UFI state type of $holderType",
@@ -322,10 +314,9 @@ private fun hookFeedRowBinder(saveButtonId: Long): String {
 }
 
 /**
- * The same post can render its UFI row as a view, a Litho or a Compose component, chosen by a
- * MobileConfig value. Only the view renderer creates the holder [hookFeedRowBinder] extends, so the
- * main feed is pinned to it and every other module keeps the original selector result. 439 splits
- * the selector into a static variant and an instance variant; both are pinned.
+ * Only the view UFI renderer creates the holder [hookFeedRowBinder] hooks, so the main feed is
+ * pinned to it; other modules keep the original selector result. 439 has a static and an instance
+ * selector, and both are pinned.
  */
 context(patchContext: BytecodePatchContext)
 private fun pinMainFeedToViewUfi() {
