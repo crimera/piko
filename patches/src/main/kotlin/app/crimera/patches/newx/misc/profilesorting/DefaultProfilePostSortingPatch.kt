@@ -7,9 +7,9 @@
 package app.crimera.patches.newx.misc.profilesorting
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.choice
+import app.crimera.patches.settings.choice
 import app.crimera.patches.newx.settings.newXSingleChoice
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.PROFILE_POST_SORTING_RESOLVER_DESCRIPTOR
 import app.crimera.bytecode.insertHook

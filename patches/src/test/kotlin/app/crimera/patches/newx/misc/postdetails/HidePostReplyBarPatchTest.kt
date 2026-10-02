@@ -4,7 +4,7 @@ package app.crimera.patches.newx.misc.postdetails
 // existing inset contract, while the emitted-bytecode check proves the immersive likes/repost/share
 // row receives navigation padding before it renders rather than mutating the reply editor.
 
-import app.crimera.patches.newx.settings.ToggleSettingDefinition
+import app.crimera.patches.settings.ToggleSettingDefinition
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException

@@ -26,7 +26,7 @@ import java.util.Set;
 import app.morphe.extension.newx.misc.UpdateFont;
 import app.morphe.extension.newx.postfilter.VerifiedAccountWhitelistStore;
 import app.morphe.extension.newx.ui.BottomSheetView;
-import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.crimera.ui.ButtonView;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.shared.Utils;
 

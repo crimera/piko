@@ -7,7 +7,7 @@ import java.util.List;
 
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.utils.NewXUtils;
 
 /** Adds a "Browse Tweet Object" debug action to NewX post menus. */

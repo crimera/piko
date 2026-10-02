@@ -14,9 +14,9 @@ import android.widget.TextView;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
 
 import java.io.IOException;
 import java.lang.ref.ReferenceQueue;
@@ -31,7 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.utils.ToStringParser;
 
 @SuppressWarnings("unused")
@@ -1308,7 +1308,7 @@ public final class InlineDownloadButton {
                         : "piko_newx_download_first_run_videos";
 
         LinearLayout body = dialogForm(activity);
-        TextView retry = NewXSettingsUi.summaryText(activity);
+        TextView retry = SettingsUi.summaryText(activity);
         retry.setText(StringRef.str("piko_newx_download_first_run_retry"));
         body.addView(retry, new LinearLayout.LayoutParams(-1, -2));
 
@@ -1335,7 +1335,7 @@ public final class InlineDownloadButton {
             ));
         }
 
-        ButtonView cancel = NewXSettingsUi.dialogButton(
+        ButtonView cancel = SettingsUi.dialogButton(
                 activity,
                 StringRef.str("piko_newx_settings_cancel")
         );
@@ -1350,7 +1350,7 @@ public final class InlineDownloadButton {
             DownloadDestination.MediaKind kind,
             String labelResource
     ) {
-        ButtonView button = NewXSettingsUi.dialogButton(activity, StringRef.str(labelResource));
+        ButtonView button = SettingsUi.dialogButton(activity, StringRef.str(labelResource));
         button.setOnClickListener(ignored -> {
             dialog.dismiss();
             activity.startActivity(new Intent(activity, DownloadFolderPickerActivity.class)

@@ -3,7 +3,7 @@ package app.crimera.patches.newx.misc.customsharingdomain
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXTextInput
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.Block
 import app.crimera.bytecode.insertHook

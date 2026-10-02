@@ -25,15 +25,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.settings.SettingsNode;
-import app.morphe.extension.newx.settings.SettingsRegistry;
-import app.morphe.extension.newx.settings.StringSetSetting;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.ChoiceRow;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.settings.SettingsNode;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.StringSetSetting;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.ChoiceRow;
+import app.morphe.extension.crimera.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
@@ -44,7 +44,7 @@ import app.morphe.extension.shared.settings.Setting;
  * up to five native slots underneath; this screen presents those slots as a single destination list.
  */
 @SuppressWarnings("deprecation")
-public final class NavBarEditorFragment extends NewXCustomScreenFragment {
+public final class NavBarEditorFragment extends CustomScreenFragment {
     private static final String DRAG_MIME = "piko/newx-navbar-item";
     private static final String HIDE_BADGES_ID = "newx.content.hidden_navbar_badges";
     private static final long DRAG_SCROLL_FRAME_DELAY_MS = 16L;
@@ -81,11 +81,11 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         Context context = requireContext();
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        root.setBackgroundColor(SettingsUi.backgroundColor(context));
 
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        scroll.setBackgroundColor(SettingsUi.backgroundColor(context));
         scrollView = scroll;
         rowsContainer = new DropIndicatorLayout(context);
         rowsContainer.setOrientation(LinearLayout.VERTICAL);
@@ -93,7 +93,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         scroll.addView(rowsContainer, new ViewGroup.LayoutParams(-1, -2));
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1f));
         restartFooter = buildRestartRow(context);
-        root.addView(NewXSettingsUi.divider(context));
+        root.addView(SettingsUi.divider(context));
         root.addView(restartFooter, new LinearLayout.LayoutParams(-1, -2));
 
         rebuildRows();
@@ -120,8 +120,8 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
 
         Context context = requireContext();
         container.addView(badgeRow(context), new LinearLayout.LayoutParams(-1, -2));
-        container.addView(NewXSettingsUi.divider(context));
-        TextView hint = NewXSettingsUi.summaryText(context);
+        container.addView(SettingsUi.divider(context));
+        TextView hint = SettingsUi.summaryText(context);
         hint.setText(StringRef.str("piko_newx_nav_editor_hint"));
         hint.setPadding(
                 Theme.dpToPx(context, 24f),
@@ -144,7 +144,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
             addRow(container, row);
         }
 
-        container.addView(NewXSettingsUi.divider(context));
+        container.addView(SettingsUi.divider(context));
         availableHeader = addSectionHeader(context, "piko_newx_nav_editor_available");
 
         for (String tabId : orderedTabs) {
@@ -167,7 +167,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
     }
 
     private TextView addSectionHeader(Context context, String titleResourceName) {
-        TextView header = NewXSettingsUi.summaryText(context);
+        TextView header = SettingsUi.summaryText(context);
         header.setText(StringRef.str(titleResourceName));
         header.setTextColor(Theme.primaryAccent(context));
         header.setPadding(
@@ -193,15 +193,15 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
                 Theme.dpToPx(context, 24f),
                 Theme.dpToPx(context, 16f)
         );
-        NewXSettingsUi.applyRippleBackground(root);
+        SettingsUi.applyRippleBackground(root);
         root.setClickable(true);
         root.setFocusable(true);
 
-        TextView title = NewXSettingsUi.titleText(context);
+        TextView title = SettingsUi.titleText(context);
         title.setText(StringRef.str("piko_newx_nav_badges_title"));
         root.addView(title, new LinearLayout.LayoutParams(-1, -2));
 
-        TextView summary = NewXSettingsUi.summaryText(context);
+        TextView summary = SettingsUi.summaryText(context);
         summary.setText(badgeSummary());
         summary.setPadding(0, Theme.dpToPx(context, 6f), 0, 0);
         root.addView(summary, new LinearLayout.LayoutParams(-1, -2));
@@ -250,7 +250,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         options.setOrientation(LinearLayout.VERTICAL);
         dialog.setScrollableBodyView(options);
         for (SettingsNode.ChoiceOption option : node.options) {
-            ChoiceRow row = NewXSettingsUi.choiceRow(
+            ChoiceRow row = SettingsUi.choiceRow(
                     context,
                     option.title.toString(),
                     selected.contains(option.id),
@@ -266,12 +266,12 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
             options.addView(row, new LinearLayout.LayoutParams(-1, -2));
         }
 
-        ButtonView cancel = NewXSettingsUi.dialogButton(
+        ButtonView cancel = SettingsUi.dialogButton(
                 context,
                 StringRef.str("piko_newx_settings_cancel")
         );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
-        ButtonView save = NewXSettingsUi.dialogButton(
+        ButtonView save = SettingsUi.dialogButton(
                 context,
                 StringRef.str("piko_newx_settings_ok")
         );
@@ -347,14 +347,14 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
         ButtonView cancel =
-                NewXSettingsUi.dialogButton(
+                SettingsUi.dialogButton(
                         context,
                         StringRef.str("piko_newx_settings_cancel")
                 );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
 
         ButtonView restart =
-                NewXSettingsUi.dialogButton(
+                SettingsUi.dialogButton(
                         context,
                         StringRef.str("piko_newx_nav_editor_restart_confirm")
                 );
@@ -391,7 +391,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         );
         row.root = root;
 
-        row.handle = NewXSettingsUi.summaryText(context);
+        row.handle = SettingsUi.summaryText(context);
         row.handle.setText("\u2261");
         row.handle.setTextSize(22f);
         row.handle.setGravity(Gravity.CENTER);
@@ -420,7 +420,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
                 new LinearLayout.LayoutParams(Theme.dpToPx(context, 24f), Theme.dpToPx(context, 24f))
         );
 
-        row.titleView = NewXSettingsUi.titleText(context);
+        row.titleView = SettingsUi.titleText(context);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, -2, 1f);
         titleParams.setMarginStart(Theme.dpToPx(context, 16f));
         root.addView(row.titleView, titleParams);
@@ -429,7 +429,7 @@ public final class NavBarEditorFragment extends NewXCustomScreenFragment {
         row.iconView.setOnLongClickListener(dragListener);
         row.titleView.setOnLongClickListener(dragListener);
 
-        NewXSettingsUi.applyRippleBackground(root);
+        SettingsUi.applyRippleBackground(root);
         row.refresh();
     }
 

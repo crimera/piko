@@ -5,6 +5,7 @@ import android.app.Activity;
 import java.util.List;
 
 import app.morphe.extension.crimera.logging.LogExporter;
+import app.morphe.extension.crimera.settings.SettingsActionHandler;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 

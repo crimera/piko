@@ -2,8 +2,8 @@ package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.models.newXTimelineModelAdapterPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.settingStrings
-import app.crimera.patches.newx.settings.toggle
+import app.crimera.patches.settings.settingStrings
+import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.morphe.patcher.patch.bytecodePatch

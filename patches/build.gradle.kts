@@ -32,6 +32,9 @@ dependencies {
     // Typed Dalvik emission (https://github.com/crimera/morphe-bytecode).
     implementation("crimera:morphe-bytecode:0.1.3")
 
+    // Settings DSL and registry injection shared with the other piko patch sets.
+    implementation(libs.piko.patches.settings)
+
     testImplementation(kotlin("test"))
 }
 

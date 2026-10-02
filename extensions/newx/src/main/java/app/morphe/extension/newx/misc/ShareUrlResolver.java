@@ -4,7 +4,7 @@ import java.net.URI;
 import java.net.URL;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 /**
  * Rewrites the host of shared post links to the user-configured domain.

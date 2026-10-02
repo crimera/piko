@@ -21,15 +21,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.settings.SettingsNode;
-import app.morphe.extension.newx.settings.SettingsRegistry;
-import app.morphe.extension.newx.settings.StringSetSetting;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.settings.SettingsNode;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.StringSetSetting;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
@@ -41,7 +41,7 @@ import app.morphe.extension.shared.settings.Setting;
  * shared hidden-items setting; shortcut rows toggle their own settings. The drawer recomposes
  * on open, so changes apply without a restart.
  */
-public final class DrawerEditorFragment extends NewXCustomScreenFragment {
+public final class DrawerEditorFragment extends CustomScreenFragment {
     private static final String HIDDEN_ITEMS_ID = "newx.content.hidden_drawer_items";
 
     private static final class Shortcut {
@@ -92,16 +92,16 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         Context context = requireContext();
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        root.setBackgroundColor(SettingsUi.backgroundColor(context));
 
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        scroll.setBackgroundColor(SettingsUi.backgroundColor(context));
         rowsContainer = new LinearLayout(context);
         rowsContainer.setOrientation(LinearLayout.VERTICAL);
         scroll.addView(rowsContainer, new ViewGroup.LayoutParams(-1, -2));
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1f));
-        root.addView(NewXSettingsUi.divider(context));
+        root.addView(SettingsUi.divider(context));
         root.addView(buildRestartRow(context), new LinearLayout.LayoutParams(-1, -2));
 
         rebuildRows();
@@ -153,14 +153,14 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         dialog.getDialog().setCanceledOnTouchOutside(true);
 
         ButtonView cancel =
-                NewXSettingsUi.dialogButton(
+                SettingsUi.dialogButton(
                         context,
                         StringRef.str("piko_newx_settings_cancel")
                 );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
 
         ButtonView restart =
-                NewXSettingsUi.dialogButton(
+                SettingsUi.dialogButton(
                         context,
                         StringRef.str("piko_newx_drawer_editor_restart_confirm")
                 );
@@ -178,7 +178,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
         container.removeAllViews();
 
         Context context = requireContext();
-        TextView hint = NewXSettingsUi.summaryText(context);
+        TextView hint = SettingsUi.summaryText(context);
         hint.setText(StringRef.str("piko_newx_drawer_editor_hint"));
         hint.setPadding(
                 Theme.dpToPx(context, 24f),
@@ -195,7 +195,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
 
         List<SettingsNode.ChoiceOption> options = sortedDrawerOptions();
         if (!options.isEmpty()) {
-            container.addView(NewXSettingsUi.divider(context));
+            container.addView(SettingsUi.divider(context));
             container.addView(sectionHeader(context, "piko_newx_drawer_editor_items"));
             Set<String> hidden = hiddenItems();
             for (SettingsNode.ChoiceOption option : options) {
@@ -239,7 +239,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
     }
 
     private TextView sectionHeader(Context context, String titleResourceName) {
-        TextView header = NewXSettingsUi.summaryText(context);
+        TextView header = SettingsUi.summaryText(context);
         header.setText(StringRef.str(titleResourceName));
         header.setTextColor(Theme.primaryAccent(context));
         header.setPadding(
@@ -292,7 +292,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
             CharSequence title,
             int drawableRes,
             boolean checked,
-            NewXSettingsUi.CheckedChangeListener listener
+            SettingsUi.CheckedChangeListener listener
     ) {
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.HORIZONTAL);
@@ -304,7 +304,7 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
                 Theme.dpToPx(context, 16f),
                 Theme.dpToPx(context, 8f)
         );
-        NewXSettingsUi.applyRippleBackground(root);
+        SettingsUi.applyRippleBackground(root);
 
         if (drawableRes != 0) {
             ImageView iconView = new ImageView(context);
@@ -326,14 +326,14 @@ public final class DrawerEditorFragment extends NewXCustomScreenFragment {
             );
         }
 
-        TextView titleView = NewXSettingsUi.titleText(context);
+        TextView titleView = SettingsUi.titleText(context);
         titleView.setText(title);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, -2, 1f);
         titleParams.setMarginStart(Theme.dpToPx(context, 16f));
         titleParams.setMarginEnd(Theme.dpToPx(context, 14f));
         root.addView(titleView, titleParams);
 
-        NewXSettingsUi.SwitchControl control = new NewXSettingsUi.SwitchControl(context);
+        SettingsUi.SwitchControl control = new SettingsUi.SwitchControl(context);
         control.setInteractive(true);
         control.setChecked(checked, false);
         control.setOnCheckedChangeListener(listener);

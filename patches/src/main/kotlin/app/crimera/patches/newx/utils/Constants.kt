@@ -23,7 +23,13 @@ internal object Constants {
 
     const val EXTENSION_PACKAGE = "Lapp/morphe/extension/newx"
     const val SETTINGS_PACKAGE = "$EXTENSION_PACKAGE/settings"
-    const val SETTINGS_REGISTRY_DESCRIPTOR = "$SETTINGS_PACKAGE/SettingsRegistry;"
+
+    /**
+     * The registry, renderer and widgets come from piko-extension-settings (dexed into the shared
+     * bundle), not from the NewX extension. NewX keeps only its own host binding and built-ins.
+     */
+    const val SETTINGS_REGISTRY_DESCRIPTOR = app.crimera.patches.settings.SETTINGS_REGISTRY_DESCRIPTOR
+    const val SETTINGS_HOST_DESCRIPTOR = "$SETTINGS_PACKAGE/NewXSettingsHost;"
     const val COMPOSE_SETTINGS_HOOK_DESCRIPTOR = "$SETTINGS_PACKAGE/ComposeSettingsHook;"
     const val PIKO_SETTINGS_ICON_DESCRIPTOR = "$SETTINGS_PACKAGE/PikoSettingsIcon;"
     const val TIMELINE_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/NewXTimelineFilter;"

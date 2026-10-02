@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 /** Filters the initial NewX home timeline tab route array. */
 public final class TimelineTabFilter {

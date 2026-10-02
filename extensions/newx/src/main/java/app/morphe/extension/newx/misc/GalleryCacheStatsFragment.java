@@ -22,16 +22,16 @@ import java.util.List;
 import java.util.Locale;
 
 import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
 
 /** Developer tools screen showing gallery thumbnail cache usage and hit-rate analytics. */
 @SuppressWarnings("deprecation")
-public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
+public final class GalleryCacheStatsFragment extends CustomScreenFragment {
     private LinearLayout rows;
     private TextView status;
     private volatile boolean destroyed;
@@ -47,7 +47,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
 
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        scroll.setBackgroundColor(SettingsUi.backgroundColor(context));
 
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
@@ -55,7 +55,7 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
         content.setPadding(padding, padding, padding, Theme.dpToPx(context, 32f));
         scroll.addView(content, new ViewGroup.LayoutParams(-1, -2));
 
-        status = NewXSettingsUi.summaryText(context);
+        status = SettingsUi.summaryText(context);
         content.addView(status, new LinearLayout.LayoutParams(-1, -2));
 
         rows = new LinearLayout(context);
@@ -167,20 +167,20 @@ public final class GalleryCacheStatsFragment extends NewXCustomScreenFragment {
 
     private void addSection(CharSequence title, List<CharSequence> lines) {
         Context context = requireContext();
-        TextView header = NewXSettingsUi.titleText(context);
+        TextView header = SettingsUi.titleText(context);
         header.setText(title);
         LinearLayout.LayoutParams headerParams = new LinearLayout.LayoutParams(-1, -2);
         headerParams.topMargin = rows.getChildCount() == 0 ? 0 : Theme.dpToPx(context, 16f);
         headerParams.bottomMargin = Theme.dpToPx(context, 4f);
         rows.addView(header, headerParams);
         for (CharSequence line : lines) {
-            TextView row = NewXSettingsUi.summaryText(context);
+            TextView row = SettingsUi.summaryText(context);
             row.setText(line);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
             params.topMargin = Theme.dpToPx(context, 2f);
             rows.addView(row, params);
         }
-        rows.addView(NewXSettingsUi.divider(requireContext()));
+        rows.addView(SettingsUi.divider(requireContext()));
     }
 
     private static List<CharSequence> diskRows(MediaDiskCache.Stats disk) {

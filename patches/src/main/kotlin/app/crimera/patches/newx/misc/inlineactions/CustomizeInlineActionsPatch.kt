@@ -7,11 +7,11 @@ import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionBarModelResolutionPatch
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.choice
-import app.crimera.patches.newx.settings.group
-import app.crimera.patches.newx.settings.injectReadWithRegister
-import app.crimera.patches.newx.settings.multiChoice
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.choice
+import app.crimera.patches.settings.group
+import app.crimera.patches.settings.injectReadWithRegister
+import app.crimera.patches.settings.multiChoice
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR

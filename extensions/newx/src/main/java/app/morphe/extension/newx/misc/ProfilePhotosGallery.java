@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.ui.LoadingIndicatorView;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.newx.utils.NewXUtils;

@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import kotlin.jvm.functions.Function0;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.shared.Utils;
 
 /**

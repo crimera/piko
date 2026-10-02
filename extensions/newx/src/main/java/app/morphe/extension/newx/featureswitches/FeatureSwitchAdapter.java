@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Locale;
 
 import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
+import app.morphe.extension.crimera.settings.SettingsUi;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.newx.utils.NewXUtils;
 
@@ -201,7 +201,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
                 Theme.dpToPx(context, 20f),
                 Theme.dpToPx(context, 10f)
         );
-        NewXSettingsUi.applyRippleBackground(root);
+        SettingsUi.applyRippleBackground(root);
 
         View newDot = new View(context);
         int dotSize = Theme.dpToPx(context, 7f);
@@ -214,7 +214,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
         newDot.setBackground(dotBg);
         root.addView(newDot, dotParams);
 
-        TextView key = NewXSettingsUi.titleText(context);
+        TextView key = SettingsUi.titleText(context);
         key.setSingleLine(true);
         key.setEllipsize(TextUtils.TruncateAt.END);
         LinearLayout.LayoutParams keyParams = new LinearLayout.LayoutParams(
@@ -225,7 +225,7 @@ final class FeatureSwitchAdapter extends BaseAdapter {
         keyParams.setMarginEnd(Theme.dpToPx(context, 12f));
         root.addView(key, keyParams);
 
-        TextView value = NewXSettingsUi.summaryText(context);
+        TextView value = SettingsUi.summaryText(context);
         value.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         value.setSingleLine(true);
         value.setEllipsize(TextUtils.TruncateAt.END);
@@ -292,9 +292,9 @@ final class FeatureSwitchAdapter extends BaseAdapter {
             );
             setClickable(true);
             setFocusable(true);
-            NewXSettingsUi.applyRippleBackground(this);
+            SettingsUi.applyRippleBackground(this);
 
-            title = NewXSettingsUi.summaryText(context);
+            title = SettingsUi.summaryText(context);
             title.setTextSize(14);
             title.setTextColor(Theme.secondaryText(context));
             title.setTypeface(Typeface.create(title.getTypeface(), Typeface.BOLD));

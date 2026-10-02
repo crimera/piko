@@ -1,9 +1,9 @@
 package app.crimera.patches.newx.premium
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
-import app.crimera.patches.newx.settings.injectRead
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.SettingReadRegisterConstraint
+import app.crimera.patches.settings.injectRead
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.hasComposeShape

@@ -7,7 +7,7 @@ import java.util.List;
 
 import app.morphe.extension.newx.filteredreplies.FilteredRepliesDialog;
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.utils.NewXUtils;
 import app.morphe.extension.shared.Utils;
 

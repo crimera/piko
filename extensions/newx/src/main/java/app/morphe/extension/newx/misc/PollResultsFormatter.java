@@ -2,7 +2,7 @@ package app.morphe.extension.newx.misc;
 
 import java.util.Map;
 
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 /** Formats poll labels while the poll is still awaiting the current user's vote. */
 public final class PollResultsFormatter {

@@ -4,11 +4,11 @@ import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.newXPostModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
-import app.crimera.patches.newx.settings.ToggleSettingDefinition
-import app.crimera.patches.newx.settings.injectRead
+import app.crimera.patches.settings.SettingReadRegisterConstraint
+import app.crimera.patches.settings.ToggleSettingDefinition
+import app.crimera.patches.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.bytecode.RegisterLimit

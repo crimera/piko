@@ -4,7 +4,7 @@ import androidx.annotation.Nullable;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 /**
  * Resolves the default reply-sorting mode for NewX tweet detail requests and remembers the

@@ -9,7 +9,7 @@ import java.util.Set;
 
 import app.morphe.extension.newx.filteredreplies.FilteredRepliesStore;
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.postfilter.PostFilterMatcher;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
 import app.morphe.extension.newx.postfilter.VerifiedAccountWhitelistStore;

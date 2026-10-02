@@ -21,7 +21,7 @@ import java.util.Locale;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.newx.settings.SettingsActionHandler;
+import app.morphe.extension.crimera.settings.SettingsActionHandler;
 
 public final class FeatureSwitchImportExport {
     private static final int IMPORT_REQUEST_CODE = 0x5046;

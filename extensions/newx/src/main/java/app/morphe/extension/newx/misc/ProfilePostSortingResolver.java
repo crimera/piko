@@ -1,7 +1,7 @@
 package app.morphe.extension.newx.misc;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 /** Resolves the initial latest/popular mode for profile post timelines. */
 public final class ProfilePostSortingResolver {

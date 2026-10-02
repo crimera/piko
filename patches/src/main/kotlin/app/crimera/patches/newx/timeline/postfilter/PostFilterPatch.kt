@@ -1,8 +1,8 @@
 package app.crimera.patches.newx.timeline.postfilter
 
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.customScreen
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.customScreen
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.timeline.newXTimelineFilterPatch
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X

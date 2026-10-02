@@ -14,9 +14,9 @@ import java.util.Set;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.ui.BottomSheetView;
-import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.crimera.ui.ButtonView;
 import app.morphe.extension.newx.ui.IconView;
 import app.morphe.extension.newx.ui.ListItem;
 import app.morphe.extension.newx.ui.Theme;

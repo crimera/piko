@@ -5,7 +5,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.TypedValue;
 
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.theme.TwitterTheme;
 
 /**

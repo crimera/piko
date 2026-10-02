@@ -18,15 +18,15 @@ import java.util.Set;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 import app.morphe.extension.newx.ui.Theme;
 
 @SuppressWarnings("deprecation")
-public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
+public final class ForYouTopicFilterFragment extends CustomScreenFragment {
     private final Runnable topicCatalogListener = this::onTopicCatalogChanged;
     private LinearLayout topicsContainer;
-    private NewXSettingsUi.SwitchRow masterSwitch;
+    private SettingsUi.SwitchRow masterSwitch;
 
     @Override
     public View onCreateView(
@@ -37,9 +37,9 @@ public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
         Context context = requireContext();
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        root.setBackgroundColor(SettingsUi.backgroundColor(context));
 
-        masterSwitch = NewXSettingsUi.switchRow(
+        masterSwitch = SettingsUi.switchRow(
                 context,
                 StringRef.str("piko_newx_topic_filter_enabled_title"),
                 StringRef.str("piko_newx_topic_filter_enabled_summary"),
@@ -47,7 +47,7 @@ public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
         );
         masterSwitch.setOnCheckedChangeListener(this::setFilteringEnabled);
         root.addView(masterSwitch, new LinearLayout.LayoutParams(-1, -2));
-        root.addView(NewXSettingsUi.divider(context));
+        root.addView(SettingsUi.divider(context));
 
         ScrollView scroll = new ScrollView(context);
         topicsContainer = new LinearLayout(context);
@@ -96,7 +96,7 @@ public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
         topicsContainer.removeAllViews();
         List<ForYouTopicFilter.Topic> topics = ForYouTopicFilter.topicOptions();
         if (topics.isEmpty()) {
-            TextView empty = NewXSettingsUi.summaryText(requireContext());
+            TextView empty = SettingsUi.summaryText(requireContext());
             empty.setText(StringRef.str("piko_newx_topic_filtering_empty"));
             int padding = Theme.dpToPx(requireContext(), 24f);
             empty.setPadding(padding, padding, padding, padding);
@@ -109,7 +109,7 @@ public final class ForYouTopicFilterFragment extends NewXCustomScreenFragment {
                 ForYouTopicFilter.shared().selectedTopicIds.get()
         );
         for (ForYouTopicFilter.Topic topic : topics) {
-            NewXSettingsUi.SwitchRow row = NewXSettingsUi.switchRow(
+            SettingsUi.SwitchRow row = SettingsUi.switchRow(
                     requireContext(),
                     topic.getName(),
                     null,

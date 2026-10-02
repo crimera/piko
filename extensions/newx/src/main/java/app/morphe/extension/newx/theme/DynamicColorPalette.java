@@ -5,7 +5,7 @@ import android.content.res.Resources;
 import android.os.Build;
 
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 /** Builds packed Compose sRGB colors from the host application's Material You resources. */
 public final class DynamicColorPalette {

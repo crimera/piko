@@ -1,5 +1,12 @@
 package app.crimera.patches.newx.settings
 
+import app.crimera.patches.settings.ActionSettingDefinition
+import app.crimera.patches.settings.CustomScreenSettingDefinition
+import app.crimera.patches.settings.MultiChoiceSettingDefinition
+import app.crimera.patches.settings.SettingsGroupDefinition
+import app.crimera.patches.settings.SingleChoiceSettingDefinition
+import app.crimera.patches.settings.TextInputSettingDefinition
+import app.crimera.patches.settings.ToggleSettingDefinition
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.file.Files
@@ -118,13 +125,15 @@ internal object SettingsAggregateValidator {
 
 internal object NewXContributionDiscovery {
     private const val PACKAGE_PATH = "app/crimera/patches/newx"
+    // The index lives in piko-patches-settings; only the NewX patch classes are scanned from this
+    // module's own output.
     private const val INDEX_CLASS =
-        "app.crimera.patches.newx.settings.SettingsContributionIndex"
+        "app.crimera.patches.settings.SettingsContributionIndex"
 
     fun discover(): List<AggregateCatalog> {
         val outputRoot =
             Path.of(
-                SettingsContributionIndex::class.java.protectionDomain.codeSource.location.toURI(),
+                Categories::class.java.protectionDomain.codeSource.location.toURI(),
             )
         val patchClasses = discoverPatchClasses(outputRoot)
         require(patchClasses.isNotEmpty()) {

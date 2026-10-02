@@ -1,20 +1,7 @@
 package app.crimera.patches.newx.settings
 
-internal data class SettingsCategory(
-    val id: String,
-    val titleResourceName: String,
-    val summaryResourceName: String?,
-    val iconResourceName: String?,
-    val order: Int,
-)
-
-internal data class SettingsGroupMetadata(
-    val id: String,
-    val titleResourceName: String,
-    val summaryResourceName: String?,
-    val iconResourceName: String?,
-    val order: Int,
-)
+import app.crimera.patches.settings.SettingsCategory
+import app.crimera.patches.settings.SettingsGroupMetadata
 
 internal object Categories {
     val TIMELINE =

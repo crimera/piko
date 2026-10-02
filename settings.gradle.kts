@@ -67,9 +67,11 @@ if (bytecodeBuild != null) {
     includeBuild(bytecodeBuild)
 }
 
-// Shared in-app code (logging) lives in piko-patches-library and is consumed as
-// app.crimera:piko-extension-library from GitHub Packages. A sibling checkout substitutes the
-// published artifact so library changes can be tested without publishing first.
+// Shared in-app code lives in piko-patches-library and is consumed from GitHub Packages as
+// app.crimera:piko-extension-library (logging), app.crimera:piko-extension-settings (themeable
+// settings UI) and app.crimera:piko-patches-settings (the patch-side DSL that contributes to it).
+// A sibling checkout substitutes the published artifacts so library changes can be tested without
+// publishing first.
 val pikoLibraryBuild = listOf("../piko-patches-library", "piko-patches-library-lib")
     .map { rootDir.resolve(it) }
     .firstOrNull { it.resolve("settings.gradle.kts").exists() }
@@ -77,6 +79,8 @@ if (pikoLibraryBuild != null) {
     includeBuild(pikoLibraryBuild) {
         dependencySubstitution {
             substitute(module("app.crimera:piko-extension-library")).using(project(":extension"))
+            substitute(module("app.crimera:piko-extension-settings")).using(project(":extension-settings"))
+            substitute(module("app.crimera:piko-patches-settings")).using(project(":patches-settings"))
         }
     }
 }

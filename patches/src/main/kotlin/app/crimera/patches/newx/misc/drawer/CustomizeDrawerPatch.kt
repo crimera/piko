@@ -2,18 +2,18 @@ package app.crimera.patches.newx.misc.drawer
 
 import app.crimera.patches.utils.classDefFlatMap
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.MultiChoiceSettingDefinition
-import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
-import app.crimera.patches.newx.settings.SettingsRegistrationState
-import app.crimera.patches.newx.settings.ToggleSettingDefinition
-import app.crimera.patches.newx.settings.choice
-import app.crimera.patches.newx.settings.injectRead
+import app.crimera.patches.settings.MultiChoiceSettingDefinition
+import app.crimera.patches.settings.SettingReadRegisterConstraint
+import app.crimera.patches.settings.SettingsRegistrationState
+import app.crimera.patches.settings.ToggleSettingDefinition
+import app.crimera.patches.settings.choice
+import app.crimera.patches.settings.injectRead
 import app.crimera.patches.newx.settings.newXCustomScreen
 import app.crimera.patches.newx.settings.newXSettingsPatch
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.settings.pikoSettingsIconGetter
 import app.crimera.patches.newx.settings.resolveSettingsIconField
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.newx.misc.navbar.NewXNavBarTabData
 import app.crimera.patches.newx.misc.navbar.NewXTabDataFingerprint

@@ -37,10 +37,10 @@ import java.nio.charset.StandardCharsets;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsActionHandler;
-import app.morphe.extension.newx.settings.SettingsRegistry;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsActionHandler;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
 
 public class UpdateFont {
     public static final String FONT_FILE_NAME = "custom_font.ttf";

@@ -2,6 +2,7 @@ package app.morphe.extension.newx.settings;
 
 import android.app.Activity;
 
+import app.morphe.extension.crimera.settings.SettingsActionHandler;
 import app.morphe.extension.newx.misc.NewXCrashHandler;
 
 /** Developer-tools action that crashes the app to exercise crash logging. */

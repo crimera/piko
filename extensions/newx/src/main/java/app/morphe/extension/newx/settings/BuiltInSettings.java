@@ -1,5 +1,7 @@
 package app.morphe.extension.newx.settings;
 
+import app.morphe.extension.crimera.settings.SettingsRegistry;
+
 final class BuiltInSettings {
     private static final String ADVANCED_CATEGORY_ID = "newx.advanced";
     private static final String BACKUP_RESTORE_GROUP_ID = "newx.advanced.backup_restore";
@@ -31,7 +33,7 @@ final class BuiltInSettings {
                 "piko_newx_backup_title",
                 "piko_newx_backup_summary",
                 100,
-                "Lapp/morphe/extension/newx/settings/SettingsBackupRestore$BackupAction;"
+                "Lapp/morphe/extension/crimera/settings/SettingsBackupRestore$BackupAction;"
         );
         registerAction(
                 BACKUP_RESTORE_GROUP_ID,
@@ -39,7 +41,7 @@ final class BuiltInSettings {
                 "piko_newx_restore_title",
                 "piko_newx_restore_summary",
                 200,
-                "Lapp/morphe/extension/newx/settings/SettingsBackupRestore$RestoreAction;"
+                "Lapp/morphe/extension/crimera/settings/SettingsBackupRestore$RestoreAction;"
         );
     }
 

@@ -4,7 +4,7 @@ import app.crimera.patches.newx.misc.postoptions.SHARE_IMAGE_ACTION
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
 import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.insertHook

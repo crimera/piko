@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
+import app.morphe.extension.crimera.settings.SettingsUi;
 import app.morphe.extension.newx.ui.Theme;
 
 @SuppressWarnings("deprecation")
@@ -94,12 +94,12 @@ final class PostFilterRuleAdapter extends BaseAdapter {
                 Theme.dpToPx(context, 16f),
                 Theme.dpToPx(context, 10f)
         );
-        NewXSettingsUi.applyRippleBackground(root);
+        SettingsUi.applyRippleBackground(root);
 
         LinearLayout labels = new LinearLayout(context);
         labels.setOrientation(LinearLayout.VERTICAL);
-        TextView phrase = NewXSettingsUi.titleText(context);
-        TextView scope = NewXSettingsUi.summaryText(context);
+        TextView phrase = SettingsUi.titleText(context);
+        TextView scope = SettingsUi.summaryText(context);
         scope.setPadding(0, Theme.dpToPx(context, 5f), 0, 0);
         labels.addView(phrase);
         labels.addView(scope);
@@ -107,7 +107,7 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         labelParams.setMarginEnd(Theme.dpToPx(context, 12f));
         root.addView(labels, labelParams);
 
-        NewXSettingsUi.SwitchControl enabled = new NewXSettingsUi.SwitchControl(context);
+        SettingsUi.SwitchControl enabled = new SettingsUi.SwitchControl(context);
         enabled.setInteractive(true);
         enabled.setContentDescription(StringRef.str("piko_newx_post_filtering_rule_enabled"));
         root.addView(enabled, new LinearLayout.LayoutParams(
@@ -129,13 +129,13 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         final LinearLayout root;
         final TextView phrase;
         final TextView scope;
-        final NewXSettingsUi.SwitchControl enabled;
+        final SettingsUi.SwitchControl enabled;
 
         Row(
                 LinearLayout root,
                 TextView phrase,
                 TextView scope,
-                NewXSettingsUi.SwitchControl enabled
+                SettingsUi.SwitchControl enabled
         ) {
             this.root = root;
             this.phrase = phrase;

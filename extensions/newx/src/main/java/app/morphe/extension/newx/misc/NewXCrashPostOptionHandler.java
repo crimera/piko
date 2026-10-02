@@ -3,7 +3,7 @@ package app.morphe.extension.newx.misc;
 import java.util.List;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.shared.Utils;
 
 /** Handles the "Crash app" post-menu option in NewX developer tools. */

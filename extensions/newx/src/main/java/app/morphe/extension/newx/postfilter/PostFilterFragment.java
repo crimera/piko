@@ -20,20 +20,20 @@ import androidx.annotation.Nullable;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 
 @SuppressWarnings("deprecation")
-public final class PostFilterFragment extends NewXCustomScreenFragment implements PostFilterRuleAdapter.Listener {
+public final class PostFilterFragment extends CustomScreenFragment implements PostFilterRuleAdapter.Listener {
     private final PostFilterRuleStore store = PostFilterRuleStore.shared();
     private PostFilterRuleAdapter adapter;
     private TextView emptyState;
     private FrameLayout rulesContainer;
     private View addButton;
-    private NewXSettingsUi.SwitchRow masterSwitch;
+    private SettingsUi.SwitchRow masterSwitch;
 
     @Override
     public View onCreateView(
@@ -43,13 +43,13 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
     ) {
         Context context = requireContext();
         FrameLayout root = new FrameLayout(context);
-        root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        root.setBackgroundColor(SettingsUi.backgroundColor(context));
 
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
         root.addView(content, matchParent());
 
-        masterSwitch = NewXSettingsUi.switchRow(
+        masterSwitch = SettingsUi.switchRow(
                 context,
                 StringRef.str("piko_newx_post_filtering_enabled_title"),
                 null,
@@ -57,7 +57,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         );
         masterSwitch.setOnCheckedChangeListener(this::setFilteringEnabled);
         content.addView(masterSwitch, new LinearLayout.LayoutParams(-1, -2));
-        content.addView(NewXSettingsUi.divider(context));
+        content.addView(SettingsUi.divider(context));
 
         rulesContainer = new FrameLayout(context);
         content.addView(rulesContainer, new LinearLayout.LayoutParams(-1, 0, 1f));
@@ -85,7 +85,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         emptyState.setPadding(emptyPadding, emptyPadding, emptyPadding, emptyPadding);
         rulesContainer.addView(emptyState, matchParent());
 
-        addButton = NewXSettingsUi.floatingActionButton(
+        addButton = SettingsUi.floatingActionButton(
                 context,
                 StringRef.str("piko_newx_post_filtering_add"),
                 ignored -> showRuleDialog(null)
@@ -139,7 +139,7 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
                 0
         );
 
-        EditText phrase = NewXSettingsUi.textInput(
+        EditText phrase = SettingsUi.textInput(
                 context,
                 StringRef.str("piko_newx_post_filtering_phrase_hint"),
                 InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
@@ -147,21 +147,21 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         if (editingRule != null) phrase.setText(editingRule.getPhrase());
         form.addView(phrase, new LinearLayout.LayoutParams(-1, -2));
 
-        NewXSettingsUi.SwitchRow matchContent = scopeSwitch(
+        SettingsUi.SwitchRow matchContent = scopeSwitch(
                 context,
                 "piko_newx_post_filtering_match_content",
                 editingRule == null || editingRule.matchesContent()
         );
         form.addView(matchContent, new LinearLayout.LayoutParams(-1, -2));
 
-        NewXSettingsUi.SwitchRow matchUsernames = scopeSwitch(
+        SettingsUi.SwitchRow matchUsernames = scopeSwitch(
                 context,
                 "piko_newx_post_filtering_match_usernames",
                 editingRule != null && editingRule.matchesUsernames()
         );
         form.addView(matchUsernames, new LinearLayout.LayoutParams(-1, -2));
 
-        TextView validation = NewXSettingsUi.summaryText(context);
+        TextView validation = SettingsUi.summaryText(context);
         validation.setTextColor(Color.rgb(244, 33, 46));
         validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
         validation.setVisibility(View.GONE);
@@ -236,12 +236,12 @@ public final class PostFilterFragment extends NewXCustomScreenFragment implement
         };
     }
 
-    private NewXSettingsUi.SwitchRow scopeSwitch(
+    private SettingsUi.SwitchRow scopeSwitch(
             Context context,
             String textResource,
             boolean checked
     ) {
-        return NewXSettingsUi.switchRow(context, StringRef.str(textResource), null, checked);
+        return SettingsUi.switchRow(context, StringRef.str(textResource), null, checked);
     }
 
     private void refreshRules() {

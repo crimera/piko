@@ -10,7 +10,7 @@ import java.lang.reflect.Modifier;
 
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 public final class TimelineScrollPositionStore {
     private static final String PREFERENCES_NAME = "piko_newx_timeline_positions";

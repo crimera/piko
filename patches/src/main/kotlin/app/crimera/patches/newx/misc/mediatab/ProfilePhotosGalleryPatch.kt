@@ -5,11 +5,11 @@ import app.crimera.patches.newx.misc.inlineactions.newXThumbnailCachePatch
 import app.crimera.patches.utils.flatMapParallel
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
-import app.crimera.patches.newx.settings.customScreen
-import app.crimera.patches.newx.settings.group
+import app.crimera.patches.settings.customScreen
+import app.crimera.patches.settings.group
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.settings.newXToggle
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint

@@ -3,7 +3,7 @@ package app.morphe.extension.newx.misc;
 import java.util.List;
 
 import app.morphe.extension.newx.settings.NewXLogger;
-import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 
 /**
  * Replicates the pre-12.28.0-alpha.04 inline-action bar layout ("classic" spacing) inside the newer

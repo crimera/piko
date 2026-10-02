@@ -2,11 +2,11 @@ package app.crimera.patches.newx.misc.dynamiccolor
 
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
-import app.crimera.patches.newx.settings.choice
-import app.crimera.patches.newx.settings.group
-import app.crimera.patches.newx.settings.settingStrings
-import app.crimera.patches.newx.settings.singleChoice
-import app.crimera.patches.newx.settings.toggle
+import app.crimera.patches.settings.choice
+import app.crimera.patches.settings.group
+import app.crimera.patches.settings.settingStrings
+import app.crimera.patches.settings.singleChoice
+import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.models.firstParameterSlot

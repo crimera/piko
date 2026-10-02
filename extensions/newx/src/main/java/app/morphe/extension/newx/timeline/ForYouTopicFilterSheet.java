@@ -11,10 +11,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import app.morphe.extension.newx.settings.NewXSettingsUi;
+import app.morphe.extension.crimera.settings.SettingsUi;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.ui.BottomSheetView;
-import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.crimera.ui.ButtonView;
 import app.morphe.extension.newx.utils.NewXUtils;
 import app.morphe.extension.shared.Utils;
 
@@ -63,10 +63,10 @@ final class ForYouTopicFilterSheet {
             LinearLayout body = new LinearLayout(activity);
             body.setOrientation(LinearLayout.VERTICAL);
 
-            List<NewXSettingsUi.SwitchRow> rows = new ArrayList<>();
+            List<SettingsUi.SwitchRow> rows = new ArrayList<>();
             ButtonView actionButton = new ButtonView(activity);
             for (ForYouTopicFilter.Topic topic : topics) {
-                NewXSettingsUi.SwitchRow row = NewXSettingsUi.switchRow(
+                SettingsUi.SwitchRow row = SettingsUi.switchRow(
                         activity,
                         topic.getName(),
                         null,
@@ -94,7 +94,7 @@ final class ForYouTopicFilterSheet {
                 try {
                     if (selected.isEmpty()) {
                         selected.clear();
-                        for (NewXSettingsUi.SwitchRow row : rows) {
+                        for (SettingsUi.SwitchRow row : rows) {
                             if (row.isChecked()) row.setChecked(false, true);
                         }
                     }

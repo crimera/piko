@@ -3,7 +3,7 @@ package app.morphe.extension.newx.misc;
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.newx.settings.SettingsValueValidator;
+import app.morphe.extension.crimera.settings.SettingsValueValidator;
 
 public final class CustomSharingDomainValidator implements SettingsValueValidator {
     @Override

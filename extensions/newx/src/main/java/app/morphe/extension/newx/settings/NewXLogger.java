@@ -6,6 +6,7 @@ import java.util.List;
 
 import app.morphe.extension.crimera.logging.LogSanitizer;
 import app.morphe.extension.crimera.logging.PikoLogger;
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.settings.BooleanSetting;
 import app.morphe.extension.shared.settings.Setting;
@@ -32,6 +33,11 @@ public final class NewXLogger {
     private static volatile Setting<?> cachedServerLoggingSetting;
 
     private NewXLogger() {
+    }
+
+    /** The shared logger instance, handed to the settings host so its diagnostics follow the same gates. */
+    static PikoLogger logger() {
+        return LOGGER;
     }
 
     public static boolean isLoggingEnabled() {

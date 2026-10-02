@@ -25,14 +25,14 @@ import java.util.List;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 import app.morphe.extension.newx.ui.Theme;
 
 @SuppressWarnings("deprecation")
-public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFragment {
+public final class VerifiedAccountWhitelistFragment extends CustomScreenFragment {
     private final VerifiedAccountWhitelistStore store = VerifiedAccountWhitelistStore.shared();
     private ArrayAdapter<String> adapter;
     private TextView emptyState;
@@ -45,13 +45,13 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
     ) {
         Context context = requireContext();
         FrameLayout root = new FrameLayout(context);
-        root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        root.setBackgroundColor(SettingsUi.backgroundColor(context));
 
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
         root.addView(content, matchParent());
 
-        TextView summary = NewXSettingsUi.summaryText(context);
+        TextView summary = SettingsUi.summaryText(context);
         summary.setText(StringRef.str("piko_newx_verified_account_whitelist_summary"));
         summary.setPadding(
                 Theme.dpToPx(context, 24f),
@@ -89,7 +89,7 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
         emptyState.setPadding(emptyPadding, emptyPadding, emptyPadding, emptyPadding);
         listContainer.addView(emptyState, matchParent());
 
-        View addButton = NewXSettingsUi.floatingActionButton(
+        View addButton = SettingsUi.floatingActionButton(
                 context,
                 StringRef.str("piko_newx_verified_account_whitelist_add"),
                 ignored -> showAccountDialog()
@@ -132,14 +132,14 @@ public final class VerifiedAccountWhitelistFragment extends NewXCustomScreenFrag
                 0
         );
 
-        EditText account = NewXSettingsUi.textInput(
+        EditText account = SettingsUi.textInput(
                 context,
                 StringRef.str("piko_newx_verified_account_whitelist_account_hint"),
                 InputType.TYPE_CLASS_TEXT
         );
         form.addView(account, new LinearLayout.LayoutParams(-1, -2));
 
-        TextView validation = NewXSettingsUi.summaryText(context);
+        TextView validation = SettingsUi.summaryText(context);
         validation.setTextColor(Color.rgb(244, 33, 46));
         validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
         validation.setVisibility(View.GONE);

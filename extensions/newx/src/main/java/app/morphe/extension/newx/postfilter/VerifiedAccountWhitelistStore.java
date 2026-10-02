@@ -5,7 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import app.morphe.extension.newx.settings.StringSetSetting;
+import app.morphe.extension.crimera.settings.StringSetSetting;
 
 public final class VerifiedAccountWhitelistStore {
     private static final String KEY = "newx.content.verified_account_whitelist";

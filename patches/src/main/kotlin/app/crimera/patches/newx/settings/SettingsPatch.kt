@@ -1,9 +1,11 @@
 package app.crimera.patches.newx.settings
 
+import app.crimera.patches.settings.insertSettingsStartupHook
+import app.crimera.patches.settings.prepareSettingsRegistryLoad
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
-import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
+import app.crimera.patches.newx.utils.Constants.SETTINGS_HOST_DESCRIPTOR
 import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
@@ -145,41 +147,14 @@ internal val newXSettingsPatch =
             }
 
             // sharedExtensionPatch finalizes after this patch and inserts Utils.setContext at
-            // index zero, so registry loading always follows shared context initialization.
-            newXInitHook.fingerprint.method.insertHook(
-                index = 0,
-                // The old `addInstruction` was a plain insertion, so an incoming label stays on the
-                // original first instruction.
-                relocateBranchTargets = false,
-            ) {
-                invokeStatic(methodReference(SETTINGS_REGISTRY_LOAD_DESCRIPTOR))
-            }
+            // index zero, so registry loading always follows shared context initialization. The
+            // host (logger, resource prefix, theme, built-ins) must be installed before the load.
+            insertSettingsStartupHook(
+                method = newXInitHook.fingerprint.method,
+                hostInstallDescriptor = SETTINGS_HOST_INSTALL_DESCRIPTOR,
+            )
         }
     }
-
-context(context: BytecodePatchContext)
-private fun prepareSettingsRegistryLoad() {
-    val registryClass = context.mutableClassDefBy(SETTINGS_REGISTRY_DESCRIPTOR)
-    val loadMethod =
-        registryClass.methods.singleOrNull { method ->
-            method.name == "load" &&
-                method.parameterTypes.isEmpty() &&
-                method.returnType == "V"
-        } ?: error("NewX SettingsRegistry.load() was not found")
-    val registerCount = loadMethod.implementation?.registerCount ?: 0
-    val preparedLoadMethod =
-        if (registerCount >= SETTINGS_REGISTRATION_REGISTER_COUNT) {
-            loadMethod
-        } else {
-            loadMethod.cloneMutable(
-                additionalRegisters = SETTINGS_REGISTRATION_REGISTER_COUNT - registerCount,
-            ).also { expandedMethod ->
-                registryClass.methods.remove(loadMethod)
-                registryClass.methods.add(expandedMethod)
-            }
-        }
-    SettingsRegistrationState.prepare(context, preparedLoadMethod)
-}
 
 context(_: BytecodePatchContext)
 internal fun resolveSettingsIconField(iconType: String): FieldReference {
@@ -213,8 +188,6 @@ internal fun resolveSettingsIconField(iconType: String): FieldReference {
     return fields.single()
 }
 
-internal const val SETTINGS_REGISTRATION_REGISTER_COUNT = 6
-
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val IS_ADDITIONAL_RESOURCES_TITLE_DESCRIPTOR =
@@ -223,7 +196,7 @@ private const val GET_SETTINGS_TITLE_DESCRIPTOR =
     "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsTitle()$STRING_DESCRIPTOR"
 private const val GET_SETTINGS_CLICK_HANDLER_DESCRIPTOR =
     "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()$FUNCTION0_DESCRIPTOR"
-private const val SETTINGS_REGISTRY_LOAD_DESCRIPTOR = "$SETTINGS_REGISTRY_DESCRIPTOR->load()V"
+private const val SETTINGS_HOST_INSTALL_DESCRIPTOR = "$SETTINGS_HOST_DESCRIPTOR->install()V"
 
 /** The row override's early-out label, kept from the smali block for traceability. */
 private const val SETTINGS_ORIGINAL_LABEL = "piko_newx_settings_original"

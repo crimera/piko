@@ -3,8 +3,8 @@ package app.crimera.patches.newx.timeline
 import app.crimera.patches.newx.models.resolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.newXPostMediaModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.injectReadWithDefault
-import app.crimera.patches.newx.settings.settingStrings
+import app.crimera.patches.settings.injectReadWithDefault
+import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.Target

@@ -7,8 +7,8 @@ import app.crimera.patches.newx.models.resolvedNewXInlineActionBarLayout
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXSettings
-import app.crimera.patches.newx.settings.settingStrings
-import app.crimera.patches.newx.settings.toggle
+import app.crimera.patches.settings.settingStrings
+import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.bytecode.insertHook

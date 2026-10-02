@@ -14,6 +14,9 @@ piko-extension-library = "0.2.0"
 morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }
 morphe-extensions-library = { module = "app.morphe:morphe-extensions-library", version.ref = "morphe-patches-library" }
 piko-extension-library = { module = "app.crimera:piko-extension-library", version.ref = "piko-extension-library" }
+# Released together with piko-extension-library, so both follow one version.
+piko-extension-settings = { module = "app.crimera:piko-extension-settings", version.ref = "piko-extension-library" }
+piko-patches-settings = { module = "app.crimera:piko-patches-settings", version.ref = "piko-extension-library" }
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }

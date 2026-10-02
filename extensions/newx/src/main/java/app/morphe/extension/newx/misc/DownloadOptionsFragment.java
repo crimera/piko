@@ -18,11 +18,11 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
 import app.morphe.extension.newx.ui.IconView;
 import app.morphe.extension.newx.ui.ListItem;
 import app.morphe.extension.newx.ui.Theme;
@@ -39,7 +39,7 @@ import app.morphe.extension.shared.Utils;
  * matching the media picker and the other custom screens.
  */
 @SuppressWarnings("deprecation")
-public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
+public final class DownloadOptionsFragment extends CustomScreenFragment {
     private ListItem imagesRow;
     private ListItem videosRow;
     private ListItem filenameRow;
@@ -56,7 +56,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
 
         ScrollView scroll = new ScrollView(context);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        scroll.setBackgroundColor(SettingsUi.backgroundColor(context));
 
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
@@ -164,12 +164,12 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
         form.setOrientation(LinearLayout.VERTICAL);
         form.setPadding(Theme.dpToPx(activity, 24f), 0, Theme.dpToPx(activity, 24f), 0);
 
-        EditText input = NewXSettingsUi.textInput(activity, null, InputType.TYPE_CLASS_TEXT);
+        EditText input = SettingsUi.textInput(activity, null, InputType.TYPE_CLASS_TEXT);
         input.setText(DownloadSettings.filenameTemplate());
         input.setSelection(input.length());
         form.addView(input, new LinearLayout.LayoutParams(-1, -2));
 
-        TextView preview = NewXSettingsUi.summaryText(activity);
+        TextView preview = SettingsUi.summaryText(activity);
         LinearLayout.LayoutParams previewParams = new LinearLayout.LayoutParams(-1, -2);
         previewParams.topMargin = Theme.dpToPx(activity, 12f);
         form.addView(preview, previewParams);
@@ -210,13 +210,13 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
                 DownloadFileName.preview(input.getText().toString())
         ));
 
-        ButtonView cancel = NewXSettingsUi.dialogButton(
+        ButtonView cancel = SettingsUi.dialogButton(
                 activity,
                 StringRef.str("piko_newx_settings_cancel")
         );
         cancel.setOnClickListener(ignored -> dialog.dismiss());
 
-        ButtonView reset = NewXSettingsUi.dialogButton(
+        ButtonView reset = SettingsUi.dialogButton(
                 activity,
                 StringRef.str("piko_newx_download_options_filename_reset")
         );
@@ -225,7 +225,7 @@ public final class DownloadOptionsFragment extends NewXCustomScreenFragment {
             input.setSelection(input.length());
         });
 
-        ButtonView save = NewXSettingsUi.dialogButton(
+        ButtonView save = SettingsUi.dialogButton(
                 activity,
                 StringRef.str("piko_newx_settings_ok")
         );

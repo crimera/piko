@@ -31,15 +31,15 @@ import java.util.Set;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.newx.settings.NewXSettingsActivity;
-import app.morphe.extension.newx.settings.NewXSettingsUi;
-import app.morphe.extension.newx.ui.ButtonView;
-import app.morphe.extension.newx.ui.DialogView;
+import app.morphe.extension.crimera.settings.SettingsUi;
+import app.morphe.extension.crimera.ui.ButtonView;
+import app.morphe.extension.crimera.ui.DialogView;
 import app.morphe.extension.newx.ui.Theme;
-import app.morphe.extension.newx.settings.NewXCustomScreenFragment;
+import app.morphe.extension.crimera.settings.CustomScreenFragment;
 import app.morphe.extension.newx.utils.NewXUtils;
 
 @SuppressWarnings("deprecation")
-public final class FeatureSwitchFragment extends NewXCustomScreenFragment implements FeatureSwitchAdapter.Listener {
+public final class FeatureSwitchFragment extends CustomScreenFragment implements FeatureSwitchAdapter.Listener {
     private final FeatureSwitchStore store = FeatureSwitchStore.shared();
     private final Set<String> sessionNewKeys = new HashSet<>();
     private boolean sessionInitialized;
@@ -64,20 +64,20 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
 
         Context context = requireContext();
         FrameLayout root = new FrameLayout(context);
-        root.setBackgroundColor(NewXSettingsUi.backgroundColor(context));
+        root.setBackgroundColor(SettingsUi.backgroundColor(context));
 
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
         root.addView(content, matchParent());
 
-        search = NewXSettingsUi.textInput(
+        search = SettingsUi.textInput(
                 context,
                 StringRef.str("piko_newx_feature_switch_search_hint"),
                 InputType.TYPE_CLASS_TEXT
         );
         search.setSingleLine(true);
         content.addView(search, new LinearLayout.LayoutParams(-1, -2));
-        content.addView(NewXSettingsUi.divider(context));
+        content.addView(SettingsUi.divider(context));
 
         FrameLayout listContainer = new FrameLayout(context);
         content.addView(listContainer, new LinearLayout.LayoutParams(-1, 0, 1f));
@@ -99,7 +99,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         emptyState.setPadding(emptyPadding, emptyPadding, emptyPadding, emptyPadding);
         listContainer.addView(emptyState, matchParent());
 
-        View addButton = NewXSettingsUi.floatingActionButton(
+        View addButton = SettingsUi.floatingActionButton(
                 context,
                 StringRef.str("piko_newx_feature_switch_add"),
                 ignored -> showAddDialog()
@@ -165,7 +165,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         Context context = requireContext();
         LinearLayout form = dialogForm(context);
 
-        EditText key = NewXSettingsUi.textInput(
+        EditText key = SettingsUi.textInput(
                 context,
                 StringRef.str("piko_newx_feature_switch_key_hint"),
                 InputType.TYPE_CLASS_TEXT
@@ -183,7 +183,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
                 0
         );
 
-        TextView typeTitle = NewXSettingsUi.titleText(context);
+        TextView typeTitle = SettingsUi.titleText(context);
         typeTitle.setText(StringRef.str("piko_newx_feature_switch_value_type"));
         typeTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         typeTitle.setSingleLine(true);
@@ -262,10 +262,10 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
         Context context = requireContext();
         LinearLayout form = dialogForm(context);
 
-        NewXSettingsUi.SwitchRow booleanValue = null;
+        SettingsUi.SwitchRow booleanValue = null;
         EditText textValue = null;
         if (featureType == FeatureSwitchStore.ValueType.BOOLEAN) {
-            booleanValue = NewXSettingsUi.switchRow(
+            booleanValue = SettingsUi.switchRow(
                     context,
                     StringRef.str("piko_newx_feature_switch_boolean_value"),
                     null,
@@ -274,7 +274,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
             booleanValue.setBackgroundColor(Color.TRANSPARENT);
             form.addView(booleanValue, new LinearLayout.LayoutParams(-1, -2));
         } else {
-            textValue = NewXSettingsUi.textInput(
+            textValue = SettingsUi.textInput(
                     context,
                     editorHint(featureType),
                     inputType(featureType)
@@ -317,7 +317,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
                 ButtonView.ButtonStyle.TEXT,
                 StringRef.str("piko_newx_feature_switch_save")
         );
-        NewXSettingsUi.SwitchRow finalBooleanValue = booleanValue;
+        SettingsUi.SwitchRow finalBooleanValue = booleanValue;
         EditText finalTextValue = textValue;
         save.setOnClickListener(ignored -> saveValue(
                 dialog,
@@ -345,7 +345,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
     }
 
     private TextView validationText(Context context) {
-        TextView validation = NewXSettingsUi.summaryText(context);
+        TextView validation = SettingsUi.summaryText(context);
         validation.setTextColor(Color.rgb(244, 33, 46));
         validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
         validation.setVisibility(View.GONE);
@@ -361,7 +361,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
             DialogView dialog,
             String featureKey,
             FeatureSwitchStore.ValueType featureType,
-            @Nullable NewXSettingsUi.SwitchRow booleanValue,
+            @Nullable SettingsUi.SwitchRow booleanValue,
             @Nullable EditText textValue,
             TextView validation
     ) {
@@ -378,7 +378,7 @@ public final class FeatureSwitchFragment extends NewXCustomScreenFragment implem
 
     private Object parseValue(
             FeatureSwitchStore.ValueType type,
-            @Nullable NewXSettingsUi.SwitchRow booleanValue,
+            @Nullable SettingsUi.SwitchRow booleanValue,
             @Nullable EditText textValue
     ) {
         if (type == FeatureSwitchStore.ValueType.BOOLEAN) {
