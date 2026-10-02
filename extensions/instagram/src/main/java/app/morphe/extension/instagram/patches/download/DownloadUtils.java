@@ -111,6 +111,7 @@ public class DownloadUtils {
         });
 
         dialog.setTitle(title);
+        dialog.setNegativeButton(str("piko_close"), (d, which) -> d.dismiss());
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 
