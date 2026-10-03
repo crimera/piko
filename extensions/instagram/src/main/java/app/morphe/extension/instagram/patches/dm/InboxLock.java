@@ -13,7 +13,11 @@ import android.app.Application;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Build;
@@ -38,6 +42,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Logger;
@@ -228,6 +233,13 @@ public final class InboxLock {
         unlock.setTextColor(UI.getThemedColour("igds_color_primary_text"));
         unlock.setTextSize(16);
         unlock.setGravity(Gravity.CENTER);
+        GradientDrawable highlight = new GradientDrawable();
+        highlight.setColor(InstagramPreferenceStyle.pressedBackgroundColor());
+        highlight.setCornerRadius(Dim.dp48);
+        StateListDrawable background = new StateListDrawable();
+        background.addState(new int[]{android.R.attr.state_pressed}, highlight);
+        background.addState(new int[]{}, new ColorDrawable(Color.TRANSPARENT));
+        unlock.setBackground(background);
         unlock.setPadding(Dim.dp24, Dim.dp16, Dim.dp24, Dim.dp16);
         unlock.setOnClickListener(v -> authenticate(activity, null));
         column.addView(unlock, new LinearLayout.LayoutParams(
