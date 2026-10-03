@@ -1,6 +1,6 @@
 package app.crimera.patches.newx.misc.navbar
 
-import app.crimera.patches.utils.classDefFlatMap
+import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.newx.misc.drawer.isDrawerRowRenderer
 import app.crimera.patches.newx.misc.drawer.isStringResourceLookup
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
@@ -12,15 +12,15 @@ import app.crimera.patches.newx.settings.newXMultiChoice
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.NAV_BAR_FILTER_DESCRIPTOR
-import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
+import app.crimera.patches.common.OBJECT_MOVE_OPCODES
 import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.newx.utils.destinationRegisterOrNull
-import app.crimera.patches.newx.utils.requireExactlyOne
-import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
-import app.crimera.patches.newx.utils.valueReachesRegister
+import app.crimera.patches.common.destinationRegisterOrNull
+import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
+import app.crimera.patches.common.valueReachesRegister
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions

@@ -6,9 +6,9 @@
 
 package app.crimera.patches.instagram.links.privacy
 
+import app.crimera.patches.common.declaredParameterRegister
+import app.crimera.patches.common.parameterRegisterStart
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
-import app.crimera.patches.shared.declaredParameterRegister
-import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions

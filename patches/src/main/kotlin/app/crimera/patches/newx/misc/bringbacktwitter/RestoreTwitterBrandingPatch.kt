@@ -7,7 +7,7 @@
 package app.crimera.patches.newx.misc.bringbacktwitter
 
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.common.requireAtMostOne
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch

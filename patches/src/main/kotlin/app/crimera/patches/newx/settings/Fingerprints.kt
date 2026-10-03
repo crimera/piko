@@ -1,6 +1,6 @@
 package app.crimera.patches.newx.settings
 
-import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.common.requireAtMostOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.methodCall
 import com.android.tools.smali.dexlib2.Opcode

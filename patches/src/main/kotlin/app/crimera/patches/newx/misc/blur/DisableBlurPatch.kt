@@ -13,7 +13,7 @@ import app.crimera.patches.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.common.requireExactlyOne
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.patches.utils.scopedMatchAll

@@ -1,7 +1,7 @@
 package app.crimera.patches.newx.premium
 
+import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.newx.models.fieldForToStringLabel
-import app.crimera.patches.newx.utils.requireAtMostOne
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string

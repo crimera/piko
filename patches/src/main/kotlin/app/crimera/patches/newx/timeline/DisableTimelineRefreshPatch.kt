@@ -6,12 +6,12 @@ import app.crimera.patches.settings.injectRead
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.crimera.patches.newx.utils.isAssignableTo
+import app.crimera.patches.common.isAssignableTo
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.newx.utils.requireAtMostOne
+import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately

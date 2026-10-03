@@ -68,30 +68,35 @@ Jetpack Compose and R8 introduce continuous bytecode churn across app versions:
 
 ### Resolver cardinality helpers
 
-Use the shared helpers for NewX resolver candidate collections:
-`patches/src/main/kotlin/app/crimera/patches/newx/utils/ResolverCardinality.kt`.
+Use the shared helpers for NewX resolver candidate collections. They live in `piko-patches-library`
+(package `app.crimera.patches.common`, alongside `isAssignableTo`, `hasComposeShape`, the instruction
+data-flow helpers and `classDefFlatMap`); a fix to one belongs in that repository, followed by a version
+bump in `gradle/libs.versions.toml`.
 
 ```kotlin
-internal fun <T> requireExactlyOne(
+fun <T> requireExactlyOne(
     label: String,
     candidates: Collection<T>,
     describe: (T) -> String = { candidate -> candidate.toString() },
 ): T
 
-internal fun <T> requireAtMostOne(
+fun <T> requireAtMostOne(
     label: String,
     candidates: Collection<T>,
     describe: (T) -> String = { candidate -> candidate.toString() },
 ): T?
 ```
 
-They fail with `PatchException` containing the label, cardinality, and candidate descriptions. Validate with `./gradlew :patches:lintNewxResolvers`; use `-PnewxResolverLintReportOnly=true` for report-only audits. If instruction order is intentionally contractual, document the exception beside the selection with a linter directive such as `// newx-resolver-lint: allow instruction-order raw-first because bytecode order is the contract`.
+They fail with `PatchException` containing the label, cardinality, and candidate descriptions. Validate with `./gradlew :patches:lintNewxResolvers` (it runs the library's `ResolverLinter`); use `-PnewxResolverLintReportOnly=true` for report-only audits. If instruction order is intentionally contractual, document the exception beside the selection with a linter directive such as `// newx-resolver-lint: allow instruction-order raw-first because bytecode order is the contract`.
 
 - Omit the optional `describe` argument unless the candidate's default `toString()` is not useful. Keep resolver call sites concise while retaining a semantic `label`.
 
 ### NewX resolver linter experiment process
 
-- Treat `NewXResolverLinterTest.kt` as the executable fixture corpus. Every real false positive, false negative, or resolver failure discovered during an agent session must become a focused regression fixture with an explicit expected finding or non-finding.
+- The linter rules and cardinality helpers live in `piko-patches-library`, with their generic fixtures. Treat
+  `NewXResolverLinterTest.kt` as this repository's executable fixture corpus: it runs the library's linter on
+  NewX resolver code.
+- Every real false positive, false negative, or resolver failure discovered during an agent session must become a focused regression fixture, with an explicit expected finding or non-finding, in the repository that owns the code.
 - Keep benchmark history in `docs/newx-resolver-linter-benchmark.md`, not in this file. Record the linter commit, fixture-corpus revision, total findings, findings by rule, known unsafe cases, detected unsafe cases, false positives, false negatives, runtime, and validation commands.
 - When changing the linter or cardinality helpers, run the full NewX test suite and `:patches:lintNewxResolvers`; compare the candidate against the previous committed baseline on the same fixture corpus.
 - Preserve separate safe and unsafe fixture sets. A lower finding count is not automatically better: improvements require increased unsafe-case detection without new false positives or changed optional-fallback behavior.

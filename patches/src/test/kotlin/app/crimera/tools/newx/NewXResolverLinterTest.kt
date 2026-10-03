@@ -10,6 +10,7 @@ import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
 import app.crimera.patches.newx.timeline.readsArrayListFromParameter
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
+import app.crimera.tools.lint.ResolverLinter
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -62,7 +63,7 @@ class NewXResolverLinterTest {
     fun `raw candidate selection is rejected`() {
         val findings = lint("val selected = candidates.first()")
 
-        assertEquals(listOf(NewXResolverLinter.Rule.RAW_FIRST), findings.map { it.rule })
+        assertEquals(listOf(ResolverLinter.Rule.RAW_FIRST), findings.map { it.rule })
     }
 
     @Test
@@ -77,8 +78,8 @@ class NewXResolverLinterTest {
 
         assertEquals(
             setOf(
-                NewXResolverLinter.Rule.RAW_FIND,
-                NewXResolverLinter.Rule.RAW_LAST,
+                ResolverLinter.Rule.RAW_FIND,
+                ResolverLinter.Rule.RAW_LAST,
             ),
             findings.map { it.rule }.toSet(),
         )
@@ -120,7 +121,7 @@ class NewXResolverLinterTest {
     fun `unguarded indexed candidate access is rejected`() {
         val findings = lint("val selected = candidates[0]")
 
-        assertEquals(listOf(NewXResolverLinter.Rule.RAW_INDEX), findings.map { it.rule })
+        assertEquals(listOf(ResolverLinter.Rule.RAW_INDEX), findings.map { it.rule })
     }
 
     @Test
@@ -145,10 +146,10 @@ class NewXResolverLinterTest {
 
         assertEquals(
             setOf(
-                NewXResolverLinter.Rule.RAW_FIRST,
-                NewXResolverLinter.Rule.RAW_LAST,
-                NewXResolverLinter.Rule.RAW_FIND,
-                NewXResolverLinter.Rule.RAW_SINGLE,
+                ResolverLinter.Rule.RAW_FIRST,
+                ResolverLinter.Rule.RAW_LAST,
+                ResolverLinter.Rule.RAW_FIND,
+                ResolverLinter.Rule.RAW_SINGLE,
             ),
             findings.map { it.rule }.toSet(),
         )
@@ -158,7 +159,7 @@ class NewXResolverLinterTest {
     fun `singleOrNull safe call is rejected as nullable fallthrough`() {
         val findings = lint("candidates.singleOrNull()?.patch()")
 
-        assertEquals(listOf(NewXResolverLinter.Rule.NULLABLE_SINGLE), findings.map { it.rule })
+        assertEquals(listOf(ResolverLinter.Rule.NULLABLE_SINGLE), findings.map { it.rule })
     }
 
     @Test
@@ -182,7 +183,7 @@ class NewXResolverLinterTest {
                 """.trimIndent(),
             )
 
-        assertEquals(listOf(NewXResolverLinter.Rule.NULLABLE_SINGLE), findings.map { it.rule })
+        assertEquals(listOf(ResolverLinter.Rule.NULLABLE_SINGLE), findings.map { it.rule })
     }
 
     @Test
@@ -197,8 +198,8 @@ class NewXResolverLinterTest {
 
         assertEquals(
             setOf(
-                NewXResolverLinter.Rule.NULLABLE_FIRST,
-                NewXResolverLinter.Rule.NULLABLE_LAST,
+                ResolverLinter.Rule.NULLABLE_FIRST,
+                ResolverLinter.Rule.NULLABLE_LAST,
             ),
             findings.map { it.rule }.toSet(),
         )
@@ -244,9 +245,9 @@ class NewXResolverLinterTest {
                 """.trimIndent(),
             )
 
-        assertTrue(findings.any { it.rule == NewXResolverLinter.Rule.MAP_NOT_NULL }, findings.toString())
+        assertTrue(findings.any { it.rule == ResolverLinter.Rule.MAP_NOT_NULL }, findings.toString())
         assertTrue(findings.size == 2, "actual=$findings")
-        assertEquals(1, findings.first { it.rule == NewXResolverLinter.Rule.MAP_NOT_NULL }.line)
+        assertEquals(1, findings.first { it.rule == ResolverLinter.Rule.MAP_NOT_NULL }.line)
     }
 
     @Test
@@ -258,7 +259,7 @@ class NewXResolverLinterTest {
                 """.trimIndent(),
             )
 
-        assertTrue(findings.any { it.rule == NewXResolverLinter.Rule.MAP_NOT_NULL }, findings.toString())
+        assertTrue(findings.any { it.rule == ResolverLinter.Rule.MAP_NOT_NULL }, findings.toString())
     }
 
     @Test
@@ -329,7 +330,7 @@ class NewXResolverLinterTest {
                 """.trimIndent(),
             )
 
-        assertEquals(listOf(NewXResolverLinter.Rule.RAW_FIRST), findings.map { it.rule })
+        assertEquals(listOf(ResolverLinter.Rule.RAW_FIRST), findings.map { it.rule })
     }
 
     @Test
@@ -361,7 +362,7 @@ class NewXResolverLinterTest {
             )
 
         assertEquals(
-            listOf(NewXResolverLinter.Rule.TYPED_HOOK_POLICY),
+            listOf(ResolverLinter.Rule.TYPED_HOOK_POLICY),
             findings.map { it.rule },
         )
         assertEquals(1, findings.single().line)
@@ -431,7 +432,7 @@ class NewXResolverLinterTest {
             )
 
         assertEquals(
-            listOf(NewXResolverLinter.Rule.TYPED_HOOK_POLICY),
+            listOf(ResolverLinter.Rule.TYPED_HOOK_POLICY),
             findings.map { it.rule },
         )
     }
@@ -454,8 +455,8 @@ class NewXResolverLinterTest {
                 """.trimIndent(),
             )
 
-        assertEquals(listOf(NewXResolverLinter.Rule.RIGID_SIGNATURE), findings.map { it.rule })
-        assertTrue(!NewXResolverLinter.Rule.RIGID_SIGNATURE.advisory)
+        assertEquals(listOf(ResolverLinter.Rule.RIGID_SIGNATURE), findings.map { it.rule })
+        assertTrue(!ResolverLinter.Rule.RIGID_SIGNATURE.advisory)
     }
 
     @Test
@@ -486,10 +487,10 @@ class NewXResolverLinterTest {
         val findings = lint("""if (method.returnType == "Ljava/util/Set;") return candidate""")
 
         assertEquals(
-            listOf(NewXResolverLinter.Rule.EXACT_INTERFACE_TYPE),
+            listOf(ResolverLinter.Rule.EXACT_INTERFACE_TYPE),
             findings.map { it.rule },
         )
-        assertTrue(!NewXResolverLinter.Rule.EXACT_INTERFACE_TYPE.advisory)
+        assertTrue(!ResolverLinter.Rule.EXACT_INTERFACE_TYPE.advisory)
     }
 
     @Test
@@ -511,10 +512,10 @@ class NewXResolverLinterTest {
         val findings = lint("val feeds = instruction.registersUsed.contains(prefetchRegister)")
 
         assertEquals(
-            listOf(NewXResolverLinter.Rule.SINGLE_HOP_REGISTER),
+            listOf(ResolverLinter.Rule.SINGLE_HOP_REGISTER),
             findings.map { it.rule },
         )
-        assertTrue(!NewXResolverLinter.Rule.SINGLE_HOP_REGISTER.advisory)
+        assertTrue(!ResolverLinter.Rule.SINGLE_HOP_REGISTER.advisory)
     }
 
     @Test
@@ -551,8 +552,8 @@ class NewXResolverLinterTest {
 
     @Test
     fun `existing cardinality rules remain gating`() {
-        assertTrue(!NewXResolverLinter.Rule.RAW_FIRST.advisory)
-        assertTrue(!NewXResolverLinter.Rule.TYPED_HOOK_POLICY.advisory)
+        assertTrue(!ResolverLinter.Rule.RAW_FIRST.advisory)
+        assertTrue(!ResolverLinter.Rule.TYPED_HOOK_POLICY.advisory)
     }
 
     @Test
@@ -569,8 +570,8 @@ class NewXResolverLinterTest {
             }
             root.resolve("Ignored.java").writeText("val selected = candidates.first()")
 
-            val firstRun = NewXResolverLinter.lintDirectory(root)
-            val secondRun = NewXResolverLinter.lintDirectory(root)
+            val firstRun = ResolverLinter.lintDirectory(root)
+            val secondRun = ResolverLinter.lintDirectory(root)
 
             assertEquals(firstRun, secondRun)
             assertEquals(
@@ -588,10 +589,10 @@ class NewXResolverLinterTest {
         try {
             val exception =
                 assertFailsWith<IllegalArgumentException> {
-                    NewXResolverLinter.lintDirectory(root)
+                    ResolverLinter.lintDirectory(root)
                 }
 
-            assertTrue(exception.message.orEmpty().contains("No Kotlin NewX resolver sources"))
+            assertTrue(exception.message.orEmpty().contains("No Kotlin resolver sources"))
         } finally {
             root.toFile().deleteRecursively()
         }
@@ -902,8 +903,8 @@ class NewXResolverLinterTest {
         )
     }
 
-    private fun lint(source: String): List<NewXResolverLinter.Finding> =
-        NewXResolverLinter.lintSource("Fixture.kt", source)
+    private fun lint(source: String): List<ResolverLinter.Finding> =
+        ResolverLinter.lintSource("Fixture.kt", source)
 
     private fun newPostRendererComposeFlagFixture(directModifier: Boolean): Method {
         val implementation = MethodImplementationBuilder(14)

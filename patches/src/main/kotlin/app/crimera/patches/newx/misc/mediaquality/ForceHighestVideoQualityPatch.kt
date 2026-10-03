@@ -14,7 +14,7 @@ import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
-import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint

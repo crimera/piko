@@ -9,8 +9,8 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.newx.utils.requireAtMostOne
-import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.common.requireAtMostOne
+import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.ShapeFingerprint
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.utils.scopedMatchAllOrNull

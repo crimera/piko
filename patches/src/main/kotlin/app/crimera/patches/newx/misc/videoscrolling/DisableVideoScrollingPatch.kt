@@ -23,7 +23,7 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
-import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.common.requireExactlyOne
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction23x
 import com.android.tools.smali.dexlib2.iface.Method

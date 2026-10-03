@@ -1,7 +1,7 @@
 package app.crimera.patches.newx.timeline
 
-import app.crimera.patches.newx.utils.isObjectDescriptor
-import app.crimera.patches.newx.utils.parameterDescriptors
+import app.crimera.patches.common.isObjectDescriptor
+import app.crimera.patches.common.parameterDescriptors
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
 

@@ -6,9 +6,9 @@
 
 package app.crimera.patches.instagram.misc.theme
 
+import app.crimera.patches.common.parameterRegisterStart
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.settings.IgFragmentActivityOnCreate
-import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction

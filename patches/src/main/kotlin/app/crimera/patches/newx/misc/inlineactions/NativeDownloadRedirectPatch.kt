@@ -15,9 +15,9 @@ import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.crimera.patches.newx.utils.OBJECT_MOVE_OPCODES
-import app.crimera.patches.newx.utils.destinationRegisterOrNull
-import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.common.OBJECT_MOVE_OPCODES
+import app.crimera.patches.common.destinationRegisterOrNull
+import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions

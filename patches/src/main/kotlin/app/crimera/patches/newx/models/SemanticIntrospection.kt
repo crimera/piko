@@ -2,8 +2,8 @@ package app.crimera.patches.newx.models
 
 import app.crimera.bytecode.Block
 import app.crimera.bytecode.insertHook
-import app.crimera.patches.newx.utils.requireAtMostOne
-import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.common.requireAtMostOne
+import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match

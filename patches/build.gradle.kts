@@ -59,7 +59,7 @@ tasks {
         dependsOn(classes)
 
         classpath = sourceSets["main"].runtimeClasspath
-        mainClass.set("app.crimera.tools.newx.NewXResolverLinterKt")
+        mainClass.set("app.crimera.tools.lint.ResolverLinterKt")
         args(
             providers.gradleProperty("newxResolverSourceRoot").orElse(
                 rootProject.projectDir.resolve("patches/src/main/kotlin/app/crimera/patches/newx").absolutePath,
@@ -77,7 +77,7 @@ tasks {
         dependsOn(classes)
 
         classpath = sourceSets["main"].runtimeClasspath
-        mainClass.set("app.crimera.tools.newx.ExtensionDescriptorLinterKt")
+        mainClass.set("app.crimera.tools.lint.ExtensionDescriptorLinterKt")
         args(
             "--extensions=${layout.buildDirectory.dir("resources/main/extensions").get().asFile.absolutePath}",
             "--sources=${projectDir.resolve("src/main/kotlin").absolutePath}",

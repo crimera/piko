@@ -6,7 +6,7 @@
 
 package app.crimera.patches.instagram.misc.theme
 
-import app.crimera.patches.shared.parameterRegisterStart
+import app.crimera.patches.common.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions

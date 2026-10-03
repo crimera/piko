@@ -39,7 +39,7 @@ import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
-import app.crimera.patches.newx.utils.requireExactlyOne
+import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.ShapeFingerprint
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint

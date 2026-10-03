@@ -1,6 +1,6 @@
 package app.crimera.patches.newx.misc.navbar
 
-import app.crimera.patches.utils.classDefFlatMap
+import app.crimera.patches.common.classDefFlatMap
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -13,10 +13,10 @@ import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
-import app.crimera.patches.newx.utils.destinationRegisterOrNull
-import app.crimera.patches.newx.utils.requireAtMostOne
-import app.crimera.patches.newx.utils.requireExactlyOne
-import app.crimera.patches.newx.utils.resolveIntegerLiteralOnCurrentPath
+import app.crimera.patches.common.destinationRegisterOrNull
+import app.crimera.patches.common.requireAtMostOne
+import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.morphe.patcher.patch.BytecodePatchContext
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
