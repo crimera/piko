@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.9.0",
+  "version": "3.10.0-dev.9",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -37,6 +37,11 @@
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -504,6 +509,36 @@
     },
     {
       "name": "Custom font",
+      "description": "Adds an option to replace the app font with a font file from the device storage.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Custom font",
       "description": "Customise font style",
       "default": true,
       "dependencies": [
@@ -815,6 +850,36 @@
             {
               "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Customize navigation bar",
+      "description": "Choose which tabs appear in the bottom navigation bar and reorder them",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1200,7 +1265,7 @@
     },
     {
       "name": "Disable discover people",
-      "description": "Disables discover people section on user profile",
+      "description": "Hides suggested accounts",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1297,37 +1362,6 @@
     {
       "name": "Disable highlights",
       "description": null,
-      "default": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable onboarding permission prompts",
-      "description": "Prevents contacts and location permission onboarding prompts from appearing.",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1815,6 +1849,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1845,6 +1880,40 @@
       "description": "Filter stories to hide based on different categories",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Focus Lock",
+      "description": "Commitment mode for cutting down on Instagram. Pick what to block (Reels, Explore) and a duration; once locked those protections are forced on and cannot be switched off. Reels shared with you still open. Unlocking early requires a 24 hour cooling-off period, and resetting or importing settings is blocked while locked.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -1906,6 +1975,7 @@
       "description": "Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -2158,6 +2228,36 @@
       "options": []
     },
     {
+      "name": "Hide Reels follow button",
+      "description": "Removes the follow button from Reels.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide badges from navigation bar icons",
       "description": "Hides notification nudges & counts from navigation bar icons",
       "default": true,
@@ -2348,36 +2448,6 @@
             {
               "version": "12.19.1-release.0",
               "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Hide navigation buttons",
-      "description": "Hides navigation bar buttons, such as the Reels and Create button.",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2933,6 +3003,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -2963,6 +3034,8 @@
       "description": "Adds a new button to handle user related data like copy handle, download profile picture etc",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -3381,6 +3454,35 @@
       "options": []
     },
     {
+      "name": "Restore legacy follower lists",
+      "description": "Restores the legacy follower and following list screen.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Round off numbers",
       "description": "Enable or disable rounding off numbers",
       "default": true,
@@ -3446,7 +3548,6 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
-        "BytecodePatch",
         "ResourcePatch"
       ],
       "compatiblePackages": [
@@ -3477,6 +3578,7 @@
       "description": "Adds a button to save media comments on posts and reels.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -3673,36 +3775,6 @@
             {
               "version": "12.19.1-release.0",
               "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Stories audio autoplay",
-      "description": null,
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
               "isExperimental": false,
               "minSdk": null,
               "description": null

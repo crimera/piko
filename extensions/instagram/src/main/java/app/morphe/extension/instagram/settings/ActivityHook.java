@@ -23,6 +23,10 @@ import app.morphe.extension.instagram.constants.Constants;
 @SuppressWarnings("deprecation")
 public class ActivityHook {
 
+    public static void launchActivity(Context context, Class<?> activityClass){
+        launchActivity(context, new Intent(context, activityClass));
+    }
+
     private static void launchActivity(Context context, Intent intent){
         try {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -46,7 +50,8 @@ public class ActivityHook {
         Intent intent = null;
         if (bundleKey.equals("piko_export_dev_overrides") || bundleKey.equals("piko_export_pref")) {
             intent = new Intent(ctx,BackupPrefActivity.class);
-        } else if (bundleKey.equals("piko_import_dev_overrides") || bundleKey.equals("piko_import_id_mapping")  || bundleKey.equals("piko_import_pref")) {
+        } else if (bundleKey.equals("piko_import_dev_overrides") || bundleKey.equals("piko_import_id_mapping")  || bundleKey.equals("piko_import_pref")
+                || bundleKey.equals("piko_pref_add_font")) {
             intent = new Intent(ctx,RestorePrefActivity.class);
         } else if (bundleKey.equals("piko_download_set_path")) {
             intent = new Intent(ctx,FolderPickerActivity.class);

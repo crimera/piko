@@ -18,7 +18,6 @@ import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 
 // Credits: brosssh
 // https://github.com/brosssh/morphe-patches/commit/6a781ef8e0951ad5aa898fa17d094cfbfa5dd9fb
@@ -47,7 +46,7 @@ val hideReshareButtonPatch =
         name = "Hide reshare button",
         description = "Hides the reshare button from both posts and reels.",
     ) {
-        dependsOn(settingsPatch, resourceMappingPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

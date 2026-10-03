@@ -19,7 +19,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -43,7 +42,7 @@ val disableTypingStatusPatch =
     bytecodePatch(
         name = "Disable typing status",
     ) {
-        dependsOn(settingsPatch, resourceMappingPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)
+        dependsOn(settingsPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

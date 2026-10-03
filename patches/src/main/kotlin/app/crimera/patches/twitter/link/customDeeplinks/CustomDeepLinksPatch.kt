@@ -57,6 +57,8 @@ val customDeepLinksPatch =
                             "yiffx.com",
                             "mpregx.com",
                             "skibidix.com",
+                            "girthyx.com",
+                            "hotyurisex.com",
                         ),
                     )
             }

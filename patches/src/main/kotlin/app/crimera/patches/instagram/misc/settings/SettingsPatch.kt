@@ -7,9 +7,13 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEntity
+import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hideHomeActionButtonsPatch
+import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
@@ -23,7 +27,6 @@ import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
@@ -43,11 +46,16 @@ val settingsPatch =
         dependsOn(
             sharedExtensionPatch,
             addSettingsActivityPatch,
+            nativeSettingsSwitchStylePatch,
             mainFeedActionBarButtonPatch,
+            hideHomeActionButtonsPatch,
+            userProfileActionBarButtonPatch,
+            userDataEntity,
             userProfileButtonPatch,
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
             profileInfoEntity,
+            instagramDialogBoxEntity,
             instagramButtonEntity,
             developerOptionsEntity,
             addResourcesPatch,
@@ -56,11 +64,12 @@ val settingsPatch =
             addAppResources("shared")
             addAppResources("instagram")
 
-            IgFragmentActivityOnCreate.method.apply {
+            // Returning from a modal must restore the activity used for native themes.
+            for (method in listOf(IgFragmentActivityOnCreate.method, IgFragmentActivityOnResume.method)) {
 
-                val returnVoidIndex = indexOfFirstInstruction(Opcode.RETURN_VOID)
+                val returnVoidIndex = method.indexOfFirstInstruction(Opcode.RETURN_VOID)
 
-                addInstruction(
+                method.addInstruction(
                     returnVoidIndex,
                     """
                     invoke-static {p0}, Lapp/morphe/extension/shared/Utils;->setActivity(Landroid/app/Activity;)V

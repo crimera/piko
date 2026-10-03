@@ -13,25 +13,22 @@ import java.util.Set;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptionsItem;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class HookFlags {
     private static Map<String, Boolean> BOOL_FLAGS = new HashMap<>();
+    private static Map<String, Long> LONG_FLAGS = new HashMap<>();
     private static DeveloperOptions developerOptions = new DeveloperOptions();
-
-    private static void onboardingPermissionPromptFlags() {
-        BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
-        BOOL_FLAGS.put("77866", false); //ig4a_d0_retention
-    }
 
     private static void simpleOverflowMenuFlags() {
         BOOL_FLAGS.put("104772", false); //ig_ini
         BOOL_FLAGS.put("117613::0", true); //ig_overflow_menu_icon::use_more_lines_icon
         BOOL_FLAGS.put("100002", true); //ig_igds_android_prism_overflow_sheet
     }
-   
+
     private static void adsFlags() {
 //        BOOL_FLAGS.put("58206::0", false); //is_acp_enabled
 //        BOOL_FLAGS.put("72396::0", false); //is_mae_exclusion_feed_enabled
@@ -56,7 +53,7 @@ public class HookFlags {
 
     private static void profileActionBarFlags() {
         Set<String> pref = Pref.userProfileActionBarButtons();
-        if(!pref.isEmpty()) {
+        if (!pref.equals(Set.of(Constants.AB_CREATE))) {
             BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
             BOOL_FLAGS.put("89230::0", true); //ig_android_profile_overflow_menu_redesign_launcher:enabled
         }
@@ -64,7 +61,7 @@ public class HookFlags {
 
     private static void mainFeedActionBarFlags() {
         Set<String> pref = Pref.mainFeedActionBarButtons();
-        if(!pref.isEmpty()) {
+        if (!pref.equals(Set.of(Constants.AB_CREATE, Constants.AB_NOTIFICATIONS))) {
             BOOL_FLAGS.put("81826::1", true); //igx_action_bar_service_replacement::is_main_feed_replaced
             BOOL_FLAGS.put("81826::4", true); //igx_action_bar_service_replacement::is_main_feed_large_screen_replaced
         }
@@ -82,6 +79,8 @@ public class HookFlags {
         if(SettingsStatus.recommendedFlags) {
             Map<String, Boolean> recFlags = FlagsSharedPref.getAll();
             BOOL_FLAGS.putAll(recFlags);
+            Map<String, Long> recLongFlags = FlagsSharedPref.getAllLong();
+            LONG_FLAGS.putAll(recLongFlags);
         }
     }
 
@@ -101,6 +100,23 @@ public class HookFlags {
 
             String configId = developerOptionsItem.getConfigId();
             return BOOL_FLAGS.getOrDefault(configId, null);
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+        return null;
+    }
+
+    // mobileConfig has no dedicated int type, hence the integer-valued flags (counts, limits) are stored and returned.
+    // as long instead of boolean
+    public static Long handleLongFlags(long mobileConfigSpecifier) {
+        try {
+            DeveloperOptionsItem developerOptionsItem = new DeveloperOptionsItem(mobileConfigSpecifier);
+            String universalId = developerOptionsItem.getUniversalId();
+            Long universalFlag = LONG_FLAGS.getOrDefault(universalId, null);
+            if(universalFlag!=null) return universalFlag;
+
+            String configId = developerOptionsItem.getConfigId();
+            return LONG_FLAGS.getOrDefault(configId, null);
         } catch (Exception e) {
             PikoUtils.logger(e);
         }

@@ -16,9 +16,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.resourceLiteral
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -72,10 +71,7 @@ val blockUpdateScreenPatch =
     ) {
         compatibleWith(COMPATIBILITY_X)
 
-        dependsOn(
-            settingsPatch,
-            resourceMappingPatch
-        )
+        dependsOn(settingsPatch)
 
         execute {
             val dismissButtonField = FullCoverDialogInflateFingerprint
