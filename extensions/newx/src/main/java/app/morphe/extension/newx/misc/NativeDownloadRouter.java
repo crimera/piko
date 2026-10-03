@@ -62,16 +62,16 @@ public final class NativeDownloadRouter {
         Context context = Utils.getContext();
         if (context == null) return false;
 
-        final DownloadDestination.MediaKind kind;
+        final NewXDownloadFolders.MediaKind kind;
         try {
-            kind = DownloadDestination.mediaKindFor(mimeType);
+            kind = NewXDownloadFolders.mediaKindFor(mimeType);
         } catch (IllegalArgumentException exception) {
             return false;
         }
 
         // A folder the user has not chosen, or one whose grant is gone, is not routed: the
         // native flow stays the fallback and the framework handles its own error reporting.
-        if (!DownloadDestination.isConfigured(context, kind)) return false;
+        if (!NewXDownloadFolders.isConfigured(context, kind)) return false;
 
         String postText = post == null ? null : post.toString();
         String username = NewXUtils.sourceUsername(postText);
@@ -106,7 +106,7 @@ public final class NativeDownloadRouter {
 
     private static void transfer(
             Context context,
-            DownloadDestination.MediaKind kind,
+            NewXDownloadFolders.MediaKind kind,
             String fileName,
             String url,
             String mimeType,
@@ -114,7 +114,7 @@ public final class NativeDownloadRouter {
     ) {
         final DownloadDestination.ConflictPolicy policy;
         try {
-            policy = DownloadDestination.conflictPolicy();
+            policy = NewXDownloadFolders.conflictPolicy();
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Unsupported NewX download conflict policy", exception);
             postStatus("Could not start download", username);
@@ -150,7 +150,7 @@ public final class NativeDownloadRouter {
             // save() handles its own failures; this covers throws before it could clean up.
             NewXLogger.printException(() -> "Failed to download " + target.fileName(), exception);
             boolean lost = DownloadDestination.isDestinationLoss(exception);
-            if (lost) DownloadDestination.invalidate(target.kind());
+            if (lost) NewXDownloadFolders.invalidate(target.kind());
             DownloadDestination.discard(context, target);
             state = lost
                     ? DownloadDestination.SaveState.DESTINATION_LOST

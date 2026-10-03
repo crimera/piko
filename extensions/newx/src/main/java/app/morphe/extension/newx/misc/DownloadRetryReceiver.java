@@ -49,7 +49,7 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
     static PendingIntent retryPendingIntent(
             Context context,
             String fileName,
-            DownloadDestination.MediaKind kind,
+            NewXDownloadFolders.MediaKind kind,
             String mimeType,
             String url,
             String username,
@@ -100,14 +100,14 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
             return;
         }
 
-        DownloadDestination.MediaKind kind;
+        NewXDownloadFolders.MediaKind kind;
         try {
-            kind = DownloadDestination.MediaKind.valueOf(kindName);
+            kind = NewXDownloadFolders.MediaKind.valueOf(kindName);
         } catch (IllegalArgumentException ignored) {
             return;
         }
         if (mimeType == null || mimeType.isEmpty()) {
-            mimeType = kind == DownloadDestination.MediaKind.VIDEOS ? "video/mp4" : "image/jpeg";
+            mimeType = kind == NewXDownloadFolders.MediaKind.VIDEOS ? "video/mp4" : "image/jpeg";
         }
 
         Context applicationContext = context.getApplicationContext();
@@ -130,7 +130,7 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
 
     private static void doRetry(
             Context context,
-            DownloadDestination.MediaKind kind,
+            NewXDownloadFolders.MediaKind kind,
             String fileName,
             String mimeType,
             String url,
@@ -139,7 +139,7 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
     ) {
         final DownloadDestination.ConflictPolicy policy;
         try {
-            policy = DownloadDestination.conflictPolicy();
+            policy = NewXDownloadFolders.conflictPolicy();
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Unsupported NewX download conflict policy", exception);
             DownloadDestination.cancelNotification(context, notificationId);

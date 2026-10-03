@@ -69,7 +69,7 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
                 context,
                 StringRef.str("piko_newx_download_options_folder_images"),
                 IconView.IconType.IMAGE,
-                view -> openPicker(DownloadDestination.MediaKind.IMAGES)
+                view -> openPicker(NewXDownloadFolders.MediaKind.IMAGES)
         );
         content.addView(imagesRow, rowParams());
 
@@ -77,7 +77,7 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
                 context,
                 StringRef.str("piko_newx_download_options_folder_videos"),
                 IconView.IconType.VIDEO,
-                view -> openPicker(DownloadDestination.MediaKind.VIDEOS)
+                view -> openPicker(NewXDownloadFolders.MediaKind.VIDEOS)
         );
         content.addView(videosRow, rowParams());
 
@@ -112,11 +112,11 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
     private void refresh() {
         if (imagesRow != null) {
             imagesRow.setSubtitle(folderSubtitle(imagesRow.getContext(),
-                    DownloadDestination.MediaKind.IMAGES));
+                    NewXDownloadFolders.MediaKind.IMAGES));
         }
         if (videosRow != null) {
             videosRow.setSubtitle(folderSubtitle(videosRow.getContext(),
-                    DownloadDestination.MediaKind.VIDEOS));
+                    NewXDownloadFolders.MediaKind.VIDEOS));
         }
         if (filenameRow != null) {
             filenameRow.setSubtitle(DownloadFileName.preview(DownloadSettings.filenameTemplate()));
@@ -125,18 +125,18 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
 
     private static CharSequence folderSubtitle(
             Context context,
-            DownloadDestination.MediaKind kind
+            NewXDownloadFolders.MediaKind kind
     ) {
-        String path = DownloadDestination.displayPath(kind);
+        String path = NewXDownloadFolders.displayPath(kind);
         if (path == null) {
             // Restore the display label from the saved URI when backups omit it.
-            android.net.Uri tree = DownloadDestination.treeUri(kind);
-            path = tree == null ? null : DownloadDestination.displayPathFor(tree);
+            android.net.Uri tree = NewXDownloadFolders.treeUri(kind);
+            path = tree == null ? null : NewXDownloadFolders.displayPathFor(tree);
         }
         if (path == null) {
             return StringRef.str("piko_newx_download_options_folder_not_set");
         }
-        switch (DownloadDestination.destinationState(context, kind)) {
+        switch (NewXDownloadFolders.destinationState(context, kind)) {
             case LIVE:
                 // The temporary grant may stop working after a restart.
                 return path + " \u2014 " + StringRef.str("piko_newx_download_options_folder_session");
@@ -147,7 +147,7 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
         }
     }
 
-    private void openPicker(DownloadDestination.MediaKind kind) {
+    private void openPicker(NewXDownloadFolders.MediaKind kind) {
         Activity activity = getActivity();
         if (activity == null) return;
 

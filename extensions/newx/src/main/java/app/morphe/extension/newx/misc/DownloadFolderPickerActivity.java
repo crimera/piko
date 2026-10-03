@@ -22,7 +22,7 @@ public final class DownloadFolderPickerActivity extends Activity {
 
     private static final int PICK_TREE_REQUEST = 43;
 
-    private DownloadDestination.MediaKind kind;
+    private NewXDownloadFolders.MediaKind kind;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,21 +79,21 @@ public final class DownloadFolderPickerActivity extends Activity {
             NewXLogger.printException(() -> "Could not persist NewX download folder permission", exception);
         }
 
-        if (!persisted && !DownloadDestination.hasLiveTreeAccess(getContentResolver(), treeUri)) {
+        if (!persisted && !NewXDownloadFolders.hasLiveTreeAccess(getContentResolver(), treeUri)) {
             // Nothing writable; keeping it would only replace a working folder with failures.
-            DownloadDestination.captureDestination(this, kind, "folder-picked/unwritable");
+            NewXDownloadFolders.captureDestination(this, kind, "folder-picked/unwritable");
             Utils.showToastShort(StringRef.str("piko_newx_download_options_folder_unwritable"));
             finish();
             return;
         }
 
-        DownloadDestination.store(
+        NewXDownloadFolders.store(
                 this,
                 kind,
                 treeUri,
-                DownloadDestination.displayPathFor(treeUri)
+                NewXDownloadFolders.displayPathFor(treeUri)
         );
-        DownloadDestination.captureDestination(this, kind, "folder-picked");
+        NewXDownloadFolders.captureDestination(this, kind, "folder-picked");
         Utils.showToastShort(StringRef.str(persisted
                 ? "piko_newx_download_options_changed"
                 : "piko_newx_download_options_folder_session"));
@@ -101,14 +101,14 @@ public final class DownloadFolderPickerActivity extends Activity {
     }
 
     @Nullable
-    private static DownloadDestination.MediaKind kindFrom(@Nullable Intent intent) {
+    private static NewXDownloadFolders.MediaKind kindFrom(@Nullable Intent intent) {
         if (intent == null) return null;
 
         String raw = intent.getStringExtra(KIND_EXTRA);
         if (raw == null) return null;
 
         try {
-            return DownloadDestination.MediaKind.valueOf(raw);
+            return NewXDownloadFolders.MediaKind.valueOf(raw);
         } catch (IllegalArgumentException exception) {
             return null;
         }

@@ -189,10 +189,10 @@ public final class MediaMerger {
             try {
                 target = DownloadDestination.reserve(
                         context,
-                        DownloadDestination.MediaKind.IMAGES,
+                        NewXDownloadFolders.MediaKind.IMAGES,
                         fileName,
                         mimeType,
-                        DownloadDestination.conflictPolicy()
+                        NewXDownloadFolders.conflictPolicy()
                 );
             } catch (IOException | RuntimeException exception) {
                 mergedBitmap.recycle();

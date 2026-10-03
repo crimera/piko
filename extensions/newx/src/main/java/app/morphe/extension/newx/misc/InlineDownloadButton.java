@@ -322,21 +322,21 @@ public final class InlineDownloadButton {
         }
 
         // Resolve destinations before queueing; never fall back to an app-private folder.
-        DownloadDestination.DestinationState[] destinations = destinations(context, downloads);
+        NewXDownloadFolders.DestinationState[] destinations = destinations(context, downloads);
         boolean imagesMissing = needsFolderPrompt(destinations[0]);
         boolean videosMissing = needsFolderPrompt(destinations[1]);
         if (imagesMissing || videosMissing) {
             if (imagesMissing) {
-                DownloadDestination.captureDestination(
+                NewXDownloadFolders.captureDestination(
                         context,
-                        DownloadDestination.MediaKind.IMAGES,
+                        NewXDownloadFolders.MediaKind.IMAGES,
                         "first-run"
                 );
             }
             if (videosMissing) {
-                DownloadDestination.captureDestination(
+                NewXDownloadFolders.captureDestination(
                         context,
-                        DownloadDestination.MediaKind.VIDEOS,
+                        NewXDownloadFolders.MediaKind.VIDEOS,
                         "first-run"
                 );
             }
@@ -1086,7 +1086,7 @@ public final class InlineDownloadButton {
         CLICK_EXECUTOR.execute(() -> {
             final DownloadDestination.ConflictPolicy policy;
             try {
-                policy = DownloadDestination.conflictPolicy();
+                policy = NewXDownloadFolders.conflictPolicy();
             } catch (RuntimeException exception) {
                 NewXLogger.printException(() -> "Unsupported NewX download conflict policy", exception);
                 NewXUtils.runOnUiThread(() ->
@@ -1159,7 +1159,7 @@ public final class InlineDownloadButton {
                         username,
                         index,
                         mediaCount,
-                        DownloadDestination.conflictPolicy(),
+                        NewXDownloadFolders.conflictPolicy(),
                         explicitResolution
                 );
             } catch (RuntimeException exception) {
@@ -1184,9 +1184,9 @@ public final class InlineDownloadButton {
     ) {
         if (!NewXUtils.isHttpUrl(download.url)) return EnqueueState.FAILED;
 
-        final DownloadDestination.MediaKind kind;
+        final NewXDownloadFolders.MediaKind kind;
         try {
-            kind = DownloadDestination.mediaKindFor(download.mimeType);
+            kind = NewXDownloadFolders.mediaKindFor(download.mimeType);
         } catch (IllegalArgumentException exception) {
             NewXLogger.printException(
                     () -> "Unsupported NewX download media type: " + download.mimeType,
@@ -1254,7 +1254,7 @@ public final class InlineDownloadButton {
                 // save() handles its own failures; this covers throws before it could clean up.
                 NewXLogger.printException(() -> "Failed to download " + target.fileName(), exception);
                 boolean lost = DownloadDestination.isDestinationLoss(exception);
-                if (lost) DownloadDestination.invalidate(target.kind());
+                if (lost) NewXDownloadFolders.invalidate(target.kind());
                 DownloadDestination.discard(context, target);
                 // Keep the OS trace with a retry instead of cancelling it silently.
                 DownloadDestination.notifyFailure(context, notificationId, target.fileName(),
@@ -1322,7 +1322,7 @@ public final class InlineDownloadButton {
             dialog.addButton(pickFolderButton(
                     activity,
                     dialog,
-                    DownloadDestination.MediaKind.IMAGES,
+                    NewXDownloadFolders.MediaKind.IMAGES,
                     "piko_newx_download_first_run_images_action"
             ));
         }
@@ -1330,7 +1330,7 @@ public final class InlineDownloadButton {
             dialog.addButton(pickFolderButton(
                     activity,
                     dialog,
-                    DownloadDestination.MediaKind.VIDEOS,
+                    NewXDownloadFolders.MediaKind.VIDEOS,
                     "piko_newx_download_first_run_videos_action"
             ));
         }
@@ -1347,7 +1347,7 @@ public final class InlineDownloadButton {
     private static ButtonView pickFolderButton(
             Activity activity,
             DialogView dialog,
-            DownloadDestination.MediaKind kind,
+            NewXDownloadFolders.MediaKind kind,
             String labelResource
     ) {
         ButtonView button = SettingsUi.dialogButton(activity, StringRef.str(labelResource));
@@ -1367,39 +1367,39 @@ public final class InlineDownloadButton {
     }
 
     /** Destination state per needed kind, or null when the action needs no media of that kind. */
-    private static DownloadDestination.DestinationState[] destinations(
+    private static NewXDownloadFolders.DestinationState[] destinations(
             Context context,
             List<DownloadItem> downloads
     ) {
         boolean needsImages = false;
         boolean needsVideos = false;
         for (DownloadItem item : downloads) {
-            DownloadDestination.MediaKind kind;
+            NewXDownloadFolders.MediaKind kind;
             try {
-                kind = DownloadDestination.mediaKindFor(item.mimeType);
+                kind = NewXDownloadFolders.mediaKindFor(item.mimeType);
             } catch (IllegalArgumentException exception) {
                 // Unsupported media is reported per item; it must not block the whole action.
                 continue;
             }
-            if (kind == DownloadDestination.MediaKind.VIDEOS) {
+            if (kind == NewXDownloadFolders.MediaKind.VIDEOS) {
                 needsVideos = true;
             } else {
                 needsImages = true;
             }
         }
-        return new DownloadDestination.DestinationState[] {
+        return new NewXDownloadFolders.DestinationState[] {
                 needsImages
-                        ? DownloadDestination.destinationState(context, DownloadDestination.MediaKind.IMAGES)
+                        ? NewXDownloadFolders.destinationState(context, NewXDownloadFolders.MediaKind.IMAGES)
                         : null,
                 needsVideos
-                        ? DownloadDestination.destinationState(context, DownloadDestination.MediaKind.VIDEOS)
+                        ? NewXDownloadFolders.destinationState(context, NewXDownloadFolders.MediaKind.VIDEOS)
                         : null,
         };
     }
 
     /** True when the action needs this kind but its folder is unusable. */
-    private static boolean needsFolderPrompt(DownloadDestination.DestinationState state) {
-        return state != null && !DownloadDestination.isUsable(state);
+    private static boolean needsFolderPrompt(NewXDownloadFolders.DestinationState state) {
+        return state != null && !NewXDownloadFolders.isUsable(state);
     }
 
     /** In-app message plus toast fallback, so outcomes never depend on the host being ready. */

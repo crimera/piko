@@ -691,20 +691,20 @@ public final class InlineDownloadButtonTest {
 
     @Test
     public void mediaKindRoutingRejectsNonMediaMimeTypes() {
-        assertEquals(DownloadDestination.MediaKind.IMAGES,
-                DownloadDestination.mediaKindFor("image/jpeg"));
-        assertEquals(DownloadDestination.MediaKind.VIDEOS,
-                DownloadDestination.mediaKindFor("video/mp4"));
+        assertEquals(NewXDownloadFolders.MediaKind.IMAGES,
+                NewXDownloadFolders.mediaKindFor("image/jpeg"));
+        assertEquals(NewXDownloadFolders.MediaKind.VIDEOS,
+                NewXDownloadFolders.mediaKindFor("video/mp4"));
 
         // An unroutable mime must fail closed rather than land in the wrong folder.
         try {
-            DownloadDestination.mediaKindFor("application/pdf");
+            NewXDownloadFolders.mediaKindFor("application/pdf");
             fail("Expected an unroutable MIME type to be rejected");
         } catch (IllegalArgumentException expected) {
             assertTrue(expected.getMessage().contains("application/pdf"));
         }
         try {
-            DownloadDestination.mediaKindFor(null);
+            NewXDownloadFolders.mediaKindFor(null);
             fail("Expected a null MIME type to be rejected");
         } catch (IllegalArgumentException expected) {
             // Expected.
