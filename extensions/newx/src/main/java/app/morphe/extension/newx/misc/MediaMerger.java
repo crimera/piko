@@ -1,6 +1,7 @@
 package app.morphe.extension.newx.misc;
 
 import android.content.Context;
+import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -185,11 +186,13 @@ public final class MediaMerger {
             );
 
             // Reserve before encoding so a skipped merge costs no work.
+            final Uri destinationTree = NewXDownloadFolders.treeUri(NewXDownloadFolders.MediaKind.IMAGES);
             final DownloadDestination.Target target;
             try {
                 target = DownloadDestination.reserve(
                         context,
                         NewXDownloadFolders.MediaKind.IMAGES,
+                        destinationTree,
                         fileName,
                         mimeType,
                         NewXDownloadFolders.conflictPolicy()

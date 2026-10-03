@@ -9,6 +9,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.net.Uri;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -1212,9 +1213,10 @@ public final class InlineDownloadButton {
             fileName = withResolutionSuffix(fileName, download.resolution);
         }
 
+        final Uri destinationTree = NewXDownloadFolders.treeUri(kind);
         final DownloadDestination.Target target;
         try {
-            target = DownloadDestination.reserve(context, kind, fileName, download.mimeType, policy);
+            target = DownloadDestination.reserve(context, kind, destinationTree, fileName, download.mimeType, policy);
         } catch (IOException | RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to create the NewX download file", exception);
             // reserve() clears refused folders, so the next tap re-prompts.

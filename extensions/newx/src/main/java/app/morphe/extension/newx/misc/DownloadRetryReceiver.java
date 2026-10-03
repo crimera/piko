@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 
 import java.io.IOException;
@@ -148,9 +149,10 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
             return;
         }
 
+        final Uri destinationTree = NewXDownloadFolders.treeUri(kind);
         final DownloadDestination.Target target;
         try {
-            target = DownloadDestination.reserve(context, kind, fileName, mimeType, policy);
+            target = DownloadDestination.reserve(context, kind, destinationTree, fileName, mimeType, policy);
         } catch (IOException | RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to reserve the NewX download retry", exception);
             boolean lost = DownloadDestination.isDestinationLoss(exception);

@@ -207,6 +207,7 @@ public final class DownloadDestination {
     public static Target reserve(
             Context context,
             NewXDownloadFolders.MediaKind kind,
+            @Nullable Uri destinationTree,
             String fileName,
             String mimeType,
             ConflictPolicy policy
@@ -214,10 +215,13 @@ public final class DownloadDestination {
         if (policy == null) {
             throw new IOException("Unknown download conflict policy");
         }
+        if (destinationTree == null) {
+            throw new IOException("No download folder selected for " + kind.name().toLowerCase());
+        }
         ContentResolver resolver = context.getContentResolver();
         final Uri directory;
         try {
-            directory = directoryUri(kind);
+            directory = directoryUri(destinationTree);
         } catch (RuntimeException exception) {
             NewXDownloadFolders.captureDestination(context, kind, "reserve/invalid-tree");
             NewXDownloadFolders.invalidate(kind);
@@ -674,14 +678,6 @@ public final class DownloadDestination {
         if (notificationId > 0 && connection != null) {
             ACTIVE_CONNECTIONS.remove(notificationId, connection);
         }
-    }
-
-    private static Uri directoryUri(NewXDownloadFolders.MediaKind kind) throws IOException {
-        Uri tree = NewXDownloadFolders.treeUri(kind);
-        if (tree == null) {
-            throw new IOException("No download folder selected for " + kind.name().toLowerCase());
-        }
-        return directoryUri(tree);
     }
 
     /**

@@ -1,6 +1,7 @@
 package app.morphe.extension.newx.misc;
 
 import android.content.Context;
+import android.net.Uri;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -121,9 +122,10 @@ public final class NativeDownloadRouter {
             return;
         }
 
+        final Uri destinationTree = NewXDownloadFolders.treeUri(kind);
         final DownloadDestination.Target target;
         try {
-            target = DownloadDestination.reserve(context, kind, fileName, mimeType, policy);
+            target = DownloadDestination.reserve(context, kind, destinationTree, fileName, mimeType, policy);
         } catch (IOException | RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to create the NewX download file", exception);
             // reserve() clears refused folders, so the next tap falls back to the native flow.
