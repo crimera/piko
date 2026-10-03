@@ -8,7 +8,7 @@ annotation = "1.9.1"
 appcompat = "1.7.1"
 media3 = "1.11.0"
 shadow = "9.5.1"
-piko-library = "0.4.0"
+piko-library = "0.5.0"
 
 [libraries]
 morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }
