@@ -156,8 +156,6 @@ public class SettingsStatus {
     public static void unlockPlusBenefits() { unlockPlusBenefits = true; }
     public static boolean changeLikeAnimation = false;
     public static void changeLikeAnimation() { changeLikeAnimation = true; }
-    public static boolean customiseStoryRingSize = false;
-    public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() { disableAnalytics = true; }
     public static boolean disableDiscoverPeople = false;
@@ -168,22 +166,6 @@ public class SettingsStatus {
     public static void followBackIndicator() { followBackIndicator = true; }
     public static boolean followListNonFollowerBadge = false;
     public static void followListNonFollowerBadge() { followListNonFollowerBadge = true; }
-    public static boolean viewStoryMentions = false;
-    public static void viewStoryMentions() {
-        viewStoryMentions = true;
-    }
-    public static boolean disableStoryFlipping = false;
-    public static void disableStoryFlipping() {
-        disableStoryFlipping = true;
-    }
-    public static boolean loopStory = false;
-    public static void loopStory() {
-        loopStory = true;
-    }
-    public static boolean customiseStoryTimestamp = false;
-    public static void customiseStoryTimestamp() {
-        customiseStoryTimestamp = true;
-    }
     public static boolean improveImageViewing = false;
     public static void improveImageViewing() {
         improveImageViewing = true;
@@ -220,6 +202,29 @@ public class SettingsStatus {
     public static boolean inboxLock = false;
     public static void inboxLock() { inboxLock = true; }
     public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock ;}
+
+    //Story section
+    public static boolean customiseStoryTimestamp = false;
+    public static void customiseStoryTimestamp() {
+        customiseStoryTimestamp = true;
+    }
+    public static boolean viewStoryMentions = false;
+    public static void viewStoryMentions() {
+        viewStoryMentions = true;
+    }
+    public static boolean disableStoryFlipping = false;
+    public static void disableStoryFlipping() {
+        disableStoryFlipping = true;
+    }
+    public static boolean loopStory = false;
+    public static void loopStory() {
+        loopStory = true;
+    }
+    public static boolean customiseStoryRingSize = false;
+    public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
+    public static boolean storySection() {
+        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize);
+    }
 
     //Download section.
     public static boolean downloadMedia = false;
