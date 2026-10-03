@@ -125,7 +125,7 @@ internal object SettingsAggregateValidator {
 
 internal object NewXContributionDiscovery {
     private const val PACKAGE_PATH = "app/crimera/patches/newx"
-    // The index lives in piko-patches-settings; only the NewX patch classes are scanned from this
+    // The index lives in piko-patches-library; only the NewX patch classes are scanned from this
     // module's own output.
     private const val INDEX_CLASS =
         "app.crimera.patches.settings.SettingsContributionIndex"

@@ -25,7 +25,7 @@ internal object Constants {
     const val SETTINGS_PACKAGE = "$EXTENSION_PACKAGE/settings"
 
     /**
-     * The registry, renderer and widgets come from piko-extension-settings (dexed into the shared
+     * The registry, renderer and widgets come from piko-extension-library (dexed into the shared
      * bundle), not from the NewX extension. NewX keeps only its own host binding and built-ins.
      */
     const val SETTINGS_REGISTRY_DESCRIPTOR = app.crimera.patches.settings.SETTINGS_REGISTRY_DESCRIPTOR

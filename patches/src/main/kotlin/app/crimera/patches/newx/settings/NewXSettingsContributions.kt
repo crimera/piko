@@ -22,7 +22,7 @@ import app.crimera.patches.settings.settingsToggle
 import app.morphe.patcher.patch.BytecodePatchBuilder
 
 /**
- * NewX's binding of the shared settings DSL (`piko-patches-settings`): its base patch, ID and string
+ * NewX's binding of the shared settings DSL (`piko-patches-library`): its base patch, ID and string
  * naming rules, and error label. The `newX*` functions keep the call sites of every NewX patch
  * unchanged.
  */
