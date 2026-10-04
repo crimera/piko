@@ -4,9 +4,6 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -817,92 +814,5 @@ public final class NavBarEditorFragment extends CustomScreenFragment {
         Context context = getActivity();
         if (context == null) throw new IllegalStateException("Navigation bar editor is detached");
         return context;
-    }
-
-    private static final class RowDragShadow extends View.DragShadowBuilder {
-        private final int touchPointX;
-        private final int touchPointY;
-
-        RowDragShadow(View view, int touchPointX, int touchPointY) {
-            super(view);
-            this.touchPointX = touchPointX;
-            this.touchPointY = touchPointY;
-        }
-
-        @Override
-        public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
-            super.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
-            shadowTouchPoint.x = Math.max(0, Math.min(touchPointX, shadowSize.x));
-            shadowTouchPoint.y = Math.max(0, Math.min(touchPointY, shadowSize.y));
-        }
-    }
-
-    private static final class DropIndicatorLayout extends LinearLayout {
-        private final Paint indicatorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final float horizontalInset;
-        private final float strokeWidth;
-        private float indicatorTop = -1f;
-        private float indicatorBottom = -1f;
-
-        DropIndicatorLayout(Context context) {
-            super(context);
-            horizontalInset = Theme.dpToPx(context, 12f);
-            strokeWidth = Theme.dpToPx(context, 3f);
-            indicatorPaint.setColor(Theme.primaryAccent(context));
-            indicatorPaint.setStrokeWidth(strokeWidth);
-        }
-
-        void showInsertionLine(float y) {
-            indicatorTop = y;
-            indicatorBottom = y;
-            invalidate();
-        }
-
-        void showDropTarget(View target) {
-            indicatorTop = target.getTop();
-            indicatorBottom = target.getBottom();
-            invalidate();
-        }
-
-        void clearDropIndicator() {
-            if (indicatorTop < 0f) return;
-            indicatorTop = -1f;
-            indicatorBottom = -1f;
-            invalidate();
-        }
-
-        @Override
-        protected void dispatchDraw(Canvas canvas) {
-            super.dispatchDraw(canvas);
-            if (indicatorTop < 0f) return;
-
-            float left = horizontalInset;
-            float right = getWidth() - horizontalInset;
-            float radius = strokeWidth;
-            if (indicatorTop == indicatorBottom) {
-                indicatorPaint.setStyle(Paint.Style.FILL);
-                canvas.drawRoundRect(
-                        left,
-                        indicatorTop - strokeWidth / 2f,
-                        right,
-                        indicatorTop + strokeWidth / 2f,
-                        radius,
-                        radius,
-                        indicatorPaint
-                );
-                return;
-            }
-
-            indicatorPaint.setStyle(Paint.Style.STROKE);
-            canvas.drawRoundRect(
-                    left,
-                    indicatorTop + strokeWidth / 2f,
-                    right,
-                    indicatorBottom - strokeWidth / 2f,
-                    Theme.dpToPx(getContext(), 8f),
-                    Theme.dpToPx(getContext(), 8f),
-                    indicatorPaint
-            );
-        }
     }
 }

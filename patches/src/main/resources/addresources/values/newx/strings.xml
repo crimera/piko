@@ -273,6 +273,19 @@
     <string name="piko_newx_nav_editor_restart_message">The navigation bar changes take effect after the app restarts.</string>
     <string name="piko_newx_nav_editor_restart_confirm">Restart</string>
 
+    <string name="piko_newx_profile_tabs_editor_title">Profile tabs</string>
+    <string name="piko_newx_profile_tabs_editor_summary">Choose which profile tabs are shown and in what order</string>
+    <string name="piko_newx_profile_tabs_editor_hint">Drag a tab by its handle to reorder it. Use the switches to hide tabs. Changes apply after an app restart.</string>
+    <string name="piko_newx_profile_tabs_editor_drag">Drag to reorder</string>
+    <string name="piko_newx_profile_tabs_editor_restart">Restart app to apply changes</string>
+    <string name="piko_newx_profile_tabs_editor_restart_title">Restart app?</string>
+    <string name="piko_newx_profile_tabs_editor_restart_message">The profile tab changes take effect after the app restarts.</string>
+    <string name="piko_newx_profile_tabs_editor_restart_confirm">Restart</string>
+    <string name="piko_newx_profile_tabs_editor_reset">Reset to default</string>
+    <string name="piko_newx_profile_tabs_editor_reset_title">Reset profile tabs?</string>
+    <string name="piko_newx_profile_tabs_editor_reset_message">This restores the default tab order and shows every profile tab again. Changes apply after an app restart.</string>
+    <string name="piko_newx_profile_tabs_editor_reset_confirm">Reset</string>
+
     <string name="piko_newx_drawer_title">Drawer items to hide</string>
     <string name="piko_newx_drawer_summary">Choose which items are hidden from the NewX navigation drawer</string>
     <string name="piko_newx_show_piko_settings_in_drawer_title">Show Piko Settings in the drawer footer</string>
