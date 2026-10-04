@@ -24,10 +24,20 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import app.morphe.extension.crimera.downloader.DownloadEngine;
+import app.morphe.extension.crimera.downloader.EnqueueResult;
+import app.morphe.extension.crimera.downloader.messages.DownloadMessages;
+import app.morphe.extension.crimera.downloader.messages.EnglishDownloadTexts;
+import app.morphe.extension.crimera.downloader.model.BatchResult;
+import app.morphe.extension.crimera.downloader.model.ConflictPolicy;
+import app.morphe.extension.crimera.downloader.model.DownloadRequest;
+import app.morphe.extension.crimera.downloader.model.EnqueueState;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,8 +55,6 @@ public final class InlineDownloadButton {
     private static final String QUALITY_ASK = "ask";
     private static final String QUALITY_ORIGINAL = "original";
     private static final String QUALITY_HIGHEST = "highest";
-    /** Concurrent transfers. Small enough to stay gentle on the connection pool and providers. */
-    private static final int TRANSFER_THREADS = 4;
     /**
      * NewX video variants carry only url/bitrate/contentType. Twitter encodes each mp4 variant's
      * resolution in the URL path (`.../vid/1280x720/....mp4`), so the chooser reads it from there.
@@ -58,10 +66,7 @@ public final class InlineDownloadButton {
     /** Shown when the stored folder was refused and cleared; retapping opens the picker. */
     static final String FOLDER_LOST_MESSAGE =
             "Download folder is no longer available \u2014 tap download again to choose a new one";
-    private static final ExecutorService DOWNLOAD_EXECUTOR =
-            Executors.newFixedThreadPool(TRANSFER_THREADS);
-    // Click-time parsing and document creation run here so the tap handler returns
-    // immediately; DOWNLOAD_EXECUTOR stays reserved for transfers.
+    // Click-time parsing and enqueue run here so the tap handler returns immediately.
     private static final ExecutorService CLICK_EXECUTOR = Executors.newSingleThreadExecutor();
     // Timeline/profile scrolling creates a new action object per composition. Keep weak identity
     // keys without a FIFO cap: a cap can evict an action that is still visible and make its icon
@@ -1085,7 +1090,7 @@ public final class InlineDownloadButton {
         List<DownloadItem> items = new ArrayList<>(downloads);
         // Name resolution and document creation hit the provider per item; keep off the tap path.
         CLICK_EXECUTOR.execute(() -> {
-            final DownloadDestination.ConflictPolicy policy;
+            final ConflictPolicy policy;
             try {
                 policy = NewXDownloadFolders.conflictPolicy();
             } catch (RuntimeException exception) {
@@ -1095,14 +1100,11 @@ public final class InlineDownloadButton {
                 return;
             }
 
-            int queued = 0;
-            int skipped = 0;
-            int failed = 0;
-            int lost = 0;
+            BatchResult result = new BatchResult();
             for (int index = 0; index < items.size(); index++) {
                 DownloadItem chosen = autoSelectedOption(items.get(index));
                 if (chosen == null) chosen = items.get(index);
-                switch (enqueueDownload(
+                result.add(enqueueDownload(
                         safeContext,
                         chosen,
                         postContext,
@@ -1111,19 +1113,10 @@ public final class InlineDownloadButton {
                         items.size(),
                         policy,
                         false
-                )) {
-                    case QUEUED -> queued++;
-                    case SKIPPED -> skipped++;
-                    case FAILED -> failed++;
-                    case DESTINATION_LOST -> lost++;
-                }
+                ));
             }
-            int queuedResult = queued;
-            int skippedResult = skipped;
-            int failedResult = failed;
-            int lostResult = lost;
-            NewXUtils.runOnUiThread(() ->
-                    showQueueResult(queuedResult, skippedResult, failedResult, lostResult, username));
+            String message = DownloadMessages.summary(result, new EnglishDownloadTexts(), username);
+            NewXUtils.runOnUiThread(() -> reportDownloadStatus(message));
         });
     }
 
@@ -1180,7 +1173,7 @@ public final class InlineDownloadButton {
             String username,
             int index,
             int mediaCount,
-            DownloadDestination.ConflictPolicy policy,
+            ConflictPolicy policy,
             boolean explicitResolution
     ) {
         if (!NewXUtils.isHttpUrl(download.url)) return EnqueueState.FAILED;
@@ -1213,25 +1206,38 @@ public final class InlineDownloadButton {
             fileName = withResolutionSuffix(fileName, download.resolution);
         }
 
-        final Uri destinationTree = NewXDownloadFolders.treeUri(kind);
-        final DownloadDestination.Target target;
-        try {
-            target = DownloadDestination.reserve(context, kind, destinationTree, fileName, download.mimeType, policy);
-        } catch (IOException | RuntimeException exception) {
-            NewXLogger.printException(() -> "Failed to create the NewX download file", exception);
-            // reserve() clears refused folders, so the next tap re-prompts.
-            return DownloadDestination.isDestinationLoss(exception)
-                    ? EnqueueState.DESTINATION_LOST
-                    : EnqueueState.FAILED;
+        DownloadEngine engine = NewXDownloader.get();
+        if (engine == null) {
+            return EnqueueState.FAILED;
         }
-        if (target == null) return EnqueueState.SKIPPED;
 
-        // Post progress at enqueue time, not behind earlier transfers.
-        int notificationId =
-                DownloadDestination.beginDownloadNotification(context, target.fileName());
-        // Keep transfers off CLICK_EXECUTOR so taps stay responsive.
-        downloadAsync(context, download.url, target, username, notificationId);
-        return EnqueueState.QUEUED;
+        final Uri destinationTree = NewXDownloadFolders.treeUri(kind);
+        String larger = NewXDownloader.largerVariantUrl(download.url);
+        List<String> fallbacks = larger != null ? Collections.singletonList(larger) : Collections.emptyList();
+
+        final String resolvedFileName = fileName;
+        final DownloadRequest request;
+        try {
+            request = new DownloadRequest(
+                    download.url,
+                    fallbacks,
+                    destinationTree,
+                    Collections.emptyList(),
+                    resolvedFileName,
+                    download.mimeType,
+                    policy,
+                    username
+            );
+        } catch (IllegalArgumentException exception) {
+            NewXLogger.printException(() -> "Invalid NewX download request: " + resolvedFileName, exception);
+            return EnqueueState.FAILED;
+        }
+
+        EnqueueResult result = engine.enqueue(request);
+        if (result.state() == EnqueueState.DESTINATION_LOST) {
+            NewXDownloadFolders.invalidate(kind);
+        }
+        return result.state();
     }
 
     static String withResolutionSuffix(String fileName, String resolution) {
@@ -1239,52 +1245,6 @@ public final class InlineDownloadButton {
         int dot = fileName.lastIndexOf('.');
         if (dot <= 0) return fileName + "_" + resolution;
         return fileName.substring(0, dot) + "_" + resolution + fileName.substring(dot);
-    }
-
-    private static void downloadAsync(
-            Context context,
-            String url,
-            DownloadDestination.Target target,
-            String username,
-            int notificationId
-    ) {
-        DOWNLOAD_EXECUTOR.execute(() -> {
-            DownloadDestination.SaveState state;
-            try {
-                state = DownloadDestination.save(context, target, url, notificationId, username);
-            } catch (RuntimeException exception) {
-                // save() handles its own failures; this covers throws before it could clean up.
-                NewXLogger.printException(() -> "Failed to download " + target.fileName(), exception);
-                boolean lost = DownloadDestination.isDestinationLoss(exception);
-                if (lost) NewXDownloadFolders.invalidate(target.kind());
-                DownloadDestination.discard(context, target);
-                // Keep the OS trace with a retry instead of cancelling it silently.
-                DownloadDestination.notifyFailure(context, notificationId, target.fileName(),
-                        target.kind(), target.mimeType(), url, username, lost,
-                        DownloadDestination.isNoConnection(exception));
-                state = lost
-                        ? DownloadDestination.SaveState.DESTINATION_LOST
-                        : DownloadDestination.SaveState.FAILED;
-            }
-
-            switch (state) {
-                case SAVED -> {
-                    // Success shows via the OS notification; without it, say so in-app.
-                    if (!DownloadDestination.notificationsEnabled(context)) {
-                        NewXUtils.runOnUiThread(() ->
-                                reportDownloadStatus("Saved " + target.fileName(), username));
-                    }
-                }
-                case DESTINATION_LOST -> NewXUtils.runOnUiThread(() ->
-                        reportDownloadStatus(FOLDER_LOST_MESSAGE, username));
-                case FAILED -> NewXUtils.runOnUiThread(() ->
-                        reportDownloadStatus("Could not save " + target.fileName(), username));
-                case CANCELLED -> NewXUtils.runOnUiThread(() ->
-                        NewXInAppNotification.showForUser("Download cancelled", username));
-                case NO_CONNECTION -> NewXUtils.runOnUiThread(() ->
-                        reportDownloadStatus("No connection — tap Retry when online", username));
-            }
-        });
     }
 
     /**
@@ -1405,10 +1365,13 @@ public final class InlineDownloadButton {
     }
 
     /** In-app message plus toast fallback, so outcomes never depend on the host being ready. */
-    static void reportDownloadStatus(String message, String username) {
-        String formatted = NewXInAppNotification.formatForUser(message, username);
+    static void reportDownloadStatus(String formatted) {
         NewXInAppNotification.tryShow(formatted);
         Utils.showToastShort(formatted);
+    }
+
+    static void reportDownloadStatus(String message, String username) {
+        reportDownloadStatus(NewXInAppNotification.formatForUser(message, username));
     }
 
     private static void reportEnqueueResult(EnqueueState state, String username) {
@@ -1420,54 +1383,8 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static void showQueueResult(int queued, int skipped, int failed, int lost, String username) {
-        if (failed == 0 && skipped == 0 && lost == 0) {
-            String message = queued == 1 ? "Download started" : queued + " downloads started";
-            NewXInAppNotification.showForUser(message, username);
-            return;
-        }
-        if (queued == 0) {
-            if (failed == 0 && lost == 0 && skipped > 0) {
-                NewXInAppNotification.showForUser(skipped == 1
-                        ? "Already downloaded"
-                        : skipped + " media already downloaded", username);
-                return;
-            }
-            if (lost > 0) {
-                reportDownloadStatus(FOLDER_LOST_MESSAGE, username);
-                return;
-            }
-            reportDownloadStatus("Could not start download", username);
-            return;
-        }
-        List<String> parts = new ArrayList<>();
-        parts.add(queued == 1 ? "1 download started" : queued + " downloads started");
-        if (skipped > 0) parts.add(skipped == 1
-                ? "1 already downloaded"
-                : skipped + " already downloaded");
-        if (failed > 0) parts.add(failed == 1 ? "1 failed" : failed + " failed");
-        if (lost > 0) parts.add(lost == 1 ? "1 needs a new folder" : lost + " need a new folder");
-        reportDownloadStatus(String.join(", ", parts), username);
-    }
-
-
     static Activity currentActivity() {
         return NewXUtils.findUsableActivity(null);
-    }
-
-
-    private enum EnqueueState {
-        QUEUED,
-        SKIPPED,
-        FAILED,
-        /** Stored folder was refused and cleared. */
-        DESTINATION_LOST,
-    }
-
-    enum ConflictBehavior {
-        OVERWRITE,
-        RENAME,
-        SKIP,
     }
 
     static final class DownloadItem {

@@ -9,6 +9,7 @@ import android.provider.DocumentsContract;
 
 import androidx.annotation.Nullable;
 
+import app.morphe.extension.crimera.downloader.model.ConflictPolicy;
 import app.morphe.extension.newx.settings.NewXLogger;
 
 public final class NewXDownloadFolders {
@@ -165,11 +166,11 @@ public final class NewXDownloadFolders {
     }
 
     /** Resolves the persisted policy, failing closed on foreign or hand-edited values. */
-    public static DownloadDestination.ConflictPolicy conflictPolicy() {
+    public static ConflictPolicy conflictPolicy() {
         String value = DownloadSettings.conflictPolicy();
-        if (DownloadSettings.CONFLICT_OVERWRITE.equals(value)) return DownloadDestination.ConflictPolicy.OVERWRITE;
-        if (DownloadSettings.CONFLICT_RENAME.equals(value)) return DownloadDestination.ConflictPolicy.RENAME;
-        if (DownloadSettings.CONFLICT_SKIP.equals(value)) return DownloadDestination.ConflictPolicy.SKIP;
+        if (DownloadSettings.CONFLICT_OVERWRITE.equals(value)) return ConflictPolicy.OVERWRITE;
+        if (DownloadSettings.CONFLICT_RENAME.equals(value)) return ConflictPolicy.RENAME;
+        if (DownloadSettings.CONFLICT_SKIP.equals(value)) return ConflictPolicy.SKIP;
         throw new IllegalStateException("Unknown download conflict policy: " + value);
     }
 

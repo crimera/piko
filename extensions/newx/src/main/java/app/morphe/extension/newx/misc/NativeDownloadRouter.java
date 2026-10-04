@@ -3,11 +3,17 @@ package app.morphe.extension.newx.misc;
 import android.content.Context;
 import android.net.Uri;
 
-import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import app.morphe.extension.crimera.downloader.DownloadEngine;
+import app.morphe.extension.crimera.downloader.EnqueueResult;
+import app.morphe.extension.crimera.downloader.model.ConflictPolicy;
+import app.morphe.extension.crimera.downloader.model.DownloadRequest;
+import app.morphe.extension.crimera.downloader.model.EnqueueState;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.utils.NewXUtils;
 import app.morphe.extension.shared.Utils;
@@ -26,11 +32,12 @@ import app.morphe.extension.shared.Utils;
 public final class NativeDownloadRouter {
     static final String REDIRECT_SETTING = DownloadSettings.REDIRECT_NATIVE_DOWNLOADS;
 
-    // Transfers only; routing and destination checks stay on the calling thread so the
-    // native dispatch can be skipped synchronously when the download is handled.
-    private static final int TRANSFER_THREADS = 4;
-    private static final ExecutorService DOWNLOAD_EXECUTOR =
-            Executors.newFixedThreadPool(TRANSFER_THREADS);
+    // Enqueue runs off the UI thread because document creation does provider IPC.
+    private static final Executor ENQUEUE_EXECUTOR = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "native-download-enqueue");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private NativeDownloadRouter() {
     }
@@ -100,12 +107,12 @@ public final class NativeDownloadRouter {
 
         Context applicationContext = context.getApplicationContext();
         Context safeContext = applicationContext != null ? applicationContext : context;
-        DOWNLOAD_EXECUTOR.execute(() ->
-                transfer(safeContext, kind, fileName, url, mimeType, username));
+        ENQUEUE_EXECUTOR.execute(() ->
+                enqueue(safeContext, kind, fileName, url, mimeType, username));
         return true;
     }
 
-    private static void transfer(
+    private static void enqueue(
             Context context,
             NewXDownloadFolders.MediaKind kind,
             String fileName,
@@ -113,7 +120,13 @@ public final class NativeDownloadRouter {
             String mimeType,
             String username
     ) {
-        final DownloadDestination.ConflictPolicy policy;
+        DownloadEngine engine = NewXDownloader.get();
+        if (engine == null) {
+            postStatus("Could not start download", username);
+            return;
+        }
+
+        final ConflictPolicy policy;
         try {
             policy = NewXDownloadFolders.conflictPolicy();
         } catch (RuntimeException exception) {
@@ -123,55 +136,36 @@ public final class NativeDownloadRouter {
         }
 
         final Uri destinationTree = NewXDownloadFolders.treeUri(kind);
-        final DownloadDestination.Target target;
+        String larger = NewXDownloader.largerVariantUrl(url);
+        List<String> fallbacks = larger != null ? Collections.singletonList(larger) : Collections.emptyList();
+
+        final DownloadRequest request;
         try {
-            target = DownloadDestination.reserve(context, kind, destinationTree, fileName, mimeType, policy);
-        } catch (IOException | RuntimeException exception) {
-            NewXLogger.printException(() -> "Failed to create the NewX download file", exception);
-            // reserve() clears refused folders, so the next tap falls back to the native flow.
-            postStatus(DownloadDestination.isDestinationLoss(exception)
-                    ? InlineDownloadButton.FOLDER_LOST_MESSAGE
-                    : "Could not start download", username);
-            return;
-        }
-        // The conflict policy is SKIP and the name is already taken; nothing to download.
-        if (target == null) {
-            postStatus("Already downloaded", username);
+            request = new DownloadRequest(
+                    url,
+                    fallbacks,
+                    destinationTree,
+                    Collections.emptyList(),
+                    fileName,
+                    mimeType,
+                    policy,
+                    username
+            );
+        } catch (IllegalArgumentException exception) {
+            NewXLogger.printException(() -> "Invalid NewX download request: " + fileName, exception);
+            postStatus("Could not start download", username);
             return;
         }
 
-        // The stock download toast is skipped when the router takes over, so report the
-        // download start the same way the inline download button does.
-        postStatus("Download started", username);
-        int notificationId =
-                DownloadDestination.beginDownloadNotification(context, target.fileName());
-        DownloadDestination.SaveState state;
-        try {
-            state = DownloadDestination.save(context, target, url, notificationId, username);
-        } catch (RuntimeException exception) {
-            // save() handles its own failures; this covers throws before it could clean up.
-            NewXLogger.printException(() -> "Failed to download " + target.fileName(), exception);
-            boolean lost = DownloadDestination.isDestinationLoss(exception);
-            if (lost) NewXDownloadFolders.invalidate(target.kind());
-            DownloadDestination.discard(context, target);
-            state = lost
-                    ? DownloadDestination.SaveState.DESTINATION_LOST
-                    : DownloadDestination.SaveState.FAILED;
-        }
-
-        switch (state) {
-            case SAVED -> {
-                // Success shows via the OS notification; without it, say so in-app.
-                if (!DownloadDestination.notificationsEnabled(context)) {
-                    postStatus("Saved " + target.fileName(), username);
-                }
+        EnqueueResult result = engine.enqueue(request);
+        switch (result.state()) {
+            case QUEUED -> postStatus("Download started", username);
+            case SKIPPED -> postStatus("Already downloaded", username);
+            case DESTINATION_LOST -> {
+                NewXDownloadFolders.invalidate(kind);
+                postStatus(InlineDownloadButton.FOLDER_LOST_MESSAGE, username);
             }
-            case DESTINATION_LOST ->
-                    postStatus(InlineDownloadButton.FOLDER_LOST_MESSAGE, username);
-            case FAILED -> postStatus("Could not save " + target.fileName(), username);
-            case CANCELLED -> postStatus("Download cancelled", username);
-            case NO_CONNECTION ->
-                    postStatus("No connection — tap Retry when online", username);
+            case FAILED -> postStatus("Could not start download", username);
         }
     }
 

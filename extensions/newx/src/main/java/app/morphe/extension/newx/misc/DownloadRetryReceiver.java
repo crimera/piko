@@ -138,7 +138,7 @@ public final class DownloadRetryReceiver extends BroadcastReceiver {
             String username,
             int notificationId
     ) {
-        final DownloadDestination.ConflictPolicy policy;
+        final app.morphe.extension.crimera.downloader.model.ConflictPolicy policy;
         try {
             policy = NewXDownloadFolders.conflictPolicy();
         } catch (RuntimeException exception) {

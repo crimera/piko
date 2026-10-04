@@ -210,6 +210,19 @@ public final class DownloadDestination {
             @Nullable Uri destinationTree,
             String fileName,
             String mimeType,
+            app.morphe.extension.crimera.downloader.model.ConflictPolicy policy
+    ) throws IOException {
+        if (policy == null) throw new IOException("Unknown download conflict policy");
+        return reserve(context, kind, destinationTree, fileName, mimeType, ConflictPolicy.valueOf(policy.name()));
+    }
+
+    @Nullable
+    public static Target reserve(
+            Context context,
+            NewXDownloadFolders.MediaKind kind,
+            @Nullable Uri destinationTree,
+            String fileName,
+            String mimeType,
             ConflictPolicy policy
     ) throws IOException {
         if (policy == null) {
