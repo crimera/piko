@@ -55,7 +55,7 @@
     <string name="piko_focus_lock_desc">설정된 시간 동안 방해 요소 제거 설정을 강제로 활성화합니다</string>
     <string name="piko_focus_lock_targets">잠금 설정</string>
     <string name="piko_focus_lock_reels_tab">릴스 탭</string>
-    <string name="piko_focus_lock_reels_tab_desc">하단바에서 릴스 탭을 제거합니다. 나와 공유된 릴스는 계속 열려 있습니다</string>
+    <string name="piko_focus_lock_reels_tab_desc">하단바에서 릴스 탭을 제거합니다. 공유받은 릴스는 계속 열 수 있습니다</string>
     <string name="piko_focus_lock_duration">잠금 시간</string>
     <string name="piko_focus_lock_duration_1_minute">1 분</string>
     <string name="piko_focus_lock_duration_5_minutes">5 분</string>
@@ -72,17 +72,17 @@
     <string name="piko_focus_lock_duration_1_month">1 달</string>
     <string name="piko_focus_lock_duration_3_months">3 달</string>
     <string name="piko_focus_lock_enforced">포커스 잠금에 의해 강제로 활성화됩니다</string>
-    <string name="piko_focus_lock_button_lock">지금 잠금</string>
+    <string name="piko_focus_lock_button_lock">지금 잠그기</string>
     <string name="piko_focus_lock_button_request_unlock">잠금 해제 요청</string>
     <string name="piko_focus_lock_button_cancel_unlock">잠금 해제 요청 취소</string>
     <string name="piko_focus_lock_button_unlock">잠금 해제</string>
-    <string name="piko_focus_lock_status_unlocked">꺼짐. 잠금 설정과 잠금 시간을 선택한 다음 잠그세요</string>
-    <string name="piko_focus_lock_status_locked">%1$s까지 잠겨 있습니다. 잠금을 일찍 해제하려면 24시간의 대기 기간이 필요합니다</string>
-    <string name="piko_focus_lock_status_unlock_pending">%1$s부터 잠금 해제가 가능합니다(잠금 만료: %2$s). 탭하여 요청을 취소하세요</string>
-    <string name="piko_focus_lock_status_unlock_ready">대기 시간이 끝났습니다. 탭하여 잠금을 해제하세요</string>
+    <string name="piko_focus_lock_status_unlocked">꺼져 있습니다. 잠금 설정과 잠금 시간을 선택한 다음 잠그세요</string>
+    <string name="piko_focus_lock_status_locked">%1$s 까지 잠겨 있습니다. 조기 잠금 해제하려면 24 시간의 대기 기간이 필요합니다</string>
+    <string name="piko_focus_lock_status_unlock_pending">%1$s 부터 잠금 해제가 가능합니다 (잠금 만료 시간: %2$s). 요청을 취소하려면 여기를 탭하세요</string>
+    <string name="piko_focus_lock_status_unlock_ready">대기 시간이 끝났습니다. 잠금을 해제하려면 여기를 탭하세요</string>
     <string name="piko_focus_lock_nothing_selected">먼저 잠금 설정을 하나 이상 선택하세요</string>
     <string name="piko_focus_lock_confirm_lock">포커스 잠금을 활성화하시겠습니까?</string>
-    <string name="piko_focus_lock_confirm_lock_desc">선택한 설정은 %1$s 동안 계속 적용됩니다. 조기에 잠금을 해제하려면 해제를 요청한 후 최대 %2$d 시간까지 기다려야 합니다. 잠금 상태에서는 설정 초기화 및 설정 가져오기가 차단됩니다. 앱이 다시 시작됩니다</string>
+    <string name="piko_focus_lock_confirm_lock_desc">선택한 설정은 %1$s 동안 계속 유지됩니다. 조기 잠금 해제하려면 해제를 요청한 후 최대 %2$d 시간까지 기다려야 합니다. 잠금 상태에서는 설정 초기화 및 설정 가져오기가 차단됩니다. 설정하면 앱이 다시 시작됩니다</string>
     <string name="piko_focus_lock_confirm_request_unlock">잠금 해제를 요청하시겠습니까?</string>
     <string name="piko_focus_lock_confirm_request_unlock_desc">잠금은 앞으로 %1$d 시간 동안 계속 유지됩니다. 그 후 이곳으로 돌아와 잠금 해제를 확인하세요</string>
     <string name="piko_focus_lock_confirm_unlock">지금 잠금 해제하시겠습니까?</string>
@@ -122,7 +122,7 @@
     <string name="piko_fbi_following_each_other">서로 팔로우하고 있음</string>
     <string name="piko_friendship_status">관계 상태</string>
     <string name="piko_follow_list_non_follower_badge">팔로잉 목록에 팔로워가 아닌 계정 표시</string>
-    <string name="piko_follow_list_non_follower_badge_desc">내가 팔로우하는 목록에서 나를 맞팔로우하지 않는 계정의 행에 배지를 추가합니다</string>
+    <string name="piko_follow_list_non_follower_badge_desc">내가 팔로우하는 목록에서 나를 맞팔로우하지 않는 계정 행에 배지를 추가합니다</string>
     <string name="piko_view_story_mentions">스토리 멘션 보기</string>
     <string name="piko_vsm_title">스토리 멘션</string>
     <string name="piko_vsm_no_mentions">이 스토리에 멘션이 없습니다</string>
@@ -155,6 +155,14 @@
     <string name="piko_copied">복사하였습니다</string>
     <string name="piko_more_profile_options">프로필 옵션 더보기</string>
     <string name="piko_remove_empty_bottom_space">하단 빈 공간 제거</string>
+    <string name="piko_inbox_lock">받은 메시지함 잠금</string>
+    <string name="piko_inbox_lock_desc">앱을 실행할 때마다 지문, 얼굴 인식 또는 화면 잠금으로 받은 메지함을 숨깁니다</string>
+    <string name="piko_inbox_lock_notifications">알림 차단</string>
+    <string name="piko_inbox_lock_notifications_desc">받은 메시지함 잠금이 활성화된 동안에는 메시지 알림에 ‘새 메시지’라고만 표시되며, 앱 내 메시지 배너도 표시되지 않습니다</string>
+    <string name="piko_inbox_lock_notification">새 메시지</string>
+    <string name="piko_inbox_lock_unlock">잠금</string>
+    <string name="piko_inbox_lock_prompt">메시지 잠금 해제</string>
+    <string name="piko_inbox_lock_no_lock">받은 메시지함 잠금을 사용하려면 기기에 화면 잠금을 설정하세요</string>
     <string name="piko_unlock_plus_benefits">플러스 혜택 잠금 해제</string>
     <string name="piko_unlock_plus_benefits_desc">로컬에서 확인되는 \'Plus\' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다</string>
     <string name="piko_customise_story_ring_size">스토리 링 크기 설정</string>
@@ -169,6 +177,8 @@
     <string name="piko_category_download_media">미디어 다운로드</string>
     <string name="piko_category_downloads">다운로드</string>
     <string name="piko_enable_download">다운로드 활성화</string>
+    <string name="piko_feed_download_button">피드 게시물에 다운로드 버튼 추가</string>
+    <string name="piko_feed_download_button_desc">피드 게시물 저장 버튼 옆에 다운로드 아이콘을 추가합니다</string>
     <string name="piko_enable_direct_download">즉시 다운로드 활성화</string>
     <string name="piko_enable_direct_download_desc">옵션 선택 없이 현재 보고 있는 미디어를 즉시 다운로드합니다</string>
     <string name="piko_download_username_folder">사용자 이름별로 미디어 분류</string>
@@ -176,7 +186,7 @@
     <string name="piko_embed_download_metadata">동영상 메타데이터 삽입</string>
     <string name="piko_embed_download_metadata_desc">다운로드한 MP4 파일에 자막, 게시물 링크, 크리에이터 및 업로드 날짜를 추가합니다</string>
     <string name="piko_download_file_name_template">파일 이름 형식</string>
-    <string name="piko_download_file_name_template_invalid">잘못된 파일 이름</string>
+    <string name="piko_download_file_name_template_invalid">잘못된 파일 이름입니다</string>
     <string name="piko_download_file_name_insert_token">%1$s 삽입</string>
     <string name="piko_download_file_name_variables">변수</string>
     <string name="piko_download_file_name_token_username">사용자 이름</string>
@@ -281,7 +291,7 @@
     <string name="piko_available_like_animation">사용 가능한 애니메이션</string>
     <string name="piko_like_animation_random">무작위</string>
     <string name="piko_like_animation_preview">애니메이션 미리보기</string>
-    <string name="piko_like_animation_preview_unavailable">미리보기를 사용할 수 없음</string>
+    <string name="piko_like_animation_preview_unavailable">미리보기를 사용할 수 없습니다</string>
     <!-- For arrays -->
     <string name="piko_array_default">기본</string>
     <string name="piko_array_detailed_timestamp">상세 타임스탬프 (요일/월/일/시/분/초)</string>
@@ -323,12 +333,12 @@
     <string name="piko_pref_delete_font_fail">폰트를 삭제할 수 없습니다</string>
     <string name="piko_pref_delete_font_warn">삭제할 사용자 정의 폰트를 찾을 수 없습니다</string>
     <string name="piko_use_system_font">시스템 폰트 사용</string>
-    <string name="piko_use_system_font_desc">아래에 폰트 파일이 추가되지 않은 경우에만 적용되며, 폰트 파일을 추가하면 이 스위치가 무시됩니다</string>
+    <string name="piko_use_system_font_desc">아래에 폰트 파일이 추가되지 않은 경우에만 적용되며, 폰트 파일을 추가하면 이 스위치는 무시됩니다</string>
     <!-- Developer Options Section -->
-    <string name="piko_category_rec_flags">권장 플래그</string>
+    <string name="piko_category_rec_flags">추천 플래그</string>
     <string name="piko_category_rec_flags_desc">커뮤니티에서 추천하는 개발자 플래그</string>
     <string name="piko_rec_flags_read_error">캐시된 플래그 파일을 읽을 수 없습니다</string>
-    <string name="piko_rec_flags_no_file">권장 플래그 파일을 찾을 수 없습니다</string>
+    <string name="piko_rec_flags_no_file">추천 플래그 파일을 찾을 수 없습니다</string>
     <string name="piko_rec_flags_refresh_file">플래그 새로고침</string>
     <string name="piko_rec_flags_last_modified_at">마지막 수정일: %s</string>
     <!-- Story filters -->
@@ -390,6 +400,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">사용자가 설정한 개수 미만의 항목이 있는 스토리를 숨깁니다 (기본값: 1)</string>
     <string name="piko_filter_story_maximum_item_count">최대 스토리 항목</string>
     <string name="piko_filter_story_maximum_item_count_desc">사용자가 설정한 개수를 초과하는 항목이 있는 스토리를 숨깁니다 (기본값: 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">인스턴트 저장</string>
+    <string name="piko_instants_download_desc">한 번만 볼 수 있는 인스턴트를 시청하는 동안 캡처하여 나중에 \'저장된 인스턴트 보기\'에서 다시 보고 다운로드할 수 있습니다</string>
+    <string name="piko_view_saved_instants">저장된 인스턴트 보기</string>
+    <string name="piko_instants_vault_empty">아직 저장된 인스턴트가 없습니다. 캡처를 활성화하여 인스턴트를 열면 여기에 표시됩니다</string>
+    <string name="piko_instants_link_unavailable">미디어 링크를 사용할 수 없습니다</string>
+    <string name="piko_instants_unknown_user">알 수 없음</string>
+    <string name="piko_instants_delete_confirm">이 저장된 인스턴트를 삭제하시겠습니까?</string>
+    <string name="piko_instants_clear_all">모두 지우기</string>
+    <string name="piko_instants_clear_all_confirm">저장된 인스턴트를 모두 삭제하시겠습니까?</string>
+    <string name="piko_delete">삭제</string>
+    <string name="piko_instants_title">인스턴트</string>
+    <string name="piko_search_username">사용자 이름으로 검색</string>
+    <string name="piko_instants_no_matches">해당 사용자의 저장된 인스턴트가 없습니다</string>
+    <string name="piko_instants_unavailable">사용할 수 없음</string>
+    <string name="piko_saved_on">저장 날짜</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Instagram에서 열기</string>
     <string name="piko_open_voice_with_player">음악 플레이어로 열기</string>
@@ -401,7 +427,6 @@
     <string name="piko_all">모두</string>
     <string name="piko_selected_count">%d 개 선택됨</string>
     <string name="piko_delete_selected_confirm">%d 개의 선택된 메시지를 삭제하시겠습니까?</string>
-    <string name="piko_delete">삭제</string>
     <string name="piko_unknown">알 수 없음</string>
     <string name="piko_tap_to_view">탭하여 보기</string>
     <string name="piko_media_expired">링크 만료됨</string>

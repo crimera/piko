@@ -169,7 +169,7 @@
     <string name="piko_pref_flag_keep_on">계속 켜짐</string>
     <string name="piko_pref_flag_keep_off">계속 꺼짐</string>
     <string name="piko_pref_flag_suggested_name">추천 이름:</string>
-    <string name="piko_pref_flag_check_clear">중복되거나 확인되지 않은 이름이 없습니다.</string>
+    <string name="piko_pref_flag_check_clear">중복되거나 확인되지 않은 이름이 없습니다</string>
     <string name="piko_pref_import_flags">플래그 가져오기</string>
     <string name="piko_pref_export_flags">플래그 내보내기</string>
     <string name="piko_pref_reset_flags">플래그 초기화하기</string>
@@ -402,7 +402,7 @@
 
 https://github.com/crimera/piko/blob/dev/docs /about_login_token_patch.md
 
-이 기능을 사용하기 전에 반드시 읽어보는 것을 권장합니다. 토큰을 가져오는 방법 등 중요한 정보가 포함되어 있습니다"</string>
+이 기능을 사용하기 전에 반드시 읽어보는 것을 추천합니다. 토큰을 가져오는 방법 등 중요한 정보가 포함되어 있습니다"</string>
     <string name="piko_login_token_select_account">계정 선택:</string>
     <string name="piko_login_token_export_copy_to_clipboard">클립보드에 복사</string>
     <string name="piko_login_token_export_save_to_file">파일에 저장</string>

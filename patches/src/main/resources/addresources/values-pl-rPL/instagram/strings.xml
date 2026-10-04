@@ -49,8 +49,8 @@
     <string name="piko_disable_highlights">Wyłącz wyróżnione relacje</string>
     <string name="piko_disable_explore">Wyłącz sekcję Eksploruj</string>
     <string name="piko_disable_comments">Wyłącz komentarze</string>
-    <string name="piko_limit_following_feed">Ogranicz oś czasu do obserwowanych</string>
-    <string name="piko_limit_following_feed_desc">Filtruje oś czasu, wyświetlając tylko treści od profili, które obserwujesz</string>
+    <string name="piko_limit_following_feed">Ogranicz aktualności do obserwowanych</string>
+    <string name="piko_limit_following_feed_desc">Filtruje aktualności, wyświetlając tylko treści od profili, które obserwujesz</string>
     <string name="piko_focus_lock">Blokada skupienia</string>
     <string name="piko_focus_lock_desc">Wymuś ustawienia ułatwiające skupienie na określony czas</string>
     <string name="piko_focus_lock_targets">Ustawienia do zablokowania</string>
@@ -94,7 +94,7 @@
     <string name="piko_disable_swipe_to_create">Wyłącz gest tworzenia</string>
     <string name="piko_disable_swipe_to_create_desc">Blokuje otwieranie ekranu tworzenia po przesunięciu w prawo na stronie głównej</string>
     <string name="piko_hide_stories_tray">Ukryj pasek relacji</string>
-    <string name="piko_hide_stories_tray_desc">Ukrywa pasek z relacjami na osi czasu</string>
+    <string name="piko_hide_stories_tray_desc">Ukrywa pasek z relacjami w aktualnościach</string>
     <string name="piko_hide_notes_tray">Ukryj pasek notatek</string>
     <string name="piko_hide_notes_tray_desc">Ukrywa pasek notatek w sekcji wiadomości</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ukryj przycisk tworzenia grupy w menu udostępniania</string>
@@ -155,6 +155,14 @@
     <string name="piko_copied">Skopiowano</string>
     <string name="piko_more_profile_options">Więcej opcji profilu</string>
     <string name="piko_remove_empty_bottom_space">Usuń pustą przestrzeń na dole</string>
+    <string name="piko_inbox_lock">Blokada skrzynki odbiorczej</string>
+    <string name="piko_inbox_lock_desc">Ukrywa skrzynkę odbiorczą za pomocą odcisku palca, rozpoznawania twarzy lub blokady ekranu przy każdym otwarciu aplikacji</string>
+    <string name="piko_inbox_lock_notifications">Blokuj powiadomienia</string>
+    <string name="piko_inbox_lock_notifications_desc">Gdy blokada skrzynki odbiorczej jest aktywna, powiadomienia o wiadomościach zawierają tylko tekst \"Nowa wiadomość\", a baner wiadomości w aplikacji pozostaje ukryty</string>
+    <string name="piko_inbox_lock_notification">Nowa wiadomość</string>
+    <string name="piko_inbox_lock_unlock">Odblokuj</string>
+    <string name="piko_inbox_lock_prompt">Odblokuj wiadomości</string>
+    <string name="piko_inbox_lock_no_lock">Ustaw blokadę ekranu na urządzeniu, aby korzystać z blokady skrzynki odbiorczej</string>
     <string name="piko_unlock_plus_benefits">Odblokuj korzyści Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO</string>
     <string name="piko_customise_story_ring_size">Dostosuj rozmiar obwódki relacji</string>
@@ -169,6 +177,8 @@
     <string name="piko_category_download_media">Pobieranie multimediów</string>
     <string name="piko_category_downloads">Pobrane</string>
     <string name="piko_enable_download">Włącz pobieranie</string>
+    <string name="piko_feed_download_button">Przycisk pobierania w postach w aktualnościach</string>
+    <string name="piko_feed_download_button_desc">Dodaje ikonę pobierania obok przycisku zapisywania w postach w aktualnościach</string>
     <string name="piko_enable_direct_download">Włącz bezpośrednie pobieranie</string>
     <string name="piko_enable_direct_download_desc">Pobiera przeglądane multimedia od razu bez wyświetlania okna opcji</string>
     <string name="piko_download_username_folder">Grupuj pobrania według nazwy użytkownika</string>
@@ -221,7 +231,7 @@
     <string name="piko_more_options">Więcej opcji</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Ukrywanie przycisków nawigacji</string>
-    <string name="piko_hide_navigation_feed">Ukryj przycisk Główna</string>
+    <string name="piko_hide_navigation_feed">Ukryj przycisk Aktualności</string>
     <string name="piko_hide_navigation_reels">Ukryj przycisk Rolki</string>
     <string name="piko_hide_navigation_direct">Ukryj przycisk Wiadomości</string>
     <string name="piko_hide_navigation_search">Ukryj przycisk Szukaj</string>
@@ -297,7 +307,7 @@
     <string name="piko_tap_here">Dotknij tutaj</string>
     <!-- Action Bar Section -->
     <string name="piko_category_action_bar">Pasek akcji</string>
-    <string name="piko_action_bar_main_feed">Ikony paska akcji strony głównej</string>
+    <string name="piko_action_bar_main_feed">Ikony paska akcji aktualności</string>
     <string name="piko_action_bar_user_profile">Ikony paska akcji profilu użytkownika</string>
     <string name="piko_action_bar_chat">Ikony paska akcji czatu</string>
     <string name="piko_action_bar_chat_desc">Ikony paska akcji w wiadomościach prywatnych</string>
@@ -308,7 +318,7 @@
     <string name="piko_action_bar_button_create_icon">Ikona tworzenia</string>
     <string name="piko_action_bar_button_notifications_icon">Ikona powiadomień</string>
     <string name="piko_settings_on_action_bar">Ustawienia Piko na pasku akcji</string>
-    <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji strony głównej</string>
+    <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji aktualności</string>
     <!-- Font Section -->
     <string name="piko_category_font">Czcionka</string>
     <string name="piko_custom_font">Własna czcionka</string>
@@ -390,6 +400,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">Relacje mające mniej niż x elementów zostaną ukryte (domyślnie 1)</string>
     <string name="piko_filter_story_maximum_item_count">Maksymalna liczba elementów relacji</string>
     <string name="piko_filter_story_maximum_item_count_desc">Relacje mające więcej niż x elementów zostaną ukryte (domyślnie 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Zapisuj Instants</string>
+    <string name="piko_instants_download_desc">Przechwytuj jednorazowe Instants podczas ich wyświetlania, aby móc je później obejrzeć i pobrać z poziomu \"Wyświetl zapisane Instants\".</string>
+    <string name="piko_view_saved_instants">Wyświetl zapisane Instants</string>
+    <string name="piko_instants_vault_empty">Brak zapisanych Instants. Otwórz kilka Instants z włączonym przechwytywaniem, a pojawią się w tym miejscu.</string>
+    <string name="piko_instants_link_unavailable">Link do multimediów jest niedostępny.</string>
+    <string name="piko_instants_unknown_user">Nieznany</string>
+    <string name="piko_instants_delete_confirm">Usunąć ten zapisany Instant?</string>
+    <string name="piko_instants_clear_all">Wyczyść wszystko</string>
+    <string name="piko_instants_clear_all_confirm">Usunąć wszystkie zapisane Instants?</string>
+    <string name="piko_delete">Usuń</string>
+    <string name="piko_instants_title">Instants</string>
+    <string name="piko_search_username">Szukaj według nazwy użytkownika</string>
+    <string name="piko_instants_no_matches">Brak zapisanych Instants od tego użytkownika.</string>
+    <string name="piko_instants_unavailable">Niedostępne</string>
+    <string name="piko_saved_on">Zapisano</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Otwórz w Instagramie</string>
     <string name="piko_open_voice_with_player">Otwórz w odtwarzaczu muzyki</string>
@@ -401,7 +427,6 @@
     <string name="piko_all">Wszystkie</string>
     <string name="piko_selected_count">%d wybranych</string>
     <string name="piko_delete_selected_confirm">Usunąć %d wybranych wiadomości?</string>
-    <string name="piko_delete">Usuń</string>
     <string name="piko_unknown">Nieznane</string>
     <string name="piko_tap_to_view">dotknij, aby wyświetlić</string>
     <string name="piko_media_expired">link wygasł</string>

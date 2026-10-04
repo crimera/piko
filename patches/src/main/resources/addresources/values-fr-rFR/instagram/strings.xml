@@ -310,12 +310,26 @@
     <string name="piko_settings_on_action_bar">Paramètres de Piko sur la barre d\'actions</string>
     <string name="piko_settings_on_action_bar_desc">Déplacer le point d\'entrée des paramètres de Piko vers la barre d\'actions du fil principal</string>
     <!-- Font Section -->
+    <string name="piko_category_font">Police</string>
+    <string name="piko_custom_font">Police personnalisée</string>
+    <string name="piko_pref_add_font">Ajouter une police</string>
+    <string name="piko_pref_add_font_desc">Sélectionnez un fichier de police (.ttf ou .otf) depuis votre stockage</string>
+    <string name="piko_pref_add_font_success">Police ajoutée avec succès</string>
+    <string name="piko_pref_add_font_fail">Échec de l\'ajout de la police</string>
+    <string name="piko_pref_add_font_invalid">Le fichier sélectionné n\'est pas une police valide</string>
+    <string name="piko_pref_add_font_too_large">La police sélectionnée est trop volumineuse</string>
+    <string name="piko_pref_delete_font">Supprimer la police</string>
+    <string name="piko_pref_delete_font_success">Police supprimée avec succès</string>
+    <string name="piko_pref_delete_font_fail">Échec de la suppression de la police</string>
+    <string name="piko_pref_delete_font_warn">Aucune police personnalisée à supprimer</string>
+    <string name="piko_use_system_font">Utiliser la police du système</string>
+    <string name="piko_use_system_font_desc">S\'applique uniquement lorsqu\'aucun fichier de police n\'est ajouté ci-dessous. L\'ajout d\'un fichier désactive cette option.</string>
     <!-- Developer Options Section -->
-    <string name="piko_category_rec_flags">Flags recommandés</string>
-    <string name="piko_category_rec_flags_desc">Flags de développeur suggérés par la communauté</string>
-    <string name="piko_rec_flags_read_error">Échec de la lecture du fichier de flags en cache</string>
-    <string name="piko_rec_flags_no_file">Fichier de flags recommandés introuvable</string>
-    <string name="piko_rec_flags_refresh_file">Actualiser les flags</string>
+    <string name="piko_category_rec_flags">Indicateurs recommandés</string>
+    <string name="piko_category_rec_flags_desc">Indicateurs de développeur suggérés par la communauté</string>
+    <string name="piko_rec_flags_read_error">Échec de la lecture du fichier d\'indicateurs mis en cache</string>
+    <string name="piko_rec_flags_no_file">Fichier des indicateurs recommandés introuvable</string>
+    <string name="piko_rec_flags_refresh_file">Actualiser les indicateurs</string>
     <string name="piko_rec_flags_last_modified_at">Dernière modification : %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filtres de contenu</string>
@@ -376,6 +390,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">Les stories contenant moins de x éléments seront masquées (par défaut : 1)</string>
     <string name="piko_filter_story_maximum_item_count">Nombre maximal d\'éléments par story</string>
     <string name="piko_filter_story_maximum_item_count_desc">Les stories contenant plus de x éléments seront masquées (par défaut : 9999) </string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Enregistrer les Instants</string>
+    <string name="piko_instants_download_desc">Enregistrez les Instants à vue unique lorsque vous les consultez, afin de pouvoir les revoir et les télécharger plus tard depuis “Voir les Instants enregistrés”.</string>
+    <string name="piko_view_saved_instants">Voir les Instants enregistrés</string>
+    <string name="piko_instants_vault_empty">Aucun Instant enregistré pour le moment. Ouvrez des Instants avec la capture activée et ils apparaîtront ici.</string>
+    <string name="piko_instants_link_unavailable">Lien vers le média indisponible.</string>
+    <string name="piko_instants_unknown_user">Inconnu</string>
+    <string name="piko_instants_delete_confirm">Supprimer cet Instant enregistré ?</string>
+    <string name="piko_instants_clear_all">Tout effacer</string>
+    <string name="piko_instants_clear_all_confirm">Supprimer tous les Instants enregistrés ?</string>
+    <string name="piko_delete">Supprimer</string>
+    <string name="piko_instants_title">Instants</string>
+    <string name="piko_search_username">Rechercher par nom d\'utilisateur</string>
+    <string name="piko_instants_no_matches">Aucun Instant enregistré de cet utilisateur.</string>
+    <string name="piko_instants_unavailable">Indisponible</string>
+    <string name="piko_saved_on">Enregistré le</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Ouvrir dans Instagram</string>
     <string name="piko_open_voice_with_player">Ouvrir avec le lecteur de musique</string>
@@ -387,7 +417,6 @@
     <string name="piko_all">Tout</string>
     <string name="piko_selected_count">%d sélectionné</string>
     <string name="piko_delete_selected_confirm">Supprimer %d messages sélectionnés ?</string>
-    <string name="piko_delete">Supprimer</string>
     <string name="piko_unknown">Inconnu</string>
     <string name="piko_tap_to_view">appuyer pour afficher</string>
     <string name="piko_media_expired">lien expiré</string>

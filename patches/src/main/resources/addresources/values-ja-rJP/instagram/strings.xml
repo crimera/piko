@@ -155,6 +155,14 @@
     <string name="piko_copied">コピーしました</string>
     <string name="piko_more_profile_options">プロフィールのオプション</string>
     <string name="piko_remove_empty_bottom_space">ナビゲーションバー下の空白を削除</string>
+    <string name="piko_inbox_lock">メッセージのロック</string>
+    <string name="piko_inbox_lock_desc">アプリを開くたびに、メッセージの表示に画面ロックまたは生体認証を要求します</string>
+    <string name="piko_inbox_lock_notifications">通知をブロック</string>
+    <string name="piko_inbox_lock_notifications_desc">メッセージのロック中は、メッセージ通知に「新着メッセージ」のみを表示し、アプリ内のメッセージバナーを非表示にします</string>
+    <string name="piko_inbox_lock_notification">新着メッセージ</string>
+    <string name="piko_inbox_lock_unlock">ロックを解除</string>
+    <string name="piko_inbox_lock_prompt">メッセージのロックを解除</string>
+    <string name="piko_inbox_lock_no_lock">メッセージのロックを使用するには、端末に画面ロックを設定してください</string>
     <string name="piko_unlock_plus_benefits">Plus特典を有効化</string>
     <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
     <string name="piko_customise_story_ring_size">ストーリー欄のアイコンのサイズをカスタマイズ</string>
@@ -169,6 +177,8 @@
     <string name="piko_category_download_media">メディアのダウンロード</string>
     <string name="piko_category_downloads">ダウンロード</string>
     <string name="piko_enable_download">ダウンロードを有効化</string>
+    <string name="piko_feed_download_button">フィードにダウンロードボタンを表示</string>
+    <string name="piko_feed_download_button_desc">フィード投稿の保存ボタンの横にダウンロードアイコンを追加します</string>
     <string name="piko_enable_direct_download">直接ダウンロードを有効化</string>
     <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
     <string name="piko_download_username_folder">ユーザーネームごとにメディアを分ける</string>
@@ -390,6 +400,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">指定した項目数未満のストーリーを非表示にします(デフォルト: 1)</string>
     <string name="piko_filter_story_maximum_item_count">ストーリー内の最大件数</string>
     <string name="piko_filter_story_maximum_item_count_desc">指定した項目数を超えるストーリーを非表示にします(デフォルト: 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">インスタントを保存</string>
+    <string name="piko_instants_download_desc">一度だけ表示できるインスタントを閲覧時に保存し、あとで「保存したインスタントを表示」から再閲覧したりダウンロードしたりできます。</string>
+    <string name="piko_view_saved_instants">保存したインスタントを表示</string>
+    <string name="piko_instants_vault_empty">保存されたインスタントはまだありません。キャプチャを有効にしてインスタントを開くと、ここに表示されます。</string>
+    <string name="piko_instants_link_unavailable">メディアリンクは利用できません。</string>
+    <string name="piko_instants_unknown_user">不明</string>
+    <string name="piko_instants_delete_confirm">このインスタントを削除しますか？</string>
+    <string name="piko_instants_clear_all">すべて削除</string>
+    <string name="piko_instants_clear_all_confirm">すべての保存したインスタントを削除しますか？</string>
+    <string name="piko_delete">削除</string>
+    <string name="piko_instants_title">インスタント</string>
+    <string name="piko_search_username">ユーザーネームで検索</string>
+    <string name="piko_instants_no_matches">そのユーザーから保存されたインスタントはありません。</string>
+    <string name="piko_instants_unavailable">利用不可</string>
+    <string name="piko_saved_on">保存日</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Instagramで開く</string>
     <string name="piko_open_voice_with_player">音楽プレーヤーで開く</string>
@@ -401,7 +427,6 @@
     <string name="piko_all">すべて</string>
     <string name="piko_selected_count">%d件選択中</string>
     <string name="piko_delete_selected_confirm">%d件のメッセージを削除しますか？</string>
-    <string name="piko_delete">削除</string>
     <string name="piko_unknown">不明</string>
     <string name="piko_tap_to_view">タップして表示</string>
     <string name="piko_media_expired">リンクは期限切れです</string>

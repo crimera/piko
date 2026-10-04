@@ -4,7 +4,7 @@
     <string name="piko_category_ads">Reklamlar</string>
     <string name="piko_disable_ads">Reklamları devre dışı bırak</string>
     <string name="piko_hide_suggested_content">Önerilen içeriği gizle</string>
-    <string name="piko_hide_suggested_content_desc">Önerilen hikâyeleri, Reels ve Threads içeriklerini gizler (önerilen gönderiler yine gösterilmeye devam eder).</string>
+    <string name="piko_hide_suggested_content_desc">Önerilen hikâyeleri, Reels ve Threads içeriklerini gizler (Önerilen gönderiler yine de gösterilmeye devam eder).</string>
     <!-- Developer Options Section -->
     <string name="piko_category_dev_options">Geliştirici seçenekleri</string>
     <string name="piko_enable_dev_options">Geliştirici seçeneklerini etkinleştir</string>
@@ -51,6 +51,44 @@
     <string name="piko_disable_comments">Yorumları devre dışı bırak</string>
     <string name="piko_limit_following_feed">Akışı takip edilen profillerle sınırla</string>
     <string name="piko_limit_following_feed_desc">Ana sayfa akışını yalnızca takip ettiğiniz profillerin içerikleriyle sınırlar</string>
+    <string name="piko_focus_lock">Odak Kilidi</string>
+    <string name="piko_focus_lock_desc">Belirli bir süre için dikkat dağıtıcı unsurları engelleyen ayarları zorla etkinleştir</string>
+    <string name="piko_focus_lock_targets">Kilitlenecek ayarlar</string>
+    <string name="piko_focus_lock_reels_tab">Reels sekmesi</string>
+    <string name="piko_focus_lock_reels_tab_desc">Gezinme çubuğundan Reels sekmesini kaldırır. Sizinle paylaşılan Reels’ler hâlâ açılır.</string>
+    <string name="piko_focus_lock_duration">Kilitlenecek süre</string>
+    <string name="piko_focus_lock_duration_1_minute">1 dakika</string>
+    <string name="piko_focus_lock_duration_5_minutes">5 dakika</string>
+    <string name="piko_focus_lock_duration_10_minutes">10 dakika</string>
+    <string name="piko_focus_lock_duration_30_minutes">30 dakika</string>
+    <string name="piko_focus_lock_duration_1_hour">1 saat</string>
+    <string name="piko_focus_lock_duration_2_hours">2 saat</string>
+    <string name="piko_focus_lock_duration_6_hours">6 saat</string>
+    <string name="piko_focus_lock_duration_12_hours">12 saat</string>
+    <string name="piko_focus_lock_duration_1_day">1 gün</string>
+    <string name="piko_focus_lock_duration_3_days">3 gün</string>
+    <string name="piko_focus_lock_duration_1_week">1 hafta</string>
+    <string name="piko_focus_lock_duration_2_weeks">2 hafta</string>
+    <string name="piko_focus_lock_duration_1_month">1 ay</string>
+    <string name="piko_focus_lock_duration_3_months">3 ay</string>
+    <string name="piko_focus_lock_enforced">Odak Kilidi tarafından zorla uygulandı.</string>
+    <string name="piko_focus_lock_button_lock">Şimdi kilitle</string>
+    <string name="piko_focus_lock_button_request_unlock">Kilidin açılmasını talep et</string>
+    <string name="piko_focus_lock_button_cancel_unlock">Kilidi açma isteğini iptal et</string>
+    <string name="piko_focus_lock_button_unlock">Kilidi aç</string>
+    <string name="piko_focus_lock_status_unlocked">Kapalı. Neyi ne kadar süreyle kilitleyeceğinizi seçin, ardından kilitleyin.</string>
+    <string name="piko_focus_lock_status_locked">%1$s tarihine kadar kilitli. Erken kilit açma işlemi için 24 saatlik bir bekleme süresi gereklidir.</string>
+    <string name="piko_focus_lock_status_unlock_pending">%1$s tarihinde kilit açma özelliği kullanılabilir (kilit %2$s tarihinde sona erer). İsteği iptal etmek için dokunun.</string>
+    <string name="piko_focus_lock_status_unlock_ready">Bekleme süresi sona erdi. Kilidi açmak için dokunun.</string>
+    <string name="piko_focus_lock_nothing_selected">Öncelikle kilitlemek için en az bir ayar seçin.</string>
+    <string name="piko_focus_lock_confirm_lock">Odak Kilidini etkinleştirecek misin?</string>
+    <string name="piko_focus_lock_confirm_lock_desc">Seçtiğiniz ayarlar %1$s süreyle etkin kalır. Kilidi erken açmak için talepte bulunmanız ve en fazla %2$d saat beklemeniz gerekir. Kilitliyken ayarların sıfırlanması ve içe aktarılması engellenir. Uygulama yeniden başlatılacaktır.</string>
+    <string name="piko_focus_lock_confirm_request_unlock">Kilidin açılmasını mı istiyorsunuz?</string>
+    <string name="piko_focus_lock_confirm_request_unlock_desc">Kilit, %1$d saat daha aktif kalacaktır. Bu sürenin sonunda buraya geri dönüp kilidin açılmasını onaylayın.</string>
+    <string name="piko_focus_lock_confirm_unlock">Şimdi kilidi aç?</string>
+    <string name="piko_focus_lock_confirm_unlock_desc">Bu işlemle Odak Kilidi sonlandırılır. Uygulama yeniden başlatılacaktır.</string>
+    <string name="piko_focus_lock_locked_toast">Odak Kilidi etkinleştirildi.</string>
+    <string name="piko_focus_lock_blocked_action">Odak Kilidi etkinken bu özellik kullanılamaz.</string>
     <string name="piko_disable_reels_scrolling">Reels kaydırmayı devre dışı bırak</string>
     <string name="piko_disable_reels_scrolling_desc">Instagram Reels\'deki sonsuz kaydırma özelliğini devre dışı bırakarak sonraki Reel\'a kaydırmayı engeller. Not: Temiz bir kurulumda \'İpucu\' animasyonu görünebilir ancak birkaç saniye sonra kendiliğinden duracaktır.</string>
     <string name="piko_disable_swipe_to_create">Kaydırarak içerik oluşturmayı kapat</string>
@@ -83,6 +121,8 @@
     <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
     <string name="piko_fbi_following_each_other">Karşılıklı takip</string>
     <string name="piko_friendship_status">Arkadaşlık durumu</string>
+    <string name="piko_follow_list_non_follower_badge">Takip Edilenler listesinde takip etmeyenleri göster</string>
+    <string name="piko_follow_list_non_follower_badge_desc">Kendi “Takip Edilenler” listenizdeki, sizi geri takip etmeyen hesapların satırlarına bir rozet ekler</string>
     <string name="piko_view_story_mentions">Hikaye bahsetmelerini görüntüle</string>
     <string name="piko_vsm_title">Hikaye bahsetmeleri</string>
     <string name="piko_vsm_no_mentions">Bu hikayede bahsetme yok</string>
@@ -115,6 +155,14 @@
     <string name="piko_copied">Kopyalandı</string>
     <string name="piko_more_profile_options">Daha fazla profil seçeneği</string>
     <string name="piko_remove_empty_bottom_space">Alttaki boş alanı kaldır</string>
+    <string name="piko_inbox_lock">Gelen Kutusu Kilidi</string>
+    <string name="piko_inbox_lock_desc">Uygulamayı her açtığınızda gelen kutunuzu parmak izi, yüz tanıma veya ekran kilidi ile gizler</string>
+    <string name="piko_inbox_lock_notifications">Bildirimleri engelle</string>
+    <string name="piko_inbox_lock_notifications_desc">Gelen Kutusu kilidi etkinken, mesaj bildirimlerinde yalnızca “Yeni mesaj” yazılır ve uygulama içi mesaj başlığı gizli kalır</string>
+    <string name="piko_inbox_lock_notification">Yeni mesaj</string>
+    <string name="piko_inbox_lock_unlock">Kilidi aç</string>
+    <string name="piko_inbox_lock_prompt">Mesajlarınızın kilidini açın</string>
+    <string name="piko_inbox_lock_no_lock">Gelen kutusu kilidini kullanmak için cihazınızda ekran kilidi ayarlayın</string>
     <string name="piko_unlock_plus_benefits">Plus abonelik avantajlarının kilidini aç</string>
     <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
     <string name="piko_customise_story_ring_size">Hikaye halkası boyutunu özelleştir</string>
@@ -129,6 +177,8 @@
     <string name="piko_category_download_media">Medya indirme</string>
     <string name="piko_category_downloads">İndirmeler</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>
+    <string name="piko_feed_download_button">Akış gönderilerindeki indirme düğmesi</string>
+    <string name="piko_feed_download_button_desc">Akış gönderilerindeki kaydet düğmesinin yanına bir indirme simgesi ekler</string>
     <string name="piko_enable_direct_download">Doğrudan indirmeyi etkinleştir</string>
     <string name="piko_enable_direct_download_desc">Mevcut görüntülenen medyayı seçenek sormadan indirir</string>
     <string name="piko_download_username_folder">Medyayı kullanıcı adına göre ayır</string>
@@ -221,6 +271,7 @@
     <string name="piko_import_success">Başarıyla içe aktarıldı</string>
     <string name="piko_import_fail">İçe aktarma başarısız</string>
     <string name="piko_restart_app">Değişikliklerin etkili olması için uygulamayı yeniden başlatın</string>
+    <string name="piko_close">Kapat</string>
     <string name="piko_ok">Tamam</string>
     <string name="piko_reset">Sıfırla</string>
     <string name="piko_cancel">İptal</string>
@@ -238,6 +289,9 @@
     <string name="piko_change_like_animation">Beğeni animasyonunu değiştir</string>
     <string name="piko_change_like_animation_desc">Animasyonu, mevcut halka benzeri animasyonlardan biriyle değiştirin</string>
     <string name="piko_available_like_animation">Kullanılabilir beğeni animasyonları</string>
+    <string name="piko_like_animation_random">Rastgele</string>
+    <string name="piko_like_animation_preview">Animasyon önizlemesi</string>
+    <string name="piko_like_animation_preview_unavailable">Önizleme kullanılamıyor</string>
     <!-- For arrays -->
     <string name="piko_array_default">Varsayılan</string>
     <string name="piko_array_detailed_timestamp">Detaylı zaman damgası (Hafta günü/Ay/Tarih/Saat/Dakika/Saniye)</string>
@@ -266,6 +320,20 @@
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
     <!-- Font Section -->
+    <string name="piko_category_font">Yazı tipi</string>
+    <string name="piko_custom_font">Özel yazı tipi</string>
+    <string name="piko_pref_add_font">Yazı tipi ekle</string>
+    <string name="piko_pref_add_font_desc">Depolama alanınızdan bir yazı tipi dosyası (.ttf veya .otf) seçin</string>
+    <string name="piko_pref_add_font_success">Yazı tipi başarıyla eklendi</string>
+    <string name="piko_pref_add_font_fail">Yazı tipi eklenemedi</string>
+    <string name="piko_pref_add_font_invalid">Seçilen dosya geçerli bir yazı tipi değil</string>
+    <string name="piko_pref_add_font_too_large">Seçilen yazı tipi çok büyük</string>
+    <string name="piko_pref_delete_font">Yazı tipini sil</string>
+    <string name="piko_pref_delete_font_success">Yazı tipi başarıyla silindi</string>
+    <string name="piko_pref_delete_font_fail">Yazı tipi silinemedi</string>
+    <string name="piko_pref_delete_font_warn">Silinecek özel yazı tipi bulunamadı</string>
+    <string name="piko_use_system_font">Sistem yazı tipini kullan</string>
+    <string name="piko_use_system_font_desc">Yalnızca aşağıya herhangi bir yazı tipi dosyası eklenmemişse geçerlidir; bir yazı tipi dosyası eklendiğinde bu ayar geçersiz hale gelir.</string>
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">Önerilen bayraklar</string>
     <string name="piko_category_rec_flags_desc">Topluluk tarafından önerilen geliştirici işaretleri</string>
@@ -332,6 +400,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">X öğeden az hikayeler gizlenecek (varsayılan 1)</string>
     <string name="piko_filter_story_maximum_item_count">Maksimum hikaye öğesi sayısı</string>
     <string name="piko_filter_story_maximum_item_count_desc">x\'ten fazla öğe içeren hikayeler gizlenecektir (varsayılan 9999).</string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Şipşakları Kaydet</string>
+    <string name="piko_instants_download_desc">Tek seferlik Şipşakları izlerken kaydedin; böylece daha sonra “Kaydedilmiş Şipşakları Görüntüle” bölümünden bunları tekrar izleyebilir ve indirebilirsiniz.</string>
+    <string name="piko_view_saved_instants">Kaydedilmiş Şipşakları Görüntüle</string>
+    <string name="piko_instants_vault_empty">Henüz kaydedilmiş Şipşak yok. Yakalama özelliği etkinleştirilmiş bazı Şipşakları açın; burada görünmeye başlayacaklar.</string>
+    <string name="piko_instants_link_unavailable">Medya bağlantısı mevcut değil.</string>
+    <string name="piko_instants_unknown_user">Bilinmeyen</string>
+    <string name="piko_instants_delete_confirm">Kaydedilmiş bu Şipşakları silmek ister misiniz?</string>
+    <string name="piko_instants_clear_all">Tümünü temizle</string>
+    <string name="piko_instants_clear_all_confirm">Kaydedilmiş tüm Şipşakları silmek ister misiniz?</string>
+    <string name="piko_delete">Sil</string>
+    <string name="piko_instants_title">Şipşaklar</string>
+    <string name="piko_search_username">Kullanıcı adına göre ara</string>
+    <string name="piko_instants_no_matches">Bu kullanıcıya ait kaydedilmiş Şipşaklar yok.</string>
+    <string name="piko_instants_unavailable">Mevcut değil</string>
+    <string name="piko_saved_on">Kaydedildi</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Instagram\'da aç</string>
     <string name="piko_open_voice_with_player">Müzik çalar ile aç</string>
@@ -343,7 +427,6 @@
     <string name="piko_all">Tümü</string>
     <string name="piko_selected_count">%d seçildi</string>
     <string name="piko_delete_selected_confirm">Seçilen %d mesaj silinsin mi?</string>
-    <string name="piko_delete">Sil</string>
     <string name="piko_unknown">Bilinmiyor</string>
     <string name="piko_tap_to_view">görüntülemek için dokun</string>
     <string name="piko_media_expired">bağlantının süresi doldu</string>
