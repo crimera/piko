@@ -5,7 +5,7 @@
 */
 
 
-package app.morphe.extension.crimera.downloader;
+package app.morphe.extension.crimera.legacydownloader;
 
 public enum MediaType {
     ANY,

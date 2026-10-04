@@ -24,7 +24,7 @@ import java.util.Locale;
 import  app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
-import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;

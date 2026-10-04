@@ -5,7 +5,7 @@
 */
 
 
-package app.morphe.extension.crimera.downloader;
+package app.morphe.extension.crimera.legacydownloader;
 
 import android.app.Notification;
 import android.app.NotificationChannel;

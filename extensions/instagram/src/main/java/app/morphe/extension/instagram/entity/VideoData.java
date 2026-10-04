@@ -15,7 +15,7 @@ import com.instagram.model.mediasize.VideoVersion;
 import com.instagram.model.mediasize.ImmutablePandoVideoVersion;
 import com.instagram.model.mediasize.VideoVersionIntf;
 
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 public class VideoData extends Entity implements MediaInterface {
     private final VideoVersionIntf obj;

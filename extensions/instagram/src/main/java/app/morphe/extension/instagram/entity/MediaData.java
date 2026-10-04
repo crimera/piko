@@ -15,7 +15,7 @@ import java.util.HashSet;
 import android.content.Context;
 
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 import app.morphe.extension.instagram.constants.PostType;
 
 import com.instagram.common.session.UserSession;

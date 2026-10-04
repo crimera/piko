@@ -16,7 +16,7 @@ import android.net.Uri;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
-import app.morphe.extension.crimera.downloader.FolderPickerActivity;
+import app.morphe.extension.crimera.legacydownloader.FolderPickerActivity;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.Constants;
 

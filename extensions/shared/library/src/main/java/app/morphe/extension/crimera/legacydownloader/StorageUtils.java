@@ -5,7 +5,7 @@
 */
 
 
-package app.morphe.extension.crimera.downloader;
+package app.morphe.extension.crimera.legacydownloader;
 
 import android.app.LocaleManager;
 import android.content.Context;

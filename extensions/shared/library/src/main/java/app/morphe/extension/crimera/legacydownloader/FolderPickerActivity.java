@@ -5,7 +5,7 @@
 */
 
 
-package app.morphe.extension.crimera.downloader;
+package app.morphe.extension.crimera.legacydownloader;
 
 import android.content.Intent;
 import android.net.Uri;

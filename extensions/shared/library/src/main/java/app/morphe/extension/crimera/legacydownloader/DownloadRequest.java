@@ -5,7 +5,7 @@
 */
 
 
-package app.morphe.extension.crimera.downloader;
+package app.morphe.extension.crimera.legacydownloader;
 
 public class DownloadRequest {
     public String url;

@@ -31,10 +31,10 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.crimera.ObjectBrowser;
-import app.morphe.extension.crimera.downloader.MediaDownloader;
-import app.morphe.extension.crimera.downloader.DownloadMetadata;
-import app.morphe.extension.crimera.downloader.DownloadRequest;
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaDownloader;
+import app.morphe.extension.crimera.legacydownloader.DownloadMetadata;
+import app.morphe.extension.crimera.legacydownloader.DownloadRequest;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 import app.morphe.extension.crimera.PikoUtils;
 
 import com.instagram.common.session.UserSession;
