@@ -49,11 +49,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
+import app.crimera.patches.downloader.downloaderManifestPatch
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
-import org.w3c.dom.Element
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patches.all.misc.resources.ResourceType
@@ -87,31 +86,13 @@ private const val POST_MEDIA_HELPER = "getPostMedia"
 private const val REPOSTED_POST_HELPER = "getRepostedPost"
 private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
 private const val CREATE_ACTION_HELPER = "createDownloadAction"
+private const val NEWX_DOWNLOADER = "Lapp/morphe/extension/newx/misc/NewXDownloader;"
+private const val DOWNLOADER_INSTALL = "$NEWX_DOWNLOADER->install(Landroid/content/Context;)V"
 
 private fun MutableMethod.requireStatic(label: String) {
     if (AccessFlags.STATIC.isSet(accessFlags)) return
     throw PatchException("$label is no longer static: $this")
 }
-
-private val newXInlineDownloadNotificationResourcePatch =
-    resourcePatch(
-        description = "Adds the NewX download notification receivers to the Android manifest.",
-    ) {
-        finalize {
-            document("AndroidManifest.xml").use { document ->
-                val application = document.getElementsByTagName("application").item(0) as Element
-                listOf(
-                    "app.morphe.extension.newx.misc.DownloadRetryReceiver",
-                    "app.morphe.extension.newx.misc.DownloadCancelReceiver",
-                ).forEach { receiverName ->
-                    val receiver = document.createElement("receiver")
-                    receiver.setAttribute("android:name", receiverName)
-                    receiver.setAttribute("android:exported", "false")
-                    application.appendChild(receiver)
-                }
-            }
-        }
-    }
 
 @Suppress("unused")
 val newXInlineDownloadButtonPatch =
@@ -129,7 +110,7 @@ val newXInlineDownloadButtonPatch =
             newXInlineDownloadModelResolutionPatch,
             newXThumbnailCachePatch,
             newXInAppNotificationPatch,
-            newXInlineDownloadNotificationResourcePatch,
+            downloaderManifestPatch,
             newXExtensionPatch,
         )
 
@@ -293,6 +274,10 @@ val newXInlineDownloadButtonPatch =
             applicationOnCreate.insertHook(0, relocateBranchTargets = false) {
                 invokeStatic(
                     methodReference("$EXTENSION->initialize(Landroid/content/Context;)V"),
+                    applicationOnCreate.p0Register,
+                )
+                invokeStatic(
+                    methodReference(DOWNLOADER_INSTALL),
                     applicationOnCreate.p0Register,
                 )
             }
