@@ -317,6 +317,8 @@
     <string name="piko_filter_story_minimum_item_count_desc">Cerita yang berisi kurang dari x item akan disembunyikan (nilai bawaan 1)</string>
     <string name="piko_filter_story_maximum_item_count">Item cerita maksimum</string>
     <string name="piko_filter_story_maximum_item_count_desc">Cerita yang memiliki lebih dari x item akan disembunyikan (nilai bawaan 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_delete">Hapus</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Buka di Instagram</string>
     <string name="piko_open_voice_with_player">Buka dengan pemutar musik</string>
@@ -328,7 +330,6 @@
     <string name="piko_all">Semua</string>
     <string name="piko_selected_count">%d dipilih</string>
     <string name="piko_delete_selected_confirm">Hapus %d pesan terpilih?</string>
-    <string name="piko_delete">Hapus</string>
     <string name="piko_unknown">Tak diketahui</string>
     <string name="piko_tap_to_view">ketuk untuk melihat</string>
     <string name="piko_media_expired">tautan kedaluwarsa</string>

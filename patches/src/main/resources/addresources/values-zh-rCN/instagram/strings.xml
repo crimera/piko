@@ -317,6 +317,8 @@
     <string name="piko_filter_story_minimum_item_count_desc">少于 X 个项目的快拍将被隐藏 (默认为1)</string>
     <string name="piko_filter_story_maximum_item_count">最大快拍项</string>
     <string name="piko_filter_story_maximum_item_count_desc">超过 X 项的故事将被隐藏 (默认 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_delete">删除</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">在 Instagram 中打开</string>
     <string name="piko_open_voice_with_player">使用音乐播放器打开</string>
@@ -328,7 +330,6 @@
     <string name="piko_all">全部</string>
     <string name="piko_selected_count">已选择 %d 项</string>
     <string name="piko_delete_selected_confirm">删除 %d 选中的消息吗？</string>
-    <string name="piko_delete">删除</string>
     <string name="piko_unknown">未知</string>
     <string name="piko_tap_to_view">点击查看</string>
     <string name="piko_media_expired">当前链接已失效</string>

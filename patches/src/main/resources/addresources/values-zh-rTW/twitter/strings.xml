@@ -145,6 +145,18 @@
     <string name="piko_pref_edit_flag_title">編輯標誌</string>
     <string name="piko_pref_add_flag_title">新增標誌</string>
     <string name="piko_pref_search_flags">搜尋標誌</string>
+    <string name="piko_pref_add_selected_flags">新增已選取項目</string>
+    <string name="piko_pref_flag_already_added">已新增</string>
+    <string name="piko_pref_select_flags">選擇</string>
+    <string name="piko_pref_flags_enable">開啟</string>
+    <string name="piko_pref_flags_disable">關閉</string>
+    <string name="piko_pref_flags_remove_selected">移除已選擇的 flag？</string>
+    <string name="piko_pref_flag_verify_name">建議的 flag 名稱</string>
+    <string name="piko_pref_flags_selected">%s 已選擇</string>
+    <string name="piko_pref_flag_typo_short">可能的錯字</string>
+    <string name="piko_pref_flag_keep_on">保持開啟</string>
+    <string name="piko_pref_flag_keep_off">保持關閉</string>
+    <string name="piko_pref_flag_suggested_name">建議的名稱：</string>
     <string name="piko_pref_import_flags">匯入標誌</string>
     <string name="piko_pref_export_flags">匯出標誌</string>
     <string name="piko_pref_reset_flags">重置標誌</string>
@@ -165,7 +177,10 @@
     <string name="piko_pref_show_poll_result">顯示投票結果</string>
     <string name="piko_pref_show_poll_result_desc">在沒有投票的情況下查看投票結果</string>
     <string name="piko_pref_hide_community_notes">隱藏社群徽章</string>
+    <string name="piko_pref_hide_immersive_player">取消沉浸式播放器</string>
+    <string name="piko_pref_hide_immersive_player_desc">禁止你透過往上滑動觀看更多影片</string>
     <string name="piko_pref_enable_vid_auto_advance">啟用影片自動捲動</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">在沉浸式播放器中啟用影片自動捲動</string>
     <string name="piko_pref_hide_hidden_replies">隱藏隱藏的回覆</string>
     <string name="piko_pref_force_hd">強制高畫質影片</string>
     <string name="piko_pref_force_hd_desc">始終選取最高畫質影片播放</string>
@@ -202,6 +217,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">個人資料頁顯示更多資訊</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">在個人資料頁面上新增更多詳細資訊</string>
     <string name="piko_fast_follower">Fast Follower</string>
+    <string name="piko_pref_account_id">ID：%s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">字體樣式</string>
     <string name="piko_pref_add_font">新增字型</string>
@@ -280,6 +296,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">傳統圖示 4</string>
     <string name="piko_app_icon_name_legacy_blue">傳統藍</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_material_you">Material You 模式</string>
     <string name="piko_app_icon_name_earth">地球</string>
     <string name="piko_app_icon_name_moon">月球</string>
     <string name="piko_app_icon_name_mars">火星</string>

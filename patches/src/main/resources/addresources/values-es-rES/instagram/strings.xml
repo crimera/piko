@@ -51,6 +51,44 @@
     <string name="piko_disable_comments">Desactivar comentarios</string>
     <string name="piko_limit_following_feed">Limitar feed a perfiles seguidos</string>
     <string name="piko_limit_following_feed_desc">Filtra el feed de inicio para mostrar solo contenido de los perfiles que sigues.</string>
+    <string name="piko_focus_lock">Bloqueo de Enfoque</string>
+    <string name="piko_focus_lock_desc">Forzar la activación de configuraciones sin distracciones durante un tiempo determinado</string>
+    <string name="piko_focus_lock_targets">Configuraciones para bloquear</string>
+    <string name="piko_focus_lock_reels_tab">Pestaña de Reels</string>
+    <string name="piko_focus_lock_reels_tab_desc">Elimina la pestaña Reels de la barra de navegación. Los carretes compartidos contigo aún están abiertos.</string>
+    <string name="piko_focus_lock_duration">Bloquear para</string>
+    <string name="piko_focus_lock_duration_1_minute">1 Minuto</string>
+    <string name="piko_focus_lock_duration_5_minutes">5 minutos</string>
+    <string name="piko_focus_lock_duration_10_minutes">10 minutos</string>
+    <string name="piko_focus_lock_duration_30_minutes">30 minutos</string>
+    <string name="piko_focus_lock_duration_1_hour">1 hora</string>
+    <string name="piko_focus_lock_duration_2_hours">2 horas</string>
+    <string name="piko_focus_lock_duration_6_hours">6 horas</string>
+    <string name="piko_focus_lock_duration_12_hours">12 horas</string>
+    <string name="piko_focus_lock_duration_1_day">1 día</string>
+    <string name="piko_focus_lock_duration_3_days">3 días</string>
+    <string name="piko_focus_lock_duration_1_week">1 semana</string>
+    <string name="piko_focus_lock_duration_2_weeks">2 semanas</string>
+    <string name="piko_focus_lock_duration_1_month">1 mes</string>
+    <string name="piko_focus_lock_duration_3_months">3 meses</string>
+    <string name="piko_focus_lock_enforced">Forzado por Bloqueo de Enfoque.</string>
+    <string name="piko_focus_lock_button_lock">Bloquear ahora</string>
+    <string name="piko_focus_lock_button_request_unlock">Solicitar desbloqueo</string>
+    <string name="piko_focus_lock_button_cancel_unlock">Cancelar solicitud de desbloqueo</string>
+    <string name="piko_focus_lock_button_unlock">Desbloquear</string>
+    <string name="piko_focus_lock_status_unlocked">Apagado. Elija qué bloquear y durante cuánto tiempo, luego bloquéelo.</string>
+    <string name="piko_focus_lock_status_locked">Bloqueado hasta %1$s. Para desbloquearlo anticipadamente se requiere un período de enfriamiento de 24 horas.</string>
+    <string name="piko_focus_lock_status_unlock_pending">Desbloqueo disponible en %1$s (el bloqueo vence en %2$s). Toque para cancelar la solicitud.</string>
+    <string name="piko_focus_lock_status_unlock_ready">El período de enfriamiento ha terminado. Toque para desbloquear.</string>
+    <string name="piko_focus_lock_nothing_selected">Elija primero al menos una configuración para bloquear.</string>
+    <string name="piko_focus_lock_confirm_lock">¿Habilitar el Bloqueo de Enfoque?</string>
+    <string name="piko_focus_lock_confirm_lock_desc">Las configuraciones que elegiste permanecen activadas por %1$s. Para desbloquear temprano tienes que solicitarlo y esperar hasta %2$d horas. Restablecer e importar configuraciones están bloqueados mientras están bloqueados. La aplicación se reiniciará.</string>
+    <string name="piko_focus_lock_confirm_request_unlock">¿Solicitar desbloqueo?</string>
+    <string name="piko_focus_lock_confirm_request_unlock_desc">La cerradura permanece activa durante otras %1$d horas. Después de eso, regresa aquí y confirma el desbloqueo.</string>
+    <string name="piko_focus_lock_confirm_unlock">¿Desbloquear ahora?</string>
+    <string name="piko_focus_lock_confirm_unlock_desc">Esto finaliza Bloqueo de Enfoque. La aplicación se reiniciará.</string>
+    <string name="piko_focus_lock_locked_toast">Bloqueo de Enfoque habilitado.</string>
+    <string name="piko_focus_lock_blocked_action">No disponible mientras Bloqueo de Enfoque esté activo.</string>
     <string name="piko_disable_reels_scrolling">Desactiva desplazamiento de Reels</string>
     <string name="piko_disable_reels_scrolling_desc">Desactiva el comportamiento de desplazamiento sin fin en Instagram Reels, evitando pasar al siguiente Reel. Nota: En una instalación limpia, puede aparecer la animación \'Consejo\', pero se detendrá por sí sola después de unos segundos.</string>
     <string name="piko_disable_swipe_to_create">Deshabilitar la función de deslizar para crear</string>
@@ -83,6 +121,8 @@
     <string name="piko_fbi_doesnt_follows_you">No te sigue</string>
     <string name="piko_fbi_following_each_other">Siguiéndose unos a otros</string>
     <string name="piko_friendship_status">Estado de amistad</string>
+    <string name="piko_follow_list_non_follower_badge">Mostrar quienes te dejaron de seguir en la siguiente lista</string>
+    <string name="piko_follow_list_non_follower_badge_desc">Agrega una insignia a las filas de tu propia lista de seguimiento para las cuentas que no te siguen</string>
     <string name="piko_view_story_mentions">Ver menciones de historia</string>
     <string name="piko_vsm_title">Menciones de historia</string>
     <string name="piko_vsm_no_mentions">No hay menciones en esta historia</string>
@@ -115,6 +155,14 @@
     <string name="piko_copied">Copiado</string>
     <string name="piko_more_profile_options">Más opciones de perfil</string>
     <string name="piko_remove_empty_bottom_space">Eliminar espacio inferior vacío</string>
+    <string name="piko_inbox_lock">Bandeja de entrada cerrada</string>
+    <string name="piko_inbox_lock_desc">Oculta tu bandeja de entrada detrás de tu huella digital, rostro o bloqueo de pantalla cada vez que abres la aplicación</string>
+    <string name="piko_inbox_lock_notifications">Bloquear notificaciones</string>
+    <string name="piko_inbox_lock_notifications_desc">Mientras el bloqueo de la bandeja de entrada está activado, las notificaciones de mensajes solo dicen \"Nuevo mensaje\" y el banner del mensaje en la aplicación permanece oculto</string>
+    <string name="piko_inbox_lock_notification">Nuevo mensaje</string>
+    <string name="piko_inbox_lock_unlock">Desbloquear</string>
+    <string name="piko_inbox_lock_prompt">Desbloquea tus mensajes</string>
+    <string name="piko_inbox_lock_no_lock">Establezca un bloqueo de pantalla en su dispositivo para usar el bloqueo de bandeja de entrada</string>
     <string name="piko_unlock_plus_benefits">Desbloquear beneficios Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Desbloquea beneficios de la suscripción \"Plus\" verificados localmente. ÚSALO BAJO TU PROPIO RIESGO</string>
     <string name="piko_customise_story_ring_size">Personalizar tamaño del anillo de historia</string>
@@ -129,6 +177,8 @@
     <string name="piko_category_download_media">Descargar medios</string>
     <string name="piko_category_downloads">Descargas</string>
     <string name="piko_enable_download">Activar descarga</string>
+    <string name="piko_feed_download_button">Botón de descarga en publicaciones de feed</string>
+    <string name="piko_feed_download_button_desc">Agrega un ícono de descarga al lado del botón Guardar en las publicaciones del feed</string>
     <string name="piko_enable_direct_download">Activar descarga directa</string>
     <string name="piko_enable_direct_download_desc">Descarga el medio actual sin pedir opciones</string>
     <string name="piko_download_username_folder">Separar medios por nombre de usuario</string>
@@ -221,6 +271,7 @@
     <string name="piko_import_success">Importado con éxito</string>
     <string name="piko_import_fail">Error al importar</string>
     <string name="piko_restart_app">La app necesita ser reiniciada para que los cambios se reflejen</string>
+    <string name="piko_close">Cerrar</string>
     <string name="piko_ok">Aceptar</string>
     <string name="piko_reset">Restablecer</string>
     <string name="piko_cancel">Cancelar</string>
@@ -238,6 +289,9 @@
     <string name="piko_change_like_animation">Cambiar animación de me gusta</string>
     <string name="piko_change_like_animation_desc">Cambia la animación a una de las animaciones existentes de creadores rings</string>
     <string name="piko_available_like_animation">Animaciones de me gusta disponibles</string>
+    <string name="piko_like_animation_random">Aleatorio</string>
+    <string name="piko_like_animation_preview">Vista previa de animación</string>
+    <string name="piko_like_animation_preview_unavailable">Vista previa no disponible</string>
     <!-- For arrays -->
     <string name="piko_array_default">Predeterminado</string>
     <string name="piko_array_detailed_timestamp">Horario detallado (Día de la Semana/Mes/Fecha/Hora/Minutos/Segundo)</string>
@@ -266,6 +320,20 @@
     <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
     <!-- Font Section -->
+    <string name="piko_category_font">Fuente</string>
+    <string name="piko_custom_font">Fuente personalizada</string>
+    <string name="piko_pref_add_font">Agregar fuente</string>
+    <string name="piko_pref_add_font_desc">Elija un archivo de fuente (.ttf o .otf) de su almacenamiento</string>
+    <string name="piko_pref_add_font_success">Fuente agregada exitosamente</string>
+    <string name="piko_pref_add_font_fail">No se pudo agregar la fuente</string>
+    <string name="piko_pref_add_font_invalid">El archivo seleccionado no es una fuente válida</string>
+    <string name="piko_pref_add_font_too_large">La fuente seleccionada es demasiado grande</string>
+    <string name="piko_pref_delete_font">Eliminar fuente</string>
+    <string name="piko_pref_delete_font_success">Fuente eliminada exitosamente</string>
+    <string name="piko_pref_delete_font_fail">No se pudo eliminar la fuente</string>
+    <string name="piko_pref_delete_font_warn">No se encontró ninguna fuente personalizada para eliminar</string>
+    <string name="piko_use_system_font">Utilice la fuente del sistema</string>
+    <string name="piko_use_system_font_desc">Solo se aplica cuando no se agrega ningún archivo de fuente a continuación; agregar uno anula este cambio.</string>
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">Banderas recomendadas</string>
     <string name="piko_category_rec_flags_desc">Banderas de desarrolladores sugeridas por la comunidad</string>
@@ -332,6 +400,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">Las historias con menos de x elementos se ocultarán (Por defecto 1)</string>
     <string name="piko_filter_story_maximum_item_count">Elementos de historia máximos</string>
     <string name="piko_filter_story_maximum_item_count_desc">Las historias que tengan más de x elementos se ocultarán (Por defecto 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Guardar instantes</string>
+    <string name="piko_instants_download_desc">Capture los instantes de una sola vista a medida que los vea, para que pueda volver a verlos y descargarlos más tarde desde “Ver instantes guardados”.</string>
+    <string name="piko_view_saved_instants">Ver instantes guardados</string>
+    <string name="piko_instants_vault_empty">Aún no hay instantes guardados. Abra algunos Instantes con la captura habilitada y aparecerán aquí.</string>
+    <string name="piko_instants_link_unavailable">Enlace multimedia no disponible.</string>
+    <string name="piko_instants_unknown_user">Desconocido</string>
+    <string name="piko_instants_delete_confirm">¿Eliminar este instante guardado?</string>
+    <string name="piko_instants_clear_all">Borrar todo</string>
+    <string name="piko_instants_clear_all_confirm">¿Eliminar todos los instantes guardados?</string>
+    <string name="piko_delete">Eliminar</string>
+    <string name="piko_instants_title">Instantes</string>
+    <string name="piko_search_username">Buscar por nombre de usuario</string>
+    <string name="piko_instants_no_matches">No hay instantes guardados de ese usuario.</string>
+    <string name="piko_instants_unavailable">No disponible</string>
+    <string name="piko_saved_on">Guardado activado</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Abrir en Instagram</string>
     <string name="piko_open_voice_with_player">Abrir con reproductor de música</string>
@@ -343,7 +427,6 @@
     <string name="piko_all">Todo</string>
     <string name="piko_selected_count">%d seleccionado</string>
     <string name="piko_delete_selected_confirm">¿Eliminar %d mensajes seleccionados?</string>
-    <string name="piko_delete">Eliminar</string>
     <string name="piko_unknown">Desconocido</string>
     <string name="piko_tap_to_view">toque para ver</string>
     <string name="piko_media_expired">enlace caducado</string>

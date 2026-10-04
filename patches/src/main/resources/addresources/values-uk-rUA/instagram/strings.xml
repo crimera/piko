@@ -155,6 +155,14 @@
     <string name="piko_copied">Скопійовано</string>
     <string name="piko_more_profile_options">Більше параметрів профілю</string>
     <string name="piko_remove_empty_bottom_space">Прибрати порожній простір знизу</string>
+    <string name="piko_inbox_lock">Блокування папки «Вхідні»</string>
+    <string name="piko_inbox_lock_desc">Ховає вашу папку «Вхідні» за відбитком пальця, розпізнаванням обличчя або блокуванням екрана щоразу, коли ви відкриваєте додаток</string>
+    <string name="piko_inbox_lock_notifications">Блокувати сповіщення</string>
+    <string name="piko_inbox_lock_notifications_desc">Поки ввімкнено блокування папки «Вхідні», сповіщення про повідомлення містять лише текст «Нове повідомлення», а банер повідомлень у додатку залишається прихованим</string>
+    <string name="piko_inbox_lock_notification">Нове повідомлення</string>
+    <string name="piko_inbox_lock_unlock">Розблокувати</string>
+    <string name="piko_inbox_lock_prompt">Розблокуйте ваші повідомлення</string>
+    <string name="piko_inbox_lock_no_lock">Встановіть блокування екрана на вашому пристрої, щоб використовувати блокування папки «Вхідні»</string>
     <string name="piko_unlock_plus_benefits">Розблокувати переваги підписки «Plus»</string>
     <string name="piko_unlock_plus_benefits_desc">Розблоковує переваги підписки \'Plus\', що перевіряються локально. ВИКОРИСТОВУЙТЕ НА ВЛАСНИЙ РИЗИК</string>
     <string name="piko_customise_story_ring_size">Змінити розмір кільця історії</string>
@@ -169,6 +177,8 @@
     <string name="piko_category_download_media">Завантаження медіа</string>
     <string name="piko_category_downloads">Завантаження</string>
     <string name="piko_enable_download">Увімкнути завантаження</string>
+    <string name="piko_feed_download_button">Кнопка завантаження на дописах у стрічці</string>
+    <string name="piko_feed_download_button_desc">Додає значок завантаження поруч із кнопкою збереження на дописах у стрічці</string>
     <string name="piko_enable_direct_download">Увімкнути пряме завантаження</string>
     <string name="piko_enable_direct_download_desc">Завантажує відкрите медіа без додаткових запитів</string>
     <string name="piko_download_username_folder">Розділяти медіа за іменем користувача</string>
@@ -390,6 +400,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">Історії з меншою кількістю фрагментів ніж x будуть приховані (за замовчуванням 1)</string>
     <string name="piko_filter_story_maximum_item_count">Максимальна кількість історій</string>
     <string name="piko_filter_story_maximum_item_count_desc">Історії з більшою кількістю фрагментів ніж x будуть приховані (за замовчуванням 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Зберігати Instants</string>
+    <string name="piko_instants_download_desc">Зберігайте одноразові Instants під час їх перегляду, щоб пізніше ви могли переглянути та завантажити їх у розділі «Переглянути збережені Instants».</string>
+    <string name="piko_view_saved_instants">Переглянути збережені Instants</string>
+    <string name="piko_instants_vault_empty">Поки що немає збережених Instants. Відкрийте кілька Instants з увімкненим збереженням, і вони з\'являться тут.</string>
+    <string name="piko_instants_link_unavailable">Посилання на медіа недоступне.</string>
+    <string name="piko_instants_unknown_user">Невідомо</string>
+    <string name="piko_instants_delete_confirm">Видалити цей збережений Instant?</string>
+    <string name="piko_instants_clear_all">Очистити все</string>
+    <string name="piko_instants_clear_all_confirm">Видалити всі збережені Instants?</string>
+    <string name="piko_delete">Видалити</string>
+    <string name="piko_instants_title">Instants</string>
+    <string name="piko_search_username">Пошук за ім\'ям користувача</string>
+    <string name="piko_instants_no_matches">Немає збережених Instants від цього користувача.</string>
+    <string name="piko_instants_unavailable">Недоступно</string>
+    <string name="piko_saved_on">Збережено</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Відкрити в Instagram</string>
     <string name="piko_open_voice_with_player">Відкрити у музичному плеєрі</string>
@@ -401,7 +427,6 @@
     <string name="piko_all">Усі</string>
     <string name="piko_selected_count">Вибрано: %d</string>
     <string name="piko_delete_selected_confirm">Видалити вибрані повідомлення (%d)?</string>
-    <string name="piko_delete">Видалити</string>
     <string name="piko_unknown">Невідомо</string>
     <string name="piko_tap_to_view">натисніть для перегляду</string>
     <string name="piko_media_expired">термін дії посилання минув</string>

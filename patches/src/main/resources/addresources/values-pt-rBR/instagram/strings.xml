@@ -155,6 +155,14 @@
     <string name="piko_copied">Copiado</string>
     <string name="piko_more_profile_options">Mais opções de perfil</string>
     <string name="piko_remove_empty_bottom_space">Remova o espaço vazio na parte inferior</string>
+    <string name="piko_inbox_lock">Bloqueio da caixa de entrada</string>
+    <string name="piko_inbox_lock_desc">Oculta sua caixa de entrada atrás da sua impressão digital, reconhecimento facial ou bloqueio de tela sempre que você abre o aplicativo</string>
+    <string name="piko_inbox_lock_notifications">Bloquear notificações</string>
+    <string name="piko_inbox_lock_notifications_desc">Enquanto o bloqueio da Caixa de Entrada estiver ativado, as notificações de mensagens exibirão apenas \"Nova mensagem\" e o banner de mensagens no aplicativo permanecerá oculto</string>
+    <string name="piko_inbox_lock_notification">Nova mensagem</string>
+    <string name="piko_inbox_lock_unlock">Desbloquear</string>
+    <string name="piko_inbox_lock_prompt">Desbloqueie suas mensagens</string>
+    <string name="piko_inbox_lock_no_lock">Configure um bloqueio de tela no seu dispositivo para usar o bloqueio da Caixa de Entrada</string>
     <string name="piko_unlock_plus_benefits">Desbloqueie os benefícios da assinatura do Instagram Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Desbloqueie os benefícios da assinatura do Instagram Plus sendo verificados localmente. USE POR SUA CONTA E RISCO.</string>
     <string name="piko_customise_story_ring_size">Personalizar tamanho do anel do stories</string>
@@ -169,6 +177,8 @@
     <string name="piko_category_download_media">Download</string>
     <string name="piko_category_downloads">Downloads</string>
     <string name="piko_enable_download">Ativar download de postagens de imagens e vídeos</string>
+    <string name="piko_feed_download_button">Botão de download nas postagens do feed</string>
+    <string name="piko_feed_download_button_desc">Adiciona um ícone de download ao lado do botão de salvar nas publicações do feed</string>
     <string name="piko_enable_direct_download">Ativar download de mídias no direct</string>
     <string name="piko_enable_direct_download_desc">Baixar foto/vídeo de uma conversa no direct.</string>
     <string name="piko_download_username_folder">Separar mídia por nome de usuário</string>
@@ -390,6 +400,22 @@
     <string name="piko_filter_story_minimum_item_count_desc">Stories com menos de \"x\" itens serão ocultadas (padrão: 1)</string>
     <string name="piko_filter_story_maximum_item_count">Número máximo de itens da story</string>
     <string name="piko_filter_story_maximum_item_count_desc">Stories com mais de \"x\" itens serão ocultadas (padrão: 9999)</string>
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Economize Instantes</string>
+    <string name="piko_instants_download_desc">Capture os Instantes visualizados uma única vez, para que você possa visualizá-los novamente e baixá-los mais tarde em \"Visualizar Instantes salvos\".</string>
+    <string name="piko_view_saved_instants">Ver instantes salvos</string>
+    <string name="piko_instants_vault_empty">Ainda não há Instants salvos. Abra alguns Instantes com a captura ativada e eles aparecerão aqui.</string>
+    <string name="piko_instants_link_unavailable">Link para mídia não disponível.</string>
+    <string name="piko_instants_unknown_user">Desconhecido</string>
+    <string name="piko_instants_delete_confirm">Remover este Instantes salvo?</string>
+    <string name="piko_instants_clear_all">Limpar tudo</string>
+    <string name="piko_instants_clear_all_confirm">Remover todos os Instantes salvos?</string>
+    <string name="piko_delete">Apagar</string>
+    <string name="piko_instants_title">Instants</string>
+    <string name="piko_search_username">Pesquisar por nome de usuário</string>
+    <string name="piko_instants_no_matches">Nenhum Instantes salvo para esse usuário.</string>
+    <string name="piko_instants_unavailable">Indisponível</string>
+    <string name="piko_saved_on">Salvo em</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Abrir no Instagram</string>
     <string name="piko_open_voice_with_player">Abrir com o reprodutor de músicas</string>
@@ -401,7 +427,6 @@
     <string name="piko_all">Tudo</string>
     <string name="piko_selected_count">%d selecionados</string>
     <string name="piko_delete_selected_confirm">Excluir %d mensagens selecionadas?</string>
-    <string name="piko_delete">Apagar</string>
     <string name="piko_unknown">Desconhecido</string>
     <string name="piko_tap_to_view">toque para ver</string>
     <string name="piko_media_expired">link expirado</string>
