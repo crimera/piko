@@ -124,6 +124,9 @@ val viewStoriesAnonymouslyPatch =
                     pendingSeenClass,
                     mediaConversion.returnType,
                 )
+            val aggregateMethod = addStoryAggregateBridge(
+                consumedMethod, mediaConversionIndex, aggregateEntry, mediaConversion.returnType,
+            ) { mutableClassDefBy(it) }
             val reelOwnerIdField =
                 deriveReelOwnerIdField(
                     consumedMethod,
@@ -209,7 +212,7 @@ val viewStoriesAnonymouslyPatch =
                     PromptStoryProgressExtensionFingerprint.method,
                 ),
                 Triple(
-                    StandardStoryProgressFingerprint.method,
+                    StandardStoryProgressFingerprint.matchAll(1..1).single().method,
                     "captureFromStandardProgress",
                     StandardStoryProgressExtensionFingerprint.method,
                 ),
@@ -358,7 +361,7 @@ val viewStoriesAnonymouslyPatch =
                 if-eqz p3, :piko_request_unavailable
                 new-instance p1, $pendingSeenClass
                 invoke-direct {p1}, $pendingSeenClass-><init>()V
-                invoke-static {p3, p0, p1, p2}, ${aggregateEntry.reference}
+                invoke-static {p3, p0, p1, p2}, $aggregateMethod
                 invoke-virtual {p1, p0}, $requestBuilder
                 move-result-object p3
                 return-object p3
@@ -380,11 +383,18 @@ val viewStoriesAnonymouslyPatch =
                 ) {}
             val storeScheduleMethod = storeScheduleFingerprint.method
             val requestType = requestBuilder.returnType
+            val requestTypes = buildSet {
+                var type: String? = requestType
+                while (type != null && type != "Ljava/lang/Object;" && add(type)) {
+                    type = classDefBy(type).superclass
+                }
+            }
             val scheduleReferences =
                 deriveRequestScheduleReferences(
                     storeScheduleMethod,
                     pendingSeenClass,
                     requestBuilder,
+                    requestTypes,
                 )
             val managerGetter = scheduleReferences.managerGetter
             val scheduleRequest = scheduleReferences.scheduleRequest

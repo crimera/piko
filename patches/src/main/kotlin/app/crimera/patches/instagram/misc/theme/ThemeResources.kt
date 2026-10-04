@@ -24,6 +24,8 @@ private const val STOCK_CREATION_BUTTON_BACKGROUND = "#ff191c1f"
 private const val STOCK_CLIPS_COMPOSER_BACKGROUND =
     "piko_stock_clips_composer_background"
 private const val STOCK_CLIPS_COMPOSER_BACKGROUND_COLOR = "#ff25292e"
+// This GM3 elevation color and its consumers were removed in newer Instagram resources.
+private const val LEGACY_SURFACE_TINT = "baseline_neutral_10_with_surface_tint_dark_alpha_14"
 
 internal data class Api31BaseSnapshot(
     val dayColors: Map<String, String>,
@@ -281,7 +283,7 @@ internal fun ResourcePatchContext.writeMaterialYouOverlay(night: Boolean): File 
                 },
                 copy = false,
             ),
-        values = materialYouOverlayValues(night),
+        values = supportedOverlayValues(materialYouOverlayValues(night)),
     )
 
 internal fun ResourcePatchContext.writeAmoledOverlay(
@@ -292,7 +294,7 @@ internal fun ResourcePatchContext.writeAmoledOverlay(
         sourcePublic = get("res/values/public.xml"),
         packageName = packageMetadata.packageName,
         outputFile = get("assets/piko/amoled.arsc", copy = false),
-        values = amoledOverlayValues(snapshot),
+        values = supportedOverlayValues(amoledOverlayValues(snapshot)),
     )
 
 internal fun amoledMaterialYouOverlayValues(): OverlayValues {
@@ -336,7 +338,7 @@ internal fun ResourcePatchContext.writeAmoledMaterialYouOverlay(): File =
         sourcePublic = get("res/values/public.xml"),
         packageName = packageMetadata.packageName,
         outputFile = get("assets/piko/amoled_material_you.arsc", copy = false),
-        values = amoledMaterialYouOverlayValues(),
+        values = supportedOverlayValues(amoledMaterialYouOverlayValues()),
     )
 
 internal fun amoledOverlayValues(snapshot: Api31BaseSnapshot): OverlayValues =
@@ -369,13 +371,18 @@ private fun ResourcePatchContext.applyLegacyAmoledTheme() {
 }
 
 private fun ResourcePatchContext.applyLegacyMaterialYouTheme() {
+    val namedMappings = if (LEGACY_SURFACE_TINT in readColors("res/values/colors.xml")) {
+        materialYouNamedMappings
+    } else {
+        materialYouNamedMappings - LEGACY_SURFACE_TINT
+    }
     listOf(
         "res/values" to (materialYouLightFallbackAliases + materialYouNeutralConstantsHex),
         "res/values-night" to (materialYouDarkFallbackAliases + materialYouNeutralConstantsHex),
     ).forEach { (directoryPath, aliases) ->
         ensureColorsXml(directoryPath)
         document("$directoryPath/colors.xml").use { document ->
-            (aliases + materialYouNamedMappings).forEach { (name, value) ->
+            (aliases + namedMappings).forEach { (name, value) ->
                 document.upsertColor(name, value)
             }
         }
@@ -399,11 +406,25 @@ private fun ResourcePatchContext.readColors(path: String): Map<String, String> {
 private fun resolveBaseColors(
     vararg buckets: Map<String, String>,
 ): Map<String, String> =
-    materialYouNamedMappings.keys.associateWith { name ->
-        checkNotNull(buckets.firstNotNullOfOrNull { it[name] }) {
-            "Unable to resolve base color: $name"
+    materialYouNamedMappings.keys.mapNotNull { name ->
+        val value = buckets.firstNotNullOfOrNull { it[name] }
+        if (value == null && name == LEGACY_SURFACE_TINT) {
+            null
+        } else {
+            name to checkNotNull(value) { "Unable to resolve base color: $name" }
         }
-    }
+    }.toMap()
+
+private fun ResourcePatchContext.supportedOverlayValues(values: OverlayValues): OverlayValues {
+    if (LEGACY_SURFACE_TINT in readColors("res/values/colors.xml")) return values
+
+    return values.copy(
+        day = values.day - LEGACY_SURFACE_TINT,
+        night = values.night - LEGACY_SURFACE_TINT,
+        dayApi34 = values.dayApi34?.minus(LEGACY_SURFACE_TINT),
+        nightApi34 = values.nightApi34?.minus(LEGACY_SURFACE_TINT),
+    )
+}
 
 private fun ResourcePatchContext.writeColors(
     directoryPath: String,

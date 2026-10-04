@@ -6,19 +6,20 @@
 
 package app.crimera.patches.instagram.entity.profileinfo
 
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
+import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.fieldExtractor
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
-import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.AccessFlags
 
 @Suppress("unused")
 val profileInfoEntity =
     bytecodePatch(
         description = "Used to decode profile info",
     ) {
+        dependsOn(decoderEntity)
 
         execute {
 
@@ -35,16 +36,12 @@ val profileInfoEntity =
                             .name
                     GetUserDetailViewModelExtensionFingerprint.changeFirstString(userDetailViewModelFieldName)
 
-                    GetUsernameFromUserDetailViewModelFingerprint.apply {
-                        val strIndex = stringMatches.first().index
-                        method.apply {
-                            val userObjectFieldName =
-                                getInstruction(
-                                    indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT),
-                                ).fieldExtractor().name
-                            GetUserDataExtensionFingerprint.changeFirstString(userObjectFieldName)
-                        }
+                    val userFields = classDefBy(USER_DETAIL_VIEW_MODEL_CLASS).fields.filter {
+                        it.type == USER_MODEL_CLASS_NAME && !AccessFlags.STATIC.isSet(it.accessFlags)
                     }
+                    val userObjectFieldName = userFields.singleOrNull()?.name
+                        ?: throw PatchException("Expected one profile user field, found ${userFields.size}")
+                    GetUserDataExtensionFingerprint.changeFirstString(userObjectFieldName)
 
                     val isSelfProfileFieldName =
                         profileRelatedDetailsClass.fields

@@ -8,14 +8,14 @@ package app.crimera.patches.instagram.misc.comment
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 // Thanks to MyInsta.
@@ -26,7 +26,7 @@ val addCommentPatch =
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         execute {
-            AddCommentButtonFingerprint.method.apply {
+            AddCommentButtonFingerprint.matchAll(1..1).single().method.apply {
                 // Include copy button.
                 val arrayListInitInstructions =
                     instructions.filter {
@@ -34,27 +34,30 @@ val addCommentPatch =
                             it.getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
                     }
 
-                arrayListInitInstructions.firstOrNull { instruction ->
+                val candidates = arrayListInitInstructions.mapNotNull { instruction ->
                     val index = instruction.location.index
-                    val nextInstructionOpcode: Opcode = getInstruction(index + 1).opcode
-                    val nextNextInstruction: Instruction = getInstruction(index + 2)
-
-                    if (nextInstructionOpcode == Opcode.INVOKE_DIRECT && nextNextInstruction.opcode == Opcode.IGET_OBJECT) {
-                        val arrayListRegister = instruction.registersUsed[0]
-                        val freeRegister = findFreeRegister(index + 1)
-                        var commentObjectDataRegister = nextNextInstruction.registersUsed[1]
-
-                        addInstruction(
-                            index + 2,
-                            """
-                            invoke-static {v$arrayListRegister,v$commentObjectDataRegister},${HANDLE_COMMENT_BUTTON_EXTENSION_CLASS}->addButtons(Ljava/util/List;Ljava/lang/Object;)V
-                            """.trimIndent(),
-                        )
-                        true
-                    } else {
-                        false
-                    }
+                    val constructor = instructions.getOrNull(index + 1) ?: return@mapNotNull null
+                    val commentRead = instructions.getOrNull(index + 2) ?: return@mapNotNull null
+                    val arrayListRegister = instruction.registersUsed.singleOrNull() ?: return@mapNotNull null
+                    val commentRegisters = commentRead.registersUsed
+                    if (constructor.opcode != Opcode.INVOKE_DIRECT ||
+                        constructor.getReference<MethodReference>()?.let {
+                            it.definingClass == "Ljava/util/ArrayList;" && it.name == "<init>" && it.parameterTypes.isEmpty()
+                        } != true || constructor.registersUsed != listOf(arrayListRegister) ||
+                        commentRead.opcode != Opcode.IGET_OBJECT || commentRegisters.size != 2 ||
+                        commentRead.getReference<FieldReference>()?.type != "Lcom/instagram/user/model/User;"
+                    ) return@mapNotNull null
+                    Triple(index + 2, arrayListRegister, commentRegisters[1])
                 }
+                val (index, arrayListRegister, commentRegister) = candidates.singleOrNull()
+                    ?: throw PatchException("Expected one comment action list initialization, found ${candidates.size}")
+                if (arrayListRegister !in 0..15 || commentRegister !in 0..15 || arrayListRegister == commentRegister) {
+                    throw PatchException("Expected distinct 4-bit comment action list and comment registers")
+                }
+                addInstruction(
+                    index,
+                    "invoke-static {v$arrayListRegister,v$commentRegister},${HANDLE_COMMENT_BUTTON_EXTENSION_CLASS}->addButtons(Ljava/util/List;Ljava/lang/Object;)V",
+                )
             }
         }
     }

@@ -11,6 +11,10 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
@@ -70,11 +74,25 @@ internal fun Method.hasString(value: String): Boolean =
         ((instruction as? ReferenceInstruction)?.reference as? StringReference)?.string == value
     } == true
 
-private fun Method.isStoryProgressCallback(): Boolean =
+private fun Method.isStoryProgressCallback(owner: ClassDef? = null): Boolean =
     returnType == "V" &&
         parameterTypes.size == 2 &&
         parameterTypes.last() == "I" &&
-        callsStoryConsumptionCallback()
+        (callsStoryConsumptionCallback() || owner?.let { classDef ->
+            if (implementation == null || AccessFlags.STATIC.isSet(accessFlags) ||
+                !parameterTypes.first().toString().startsWith("L")
+            ) return@let false
+            val receiver = implementation!!.registerCount - 3
+            implementation?.instructions?.any { instruction ->
+                val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                    ?: return@any false
+                instruction.opcode in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) &&
+                    reference.definingClass == definingClass && reference.returnType == "V" &&
+                    reference.parameterTypes == listOf(parameterTypes.first()) &&
+                    instruction.registersUsed == listOf(receiver, receiver + 1) &&
+                    classDef.methods.singleOrNull { it.matches(reference) }?.callsStoryConsumptionCallback() == true
+            } == true
+        } == true)
 
 internal object PromptStoryProgressFingerprint : Fingerprint(
     returnType = "V",
@@ -86,8 +104,8 @@ internal object PromptStoryProgressFingerprint : Fingerprint(
 
 internal object StandardStoryProgressFingerprint : Fingerprint(
     returnType = "V",
-    custom = { methodDef, _ ->
-        methodDef.isStoryProgressCallback() &&
+    custom = { methodDef, classDef ->
+        methodDef.isStoryProgressCallback(classDef) &&
             methodDef.updatesSegmentedStoryProgress() &&
             !methodDef.hasString("model")
     },

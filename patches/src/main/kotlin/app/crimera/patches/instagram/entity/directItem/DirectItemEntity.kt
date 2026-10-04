@@ -17,6 +17,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
@@ -326,7 +328,7 @@ val directItemEntity =
                                 .contains("mThreadId")
                     if (!isThreadIdLabel) return@mapNotNull null
 
-                    threadInstructions.drop(labelIndex + 1).firstOrNull {
+                    val followingField = threadInstructions.drop(labelIndex + 1).firstOrNull {
                         it.opcode == Opcode.IGET_OBJECT &&
                             ((it as ReferenceInstruction).reference as? FieldReference)?.let { field ->
                                 field.definingClass ==
@@ -334,6 +336,29 @@ val directItemEntity =
                                     field.type == "Ljava/lang/String;"
                             } == true
                     }?.let { (it as ReferenceInstruction).reference as FieldReference }
+                    if (followingField != null) return@mapNotNull followingField
+
+                    val labelRegister = instruction.registersUsed.single()
+                    threadInstructions.withIndex().mapNotNull concat@ { (callIndex, call) ->
+                        val reference = call.getReference<MethodReference>() ?: return@concat null
+                        if (call.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) ||
+                            reference.returnType != "Ljava/lang/String;" ||
+                            reference.parameterTypes.any { it != "Ljava/lang/String;" }
+                        ) return@concat null
+                        val registers = call.registersUsed
+                        val labelArgument = registers.indexOf(labelRegister)
+                        if (registers.size != reference.parameterTypes.size ||
+                            labelArgument < 0 || labelArgument + 1 >= registers.size
+                        ) return@concat null
+                        val valueRegister = registers[labelArgument + 1]
+                        val valueSource = threadInstructions.take(callIndex).lastOrNull {
+                            it.opcode.setsRegister() && it.registersUsed.firstOrNull() == valueRegister
+                        } ?: return@concat null
+                        if (valueSource.opcode != Opcode.IGET_OBJECT) return@concat null
+                        valueSource.getReference<FieldReference>()?.takeIf {
+                            it.definingClass == threadKeyClass.type && it.type == "Ljava/lang/String;"
+                        }
+                    }.singleOrNull()
                 }.distinctBy { Triple(it.definingClass, it.name, it.type) }
             if (threadIdFields.size != 1) {
                 throw PatchException(

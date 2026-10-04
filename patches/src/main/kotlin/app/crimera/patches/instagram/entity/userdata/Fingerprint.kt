@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.entity.userdata
 
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
+import app.crimera.patches.instagram.entity.userfriendshipstatus.friendshipStatusClass
 import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.literal
@@ -92,11 +94,6 @@ internal object IsVerifiedExtensionFingerprint : Fingerprint(
 
 // -----------------------------------
 
-internal object SelectHighlightsCoverFragmentOnCreateFingerprint : Fingerprint(
-    definingClass = "SelectHighlightsCoverFragment;",
-    name = "onCreate",
-)
-
 internal object FullNameLiveTreeUserDictFingerprint : Fingerprint(
     custom = { methodDef, _ -> methodDef.inUserModel() },
     filters =
@@ -118,8 +115,15 @@ internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
 )
 
 internal object FriendshipStatusLiveTreeUserDictFingerprint : Fingerprint(
-    custom = { methodDef, _ -> methodDef.inUserModel() },
-    returnType = "FriendshipStatus;",
+    custom = { methodDef, _ ->
+        methodDef.inUserModel() && methodDef.parameterTypes.isEmpty() &&
+            methodDef.returnType == friendshipStatusClass
+    },
+)
+
+internal object GetUserIdExtensionFingerprint : Fingerprint(
+    name = "getUserId",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object BiographyLiveTreeUserDictFingerprint : Fingerprint(

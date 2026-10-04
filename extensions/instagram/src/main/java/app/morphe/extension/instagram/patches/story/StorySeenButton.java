@@ -26,7 +26,10 @@ import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 
 public final class StorySeenButton {
-    private static final String HEADER_MENU_ID_NAME = "header_menu_button";
+    private static final String[] HEADER_MENU_ID_NAMES = {
+            "header_menu_button",
+            "mimicry_top_right_hamburger_container"
+    };
     private static final int MAX_DEFERRED_BINDING_ATTEMPTS = 8;
     private static final long DEFERRED_BINDING_TIMEOUT_MILLIS = 250L;
     private static final AtomicLong CAPTURE_GENERATION = new AtomicLong();
@@ -191,20 +194,13 @@ public final class StorySeenButton {
         View bound = null;
         boolean deferred = false;
         try {
-            Activity activity = Utils.getActivity();
-            int headerMenuId = ResourceUtils.getIdentifier(ResourceType.ID, HEADER_MENU_ID_NAME);
-            View overflow = headerMenuId == 0
-                    ? null
-                    : root == null
-                            ? activity == null ? null : activity.findViewById(headerMenuId)
-                            : root.findViewById(headerMenuId);
-            if (headerMenuId != 0 && root != null) {
+            View overflow = findHeaderMenu(root);
+            if (root != null) {
                 if (overflow == null) {
                     deferred = deferBinding(
                             generation,
                             story,
-                            root,
-                            headerMenuId
+                            root
                     );
                 } else {
                     bound = bind(overflow, story);
@@ -212,8 +208,7 @@ public final class StorySeenButton {
                         deferred = deferBinding(
                                 generation,
                                 story,
-                                root,
-                                headerMenuId
+                                root
                         );
                     }
                 }
@@ -229,19 +224,39 @@ public final class StorySeenButton {
         }
     }
 
+    private static View findHeaderMenu(View root) {
+        Activity activity = root == null ? Utils.getActivity() : null;
+        View pending = null;
+        for (String name : HEADER_MENU_ID_NAMES) {
+            int id = ResourceUtils.getIdentifier(ResourceType.ID, name);
+            if (id == 0) {
+                continue;
+            }
+            View candidate = root != null ? root.findViewById(id)
+                    : activity != null ? activity.findViewById(id) : null;
+            if (candidate != null) {
+                if (candidate.isShown()) {
+                    return candidate;
+                }
+                if (pending == null) {
+                    pending = candidate;
+                }
+            }
+        }
+        return pending;
+    }
+
     private static boolean deferBinding(
             long generation,
             CapturedStory story,
-            View root,
-            int headerMenuId) {
+            View root) {
         StorySeenBindingRetry retry = new StorySeenBindingRetry(
                 StorySeenButtonView.frameHost(root),
                 () -> isLatestCapture(generation, CAPTURE_GENERATION.get()),
                 () -> attemptDeferredBinding(
                         generation,
                         story,
-                        root,
-                        headerMenuId
+                        root
                 ),
                 completed -> deferredBindingStopped(
                         generation,
@@ -270,9 +285,8 @@ public final class StorySeenButton {
     private static boolean attemptDeferredBinding(
             long generation,
             CapturedStory story,
-            View root,
-            int headerMenuId) {
-        View overflow = root.findViewById(headerMenuId);
+            View root) {
+        View overflow = findHeaderMenu(root);
         if (overflow == null) {
             return false;
         }

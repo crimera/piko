@@ -13,13 +13,28 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+
+private object BenefitCheckLoggingFingerprint : Fingerprint(
+    strings = listOf("is_benefit_active"),
+)
 
 internal object ActiveBenefitCheckerFingerprint : Fingerprint(
+    classFingerprint = BenefitCheckLoggingFingerprint,
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
     parameters = listOf("Ljava/lang/String;"),
     returnType = "Z",
-    strings = listOf("is_benefit_active"),
+    custom = { method, _ ->
+        val references = method.implementation?.instructions?.mapNotNull {
+            (it as? ReferenceInstruction)?.reference?.toString()
+        }.orEmpty()
+        "Ljava/util/Set;->contains(Ljava/lang/Object;)Z" in references &&
+            "Ljava/util/concurrent/atomic/AtomicReference;->get()Ljava/lang/Object;" in references
+    },
 )
 
 @Suppress("unused")
@@ -33,7 +48,10 @@ val unlockPlusBenefitsPatch =
         dependsOn(settingsPatch)
         execute {
 
-            ActiveBenefitCheckerFingerprint.method.apply {
+            ActiveBenefitCheckerFingerprint.matchAll(1..1).single().method.apply {
+                if (implementation!!.registerCount <= 2) {
+                    throw PatchException("Active benefit checker has no local register")
+                }
 
                 addInstructionsWithLabels(
                     0,

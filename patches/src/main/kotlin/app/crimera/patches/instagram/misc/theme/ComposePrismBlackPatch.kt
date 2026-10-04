@@ -333,12 +333,30 @@ private fun installComposePrismPaletteRuntime(
                     it.parameterTypes.isEmpty() &&
                     it.returnType == "V"
             } ?: return@classDefForEach
+        val instructions = clinit.implementation?.instructions?.toList()
+            ?: return@classDefForEach
         val readsPrismField =
-            clinit.implementation?.instructions?.any { instruction ->
+            instructions.any { instruction ->
                 instruction.opcode == Opcode.SGET_WIDE &&
                     (instruction as? ReferenceInstruction)?.reference == prismField
-            } == true
-        if (readsPrismField) holderClasses += classDef
+            }
+        if (!readsPrismField) return@classDefForEach
+
+        // Other Compose caches also read GRAY_1600 without constructing a Prism palette.
+        val cachedTypes = instructions.mapNotNull { instruction ->
+            val field = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+            field?.type?.takeIf {
+                instruction.opcode == Opcode.SPUT_OBJECT && field.definingClass == classDef.type
+            }
+        }.toSet()
+        val constructsPalette = instructions.any { instruction ->
+            val constructor = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+            instruction.opcode == Opcode.INVOKE_DIRECT_RANGE && constructor != null &&
+                constructor.definingClass in cachedTypes && constructor.name == "<init>" &&
+                constructor.returnType == "V" && constructor.parameterTypes.isNotEmpty() &&
+                constructor.parameterTypes.all { it.toString() == "J" }
+        }
+        if (constructsPalette) holderClasses += classDef
     }
     if (holderClasses.size != EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS) {
         throw PatchException(

@@ -16,10 +16,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 // The method is obfuscated but this is where it adds buttons.
 object AddStoryButtonFingerprint : Fingerprint(
@@ -55,41 +57,35 @@ val handleStoryButtonPatch =
         execute {
 
             val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
-            // Add button on self story bottom sheet.
-            SelfStoryAddStoryButtonFingerprint.method.apply {
-                instructions.filter { it.opcode == Opcode.IF_EQZ }.first { it ->
-                    val index = it.location.index
-                    val nextOpcode = getInstruction(index + 1).opcode
-                    if (nextOpcode == Opcode.IGET_OBJECT) {
-                        val arrayMoveResultObjectIndex = index - 1
-                        val arrayListRegister = getInstruction(arrayMoveResultObjectIndex).registersUsed[0]
+            listOf(SelfStoryAddStoryButtonFingerprint, AddStoryButtonFingerprint).forEach { fingerprint ->
+                fingerprint.matchAll(1..1).single().method.apply {
+                    val code = instructions
+                    val arrayListRegister = code.mapNotNull { instruction ->
+                        val reference = instruction.getReference<MethodReference>()
+                        if (reference?.name == "toArray" &&
+                            reference.parameterTypes == listOf("[Ljava/lang/Object;") &&
+                            reference.returnType == "[Ljava/lang/Object;"
+                        ) instruction.registersUsed.firstOrNull() else null
+                    }.distinct().singleOrNull()
+                        ?: throw PatchException("Could not uniquely resolve the story menu output list")
+                    val allocationIndex = code.withIndex().singleOrNull { (index, instruction) ->
+                        val reference = instruction.getReference<MethodReference>()
+                        val result = code.getOrNull(index + 1)
+                        instruction.opcode in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) &&
+                            reference?.returnType == "Ljava/util/ArrayList;" &&
+                            reference.parameterTypes.isEmpty() &&
+                            result?.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                            result.registersUsed == listOf(arrayListRegister)
+                    }?.index ?: throw PatchException("Could not uniquely resolve the story menu list allocation")
 
-                        addInstructions(
-                            arrayMoveResultObjectIndex + 1,
-                            """
-                            invoke-static {v$arrayListRegister},$STORY_BUTTON_EXTENSION_CLASS ->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
-                            move-result-object v$arrayListRegister
-                            """.trimIndent(),
-                        )
-                        true
-                    } else {
-                        false
-                    }
+                    addInstructions(
+                        allocationIndex + 2,
+                        """
+                        invoke-static/range {v$arrayListRegister .. v$arrayListRegister}, $STORY_BUTTON_EXTENSION_CLASS->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+                        move-result-object v$arrayListRegister
+                        """.trimIndent(),
+                    )
                 }
-            }
-
-            // Add button on story bottom sheet.
-            AddStoryButtonFingerprint.method.apply {
-                val firstMoveResultObjectInstruction = indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)
-                val arrayListRegister = getInstruction(firstMoveResultObjectInstruction).registersUsed[0]
-
-                addInstructions(
-                    firstMoveResultObjectInstruction + 1,
-                    """
-                    invoke-static {v$arrayListRegister},$STORY_BUTTON_EXTENSION_CLASS ->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
-                    move-result-object v$arrayListRegister
-                    """.trimIndent(),
-                )
             }
 
             val onClickFingerprints = listOf(SelfStoryOnCLickStoryButtonFingerprint, OnCLickStoryButtonFingerprint)

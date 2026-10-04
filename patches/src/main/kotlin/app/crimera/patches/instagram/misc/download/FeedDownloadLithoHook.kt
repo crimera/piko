@@ -15,6 +15,7 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -22,12 +23,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction31i
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
-
-/** Node type the UFI icon chain is built from. */
-private const val NODE_DESCRIPTOR = "LX/03iH;"
-
-/** Compiled component the UFI icon chain resolves to. */
-private const val COMPONENT_DESCRIPTOR = "LX/03Wk;"
 
 /** Kotlin event handler type the UFI `ON_CLICK` setter takes. */
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
@@ -47,9 +42,6 @@ private const val CLICK_HANDLER_CONSTRUCTOR =
     "$CLICK_HANDLER_DESCRIPTOR-><init>($CONTEXT_DESCRIPTOR$USER_SESSION_DESCRIPTOR$OBJECT_DESCRIPTOR)V"
 private const val FEED_DOWNLOAD_ENABLED = "$DOWNLOAD_UTILS_DESCRIPTOR->isFeedDownloadButtonEnabled()Z"
 
-private val ICON_WRAPPER_PARAMETERS =
-    listOf("Landroid/widget/ImageView\$ScaleType;", NODE_DESCRIPTOR, INTEGER_DESCRIPTOR, "I", "I")
-
 /**
  * Litho UFI surfaces (e.g. the contextual profile feed) reject views added by hand, so the
  * download icon is built into the component tree as a second icon node ahead of the save icon.
@@ -68,13 +60,28 @@ internal fun injectLithoDownloadButton(
             buildList {
                 patchContext.classDefForEach { classDef ->
                     classDef.methods.filterTo(this) { method ->
+                        val parameters = method.parameterTypes.map { it.toString() }
                         method.name == "<init>" &&
-                            method.parameterTypes.map { it.toString() } == ICON_WRAPPER_PARAMETERS
+                            parameters.size in 5..6 &&
+                            parameters[0] == "Landroid/widget/ImageView\$ScaleType;" &&
+                            parameters[1].startsWith("L") &&
+                            parameters.subList(2, 5) == listOf(INTEGER_DESCRIPTOR, "I", "I") &&
+                            (parameters.size == 5 || parameters[5] == "Z")
                     }
                 }
             },
         )
     val iconWrapperClass = iconWrapperConstructor.definingClass
+    val nodeType = iconWrapperConstructor.parameterTypes[1].toString()
+    val componentType =
+        requireOne(
+            "UFI component base constructor",
+            iconWrapperConstructor.implementation?.instructions?.toList().orEmpty()
+                .filter { it.opcode == Opcode.INVOKE_DIRECT }
+                .mapNotNull { it.getReference<MethodReference>() }
+                .filter { it.name == "<init>" && it.parameterTypes.isEmpty() && it.definingClass != iconWrapperClass }
+                .map { it.definingClass }.distinct(),
+        )
 
     val builder =
         requireOne(
@@ -103,8 +110,8 @@ internal fun injectLithoDownloadButton(
 
     fun setterIndex(valueType: String) =
         indexAfterSave("icon setter taking $valueType") { reference ->
-            reference.returnType == NODE_DESCRIPTOR &&
-                reference.parameterTypes.map { it.toString() } == listOf(NODE_DESCRIPTOR, valueType)
+            reference.returnType == nodeType &&
+                reference.parameterTypes.map { it.toString() } == listOf(nodeType, valueType)
         }
 
     val idSetter = instructions[setterIndex("I")].methodRef()!!
@@ -130,10 +137,47 @@ internal fun injectLithoDownloadButton(
             it.definingClass == iconWrapperClass && it.name == "<init>"
         }
     val factoryIndex =
-        indexAfterSave("component factory call", after = wrapperIndex) { it.returnType == COMPONENT_DESCRIPTOR }
+        indexAfterSave("component factory call", after = wrapperIndex) { it.returnType == componentType }
     val factory = instructions[factoryIndex].methodRef()!!
     val call = instructions[factoryIndex].registers()
     if (call.size != 7) throw PatchException("Unexpected component factory call shape in $builder: ${call.size} registers")
+    if (call != (call.first()..call.last()).toList()) {
+        throw PatchException("Non-consecutive component factory registers in $builder")
+    }
+
+    // Reuse the staging register only if it is dead until the native assignment
+    // and its source remains unchanged.
+    val wrapperCall = instructions[wrapperIndex].registers()
+    if (wrapperCall.size != iconWrapperConstructor.parameterTypes.size + 1 ||
+        wrapperCall.take(6) != call.drop(1) ||
+        wrapperCall != (wrapperCall.first()..wrapperCall.last()).toList()
+    ) {
+        throw PatchException("Unexpected icon wrapper registers in $builder")
+    }
+    val wrapperFlagSource =
+        if (wrapperCall.size == 7) {
+            val flagRegister = wrapperCall.last()
+            val assignmentIndex =
+                (wrapperIndex - 1 downTo onClickIndex).firstOrNull { index ->
+                    instructions[index].opcode.setsRegister() &&
+                        instructions[index].registersUsed.firstOrNull() == flagRegister
+                } ?: throw PatchException("No native icon flag assignment in $builder")
+            val assignment = instructions[assignmentIndex]
+            if (assignment.opcode !in listOf(Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16)) {
+                throw PatchException("Unexpected native icon flag assignment in $builder")
+            }
+            val source = assignment.registersUsed[1]
+            if (instructions.subList(onClickIndex, assignmentIndex).any { flagRegister in it.registers() } ||
+                instructions.subList(onClickIndex, wrapperIndex).any {
+                    it.opcode.setsRegister() && it.registersUsed.firstOrNull() == source
+                } || source in call
+            ) {
+                throw PatchException("Native icon flag registers are not safe to reuse in $builder")
+            }
+            source
+        } else {
+            null
+        }
 
     val sources =
         call.drop(2).map { destination ->
@@ -197,7 +241,8 @@ internal fun injectLithoDownloadButton(
         )
 
     val excluded =
-        (builder.parameterBlock() + nodeRegister + stateRegister + listRegister + call + sources).distinct()
+        (builder.parameterBlock() + nodeRegister + stateRegister + listRegister + call + wrapperCall +
+            sources + listOfNotNull(wrapperFlagSource)).distinct()
     val scratch = builder.reserveFreeRegisters(onClickIndex, 7, maximum = 255, excluded = excluded)
     val flag = scratch[0] // also the constant staging register
     val handler = scratch[1]
@@ -263,7 +308,8 @@ internal fun injectLithoDownloadButton(
             ${moveObject(call[4], tint)}
             ${moveInt(call[5], flag)}
             ${moveInt(call[6], dimension)}
-            invoke-direct/range ${registerRange(call[1], call[6])}, $iconWrapperConstructor
+            ${wrapperFlagSource?.let { moveInt(wrapperCall.last(), it) }.orEmpty()}
+            invoke-direct/range ${registerRange(wrapperCall.first(), wrapperCall.last())}, $iconWrapperConstructor
 
             ${moveObject(call[2], sources[0])}
             ${moveObject(call[3], sources[1])}

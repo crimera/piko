@@ -13,6 +13,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -34,17 +35,17 @@ private fun Instruction.calls(owner: String, name: String): Boolean {
     return reference?.definingClass == owner && reference.name == name
 }
 
-context(_: BytecodePatchContext)
+context(context: BytecodePatchContext)
 internal fun hideActivityFeedSuggestions() {
     val method = ActivityFeedSectionsFingerprint.matchAll(1..1).single().method
     val code = method.instructions
     val edits = mutableListOf<Pair<Int, () -> Unit>>()
 
-    fun filterUsersAfter(index: Int) {
-        val register = code[index].registersUsed.firstOrNull()
+    fun filterUsersAfter(index: Int, target: MutableMethod = method) {
+        val register = target.instructions[index].registersUsed.firstOrNull()
             ?: throw PatchException("Missing activity feed users register")
         edits += index + 1 to {
-            method.addInstructions(index + 1, """
+            target.addInstructions(index + 1, """
                 invoke-static/range {v$register .. v$register}, $SUGGESTIONS->filterActivityFeedUsers(Ljava/util/List;)Ljava/util/List;
                 move-result-object v$register
             """.trimIndent())
@@ -55,7 +56,7 @@ internal fun hideActivityFeedSuggestions() {
     val legacyReads = code.indices.filter { index ->
         val field = (code[index] as? ReferenceInstruction)?.reference as? FieldReference
         if (code[index].opcode != Opcode.IGET_OBJECT || field?.type != LIST ||
-            field.definingClass != method.parameterTypes[5]
+            field.definingClass !in method.parameterTypes.subList(4, 6)
         ) return@filter false
         val emptyIndex = index + if (code.getOrNull(index + 1)?.opcode == Opcode.IF_EQZ) 2 else 1
         val header = (code.getOrNull(emptyIndex + 4) as? ReferenceInstruction)?.reference as? MethodReference
@@ -65,9 +66,27 @@ internal fun hideActivityFeedSuggestions() {
             header?.definingClass == method.definingClass &&
             header.parameterTypes == listOf(COLLECTION, "I") && header.returnType == "V"
     }
-    if (legacyReads.size != 3) throw PatchException("Expected three legacy activity feed user sections")
+    if (legacyReads.size !in 2..3) throw PatchException("Expected legacy activity feed user sections")
     filterUsersAfter(legacyReads[0])
-    filterUsersAfter(legacyReads[2])
+    if (legacyReads.size == 3) {
+        filterUsersAfter(legacyReads[2])
+    } else {
+        val response = ((code[legacyReads[1]] as ReferenceInstruction).reference as FieldReference).definingClass
+        val thirdRead = (legacyReads[1] + 1 until code.size).firstOrNull {
+            val field = (code[it] as? ReferenceInstruction)?.reference as? FieldReference
+            code[it].opcode == Opcode.IGET_OBJECT && field?.definingClass == response && field.type == LIST
+        } ?: throw PatchException("Missing delegated suggested user section")
+        val delegatedCall = (thirdRead + 4 until minOf(thirdRead + 15, code.size)).singleOrNull {
+            val ref = (code[it] as? ReferenceInstruction)?.reference as? MethodReference
+            ref?.definingClass == method.definingClass && ref.returnType == method.returnType &&
+                ref.parameterTypes == listOf(method.parameterTypes[2], response, COLLECTION, LIST, "I", "Z", "Z")
+        }
+        if (!code[thirdRead + 1].calls(LIST, "isEmpty") ||
+            code[thirdRead + 2].opcode != Opcode.MOVE_RESULT ||
+            code[thirdRead + 3].opcode != Opcode.IF_NEZ || delegatedCall == null
+        ) throw PatchException("Unexpected delegated suggested user section")
+        filterUsersAfter(thirdRead)
+    }
 
     val successReads = code.indices.filter { index ->
         val field = (code[index] as? ReferenceInstruction)?.reference as? FieldReference
@@ -77,18 +96,48 @@ internal fun hideActivityFeedSuggestions() {
             cast?.opcode == Opcode.CHECK_CAST && type?.type in listOf(LIST, "Ljava/lang/Iterable;") &&
             code[index].registersUsed.firstOrNull() == cast.registersUsed.singleOrNull()
     }
-    if (successReads.size != 2 ||
+    if (successReads.size !in 1..2 || (successReads.size == 2 &&
         (code[successReads[0]] as ReferenceInstruction).reference.toString() !=
-        (code[successReads[1]] as ReferenceInstruction).reference.toString()
+        (code[successReads[1]] as ReferenceInstruction).reference.toString())
     ) throw PatchException("Expected both activity feed recommendation result paths")
     val iterableRead = successReads.singleOrNull {
         ((code[it + 1] as ReferenceInstruction).reference as TypeReference).type == "Ljava/lang/Iterable;"
     } ?: throw PatchException("Missing activity feed recommendation iterable")
-    val listRead = successReads.single { it != iterableRead }
-    filterUsersAfter(listRead + 1)
+    if (successReads.size == 2) {
+        filterUsersAfter(successReads.single { it != iterableRead } + 1)
+    } else {
+        val resultField = (code[iterableRead] as ReferenceInstruction).reference.toString()
+        val delegatedReads = context.mutableClassDefBy(method.definingClass).methods.flatMap { target ->
+            if (target == method || target.returnType != method.returnType) return@flatMap emptyList()
+            target.instructions.indices.mapNotNull { index ->
+                val read = target.instructions[index]
+                val cast = target.instructions.getOrNull(index + 1)
+                if (read.opcode == Opcode.IGET_OBJECT &&
+                    (read as? ReferenceInstruction)?.reference.toString() == resultField &&
+                    cast?.opcode == Opcode.CHECK_CAST &&
+                    ((cast as? ReferenceInstruction)?.reference as? TypeReference)?.type == LIST &&
+                    read.registersUsed.firstOrNull() == cast.registersUsed.singleOrNull()
+                ) target to index else null
+            }
+        }
+        val (target, index) = delegatedReads.singleOrNull()
+            ?: throw PatchException("Missing delegated activity feed recommendation result")
+        filterUsersAfter(index + 1, target)
+    }
 
     val pinnedRowIndex = code.indices.singleOrNull {
         ((code[it] as? ReferenceInstruction)?.reference as? StringReference)?.string == "friend_request_pinned_row"
+    } ?: code.indices.singleOrNull {
+        val reference = (code[it] as? ReferenceInstruction)?.reference as? MethodReference
+        code[it].opcode == Opcode.INVOKE_VIRTUAL &&
+            reference?.definingClass == method.parameterTypes[6] &&
+            reference.parameterTypes.isEmpty() && reference.returnType.startsWith("L") &&
+            context.classDefBy(reference.definingClass).methods.singleOrNull { candidate ->
+                candidate.name == reference.name && candidate.parameterTypes == reference.parameterTypes
+            }?.implementation?.instructions?.any { instruction ->
+                ((instruction as? ReferenceInstruction)?.reference as? StringReference)?.string ==
+                    "friend_request_pinned_row"
+            } == true
     } ?: throw PatchException("Missing pinned follow request row")
     val emptyIndex = (iterableRead + 2 until pinnedRowIndex).firstOrNull { code[it].calls(LIST, "isEmpty") }
         ?: throw PatchException("Missing activity feed recommendation empty check")
@@ -111,7 +160,7 @@ internal fun hideActivityFeedSuggestions() {
     ) throw PatchException("Missing pinned request setup after recommendation header")
     val headerScratch = next.registersUsed[0]
     // Pinned request construction reuses the parameter registers; use the native saved category.
-    val categoryCopy = (emptyIndex + 3 until headerIndex).singleOrNull {
+    val categoryCopy = (0 until headerIndex).lastOrNull {
         code[it].opcode == Opcode.MOVE_OBJECT_FROM16 && code[it].registersUsed.getOrNull(1) == parameters + 8
     } ?: throw PatchException("Missing saved activity feed category")
     val categoryRegister = code[categoryCopy].registersUsed[0]

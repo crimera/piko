@@ -42,14 +42,14 @@ internal object FriendingCenterCategoryFingerprint : Fingerprint(
 )
 
 internal object ActivityFeedSectionsFingerprint : Fingerprint(
-    strings = listOf("new_stories", "FOLLOW_REQUEST", "SUGGESTED_USERS", "friend_request_pinned_row"),
+    strings = listOf("new_stories", "FOLLOW_REQUEST", "SUGGESTED_USERS"),
     custom = { method, _ ->
         AccessFlags.STATIC.isSet(method.accessFlags) &&
-            method.parameterTypes.size == 16 &&
+            method.parameterTypes.size in 16..17 &&
             method.parameterTypes[0] == "Landroid/content/Context;" &&
             method.parameterTypes.subList(8, 12).all { it == "Ljava/lang/String;" } &&
             method.parameterTypes.subList(12, 15).all { it == "Ljava/util/List;" } &&
-            method.parameterTypes[15] == "Z"
+            method.parameterTypes.drop(15).all { it == "Z" }
     },
 )
 

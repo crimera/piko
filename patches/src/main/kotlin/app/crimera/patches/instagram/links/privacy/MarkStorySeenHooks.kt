@@ -14,6 +14,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
@@ -25,6 +26,10 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
 internal fun addNormalStorySeenObservationHook(method: MutableMethod) {
     val instructions = method.instructions
@@ -84,6 +89,7 @@ internal data class AggregateInvocation(
     val index: Int,
     val reference: MethodReference,
     val ownerRegister: Int,
+    val isStatic: Boolean = true,
 )
 
 internal data class LocalStorySeenReferences(
@@ -232,13 +238,19 @@ internal fun deriveAggregateInvocation(
         method.instructions.drop(startIndex).mapIndexedNotNull { offset, instruction ->
             val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
             val parameterTypes = reference.parameterTypes.map(CharSequence::toString)
+            val isStatic = instruction.opcode in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)
+            val isVirtual = instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE)
+            val matchesParameters = if (isStatic) {
+                parameterTypes == listOf(mediaRequestType, USER_SESSION_CLASS, pendingSeenClass, STRING_CLASS)
+            } else {
+                isVirtual && parameterTypes.size == 3 && parameterTypes[0] == USER_SESSION_CLASS &&
+                    parameterTypes[1].startsWith("L") && parameterTypes[2] == STRING_CLASS
+            }
             if (
-                instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) ||
+                !matchesParameters ||
                 instruction.registersUsed.size != 4 ||
                 reference.definingClass != pendingSeenClass ||
-                reference.returnType != "V" ||
-                parameterTypes !=
-                listOf(mediaRequestType, USER_SESSION_CLASS, pendingSeenClass, STRING_CLASS)
+                reference.returnType != "V"
             ) {
                 return@mapIndexedNotNull null
             }
@@ -246,10 +258,91 @@ internal fun deriveAggregateInvocation(
                 index = startIndex + offset,
                 reference = reference,
                 ownerRegister = instruction.registersUsed.last(),
+                isStatic = isStatic,
             )
         }
     return matches.singleOrNull()
         ?: throw PatchException("Expected one exact pending-story aggregation call, found ${matches.size}")
+}
+
+internal fun addStoryAggregateBridge(
+    consumed: MutableMethod,
+    conversionIndex: Int,
+    aggregate: AggregateInvocation,
+    rawMediaType: String,
+    resolveClass: (String) -> MutableClass,
+): MethodReference {
+    if (aggregate.isStatic) return aggregate.reference
+    val code = consumed.instructions
+    if (code.getOrNull(conversionIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+        throw PatchException("Expected raw story media conversion result")
+    }
+    val callRegisters = code[aggregate.index].registersUsed
+    val wrapperType = aggregate.reference.parameterTypes[1].toString()
+    val rawRegister = code[conversionIndex + 1].registersUsed.single()
+    val wrapperRegister = callRegisters[2]
+    val construction = code.subList(conversionIndex + 2, aggregate.index).singleOrNull {
+        val reference = it.getReference<MethodReference>()
+        it.opcode == Opcode.INVOKE_DIRECT && reference?.name == "<init>" &&
+            reference.parameterTypes.size == 2 && reference.parameterTypes[1] == rawMediaType &&
+            it.registersUsed.size == 3 && it.registersUsed[0] == wrapperRegister &&
+            it.registersUsed[2] == rawRegister
+    } ?: throw PatchException("Expected one typed story media wrapper construction")
+    val wrapperConstructor = construction.getReference<MethodReference>()!!
+    val wrapperClass = resolveClass(wrapperType)
+    if (wrapperConstructor.definingClass != wrapperType && wrapperConstructor.definingClass != wrapperClass.superclass) {
+        throw PatchException("Unexpected story media wrapper superclass")
+    }
+    val allocations = code.subList(conversionIndex + 2, aggregate.index).filter {
+        it.opcode == Opcode.NEW_INSTANCE && it.registersUsed.single() == wrapperRegister &&
+            it.getReference<TypeReference>()?.type == wrapperType
+    }
+    if (allocations.size != 1) throw PatchException("Expected one typed story media allocation")
+    val metadataType = wrapperConstructor.parameterTypes[0].toString()
+    val metadataConstructor = resolveClass(metadataType).methods.singleOrNull {
+        it.name == "<init>" && it.parameterTypes == listOf("Ljava/util/List;", "I", STRING_CLASS) &&
+            AccessFlags.PUBLIC.isSet(it.accessFlags)
+    } ?: throw PatchException("Expected one story media metadata constructor")
+    if (code.subList(conversionIndex + 2, aggregate.index).none {
+            it.opcode == Opcode.INVOKE_DIRECT &&
+                it.getReference<MethodReference>()?.toString() == metadataConstructor.toString() &&
+                it.registersUsed.firstOrNull() == construction.registersUsed[1]
+        }
+    ) throw PatchException("Story wrapper metadata is not constructed by the native callback")
+    if (resolveClass(wrapperConstructor.definingClass).methods.none {
+            it.toString() == wrapperConstructor.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags)
+        }
+    ) throw PatchException("Story media wrapper constructor is not public")
+    val owner = resolveClass(aggregate.reference.definingClass)
+    if (owner.methods.none {
+            it.toString() == aggregate.reference.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
+                !AccessFlags.STATIC.isSet(it.accessFlags)
+        }
+    ) throw PatchException("Typed story aggregation method is not public")
+    val name = "pikoAddStorySeen"
+    if (owner.methods.any { it.name == name }) throw PatchException("Duplicate story aggregation bridge")
+    val bridge = MutableMethod(ImmutableMethod(
+        owner.type, name,
+        listOf(rawMediaType, USER_SESSION_CLASS, owner.type, STRING_CLASS).map {
+            ImmutableMethodParameter(it, emptySet(), null)
+        },
+        "V", AccessFlags.PUBLIC.value or AccessFlags.STATIC.value or AccessFlags.SYNTHETIC.value,
+        emptySet(), emptySet(), ImmutableMethodImplementation(8, emptyList(), emptyList(), emptyList()),
+    ))
+    bridge.addInstructions(0, """
+        invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
+        move-result-object v0
+        const v1, -0x18b1a0fe
+        const-string v2, "itas-android"
+        new-instance v3, $metadataType
+        invoke-direct {v3, v0, v1, v2}, $metadataConstructor
+        new-instance v0, $wrapperType
+        invoke-direct {v0, v3, p0}, $wrapperConstructor
+        invoke-virtual {p2, p1, v0, p3}, ${aggregate.reference}
+        return-void
+    """.trimIndent())
+    owner.methods.add(bridge)
+    return bridge
 }
 
 internal fun deriveStoryMediaField(
@@ -370,6 +463,7 @@ internal fun deriveRequestScheduleReferences(
     method: MutableMethod,
     pendingSeenClass: String,
     requestBuilder: MethodReference,
+    requestTypes: Set<String> = setOf(requestBuilder.returnType),
 ): RequestScheduleReferences {
     if (method.parameterTypes.count { it.toString() == pendingSeenClass } != 1) {
         throw PatchException("Request scheduling requires one pending-story parameter")
@@ -449,8 +543,8 @@ internal fun deriveRequestScheduleReferences(
                     if (
                         scheduleInstruction.opcode in
                         setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
-                        scheduleReference.parameterTypes.map(CharSequence::toString) ==
-                        listOf(requestBuilder.returnType) &&
+                        scheduleReference.parameterTypes.size == 1 &&
+                        scheduleReference.parameterTypes.single().toString() in requestTypes &&
                         scheduleReference.returnType == "V" &&
                         scheduleInstruction.registersUsed ==
                         listOf(managerEntry.managerRegister, builderEntry.requestRegister)

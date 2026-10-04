@@ -125,11 +125,6 @@ internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprin
     strings = listOf("nme_ig_post_post_creation_notif", "nme_ig_post_story_creation_notif"),
 )
 
-internal object VideoMediaInIGTVFeedHasVideoVariantsFingerprint : Fingerprint(
-    returnType = "Z",
-    strings = listOf("id: ", " type: ", "InvalidVideoMediaInIGTVFeed"),
-)
-
 internal object AslSessionRelatedFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("asl_session_id", "is_video", "is_carousel"),
@@ -203,9 +198,10 @@ internal object ProductInfoMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
 )
 
-internal object AyuMidcardMediaHelperImageObjectMethodFingerprint : Fingerprint(
-    definingClass = "AyuMidcardMediaHelper;",
-    returnType = "Ljava/lang/Object;",
+internal object ImageInfoCandidatesMapperFingerprint : Fingerprint(
+    parameters = listOf("Lcom/instagram/model/mediasize/ImageInfo;"),
+    returnType = "Ljava/util/Map;",
+    strings = listOf("additional_candidates", "candidates"),
 )
 
 internal object GetOriginalSoundDataIntfFromMediaFingerprint : Fingerprint(

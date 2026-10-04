@@ -8,6 +8,8 @@ package app.crimera.patches.instagram.misc.theme
 
 import app.morphe.patcher.Fingerprint
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 internal object LegacyDarkModeFragmentConstructorFingerprint : Fingerprint(
     name = "<init>",
@@ -34,15 +36,23 @@ internal object DarkModeSectionFingerprint : Fingerprint(
     returnType = "V",
     strings =
         listOf(
-            "com.instagram.settings.impl.accessibility.DarkModeSection " +
-                "(AccessibilityOptionsComposeFragment.kt:267)",
             "dark",
             "light",
             "system",
         ),
     custom = { method, _ ->
-        method.parameterTypes.count {
-            it == "Lkotlin/jvm/functions/Function1;"
-        } == 1
+        AccessFlags.STATIC.isSet(method.accessFlags) &&
+            method.parameterTypes.size == 3 &&
+            method.parameterTypes[0].toString().isObjectDescriptor() &&
+            method.parameterTypes[1] == FUNCTION1_DESCRIPTOR &&
+            method.parameterTypes[2] == "I" &&
+            method.implementation?.instructions?.any { instruction ->
+                val value =
+                    ((instruction as? ReferenceInstruction)?.reference as? StringReference)?.string
+                value?.startsWith(
+                    "com.instagram.settings.impl.accessibility.DarkModeSection " +
+                        "(AccessibilityOptionsComposeFragment.kt:",
+                ) == true
+            } == true
     },
 )

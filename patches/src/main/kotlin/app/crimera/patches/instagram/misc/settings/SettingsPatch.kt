@@ -27,13 +27,17 @@ import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.findFreeRegister
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 @Suppress("unused")
 val settingsPatch =
@@ -99,21 +103,27 @@ val settingsPatch =
             }
 
             // For welcome message.
-            MainFeedFragmentOnCreateFingerprint.apply {
-                val strIndex = stringMatches[0].index
-
-                method.apply {
-                    val contextIndex = indexOfFirstInstruction(strIndex, Opcode.MOVE_RESULT_OBJECT)
-                    val contextInstruction = getInstruction(contextIndex)
-                    val contextRegister = contextInstruction.registersUsed[0]
-
-                    addInstruction(
-                        contextIndex + 1,
-                        """
-                        invoke-static{v$contextRegister}, $PATCHES_DESCRIPTOR/WelcomeMessage;->openWelcomeMessage(Landroid/content/Context;)V
-                        """.trimIndent(),
-                    )
+            MainFeedFragmentOnCreateFingerprint.matchAll(1..1).single().method.apply {
+                val code = instructions
+                val contextIndex = code.withIndex().singleOrNull { (_, instruction) ->
+                    val reference = instruction.getReference<MethodReference>()
+                    instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
+                        reference?.definingClass == "Landroidx/fragment/app/Fragment;" &&
+                        reference.name == "requireContext" &&
+                        reference.parameterTypes.isEmpty() &&
+                        reference.returnType == "Landroid/content/Context;"
+                }?.index ?: throw PatchException("Could not uniquely resolve main feed welcome context")
+                val contextResult = code.getOrNull(contextIndex + 1)
+                if (contextResult?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+                    throw PatchException("Main feed welcome context has no object result")
                 }
+                val contextRegister = contextResult.registersUsed.single()
+
+                addInstruction(
+                    contextIndex + 2,
+                    "invoke-static/range {v$contextRegister .. v$contextRegister}, " +
+                        "$PATCHES_DESCRIPTOR/WelcomeMessage;->openWelcomeMessage(Landroid/content/Context;)V",
+                )
             }
         }
     }

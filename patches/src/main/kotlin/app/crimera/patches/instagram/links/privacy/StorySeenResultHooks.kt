@@ -49,10 +49,14 @@ internal fun addStorySeenResultHooks(
             throw PatchException("Could not trace the returned story request allocation")
         }
         resolveClass(allocation.getReference<TypeReference>()!!.type).also {
-            if (it.superclass != requestType) throw PatchException("Unexpected native story request superclass")
+            if (it.type != requestType && it.superclass != requestType) {
+                throw PatchException("Unexpected native story request superclass")
+            }
         }
     }.distinctBy { it.type }
-    if (requestClasses.size != 2) throw PatchException("Expected the two native story request implementations")
+    if (requestClasses.size != 2 && requestClasses.singleOrNull()?.type != requestType) {
+        throw PatchException("Expected native story request implementations")
+    }
 
     fun runMethod(owner: MutableClass) = owner.methods.singleOrNull {
         it.name == "run" && it.parameterTypes.isEmpty() && it.returnType == "V"
@@ -83,7 +87,9 @@ internal fun addStorySeenResultHooks(
     }.singleOrNull() ?: throw PatchException("Could not identify the completed request result getter")
     val taskField = regular.fields.singleOrNull { it.type == resultGetter.definingClass }
         ?: throw PatchException("Could not identify the regular request result task")
-    addResultMethod(resolveClass(requestType), "const/4 v0, 0x0\nreturn v0")
+    if (regular.type != requestType) {
+        addResultMethod(resolveClass(requestType), "const/4 v0, 0x0\nreturn v0")
+    }
     addResultMethod(regular, """
         iget-object v0, p0, $taskField
         invoke-virtual {v0}, $resultGetter
@@ -92,52 +98,53 @@ internal fun addStorySeenResultHooks(
         return v0
     """.trimIndent())
 
-    val streaming = requestClasses.single { it.type != regular.type }
-    val streamingRun = runMethod(streaming)
-    val streamRunReference = uniqueMethodReference(streamingRun, "streaming story request task") {
-        it.name == "run" && it.parameterTypes.isEmpty() && it.returnType == "V"
+    requestClasses.singleOrNull { it.type != regular.type }?.let { streaming ->
+        val streamingRun = runMethod(streaming)
+        val streamRunReference = uniqueMethodReference(streamingRun, "streaming story request task") {
+            it.name == "run" && it.parameterTypes.isEmpty() && it.returnType == "V"
+        }
+        val stream = resolveClass(streamRunReference.definingClass)
+        val streamField = streaming.fields.singleOrNull { it.type == stream.type }
+            ?: throw PatchException("Could not identify the streaming request task field")
+        val responseMethod = stream.methods.singleOrNull { it.hasString("StreamingHttpRequestTask.onNewData ") }
+            ?: throw PatchException("Could not identify streaming response handling")
+        val predicateIndex = responseMethod.instructions.indices.singleOrNull { index ->
+            val instruction = responseMethod.instructions[index]
+            val call = instruction.getReference<MethodReference>()
+            instruction.opcode == Opcode.INVOKE_INTERFACE && call?.parameterTypes?.isEmpty() == true &&
+                call.returnType == "Z" && call.definingClass != "Ljava/util/Iterator;"
+        } ?: throw PatchException("Could not identify streaming response success check")
+        val result = responseMethod.instructions.getOrNull(predicateIndex + 1)
+        val receiver = parameterRegisterStart(responseMethod)
+        val resultRegister = result?.registersUsed?.singleOrNull()
+        if (result?.opcode != Opcode.MOVE_RESULT || resultRegister == null ||
+            resultRegister !in 0..15 || receiver !in 0..15 || resultRegister == receiver
+        ) throw PatchException("Unsupported streaming response result registers")
+        val failureReference = uniqueMethodReference(responseMethod, "streaming response failure handler") {
+            it.definingClass == stream.type && it.returnType == "V" && it.parameterTypes.size == 1
+        }
+        val failureMethod = stream.methods.single { it.matches(failureReference) }
+        val cancelMethod = stream.methods.singleOrNull { it.name == "onCancel" && it.parameterTypes.isEmpty() }
+            ?: throw PatchException("Could not identify streaming cancellation")
+        val succeeded = addResultField(stream, "pikoStorySeenResponseOk")
+        val failed = addResultField(stream, "pikoStorySeenResponseFailed")
+        // Streaming responses are processed on a different thread. Keep their outcome on the task,
+        // then read it only after run() has finished waiting for the response.
+        responseMethod.addInstruction(predicateIndex + 2, "iput-boolean v$resultRegister, v$receiver, $succeeded")
+        prependResultFlag(runMethod(stream), listOf(succeeded, failed), false)
+        prependResultFlag(failureMethod, listOf(failed), true)
+        prependResultFlag(cancelMethod, listOf(failed), true)
+        addResultMethod(streaming, """
+            iget-object v0, p0, $streamField
+            iget-boolean v1, v0, $failed
+            if-nez v1, :piko_story_request_failed
+            iget-boolean v0, v0, $succeeded
+            return v0
+            :piko_story_request_failed
+            const/4 v0, 0x0
+            return v0
+        """.trimIndent())
     }
-    val stream = resolveClass(streamRunReference.definingClass)
-    val streamField = streaming.fields.singleOrNull { it.type == stream.type }
-        ?: throw PatchException("Could not identify the streaming request task field")
-    val responseMethod = stream.methods.singleOrNull { it.hasString("StreamingHttpRequestTask.onNewData ") }
-        ?: throw PatchException("Could not identify streaming response handling")
-    val predicateIndex = responseMethod.instructions.indices.singleOrNull { index ->
-        val instruction = responseMethod.instructions[index]
-        val call = instruction.getReference<MethodReference>()
-        instruction.opcode == Opcode.INVOKE_INTERFACE && call?.parameterTypes?.isEmpty() == true &&
-            call.returnType == "Z" && call.definingClass != "Ljava/util/Iterator;"
-    } ?: throw PatchException("Could not identify streaming response success check")
-    val result = responseMethod.instructions.getOrNull(predicateIndex + 1)
-    val receiver = parameterRegisterStart(responseMethod)
-    val resultRegister = result?.registersUsed?.singleOrNull()
-    if (result?.opcode != Opcode.MOVE_RESULT || resultRegister == null ||
-        resultRegister !in 0..15 || receiver !in 0..15 || resultRegister == receiver
-    ) throw PatchException("Unsupported streaming response result registers")
-    val failureReference = uniqueMethodReference(responseMethod, "streaming response failure handler") {
-        it.definingClass == stream.type && it.returnType == "V" && it.parameterTypes.size == 1
-    }
-    val failureMethod = stream.methods.single { it.matches(failureReference) }
-    val cancelMethod = stream.methods.singleOrNull { it.name == "onCancel" && it.parameterTypes.isEmpty() }
-        ?: throw PatchException("Could not identify streaming cancellation")
-    val succeeded = addResultField(stream, "pikoStorySeenResponseOk")
-    val failed = addResultField(stream, "pikoStorySeenResponseFailed")
-    // Streaming responses are processed on a different thread. Keep their outcome on the task,
-    // then read it only after run() has finished waiting for the response.
-    responseMethod.addInstruction(predicateIndex + 2, "iput-boolean v$resultRegister, v$receiver, $succeeded")
-    prependResultFlag(runMethod(stream), listOf(succeeded, failed), false)
-    prependResultFlag(failureMethod, listOf(failed), true)
-    prependResultFlag(cancelMethod, listOf(failed), true)
-    addResultMethod(streaming, """
-        iget-object v0, p0, $streamField
-        iget-boolean v1, v0, $failed
-        if-nez v1, :piko_story_request_failed
-        iget-boolean v0, v0, $succeeded
-        return v0
-        :piko_story_request_failed
-        const/4 v0, 0x0
-        return v0
-    """.trimIndent())
     extensionMethod.addInstructions(0, """
         instance-of p1, p0, $requestType
         if-eqz p1, :piko_story_result_unavailable

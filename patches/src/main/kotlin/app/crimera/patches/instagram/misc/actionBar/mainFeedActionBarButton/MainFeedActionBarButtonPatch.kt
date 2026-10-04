@@ -8,7 +8,6 @@ package app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton
 
 import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -17,10 +16,13 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.PatchException
+import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 object BindMainFeedActionBarFingerprint : Fingerprint(
     strings = listOf("BindMainFeedActionBar"),
@@ -69,29 +71,29 @@ val mainFeedActionBarButtonPatch =
 
         execute {
 
-            BindMainFeedActionBarFingerprint.apply {
-                val strIndex = stringMatches.first().index
-                method.apply {
-                    val allIfEqz = instructions.filter { it.location.index > strIndex && it.opcode == Opcode.IF_EQZ }
-                    allIfEqz.firstOrNull {
-                        val index = it.location.index
-                        val prevInstruction = getInstruction(index - 1)
-                        val prevInstructionOpcode = prevInstruction.opcode
-                        if (prevInstructionOpcode == Opcode.IGET_OBJECT) {
-                            val layoutRegister = prevInstruction.registersUsed[0]
-                            addInstruction(
-                                index,
-                                """
-                                invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR->mainFeedActionBarButton(Landroid/view/ViewGroup;)V
-                                """.trimIndent(),
-                            )
-                            addFlags("mainFeedActionBarFlags")
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                }
+            BindMainFeedActionBarFingerprint.matchAll(1..1).single().method.apply {
+                val code = instructions.toList()
+                val markerIndex = code.withIndex().singleOrNull { (_, instruction) ->
+                    instruction.getReference<StringReference>()?.string == "BindMainFeedActionBar"
+                }?.index ?: throw PatchException("Expected one main feed action bar binding marker")
+                val containerIndex = (markerIndex + 1 until code.size - 2).singleOrNull { index ->
+                    val read = code[index]
+                    val field = read.getReference<FieldReference>()
+                    val visibility = code[index + 2].getReference<MethodReference>()
+                    read.opcode == Opcode.IGET_OBJECT &&
+                        field?.definingClass == "Linstagram/features/feed/mainfeed/actionbar/MainFeedActionBar;" &&
+                        field.type == "Landroid/widget/LinearLayout;" &&
+                        code[index + 1].opcode == Opcode.IF_EQZ &&
+                        visibility?.name == "setVisibility" && visibility.parameterTypes == listOf("I") &&
+                        visibility.returnType == "V" &&
+                        code[index + 2].registersUsed.firstOrNull() == read.registersUsed.firstOrNull()
+                } ?: throw PatchException("Expected one main feed action button container")
+                val layoutRegister = code[containerIndex].registersUsed.first()
+                addInstruction(
+                    containerIndex + 1,
+                    "invoke-static/range {v$layoutRegister .. v$layoutRegister}, $ACTIONBAR_DESCRIPTOR->mainFeedActionBarButton(Landroid/view/ViewGroup;)V",
+                )
+                addFlags("mainFeedActionBarFlags")
             }
         }
     }

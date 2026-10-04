@@ -13,6 +13,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.util.registersUsed
@@ -20,6 +21,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 
@@ -33,10 +35,59 @@ private object NativeSwitchInitializer : Fingerprint(
     name = "<clinit>",
 )
 
+private fun verifyFixedMaterialSwitchStyle(switchClass: MutableClass) {
+    fun method(name: String, vararg parameters: String) = switchClass.methods.singleOrNull {
+        it.name == name && it.parameterTypes == parameters.toList() && it.returnType == "V"
+    } ?: throw PatchException("Expected one native switch $name implementation")
+
+    fun MutableMethod.hasRadii(vararg radii: Float): Boolean {
+        val constants = instructions.mapNotNull { (it as? WideLiteralInstruction)?.wideLiteral }
+        return radii.all { it.toRawBits().toLong() in constants }
+    }
+
+    fun MutableMethod.references(opcode: Opcode, reference: String) = instructions.any {
+        it.opcode == opcode && (it as? ReferenceInstruction)?.reference.toString() == reference
+    }
+
+    val constructor = method("<init>", "Landroid/content/Context;", "Landroid/util/AttributeSet;", "I")
+    val draw = method("onDraw", "Landroid/graphics/Canvas;")
+    val setChecked = method("setChecked", "Z")
+    val setCheckedAnimated = method("setCheckedAnimated", "Z")
+    val radiusField = constructor.instructions.mapNotNull { instruction ->
+        val field = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+        field?.takeIf {
+            instruction.opcode == Opcode.IPUT && it.definingClass == IGDS_SWITCH && it.type == "F"
+        }
+    }.singleOrNull() ?: throw PatchException("Expected one native switch thumb radius")
+
+    if (switchClass.superclass != "Landroid/widget/CompoundButton;" ||
+        switchClass.methods.any { method ->
+            method.instructions.any { it.opcode == Opcode.SGET_BOOLEAN }
+        } ||
+        !constructor.hasRadii(8f, 12f) ||
+        !draw.references(Opcode.IGET, radiusField.toString()) ||
+        !draw.references(Opcode.INVOKE_VIRTUAL,
+            "Landroid/graphics/drawable/Drawable;->setBounds(Landroid/graphics/Rect;)V") ||
+        !setChecked.hasRadii(8f, 12f, 14f) ||
+        !setChecked.references(Opcode.IPUT, radiusField.toString()) ||
+        !setChecked.references(Opcode.INVOKE_VIRTUAL,
+            "Landroid/view/View;->startAnimation(Landroid/view/animation/Animation;)V") ||
+        !setCheckedAnimated.references(Opcode.INVOKE_VIRTUAL,
+            "Landroid/widget/CompoundButton;->setChecked(Z)V")
+    ) {
+        throw PatchException("Native switch has no verified Material style implementation")
+    }
+}
+
 internal val nativeSettingsSwitchStylePatch = bytecodePatch {
     dependsOn(sharedExtensionPatch)
     execute {
-        val initializer = NativeSwitchInitializer.matchAll(1..1).single().method
+        val switchClass = mutableClassDefBy(IGDS_SWITCH)
+        val initializer = NativeSwitchInitializer.matchAll(0..1).singleOrNull()?.method
+        if (initializer == null) {
+            verifyFixedMaterialSwitchStyle(switchClass)
+            return@execute
+        }
         val styleField = initializer.instructions.mapNotNull { instruction ->
             val field = (instruction as? ReferenceInstruction)?.reference as? FieldReference
             field?.takeIf {
@@ -44,7 +95,6 @@ internal val nativeSettingsSwitchStylePatch = bytecodePatch {
                     it.definingClass == IGDS_SWITCH && it.type == "Z"
             }
         }.singleOrNull() ?: throw PatchException("Expected one native switch style flag")
-        val switchClass = mutableClassDefBy(IGDS_SWITCH)
         if (switchClass.methods.any { it.name == STYLE_METHOD }) {
             throw PatchException("Native switch style bridge already exists")
         }

@@ -10,6 +10,7 @@ import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -23,6 +24,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private data class LegacyRadioItemBinding(
     val idField: FieldReference,
@@ -65,6 +67,7 @@ internal fun installLegacyNativeThemeModeSync() {
                 method.returnType == "V" &&
                 !AccessFlags.STATIC.isSet(method.accessFlags)
             ) {
+                if (findLegacyBinding(method) == null) inlineLegacyRadioRowFactory(method)
                 findLegacyBinding(method)
             } else {
                 null
@@ -77,6 +80,51 @@ internal fun installLegacyNativeThemeModeSync() {
         binding = onResumeBinding,
         itemBinding = itemBinding,
     )
+}
+
+context(patchContext: BytecodePatchContext)
+private fun inlineLegacyRadioRowFactory(method: MutableMethod) {
+    val factories = method.instructions.mapIndexedNotNull { index, instruction ->
+        val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+        if (instruction.opcode != Opcode.INVOKE_STATIC || reference?.returnType != "V" ||
+            reference.parameterTypes != listOf(RADIO_GROUP_LISTENER_DESCRIPTOR, STRING_DESCRIPTOR,
+                "Ljava/util/AbstractCollection;", LIST_DESCRIPTOR)
+        ) return@mapIndexedNotNull null
+        index to reference
+    }
+    val (index, factory) = factories.singleOrNull()
+        ?: throw PatchException("Expected one delegated legacy RadioGroup row factory")
+    val helper = patchContext.mutableClassDefBy(factory.definingClass).methods.single { it.toString() == factory.toString() }
+    val code = helper.instructions.toList()
+    val args = method.instructions[index].registersUsed
+    val firstParameter = parameterRegisterStart(helper)
+    val row = code.firstOrNull()?.registersUsed?.singleOrNull()
+    val constructor = (code.getOrNull(1) as? ReferenceInstruction)?.reference as? MethodReference
+    val add = (code.getOrNull(2) as? ReferenceInstruction)?.reference as? MethodReference
+    if (code.size != 4 || row == null || row >= firstParameter || args.size != 4 ||
+        code[0].opcode != Opcode.NEW_INSTANCE || code[1].opcode != Opcode.INVOKE_DIRECT ||
+        code[2].opcode != Opcode.INVOKE_VIRTUAL || code[3].opcode != Opcode.RETURN_VOID ||
+        constructor?.name != "<init>" || constructor.returnType != "V" ||
+        constructor.definingClass != ((code[0] as? ReferenceInstruction)?.reference as? TypeReference)?.type ||
+        constructor.parameterTypes != listOf(RADIO_GROUP_LISTENER_DESCRIPTOR, STRING_DESCRIPTOR, LIST_DESCRIPTOR) ||
+        code[1].registersUsed != listOf(row, firstParameter, firstParameter + 1, firstParameter + 3) ||
+        add?.definingClass != "Ljava/util/AbstractCollection;" || add.name != "add" ||
+        add.parameterTypes != listOf(THEME_OBJECT_DESCRIPTOR) || add.returnType != "Z" ||
+        code[2].registersUsed != listOf(firstParameter + 2, row)
+    ) throw PatchException("Unexpected delegated legacy RadioGroup row factory")
+    val rowClass = patchContext.classDefBy(constructor.definingClass)
+    if (!AccessFlags.PUBLIC.isSet(rowClass.accessFlags) || rowClass.methods.none {
+        it.toString() == constructor.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags)
+    }) throw PatchException("Legacy RadioGroup constructor is not publicly accessible")
+    val scratch = method.findFreeRegister(index, *args.toIntArray())
+    if ((args + scratch).any { it !in 0..15 } || scratch >= parameterRegisterStart(method)) {
+        throw PatchException("Legacy RadioGroup factory requires local 4-bit registers")
+    }
+    method.replaceInstruction(index, "new-instance v$scratch, ${constructor.definingClass}")
+    method.addInstructions(index + 1, """
+        invoke-direct {v$scratch, v${args[0]}, v${args[1]}, v${args[3]}}, $constructor
+        invoke-virtual {v${args[2]}, v$scratch}, $add
+    """.trimIndent())
 }
 
 private fun deriveLegacyRadioItemType(method: MutableMethod): String {
@@ -309,7 +357,10 @@ private fun installLegacyOnResumeThemeSync(
                     instruction.opcode == Opcode.IGET_OBJECT &&
                     field.sameField(itemBinding.idField) &&
                     registers.size == 2 &&
-                    registers[0] == selectedIdRegister
+                    registers[0] == selectedIdRegister &&
+                    method.instructions.subList(index + 1, rowNewIndex).none {
+                        it.opcode.setsRegister() && it.registersUsed.firstOrNull() == selectedIdRegister
+                    }
                 ) {
                     index
                 } else {
