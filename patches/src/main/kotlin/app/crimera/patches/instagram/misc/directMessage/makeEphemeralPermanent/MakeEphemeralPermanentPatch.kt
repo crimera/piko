@@ -56,12 +56,11 @@ val makeEphemeralPermanentPatch =
                     val ephemeralMediaClassName = extensionToClassName(viewModeInstructionExtraction.definingClass)
                     val viewModeFieldName = viewModeInstructionExtraction.name
 
+                    // The field stored right after the expire key, since other keys can now sit before view_mode.
                     val expireAtInstructionExtraction =
-                        instructions
-                            .last {
-                                it.location.index < viewModeStringIndex &&
-                                    it.opcode == Opcode.IPUT_OBJECT
-                            }.fieldExtractor()
+                        getInstruction(
+                            indexOfFirstInstruction(expireAtStringIndex, Opcode.IPUT_OBJECT),
+                        ).fieldExtractor()
                     val expireAtFieldName = expireAtInstructionExtraction.name
 
                     val returnObjectInstruction = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
