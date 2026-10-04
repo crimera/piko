@@ -9,8 +9,11 @@ import android.provider.DocumentsContract;
 
 import androidx.annotation.Nullable;
 
+import app.morphe.extension.crimera.downloader.FolderPicker;
 import app.morphe.extension.crimera.downloader.model.ConflictPolicy;
 import app.morphe.extension.newx.settings.NewXLogger;
+import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.shared.Utils;
 
 public final class NewXDownloadFolders {
 
@@ -192,6 +195,36 @@ public final class NewXDownloadFolders {
                     : documentId;
         } catch (RuntimeException exception) {
             return treeUri.toString();
+        }
+    }
+
+    /** Launches the shared folder picker and updates the configured folder on success. */
+    public static void choose(Context context, MediaKind kind) {
+        try {
+            FolderPicker.launch(context, new FolderPicker.Callback() {
+                @Override
+                public void onPicked(Uri tree, String displayPath, boolean persisted) {
+                    store(context, kind, tree, displayPath);
+                    captureDestination(context, kind, "folder-picked");
+                    Utils.showToastShort(StringRef.str(persisted
+                            ? "piko_newx_download_options_changed"
+                            : "piko_newx_download_options_folder_session"));
+                }
+
+                @Override
+                public void onCancelled() {
+                    Utils.showToastShort(StringRef.str("piko_newx_download_options_cancelled"));
+                }
+
+                @Override
+                public void onUnwritable() {
+                    captureDestination(context, kind, "folder-picked/unwritable");
+                    Utils.showToastShort(StringRef.str("piko_newx_download_options_folder_unwritable"));
+                }
+            });
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to launch folder picker", exception);
+            Utils.showToastShort(StringRef.str("piko_newx_download_options_cancelled"));
         }
     }
 }

@@ -12,24 +12,43 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
+import app.morphe.extension.crimera.downloader.engine.DestinationLoss;
+import app.morphe.extension.crimera.downloader.engine.DownloadLog;
+import app.morphe.extension.crimera.downloader.engine.Reservation;
+import app.morphe.extension.crimera.downloader.engine.SafDestination;
+import app.morphe.extension.crimera.downloader.model.DownloadRequest;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.utils.NewXUtils;
 
 /**
  * Downloads multiple image slices in the background, stitches them horizontally
- * in 1-2-3-4 order, and saves the final merged image through {@link DownloadDestination} so a
+ * in 1-2-3-4 order, and saves the final merged image through {@link SafDestination} so a
  * merge lands in the same folder, under the same filename template, as a plain download.
  * Intermediate splits are stored in cache and deleted immediately after merging.
  */
 public final class MediaMerger {
     private static final String LOG_PREFIX = "[PikoNewX][MediaMerger] ";
+    private static final DownloadLog LOG = new DownloadLog() {
+        @Override
+        public void info(Supplier<String> message) {
+            NewXLogger.printInfo(message::get);
+        }
+
+        @Override
+        public void error(Supplier<String> message, Throwable cause) {
+            NewXLogger.printException(message::get, cause);
+        }
+    };
     private static final ExecutorService MERGE_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int CONNECT_TIMEOUT_MS = 10_000;
     private static final int READ_TIMEOUT_MS = 20_000;
@@ -187,20 +206,34 @@ public final class MediaMerger {
 
             // Reserve before encoding so a skipped merge costs no work.
             final Uri destinationTree = NewXDownloadFolders.treeUri(NewXDownloadFolders.MediaKind.IMAGES);
-            final DownloadDestination.Target target;
+            final DownloadRequest request;
             try {
-                target = DownloadDestination.reserve(
-                        context,
-                        NewXDownloadFolders.MediaKind.IMAGES,
+                request = new DownloadRequest(
+                        items.get(0).url,
+                        Collections.emptyList(),
                         destinationTree,
+                        Collections.emptyList(),
                         fileName,
                         mimeType,
-                        NewXDownloadFolders.conflictPolicy()
+                        NewXDownloadFolders.conflictPolicy(),
+                        username
                 );
-            } catch (IOException | RuntimeException exception) {
+            } catch (IllegalArgumentException exception) {
+                mergedBitmap.recycle();
+                NewXLogger.printException(() -> LOG_PREFIX + "Invalid NewX download request: " + fileName, exception);
+                InlineDownloadButton.reportDownloadStatus("Failed to save merged image: " + fileName, username);
+                return;
+            }
+
+            SafDestination destination = new SafDestination(LOG);
+            final Reservation reservation;
+            try {
+                reservation = destination.reserve(context, request);
+            } catch (Exception exception) {
                 mergedBitmap.recycle();
                 NewXLogger.printException(() -> LOG_PREFIX + "Failed to create merged image document", exception);
-                if (DownloadDestination.isDestinationLoss(exception)) {
+                if (DestinationLoss.matches(exception)) {
+                    NewXDownloadFolders.invalidate(NewXDownloadFolders.MediaKind.IMAGES);
                     InlineDownloadButton.reportDownloadStatus(
                             InlineDownloadButton.FOLDER_LOST_MESSAGE,
                             username
@@ -213,27 +246,34 @@ public final class MediaMerger {
                 }
                 return;
             }
-            if (target == null) {
+            if (reservation == null) {
                 mergedBitmap.recycle();
                 NewXInAppNotification.showForUser("Merged image already exists: " + fileName, username);
                 return;
             }
 
-            DownloadDestination.SaveState saveState = saveMergedBitmap(context, mergedBitmap, target, format);
-            mergedBitmap.recycle();
-
-            switch (saveState) {
-                case SAVED -> {
-                    NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + target.fileName());
+            try {
+                writeMergedBitmap(context, mergedBitmap, reservation.documentUri(), format);
+                NewXLogger.printInfo(() -> LOG_PREFIX + "Successfully merged and saved " + reservation.fileName());
+                InlineDownloadButton.reportDownloadStatus(
+                        "Merged image saved: " + reservation.fileName(), username);
+            } catch (Exception exception) {
+                destination.discard(context, reservation);
+                NewXLogger.printException(() -> LOG_PREFIX + "Failed to write merged image", exception);
+                if (DestinationLoss.matches(exception)) {
+                    NewXDownloadFolders.invalidate(NewXDownloadFolders.MediaKind.IMAGES);
                     InlineDownloadButton.reportDownloadStatus(
-                            "Merged image saved: " + target.fileName(), username);
+                            InlineDownloadButton.FOLDER_LOST_MESSAGE,
+                            username
+                    );
+                } else {
+                    InlineDownloadButton.reportDownloadStatus(
+                            "Failed to save merged image: " + fileName,
+                            username
+                    );
                 }
-                case DESTINATION_LOST -> InlineDownloadButton.reportDownloadStatus(
-                        InlineDownloadButton.FOLDER_LOST_MESSAGE, username);
-                // Merges never go through the cancellable transfer path; CANCELLED and
-                // NO_CONNECTION are unreachable here but required for an exhaustive switch.
-                case FAILED, CANCELLED, NO_CONNECTION -> InlineDownloadButton.reportDownloadStatus(
-                        "Failed to save merged image: " + fileName, username);
+            } finally {
+                mergedBitmap.recycle();
             }
 
         } catch (Throwable t) {
@@ -294,17 +334,22 @@ public final class MediaMerger {
         }
     }
 
-    private static DownloadDestination.SaveState saveMergedBitmap(
+    private static void writeMergedBitmap(
             Context context,
             Bitmap bitmap,
-            DownloadDestination.Target target,
+            Uri uri,
             Bitmap.CompressFormat format
-    ) {
+    ) throws IOException {
         int quality = format == Bitmap.CompressFormat.PNG ? 100 : 95;
-        return DownloadDestination.save(
-                context,
-                target,
-                output -> bitmap.compress(format, quality, output)
-        );
+        OutputStream stream = context.getContentResolver().openOutputStream(uri, "wt");
+        if (stream == null) {
+            throw new IOException("Could not open output stream for " + uri);
+        }
+        try (OutputStream out = stream) {
+            if (!bitmap.compress(format, quality, out)) {
+                throw new IOException("Failed to compress merged image");
+            }
+            out.flush();
+        }
     }
 }

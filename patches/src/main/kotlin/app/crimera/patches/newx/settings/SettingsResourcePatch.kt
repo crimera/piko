@@ -37,7 +37,7 @@ internal val newXSettingsResourcePatch =
                     document.createElement("activity").apply {
                         setAttribute(
                             "android:name",
-                            "app.morphe.extension.newx.misc.DownloadFolderPickerActivity",
+                            "app.morphe.extension.crimera.downloader.FolderPickerActivity",
                         )
                         setAttribute("android:excludeFromRecents", "true")
                         setAttribute("android:exported", "false")

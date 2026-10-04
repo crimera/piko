@@ -151,9 +151,7 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
         Activity activity = getActivity();
         if (activity == null) return;
 
-        Intent intent = new Intent(activity, DownloadFolderPickerActivity.class)
-                .putExtra(DownloadFolderPickerActivity.KIND_EXTRA, kind.name());
-        activity.startActivity(intent);
+        NewXDownloadFolders.choose(activity, kind);
     }
 
     private void showFilenameEditor() {

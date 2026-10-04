@@ -1315,8 +1315,7 @@ public final class InlineDownloadButton {
         ButtonView button = SettingsUi.dialogButton(activity, StringRef.str(labelResource));
         button.setOnClickListener(ignored -> {
             dialog.dismiss();
-            activity.startActivity(new Intent(activity, DownloadFolderPickerActivity.class)
-                    .putExtra(DownloadFolderPickerActivity.KIND_EXTRA, kind.name()));
+            NewXDownloadFolders.choose(activity, kind);
         });
         return button;
     }
