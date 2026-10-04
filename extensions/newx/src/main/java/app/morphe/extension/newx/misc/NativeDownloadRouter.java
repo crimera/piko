@@ -13,7 +13,6 @@ import app.morphe.extension.crimera.downloader.DownloadEngine;
 import app.morphe.extension.crimera.downloader.EnqueueResult;
 import app.morphe.extension.crimera.downloader.model.ConflictPolicy;
 import app.morphe.extension.crimera.downloader.model.DownloadRequest;
-import app.morphe.extension.crimera.downloader.model.EnqueueState;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.newx.utils.NewXUtils;
 import app.morphe.extension.shared.Utils;

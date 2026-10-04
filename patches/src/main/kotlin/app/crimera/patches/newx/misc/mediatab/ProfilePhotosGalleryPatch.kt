@@ -1444,7 +1444,6 @@ private fun resolveItemClickViewerTargets(
         if (AccessFlags.ABSTRACT.isSet(classDef.accessFlags)) return@flatMapParallel emptyList()
         val instanceFields = classDef.fields.filter { !AccessFlags.STATIC.isSet(it.accessFlags) }
         if (instanceFields.size != 1) return@flatMapParallel emptyList()
-        // newx-resolver-lint: allow raw-index because the size guard above skips non-candidate classes
         val field = instanceFields[0]
         val itemType = field.type.toString()
         if (!itemType.startsWith("L")) return@flatMapParallel emptyList()

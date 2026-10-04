@@ -8,7 +8,6 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.Intent;
 import android.net.Uri;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,7 +18,6 @@ import app.morphe.extension.crimera.settings.SettingsUi;
 import app.morphe.extension.crimera.ui.ButtonView;
 import app.morphe.extension.crimera.ui.DialogView;
 
-import java.io.IOException;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -1116,7 +1114,17 @@ public final class InlineDownloadButton {
                 ));
             }
             String message = DownloadMessages.summary(result, new EnglishDownloadTexts(), username);
-            NewXUtils.runOnUiThread(() -> reportDownloadStatus(message));
+            // Only a clean outcome stays quiet (toast when the in-app host is absent); anything
+            // that went wrong or was partly skipped also toasts, as before.
+            boolean clean = result.failed() == 0 && result.lost() == 0
+                    && (result.queued() == 0 ? result.skipped() > 0 : result.skipped() == 0);
+            NewXUtils.runOnUiThread(() -> {
+                if (clean) {
+                    NewXInAppNotification.show(message);
+                } else {
+                    reportDownloadStatus(message);
+                }
+            });
         });
     }
 

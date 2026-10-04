@@ -10,7 +10,6 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

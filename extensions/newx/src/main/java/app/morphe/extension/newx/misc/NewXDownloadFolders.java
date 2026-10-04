@@ -2,8 +2,6 @@ package app.morphe.extension.newx.misc;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.UriPermission;
-import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 
