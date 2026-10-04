@@ -1,3 +1,32 @@
+## [3.10.0-dev.10](https://github.com/crimera/piko/compare/v3.10.0-dev.9...v3.10.0-dev.10) (2026-10-04)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Align Instants settings and saved viewer styling ([#2017](https://github.com/crimera/piko/issues/2017)) ([a0a3360](https://github.com/crimera/piko/commit/a0a33601aa0c6cc99e990ea0f7f8dfd31c43640d))
+* **Instagram:** Fill menu highlights above dialog buttons ([#2016](https://github.com/crimera/piko/issues/2016)) ([a326e42](https://github.com/crimera/piko/commit/a326e42fd87be1540aad23f7c8aab0e96dbb263d))
+* **Instagram:** Hide non-follower badges for unknown friendship status ([f385660](https://github.com/crimera/piko/commit/f3856607144c2b2b825aec46f7cd3a5ee0490a8f))
+* **Instagram:** Restore the activity context for like animation previews ([#2014](https://github.com/crimera/piko/issues/2014)) ([1f08d91](https://github.com/crimera/piko/commit/1f08d91edf63d2a31ce49d52a5af3acf6ed04c98))
+* **Instagram:** Validate the picked file before restoring settings ([#1985](https://github.com/crimera/piko/issues/1985)) ([1f1f3f7](https://github.com/crimera/piko/commit/1f1f3f7d25ca1159823c55580194c62b1af882ea))
+* **Twitter:** Apply dynamic color to Dim and Lights out themes ([#2027](https://github.com/crimera/piko/issues/2027)) ([5842cb7](https://github.com/crimera/piko/commit/5842cb7b3589bba0669cc78a34cb3c27f1749a2d)), closes [#15202](https://github.com/crimera/piko/issues/15202) [#bf15202](https://github.com/crimera/piko/issues/bf15202)
+
+### ✨ New Features
+
+* **Instagram:** Add an option to enable inline download button on feed and profile posts ([#1997](https://github.com/crimera/piko/issues/1997)) ([a074bb9](https://github.com/crimera/piko/commit/a074bb97485f79dcd239675be44403e8b3dbbf80))
+* **Instagram:** Add Inbox lock to ask for your biometrics before messages ([#2020](https://github.com/crimera/piko/issues/2020)) ([d2c5f0a](https://github.com/crimera/piko/commit/d2c5f0a6b843a4aabf08bf7aeb2c25b51e62e9e7)), closes [#2018](https://github.com/crimera/piko/issues/2018)
+* **Instagram:** Save and view received Instants ([#1538](https://github.com/crimera/piko/issues/1538)) ([40e1327](https://github.com/crimera/piko/commit/40e1327b265565e19074bf699091dcde77f581dc))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Add support for 447.0.0.55.81 ([3e15b92](https://github.com/crimera/piko/commit/3e15b928c85449e21b3e6a34a2ac419d272885bb))
+
+### 🔧 Improvements
+
+* **Instagram:** Add a close button to resolution dialogs ([9383ab3](https://github.com/crimera/piko/commit/9383ab3ce00462d3f3ce174ef51bba6699fee137))
+* **Instagram:** Add feedback to the unlock button ([44fcefb](https://github.com/crimera/piko/commit/44fcefb539dce3640fc2e88eb20c72ef9ccec101))
+* **Instagram:** Match Inbox lock styling and reorder DM settings ([8dbcb52](https://github.com/crimera/piko/commit/8dbcb52bdb0bf34a74d3c6bf1be578fab27e517e))
+* **Instagram:** Reorder DM settings ([40f8c14](https://github.com/crimera/piko/commit/40f8c148a21f4963800c281c961e668e3fbcb6d2))
+* **Instagram:** Use the native story mentions dialog ([#2030](https://github.com/crimera/piko/issues/2030)) ([14faf0a](https://github.com/crimera/piko/commit/14faf0a00a46bd46361f0d6153375f2451bf20f7))
+
 ## [3.10.0-dev.9](https://github.com/crimera/piko/compare/v3.10.0-dev.8...v3.10.0-dev.9) (2026-09-29)
 
 ### 🐛 Bug Fixes

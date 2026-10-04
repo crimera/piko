@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.10.0-dev.9",
+  "version": "3.10.0-dev.10",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -61,9 +61,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -92,9 +92,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -111,8 +111,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -140,8 +139,7 @@
       "description": "Blocks the 'This app is out of date' update screen from being shown on launch",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -238,9 +236,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -283,9 +281,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -354,9 +352,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -423,7 +421,6 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
-        "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -437,9 +434,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -524,9 +521,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -615,9 +612,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -690,8 +687,7 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -703,9 +699,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -733,9 +729,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -876,9 +872,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1100,9 +1096,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1131,9 +1127,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1162,9 +1158,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1250,9 +1246,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1281,9 +1277,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1315,9 +1311,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1346,9 +1342,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1377,9 +1373,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1407,9 +1403,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1438,9 +1434,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1468,9 +1464,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1498,9 +1494,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1517,7 +1513,6 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
-        "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -1531,9 +1526,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1561,9 +1556,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1591,6 +1586,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1603,9 +1599,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1662,9 +1658,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1862,9 +1858,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1894,9 +1890,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1928,9 +1924,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1990,9 +1986,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2244,9 +2240,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2387,9 +2383,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2462,8 +2458,7 @@
       "description": "Hides notes tray in DM section",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -2475,9 +2470,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2607,8 +2602,7 @@
       "description": "Hides the reshare button from both posts and reels.",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -2620,9 +2614,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2638,8 +2632,7 @@
       "description": "Hides stories tray from main feed.",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -2651,9 +2644,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2681,9 +2674,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2728,7 +2721,6 @@
       "description": "Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.",
       "default": true,
       "dependencies": [
-        "ResourcePatch",
         "BytecodePatch",
         "ResourcePatch"
       ],
@@ -2770,9 +2762,39 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Inbox lock",
+      "description": "Asks for your fingerprint, face or screen lock before the inbox is shown.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2829,9 +2851,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2887,9 +2909,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2919,9 +2941,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2949,9 +2971,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2968,7 +2990,6 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
-        "ResourcePatch",
         "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -3016,9 +3037,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3050,9 +3071,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3206,9 +3227,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3266,9 +3287,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3325,9 +3346,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3355,9 +3376,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3487,8 +3508,7 @@
       "description": "Enable or disable rounding off numbers",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -3528,9 +3548,41 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Save Instants",
+      "description": "Captures view-once Instants as you view them so you can re-view and download them later.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3560,9 +3612,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3583,7 +3635,6 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
-        "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -3597,9 +3648,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3760,8 +3811,7 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -3822,7 +3872,6 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
-        "ResourcePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3835,9 +3884,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3875,9 +3924,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3907,9 +3956,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3939,9 +3988,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3969,9 +4018,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -4001,9 +4050,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -4034,9 +4083,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -4067,9 +4116,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -4102,9 +4151,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
