@@ -12,6 +12,7 @@ import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
+import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -24,6 +25,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.util.getReference
 import app.morphe.util.p0Register
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -37,6 +39,14 @@ private const val TIMELINE_REFRESH_GATE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineRefreshGate;"
 private const val INTENT_DESCRIPTOR = "Landroid/content/Intent;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
+private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
+private const val TIMELINE_MODEL_PACKAGE = "Lcom/x/models/timelines/"
+// Home tabs keyed by their enum alone.
+private val HOME_TIMELINE_NAMES = listOf("FOR_YOU", "FOLLOWING", "RANKED_FOLLOWING")
+// Pinnable tabs keyed by a per-id identity, matching TimelineScrollPositionStore.isPerIdTimeline.
+// LIST_POSTS is the contract for pinned lists; the others are suppressed where the target has them.
+private const val LIST_TIMELINE_NAME = "LIST_POSTS"
+private val OPTIONAL_PER_ID_TIMELINE_NAMES = listOf("TOPIC", "COMMUNITY_DETAIL_POSTS")
 private const val GET_INTENT_DESCRIPTOR = "Landroid/app/Activity;->getIntent()$INTENT_DESCRIPTOR"
 private const val MARK_POST_DEEP_LINK_DESCRIPTOR =
     "$TIMELINE_REFRESH_GATE_DESCRIPTOR->markPostDeepLink($INTENT_DESCRIPTOR)V"
@@ -51,7 +61,7 @@ private const val IS_FOR_YOU_FILTER_REFRESH_PENDING_DESCRIPTOR =
 private const val IS_TIMELINE_DATA_EMPTY_DESCRIPTOR =
     "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty($LIST_DESCRIPTOR)Z"
 private const val RESTORE_TIMELINE_POSITION_DESCRIPTOR =
-    "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I"
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR$STRING_DESCRIPTOR)[I"
 private const val URT_SUPPRESS_LABEL = "piko_newx_refresh_urt_suppress"
 private const val URT_CHECK_POSITION_LABEL = "piko_newx_refresh_urt_check_position"
 
@@ -325,6 +335,49 @@ val disableTimelineRefreshPatch =
             }
             val timelineGetter = timelineGetterMatches.single()
             val timelineEnumDescriptor = timelineGetter.returnType.toString()
+            val timelineEnumFieldNames =
+                mutableClassDefBy(timelineEnumDescriptor).fields.map { it.name }.toSet()
+            val missingTimelineNames =
+                (HOME_TIMELINE_NAMES + LIST_TIMELINE_NAME).filter { it !in timelineEnumFieldNames }
+            if (missingTimelineNames.isNotEmpty()) {
+                throw PatchException(
+                    "NewX timeline enum $timelineEnumDescriptor is missing required constants: " +
+                        missingTimelineNames.joinToString(),
+                )
+            }
+            val suppressedTimelineNames =
+                HOME_TIMELINE_NAMES + LIST_TIMELINE_NAME +
+                    OPTIONAL_PER_ID_TIMELINE_NAMES.filter { it in timelineEnumFieldNames }
+            // The repository carries the list/topic/community id next to the timeline type. A
+            // position saved for a pinned tab is keyed by that id, so the restore probe needs it.
+            val timelineIdentityGetter =
+                requireExactlyOne(
+                    "NewX URT repository timeline identity getter",
+                    repositoryClass.methods.filter { method ->
+                        val returnType = method.returnType.toString()
+                        method.parameterTypes.isEmpty() &&
+                            returnType.startsWith(TIMELINE_MODEL_PACKAGE) &&
+                            returnType != timelineEnumDescriptor &&
+                            runCatching {
+                                mutableClassDefBy(returnType).fields.count { field ->
+                                    field.type.toString() == STRING_DESCRIPTOR
+                                } == 1
+                            }.getOrDefault(false)
+                    },
+                )
+            val timelineIdentityDescriptor = timelineIdentityGetter.returnType.toString()
+            val timelineIdentityField =
+                requireExactlyOne(
+                    "NewX URT timeline identity field",
+                    mutableClassDefBy(timelineIdentityDescriptor).fields.filter { field ->
+                        field.type.toString() == STRING_DESCRIPTOR
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(timelineIdentityField.accessFlags)) {
+                throw PatchException("NewX URT timeline identity field is not public: $timelineIdentityField")
+            }
+            val repositoryTimelineIdentityGetterReference =
+                "$repoDescriptor->${timelineIdentityGetter.name}()$timelineIdentityDescriptor"
             val repositoryTimelineGetterReference =
                 "$repoDescriptor->${timelineGetter.name}()$timelineEnumDescriptor"
             val flowGetterCandidates =
@@ -433,21 +486,13 @@ val disableTimelineRefreshPatch =
                     ifNe(requestRegister, settingRegister, Target.Original)
                     invokeVirtual(methodReference(repositoryTimelineGetterReference), method.p0Register)
                     moveResult(timelineRegister, timelineEnumDescriptor)
-                    sget(
-                        settingRegister,
-                        fieldReference("$timelineEnumDescriptor->FOR_YOU:$timelineEnumDescriptor"),
-                    )
-                    ifEq(timelineRegister, settingRegister, Target.Local(URT_SUPPRESS_LABEL))
-                    sget(
-                        settingRegister,
-                        fieldReference("$timelineEnumDescriptor->FOLLOWING:$timelineEnumDescriptor"),
-                    )
-                    ifEq(timelineRegister, settingRegister, Target.Local(URT_SUPPRESS_LABEL))
-                    sget(
-                        settingRegister,
-                        fieldReference("$timelineEnumDescriptor->RANKED_FOLLOWING:$timelineEnumDescriptor"),
-                    )
-                    ifEq(timelineRegister, settingRegister, Target.Local(URT_SUPPRESS_LABEL))
+                    for (timelineName in suppressedTimelineNames) {
+                        sget(
+                            settingRegister,
+                            fieldReference("$timelineEnumDescriptor->$timelineName:$timelineEnumDescriptor"),
+                        )
+                        ifEq(timelineRegister, settingRegister, Target.Local(URT_SUPPRESS_LABEL))
+                    }
                     goto(Target.Original)
                     label(URT_SUPPRESS_LABEL)
                     invokeStatic(methodReference(CONSUME_POST_DEEP_LINK_DESCRIPTOR))
@@ -465,7 +510,14 @@ val disableTimelineRefreshPatch =
                     ifNez(settingRegister, Target.Local(URT_CHECK_POSITION_LABEL))
                     returnVoid()
                     label(URT_CHECK_POSITION_LABEL)
-                    invokeStatic(methodReference(RESTORE_TIMELINE_POSITION_DESCRIPTOR), timelineRegister)
+                    invokeVirtual(methodReference(repositoryTimelineIdentityGetterReference), method.p0Register)
+                    moveResult(settingRegister, timelineIdentityDescriptor)
+                    iget(settingRegister, settingRegister, timelineIdentityField)
+                    invokeStatic(
+                        methodReference(RESTORE_TIMELINE_POSITION_DESCRIPTOR),
+                        timelineRegister,
+                        settingRegister,
+                    )
                     moveResult(settingRegister, "[I")
                     ifEqz(settingRegister, Target.Original)
                     sget(requestRegister, fieldReference(repositoryViewportAwareAutoRefreshFieldReference))
