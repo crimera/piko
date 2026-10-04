@@ -9,6 +9,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import app.morphe.extension.crimera.downloader.engine.DestinationLoss;
 import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.shared.settings.BooleanSetting;
 
@@ -715,29 +716,29 @@ public final class InlineDownloadButtonTest {
     public void destinationLossClearsOnlyUnusableFolders() {
         // A revoked grant, a folder the provider deleted, and a stored uri the tree helpers cannot
         // parse are all destinations that can never serve a download again.
-        assertTrue(DownloadDestination.isDestinationLoss(new SecurityException("Permission Denial")));
-        assertTrue(DownloadDestination.isDestinationLoss(
+        assertTrue(DestinationLoss.matches(new SecurityException("Permission Denial")));
+        assertTrue(DestinationLoss.matches(
                 new FileNotFoundException("primary:Download/Piko")));
-        assertTrue(DownloadDestination.isDestinationLoss(new IOException(
+        assertTrue(DestinationLoss.matches(new IOException(
                 "Stored download folder is not a usable tree",
                 new IllegalArgumentException("Unsupported Uri"))));
 
         // Transfer failures must keep the stored folder: clearing it on a network error would make
         // the user pick their folder again for nothing.
-        assertFalse(DownloadDestination.isDestinationLoss(
+        assertFalse(DestinationLoss.matches(
                 new IOException("HTTP 503 for https://pbs.twimg.com/media.jpg")));
-        assertFalse(DownloadDestination.isDestinationLoss(
+        assertFalse(DestinationLoss.matches(
                 new IOException("Could not find an unused name for jack_1.jpg")));
-        assertFalse(DownloadDestination.isDestinationLoss(null));
+        assertFalse(DestinationLoss.matches(null));
         // A generic IllegalArgumentException (bad filename, bad mime) must not clear the folder.
-        assertFalse(DownloadDestination.isDestinationLoss(
+        assertFalse(DestinationLoss.matches(
                 new IllegalArgumentException("bad filename")));
 
         Throwable first = new IOException("cycle A");
         Throwable second = new IOException("cycle B");
         first.initCause(second);
         second.initCause(first);
-        assertFalse(DownloadDestination.isDestinationLoss(first));
+        assertFalse(DestinationLoss.matches(first));
     }
 
     @SuppressWarnings("unchecked")

@@ -70,8 +70,6 @@ public final class NewXDownloader {
         return thread;
     });
 
-    private static final Executor STATUS_EXECUTOR = new MainThreadExecutor();
-
     private NewXDownloader() {
     }
 
@@ -117,7 +115,7 @@ public final class NewXDownloader {
         );
         events.register(
                 new StatusListener(applicationContext, created),
-                STATUS_EXECUTOR
+                new MainThreadExecutor()
         );
         DownloadControllers.install(created);
         engine = created;

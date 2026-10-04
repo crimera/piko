@@ -10,7 +10,9 @@ import android.provider.DocumentsContract;
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.crimera.downloader.FolderPicker;
+import app.morphe.extension.crimera.downloader.engine.DestinationCheck;
 import app.morphe.extension.crimera.downloader.model.ConflictPolicy;
+import app.morphe.extension.crimera.downloader.engine.DownloadNotifications;
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
@@ -93,38 +95,17 @@ public final class NewXDownloadFolders {
     }
 
     public static boolean hasPersistedWritePermission(ContentResolver resolver, Uri tree) {
-        String treeDocumentId = treeDocumentIdOf(tree);
-        for (UriPermission permission : resolver.getPersistedUriPermissions()) {
-            if (!permission.isWritePermission()) continue;
-
-            Uri granted = permission.getUri();
-            if (granted.equals(tree)) return true;
-
-            // Providers may normalize the uri, so compare document ids too. Authority must
-            // match so a grant from another device with the same id cannot validate this tree.
-            if (!sameAuthority(granted, tree)) continue;
-            String grantedDocumentId = treeDocumentIdOf(granted);
-            if (treeDocumentId != null && treeDocumentId.equals(grantedDocumentId)) return true;
-        }
-        return false;
+        return DestinationCheck.hasPersistedWritePermission(resolver, tree);
     }
 
-    private static boolean sameAuthority(Uri left, Uri right) {
-        String authority = left.getAuthority();
-        return authority != null && authority.equals(right.getAuthority());
+    public static boolean sameAuthority(Uri left, Uri right) {
+        return DestinationCheck.sameAuthority(left, right);
     }
 
     /** Whether the tree answers right now. Not gated on advertised flags: some writable
      * providers omit the create flag, and honoring it would leave no pickable folder. */
     public static boolean hasLiveTreeAccess(ContentResolver resolver, Uri tree) {
-        try {
-            String[] projection = {DocumentsContract.Document.COLUMN_DOCUMENT_ID};
-            try (Cursor cursor = resolver.query(DownloadDestination.directoryUri(tree), projection, null, null, null)) {
-                return cursor != null && cursor.moveToFirst();
-            }
-        } catch (RuntimeException exception) {
-            return false;
-        }
+        return DestinationCheck.hasLiveTreeAccess(resolver, tree);
     }
 
     /** Drops an unwritable folder so the next tap re-prompts instead of failing the same way. */
@@ -151,7 +132,7 @@ public final class NewXDownloadFolders {
                 String documentId = treeDocumentIdOf(tree);
                 detail.append(" treeId=").append(documentId == null ? "unknown" : documentId);
             }
-            detail.append(" notifications=").append(DownloadDestination.notificationsEnabled(context) ? "enabled" : "blocked");
+            detail.append(" notifications=").append(DownloadNotifications.notificationsEnabled(context, NewXDownloader.CHANNEL_ID) ? "enabled" : "blocked");
             NewXLogger.captureDownloadFailure(detail.toString(), null);
         } catch (RuntimeException ignored) {
             // Diagnostics must never affect download behaviour.
@@ -185,17 +166,7 @@ public final class NewXDownloadFolders {
 
     /** Human-readable path for a tree URI, falling back to the raw document id. */
     public static String displayPathFor(Uri treeUri) {
-        try {
-            String documentId = DocumentsContract.getTreeDocumentId(treeUri);
-            if (documentId.startsWith("primary:")) {
-                return "/" + documentId.substring("primary:".length());
-            }
-            int colon = documentId.indexOf(':');
-            return colon > 0 ? documentId.substring(0, colon) + "/" + documentId.substring(colon + 1)
-                    : documentId;
-        } catch (RuntimeException exception) {
-            return treeUri.toString();
-        }
+        return DestinationCheck.displayPathFor(treeUri);
     }
 
     /** Launches the shared folder picker and updates the configured folder on success. */
