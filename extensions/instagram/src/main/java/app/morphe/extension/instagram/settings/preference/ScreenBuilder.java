@@ -447,6 +447,15 @@ public class ScreenBuilder {
                     Settings.LIMIT_FOLLOWING_FEED
             );
         }
+        if (SettingsStatus.disableDiscoverPeople) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_discover_people"),
+                            "",
+                            Settings.DISABLE_DISCOVER_PEOPLE
+                    )
+            );
+        }
         if (SettingsStatus.disableReelsScrolling) {
             addLockableSwitch(
                     str("piko_disable_reels_scrolling"),
@@ -475,7 +484,24 @@ public class ScreenBuilder {
                     Settings.HIDE_REELS_FOLLOW_BUTTON
             );
         }
-
+        if (SettingsStatus.hideReshareButton) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_reshare_button"),
+                            "",
+                            Settings.HIDE_RESHARE_BUTTON
+                    )
+            );
+        }
+        if (SettingsStatus.disableVideoAutoplay) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_video_autoplay"),
+                            "",
+                            Settings.DISABLE_VIDEO_AUTOPLAY
+                    )
+            );
+        }
         if (SettingsStatus.disableDoubleTapLike) {
             addLockableSwitch(
                     str("piko_disable_double_tap_like_post"),
@@ -629,24 +655,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.disableVideoAutoplay) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_video_autoplay"),
-                            "",
-                            Settings.DISABLE_VIDEO_AUTOPLAY
-                    )
-            );
-        }
-        if (SettingsStatus.disableDiscoverPeople) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_discover_people"),
-                            "",
-                            Settings.DISABLE_DISCOVER_PEOPLE
-                    )
-            );
-        }
         if (SettingsStatus.followBackIndicator) {
             addPreference(
                     helper.switchPreference(
@@ -682,31 +690,12 @@ public class ScreenBuilder {
                     )
             );
         }
-
-        if (SettingsStatus.hideReshareButton) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_hide_reshare_button"),
-                            "",
-                            Settings.HIDE_RESHARE_BUTTON
-                    )
-            );
-        }
         if (SettingsStatus.copyCommentButton) {
             addPreference(
                     helper.switchPreference(
                             str("piko_copy_comment"),
                             str("piko_copy_comment_desc"),
                             Settings.COMMENT_COPY_BUTTON
-                    )
-            );
-        }
-        if (SettingsStatus.saveMediaCommentButton) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_save_media_comment"),
-                            str("piko_save_media_comment_desc"),
-                            Settings.COMMENT_SAVE_MEDIA_BUTTON
                     )
             );
         }
@@ -759,6 +748,15 @@ public class ScreenBuilder {
                             str("piko_feed_download_button"),
                             str("piko_feed_download_button_desc"),
                             Settings.FEED_DOWNLOAD_BUTTON
+                    )
+            );
+        }
+        if (SettingsStatus.saveMediaCommentButton) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_save_media_comment"),
+                            str("piko_save_media_comment_desc"),
+                            Settings.COMMENT_SAVE_MEDIA_BUTTON
                     )
             );
         }
