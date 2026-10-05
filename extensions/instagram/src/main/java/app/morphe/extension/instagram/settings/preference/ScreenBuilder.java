@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.List;
 import java.util.Locale;
 
-import  app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
-import  app.morphe.extension.instagram.patches.devFlags.Flag;
+import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
+import app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.patches.Links;
@@ -50,12 +50,12 @@ public class ScreenBuilder {
     }
 
     private void addPreference(Preference pref) {
-        addPreference(null,pref);
+        addPreference(null, pref);
     }
 
-    // Adding preference category might be usedin the future
+    // Adding preference category might be used in the future
     // to segregate the preference inside the fragment
-    private void addPreference(PreferenceCategory category,  Preference pref) {
+    private void addPreference(PreferenceCategory category, Preference pref) {
         if (category != null) {
             category.addPreference(pref);
         } else {
@@ -673,52 +673,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.viewStoryMentions) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_view_story_mentions"),
-                            "",
-                            Settings.VIEW_STORY_MENTIONS
-                    )
-            );
-        }
-        if (SettingsStatus.disableStoryFlipping) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_story_flipping"),
-                            str("piko_disable_story_flipping_desc"),
-                            Settings.DISABLE_STORY_FLIPPING
-                    )
-            );
-        }
-        if (SettingsStatus.loopStory) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_loop_story"),
-                            str("piko_loop_story_desc"),
-                            Settings.LOOP_STORY
-                    )
-            );
-        }
-
-        if (SettingsStatus.customiseStoryTimestamp) {
-            addPreference(
-                    helper.listPreference(
-                            str("piko_customise_story_timestamp"),
-                            str("piko_customise_story_timestamp_desc"),
-                            Settings.CUSTOMISE_STORY_TIMESTAMP
-                    )
-            );
-        }
-        if(SettingsStatus.customiseStoryRingSize) {
-            addPreference(
-                    helper.editTextNumPreference(
-                            str("piko_customise_story_ring_size"),
-                            str("piko_customise_story_ring_size_desc"),
-                            Settings.CUSTOMISE_STORY_RING_SIZE
-                    ));
-        }
-
         if (SettingsStatus.improveImageViewing) {
             addPreference(
                     helper.switchPreference(
@@ -1082,6 +1036,56 @@ public class ScreenBuilder {
 
     }
 
+    public void storySection() {
+        if (!SettingsStatus.storySection()) return;
+
+        if (SettingsStatus.viewStoryMentions) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_view_story_mentions"),
+                            "",
+                            Settings.VIEW_STORY_MENTIONS
+                    )
+            );
+        }
+        if (SettingsStatus.disableStoryFlipping) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_story_flipping"),
+                            str("piko_disable_story_flipping_desc"),
+                            Settings.DISABLE_STORY_FLIPPING
+                    )
+            );
+        }
+        if (SettingsStatus.loopStory) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_loop_story"),
+                            str("piko_loop_story_desc"),
+                            Settings.LOOP_STORY
+                    )
+            );
+        }
+        if (SettingsStatus.customiseStoryTimestamp) {
+            addPreference(
+                    helper.listPreference(
+                            str("piko_customise_story_timestamp"),
+                            str("piko_customise_story_timestamp_desc"),
+                            Settings.CUSTOMISE_STORY_TIMESTAMP
+                    )
+            );
+        }
+        if (SettingsStatus.customiseStoryRingSize) {
+            addPreference(
+                    helper.editTextNumPreference(
+                            str("piko_customise_story_ring_size"),
+                            str("piko_customise_story_ring_size_desc"),
+                            Settings.CUSTOMISE_STORY_RING_SIZE
+                    )
+            );
+        }
+    }
+
     public void buildSettingsPage() {
         if (SettingsStatus.adsSection()){
             addPreference(
@@ -1119,6 +1123,16 @@ public class ScreenBuilder {
                             str("piko_category_dm"),
                             "",
                             Constants.PIKO_FRAGMENT_DM
+                    )
+            );
+        }
+
+        if (SettingsStatus.storySection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_category_story"),
+                            "",
+                            Constants.PIKO_FRAGMENT_STORY
                     )
             );
         }
