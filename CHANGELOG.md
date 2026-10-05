@@ -1,3 +1,10 @@
+## [3.10.0-dev.11](https://github.com/crimera/piko/compare/v3.10.0-dev.10...v3.10.0-dev.11) (2026-10-05)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Find the expire field of ephemeral media by its own key ([#2046](https://github.com/crimera/piko/issues/2046)) ([ff2c809](https://github.com/crimera/piko/commit/ff2c809f1a89a5b9be8713a6fd987299d9397c63))
+* **Instagram:** Stop Open links externally from crashing on 447 ([#2047](https://github.com/crimera/piko/issues/2047)) ([4c15083](https://github.com/crimera/piko/commit/4c15083cf3a1b65f874c0bc59f68b51055bdaff2))
+
 ## [3.10.0-dev.10](https://github.com/crimera/piko/compare/v3.10.0-dev.9...v3.10.0-dev.10) (2026-10-04)
 
 ### 🐛 Bug Fixes
