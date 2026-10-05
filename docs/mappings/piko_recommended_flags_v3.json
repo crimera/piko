@@ -80,6 +80,17 @@
     "code" : "121815"
   },
   {
+    "name" : "Hide the seekbar on short Reels",
+    "desc" : "Disable and set \"Minimum Reel duration for the seekbar\" to 1 to show the seekbar on all Reels",
+    "code" : "82799::16"
+  },
+  {
+    "name" : "Minimum Reel duration for the seekbar",
+    "desc" : "Set to 1 and disable \"Hide the seekbar on short Reels\" to show the seekbar on all Reels",
+    "code" : "82799::41",
+    "type" : "long"
+  },
+  {
     "name" : "Show a spoiler of the temporary photo/video in direct",
     "desc" : "",
     "code" : "98405"
