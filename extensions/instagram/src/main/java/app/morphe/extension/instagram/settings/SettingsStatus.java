@@ -188,7 +188,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || followListNonFollowerBadge || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton || customFont);}
+    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || disableDiscoverPeople || followBackIndicator || followListNonFollowerBadge || hideReshareButton || customFont);}
 
     //DM section
     public static boolean unlimitedReplaysOnEphemeralMedia = false;
