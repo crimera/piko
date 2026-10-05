@@ -15,6 +15,8 @@ import app.morphe.patcher.Match
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -33,7 +35,7 @@ private const val BOOLEAN_DESCRIPTOR = "Z"
 
 // android.R.string "add_tab" ("Add tab"): the content description only the home timeline
 // add-tab button carries. The resource id is stable across the declared NewX targets.
-private const val ADD_TAB_STRING_RESOURCE_ID = 0x7f14006d
+private const val ADD_TAB_STRING_RESOURCE_NAME = "add_tab"
 
 private val TIMELINE_TABS_CALLBACK_PREFIX =
     listOf(
@@ -78,7 +80,9 @@ private object NewXTimelineTabsBarFingerprint : Fingerprint(
 private object NewXTimelineAddTabButtonFingerprint : Fingerprint(
     definingClass = HOME_TABBED_SCOPE,
     returnType = "V",
-    filters = listOf(literal(ADD_TAB_STRING_RESOURCE_ID)),
+    // Resource ids shift whenever the app adds a string (12.32 moved `add_tab` by one), so the id is
+    // resolved by name at match time.
+    filters = listOf(literal({ getResourceId(ResourceType.STRING, ADD_TAB_STRING_RESOURCE_NAME) })),
     custom = { method, classDef ->
         val packageRelativeName = classDef.type.removePrefix(HOME_TABBED_SCOPE)
         classDef.type.startsWith(HOME_TABBED_SCOPE) &&

@@ -20,8 +20,8 @@ private object NewXNewPostsPillFingerprint : Fingerprint(
     custom = { method, _ ->
         method.parameterDescriptors().hasComposeShape(
             required =
+                // `Modifier` is optional: 12.32 dropped it from the renderer.
                 listOf(
-                    "Landroidx/compose/ui/Modifier;",
                     "Lkotlin/jvm/functions/Function0;",
                     "Landroidx/compose/runtime/Composer;",
                 ),

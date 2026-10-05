@@ -37,8 +37,11 @@ private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val INT_DESCRIPTOR = "I"
 private const val VOID_DESCRIPTOR = "V"
 private const val SEND_HELPER = "send"
-private const val LOCAL_REGISTER_COUNT = 12
-private const val DEFAULT_ARGUMENT_MASK = 0x3fe
+// Locals the bridge body reserves besides the constructor operands: the facade, the API receiver
+// and the literal. The constructor operands themselves are sized from the resolved constructor.
+private const val FIXED_LOCAL_REGISTER_COUNT = 3
+// Leading parameters the body supplies explicitly: the message model.
+private const val SUPPLIED_PARAMETER_COUNT = 1
 private const val UNAVAILABLE_LABEL = "piko_newx_in_app_notification_unavailable"
 
 private data class FacadeCandidate(
@@ -149,25 +152,33 @@ private fun resolveApiClass(classDefs: List<ClassDef>): ClassDef {
     return apiClass
 }
 
+/**
+ * The model gains and loses optional API-typed fields between releases (12.32 added one before the
+ * trailing String), so the arity is not part of the contract. The invariants are: a leading model
+ * parameter, the API-typed pair, the List and second model parameter, any run of API-typed
+ * parameters, then the trailing String and the Kotlin default mask.
+ */
+private fun isApiConstructorShape(parameters: List<String>): Boolean {
+    if (parameters.size < 10) return false
+    val last = parameters.lastIndex
+    return parameters[0].startsWith(MODEL_SCOPE) &&
+        parameters[1].startsWith(API_SCOPE) &&
+        parameters[2].startsWith(API_SCOPE) &&
+        parameters[3] == LIST_DESCRIPTOR &&
+        parameters[4].startsWith(MODEL_SCOPE) &&
+        (5 until last - 1).all { index -> parameters[index].startsWith(API_SCOPE) } &&
+        parameters[last - 1] == STRING_DESCRIPTOR &&
+        parameters[last] == INT_DESCRIPTOR
+}
+
 private fun resolveApiConstructor(apiClass: ClassDef): Method {
     val constructors = apiClass.methods.filter { method ->
-        val parameters = method.parameterTypes.map(CharSequence::toString)
         method.name == "<init>" &&
             method.returnType == VOID_DESCRIPTOR &&
-            parameters.size == 10 &&
-            parameters[0].startsWith(MODEL_SCOPE) &&
-            parameters[1].startsWith(API_SCOPE) &&
-            parameters[2].startsWith(API_SCOPE) &&
-            parameters[3] == LIST_DESCRIPTOR &&
-            parameters[4].startsWith(MODEL_SCOPE) &&
-            parameters[5].startsWith(API_SCOPE) &&
-            parameters[6].startsWith(API_SCOPE) &&
-            parameters[7].startsWith(API_SCOPE) &&
-            parameters[8] == STRING_DESCRIPTOR &&
-            parameters[9] == INT_DESCRIPTOR
+            isApiConstructorShape(method.parameterTypes.map(CharSequence::toString))
     }
     return requireExactlyOne(
-        "NewX in-app notification API 10-argument constructor in ${apiClass.type}",
+        "NewX in-app notification API default-mask constructor in ${apiClass.type}",
         constructors,
     )
 }
@@ -280,7 +291,7 @@ private fun patchBridge(runtime: ResolvedNotificationRuntime) {
 
     val implementation = placeholder.implementation
         ?: throw PatchException("NewX in-app notification bridge has no implementation: $placeholder")
-    val requiredRegisterCount = placeholder.numberOfParameterRegisters + LOCAL_REGISTER_COUNT
+    val requiredRegisterCount = placeholder.numberOfParameterRegisters + localRegisterCount(runtime)
     val helper =
         if (implementation.registerCount >= requiredRegisterCount) {
             placeholder
@@ -298,8 +309,11 @@ private fun patchBridge(runtime: ResolvedNotificationRuntime) {
     }
 }
 
+private fun localRegisterCount(runtime: ResolvedNotificationRuntime): Int =
+    FIXED_LOCAL_REGISTER_COUNT + runtime.apiConstructor.parameterTypes.size
+
 /**
- * Emits the bridge body into the twelve locals the frame growth above reserved: the facade captured
+ * Emits the bridge body into the locals the frame growth above reserved: the facade captured
  * by [patchFacadeConstructor], one API model around the `p0` message, and the facade's generic
  * sender. Both paths return a boolean, so the stub's own trailing return is never reached.
  *
@@ -316,11 +330,14 @@ private fun Block.notificationInstructions(
     newInstance(1, runtime.apiDescriptor)
     newInstance(2, runtime.literalDescriptor)
     invokeDirect(runtime.literalConstructor, 2, messageRegister)
-    (3..10).forEach { register -> constInt(register, 0) }
-    constInt(11, DEFAULT_ARGUMENT_MASK)
-    // Eleven operand words: the receiver v1 plus the ten constructor parameters v2..v11, which the
-    // typed invoke lowers to the `invoke-direct/range {v1 .. v11}` this block has always emitted.
-    invokeDirect(runtime.apiConstructor, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+    // Parameter 0 is the literal; the middle parameters stay null and the trailing int is the
+    // Kotlin default mask. Registers follow the resolved arity: receiver v1, parameters v2..v(n+1).
+    val parameterCount = runtime.apiConstructor.parameterTypes.size
+    val maskRegister = parameterCount + 1
+    (SUPPLIED_PARAMETER_COUNT + 2 until maskRegister).forEach { register -> constInt(register, 0) }
+    // Every parameter after the message defaults: one bit per real parameter, past the message bit.
+    constInt(maskRegister, (1 shl parameterCount) - 2)
+    invokeDirect(runtime.apiConstructor, 1, *IntArray(parameterCount) { index -> index + 2 })
     invokeStatic(runtime.sender, 0, 1)
     constInt(0, 1)
     returnValue(0)

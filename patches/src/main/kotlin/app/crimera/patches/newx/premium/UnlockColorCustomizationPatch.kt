@@ -23,7 +23,11 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
-private const val DISPLAY_SETTINGS_SCOPE = "Lcom/x/settings/accessibility/display/"
+// Parent packages move between releases (12.32 inserted `legacy/`), so the scope is the feature
+// segment only, matched anywhere in the descriptor. The Function6 bridge shape alone is not unique:
+// unrelated settings screens (privacy/chats/notifications) share it, so the feature segment is
+// the discriminator and the premium-result shape below is the cardinality guard.
+private const val DISPLAY_SETTINGS_SCOPE = "/accessibility/display/"
 private const val FUNCTION6_DESCRIPTOR = "Lkotlin/jvm/functions/Function6;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val BOOLEAN_DESCRIPTOR = "Ljava/lang/Boolean;"

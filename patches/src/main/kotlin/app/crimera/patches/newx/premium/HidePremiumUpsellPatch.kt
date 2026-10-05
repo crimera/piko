@@ -8,6 +8,7 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.hasComposeShape
 import app.crimera.patches.common.parameterDescriptors
+import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -31,12 +32,30 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 private const val FEATURE_SWITCHES_SCOPE = "Lcom/x/featureswitches/"
 private const val SUBSCRIPTIONS_SCOPE = "Lcom/x/subscriptions/"
 
+private const val HOME_STATE_SCOPE = "Lcom/x/home/"
+private const val HOME_TABBED_SCOPE = "Lcom/x/home/tabbed/"
+private const val FUNCTION_PREFIX = "Lkotlin/jvm/functions/Function"
+private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
+
 /**
- * The home-nav header's nullable state (p4) is both the sibling discriminator and the value the
- * hook nulls to skip the upsell chip.
+ * The home-nav header's nullable state is both the sibling discriminator and the value the hook
+ * nulls to skip the upsell chip. Its position is not stable (12.32 inserted a refresh-state
+ * parameter before it), so it is resolved by role: the only parameter owned by the home package
+ * outside its tabbed UI package. The header takes only `Function0` callbacks, which separates it
+ * from the scaffold siblings that also carry the state but take `Function1`/`Function2` callbacks.
  */
-private const val HOME_NAV_STATE_PARAMETER_INDEX = 4
-private const val HOME_NAV_STATE_DESCRIPTOR = "Lcom/x/home/c;"
+private fun homeNavStateParameterIndex(parameters: List<String>): Int? {
+    val callbacks = parameters.filter { it.startsWith(FUNCTION_PREFIX) }
+    if (callbacks.size < 4 || callbacks.any { it != FUNCTION0_DESCRIPTOR }) return null
+    return requireAtMostOne(
+        label = "NewX home-nav state parameter",
+        candidates =
+            parameters.indices.filter { index ->
+                parameters[index].startsWith(HOME_STATE_SCOPE) &&
+                    !parameters[index].startsWith(HOME_TABBED_SCOPE)
+            },
+    )
+}
 
 private object NewXHomeNavUpsellTypeFingerprint : Fingerprint(
     definingClass = SUBSCRIPTIONS_SCOPE,
@@ -134,8 +153,7 @@ private object NewXHomeNavUpsellComposableFingerprint : Fingerprint(
             last = "I",
             objectFirst = true,
         ) &&
-            parameters.count { descriptor -> descriptor == "Lkotlin/jvm/functions/Function0;" } >= 4 &&
-            parameters.getOrNull(HOME_NAV_STATE_PARAMETER_INDEX) == HOME_NAV_STATE_DESCRIPTOR
+            homeNavStateParameterIndex(parameters) != null
     },
 )
 
@@ -202,7 +220,14 @@ val hidePremiumUpsellPatch =
                     )
                 composeMatch.method.apply {
                     // The fingerprint guarantees this register holds the nullable home-nav state.
-                    val stateRegister = p0Register + HOME_NAV_STATE_PARAMETER_INDEX
+                    val stateIndex =
+                        homeNavStateParameterIndex(parameterDescriptors())
+                            ?: throw PatchException("NewX home-nav upsell composable lost its state parameter")
+                    val stateRegister =
+                        p0Register +
+                            parameterDescriptors().take(stateIndex).sumOf { descriptor ->
+                                if (descriptor == "J" || descriptor == "D") 2 else 1 as Int
+                            }
                     val read =
                         hidePremiumUpsell.injectRead(
                             method = this,

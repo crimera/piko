@@ -6,6 +6,12 @@ import app.morphe.patcher.methodCall
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
+/**
+ * Owner scope for the settings Compose rows. 12.32 moved `common` under `legacy/` while a new,
+ * unrelated `common` package appeared at the old path, so a sub-package is not a stable anchor.
+ * The parameter-layout check in [composeSettingsBasicItemLayout] is the semantic gate.
+ */
+private const val SETTINGS_SCOPE = "Lcom/x/settings/"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
@@ -114,22 +120,22 @@ private val COMPOSE_SETTINGS_BASIC_ITEM_RENDERER_FILTERS =
  * by an exact generated parameter list.
  */
 internal object ComposeSettingsBasicItemCallerFingerprint : Fingerprint(
-    definingClass = "Lcom/x/settings/common/",
+    definingClass = SETTINGS_SCOPE,
     filters =
         listOf(
             methodCall(
-                definingClass = "Lcom/x/settings/common/",
+                definingClass = SETTINGS_SCOPE,
                 returnType = "V",
             ),
         ),
 )
 
 /**
- * 12.28 no longer emits a caller for this renderer from the common settings package. Resolve the
+ * 12.28 no longer emits a caller for this renderer from the settings package. Resolve the
  * renderer directly as a scoped fallback, then validate its parameter roles dynamically.
  */
 internal object ComposeSettingsBasicItemRendererFingerprint : Fingerprint(
-    definingClass = "Lcom/x/settings/common/",
+    definingClass = SETTINGS_SCOPE,
     returnType = "V",
     filters = COMPOSE_SETTINGS_BASIC_ITEM_RENDERER_FILTERS,
 )
