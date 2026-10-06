@@ -15,7 +15,7 @@ final class BuiltInSettings {
                 ADVANCED_CATEGORY_ID,
                 "piko_newx_category_advanced_title",
                 "piko_newx_category_advanced_summary",
-                "ic_vector_toolbox_stroke",
+                "ic_vector_wrench",
                 600
         );
         registerDeveloperTools();

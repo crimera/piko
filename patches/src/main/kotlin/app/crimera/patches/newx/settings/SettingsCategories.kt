@@ -54,7 +54,7 @@ internal object Categories {
             id = "newx.advanced",
             titleResourceName = "piko_newx_category_advanced_title",
             summaryResourceName = "piko_newx_category_advanced_summary",
-            iconResourceName = "ic_vector_toolbox_stroke",
+            iconResourceName = "ic_vector_wrench",
             order = 600,
         )
 }
