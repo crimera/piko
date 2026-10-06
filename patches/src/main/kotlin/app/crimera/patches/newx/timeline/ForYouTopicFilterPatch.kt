@@ -461,15 +461,6 @@ private fun Method.resolveModernForYouTabHook(
     reselectedEventType: String,
 ): ResolvedModernForYouTabHook? {
     val instructions = implementation?.instructions?.toList() ?: return null
-    val pageLookupCandidates = instructions.withIndex().filter { (_, instruction) ->
-        val reference = instruction.getReference<MethodReference>() ?: return@filter false
-        instruction.opcode == Opcode.INVOKE_STATIC &&
-            reference.name == "getOrNull" &&
-            reference.returnType == OBJECT_DESCRIPTOR &&
-            reference.parameterTypes.map(CharSequence::toString) ==
-                listOf(OBJECT_LIST_DESCRIPTOR, INTEGER_DESCRIPTOR)
-    }
-
     val eventBranches = instructions.withIndex()
         .mapNotNull { (instanceOfIndex, instanceOfInstruction) ->
             if (instanceOfInstruction.opcode != Opcode.INSTANCE_OF) {
@@ -506,17 +497,6 @@ private fun Method.resolveModernForYouTabHook(
         )
     }
     val eventBranch = eventBranches.single()
-    val currentPageLookupCandidates = pageLookupCandidates.filter { (index, _) ->
-        index < eventBranch.first
-    }
-    if (currentPageLookupCandidates.size != 1) {
-        throw PatchException(
-            "Expected one NewX modern For You current-page lookup before the reselection event, " +
-                "found ${currentPageLookupCandidates.size}: " +
-                "${currentPageLookupCandidates.joinToString()}",
-        )
-    }
-
     val hookCandidates = mutableListOf<ResolvedModernForYouTabHook>()
     for ((pageLookupIndex, pageLookupInstruction) in instructions.withIndex()
         .drop(eventBranch.third + 1)) {

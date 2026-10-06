@@ -90,7 +90,7 @@ private fun isDisplaySettingsStateCombiner(method: Method, classDef: ClassDef): 
     if (!classDef.interfaces.contains(FUNCTION6_DESCRIPTOR)) return false
 
     val instructions = method.implementation?.instructions?.toList().orEmpty()
-    return premiumResultIndices(instructions, classDef.type).size == 1
+    return premiumResultIndices(instructions, classDef.type).isNotEmpty()
 }
 
 private object NewXDisplaySettingsPremiumStateFingerprint : Fingerprint(
@@ -100,44 +100,53 @@ private object NewXDisplaySettingsPremiumStateFingerprint : Fingerprint(
     custom = { method, classDef -> isDisplaySettingsStateCombiner(method, classDef) },
 )
 
+/**
+ * The Function6 bridge carries one premium-result case per display-settings coroutine. 12.33
+ * alpha.02 merged the legacy and current screens' combiners into one bridge with a two-case
+ * switch, so every case is patched; each must own exactly one state write after its result.
+ */
 private fun unlockColorCustomization(match: Match) {
     val instructions = match.method.instructions.toList()
     val resultIndices = premiumResultIndices(instructions, match.originalClassDef.type)
-    if (resultIndices.size != 1) {
+    if (resultIndices.isEmpty()) {
         throw PatchException(
-            "Expected one NewX display-settings premium result, found ${resultIndices.size}: " +
-                match.originalMethod,
+            "Expected at least one NewX display-settings premium result: ${match.originalMethod}",
         )
     }
 
-    val resultIndex = resultIndices.single()
-    val resultRegister =
-        instructions[resultIndex].registersUsed.firstOrNull()
-            ?: throw PatchException("NewX display-settings premium result has no destination register")
-    val stateWriteIndices =
-        instructions.indices.filter { index ->
-            index > resultIndex && instructions[index].opcode == Opcode.IPUT_BOOLEAN
+    val overrides =
+        resultIndices.mapIndexed { position, resultIndex ->
+            val nextResultIndex = resultIndices.getOrNull(position + 1) ?: instructions.size
+            val resultRegister =
+                instructions[resultIndex].registersUsed.firstOrNull()
+                    ?: throw PatchException("NewX display-settings premium result has no destination register")
+            val stateWriteIndices =
+                (resultIndex + 1 until nextResultIndex).filter { index ->
+                    instructions[index].opcode == Opcode.IPUT_BOOLEAN
+                }
+            if (stateWriteIndices.size != 1) {
+                throw PatchException(
+                    "Expected one NewX display-settings premium state write after result " +
+                        "$resultIndex, found ${stateWriteIndices.size}: ${match.originalMethod}",
+                )
+            }
+            stateWriteIndices.single() to resultRegister
         }
-    if (stateWriteIndices.size != 1) {
-        throw PatchException(
-            "Expected one NewX display-settings premium state write, found " +
-                "${stateWriteIndices.size}: ${match.originalMethod}",
-        )
-    }
-
-    val stateWriteIndex = stateWriteIndices.single()
 
     // Override the value immediately before it is stored; never split invoke/move-result.
     // `constInt` is register-aware, so it picks the same encoding the old `const/4`-vs-`const/16`
     // choice produced. `relocateBranchTargets = false` keeps the plain-insertion semantics of the
     // previous `addInstruction`: an incoming label stays on the store, so a path that branched
-    // straight to it still skips the override.
-    match.method.insertHook(
-        index = stateWriteIndex,
-        relocateBranchTargets = false,
-    ) {
-        constInt(resultRegister, 1)
-    }
+    // straight to it still skips the override. Highest index first keeps the others valid.
+    overrides.sortedByDescending { (stateWriteIndex, _) -> stateWriteIndex }
+        .forEach { (stateWriteIndex, resultRegister) ->
+            match.method.insertHook(
+                index = stateWriteIndex,
+                relocateBranchTargets = false,
+            ) {
+                constInt(resultRegister, 1)
+            }
+        }
 }
 
 @Suppress("unused")

@@ -411,8 +411,9 @@ internal fun Method.hasStackNavigationCall(): Boolean {
         call.registersUsed.firstOrNull() == fieldLoad.registerA &&
             field.type.toString() == reference.definingClass.toString() &&
             reference.returnType.toString() == "V" &&
-            reference.parameterTypes.map(CharSequence::toString) ==
-                listOf(FUNCTION2_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
+            // The navigator's (Function2, Function1) parameters swapped order in 12.33 alpha.02.
+            reference.parameterTypes.map(CharSequence::toString).sorted() ==
+                listOf(FUNCTION1_DESCRIPTOR, FUNCTION2_DESCRIPTOR)
     }
 }
 

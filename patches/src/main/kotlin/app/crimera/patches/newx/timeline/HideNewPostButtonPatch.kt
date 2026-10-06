@@ -25,7 +25,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
-private const val FUNCTION_ZERO_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION_THREE_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val COMPOSE_ANIMATION_SCOPE = "Landroidx/compose/animation/"
@@ -38,28 +37,19 @@ private fun newPostButtonVisibilityFilter() =
         returnType = "Z",
     )
 
+// The renderer's Compose ABI has moved between releases: (I, Composer, Modifier, Function0) up to
+// 12.28, (Modifier, Function0, Composer, I, I) in 12.29, and (Modifier, ComposableLambda, Composer, I)
+// in 12.33 alpha.02, where R8 split the click handler into a content lambda and the visibility
+// wrapper became the shared FAB container. The content parameter is therefore not part of the
+// contract; the visibility call, AnimatedVisibility call and Modifier provenance are.
 private object NewXNewPostButtonCandidateFingerprint : Fingerprint(
     returnType = "V",
     filters = listOf(newPostButtonVisibilityFilter()),
     custom = { method, _ ->
-        method.parameterDescriptors().hasComposeShape(
-            required = listOf(COMPOSER_DESCRIPTOR, MODIFIER_DESCRIPTOR, FUNCTION_ZERO_DESCRIPTOR),
-            first = "I",
-        ) && method.isNewPostButtonRendererCandidate()
-    },
-)
-
-// 12.29 relocated the renderer and lowered its Compose ABI to (Modifier, Function0, Composer, I, I):
-// content parameters first, then Composer and the two changed/default bitmasks. Resolve both shapes
-// and share the common mutation below.
-private object NewXNewPostButtonComposeFlagCandidateFingerprint : Fingerprint(
-    returnType = "V",
-    filters = listOf(newPostButtonVisibilityFilter()),
-    custom = { method, _ ->
-        method.parameterDescriptors().hasComposeShape(
-            required = listOf(MODIFIER_DESCRIPTOR, FUNCTION_ZERO_DESCRIPTOR, COMPOSER_DESCRIPTOR),
-            last = "I",
-        ) && method.isNewPostButtonRendererCandidate()
+        val parameters = method.parameterDescriptors()
+        parameters.hasComposeShape(required = listOf(MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR)) &&
+            (parameters.first() == "I" || parameters.last() == "I") &&
+            method.isNewPostButtonRendererCandidate()
     },
 )
 
@@ -191,11 +181,7 @@ val hideNewPostButtonPatch =
             )
 
         execute {
-            val candidates =
-                buildList {
-                    addAll(NewXNewPostButtonCandidateFingerprint.scopedMatchAllOrNull().orEmpty())
-                    addAll(NewXNewPostButtonComposeFlagCandidateFingerprint.scopedMatchAllOrNull().orEmpty())
-                }
+            val candidates = NewXNewPostButtonCandidateFingerprint.scopedMatchAllOrNull().orEmpty()
             val renderer =
                 requireExactlyOne(
                     label = "NewX new-post button renderer",

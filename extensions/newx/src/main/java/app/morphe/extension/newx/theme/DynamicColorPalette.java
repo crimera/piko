@@ -37,6 +37,13 @@ public final class DynamicColorPalette {
     private static final String THEME_MATERIAL = "material";
     private static final String THEME_CONTRAST = "contrast";
     private static final String THEME_DIM = "dim";
+    /** Framework equivalents of the 13-step ramp, indexed by NewX tone (primary100 .. primary0). */
+    private static final String[] ACCENT_FRAMEWORK_NAMES = {
+            "system_accent1_0", "system_accent1_10", "system_accent1_50", "system_accent1_100",
+            "system_accent1_200", "system_accent1_300", "system_accent1_400", "system_accent1_500",
+            "system_accent1_600", "system_accent1_700", "system_accent1_800", "system_accent1_900",
+            "system_accent1_1000",
+    };
     private static final String LIGHT_PRIMARY = "m3_sys_color_dynamic_light_primary";
     private static final String LIGHT_ON_PRIMARY = "m3_sys_color_dynamic_light_on_primary";
     private static final String LIGHT_PRIMARY_CONTAINER = "m3_sys_color_dynamic_light_primary_container";
@@ -354,7 +361,7 @@ public final class DynamicColorPalette {
                     "Unknown NewX dynamic accent tone: " + tone
             );
         };
-        return color(resourceName);
+        return pack(requiredColor(resourceName, ACCENT_FRAMEWORK_NAMES[tone]));
     }
 
     private static long paletteColor(int token, boolean dark) {
@@ -434,6 +441,15 @@ public final class DynamicColorPalette {
     }
 
     private static int requiredColor(String resourceName) {
+        return requiredColor(resourceName, null);
+    }
+
+    /**
+     * Reads an app color resource, optionally falling back to the Android 12 framework palette.
+     * 12.33 alpha.02 shrank the app's {@code material_dynamic_primary*} ramp out of its resources,
+     * but each tone is the same value as the framework's {@code system_accent1_*} color.
+     */
+    private static int requiredColor(String resourceName, String frameworkFallbackName) {
         Context context = Utils.getContext();
         if (context == null) {
             throw new IllegalStateException(
@@ -443,6 +459,9 @@ public final class DynamicColorPalette {
 
         Resources resources = context.getResources();
         int resourceId = resources.getIdentifier(resourceName, "color", context.getPackageName());
+        if (resourceId == 0 && frameworkFallbackName != null) {
+            resourceId = resources.getIdentifier(frameworkFallbackName, "color", "android");
+        }
         if (resourceId == 0) {
             throw new IllegalStateException(
                     "NewX dynamic color resource is missing on Android 12+: " + resourceName

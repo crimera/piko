@@ -134,10 +134,11 @@ private object NewXComposeReplySortingFingerprint : ShapeFingerprint(
 /**
  * Targets the synthetic FunctionReference that handles a reply-sorting choice from the sheet.
  * The callback owner and package are release-specific; resolve it from the stable Kotlin
- * function-reference shape and the semantic branch strings instead.
+ * function-reference shape and the semantic branch strings instead. The method name is not part
+ * of the contract either: 12.33 alpha.02 un-merged the callback's `invoke` switch into private
+ * per-case methods (`B(Object)`) while keeping the same body.
  */
 private object NewXComposeReplySortingSelectionFingerprint : ShapeFingerprint(
-    name = "invoke",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
     custom = { method, classDef ->
