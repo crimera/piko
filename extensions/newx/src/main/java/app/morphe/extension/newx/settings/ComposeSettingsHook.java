@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import kotlin.jvm.functions.Function0;
 
+import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 
@@ -28,6 +29,11 @@ public final class ComposeSettingsHook {
 
     public static String getSettingsTitle() {
         return ResourceUtils.getStringOrThrow("piko_newx_settings_title");
+    }
+
+    /** Injection point: string resource id of the Piko settings title for resource-backed rows. */
+    public static int getSettingsTitleResId() {
+        return ResourceUtils.getIdentifierOrThrow(ResourceType.STRING, "piko_newx_settings_title");
     }
 
     public static Function0<?> getSettingsClickHandler() {

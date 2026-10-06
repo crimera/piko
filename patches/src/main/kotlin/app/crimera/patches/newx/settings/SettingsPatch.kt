@@ -146,6 +146,13 @@ internal val newXSettingsPatch =
                 }
             }
 
+            // 12.33 alpha.02 redesigned the root list into data models that bypass the renderer
+            // above, so the "Additional resources" model is rewritten at construction as well.
+            // Releases without that builder keep the renderer hook alone.
+            resolveSettingsRowModelTarget()?.let { target ->
+                patchSettingsRowModel(target) { iconType -> pikoSettingsIconGetter(iconType) }
+            }
+
             // sharedExtensionPatch finalizes after this patch and inserts Utils.setContext at
             // index zero, so registry loading always follows shared context initialization. The
             // host (logger, resource prefix, theme, built-ins) must be installed before the load.
