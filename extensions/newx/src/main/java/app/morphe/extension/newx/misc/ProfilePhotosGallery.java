@@ -784,7 +784,7 @@ public final class ProfilePhotosGallery {
             if (!(context instanceof Activity)) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }
-            intent.setPackage("com.twitter.android");
+            intent.setPackage(context.getPackageName());
             try {
                 context.startActivity(intent);
                 return;
