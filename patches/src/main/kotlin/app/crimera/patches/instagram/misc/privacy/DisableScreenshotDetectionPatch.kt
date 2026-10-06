@@ -10,16 +10,19 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.utils.lastInstruction
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal object ScreenshotDetectorFingerprint : Fingerprint(
     strings = listOf("ig_android_story_screenshot_directory", "screenshot_detector"),
@@ -79,18 +82,39 @@ val disableScreenshotDetection =
                         ExternalLabel("piko", nextConstInstruction),
                     )
 
-                    // Thanks to InstaPro
-                    AddFlagsToWindowFingerprint.method.apply {
-                        val lastFlagIndex = instructions.indexOfLast { it.opcode == Opcode.CONST_16 }
+                    val secureWindowState = AddFlagsToWindowFingerprint.method
+                    val secureWindowRequest = AddFlagsToWindowFingerprint.classDef.methods.singleOrNull {
+                        it.parameterTypes == listOf("Landroid/view/Window;", "Ljava/lang/String;") &&
+                            it.returnType == "V" &&
+                            it.implementation != null &&
+                            it.instructions.any { instruction ->
+                                instruction.getReference<MethodReference>()?.toString() ==
+                                    "Landroid/view/Window;->setFlags(II)V"
+                            }
+                    } ?: throw PatchException("Expected one screenshot protection request method")
 
-                        addInstructionsWithLabels(
-                            lastFlagIndex + 1,
+                    // DM viewers and threads request protection directly, bypassing state reconciliation.
+                    listOf(secureWindowState, secureWindowRequest).forEach { secureMethod ->
+                        if (AccessFlags.STATIC.isSet(secureMethod.accessFlags) ||
+                            secureMethod.returnType != "V" ||
+                            secureMethod.parameterTypes.firstOrNull() != "Landroid/view/Window;" ||
+                            secureMethod.implementation!!.registerCount - secureMethod.parameterTypes.size - 1 < 2
+                        ) {
+                            throw PatchException("Unexpected screenshot protection method layout")
+                        }
+                        secureMethod.addInstructionsWithLabels(
+                            0,
                             """
-                            $PREF_CALL v1
-                            if-eqz v1, :piko
+                            ${PREF_CALL} v0
+                            if-eqz v0, :piko
+                            move-object/from16 v0, p1
+                            if-eqz v0, :return
+                            const/16 v1, 0x2000
+                            invoke-virtual {v0, v1}, Landroid/view/Window;->clearFlags(I)V
+                            :return
                             return-void
                             """.trimIndent(),
-                            ExternalLabel("piko", getInstruction(lastFlagIndex + 1)),
+                            ExternalLabel("piko", secureMethod.getInstruction(0)),
                         )
                     }
 
