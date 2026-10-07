@@ -47,7 +47,6 @@ public class Links {
     private static final boolean DISABLE_COMMENTS;
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
-    private static final boolean DISABLE_HIGHLIGHTS;
     private static final List<String> META_PACKAGES;
     private static final ShareLinkSanitizer SHARE_LINK_SANITIZER = new ShareLinkSanitizer(
             "instagram.com",
@@ -58,7 +57,6 @@ public class Links {
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
-        DISABLE_HIGHLIGHTS = Pref.disableHighlights() && SettingsStatus.disableHighlights;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
@@ -164,8 +162,6 @@ public class Links {
                         || path.contains("/feed/injected_reels_media/")
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
-                } else if (path.contains("/highlights_tray")) {
-                    shouldBlockUri = DISABLE_HIGHLIGHTS || FocusLock.isForced(Settings.DISABLE_HIGHLIGHTS);
                 }
 
             }

@@ -7,10 +7,15 @@
 package app.crimera.patches.instagram.filter.story
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.AccessFlags
 
-internal object StoryResponseJsonParserFingerprint : Fingerprint(
-    strings = listOf("tray", "share_to_friends_story_pending_media", "hallpass_share_info"),
-    custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
+internal object PopulateStoryTrayFingerprint : Fingerprint(
+    returnType = "V",
+    parameters = listOf(
+        "L", "L", "L", "Lcom/instagram/user/model/User;", "Ljava/lang/String;",
+        "Ljava/util/List;", "Ljava/util/List;", "Z", "Z",
+    ),
+    filters = listOf(string("ReelStore.maybeAddNewTrayReelResponseItemIntfs")),
+    custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
 )
