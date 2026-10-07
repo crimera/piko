@@ -149,6 +149,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_COMMENTS);
     }
 
+    public static boolean hideCommentButtons() {
+        return lockable(Settings.DISABLE_COMMENTS) && SettingsStatus.disableComments;
+    }
+
     public static boolean limitFollowingFeed() {
         return SharedPref.getBooleanPref(Settings.LIMIT_FOLLOWING_FEED);
     }
