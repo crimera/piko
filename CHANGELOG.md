@@ -1,3 +1,29 @@
+## [3.10.0-dev.12](https://github.com/crimera/piko/compare/v3.10.0-dev.11...v3.10.0-dev.12) (2026-10-07)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Allow screenshots in protected DM windows ([45fee55](https://github.com/crimera/piko/commit/45fee5532102b27aa8a4e95ff5c00ac3cb75fd75))
+* **Instagram:** Correct patch status mappings ([bf4a28c](https://github.com/crimera/piko/commit/bf4a28ca5387efd2c51453ef368d686cbf643f8b))
+* **Instagram:** Correct the names of the HDR and auto-scroll recommended flags ([#2078](https://github.com/crimera/piko/issues/2078)) ([8917d71](https://github.com/crimera/piko/commit/8917d71e36356ed56e68154b7cf272cfa4dcf0c5))
+* **Instagram:** Hide ads in the Following feed ([7914a26](https://github.com/crimera/piko/commit/7914a2634e39738dd11318ea71491a5bf11493f4))
+* **Instagram:** Hide the reshare button in the home feed ([ae38467](https://github.com/crimera/piko/commit/ae38467035fbbeeba8e03824535f927cc635adea))
+* **Instagram:** Isolate story filters and refresh highlight visibility ([2946e7e](https://github.com/crimera/piko/commit/2946e7ecabedd5da21075e56e9f10824cd1c94d3))
+* **Instagram:** Move the story seen button to the bottom action row ([0d7fba0](https://github.com/crimera/piko/commit/0d7fba0feeb17c430af4292176be47036593bda3))
+* **Instagram:** Preserve ephemeral media after refreshing chats ([d9ab7c7](https://github.com/crimera/piko/commit/d9ab7c7d3327481ea07e8a63f302590158c9fae5))
+* **Instagram:** Refresh profile friendship status and hide unknown states ([2418d65](https://github.com/crimera/piko/commit/2418d657c7cfb1db752980c2cc10b74bd3af4641))
+
+### ✨ New Features
+
+* **Instagram:** Add Hide save buttons patch ([ac89a04](https://github.com/crimera/piko/commit/ac89a04d6f75dbc5e5c80dc95a80bec539e8f167))
+* **Instagram:** Add Hide share button patch ([15b8856](https://github.com/crimera/piko/commit/15b88567abb2433ca930da264709f5c2b37f7037))
+* **Instagram:** Add recommended flags for the Reels seekbar ([e558f88](https://github.com/crimera/piko/commit/e558f8848f983802a9063c45996b3275ccdb0b0a))
+* **Instagram:** Add Story category ([#1948](https://github.com/crimera/piko/issues/1948)) ([ec55052](https://github.com/crimera/piko/commit/ec55052596689de7996ed8fb78ea907977158269))
+
+### 🔧 Improvements
+
+* **Instagram:** Hide comment buttons and counts ([2cbd8b2](https://github.com/crimera/piko/commit/2cbd8b268b8ba21c5321b58be861c1402b46e6d8))
+* **Instagram:** Organization options ([#2073](https://github.com/crimera/piko/issues/2073)) ([e3039f9](https://github.com/crimera/piko/commit/e3039f97cd247659d9f853146e2393f57ce662c1))
+
 ## [3.10.0-dev.11](https://github.com/crimera/piko/compare/v3.10.0-dev.10...v3.10.0-dev.11) (2026-10-05)
 
 ### 🐛 Bug Fixes

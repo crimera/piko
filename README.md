@@ -69,7 +69,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.10.0-dev.11](https://github.com/crimera/piko/releases/tag/v3.10.0-dev.11)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;137 patches total
+> **[v3.10.0-dev.12](https://github.com/crimera/piko/releases/tag/v3.10.0-dev.12)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;139 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
@@ -160,7 +160,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;62 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;64 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -184,7 +184,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
 | [Disable ads](#disable-ads) |  |  |
 | [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
-| [Disable comments](#disable-comments) |  |  |
+| [Disable comments](#disable-comments) | Disables comments and hides comment buttons and counts on posts and reels. |  |
 | [Disable discover people](#disable-discover-people) | Hides suggested accounts |  |
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
@@ -205,6 +205,8 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide notes tray](#hide-notes-tray) | Hides notes tray in DM section |  |
 | [Hide reshare button](#hide-reshare-button) | Hides the reshare button from both posts and reels. |  |
+| [Hide save buttons](#hide-save-buttons) | Hides save buttons on posts and reels |  |
+| [Hide share button](#hide-share-button) | Hides the share button on posts and reels |  |
 | [Hide stories tray](#hide-stories-tray) | Hides stories tray from main feed. |  |
 | [Hide suggested content](#hide-suggested-content) | Hides suggested stories, reels, threads (Suggested posts will still be shown). |  |
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
