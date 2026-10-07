@@ -183,18 +183,18 @@
     "type" : "long"
   },
   {
-    "name" : "Disable forced HDR brightness on photos",
-    "desc" : "Turns off Ultra HDR, which always renders photos at boosted brightness",
+    "name" : "Ultra HDR always on",
+    "desc" : "Disable to prevent rendering Ultra HDR photos at full brightness.",
     "code" : "109125"
   },
   {
-    "name" : "Disable forced brightness boost on Reels/video",
-    "desc" : "Turns off the SDR 'super white' brightness boost on HDR-capable screens",
+    "name" : "SDR super white on HDR content",
+    "desc" : "Disable to remove the brightness boost on Reels and videos on HDR-capable screens.",
     "code" : "68885"
   },
   {
-    "name" : "Remember auto-scroll state across restarts",
-    "desc" : "Disable to keep auto-scroll in whatever state you left it in, instead of resetting to off every time Instagram is closed",
+    "name" : "Per-session auto-scroll",
+    "desc" : "Disable to keep auto-scroll in the state you left it, instead of resetting to off every time Instagram is closed.",
     "code" : "83371::10"
   }
 ]
