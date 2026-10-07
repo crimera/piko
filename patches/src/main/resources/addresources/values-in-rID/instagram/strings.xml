@@ -60,6 +60,8 @@
     <string name="piko_hide_notes_tray">Sembunyikan deretan catatan</string>
     <string name="piko_hide_notes_tray_desc">Menyembunyikan deretan catatan di bagian DM</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Sembunyikan tombol pembuatan grup pada lembar berbagi</string>
+    <string name="piko_hide_reshare_button">Sembunyikan tombol bagikan ulang</string>
+    <string name="piko_disable_video_autoplay">Nonaktifkan putar otomatis video</string>
     <string name="piko_disable_double_tap_like_post">Nonaktifkan ketuk dua kali untuk menyukai postingan</string>
     <string name="piko_disable_double_tap_like_reel">Nonaktifkan ketuk dua kali untuk menyukai reel</string>
     <string name="piko_disable_double_tap_like_comment">Nonaktifkan ketuk dua kali untuk menyukai komentar</string>
@@ -80,25 +82,12 @@
     <string name="piko_fbi_doesnt_follows_you">Tidak mengikuti Anda</string>
     <string name="piko_fbi_following_each_other">Mengikuti satu sama lain</string>
     <string name="piko_friendship_status">Status pertemanan</string>
-    <string name="piko_view_story_mentions">Lihat sebutan cerita</string>
-    <string name="piko_vsm_title">Sebutan cerita</string>
-    <string name="piko_vsm_no_mentions">Tidak ada sebutan di cerita ini</string>
-    <string name="piko_disable_story_flipping">Nonaktifkan pembalikan cerita</string>
-    <string name="piko_disable_story_flipping_desc">Nonaktifkan pembalikan/perpindahan otomatis ke cerita berikutnya</string>
-    <string name="piko_loop_story">Ulangi cerita</string>
-    <string name="piko_loop_story_desc">Putar ulang cerita yang sedang ditayangkan saat cerita tersebut berakhir</string>
-    <string name="piko_disable_video_autoplay">Nonaktifkan putar otomatis video</string>
-    <string name="piko_customise_story_timestamp">Sesuaikan stempel waktu cerita</string>
-    <string name="piko_customise_story_timestamp_desc">Sesuaikan stempel waktu yang menunjukkan kapan cerita diposting</string>
     <string name="piko_improve_image_viewing">Tingkatkan tampilan gambar</string>
     <string name="piko_improve_image_viewing_desc">Mengambil gambar dengan resolusi maksimum dari server. Mungkin mengurangi kinerja, menambah ukuran data aplikasi, atau menyebabkan aplikasi beralih ke tata letak yang lebih lama</string>
-    <string name="piko_hide_reshare_button">Sembunyikan tombol bagikan ulang</string>
     <string name="piko_copy_comment">Salin komentar</string>
     <string name="piko_copy_comment_desc">Menambahkan tombol untuk menyalin komentar pada postingan dan reel</string>
     <string name="piko_comment_copied_success">Komentar disalin</string>
     <string name="piko_comment_copied_failed">Tidak ada teks yang ditemukan untuk disalin</string>
-    <string name="piko_save_media_comment">Simpan komentar media</string>
-    <string name="piko_save_media_comment_desc">Menambahkan tombol untuk menyimpan komentar media pada postingan dan reels</string>
     <string name="piko_copy_username">Salin nama pengguna</string>
     <string name="piko_copy_full_name">Salin nama lengkap</string>
     <string name="piko_copy_user_id">Salin id pengguna</string>
@@ -114,18 +103,30 @@
     <string name="piko_remove_empty_bottom_space">Hapus ruang kosong di bagian bawah</string>
     <string name="piko_unlock_plus_benefits">Buka keuntungan Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Buka keuntungan langganan \'Plus\' yang diperiksa secara lokal. GUNAKAN DENGAN RISIKO ANDA SENDIRI</string>
-    <string name="piko_customise_story_ring_size">Sesuaikan ukuran lingkaran cerita</string>
-    <string name="piko_customise_story_ring_size_desc">Ubah ukuran lingkaran cerita berdasarkan persentase (Bawaan: 100)</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Jadikan media sementara menjadi permanen</string>
     <string name="piko_unlimited_replays_desc">Mengubah media sekali lihat atau dua kali lihat yang belum kedaluwarsa menjadi tampilan permanen</string>
     <string name="piko_enable_mark_chat_as_read">Aktifkan pilihan tandai obrolan sebagai sudah dibaca</string>
     <string name="piko_enable_mark_chat_as_read_desc">Tambahkan opsi, dengan menekan lama obrolan, untuk menandainya sebagai sudah dibaca. Saat Anda menandai obrolan sebagai sudah dibaca, orang lain dapat melihat bahwa Anda telah membaca pesan mereka, meskipun opsi Lihat pesan langsung secara anonim diaktifkan</string>
+    <!-- Story Section -->
+    <string name="piko_view_story_mentions">Lihat sebutan cerita</string>
+    <string name="piko_vsm_title">Sebutan cerita</string>
+    <string name="piko_vsm_no_mentions">Tidak ada sebutan di cerita ini</string>
+    <string name="piko_customise_story_timestamp">Sesuaikan stempel waktu cerita</string>
+    <string name="piko_customise_story_timestamp_desc">Sesuaikan stempel waktu yang menunjukkan kapan cerita diposting</string>
+    <string name="piko_customise_story_ring_size">Sesuaikan ukuran lingkaran cerita</string>
+    <string name="piko_customise_story_ring_size_desc">Ubah ukuran lingkaran cerita berdasarkan persentase (Bawaan: 100)</string>
+    <string name="piko_disable_story_flipping">Nonaktifkan pembalikan cerita</string>
+    <string name="piko_disable_story_flipping_desc">Nonaktifkan pembalikan/perpindahan otomatis ke cerita berikutnya</string>
+    <string name="piko_loop_story">Ulangi cerita</string>
+    <string name="piko_loop_story_desc">Putar ulang cerita yang sedang ditayangkan saat cerita tersebut berakhir</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Unduh media</string>
     <string name="piko_category_downloads">Unduhan</string>
     <string name="piko_enable_download">Aktifkan unduhan</string>
+    <string name="piko_save_media_comment">Simpan komentar media</string>
+    <string name="piko_save_media_comment_desc">Menambahkan tombol untuk menyimpan komentar media pada postingan dan reels</string>
     <string name="piko_enable_direct_download">Aktifkan unduhan langsung</string>
     <string name="piko_enable_direct_download_desc">Mengunduh media yang sedang dilihat tanpa menanyakan pilihan</string>
     <string name="piko_download_username_folder">Pisahkan media berdasarkan nama pengguna</string>

@@ -51,6 +51,7 @@
     <string name="piko_disable_comments">Вимкнути коментарі</string>
     <string name="piko_limit_following_feed">Фільтрує головну стрічку, залишаючи лише контент від профілів, за якими ви стежите</string>
     <string name="piko_limit_following_feed_desc">Фільтрує головну стрічку, залишаючи лише контент від профілів, за якими ви стежите.</string>
+    <string name="piko_disable_discover_people">Приховати рекомендовані акаунти</string>
     <string name="piko_focus_lock">Блокування фокусу</string>
     <string name="piko_focus_lock_desc">Примусово вмикає налаштування без відволікань на встановлений час</string>
     <string name="piko_focus_lock_targets">Налаштування для блокування</string>
@@ -99,7 +100,9 @@
     <string name="piko_hide_notes_tray_desc">Сховує панель нотаток у розділі повідомлень</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Приховати кнопку створення групи в меню поширення</string>
     <string name="piko_hide_reels_follow_button">Приховати кнопку підписки в Reels</string>
+    <string name="piko_hide_reshare_button">Приховати кнопку «Поширити» (Репост)</string>
     <string name="piko_hide_reels_follow_button_desc">Видаляє кнопку підписки з рядка автора Reels</string>
+    <string name="piko_disable_video_autoplay">Вимкнути автовідтворення відео</string>
     <string name="piko_disable_double_tap_like_post">Вимкнути like подвійним дотиком на дописах</string>
     <string name="piko_disable_double_tap_like_reel">Вимкнути like подвійним дотиком на (Reels)</string>
     <string name="piko_disable_double_tap_like_comment">Вимкнути like подвійним дотиком на коментарях</string>
@@ -112,7 +115,6 @@
     <string name="piko_disable_analytics">Вимкнути аналітику</string>
     <string name="piko_delete_analytics_cache">Очистити кеш аналітики</string>
     <string name="piko_disable_analytics_desc">Блокувати надсилання аналітики на сервери Instagram/Facebook</string>
-    <string name="piko_disable_discover_people">Приховати рекомендовані акаунти</string>
     <string name="piko_follow_back_indicator">Увімкнути індикатор взаємної підписки</string>
     <string name="piko_follow_back_indicator_desc">Додає позначку «Стежить за вами» на сторінці профілю та показує детальну інформацію про статус дружби після натискання</string>
     <string name="piko_fbi_color_indicator">Увімкнути кольоровий індикатор статусу дружби</string>
@@ -123,25 +125,12 @@
     <string name="piko_friendship_status">Статус дружби</string>
     <string name="piko_follow_list_non_follower_badge">Показувати тих, хто не підписаний на вас, у списку підписок</string>
     <string name="piko_follow_list_non_follower_badge_desc">Додає значок у рядках у вашому власному списку підписок для акаунтів, які не підписані на вас у відповідь</string>
-    <string name="piko_view_story_mentions">Перегляд згадок в історії</string>
-    <string name="piko_vsm_title">Згадки в історії</string>
-    <string name="piko_vsm_no_mentions">У цій історії немає згадок</string>
-    <string name="piko_disable_story_flipping">Вимкнути перегортання історій</string>
-    <string name="piko_disable_story_flipping_desc">Вимкнути автоматичний перехід до наступної історії</string>
-    <string name="piko_loop_story">Зациклювати історію</string>
-    <string name="piko_loop_story_desc">Повторювати поточну історію після її завершення</string>
-    <string name="piko_disable_video_autoplay">Вимкнути автовідтворення відео</string>
-    <string name="piko_customise_story_timestamp">Налаштувати час публікації історій</string>
-    <string name="piko_customise_story_timestamp_desc">Налаштувати формат часу, коли була опублікована історія</string>
     <string name="piko_improve_image_viewing">Покращити якість перегляду зображень</string>
     <string name="piko_improve_image_viewing_desc">Отримувати зображення з сервера в максимальній роздільній здатності</string>
-    <string name="piko_hide_reshare_button">Приховати кнопку «Поширити» (Репост)</string>
     <string name="piko_copy_comment">Скопіювати коментар</string>
     <string name="piko_copy_comment_desc">Додає кнопку для копіювання коментарів під дописами та Reels</string>
     <string name="piko_comment_copied_success">Коментар скопійовано</string>
     <string name="piko_comment_copied_failed">Текст для копіювання не знайдено</string>
-    <string name="piko_save_media_comment">Зберегти медіа з коментаря</string>
-    <string name="piko_save_media_comment_desc">Додає кнопку для збереження медіафайлів із коментарів під дописами та Reels</string>
     <string name="piko_copy_username">Скопіювати ім\'я користувача (username)</string>
     <string name="piko_copy_full_name">Скопіювати повне ім’я</string>
     <string name="piko_copy_user_id">Скопіювати ID користувача</string>
@@ -165,20 +154,36 @@
     <string name="piko_inbox_lock_no_lock">Встановіть блокування екрана на вашому пристрої, щоб використовувати блокування папки «Вхідні»</string>
     <string name="piko_unlock_plus_benefits">Розблокувати переваги підписки «Plus»</string>
     <string name="piko_unlock_plus_benefits_desc">Розблоковує переваги підписки \'Plus\', що перевіряються локально. ВИКОРИСТОВУЙТЕ НА ВЛАСНИЙ РИЗИК</string>
-    <string name="piko_customise_story_ring_size">Змінити розмір кільця історії</string>
-    <string name="piko_customise_story_ring_size_desc">Змінити розмір кільця історії у відсотках (за замовчуванням: 100)</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Повідомлення DM</string>
     <string name="piko_unlimited_replays">Робить медіа з одноразовим переглядом доступними постійно</string>
     <string name="piko_unlimited_replays_desc">Змінює разові медіафайли на постійні для необмеженого перегляду</string>
     <string name="piko_enable_mark_chat_as_read">Увімкнути опцію «Позначити як прочитане»</string>
     <string name="piko_enable_mark_chat_as_read_desc">Додати опцію позначення чату як прочитаного за довгим натисканням на нього. Коли ви позначаєте чат як прочитаний, інші бачитимуть, що ви прочитали їхні повідомлення, навіть якщо параметр «Переглядати особисті повідомлення анонімно» ввімкнено</string>
+    <!-- Story Section -->
+    <string name="piko_category_story">Історія</string>
+    <string name="piko_view_story_mentions">Перегляд згадок в історії</string>
+    <string name="piko_vsm_title">Згадки в історії</string>
+    <string name="piko_vsm_no_mentions">У цій історії немає згадок</string>
+    <string name="piko_mark_story_seen">Позначити як переглянуте</string>
+    <string name="piko_story_seen_pending">Позначається як переглянуте…</string>
+    <string name="piko_story_seen_sent">Позначено як переглянуте</string>
+    <string name="piko_customise_story_timestamp">Налаштувати час публікації історій</string>
+    <string name="piko_customise_story_timestamp_desc">Налаштувати формат часу, коли була опублікована історія</string>
+    <string name="piko_customise_story_ring_size">Змінити розмір кільця історії</string>
+    <string name="piko_customise_story_ring_size_desc">Змінити розмір кільця історії у відсотках (за замовчуванням: 100)</string>
+    <string name="piko_disable_story_flipping">Вимкнути перегортання історій</string>
+    <string name="piko_disable_story_flipping_desc">Вимкнути автоматичний перехід до наступної історії</string>
+    <string name="piko_loop_story">Зациклювати історію</string>
+    <string name="piko_loop_story_desc">Повторювати поточну історію після її завершення</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Завантаження медіа</string>
     <string name="piko_category_downloads">Завантаження</string>
     <string name="piko_enable_download">Увімкнути завантаження</string>
     <string name="piko_feed_download_button">Кнопка завантаження на дописах у стрічці</string>
     <string name="piko_feed_download_button_desc">Додає значок завантаження поруч із кнопкою збереження на дописах у стрічці</string>
+    <string name="piko_save_media_comment">Зберегти медіа з коментаря</string>
+    <string name="piko_save_media_comment_desc">Додає кнопку для збереження медіафайлів із коментарів під дописами та Reels</string>
     <string name="piko_enable_direct_download">Увімкнути пряме завантаження</string>
     <string name="piko_enable_direct_download_desc">Завантажує відкрите медіа без додаткових запитів</string>
     <string name="piko_download_username_folder">Розділяти медіа за іменем користувача</string>
@@ -450,7 +455,4 @@
     <string name="piko_media_like">подобається</string>
     <string name="piko_media_link">посилання</string>
     <string name="piko_media_activity">активність</string>
-    <string name="piko_mark_story_seen">Позначити як переглянуте</string>
-    <string name="piko_story_seen_pending">Позначається як переглянуте…</string>
-    <string name="piko_story_seen_sent">Позначено як переглянуте</string>
 </resources>

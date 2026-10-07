@@ -51,6 +51,7 @@
     <string name="piko_disable_comments">Yorumları devre dışı bırak</string>
     <string name="piko_limit_following_feed">Akışı takip edilen profillerle sınırla</string>
     <string name="piko_limit_following_feed_desc">Ana sayfa akışını yalnızca takip ettiğiniz profillerin içerikleriyle sınırlar</string>
+    <string name="piko_disable_discover_people">Önerilen hesapları gizle</string>
     <string name="piko_focus_lock">Odak Kilidi</string>
     <string name="piko_focus_lock_desc">Belirli bir süre için dikkat dağıtıcı unsurları engelleyen ayarları zorla etkinleştir</string>
     <string name="piko_focus_lock_targets">Kilitlenecek ayarlar</string>
@@ -99,7 +100,9 @@
     <string name="piko_hide_notes_tray_desc">DM kısmındaki notlar tepsisini gizler</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Paylaşım menüsündeki grup oluşturma düğmesini gizle</string>
     <string name="piko_hide_reels_follow_button">Reels takip et butonunu gizle</string>
+    <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
     <string name="piko_hide_reels_follow_button_desc">Reels yazar satırındaki takip et butonunu kaldırır</string>
+    <string name="piko_disable_video_autoplay">Video otomatik oynatmayı kapat</string>
     <string name="piko_disable_double_tap_like_post">Gönderilerde çift dokunarak beğenmeyi kapat</string>
     <string name="piko_disable_double_tap_like_reel">Reels\'lerde çift dokunarak beğenmeyi kapat</string>
     <string name="piko_disable_double_tap_like_comment">Yoruma çift tıklayıp beğenmeyi devre dışı bırak</string>
@@ -112,7 +115,6 @@
     <string name="piko_disable_analytics">Analizleri devre dışı bırak</string>
     <string name="piko_delete_analytics_cache">Analiz önbelleğini sil</string>
     <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analitikleri engeller</string>
-    <string name="piko_disable_discover_people">Önerilen hesapları gizle</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
     <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
     <string name="piko_fbi_color_indicator">Renkli arkadaşlık durumu göstergesini etkinleştir</string>
@@ -123,25 +125,12 @@
     <string name="piko_friendship_status">Arkadaşlık durumu</string>
     <string name="piko_follow_list_non_follower_badge">Takip Edilenler listesinde takip etmeyenleri göster</string>
     <string name="piko_follow_list_non_follower_badge_desc">Kendi “Takip Edilenler” listenizdeki, sizi geri takip etmeyen hesapların satırlarına bir rozet ekler</string>
-    <string name="piko_view_story_mentions">Hikaye bahsetmelerini görüntüle</string>
-    <string name="piko_vsm_title">Hikaye bahsetmeleri</string>
-    <string name="piko_vsm_no_mentions">Bu hikayede bahsetme yok</string>
-    <string name="piko_disable_story_flipping">Hikaye geçişini kapat</string>
-    <string name="piko_disable_story_flipping_desc">Sonraki hikayeye otomatik geçişi devre dışı bırakır</string>
-    <string name="piko_loop_story">Hikayeyi döngüye al</string>
-    <string name="piko_loop_story_desc">Mevcut hikaye bittiğinde yeniden oynatır</string>
-    <string name="piko_disable_video_autoplay">Video otomatik oynatmayı kapat</string>
-    <string name="piko_customise_story_timestamp">Hikaye zaman damgasını özelleştir</string>
-    <string name="piko_customise_story_timestamp_desc">Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştir</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan en yüksek çözünürlüklü görselleri çeker. Performansı düşürebilir, uygulama veri boyutunu artırabilir veya uygulamanın eski bir düzene geçmesine neden olabilir</string>
-    <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
     <string name="piko_copy_comment">Yorumu kopyala</string>
     <string name="piko_copy_comment_desc">Gönderi ve Reels videolarındaki yorumları kopyalamak için bir buton ekler</string>
     <string name="piko_comment_copied_success">Yorum kopyalandı</string>
     <string name="piko_comment_copied_failed">Kopyalanacak metin bulunamadı</string>
-    <string name="piko_save_media_comment">Yorum medyasını kaydet</string>
-    <string name="piko_save_media_comment_desc">Gönderi ve Reels yorumlarındaki medya içeriklerini kaydetmek için bir buton ekler</string>
     <string name="piko_copy_username">Kullanıcı adını kopyala</string>
     <string name="piko_copy_full_name">Tam adı kopyala</string>
     <string name="piko_copy_user_id">Kullanıcı kimliğini kopyala</string>
@@ -165,20 +154,36 @@
     <string name="piko_inbox_lock_no_lock">Gelen kutusu kilidini kullanmak için cihazınızda ekran kilidi ayarlayın</string>
     <string name="piko_unlock_plus_benefits">Plus abonelik avantajlarının kilidini aç</string>
     <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
-    <string name="piko_customise_story_ring_size">Hikaye halkası boyutunu özelleştir</string>
-    <string name="piko_customise_story_ring_size_desc">Hikaye halkasının boyutunu yüzde olarak değiştirin (Varsayılan: 100)</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Mesajlar</string>
     <string name="piko_unlimited_replays">Kaybolan medyaları kalıcı yap</string>
     <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
     <string name="piko_enable_mark_chat_as_read">Sohbeti okundu olarak işaretle seçeneğini etkinleştir</string>
     <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine uzun basıldığında okundu olarak işaretleme seçeneği sunar. Bir sohbeti okundu olarak işaretlediğinizde, \"Mesajlar için hayalet modu\" etkin olsa bile başkaları mesajlarını okuduğunuzu görebilir</string>
+    <!-- Story Section -->
+    <string name="piko_category_story">Hikaye</string>
+    <string name="piko_view_story_mentions">Hikaye bahsetmelerini görüntüle</string>
+    <string name="piko_vsm_title">Hikaye bahsetmeleri</string>
+    <string name="piko_vsm_no_mentions">Bu hikayede bahsetme yok</string>
+    <string name="piko_mark_story_seen">Görüldü olarak işaretle</string>
+    <string name="piko_story_seen_pending">Görüldü olarak işaretleme</string>
+    <string name="piko_story_seen_sent">Görüldü olarak işaretlendi</string>
+    <string name="piko_customise_story_timestamp">Hikaye zaman damgasını özelleştir</string>
+    <string name="piko_customise_story_timestamp_desc">Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştir</string>
+    <string name="piko_customise_story_ring_size">Hikaye halkası boyutunu özelleştir</string>
+    <string name="piko_customise_story_ring_size_desc">Hikaye halkasının boyutunu yüzde olarak değiştirin (Varsayılan: 100)</string>
+    <string name="piko_disable_story_flipping">Hikaye geçişini kapat</string>
+    <string name="piko_disable_story_flipping_desc">Sonraki hikayeye otomatik geçişi devre dışı bırakır</string>
+    <string name="piko_loop_story">Hikayeyi döngüye al</string>
+    <string name="piko_loop_story_desc">Mevcut hikaye bittiğinde yeniden oynatır</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Medya indirme</string>
     <string name="piko_category_downloads">İndirmeler</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>
     <string name="piko_feed_download_button">Akış gönderilerindeki indirme düğmesi</string>
     <string name="piko_feed_download_button_desc">Akış gönderilerindeki kaydet düğmesinin yanına bir indirme simgesi ekler</string>
+    <string name="piko_save_media_comment">Yorum medyasını kaydet</string>
+    <string name="piko_save_media_comment_desc">Gönderi ve Reels yorumlarındaki medya içeriklerini kaydetmek için bir buton ekler</string>
     <string name="piko_enable_direct_download">Doğrudan indirmeyi etkinleştir</string>
     <string name="piko_enable_direct_download_desc">Mevcut görüntülenen medyayı seçenek sormadan indirir</string>
     <string name="piko_download_username_folder">Medyayı kullanıcı adına göre ayır</string>
@@ -402,8 +407,8 @@
     <string name="piko_filter_story_maximum_item_count_desc">x\'ten fazla öğe içeren hikayeler gizlenecektir (varsayılan 9999).</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">Şipşakları Kaydet</string>
-    <string name="piko_instants_download_desc">Tek seferlik Şipşakları izlerken kaydedin; böylece daha sonra “Kaydedilmiş Şipşakları Görüntüle” bölümünden bunları tekrar izleyebilir ve indirebilirsiniz.</string>
-    <string name="piko_view_saved_instants">Kaydedilmiş Şipşakları Görüntüle</string>
+    <string name="piko_instants_download_desc">Tek seferlik Şipşakları izlerken kaydedin; böylece daha sonra “Kaydedilmiş Şipşaklar” bölümünden bunları tekrar izleyebilir ve indirebilirsiniz.</string>
+    <string name="piko_view_saved_instants">Kaydedilmiş Şipşaklar</string>
     <string name="piko_instants_vault_empty">Henüz kaydedilmiş Şipşak yok. Yakalama özelliği etkinleştirilmiş bazı Şipşakları açın; burada görünmeye başlayacaklar.</string>
     <string name="piko_instants_link_unavailable">Medya bağlantısı mevcut değil.</string>
     <string name="piko_instants_unknown_user">Bilinmeyen</string>
@@ -450,7 +455,4 @@
     <string name="piko_media_like">beğeni</string>
     <string name="piko_media_link">bağlantı</string>
     <string name="piko_media_activity">aktivite</string>
-    <string name="piko_mark_story_seen">Görüldü olarak işaretle</string>
-    <string name="piko_story_seen_pending">Görüldü olarak işaretleme</string>
-    <string name="piko_story_seen_sent">Görüldü olarak işaretlendi</string>
 </resources>

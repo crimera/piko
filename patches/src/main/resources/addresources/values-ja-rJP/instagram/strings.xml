@@ -48,9 +48,10 @@
     <string name="piko_disable_stories">ストーリーズを非表示</string>
     <string name="piko_disable_highlights">ハイライトを非表示</string>
     <string name="piko_disable_explore">発見を無効化</string>
-    <string name="piko_disable_comments">コメントを非表示</string>
+    <string name="piko_disable_comments">コメントを無効化</string>
     <string name="piko_limit_following_feed">フィードにフォロー中のアカウントのみ表示</string>
     <string name="piko_limit_following_feed_desc">ホームフィードにフォローしているアカウントの投稿のみ表示します。</string>
+    <string name="piko_disable_discover_people">おすすめのアカウントを非表示</string>
     <string name="piko_focus_lock">フォーカスロック</string>
     <string name="piko_focus_lock_desc">指定した期間、集中を妨げる機能の設定を強制的にオンにします</string>
     <string name="piko_focus_lock_targets">ロックする設定</string>
@@ -99,7 +100,11 @@
     <string name="piko_hide_notes_tray_desc">DMのノート欄を非表示にします</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">シェアシートのグループ作成ボタンを非表示</string>
     <string name="piko_hide_reels_follow_button">フォローボタンを非表示</string>
+    <string name="piko_hide_share_button">共有ボタンを非表示</string>
+    <string name="piko_hide_save_buttons">保存ボタンを非表示</string>
+    <string name="piko_hide_reshare_button">再投稿ボタンを非表示</string>
     <string name="piko_hide_reels_follow_button_desc">リールからフォローボタンを非表示にします</string>
+    <string name="piko_disable_video_autoplay">動画を自動で再生しない</string>
     <string name="piko_disable_double_tap_like_post">投稿をダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_reel">リールをダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_comment">コメントをダブルタップして「いいね！」を無効化</string>
@@ -112,7 +117,6 @@
     <string name="piko_disable_analytics">分析データの送信を無効化</string>
     <string name="piko_delete_analytics_cache">分析キャッシュを削除</string>
     <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
-    <string name="piko_disable_discover_people">おすすめのアカウントを非表示</string>
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>
     <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、タップすると詳細なフォロー関係を表示します</string>
     <string name="piko_fbi_color_indicator">色付きの [フレンド状態の表示] を有効化</string>
@@ -121,27 +125,14 @@
     <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
     <string name="piko_fbi_following_each_other">相互フォロー</string>
     <string name="piko_friendship_status">フレンド状態</string>
-    <string name="piko_follow_list_non_follower_badge">フォローされていないアカウントを表示</string>
+    <string name="piko_follow_list_non_follower_badge">「フォロー中」にバッジを表示</string>
     <string name="piko_follow_list_non_follower_badge_desc">自分の「フォロー中」一覧で、フォローされていないアカウントにステータスバッジを表示します</string>
-    <string name="piko_view_story_mentions">ストーリーのメンションを表示</string>
-    <string name="piko_vsm_title">メンションされたアカウント</string>
-    <string name="piko_vsm_no_mentions">このストーリーでメンションされたアカウントはありません</string>
-    <string name="piko_disable_story_flipping">ストーリーの自動切り替えを無効化</string>
-    <string name="piko_disable_story_flipping_desc">次のストーリーに自動で移動しないようにします</string>
-    <string name="piko_loop_story">ストーリーをループ再生</string>
-    <string name="piko_loop_story_desc">終了時に現在のストーリーを再生します</string>
-    <string name="piko_disable_video_autoplay">動画を自動で再生しない</string>
-    <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
-    <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
     <string name="piko_improve_image_viewing">画像を高画質で表示</string>
     <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します。動作が遅くなったり、アプリデータの容量が増えたり、古いレイアウトに切り替わったりする場合があります</string>
-    <string name="piko_hide_reshare_button">再投稿ボタンを非表示</string>
     <string name="piko_copy_comment">コメントをコピー</string>
     <string name="piko_copy_comment_desc">投稿やリールのコメントをコピーするボタンを追加します</string>
     <string name="piko_comment_copied_success">コメントをコピーしました</string>
     <string name="piko_comment_copied_failed">コピーするテキストが見つかりません</string>
-    <string name="piko_save_media_comment">GIFコメントを保存</string>
-    <string name="piko_save_media_comment_desc">投稿やリールのGIFコメントを保存するボタンを追加します</string>
     <string name="piko_copy_username">ユーザーネームをコピー</string>
     <string name="piko_copy_full_name">名前をコピー</string>
     <string name="piko_copy_user_id">ユーザーIDをコピー</string>
@@ -165,20 +156,36 @@
     <string name="piko_inbox_lock_no_lock">メッセージのロックを使用するには、端末に画面ロックを設定してください</string>
     <string name="piko_unlock_plus_benefits">Plus特典を有効化</string>
     <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
-    <string name="piko_customise_story_ring_size">ストーリー欄のアイコンのサイズをカスタマイズ</string>
-    <string name="piko_customise_story_ring_size_desc">ストーリー欄のアイコンのサイズをパーセントで変更します。（デフォルト値：100）</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">一時的なメディアを永続的にする</string>
     <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
     <string name="piko_enable_mark_chat_as_read">チャットを既読にするオプションを有効化</string>
     <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にするオプションを追加します。「DMを匿名で閲覧」が有効でも、手動で既読にすると相手に既読が表示されます</string>
+    <!-- Story Section -->
+    <string name="piko_category_story">ストーリー</string>
+    <string name="piko_view_story_mentions">ストーリーのメンションを表示</string>
+    <string name="piko_vsm_title">メンションされたアカウント</string>
+    <string name="piko_vsm_no_mentions">このストーリーでメンションされたアカウントはありません</string>
+    <string name="piko_mark_story_seen">閲覧済みにする</string>
+    <string name="piko_story_seen_pending">送信中</string>
+    <string name="piko_story_seen_sent">閲覧済み</string>
+    <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
+    <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
+    <string name="piko_customise_story_ring_size">ストーリー欄のアイコンのサイズをカスタマイズ</string>
+    <string name="piko_customise_story_ring_size_desc">ストーリー欄のアイコンのサイズをパーセントで変更します。（デフォルト値：100）</string>
+    <string name="piko_disable_story_flipping">ストーリーの自動切り替えを無効化</string>
+    <string name="piko_disable_story_flipping_desc">次のストーリーに自動で移動しないようにします</string>
+    <string name="piko_loop_story">ストーリーをループ再生</string>
+    <string name="piko_loop_story_desc">終了時に現在のストーリーを再生します</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">メディアのダウンロード</string>
     <string name="piko_category_downloads">ダウンロード</string>
     <string name="piko_enable_download">ダウンロードを有効化</string>
     <string name="piko_feed_download_button">フィードにダウンロードボタンを表示</string>
     <string name="piko_feed_download_button_desc">フィード投稿の保存ボタンの横にダウンロードアイコンを追加します</string>
+    <string name="piko_save_media_comment">GIFコメントを保存</string>
+    <string name="piko_save_media_comment_desc">投稿やリールのGIFコメントを保存するボタンを追加します</string>
     <string name="piko_enable_direct_download">直接ダウンロードを有効化</string>
     <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
     <string name="piko_download_username_folder">ユーザーネームごとにメディアを分ける</string>
@@ -450,7 +457,4 @@
     <string name="piko_media_like">いいね</string>
     <string name="piko_media_link">リンク</string>
     <string name="piko_media_activity">アクティビティ</string>
-    <string name="piko_mark_story_seen">閲覧済みにする</string>
-    <string name="piko_story_seen_pending">送信中</string>
-    <string name="piko_story_seen_sent">閲覧済み</string>
 </resources>

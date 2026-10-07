@@ -51,6 +51,7 @@
     <string name="piko_disable_comments">Désactiver les commentaires</string>
     <string name="piko_limit_following_feed">Limiter le fil aux comptes suivis</string>
     <string name="piko_limit_following_feed_desc">Filtre le fil d\'accueil pour n\'afficher que le contenu des comptes que vous suivez.</string>
+    <string name="piko_disable_discover_people">Masquer les comptes suggérés</string>
     <string name="piko_focus_lock">Verrouillage de la mise au point</string>
     <string name="piko_focus_lock_desc">Forcer les paramètres sans distraction à rester activés pendant une durée définie</string>
     <string name="piko_focus_lock_targets">Paramètres de verrouillage</string>
@@ -99,7 +100,9 @@
     <string name="piko_hide_notes_tray_desc">Masque le bandeau des notes dans la section des messages privés</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Masquer le bouton de création de groupe dans le panneau de partage</string>
     <string name="piko_hide_reels_follow_button">Masquer le bouton \"Suivre\" des Reels</string>
+    <string name="piko_hide_reshare_button">Masquer le bouton de repartage</string>
     <string name="piko_hide_reels_follow_button_desc">Supprime le bouton \"Suivre\" de la ligne de l\'auteur des Reels</string>
+    <string name="piko_disable_video_autoplay">Désactiver la lecture automatique des vidéos</string>
     <string name="piko_disable_double_tap_like_post">Désactiver le double appui pour liker sur une publication</string>
     <string name="piko_disable_double_tap_like_reel">Désactiver le double appui pour liker sur un reel</string>
     <string name="piko_disable_double_tap_like_comment">Désactiver le double appui pour liker sur un commentaire</string>
@@ -112,7 +115,6 @@
     <string name="piko_disable_analytics">Désactiver les analyses</string>
     <string name="piko_delete_analytics_cache">Supprimer le cache des analyses</string>
     <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs d\'Instagram/Facebook</string>
-    <string name="piko_disable_discover_people">Masquer les comptes suggérés</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>
     <string name="piko_follow_back_indicator_desc">Ajoute un libellé indiquant qu\'un utilisateur vous suit en retour sur sa page de profil et affiche un aperçu détaillé du statut de votre relation lorsqu\'on clique dessus</string>
     <string name="piko_fbi_color_indicator">Activer l\'indicateur de statut d\'amitié coloré</string>
@@ -123,25 +125,12 @@
     <string name="piko_friendship_status">Statut d\'amitié</string>
     <string name="piko_follow_list_non_follower_badge">Afficher les comptes qui ne vous suivent pas dans la liste \'Suivi(e)s\'</string>
     <string name="piko_follow_list_non_follower_badge_desc">Ajoute un badge aux comptes de votre liste de \'Suivi(e)s\' qui ne vous suivent pas en retour</string>
-    <string name="piko_view_story_mentions">Voir les mentions de la story</string>
-    <string name="piko_vsm_title">Mentions en story</string>
-    <string name="piko_vsm_no_mentions">Aucune mention dans cette story</string>
-    <string name="piko_disable_story_flipping">Désactiver le défilement de story</string>
-    <string name="piko_disable_story_flipping_desc">Désactiver le défilement/passage automatique vers la prochaine story</string>
-    <string name="piko_loop_story">Story en boucle</string>
-    <string name="piko_loop_story_desc">Rejouer la story actuelle lorsqu\'elle se termine</string>
-    <string name="piko_disable_video_autoplay">Désactiver la lecture automatique des vidéos</string>
-    <string name="piko_customise_story_timestamp">Personnaliser l\'horodatage de story</string>
-    <string name="piko_customise_story_timestamp_desc">Personnaliser l\'horodatage qui indique quand la story a été publiée</string>
     <string name="piko_improve_image_viewing">Améliorer la visualisation des images</string>
     <string name="piko_improve_image_viewing_desc">Récupère les images en résolution maximale depuis le serveur. Peut réduire les performances, augmenter la taille des données de l\'application ou faire basculer l\'application vers une ancienne disposition</string>
-    <string name="piko_hide_reshare_button">Masquer le bouton de repartage</string>
     <string name="piko_copy_comment">Copier le commentaire</string>
     <string name="piko_copy_comment_desc">Ajoute un bouton pour copier les commentaires sur les publications et les reels</string>
     <string name="piko_comment_copied_success">Commentaire copié</string>
     <string name="piko_comment_copied_failed">Aucun texte à copier</string>
-    <string name="piko_save_media_comment">Enregistrer les médias des commentaires</string>
-    <string name="piko_save_media_comment_desc">Ajoute un bouton pour enregistrer les médias des commentaires sur les publications et les reels</string>
     <string name="piko_copy_username">Copier le nom d\'utilisateur</string>
     <string name="piko_copy_full_name">Copier le nom complet</string>
     <string name="piko_copy_user_id">Copier l\'identifiant utilisateur</string>
@@ -165,20 +154,36 @@
     <string name="piko_inbox_lock_no_lock">Définir un verrouillage de l\'écran sur votre appareil pour utiliser le verrouillage de la boîte de réception</string>
     <string name="piko_unlock_plus_benefits">Débloquer les avantages \"Plus\"</string>
     <string name="piko_unlock_plus_benefits_desc">Débloquez les avantages de l\'abonnement “Plus” vérifiés localement. UTILISEZ-LE À VOS PROPRES RISQUES</string>
-    <string name="piko_customise_story_ring_size">Personnaliser la taille de l\'anneau de story</string>
-    <string name="piko_customise_story_ring_size_desc">Modifier la taille de l\'anneau de story en pourcentage (Par défaut : 100)</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Messages privés</string>
     <string name="piko_unlimited_replays">Rendre les médias éphémères permanents</string>
     <string name="piko_unlimited_replays_desc">Modifie les contenus à vue unique ou à double vue non expirés en vue permanente</string>
     <string name="piko_enable_mark_chat_as_read">Activer l\'option marquer la discussion comme lue</string>
     <string name="piko_enable_mark_chat_as_read_desc">Obtenez une option, en appuyant longuement sur la discussion, pour la marquer comme lue. Lorsque vous marquez une discussion comme lue, les autres utilisateurs peuvent voir que vous avez lu leurs messages, même lorsque l\'option \'Voir les messages directs anonymement\' est activée</string>
+    <!-- Story Section -->
+    <string name="piko_category_story">Story</string>
+    <string name="piko_view_story_mentions">Voir les mentions de la story</string>
+    <string name="piko_vsm_title">Mentions en story</string>
+    <string name="piko_vsm_no_mentions">Aucune mention dans cette story</string>
+    <string name="piko_mark_story_seen">Marquer comme vue</string>
+    <string name="piko_story_seen_pending">Marquage comme vue</string>
+    <string name="piko_story_seen_sent">Marqué comme vue</string>
+    <string name="piko_customise_story_timestamp">Personnaliser l\'horodatage de story</string>
+    <string name="piko_customise_story_timestamp_desc">Personnaliser l\'horodatage qui indique quand la story a été publiée</string>
+    <string name="piko_customise_story_ring_size">Personnaliser la taille de l\'anneau de story</string>
+    <string name="piko_customise_story_ring_size_desc">Modifier la taille de l\'anneau de story en pourcentage (Par défaut : 100)</string>
+    <string name="piko_disable_story_flipping">Désactiver le défilement de story</string>
+    <string name="piko_disable_story_flipping_desc">Désactiver le défilement/passage automatique vers la prochaine story</string>
+    <string name="piko_loop_story">Story en boucle</string>
+    <string name="piko_loop_story_desc">Rejouer la story actuelle lorsqu\'elle se termine</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Télécharger le média</string>
     <string name="piko_category_downloads">Téléchargements</string>
     <string name="piko_enable_download">Activer le téléchargement</string>
     <string name="piko_feed_download_button">Bouton de téléchargement sur les publications du fil d\'actualité</string>
     <string name="piko_feed_download_button_desc">Ajoute une icône de téléchargement à côté du bouton enregistrer sur les publications du fil d\'actualité</string>
+    <string name="piko_save_media_comment">Enregistrer les médias des commentaires</string>
+    <string name="piko_save_media_comment_desc">Ajoute un bouton pour enregistrer les médias des commentaires sur les publications et les reels</string>
     <string name="piko_enable_direct_download">Activer le téléchargement direct</string>
     <string name="piko_enable_direct_download_desc">Télécharge le média actuellement affiché sans demander d\'options</string>
     <string name="piko_download_username_folder">Séparer les médias par nom d\'utilisateur</string>
@@ -450,7 +455,4 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">lien</string>
     <string name="piko_media_activity">activité</string>
-    <string name="piko_mark_story_seen">Marquer comme vue</string>
-    <string name="piko_story_seen_pending">Marquage comme vue</string>
-    <string name="piko_story_seen_sent">Marqué comme vue</string>
 </resources>
