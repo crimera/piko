@@ -237,6 +237,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
 
+    public static boolean hideShareButton() {
+        return SharedPref.getBooleanPref(Settings.HIDE_SHARE_BUTTON) && SettingsStatus.hideShareButton;
+    }
+
     public static boolean hideSaveButtons() {
         return SharedPref.getBooleanPref(Settings.HIDE_SAVE_BUTTONS) && SettingsStatus.hideSaveButtons;
     }
