@@ -165,12 +165,16 @@ public class SettingsStatus {
     public static void disableDiscoverPeople() {
         disableDiscoverPeople = true;
     }
+    public static boolean hideSaveButtons = false;
+    public static void hideSaveButtons() {
+        hideSaveButtons = true;
+    }
     public static boolean hideReshareButton = false;
     public static void hideReshareButton() {
         hideReshareButton = true;
     }
     public static boolean distractionFreeSection() {
-        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
     //Misc section.
@@ -274,6 +278,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_save_media_comment"),SettingsStatus.saveMediaCommentButton);
         FLAGS.put(str("piko_copy_comment"),SettingsStatus.copyCommentButton);
         FLAGS.put(str("piko_hide_reshare_button"),SettingsStatus.hideReshareButton);
+        FLAGS.put(str("piko_hide_save_buttons"), SettingsStatus.hideSaveButtons);
         FLAGS.put(str("piko_improve_image_viewing"),SettingsStatus.improveImageViewing);
         FLAGS.put(str("piko_unlimited_replays"),SettingsStatus.unlimitedReplaysOnEphemeralMedia);
 

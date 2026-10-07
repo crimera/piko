@@ -53,7 +53,24 @@ public class FlagsSharedPref extends BaseSharedPref {
                 if (!flagState.equals(FlagState.ENABLE.toString()) && !flagState.equals(FlagState.DISABLE.toString())) continue;
                 Boolean value = flagState.equals(FlagState.ENABLE.toString()) ? true:false;
                 // PikoUtils.logger(key+" : "+Boolean.valueOf(value));
-                outFlags.put(key, value);
+                if (!key.contains(",")) outFlags.put(key, value);
+            }
+            // A grouped choice takes precedence over older individual overrides, including Default.
+            keys = flags.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (!key.contains(",")) continue;
+                String state = flags.optString(key);
+                if (!state.equals(FlagState.DEFAULT.toString())
+                        && !state.equals(FlagState.ENABLE.toString())
+                        && !state.equals(FlagState.DISABLE.toString())) continue;
+                for (String code : key.split(",")) {
+                    if (state.equals(FlagState.DEFAULT.toString())) {
+                        outFlags.remove(code);
+                    } else {
+                        outFlags.put(code, state.equals(FlagState.ENABLE.toString()));
+                    }
+                }
             }
         } catch (Exception e) {
 

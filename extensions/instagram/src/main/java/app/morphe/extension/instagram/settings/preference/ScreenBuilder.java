@@ -484,6 +484,15 @@ public class ScreenBuilder {
                     Settings.HIDE_REELS_FOLLOW_BUTTON
             );
         }
+        if (SettingsStatus.hideSaveButtons) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_save_buttons"),
+                            "",
+                            Settings.HIDE_SAVE_BUTTONS
+                    )
+            );
+        }
         if (SettingsStatus.hideReshareButton) {
             addPreference(
                     helper.switchPreference(
