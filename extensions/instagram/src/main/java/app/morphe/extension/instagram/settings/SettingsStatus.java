@@ -67,7 +67,9 @@ public class SettingsStatus {
     public static void markChatAsRead() { markChatAsRead = true; }
     public static boolean inboxLock = false;
     public static void inboxLock() { inboxLock = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock ;}
+    public static boolean notesCustomTextColor = false;
+    public static void notesCustomTextColor() { notesCustomTextColor = true; }
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || notesCustomTextColor ;}
 
     //Story section
     public static boolean customiseStoryTimestamp = false;
