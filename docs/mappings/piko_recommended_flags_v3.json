@@ -35,11 +35,6 @@
     "code" : "93316"
   },
   {
-    "name" : "Redesign Stories viewer",
-    "desc" : "",
-    "code" : "90996"
-  },
-  {
     "name" : "Remove yourself from someone's Stories Close Friends list",
     "desc" : "Click the Close Friends icon, and you'll see a button to leave.",
     "code" : "105130"
@@ -53,11 +48,6 @@
     "name" : "Stories viewer list redesign",
     "desc" : "",
     "code" : "119728"
-  },
-  {
-    "name" : "Upload progress percentage while posting a Stories",
-    "desc" : "Shows upload progress percentage while posting a Story, giving real-time feedback on upload status.",
-    "code" : "115501"
   },
   {
     "name" : "Replace the Instagram logo with 'For You' in the feed.",
@@ -119,11 +109,6 @@
     "name" : "Display the user's username instead of the nickname",
     "desc" : "for notifications and in direct",
     "code" : "77064"
-  },
-  {
-    "name" : "New Instagram logo",
-    "desc" : "",
-    "code" : "111259"
   },
   {
     "name" : "Redesign for notification settings",
