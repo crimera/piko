@@ -18,10 +18,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getFreeRegisterProvider
+import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val HOOK_CLASS = "$PATCHES_DESCRIPTOR/dm/SavedMessagesHook;"
 
@@ -32,8 +36,6 @@ val saveDeletedMessagesPatch =
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
         default = true,
     ) {
-        // userDataEntity is deliberately not a dependency: it only backs Hook 6's username
-        // enrichment, so a break in its resolver must not abort capture.
         dependsOn(settingsPatch, directItemEntity, deletedMessagesResourcePatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
@@ -129,14 +131,28 @@ val saveDeletedMessagesPatch =
                 if (usersKeyIndex < 0) {
                     throw PatchException("Thread users dispatch has no users key")
                 }
-                val listPutInstruction =
-                    insns.drop(usersKeyIndex + 1).firstOrNull {
+                val usersArrayIndex = (usersKeyIndex + 1 until insns.size).firstOrNull {
+                    insns[it].opcode == Opcode.NEW_INSTANCE &&
+                        insns[it].getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
+                } ?: throw PatchException("Thread users dispatch has no users array")
+                val arrayGuard = insns[usersArrayIndex - 1] as? BuilderOffsetInstruction
+                if (arrayGuard?.opcode != Opcode.IF_NE) {
+                    throw PatchException("Thread users array has an unexpected guard")
+                }
+                // v447 moves the list write out of line, after other JSON fields. Follow the
+                // array guard to its completion block instead of selecting the next list write.
+                val listPutInstruction = insns.drop(arrayGuard.target.location.index)
+                    .takeWhile { it.opcode != Opcode.RETURN_VOID }
+                    .singleOrNull {
                         it.opcode == Opcode.IPUT_OBJECT &&
-                            (it as ReferenceInstruction).reference.toString().endsWith(":Ljava/util/List;")
-                    } ?: throw PatchException("Thread users dispatch has no users list field")
+                            it.getReference<FieldReference>()?.type == "Ljava/util/List;"
+                    } ?: throw PatchException("Expected one thread users list field")
                 val listRegisters = listPutInstruction.registersUsed
-                if (listRegisters.size != 2) {
-                    throw PatchException("Thread users list write has an unexpected register count")
+                if (listRegisters.size != 2 ||
+                    insns[usersArrayIndex].registersUsed.singleOrNull() != listRegisters[0] ||
+                    listPutInstruction.getReference<FieldReference>()?.definingClass != parameterTypes.firstOrNull()
+                ) {
+                    throw PatchException("Thread users list write has an unexpected source or owner")
                 }
                 val parsedUsersRegister = listRegisters[0]
                 val putIndex = listPutInstruction.location.index

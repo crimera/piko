@@ -21,6 +21,7 @@ import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -50,7 +51,24 @@ val directItemEntity =
                                         instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
                                         (instruction as ReferenceInstruction).reference.toString() == key
                                 if (!isKey) return@mapNotNull null
-                                insns.drop(keyIndex + 1).firstOrNull {
+                                val equalsCall = insns.getOrNull(keyIndex + 1)
+                                val result = insns.getOrNull(keyIndex + 2)
+                                val branch = insns.getOrNull(keyIndex + 3) as? BuilderOffsetInstruction
+                                    ?: return@mapNotNull null
+                                if (equalsCall?.getReference<MethodReference>()?.toString() !=
+                                    "Ljava/lang/String;->equals(Ljava/lang/Object;)Z" ||
+                                    result?.opcode != Opcode.MOVE_RESULT ||
+                                    result.registersUsed.singleOrNull() != branch.registersUsed.singleOrNull()
+                                ) return@mapNotNull null
+
+                                // v447 shares an out-of-line assignment for text and reaction.
+                                // Only follow the branch where the JSON key actually matches.
+                                val valueIndex = when (branch.opcode) {
+                                    Opcode.IF_EQZ -> keyIndex + 4
+                                    Opcode.IF_NEZ -> branch.target.location.index
+                                    else -> return@mapNotNull null
+                                }
+                                insns.drop(valueIndex).firstOrNull {
                                     it.opcode.name.startsWith("iput", ignoreCase = true)
                                 }?.fieldExtractor()
                             }
@@ -89,9 +107,12 @@ val directItemEntity =
 
                 GetUserIdExtension.changeFirstString(fieldAfter("user_id").name)
 
-                val textField = fieldAfter("text").name
-                GetTextExtension.changeString("baseTextField", textField)
-                SetTextExtension.changeString("baseTextField", textField)
+                val textField = stringFieldAfter("text")
+                if (textField.definingClass != itemId.definingClass) {
+                    throw PatchException("DirectItem text resolves to a different base class")
+                }
+                GetTextExtension.changeString("baseTextField", textField.name)
+                SetTextExtension.changeString("baseTextField", textField.name)
 
                 GetTimestampRawExtension.changeFirstString(fieldAfter("timestamp").name)
 

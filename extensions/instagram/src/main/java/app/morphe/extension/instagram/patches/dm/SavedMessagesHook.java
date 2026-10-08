@@ -26,6 +26,8 @@ import app.morphe.extension.instagram.utils.Pref;
 @SuppressWarnings("unused")
 public class SavedMessagesHook {
 
+    static final String NOTIFICATION_CHANNEL_ID = "piko_deleted_messages";
+
     private static volatile String sMyUserId;
     private static android.os.HandlerThread sWorkerThread;
     private static android.os.Handler sWorker;
@@ -259,10 +261,9 @@ public class SavedMessagesHook {
                             Context.NOTIFICATION_SERVICE);
             if (manager == null) return;
 
-            String channelId = "piko_deleted_messages";
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 android.app.NotificationChannel channel = new android.app.NotificationChannel(
-                        channelId, str("piko_deleted_messages_channel"),
+                        NOTIFICATION_CHANNEL_ID, str("piko_deleted_messages_channel"),
                         android.app.NotificationManager.IMPORTANCE_DEFAULT);
                 channel.setDescription(str("piko_deleted_messages_channel_desc"));
                 manager.createNotificationChannel(channel);
@@ -284,17 +285,19 @@ public class SavedMessagesHook {
             int icon = context.getApplicationInfo().icon;
             android.app.Notification.Builder builder =
                     android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
-                            ? new android.app.Notification.Builder(context, channelId)
+                            ? new android.app.Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
                             : new android.app.Notification.Builder(context);
             android.app.Notification notification = builder
                     .setSmallIcon(icon != 0 ? icon : android.R.drawable.ic_dialog_info)
+                    .setCategory(android.app.Notification.CATEGORY_MESSAGE)
                     .setContentTitle(String.format(str("piko_deleted_a_message"), who))
                     .setContentText(body)
                     .setAutoCancel(true)
                     .setContentIntent(pendingIntent)
                     .build();
 
-            manager.notify((int) (System.currentTimeMillis() & 0x7fffffff), notification);
+            manager.notify((int) (System.currentTimeMillis() & Integer.MAX_VALUE),
+                    InboxLock.hideNotification(notification));
         } catch (Exception e) {
             piko("SavedMessagesHook.notifyDeletion: " + e);
         }
