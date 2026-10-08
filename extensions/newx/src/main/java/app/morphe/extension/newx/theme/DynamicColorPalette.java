@@ -65,6 +65,13 @@ public final class DynamicColorPalette {
     private static final String DARK_OUTLINE = "m3_sys_color_dynamic_dark_outline";
     private static final String DARK_OUTLINE_VARIANT = "m3_sys_color_dynamic_dark_outline_variant";
     private static final long COMPOSE_COLOR_SPACE_MASK = 0x3FL;
+    private static final long SRGB_WHITE = 0xFFFFFFFF00000000L;
+    // Compose Color.Unspecified: zero components in the "None" color space (id 0x10).
+    private static final long COMPOSE_UNSPECIFIED = 0x10L;
+    // Default-flag bit of the shared icon composable that selects the ambient tint.
+    private static final int ICON_DEFAULT_TINT_BIT = 0x8;
+    // Opaque #E5EAEC author handle color (Compose encoding of sRGB with alpha 1).
+    private static final long SRGB_HANDLE_GRAY = 0xFFE5EAEC00000000L;
     private static final int ALPHA_STANDARD_DIM_TRANSLUCENT = 0xBF;
     private static final int ALPHA_GLASS_BACKGROUND = 0xCC;
     private static final int ALPHA_LIGHT_GLASS_SHADOW = 0x26;
@@ -232,6 +239,46 @@ public final class DynamicColorPalette {
                     dynamicColor(!isLight, LIGHT_ON_SURFACE_VARIANT, DARK_ON_SURFACE_VARIANT);
             default -> throw new IllegalArgumentException("Unknown NewX XDS foreground role: " + role);
         };
+    }
+
+    /**
+     * The media viewer chrome draws its name, caption, and follow label as plain sRGB white over
+     * video. Only that exact white is replaced, so every other text color keeps its value.
+     */
+    public static long mediaTextColor(long originalColor) {
+        if (!isEnabled()) return originalColor;
+        if (originalColor == SRGB_WHITE) return color(DARK_ON_SURFACE);
+        // The author handle is a fixed opaque gray (#E5EAEC) that reads as secondary text.
+        if (originalColor == SRGB_HANDLE_GRAY) return color(DARK_ON_SURFACE_VARIANT);
+        return originalColor;
+    }
+
+
+    /**
+     * Icon tint for the hooked media icon call sites. The hooked sites pass either explicit sRGB
+     * white, Compose Unspecified ({@code Color.Unspecified} is the "None" color space id 0x10 with
+     * zero components), or raw zero with the icon's default bit set (ambient LocalContentColor).
+     * Raw zero is only passed with the default bit set at those sites, so it is replaced as the
+     * ambient case. Only call sites patched to route through this hook are affected.
+     */
+    public static long mediaIconTint(long originalColor) {
+        if (!isEnabled()) return originalColor;
+        if (originalColor == SRGB_WHITE
+                || originalColor == COMPOSE_UNSPECIFIED
+                || originalColor == 0L) {
+            return color(DARK_ON_SURFACE);
+        }
+        return originalColor;
+    }
+
+    /**
+     * Clears the icon default-tint bit so the explicit palette tint from {@link #mediaIconTint}
+     * takes effect instead of the ambient LocalContentColor. Hooked sites without the bit are
+     * unchanged.
+     */
+    public static int mediaIconDefaults(int defaults) {
+        if (!isEnabled()) return defaults;
+        return defaults & ~ICON_DEFAULT_TINT_BIT;
     }
 
     /** Uses Material 3's lower-emphasis on-surface-variant role for normal action icons. */

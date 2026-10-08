@@ -83,6 +83,23 @@ private const val XDS_CHROME_BACKGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J"
 private const val XDS_FOREGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsForeground(IZJ)J"
+private const val MEDIA_TEXT_COLOR_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->mediaTextColor(J)J"
+private const val MEDIA_ICON_TINT_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->mediaIconTint(J)J"
+private const val MEDIA_ICON_DEFAULTS_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->mediaIconDefaults(I)I"
+private const val COMPOSE_ICON_OWNER_PARAMETER = "Lcom/x/icons/b;"
+private const val COMPOSE_ICON_TINT_PARAMETER = 3
+private const val COMPOSE_ICON_DEFAULTS_PARAMETER = 7
+// The media Follow pill is a shared ports button composable.
+private const val PORTS_BUTTON_PACKAGE = "Lcom/x/ui/common/ports/buttons/"
+private const val USER_ROW_PACKAGE = "Lcom/x/ui/common/user/"
+private const val MATERIAL3_PACKAGE = "Landroidx/compose/material3/"
+private const val MEDIA_VIEWER_CHROME_PACKAGE = "Lcom/x/ui/immersive/chrome/"
+private const val MEDIA_PLAYBACK_PACKAGE = "Lcom/x/media/"
+private const val RICH_TEXT_PACKAGE = "Lcom/x/ui/common/text/"
+private const val TEXT_STYLE_PACKAGE = "Landroidx/compose/ui/text/"
 private const val PALETTE_IS_ENABLED_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z"
 private const val PALETTE_USE_MATERIAL_BACKGROUND_METHOD =
@@ -265,6 +282,7 @@ val dynamicColorPatch =
             patchTabTints(paletteDescriptor)
             val xdsSchemeConstructor = patchXdsChromeBackground()
             patchXdsForegroundColors(xdsSchemeConstructor)
+            patchMediaViewerTextColors()
         }
     }
 
@@ -1512,6 +1530,361 @@ private fun MutableMethod.resolveXdsSchemeFields(schemeDescriptor: String): XdsS
         throw PatchException("NewX XDS foreground roles are not adjacent: $indices in $this")
     }
     return XdsSchemeFields(foreground.mapValues { (_, index) -> colorFields[index] }, isLight)
+}
+
+/**
+ * Routes the color argument of every material3 Text call in the media viewer chrome through the
+ * palette hook. The chrome's name, caption, and follow label pass plain sRGB white, which the
+ * Horizon and XDS hooks never see. The color is the first long after the text and modifier, and
+ * the hook only changes that exact white, so other colors keep their values.
+ */
+context(context: BytecodePatchContext)
+private fun patchMediaViewerTextColors() {
+    val chromeClasses = mutableListOf<String>()
+    context.classDefForEach { classDef ->
+        if (classDef.type.startsWith(MEDIA_VIEWER_CHROME_PACKAGE)) chromeClasses += classDef.type
+    }
+    // Older targets (12.27 prod) have no immersive chrome, so there is no media viewer text to
+    // theme. A chrome that exists but has no matching Text calls is drift and fails below.
+    if (chromeClasses.isEmpty()) return
+    var hookCount = 0
+    for (descriptor in chromeClasses) {
+        for (method in context.mutableClassDefBy(descriptor).methods) {
+            val methodInstructions = method.instructions.toList()
+            val textCalls =
+                methodInstructions.withIndex().filter { (_, instruction) ->
+                    instruction.isMaterialTextCall()
+                }
+            // Descending order keeps the lower call indexes valid while the hooks are inserted.
+            for ((index, instruction) in textCalls.asReversed()) {
+                val reference = instruction.getReference<MethodReference>() ?: continue
+                val colorRegister =
+                    methodInstructions.invokeArgumentRegister(index, reference, 2)
+                        ?: throw PatchException("NewX media viewer Text color is missing: $method")
+                // Text calls sit at the branch targets of the conditional content blocks, so the
+                // hook must run on every path into the call.
+                method.insertHook(index = index, relocateBranchTargets = true) {
+                    invokeStatic(methodReference(MEDIA_TEXT_COLOR_METHOD), colorRegister, colorRegister + 1)
+                    moveResult(colorRegister, "J")
+                }
+                hookCount++
+            }
+        }
+    }
+    if (hookCount == 0) {
+        throw PatchException("NewX media viewer chrome has no material Text calls to theme")
+    }
+    patchMediaViewerRichTextColors()
+    patchMediaViewerIconTints(chromeClasses)
+    patchMediaViewerFollowPill()
+    patchMediaViewerButtonContentColors()
+    patchMediaViewerUserNameColors()
+}
+
+/**
+ * Icons in the media viewer chrome go through the shared icon composable, which takes its tint
+ * from a long argument unless the default bit (0x8) of the last int is set. The chrome passes
+ * either explicit sRGB white or the ambient tint (raw zero with the default bit), so the hook
+ * routes both through the palette, and clears the default bit only when the palette replaced it.
+ */
+context(context: BytecodePatchContext)
+private fun patchMediaViewerIconTints(chromeClasses: List<String>) {
+    var hookCount = 0
+    for (descriptor in chromeClasses) {
+        for (method in context.mutableClassDefBy(descriptor).methods) {
+            if (method.implementation == null) continue
+            hookCount += method.hookIconTints()
+        }
+    }
+    // Same rule as the rich text hook: a viewer without matching icon calls keeps its icons.
+    if (hookCount == 0) return
+}
+
+/**
+ * The media Follow pill is the shared ports button composable reached from the author row: its
+ * icon tint is LocalContentColor copied into the explicit tint pair before the icon call (default
+ * bit clear). Exact sRGB white is routed through the palette; other colors are unchanged, so other
+ * buttons keep their values. Zero matches skip the pill; more than one throws.
+ */
+context(context: BytecodePatchContext)
+private fun patchMediaViewerFollowPill() {
+    val buttons =
+        findMethodsInPackage(PORTS_BUTTON_PACKAGE) { method ->
+            val instructions = method.implementation?.instructions ?: return@findMethodsInPackage false
+            instructions.any { it.isComposeIconCall() } && instructions.any { it.isMaterialTextCall() }
+        }
+    val method = requireAtMostOne("NewX media viewer follow pill", buttons) ?: return
+    if (method.hookExactWhiteIconTints() == 0) {
+        throw PatchException("NewX media viewer follow pill has no icon to theme: $method")
+    }
+}
+
+/**
+ * The media author row builds its Follow button style from small color suppliers in the media
+ * package; the content-color supplier wraps Compose white in a color state, and the surface
+ * provides that value as the ambient content color for both the caption and the icon. Routing the
+ * color long through the palette themes both without touching the shared button composable. Only
+ * exact sRGB white changes, and builds without such a call skip it.
+ */
+context(context: BytecodePatchContext)
+private fun patchMediaViewerButtonContentColors() {
+    val mediaClasses = mutableListOf<String>()
+    context.classDefForEach { classDef ->
+        if (classDef.type.startsWith(MEDIA_PLAYBACK_PACKAGE)) mediaClasses += classDef.type
+    }
+    for (descriptor in mediaClasses) {
+        for (method in context.mutableClassDefBy(descriptor).methods) {
+            if (method.implementation == null) continue
+            val methodInstructions = method.instructions.toList()
+            val colorStateCalls =
+                methodInstructions.withIndex().filter { (_, instruction) ->
+                    instruction.isColorStateCall()
+                }
+            for ((index, instruction) in colorStateCalls.asReversed()) {
+                val reference = instruction.getReference<MethodReference>() ?: continue
+                val colorRegister =
+                    methodInstructions.invokeArgumentRegister(index, reference, 2)
+                        ?: throw PatchException("NewX media button content color is missing: $method")
+                method.insertHook(index = index, relocateBranchTargets = true) {
+                    invokeStatic(methodReference(MEDIA_TEXT_COLOR_METHOD), colorRegister, colorRegister + 1)
+                    moveResult(colorRegister, "J")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Compose's color-state helper: a static call on the animation package taking a composer, a
+ * boolean, and the color long, and returning a Compose graphics type. R8 moves the owner between
+ * `animation` and `animation/core` per build (12.33 alpha.01 and 12.32 alpha.04 use the former), so
+ * only the package family and the parameter shape are matched.
+ */
+private fun Instruction.isColorStateCall(): Boolean {
+    if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
+    val reference = getReference<MethodReference>() ?: return false
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    return reference.returnType.startsWith("Landroidx/compose/ui/graphics/") &&
+        parameters.size == 3 &&
+        parameters[0].startsWith("Landroidx/compose/runtime/") &&
+        parameters[1] == "Z" &&
+        parameters[2] == "J"
+}
+
+/**
+ * Routes the explicit tint pair of each icon call through the exact-white text mapping. Only the
+ * pair is read and rewritten, in place, before the verified icon invoke.
+ */
+private fun MutableMethod.hookExactWhiteIconTints(): Int {
+    val methodInstructions = instructions.toList()
+    val iconCalls =
+        methodInstructions.withIndex().filter { (_, instruction) ->
+            instruction.isComposeIconCall()
+        }
+    for ((index, instruction) in iconCalls.asReversed()) {
+        val reference = instruction.getReference<MethodReference>() ?: continue
+        val tintRegister =
+            methodInstructions.invokeArgumentRegister(index, reference, COMPOSE_ICON_TINT_PARAMETER)
+                ?: throw PatchException("NewX media viewer follow pill icon tint is missing: $this")
+        insertHook(index = index, relocateBranchTargets = true) {
+            invokeStatic(methodReference(MEDIA_TEXT_COLOR_METHOD), tintRegister, tintRegister + 1)
+            moveResult(tintRegister, "J")
+        }
+    }
+    return iconCalls.size
+}
+
+/**
+ * The author name in the media viewer is the user row's name composable, which takes two strings
+ * (name, handle). Builds without that shape (12.31) skip it, so it is only claimed where it exists and passes its color through to material Text. The viewer passes explicit sRGB
+ * white to it, so only that exact white is routed through the palette.
+ */
+context(context: BytecodePatchContext)
+private fun patchMediaViewerUserNameColors() {
+    val nameMethods =
+        findMethodsInPackage(USER_ROW_PACKAGE) { method ->
+            method.parameterTypes.take(2).map(CharSequence::toString) ==
+                listOf("Ljava/lang/String;", "Ljava/lang/String;") &&
+                method.implementation?.instructions?.any { it.isMaterialTextCall() } == true
+        }
+    // 12.31 has no (String, String) user row composable, so the element is skipped there.
+    val method = requireAtMostOne("NewX media viewer author name", nameMethods) ?: return
+    if (method.hookMaterialTextColors() == 0) {
+        throw PatchException("NewX media viewer author name has no Text calls to theme: $method")
+    }
+}
+
+/**
+ * Collects the mutable methods in the package whose immutable form satisfies [predicate]. The
+ * immutable scan keeps the mutable class lookup limited to the matching classes.
+ */
+context(context: BytecodePatchContext)
+private fun findMethodsInPackage(
+    packagePrefix: String,
+    predicate: (com.android.tools.smali.dexlib2.iface.Method) -> Boolean,
+): List<MutableMethod> {
+    val matches = mutableListOf<MutableMethod>()
+    context.classDefForEach { classDef ->
+        if (!classDef.type.startsWith(packagePrefix)) return@classDefForEach
+        if (classDef.methods.none(predicate)) return@classDefForEach
+        matches += context.mutableClassDefBy(classDef.type).methods.filter(predicate)
+    }
+    return matches
+}
+
+private fun MutableMethod.hookIconTints(): Int {
+    val methodInstructions = instructions.toList()
+    val iconCalls =
+        methodInstructions.withIndex().filter { (_, instruction) ->
+            instruction.isComposeIconCall()
+        }
+    // Descending order keeps the lower call indexes valid while the hooks are inserted.
+    for ((index, instruction) in iconCalls.asReversed()) {
+        val reference = instruction.getReference<MethodReference>() ?: continue
+        val tintRegister =
+            methodInstructions.invokeArgumentRegister(index, reference, COMPOSE_ICON_TINT_PARAMETER)
+                ?: throw PatchException("NewX media viewer icon tint is missing: $this")
+        val defaultsRegister =
+            methodInstructions.invokeArgumentRegister(index, reference, COMPOSE_ICON_DEFAULTS_PARAMETER)
+                ?: throw PatchException("NewX media viewer icon defaults are missing: $this")
+        // Each hook only reads and writes the exact argument registers of the g.d call (the tint
+        // pair and the defaults int), in place. Both are guaranteed by the verified invoke on every
+        // path into the hook, so no argument copies are introduced.
+        insertHook(index = index, relocateBranchTargets = true) {
+            invokeStatic(methodReference(MEDIA_ICON_TINT_METHOD), tintRegister, tintRegister + 1)
+            moveResult(tintRegister, "J")
+            invokeStatic(methodReference(MEDIA_ICON_DEFAULTS_METHOD), defaultsRegister)
+            moveResult(defaultsRegister, "I")
+        }
+    }
+    return iconCalls.size
+}
+
+private fun MutableMethod.hookMaterialTextColors(): Int {
+    val methodInstructions = instructions.toList()
+    val textCalls =
+        methodInstructions.withIndex().filter { (_, instruction) ->
+            instruction.isMaterialTextCall()
+        }
+    for ((index, instruction) in textCalls.asReversed()) {
+        val reference = instruction.getReference<MethodReference>() ?: continue
+        val colorRegister =
+            methodInstructions.invokeArgumentRegister(index, reference, 2)
+                ?: throw PatchException("NewX media viewer Text color is missing: $this")
+        insertHook(index = index, relocateBranchTargets = true) {
+            invokeStatic(methodReference(MEDIA_TEXT_COLOR_METHOD), colorRegister, colorRegister + 1)
+            moveResult(colorRegister, "J")
+        }
+    }
+    return textCalls.size
+}
+
+/**
+ * Matches the shared icon composable by its signature: icon, label, modifier, a long tint, a
+ * boolean, the composer, then the two int flags. The owner class is not checked because R8
+ * renames it, and the call is only hooked inside the media viewer methods.
+ */
+private fun Instruction.isComposeIconCall(): Boolean {
+    if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
+    val reference = getReference<MethodReference>() ?: return false
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    return reference.returnType == "V" &&
+        parameters.size == 8 &&
+        parameters[0] == COMPOSE_ICON_OWNER_PARAMETER &&
+        parameters[1] == "Ljava/lang/String;" &&
+        parameters[2] == "Landroidx/compose/ui/Modifier;" &&
+        parameters[COMPOSE_ICON_TINT_PARAMETER] == "J" &&
+        parameters[4] == "Z" &&
+        parameters[5] == "Landroidx/compose/runtime/Composer;" &&
+        parameters[COMPOSE_ICON_DEFAULTS_PARAMETER] == "I"
+}
+
+/**
+ * The post body in the media viewer is drawn by the shared rich-text composable, not material3
+ * Text. Its color is the eighth parameter (a long after the text model and the TextStyle), and the
+ * viewer passes plain white there. Only the media playback package is hooked, so the same
+ * composable keeps its color across the rest of the app.
+ */
+context(context: BytecodePatchContext)
+private fun patchMediaViewerRichTextColors() {
+    val mediaClasses = mutableListOf<String>()
+    context.classDefForEach { classDef ->
+        if (classDef.type.startsWith(MEDIA_PLAYBACK_PACKAGE)) mediaClasses += classDef.type
+    }
+    var hookCount = 0
+    for (descriptor in mediaClasses) {
+        for (method in context.mutableClassDefBy(descriptor).methods) {
+            // Abstract and native methods have no body to hook.
+            if (method.implementation == null) continue
+            val methodInstructions = method.instructions.toList()
+            val richTextCalls =
+                methodInstructions.withIndex().filter { (_, instruction) ->
+                    instruction.isRichTextColorCall()
+                }
+            for ((index, instruction) in richTextCalls.asReversed()) {
+                val reference = instruction.getReference<MethodReference>() ?: continue
+                val colorParameter = richTextColorParameter(reference)
+                    ?: throw PatchException("NewX media viewer rich text color is missing: $method")
+                val colorRegister =
+                    methodInstructions.invokeArgumentRegister(index, reference, colorParameter)
+                        ?: throw PatchException("NewX media viewer rich text color is missing: $method")
+                method.insertHook(index = index, relocateBranchTargets = true) {
+                    invokeStatic(methodReference(MEDIA_TEXT_COLOR_METHOD), colorRegister, colorRegister + 1)
+                    moveResult(colorRegister, "J")
+                }
+                hookCount++
+            }
+        }
+    }
+    // Older viewers (12.29 prod) have no shared rich-text call; their body text stays untouched
+    // instead of failing the whole theme patch on a declared target.
+    if (hookCount == 0) return
+}
+
+/**
+ * Matches the shared rich-text composable by its signature: a static call on the text package
+ * (the owner class and method name are renamed per build: `text/i` in 12.33, `text/h` in 12.29)
+ * with a String text, whose single color long directly follows a TextStyle. The parameter count
+ * and position drift between releases (12.31 has one fewer boolean than 12.33), and R8 renames the
+ * TextStyle class, so the color is located by that neighbor rather than by index.
+ */
+private fun Instruction.isRichTextColorCall(): Boolean {
+    if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
+    val reference = getReference<MethodReference>() ?: return false
+    return reference.definingClass.startsWith(RICH_TEXT_PACKAGE) &&
+        reference.returnType == "V" &&
+        richTextColorParameter(reference) != null
+}
+
+/**
+ * The index of the color long in the rich-text composable, or null when the shape is absent.
+ * The String text is parameter 0 and the color is the only long placed after a TextStyle.
+ */
+private fun richTextColorParameter(reference: MethodReference): Int? {
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    if (parameters.getOrNull(0) != "Ljava/lang/String;") return null
+    return parameters.indices
+        .filter { index ->
+            index > 0 &&
+                parameters[index] == "J" &&
+                parameters[index - 1].startsWith(TEXT_STYLE_PACKAGE)
+        }
+        .singleOrNull()
+}
+
+/**
+ * R8 renames the material3 holder class per build (`ue` in 12.33, `se` in 12.31), so the Text
+ * composable is matched by its signature: text, modifier, then the color long.
+ */
+private fun Instruction.isMaterialTextCall(): Boolean {
+    if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
+    val reference = getReference<MethodReference>() ?: return false
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    return reference.definingClass.startsWith(MATERIAL3_PACKAGE) &&
+        reference.returnType == "V" &&
+        parameters.getOrNull(0) == "Ljava/lang/String;" &&
+        parameters.getOrNull(1) == "Landroidx/compose/ui/Modifier;" &&
+        parameters.getOrNull(2) == "J"
 }
 
 private data class XdsDarkConstruction(
