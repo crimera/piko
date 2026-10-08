@@ -71,6 +71,7 @@ val addSettingsActivityPatch =
                 ResourceGroup(
                     "drawable",
                     "piko_settings_shortcut_icon.xml",
+                    "piko_settings_shortcut_foreground.xml",
                     "piko_ghost_icon.xml",
                 ),
                 ResourceGroup(
