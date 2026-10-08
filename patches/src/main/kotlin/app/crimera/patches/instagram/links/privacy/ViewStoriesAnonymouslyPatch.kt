@@ -34,6 +34,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 val viewStoriesAnonymouslyPatch =
     bytecodePatch(
         name = "View stories anonymously",
+        default = false,
     ) {
         dependsOn(
             settingsPatch,

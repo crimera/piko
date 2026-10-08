@@ -42,7 +42,7 @@ val unlockPlusBenefitsPatch =
     bytecodePatch(
         name = "Unlock Plus benefits",
         description = "Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(settingsPatch)
