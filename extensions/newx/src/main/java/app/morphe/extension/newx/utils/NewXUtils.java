@@ -315,13 +315,8 @@ public final class NewXUtils {
             if (originalScreenName != null) return originalScreenName;
         }
 
-        if (sourceMediaField(postText, "sourcePostIdentifier") != null) {
-            String mentionScreenName = firstMentionScreenName(postText);
-            if (mentionScreenName != null) return mentionScreenName;
-
-            String expandedUrlScreenName = mediaExpandedUrlScreenName(postText);
-            if (expandedUrlScreenName != null) return expandedUrlScreenName;
-        }
+        String sourceMediaScreenName = sourceMediaScreenName(postText);
+        if (sourceMediaScreenName != null) return sourceMediaScreenName;
 
         String canonicalScreenName = rawAuthorField(canonicalPostText(postText), "screenName");
         if (canonicalScreenName != null) return canonicalScreenName;
@@ -343,6 +338,12 @@ public final class NewXUtils {
         if (originalPostText != null) {
             String originalName = rawAuthorField(originalPostText, "name");
             if (originalName != null) return originalName;
+        }
+
+        // When the handle comes from the media's source post, the name must come from that same
+        // account too; falling through would pair the source handle with the quoting author's name.
+        if (sourceMediaScreenName(postText) != null) {
+            return sourceMediaField(postText, "sourceUserDisplayName");
         }
 
         String canonicalName = rawAuthorField(canonicalPostText(postText), "name");
@@ -391,6 +392,17 @@ public final class NewXUtils {
 
         String canonicalPost = ToStringParser.fieldValue(repostedPost, "canonicalPost");
         return canonicalPost != null ? canonicalPost : repostedPost;
+    }
+
+    /**
+     * Author handle of the media's source post, resolved only when the media carries source
+     * lineage. Shared by the handle and display-name resolvers so both describe the same account.
+     */
+    private static String sourceMediaScreenName(String postText) {
+        if (sourceMediaField(postText, "sourcePostIdentifier") == null) return null;
+
+        String mentionScreenName = firstMentionScreenName(postText);
+        return mentionScreenName != null ? mentionScreenName : mediaExpandedUrlScreenName(postText);
     }
 
     private static String firstMentionScreenName(String text) {

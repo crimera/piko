@@ -530,6 +530,8 @@ public final class InlineDownloadButtonTest {
         assertEquals("Phot0_detective", context.screenName);
         assertEquals("2088553803364843766", context.id);
         assertEquals("写真集探偵", context.sourceUserDisplayName);
+        // {userName} and {name} must describe the same account as {id}, not the quoting author.
+        assertEquals("写真集探偵", context.name);
         assertEquals("Phot0_detective_2088553803364843766.jpg",
                 DownloadFileName.render(null, context, 0, 1, "jpg"));
     }
@@ -538,13 +540,17 @@ public final class InlineDownloadButtonTest {
     public void repostWithAttachedMediaFallsBackToAuthorWhenNoExpandedUrlOrMentions() {
         String post = "ContextualPost(canonicalPost=CanonicalPost(id=2091833522717663582, " +
                 "media=[MediaContentImage(mediaId=2088553798574944256, " +
-                "sourceInfo=SourceInfo(sourcePostIdentifier=2088553803364843766))], " +
+                "sourceInfo=SourceInfo(sourcePostIdentifier=2088553803364843766, " +
+                "sourceUserDisplayName=写真集探偵))], " +
                 "entityList=PostEntityList(mentions=[], urls=[], media=[]), " +
                 "author=MinimalUser(id=1252509176015790080, screenName=Chetanc54455628, name=一日一グラビア), " +
                 "rePostedPost=null)";
 
+        // With no handle recoverable from the source lineage, both handle and name stay with the
+        // author; the source's display name must not be paired with the author's handle.
         DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
         assertEquals("Chetanc54455628", context.screenName);
+        assertEquals("一日一グラビア", context.name);
         assertEquals("2088553803364843766", context.id);
     }
 
@@ -560,6 +566,8 @@ public final class InlineDownloadButtonTest {
         DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
         assertEquals("chachironi3", context.screenName);
         assertEquals("2088279482146898407", context.id);
+        // No source display name in the lineage: leave {name} empty rather than the author's name.
+        assertNull(context.name);
     }
 
     @Test
