@@ -221,7 +221,7 @@
     <string name="piko_newx_download_options_folder_hint">Files are written straight into the folder you pick. Pick a folder under Pictures or DCIM to have downloads appear in your gallery.</string>
     <string name="piko_newx_download_options_filename_hint">Tap a token to insert it. Anything outside braces is kept as-is.</string>
     <string name="piko_newx_download_options_filename_preview">Preview: %1$s</string>
-    <string name="piko_newx_download_options_filename_reset">Reset to default</string>
+    <string name="piko_newx_download_options_filename_reset">Reset</string>
     <string name="piko_newx_download_options_changed">Download folder updated</string>
     <string name="piko_newx_download_options_cancelled">No folder selected</string>
 

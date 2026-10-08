@@ -207,12 +207,6 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
                 DownloadFileName.preview(input.getText().toString())
         ));
 
-        ButtonView cancel = SettingsUi.dialogButton(
-                activity,
-                StringRef.str("piko_newx_settings_cancel")
-        );
-        cancel.setOnClickListener(ignored -> dialog.dismiss());
-
         ButtonView reset = SettingsUi.dialogButton(
                 activity,
                 StringRef.str("piko_newx_download_options_filename_reset")
@@ -240,7 +234,7 @@ public final class DownloadOptionsFragment extends CustomScreenFragment {
             refresh();
         });
 
-        dialog.addButton(cancel).addButton(reset).addButton(save).show();
+        dialog.addButton(reset).addButton(save).show();
     }
 
     private static LinearLayout tokenChips(Activity activity, EditText input) {
