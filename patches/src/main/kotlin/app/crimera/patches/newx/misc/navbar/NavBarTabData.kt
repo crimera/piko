@@ -225,7 +225,7 @@ internal fun resolveNewXNavBarFilterTarget(match: Match): TabDataFilterTarget {
         )
     }
 
-    // 12.29 wraps the tab map in a landing wrapper constructor instead of a state holder.
+    // 12.29+ wraps the tab map in a landing wrapper constructor instead of a state holder.
     val wrapperInitIndex = match.method.findTabDataWrapperInitIndex(mapPutIndex, mapRegister)
     val wrapperInitInstruction =
         match.method.instructions.getOrNull(wrapperInitIndex) as? Instruction35c
@@ -276,7 +276,7 @@ private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int? {
     return requireAtMostOne("stable NewX tabData State constructor", candidates)
 }
 
-private fun MutableMethod.findTabDataWrapperInitIndex(
+internal fun MutableMethod.findTabDataWrapperInitIndex(
     anchorIndex: Int,
     mapRegister: Int,
 ): Int {
@@ -291,12 +291,14 @@ private fun MutableMethod.findTabDataWrapperInitIndex(
                 val parameters = reference.parameterTypes.map { it.toString() }
                 if (reference.name != "<init>" ||
                     reference.returnType != "V" ||
-                    parameters != listOf(MAP_DESCRIPTOR, "Z", LINKED_HASH_MAP_DESCRIPTOR)
+                    LINKED_HASH_MAP_DESCRIPTOR !in parameters
                 ) {
                     return@mapNotNull null
                 }
                 // Tie the wrapper to the exact map the fingerprint built, so no obfuscated owner
-                // is needed and a stray (Map, Z, LinkedHashMap) constructor cannot match.
+                // is needed and a stray LinkedHashMap constructor cannot match. The auxiliary
+                // parameters (12.33 prod.01 inserted an int between the Map and the flag) are
+                // not part of the contract, so they are not matched by position.
                 val linkedHashMapIndex = parameters.indexOf(LINKED_HASH_MAP_DESCRIPTOR)
                 if (invoke.registersUsed.getOrNull(linkedHashMapIndex + 1) != mapRegister) {
                     return@mapNotNull null
