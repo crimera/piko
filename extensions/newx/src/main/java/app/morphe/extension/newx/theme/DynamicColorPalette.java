@@ -170,6 +170,22 @@ public final class DynamicColorPalette {
         return pack(THEME_DIM.equals(themeStyle) ? DIM_XDS_BACKGROUND : BLACK_XDS_BACKGROUND);
     }
 
+    /**
+     * Supplies the light scheme's chrome background from its constructor. Only Material You
+     * changes it, to the dynamic light surface the body uses. The dark scheme is handled by
+     * {@link #xdsChromeBackground(long)} at class init, and light hosts keep native chrome for
+     * High contrast and Dim.
+     */
+    public static long xdsSchemeBackground(boolean isLight, long originalColor) {
+        if (!isLight || !useMaterialBackground() || !isEnabled()) return originalColor;
+        Context context = Utils.getContext();
+        if (context == null) {
+            throw new IllegalStateException("NewX XDS colors need the initialized host context");
+        }
+        if (TwitterTheme.fromContext(context) != TwitterTheme.STANDARD) return originalColor;
+        return color(LIGHT_SURFACE);
+    }
+
     public static long light(int token) {
         requireSupported();
         requireDynamicTheme();

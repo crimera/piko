@@ -83,6 +83,8 @@ private const val XDS_CHROME_BACKGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsChromeBackground(J)J"
 private const val XDS_FOREGROUND_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsForeground(IZJ)J"
+private const val XDS_SCHEME_BACKGROUND_METHOD =
+    "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->xdsSchemeBackground(ZJ)J"
 private const val MEDIA_TEXT_COLOR_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->mediaTextColor(J)J"
 private const val MEDIA_ICON_TINT_METHOD =
@@ -280,8 +282,8 @@ val dynamicColorPatch =
             patchDynamicAccentPalettes()
             patchInlineActionTints()
             patchTabTints(paletteDescriptor)
-            val xdsSchemeConstructor = patchXdsChromeBackground()
-            patchXdsForegroundColors(xdsSchemeConstructor)
+            val (xdsSchemeConstructor, chromeBackgroundField) = patchXdsChromeBackground()
+            patchXdsForegroundColors(xdsSchemeConstructor, chromeBackgroundField)
             patchMediaViewerTextColors()
         }
     }
@@ -1274,7 +1276,7 @@ private object XdsChromeBackgroundFingerprint : Fingerprint(
 )
 
 context(context: BytecodePatchContext)
-private fun patchXdsChromeBackground(): MutableMethod {
+private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
     val backgroundFields =
         XdsChromeBackgroundFingerprint
             .matchAllOrNull()
@@ -1390,7 +1392,7 @@ private fun patchXdsChromeBackground(): MutableMethod {
         )
         moveResult(darkConstruction.colorRegister, "J")
     }
-    return constructor
+    return constructor to backgroundField
 }
 
 /** [role] mirrors `DynamicColorPalette.XDS_FOREGROUND_*`. */
@@ -1408,12 +1410,14 @@ private data class XdsSchemeFields(
 private val XDS_PROPERTY_NAME = Regex("([A-Za-z0-9]+)=$")
 
 /**
- * Themes the XDS text roles at the end of the scheme constructor, which both the light and dark
- * schemes run through. Fields are matched by the property names `toString` prints, not by R8
- * names: the n-th color read there is the n-th property name.
+ * Themes the XDS text roles and the chrome background at the end of the scheme constructor, which
+ * both the light and dark schemes run through. Fields are matched by the property names `toString`
+ * prints, not by R8 names: the n-th color read there is the n-th property name. The chrome
+ * background is the primary surface; the light scheme's copy is set by this same constructor,
+ * since its colors are all constructor defaults and no call site ever passes them.
  */
 context(context: BytecodePatchContext)
-private fun patchXdsForegroundColors(constructor: MutableMethod) {
+private fun patchXdsForegroundColors(constructor: MutableMethod, chromeBackground: FieldReference) {
     val schemeDescriptor = constructor.definingClass
     val schemeToString =
         requireExactlyOne(
@@ -1434,7 +1438,7 @@ private fun patchXdsForegroundColors(constructor: MutableMethod) {
             }
             instruction.getReference<FieldReference>()?.toString()
         }
-    (fields.foreground.values + fields.isLight).forEach { field ->
+    (fields.foreground.values + fields.isLight + chromeBackground).forEach { field ->
         if (storedFields.count { stored -> stored == field.toString() } != 1) {
             throw PatchException(
                 "NewX XDS scheme field $field is not assigned exactly once in $constructor",
@@ -1476,6 +1480,12 @@ private fun patchXdsForegroundColors(constructor: MutableMethod) {
             moveResult(color, "J")
             iput(color, self, field)
         }
+        // The chrome background is the surface the top bar and nav bar tint with; the extension
+        // only changes the light scheme's copy, so the dark scheme keeps its class-init value.
+        iget(color, self, chromeBackground)
+        invokeStatic(methodReference(XDS_SCHEME_BACKGROUND_METHOD), isLight, color, colorHigh)
+        moveResult(color, "J")
+        iput(color, self, chromeBackground)
     }
 }
 
