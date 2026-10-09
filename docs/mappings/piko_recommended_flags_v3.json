@@ -173,11 +173,6 @@
   {
     "name" : "Suggested users in search null state",
     "desc" : "Disable to hide suggested accounts from the search screen.",
-    "code" : "63806::0"
-  },
-  {
-    "name" : "Suggested users in search null state",
-    "desc" : "Disable to hide suggested accounts from the search screen.",
     "code" : "130063::0,130063::4,130063::3,130063::2"
   },
   {
