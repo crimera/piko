@@ -176,6 +176,11 @@
     "code" : "63806::0"
   },
   {
+    "name" : "Suggested users in search null state",
+    "desc" : "Disable to hide suggested accounts from the search screen.",
+    "code" : "130063::0,130063::4,130063::3,130063::2"
+  },
+  {
     "name" : "Max recent searches shown (Android)",
     "desc" : "Number of recent profiles kept in search history. Classic value was 25.",
     "code" : "111509::17",
