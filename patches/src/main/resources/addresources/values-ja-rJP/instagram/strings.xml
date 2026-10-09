@@ -149,7 +149,7 @@
     <string name="piko_inbox_lock">メッセージのロック</string>
     <string name="piko_inbox_lock_desc">アプリを開くたびに、メッセージの表示に画面ロックまたは生体認証を要求します</string>
     <string name="piko_inbox_lock_notifications">通知をブロック</string>
-    <string name="piko_inbox_lock_notifications_desc">メッセージのロック中は、メッセージ通知に「新着メッセージ」のみを表示し、アプリ内のメッセージバナーを非表示にします</string>
+    <string name="piko_inbox_lock_notifications_desc">メッセージのロック中は、メッセージ通知の送信者と本文を隠し、アプリ内のメッセージバナーも非表示にします</string>
     <string name="piko_inbox_lock_notification">新着メッセージ</string>
     <string name="piko_inbox_lock_unlock">ロックを解除</string>
     <string name="piko_inbox_lock_prompt">メッセージのロックを解除</string>

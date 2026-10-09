@@ -51,6 +51,24 @@
     <string name="piko_disable_comments">关闭评论</string>
     <string name="piko_limit_following_feed">限制主页只看关注</string>
     <string name="piko_limit_following_feed_desc">过滤主页，只显示您关注的人的内容。</string>
+    <string name="piko_disable_discover_people">隐藏推荐内容</string>
+    <string name="piko_focus_lock">聚焦锁</string>
+    <string name="piko_focus_lock_targets">锁定设置</string>
+    <string name="piko_focus_lock_duration">锁定</string>
+    <string name="piko_focus_lock_duration_1_minute">1分钟</string>
+    <string name="piko_focus_lock_duration_5_minutes">5 分钟</string>
+    <string name="piko_focus_lock_duration_10_minutes">10 分钟</string>
+    <string name="piko_focus_lock_duration_30_minutes">30 分钟</string>
+    <string name="piko_focus_lock_duration_1_hour">1 小时</string>
+    <string name="piko_focus_lock_duration_2_hours">2 小时</string>
+    <string name="piko_focus_lock_duration_6_hours">6 小时</string>
+    <string name="piko_focus_lock_duration_12_hours">12 小时</string>
+    <string name="piko_focus_lock_duration_1_day">1天</string>
+    <string name="piko_focus_lock_duration_3_days">3 天</string>
+    <string name="piko_focus_lock_duration_1_week">1 周</string>
+    <string name="piko_focus_lock_duration_2_weeks">2 周</string>
+    <string name="piko_focus_lock_duration_1_month">1 个月</string>
+    <string name="piko_focus_lock_duration_3_months">3 个月</string>
     <string name="piko_disable_reels_scrolling">禁用Reels 自动滑动</string>
     <string name="piko_disable_reels_scrolling_desc">在 Instagram Reels 中禁用自动滑动，防止滑动到下一个 Reel。注意：在第一次安装后，提示动画可能会出现，但在几秒钟后将自动停止。</string>
     <string name="piko_disable_swipe_to_create">禁用滑动创建</string>
@@ -60,7 +78,11 @@
     <string name="piko_hide_notes_tray">隐藏便笺托盘</string>
     <string name="piko_hide_notes_tray_desc">在私信中隐藏便笺</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">在分享表单中隐藏\"发送到新群聊\"按钮</string>
+    <string name="piko_hide_reels_follow_button">隐藏Reels关注按钮</string>
+    <string name="piko_hide_share_button">隐藏分享按钮</string>
+    <string name="piko_hide_save_buttons">隐藏保存按钮</string>
     <string name="piko_hide_reshare_button">隐藏转发按钮</string>
+    <string name="piko_hide_reels_follow_button_desc">在Reels中移除关注按钮</string>
     <string name="piko_disable_video_autoplay">禁用视频自动播放</string>
     <string name="piko_disable_double_tap_like_post">禁用双击点赞帖子</string>
     <string name="piko_disable_double_tap_like_reel">禁用双击点赞 reel</string>
@@ -128,6 +150,8 @@
     <string name="piko_category_download_media">下载内容</string>
     <string name="piko_category_downloads">下载</string>
     <string name="piko_enable_download">启用下载</string>
+    <string name="piko_feed_download_button">Feed 帖子下载按钮</string>
+    <string name="piko_feed_download_button_desc">在主页帖子的保存按钮旁边添加下载按钮</string>
     <string name="piko_save_media_comment">保存媒体评论</string>
     <string name="piko_save_media_comment_desc">在帖子和 Reels 上添加了一个用于保存媒体评论的按钮</string>
     <string name="piko_enable_direct_download">启用直接下载</string>
@@ -136,6 +160,8 @@
     <string name="piko_download_username_folder_desc">基于用户名创建子文件夹</string>
     <string name="piko_embed_download_metadata">嵌入视频元数据</string>
     <string name="piko_embed_download_metadata_desc">添加标题、帖子链接、创建者和上传日期到下载的 MP4 文件</string>
+    <string name="piko_download_file_name_template">文件名格式</string>
+    <string name="piko_download_file_name_template_invalid">无效的文件名</string>
     <string name="piko_download_current_media">下载当前媒体</string>
     <string name="piko_download_as_image">保存为图片</string>
     <string name="piko_video_variants">视频分辨率</string>
@@ -192,7 +218,7 @@
     <!-- Information Section -->
     <string name="piko_category_about">关于</string>
     <string name="piko_export_pref">导出 Piko 设置</string>
-    <string name="piko_import_pref">导出 Piko 设置</string>
+    <string name="piko_import_pref">导入Piko设置</string>
     <string name="piko_reset_pref">重置 Piko 设置</string>
     <string name="piko_reset_pref_confirm">重置 Piko 设置？</string>
     <string name="piko_reset_pref_success">重置 Piko 设置</string>
@@ -227,6 +253,9 @@
     <string name="piko_change_like_animation">更改点赞动画</string>
     <string name="piko_change_like_animation_desc">将点赞动画更改为现有快拍环动画中的一个</string>
     <string name="piko_available_like_animation">可用的点赞动画</string>
+    <string name="piko_like_animation_random">随机</string>
+    <string name="piko_like_animation_preview">动画预览</string>
+    <string name="piko_like_animation_preview_unavailable">预览不可用</string>
     <!-- For arrays -->
     <string name="piko_array_default">默认</string>
     <string name="piko_array_detailed_timestamp">详细时间戳(周/月/日/小时/分钟/秒)</string>
@@ -255,6 +284,20 @@
     <string name="piko_settings_on_action_bar">操作栏上的 Piko 设置</string>
     <string name="piko_settings_on_action_bar_desc">移动Piko 设置到主页操作栏</string>
     <!-- Font Section -->
+    <string name="piko_category_font">字体</string>
+    <string name="piko_custom_font">自定义字体</string>
+    <string name="piko_pref_add_font">添加字体</string>
+    <string name="piko_pref_add_font_desc">从您的存储设备中选择字体文件 (.ttf 或 .otf)</string>
+    <string name="piko_pref_add_font_success">字体添加成功</string>
+    <string name="piko_pref_add_font_fail">添加字体失败</string>
+    <string name="piko_pref_add_font_invalid">所选文件不是一个有效的字体</string>
+    <string name="piko_pref_add_font_too_large">所选字体过大</string>
+    <string name="piko_pref_delete_font">删除字体</string>
+    <string name="piko_pref_delete_font_success">字体删除成功</string>
+    <string name="piko_pref_delete_font_fail">删除字体失败</string>
+    <string name="piko_pref_delete_font_warn">未找到可删除的自定义字体</string>
+    <string name="piko_use_system_font">使用系统字体</string>
+    <string name="piko_use_system_font_desc">仅在下方没有添加字体文件时才适用，添加一个覆盖此开关。</string>
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">推荐标记</string>
     <string name="piko_category_rec_flags_desc">社区建议的开发者标志</string>

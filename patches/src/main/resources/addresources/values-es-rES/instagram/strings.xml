@@ -147,7 +147,6 @@
     <string name="piko_inbox_lock">Bandeja de entrada cerrada</string>
     <string name="piko_inbox_lock_desc">Oculta tu bandeja de entrada detrás de tu huella digital, rostro o bloqueo de pantalla cada vez que abres la aplicación</string>
     <string name="piko_inbox_lock_notifications">Bloquear notificaciones</string>
-    <string name="piko_inbox_lock_notifications_desc">Mientras el bloqueo de la bandeja de entrada está activado, las notificaciones de mensajes solo dicen \"Nuevo mensaje\" y el banner del mensaje en la aplicación permanece oculto</string>
     <string name="piko_inbox_lock_notification">Nuevo mensaje</string>
     <string name="piko_inbox_lock_unlock">Desbloquear</string>
     <string name="piko_inbox_lock_prompt">Desbloquea tus mensajes</string>

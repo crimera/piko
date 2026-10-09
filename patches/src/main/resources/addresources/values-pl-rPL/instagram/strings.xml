@@ -100,6 +100,8 @@
     <string name="piko_hide_notes_tray_desc">Ukrywa pasek notatek w sekcji wiadomości</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ukryj przycisk tworzenia grupy w menu udostępniania</string>
     <string name="piko_hide_reels_follow_button">Ukryj przycisk Obserwuj w Rolkach</string>
+    <string name="piko_hide_share_button">Ukryj przycisk udostępniania</string>
+    <string name="piko_hide_save_buttons">Ukryj przyciski zapisu</string>
     <string name="piko_hide_reshare_button">Ukryj przycisk Udostępnij</string>
     <string name="piko_hide_reels_follow_button_desc">Usuwa przycisk obserwowania z wiersza autora Rolki</string>
     <string name="piko_disable_video_autoplay">Wyłącz autoodtwarzanie filmu</string>
@@ -147,7 +149,7 @@
     <string name="piko_inbox_lock">Blokada skrzynki odbiorczej</string>
     <string name="piko_inbox_lock_desc">Ukrywa skrzynkę odbiorczą za pomocą odcisku palca, rozpoznawania twarzy lub blokady ekranu przy każdym otwarciu aplikacji</string>
     <string name="piko_inbox_lock_notifications">Blokuj powiadomienia</string>
-    <string name="piko_inbox_lock_notifications_desc">Gdy blokada skrzynki odbiorczej jest aktywna, powiadomienia o wiadomościach zawierają tylko tekst \"Nowa wiadomość\", a baner wiadomości w aplikacji pozostaje ukryty</string>
+    <string name="piko_inbox_lock_notifications_desc">Gdy blokada skrzynki odbiorczej jest włączona, powiadomienia o wiadomościach ukrywają nadawcę i treść, a baner wiadomości w aplikacji pozostaje ukryty</string>
     <string name="piko_inbox_lock_notification">Nowa wiadomość</string>
     <string name="piko_inbox_lock_unlock">Odblokuj</string>
     <string name="piko_inbox_lock_prompt">Odblokuj wiadomości</string>

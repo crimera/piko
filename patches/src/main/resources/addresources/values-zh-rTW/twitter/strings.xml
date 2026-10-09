@@ -269,7 +269,7 @@
     <string name="piko_pref_version_info">版本資訊</string>
     <string name="piko_changelogs_title">變更日誌</string>
     <string name="piko_debug">Piko 偵錯</string>
-    <string name="piko_pref_patches">補丁</string>
+    <string name="piko_pref_patches">修補程式</string>
     <string name="piko_pref_included">包含</string>
     <string name="piko_pref_excluded">排除</string>
     <string name="piko_pref_app_restart_rec">建議重新啟動應用程式</string>

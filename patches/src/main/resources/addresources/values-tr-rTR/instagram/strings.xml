@@ -147,7 +147,6 @@
     <string name="piko_inbox_lock">Gelen Kutusu Kilidi</string>
     <string name="piko_inbox_lock_desc">Uygulamayı her açtığınızda gelen kutunuzu parmak izi, yüz tanıma veya ekran kilidi ile gizler</string>
     <string name="piko_inbox_lock_notifications">Bildirimleri engelle</string>
-    <string name="piko_inbox_lock_notifications_desc">Gelen Kutusu kilidi etkinken, mesaj bildirimlerinde yalnızca “Yeni mesaj” yazılır ve uygulama içi mesaj başlığı gizli kalır</string>
     <string name="piko_inbox_lock_notification">Yeni mesaj</string>
     <string name="piko_inbox_lock_unlock">Kilidi aç</string>
     <string name="piko_inbox_lock_prompt">Mesajlarınızın kilidini açın</string>

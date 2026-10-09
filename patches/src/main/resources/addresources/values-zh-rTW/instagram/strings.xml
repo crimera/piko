@@ -79,7 +79,7 @@
     <string name="piko_focus_lock_button_unlock">解鎖</string>
     <string name="piko_focus_lock_status_unlocked">未開啟。請選擇要鎖定的項目與時長，然後開啟鎖定。</string>
     <string name="piko_focus_lock_status_locked">鎖定至 %1$s。若要提早解鎖，需要 24 小時的冷卻期。</string>
-    <string name="piko_focus_lock_status_unlock_pending">將於 %1$s 開放解鎖（原本鎖定至 \%2$s）。點擊可取消解鎖申請。</string>
+    <string name="piko_focus_lock_status_unlock_pending">將於 %1$s 開放解鎖（原本鎖定至 %2$s）。點擊可取消解鎖申請。</string>
     <string name="piko_focus_lock_status_unlock_ready">冷卻期已結束。點擊即可解鎖。</string>
     <string name="piko_focus_lock_nothing_selected">請先至少選擇一項要鎖定的設定。</string>
     <string name="piko_focus_lock_confirm_lock">要啟用專注鎖嗎？</string>
@@ -93,11 +93,11 @@
     <string name="piko_disable_reels_scrolling">停用 Reels 捲動</string>
     <string name="piko_disable_reels_scrolling_desc">停用 Instagram Reels 中的無限捲動功能，防止滑動至下一則 Reel。注意：在全新安裝的情況下，可能會出現「提示」動畫，但幾秒鐘後會自動停止。</string>
     <string name="piko_disable_swipe_to_create">停用滑動建立</string>
-    <string name="piko_disable_swipe_to_create_desc">防止在首頁分頁向右滑動開啟創作畫面。</string>
-    <string name="piko_hide_stories_tray">隱藏限時動態欄</string>
-    <string name="piko_hide_stories_tray_desc">從動態首頁中限時動態欄</string>
-    <string name="piko_hide_notes_tray">隱藏筆記欄</string>
-    <string name="piko_hide_notes_tray_desc">在私訊中隱藏筆記欄</string>
+    <string name="piko_disable_swipe_to_create_desc">防止在首頁分頁向右滑動開啟建立畫面。</string>
+    <string name="piko_hide_stories_tray">隱藏限時動態橫幅</string>
+    <string name="piko_hide_stories_tray_desc">從動態首頁中隱藏限時動態橫幅</string>
+    <string name="piko_hide_notes_tray">隱藏筆記橫幅</string>
+    <string name="piko_hide_notes_tray_desc">在私訊中隱藏筆記橫幅</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">在分享表單中隱藏「傳送到新的群組聊天」按鈕</string>
     <string name="piko_hide_reels_follow_button">隱藏 Reels 追蹤按鈕</string>
     <string name="piko_hide_share_button">隱藏分享按鈕</string>
@@ -149,7 +149,7 @@
     <string name="piko_inbox_lock">收件匣鎖定</string>
     <string name="piko_inbox_lock_desc">每次開啟應用程式時，需透過指紋、臉部或螢幕解鎖才能存取收件匣</string>
     <string name="piko_inbox_lock_notifications">隱藏通知內容</string>
-    <string name="piko_inbox_lock_notifications_desc">當啟用收件匣鎖定時，訊息通知僅顯示「新訊息」，且會隱藏應用程式內的訊息橫幅</string>
+    <string name="piko_inbox_lock_notifications_desc">當啟用收件匣鎖定時，訊息通知會隱藏發送人與訊息內容，且會隱藏應用程式內的訊息橫幅</string>
     <string name="piko_inbox_lock_notification">新訊息</string>
     <string name="piko_inbox_lock_unlock">解鎖</string>
     <string name="piko_inbox_lock_prompt">解鎖你的訊息</string>
@@ -157,7 +157,7 @@
     <string name="piko_unlock_plus_benefits">解鎖 Plus 專屬福利</string>
     <string name="piko_unlock_plus_benefits_desc">解鎖在本地驗證的 Plus 專屬福利。使用時請自行承擔風險</string>
     <!-- DM Section -->
-    <string name="piko_category_dm">私訊 (DM)</string>
+    <string name="piko_category_dm">私訊</string>
     <string name="piko_unlimited_replays">使限時媒體變為永久</string>
     <string name="piko_unlimited_replays_desc">將未過期的單次或雙次檢視媒體變更為永久檢視</string>
     <string name="piko_enable_mark_chat_as_read">啟用標記聊天為已讀選項</string>
@@ -173,7 +173,7 @@
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
     <string name="piko_customise_story_ring_size">自訂限時動態光圈尺寸</string>
-    <string name="piko_customise_story_ring_size_desc">按百分比調整限時動態光圈尺寸 (預設值：100)</string>
+    <string name="piko_customise_story_ring_size_desc">按百分比調整限時動態光圈尺寸（預設值：100）</string>
     <string name="piko_disable_story_flipping">停用自動切換限時動態</string>
     <string name="piko_disable_story_flipping_desc">停用自動切換/移動至下一個限時動態</string>
     <string name="piko_loop_story">循環播放限時動態</string>
@@ -234,7 +234,7 @@
     <string name="piko_copy_post_owner_username">複製發文者的使用者名稱</string>
     <string name="piko_copy_post_owner_fullname">複製發文者的全名</string>
     <string name="piko_enable_more_options_on_post">在貼文中啟用更多選項</string>
-    <string name="piko_enable_more_options_on_post_desc">在貼文 / Reels 新增一個溢位選單按鈕以取得更多選項，例如複製描述、複製使用者名稱等</string>
+    <string name="piko_enable_more_options_on_post_desc">在貼文與 Reels 新增選單按鈕以提供更多選項，例如複製描述、複製使用者名稱等</string>
     <string name="piko_more_options">更多選項</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">隱藏導覽按鈕</string>
@@ -242,7 +242,7 @@
     <string name="piko_hide_navigation_reels">隱藏 Reels 按鈕</string>
     <string name="piko_hide_navigation_direct">隱藏私訊按鈕</string>
     <string name="piko_hide_navigation_search">隱藏搜尋按鈕</string>
-    <string name="piko_hide_navigation_create">隱藏創作按鈕</string>
+    <string name="piko_hide_navigation_create">隱藏建立按鈕</string>
     <string name="piko_category_navigation_tabs">導覽列</string>
     <string name="piko_navigation_tabs_title">顯示與重排分頁</string>
     <string name="piko_navigation_tabs_summary">選擇底部顯示的分頁並拖曳調整順序</string>
@@ -266,8 +266,8 @@
     <string name="piko_reset_pref_success">Piko 設定已重設</string>
     <string name="piko_reset_pref_failed">重設 Piko 設定失敗</string>
     <string name="piko_app_version">應用程式版本：%s</string>
-    <string name="piko_patch_version">補丁版本：%s</string>
-    <string name="piko_patch_info_title">補丁資訊</string>
+    <string name="piko_patch_version">修補程式版本：%s</string>
+    <string name="piko_patch_info_title">修補程式資訊</string>
     <string name="piko_patch_enabled">已啟用</string>
     <string name="piko_patch_disabled">已停用</string>
     <!-- Export and Import Section -->
@@ -283,8 +283,8 @@
     <string name="piko_reset">重設</string>
     <string name="piko_cancel">取消</string>
     <string name="piko_deleted">已刪除</string>
-    <string name="piko_debug">Piko 調試</string>
-    <string name="piko_debug_desc">為部分組件添加調試選項以進行測試</string>
+    <string name="piko_debug">Piko 偵錯</string>
+    <string name="piko_debug_desc">為部分組件添加偵錯選項以進行測試</string>
     <string name="piko_export_experiment_list">匯出實驗列表</string>
     <string name="piko_export_experiment_mappings">匯出實驗映射</string>
     <!-- Open With Section -->
@@ -295,22 +295,22 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">更改「按讚」動畫</string>
     <string name="piko_change_like_animation_desc">將按讚動畫變更為現有的光圈按讚動畫之一</string>
-    <string name="piko_available_like_animation">可用的「按讚」動畫</string>
+    <string name="piko_available_like_animation">可用的按讚動畫</string>
     <string name="piko_like_animation_random">隨機</string>
     <string name="piko_like_animation_preview">預覽動畫</string>
     <string name="piko_like_animation_preview_unavailable">無法預覽</string>
     <!-- For arrays -->
     <string name="piko_array_default">預設</string>
-    <string name="piko_array_detailed_timestamp">詳細時間 (星期/月份/日期/小時/分鐘/秒)</string>
-    <string name="piko_array_post_time">發佈時間 (小時/分鐘/秒)</string>
-    <string name="piko_array_time_left">剩餘時間 (小時/分鐘/秒)</string>
+    <string name="piko_array_detailed_timestamp">詳細時間（星期/月份/日期/小時/分鐘/秒）</string>
+    <string name="piko_array_post_time">發佈時間（小時/分鐘/秒）</string>
+    <string name="piko_array_time_left">剩餘時間（小時/分鐘/秒）</string>
     <string name="piko_array_recmd_flag_state_enable">開啟</string>
     <string name="piko_array_recmd_flag_state_disable">關閉</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">歡迎來到 Piko</string>
     <string name="piko_welcome_message">為了提升您使用 Piko 的體驗，請前往 Piko 設定調整您的偏好設定</string>
     <string name="piko_goto_piko_settings">前往 Piko 設定</string>
-    <string name="piko_no_internet">請連接到互聯網</string>
+    <string name="piko_no_internet">請連線至網際網路</string>
     <string name="piko_tap_here">點這裡！！</string>
     <!-- Action Bar Section -->
     <string name="piko_category_action_bar">功能列</string>
@@ -347,7 +347,7 @@
     <string name="piko_rec_flags_read_error">讀取快取的標記檔案失敗</string>
     <string name="piko_rec_flags_no_file">找不到推薦的標記檔案</string>
     <string name="piko_rec_flags_refresh_file">重新整理標記</string>
-    <string name="piko_rec_flags_last_modified_at">最近修改： %s</string>
+    <string name="piko_rec_flags_last_modified_at">最近修改：%s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">內容過濾</string>
     <string name="piko_filter_story">過濾限時動態</string>
@@ -404,9 +404,9 @@
     <string name="piko_user_type_unverified">未驗證使用者</string>
     <string name="piko_user_type_verified">已驗證使用者</string>
     <string name="piko_filter_story_minimum_item_count">最少限時動態項目數量</string>
-    <string name="piko_filter_story_minimum_item_count_desc">少於 X 個項目的限時動態將會隱藏 (預設值：1)</string>
+    <string name="piko_filter_story_minimum_item_count_desc">少於 X 個項目的限時動態將會隱藏（預設值：1）</string>
     <string name="piko_filter_story_maximum_item_count">最多限時動態項目數量</string>
-    <string name="piko_filter_story_maximum_item_count_desc">多於 X 個項目的限時動態將會隱藏 (預設值：9999)</string>
+    <string name="piko_filter_story_maximum_item_count_desc">多於 X 個項目的限時動態將會隱藏（預設值：9999）</string>
     <!-- Save Instants -->
     <string name="piko_instants_download">儲存 Instants</string>
     <string name="piko_instants_download_desc">在檢視只能看一次的 Instants 時自動擷取，方便日後從「檢視已儲存的 Instants」重新查看或下載。</string>

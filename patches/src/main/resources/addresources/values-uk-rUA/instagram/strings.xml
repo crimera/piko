@@ -147,7 +147,6 @@
     <string name="piko_inbox_lock">Блокування папки «Вхідні»</string>
     <string name="piko_inbox_lock_desc">Ховає вашу папку «Вхідні» за відбитком пальця, розпізнаванням обличчя або блокуванням екрана щоразу, коли ви відкриваєте додаток</string>
     <string name="piko_inbox_lock_notifications">Блокувати сповіщення</string>
-    <string name="piko_inbox_lock_notifications_desc">Поки ввімкнено блокування папки «Вхідні», сповіщення про повідомлення містять лише текст «Нове повідомлення», а банер повідомлень у додатку залишається прихованим</string>
     <string name="piko_inbox_lock_notification">Нове повідомлення</string>
     <string name="piko_inbox_lock_unlock">Розблокувати</string>
     <string name="piko_inbox_lock_prompt">Розблокуйте ваші повідомлення</string>

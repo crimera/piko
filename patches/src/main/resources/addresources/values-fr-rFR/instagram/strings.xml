@@ -55,8 +55,8 @@
     <string name="piko_focus_lock">Verrouillage de la mise au point</string>
     <string name="piko_focus_lock_desc">Forcer les paramètres sans distraction à rester activés pendant une durée définie</string>
     <string name="piko_focus_lock_targets">Paramètres de verrouillage</string>
-    <string name="piko_focus_lock_reels_tab">Onglet Reels</string>
-    <string name="piko_focus_lock_reels_tab_desc">Supprime l\'onglet Reels de la barre de navigation. Les Reels qui vous sont partagés s\'ouvrent toujours</string>
+    <string name="piko_focus_lock_reels_tab">Onglet \"Reels\"</string>
+    <string name="piko_focus_lock_reels_tab_desc">Supprime l\'onglet \"Reels\" de la barre de navigation. Les Reels qui vous sont partagés s\'ouvrent toujours</string>
     <string name="piko_focus_lock_duration">Verrouiller pendant</string>
     <string name="piko_focus_lock_duration_1_minute">1 minute</string>
     <string name="piko_focus_lock_duration_5_minutes">5 minutes</string>
@@ -100,6 +100,8 @@
     <string name="piko_hide_notes_tray_desc">Masque le bandeau des notes dans la section des messages privés</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Masquer le bouton de création de groupe dans le panneau de partage</string>
     <string name="piko_hide_reels_follow_button">Masquer le bouton \"Suivre\" des Reels</string>
+    <string name="piko_hide_share_button">Masquer le bouton \"Partager\"</string>
+    <string name="piko_hide_save_buttons">Masquer le bouton \"Enregistrer\"</string>
     <string name="piko_hide_reshare_button">Masquer le bouton de repartage</string>
     <string name="piko_hide_reels_follow_button_desc">Supprime le bouton \"Suivre\" de la ligne de l\'auteur des Reels</string>
     <string name="piko_disable_video_autoplay">Désactiver la lecture automatique des vidéos</string>
@@ -147,7 +149,6 @@
     <string name="piko_inbox_lock">Verrouillage de la boîte de réception</string>
     <string name="piko_inbox_lock_desc">Masque votre boîte de réception derrière votre empreinte digitale, votre visage ou le verrouillage de l\'écran chaque fois que vous ouvrez l\'application</string>
     <string name="piko_inbox_lock_notifications">Bloquer les notifications</string>
-    <string name="piko_inbox_lock_notifications_desc">Lorsque le verrouillage de la boîte de réception est activé, les notifications de messages indiquent uniquement \'Nouveau message\' et la bannière de message dans l\'application reste masquée</string>
     <string name="piko_inbox_lock_notification">Nouveau message</string>
     <string name="piko_inbox_lock_unlock">Déverrouiller</string>
     <string name="piko_inbox_lock_prompt">Déverrouillez vos messages</string>

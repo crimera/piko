@@ -100,6 +100,7 @@
     <string name="piko_hide_notes_tray_desc">메시지 섹션에서 메모 선반을 숨깁니다</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">공유 시트에서 그룹 만들기 버튼 숨기기</string>
     <string name="piko_hide_reels_follow_button">릴스 팔로우 버튼 숨기기</string>
+    <string name="piko_hide_share_button">공유 버튼 숨기기</string>
     <string name="piko_hide_save_buttons">저장 버튼 숨기기</string>
     <string name="piko_hide_reshare_button">리포스트 버튼 숨기기</string>
     <string name="piko_hide_reels_follow_button_desc">릴스 작성자 행에서 팔로우 버튼을 제거합니다</string>
@@ -148,7 +149,7 @@
     <string name="piko_inbox_lock">받은 메시지함 잠금</string>
     <string name="piko_inbox_lock_desc">앱을 실행할 때마다 지문, 얼굴 인식 또는 화면 잠금으로 받은 메지함을 숨깁니다</string>
     <string name="piko_inbox_lock_notifications">알림 차단</string>
-    <string name="piko_inbox_lock_notifications_desc">받은 메시지함 잠금이 활성화된 동안에는 메시지 알림에 ‘새 메시지’라고만 표시되며, 앱 내 메시지 배너도 표시되지 않습니다</string>
+    <string name="piko_inbox_lock_notifications_desc">받은 메시지함 잠금이 활성화되어 있는 동안에는 메시지 알림에서 보낸 사람과 메시지 내용이 표시되지 않으며, 앱 내 메시지 배너도 숨겨집니다</string>
     <string name="piko_inbox_lock_notification">새 메시지</string>
     <string name="piko_inbox_lock_unlock">잠금</string>
     <string name="piko_inbox_lock_prompt">메시지 잠금 해제</string>

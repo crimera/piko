@@ -100,6 +100,7 @@
     <string name="piko_hide_notes_tray_desc">Oculta a barra de notas no direct.</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ocultar botão de criação de grupo na aba de compartilhamento</string>
     <string name="piko_hide_reels_follow_button">Ocultar botão de seguir no Reels</string>
+    <string name="piko_hide_share_button">Ocultar botão de compartilhar</string>
     <string name="piko_hide_save_buttons">Ocultar botões de salvar</string>
     <string name="piko_hide_reshare_button">Ocultar botão de repostar</string>
     <string name="piko_hide_reels_follow_button_desc">Remove o botão de seguir o autor da Reels</string>
@@ -148,7 +149,6 @@
     <string name="piko_inbox_lock">Bloqueio da caixa de entrada</string>
     <string name="piko_inbox_lock_desc">Oculta sua caixa de entrada atrás da sua impressão digital, reconhecimento facial ou bloqueio de tela sempre que você abre o aplicativo</string>
     <string name="piko_inbox_lock_notifications">Bloquear notificações</string>
-    <string name="piko_inbox_lock_notifications_desc">Enquanto o bloqueio da Caixa de Entrada estiver ativado, as notificações de mensagens exibirão apenas \"Nova mensagem\" e o banner de mensagens no aplicativo permanecerá oculto</string>
     <string name="piko_inbox_lock_notification">Nova mensagem</string>
     <string name="piko_inbox_lock_unlock">Desbloquear</string>
     <string name="piko_inbox_lock_prompt">Desbloqueie suas mensagens</string>
@@ -183,7 +183,7 @@
     <string name="piko_enable_download">Ativar download de postagens de imagens e vídeos</string>
     <string name="piko_feed_download_button">Botão de download nas postagens do feed</string>
     <string name="piko_feed_download_button_desc">Adiciona um ícone de download ao lado do botão de salvar nas publicações do feed</string>
-    <string name="piko_save_media_comment">Salvar a mídia do comentário</string>
+    <string name="piko_save_media_comment">Ativar download de mídia do comentário</string>
     <string name="piko_save_media_comment_desc">Adiciona um botão para salvar fotos e gifs dos comentários em posts e reels.</string>
     <string name="piko_enable_direct_download">Ativar download de mídias no direct</string>
     <string name="piko_enable_direct_download_desc">Baixar foto/vídeo de uma conversa no direct.</string>
