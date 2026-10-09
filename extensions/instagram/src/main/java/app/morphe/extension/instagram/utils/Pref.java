@@ -275,10 +275,6 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.ALLOW_USER_NETWORK_CERTIFICATE);
     }
 
-    public static int buildAge(int appAge) {
-        return SharedPref.getBooleanPref(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1 : appAge;
-    }
-
     public static boolean disableAnalytics() {
         return SharedPref.getBooleanPref(Settings.DISABLE_ANALYTICS);
     }

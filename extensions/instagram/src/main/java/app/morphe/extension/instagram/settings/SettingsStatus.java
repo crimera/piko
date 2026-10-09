@@ -245,10 +245,6 @@ public class SettingsStatus {
     public static void enableDeveloperOptions() {
         enableDeveloperOptions = true;
     }
-    public static boolean removeBuildExpirePopup = false;
-    public static void removeBuildExpirePopup() {
-        removeBuildExpirePopup = true;
-    }
     public static boolean unlockEmployeeOptions = false;
     public static void unlockEmployeeOptions() {
         unlockEmployeeOptions = true;
@@ -260,7 +256,7 @@ public class SettingsStatus {
     public static boolean recommendedFlags = false;
     public static void recommendedFlags() {recommendedFlags = true;}
     public static boolean developerOptionsSection() {
-        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup || recommendedFlags);
+        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || recommendedFlags);
     }
 
 
@@ -326,7 +322,6 @@ public class SettingsStatus {
         FLAGS.put(str("piko_custom_sharing_domain"),SettingsStatus.customSharingDomain);
         FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);
         FLAGS.put(str("piko_enable_dev_options"),SettingsStatus.enableDeveloperOptions);
-        FLAGS.put(str("piko_remove_build_expire_popup"),SettingsStatus.removeBuildExpirePopup);
         FLAGS.put(str("piko_enable_emp_options"),SettingsStatus.unlockEmployeeOptions);
         FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
 

@@ -16,8 +16,6 @@
     <string name="piko_enable_emp_options_desc">Unlocks all employee options used for testing</string>
     <string name="piko_allow_user_network_certificate">Allow user network certificate</string>
     <string name="piko_allow_user_network_certificate_desc">Allows user network certificate for whitehat testing</string>
-    <string name="piko_remove_build_expire_popup">Remove build expire popup</string>
-    <string name="piko_remove_build_expire_popup_desc">Removes the popup that appears after a while, when the app version ages</string>
     <string name="piko_export_dev_overrides">Export overrides</string>
     <string name="piko_import_dev_overrides">Import overrides</string>
     <string name="piko_import_id_mapping">Import mapping files</string>

@@ -140,15 +140,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.removeBuildExpirePopup) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_remove_build_expire_popup"),
-                            str("piko_remove_build_expire_popup_desc"),
-                            Settings.REMOVE_BUILD_EXPIRE_POPUP
-                    )
-            );
-        }
         if (SettingsStatus.unlockEmployeeOptions) {
             addPreference(
                     helper.switchPreference(

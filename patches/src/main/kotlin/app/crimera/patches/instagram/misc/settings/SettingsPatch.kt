@@ -11,6 +11,8 @@ import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
+import app.crimera.patches.instagram.links.validateLinks.validateLinksPatch
+import app.crimera.patches.instagram.misc.buildExpiredPopup.removeBuildExpiredPopupPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hideHomeActionButtonsPatch
 import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
@@ -59,6 +61,8 @@ val settingsPatch =
             userProfileButtonPatch,
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
+            validateLinksPatch,
+            removeBuildExpiredPopupPatch,
             preserveUnknownFriendshipStatusPatch,
             profileInfoEntity,
             instagramDialogBoxEntity,
