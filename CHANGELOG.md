@@ -1,3 +1,16 @@
+## [3.10.0-dev.13](https://github.com/crimera/piko/compare/v3.10.0-dev.12...v3.10.0-dev.13) (2026-10-09)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix deleted message handling ([4254162](https://github.com/crimera/piko/commit/425416276c0ae2df7a6cf53fab9b37708735f8be))
+* **Instagram:** Preserve friendship status when metadata is missing ([6eeb0f0](https://github.com/crimera/piko/commit/6eeb0f08db63e99cfb102e1ddb653945a10e1780))
+* **Instagram:** Sanitize shared links before changing domains ([b1d0eb4](https://github.com/crimera/piko/commit/b1d0eb481e748a33110a5f5fd51ade221fe1ecef))
+* **Instagram:** Use an adaptive settings shortcut icon ([454f283](https://github.com/crimera/piko/commit/454f283baf3f7d444cb7d8b13eb3728e6a081a36))
+
+### 🔧 Improvements
+
+* **Instagram:** Add flags to Suggested users in search ([4dbc376](https://github.com/crimera/piko/commit/4dbc3764bf9bda3c10546d8e112328a4310cf48a))
+
 ## [3.10.0-dev.12](https://github.com/crimera/piko/compare/v3.10.0-dev.11...v3.10.0-dev.12) (2026-10-07)
 
 ### 🐛 Bug Fixes

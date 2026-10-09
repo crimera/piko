@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.10.0-dev.12",
+  "version": "3.10.0-dev.13",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -49,6 +49,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "ResourcePatch"
       ],
       "compatiblePackages": [
@@ -77,7 +78,7 @@
     {
       "name": "Allow user network certificate",
       "description": "Allows user network certificate for whitehat testing",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
@@ -1143,7 +1144,7 @@
     {
       "name": "Disable analytics",
       "description": "Block analytics that are sent to Instagram/Facebook servers.",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
@@ -1388,7 +1389,7 @@
     {
       "name": "Disable screenshot detection",
       "description": "Disables screenshots detection in DM",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch"
       ],
@@ -2985,7 +2986,7 @@
     {
       "name": "Make ephemeral media permanent",
       "description": "Changes unexpired view once, view twice media to permanent view.",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -3972,7 +3973,7 @@
     {
       "name": "Unlock Plus benefits",
       "description": "Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch"
       ],
@@ -4034,7 +4035,7 @@
     {
       "name": "Unlock employee options",
       "description": "Unlocks all options using by employee for debugging",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -4096,7 +4097,7 @@
     {
       "name": "View DMs anonymously",
       "description": null,
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -4128,7 +4129,7 @@
     {
       "name": "View live anonymously",
       "description": null,
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -4161,7 +4162,7 @@
     {
       "name": "View stories anonymously",
       "description": null,
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
