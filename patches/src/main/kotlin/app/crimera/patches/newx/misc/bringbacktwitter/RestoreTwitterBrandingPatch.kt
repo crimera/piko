@@ -29,7 +29,7 @@ val bringBackTwitterPatch =
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
-        dependsOn(addResourcesPatch)
+        dependsOn(addResourcesPatch, restoreTwitterTopBarLogoPatch)
 
         execute {
             addAppResources("twitter-bring-back")
