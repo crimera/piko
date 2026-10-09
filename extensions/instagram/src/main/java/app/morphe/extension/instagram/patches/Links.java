@@ -187,6 +187,16 @@ public class Links {
         return url;
     }
 
+    public static String sanitizeSharedUrl(String url) {
+        return SettingsStatus.sanitizeShareLinks ? sanitizeUrl(url) : url;
+    }
+
+    public static String processSharedUrl(String url) {
+        // Clean the original Instagram URL before changing its host.
+        String sanitizedUrl = sanitizeSharedUrl(url);
+        return SettingsStatus.customSharingDomain ? changeDomain(sanitizedUrl) : sanitizedUrl;
+    }
+
     public static String changeDomain(String url) {
         try {
             String domain = normalizeCustomDomain(Pref.customSharingDomain());
