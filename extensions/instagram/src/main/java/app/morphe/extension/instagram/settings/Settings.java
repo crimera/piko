@@ -52,6 +52,7 @@ public class Settings {
     public static final BooleanSetting LOOP_STORY = new BooleanSetting("loop_story", false);
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default");
     public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", false);
+    public static final BooleanSetting EPHEMERAL_MEDIA_CAPTION = new BooleanSetting("ephemeral_media_caption", false);
     public static final BooleanSetting HIDE_SHARE_BUTTON = new BooleanSetting("hide_share_button", false);
     public static final BooleanSetting HIDE_SAVE_BUTTONS = new BooleanSetting("hide_save_buttons", false);
     public static final BooleanSetting HIDE_RESHARE_BUTTON = new BooleanSetting("hide_reshare_button", false);

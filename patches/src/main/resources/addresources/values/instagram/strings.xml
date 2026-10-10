@@ -164,6 +164,13 @@
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
+    <string name="piko_ephemeral_caption">Show how ephemeral media was received</string>
+    <string name="piko_ephemeral_caption_desc">Adds a line under photos and videos that were sent as ephemeral media saying how they were sent and until when they are available</string>
+    <string name="piko_ephemeral_received_once">Received to view once</string>
+    <string name="piko_ephemeral_received_twice">Received to view twice</string>
+    <string name="piko_ephemeral_received_chat">Received to keep in chat</string>
+    <string name="piko_ephemeral_available_until">available until %s</string>
+    <string name="piko_ephemeral_expired">expired</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
     <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
 
