@@ -35,11 +35,6 @@
     "code" : "93316"
   },
   {
-    "name" : "Redesign Stories viewer",
-    "desc" : "",
-    "code" : "90996"
-  },
-  {
     "name" : "Remove yourself from someone's Stories Close Friends list",
     "desc" : "Click the Close Friends icon, and you'll see a button to leave.",
     "code" : "105130"
@@ -53,11 +48,6 @@
     "name" : "Stories viewer list redesign",
     "desc" : "",
     "code" : "119728"
-  },
-  {
-    "name" : "Upload progress percentage while posting a Stories",
-    "desc" : "Shows upload progress percentage while posting a Story, giving real-time feedback on upload status.",
-    "code" : "115501"
   },
   {
     "name" : "Replace the Instagram logo with 'For You' in the feed.",
@@ -80,6 +70,17 @@
     "code" : "121815"
   },
   {
+    "name" : "Hide the seekbar on short Reels",
+    "desc" : "Disable and set \"Minimum Reel duration for the seekbar\" to 1 to show the seekbar on all Reels",
+    "code" : "82799::16"
+  },
+  {
+    "name" : "Minimum Reel duration for the seekbar",
+    "desc" : "Set to 1 and disable \"Hide the seekbar on short Reels\" to show the seekbar on all Reels",
+    "code" : "82799::41",
+    "type" : "long"
+  },
+  {
     "name" : "Show a spoiler of the temporary photo/video in direct",
     "desc" : "",
     "code" : "98405"
@@ -95,6 +96,11 @@
     "code" : "93842"
   },
   {
+    "name" : "Saved button in Explore",
+    "desc" : "",
+    "code" : "126311::1,133789::0"
+  },
+  {
     "name" : "Redesign in the explore tab",
     "desc" : "",
     "code" : "124823"
@@ -103,11 +109,6 @@
     "name" : "Display the user's username instead of the nickname",
     "desc" : "for notifications and in direct",
     "code" : "77064"
-  },
-  {
-    "name" : "New Instagram logo",
-    "desc" : "",
-    "code" : "111259"
   },
   {
     "name" : "Redesign for notification settings",
@@ -128,5 +129,62 @@
     "name" : "Add Meta AI reels description pills",
     "desc" : "",
     "code" : "80654"
+  },
+  {
+    "name" : "Meta AI suggestions in search",
+    "desc" : "Disable to show recent profile searches instead.",
+    "code" : "111509::3"
+  },
+  {
+    "name" : "Collapsible recent searches",
+    "desc" : "Disable to stop the recent searches list from collapsing.",
+    "code" : "111509::9"
+  },
+  {
+    "name" : "Horizontal scroll for recent searches",
+    "desc" : "Disable to show recent searches in a vertical list instead.",
+    "code" : "111509::21"
+  },
+  {
+    "name" : "Search bar hint carousel",
+    "desc" : "",
+    "code" : "111509::25"
+  },
+  {
+    "name" : "Search bar hint carousel (dynamic)",
+    "desc" : "",
+    "code" : "111509::26"
+  },
+  {
+    "name" : "Suggested users in search null state",
+    "desc" : "Disable to hide suggested accounts from the search screen.",
+    "code" : "130063::0,130063::4,130063::3,130063::2"
+  },
+  {
+    "name" : "Max recent searches shown (Android)",
+    "desc" : "Number of recent profiles kept in search history. Classic value was 25.",
+    "code" : "111509::17",
+    "type" : "long"
+  },
+  {
+    "name" : "Max recent searches shown",
+    "desc" : "Number of recent profiles kept in search history. Classic value was 25.",
+    "code" : "111509::1",
+    "type" : "long"
+  },
+  {
+    "name" : "Ultra HDR always on",
+    "desc" : "Disable to prevent rendering Ultra HDR photos at full brightness.",
+    "code" : "109125"
+  },
+  {
+    "name" : "SDR super white on HDR content",
+    "desc" : "Disable to remove the brightness boost on Reels and videos on HDR-capable screens.",
+    "code" : "68885"
+  },
+  {
+    "name" : "Per-session auto-scroll",
+    "desc" : "Disable to keep auto-scroll in the state you left it, instead of resetting to off every time Instagram is closed.",
+    "code" : "83371::10"
   }
 ]

@@ -12,11 +12,16 @@ import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
+import app.crimera.utils.MethodFieldMetadata
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -34,31 +39,80 @@ val directItemEntity =
         execute {
             DirectItemDispatchFingerprint.apply {
                 // Scan all methods: v426 deserializer is A00, v430+ moved it to unsafeParseFromJson.
-                fun fieldAfter(key: String) =
+                fun fieldsAfter(key: String) =
                     mutableClassDefBy { it.type == method.definingClass }
-                        .methods.firstNotNullOfOrNull { m ->
+                        .methods.flatMap { m ->
                             val insns = runCatching { m.instructions.toList() }.getOrNull()
-                                ?: return@firstNotNullOfOrNull null
-                            val keyIndex =
-                                insns.indexOfFirst {
-                                    (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
-                                        (it as ReferenceInstruction).reference.toString() == key
-                                }
-                            if (keyIndex < 0) return@firstNotNullOfOrNull null
-                            insns.drop(keyIndex + 1).firstOrNull {
-                                it.opcode.name.startsWith("iput", ignoreCase = true)
-                            }?.fieldExtractor()
-                        } ?: error("no iput after '$key' in ${method.definingClass}")
+                                ?: return@flatMap emptyList()
+                            insns.indices.mapNotNull { keyIndex ->
+                                val instruction = insns[keyIndex]
+                                val isKey =
+                                    (instruction.opcode == Opcode.CONST_STRING ||
+                                        instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                        (instruction as ReferenceInstruction).reference.toString() == key
+                                if (!isKey) return@mapNotNull null
+                                val equalsCall = insns.getOrNull(keyIndex + 1)
+                                val result = insns.getOrNull(keyIndex + 2)
+                                val branch = insns.getOrNull(keyIndex + 3) as? BuilderOffsetInstruction
+                                    ?: return@mapNotNull null
+                                if (equalsCall?.getReference<MethodReference>()?.toString() !=
+                                    "Ljava/lang/String;->equals(Ljava/lang/Object;)Z" ||
+                                    result?.opcode != Opcode.MOVE_RESULT ||
+                                    result.registersUsed.singleOrNull() != branch.registersUsed.singleOrNull()
+                                ) return@mapNotNull null
 
-                val itemId = fieldAfter("item_id")
+                                // v447 shares an out-of-line assignment for text and reaction.
+                                // Only follow the branch where the JSON key actually matches.
+                                val valueIndex = when (branch.opcode) {
+                                    Opcode.IF_EQZ -> keyIndex + 4
+                                    Opcode.IF_NEZ -> branch.target.location.index
+                                    else -> return@mapNotNull null
+                                }
+                                insns.drop(valueIndex).firstOrNull {
+                                    it.opcode.name.startsWith("iput", ignoreCase = true)
+                                }?.fieldExtractor()
+                            }
+                        }.distinctBy { Triple(it.definingClass, it.name, it.returnType) }
+
+                fun fieldAfter(key: String): MethodFieldMetadata {
+                    val matches = fieldsAfter(key)
+                    if (matches.size != 1) {
+                        throw PatchException(
+                            "Expected one field assignment after '$key' in ${method.definingClass}, " +
+                                "found ${matches.size}",
+                        )
+                    }
+                    return matches.single()
+                }
+
+                fun stringFieldAfter(key: String): MethodFieldMetadata {
+                    val matches = fieldsAfter(key).filter { it.returnType == "java.lang.String" }
+                    if (matches.size != 1) {
+                        throw PatchException(
+                            "Expected one String field after '$key' in ${method.definingClass}, " +
+                                "found ${matches.size}",
+                        )
+                    }
+                    return matches.single()
+                }
+
+                val itemId = stringFieldAfter("item_id")
+                val clientContext = stringFieldAfter("client_context")
+                if (clientContext.definingClass != itemId.definingClass) {
+                    throw PatchException("DirectItem identifiers resolve to different base classes")
+                }
                 GetItemIdExtension.changeFirstString(itemId.name)
+                GetClientContextExtension.changeFirstString(clientContext.name)
                 GetBaseClassNameExtension.changeFirstString(itemId.definingClass)
 
                 GetUserIdExtension.changeFirstString(fieldAfter("user_id").name)
 
-                val textField = fieldAfter("text").name
-                GetTextExtension.changeString("baseTextField", textField)
-                SetTextExtension.changeString("baseTextField", textField)
+                val textField = stringFieldAfter("text")
+                if (textField.definingClass != itemId.definingClass) {
+                    throw PatchException("DirectItem text resolves to a different base class")
+                }
+                GetTextExtension.changeString("baseTextField", textField.name)
+                SetTextExtension.changeString("baseTextField", textField.name)
 
                 GetTimestampRawExtension.changeFirstString(fieldAfter("timestamp").name)
 
@@ -277,14 +331,63 @@ val directItemEntity =
                 }
             }
 
-            // DirectThreadKey is stable but its thread-id field is obfuscated: first String instance field.
+            // Resolve the exact mThreadId access from the stable toString label.
             val threadKeyClass =
                 mutableClassDefBy { it.type == "Lcom/instagram/model/direct/DirectThreadKey;" }
-            val threadIdField =
-                threadKeyClass.fields
-                    .first {
-                        !AccessFlags.STATIC.isSet(it.accessFlags) && it.type == "Ljava/lang/String;"
-                    }.name
-            GetThreadIdExtension.changeFirstString(threadIdField)
+            val toStringMethod =
+                threadKeyClass.methods.singleOrNull {
+                    it.name == "toString" && it.parameterTypes.isEmpty() && it.returnType == "Ljava/lang/String;"
+                } ?: throw PatchException("Expected one DirectThreadKey.toString() method")
+            val threadInstructions = toStringMethod.instructions.toList()
+            val threadIdFields =
+                threadInstructions.indices.mapNotNull { labelIndex ->
+                    val instruction = threadInstructions[labelIndex]
+                    val isThreadIdLabel =
+                        (instruction.opcode == Opcode.CONST_STRING ||
+                            instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
+                            (instruction as ReferenceInstruction).reference.toString()
+                                .contains("mThreadId")
+                    if (!isThreadIdLabel) return@mapNotNull null
+
+                    val followingField = threadInstructions.drop(labelIndex + 1).firstOrNull {
+                        it.opcode == Opcode.IGET_OBJECT &&
+                            ((it as ReferenceInstruction).reference as? FieldReference)?.let { field ->
+                                field.definingClass ==
+                                    "Lcom/instagram/model/direct/DirectThreadKey;" &&
+                                    field.type == "Ljava/lang/String;"
+                            } == true
+                    }?.let { (it as ReferenceInstruction).reference as FieldReference }
+                    if (followingField != null) return@mapNotNull followingField
+
+                    val labelRegister = instruction.registersUsed.single()
+                    threadInstructions.withIndex().mapNotNull concat@ { (callIndex, call) ->
+                        val reference = call.getReference<MethodReference>() ?: return@concat null
+                        if (call.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) ||
+                            reference.returnType != "Ljava/lang/String;" ||
+                            reference.parameterTypes.any { it != "Ljava/lang/String;" }
+                        ) return@concat null
+                        val registers = call.registersUsed
+                        val labelArgument = registers.indexOf(labelRegister)
+                        if (registers.size != reference.parameterTypes.size ||
+                            labelArgument < 0 || labelArgument + 1 >= registers.size
+                        ) return@concat null
+                        val valueRegister = registers[labelArgument + 1]
+                        val valueSource = threadInstructions.take(callIndex).lastOrNull {
+                            it.opcode.setsRegister() && it.registersUsed.firstOrNull() == valueRegister
+                        } ?: return@concat null
+                        if (valueSource.opcode != Opcode.IGET_OBJECT) return@concat null
+                        valueSource.getReference<FieldReference>()?.takeIf {
+                            it.definingClass == threadKeyClass.type && it.type == "Ljava/lang/String;"
+                        }
+                    }.singleOrNull()
+                }.distinctBy { Triple(it.definingClass, it.name, it.type) }
+            if (threadIdFields.size != 1) {
+                throw PatchException(
+                    "Expected one DirectThreadKey mThreadId field, " +
+                        "found ${threadIdFields.size}",
+                )
+            }
+            val threadIdField = threadIdFields.single()
+            GetThreadIdExtension.changeFirstString(threadIdField.name)
         }
     }

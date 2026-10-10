@@ -6,8 +6,7 @@
 
 package app.crimera.patches.instagram.links.sanitizeShareLinks
 
-import app.crimera.patches.instagram.links.shareLinks.hookShareLinks
-import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.links.shareLinks.shareLinksPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
@@ -18,12 +17,10 @@ val sanitizeShareLinksPatch =
         name = "Sanitize share links",
     ) {
 
-        dependsOn(settingsPatch)
+        dependsOn(shareLinksPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            hookShareLinks("sanitizeUrl")
-
             enableSettings("sanitizeShareLinks")
         }
     }

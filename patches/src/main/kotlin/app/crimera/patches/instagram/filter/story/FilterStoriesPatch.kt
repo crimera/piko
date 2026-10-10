@@ -12,13 +12,8 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.Opcode
 
 // Heavily based on @brosssh work.
 // https://github.com/brosssh/instagram-morphe-patches-library/blob/dev/patch-library/src/main/kotlin/app/morphe/library/instagram/patches/FilterStoriesListPatch.kt
@@ -34,27 +29,17 @@ val filterStoriesPatch =
         dependsOn(settingsPatch, reelResponseItemEntity, userDataEntity)
         execute {
 
-            StoryResponseJsonParserFingerprint.apply {
-                val strIndex = stringMatches[0].index
-
-                method.apply {
-
-                    val reelItemCheckInstruction = instructions.last { it.location.index < strIndex && it.opcode == Opcode.IF_EQZ }
-                    val index = reelItemCheckInstruction.location.index
-                    val reelResponseItemRegister = reelItemCheckInstruction.registersUsed[0]
-
-                    addInstructionsWithLabels(
-                        index + 1,
-                        """
-                        invoke-static{v$reelResponseItemRegister}, $PATCHES_DESCRIPTOR/filter/story/FilterStory;->filter(Ljava/lang/Object;)Ljava/lang/Object;
-                        move-result-object v$reelResponseItemRegister
-                        if-eqz v$reelResponseItemRegister, :piko
-                        """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(index + 2)),
-                    )
-
-                    enableSettings("storyFilters")
-                }
+            PopulateStoryTrayFingerprint.matchAll(1..1).single().method.apply {
+                // The JSON parser is shared with profile highlights. Filter only the story tray
+                // after decoding, including cached responses, tail loads and the Following tray.
+                addInstructions(
+                    0,
+                    """
+                    invoke-static/range {p5 .. p5}, $PATCHES_DESCRIPTOR/filter/story/FilterStory;->filter(Ljava/util/List;)Ljava/util/List;
+                    move-result-object p5
+                    """.trimIndent(),
+                )
+                enableSettings("storyFilters")
             }
         }
     }

@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.9.0",
+  "version": "3.10.0-dev.14",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -44,6 +44,15 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
         "ResourcePatch"
       ],
       "compatiblePackages": [
@@ -56,9 +65,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -72,7 +81,7 @@
     {
       "name": "Allow user network certificate",
       "description": "Allows user network certificate for whitehat testing",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
@@ -87,9 +96,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -106,8 +115,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -135,8 +143,7 @@
       "description": "Blocks the 'This app is out of date' update screen from being shown on launch",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -233,9 +240,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -278,9 +285,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -349,9 +356,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -418,7 +425,6 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
-        "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -432,9 +438,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -493,6 +499,36 @@
             {
               "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Custom font",
+      "description": "Adds an option to replace the app font with a font file from the device storage.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -580,9 +616,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -655,8 +691,7 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -668,9 +703,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -698,9 +733,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -815,6 +850,36 @@
             {
               "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Customize navigation bar",
+      "description": "Choose which tabs appear in the bottom navigation bar and reorder them",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1035,9 +1100,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1066,9 +1131,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1082,7 +1147,7 @@
     {
       "name": "Disable analytics",
       "description": "Block analytics that are sent to Instagram/Facebook servers.",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
@@ -1097,9 +1162,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1169,7 +1234,7 @@
     },
     {
       "name": "Disable comments",
-      "description": null,
+      "description": "Disables comments and hides comment buttons and counts on posts and reels.",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1185,9 +1250,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1200,7 +1265,7 @@
     },
     {
       "name": "Disable discover people",
-      "description": "Disables discover people section on user profile",
+      "description": "Hides suggested accounts",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1216,9 +1281,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1250,9 +1315,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1281,9 +1346,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1299,7 +1364,6 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1312,40 +1376,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable onboarding permission prompts",
-      "description": "Prevents contacts and location permission onboarding prompts from appearing.",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1359,7 +1392,7 @@
     {
       "name": "Disable screenshot detection",
       "description": "Disables screenshots detection in DM",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch"
       ],
@@ -1373,9 +1406,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1404,9 +1437,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1434,9 +1467,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1464,9 +1497,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1483,7 +1516,6 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
-        "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -1497,9 +1529,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1527,9 +1559,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1557,6 +1589,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1569,9 +1602,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1628,9 +1661,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1815,6 +1848,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1827,9 +1861,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1859,9 +1893,43 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Focus Lock",
+      "description": "Commitment mode for cutting down on Instagram. Pick what to block (Reels, Explore) and a duration; once locked those protections are forced on and cannot be switched off. Reels shared with you still open. Unlocking early requires a 24 hour cooling-off period, and resetting or importing settings is blocked while locked.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1908,6 +1976,7 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1920,9 +1989,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2158,6 +2227,36 @@
       "options": []
     },
     {
+      "name": "Hide Reels follow button",
+      "description": "Removes the follow button from Reels.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide badges from navigation bar icons",
       "description": "Hides notification nudges & counts from navigation bar icons",
       "default": true,
@@ -2287,9 +2386,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2358,8 +2457,8 @@
       "options": []
     },
     {
-      "name": "Hide navigation buttons",
-      "description": "Hides navigation bar buttons, such as the Reels and Create button.",
+      "name": "Hide notes tray",
+      "description": "Hides notes tray in DM section",
       "default": true,
       "dependencies": [
         "BytecodePatch"
@@ -2374,40 +2473,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Hide notes tray",
-      "description": "Hides notes tray in DM section",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2537,8 +2605,7 @@
       "description": "Hides the reshare button from both posts and reels.",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -2550,9 +2617,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2564,8 +2631,8 @@
       "options": []
     },
     {
-      "name": "Hide stories tray",
-      "description": "Hides stories tray from main feed.",
+      "name": "Hide save buttons",
+      "description": "Hides save buttons on posts and reels",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -2581,9 +2648,69 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide share button",
+      "description": "Hides the share button on posts and reels",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide stories tray",
+      "description": "Hides stories tray from main feed.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2611,9 +2738,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2658,7 +2785,6 @@
       "description": "Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.",
       "default": true,
       "dependencies": [
-        "ResourcePatch",
         "BytecodePatch",
         "ResourcePatch"
       ],
@@ -2700,9 +2826,39 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Inbox lock",
+      "description": "Asks for your fingerprint, face or screen lock before the inbox is shown.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2759,9 +2915,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2817,9 +2973,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2833,8 +2989,10 @@
     {
       "name": "Make ephemeral media permanent",
       "description": "Changes unexpired view once, view twice media to permanent view.",
-      "default": true,
+      "default": false,
       "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -2849,9 +3007,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2879,9 +3037,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2898,7 +3056,6 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
-        "ResourcePatch",
         "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
@@ -2933,6 +3090,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -2945,9 +3103,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2965,6 +3123,8 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -2977,9 +3137,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3133,9 +3293,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3193,9 +3353,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3236,36 +3396,6 @@
       "options": []
     },
     {
-      "name": "Remove build expired popup",
-      "description": "Removes the popup that appears after a while, when the app version ages.",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "Remove empty bottom space",
       "description": "Removes empty space below bottom navigation bar",
       "default": true,
@@ -3282,9 +3412,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3381,12 +3511,40 @@
       "options": []
     },
     {
+      "name": "Restore legacy follower lists",
+      "description": "Restores the legacy follower and following list screen.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Round off numbers",
       "description": "Enable or disable rounding off numbers",
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -3426,9 +3584,41 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Save Instants",
+      "description": "Captures view-once Instants as you view them so you can re-view and download them later.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "447.0.0.55.81",
+              "versionCodes": {
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3446,7 +3636,6 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
-        "BytecodePatch",
         "ResourcePatch"
       ],
       "compatiblePackages": [
@@ -3459,9 +3648,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3481,7 +3670,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
-        "ResourcePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -3495,9 +3684,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3658,8 +3847,7 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch",
-        "ResourcePatch"
+        "BytecodePatch"
       ],
       "compatiblePackages": [
         {
@@ -3673,36 +3861,6 @@
             {
               "version": "12.19.1-release.0",
               "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Stories audio autoplay",
-      "description": null,
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3750,7 +3908,6 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
-        "ResourcePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3763,9 +3920,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3789,7 +3946,7 @@
     {
       "name": "Unlock Plus benefits",
       "description": "Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch"
       ],
@@ -3803,9 +3960,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3835,9 +3992,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3851,7 +4008,7 @@
     {
       "name": "Unlock employee options",
       "description": "Unlocks all options using by employee for debugging",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -3867,39 +4024,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Validate links",
-      "description": "Fixes app crashing issue while opening links from a different app",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "439.0.0.37.89",
-              "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3913,7 +4040,7 @@
     {
       "name": "View DMs anonymously",
       "description": null,
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -3929,9 +4056,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3945,7 +4072,7 @@
     {
       "name": "View live anonymously",
       "description": null,
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -3962,9 +4089,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3978,7 +4105,7 @@
     {
       "name": "View stories anonymously",
       "description": null,
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
@@ -3995,9 +4122,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,
@@ -4030,9 +4157,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "439.0.0.37.89",
+              "version": "447.0.0.55.81",
               "versionCodes": {
-                "ARM64_V8A": 384510827
+                "ARM64_V8A": 385311895
               },
               "isExperimental": false,
               "minSdk": null,

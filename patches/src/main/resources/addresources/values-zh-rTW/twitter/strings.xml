@@ -19,7 +19,7 @@
     <string name="piko_pref_download_path">下載主資料夾</string>
     <string name="piko_pref_download_path_desc">儲存下載影片的主資料夾</string>
     <string name="piko_pref_download_folder">下載子資料夾</string>
-    <string name="piko_pref_download_folder_desc">儲存下載影片的子資料夾：下載主資料夾/子資料夾</string>
+    <string name="piko_pref_download_folder_desc">儲存下載影片的子資料夾：（[主資料夾]/[子資料夾]）</string>
     <string name="piko_pref_download_media_link_handle">下載偏好設定</string>
     <string name="piko_pref_download_media_link_handle_download">直接開始下載</string>
     <string name="piko_pref_download_media_link_handle_copy_link">直接複製多媒體網址</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">快取刪除失敗</string>
     <string name="piko_title_native_share_menu">原生分享選單</string>
     <string name="piko_native_share_menu_toggle">啟用原生分享選單</string>
+    <string name="piko_native_share_menu_items_to_hide">要隱藏的原生分享功能表項目</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">廣告</string>
     <string name="piko_pref_hide_promoted_posts">隱藏推廣推文</string>
@@ -139,12 +140,36 @@
     <string name="piko_pref_search_suggestion_desc">隱藏探索分頁中的搜尋建議</string>
     <string name="piko_legacy_share_link">舊版分享連結</string>
     <string name="piko_block_redirecting_to_x_lite">封鎖重導向至 X Lite</string>
+    <string name="piko_pref_block_update_screen">阻擋更新畫面</string>
+    <string name="piko_pref_block_update_screen_desc">啟動應用程式時阻擋顯示「此應用程式已過期」的更新畫面</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">功能標誌</string>
     <string name="piko_pref_feature_flags">新增功能標誌</string>
     <string name="piko_pref_edit_flag_title">編輯標誌</string>
     <string name="piko_pref_add_flag_title">新增標誌</string>
     <string name="piko_pref_search_flags">搜尋標誌</string>
+    <string name="piko_pref_add_selected_flags">新增已選取項目</string>
+    <string name="piko_pref_flag_name">標記名稱</string>
+    <string name="piko_pref_flag_already_added">已新增</string>
+    <string name="piko_pref_flag_invalid_name">請輸入標記名稱，且不得包含空格、逗號或冒號。</string>
+    <string name="piko_pref_select_flags">選擇</string>
+    <string name="piko_pref_check_flags">檢查標記</string>
+    <string name="piko_pref_flags_enable">開啟</string>
+    <string name="piko_pref_flags_disable">關閉</string>
+    <string name="piko_pref_flags_remove_selected">移除已選擇的 flag？</string>
+    <string name="piko_pref_flag_verify_name">建議的 flag 名稱</string>
+    <string name="piko_pref_flags_selected">%s 已選擇</string>
+    <string name="piko_pref_flag_unknown">未在「搜尋標記」中找到。這可能是拼字錯誤，或應用程式尚未收集到該標記。</string>
+    <string name="piko_pref_flag_duplicates">重複的項目</string>
+    <string name="piko_pref_flag_unverified_short">未驗證的名稱</string>
+    <string name="piko_pref_flag_typo_short">可能的錯字</string>
+    <string name="piko_pref_flag_merge_same">這些項目具有相同的數值。請將它們合併為一個標記並保留此數值：</string>
+    <string name="piko_pref_flag_merge_conflict">這些項目具有不同的數值。合併為一個標記時，請選擇要保留的數值。</string>
+    <string name="piko_pref_flag_merge">合併為一個</string>
+    <string name="piko_pref_flag_keep_on">保持開啟</string>
+    <string name="piko_pref_flag_keep_off">保持關閉</string>
+    <string name="piko_pref_flag_suggested_name">建議的名稱：</string>
+    <string name="piko_pref_flag_check_clear">未發現重複或未驗證的名稱。</string>
     <string name="piko_pref_import_flags">匯入標誌</string>
     <string name="piko_pref_export_flags">匯出標誌</string>
     <string name="piko_pref_reset_flags">重置標誌</string>
@@ -165,7 +190,10 @@
     <string name="piko_pref_show_poll_result">顯示投票結果</string>
     <string name="piko_pref_show_poll_result_desc">在沒有投票的情況下查看投票結果</string>
     <string name="piko_pref_hide_community_notes">隱藏社群徽章</string>
+    <string name="piko_pref_hide_immersive_player">取消沉浸式播放器</string>
+    <string name="piko_pref_hide_immersive_player_desc">禁止你透過往上滑動觀看更多影片</string>
     <string name="piko_pref_enable_vid_auto_advance">啟用影片自動捲動</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">在沉浸式播放器中啟用影片自動捲動</string>
     <string name="piko_pref_hide_hidden_replies">隱藏隱藏的回覆</string>
     <string name="piko_pref_force_hd">強制高畫質影片</string>
     <string name="piko_pref_force_hd_desc">始終選取最高畫質影片播放</string>
@@ -202,6 +230,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">個人資料頁顯示更多資訊</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">在個人資料頁面上新增更多詳細資訊</string>
     <string name="piko_fast_follower">Fast Follower</string>
+    <string name="piko_pref_account_id">ID：%s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">字體樣式</string>
     <string name="piko_pref_add_font">新增字型</string>
@@ -217,7 +246,7 @@
     <!-- Logging Settings -->
     <string name="piko_title_logging">日誌記錄</string>
     <string name="piko_pref_server_response_logging">記錄伺服器回應</string>
-    <string name="piko_pref_server_response_logging_desc">記錄從伺服器收到的 JSON 回應，儲存在 \'Download/Piko\' 資料夾中</string>
+    <string name="piko_pref_server_response_logging_desc">記錄從伺服器收到的 json 回應，儲存在 \'Download/Piko\' 資料夾中</string>
     <string name="piko_pref_server_response_logging_file_overwrite">覆寫回應日誌檔案</string>
     <string name="piko_pref_server_response_logging_file_overwrite_desc">啟動時清除現有的回應日誌數據</string>
     <!-- Backup and Restore -->
@@ -240,12 +269,12 @@
     <string name="piko_pref_version_info">版本資訊</string>
     <string name="piko_changelogs_title">變更日誌</string>
     <string name="piko_debug">Piko 偵錯</string>
-    <string name="piko_pref_patches">補丁</string>
+    <string name="piko_pref_patches">修補程式</string>
     <string name="piko_pref_included">包含</string>
     <string name="piko_pref_excluded">排除</string>
     <string name="piko_pref_app_restart_rec">建議重新啟動應用程式</string>
     <string name="piko_dialog_delete_title">刪除</string>
-    <string name="piko_dialog_delete_message">刪除%s?</string>
+    <string name="piko_dialog_delete_message">刪除 %s？</string>
     <string name="piko_pref_search_type_ahead_users">使用者</string>
     <string name="piko_pref_search_type_ahead_events">活動</string>
     <string name="piko_pref_search_type_ahead_ordered_section">訂購</string>
@@ -280,6 +309,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">傳統圖示 4</string>
     <string name="piko_app_icon_name_legacy_blue">傳統藍</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_material_you">Material You 模式</string>
     <string name="piko_app_icon_name_earth">地球</string>
     <string name="piko_app_icon_name_moon">月球</string>
     <string name="piko_app_icon_name_mars">火星</string>
@@ -300,16 +330,16 @@
     <string name="piko_app_icon_name_beijing_olympics_1">北京奧運會 1</string>
     <string name="piko_app_icon_name_beijing_olympics_2">北京奧運會 2</string>
     <string name="piko_app_icon_name_daytona">Daytona</string>
-    <string name="piko_app_icon_name_formulaone">一級方程式 (Formula One)</string>
-    <string name="piko_app_icon_name_kentucky_derby">肯塔基德比 (Kentucky Derby)</string>
+    <string name="piko_app_icon_name_formulaone">一級方程式</string>
+    <string name="piko_app_icon_name_kentucky_derby">肯塔基德比</string>
     <string name="piko_app_icon_name_mlb">MLB</string>
     <string name="piko_app_icon_name_nba">NBA</string>
     <string name="piko_app_icon_name_nba_2">NBA 2</string>
     <string name="piko_app_icon_name_ncaa">NCAA</string>
-    <string name="piko_app_icon_name_masters">大師賽 (Masters)</string>
+    <string name="piko_app_icon_name_masters">大師賽</string>
     <string name="piko_app_icon_name_nba_finals">NBA 總決賽</string>
-    <string name="piko_app_icon_name_stanley_cup">史丹利盃 (Stanley Cup)</string>
-    <string name="piko_app_icon_name_commonwealth">大英國協 (Commonwealth)</string>
+    <string name="piko_app_icon_name_stanley_cup">史丹利盃</string>
+    <string name="piko_app_icon_name_commonwealth">大英國協</string>
     <string name="piko_app_icon_name_mothers_day">母親節</string>
     <string name="piko_app_icon_name_womansday">婦女節</string>
     <string name="piko_app_icon_name_halloween_2021">萬聖節 2021</string>
@@ -317,18 +347,18 @@
     <string name="piko_app_icon_name_halloween_2024_1">萬聖節 2024 1</string>
     <string name="piko_app_icon_name_halloween_2024_2">萬聖節 2024 2</string>
     <string name="piko_app_icon_name_halloween_2024_3">萬聖節 2024 3</string>
-    <string name="piko_app_icon_name_holi">灑紅節 (Holi)</string>
+    <string name="piko_app_icon_name_holi">灑紅節</string>
     <string name="piko_app_icon_name_stpatricks_day">聖巴德利爵節</string>
     <string name="piko_app_icon_name_easter">復活節</string>
-    <string name="piko_app_icon_name_anzac">澳紐軍團日 (Anzac Day)</string>
+    <string name="piko_app_icon_name_anzac">澳紐軍團日</string>
     <string name="piko_app_icon_name_ramadan">齋戒月</string>
-    <string name="piko_app_icon_name_black_history">黑人歷史月 (Black History Month)</string>
+    <string name="piko_app_icon_name_black_history">黑人歷史</string>
     <string name="piko_app_icon_name_eurovisionfinal">歐洲歌唱大賽決賽</string>
     <string name="piko_app_icon_name_lunar_new_year_1">農曆新年 1</string>
     <string name="piko_app_icon_name_lunar_new_year_2">農曆新年 2</string>
     <string name="piko_app_icon_name_japanese_new_year_2024_1">日本新年 2024 1</string>
     <string name="piko_app_icon_name_japanese_new_year_2024_2">日本新年 2024 2</string>
-    <string name="piko_app_icon_name_may_the_fourth">星際大戰日 (May the Fourth)</string>
+    <string name="piko_app_icon_name_may_the_fourth">星際大戰日</string>
     <string name="piko_app_icon_name_barbie">芭比</string>
     <string name="piko_app_icon_name_thanksgiving_1">感恩節 1</string>
     <string name="piko_app_icon_name_thanksgiving_2">感恩節 2</string>
@@ -344,27 +374,27 @@
     <string name="piko_app_icon_name_euro">歐洲盃</string>
     <string name="piko_app_icon_name_independence_day">獨立紀念日</string>
     <string name="piko_app_icon_name_juneteenth">六月節</string>
-    <string name="piko_app_icon_name_naidoc">NAIDOC 週</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc 週</string>
     <string name="piko_app_icon_name_christmas_2024_1">聖誕節 2024 1</string>
     <string name="piko_app_icon_name_christmas_2024_2">聖誕節 2024 2</string>
     <string name="piko_app_icon_name_christmas_2024_3">聖誕節 2024 3</string>
     <string name="piko_app_icon_name_christmas_2024_4">聖誕節 2024 4</string>
-    <string name="piko_app_icon_name_upsidedown">上下顛倒 (Upside Down)</string>
+    <string name="piko_app_icon_name_upsidedown">上下顛倒</string>
     <string name="piko_app_icon_name_games_chamber">遊戲室</string>
     <string name="piko_app_icon_name_pridesouthern">Pride Southern</string>
     <string name="piko_app_icon_name_newzealand_pride_1">紐西蘭 Pride 1</string>
     <string name="piko_app_icon_name_newzealand_pride_2">紐西蘭 Pride 2</string>
-    <string name="piko_app_icon_name_pride_month">同志驕傲月 (Pride Month)</string>
-    <string name="piko_app_icon_name_fancy">花俏 (Fancy)</string>
-    <string name="piko_app_icon_name_broken">損毀 (Broken)</string>
-    <string name="piko_app_icon_name_cyber">賽博 (Cyber)</string>
+    <string name="piko_app_icon_name_pride_month">同志驕傲月</string>
+    <string name="piko_app_icon_name_fancy">花俏</string>
+    <string name="piko_app_icon_name_broken">損毀</string>
+    <string name="piko_app_icon_name_cyber">賽博</string>
     <string name="piko_app_icon_name_soft_pastel_pink">柔和粉紅</string>
     <string name="piko_app_icon_name_electric_indigo">電光靛藍</string>
     <string name="piko_app_icon_name_neon_pink">霓虹粉紅</string>
     <string name="piko_app_icon_name_tropical_teal">熱帶藍綠</string>
     <string name="piko_app_icon_name_vivid_orange">鮮豔橘</string>
     <!-- Import / export login tokens -->
-    <string name="piko_login_token_export_screen_description">"此功能可匯出當前已登入帳戶的會話權杖 (Session Token)。
+    <string name="piko_login_token_export_screen_description">"此功能可匯出當前已登入帳戶的會話權杖。
 
 警告：匯出的權杖屬於高度機密資訊。
 切勿分享給任何人！

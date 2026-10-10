@@ -13,7 +13,6 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 
 @Suppress("unused")
 val themePatch =
@@ -42,7 +41,6 @@ val themePatch =
         dependsOn(
             settingsPatch,
             sharedExtensionPatch,
-            resourceMappingPatch,
             bytecodePatch {
                 execute {
                     bytecodePatchContext = this

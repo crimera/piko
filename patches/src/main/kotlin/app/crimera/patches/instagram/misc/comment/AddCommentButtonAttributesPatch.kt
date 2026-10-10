@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.misc.comment
 
 import app.crimera.patches.instagram.entity.decoder.COMMENT_BUTTON_CLASS
+import app.crimera.patches.instagram.entity.commentDataEntity.CHAT_CONTEXT_BUTTON_SUPER_CLASS
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
@@ -15,15 +16,37 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.indexOfFirstLiteralInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+
+internal fun nativeChatButtonResources(constructor: Method): Pair<Long, Long> {
+    val code = constructor.implementation?.instructions?.toList()
+        ?: throw PatchException("Chat button constructor has no implementation")
+    val callIndex = code.indexOfLast { instruction ->
+        instruction.opcode == Opcode.INVOKE_DIRECT && instruction.getReference<MethodReference>()?.let {
+            it.definingClass == CHAT_CONTEXT_BUTTON_SUPER_CLASS && it.name == "<init>" &&
+                it.parameterTypes.size == 4 && it.parameterTypes.drop(1).map { type -> type.toString() } == listOf("I", "I", "Z")
+        } == true
+    }
+    val registers = code.getOrNull(callIndex)?.registersUsed.orEmpty()
+    if (registers.size != 5) throw PatchException("Expected native chat button resource arguments")
+
+    fun literal(register: Int): Long = code.take(callIndex).filter { it.registersUsed == listOf(register) }
+        .singleOrNull()?.let { (it as? NarrowLiteralInstruction)?.narrowLiteral?.toLong() }
+        ?.takeIf { it > 0 } ?: throw PatchException("Expected one chat button resource literal for v$register")
+
+    return literal(registers[3]) to literal(registers[2])
+}
 
 context(patchContext: BytecodePatchContext)
 fun addButtonAttribute(
@@ -33,7 +56,7 @@ fun addButtonAttribute(
     buttonInstanceFingerprint: Fingerprint,
 ) {
     AddCommentButtonFingerprint.method.apply {
-        val drawableId = getResourceId(ResourceType.DRAWABLE, "instagram_eye_off_outline_24")
+        val drawableId = resourceId(ResourceType.DRAWABLE, "instagram_eye_off_outline_24")
         val drawableIndex = indexOfFirstLiteralInstruction(drawableId)
 
         val arrayAddInstruction =
@@ -95,7 +118,7 @@ fun addButtonAttribute(
             
             sget-object v$buttonStyleRegister, $buttonStyleClass->A00:$buttonStyleClass
             
-            new-instance v$bundleRegister, ${buttonInstanceFingerprint.definingClass}
+            new-instance v$bundleRegister, ${buttonInstanceFingerprint.originalMethod.definingClass}
             invoke-direct {v$bundleRegister, v$buttonStyleRegister, v$drawableInitRegister, v$stringInitRegister, v$buttonInvokeRelatedRegister}, $bundleClass-><init>($buttonStyleParentClass $drawableInitClass $stringInitClass $buttonInvokeRelatedClass)V
             
             goto :array_add

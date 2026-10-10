@@ -83,6 +83,11 @@ internal object GetMediaPkIdExtensionFingerprint : Fingerprint(
     name = "getMediaPkId",
 )
 
+internal object GetTakenAtSecondsExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getTakenAtSeconds",
+)
+
 internal object GetDescriptionTextExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
     name = "getDescriptionText",
@@ -118,11 +123,6 @@ internal object GetPostTypeExtensionFingerprint : Fingerprint(
 internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
     definingClass = "/InstagramMainActivity;",
     strings = listOf("nme_ig_post_post_creation_notif", "nme_ig_post_story_creation_notif"),
-)
-
-internal object VideoMediaInIGTVFeedHasVideoVariantsFingerprint : Fingerprint(
-    returnType = "Z",
-    strings = listOf("id: ", " type: ", "InvalidVideoMediaInIGTVFeed"),
 )
 
 internal object AslSessionRelatedFingerprint : Fingerprint(
@@ -198,9 +198,10 @@ internal object ProductInfoMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
 )
 
-internal object AyuMidcardMediaHelperImageObjectMethodFingerprint : Fingerprint(
-    definingClass = "AyuMidcardMediaHelper;",
-    returnType = "Ljava/lang/Object;",
+internal object ImageInfoCandidatesMapperFingerprint : Fingerprint(
+    parameters = listOf("Lcom/instagram/model/mediasize/ImageInfo;"),
+    returnType = "Ljava/util/Map;",
+    strings = listOf("additional_candidates", "candidates"),
 )
 
 internal object GetOriginalSoundDataIntfFromMediaFingerprint : Fingerprint(

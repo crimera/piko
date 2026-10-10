@@ -1,5 +1,5 @@
 name: "🐞 Twitter bug"
-description: Report a reproducible Twitter/X bug.
+description: Report a reproducible legacy Twitter/X bug. (12.19.1-release.0)
 title: "bug(Twitter): "
 labels: ["bug", "twitter"]
 body:

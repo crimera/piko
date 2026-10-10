@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.utils;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Build;
@@ -22,8 +23,11 @@ import java.net.HttpURLConnection;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.patches.dm.InboxLock;
+import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.requests.Requester;
@@ -77,6 +81,15 @@ public class InstaUtils {
     }
 
     public static void showResetSettingsDialog(Context context) {
+        if (FocusLock.isActive()) {
+            PikoUtils.toast(str("piko_focus_lock_blocked_action"));
+            return;
+        }
+        // A reset would also turn Inbox lock off, so it has to be confirmed first while the lock is up.
+        if (InboxLock.mustConfirmToDisable() && context instanceof Activity) {
+            InboxLock.confirmIfLocked((Activity) context, () -> showResetSettingsDialog(context), null);
+            return;
+        }
         new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(context))
                 .setTitle(str("piko_reset_pref_confirm"))
                 .setNegativeButton(str("piko_cancel"), null)
@@ -88,6 +101,8 @@ public class InstaUtils {
     }
 
     public static void deletePref(){
+        // The font file lives outside the preferences, so a reset removes it separately.
+        FontStorage.delete();
         if(Pref.clearAllPreferences()){
             PikoUtils.toast(str("piko_reset_pref_success"));
             Utils.restartApp(Utils.getContext());

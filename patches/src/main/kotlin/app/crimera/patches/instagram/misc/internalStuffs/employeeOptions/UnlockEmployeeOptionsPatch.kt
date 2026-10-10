@@ -19,7 +19,7 @@ val unlockEmployeeOptionsPatch =
     bytecodePatch(
         name = "Unlock employee options",
         description = "Unlocks all options using by employee for debugging",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(

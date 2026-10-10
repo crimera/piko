@@ -12,18 +12,31 @@ import app.crimera.patches.instagram.links.shareLinks.ShareLinkKind.LIVE
 import app.crimera.patches.instagram.links.shareLinks.ShareLinkKind.POST
 import app.crimera.patches.instagram.links.shareLinks.ShareLinkKind.PROFILE
 import app.crimera.patches.instagram.links.shareLinks.ShareLinkKind.STORY
+import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstructionOrThrow
+import app.morphe.util.matchSingle
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+
+internal val shareLinksPatch =
+    bytecodePatch {
+        dependsOn(settingsPatch)
+
+        execute {
+            hookShareLinks("processSharedUrl", skip = setOf(PROFILE, AUDIO, HIGHLIGHT))
+            hookShareLinks("sanitizeSharedUrl", skip = setOf(POST, STORY, LIVE))
+        }
+    }
 
 internal enum class ShareLinkKind {
     POST,
@@ -80,7 +93,7 @@ internal fun hookShareLinks(
 
 context(patchContext: BytecodePatchContext)
 private fun hookAudioShareLink(hook: (Int) -> String) {
-    val audioUrlParserMatch = AudioUrlResponseJsonParserFingerprint.matchAll(1..1).single()
+    val audioUrlParserMatch = AudioUrlResponseJsonParserFingerprint.matchSingle()
     val audioUrlStringIndex = audioUrlParserMatch.stringMatches.single().index
 
     audioUrlParserMatch.method.apply {
@@ -105,7 +118,7 @@ private fun hookAudioShareLink(hook: (Int) -> String) {
 
 context(patchContext: BytecodePatchContext)
 private fun hookHighlightShareLink(hook: (Int) -> String) {
-    val highlightShareUrlRequestMatch = HighlightShareUrlRequestFingerprint.matchAll(1..1).single()
+    val highlightShareUrlRequestMatch = HighlightShareUrlRequestFingerprint.matchSingle()
     val highlightCallbackType =
         highlightShareUrlRequestMatch.method.instructions
             .mapNotNull { instruction ->

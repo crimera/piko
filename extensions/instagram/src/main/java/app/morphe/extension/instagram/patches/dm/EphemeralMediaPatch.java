@@ -7,9 +7,14 @@
 
 package app.morphe.extension.instagram.patches.dm;
 
-import app.morphe.extension.instagram.entity.Entity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.entity.DirectItem;
+import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
+import com.instagram.common.session.UserSession;
 
 @SuppressWarnings("unused")
 public class EphemeralMediaPatch {
@@ -18,6 +23,39 @@ public class EphemeralMediaPatch {
 
     static {
         MAKE_EPHEMERAL_MEDIA_PERMANENT = Pref.makeEphemeralMediaPermanent();
+    }
+
+    public static boolean shouldSuppressEphemeralMediaReceipt(UserSession session, Object item) {
+        if (!MAKE_EPHEMERAL_MEDIA_PERMANENT) return false;
+        try {
+            String key = localReadKey(session.getUserId(), item);
+            SharedPreferences preferences = localReadPreferences();
+            if (key != null && preferences != null) preferences.edit().putBoolean(key, true).apply();
+        } catch (Exception ignored) { }
+        return true;
+    }
+
+    public static boolean wasEphemeralMediaViewed(Object item, Object viewer) {
+        if (!MAKE_EPHEMERAL_MEDIA_PERMANENT) return false;
+        try {
+            String key = localReadKey(new UserData(viewer).getUserId(), item);
+            SharedPreferences preferences = localReadPreferences();
+            return key != null && preferences != null && preferences.getBoolean(key, false);
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private static String localReadKey(String viewerId, Object item) {
+        if (viewerId == null || viewerId.isEmpty() || item == null) return null;
+        String itemId = new DirectItem(item).getItemId();
+        return itemId == null || itemId.isEmpty() ? null : viewerId + ":" + itemId;
+    }
+
+    private static SharedPreferences localReadPreferences() {
+        Context context = PikoUtils.getContext();
+        // Suppressing the receipt preserves the image, but refresh resets the server's seen count.
+        return context == null ? null : context.getSharedPreferences("piko_ephemeral_media_viewed", Context.MODE_PRIVATE);
     }
 
     public static String makeEphemeralMediaPermanent(Long expireAt, String viewMode) {

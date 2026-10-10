@@ -13,14 +13,15 @@ import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.misc.comment.copyComment.CopyTextChatButtonToStringFingerprint
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
-import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
-import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import kotlin.properties.Delegates
 
 var CHAT_CONTEXT_BUTTON_SUPER_CLASS: String by Delegates.notNull()
@@ -47,27 +48,23 @@ val commentDataEntity =
             }
             var commentObject: String
             var commentGifObject: String
-            var commentMediaHelperClass = "fieldName"
+            var commentMediaHelperClass: String
 
             RandomGetCommentObjectMediaFingerprint.apply {
                 commentObject = method.returnType
 
-                method.apply {
-                    instructions.filter { it.opcode == Opcode.NEW_INSTANCE }.firstOrNull {
-                        val index = it.location.index
-                        val prevOpcode = getInstruction(index - 1).opcode
-                        if (prevOpcode == Opcode.CONST_4) {
-                            val nextInvokeDirectIndex = indexOfFirstInstruction(index, Opcode.INVOKE_DIRECT)
-                            commentMediaHelperClass =
-                                extensionToClassName(getInstruction(nextInvokeDirectIndex).methodExtractor().definingClass)
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                }
+                commentMediaHelperClass = method.instructions.mapNotNull { instruction ->
+                    instruction.getReference<MethodReference>()?.takeIf {
+                        it.name == "<init>" && it.returnType == "V" && it.parameterTypes.size == 4 &&
+                            it.parameterTypes.drop(1).map { type -> type.toString() } == listOf(
+                                "Lcom/instagram/common/gallery/Medium;", MEDIA_CLASS_NAME, "Ljava/lang/String;",
+                            )
+                    }?.definingClass
+                }.distinct().singleOrNull()
+                    ?: throw PatchException("Expected one comment photo wrapper constructor")
 
-                classDef.methods.first { it.parameters.size == 1 }.apply {
+                (classDef.methods.singleOrNull { it.parameters.size == 1 }
+                    ?: throw PatchException("Expected one comment GIF converter")).apply {
                     commentGifObject = returnType
 
                     val lastIPutObjectInstruction = instructions.last { it.opcode == Opcode.IPUT_OBJECT }
@@ -89,20 +86,23 @@ val commentDataEntity =
 
             val commentObjectFields = mutableClassDefBy { it.type == commentObject }.fields
 
-            val commentMediaHelperFieldName = commentObjectFields.first { it.type == commentMediaHelperClass }.name
+            val commentMediaHelperFieldName = commentObjectFields.singleOrNull { it.type == commentMediaHelperClass }?.name
+                ?: throw PatchException("Expected one comment photo wrapper field")
             GetImageMediaExtension.changeFirstString(commentMediaHelperFieldName)
 
-            val gifObjectFieldFromCommentObject = commentObjectFields.first { it.type == commentGifObject }.name
+            val gifObjectFieldFromCommentObject = commentObjectFields.singleOrNull { it.type == commentGifObject }?.name
+                ?: throw PatchException("Expected one comment GIF field")
             GetGifMediaExtension.changeFirstString(gifObjectFieldFromCommentObject)
 
-            val commentUserFieldName = commentObjectFields.first { it.type == USER_MODEL_CLASS_NAME }.name
+            val commentUserFieldName = commentObjectFields.singleOrNull { it.type == USER_MODEL_CLASS_NAME }?.name
+                ?: throw PatchException("Expected one comment user field")
             GetCommentUserDataExtension.changeFirstString(commentUserFieldName)
 
             val commentMediaObjectFieldName =
                 classDefBy { it.type == commentMediaHelperClass }
                     .fields
-                    .first { it.type == MEDIA_CLASS_NAME }
-                    .name
+                    .singleOrNull { it.type == MEDIA_CLASS_NAME }
+                    ?.name ?: throw PatchException("Expected one photo wrapper media field")
             GetImageMediaExtension.changeStringAt(1, commentMediaObjectFieldName)
         }
     }

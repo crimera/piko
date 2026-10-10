@@ -12,6 +12,6 @@ import app.morphe.patcher.Fingerprint
 internal const val HANDLE_COMMENT_BUTTON_EXTENSION_CLASS = "${COMMENT_BUTTON_EXTENSION_CLASS}/HandleCommentButton;"
 
 internal object AddCommentButtonFingerprint : Fingerprint(
-    returnType = "Ljava/util/List;",
     strings = listOf("instagram_share_comment_to_story_entrypoint_impression"),
+    custom = { method, _ -> method.returnType in listOf("Ljava/util/List;", "Ljava/util/ArrayList;") },
 )

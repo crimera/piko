@@ -46,6 +46,8 @@ import com.instagram.common.session.UserSession;
 
 public class FriendshipStatusIndicator {
 
+    private static final String STATUS_TAG = "piko_friendship_status_textview";
+
     private static void friendshipStatusDialogBox(Context context, UserFriendshipStatus userFriendshipStatus) {
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
@@ -77,6 +79,97 @@ public class FriendshipStatusIndicator {
         dlg.show();
     }
 
+    public static TextView createStatusTextView(
+            Context context,
+            UserFriendshipStatus userFriendshipStatus,
+            String text,
+            String indicatorColorHex,
+            String indicatorIconDrawable
+    ) {
+        TextView friendshipStatusTextView = new TextView(context);
+        bindStatusTextView(friendshipStatusTextView, userFriendshipStatus, text,
+                indicatorColorHex, indicatorIconDrawable);
+        return friendshipStatusTextView;
+    }
+
+    private static void bindStatusTextView(
+            TextView friendshipStatusTextView,
+            UserFriendshipStatus userFriendshipStatus,
+            String text,
+            String indicatorColorHex,
+            String indicatorIconDrawable
+    ) {
+        Context context = friendshipStatusTextView.getContext();
+        friendshipStatusTextView.setText(text);
+
+        float indicatorTextSizeSp = 12;
+        int indicatorTextSizePx = Math.round(TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                indicatorTextSizeSp,
+                context.getResources().getDisplayMetrics()
+        ));
+        int primaryTextColor = UI.getThemedColour("igds_color_primary_text");
+        friendshipStatusTextView.setTextColor(primaryTextColor);
+
+        int indicatorColor = indicatorColorHex == null
+                ? primaryTextColor
+                : Color.parseColor(indicatorColorHex);
+        Drawable statusIcon = ResourceUtils
+                .getDrawable(indicatorIconDrawable)
+                .mutate();
+        statusIcon.setColorFilter(
+                new PorterDuffColorFilter(indicatorColor, PorterDuff.Mode.SRC_ATOP)
+        );
+        statusIcon.setBounds(0, 0, indicatorTextSizePx, indicatorTextSizePx);
+
+        friendshipStatusTextView.setCompoundDrawablePadding(Dim.dp4);
+        friendshipStatusTextView.setCompoundDrawablesRelative(
+                statusIcon,
+                null,
+                null,
+                null
+        );
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(Color.TRANSPARENT);
+        background.setStroke(
+                Dim.dp2 / 2,
+                Color.argb(
+                        26,
+                        Color.red(primaryTextColor),
+                        Color.green(primaryTextColor),
+                        Color.blue(primaryTextColor)
+                )
+        );
+        background.setCornerRadius(Dim.dp20);
+        friendshipStatusTextView.setBackground(background);
+        friendshipStatusTextView.setGravity(Gravity.CENTER_VERTICAL);
+        friendshipStatusTextView.setIncludeFontPadding(false);
+        friendshipStatusTextView.setSingleLine(true);
+        friendshipStatusTextView.setPadding(Dim.dp8, Dim.dp6, Dim.dp8, Dim.dp6);
+        friendshipStatusTextView.setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                indicatorTextSizeSp
+        );
+        friendshipStatusTextView.setTypeface(Typeface.create(
+                "sans-serif-medium",
+                Typeface.NORMAL
+        ));
+
+        setStatusClickListener(friendshipStatusTextView, userFriendshipStatus);
+        friendshipStatusTextView.setVisibility(View.VISIBLE);
+    }
+
+    // Split out so a recycled badge's listener can be refreshed for its new row without
+    // rebuilding the whole view.
+    public static void setStatusClickListener(View statusView, UserFriendshipStatus userFriendshipStatus) {
+        statusView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                friendshipStatusDialogBox(v.getContext(), userFriendshipStatus);
+            }
+        });
+    }
+
     private static void addFriendshipTextView(
             View internalBadgeTextView,
             UserFriendshipStatus userFriendshipStatus,
@@ -90,75 +183,17 @@ public class FriendshipStatusIndicator {
         if (parent instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) parent;
 
-            String tag = "piko_friendship_status_textview";
-            if (viewGroup.findViewWithTag(tag) != null) {
+            TextView existingStatus = viewGroup.findViewWithTag(STATUS_TAG);
+            if (existingStatus != null) {
+                bindStatusTextView(existingStatus, userFriendshipStatus, text,
+                        indicatorColorHex, indicatorIconDrawable);
                 return;
             }
 
-            Context context = internalBadgeTextView.getContext();
-            TextView friendshipStatusTextView = new TextView(context);
-            friendshipStatusTextView.setTag(tag);
-            friendshipStatusTextView.setText(text);
-
-            float indicatorTextSizeSp = 12;
-            int indicatorTextSizePx = Math.round(TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_SP,
-                    indicatorTextSizeSp,
-                    context.getResources().getDisplayMetrics()
-            ));
-            int primaryTextColor = UI.getThemedColour("igds_color_primary_text");
-            friendshipStatusTextView.setTextColor(primaryTextColor);
-
-            int indicatorColor = indicatorColorHex == null
-                    ? primaryTextColor
-                    : Color.parseColor(indicatorColorHex);
-            Drawable statusIcon = ResourceUtils
-                    .getDrawable(indicatorIconDrawable)
-                    .mutate();
-            statusIcon.setColorFilter(
-                    new PorterDuffColorFilter(indicatorColor, PorterDuff.Mode.SRC_ATOP)
-            );
-            statusIcon.setBounds(0, 0, indicatorTextSizePx, indicatorTextSizePx);
-
-            friendshipStatusTextView.setCompoundDrawablePadding(Dim.dp4);
-            friendshipStatusTextView.setCompoundDrawablesRelative(
-                    statusIcon,
-                    null,
-                    null,
-                    null
-            );
-            GradientDrawable background = new GradientDrawable();
-            background.setColor(Color.TRANSPARENT);
-            background.setStroke(
-                    Dim.dp2 / 2,
-                    Color.argb(
-                            26,
-                            Color.red(primaryTextColor),
-                            Color.green(primaryTextColor),
-                            Color.blue(primaryTextColor)
-                    )
-            );
-            background.setCornerRadius(Dim.dp20);
-            friendshipStatusTextView.setBackground(background);
-            friendshipStatusTextView.setGravity(Gravity.CENTER_VERTICAL);
-            friendshipStatusTextView.setIncludeFontPadding(false);
-            friendshipStatusTextView.setSingleLine(true);
-            friendshipStatusTextView.setPadding(Dim.dp8, Dim.dp6, Dim.dp8, Dim.dp6);
-            friendshipStatusTextView.setTextSize(
-                    TypedValue.COMPLEX_UNIT_SP,
-                    indicatorTextSizeSp
-            );
-            friendshipStatusTextView.setTypeface(Typeface.create(
-                    "sans-serif-medium",
-                    Typeface.NORMAL
-            ));
-
-            friendshipStatusTextView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    friendshipStatusDialogBox(v.getContext(), userFriendshipStatus);
-                }
-            });
+            TextView friendshipStatusTextView = createStatusTextView(
+                    internalBadgeTextView.getContext(), userFriendshipStatus, text,
+                    indicatorColorHex, indicatorIconDrawable);
+            friendshipStatusTextView.setTag(STATUS_TAG);
 
             int targetIndex = viewGroup.indexOfChild(internalBadgeTextView);
             ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(
@@ -171,8 +206,19 @@ public class FriendshipStatusIndicator {
     }
 
     public static void addFriendshipIndicator(Object profileInfoObject, Object badgeObject){
-        if(Pref.followBackIndicator() && SettingsStatus.followBackIndicator) {
-            try {
+        try {
+            Entity entity = new Entity(badgeObject);
+            TextView badgeView = (TextView) entity.getMethod("getView");
+            if (badgeView == null) return;
+
+            ViewParent parent = badgeView.getParent();
+            if (parent instanceof ViewGroup) {
+                View existingStatus = ((ViewGroup) parent).findViewWithTag(STATUS_TAG);
+                // A reused profile may now be unknown, self, or disabled.
+                if (existingStatus != null) existingStatus.setVisibility(View.GONE);
+            }
+
+            if(Pref.followBackIndicator() && SettingsStatus.followBackIndicator) {
                 ProfileInfo profileInfo = new ProfileInfo(profileInfoObject);
                 Boolean isSelfProfile = profileInfo.isSelfProfile();
 
@@ -181,11 +227,10 @@ public class FriendshipStatusIndicator {
 
                 UserData viewingUserData = profileInfo.getUserData();
                 UserFriendshipStatus userFriendshipStatus = viewingUserData.getUserFriendshipStatus();
-                Boolean followed_by = userFriendshipStatus.getFollowBackStatus();
-                Boolean following = userFriendshipStatus.getFollowingStatus();
-
-                Entity entity = new Entity(badgeObject);
-                TextView badgeView = (TextView) entity.getMethod("getView");
+                Map<String, Boolean> friendshipMap = userFriendshipStatus.getMappings();
+                Boolean followed_by = friendshipMap.get("followed_by");
+                if (followed_by == null) return;
+                boolean following = Boolean.TRUE.equals(friendshipMap.get("following"));
 
                 String indicatorText;
                 String indicatorIconDrawable;
@@ -213,9 +258,9 @@ public class FriendshipStatusIndicator {
                         indicatorIconDrawable
                 );
 
-            } catch (Exception ex) {
-                Logger.printException(() -> "Failed follow back indicator", ex);
             }
+        } catch (Exception ex) {
+            Logger.printException(() -> "Failed follow back indicator", ex);
         }
     }
 }

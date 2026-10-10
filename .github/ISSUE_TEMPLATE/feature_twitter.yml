@@ -1,7 +1,7 @@
 name: "⭐ Twitter feature"
-description: Request a Twitter/X feature.
+description: Request a legacy Twitter/X feature. (12.19.1-release.0)
 title: "feature(Twitter): "
-labels: ["feature", "twitter"]
+labels: ["enhancement", "twitter"]
 body:
   - type: markdown
     attributes:

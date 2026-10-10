@@ -22,10 +22,10 @@ object Constants {
                 listOf(
                     // Stable
                     AppTarget(
-                        version = "439.0.0.37.89",
+                        version = "447.0.0.55.81",
                         versionCodes =
                             mapOf(
-                                ARM64_V8A to 384510827,
+                                ARM64_V8A to 385311895,
                             ),
                     ),
                 ),
@@ -33,7 +33,6 @@ object Constants {
 
     // Instagram classes.
     const val FRAGMENT_ACTIVITY = "Landroidx/fragment/app/FragmentActivity;"
-    const val FRIENDSHIP_STATUS_CLASS = "Lcom/instagram/user/model/FriendshipStatus;"
     const val EDIT_MEDIA_INFO_FRAGMENT_CLASS = "Linstagram/features/creation/fragment/EditMediaInfoFragment;"
     const val EXTENDED_IMAGE_URL_CLASS = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"
     const val MEDIA_OPTIONS_CLASS = "Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"
@@ -41,6 +40,7 @@ object Constants {
     const val USER_DETAIL_VIEW_MODEL_CLASS = "Lcom/instagram/profile/fragment/UserDetailViewModel;"
     const val ORIGINAL_SOUND_DATA_INTF = "Lcom/instagram/api/schemas/OriginalSoundDataIntf;"
     const val MUSIC_INFO_CLASS = "Lcom/instagram/api/schemas/MusicInfo;"
+    const val FOLLOW_LIST_DATA_CLASS = "Lcom/instagram/follow/analytics/FollowListData;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
@@ -57,6 +57,7 @@ object Constants {
         move-result-object v%s"""
 
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
+    const val CUSTOM_FONT_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise/font/CustomFont;"
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
     const val ACTIONBAR_DESCRIPTOR = "$PATCHES_DESCRIPTOR/actionbar/ActionBarPatch;"
 
@@ -69,4 +70,5 @@ object Constants {
     const val LOAD_FLAGS_DESCRIPTOR = "invoke-static {}, $HOOK_FLAGS_DESCRIPTOR->%s()V"
 
     const val COMMENT_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/comment"
+    const val INSTANTS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/instants"
 }

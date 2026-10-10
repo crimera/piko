@@ -7,16 +7,11 @@
 package app.crimera.patches.instagram.entity.userdata
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
+import app.crimera.patches.instagram.entity.userfriendshipstatus.friendshipStatusClass
 import app.crimera.patches.instagram.utils.Constants
-import app.crimera.patches.twitter.logging.responseLogging.JACKSON_CLASS
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.literal
-import app.morphe.patcher.opcode
 import app.morphe.patcher.string
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.resourceLiteral
-import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -99,11 +94,6 @@ internal object IsVerifiedExtensionFingerprint : Fingerprint(
 
 // -----------------------------------
 
-internal object SelectHighlightsCoverFragmentOnCreateFingerprint : Fingerprint(
-    definingClass = "SelectHighlightsCoverFragment;",
-    name = "onCreate",
-)
-
 internal object FullNameLiveTreeUserDictFingerprint : Fingerprint(
     custom = { methodDef, _ -> methodDef.inUserModel() },
     filters =
@@ -125,8 +115,15 @@ internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
 )
 
 internal object FriendshipStatusLiveTreeUserDictFingerprint : Fingerprint(
-    custom = { methodDef, _ -> methodDef.inUserModel() },
-    returnType = "FriendshipStatus;",
+    custom = { methodDef, _ ->
+        methodDef.inUserModel() && methodDef.parameterTypes.isEmpty() &&
+            methodDef.returnType == friendshipStatusClass
+    },
+)
+
+internal object GetUserIdExtensionFingerprint : Fingerprint(
+    name = "getUserId",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object BiographyLiveTreeUserDictFingerprint : Fingerprint(

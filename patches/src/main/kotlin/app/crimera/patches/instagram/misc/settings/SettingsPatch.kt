@@ -7,13 +7,21 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEntity
+import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
+import app.crimera.patches.instagram.links.validateLinks.validateLinksPatch
+import app.crimera.patches.instagram.misc.buildExpiredPopup.removeBuildExpiredPopupPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hideHomeActionButtonsPatch
+import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.notification.fixDirectNotificationActionCrashPatch
 import app.crimera.patches.instagram.misc.notification.fixNotificationRegistrationCrashPatch
+import app.crimera.patches.instagram.misc.userProfile.preserveUnknownFriendshipStatusPatch
 import app.crimera.patches.instagram.misc.userProfile.userProfileButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
@@ -24,13 +32,16 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.findFreeRegister
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 @Suppress("unused")
 val settingsPatch =
@@ -43,11 +54,20 @@ val settingsPatch =
         dependsOn(
             sharedExtensionPatch,
             addSettingsActivityPatch,
+            nativeSettingsSwitchStylePatch,
             mainFeedActionBarButtonPatch,
+            hideHomeActionButtonsPatch,
+            userProfileActionBarButtonPatch,
+            userDataEntity,
             userProfileButtonPatch,
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
+            fixDirectNotificationActionCrashPatch,
+            validateLinksPatch,
+            removeBuildExpiredPopupPatch,
+            preserveUnknownFriendshipStatusPatch,
             profileInfoEntity,
+            instagramDialogBoxEntity,
             instagramButtonEntity,
             developerOptionsEntity,
             addResourcesPatch,
@@ -56,11 +76,12 @@ val settingsPatch =
             addAppResources("shared")
             addAppResources("instagram")
 
-            IgFragmentActivityOnCreate.method.apply {
+            // Returning from a modal must restore the activity used for native themes.
+            for (method in listOf(IgFragmentActivityOnCreate.method, IgFragmentActivityOnResume.method)) {
 
-                val returnVoidIndex = indexOfFirstInstruction(Opcode.RETURN_VOID)
+                val returnVoidIndex = method.indexOfFirstInstruction(Opcode.RETURN_VOID)
 
-                addInstruction(
+                method.addInstruction(
                     returnVoidIndex,
                     """
                     invoke-static {p0}, Lapp/morphe/extension/shared/Utils;->setActivity(Landroid/app/Activity;)V
@@ -90,21 +111,27 @@ val settingsPatch =
             }
 
             // For welcome message.
-            MainFeedFragmentOnCreateFingerprint.apply {
-                val strIndex = stringMatches[0].index
-
-                method.apply {
-                    val contextIndex = indexOfFirstInstruction(strIndex, Opcode.MOVE_RESULT_OBJECT)
-                    val contextInstruction = getInstruction(contextIndex)
-                    val contextRegister = contextInstruction.registersUsed[0]
-
-                    addInstruction(
-                        contextIndex + 1,
-                        """
-                        invoke-static{v$contextRegister}, $PATCHES_DESCRIPTOR/WelcomeMessage;->openWelcomeMessage(Landroid/content/Context;)V
-                        """.trimIndent(),
-                    )
+            MainFeedFragmentOnCreateFingerprint.matchAll(1..1).single().method.apply {
+                val code = instructions
+                val contextIndex = code.withIndex().singleOrNull { (_, instruction) ->
+                    val reference = instruction.getReference<MethodReference>()
+                    instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
+                        reference?.definingClass == "Landroidx/fragment/app/Fragment;" &&
+                        reference.name == "requireContext" &&
+                        reference.parameterTypes.isEmpty() &&
+                        reference.returnType == "Landroid/content/Context;"
+                }?.index ?: throw PatchException("Could not uniquely resolve main feed welcome context")
+                val contextResult = code.getOrNull(contextIndex + 1)
+                if (contextResult?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+                    throw PatchException("Main feed welcome context has no object result")
                 }
+                val contextRegister = contextResult.registersUsed.single()
+
+                addInstruction(
+                    contextIndex + 2,
+                    "invoke-static/range {v$contextRegister .. v$contextRegister}, " +
+                        "$PATCHES_DESCRIPTOR/WelcomeMessage;->openWelcomeMessage(Landroid/content/Context;)V",
+                )
             }
         }
     }

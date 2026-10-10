@@ -13,8 +13,11 @@ import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 
 val instagramDialogBoxEntity =
     bytecodePatch(
@@ -51,12 +54,27 @@ val instagramDialogBoxEntity =
             }
 
             val dialogBoxClassMethods = GetDialogFingerprint.classDef.methods
-            val dialogBoxAddItemsMethodName =
+            val dialogBoxAddItemsMethod =
                 dialogBoxClassMethods
-                    .first {
-                        it.parameters.size > 1 &&
-                            it.parameters[1].type == "[Ljava/lang/CharSequence;"
-                    }.name
-            AddDialogMenuItemsExtensionFingerprint.changeFirstString(dialogBoxAddItemsMethodName)
+                    .singleOrNull {
+                        it.parameterTypes == listOf("Landroid/content/DialogInterface\$OnClickListener;", "[Ljava/lang/CharSequence;") &&
+                            it.returnType == "V"
+                    } ?: throw PatchException("Could not uniquely resolve dialog menu method")
+            AddDialogMenuItemsExtensionFingerprint.changeFirstString(dialogBoxAddItemsMethod.name)
+
+            // The native builder enables top and bottom rounding together on the menu adapter.
+            val cornerWrites = GetDialogFingerprint.method.instructions.toList().windowed(3)
+                .filter { (constant, top, bottom) ->
+                    constant.opcode == Opcode.CONST_4 &&
+                        (constant as NarrowLiteralInstruction).narrowLiteral == 1 &&
+                        top.opcode == Opcode.IPUT_BOOLEAN && bottom.opcode == Opcode.IPUT_BOOLEAN &&
+                        top.registersUsed.size == 2 && bottom.registersUsed == top.registersUsed &&
+                        constant.registersUsed.single() == top.registersUsed.first() &&
+                        top.fieldExtractor().definingClass == bottom.fieldExtractor().definingClass &&
+                        top.fieldExtractor().definingClass != classNameToExtension(GetDialogFingerprint.classDef.type) &&
+                        top.fieldExtractor().name != bottom.fieldExtractor().name
+                }.singleOrNull()
+                ?: throw PatchException("Could not uniquely resolve dialog menu corner flags")
+            ClearMenuBottomCornersExtensionFingerprint.changeFirstString(cornerWrites.last().fieldExtractor().name)
         }
     }

@@ -27,6 +27,7 @@ val developerOptionsEntity =
             }
 
             ExperimentsGetMobileConfigSpecifier.apply {
+                matchAll(1..1)
                 GetExperimentItemHelperClassExtension.changeFirstString(classNameToExtension(classDef.type))
                 method.apply {
                     val getUniversalIdInstructionData = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_STATIC)).methodExtractor()

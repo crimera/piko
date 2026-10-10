@@ -15,10 +15,18 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.literal
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.util.findFreeRegister
+import app.morphe.util.getReference
+import app.morphe.util.matchSingle
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 // Credits: brosssh
 // https://github.com/brosssh/morphe-patches/commit/6a781ef8e0951ad5aa898fa17d094cfbfa5dd9fb
@@ -47,7 +55,7 @@ val hideReshareButtonPatch =
         name = "Hide reshare button",
         description = "Hides the reshare button from both posts and reels.",
     ) {
-        dependsOn(settingsPatch, resourceMappingPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -83,6 +91,68 @@ val hideReshareButtonPatch =
                 :nopatch
                 nop
         """,
+            )
+
+            // The ALV2 feed state bypasses the Media/Pando getters above. Feed renderers
+            // use this state field to hide the entire repost control, including its count.
+            val stateMatch =
+                Fingerprint(
+                    name = "toString",
+                    returnType = "Ljava/lang/String;",
+                    parameters = emptyList(),
+                    filters = listOf(string(", isRepostButtonEnabled=")),
+                ).matchSingle()
+            val stateInstructions = stateMatch.method.implementation!!.instructions
+            val labelIndex = stateMatch.instructionMatches.single().index
+            val appendIndex =
+                ((labelIndex + 1) until stateInstructions.size)
+                    .takeWhile { stateInstructions[it].getReference<StringReference>() == null }
+                    .singleOrNull {
+                        stateInstructions[it].getReference<MethodReference>()?.toString() ==
+                            "Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;"
+                    } ?: throw PatchException("Could not resolve the feed repost state value")
+            val appendRegisters = stateInstructions[appendIndex].registersUsed
+            if (appendRegisters.size != 2) throw PatchException("Unexpected feed repost append registers")
+            val valueRegister = appendRegisters[1]
+            val fieldRead =
+                stateInstructions.take(appendIndex).lastOrNull {
+                    it.opcode.setsRegister() && it.registersUsed.firstOrNull() == valueRegister
+                }
+            val stateField = fieldRead?.getReference<FieldReference>()
+            if (fieldRead?.opcode != Opcode.IGET_BOOLEAN || stateField?.type != "Z" ||
+                stateField.definingClass != stateMatch.classDef.type
+            ) {
+                throw PatchException("Could not resolve the feed repost state field")
+            }
+            val stateClass = mutableClassDefBy(stateMatch.classDef.type)
+            val writes =
+                stateClass.methods.filter { it.name == "<init>" }.flatMap { constructor ->
+                    constructor.implementation?.instructions.orEmpty().mapIndexedNotNull { index, instruction ->
+                        if (instruction.opcode == Opcode.IPUT_BOOLEAN &&
+                            instruction.getReference<FieldReference>()?.toString() == stateField.toString()
+                        ) {
+                            constructor to index
+                        } else {
+                            null
+                        }
+                    }
+                }
+            val (constructor, writeIndex) =
+                writes.singleOrNull() ?: throw PatchException("Expected one feed repost state initialization, found ${writes.size}")
+            val write = constructor.getInstruction(writeIndex)
+            val writeRegisters = write.registersUsed
+            if (writeRegisters.size != 2) throw PatchException("Unexpected feed repost field registers")
+            val scratch = constructor.findFreeRegister(writeIndex, writeRegisters)
+            if (scratch > 255) throw PatchException("No encodable register for the feed repost setting")
+            constructor.addInstructionsWithLabels(
+                writeIndex,
+                """
+                $PREF_CALL
+                move-result v$scratch
+                if-eqz v$scratch, :original
+                const/4 v${writeRegisters[0]}, 0x0
+                """.trimIndent(),
+                ExternalLabel("original", write),
             )
 
             enableSettings("hideReshareButton")

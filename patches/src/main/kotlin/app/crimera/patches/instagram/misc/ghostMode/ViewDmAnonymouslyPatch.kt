@@ -22,6 +22,7 @@ import app.morphe.util.getFreeRegisterProvider
 val viewDmAnonymouslyPatch =
     bytecodePatch(
         name = "View DMs anonymously",
+        default = false,
     ) {
         dependsOn(settingsPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)

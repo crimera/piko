@@ -10,6 +10,10 @@ import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMedia
 import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.MEDIAEXT_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
+import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
+import app.crimera.patches.instagram.entity.videoData.videoDataEntity
 import app.crimera.patches.instagram.utils.Constants.MUSIC_INFO_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
@@ -36,7 +40,7 @@ val mediaDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the media data",
     ) {
-        dependsOn(decoderEntity)
+        dependsOn(decoderEntity, userDataEntity, videoDataEntity, originalSoundDataIntfEntity, trackDataIntfEntity)
         execute {
             // Pin the getter class before any fingerprint resolves.
             mediaModelClass =
@@ -51,10 +55,22 @@ val mediaDataEntity =
             GetUserDataWithUserSessionExtensionFingerprint.changeFirstString(GetUserDataFromMediaFingerprint.method.name)
 
             // Extracting image variants list.
-            AyuMidcardMediaHelperImageObjectMethodFingerprint.method.apply {
-                val imageVariantsIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_INTERFACE }
-                val imageVariantsMethodName = getInstruction(imageVariantsIndex).methodExtractor().name
-                GetImageVariantsExtensionFingerprint.changeStringAt(1, imageVariantsMethodName)
+            ImageInfoCandidatesMapperFingerprint.matchAll(1..1).single().method.apply {
+                val code = instructions
+                val candidatesIndex = code.withIndex().singleOrNull { (_, instruction) ->
+                    instruction.getReference<StringReference>()?.string == "candidates"
+                }?.index ?: throw PatchException("Could not uniquely resolve image candidates mapping")
+                val previousKeyIndex = (0 until candidatesIndex).lastOrNull { index ->
+                    code[index].getReference<StringReference>() != null
+                } ?: -1
+                val getter = (previousKeyIndex + 1 until candidatesIndex).mapNotNull { index ->
+                    code[index].getReference<MethodReference>()?.takeIf {
+                        it.definingClass == "Lcom/instagram/model/mediasize/ImageInfo;" &&
+                            it.parameterTypes.isEmpty() && it.returnType == "Ljava/util/List;"
+                    }
+                }.distinctBy { it.toString() }.singleOrNull()
+                    ?: throw PatchException("Could not uniquely resolve image candidates getter")
+                GetImageVariantsExtensionFingerprint.changeStringAt(1, getter.name)
             }
 
             // Extracting the get mention set method used media helper class.
@@ -73,12 +89,17 @@ val mediaDataEntity =
                 }
             }
 
-            // Extracting get video variants.
-            VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
-                val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
-                val getVideoVariantsMethodName = firstInvokeInterfaceInstruction.methodExtractor().name
-                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
+            val videoVariantsGetters =
+                mutableClassDefBy { it.type == mediaModelClass }
+                    .methods
+                    .filter { method ->
+                        method.parameters.isEmpty() && method.returnType == "Ljava/util/List;" &&
+                            method.instructions.any { it.getReference<StringReference>()?.string == "video_versions" }
+                    }
+            if (videoVariantsGetters.size != 1) {
+                throw PatchException("Expected one video_versions getter in $mediaModelClass, found ${videoVariantsGetters.size}")
             }
+            GetVideoVariantsV1ExtensionFingerprint.changeFirstString(videoVariantsGetters.single().name)
 
             // Extracting method is video used in media class.
             AslSessionRelatedFingerprint.method.apply {
@@ -123,6 +144,25 @@ val mediaDataEntity =
                 val mediaPkIdMethodName = instructions[indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)].methodExtractor().name
                 GetMediaPkIdExtensionFingerprint.changeFirstString(mediaPkIdMethodName)
             }
+
+            val takenAtCandidates =
+                mutableClassDefBy { it.type == mediaModelClass }
+                    .methods
+                    .filter { method ->
+                        method.parameters.isEmpty() &&
+                            method.returnType == "Ljava/lang/Long;" &&
+                            method.instructions.any { instruction ->
+                                (instruction.opcode == Opcode.CONST_STRING ||
+                                    instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                    instruction.getReference<StringReference>()?.string == "taken_at"
+                            }
+                    }
+            if (takenAtCandidates.size != 1) {
+                throw PatchException(
+                    "Expected exactly one taken_at getter in $mediaModelClass, found ${takenAtCandidates.size}",
+                )
+            }
+            GetTakenAtSecondsExtensionFingerprint.changeFirstString(takenAtCandidates.single().name)
 
             // Extraction of user data used in extended media class.
             GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(LiveTreeMediaDictGetUserFingerprint.method.name)
