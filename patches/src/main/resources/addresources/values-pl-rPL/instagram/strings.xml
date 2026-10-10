@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Odblokowuje wszystkie opcje pracownicze używane do testów</string>
     <string name="piko_allow_user_network_certificate">Zezwalaj na certyfikaty użytkownika</string>
     <string name="piko_allow_user_network_certificate_desc">Umożliwia aplikacji zaufanie certyfikatom sieciowym zainstalowanym przez użytkownika do testów whitehat</string>
-    <string name="piko_remove_build_expire_popup">Usuń powiadomienie o wygasaniu wersji</string>
-    <string name="piko_remove_build_expire_popup_desc">Usuwa powiadomienie, które pojawia się, gdy zainstalowana wersja aplikacji zestarzeje się</string>
     <string name="piko_export_dev_overrides">Eksportuj nadpisania</string>
     <string name="piko_import_dev_overrides">Importuj nadpisania</string>
     <string name="piko_import_id_mapping">Importuj pliki mapowania</string>

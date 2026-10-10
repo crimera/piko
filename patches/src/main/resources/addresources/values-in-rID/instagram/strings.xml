@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Membuka semua pilihan karyawan yang digunakan untuk pengujian</string>
     <string name="piko_allow_user_network_certificate">Izinkan sertifikat jaringan pengguna</string>
     <string name="piko_allow_user_network_certificate_desc">Mengizinkan sertifikat jaringan pengguna untuk pengujian whitehat</string>
-    <string name="piko_remove_build_expire_popup">Hapus popup build kedaluwarsa</string>
-    <string name="piko_remove_build_expire_popup_desc">Menghapus popup yang muncul setelah beberapa saat, ketika versi aplikasi terlalu usang</string>
     <string name="piko_export_dev_overrides">Ekspor override</string>
     <string name="piko_import_dev_overrides">Impor override</string>
     <string name="piko_import_id_mapping">Impor berkas pemetaan</string>

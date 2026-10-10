@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Sblocca tutte le opzioni per dipendenti utilizzate per i test</string>
     <string name="piko_allow_user_network_certificate">Consenti certificato di rete utente</string>
     <string name="piko_allow_user_network_certificate_desc">Consenti certificato di rete utente per i test whitehat</string>
-    <string name="piko_remove_build_expire_popup">Rimuovi popup scadenza build</string>
-    <string name="piko_remove_build_expire_popup_desc">Rimuove il popup che appare dopo un po\', quando la versione dell\'applicazione diventa vecchia</string>
     <string name="piko_export_dev_overrides">Esporta sovrascritture</string>
     <string name="piko_import_dev_overrides">Importa sovrascritture</string>
     <string name="piko_import_id_mapping">Importa file di mappatura</string>

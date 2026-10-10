@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Desbloqueia todas as opções de funcionários utilizadas para testes.</string>
     <string name="piko_allow_user_network_certificate">Permitir certificado de rede do usuário</string>
     <string name="piko_allow_user_network_certificate_desc">Permite o uso de certificados de rede do usuário para testes de segurança.</string>
-    <string name="piko_remove_build_expire_popup">Remover popup de versão expirada</string>
-    <string name="piko_remove_build_expire_popup_desc">Remove a janela pop-up que aparece depois de algum tempo, quando a versão do aplicativo fica desatualizada.</string>
     <string name="piko_export_dev_overrides">Exportar Backup de comandos</string>
     <string name="piko_import_dev_overrides">Importar Backup de comandos</string>
     <string name="piko_import_id_mapping">Importar arquivo de mapeamento</string>
@@ -149,6 +147,7 @@
     <string name="piko_inbox_lock">Bloqueio da caixa de entrada</string>
     <string name="piko_inbox_lock_desc">Oculta sua caixa de entrada atrás da sua impressão digital, reconhecimento facial ou bloqueio de tela sempre que você abre o aplicativo</string>
     <string name="piko_inbox_lock_notifications">Bloquear notificações</string>
+    <string name="piko_inbox_lock_notifications_desc">Enquanto o bloqueio da Caixa de Entrada estiver ativado, as notificações de mensagens ocultam o remetente e o conteúdo, e o banner de mensagens no aplicativo permanece oculto</string>
     <string name="piko_inbox_lock_notification">Nova mensagem</string>
     <string name="piko_inbox_lock_unlock">Desbloquear</string>
     <string name="piko_inbox_lock_prompt">Desbloqueie suas mensagens</string>

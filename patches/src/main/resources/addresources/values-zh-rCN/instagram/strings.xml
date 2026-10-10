@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">解锁所有用于测试的员工选项</string>
     <string name="piko_allow_user_network_certificate">允许用户网络证书</string>
     <string name="piko_allow_user_network_certificate_desc">允许使用用户网络证书进行白帽测试</string>
-    <string name="piko_remove_build_expire_popup">移除版本过期弹出窗口</string>
-    <string name="piko_remove_build_expire_popup_desc">移除因应用程序版本过旧而弹出的弹窗</string>
     <string name="piko_export_dev_overrides">导出覆盖</string>
     <string name="piko_import_dev_overrides">导入覆盖</string>
     <string name="piko_import_id_mapping">导入映射文件</string>

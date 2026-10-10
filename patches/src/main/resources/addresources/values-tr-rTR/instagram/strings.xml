@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Test için kullanılan tüm çalışan seçeneklerinin kilidini açar</string>
     <string name="piko_allow_user_network_certificate">Kullanıcı ağ sertifikasına izin ver</string>
     <string name="piko_allow_user_network_certificate_desc">Beyaz şapka testleri için kullanıcı ağ sertifikasına izin verir</string>
-    <string name="piko_remove_build_expire_popup">Sürüm süresi doldu uyarısını kaldır</string>
-    <string name="piko_remove_build_expire_popup_desc">Uygulama sürümü eskiyince bir süre sonra görünen uyarı penceresini kaldırır</string>
     <string name="piko_export_dev_overrides">Geçersiz kılma ayarlarını dışa aktar</string>
     <string name="piko_import_dev_overrides">Geçersiz kılma ayarlarını içe aktar</string>
     <string name="piko_import_id_mapping">Eşleme dosyalarını içe aktar</string>
@@ -100,6 +98,8 @@
     <string name="piko_hide_notes_tray_desc">DM kısmındaki notlar tepsisini gizler</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Paylaşım menüsündeki grup oluşturma düğmesini gizle</string>
     <string name="piko_hide_reels_follow_button">Reels takip et butonunu gizle</string>
+    <string name="piko_hide_share_button">Paylaş butonunu gizle</string>
+    <string name="piko_hide_save_buttons">Kaydet düğmelerini gizle</string>
     <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
     <string name="piko_hide_reels_follow_button_desc">Reels yazar satırındaki takip et butonunu kaldırır</string>
     <string name="piko_disable_video_autoplay">Video otomatik oynatmayı kapat</string>
@@ -147,6 +147,7 @@
     <string name="piko_inbox_lock">Gelen Kutusu Kilidi</string>
     <string name="piko_inbox_lock_desc">Uygulamayı her açtığınızda gelen kutunuzu parmak izi, yüz tanıma veya ekran kilidi ile gizler</string>
     <string name="piko_inbox_lock_notifications">Bildirimleri engelle</string>
+    <string name="piko_inbox_lock_notifications_desc">Gelen Kutusu kilidi etkinken, mesaj bildirimlerinde gönderen kişi ve içeriği gizlenir, ve uygulama içi mesaj başlığı gizli kalır</string>
     <string name="piko_inbox_lock_notification">Yeni mesaj</string>
     <string name="piko_inbox_lock_unlock">Kilidi aç</string>
     <string name="piko_inbox_lock_prompt">Mesajlarınızın kilidini açın</string>

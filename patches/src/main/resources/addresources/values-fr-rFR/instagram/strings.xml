@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Déverrouille toutes les options employé utilisées pour les tests</string>
     <string name="piko_allow_user_network_certificate">Autoriser le certificat réseau utilisateur</string>
     <string name="piko_allow_user_network_certificate_desc">Autorise les certificats réseau de l\'utilisateur pour les tests whitehat</string>
-    <string name="piko_remove_build_expire_popup">Supprimer la fenêtre contextuelle d\'expiration de la version</string>
-    <string name="piko_remove_build_expire_popup_desc">Supprime la fenêtre contextuelle qui apparaît après un certain temps, lorsque la version de l\'application devient ancienne</string>
     <string name="piko_export_dev_overrides">Exporter les surcharges</string>
     <string name="piko_import_dev_overrides">Importer les surcharges</string>
     <string name="piko_import_id_mapping">Importer les fichiers de mappage</string>

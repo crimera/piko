@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">テスト用の設定をすべて有効にします</string>
     <string name="piko_allow_user_network_certificate">ユーザーネットワーク証明書を許可</string>
     <string name="piko_allow_user_network_certificate_desc">セキュリティテスト用にユーザーネットワーク証明書を許可します</string>
-    <string name="piko_remove_build_expire_popup">ビルド期限切れポップアップを非表示</string>
-    <string name="piko_remove_build_expire_popup_desc">アプリのバージョンが古い場合に表示されるポップアップを非表示にします</string>
     <string name="piko_export_dev_overrides">オーバーライドをエクスポート</string>
     <string name="piko_import_dev_overrides">オーバーライドをインポート</string>
     <string name="piko_import_id_mapping">マッピングファイルをインポート</string>
@@ -234,7 +232,7 @@
     <string name="piko_copy_post_owner_username">投稿者のユーザーネームをコピー</string>
     <string name="piko_copy_post_owner_fullname">投稿者の名前をコピー</string>
     <string name="piko_enable_more_options_on_post">投稿の追加のオプションを有効化</string>
-    <string name="piko_enable_more_options_on_post_desc">投稿を長押ししたときに追加のオプションを表示します</string>
+    <string name="piko_enable_more_options_on_post_desc">投稿やリールのメニューに説明文やユーザー名のコピーなどができるボタンを追加します</string>
     <string name="piko_more_options">追加のオプション</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">ナビゲーションボタンを非表示</string>

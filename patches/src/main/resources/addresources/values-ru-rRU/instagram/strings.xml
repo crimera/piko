@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Открывает все служебные параметры, используемые для тестирования</string>
     <string name="piko_allow_user_network_certificate">Разрешить пользовательские сетевые сертификаты</string>
     <string name="piko_allow_user_network_certificate_desc">Разрешает использование пользовательских сетевых сертификатов для тестирования безопасности</string>
-    <string name="piko_remove_build_expire_popup">Убрать уведомление об устаревании сборки</string>
-    <string name="piko_remove_build_expire_popup_desc">Убирает всплывающее уведомление, которое появляется спустя время после устаревания версии приложения</string>
     <string name="piko_export_dev_overrides">Экспорт замещений</string>
     <string name="piko_import_dev_overrides">Импорт замещений</string>
     <string name="piko_import_id_mapping">Импорт файлов сопоставления</string>

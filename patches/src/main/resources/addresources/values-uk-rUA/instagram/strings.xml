@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Розблоковує всі службові параметри, що використовуються для тестування</string>
     <string name="piko_allow_user_network_certificate">Дозволити користувацькі мережеві сертифікати</string>
     <string name="piko_allow_user_network_certificate_desc">Дозволяє використання користувацьких мережевих сертифікатів для тестування безпеки (whitehat)</string>
-    <string name="piko_remove_build_expire_popup">Прибрати сповіщення про застарілу збірку</string>
-    <string name="piko_remove_build_expire_popup_desc">Прибирає спливаюче вікно, яке з\'являється з часом, коли версія застосунку старіє</string>
     <string name="piko_export_dev_overrides">Експорт заміщень</string>
     <string name="piko_import_dev_overrides">Імпорт заміщень</string>
     <string name="piko_import_id_mapping">Імпорт файлів зіставлення</string>

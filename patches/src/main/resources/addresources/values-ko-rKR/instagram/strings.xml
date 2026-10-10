@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">테스트에 사용되는 모든 직원 옵션을 활성화합니다</string>
     <string name="piko_allow_user_network_certificate">사용자 네트워크 인증서 허용</string>
     <string name="piko_allow_user_network_certificate_desc">화이트햇 테스트를 위해 사용자 네트워크 인증서를 허용합니다</string>
-    <string name="piko_remove_build_expire_popup">빌드 만료 팝업 제거</string>
-    <string name="piko_remove_build_expire_popup_desc">앱 버전이 오래되었을 경우에 일정 시간이 지나면 표시되는 팝업을 제거합니다</string>
     <string name="piko_export_dev_overrides">재정의 내보내기</string>
     <string name="piko_import_dev_overrides">재정의 가져오기</string>
     <string name="piko_import_id_mapping">매핑 파일 가져오기</string>

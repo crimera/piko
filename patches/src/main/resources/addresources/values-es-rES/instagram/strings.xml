@@ -15,8 +15,6 @@
     <string name="piko_enable_emp_options_desc">Desbloquea todas las opciones de empleados utilizadas para pruebas</string>
     <string name="piko_allow_user_network_certificate">Permitir certificado de red del usuario</string>
     <string name="piko_allow_user_network_certificate_desc">Permitir certificados de red de usuario para pruebas de seguridad</string>
-    <string name="piko_remove_build_expire_popup">Eliminar ventana de versión expirada</string>
-    <string name="piko_remove_build_expire_popup_desc">Elimina la ventana emergente que aparece al cabo de un rato, cuando la versión de la aplicación queda obsoleta</string>
     <string name="piko_export_dev_overrides">Exportar copia de seguridad de comandos</string>
     <string name="piko_import_dev_overrides">Importar copia de seguridad de comandos</string>
     <string name="piko_import_id_mapping">Importar archivo de mapeo</string>
@@ -100,6 +98,8 @@
     <string name="piko_hide_notes_tray_desc">Oculta la bandeja de notas en la sección de mensajes directos</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ocultar el botón de creación de grupos en la hoja para compartir</string>
     <string name="piko_hide_reels_follow_button">Ocultar el botón de seguimiento de Reels</string>
+    <string name="piko_hide_share_button">Ocultar botón para compartir</string>
+    <string name="piko_hide_save_buttons">Ocultar botones guardados</string>
     <string name="piko_hide_reshare_button">Ocultar botón de republicar</string>
     <string name="piko_hide_reels_follow_button_desc">Elimina el siguiente botón de la fila de autores de Reels</string>
     <string name="piko_disable_video_autoplay">Desactivar reproducción automática de videos</string>
@@ -147,6 +147,7 @@
     <string name="piko_inbox_lock">Bandeja de entrada cerrada</string>
     <string name="piko_inbox_lock_desc">Oculta tu bandeja de entrada detrás de tu huella digital, rostro o bloqueo de pantalla cada vez que abres la aplicación</string>
     <string name="piko_inbox_lock_notifications">Bloquear notificaciones</string>
+    <string name="piko_inbox_lock_notifications_desc">Mientras el bloqueo de la bandeja de entrada está activado, las notificaciones de mensajes ocultan el remitente y el contenido, y el banner del mensaje en la aplicación permanece oculto</string>
     <string name="piko_inbox_lock_notification">Nuevo mensaje</string>
     <string name="piko_inbox_lock_unlock">Desbloquear</string>
     <string name="piko_inbox_lock_prompt">Desbloquea tus mensajes</string>
