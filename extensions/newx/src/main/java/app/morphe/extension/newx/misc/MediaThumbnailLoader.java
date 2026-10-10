@@ -62,6 +62,13 @@ public final class MediaThumbnailLoader {
 
     public interface Callback {
         void onLoaded(Bitmap bitmap);
+
+        /**
+         * Runs on the main thread when a request ends without a bitmap. A transient failure
+         * (network or server) may succeed later; a permanent one will not change.
+         */
+        default void onFailed(boolean transientError) {
+        }
     }
 
     /** Process-lifetime request-tier counters for the Developer tools stats screen. */
@@ -146,6 +153,7 @@ public final class MediaThumbnailLoader {
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "ignored request with invalid network URL: " + describeUrl(networkUrl));
             }
+            MAIN_HANDLER.post(() -> callback.onFailed(false));
             return;
         }
 
@@ -205,9 +213,12 @@ public final class MediaThumbnailLoader {
             }
 
             // 4. Fetch from network and save to disk cache
+            boolean transientFailure = false;
             if (bitmap == null) {
                 String fetchUrl = cacheUrl != null ? cacheUrl : networkUrl;
-                bitmap = fetchAndCache(context, fetchUrl, networkUrl, requestId);
+                Fetch fetch = fetchAndCache(context, fetchUrl, networkUrl, requestId);
+                bitmap = fetch.bitmap;
+                transientFailure = fetch.transientError;
                 if (bitmap != null) {
                     source = "network";
                 }
@@ -217,6 +228,8 @@ public final class MediaThumbnailLoader {
                 NETWORK_FAILED.incrementAndGet();
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " failed; no thumbnail available");
+                boolean retryable = transientFailure;
+                MAIN_HANDLER.post(() -> callback.onFailed(retryable));
                 return;
             }
 
@@ -472,7 +485,24 @@ public final class MediaThumbnailLoader {
         return null;
     }
 
-    private static Bitmap fetchAndCache(
+    /** One network attempt: the decoded bitmap, or whether its failure is worth retrying later. */
+    private static final class Fetch {
+        final Bitmap bitmap;
+        final boolean transientError;
+
+        Fetch(Bitmap bitmap, boolean transientError) {
+            this.bitmap = bitmap;
+            this.transientError = transientError;
+        }
+    }
+
+    private static boolean isRetryableStatus(int responseCode) {
+        return responseCode == HttpURLConnection.HTTP_CLIENT_TIMEOUT
+                || responseCode == 429
+                || responseCode >= HttpURLConnection.HTTP_INTERNAL_ERROR;
+    }
+
+    private static Fetch fetchAndCache(
             Context context,
             String downloadUrl,
             String networkUrl,
@@ -495,7 +525,7 @@ public final class MediaThumbnailLoader {
                 NETWORK_FAILED.incrementAndGet();
                 NewXLogger.printInfo(() -> LOG_PREFIX +
                         "request #" + requestId + " network rejected HTTP " + responseCode);
-                return null;
+                return new Fetch(null, isRetryableStatus(responseCode));
             }
 
             int contentLength = connection.getContentLength();
@@ -505,7 +535,7 @@ public final class MediaThumbnailLoader {
                         "request #" + requestId + " network response too large bytes=" +
                                 contentLength
                 );
-                return null;
+                return new Fetch(null, false);
             }
 
             try (InputStream input = connection.getInputStream()) {
@@ -514,7 +544,7 @@ public final class MediaThumbnailLoader {
                     NETWORK_FAILED.incrementAndGet();
                     NewXLogger.printInfo(() -> LOG_PREFIX +
                             "request #" + requestId + " network response could not be read");
-                    return null;
+                    return new Fetch(null, false);
                 }
 
                 // Persist under the canonical network key only; oversized responses are
@@ -526,7 +556,7 @@ public final class MediaThumbnailLoader {
                             "request #" + requestId + " network response failed to decode bytes=" +
                                     data.length
                     );
-                    return null;
+                    return new Fetch(null, false);
                 }
                 if (data.length > MediaDiskCache.MAX_DISK_ENTRY_BYTES) {
                     OVERSIZED_SKIPPED.incrementAndGet();
@@ -554,13 +584,14 @@ public final class MediaThumbnailLoader {
                         "request #" + requestId + " network decode success bytes=" + data.length +
                                 " size=" + dimensions(bitmap)
                 );
-                return bitmap;
+                return new Fetch(bitmap, false);
             }
         } catch (IOException | RuntimeException exception) {
             NETWORK_FAILED.incrementAndGet();
             NewXLogger.printException(() -> LOG_PREFIX +
                     "request #" + requestId + " network fetch failed", exception);
-            return null;
+            // Timeouts and DNS lookups can clear on retry; a runtime error will not.
+            return new Fetch(null, exception instanceof IOException);
         } finally {
             if (connection != null) connection.disconnect();
         }

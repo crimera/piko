@@ -3,6 +3,7 @@ package app.morphe.extension.newx.misc;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.view.MotionEvent;
@@ -698,6 +699,8 @@ public final class ProfilePhotosGallery {
     private static final class GalleryGrid extends ViewGroup {
         private static final int COLUMN_COUNT = 3;
         private static final int GAP_DP = 2;
+        // Delays before retrying a transiently failed thumbnail: three attempts in total.
+        private static final int[] THUMBNAIL_RETRY_DELAYS_MS = {1_500, 4_000};
         private final int gapPixels;
         private List<GalleryCell> cells = Collections.emptyList();
         private Object itemClickCallback;
@@ -716,19 +719,31 @@ public final class ProfilePhotosGallery {
         void setCells(List<GalleryCell> nextCells) {
             if (cells.equals(nextCells)) return;
             int oldSize = cells.size();
-            cells = nextCells;
-
-            if (oldSize == 0 || nextCells.size() < oldSize) {
-                removeAllViews();
-                for (GalleryCell cell : cells) {
-                    addView(createCellView(cell));
-                }
-            } else {
-                for (int i = oldSize; i < nextCells.size(); i++) {
-                    addView(createCellView(nextCells.get(i)));
+            int sharedSize = Math.min(oldSize, nextCells.size());
+            boolean needsLayout = nextCells.size() != oldSize;
+            // Views are bound by position. Rebind only the positions whose media changed, so a
+            // prepended or reordered list shows the right photos without rebuilding the whole grid.
+            // Timeline item identity does not count: it changes on every emission.
+            for (int i = 0; i < sharedSize; i++) {
+                GalleryCell before = cells.get(i);
+                GalleryCell after = nextCells.get(i);
+                ImageView image = (ImageView) getChildAt(i);
+                image.setOnClickListener(view -> openPhoto(after));
+                if (!before.url.equals(after.url)) {
+                    needsLayout = true;
+                    image.setTag(after.url);
+                    image.setImageDrawable(null);
+                    load(image, after.url);
                 }
             }
-            requestLayout();
+            if (nextCells.size() < oldSize) {
+                removeViews(nextCells.size(), oldSize - nextCells.size());
+            }
+            for (int i = oldSize; i < nextCells.size(); i++) {
+                addView(createCellView(nextCells.get(i)));
+            }
+            cells = nextCells;
+            if (needsLayout) requestLayout();
         }
 
         private View createCellView(GalleryCell cell) {
@@ -742,13 +757,37 @@ public final class ProfilePhotosGallery {
         }
 
         private void load(ImageView image, String url) {
+            loadThumbnail(image, url, false, 0);
+        }
+
+        private void loadThumbnail(ImageView image, String url, boolean original, int attempt) {
             MediaThumbnailLoader.load(
                     getContext(),
-                    thumbnailUrl(url),
+                    original ? null : thumbnailUrl(url),
                     url,
-                    bitmap -> {
-                        if (url.equals(image.getTag()) && !bitmap.isRecycled()) {
-                            image.setImageBitmap(bitmap);
+                    new MediaThumbnailLoader.Callback() {
+                        @Override
+                        public void onLoaded(Bitmap bitmap) {
+                            if (url.equals(image.getTag()) && !bitmap.isRecycled()) {
+                                image.setImageBitmap(bitmap);
+                            }
+                        }
+
+                        @Override
+                        public void onFailed(boolean transientError) {
+                            if (!url.equals(image.getTag())) return;
+                            if (transientError && attempt < THUMBNAIL_RETRY_DELAYS_MS.length) {
+                                // DNS flaps, timeouts and server errors can clear on a later attempt.
+                                // postDelayed holds the retry until the tile is attached.
+                                image.postDelayed(() -> {
+                                    if (url.equals(image.getTag())) {
+                                        loadThumbnail(image, url, original, attempt + 1);
+                                    }
+                                }, THUMBNAIL_RETRY_DELAYS_MS[attempt]);
+                            } else if (!original && !url.equals(thumbnailUrl(url))) {
+                                // The rewritten size variant was refused. The original is the last attempt.
+                                loadThumbnail(image, url, true, 0);
+                            }
                         }
                     }
             );
