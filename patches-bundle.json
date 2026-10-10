@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-10-09T08:27:09",
-  "description": "## [3.10.0-dev.13](https://github.com/crimera/piko/compare/v3.10.0-dev.12...v3.10.0-dev.13) (2026-10-09)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Fix deleted message handling ([4254162](https://github.com/crimera/piko/commit/425416276c0ae2df7a6cf53fab9b37708735f8be))\n* **Instagram:** Preserve friendship status when metadata is missing ([6eeb0f0](https://github.com/crimera/piko/commit/6eeb0f08db63e99cfb102e1ddb653945a10e1780))\n* **Instagram:** Sanitize shared links before changing domains ([b1d0eb4](https://github.com/crimera/piko/commit/b1d0eb481e748a33110a5f5fd51ade221fe1ecef))\n* **Instagram:** Use an adaptive settings shortcut icon ([454f283](https://github.com/crimera/piko/commit/454f283baf3f7d444cb7d8b13eb3728e6a081a36))\n\n### 🔧 Improvements\n\n* **Instagram:** Add flags to Suggested users in search ([4dbc376](https://github.com/crimera/piko/commit/4dbc3764bf9bda3c10546d8e112328a4310cf48a))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.13/patches-3.10.0-dev.13.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.13/patches-3.10.0-dev.13.mpp.asc",
-  "version": "3.10.0-dev.13"
+  "created_at": "2026-10-10T07:14:30",
+  "description": "## [3.10.0-dev.14](https://github.com/crimera/piko/compare/v3.10.0-dev.13...v3.10.0-dev.14) (2026-10-10)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Skip the remind me notification action when the link has no x ([#2101](https://github.com/crimera/piko/issues/2101)) ([c4a6479](https://github.com/crimera/piko/commit/c4a64794d5d0f8a30327a38986ff84f5b8b4cdf4))\n\n### 🔧 Improvements\n\n* **Instagram:** Always apply link and build expiration fixes ([476cf62](https://github.com/crimera/piko/commit/476cf6220c4b59b85b812829e77f9135f3c73cdb))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.14/patches-3.10.0-dev.14.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.10.0-dev.14/patches-3.10.0-dev.14.mpp.asc",
+  "version": "3.10.0-dev.14"
 }

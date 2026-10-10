@@ -69,7 +69,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.10.0-dev.13](https://github.com/crimera/piko/releases/tag/v3.10.0-dev.13)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;139 patches total
+> **[v3.10.0-dev.14](https://github.com/crimera/piko/releases/tag/v3.10.0-dev.14)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;137 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
@@ -160,7 +160,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;64 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;62 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -219,7 +219,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
 | [Recommended flags](#recommended-flags) | Developer flags suggested by the community |  |
-| [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
 | [Remove empty bottom space](#remove-empty-bottom-space) | Removes empty space below bottom navigation bar |  |
 | [Sanitize share links](#sanitize-share-links) |  |  |
 | [Save Instants](#save-instants) | Captures view-once Instants as you view them so you can re-view and download them later. |  |
@@ -229,7 +228,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
 | [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |
-| [Validate links](#validate-links) | Fixes app crashing issue while opening links from a different app |  |
 | [View DMs anonymously](#view-dms-anonymously) |  |  |
 | [View live anonymously](#view-live-anonymously) |  |  |
 | [View stories anonymously](#view-stories-anonymously) |  |  |
