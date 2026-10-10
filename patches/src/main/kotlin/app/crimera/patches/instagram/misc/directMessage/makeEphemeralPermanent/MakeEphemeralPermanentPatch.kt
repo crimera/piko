@@ -16,6 +16,7 @@ import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -23,6 +24,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getFreeRegisterProvider
@@ -33,7 +36,24 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+
+// The binder of photo and video messages, found by the bubble it inflates.
+private object VisualMessageBinderFingerprint : Fingerprint(
+    filters = listOf(resourceLiteral(ResourceType.ID, "message_content_visual_thumbnail_bubble_container")),
+)
+
+// Fills the views of a photo or video message with the message; it is the binder's only method with two object parameters.
+private object VisualMessageBindFingerprint : Fingerprint(
+    classFingerprint = VisualMessageBinderFingerprint,
+    returnType = "V",
+    custom = { method, _ ->
+        !AccessFlags.STATIC.isSet(method.accessFlags) &&
+            method.parameters.size == 2 &&
+            method.parameters.all { it.type.startsWith("L") }
+    },
+)
 
 internal object EphemeralMediaJsonParserFingerprint : Fingerprint(
     custom = { methodDef, _ ->
@@ -103,6 +123,16 @@ val makeEphemeralPermanentPatch =
                     )
                 }
             }
+            // The parameters sit above v15, so they are copied to v0 and v1 (unused at the start) to be passed on.
+            VisualMessageBindFingerprint.method.addInstructions(
+                0,
+                """
+                move-object/from16 v0, p1
+                move-object/from16 v1, p2
+                invoke-static {v0, v1}, $PATCHES_DESCRIPTOR/dm/EphemeralMediaCaption;->onBind(Ljava/lang/Object;Ljava/lang/Object;)V
+                """,
+            )
+
             enableSettings("unlimitedReplaysOnEphemeralMedia")
         }
     }
