@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -312,6 +313,36 @@ public final class ProfilePhotosGallery {
             if (!loadMoreInFlight || itemsChanged || itemCountChanged) {
                 setLoadingMore(false);
             }
+        }
+
+        // NestedScrollView computes drag deltas from touch Y relative to itself. Compose moves this
+        // view while it consumes the drag, and that move is not reported back in time, so each delta
+        // counts the move again: the content lags the finger and oscillates. Touch Y is therefore
+        // re-expressed in the frame of the gesture's DOWN. The DOWN keeps its local coordinates, so the
+        // child hit test still matches, and later events move with the finger instead of with this view.
+        // onTouchEvent and onInterceptTouchEvent are final in the app's copy of NestedScrollView, so the
+        // conversion runs in dispatchTouchEvent, which the framework declares and the app does not finalize.
+        private float downScreenTop = Float.NaN;
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            MotionEvent anchored = toAnchoredEvent(ev);
+            try {
+                return super.dispatchTouchEvent(anchored);
+            } finally {
+                anchored.recycle();
+            }
+        }
+
+        private MotionEvent toAnchoredEvent(MotionEvent ev) {
+            // getRawY() - getY() is this view's screen top when the event was dispatched.
+            float screenTop = ev.getRawY() - ev.getY();
+            if (ev.getActionMasked() == MotionEvent.ACTION_DOWN || Float.isNaN(downScreenTop)) {
+                downScreenTop = screenTop;
+            }
+            MotionEvent copy = MotionEvent.obtain(ev);
+            copy.offsetLocation(0, screenTop - downScreenTop);
+            return copy;
         }
 
         private void checkLoadMore() {
