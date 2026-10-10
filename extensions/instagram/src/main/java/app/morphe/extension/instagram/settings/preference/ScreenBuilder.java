@@ -233,6 +233,13 @@ public class ScreenBuilder {
                             Settings.UNLIMITED_REPLAYS
                     )
             );
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_ephemeral_caption"),
+                            str("piko_ephemeral_caption_desc"),
+                            Settings.EPHEMERAL_MEDIA_CAPTION
+                    )
+            );
         }
 
         if (SettingsStatus.markChatAsRead) {

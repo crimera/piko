@@ -59,6 +59,7 @@ public class EphemeralMediaPatch {
     }
 
     public static String makeEphemeralMediaPermanent(Long expireAt, String viewMode) {
+        EphemeralMediaCaption.record(expireAt, viewMode);
         try {
             if (expireAt == null || !MAKE_EPHEMERAL_MEDIA_PERMANENT) return viewMode;
 
