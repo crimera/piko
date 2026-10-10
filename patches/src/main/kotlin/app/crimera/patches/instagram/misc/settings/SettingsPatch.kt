@@ -19,6 +19,7 @@ import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.u
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.notification.fixDirectNotificationActionCrashPatch
 import app.crimera.patches.instagram.misc.notification.fixNotificationRegistrationCrashPatch
 import app.crimera.patches.instagram.misc.userProfile.preserveUnknownFriendshipStatusPatch
 import app.crimera.patches.instagram.misc.userProfile.userProfileButtonPatch
@@ -61,6 +62,7 @@ val settingsPatch =
             userProfileButtonPatch,
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
+            fixDirectNotificationActionCrashPatch,
             validateLinksPatch,
             removeBuildExpiredPopupPatch,
             preserveUnknownFriendshipStatusPatch,
