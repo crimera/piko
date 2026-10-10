@@ -46,8 +46,9 @@ public final class NewXShareImageHandler {
     private static final String OPTION_NAME = NewXPostOptionActions.SHARE_IMAGE_ACTION;
     private static final String SETTING_ID = "newx.content.share_post_as_image";
     private static final String URT_POST_CLASS = "com.x.models.timelines.items.UrtTimelinePost";
+    // Release allowlist: the callback argument and its window-relative c() accessor. The rect itself is
+    // matched by shape, because R8 renumbers the Compose unit classes between releases.
     private static final String SPATIAL_BOUNDS_CLASS = "androidx.compose.ui.spatial.c";
-    private static final String INT_RECT_CLASS = "androidx.compose.ui.unit.k";
     private static final int MAX_CAPTURE_PIXELS = 16_000_000;
     private static final int MAX_RENDERED_BOUNDS = 128;
     private static volatile Handler mainHandler;
@@ -568,22 +569,10 @@ public final class NewXShareImageHandler {
         return boundsReader(layoutBounds.getClass()).read(layoutBounds);
     }
 
-    private static Rect readIntRect(Object value) throws IllegalAccessException {
+    static Rect readIntRect(Object value) throws IllegalAccessException {
         if (value == null) return null;
 
-        if (!INT_RECT_CLASS.equals(value.getClass().getName())) return null;
-
-        Class<?> valueClass = value.getClass();
-        Field[] fields = RECTANGLE_FIELDS.get(valueClass);
-        if (fields == null) {
-            synchronized (RECTANGLE_FIELDS) {
-                fields = RECTANGLE_FIELDS.get(valueClass);
-                if (fields == null) {
-                    fields = rectangleFields(valueClass);
-                    RECTANGLE_FIELDS.put(valueClass, fields);
-                }
-            }
-        }
+        Field[] fields = windowRectFields(value.getClass());
         if (fields.length == 0) return null;
 
         return new Rect(
@@ -592,6 +581,25 @@ public final class NewXShareImageHandler {
                 fields[2].getInt(value),
                 fields[3].getInt(value)
         );
+    }
+
+    /**
+     * Returns the four coordinate fields when the type is a window rect, otherwise an empty array.
+     * The shape is the contract: 12.33.0-prod.01 moved IntRect from unit/k to unit/l, and a class-name
+     * check made spatial c() look unavailable for every share.
+     */
+    static Field[] windowRectFields(Class<?> type) {
+        Field[] fields = RECTANGLE_FIELDS.get(type);
+        if (fields == null) {
+            synchronized (RECTANGLE_FIELDS) {
+                fields = RECTANGLE_FIELDS.get(type);
+                if (fields == null) {
+                    fields = rectangleFields(type);
+                    RECTANGLE_FIELDS.put(type, fields);
+                }
+            }
+        }
+        return fields;
     }
 
     private static Field[] rectangleFields(Class<?> type) {
@@ -645,11 +653,12 @@ public final class NewXShareImageHandler {
             }
             try {
                 Method method = layoutBoundsClass.getMethod("c");
-                if (method.getParameterCount() != 0 ||
-                        !INT_RECT_CLASS.equals(method.getReturnType().getName())) {
+                Class<?> returnType = method.getReturnType();
+                if (method.getParameterCount() != 0 || windowRectFields(returnType).length == 0) {
                     boundsAccessorUnavailable = true;
                     NewXLogger.printInfo(
-                            () -> DEBUG_TAG + ": Bounds accessor c() has unexpected signature"
+                            () -> DEBUG_TAG + ": Bounds accessor c() has unexpected signature, returns " +
+                                    returnType.getName()
                     );
                     return null;
                 }
