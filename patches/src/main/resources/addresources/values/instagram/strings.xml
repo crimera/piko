@@ -158,7 +158,7 @@
     <string name="piko_inbox_lock_prompt">Unlock your messages</string>
     <string name="piko_inbox_lock_no_lock">Set a screen lock on your device to use Inbox lock</string>
     <string name="piko_hidden_chats">Hidden chats</string>
-    <string name="piko_hidden_chats_desc">Adds a hide option to the chat long-press menu that moves the chat to a private inbox, separate for each account</string>
+    <string name="piko_hidden_chats_desc">Adds a hide option to the chat long-press menu that moves the chat to a private inbox, separate for each account. Turn on Inbox lock to protect it</string>
     <string name="piko_hidden_chats_hidden">Chat hidden</string>
     <string name="piko_hidden_chats_unhidden">Chat unhidden</string>
     <string name="piko_hidden_chats_opened">Hidden chats</string>
