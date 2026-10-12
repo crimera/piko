@@ -53,6 +53,7 @@ val newXShareImagePatch =
     bytecodePatch(
         name = "NewX: Share post as image",
         description = "Adds a rendered-image share action to NewX post menus.",
+        default= false,
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
