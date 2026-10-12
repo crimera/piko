@@ -187,9 +187,10 @@ public class Helper {
                     if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
                         return MaterialYouTheme.requestMaterialYouChange(context, val);
                     }
-                    boolean inboxLockKey = Settings.INBOX_LOCK.key.equals(key)
-                            || Settings.INBOX_LOCK_NOTIFICATIONS.key.equals(key);
-                    if (inboxLockKey && !val && InboxLock.mustConfirmToDisable() && context instanceof Activity) {
+                    boolean lockedKey = Settings.INBOX_LOCK.key.equals(key)
+                            || Settings.INBOX_LOCK_NOTIFICATIONS.key.equals(key)
+                            || Settings.HIDDEN_CHATS.key.equals(key);
+                    if (lockedKey && !val && InboxLock.mustConfirmToDisable() && context instanceof Activity) {
                         // Reject for now; the switch turns off once the device lock confirms it, so cancelling can't bypass the lock.
                         InboxLock.confirm((Activity) context, () -> {
                             if (setValue(preference, newValue)) ((SwitchPreference) preference).setChecked(false);
