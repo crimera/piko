@@ -6,28 +6,21 @@
 
 package app.crimera.patches.instagram.misc.instants
 
-import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.morphe.patcher.Fingerprint
 
-/** Instants are "quicksnap" internally, and this repository keeps its real name through R8. */
-internal const val QUICK_SNAP_REPOSITORY_CLASS =
-    "Lcom/instagram/quicksnap/data/repository/QuickSnapRepository;"
-
 /**
- * Types the quicksnap classes touch. Pinned by instantsDownloadPatch before the fingerprint below
- * resolves, since a Media-carrying item on its own is not unique to instants.
+ * The app's per-instant item, which has the view modes of an instant.
  */
-internal var quickSnapTypes: Set<String> = emptySet()
+internal object InstantItemFingerprint : Fingerprint(
+    name = "hashCode",
+    strings = listOf("NUX_VIDEO", "ONCE", "PERMANENT", "REPLAYABLE"),
+)
 
 /**
- * The app's per-instant item, built from that instant's Media. Hooking its constructor catches every
+ * The per-instant item is built from that instant's Media, its first parameter. Hooking its constructor catches every
  * instant as it is created and hands the Media straight to the extension.
  */
 internal object InstantItemConstructorFingerprint : Fingerprint(
+    classFingerprint = InstantItemFingerprint,
     name = "<init>",
-    custom = { methodDef, classDef ->
-        classDef.type in quickSnapTypes &&
-            methodDef.parameters.firstOrNull()?.type == MEDIA_CLASS_NAME &&
-            classDef.fields.any { it.type == MEDIA_CLASS_NAME }
-    },
 )

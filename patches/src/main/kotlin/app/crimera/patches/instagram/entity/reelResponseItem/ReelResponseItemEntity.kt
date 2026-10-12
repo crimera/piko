@@ -8,9 +8,8 @@ package app.crimera.patches.instagram.entity.reelResponseItem
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.methodExtractor
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 
 val reelResponseItemEntity =
@@ -21,22 +20,17 @@ val reelResponseItemEntity =
         execute {
 
             ReelResponseItemFingerprint.apply {
-                val classFields = classDef.fields
+                val classFields = originalClassDef.fields
 
-                val reelTypeFieldName = classFields.first { it.type == ReelTypeEnumInitFingerprint.classDef.type }.name
+                val reelTypeFieldName = classFields.first { it.type == ReelTypeEnumInitFingerprint.originalClassDef.type }.name
                 GetReelTypeExtensionFingerprint.changeFirstString(reelTypeFieldName)
 
                 val userFieldName = classFields.first { it.type == USER_MODEL_CLASS_NAME }.name
                 GetUserDataExtensionFingerprint.changeFirstString(userFieldName)
             }
 
-            ReelResponseItemIntfMapperFingerprint.apply {
-                val mediaCountStrIndex = stringMatches[1].index
-
-                method.apply {
-                    val mediaCountMethodName = getInstruction(mediaCountStrIndex + 1).methodExtractor().name
-                    GetMediaCountExtensionFingerprint.changeFirstString(mediaCountMethodName)
-                }
-            }
+            GetMediaCountExtensionFingerprint.changeFirstString(
+                ReelResponseItemIntfMapperFingerprint.instructionMatches.last().methodReference.name,
+            )
         }
     }

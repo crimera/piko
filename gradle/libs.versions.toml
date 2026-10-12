@@ -1,5 +1,5 @@
 [versions]
-morphe-patcher = "1.14.1"
+morphe-patcher = "1.15.1"
 morphe-patches-library = "1.6.0"
 #noinspection GradleDependency
 smali = "d92701d947"

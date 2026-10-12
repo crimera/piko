@@ -8,6 +8,12 @@ package app.crimera.patches.instagram.entity.originalSoundDataIntf
 
 import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/OriginalSoundDataIntf;"
 
@@ -33,5 +39,16 @@ internal object GetAudioUrlExtension : Fingerprint(
 
 internal object OriginalSoundMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
-    strings = listOf("audio_asset_id", "hide_remixing", "original_audio_title", "progressive_download_url"),
+    filters = listOf(
+        string("audio_asset_id"),
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterImmediately()),
+        string("hide_remixing"),
+        // User data, read after the hide remixing entry is added.
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterWithin(1)),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        string("original_audio_title"),
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterImmediately()),
+        string("progressive_download_url"),
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, location = MatchAfterImmediately()),
+    ),
 )
