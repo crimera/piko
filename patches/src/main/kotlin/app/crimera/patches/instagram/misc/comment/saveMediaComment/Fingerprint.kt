@@ -6,12 +6,14 @@
 
 package app.crimera.patches.instagram.misc.comment.saveMediaComment
 
-import app.crimera.patches.instagram.entity.commentDataEntity.CHAT_CONTEXT_BUTTON_SUPER_CLASS
 import app.crimera.patches.instagram.utils.Constants.COMMENT_BUTTON_EXTENSION_CLASS
 import app.morphe.patcher.Fingerprint
-import app.morphe.util.getReference
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 internal const val COMMENT_COPY_EXTENSION_CLASS = "${COMMENT_BUTTON_EXTENSION_CLASS}/saveMediaButton"
 internal const val BUTTON_EXTENSION_CLASS = "${COMMENT_COPY_EXTENSION_CLASS}/SaveMediaButton;"
@@ -30,18 +32,12 @@ internal object InitSaveMediaButtonExtensionFingerprint : Fingerprint(
 
 internal object ChatButtonActionsFingerprint : Fingerprint(
     name = "<clinit>",
-    strings = listOf("SAVE_MEDIA", "COPY_TEXT", "save_media"),
-    custom = { _, classDef -> classDef.superclass == "Ljava/lang/Enum;" },
-)
-
-internal class SaveMediaChatButtonInitFingerprint(action: FieldReference) : Fingerprint(
-    name = "<init>",
-    parameters = emptyList(),
-    custom = { method, classDef ->
-        classDef.superclass == CHAT_CONTEXT_BUTTON_SUPER_CLASS && method.implementation?.instructions?.any { instruction ->
-            instruction.opcode == Opcode.SGET_OBJECT && instruction.getReference<FieldReference>()?.let {
-                it.definingClass == action.definingClass && it.name == action.name && it.type == action.type
-            } == true
-        } == true
-    },
+    strings = listOf("COPY_TEXT", "save_media"),
+    filters = listOf(
+        string("SAVE_MEDIA"),
+        methodCall(opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        // Save media action.
+        fieldAccess(opcode = Opcode.SPUT_OBJECT, location = MatchAfterImmediately()),
+    ),
 )

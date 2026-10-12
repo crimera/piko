@@ -45,8 +45,9 @@ val customFontPatch =
             ComposePlatformTypefacesFingerprint.method.hookWrappedTypeface()
 
             // React Native's "Optimistic VF App Lite" variable font, resolved on its own.
-            val registrationIndex = ReactNativeFontRegistrationFingerprint.stringMatches.single().index
-            ReactNativeFontRegistrationFingerprint.method.hookReactNativeFontRegistration(registrationIndex)
+            ReactNativeFontRegistrationFingerprint.let {
+                it.method.hookReactNativeFontRegistration(it.instructionMatches[1])
+            }
 
             // Collected in one pass and edited after, so classes are not rewritten while read:
             // resolvers of fonts the user picks inside the app (they take the repository as their

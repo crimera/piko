@@ -6,23 +6,30 @@
 
 package app.crimera.patches.instagram.misc.download
 
-import app.crimera.patches.shared.declaredParameterRegister
+import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
+import app.morphe.util.indexOfFirstInstructionOrThrow
+import app.morphe.util.indexOfFirstInstructionReversedOrThrow
+import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
+import app.morphe.util.writeRegister
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction31i
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
 
 /** Kotlin event handler type the UFI `ON_CLICK` setter takes. */
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
@@ -43,6 +50,56 @@ private const val CLICK_HANDLER_CONSTRUCTOR =
 private const val FEED_DOWNLOAD_ENABLED = "$DOWNLOAD_UTILS_DESCRIPTOR->isFeedDownloadButtonEnabled()Z"
 
 /**
+ * The litho UFI builder, from the content description setter of the save icon to the add of its
+ * finished component to the icon list.
+ */
+private fun lithoUfiBuilderFingerprint(saveButtonId: Long) = Fingerprint(
+    parameters = listOf("L"),
+    filters = listOf(
+        // Content description setter.
+        methodCall(opcode = Opcode.INVOKE_STATIC, parameters = listOf("L", "Ljava/lang/CharSequence;")),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        string(BUTTON_VIEW_CLASS, MatchAfterImmediately()),
+        literal(saveButtonId, location = MatchAfterWithin(4)),
+        // Icon id setter.
+        methodCall(opcode = Opcode.INVOKE_STATIC, parameters = listOf("L", "I"), location = MatchAfterImmediately()),
+        // ON_CLICK setter. The node passed to it has no click props yet, so the download node
+        // does not inherit them.
+        methodCall(parameters = listOf("L", FUNCTION1_DESCRIPTOR)),
+        // The save icon's size and tint come from two theme attribute lookups.
+        opcode(Opcode.CONST),
+        methodCall(
+            opcode = Opcode.INVOKE_STATIC,
+            parameters = listOf("L", "I"),
+            returnType = "I",
+            location = MatchAfterImmediately(),
+        ),
+        opcode(Opcode.CONST, MatchAfterWithin(1)),
+        methodCall(
+            opcode = Opcode.INVOKE_STATIC,
+            parameters = listOf("L", "I"),
+            returnType = "I",
+            location = MatchAfterImmediately(),
+        ),
+        // Icon wrapper construction.
+        methodCall(
+            name = "<init>",
+            parameters = listOf("Landroid/widget/ImageView\$ScaleType;", "L", INTEGER_DESCRIPTOR, "I", "I", "Z"),
+        ),
+        // Component factory, which takes seven consecutive registers.
+        methodCall(parameters = listOf("L", "L", "L", "L", USER_SESSION_DESCRIPTOR, "Z", "Z")),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        // Icon list add.
+        methodCall(
+            name = "add",
+            parameters = listOf(OBJECT_DESCRIPTOR),
+            returnType = "Z",
+            location = MatchAfterWithin(1),
+        ),
+    ),
+)
+
+/**
  * Litho UFI surfaces (e.g. the contextual profile feed) reject views added by hand, so the
  * download icon is built into the component tree as a second icon node ahead of the save icon.
  * Every obfuscated member is resolved from the instructions that build the save icon, and the
@@ -54,100 +111,33 @@ internal fun injectLithoDownloadButton(
     downloadDrawableId: Long,
     stateType: String,
 ) {
-    val iconWrapperConstructor =
-        requireOne(
-            "UFI icon wrapper constructor",
-            buildList {
-                patchContext.classDefForEach { classDef ->
-                    classDef.methods.filterTo(this) { method ->
-                        val parameters = method.parameterTypes.map { it.toString() }
-                        method.name == "<init>" &&
-                            parameters.size in 5..6 &&
-                            parameters[0] == "Landroid/widget/ImageView\$ScaleType;" &&
-                            parameters[1].startsWith("L") &&
-                            parameters.subList(2, 5) == listOf(INTEGER_DESCRIPTOR, "I", "I") &&
-                            (parameters.size == 5 || parameters[5] == "Z")
-                    }
-                }
-            },
-        )
+    val match = lithoUfiBuilderFingerprint(saveButtonId).match()
+    val builder = match.method
+    val instructions = builder.instructions.toList()
+    val matches = match.instructionMatches
+
+    val descriptionSetter = matches[0].methodReference
+    val idSetter = matches[4].methodReference
+    val onClickIndex = matches[5].index
+    val onClickSetter = matches[5].methodReference
+    val nodeRegister = matches[5].instruction.registersUsed.first()
+    val dimensionAttribute = matches[6].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
+    val themeAccessor = matches[7].methodReference
+    val tintAttribute = matches[8].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
+    val wrapperIndex = matches[10].index
+    val iconWrapperConstructor = matches[10].methodReference
     val iconWrapperClass = iconWrapperConstructor.definingClass
-    val nodeType = iconWrapperConstructor.parameterTypes[1].toString()
-    val componentType =
-        requireOne(
-            "UFI component base constructor",
-            iconWrapperConstructor.implementation?.instructions?.toList().orEmpty()
-                .filter { it.opcode == Opcode.INVOKE_DIRECT }
-                .mapNotNull { it.getReference<MethodReference>() }
-                .filter { it.name == "<init>" && it.parameterTypes.isEmpty() && it.definingClass != iconWrapperClass }
-                .map { it.definingClass }.distinct(),
-        )
-
-    val builder =
-        requireOne(
-            "UFI litho component builder",
-            Fingerprint(filters = listOf(literal(saveButtonId)))
-                .matchAll()
-                .filter { match ->
-                    match.method.implementation?.instructions?.any { it.methodRef()?.definingClass == iconWrapperClass } == true
-                }.map { it.method },
-        )
-    val instructions =
-        builder.implementation?.instructions?.toList()
-            ?: throw PatchException("Litho UFI builder $builder has no implementation")
-
-    val saveIndex =
-        instructions.indexOfFirst { it is Instruction31i && it.wideLiteral == saveButtonId }
-    if (saveIndex < 0) throw PatchException("No save-button literal in $builder")
-
-    fun indexAfterSave(
-        what: String,
-        after: Int = saveIndex,
-        matches: (MethodReference) -> Boolean,
-    ): Int =
-        (after + 1 until instructions.size).firstOrNull { index -> instructions[index].methodRef()?.let(matches) == true }
-            ?: throw PatchException("No $what after index $after in $builder")
-
-    fun setterIndex(valueType: String) =
-        indexAfterSave("icon setter taking $valueType") { reference ->
-            reference.returnType == nodeType &&
-                reference.parameterTypes.map { it.toString() } == listOf(nodeType, valueType)
-        }
-
-    val idSetter = instructions[setterIndex("I")].methodRef()!!
-    val onClickIndex = setterIndex(FUNCTION1_DESCRIPTOR)
-    val onClickSetter = instructions[onClickIndex].methodRef()!!
-
-    // The content description is set two instructions before the button view class is loaded. The
-    // node passed to ON_CLICK has no click props yet, so the download node does not inherit them.
-    val viewClassIndex =
-        (saveIndex - 1 downTo 0).firstOrNull { instructions[it].getReference<StringReference>()?.string == BUTTON_VIEW_CLASS }
-            ?: throw PatchException("No \"$BUTTON_VIEW_CLASS\" before the save literal in $builder")
-    val descriptionSetter =
-        instructions.getOrNull(viewClassIndex - 2)?.methodRef()
-            ?: throw PatchException("No content description setter before index $viewClassIndex in $builder")
-    val nodeRegister =
-        instructions[onClickIndex].registers().firstOrNull()
-            ?: throw PatchException("ON_CLICK call at $onClickIndex has no node in $builder")
-
-    // The factory call takes seven consecutive registers; the last five are staged by the moves
-    // right before it.
-    val wrapperIndex =
-        indexAfterSave("icon wrapper construction", after = onClickIndex) {
-            it.definingClass == iconWrapperClass && it.name == "<init>"
-        }
-    val factoryIndex =
-        indexAfterSave("component factory call", after = wrapperIndex) { it.returnType == componentType }
-    val factory = instructions[factoryIndex].methodRef()!!
-    val call = instructions[factoryIndex].registers()
-    if (call.size != 7) throw PatchException("Unexpected component factory call shape in $builder: ${call.size} registers")
+    val factoryIndex = matches[11].index
+    val factory = matches[11].methodReference
+    val call = matches[11].instruction.registersUsed
+    val listRegister = matches[13].instruction.registersUsed.first()
     if (call != (call.first()..call.last()).toList()) {
         throw PatchException("Non-consecutive component factory registers in $builder")
     }
 
     // Reuse the staging register only if it is dead until the native assignment
     // and its source remains unchanged.
-    val wrapperCall = instructions[wrapperIndex].registers()
+    val wrapperCall = matches[10].instruction.registersUsed
     if (wrapperCall.size != iconWrapperConstructor.parameterTypes.size + 1 ||
         wrapperCall.take(6) != call.drop(1) ||
         wrapperCall != (wrapperCall.first()..wrapperCall.last()).toList()
@@ -157,17 +147,16 @@ internal fun injectLithoDownloadButton(
     val wrapperFlagSource =
         if (wrapperCall.size == 7) {
             val flagRegister = wrapperCall.last()
-            val assignmentIndex =
-                (wrapperIndex - 1 downTo onClickIndex).firstOrNull { index ->
-                    instructions[index].opcode.setsRegister() &&
-                        instructions[index].registersUsed.firstOrNull() == flagRegister
-                } ?: throw PatchException("No native icon flag assignment in $builder")
+            val assignmentIndex = builder.indexOfFirstInstructionReversedOrThrow(wrapperIndex - 1) {
+                writeRegister == flagRegister
+            }
+            if (assignmentIndex < onClickIndex) throw PatchException("No native icon flag assignment in $builder")
             val assignment = instructions[assignmentIndex]
             if (assignment.opcode !in listOf(Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16)) {
                 throw PatchException("Unexpected native icon flag assignment in $builder")
             }
             val source = assignment.registersUsed[1]
-            if (instructions.subList(onClickIndex, assignmentIndex).any { flagRegister in it.registers() } ||
+            if (instructions.subList(onClickIndex, assignmentIndex).any { flagRegister in it.registersUsed } ||
                 instructions.subList(onClickIndex, wrapperIndex).any {
                     it.opcode.setsRegister() && it.registersUsed.firstOrNull() == source
                 } || source in call
@@ -179,59 +168,23 @@ internal fun injectLithoDownloadButton(
             null
         }
 
+    // The last five factory arguments are staged by the moves right before it.
     val sources =
         call.drop(2).map { destination ->
-            (factoryIndex - 1 downTo (factoryIndex - 8).coerceAtLeast(0))
-                .firstNotNullOfOrNull { index ->
-                    (instructions[index] as? TwoRegisterInstruction)?.takeIf { it.registerA == destination }?.registerB
-                } ?: throw PatchException("No source move for component argument v$destination in $builder")
+            val moveIndex = builder.indexOfFirstInstructionReversedOrThrow(factoryIndex - 1) {
+                this is TwoRegisterInstruction && registerA == destination
+            }
+            if (moveIndex < factoryIndex - 8) {
+                throw PatchException("No source move for component argument v$destination in $builder")
+            }
+            builder.getInstruction<TwoRegisterInstruction>(moveIndex).registerB
         }
     val userSessionRegister = sources[2]
 
-    val listAddIndex =
-        indexAfterSave("icon list add", after = factoryIndex) {
-            it.name == "add" && it.returnType == "Z" && it.parameterTypes.map { type -> type.toString() } == listOf(OBJECT_DESCRIPTOR)
-        }
-    val listRegister =
-        instructions[listAddIndex].registers().firstOrNull()
-            ?: throw PatchException("Icon list add at $listAddIndex has no receiver in $builder")
-
-    val stateRegister =
-        instructions
-            .firstOrNull { it.opcode == Opcode.CHECK_CAST && it.getReference<TypeReference>()?.type == stateType }
-            ?.let { (it as OneRegisterInstruction).registerA }
-            ?: throw PatchException("No check-cast to $stateType in $builder")
-
-    // The save icon's size and tint come from two theme attribute lookups; reuse them.
-    val themeCalls =
-        (saveIndex until factoryIndex).mapNotNull { index ->
-            val reference = instructions[index].methodRef() ?: return@mapNotNull null
-            val parameters = reference.parameterTypes.map { it.toString() }
-            if (instructions[index].opcode == Opcode.INVOKE_STATIC &&
-                reference.returnType == "I" &&
-                parameters.size == 2 &&
-                parameters[1] == "I"
-            ) {
-                index to reference
-            } else {
-                null
-            }
-        }
-    if (themeCalls.size != 2 || !themeCalls[0].second.sameSignatureAs(themeCalls[1].second)) {
-        throw PatchException("Expected two matching theme attribute lookups in $builder, found ${themeCalls.size}")
-    }
-    val themeAccessor = themeCalls[0].second
-
-    fun attributeLiteral(callIndex: Int): Int =
-        (callIndex - 1 downTo (callIndex - 4).coerceAtLeast(0))
-            .firstNotNullOfOrNull { (instructions[it] as? Instruction31i)?.wideLiteral?.toInt() }
-            ?: throw PatchException("No theme attribute constant before index $callIndex in $builder")
-
-    val dimensionAttribute = attributeLiteral(themeCalls[0].first)
-    val tintAttribute = attributeLiteral(themeCalls[1].first)
-
-    if (builder.parameterTypes.size != 1) throw PatchException("Expected one parameter on $builder")
-    val componentContext = declaredParameterRegister(builder, 0)
+    val stateRegister = builder.getInstruction<OneRegisterInstruction>(
+        builder.indexOfFirstInstructionOrThrow(checkCast(stateType)),
+    ).registerA
+    val componentContext = builder.p0Register + 1
     val contextGetter =
         requireOne(
             "component context accessor",

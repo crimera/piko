@@ -7,31 +7,23 @@
 package app.crimera.patches.instagram.misc.extension.hooks
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patches.all.misc.extension.ExtensionHook
-import app.morphe.util.registersUsed
+import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 
 internal val instagramInitHook =
     ExtensionHook(
         fingerprint =
             Fingerprint(
+                definingClass = "/InstagramAppShell;",
                 name = "onCreate",
-                custom = { _, classDef ->
-                    classDef.endsWith("/InstagramAppShell;")
-                },
             ),
         insertIndexResolver = { method ->
-            method.instructions.indexOfFirst { instruction ->
-                instruction.opcode == Opcode.INVOKE_SUPER
-            } + 1
+            method.indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER) + 1
         },
         contextRegisterResolver = { method ->
-            val invokeSuperInstruction =
-                method.instructions.first { instruction ->
-                    instruction.opcode == Opcode.INVOKE_SUPER
-                }
-
-            "v${invokeSuperInstruction.registersUsed[0]}"
+            "v${method.getInstruction<FiveRegisterInstruction>(method.indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)).registerC}"
         },
     )

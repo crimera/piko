@@ -13,17 +13,24 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.findFreeRegister
-import app.morphe.util.indexOfFirstInstructionOrThrow
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 internal object InAppBrowserFunctionFingerprint : Fingerprint(
     returnType = "Z",
-    strings = listOf("Tracking.ARG_CLICK_SOURCE", "TrackingInfo.ARG_MODULE_NAME"),
+    filters = listOf(
+        string("TrackingInfo.ARG_MODULE_NAME"),
+        string("Tracking.ARG_CLICK_SOURCE"),
+        // A Bundle can be moved between the key and the call, so the url is moved after the call.
+        methodCall(smali = "Landroid/os/BaseBundle;->putString(Ljava/lang/String;Ljava/lang/String;)V"),
+        opcode(Opcode.MOVE_OBJECT_FROM16),
+    ),
 )
 
 @Suppress("unused")
@@ -41,18 +48,10 @@ val openLinksExternallyPatch =
         execute {
 
             InAppBrowserFunctionFingerprint.let {
-                val stringMatchIndex = it.stringMatches[0].index
+                val urlResultObjIndex = it.instructionMatches.last().index
 
                 it.method.apply {
-                    // Search after the putString call, since a Bundle can be moved between the key and the call.
-                    val putStringIndex = indexOfFirstInstructionOrThrow(stringMatchIndex, Opcode.INVOKE_VIRTUAL)
-                    val urlResultObjIndex =
-                        indexOfFirstInstructionOrThrow(
-                            putStringIndex,
-                            Opcode.MOVE_OBJECT_FROM16,
-                        )
-
-                    val urlRegister = getInstruction(urlResultObjIndex).registersUsed[0]
+                    val urlRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
                     val freeRegister = findFreeRegister(urlResultObjIndex + 1)
 
                     addInstructionsWithLabels(
@@ -63,7 +62,7 @@ val openLinksExternallyPatch =
                         if-eqz v$freeRegister, :piko
                         return v$freeRegister
                     """,
-                        ExternalLabel("piko", instructions[urlResultObjIndex + 1]),
+                        ExternalLabel("piko", getInstruction(urlResultObjIndex + 1)),
                     )
 
                     enableSettings("openLinksExternally")

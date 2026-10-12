@@ -7,7 +7,14 @@
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.newInstance
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 private const val SAVED_MESSAGES_HOOK_CLASS = "$PATCHES_DESCRIPTOR/dm/SavedMessagesHook;"
 
@@ -17,13 +24,19 @@ internal object DeltaThreadIdFieldExtensionFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
 )
 
-// returnType omitted: v426 returns Z, v433+ returns V. Only classDef is used, not the method directly.
-internal object DirectItemFieldParserFingerprint : Fingerprint(
-    strings = listOf("item_id", "hide_in_thread"),
+internal object DirectItemJsonParserFingerprint : Fingerprint(
+    name = "unsafeParseFromJson",
+    returnType = "Ljava/lang/Object;",
+    filters = listOf(
+        string("item_id"),
+        string("hide_in_thread"),
+        opcode(Opcode.RETURN_OBJECT),
+    ),
 )
 
-// MQTT post-processing step (not on REST path). Its return type varies between app versions.
+// MQTT post-processing step (not on REST path).
 internal object DirectItemPostprocessFingerprint : Fingerprint(
+    parameters = listOf(USER_SESSION_CLASS, "L"),
     strings = listOf("DirectMessage.postprocess.%s", "Encountered DirectMessage with null type"),
 )
 
@@ -38,7 +51,14 @@ internal object DirectItemDbHideFingerprint : Fingerprint(
     returnType = "V",
 )
 
-// DM thread deserializer dispatch. returnType omitted: v426 returns Z, v430+ returns V.
+// DM thread deserializer dispatch.
 internal object ThreadUsersDispatchFingerprint : Fingerprint(
-    strings = listOf("users", "admin_user_ids", "left_users", "thread_v2_id", "input_mode"),
+    returnType = "V",
+    strings = listOf("admin_user_ids", "left_users", "thread_v2_id", "input_mode"),
+    filters = listOf(
+        string("users"),
+        // Users array guard, which jumps to the block that stores the users list.
+        opcode(Opcode.IF_NE, MatchAfterWithin(10)),
+        newInstance("Ljava/util/ArrayList;", MatchAfterImmediately()),
+    ),
 )

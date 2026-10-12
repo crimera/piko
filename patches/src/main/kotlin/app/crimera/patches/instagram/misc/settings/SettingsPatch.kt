@@ -12,10 +12,10 @@ import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntit
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.links.validateLinks.validateLinksPatch
-import app.crimera.patches.instagram.misc.buildExpiredPopup.removeBuildExpiredPopupPatch
-import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hideHomeActionButtonsPatch
+import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
+import app.crimera.patches.instagram.misc.buildExpiredPopup.removeBuildExpiredPopupPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
@@ -31,17 +31,15 @@ import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.findFreeRegister
-import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.indexOfFirstInstructionOrThrow
+import app.morphe.util.matchSingle
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 @Suppress("unused")
 val settingsPatch =
@@ -77,12 +75,9 @@ val settingsPatch =
             addAppResources("instagram")
 
             // Returning from a modal must restore the activity used for native themes.
-            for (method in listOf(IgFragmentActivityOnCreate.method, IgFragmentActivityOnResume.method)) {
-
-                val returnVoidIndex = method.indexOfFirstInstruction(Opcode.RETURN_VOID)
-
-                method.addInstruction(
-                    returnVoidIndex,
+            for (fingerprint in listOf(IgFragmentActivityOnCreate, IgFragmentActivityOnResume)) {
+                fingerprint.method.addInstruction(
+                    fingerprint.instructionMatches.first().index,
                     """
                     invoke-static {p0}, Lapp/morphe/extension/shared/Utils;->setActivity(Landroid/app/Activity;)V
                     """.trimIndent(),
@@ -91,7 +86,7 @@ val settingsPatch =
 
             instagramInitHook.fingerprint.method.apply {
 
-                val firstInvokeSuperIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
+                val firstInvokeSuperIndex = indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)
                 val contextRegister = getInstruction(firstInvokeSuperIndex).registersUsed[0]
                 val freeRegister = findFreeRegister(firstInvokeSuperIndex, listOf(firstInvokeSuperIndex))
 
@@ -111,24 +106,12 @@ val settingsPatch =
             }
 
             // For welcome message.
-            MainFeedFragmentOnCreateFingerprint.matchAll(1..1).single().method.apply {
-                val code = instructions
-                val contextIndex = code.withIndex().singleOrNull { (_, instruction) ->
-                    val reference = instruction.getReference<MethodReference>()
-                    instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
-                        reference?.definingClass == "Landroidx/fragment/app/Fragment;" &&
-                        reference.name == "requireContext" &&
-                        reference.parameterTypes.isEmpty() &&
-                        reference.returnType == "Landroid/content/Context;"
-                }?.index ?: throw PatchException("Could not uniquely resolve main feed welcome context")
-                val contextResult = code.getOrNull(contextIndex + 1)
-                if (contextResult?.opcode != Opcode.MOVE_RESULT_OBJECT) {
-                    throw PatchException("Main feed welcome context has no object result")
-                }
-                val contextRegister = contextResult.registersUsed.single()
+            MainFeedFragmentOnCreateFingerprint.matchSingle().let {
+                val contextResultIndex = it.instructionMatches.last().index
+                val contextRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
 
-                addInstruction(
-                    contextIndex + 2,
+                it.method.addInstruction(
+                    contextResultIndex + 1,
                     "invoke-static/range {v$contextRegister .. v$contextRegister}, " +
                         "$PATCHES_DESCRIPTOR/WelcomeMessage;->openWelcomeMessage(Landroid/content/Context;)V",
                 )

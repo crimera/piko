@@ -12,7 +12,6 @@ import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.registersUsed
@@ -40,7 +39,7 @@ val customiseStoryRingSizePatch =
             StoryRingBuilderFingerprint.let {
                 it.method.apply {
                     val ringSizeLiteralIndex = it.instructionMatches[1].index
-                    val register = getInstruction(ringSizeLiteralIndex).registersUsed[0]
+                    val register = it.instructionMatches[1].instruction.registersUsed[0]
 
                     addInstructions(
                         ringSizeLiteralIndex + 1,
