@@ -31,6 +31,7 @@ import java.lang.reflect.Proxy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -277,13 +278,18 @@ public final class HiddenChats {
         return null;
     }
 
-    /** Called with the buttons of a chat's menu; adds the button that hides the chat, or shows it while the hidden chats are open. */
+    /**
+     * Called with the buttons of a chat's menu when it opens; returns them with the button that hides the chat added,
+     * or the one that shows it while the hidden chats are open. A copy is returned because Instagram's list can be read-only.
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void addMenuButton(List buttons, Object session) {
+    public static List menuOpening(List buttons, Object menu) {
+        menuButton = null;
         try {
-            menuButton = null;
-            if (!Pref.hiddenChats() || buttons == null || buttons.isEmpty() || !(session instanceof UserSession)) return;
-            boolean unhide = hiddenMode && ((UserSession) session).getUserId().equals(modeUser);
+            if (!Pref.hiddenChats() || buttons == null || buttons.isEmpty() || menu == null) return buttons;
+            UserSession session = (UserSession) fieldOfType(menu, UserSession.class);
+            if (session == null) return buttons;
+            boolean unhide = hiddenMode && session.getUserId().equals(modeUser);
             Class<? extends Enum> type = (Class<? extends Enum>) buttons.get(0).getClass();
 
             // Only a button the menu does not have is used, so nothing Instagram shows is taken over.
@@ -291,14 +297,16 @@ public final class HiddenChats {
             for (Object button : buttons) present.add(String.valueOf(button));
             for (String candidate : unhide ? UNHIDE_BUTTONS : HIDE_BUTTONS) {
                 if (present.contains(candidate)) continue;
-                buttons.add(Enum.valueOf(type, candidate));
+                List extended = new ArrayList(buttons);
+                extended.add(Enum.valueOf(type, candidate));
                 menuButton = candidate;
                 menuButtonHides = !unhide;
-                return;
+                return extended;
             }
         } catch (Throwable t) {
-            Logger.printException(() -> "HiddenChats.addMenuButton failed", t);
+            Logger.printException(() -> "HiddenChats.menuOpening failed", t);
         }
+        return buttons;
     }
 
     /** Called when a button of a chat's menu is pressed; true when it was the one added here, so nothing else handles it. */
@@ -341,15 +349,13 @@ public final class HiddenChats {
 
     /**
      * Called with the state of the messages button badge; takes the hidden chats out of its unread count.
+     * {@code unreadList} is the name of the state's list of unread chats, resolved by the patch.
      * Returns true when the update only changed because of hidden chats, so the badge is left alone and does not animate.
      */
-    @SuppressWarnings("unchecked")
-    public static boolean onBadge(Object controller, Object badge) {
+    public static boolean onBadge(Object controller, Object badge, String unreadList) {
         try {
             if (!Pref.hiddenChats() || controller == null || badge == null) return false;
-            UserSession session = (UserSession) fieldOfType(controller, UserSession.class);
-            if (session == null) return false;
-            Set<String> hidden = HiddenChatsPref.ids(session.getUserId());
+            Set<String> hidden = hiddenOf(controller);
             if (hidden.isEmpty()) return false;
 
             // The badge object holds the count and a state object with lists of the unread chats.
@@ -362,42 +368,19 @@ public final class HiddenChats {
                 else if (!field.getType().isPrimitive() && !isFramework(field.getType())) state = field.get(badge);
             }
             if (state == null || countField == null) return false;
-            Field stateCount = null;
-            for (Field field : state.getClass().getDeclaredFields()) {
-                if (!Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
-                    field.setAccessible(true);
-                    stateCount = field;
-                }
-            }
+            Field stateCount = countFieldOf(state);
             if (stateCount == null) return false;
-            int count = stateCount.getInt(state);
 
-            int removedFromUnread = 0;
-            for (Field field : state.getClass().getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers()) || field.getType() != List.class) continue;
-                field.setAccessible(true);
-                List<Object> list = (List<Object>) field.get(state);
-                if (list == null || list.isEmpty()) continue;
-                List<Object> kept = new ArrayList<>();
-                for (Object entry : list) {
-                    Object key = threadKeyOf(entry);
-                    if (key == null || !hidden.contains(HiddenChatsPref.idOf(String.valueOf(key)))) kept.add(entry);
-                }
-                int removed = list.size() - kept.size();
-                if (removed == 0) continue;
-                field.set(state, kept);
-                // The unread list is the one whose size is the unread count.
-                if (list.size() == count) removedFromUnread = removed;
-            }
-            if (removedFromUnread == 0) {
+            int count = stateCount.getInt(state);
+            int removed = removeHidden(state, stateCount, hidden, unreadList);
+            if (removed == 0) {
                 badgeCount = count;
                 return false;
             }
 
-            int shown = Math.max(0, count - removedFromUnread);
-            stateCount.setInt(state, shown);
+            int shown = stateCount.getInt(state);
             int previous = badgeCount;
-            countField.setInt(badge, Math.max(0, countField.getInt(badge) - removedFromUnread));
+            countField.setInt(badge, Math.max(0, countField.getInt(badge) - removed));
             badgeCount = shown;
             // Only a hidden chat changed: the number on screen stays, so Instagram has nothing to redraw.
             return shown > 0 && shown == previous;
@@ -405,6 +388,68 @@ public final class HiddenChats {
             Logger.printException(() -> "HiddenChats.onBadge failed", t);
             return false;
         }
+    }
+
+    /**
+     * Called when the badge is painted without a new state (first paint, or after the screen is rebuilt):
+     * Instagram then reads the state from its store, so the hidden chats are taken out of that one.
+     */
+    public static void onStoredBadge(Object controller, Object state, String unreadList) {
+        try {
+            if (!Pref.hiddenChats() || controller == null || state == null) return;
+            Set<String> hidden = hiddenOf(controller);
+            if (hidden.isEmpty()) return;
+            Field stateCount = countFieldOf(state);
+            if (stateCount == null) return;
+            removeHidden(state, stateCount, hidden, unreadList);
+            badgeCount = stateCount.getInt(state);
+        } catch (Throwable t) {
+            Logger.printException(() -> "HiddenChats.onStoredBadge failed", t);
+        }
+    }
+
+    private static Set<String> hiddenOf(Object controller) throws Exception {
+        UserSession session = (UserSession) fieldOfType(controller, UserSession.class);
+        return session == null ? Collections.emptySet() : HiddenChatsPref.ids(session.getUserId());
+    }
+
+    private static Field countFieldOf(Object state) {
+        Field found = null;
+        for (Field field : state.getClass().getDeclaredFields()) {
+            if (!Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
+                field.setAccessible(true);
+                found = field;
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Takes the hidden chats out of every chat list of the state and lowers its count by those that were unread.
+     * Returns how many unread chats were removed.
+     */
+    @SuppressWarnings("unchecked")
+    private static int removeHidden(Object state, Field stateCount, Set<String> hidden, String unreadList) throws Exception {
+        int removedFromUnread = 0;
+        for (Field field : state.getClass().getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers()) || field.getType() != List.class) continue;
+            field.setAccessible(true);
+            List<Object> list = (List<Object>) field.get(state);
+            if (list == null || list.isEmpty()) continue;
+            List<Object> kept = new ArrayList<>();
+            for (Object entry : list) {
+                Object key = threadKeyOf(entry);
+                if (key == null || !hidden.contains(HiddenChatsPref.idOf(String.valueOf(key)))) kept.add(entry);
+            }
+            int removed = list.size() - kept.size();
+            if (removed == 0) continue;
+            field.set(state, kept);
+            if (field.getName().equals(unreadList)) removedFromUnread = removed;
+        }
+        if (removedFromUnread > 0) {
+            stateCount.setInt(state, Math.max(0, stateCount.getInt(state) - removedFromUnread));
+        }
+        return removedFromUnread;
     }
 
     private static Object fieldOfType(Object owner, Class<?> type) throws Exception {

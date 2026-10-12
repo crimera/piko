@@ -14,17 +14,21 @@ import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.literal
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val EXTENSION_CLASS = "$PATCHES_DESCRIPTOR/dm/HiddenChats;"
 
@@ -72,19 +76,15 @@ private object MenuButtonsEnumFingerprint : Fingerprint(
         ),
 )
 
-// Builds the list of buttons of a chat menu, with the account session first and the list last.
-private object MenuButtonsFingerprint : Fingerprint(
+// Opens the menu of a chat; the other opener of the labels (bulk actions) lives elsewhere and has no such call.
+private object MenuOpenFingerprint : Fingerprint(
+    classFingerprint = MenuButtonsLabelsFingerprint,
     returnType = "V",
     custom = { method, _ ->
-        method.parameters.size == 3 &&
-            method.parameters.first().type == USER_SESSION_CLASS &&
-            method.parameters.last().type == "Ljava/util/List;"
+        AccessFlags.STATIC.isSet(method.accessFlags) &&
+            method.parameters.firstOrNull()?.type == "Landroid/graphics/RectF;" &&
+            method.parameters.count { it.type == "Ljava/util/List;" } == 1
     },
-    filters =
-        listOf(
-            literal(0),
-            literal(25),
-        ),
 )
 
 // Lists the names of the buttons; the class it belongs to also handles their press.
@@ -103,6 +103,29 @@ private object MenuButtonActionFingerprint : Fingerprint(
         ),
 )
 
+// The badge object holds the count and the state of the unread chats; the state is the field that is not a number or text.
+context(context: BytecodePatchContext)
+private fun badgeStateType(badgeType: String): String =
+    context.mutableClassDefBy(badgeType)
+        .fields
+        .first { it.type != "I" && it.type != "Ljava/lang/String;" }
+        .type
+
+// The state keeps several lists of chats; the unread one is the first list its constructor receives.
+context(context: BytecodePatchContext)
+private fun unreadListOf(stateType: String): String {
+    val constructor = context.mutableClassDefBy(stateType).methods.first { it.name == "<init>" }
+    val implementation = constructor.implementation!!
+    // Parameters sit in the last registers (longs take two), so the register of the first list is counted from there.
+    fun width(type: String) = if (type == "J" || type == "D") 2 else 1
+    val parameters = constructor.parameters.map { it.type }
+    val register = implementation.registerCount - parameters.sumOf(::width) + parameters.takeWhile { it != "Ljava/util/List;" }.sumOf(::width)
+    return implementation.instructions
+        .first { it.opcode == Opcode.IPUT_OBJECT && (it as TwoRegisterInstruction).registerA == register }
+        .getReference<FieldReference>()!!
+        .name
+}
+
 @Suppress("unused")
 val hiddenChatsPatch =
     bytecodePatch(
@@ -120,14 +143,20 @@ val hiddenChatsPatch =
                 "invoke-static/range {p0 .. p0}, $EXTENSION_CLASS->filterRows(Ljava/lang/Object;)V",
             )
 
-            MenuButtonsFingerprint.method.apply {
-                // The method is static, so its first parameter is p0; parameters are found by type.
-                val thisOffset = if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1
-                val list = parameters.indexOfFirst { it.type == "Ljava/util/List;" } + thisOffset
-                val session = parameters.indexOfFirst { it.type == USER_SESSION_CLASS } + thisOffset
-                addInstruction(
+            MenuOpenFingerprint.method.apply {
+                // The method is static; its list is replaced by one with the extra button before anything uses it.
+                val list = parameters.indexOfFirst { it.type == "Ljava/util/List;" }
+                val menu = parameters.indexOfFirst { it.type == MenuButtonsLabelsFingerprint.classDef.type }
+                // The registers are far from v0, so they are copied to the free v0 and v1 to be passed on.
+                addInstructions(
                     0,
-                    "invoke-static {p$list, p$session}, $EXTENSION_CLASS->addMenuButton(Ljava/util/List;Ljava/lang/Object;)V",
+                    """
+                    move-object/from16 v0, p$list
+                    move-object/from16 v1, p$menu
+                    invoke-static {v0, v1}, $EXTENSION_CLASS->menuOpening(Ljava/util/List;Ljava/lang/Object;)Ljava/util/List;
+                    move-result-object v0
+                    move-object/from16 p$list, v0
+                    """.trimIndent(),
                 )
             }
 
@@ -179,10 +208,25 @@ val hiddenChatsPatch =
 
             BadgeSetterFingerprint.method.apply {
                 val first = instructions.first()
+                val stateType = badgeStateType(parameters.first().type)
+                val unreadList = unreadListOf(stateType)
+
+                // The badge is also painted from the stored state when no new state arrives (first paint).
+                val stored = instructions.indexOfFirst { it.getReference<MethodReference>()?.returnType == stateType } + 1
+                val storedRegister = getInstruction<OneRegisterInstruction>(stored).registerA
+                addInstructions(
+                    stored + 1,
+                    """
+                    const-string v0, "$unreadList"
+                    invoke-static {p0, v$storedRegister, v0}, $EXTENSION_CLASS->onStoredBadge(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V
+                    """.trimIndent(),
+                )
+
                 addInstructionsWithLabels(
                     0,
                     """
-                    invoke-static {p0, p1}, $EXTENSION_CLASS->onBadge(Ljava/lang/Object;Ljava/lang/Object;)Z
+                    const-string v0, "$unreadList"
+                    invoke-static {p0, p1, v0}, $EXTENSION_CLASS->onBadge(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Z
                     move-result v0
                     if-eqz v0, :piko_badge
                     return-void
