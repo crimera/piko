@@ -708,7 +708,7 @@ public final class ProfilePhotosGallery {
         GalleryGrid(Context context) {
             super(context);
             gapPixels = Math.max(1, Math.round(GAP_DP * getResources().getDisplayMetrics().density));
-            setBackgroundColor(Color.BLACK);
+            setBackgroundColor(Color.TRANSPARENT);
             setWillNotDraw(true);
         }
 
@@ -748,7 +748,7 @@ public final class ProfilePhotosGallery {
 
         private View createCellView(GalleryCell cell) {
             ImageView image = new ImageView(getContext());
-            image.setBackgroundColor(Color.BLACK);
+            image.setBackgroundColor(Color.TRANSPARENT);
             image.setScaleType(ImageView.ScaleType.CENTER_CROP);
             image.setTag(cell.url);
             image.setOnClickListener(view -> openPhoto(cell));
