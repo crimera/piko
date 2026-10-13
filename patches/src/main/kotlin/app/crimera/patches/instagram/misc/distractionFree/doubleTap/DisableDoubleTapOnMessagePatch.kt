@@ -18,9 +18,6 @@ internal object MessageGestureDetectorInitFingerprint : Fingerprint(
     returnType = "V",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR),
     parameters = listOf(SIMPLE_ON_GESTURE_LISTENER_CLASS, "Landroid/view/View;", "Landroid/widget/TextView;", "Z"),
-    custom = { _, classDef ->
-        classDef.superclass == SIMPLE_ON_GESTURE_LISTENER_CLASS
-    },
 )
 
 internal object MessageGestureOnDoubleTapFingerprint : Fingerprint(

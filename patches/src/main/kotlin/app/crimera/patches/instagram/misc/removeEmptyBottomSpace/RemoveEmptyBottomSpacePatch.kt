@@ -11,18 +11,26 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 internal object NavigationBarAdjusterFingerprint : Fingerprint(
-    strings = listOf("android", "config_showNavigationBar", "_hasNavigationBar_notFound"),
+    strings = listOf("config_showNavigationBar", "_hasNavigationBar_notFound"),
+    filters = listOf(
+        opcode(Opcode.IF_GTZ),
+        fieldAccess(opcode = Opcode.SGET_BOOLEAN, location = MatchAfterImmediately()),
+        string("android"),
+        // Navigation bar size.
+        fieldAccess(opcode = Opcode.SPUT),
+    ),
 )
 
 // Thanks to MyInsta
@@ -39,19 +47,10 @@ val removeEmptyBottomSpacePatch =
 
             // Thanks to MyInsta.
             NavigationBarAdjusterFingerprint.apply {
-                val strIndex = stringMatches[0].index
-
                 method.apply {
-                    val lastIfGtzInstructionBeforeStr =
-                        instructions.last {
-                            it.location.index < strIndex &&
-                                it.opcode == Opcode.IF_GTZ
-                        }
-                    val index = lastIfGtzInstructionBeforeStr.location.index
-
-                    val firstSPutIndexAfterStr = indexOfFirstInstruction(strIndex, Opcode.SPUT)
-
-                    val freeRegister = getInstruction(index + 1).registersUsed[0]
+                    val index = instructionMatches.first().index
+                    val freeRegister = getInstruction<OneRegisterInstruction>(index + 1).registerA
+                    val firstSPutIndexAfterStr = instructionMatches.last().index
 
                     addInstructionsWithLabels(
                         index + 1,

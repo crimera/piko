@@ -11,22 +11,14 @@ import app.crimera.patches.instagram.misc.ghostMode.DMSeenFingerprint
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
-import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 @Suppress("unused")
 val markChatAsReadPatch =
@@ -51,31 +43,14 @@ val markChatAsReadPatch =
                 }
             }
 
-            DmInfoJsonParserFingerprint.apply {
-                val strIndex = stringMatches.first().index
-                method.apply {
-                    val messageCursorIPutObjectIndex = indexOfFirstInstruction(strIndex, Opcode.IPUT_OBJECT)
-
-                    val messageCursorFieldName = getInstruction(messageCursorIPutObjectIndex).fieldExtractor().name
-                    GetMessageCursorFieldNameExtensionFingerprint.changeFirstString(messageCursorFieldName)
-                }
-            }
+            GetMessageCursorFieldNameExtensionFingerprint.changeFirstString(
+                DmInfoJsonParserFingerprint.instructionMatches.last().fieldReference.name,
+            )
 
             // -------------------------
 
-            val markAsReadButtonFieldRef: FieldReference
-            val buttonEnumClassName: String
-            ThreadLongPressButtonsEnumInitFingerprint.apply {
-                val strIndex = stringMatches.first().index
-                buttonEnumClassName = classDef.type
-                GetButtonEnumClassNameExtensionFingerprint.changeFirstString(classNameToExtension(buttonEnumClassName))
-
-                method.apply {
-                    val markAsReadButtonSPutObjectIndex = indexOfFirstInstruction(strIndex, Opcode.SPUT_OBJECT)
-
-                    markAsReadButtonFieldRef = getInstruction(markAsReadButtonSPutObjectIndex).getReference<FieldReference>()!!
-                }
-            }
+            val buttonEnumClassName = ThreadLongPressButtonsEnumInitFingerprint.instructionMatches.last().fieldReference.definingClass
+            GetButtonEnumClassNameExtensionFingerprint.changeFirstString(classNameToExtension(buttonEnumClassName))
 
             ThreadLongPressMuteButtonBuilderFingerprint.method.apply {
                 val listParameterIndex = parameterTypes.indexOf("Ljava/util/List;")

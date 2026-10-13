@@ -6,8 +6,8 @@
 
 package app.crimera.patches.instagram.misc.download
 
-import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.AccessFlags
 
 internal object FeedButtonOnClickFingerprint : Fingerprint(
     parameters = listOf("Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"),
@@ -23,6 +23,14 @@ internal object GetDirectThreadMediaSaverModuleNameFingerprint : Fingerprint(
     strings = listOf("DirectThreadMediaSaver"),
     name = "getModuleName",
     returnType = "Ljava/lang/String;",
+)
+
+internal object DirectThreadMediaSaveFingerprint : Fingerprint(
+    classFingerprint = GetDirectThreadMediaSaverModuleNameFingerprint,
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
+    returnType = "V",
+    parameters = listOf("L", "L", "L", "L", "Z"),
+    strings = listOf("android.permission.WRITE_EXTERNAL_STORAGE"),
 )
 
 internal object MediaOptionsOverflowMenuCreatorConstructorFingerprint : Fingerprint(
