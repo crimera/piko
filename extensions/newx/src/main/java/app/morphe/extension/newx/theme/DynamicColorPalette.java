@@ -300,6 +300,16 @@ public final class DynamicColorPalette {
     /** Uses Material 3's lower-emphasis on-surface-variant role for normal action icons. */
     public static long inlineActionTint(long originalColor) {
         if (!isEnabled()) return originalColor;
+        return inlineActionVariantTint(originalColor);
+    }
+
+    /**
+     * Pure sRGB white is the media viewer's light-on-dark action tint, so it keeps the dark
+     * on-surface-variant role on light hosts too, matching the dark theme. Every other value
+     * follows the host.
+     */
+    private static long inlineActionVariantTint(long originalColor) {
+        if (originalColor == SRGB_WHITE) return color(DARK_ON_SURFACE_VARIANT);
         return dynamicColor(isDarkTheme(), LIGHT_ON_SURFACE_VARIANT, DARK_ON_SURFACE_VARIANT);
     }
 
@@ -311,7 +321,7 @@ public final class DynamicColorPalette {
      */
     public static long inlineActionContentTint(long originalColor) {
         if (!isEnabled() || (originalColor & COMPOSE_COLOR_SPACE_MASK) != 0) return originalColor;
-        return dynamicColor(isDarkTheme(), LIGHT_ON_SURFACE_VARIANT, DARK_ON_SURFACE_VARIANT);
+        return inlineActionVariantTint(originalColor);
     }
 
     /** Uses Material 3 primary for selected action icons. */
