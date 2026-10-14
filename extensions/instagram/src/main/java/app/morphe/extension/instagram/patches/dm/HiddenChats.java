@@ -31,14 +31,13 @@ import java.lang.reflect.Proxy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.utils.Pref;
@@ -58,7 +57,7 @@ public final class HiddenChats {
     private static final int SEARCH_DEPTH = 4;
     private static final int SEARCH_LIMIT = 400;
     private static final Field[] NO_PATH = new Field[0];
-    private static final Map<Class<?>, Field[]> keyPaths = new HashMap<>();
+    private static final Map<Class<?>, Field[]> keyPaths = new ConcurrentHashMap<>();
 
     // Taps on the messages button count as one gesture while each comes this soon after the last.
     private static final long TAP_GAP_MS = 600;
@@ -81,7 +80,12 @@ public final class HiddenChats {
     private static boolean initialized;
     private static int startedActivities;
     // The unread count last shown on the messages button.
-    private static int badgeCount;
+    private static int badgeCount = -1;
+    private static final long BADGE_SETTLE_MS = 1500;
+    private static Object badgeJob;
+    private static Object badgeManager;
+    private static final ThreadLocal<String> badgeUser = new ThreadLocal<>();
+    private static final Map<Class<?>, Field[]> ownerPaths = new ConcurrentHashMap<>();
     private static int taps;
     private static long lastTapAt;
     // True while the inbox shows only the hidden chats of modeUser.
@@ -247,17 +251,50 @@ public final class HiddenChats {
         else open.run();
     }
 
-    /** Makes the inbox build its rows again, after the mode or the hidden chats changed. */
+    /** Makes the inbox and the badge build themselves again, after the mode or the hidden chats changed. */
     private static void refresh() {
         try {
             Object job = lastJob.get();
-            if (!(job instanceof Runnable) || lastListField == null) return;
-            lastListField.set(job, lastOriginal);
-            Handler handler = workerOf(job);
-            if (handler != null) handler.post((Runnable) job);
-            else new Thread((Runnable) job).start();
+            if (job instanceof Runnable && lastListField != null) {
+                lastListField.set(job, lastOriginal);
+                Handler handler = workerOf(job);
+                if (handler != null) handler.post((Runnable) job);
+                else new Thread((Runnable) job).start();
+            }
+            // The badge state is stored too, so it has to be worked out again for the stored count to be right.
+            Object badge = badgeJob;
+            Runnable badgePass = () -> rebuildBadge(badge);
+            badgePass.run();
+            // Instagram animates the badge for a moment after a message; a second pass applies the final state once it ends.
+            new Handler(Looper.getMainLooper()).postDelayed(badgePass, BADGE_SETTLE_MS);
         } catch (Throwable t) {
             Logger.printException(() -> "HiddenChats refresh failed", t);
+        }
+    }
+
+    /** Runs again the two things that work out the badge state: the job of the store and the one of the message events. */
+    private static void rebuildBadge(Object job) {
+        try {
+            if (job instanceof Runnable) new Thread((Runnable) job).start();
+            Object manager = badgeManager;
+            if (manager == null) return;
+            // The event handler takes a time and a reason; without a time it always works the state out.
+            for (Method method : manager.getClass().getDeclaredMethods()) {
+                Class<?>[] types = method.getParameterTypes();
+                if (Modifier.isStatic(method.getModifiers()) || method.getReturnType() != void.class
+                        || types.length != 2 || types[0] != Long.class || types[1] != String.class) continue;
+                method.setAccessible(true);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    try {
+                        method.invoke(manager, null, "hidden_chats");
+                    } catch (Throwable t) {
+                        Logger.printException(() -> "HiddenChats badge event failed", t);
+                    }
+                });
+                return;
+            }
+        } catch (Throwable t) {
+            Logger.printException(() -> "HiddenChats rebuildBadge failed", t);
         }
     }
 
@@ -348,108 +385,122 @@ public final class HiddenChats {
     }
 
     /**
-     * Called with the state of the messages button badge; takes the hidden chats out of its unread count.
-     * {@code unreadList} is the name of the state's list of unread chats, resolved by the patch.
-     * Returns true when the update only changed because of hidden chats, so the badge is left alone and does not animate.
+     * Called while Instagram builds the state of the messages button badge, with the chats it will count;
+     * returns them without the hidden ones, so the count, its cap and the muted chats are worked out from the rest.
      */
-    public static boolean onBadge(Object controller, Object badge, String unreadList) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static List filterThreads(List threads, Object session) {
         try {
-            if (!Pref.hiddenChats() || controller == null || badge == null) return false;
-            Set<String> hidden = hiddenOf(controller);
-            if (hidden.isEmpty()) return false;
+            if (!Pref.hiddenChats() || threads == null || threads.isEmpty() || !(session instanceof UserSession)) return threads;
+            Set<String> hidden = HiddenChatsPref.ids(((UserSession) session).getUserId());
+            if (hidden.isEmpty()) return threads;
+            List kept = new ArrayList(threads.size());
+            for (Object thread : threads) {
+                Object key = threadKeyOf(thread);
+                if (key == null || !hidden.contains(HiddenChatsPref.idOf(String.valueOf(key)))) kept.add(thread);
+            }
+            return kept.size() == threads.size() ? threads : kept;
+        } catch (Throwable t) {
+            Logger.printException(() -> "HiddenChats.filterThreads failed", t);
+            return threads;
+        }
+    }
 
-            // The badge object holds the count and a state object with lists of the unread chats.
-            Object state = null;
+    /** Called when the job that builds the badge state runs; it is kept to run it again after a chat is hidden or shown. */
+    public static void badgeJob(Object job) {
+        badgeJob = job;
+        badgeOwner(job);
+    }
+
+    /** Called when a message event makes Instagram build the badge state its own way, from a list of its own. */
+    public static void badgeEvent(Object manager) {
+        badgeManager = manager;
+        badgeOwner(manager);
+    }
+
+    public static void badgeOwner(Object owner) {
+        try {
+            Field[] path = ownerPaths.get(owner.getClass());
+            if (path == null) {
+                path = pathTo(owner, UserSession.class);
+                ownerPaths.put(owner.getClass(), path);
+            }
+            Object value = owner;
+            if (path != NO_PATH) for (Field field : path) value = value == null ? null : field.get(value);
+            badgeUser.set(value instanceof UserSession ? ((UserSession) value).getUserId() : null);
+        } catch (Throwable t) {
+            badgeUser.set(null);
+        }
+    }
+
+    /**
+     * Called with every badge state before it is used, whoever built it; takes the hidden chats out of its lists and
+     * works the count out again from the list that is counted ({@code counted}), keeping Instagram's cap.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void filterState(Object state, String counted) {
+        try {
+            String userId = badgeUser.get();
+            if (!Pref.hiddenChats() || state == null || userId == null) return;
+            Set<String> hidden = HiddenChatsPref.ids(userId);
+            if (hidden.isEmpty()) return;
             Field countField = null;
-            for (Field field : badge.getClass().getDeclaredFields()) {
+            int removedCounted = 0;
+            int countedSize = 0;
+            for (Field field : state.getClass().getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers())) continue;
                 field.setAccessible(true);
-                if (field.getType() == int.class) countField = field;
-                else if (!field.getType().isPrimitive() && !isFramework(field.getType())) state = field.get(badge);
+                if (field.getType() == int.class) {
+                    countField = field;
+                    continue;
+                }
+                if (field.getType() != List.class) continue;
+                List list = (List) field.get(state);
+                if (list == null || list.isEmpty()) continue;
+                List kept = new ArrayList(list.size());
+                for (Object entry : list) {
+                    Object key = threadKeyOf(entry);
+                    if (key == null || !hidden.contains(HiddenChatsPref.idOf(String.valueOf(key)))) kept.add(entry);
+                }
+                if (kept.size() == list.size()) continue;
+                if (field.getName().equals(counted)) {
+                    countedSize = list.size();
+                    removedCounted = list.size() - kept.size();
+                }
+                field.set(state, kept);
             }
-            if (state == null || countField == null) return false;
-            Field stateCount = countFieldOf(state);
-            if (stateCount == null) return false;
+            if (countField == null || removedCounted == 0) return;
+            // Instagram shows at most its cap, so a count below the size of the list was capped.
+            int count = countField.getInt(state);
+            int remaining = countedSize - removedCounted;
+            countField.setInt(state, count < countedSize ? Math.min(remaining, count) : remaining);
+        } catch (Throwable t) {
+            Logger.printException(() -> "HiddenChats.filterState failed", t);
+        }
+    }
 
-            int count = stateCount.getInt(state);
-            int removed = removeHidden(state, stateCount, hidden, unreadList);
-            if (removed == 0) {
-                badgeCount = count;
-                return false;
+    /**
+     * Called with the state of the messages button badge, which already leaves out the hidden chats.
+     * Returns true when a message of a hidden chat gave the same number, so the badge is left alone and does not animate.
+     */
+    public static boolean onBadge(Object controller, Object badge) {
+        try {
+            if (!Pref.hiddenChats() || controller == null || badge == null) return false;
+            UserSession session = (UserSession) fieldOfType(controller, UserSession.class);
+            if (session == null || HiddenChatsPref.ids(session.getUserId()).isEmpty()) return false;
+            int count = -1;
+            for (Field field : badge.getClass().getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) || field.getType() != int.class) continue;
+                field.setAccessible(true);
+                count = field.getInt(badge);
             }
-
-            int shown = stateCount.getInt(state);
             int previous = badgeCount;
-            countField.setInt(badge, Math.max(0, countField.getInt(badge) - removed));
-            badgeCount = shown;
-            // Only a hidden chat changed: the number on screen stays, so Instagram has nothing to redraw.
-            return shown > 0 && shown == previous;
+            badgeCount = count;
+            return count > 0 && count == previous;
         } catch (Throwable t) {
             Logger.printException(() -> "HiddenChats.onBadge failed", t);
             return false;
         }
-    }
-
-    /**
-     * Called when the badge is painted without a new state (first paint, or after the screen is rebuilt):
-     * Instagram then reads the state from its store, so the hidden chats are taken out of that one.
-     */
-    public static void onStoredBadge(Object controller, Object state, String unreadList) {
-        try {
-            if (!Pref.hiddenChats() || controller == null || state == null) return;
-            Set<String> hidden = hiddenOf(controller);
-            if (hidden.isEmpty()) return;
-            Field stateCount = countFieldOf(state);
-            if (stateCount == null) return;
-            removeHidden(state, stateCount, hidden, unreadList);
-            badgeCount = stateCount.getInt(state);
-        } catch (Throwable t) {
-            Logger.printException(() -> "HiddenChats.onStoredBadge failed", t);
-        }
-    }
-
-    private static Set<String> hiddenOf(Object controller) throws Exception {
-        UserSession session = (UserSession) fieldOfType(controller, UserSession.class);
-        return session == null ? Collections.emptySet() : HiddenChatsPref.ids(session.getUserId());
-    }
-
-    private static Field countFieldOf(Object state) {
-        Field found = null;
-        for (Field field : state.getClass().getDeclaredFields()) {
-            if (!Modifier.isStatic(field.getModifiers()) && field.getType() == int.class) {
-                field.setAccessible(true);
-                found = field;
-            }
-        }
-        return found;
-    }
-
-    /**
-     * Takes the hidden chats out of every chat list of the state and lowers its count by those that were unread.
-     * Returns how many unread chats were removed.
-     */
-    @SuppressWarnings("unchecked")
-    private static int removeHidden(Object state, Field stateCount, Set<String> hidden, String unreadList) throws Exception {
-        int removedFromUnread = 0;
-        for (Field field : state.getClass().getDeclaredFields()) {
-            if (Modifier.isStatic(field.getModifiers()) || field.getType() != List.class) continue;
-            field.setAccessible(true);
-            List<Object> list = (List<Object>) field.get(state);
-            if (list == null || list.isEmpty()) continue;
-            List<Object> kept = new ArrayList<>();
-            for (Object entry : list) {
-                Object key = threadKeyOf(entry);
-                if (key == null || !hidden.contains(HiddenChatsPref.idOf(String.valueOf(key)))) kept.add(entry);
-            }
-            int removed = list.size() - kept.size();
-            if (removed == 0) continue;
-            field.set(state, kept);
-            if (field.getName().equals(unreadList)) removedFromUnread = removed;
-        }
-        if (removedFromUnread > 0) {
-            stateCount.setInt(state, Math.max(0, stateCount.getInt(state) - removedFromUnread));
-        }
-        return removedFromUnread;
     }
 
     private static Object fieldOfType(Object owner, Class<?> type) throws Exception {

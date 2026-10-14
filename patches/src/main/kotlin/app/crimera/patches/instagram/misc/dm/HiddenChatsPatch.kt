@@ -19,6 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -29,6 +30,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val EXTENSION_CLASS = "$PATCHES_DESCRIPTOR/dm/HiddenChats;"
 
@@ -54,6 +56,48 @@ private object BadgeSetterFingerprint : Fingerprint(
             method.implementation?.instructions?.any {
                 it.getReference<FieldReference>()?.definingClass ==
                     "Lcom/instagram/notifications/badging/plugin/BadgingPluginImpl;"
+            } == true
+    },
+)
+
+// The badge object and its state, taken from the badge setter before the two fingerprints below are read.
+private var badgeType = ""
+private var stateType = ""
+
+// Builds the badge state from the sorted chats; it cuts the list, drops the muted chats and caps the count.
+private object BadgeStateBuilderFingerprint : Fingerprint(
+    custom = { method, _ ->
+        method.returnType == stateType &&
+            method.parameters.isEmpty() &&
+            (method.implementation?.instructions?.count {
+                val call = it.getReference<MethodReference>()
+                call?.definingClass == "Ljava/lang/Math;" && call.name == "min"
+            } ?: 0) >= 3
+    },
+)
+
+// Works the badge state out from a message event, with a list of its own: it makes a state and a badge from it.
+private object BadgeEventFingerprint : Fingerprint(
+    returnType = "V",
+    custom = { method, _ ->
+        method.parameters.map { it.type } == listOf("Ljava/lang/Long;", "Ljava/lang/String;") &&
+            method.implementation?.instructions?.let { code ->
+                code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == badgeType } &&
+                    code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == stateType }
+            } == true
+    },
+)
+
+// The job that works out the badge state again and posts it to the screen.
+private object BadgeJobFingerprint : Fingerprint(
+    returnType = "V",
+    custom = { method, _ ->
+        method.name == "run" &&
+            method.parameters.isEmpty() &&
+            method.implementation?.instructions?.let { code ->
+                code.any { it.getReference<MethodReference>()?.returnType == stateType } &&
+                    code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == badgeType } &&
+                    code.any { it.getReference<MethodReference>()?.name == "post" }
             } == true
     },
 )
@@ -111,15 +155,16 @@ private fun badgeStateType(badgeType: String): String =
         .first { it.type != "I" && it.type != "Ljava/lang/String;" }
         .type
 
-// The state keeps several lists of chats; the unread one is the first list its constructor receives.
+// The state keeps several lists of chats; the counted one is the second list its constructor receives.
 context(context: BytecodePatchContext)
-private fun unreadListOf(stateType: String): String {
+private fun countedListOf(stateType: String): String {
     val constructor = context.mutableClassDefBy(stateType).methods.first { it.name == "<init>" }
     val implementation = constructor.implementation!!
-    // Parameters sit in the last registers (longs take two), so the register of the first list is counted from there.
+    // Parameters sit in the last registers (longs take two), so the register of the list is counted from there.
     fun width(type: String) = if (type == "J" || type == "D") 2 else 1
     val parameters = constructor.parameters.map { it.type }
-    val register = implementation.registerCount - parameters.sumOf(::width) + parameters.takeWhile { it != "Ljava/util/List;" }.sumOf(::width)
+    val second = parameters.indices.filter { parameters[it] == "Ljava/util/List;" }[1]
+    val register = implementation.registerCount - parameters.sumOf(::width) + parameters.take(second).sumOf(::width)
     return implementation.instructions
         .first { it.opcode == Opcode.IPUT_OBJECT && (it as TwoRegisterInstruction).registerA == register }
         .getReference<FieldReference>()!!
@@ -207,26 +252,13 @@ val hiddenChatsPatch =
             }
 
             BadgeSetterFingerprint.method.apply {
+                badgeType = parameters.first().type
+                stateType = badgeStateType(badgeType)
                 val first = instructions.first()
-                val stateType = badgeStateType(parameters.first().type)
-                val unreadList = unreadListOf(stateType)
-
-                // The badge is also painted from the stored state when no new state arrives (first paint).
-                val stored = instructions.indexOfFirst { it.getReference<MethodReference>()?.returnType == stateType } + 1
-                val storedRegister = getInstruction<OneRegisterInstruction>(stored).registerA
-                addInstructions(
-                    stored + 1,
-                    """
-                    const-string v0, "$unreadList"
-                    invoke-static {p0, v$storedRegister, v0}, $EXTENSION_CLASS->onStoredBadge(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V
-                    """.trimIndent(),
-                )
-
                 addInstructionsWithLabels(
                     0,
                     """
-                    const-string v0, "$unreadList"
-                    invoke-static {p0, p1, v0}, $EXTENSION_CLASS->onBadge(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Z
+                    invoke-static {p0, p1}, $EXTENSION_CLASS->onBadge(Ljava/lang/Object;Ljava/lang/Object;)Z
                     move-result v0
                     if-eqz v0, :piko_badge
                     return-void
@@ -234,6 +266,64 @@ val hiddenChatsPatch =
                     ExternalLabel("piko_badge", first),
                 )
             }
+
+            BadgeStateBuilderFingerprint.method.apply {
+                val session = instructions.first { it.getReference<FieldReference>()?.type == USER_SESSION_CLASS }
+                    .let { (it as OneRegisterInstruction).registerA }
+                // The hidden chats are taken out of the two lists the state is made from, right after each is read.
+                val sites = mutableListOf<Int>()
+                instructions.forEachIndexed { index, instruction ->
+                    val call = instruction.getReference<MethodReference>() ?: return@forEachIndexed
+                    val chats = (instruction.opcode == Opcode.INVOKE_VIRTUAL &&
+                        call.returnType == "Ljava/util/List;" &&
+                        call.parameterTypes.size == 4 &&
+                        call.parameterTypes.last() == "Z") ||
+                        (call.definingClass == "Ljava/util/Collections;" && call.name == "unmodifiableList")
+                    if (chats && instructions[index + 1].opcode == Opcode.MOVE_RESULT_OBJECT) sites += index + 1
+                }
+                if (sites.isEmpty()) throw PatchException("Chat lists of the badge state not found")
+                for (site in sites.sortedDescending()) {
+                    val list = (instructions[site] as OneRegisterInstruction).registerA
+                    addInstructions(
+                        site + 1,
+                        """
+                        invoke-static {v$list, v$session}, $EXTENSION_CLASS->filterThreads(Ljava/util/List;Ljava/lang/Object;)Ljava/util/List;
+                        move-result-object v$list
+                        """.trimIndent(),
+                    )
+                }
+            }
+
+            BadgeJobFingerprint.method.addInstruction(0, "invoke-static {p0}, $EXTENSION_CLASS->badgeJob(Ljava/lang/Object;)V")
+            BadgeEventFingerprint.method.apply {
+                // The chats it counts come from a list of its own: the hidden ones are taken out of it right where it is read.
+                val session = instructions.first { it.getReference<FieldReference>()?.type == USER_SESSION_CLASS }
+                    .let { (it as OneRegisterInstruction).registerA }
+                val cast = instructions.indexOfFirst {
+                    it.opcode == Opcode.CHECK_CAST && it.getReference<TypeReference>()?.type == "Ljava/util/List;"
+                }
+                if (cast < 0) throw PatchException("Chat list of the badge event not found")
+                val list = (instructions[cast] as OneRegisterInstruction).registerA
+                addInstructions(
+                    cast + 1,
+                    """
+                    invoke-static {v$list, v$session}, $EXTENSION_CLASS->filterThreads(Ljava/util/List;Ljava/lang/Object;)Ljava/util/List;
+                    move-result-object v$list
+                    """.trimIndent(),
+                )
+                // The registers of this method go past v15, so the call takes its argument as a range.
+                addInstruction(0, "invoke-static/range {p0 .. p0}, $EXTENSION_CLASS->badgeEvent(Ljava/lang/Object;)V")
+            }
+
+            // Every badge state goes through the constructor of the badge, whoever built it, so it is cleaned there.
+            val counted = countedListOf(stateType)
+            mutableClassDefBy(badgeType).methods.first { it.name == "<init>" }.addInstructions(
+                0,
+                """
+                const-string v0, "$counted"
+                invoke-static {p1, v0}, $EXTENSION_CLASS->filterState(Ljava/lang/Object;Ljava/lang/String;)V
+                """.trimIndent(),
+            )
 
             instagramInitHook.fingerprint.method.apply {
                 val superIndex = instructions.indexOfFirst { it.opcode == Opcode.INVOKE_SUPER }
