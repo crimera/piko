@@ -23,11 +23,11 @@
             "preset": "conventionalcommits",
             "presetConfig": {
                 "types": [
-                    { "type": "fix", "section": "🐛 Bug Fixes", "hidden": false },
-                    { "type": "feat", "section": "✨ New Features", "hidden": false },
-                    { "type": "bump", "section": "🚀 Updated App Support", "hidden": false },
-                    { "type": "improve", "section": "🔧 Improvements",  "hidden": false },
-                    { "type": "build", "hidden": true }
+                    { "type": "fix", "section": "🐛 Bug Fixes", "effect": "changelog" },
+                    { "type": "feat", "section": "✨ New Features", "effect": "changelog" },
+                    { "type": "bump", "section": "🚀 Updated App Support", "effect": "changelog" },
+                    { "type": "improve", "section": "🔧 Improvements",  "effect": "changelog" },
+                    { "type": "build", "effect": "hidden" }
                 ]
             }
             }
