@@ -417,6 +417,13 @@ public class ScreenBuilder {
                     Settings.HIDE_NOTES_TRAY
             );
         }
+        if (SettingsStatus.hideInboxSearchBar) {
+            addLockableSwitch(
+                    str("piko_hide_inbox_search_bar"),
+                    str("piko_hide_inbox_search_bar_desc"),
+                    Settings.HIDE_INBOX_SEARCH_BAR
+            );
+        }
         if (SettingsStatus.disableExplore) {
             addLockableSwitch(
                     str("piko_disable_explore"),

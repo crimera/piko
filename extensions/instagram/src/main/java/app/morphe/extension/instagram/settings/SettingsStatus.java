@@ -130,6 +130,10 @@ public class SettingsStatus {
     public static void hideNotesTray() {
         hideNotesTray = true;
     }
+    public static boolean hideInboxSearchBar = false;
+    public static void hideInboxSearchBar() {
+        hideInboxSearchBar = true;
+    }
     public static boolean limitFollowingFeed = false;
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
@@ -178,7 +182,7 @@ public class SettingsStatus {
         hideReshareButton = true;
     }
     public static boolean distractionFreeSection() {
-        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || hideInboxSearchBar || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
     //Misc section.
@@ -302,6 +306,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_hide_reels_follow_button"),SettingsStatus.hideReelsFollowButton);
         FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
         FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
+        FLAGS.put(str("piko_hide_inbox_search_bar"),SettingsStatus.hideInboxSearchBar);
         FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);
         FLAGS.put(str("piko_disable_comments"),SettingsStatus.disableComments);
         FLAGS.put(str("piko_disable_explore"),SettingsStatus.disableExplore);
