@@ -18,6 +18,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -50,13 +51,13 @@ private object MessageNotificationFingerprint : Fingerprint(
 // Sets the unread count on the messages button; its class holds the account session and uses the badging plugin.
 private object BadgeSetterFingerprint : Fingerprint(
     returnType = "V",
-    custom = { method, classDef ->
-        method.parameters.size == 1 &&
-            classDef.fields.any { it.type == USER_SESSION_CLASS } &&
-            method.implementation?.instructions?.any {
-                it.getReference<FieldReference>()?.definingClass ==
-                    "Lcom/instagram/notifications/badging/plugin/BadgingPluginImpl;"
-            } == true
+    parameters = listOf("L"),
+    filters =
+        listOf(
+            fieldAccess(definingClass = "Lcom/instagram/notifications/badging/plugin/BadgingPluginImpl;"),
+        ),
+    custom = { _, classDef ->
+        classDef.fields.any { it.type == USER_SESSION_CLASS }
     },
 )
 
@@ -79,35 +80,35 @@ private object BadgeStateBuilderFingerprint : Fingerprint(
 // Works the badge state out from a message event, with a list of its own: it makes a state and a badge from it.
 private object BadgeEventFingerprint : Fingerprint(
     returnType = "V",
+    parameters = listOf("Ljava/lang/Long;", "Ljava/lang/String;"),
     custom = { method, _ ->
-        method.parameters.map { it.type } == listOf("Ljava/lang/Long;", "Ljava/lang/String;") &&
-            method.implementation?.instructions?.let { code ->
-                code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == badgeType } &&
-                    code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == stateType }
-            } == true
+        method.implementation?.instructions?.let { code ->
+            code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == badgeType } &&
+                code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == stateType }
+        } == true
     },
 )
 
 // The job that works out the badge state again and posts it to the screen.
 private object BadgeJobFingerprint : Fingerprint(
     returnType = "V",
+    name = "run",
+    parameters = emptyList(),
     custom = { method, _ ->
-        method.name == "run" &&
-            method.parameters.isEmpty() &&
-            method.implementation?.instructions?.let { code ->
-                code.any { it.getReference<MethodReference>()?.returnType == stateType } &&
-                    code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == badgeType } &&
-                    code.any { it.getReference<MethodReference>()?.name == "post" }
-            } == true
+        method.implementation?.instructions?.let { code ->
+            code.any { it.getReference<MethodReference>()?.returnType == stateType } &&
+                code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == badgeType } &&
+                code.any { it.getReference<MethodReference>()?.name == "post" }
+        } == true
     },
 )
 
 // The job that builds the rows of the inbox from its list of chats; the list is the last one before the screen.
 private object RowsJobFingerprint : Fingerprint(
     returnType = "V",
-    parameters = listOf(),
+    name = "run",
+    parameters = emptyList(),
     filters = listOf(string("DirectThreadRowViewModelFactory.createList")),
-    custom = { method, _ -> method.name == "run" },
 )
 
 // The buttons of the chat menu are constants of an enum, found by the names of three of them.
