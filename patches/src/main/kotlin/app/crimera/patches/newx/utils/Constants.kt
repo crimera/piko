@@ -42,6 +42,7 @@ internal object Constants {
     const val FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/ForYouTopicFilterFragment;"
     const val INLINE_ACTION_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/InlineActionFilter;"
     const val MEDIA_THUMBNAIL_LOADER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/MediaThumbnailLoader;"
+    const val AUDIO_RENDITION_DIAGNOSTICS_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/AudioRenditionDiagnostics;"
     const val DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/DownloadOptionsFragment;"
     const val NAV_BAR_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/NavBarFilter;"
     const val PROFILE_TABS_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/ProfileTabFilter;"
