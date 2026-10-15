@@ -108,6 +108,13 @@ final class ProfileCoverGestures implements InvocationHandler {
             return true;
         }
 
+        // A new first finger means the end of the last gesture never came, so it must not keep swallowing the touches.
+        if (action == MotionEvent.ACTION_DOWN) {
+            active = false;
+            if (cover != null) cover.save();
+            return false;
+        }
+
         switch (action) {
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_POINTER_UP:
