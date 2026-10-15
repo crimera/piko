@@ -1338,7 +1338,7 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
 
         val darkConstructionCount = classInitializer.findDarkSchemeConstructions(
             schemeClass.type.toString(),
-            constructor,
+            darkSchemeEntryConstructors(schemeClass.methods, constructor),
         ).size == 1
         schemeResolution += "$field: singleton shape=$darkConstructionCount"
         darkConstructionCount
@@ -1350,7 +1350,8 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
         )
     }
     val backgroundField =
-        requireExactlyOne("NewX XDS chrome background field", schemeBackgroundFields)
+        primaryChromeBackgroundField(schemeBackgroundFields)
+            ?: requireExactlyOne("NewX XDS chrome background field", schemeBackgroundFields)
     val schemeClass = context.mutableClassDefBy(backgroundField.definingClass)
     val constructor =
         requireExactlyOne(
@@ -1372,7 +1373,10 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
             },
         )
     val darkSchemeConstructions =
-        classInitializer.findDarkSchemeConstructions(schemeClass.type.toString(), constructor)
+        classInitializer.findDarkSchemeConstructions(
+            schemeClass.type.toString(),
+            darkSchemeEntryConstructors(schemeClass.methods, constructor),
+        )
     val darkConstruction =
         requireExactlyOne(
             "NewX XDS dark scheme construction for the chrome background",
@@ -1393,6 +1397,30 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
         moveResult(darkConstruction.colorRegister, "J")
     }
     return constructor to backgroundField
+}
+
+/**
+ * Several dark-scheme fields can pass the shape checks, because they share one scheme class. The
+ * chrome background is the primary surface, and the scheme's `toString` prints `backgroundPrimary`
+ * before any other color, so the first candidate it reads is the chrome background. Returns null
+ * unless every candidate belongs to one class, so the caller's cardinality check still applies.
+ */
+context(context: BytecodePatchContext)
+private fun primaryChromeBackgroundField(candidates: List<FieldReference>): FieldReference? {
+    val owners = candidates.map { field -> field.definingClass }.distinct()
+    if (owners.size != 1) return null
+    val toStringMethod =
+        requireAtMostOne(
+            "NewX XDS scheme toString",
+            context.mutableClassDefBy(owners.single()).methods.filter { method ->
+                method.name == "toString" && method.parameterTypes.isEmpty()
+            },
+        ) ?: return null
+    val candidateNames = candidates.map { field -> field.toString() }.toSet()
+    return toStringMethod.implementation?.instructions?.firstNotNullOfOrNull { instruction ->
+        if (instruction.opcode != Opcode.IGET_WIDE) return@firstNotNullOfOrNull null
+        instruction.getReference<FieldReference>()?.takeIf { field -> field.toString() in candidateNames }
+    }
 }
 
 /** [role] mirrors `DynamicColorPalette.XDS_FOREGROUND_*`. */
@@ -1904,20 +1932,23 @@ private data class XdsDarkConstruction(
 
 private fun Method.findDarkSchemeConstructions(
     schemeDescriptor: String,
-    constructor: Method,
+    constructors: Collection<Method>,
 ): List<XdsDarkConstruction> {
     val instructions = implementation?.instructions?.toList() ?: return emptyList()
-    val constructorParameters = constructor.parameterTypes.map(CharSequence::toString)
-    val firstMaskIndex = constructorParameters.indexOfFirst { parameter -> parameter == "I" }
-    if (firstMaskIndex < 0 || !constructor.hasFirstColorDefaultMaskBit()) return emptyList()
 
     return instructions.withIndex().mapNotNull { indexed ->
         val instruction = indexed.value
         val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+        val constructor =
+            requireAtMostOne(
+                "NewX XDS dark scheme constructor target",
+                constructors.filter { candidate -> reference.isSameConstructorAs(candidate) },
+            ) ?: return@mapNotNull null
+        val constructorParameters = constructor.parameterTypes.map(CharSequence::toString)
+        val firstMaskIndex = constructorParameters.indexOfFirst { parameter -> parameter == "I" }
+        if (firstMaskIndex < 0 || !constructor.hasFirstColorDefaultMaskBit()) return@mapNotNull null
         if (reference.definingClass != schemeDescriptor ||
-            reference.name != "<init>" ||
             reference.returnType != "V" ||
-            reference.parameterTypes.map(CharSequence::toString) != constructorParameters ||
             constructorParameters.firstOrNull() != "J"
         ) {
             return@mapNotNull null
@@ -1955,6 +1986,41 @@ private fun Method.findDarkSchemeConstructions(
         XdsDarkConstruction(indexed.index, colorRegister)
     }
 }
+
+/**
+ * The static initializer does not always call the constructor that stores the first color. 12.34
+ * adds a default-mask overload that forwards into the storing constructor, and the dark scheme
+ * construction calls the overload. Both count, because the overload is the one that carries the
+ * default-mask bit the dark construction is recognized by.
+ */
+private fun darkSchemeEntryConstructors(
+    methods: Iterable<Method>,
+    storingConstructor: Method,
+): List<Method> = buildList {
+    add(storingConstructor)
+    methods.filterTo(this) { method ->
+        method !== storingConstructor &&
+            method.name == "<init>" &&
+            method.returnType == "V" &&
+            method.parameterTypes.firstOrNull()?.toString() == "J" &&
+            method.delegatesToConstructor(storingConstructor)
+    }
+}
+
+private fun Method.delegatesToConstructor(target: Method): Boolean {
+    val instructions = implementation?.instructions?.toList() ?: return false
+    return instructions.any { instruction ->
+        instruction.opcode in DIRECT_INVOKE_OPCODES &&
+            instruction.getReference<MethodReference>()?.isSameConstructorAs(target) == true
+    }
+}
+
+private fun MethodReference.isSameConstructorAs(method: Method): Boolean =
+    definingClass == method.definingClass &&
+        name == "<init>" &&
+        parameterTypes.map(CharSequence::toString) == method.parameterTypes.map(CharSequence::toString)
+
+private val DIRECT_INVOKE_OPCODES = setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE)
 
 private fun Method.hasFirstColorDefaultMaskBit(): Boolean {
     val implementation = implementation ?: return false
