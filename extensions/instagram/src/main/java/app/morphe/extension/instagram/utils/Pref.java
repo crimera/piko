@@ -233,6 +233,10 @@ public class Pref {
         return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT.key, value);
     }
 
+    public static boolean ephemeralMediaCaption() {
+        return SharedPref.getBooleanPref(Settings.EPHEMERAL_MEDIA_CAPTION);
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
