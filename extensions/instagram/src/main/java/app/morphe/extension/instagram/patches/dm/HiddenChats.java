@@ -79,11 +79,7 @@ public final class HiddenChats {
     private static boolean menuButtonHides;
     private static boolean initialized;
     private static int startedActivities;
-    // The unread count last shown on the messages button.
-    private static int badgeCount = -1;
     private static final long BADGE_SETTLE_MS = 1500;
-    private static Object badgeJob;
-    private static Object badgeManager;
     private static final ThreadLocal<String> badgeUser = new ThreadLocal<>();
     private static final Map<Class<?>, Field[]> ownerPaths = new ConcurrentHashMap<>();
     private static int taps;
@@ -92,10 +88,24 @@ public final class HiddenChats {
     private static boolean hiddenMode;
     private static String modeUser;
     private static String lastUser;
-    // The last job that built the inbox rows, with its original list, run again to redraw the inbox.
-    private static WeakReference<Object> lastJob = new WeakReference<>(null);
-    private static Field lastListField;
-    private static List<Object> lastOriginal;
+
+    /** What an account needs to redraw its inbox and its badge; kept apart so a refresh of one account never touches another. */
+    private static final class Account {
+        // The last job that built the inbox rows, with its original list, run again to redraw the inbox.
+        WeakReference<Object> rowsJob = new WeakReference<>(null);
+        Field listField;
+        List<Object> original;
+        // The jobs that work out the badge state, and the unread count last shown on its messages button.
+        volatile Object badgeJob;
+        volatile Object badgeManager;
+        volatile int shownCount = -1;
+    }
+
+    private static final Map<String, Account> accounts = new ConcurrentHashMap<>();
+
+    private static Account accountOf(String userId) {
+        return accounts.computeIfAbsent(userId, id -> new Account());
+    }
 
     private HiddenChats() { }
 
@@ -113,7 +123,7 @@ public final class HiddenChats {
                     startedActivities--;
                     if (startedActivities <= 0 && !activity.isChangingConfigurations() && hiddenMode) {
                         hiddenMode = false;
-                        refresh();
+                        refresh(modeUser);
                     }
                 }
 
@@ -236,7 +246,7 @@ public final class HiddenChats {
         if (hiddenMode) {
             hiddenMode = false;
             PikoUtils.toast(str("piko_hidden_chats_closed"));
-            refresh();
+            refresh(modeUser);
             return;
         }
         Runnable open = () -> {
@@ -244,26 +254,27 @@ public final class HiddenChats {
             modeUser = lastUser;
             hiddenMode = true;
             PikoUtils.toast(str("piko_hidden_chats_opened"));
-            refresh();
+            refresh(modeUser);
         };
         // The hidden chats are as private as the inbox, so they ask for the same lock.
         if (Pref.inboxLock()) InboxLock.confirm(activity, open);
         else open.run();
     }
 
-    /** Makes the inbox and the badge build themselves again, after the mode or the hidden chats changed. */
-    private static void refresh() {
+    /** Makes the inbox and the badge of an account build themselves again, after the mode or its hidden chats changed. */
+    private static void refresh(String userId) {
         try {
-            Object job = lastJob.get();
-            if (job instanceof Runnable && lastListField != null) {
-                lastListField.set(job, lastOriginal);
+            Account account = userId == null ? null : accounts.get(userId);
+            if (account == null) return;
+            Object job = account.rowsJob.get();
+            if (job instanceof Runnable && account.listField != null) {
+                account.listField.set(job, account.original);
                 Handler handler = workerOf(job);
                 if (handler != null) handler.post((Runnable) job);
                 else new Thread((Runnable) job).start();
             }
             // The badge state is stored too, so it has to be worked out again for the stored count to be right.
-            Object badge = badgeJob;
-            Runnable badgePass = () -> rebuildBadge(badge);
+            Runnable badgePass = () -> rebuildBadge(account);
             badgePass.run();
             // Instagram animates the badge for a moment after a message; a second pass applies the final state once it ends.
             new Handler(Looper.getMainLooper()).postDelayed(badgePass, BADGE_SETTLE_MS);
@@ -273,10 +284,11 @@ public final class HiddenChats {
     }
 
     /** Runs again the two things that work out the badge state: the job of the store and the one of the message events. */
-    private static void rebuildBadge(Object job) {
+    private static void rebuildBadge(Account account) {
         try {
+            Object job = account.badgeJob;
             if (job instanceof Runnable) new Thread((Runnable) job).start();
-            Object manager = badgeManager;
+            Object manager = account.badgeManager;
             if (manager == null) return;
             // The event handler takes a time and a reason; without a time it always works the state out.
             for (Method method : manager.getClass().getDeclaredMethods()) {
@@ -355,7 +367,7 @@ public final class HiddenChats {
             if (menuButtonHides) HiddenChatsPref.add(userId, String.valueOf(threadKey));
             else HiddenChatsPref.remove(userId, String.valueOf(threadKey));
             PikoUtils.toast(str(menuButtonHides ? "piko_hidden_chats_hidden" : "piko_hidden_chats_unhidden"));
-            refresh();
+            refresh(userId);
             return true;
         } catch (Throwable t) {
             Logger.printException(() -> "HiddenChats.onMenuButton failed", t);
@@ -369,9 +381,7 @@ public final class HiddenChats {
             if (threadId == null || !Pref.hiddenChats() || !Pref.hiddenChatsMute() || !(session instanceof UserSession)) {
                 return false;
             }
-            // The id arrives as "<user id>;thread_id:<chat id>".
-            int marker = threadId.indexOf(THREAD_MARKER);
-            String quoted = "'" + (marker < 0 ? threadId : threadId.substring(marker + THREAD_MARKER.length())) + "'";
+            String quoted = quotedId(threadId);
             for (String chat : HiddenChatsPref.get(((UserSession) session).getUserId())) {
                 if (!chat.contains(quoted)) continue;
                 // The caller expects its callback once the notification is handled.
@@ -382,6 +392,31 @@ public final class HiddenChats {
             Logger.printException(() -> "HiddenChats.shouldMuteNotification failed", t);
         }
         return false;
+    }
+
+    /**
+     * Called before the notice of a deleted message is shown; true skips it when the chat is hidden. The saved
+     * messages do not say which account they belong to, so the hidden chats of every account are checked.
+     */
+    public static boolean shouldMuteDeletion(String threadId) {
+        try {
+            if (threadId == null || threadId.isEmpty() || !Pref.hiddenChats() || !Pref.hiddenChatsMute()) return false;
+            String quoted = quotedId(threadId);
+            for (String userId : HiddenChatsPref.users()) {
+                for (String chat : HiddenChatsPref.get(userId)) {
+                    if (chat.contains(quoted)) return true;
+                }
+            }
+        } catch (Throwable t) {
+            Logger.printException(() -> "HiddenChats.shouldMuteDeletion failed", t);
+        }
+        return false;
+    }
+
+    /** The id of a chat between quotes, as it is written in a saved key; a push gives it as "<user id>;thread_id:<chat id>". */
+    private static String quotedId(String threadId) {
+        int marker = threadId.indexOf(THREAD_MARKER);
+        return "'" + (marker < 0 ? threadId : threadId.substring(marker + THREAD_MARKER.length())) + "'";
     }
 
     /**
@@ -408,17 +443,19 @@ public final class HiddenChats {
 
     /** Called when the job that builds the badge state runs; it is kept to run it again after a chat is hidden or shown. */
     public static void badgeJob(Object job) {
-        badgeJob = job;
-        badgeOwner(job);
+        String userId = markOwner(job);
+        if (userId != null) accountOf(userId).badgeJob = job;
     }
 
     /** Called when a message event makes Instagram build the badge state its own way, from a list of its own. */
     public static void badgeEvent(Object manager) {
-        badgeManager = manager;
-        badgeOwner(manager);
+        String userId = markOwner(manager);
+        if (userId != null) accountOf(userId).badgeManager = manager;
     }
 
-    public static void badgeOwner(Object owner) {
+    /** Notes which account the state this thread is about to build belongs to, and returns it. */
+    private static String markOwner(Object owner) {
+        String userId = null;
         try {
             Field[] path = ownerPaths.get(owner.getClass());
             if (path == null) {
@@ -427,10 +464,10 @@ public final class HiddenChats {
             }
             Object value = owner;
             if (path != NO_PATH) for (Field field : path) value = value == null ? null : field.get(value);
-            badgeUser.set(value instanceof UserSession ? ((UserSession) value).getUserId() : null);
-        } catch (Throwable t) {
-            badgeUser.set(null);
-        }
+            if (value instanceof UserSession) userId = ((UserSession) value).getUserId();
+        } catch (Throwable ignored) { }
+        badgeUser.set(userId);
+        return userId;
     }
 
     /**
@@ -485,17 +522,23 @@ public final class HiddenChats {
      */
     public static boolean onBadge(Object controller, Object badge) {
         try {
-            if (!Pref.hiddenChats() || controller == null || badge == null) return false;
+            if (!Pref.hiddenChats() || controller == null) return false;
             UserSession session = (UserSession) fieldOfType(controller, UserSession.class);
-            if (session == null || HiddenChatsPref.ids(session.getUserId()).isEmpty()) return false;
+            if (session == null) return false;
+            Account account = accountOf(session.getUserId());
+            // Without a state the button is painted from the stored count, so what it shows is not known.
+            if (badge == null || HiddenChatsPref.ids(session.getUserId()).isEmpty()) {
+                account.shownCount = -1;
+                return false;
+            }
             int count = -1;
             for (Field field : badge.getClass().getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers()) || field.getType() != int.class) continue;
                 field.setAccessible(true);
                 count = field.getInt(badge);
             }
-            int previous = badgeCount;
-            badgeCount = count;
+            int previous = account.shownCount;
+            account.shownCount = count;
             return count > 0 && count == previous;
         } catch (Throwable t) {
             Logger.printException(() -> "HiddenChats.onBadge failed", t);
@@ -537,9 +580,10 @@ public final class HiddenChats {
             List<Object> list = (List<Object>) listField.get(task);
             if (list == null || list.isEmpty()) return;
             lastUser = userId;
-            lastJob = new WeakReference<>(task);
-            lastListField = listField;
-            lastOriginal = list;
+            Account account = accountOf(userId);
+            account.rowsJob = new WeakReference<>(task);
+            account.listField = listField;
+            account.original = list;
             if (hiddenMode && !userId.equals(modeUser)) hiddenMode = false;
             boolean onlyHidden = hiddenMode;
 

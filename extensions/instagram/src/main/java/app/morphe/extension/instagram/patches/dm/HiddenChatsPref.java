@@ -7,8 +7,10 @@
 package app.morphe.extension.instagram.patches.dm;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -25,8 +27,22 @@ public class HiddenChatsPref extends BaseSharedPref {
         super("piko_hidden_chats");
     }
 
+    private static final String KEY_PREFIX = "chats_";
+
     private static String key(String userId) {
-        return "chats_" + userId;
+        return KEY_PREFIX + userId;
+    }
+
+    /** The ids of the accounts that have saved hidden chats. */
+    public static Set<String> users() {
+        Set<String> users = new LinkedHashSet<>();
+        JSONObject all = INSTANCE.all();
+        if (all == null) return users;
+        for (Iterator<String> keys = all.keys(); keys.hasNext(); ) {
+            String key = keys.next();
+            if (key.startsWith(KEY_PREFIX)) users.add(key.substring(KEY_PREFIX.length()));
+        }
+        return users;
     }
 
     private static final Pattern THREAD_ID = Pattern.compile("mThreadId='([^']*)'");
