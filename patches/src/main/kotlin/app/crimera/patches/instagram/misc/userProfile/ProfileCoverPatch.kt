@@ -23,7 +23,7 @@ val profileCoverPatch =
     bytecodePatch(
         name = "Profile cover",
         description = "Shows an image or GIF of your choice behind your own profile header. Only visible to you",
-        default = false,
+        default = true,
     ) {
         dependsOn(settingsPatch, profileInfoEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
