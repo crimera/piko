@@ -161,6 +161,10 @@ public class Pref {
         return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }
 
+    public static boolean hideHiddenRequests() {
+        return lockable(Settings.HIDE_HIDDEN_REQUESTS) && SettingsStatus.hideHiddenRequests;
+    }
+
     public static boolean hideNotesTray() {
         return lockable(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
