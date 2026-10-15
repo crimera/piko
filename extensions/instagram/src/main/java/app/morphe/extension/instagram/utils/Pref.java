@@ -165,6 +165,10 @@ public class Pref {
         return lockable(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
 
+    public static boolean hideInboxSearchBar() {
+        return lockable(Settings.HIDE_INBOX_SEARCH_BAR) && SettingsStatus.hideInboxSearchBar;
+    }
+
     public static boolean disableReelsScrolling() {
         return lockable(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }

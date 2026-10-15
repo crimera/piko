@@ -67,6 +67,8 @@ public final class FocusLockTargets {
                 Settings.DISABLE_HIGHLIGHTS, "piko_disable_highlights", null);
         add(targets, SettingsStatus.hideNotesTray,
                 Settings.HIDE_NOTES_TRAY, "piko_hide_notes_tray", null);
+        add(targets, SettingsStatus.hideInboxSearchBar,
+                Settings.HIDE_INBOX_SEARCH_BAR, "piko_hide_inbox_search_bar", null);
         add(targets, SettingsStatus.disableComments,
                 Settings.DISABLE_COMMENTS, "piko_disable_comments", null);
         add(targets, SettingsStatus.limitFollowingFeed,
