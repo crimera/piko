@@ -1003,12 +1003,14 @@ private fun patchCardNavigation(
     // the card URL field read directly (12.30 inlines the getter into the callback). The two
     // shapes share the same downstream mutation; the tail anchors keep the match on the card
     // path even when the callback contains other navigation calls.
+    // The navigation helper's arity is not an invariant: 12.34 added a boolean argument to it
+    // (`navigation/kd;->a(String, L, Z)`). The URL-as-first-argument contract is checked by
+    // verifyCardNavigationConsumes, so the parameter list is left unconstrained here.
     val tailFilters =
         listOf(
             methodCall(
                 opcode = Opcode.INVOKE_STATIC,
                 definingClass = "Lcom/x/navigation/",
-                parameters = listOf(STRING_DESCRIPTOR, "L"),
                 returnType = STRING_DESCRIPTOR,
             ),
             methodCall(
