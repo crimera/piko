@@ -61,9 +61,17 @@ private const val SETTING_READ_DESCRIPTOR =
  * addresses without an instruction object.
  */
 private const val IGNORE_NATIVE_POSITION_LABEL = "piko_newx_restore_position_ignore_native"
-private const val SAVE_LOADED_POSITION_LABEL = "piko_newx_restore_position_save_loaded"
+private val MOVE_RESULT_OPCODES = setOf(Opcode.MOVE_RESULT, Opcode.MOVE_RESULT_OBJECT, Opcode.MOVE_RESULT_WIDE)
 private const val RESTORE_TEMPORARY_REGISTER_COUNT = 2
 private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 3
+
+/**
+ * Fresh locals added to the save method clone, just below its parameter block. The map put's three
+ * arguments are spilled into the first two, a loaded flag takes the third, and the persistent store's
+ * four arguments are staged in the last four, which must be consecutive for `invoke-static/range`.
+ */
+private const val SAVE_SCRATCH_LOCALS = 7
+private const val SAVE_SKIPPED_LABEL = "piko_newx_restore_position_save_skipped"
 
 private object NewXScrollPositionHolderFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/",
@@ -552,11 +560,17 @@ val restoreTimelinePositionPatch =
             }
             val saveMethod =
                 originalSaveMethod.cloneMutable(
-                    additionalRegisters = originalSaveMethod.numberOfParameterRegisters + 3,
+                    additionalRegisters = SAVE_SCRATCH_LOCALS,
                 ).also { expandedMethod ->
                     saveMatch.classDef.methods.remove(originalSaveMethod)
                     saveMatch.classDef.methods.add(expandedMethod)
                 }
+            // The clone's fresh locals sit directly below the parameter block: registerCount minus the
+            // parameter registers gives the first local that the clone added.
+            val saveLocalBase =
+                (saveMethod.implementation?.registerCount
+                    ?: throw PatchException("NewX save-scroll-position clone has no implementation")) -
+                    originalSaveMethod.numberOfParameterRegisters - SAVE_SCRATCH_LOCALS
             val mapPutCandidates =
                 saveMethod.instructions.withIndex().filter { indexedInstruction ->
                     if (indexedInstruction.value.opcode != Opcode.INVOKE_VIRTUAL) return@filter false
@@ -684,9 +698,12 @@ val restoreTimelinePositionPatch =
                             }
                     },
                 )
-            // Returning before the map write must skip only that write.
-            if (saveMethod.instructions.getOrNull(mapPutIndex + 1)?.opcode != Opcode.RETURN_VOID) {
-                throw PatchException("NewX timeline-position map write is not the save branch's last action")
+            // Skipping the write must not skip the rest of the save method: 12.34 keeps working on the
+            // timeline state after the map put. The skip branch targets the instruction after the put,
+            // which is only correct when nothing consumes the put's result.
+            val resultOpcode = saveMethod.instructions.getOrNull(mapPutIndex + 1)?.opcode
+            if (resultOpcode != null && resultOpcode in MOVE_RESULT_OPCODES) {
+                throw PatchException("NewX timeline-position map write has result handling; the skip target would drop it")
             }
 
             // Ranked Following uses the same shared save method as Latest Following, but
@@ -714,31 +731,40 @@ val restoreTimelinePositionPatch =
                 layoutPolicyGateIndex + 1,
                 "nop",
             )
+            // The put's map and key are live until the put, so they are spilled into fresh locals and reused as
+            // 4-bit scratch. The holder is only read, so it stays in place. Every path restores the map and key
+            // before the put, and the not-loaded path then skips only the put.
+            val spilledMap = saveLocalBase
+            val spilledKey = saveLocalBase + 1
+            val loadedFlag = saveLocalBase + 2
+            val timelineArgument = saveLocalBase + 3
+            val identityArgument = saveLocalBase + 4
+            val indexArgument = saveLocalBase + 5
+            val offsetArgument = saveLocalBase + 6
             saveMethod.insertHook(
                 index = mapPutIndex,
-                // The three registers the original call reads are live here and must stay untouched.
-                excludedRegisters = listOf(saveTimelineRegister, saveHolderRegister, saveMapRegister),
                 // Plain insertion used to leave an incoming branch on the map write, which keeps skipping
                 // the hook exactly as before.
                 relocateBranchTargets = false,
             ) {
-                val saveIdentityRegister = scratchRegister()
-                val saveIndexRegister = scratchRegister()
-                val saveOffsetRegister = scratchRegister()
-                move(saveIdentityRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
-                iget(saveIdentityRegister, saveIdentityRegister, stateFlowField)
-                checkCast(saveIdentityRegister, stateGetValueReference.definingClass.toString())
-                invokeVirtual(stateGetValueReference, saveIdentityRegister)
-                moveResult(saveIdentityRegister, OBJECT_DESCRIPTOR)
-                instanceOf(saveIndexRegister, saveIdentityRegister, successStateType)
-                ifNez(saveIndexRegister, Target.Local(SAVE_LOADED_POSITION_LABEL))
-                returnVoid()
-                label(SAVE_LOADED_POSITION_LABEL)
-                move(saveIdentityRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
-                iget(saveIdentityRegister, saveIdentityRegister, repositoryField)
-                invokeInterface(methodReference(timelineIdentityGetterReference), saveIdentityRegister)
-                moveResult(saveIdentityRegister, OBJECT_DESCRIPTOR)
-                iget(saveIdentityRegister, saveIdentityRegister, timelineIdentityField)
+                move(spilledMap, saveMapRegister, OBJECT_DESCRIPTOR)
+                move(spilledKey, saveTimelineRegister, OBJECT_DESCRIPTOR)
+                move(saveMapRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(saveMapRegister, saveMapRegister, stateFlowField)
+                checkCast(saveMapRegister, stateGetValueReference.definingClass.toString())
+                invokeVirtual(stateGetValueReference, saveMapRegister)
+                moveResult(saveMapRegister, OBJECT_DESCRIPTOR)
+                instanceOf(saveTimelineRegister, saveMapRegister, successStateType)
+                move(loadedFlag, saveTimelineRegister, "Z")
+                // Not loaded: jump past the persistent store, to the restore below.
+                ifEqz(loadedFlag, Target.Local(SAVE_SKIPPED_LABEL))
+                move(timelineArgument, spilledKey, OBJECT_DESCRIPTOR)
+                move(saveMapRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
+                iget(saveMapRegister, saveMapRegister, repositoryField)
+                invokeInterface(methodReference(timelineIdentityGetterReference), saveMapRegister)
+                moveResult(saveMapRegister, OBJECT_DESCRIPTOR)
+                iget(saveMapRegister, saveMapRegister, timelineIdentityField)
+                move(identityArgument, saveMapRegister, OBJECT_DESCRIPTOR)
                 // The resolver already proved the holder has exactly these two public int fields;
                 // destructure instead of indexing so the cardinality stays explicit here too.
                 val (positionIndexField, positionOffsetField) =
@@ -749,15 +775,23 @@ val restoreTimelinePositionPatch =
                             )
                         }
                     }
-                iget(saveIndexRegister, saveHolderRegister, positionIndexField)
-                iget(saveOffsetRegister, saveHolderRegister, positionOffsetField)
+                iget(saveTimelineRegister, saveHolderRegister, positionIndexField)
+                move(indexArgument, saveTimelineRegister, "I")
+                iget(saveTimelineRegister, saveHolderRegister, positionOffsetField)
+                move(offsetArgument, saveTimelineRegister, "I")
+                // The four staged arguments are consecutive, so the call is emitted in range form.
                 invokeStatic(
                     methodReference(SAVE_POSITION_DESCRIPTOR),
-                    saveTimelineRegister,
-                    saveIdentityRegister,
-                    saveIndexRegister,
-                    saveOffsetRegister,
+                    timelineArgument,
+                    identityArgument,
+                    indexArgument,
+                    offsetArgument,
                 )
+                label(SAVE_SKIPPED_LABEL)
+                move(saveMapRegister, spilledMap, OBJECT_DESCRIPTOR)
+                move(saveTimelineRegister, spilledKey, OBJECT_DESCRIPTOR)
+                // Not loaded: skip only the map put (the original instruction). Loaded: fall into the put.
+                ifEqz(loadedFlag, Target.AfterOriginal(1))
             }
         }
     }
