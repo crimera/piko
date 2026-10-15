@@ -33,6 +33,49 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LOG_PLAYLIST_METHOD = "$AUDIO_RENDITION_DIAGNOSTICS_DESCRIPTOR->logPlaylist(Ljava/lang/Object;)V"
 private const val LOG_RENDITION_METHOD =
     "$AUDIO_RENDITION_DIAGNOSTICS_DESCRIPTOR->logRendition($STRING_DESCRIPTOR" + "Ljava/lang/Object;)V"
+private const val LOG_REQUEST_METHOD = "$AUDIO_RENDITION_DIAGNOSTICS_DESCRIPTOR->logRequest(Ljava/lang/Object;)V"
+
+/** Resolve DataSource.open through the parser's InputStream adapter, not obfuscated names. */
+context(context: BytecodePatchContext)
+private fun patchStreamRequests(parser: Match) {
+    val dataSpec = requireExactlyOne(
+        "NewX diagnostic DataSpec",
+        context.classDefByStrings("DataSpec["),
+    )
+    val stream = context.classDefBy(parser.originalMethod.parameterTypes[1].toString())
+    if (stream.superclass != "Ljava/io/InputStream;") {
+        throw PatchException("NewX diagnostic parser input is not an InputStream: ${stream.type}")
+    }
+    val constructor = requireExactlyOne(
+        "NewX diagnostic DataSourceInputStream constructor",
+        stream.methods.filter { method ->
+            method.name == "<init>" && method.parameterTypes.size == 2 &&
+                method.parameterTypes[1].toString() == dataSpec.type
+        },
+    )
+    val source = context.classDefBy(constructor.parameterTypes[0].toString())
+    val open = requireExactlyOne(
+        "NewX diagnostic DataSource open contract",
+        source.methods.filter { method ->
+            method.returnType == "J" && method.parameterTypes.map { it.toString() } == listOf(dataSpec.type)
+        },
+    )
+    // Many implementations/wrappers are intentional: include cache hits as well as network loads.
+    val matches = Fingerprint(
+        name = open.name,
+        returnType = "J",
+        parameters = listOf(dataSpec.type),
+    ).matchAllOrNull().orEmpty().filter { it.originalMethod.implementation != null }
+    if (matches.isEmpty()) {
+        throw PatchException("NewX diagnostic: no concrete DataSource open implementations for $open")
+    }
+    matches.forEach { match ->
+        val method = match.method
+        method.insertHook(index = 0, relocateBranchTargets = true) {
+            invokeStatic(methodReference(LOG_REQUEST_METHOD), parameterRegister(method, 0))
+        }
+    }
+}
 
 /**
  * The regex holder is the static field that a class stores in its `<clinit>` after building the audio pattern.
@@ -152,6 +195,8 @@ val newXAudioRenditionDiagnosticsPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
 
         execute {
-            patchRenditionDiagnostics(audioRenditionMatchSite(audioRegexField()))
+            val parser = audioRenditionMatchSite(audioRegexField())
+            patchStreamRequests(parser)
+            patchRenditionDiagnostics(parser)
         }
     }

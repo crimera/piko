@@ -13,6 +13,18 @@ public final class AudioRenditionDiagnostics {
     private AudioRenditionDiagnostics() {
     }
 
+    /** An actual DataSource.open attempt, not merely a rendition advertised by a master playlist. */
+    public static void logRequest(Object dataSpec) {
+        if (!NewXLogger.isLoggingEnabled()) {
+            return;
+        }
+        String request = String.valueOf(dataSpec);
+        if (!request.contains("video.twimg.com/")) {
+            return;
+        }
+        NewXLogger.printInfo(() -> LOG_PREFIX + "open request=" + request);
+    }
+
     /** Logs the playlist URI the parser was asked to load. */
     public static void logPlaylist(Object playlistUri) {
         if (!NewXLogger.isLoggingEnabled()) {
