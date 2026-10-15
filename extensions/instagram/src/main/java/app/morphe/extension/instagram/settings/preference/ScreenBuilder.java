@@ -403,6 +403,13 @@ public class ScreenBuilder {
                     Settings.HIDE_STORIES_TRAY
             );
         }
+        if (SettingsStatus.hideHiddenRequests) {
+            addLockableSwitch(
+                    str("piko_hide_hidden_requests"),
+                    str("piko_hide_hidden_requests_desc"),
+                    Settings.HIDE_HIDDEN_REQUESTS
+            );
+        }
         if (SettingsStatus.disableHighlights) {
             addLockableSwitch(
                     str("piko_disable_highlights"),
