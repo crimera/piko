@@ -15,6 +15,13 @@
         <item>timeleft</item>
     </string-array>
 
+    <string-array name="piko_array_hidden_chats_taps">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
     <string-array name="piko_array_focus_lock_duration">
         <item>@string/piko_focus_lock_duration_1_minute</item>
         <item>@string/piko_focus_lock_duration_5_minutes</item>

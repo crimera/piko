@@ -432,6 +432,16 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return (r != null && !r.isEmpty()) ? r : null;
     }
 
+    /** thread_id stored for a message, or null. */
+    public String getThreadId(String messageId) {
+        if (messageId == null) return null;
+        Cursor c = getReadableDatabase().query(TABLE, new String[]{"thread_id"},
+                "message_id = ?", new String[]{messageId}, null, null, null);
+        String r = c.moveToFirst() ? c.getString(0) : null;
+        c.close();
+        return (r != null && !r.isEmpty()) ? r : null;
+    }
+
     /** A previously stored username for this sender in this thread, or null. */
     public String getThreadUsername(String threadId, String senderId) {
         if (threadId == null || threadId.isEmpty()

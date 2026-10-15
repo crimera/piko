@@ -262,6 +262,30 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.hiddenChats) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hidden_chats"),
+                            str("piko_hidden_chats_desc"),
+                            Settings.HIDDEN_CHATS
+                    )
+            );
+            addPreference(
+                    helper.listPreference(
+                            str("piko_hidden_chats_taps"),
+                            str("piko_hidden_chats_taps_desc"),
+                            Settings.HIDDEN_CHATS_TAPS
+                    )
+            );
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hidden_chats_mute"),
+                            str("piko_hidden_chats_mute_desc"),
+                            Settings.HIDDEN_CHATS_MUTE
+                    )
+            );
+        }
+
         if (SettingsStatus.saveDeletedMessages) {
             addPreference(
                     helper.switchPreference(
