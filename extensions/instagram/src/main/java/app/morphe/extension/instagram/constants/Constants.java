@@ -30,6 +30,7 @@ public class Constants {
     public static final String AB_CREATE = "CREATE";
     public static final String AB_NOTIFICATIONS = "NOTIFICATIONS";
     public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
+    public static final String AB_JUMP_OLDEST_ICON = "JUMP_OLDEST_ICON";
     public static final String AB_PROFILE_INFO_ICON = "PROFILE_INFO_ICON";
 
     public static final String PIKO_FRAGMENT_TITLE = "piko_frag_title";

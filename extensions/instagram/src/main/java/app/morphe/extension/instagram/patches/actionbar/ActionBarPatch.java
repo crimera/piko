@@ -229,6 +229,11 @@ public class ActionBarPatch {
                 ghostModeToggle(viewGroup);
             }
 
+            if(pref.contains(Constants.AB_JUMP_OLDEST_ICON)) {
+                UI.addImageViewToViewGroup(viewGroup, "instagram_chevron_up_outline_24",
+                        () -> app.morphe.extension.instagram.patches.dm.JumpToOldestMessage.toggle(viewGroup));
+            }
+
         } catch (Exception e) {
             Logger.printException(() -> "chatActionBarButton:", e);
         }
