@@ -1,6 +1,7 @@
 package app.crimera.patches.newx.misc.postdetails
 
 import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.settings.InjectedSettingRead
 import app.crimera.patches.settings.SettingReadRegisterConstraint
 import app.crimera.patches.settings.ToggleSettingDefinition
 import app.crimera.patches.settings.branchIfEnabled
@@ -780,13 +781,7 @@ internal fun applyImmersiveActionBarSafeAreaHook(
     setting: ToggleSettingDefinition,
     hook: ImmersiveActionBarSafeAreaHook,
 ) {
-    val settingRead =
-        setting.injectRead(
-            method = hook.method,
-            index = hook.actionBarCallIndex,
-            excludedRegisters = listOf(hook.modifierRegister, hook.composerRegister),
-            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
-        )
+    val settingRead = setting.injectReadBeforeActionBar(hook)
     hook.method.insertHook(
         index = settingRead.nextIndex,
         // The old plain insertion left incoming labels on the action-bar call, so a path that
@@ -804,6 +799,47 @@ internal fun applyImmersiveActionBarSafeAreaHook(
         invokeStatic(hook.insetsPaddingCall, hook.modifierRegister, settingRead.register)
         moveResult(hook.modifierRegister, hook.insetsPaddingCall.returnType.toString())
     }
+}
+
+/**
+ * The setting read and the padding block need a four-bit scratch register that is free at their
+ * injection point. The action-bar call passes its whole argument block as a range, so every low
+ * register is live there. Move the injection up to the latest earlier index where one is free.
+ *
+ * Between that index and the call, the modifier and composer must keep the values the call
+ * consumes, and no label may sit in the window: a path that skipped the block would also skip the
+ * padding. The search only retries [injectRead]; a failed attempt throws before it edits the method.
+ */
+private fun ToggleSettingDefinition.injectReadBeforeActionBar(hook: ImmersiveActionBarSafeAreaHook): InjectedSettingRead {
+    val instructions = hook.method.instructions.toList()
+    val guardedRegisters = listOf(hook.modifierRegister, hook.composerRegister)
+    val lastGuardedUse =
+        (0 until hook.actionBarCallIndex).lastOrNull { index ->
+            instructions[index].registersUsed.any { register -> register in guardedRegisters }
+        } ?: -1
+    val lastLabelledIndex =
+        (0..hook.actionBarCallIndex).lastOrNull { index ->
+            instructions[index].location.labels.isNotEmpty()
+        } ?: -1
+    val earliestIndex = maxOf(lastGuardedUse, lastLabelledIndex) + 1
+    var failure: PatchException? = null
+    for (index in hook.actionBarCallIndex downTo earliestIndex) {
+        try {
+            return injectRead(
+                method = hook.method,
+                index = index,
+                excludedRegisters = guardedRegisters,
+                registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+            )
+        } catch (exception: PatchException) {
+            failure = exception
+        }
+    }
+    throw PatchException(
+        "NewX immersive-media setting read has no four-bit scratch register between index " +
+            "$earliestIndex and ${hook.actionBarCallIndex} in ${hook.method}",
+        failure,
+    )
 }
 
 /**
