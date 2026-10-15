@@ -32,7 +32,6 @@ import kotlin.math.max
 import kotlin.math.sin
 
 private const val XLOGO_PACKAGE = "Lcom/x/ui/common/xlogo/"
-private const val REFRESH_PACKAGE = "Lcom/x/home/tabbed/refresh/"
 private const val BIRD_ASSET = "/twitter/bringbacktwitter/drawable/ic_vector_twitter.xml"
 private const val STROKE_COVERAGE_FACTOR = 0.7f
 /** Tilt of the sweep line from vertical, toward the beak: the bird rises from bottom to top, banking slightly. */
@@ -53,8 +52,6 @@ internal data class LogoMethodKey(
 
 internal sealed interface LogoHit {
     data class XLogoClass(val type: String) : LogoHit
-
-    data class RefreshClass(val type: String) : LogoHit
 
     data class Glyph(val owner: LogoMethodKey, val index: Int, val register: Int) : LogoHit
 
@@ -78,17 +75,13 @@ internal data class SweepArm(val thickness: Float, val ax: Float, val ay: Float,
 
 internal fun isSvgPathData(value: String): Boolean = value.length >= 16 && PATH_DATA.matches(value)
 
-/** Gate + cardinality. `null` means: an APK from before the procedural logo; nothing to patch. */
+/**
+ * Gate + cardinality. `null` means there is no animated logo to rewrite in code. That covers APKs from
+ * before the procedural logo, and 12.34+, which dropped the xlogo classes. There the top-bar X is the
+ * `ic_vector_twitter` drawable, and [bringBackTwitterPatch] swaps that drawable for the static bird.
+ */
 internal fun requireLogoSites(hits: List<LogoHit>): LogoSites? {
-    val xlogoClasses = hits.filterIsInstance<LogoHit.XLogoClass>()
-    val refreshClasses = hits.filterIsInstance<LogoHit.RefreshClass>()
-    if (xlogoClasses.isEmpty()) {
-        if (refreshClasses.isEmpty()) return null
-        throw PatchException(
-            "NewX top-bar logo: this APK has the pull-to-refresh package ($REFRESH_PACKAGE, ${refreshClasses.size} classes) " +
-                "but no $XLOGO_PACKAGE classes. The animated logo moved; update the glyph resolver, otherwise the top bar keeps the X.",
-        )
-    }
+    if (hits.none { hit -> hit is LogoHit.XLogoClass }) return null
     val glyph =
         requireExactlyOne(
             "NewX top-bar logo glyph path-data constant in $XLOGO_PACKAGE",
@@ -364,7 +357,6 @@ private fun scanLogo(): List<LogoHit> =
     classDefFlatMap { classDef ->
         val type = classDef.type
         when {
-            type.startsWith(REFRESH_PACKAGE) -> listOf(LogoHit.RefreshClass(type))
             type.startsWith(XLOGO_PACKAGE) ->
                 listOf<LogoHit>(LogoHit.XLogoClass(type)) + classDef.methods.flatMap { scanXLogoMethod(type, it) }
             else -> emptyList()

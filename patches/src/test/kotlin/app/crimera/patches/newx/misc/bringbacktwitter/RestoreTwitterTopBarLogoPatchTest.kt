@@ -36,7 +36,6 @@ import kotlin.test.assertTrue
 class RestoreTwitterTopBarLogoPatchTest {
     private val birdAsset = "/twitter/bringbacktwitter/drawable/ic_vector_twitter.xml"
     private val xlogoClass = LogoHit.XLogoClass("Lcom/x/ui/common/xlogo/XLogoView;")
-    private val refreshClass = LogoHit.RefreshClass("Lcom/x/home/tabbed/refresh/RefreshHeader;")
     private val owner = LogoMethodKey("Lcom/x/ui/common/xlogo/XLogoView;", "draw", emptyList())
     private val armOwner = LogoMethodKey("Lcom/x/ui/common/xlogo/XLogoView;", "arm", listOf("F", "J", "J"))
 
@@ -44,8 +43,8 @@ class RestoreTwitterTopBarLogoPatchTest {
     fun `contract gate`() {
         assertNull(requireLogoSites(emptyList()))
 
-        val refreshOnly = assertFailsWith<PatchException> { requireLogoSites(listOf(refreshClass)) }
-        assertTrue(refreshOnly.message.orEmpty().contains("xlogo"), refreshOnly.message)
+        // Without an xlogo class there is no animated logo to rewrite: the static-bird route, not a failure.
+        assertNull(requireLogoSites(listOf(glyph(index = 0))))
 
         assertFailsWith<PatchException> { requireLogoSites(listOf(xlogoClass)) }
         assertFailsWith<PatchException> {
