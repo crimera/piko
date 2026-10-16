@@ -56,6 +56,10 @@ val mediaDataEntity =
                 GetVideoVariantsV2ExtensionFingerprint.changeFirstString(it.instructionMatches[2].fieldReference.name)
             }
 
+            // DASH manifest and audio flag, for downloads above the progressive 720p.
+            GetVideoDashManifestExtensionFingerprint.changeFirstString(VideoDashManifestGetterFingerprint.originalMethod.name)
+            HasAudioTrackExtensionFingerprint.changeFirstString(HasAudioGetterFingerprint.originalMethod.name)
+
             // Extracting method is video used in media class.
             IsVideoExtensionFingerprint.changeFirstString(
                 AslSessionRelatedFingerprint.instructionMatches.last().methodReference.name,

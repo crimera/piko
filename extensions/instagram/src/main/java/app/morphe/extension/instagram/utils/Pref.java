@@ -334,8 +334,8 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
     }
 
-    public static boolean downloadBestQuality() {
-        return SharedPref.getBooleanPref(Settings.DOWNLOAD_BEST_QUALITY) && SettingsStatus.bestQualityDownload;
+    public static boolean preferDashFormat() {
+        return SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT);
     }
 
     public static String downloadFileNameTemplate() {

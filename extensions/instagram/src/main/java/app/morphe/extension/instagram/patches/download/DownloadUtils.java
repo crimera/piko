@@ -74,7 +74,7 @@ public class DownloadUtils {
             title = str("piko_video_variants");
             // DASH renditions first, sharpest on top, then the progressive files.
             variantList = new ArrayList<>();
-            if (Pref.downloadBestQuality()) variantList.addAll(currentMediaData.getDashVideos());
+            if (Pref.preferDashFormat()) variantList.addAll(currentMediaData.getDashVideos());
             variantList.addAll(currentMediaData.getVideoVariants());
         }else{
             title = str("piko_image_variants");
@@ -301,7 +301,7 @@ public class DownloadUtils {
         String progressiveUrl = mediaUrl;
         String audioUrl = null;
 
-        DashVideoData dashVideo = isVideo && variantTag == null && Pref.downloadBestQuality()
+        DashVideoData dashVideo = isVideo && variantTag == null && Pref.preferDashFormat()
                 ? childMediaData.getSharperDashVideo()
                 : null;
         if (dashVideo != null) {
