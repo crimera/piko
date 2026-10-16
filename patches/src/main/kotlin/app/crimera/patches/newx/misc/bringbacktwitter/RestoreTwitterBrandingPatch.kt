@@ -32,6 +32,7 @@ val bringBackTwitterPatch =
         dependsOn(addResourcesPatch, restoreTwitterTopBarLogoPatch)
 
         execute {
+            val hasPullToRefreshLogo = get("res/raw/x_refresh_logo.json").exists()
             addAppResources("twitter-bring-back")
             ensureNightSplashBackground()
             
@@ -81,6 +82,14 @@ val bringBackTwitterPatch =
                 }.forEach {
                     copyResources("twitter/bringbacktwitter", it)
                 }
+
+            // NewX 12.34 renders the pull-to-refresh logo from this Lottie resource, bypassing the drawable overrides.
+            if (hasPullToRefreshLogo) {
+                copyResources(
+                    "twitter/bringbacktwitter",
+                    ResourceGroup("raw", "x_refresh_logo.json"),
+                )
+            }
 
             // mipmap icons
             sizes
