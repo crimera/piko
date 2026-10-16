@@ -30,6 +30,7 @@ import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.entity.DashVideoData;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
@@ -71,7 +72,10 @@ public class DownloadUtils {
         String title = "";
         if(mediaType.equals(MediaType.VIDEO)){
             title = str("piko_video_variants");
-            variantList = currentMediaData.getVideoVariants();
+            // DASH renditions first, sharpest on top, then the progressive files.
+            variantList = new ArrayList<>();
+            if (Pref.preferDashFormat()) variantList.addAll(currentMediaData.getDashVideos());
+            variantList.addAll(currentMediaData.getVideoVariants());
         }else{
             title = str("piko_image_variants");
             variantList = currentMediaData.getImageVariants();
@@ -79,7 +83,7 @@ public class DownloadUtils {
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
         ArrayList<String> options = new ArrayList<>();
-        variantList.forEach(item -> options.add(item.getVariantTag()));
+        variantList.forEach(item -> options.add(item.getLabel()));
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -100,6 +104,7 @@ public class DownloadUtils {
                             fileName,
                             data.getVariantTag()
                     );
+                    request.audioUrl = data.getAudioUrl();
                     enqueueDownload(context, request);
                 } catch (Exception e) {
                     PikoUtils.logger(e);
@@ -276,6 +281,10 @@ public class DownloadUtils {
 
     }
 
+    /**
+     * The request for one media. A video with no variant chosen downloads as the sharpest DASH
+     * rendition, with its audio merged in, when that is sharper than the progressive file.
+     */
     private static DownloadRequest buildMediaRequest(
             MediaData rootMediaData,
             MediaData childMediaData,
@@ -289,6 +298,16 @@ public class DownloadUtils {
         boolean isVideo = mediaType.equals(MediaType.VIDEO)
                 || (mediaType.equals(MediaType.ANY) && childMediaData.isVideo());
         String fileName = fallbackFileName;
+        String progressiveUrl = mediaUrl;
+        String audioUrl = null;
+
+        DashVideoData dashVideo = isVideo && variantTag == null && Pref.preferDashFormat()
+                ? childMediaData.getSharperDashVideo()
+                : null;
+        if (dashVideo != null) {
+            mediaUrl = dashVideo.getUrl();
+            audioUrl = dashVideo.getAudioUrl();
+        }
 
         try {
             String username = rootMediaData.getUserData().getUsername();
@@ -324,6 +343,8 @@ public class DownloadUtils {
         }
 
         DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
+        request.audioUrl = audioUrl;
+        if (audioUrl != null) request.fallbackUrl = progressiveUrl;
         if (!isVideo || !Pref.embedDownloadMetadata()) {
             return request;
         }
@@ -334,13 +355,13 @@ public class DownloadUtils {
             Long uploadTimestampMillis = takenAtSeconds == null
                     ? null
                     : takenAtSeconds * 1000L;
-            DownloadMetadata metadata = new DownloadMetadata(
+            request.metadata = new DownloadMetadata(
                     rootMediaData.getDescriptionText(),
                     Links.generatePostLink(rootMediaData, carouselIndex),
                     username,
                     uploadTimestampMillis
             );
-            return new DownloadRequest(mediaUrl, subFolder, fileName, metadata);
+            return request;
         } catch (Exception | LinkageError metadataException) {
             PikoUtils.logger(metadataException);
             Logger.printException(

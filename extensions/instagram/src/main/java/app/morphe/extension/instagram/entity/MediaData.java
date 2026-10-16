@@ -14,6 +14,7 @@ import java.util.HashSet;
 
 import android.content.Context;
 
+import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.downloader.MediaType;
 import app.morphe.extension.instagram.constants.PostType;
@@ -271,6 +272,43 @@ public class MediaData extends Entity {
         List<ImageData> imageList = new ArrayList<>();
         variantList.forEach(item -> imageList.add(new ImageData(item)));
         return imageList;
+    }
+
+    // Through the app's getter, not the dict field it caches into: that field can stay null until
+    // the getter has run once.
+    private String getVideoDashManifest() throws Exception {
+        return (String) super.getMethod(this.getExtendedData(), "methodName");
+    }
+
+    /** Whether the video has a sound track, by the app's has_audio flag; true when the flag is missing. */
+    public boolean hasAudioTrack() throws Exception {
+        Boolean hasAudio = (Boolean) super.getMethod(this.getExtendedData(), "methodName");
+        return hasAudio == null || hasAudio;
+    }
+
+    /**
+     * The media's DASH video renditions (see {@link DashVideoData}) that keep its sound: empty
+     * when the manifest lists no audio for a video that has some, since that would save it
+     * silent, and without a manifest or on any failure.
+     */
+    public List<DashVideoData> getDashVideos() {
+        try {
+            List<DashVideoData> videos = DashVideoData.parse(this.getVideoDashManifest());
+            boolean silent = !videos.isEmpty() && videos.get(0).getAudioUrl() == null && this.hasAudioTrack();
+            return silent ? new ArrayList<>() : videos;
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not read the DASH manifest", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /** The sharpest DASH rendition when it beats the progressive file the media downloads as by default; null otherwise. */
+    public DashVideoData getSharperDashVideo() throws Exception {
+        List<DashVideoData> videos = this.getDashVideos();
+        if (videos.isEmpty()) return null;
+        List<VideoData> progressive = this.getVideoVariants();
+        int progressiveShortSide = progressive == null || progressive.isEmpty() ? 0 : progressive.get(0).shortSide();
+        return videos.get(0).shortSide() > progressiveShortSide ? videos.get(0) : null;
     }
 
     public String getVideoLink() throws Exception {
