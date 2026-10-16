@@ -7,25 +7,21 @@
 
 package app.morphe.extension.crimera.downloader;
 
+/** One file to download; the optional fields are set after construction. */
 public class DownloadRequest {
     public String url;
-    public String subFolder; 
+    public String subFolder;
     public String fileName;
+    /** Embedded into the MP4 on the way; null leaves the file as served. */
     public DownloadMetadata metadata;
+    /** A separate audio file to merge into the video at {@link #url}, as DASH serves it; null for a complete file. */
+    public String audioUrl;
+    /** A complete file to download instead when merging the audio fails; null fails the download. */
+    public String fallbackUrl;
 
     public DownloadRequest(String url, String subFolder, String fileName) {
-        this(url, subFolder, fileName, null);
-    }
-
-    public DownloadRequest(
-            String url,
-            String subFolder,
-            String fileName,
-            DownloadMetadata metadata
-    ) {
         this.url = url;
         this.subFolder = subFolder;
         this.fileName = fileName;
-        this.metadata = metadata;
     }
 }

@@ -786,6 +786,16 @@ public class ScreenBuilder {
                 )
         );
 
+        if (SettingsStatus.bestQualityDownload) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_download_best_quality"),
+                            str("piko_download_best_quality_desc"),
+                            Settings.DOWNLOAD_BEST_QUALITY
+                    )
+            );
+        }
+
         addPreference(
                 helper.switchPreference(
                         str("piko_embed_download_metadata"),

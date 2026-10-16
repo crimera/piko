@@ -334,6 +334,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
     }
 
+    public static boolean downloadBestQuality() {
+        return SharedPref.getBooleanPref(Settings.DOWNLOAD_BEST_QUALITY) && SettingsStatus.bestQualityDownload;
+    }
+
     public static String downloadFileNameTemplate() {
         return removeLineBreaks(SharedPref.getStringPref(Settings.DOWNLOAD_FILE_NAME_TEMPLATE));
     }
