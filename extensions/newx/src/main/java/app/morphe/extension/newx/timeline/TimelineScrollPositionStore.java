@@ -5,9 +5,6 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.Nullable;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.settings.SettingsRegistry;
@@ -24,6 +21,7 @@ public final class TimelineScrollPositionStore {
     private static final String TIMELINE_KEY_PREFIX = "timeline.";
     private static final Object SAVE_LOCK = new Object();
     private static volatile SharedPreferences cachedPreferences;
+    private static volatile long lastAccountId;
     private static SharedPreferences lastSavedPreferences;
     private static String lastSavedKey;
     private static int lastSavedIndex = -1;
@@ -33,12 +31,29 @@ public final class TimelineScrollPositionStore {
     }
 
     @Nullable
-    public static int[] restore(Enum<?> timeline) {
-        return restore(timeline, null);
+    public static int[] restore(Enum<?> timeline, @Nullable String profileId) {
+        long accountId = lastAccountId;
+        if (accountId <= 0) return null;
+        // Refresh has no account in scope, so only restore after a scoped hook established one.
+        return restore(timeline, profileId, accountId);
     }
 
     @Nullable
-    public static int[] restore(Enum<?> timeline, @Nullable String profileId) {
+    public static int[] restore(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            long accountId
+    ) {
+        String timelineName = timeline == null ? null : timeline.name();
+        if (accountId <= 0) {
+            if (NewXLogger.isLoggingEnabled()) {
+                NewXLogger.logger("NewX restore miss timeline=" + timelineName + " account=" + accountId
+                        + " reason=no-account");
+            }
+            return null;
+        }
+        lastAccountId = accountId;
+
         try {
             boolean restoreTimelinePosition = SettingsRegistry.getBooleanOrDefault(
                     RESTORE_TIMELINE_POSITION_SETTING,
@@ -48,8 +63,8 @@ public final class TimelineScrollPositionStore {
                     RESTORE_PROFILE_POSITION_SETTING,
                     false
             );
-            String timelineName = timeline == null ? null : timeline.name();
-            String key = storageKey(
+            String key = accountStorageKey(
+                    accountId,
                     timelineName,
                     profileId,
                     restoreTimelinePosition,
@@ -57,6 +72,7 @@ public final class TimelineScrollPositionStore {
             );
             if (NewXLogger.isLoggingEnabled()) {
                 NewXLogger.logger("NewX restore timeline=" + timelineName + " profileId=" + profileId
+                        + " account=" + accountId
                         + " key=" + key + " restoreTimeline=" + restoreTimelinePosition
                         + " restoreProfile=" + restoreProfilePosition);
             }
@@ -65,7 +81,8 @@ public final class TimelineScrollPositionStore {
             SharedPreferences preferences = preferences();
             if (preferences == null) {
                 if (NewXLogger.isLoggingEnabled()) {
-                    NewXLogger.logger("NewX restore miss timeline=" + timelineName + " reason=no-preferences");
+                    NewXLogger.logger("NewX restore miss timeline=" + timelineName + " account=" + accountId
+                            + " reason=no-preferences");
                 }
                 return null;
             }
@@ -76,7 +93,8 @@ public final class TimelineScrollPositionStore {
             int index = preferences.getInt(indexKey, -1);
             if (index < 0) {
                 if (NewXLogger.isLoggingEnabled()) {
-                    NewXLogger.logger("NewX restore miss timeline=" + timelineName + " key=" + key
+                    NewXLogger.logger("NewX restore miss timeline=" + timelineName + " account=" + accountId
+                            + " key=" + key
                             + " reason=no-entry");
                 }
                 return null;
@@ -84,130 +102,41 @@ public final class TimelineScrollPositionStore {
 
             int offset = preferences.getInt(key + OFFSET_SUFFIX, 0);
             if (NewXLogger.isLoggingEnabled()) {
-                NewXLogger.logger("NewX restore hit timeline=" + timelineName + " key=" + key
+                NewXLogger.logger("NewX restore hit timeline=" + timelineName + " account=" + accountId
+                        + " key=" + key
                         + " index=" + index + " offset=" + offset);
             }
             return new int[]{index, offset};
         } catch (Exception exception) {
-            NewXLogger.printException(() -> "Failed to restore NewX timeline position", exception);
+            NewXLogger.printException(() -> "Failed to restore NewX timeline position account=" + accountId,
+                    exception);
             return null;
         }
     }
 
-    public static void save(Enum<?> timeline, Object holder) {
-        save(timeline, null, holder);
-    }
-
+    /** Saves an already decoded position without allocating or reflectively parsing a holder. */
     public static void save(
             Enum<?> timeline,
             @Nullable String profileId,
-            Object holder
-    ) {
-        if (holder == null) {
-            if (NewXLogger.isLoggingEnabled()) {
-                NewXLogger.logger("NewX save skip reason=null-holder");
-            }
-            return;
-        }
-
-        try {
-            boolean restoreTimelinePosition = SettingsRegistry.getBooleanOrDefault(
-                    RESTORE_TIMELINE_POSITION_SETTING,
-                    true
-            );
-            boolean restoreProfilePosition = SettingsRegistry.getBooleanOrDefault(
-                    RESTORE_PROFILE_POSITION_SETTING,
-                    false
-            );
-            String timelineName = timeline == null ? null : timeline.name();
-            String key = storageKey(
-                    timelineName,
-                    profileId,
-                    restoreTimelinePosition,
-                    restoreProfilePosition
-            );
-            if (key == null) {
-                if (NewXLogger.isLoggingEnabled()) {
-                    NewXLogger.logger("NewX save skip timeline=" + timelineName + " profileId=" + profileId
-                            + " reason=unsupported-key restoreTimeline=" + restoreTimelinePosition
-                            + " restoreProfile=" + restoreProfilePosition);
-                }
-                return;
-            }
-
-            SharedPreferences preferences = preferences();
-            if (preferences == null) {
-                if (NewXLogger.isLoggingEnabled()) {
-                    NewXLogger.logger("NewX save skip timeline=" + timelineName + " key=" + key
-                            + " reason=no-preferences");
-                }
-                return;
-            }
-
-            int index = -1;
-            int offset = -1;
-
-            int[] parsed = parsePositionHolder(holder.toString());
-            if (parsed != null) {
-                index = parsed[0];
-                offset = parsed[1];
-            } else {
-                Field[] fields = holder.getClass().getDeclaredFields();
-                int found = 0;
-                for (Field field : fields) {
-                    if (field.getType() == int.class && !Modifier.isStatic(field.getModifiers())) {
-                        field.setAccessible(true);
-                        if (found == 0) {
-                            index = field.getInt(holder);
-                            found++;
-                        } else if (found == 1) {
-                            offset = field.getInt(holder);
-                            found++;
-                            break;
-                        }
-                    }
-                }
-                if (found < 2) {
-                    if (NewXLogger.isLoggingEnabled()) {
-                        NewXLogger.logger("NewX save skip timeline=" + timelineName + " key=" + key
-                                + " reason=unparseable-holder");
-                    }
-                    return;
-                }
-            }
-
-            if (index < 0 || offset < 0) {
-                if (NewXLogger.isLoggingEnabled()) {
-                    NewXLogger.logger("NewX save skip timeline=" + timelineName + " key=" + key
-                            + " reason=negative-position");
-                }
-                return;
-            }
-
-            if (NewXLogger.isLoggingEnabled()) {
-                NewXLogger.logger("NewX save timeline=" + timelineName + " key=" + key
-                        + " index=" + index + " offset=" + offset);
-            }
-            preferences.edit()
-                    .putInt(key + INDEX_SUFFIX, index)
-                    .putInt(key + OFFSET_SUFFIX, offset)
-                    .apply();
-        } catch (Exception exception) {
-            NewXLogger.printException(() -> "Failed to save NewX timeline position", exception);
-        }
-    }
-
-    /** Saves an already decoded position without allocating or reflectively parsing the holder. */
-    public static void save(
-            Enum<?> timeline,
-            @Nullable String profileId,
+            long accountId,
             int index,
             int offset
     ) {
         boolean loggingEnabled = NewXLogger.isLoggingEnabled();
+        String timelineName = timeline == null ? null : timeline.name();
+        if (accountId <= 0) {
+            if (loggingEnabled) {
+                NewXLogger.logger("NewX save skip timeline=" + timelineName + " account=" + accountId
+                        + " reason=no-account");
+            }
+            return;
+        }
+        lastAccountId = accountId;
+
         if (index < 0 || offset < 0) {
             if (loggingEnabled) {
-                NewXLogger.logger("NewX save skip reason=negative-position");
+                NewXLogger.logger("NewX save skip timeline=" + timelineName + " account=" + accountId
+                        + " reason=negative-position");
             }
             return;
         }
@@ -221,8 +150,8 @@ public final class TimelineScrollPositionStore {
                     RESTORE_PROFILE_POSITION_SETTING,
                     false
             );
-            String timelineName = timeline == null ? null : timeline.name();
-            String key = storageKey(
+            String key = accountStorageKey(
+                    accountId,
                     timelineName,
                     profileId,
                     restoreTimelinePosition,
@@ -249,38 +178,12 @@ public final class TimelineScrollPositionStore {
             }
 
             if (loggingEnabled) {
-                NewXLogger.logger("NewX save timeline=" + timelineName + " key=" + key
+                NewXLogger.logger("NewX save timeline=" + timelineName + " account=" + accountId + " key=" + key
                         + " index=" + index + " offset=" + offset);
             }
         } catch (Exception exception) {
-            NewXLogger.printException(() -> "Failed to save NewX timeline position", exception);
-        }
-    }
-
-    /** Manual parse of the known holder shape; cheaper than a regex per save. */
-    @Nullable
-    private static int[] parsePositionHolder(String holder) {
-        if (holder == null) return null;
-        int indexValue = parseHolderField(holder, "firstVisibleItemIndex=");
-        if (indexValue < 0) return null;
-        int offsetValue = parseHolderField(holder, "firstVisibleItemScrollOffset=");
-        if (offsetValue < 0) return null;
-        return new int[]{indexValue, offsetValue};
-    }
-
-    private static int parseHolderField(String holder, String label) {
-        int valueStart = holder.indexOf(label);
-        if (valueStart < 0) return -1;
-        valueStart += label.length();
-        int valueEnd = valueStart;
-        while (valueEnd < holder.length() && Character.isDigit(holder.charAt(valueEnd))) {
-            valueEnd++;
-        }
-        if (valueEnd == valueStart) return -1;
-        try {
-            return Integer.parseInt(holder.substring(valueStart, valueEnd));
-        } catch (NumberFormatException exception) {
-            return -1;
+            NewXLogger.printException(() -> "Failed to save NewX timeline position account=" + accountId,
+                    exception);
         }
     }
 
@@ -335,6 +238,25 @@ public final class TimelineScrollPositionStore {
         String trimmedProfileId = profileId.trim();
         if (trimmedProfileId.isEmpty()) return null;
         return PROFILE_KEY_PREFIX + timelineName + "." + trimmedProfileId;
+    }
+
+    @Nullable
+    static String accountStorageKey(
+            long accountId,
+            @Nullable String timelineName,
+            @Nullable String profileId,
+            boolean restoreTimelinePosition,
+            boolean restoreProfilePosition
+    ) {
+        if (accountId <= 0) return null;
+        String key = storageKey(
+                timelineName,
+                profileId,
+                restoreTimelinePosition,
+                restoreProfilePosition
+        );
+        if (key == null) return null;
+        return "account." + accountId + "." + key;
     }
 
     private static boolean isHomeTimeline(String timelineName) {

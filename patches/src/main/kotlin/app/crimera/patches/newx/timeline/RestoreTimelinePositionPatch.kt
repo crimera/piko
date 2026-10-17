@@ -28,12 +28,15 @@ import app.morphe.util.numberOfParameterRegisters
 import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 
 private const val CONCURRENT_HASH_MAP_DESCRIPTOR = "Ljava/util/concurrent/ConcurrentHashMap;"
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
@@ -49,9 +52,9 @@ private const val MAP_PUT_DESCRIPTOR =
 private const val HAS_IN_MEMORY_POSITION_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->useInMemoryPosition($ENUM_DESCRIPTOR)Z"
 private const val RESTORE_POSITION_DESCRIPTOR =
-    "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR})[I"
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}J)[I"
 private const val SAVE_POSITION_DESCRIPTOR =
-    "$TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}II)V"
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}JII)V"
 private const val SETTING_READ_DESCRIPTOR =
     "$SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault($STRING_DESCRIPTOR)Z"
 
@@ -61,17 +64,25 @@ private const val SETTING_READ_DESCRIPTOR =
  * addresses without an instruction object.
  */
 private const val IGNORE_NATIVE_POSITION_LABEL = "piko_newx_restore_position_ignore_native"
+private const val ACCOUNT_ID_BRIDGE_NAME = "piko\$newxAccountId"
+private const val ACCOUNT_ID_BRIDGE_NULL_LABEL = "piko_newx_account_id_null"
 private val MOVE_RESULT_OPCODES = setOf(Opcode.MOVE_RESULT, Opcode.MOVE_RESULT_OBJECT, Opcode.MOVE_RESULT_WIDE)
-private const val RESTORE_TEMPORARY_REGISTER_COUNT = 2
-private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 3
+private const val RESTORE_TEMPORARY_REGISTER_COUNT = 4
+private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 5
 
 /**
  * Fresh locals added to the save method clone, just below its parameter block. The map put's three
  * arguments are spilled into the first two, a loaded flag takes the third, and the persistent store's
- * four arguments are staged in the last four, which must be consecutive for `invoke-static/range`.
+ * six argument words are staged consecutively in the last six for `invoke-static/range`.
  */
-private const val SAVE_SCRATCH_LOCALS = 7
+private const val SAVE_SCRATCH_LOCALS = 9
 private const val SAVE_SKIPPED_LABEL = "piko_newx_restore_position_save_skipped"
+
+private object NewXUserIdentifierSerializerFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    name = "<clinit>",
+    strings = listOf("com.x.models.UserIdentifier"),
+)
 
 private object NewXScrollPositionHolderFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/",
@@ -161,6 +172,40 @@ val restoreTimelinePositionPatch =
         )
 
         execute {
+            val userIdentifierSerializerMatch =
+                requireExactlyOne(
+                    "NewX UserIdentifier serializer class",
+                    NewXUserIdentifierSerializerFingerprint.scopedMatchAll(),
+                )
+            val userIdentifierSerializerDescriptor = userIdentifierSerializerMatch.originalClassDef.type.toString()
+            val userIdentifierDeserializer =
+                requireExactlyOne(
+                    "NewX UserIdentifier deserializer",
+                    mutableClassDefBy(userIdentifierSerializerDescriptor).methods.filter { method ->
+                        method.name == "deserialize" &&
+                            method.parameterTypes.size == 1 &&
+                            method.returnType == OBJECT_DESCRIPTOR
+                    },
+                )
+            val userIdentifierDescriptor =
+                requireExactlyOne(
+                    "NewX UserIdentifier deserializer allocation type",
+                    userIdentifierDeserializer.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.NEW_INSTANCE) return@mapNotNull null
+                        instruction.getReference<TypeReference>()?.type?.toString()
+                    },
+                )
+            val userIdentifierIdField =
+                requireExactlyOne(
+                    "NewX UserIdentifier account-id field",
+                    mutableClassDefBy(userIdentifierDescriptor).fields.filter { field ->
+                        !AccessFlags.STATIC.isSet(field.accessFlags) && field.type.toString() == "J"
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(userIdentifierIdField.accessFlags)) {
+                throw PatchException("NewX UserIdentifier account-id field is not public: $userIdentifierIdField")
+            }
+
             val holderMatch =
                 requireExactlyOne(
                     "NewX scroll-position holder",
@@ -234,7 +279,10 @@ val restoreTimelinePositionPatch =
                     ?: throw PatchException("NewX cloned scroll-position getter has no implementation")
             val scratchBase = originalRegisterCount
             val restoreRegisters = scratchBase..scratchBase + 1
-            val fallbackRegisters = scratchBase + 2..scratchBase + 4
+            val fallbackRegisterStart = scratchBase + RESTORE_TEMPORARY_REGISTER_COUNT
+            val fallbackRegisters =
+                fallbackRegisterStart..
+                    fallbackRegisterStart + FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT - 1
             val scratchLast = fallbackRegisters.last
             val shiftedParameterRegionStart = expandedRegisterCount - parameterRegisterCount
             if (scratchBase < 0 || scratchLast > 15 || scratchLast >= shiftedParameterRegionStart) {
@@ -313,6 +361,45 @@ val restoreTimelinePositionPatch =
                     },
                 )
             val componentDescriptor = getterMatch.originalMethod.definingClass
+            val componentAccountField =
+                requireExactlyOne(
+                    "NewX timeline component UserIdentifier field",
+                    mutableClassDefBy(componentDescriptor).fields.filter { field ->
+                        !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                            field.type.toString() == userIdentifierDescriptor
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(componentAccountField.accessFlags)) {
+                throw PatchException("NewX timeline component UserIdentifier field is not public: $componentAccountField")
+            }
+            val componentClass = mutableClassDefBy(componentDescriptor)
+            if (componentClass.methods.any { method -> method.name == ACCOUNT_ID_BRIDGE_NAME }) {
+                throw PatchException("NewX timeline component already has $ACCOUNT_ID_BRIDGE_NAME: $componentDescriptor")
+            }
+            val accountIdBridge =
+                MutableMethod(
+                    ImmutableMethod(
+                        componentDescriptor,
+                        ACCOUNT_ID_BRIDGE_NAME,
+                        emptyList(),
+                        "J",
+                        AccessFlags.PUBLIC.value or AccessFlags.FINAL.value or AccessFlags.SYNTHETIC.value,
+                        emptySet(),
+                        emptySet(),
+                        MutableMethodImplementation(3),
+                    ),
+                )
+            componentClass.methods.add(accountIdBridge)
+            // Keep the wide field read in v0/v1; callers can have parameter registers above iget-wide's limit.
+            accountIdBridge.insertHook(0, relocateBranchTargets = false) {
+                iget(0, accountIdBridge.p0Register, componentAccountField)
+                ifEqz(0, Target.Local(ACCOUNT_ID_BRIDGE_NULL_LABEL))
+                iget(0, 0, userIdentifierIdField)
+                returnWide(0)
+                label(ACCOUNT_ID_BRIDGE_NULL_LABEL)
+                constLong(0, 0L)
+                returnWide(0)
+            }
             val componentField =
                 requireExactlyOne(
                     "NewX timeline-position map owner field",
@@ -407,6 +494,7 @@ val restoreTimelinePositionPatch =
             val mapRegister = restoreRegisters.last
             val indexRegister = mapRegister
             val offsetRegister = timelineRegister
+            val accountIdRegister = scratchBase + 2
             // The old `continue` label sat on the instruction after the enum result, so the block's
             // jumps have to land on that original instruction: `Target.Original` with the
             // insertion point's labels left in place, exactly like `addInstructionsWithLabels`.
@@ -433,7 +521,18 @@ val restoreTimelinePositionPatch =
                 invokeInterface(methodReference(timelineIdentityGetterReference), timelineGetterReceiverRegister)
                 moveResult(mapRegister, OBJECT_DESCRIPTOR)
                 iget(mapRegister, mapRegister, timelineIdentityField)
-                invokeStatic(methodReference(RESTORE_POSITION_DESCRIPTOR), timelineRegister, mapRegister)
+                invokeVirtual(
+                    methodReference("$componentDescriptor->$ACCOUNT_ID_BRIDGE_NAME()J"),
+                    getterMethod.p0Register,
+                )
+                moveResult(accountIdRegister, "J")
+                invokeStatic(
+                    methodReference(RESTORE_POSITION_DESCRIPTOR),
+                    timelineRegister,
+                    mapRegister,
+                    accountIdRegister,
+                    accountIdRegister + 1,
+                )
                 moveResult(positionsRegister, "[I")
                 ifEqz(positionsRegister, Target.Original)
                 constInt(indexRegister, 0)
@@ -494,7 +593,8 @@ val restoreTimelinePositionPatch =
             getterMethod.removeInstructions(fallbackHolderCandidate.index, settingReadInstructionCount)
             val fallbackRepositoryRegister = fallbackRegisters.first
             val fallbackTimelineRegister = fallbackRegisters.first + 1
-            val fallbackPositionsRegister = fallbackRegisters.last
+            val fallbackPositionsRegister = fallbackRegisters.first + 2
+            val fallbackAccountIdRegister = fallbackRegisters.first + 3
             // Raw smali replacement: the typed API has no in-place replace primitive, and this slot is
             // the one the surrounding getter branches into for a missing position. `replaceInstruction`
             // writes into the existing location, so the labels already on it keep pointing here (and run
@@ -528,10 +628,17 @@ val restoreTimelinePositionPatch =
                 invokeInterface(methodReference(timelineIdentityGetterReference), fallbackRepositoryRegister)
                 moveResult(fallbackRepositoryRegister, OBJECT_DESCRIPTOR)
                 iget(fallbackRepositoryRegister, fallbackRepositoryRegister, timelineIdentityField)
+                invokeVirtual(
+                    methodReference("$componentDescriptor->$ACCOUNT_ID_BRIDGE_NAME()J"),
+                    getterMethod.p0Register,
+                )
+                moveResult(fallbackAccountIdRegister, "J")
                 invokeStatic(
                     methodReference(RESTORE_POSITION_DESCRIPTOR),
                     fallbackTimelineRegister,
                     fallbackRepositoryRegister,
+                    fallbackAccountIdRegister,
+                    fallbackAccountIdRegister + 1,
                 )
                 moveResult(fallbackPositionsRegister, "[I")
                 ifEqz(fallbackPositionsRegister, Target.Original)
@@ -640,7 +747,7 @@ val restoreTimelinePositionPatch =
                         }
                 },
             )
-            // The scratch pool now hands out the three staging registers inside the hook below.
+            // The save hook stages its six persistent-store argument words in the clone's fresh locals.
 
             // A timeline page that is created next to the visible one and removed before its posts
             // load still reports its list position, which Compose has reset to 0,0 on an empty list.
@@ -739,8 +846,9 @@ val restoreTimelinePositionPatch =
             val loadedFlag = saveLocalBase + 2
             val timelineArgument = saveLocalBase + 3
             val identityArgument = saveLocalBase + 4
-            val indexArgument = saveLocalBase + 5
-            val offsetArgument = saveLocalBase + 6
+            val accountIdArgument = saveLocalBase + 5
+            val indexArgument = saveLocalBase + 7
+            val offsetArgument = saveLocalBase + 8
             saveMethod.insertHook(
                 index = mapPutIndex,
                 // Plain insertion used to leave an incoming branch on the map write, which keeps skipping
@@ -765,6 +873,11 @@ val restoreTimelinePositionPatch =
                 moveResult(saveMapRegister, OBJECT_DESCRIPTOR)
                 iget(saveMapRegister, saveMapRegister, timelineIdentityField)
                 move(identityArgument, saveMapRegister, OBJECT_DESCRIPTOR)
+                invokeVirtual(
+                    methodReference("$componentDescriptor->$ACCOUNT_ID_BRIDGE_NAME()J"),
+                    saveMethod.p0Register,
+                )
+                moveResult(accountIdArgument, "J")
                 // The resolver already proved the holder has exactly these two public int fields;
                 // destructure instead of indexing so the cardinality stays explicit here too.
                 val (positionIndexField, positionOffsetField) =
@@ -779,11 +892,13 @@ val restoreTimelinePositionPatch =
                 move(indexArgument, saveTimelineRegister, "I")
                 iget(saveTimelineRegister, saveHolderRegister, positionOffsetField)
                 move(offsetArgument, saveTimelineRegister, "I")
-                // The four staged arguments are consecutive, so the call is emitted in range form.
+                // The six staged argument words are consecutive, so the call is emitted in range form.
                 invokeStatic(
                     methodReference(SAVE_POSITION_DESCRIPTOR),
                     timelineArgument,
                     identityArgument,
+                    accountIdArgument,
+                    accountIdArgument + 1,
                     indexArgument,
                     offsetArgument,
                 )

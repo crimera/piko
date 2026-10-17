@@ -97,4 +97,35 @@ public final class TimelineScrollPositionStoreTest {
                 )
         );
     }
+
+    @Test
+    public void accountStorageKeysAreScopedAndRequireAnAccountAndInnerKey() {
+        assertEquals(
+                "account.101.FOLLOWING",
+                TimelineScrollPositionStore.accountStorageKey(101, "FOLLOWING", null, true, false)
+        );
+        assertEquals(
+                "account.202.FOLLOWING",
+                TimelineScrollPositionStore.accountStorageKey(202, "FOLLOWING", null, true, false)
+        );
+        assertNull(
+                TimelineScrollPositionStore.accountStorageKey(0, "FOLLOWING", null, true, false)
+        );
+        assertNull(
+                TimelineScrollPositionStore.accountStorageKey(-1, "FOLLOWING", null, true, false)
+        );
+        assertNull(
+                TimelineScrollPositionStore.accountStorageKey(101, "FOR_YOU", null, false, false)
+        );
+        assertEquals(
+                "account.101.timeline.LIST_POSTS123",
+                TimelineScrollPositionStore.accountStorageKey(
+                        101,
+                        "LIST_POSTS",
+                        "LIST_POSTS123",
+                        true,
+                        false
+                )
+        );
+    }
 }
