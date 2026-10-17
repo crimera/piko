@@ -432,7 +432,8 @@ private fun Method.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): B
 
 private fun List<String>.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean =
     this == listOf("Z", tabData.navigationType, tabData.tabDataValueType) ||
-        this == MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS
+        (size == 4 && take(3) == MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS.take(3) &&
+            last() in setOf("I", "B"))
 
 private val MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS =
     listOf("Z", "Ljava/lang/Object;", "Ljava/lang/Object;", "I")
@@ -496,7 +497,10 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
     // This is a read-only discovery pass. Converting every class to a mutable proxy here keeps
     // the whole APK alive and can exceed the manager's 512 MB minimum heap on large NewX builds.
     val consumerClass =
-        requireExactlyOne("NewX navigation bar item content class", consumerClasses)
+        requireExactlyOne(
+            "NewX navigation bar item content class for $renderer; constructor candidates=$contentClasses",
+            consumerClasses,
+        )
     val consumerClassDef = context.mutableClassDefBy(consumerClass)
     val contentConstructor =
         requireExactlyOne(

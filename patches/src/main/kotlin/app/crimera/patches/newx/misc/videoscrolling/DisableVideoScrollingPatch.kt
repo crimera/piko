@@ -58,7 +58,7 @@ private val VERTICAL_PAGER_PARAMETERS_17 =
         SNAPPING_PARAMETER_PREFIX,
         "Z",
         FUNCTION1_DESCRIPTOR,
-        NESTED_SCROLL_PARAMETER_PREFIX,
+        "L",
         SNAPPING_PARAMETER_PREFIX,
         FOUNDATION_PARAMETER_PREFIX,
         FUNCTION4_DESCRIPTOR,
@@ -80,7 +80,7 @@ private val VERTICAL_PAGER_PARAMETERS_18 =
         SNAPPING_PARAMETER_PREFIX,
         "Z",
         FUNCTION1_DESCRIPTOR,
-        NESTED_SCROLL_PARAMETER_PREFIX,
+        "L",
         SNAPPING_PARAMETER_PREFIX,
         FOUNDATION_PARAMETER_PREFIX,
         FUNCTION4_DESCRIPTOR,
@@ -91,7 +91,10 @@ private val VERTICAL_PAGER_PARAMETERS_18 =
     )
 
 private fun isVerticalPagerMethod(method: Method): Boolean =
-    method.implementation?.instructions?.any { instruction ->
+    method.parameterTypes.getOrNull(if (method.parameterTypes.size == 18) 10 else 9)
+        ?.toString()?.let { type ->
+            type.startsWith(NESTED_SCROLL_PARAMETER_PREFIX) || type.startsWith(PAGER_PARAMETER_PREFIX)
+        } == true && method.implementation?.instructions?.any { instruction ->
         if (instruction.opcode != Opcode.SGET_OBJECT) return@any false
         val field = instruction.getReference<FieldReference>() ?: return@any false
         field.name == "Vertical" &&

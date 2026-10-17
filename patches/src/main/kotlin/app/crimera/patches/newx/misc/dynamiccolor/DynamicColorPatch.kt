@@ -534,7 +534,17 @@ private fun resolveFactory(
         if (invokes.size != 1) return@mapNotNull null
         val allocationRegister = (allocation.value as? OneRegisterInstruction)?.registerA
             ?: return@mapNotNull null
-        val factoryConstructorReference = "$factoryDescriptor-><init>(I)V"
+        val integralConstructors = factoryClass.methods.filter { method ->
+            method.name == "<init>" && method.returnType == "V" &&
+                method.parameterTypes.size == 1 &&
+                method.parameterTypes[0].toString() in setOf("I", "B", "S")
+        }
+        if (integralConstructors.isEmpty()) return@mapNotNull null
+        val factoryConstructor = requireExactlyOne(
+            "NewX Function0 factory integral-selector constructor in $factoryDescriptor",
+            integralConstructors,
+        )
+        val factoryConstructorReference = factoryConstructor.toString()
         val constructors = instructions.withIndex().filter { constructor ->
             constructor.index > allocation.index &&
                 constructor.index < storeIndex &&

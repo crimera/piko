@@ -215,10 +215,12 @@ private fun resolveNativeDownloader(): ResolvedNewXNativeDownloader {
 
 private fun Method.isDownloaderCoroutine(ownerDescriptor: String): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
-    return parameters.size == 3 &&
-        parameters[0] == ownerDescriptor &&
-        parameters[2] == CONTINUATION_DESCRIPTOR &&
-        returnType == OBJECT_DESCRIPTOR
+    if (returnType != OBJECT_DESCRIPTOR || parameters.lastOrNull() != CONTINUATION_DESCRIPTOR) return false
+    return if (AccessFlags.STATIC.isSet(accessFlags)) {
+        parameters.size == 3 && parameters[0] == ownerDescriptor
+    } else {
+        parameters.size == 2 && definingClass == ownerDescriptor
+    }
 }
 
 private fun Method.hasString(value: String): Boolean =

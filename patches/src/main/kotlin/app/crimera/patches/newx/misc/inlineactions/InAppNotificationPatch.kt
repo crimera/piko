@@ -89,14 +89,14 @@ private fun resolveNotificationRuntime(): ResolvedNotificationRuntime {
     val apiConstructor = resolveApiConstructor(apiClass)
     val parameters = apiConstructor.parameterTypes.map(CharSequence::toString)
     val baseDescriptor = parameters[0]
-    val expectedLiteralDescriptor = parameters[4]
-    if (!baseDescriptor.startsWith(MODEL_SCOPE) || !expectedLiteralDescriptor.startsWith(MODEL_SCOPE)) {
+    val messageDescriptor = parameters[4]
+    if (!baseDescriptor.startsWith(MODEL_SCOPE) || !messageDescriptor.startsWith(MODEL_SCOPE)) {
         throw PatchException(
             "NewX in-app notification constructor does not use model parameters: $apiConstructor",
         )
     }
 
-    val literalClass = resolveLiteralClass(classDefs, baseDescriptor, expectedLiteralDescriptor)
+    val literalClass = resolveLiteralClass(classDefs, baseDescriptor)
     val literalConstructor = requireExactlyOne(
         "NewX in-app notification Literal(String) constructor in ${literalClass.type}",
         literalClass.methods.filter { method ->
@@ -186,7 +186,6 @@ private fun resolveApiConstructor(apiClass: ClassDef): Method {
 private fun resolveLiteralClass(
     classDefs: List<ClassDef>,
     baseDescriptor: String,
-    expectedDescriptor: String,
 ): ClassDef {
     val candidates = classDefs.filter { classDef ->
         classDef.type.startsWith(MODEL_SCOPE) &&
@@ -196,12 +195,6 @@ private fun resolveLiteralClass(
             }
     }
     val literalClass = requireExactlyOne("NewX Literal model class", candidates)
-    if (literalClass.type != expectedDescriptor) {
-        throw PatchException(
-            "NewX API model Literal parameter changed from semantic match " +
-                "${literalClass.type} to $expectedDescriptor",
-        )
-    }
     requireExactlyOne(
         "NewX Literal toString method in ${literalClass.type}",
         literalClass.methods.filter { method ->

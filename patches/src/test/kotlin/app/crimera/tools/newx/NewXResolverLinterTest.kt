@@ -611,6 +611,25 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `module divider selection follows reordered Compose wrapper and byte discriminator`() {
+        val instructions = listOf(
+            "new-instance v1, Lfixture/DividerAdapter;".toInstruction(),
+            "const/16 v2, 0x7".toInstruction(),
+            "invoke-direct {v1, v3, v2}, Lfixture/DividerAdapter;-><init>(Ljava/lang/Object;B)V".toInstruction(),
+            "new-instance v4, Landroidx/compose/runtime/internal/g;".toInstruction(),
+            "const/4 v5, 0x1".toInstruction(),
+            "invoke-direct {v4, v5, v6, v1}, Landroidx/compose/runtime/internal/g;-><init>(IZLjava/lang/Object;)V".toInstruction(),
+            "const/4 v7, 0x3".toInstruction(),
+            "const/4 v0, 0x0".toInstruction(),
+            "invoke-static {v8, v0, v4, v7}, Landroidx/compose/foundation/lazy/k;->u(Landroidx/compose/foundation/lazy/k;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;I)V".toInstruction(),
+        )
+
+        val selected = instructions.timelineModuleDividerItemIndices(::dividerAdapterCaseBlock)
+
+        assertEquals(listOf(8), selected)
+    }
+
+    @Test
     fun `module divider selection rejects hoisted and non-divider lambda items`() {
         val instructions = moduleDividerBuilderFixture()
 

@@ -127,12 +127,11 @@ private fun Instruction.isPostDividerCall(): Boolean {
     val parameters = reference.parameterTypes.map(CharSequence::toString)
     return reference.returnType == "V" &&
         parameters.size == 6 &&
-        parameters[0] == MODIFIER_DESCRIPTOR &&
-        parameters[1] == "Z" &&
-        parameters[2].isObjectDescriptor() &&
-        parameters[3] == COMPOSER_DESCRIPTOR &&
-        parameters[4] == INSETS_DESCRIPTOR &&
-        parameters[5] == INSETS_DESCRIPTOR
+        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
+        parameters.count { it == "Z" } == 1 &&
+        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+        parameters.count { it == INSETS_DESCRIPTOR } == 2 &&
+        parameters.count { it.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) } == 1
 }
 
 private fun Instruction.isDrawModifierCall(): Boolean {
@@ -254,8 +253,8 @@ private fun MethodReference.isComposeLambdaWrapperConstructor(): Boolean =
     name == "<init>" &&
         definingClass.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) &&
         returnType == "V" &&
-        parameterTypes.map(CharSequence::toString) ==
-            listOf(OBJECT_DESCRIPTOR, "Z", INSETS_DESCRIPTOR)
+        parameterTypes.map(CharSequence::toString).sorted() ==
+            listOf(OBJECT_DESCRIPTOR, "Z", INSETS_DESCRIPTOR).sorted()
 
 /**
  * The module separators are zero-key lazy items whose content lambda is built inline as a runtime
@@ -299,7 +298,9 @@ private fun List<Instruction>.inlineContentLambda(
     ) {
         return null
     }
-    val adapterRegister = this[wrapperIndex].registersUsed.getOrNull(1) ?: return null
+    val wrapperReference = this[wrapperIndex].getReference<MethodReference>() ?: return null
+    val adapterIndex = wrapperReference.parameterTypes.map(CharSequence::toString).indexOf(OBJECT_DESCRIPTOR)
+    val adapterRegister = this[wrapperIndex].registersUsed.getOrNull(adapterIndex + 1) ?: return null
 
     val adapterNewInstanceIndex =
         (wrapperIndex - 1 downTo 0).firstOrNull { index ->
@@ -323,7 +324,7 @@ private fun List<Instruction>.inlineContentLambda(
         constructorReference.parameterTypes
             .map(CharSequence::toString)
             .withIndex()
-            .singleOrNull { (_, parameter) -> parameter == INSETS_DESCRIPTOR }
+            .singleOrNull { (_, parameter) -> parameter == INSETS_DESCRIPTOR || parameter == "B" }
             ?.index ?: return null
     val discriminatorRegister =
         this[adapterConstructorIndex].registersUsed.getOrNull(discriminatorParameter + 1) ?: return null
@@ -430,8 +431,14 @@ private fun patchPostDividerHelper(
                     candidate.parameterTypes.map(CharSequence::toString) == parameterTypes
             },
         ) { it.toString() }
-    val modifierRegister = method.p0Register
-    val showDividerRegister = modifierRegister + 1
+    val modifierRegister = method.p0Register + requireExactlyOne(
+        "NewX post divider helper modifier parameter",
+        parameterTypes.indices.filter { parameterTypes[it] == MODIFIER_DESCRIPTOR },
+    )
+    val showDividerRegister = method.p0Register + requireExactlyOne(
+        "NewX post divider helper visibility parameter",
+        parameterTypes.indices.filter { parameterTypes[it] == "Z" },
+    )
     if (modifierRegister > 255 || showDividerRegister > 255) {
         throw PatchException(
             "NewX post divider helper parameters exceed bytecode register limits: " +
