@@ -1419,10 +1419,12 @@ val restoreTimelinePositionPatch =
                 returnVoid()
             }
 
-            // SideEffect runs before layout, so Compose sees this key at the next measure and relocates to its row.
-            // The u() hook stages it in this call stack; a null result here therefore means "relocate by key".
+            // i(II) is requestScrollToItem: it forces a remeasure but forgets Compose's first-item key. Writing the
+            // staged key right after it puts the key in place for that forced measure, which relocates to its row.
+            // Writing it without a scroll request left the list at the raw index until something else remeasured.
+            // The u() hook stages the key in this call stack; i(II) only runs when u() returned a position.
             postLoadCallSiteMethod.insertHook(
-                index = postLoadScrollCallSite.postLoadInvokeIndex + 2,
+                index = postLoadScrollCallSite.scrollInvokeIndex + 1,
                 relocateBranchTargets = false,
             ) {
                 invokeStatic(

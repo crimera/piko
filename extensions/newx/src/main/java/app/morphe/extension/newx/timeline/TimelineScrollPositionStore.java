@@ -167,6 +167,9 @@ public final class TimelineScrollPositionStore {
         String timelineName = timeline == null ? null : timeline.name();
         if (accountId <= 0) return;
         lastAccountId = accountId;
+        // X's resume factory can return cursor gaps and prompts; they move or vanish on reload, so
+        // relocating to them lands on an unrelated post. Clear the anchor and keep the index restore.
+        if (!isPostAnchor(entryId)) entryId = null;
 
         try {
             String key = accountStorageKeyFor(timelineName, profileId, accountId);
@@ -266,7 +269,9 @@ public final class TimelineScrollPositionStore {
                     + " found=" + foundItemIndex + " savedItem=" + pending.itemIndex
                     + " -> relocate-by-key entryId=" + pending.entryId);
         }
-        return null;
+        // Returning the restored position makes X call requestScrollToItem, which forces the remeasure
+        // that applies the staged key (written right after that call).
+        return new int[]{pending.savedIndex, pending.savedOffset};
     }
 
     @Nullable
@@ -294,6 +299,12 @@ public final class TimelineScrollPositionStore {
                     exception);
             return null;
         }
+    }
+
+    /** URT post entries: plain posts and conversation modules. Promoted posts, cursors and prompts are excluded. */
+    static boolean isPostAnchor(@Nullable String entryId) {
+        if (entryId == null || entryId.startsWith("promoted-")) return false;
+        return entryId.startsWith("tweet-") || entryId.contains("conversation-");
     }
 
     @Nullable

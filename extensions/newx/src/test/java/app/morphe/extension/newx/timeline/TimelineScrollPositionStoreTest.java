@@ -128,4 +128,15 @@ public final class TimelineScrollPositionStoreTest {
                 )
         );
     }
+
+    /** Device run (issue #93): a cursor-gap anchor moved on reload and the restore landed on another post. */
+    @Test
+    public void onlyPostEntriesAreAnchors() {
+        assertTrue(TimelineScrollPositionStore.isPostAnchor("tweet-2111445910299488679"));
+        assertTrue(TimelineScrollPositionStore.isPostAnchor("home-conversation-2111444960834879958"));
+        assertFalse(TimelineScrollPositionStore.isPostAnchor("cursor-gap-2111451911403077525"));
+        assertFalse(TimelineScrollPositionStore.isPostAnchor("flip-prompt-message-suspended-prompt"));
+        assertFalse(TimelineScrollPositionStore.isPostAnchor("promoted-tweet-2111445910299488679"));
+        assertFalse(TimelineScrollPositionStore.isPostAnchor(null));
+    }
 }

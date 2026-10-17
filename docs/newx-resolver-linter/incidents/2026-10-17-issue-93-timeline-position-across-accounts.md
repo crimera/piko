@@ -131,3 +131,31 @@ The restored post sits a constant 439 px lower than before the restart in every 
 index-only ones; that is X's collapsing header expanded on a fresh start, not a restore error.
 Earlier builds of this phase failed the same Following tests (wrong, newer post) as described under
 "Discarded designs". Not exercised on device: the post-gone path (top).
+
+### Follow-up fixes after account-switch testing (anchor5, anchor6)
+
+1. Non-post anchors. X's resume factory returned `cursor-gap-…` (a "show more" gap row) and, on
+   a suspended account, `flip-prompt-message-suspended-prompt`. A gap is filled or moved on reload
+   (`found=632 savedItem=607`), so relocating to it landed on an unrelated post. Anchors are now
+   stored only for post entries (`tweet-…`, `…conversation-…`; never `promoted-…`); anything
+   else clears the anchor and the plain index restore applies. Regression test:
+   `TimelineScrollPositionStoreTest.onlyPostEntriesAreAnchors`.
+2. Key written without a remeasure. With the key staged and `u()` returning null, the key only
+   took effect at Compose's next measure; when nothing else remeasured, the list stayed at the raw
+   index (`found=652 savedItem=641`, wrong post). `u()` now returns the restored position when
+   the post is found, so X calls `i(II)` (`requestScrollToItem`, which forces a remeasure and
+   forgets the old key), and the patch writes the staged key right after that call.
+
+Device validation (anchor6, 12.35, account 992723888814546944; MPP SHA-256 `87c06b40e33a5c13bd99cd74f1fd93866db700bc840f2f9d5ed9f64772bc541b`,
+patched APK SHA-256 `e022268f49787d47ca0c1449bbc1f6d81257f1d99d8ed07d8d5a66cbeb5b378b`; 12.34 and 12.35 both 47 applied, 0 failed):
+
+| Test | Result | Anchor log |
+| --- | --- | --- |
+| Following, cold restart | same post, 0 px | `found=653 savedItem=639 -> relocate-by-key` (moved 14 items) |
+| Following, cold restart | same post, 0 px | `found=677 savedItem=677` |
+| Following, cold restart | same post, 0 px | `found=694 savedItem=694` |
+| For You, cold restart | same post, 0 px | `found=60 savedItem=60` |
+
+Account switching (crimera -> steven -> crimera) kept crimera's post in process. The second
+account's Following tab shows only a suspension notice, so its own restore could not be validated
+on device; its keys are account-scoped like the first account's.
