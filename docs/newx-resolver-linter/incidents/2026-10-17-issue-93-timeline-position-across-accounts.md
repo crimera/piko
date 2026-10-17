@@ -72,3 +72,62 @@ entry-id-validated resume (`x_android_timeline_resume_position_enabled`, `com.x.
 `TimelineResumePosition`), absent in 12.30-12.33. A post-id check for our store needs runtime
 evidence first: the LazyColumn row key format and whether cached rows are present at the first
 measure (Compose clears `LazyListScrollPosition.lastKnownFirstItemKey` on an empty measure).
+
+## Phase 2: post-anchored restore (12.34+ only)
+
+Follow-up to "Known limits": the index restore is replaced by a post anchor. The patch now
+declares only 12.34.0-prod.01 and 12.35.0-prod.01 (the user approved dropping 12.30-12.33).
+
+### Evidence gathered on device (12.35, two accounts, logging probes since removed)
+
+- First visible row key at save: `RegularItem(entryId=tweet-..., sortIndex=...)`
+  (`Lcom/x/urt/ui/h0;`, `equals` on exactly those two values). Null only for empty lists.
+- On a cold start the persistent restore runs while the timeline state is not loaded
+  (`items=not-loaded`); posts arrive ~200 ms later.
+- X's own resume (`x_android_timeline_resume_position_enabled`, `com.x.urt.features.o`
+  `TimelineResumePosition`) is gated to `timeline == FOR_YOU`, skips saves older than
+  `x_android_timeline_resume_position_max_age_minutes` (default 60) and restores only on an exact
+  item-index match with offset 0. It cannot serve Following or lists. Its UI step is the useful part:
+  a Compose SideEffect calls the component's `u()` while state is Success and a remembered flag is
+  false, then `LazyListState.i(II)` (`requestScrollToItem`) on a non-null result.
+- Following's screen wrapper (`home/following/m`) and community detail do not override `u()`; the
+  interface default returns null, so the post-load step never reached the component there.
+
+### Discarded designs
+
+1. Item-index arithmetic at post-load (`savedRow + foundItem - savedItem`, then `i(II)`): on device
+   the saved post was at the same item index after restart, yet the restored row showed a newer post.
+   Rows map to items differently in a new process, so item-space arithmetic cannot fix row-space
+   drift; `requestScrollToItem` also clears Compose's remembered first-item key.
+2. Skipping `i(II)` when the item did not move: still landed on the wrong post (same row drift).
+
+### Implemented design
+
+- Save: `piko$newxSaveAnchor(event)` on the component calls X's resume-position factory
+  (items, visible rows, holder, clock.now()) and stores entryId / sortIndex / itemIndex per account
+  and timeline next to index/offset.
+- Restore: the getter's persistent restore arms a pending anchor. `piko$newxRestoreAnchor()` runs at
+  the top of the component's `u()`; it finds the post with X's matcher. Found: stages the anchor and
+  returns null. Gone: returns (0,0) so X scrolls to the top.
+- UI: right after X's `u()` call in the SideEffect lambda, `piko$newxApplyAnchorKey(listState)`
+  writes `new RegularItem(entryId, sortIndex)` into `LazyListScrollPosition.lastKnownFirstItemKey`.
+  SideEffect runs before layout, so on the next measure Compose moves to that row by key.
+- Delegating wrappers whose `f()` forwards to the component but lack `u()` get a forwarding `u()`
+  (12.35: Following, community detail). Topic's wrapper has a different shape and is not covered.
+
+### Device validation (anchor4 build, 12.35, 2026-10-17)
+
+MPP SHA-256 `7603b3d079be4288a845ede104c612d3836c604393b11ecf2eced8ab46039745`, patched APK
+SHA-256 `84e96209d79fa802f0d8572f7485d7d6178c11dc4eca50e446f1b695cd622b08`; both 12.34 and 12.35
+patch with 47 applied, 0 failed.
+
+| Test | Result | Anchor log |
+| --- | --- | --- |
+| Following, cold restart | same post | `found=444 savedItem=437 -> relocate-by-key` (post moved 7 items) |
+| Following, cold restart | same post | `found=538 savedItem=538 -> relocate-by-key` |
+| For You, cold restart | same post | `found=50 savedItem=50 -> relocate-by-key` |
+
+The restored post sits a constant 439 px lower than before the restart in every build, including
+index-only ones; that is X's collapsing header expanded on a fresh start, not a restore error.
+Earlier builds of this phase failed the same Following tests (wrong, newer post) as described under
+"Discarded designs". Not exercised on device: the post-gone path (top).

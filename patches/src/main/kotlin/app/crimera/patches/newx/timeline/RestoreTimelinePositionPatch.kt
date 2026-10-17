@@ -8,8 +8,11 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.crimera.bytecode.Target
+import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.common.classDefFlatMap
+import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
@@ -30,18 +33,25 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 
 private const val CONCURRENT_HASH_MAP_DESCRIPTOR = "Ljava/util/concurrent/ConcurrentHashMap;"
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val LIST_DESCRIPTOR = "Ljava/util/List;"
+private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
+private const val INSTANT_DESCRIPTOR = "Lkotlin/time/Instant;"
 private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
     "Lapp/morphe/extension/newx/timeline/TimelineScrollPositionStore;"
 private const val MAP_GET_DESCRIPTOR = "$CONCURRENT_HASH_MAP_DESCRIPTOR->get($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR"
@@ -55,6 +65,14 @@ private const val RESTORE_POSITION_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}J)[I"
 private const val SAVE_POSITION_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}JII)V"
+private const val SAVE_ANCHOR_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->saveAnchor(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}J${STRING_DESCRIPTOR}JI)V"
+private const val PENDING_ANCHOR_ENTRY_ID_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->pendingAnchorEntryId(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}J)$STRING_DESCRIPTOR"
+private const val PENDING_ANCHOR_SORT_INDEX_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->pendingAnchorSortIndex(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}J)J"
+private const val CONSUME_ANCHOR_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->consumeAnchor(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}JI)[I"
 private const val SETTING_READ_DESCRIPTOR =
     "$SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault($STRING_DESCRIPTOR)Z"
 
@@ -65,8 +83,29 @@ private const val SETTING_READ_DESCRIPTOR =
  */
 private const val IGNORE_NATIVE_POSITION_LABEL = "piko_newx_restore_position_ignore_native"
 private const val ACCOUNT_ID_BRIDGE_NAME = "piko\$newxAccountId"
+private const val SAVE_ANCHOR_BRIDGE_NAME = "piko\$newxSaveAnchor"
+private const val RESTORE_ANCHOR_BRIDGE_NAME = "piko\$newxRestoreAnchor"
+private const val APPLY_ANCHOR_KEY_BRIDGE_NAME = "piko\$newxApplyAnchorKey"
 private const val ACCOUNT_ID_BRIDGE_NULL_LABEL = "piko_newx_account_id_null"
+private const val APPLY_ANCHOR_KEY_NULL_LABEL = "piko_newx_apply_anchor_key_null"
 private val MOVE_RESULT_OPCODES = setOf(Opcode.MOVE_RESULT, Opcode.MOVE_RESULT_OBJECT, Opcode.MOVE_RESULT_WIDE)
+private val INVOKE_OPCODES =
+    setOf(
+        Opcode.INVOKE_VIRTUAL,
+        Opcode.INVOKE_VIRTUAL_RANGE,
+        Opcode.INVOKE_SUPER,
+        Opcode.INVOKE_SUPER_RANGE,
+        Opcode.INVOKE_DIRECT,
+        Opcode.INVOKE_DIRECT_RANGE,
+        Opcode.INVOKE_STATIC,
+        Opcode.INVOKE_STATIC_RANGE,
+        Opcode.INVOKE_INTERFACE,
+        Opcode.INVOKE_INTERFACE_RANGE,
+        Opcode.INVOKE_POLYMORPHIC,
+        Opcode.INVOKE_POLYMORPHIC_RANGE,
+        Opcode.INVOKE_CUSTOM,
+        Opcode.INVOKE_CUSTOM_RANGE,
+    )
 private const val RESTORE_TEMPORARY_REGISTER_COUNT = 4
 private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 5
 
@@ -77,6 +116,23 @@ private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 5
  */
 private const val SAVE_SCRATCH_LOCALS = 9
 private const val SAVE_SKIPPED_LABEL = "piko_newx_restore_position_save_skipped"
+private const val SAVE_ANCHOR_SUCCESS_LABEL = "piko_newx_save_anchor_success"
+private const val SAVE_ANCHOR_NULL_LABEL = "piko_newx_save_anchor_null"
+private const val SAVE_ANCHOR_RETURN_LABEL = "piko_newx_save_anchor_return"
+private const val RESTORE_ANCHOR_NULL_LABEL = "piko_newx_restore_anchor_null"
+private const val RESTORE_ANCHOR_LOOP_LABEL = "piko_newx_restore_anchor_loop"
+private const val RESTORE_ANCHOR_NOT_FOUND_LABEL = "piko_newx_restore_anchor_not_found"
+private const val RESTORE_ANCHOR_CONSUME_LABEL = "piko_newx_restore_anchor_consume"
+private const val RESTORE_ANCHOR_GONE_LABEL = "piko_newx_restore_anchor_gone"
+
+private val SUPPORTED_TIMELINE_POSITION_VERSIONS = setOf("12.34.0-prod.01", "12.35.0-prod.01")
+private val COMPATIBILITY_TIMELINE_POSITION =
+    COMPATIBILITY_NEW_X.excluding(
+        *COMPATIBILITY_NEW_X.targets
+            .filterNot { target -> target.version in SUPPORTED_TIMELINE_POSITION_VERSIONS }
+            .map { target -> target.version }
+            .toTypedArray(),
+    )
 
 private object NewXUserIdentifierSerializerFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/",
@@ -143,7 +199,46 @@ private fun saveScrollPositionFingerprint(
                     returnType = "Ljava/lang/Object;",
                 ),
             ),
-    )
+        )
+
+private fun Instruction.destinationRegisterOrNull(): Int? {
+    if (!opcode.setsRegister()) return null
+    return when (this) {
+        is ThreeRegisterInstruction -> registerA
+        is TwoRegisterInstruction -> registerA
+        is OneRegisterInstruction -> registerA
+        else -> null
+    }
+}
+
+private fun Opcode.isInvokeInstruction(): Boolean = this in INVOKE_OPCODES
+
+private fun Instruction.invokeArgumentRegisters(): List<Int> =
+    when (this) {
+        is FiveRegisterInstruction ->
+            listOf(registerC, registerD, registerE, registerF, registerG).take(registerCount)
+        is RegisterRangeInstruction ->
+            (startRegister until startRegister + registerCount).toList()
+        else -> throw PatchException("NewX invoke instruction has an unsupported register layout: $this")
+    }
+
+private data class DelegatingTimelineWrapper(
+    val classDescriptor: String,
+    val delegateGetter: MethodReference,
+    val delegateGetterOpcode: Opcode,
+)
+
+private data class PostLoadScrollCallSite(
+    val methodOwner: String,
+    val methodName: String,
+    val methodParameters: List<String>,
+    val methodReturnType: String,
+    val postLoadInvokeIndex: Int,
+    val scrollInvokeIndex: Int,
+    val moveResultRegister: Int,
+    val scrollStateType: String,
+    val scrollStateRegister: Int,
+)
 
 @Suppress("unused")
 val restoreTimelinePositionPatch =
@@ -151,7 +246,7 @@ val restoreTimelinePositionPatch =
         name = "NewX: Restore timeline position",
         description = "Persists supported timeline positions, then restores them after the app process restarts.",
     ) {
-        compatibleWith(COMPATIBILITY_NEW_X)
+        compatibleWith(COMPATIBILITY_TIMELINE_POSITION)
 
         val restoreTimelinePosition =
             newXToggle(
@@ -805,6 +900,719 @@ val restoreTimelinePositionPatch =
                             }
                     },
                 )
+
+            val successItemsField =
+                requireExactlyOne(
+                    "NewX timeline Success items field",
+                    mutableClassDefBy(successStateType).fields.filter { field ->
+                        !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                            isAssignableTo(field.type.toString(), LIST_DESCRIPTOR)
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(successItemsField.accessFlags)) {
+                throw PatchException("NewX timeline Success items field is not public: $successItemsField")
+            }
+
+            val resumePositionMatch =
+                requireExactlyOne(
+                    "NewX TimelineResumePosition class",
+                    Fingerprint(
+                        definingClass = "Lcom/x/urt/",
+                        name = "toString",
+                        parameters = emptyList(),
+                        returnType = STRING_DESCRIPTOR,
+                        strings = listOf("TimelineResumePosition(entryId="),
+                    ).scopedMatchAll(),
+                )
+            val resumePositionDescriptor = resumePositionMatch.originalClassDef.type.toString()
+            val resumePositionClass = mutableClassDefBy(resumePositionDescriptor)
+            val resumeEntryIdField =
+                requireExactlyOne(
+                    "NewX TimelineResumePosition entry-id field",
+                    resumePositionClass.fields.filter { field -> field.type.toString() == STRING_DESCRIPTOR },
+                )
+            val resumeSortIndexField =
+                requireExactlyOne(
+                    "NewX TimelineResumePosition sort-index field",
+                    resumePositionClass.fields.filter { field -> field.type.toString() == "J" },
+                )
+            listOf(resumeEntryIdField, resumeSortIndexField).forEach { field ->
+                if (!AccessFlags.PUBLIC.isSet(field.accessFlags)) {
+                    throw PatchException("NewX TimelineResumePosition field is not public: $field")
+                }
+            }
+            val resumeEntryIdFieldReference =
+                fieldReference("$resumePositionDescriptor->${resumeEntryIdField.name}:$STRING_DESCRIPTOR")
+            val resumeSortIndexFieldReference =
+                fieldReference("$resumePositionDescriptor->${resumeSortIndexField.name}:J")
+
+            val factoryMethodCandidates =
+                saveMethod.instructions.withIndex().filter { indexedInstruction ->
+                    if (indexedInstruction.value.opcode != Opcode.INVOKE_STATIC &&
+                        indexedInstruction.value.opcode != Opcode.INVOKE_STATIC_RANGE
+                    ) {
+                        return@filter false
+                    }
+                    val reference = indexedInstruction.value.getReference<MethodReference>()
+                        ?: return@filter false
+                    reference.parameterTypes.map(CharSequence::toString) ==
+                        listOf(
+                            successItemsField.type.toString(),
+                            ARRAY_LIST_DESCRIPTOR,
+                            holderDescriptor.toString(),
+                            INSTANT_DESCRIPTOR,
+                        ) && reference.returnType.toString() == resumePositionDescriptor
+                }
+            val factoryCall = requireExactlyOne("NewX timeline resume-position factory call", factoryMethodCandidates)
+            val factoryReference =
+                factoryCall.value.getReference<MethodReference>()
+                    ?: throw PatchException("NewX timeline resume-position factory has no method reference")
+            val factoryArguments = factoryCall.value.invokeArgumentRegisters()
+            if (factoryArguments.size != 4) {
+                throw PatchException(
+                    "NewX timeline resume-position factory has unexpected argument registers: $factoryArguments",
+                )
+            }
+            val factoryInstantResult = saveMethod.instructions.getOrNull(factoryCall.index - 1)
+            if (factoryInstantResult?.opcode != Opcode.MOVE_RESULT_OBJECT ||
+                (factoryInstantResult as? OneRegisterInstruction)?.registerA != factoryArguments[3]
+            ) {
+                throw PatchException(
+                    "NewX timeline resume-position factory's Instant argument is not the preceding invoke result",
+                )
+            }
+            val clockNowInstruction = saveMethod.instructions.getOrNull(factoryCall.index - 2)
+            val clockNowReference = clockNowInstruction?.getReference<MethodReference>()
+                ?: throw PatchException("NewX timeline clock now() call was not found before the factory")
+            if (clockNowInstruction.opcode != Opcode.INVOKE_INTERFACE ||
+                clockNowReference.name != "now" ||
+                clockNowReference.parameterTypes.isNotEmpty() ||
+                clockNowReference.returnType.toString() != INSTANT_DESCRIPTOR
+            ) {
+                throw PatchException("Unexpected NewX timeline clock now() call: $clockNowReference")
+            }
+            val clockFieldDefinition =
+                requireExactlyOne(
+                    "NewX timeline clock field definition",
+                    componentClass.fields.filter { field ->
+                        !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                            field.type.toString() == clockNowReference.definingClass.toString()
+                    },
+                )
+
+            val postLoadCandidates =
+                componentClass.methods.filter { method ->
+                    !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                        method.parameterTypes.isEmpty() &&
+                        method.returnType.toString() == holderDescriptor.toString() &&
+                        method.implementation != null &&
+                        method.instructions.any { instruction ->
+                            if (instruction.opcode != Opcode.INVOKE_STATIC &&
+                                instruction.opcode != Opcode.INVOKE_STATIC_RANGE
+                            ) {
+                                return@any false
+                            }
+                            val reference = instruction.getReference<MethodReference>() ?: return@any false
+                            reference.parameterTypes.map(CharSequence::toString) ==
+                                listOf(resumePositionDescriptor, LIST_DESCRIPTOR) &&
+                                reference.returnType.toString() == "Z"
+                        }
+                }
+            val postLoadMethod = requireExactlyOne("NewX timeline post-load holder method", postLoadCandidates)
+
+            val componentInterfaceDescriptor =
+                requireExactlyOne(
+                    "NewX timeline component interface",
+                    componentClass.interfaces.map { it.toString() }.filter { interfaceDescriptor ->
+                        val interfaceDefinition = mutableClassDefBy(interfaceDescriptor)
+                        AccessFlags.INTERFACE.isSet(interfaceDefinition.accessFlags) &&
+                            interfaceDefinition.methods.any { method ->
+                                !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                                    method.name == getterMethod.name &&
+                                    method.parameterTypes.isEmpty() &&
+                                    method.returnType.toString() == holderDescriptor.toString()
+                            } &&
+                            interfaceDefinition.methods.any { method ->
+                                !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                                    method.name == postLoadMethod.name &&
+                                    method.parameterTypes.isEmpty() &&
+                                    method.returnType.toString() == holderDescriptor.toString()
+                            }
+                    },
+                )
+            val componentInterface = mutableClassDefBy(componentInterfaceDescriptor)
+            val interfaceGetterMethod =
+                requireExactlyOne(
+                    "NewX timeline component interface getter",
+                    componentInterface.methods.filter { method ->
+                        !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                            method.name == getterMethod.name &&
+                            method.parameterTypes.isEmpty() &&
+                            method.returnType.toString() == holderDescriptor.toString()
+                    },
+                )
+            val interfacePostLoadMethod =
+                requireExactlyOne(
+                    "NewX timeline component interface post-load method",
+                    componentInterface.methods.filter { method ->
+                        !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                            method.name == postLoadMethod.name &&
+                            method.parameterTypes.isEmpty() &&
+                        method.returnType.toString() == holderDescriptor.toString()
+                    },
+                )
+
+            val postLoadScrollCallSites =
+                classDefFlatMap { classDef ->
+                    val candidates = mutableListOf<PostLoadScrollCallSite>()
+                    classDef.methods.forEach methodLoop@{ method ->
+                        val implementation = method.implementation ?: return@methodLoop
+                        val instructions = implementation.instructions.toList()
+                        instructions.forEachIndexed instructionLoop@{ postLoadInvokeIndex, instruction ->
+                            if (instruction.opcode != Opcode.INVOKE_INTERFACE &&
+                                instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
+                            ) {
+                                return@instructionLoop
+                            }
+                            val postLoadReference = instruction.getReference<MethodReference>()
+                                ?: return@instructionLoop
+                            if (postLoadReference.definingClass.toString() != componentInterfaceDescriptor ||
+                                postLoadReference.name != interfacePostLoadMethod.name ||
+                                postLoadReference.parameterTypes.isNotEmpty() ||
+                                postLoadReference.returnType.toString() != holderDescriptor.toString()
+                            ) {
+                                return@instructionLoop
+                            }
+
+                            val moveResultIndex = postLoadInvokeIndex + 1
+                            val moveResult = instructions.getOrNull(moveResultIndex) as? OneRegisterInstruction
+                                ?: return@instructionLoop
+                            if (instructions[moveResultIndex].opcode != Opcode.MOVE_RESULT_OBJECT) {
+                                return@instructionLoop
+                            }
+                            // Instruction order is the contract: the first invoke after u() must be i(II)V.
+                            var firstInvokeIndex = -1
+                            for (index in moveResultIndex + 1 until instructions.size) {
+                                if (instructions[index].opcode.isInvokeInstruction()) {
+                                    firstInvokeIndex = index
+                                    break
+                                }
+                            }
+                            if (firstInvokeIndex < 0) return@instructionLoop
+                            val scrollInvoke = instructions[firstInvokeIndex]
+                            if (scrollInvoke.opcode != Opcode.INVOKE_VIRTUAL &&
+                                scrollInvoke.opcode != Opcode.INVOKE_VIRTUAL_RANGE
+                            ) {
+                                return@instructionLoop
+                            }
+                            val scrollReference = scrollInvoke.getReference<MethodReference>()
+                                ?: return@instructionLoop
+                            if (scrollReference.name != "i" ||
+                                scrollReference.parameterTypes.map(CharSequence::toString) != listOf("I", "I") ||
+                                scrollReference.returnType.toString() != "V"
+                            ) {
+                                return@instructionLoop
+                            }
+                            val scrollArguments = runCatching { scrollInvoke.invokeArgumentRegisters() }
+                                .getOrNull() ?: return@instructionLoop
+                            if (scrollArguments.size != 3) return@instructionLoop
+
+                            val holderRegister = moveResult.registerA
+                            val holderLoads =
+                                (moveResultIndex + 1 until firstInvokeIndex).mapNotNull { index ->
+                                    val holderLoad = instructions[index]
+                                    if (holderLoad.opcode != Opcode.IGET) return@mapNotNull null
+                                    val field = holderLoad.getReference<FieldReference>()
+                                        ?: return@mapNotNull null
+                                    val registers = holderLoad as? TwoRegisterInstruction
+                                        ?: return@mapNotNull null
+                                    if (field.definingClass.toString() != holderDescriptor.toString() ||
+                                        field.type.toString() != "I" ||
+                                        registers.registerB != holderRegister
+                                    ) {
+                                        return@mapNotNull null
+                                    }
+                                    registers.registerA
+                                }
+                            if (holderLoads.size != 2 ||
+                                holderLoads.toSet() != scrollArguments.drop(1).toSet() ||
+                                scrollArguments.drop(1).toSet().size != 2
+                            ) {
+                                return@instructionLoop
+                            }
+
+                            candidates.add(
+                                PostLoadScrollCallSite(
+                                    methodOwner = classDef.type.toString(),
+                                    methodName = method.name,
+                                    methodParameters = method.parameterTypes.map(CharSequence::toString),
+                                    methodReturnType = method.returnType.toString(),
+                                    postLoadInvokeIndex = postLoadInvokeIndex,
+                                    scrollInvokeIndex = firstInvokeIndex,
+                                    moveResultRegister = holderRegister,
+                                    scrollStateType = scrollReference.definingClass.toString(),
+                                    scrollStateRegister = scrollArguments.first(),
+                                ),
+                            )
+                        }
+                    }
+                    candidates
+                }
+            val postLoadScrollCallSite =
+                requireExactlyOne(
+                    "NewX timeline post-load LazyListState scroll call site",
+                    postLoadScrollCallSites,
+                )
+            if (postLoadScrollCallSite.scrollStateRegister == postLoadScrollCallSite.moveResultRegister) {
+                throw PatchException(
+                    "NewX post-load LazyListState receiver aliases the u() holder result register: " +
+                        postLoadScrollCallSite,
+                )
+            }
+            val postLoadCallSiteMethod =
+                requireExactlyOne(
+                    "NewX timeline post-load call-site method",
+                    mutableClassDefBy(postLoadScrollCallSite.methodOwner).methods.filter { method ->
+                        method.name == postLoadScrollCallSite.methodName &&
+                            method.parameterTypes.map(CharSequence::toString) ==
+                                postLoadScrollCallSite.methodParameters &&
+                            method.returnType.toString() == postLoadScrollCallSite.methodReturnType
+                    },
+                )
+            val postLoadCallSiteImplementation = postLoadCallSiteMethod.implementation
+                ?: throw PatchException("NewX timeline post-load call site has no implementation")
+            val postLoadCallSiteInstructions = postLoadCallSiteImplementation.instructions
+            val overwrittenScrollStateRegisters =
+                (postLoadScrollCallSite.postLoadInvokeIndex + 1 until postLoadScrollCallSite.scrollInvokeIndex)
+                    .filter { index ->
+                        postLoadCallSiteInstructions[index].destinationRegisterOrNull() ==
+                            postLoadScrollCallSite.scrollStateRegister
+                    }
+            if (overwrittenScrollStateRegisters.isNotEmpty()) {
+                throw PatchException(
+                    "NewX post-load LazyListState receiver v${postLoadScrollCallSite.scrollStateRegister} " +
+                        "is overwritten between u() and i(II)V at instructions " +
+                        overwrittenScrollStateRegisters.joinToString(),
+                )
+            }
+
+            val rowKeyMatch =
+                requireExactlyOne(
+                    "NewX RegularItem row-key class",
+                    Fingerprint(
+                        definingClass = "Lcom/x/urt/",
+                        name = "toString",
+                        parameters = emptyList(),
+                        returnType = STRING_DESCRIPTOR,
+                        strings = listOf("RegularItem(entryId="),
+                    ).scopedMatchAll(),
+                )
+            val rowKeyDescriptor = rowKeyMatch.originalClassDef.type.toString()
+            val rowKeyConstructor =
+                requireExactlyOne(
+                    "NewX RegularItem row-key constructor",
+                    mutableClassDefBy(rowKeyDescriptor).methods.filter { method ->
+                        method.name == "<init>" &&
+                            method.parameterTypes.map(CharSequence::toString) == listOf(STRING_DESCRIPTOR, "J") &&
+                            method.returnType.toString() == "V"
+                    },
+                )
+            val rowKeyConstructorReference =
+                methodReference("$rowKeyDescriptor->${rowKeyConstructor.name}(${STRING_DESCRIPTOR}J)V")
+
+            val scrollStateClass = mutableClassDefBy(postLoadScrollCallSite.scrollStateType)
+            val scrollPositionCandidates =
+                scrollStateClass.fields.mapNotNull { scrollPositionField ->
+                    if (AccessFlags.STATIC.isSet(scrollPositionField.accessFlags) ||
+                        !scrollPositionField.type.toString().startsWith("L")
+                    ) {
+                        return@mapNotNull null
+                    }
+                    val positionClass =
+                        runCatching { mutableClassDefBy(scrollPositionField.type.toString()) }.getOrNull()
+                            ?: return@mapNotNull null
+                    val keyFields =
+                        positionClass.fields.filter { field ->
+                            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                                field.type.toString() == OBJECT_DESCRIPTOR
+                        }
+                    if (keyFields.size != 1) return@mapNotNull null
+                    scrollPositionField to
+                        requireExactlyOne(
+                            "NewX Compose remembered-key field in ${scrollPositionField.type}",
+                            keyFields,
+                        )
+                }
+            val (scrollPositionField, scrollPositionKeyField) =
+                requireExactlyOne(
+                    "NewX LazyListState scroll-position and remembered-key fields",
+                    scrollPositionCandidates,
+                )
+            if (!AccessFlags.PUBLIC.isSet(scrollPositionField.accessFlags)) {
+                throw PatchException("NewX LazyListState scroll-position field is not public: $scrollPositionField")
+            }
+            if (!AccessFlags.PUBLIC.isSet(scrollPositionKeyField.accessFlags)) {
+                throw PatchException("NewX Compose scroll-position key field is not public: $scrollPositionKeyField")
+            }
+            if (AccessFlags.FINAL.isSet(scrollPositionKeyField.accessFlags)) {
+                throw PatchException("NewX Compose scroll-position key field is final: $scrollPositionKeyField")
+            }
+            val scrollPositionFieldReference =
+                fieldReference(
+                    "${postLoadScrollCallSite.scrollStateType}->" +
+                        "${scrollPositionField.name}:${scrollPositionField.type}",
+                )
+            val scrollPositionKeyFieldReference =
+                fieldReference(
+                    "${scrollPositionField.type}->${scrollPositionKeyField.name}:${OBJECT_DESCRIPTOR}",
+                )
+
+            if (AccessFlags.ABSTRACT.isSet(interfacePostLoadMethod.accessFlags) ||
+                interfacePostLoadMethod.implementation == null
+            ) {
+                throw PatchException(
+                    "NewX timeline component interface post-load method is not a default method: " +
+                        "$componentInterfaceDescriptor->$interfacePostLoadMethod",
+                )
+            }
+
+            val delegatingTimelineWrappers =
+                classDefFlatMap { classDef ->
+                    val classDescriptor = classDef.type.toString()
+                    if (classDescriptor == componentDescriptor.toString() ||
+                        classDef.interfaces.none { it.toString() == componentInterfaceDescriptor }
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+                    if (classDef.methods.any { method ->
+                            method.name == postLoadMethod.name &&
+                                method.parameterTypes.isEmpty() &&
+                                method.returnType.toString() == holderDescriptor.toString()
+                        }
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+
+                    val wrapperGetterMethods =
+                        classDef.methods.filter { method ->
+                            !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                                method.name == getterMethod.name &&
+                                method.parameterTypes.isEmpty() &&
+                                method.returnType.toString() == holderDescriptor.toString()
+                        }
+                    if (wrapperGetterMethods.isEmpty()) return@classDefFlatMap emptyList()
+
+                    val wrapperGetter =
+                        requireExactlyOne(
+                            "NewX timeline wrapper getter in $classDescriptor",
+                            wrapperGetterMethods,
+                        )
+                    val implementation = wrapperGetter.implementation ?: return@classDefFlatMap emptyList()
+                    if (AccessFlags.ABSTRACT.isSet(wrapperGetter.accessFlags)) return@classDefFlatMap emptyList()
+                    val instructions = implementation.instructions.toList()
+                    if (instructions.size != 5) return@classDefFlatMap emptyList()
+
+                    val p0Register = implementation.registerCount - 1
+                    val delegateInvoke = instructions[0]
+                    if (delegateInvoke.opcode != Opcode.INVOKE_VIRTUAL &&
+                        delegateInvoke.opcode != Opcode.INVOKE_DIRECT
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+                    val delegateInvokeRegisters = delegateInvoke as? FiveRegisterInstruction
+                        ?: return@classDefFlatMap emptyList()
+                    if (delegateInvokeRegisters.registerCount != 1 ||
+                        delegateInvokeRegisters.registerC != p0Register
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+                    val delegateGetter = delegateInvoke.getReference<MethodReference>()
+                        ?: return@classDefFlatMap emptyList()
+                    if (delegateGetter.parameterTypes.isNotEmpty() ||
+                        delegateGetter.returnType.toString() != componentInterfaceDescriptor
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+
+                    val delegateResult = instructions[1] as? OneRegisterInstruction
+                        ?: return@classDefFlatMap emptyList()
+                    if (instructions[1].opcode != Opcode.MOVE_RESULT_OBJECT) {
+                        return@classDefFlatMap emptyList()
+                    }
+                    val interfaceInvoke = instructions[2]
+                    if (interfaceInvoke.opcode != Opcode.INVOKE_INTERFACE) return@classDefFlatMap emptyList()
+                    val interfaceInvokeRegisters = interfaceInvoke as? FiveRegisterInstruction
+                        ?: return@classDefFlatMap emptyList()
+                    if (interfaceInvokeRegisters.registerCount != 1 ||
+                        interfaceInvokeRegisters.registerC != delegateResult.registerA
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+                    val interfaceGetter = interfaceInvoke.getReference<MethodReference>()
+                        ?: return@classDefFlatMap emptyList()
+                    if (interfaceGetter.definingClass.toString() != componentInterfaceDescriptor ||
+                        interfaceGetter.name != interfaceGetterMethod.name ||
+                        interfaceGetter.parameterTypes.isNotEmpty() ||
+                        interfaceGetter.returnType.toString() != holderDescriptor.toString()
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+
+                    val getterResult = instructions[3] as? OneRegisterInstruction
+                        ?: return@classDefFlatMap emptyList()
+                    val returnInstruction = instructions[4] as? OneRegisterInstruction
+                        ?: return@classDefFlatMap emptyList()
+                    if (instructions[3].opcode != Opcode.MOVE_RESULT_OBJECT ||
+                        instructions[4].opcode != Opcode.RETURN_OBJECT ||
+                        returnInstruction.registerA != getterResult.registerA
+                    ) {
+                        return@classDefFlatMap emptyList()
+                    }
+
+                    listOf(DelegatingTimelineWrapper(classDescriptor, delegateGetter, delegateInvoke.opcode))
+                }
+            if (delegatingTimelineWrappers.isEmpty()) {
+                throw PatchException(
+                    "NewX delegating timeline wrappers missing the post-load override were not found; " +
+                        "matching wrappers: none",
+                )
+            }
+            val componentPostLoadReference =
+                methodReference("$componentInterfaceDescriptor->${postLoadMethod.name}()$holderDescriptor")
+
+            if (componentClass.methods.any { method -> method.name == APPLY_ANCHOR_KEY_BRIDGE_NAME }) {
+                throw PatchException(
+                    "NewX timeline component already has $APPLY_ANCHOR_KEY_BRIDGE_NAME: $componentDescriptor",
+                )
+            }
+            val applyAnchorKeyBridge =
+                MutableMethod(
+                    ImmutableMethod(
+                        componentDescriptor,
+                        APPLY_ANCHOR_KEY_BRIDGE_NAME,
+                        listOf(ImmutableMethodParameter(postLoadScrollCallSite.scrollStateType, emptySet(), null)),
+                        "V",
+                        AccessFlags.PUBLIC.value or AccessFlags.STATIC.value or AccessFlags.SYNTHETIC.value,
+                        emptySet(),
+                        emptySet(),
+                        MutableMethodImplementation(6),
+                    ),
+                )
+            componentClass.methods.add(applyAnchorKeyBridge)
+            applyAnchorKeyBridge.insertHook(0, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference(
+                        "$TIMELINE_POSITION_STORE_DESCRIPTOR->takeStagedAnchorEntryId()$STRING_DESCRIPTOR",
+                    ),
+                )
+                moveResult(0, STRING_DESCRIPTOR)
+                ifEqz(0, Target.Local(APPLY_ANCHOR_KEY_NULL_LABEL))
+                invokeStatic(
+                    methodReference("$TIMELINE_POSITION_STORE_DESCRIPTOR->stagedAnchorSortIndex()J"),
+                )
+                moveResult(1, "J")
+                newInstance(3, rowKeyDescriptor)
+                invokeDirect(rowKeyConstructorReference, 3, 0, 1, 2)
+                iget(4, applyAnchorKeyBridge.p0Register, scrollPositionFieldReference)
+                iput(3, 4, scrollPositionKeyFieldReference)
+                label(APPLY_ANCHOR_KEY_NULL_LABEL)
+                returnVoid()
+            }
+
+            // SideEffect runs before layout, so Compose sees this key at the next measure and relocates to its row.
+            // The u() hook stages it in this call stack; a null result here therefore means "relocate by key".
+            postLoadCallSiteMethod.insertHook(
+                index = postLoadScrollCallSite.postLoadInvokeIndex + 2,
+                relocateBranchTargets = false,
+            ) {
+                invokeStatic(
+                    methodReference(
+                        "$componentDescriptor->$APPLY_ANCHOR_KEY_BRIDGE_NAME(" +
+                            "${postLoadScrollCallSite.scrollStateType})V",
+                    ),
+                    postLoadScrollCallSite.scrollStateRegister,
+                )
+            }
+
+            // The interface default returns null, so wrappers without an override hide the component's post-load restore.
+            delegatingTimelineWrappers.forEach { wrapper ->
+                val wrapperClass = mutableClassDefBy(wrapper.classDescriptor)
+                if (wrapperClass.methods.any { method ->
+                        method.name == postLoadMethod.name &&
+                            method.parameterTypes.isEmpty() &&
+                            method.returnType.toString() == holderDescriptor.toString()
+                    }
+                ) {
+                    throw PatchException(
+                        "NewX timeline wrapper already declares the post-load method: ${wrapper.classDescriptor}",
+                    )
+                }
+                val wrapperPostLoadBridge =
+                    MutableMethod(
+                        ImmutableMethod(
+                            wrapper.classDescriptor,
+                            postLoadMethod.name,
+                            emptyList(),
+                            holderDescriptor.toString(),
+                            AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
+                            emptySet(),
+                            emptySet(),
+                            MutableMethodImplementation(2),
+                        ),
+                    )
+                wrapperClass.methods.add(wrapperPostLoadBridge)
+                wrapperPostLoadBridge.insertHook(0, relocateBranchTargets = false) {
+                    when (wrapper.delegateGetterOpcode) {
+                        Opcode.INVOKE_VIRTUAL ->
+                            invokeVirtual(wrapper.delegateGetter, wrapperPostLoadBridge.p0Register)
+                        Opcode.INVOKE_DIRECT ->
+                            invokeDirect(wrapper.delegateGetter, wrapperPostLoadBridge.p0Register)
+                        else ->
+                            throw PatchException(
+                                "Unsupported NewX timeline wrapper delegate invocation: " +
+                                    "${wrapper.delegateGetterOpcode} in ${wrapper.classDescriptor}",
+                            )
+                    }
+                    moveResult(0, componentInterfaceDescriptor)
+                    invokeInterface(componentPostLoadReference, 0)
+                    moveResult(0, holderDescriptor.toString())
+                    returnObject(0)
+                }
+            }
+
+            val validatorReference =
+                requireExactlyOne(
+                    "NewX timeline resume-position validator reference",
+                    postLoadMethod.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.INVOKE_STATIC &&
+                            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
+                        ) {
+                            return@mapNotNull null
+                        }
+                        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+                        reference.takeIf {
+                            it.parameterTypes.map(CharSequence::toString) ==
+                                listOf(resumePositionDescriptor, LIST_DESCRIPTOR) &&
+                                it.returnType.toString() == "Z"
+                        }
+                    }.distinctBy(MethodReference::toString),
+                )
+            val validatorMethod =
+                requireExactlyOne(
+                    "NewX timeline resume-position validator method",
+                    mutableClassDefBy(validatorReference.definingClass).methods.filter { method ->
+                        AccessFlags.STATIC.isSet(method.accessFlags) &&
+                            method.name == validatorReference.name &&
+                            method.parameterTypes.map(CharSequence::toString) ==
+                                validatorReference.parameterTypes.map(CharSequence::toString) &&
+                            method.returnType.toString() == validatorReference.returnType.toString()
+                    },
+                )
+            val validatorItemIndexFieldReference =
+                requireExactlyOne(
+                    "NewX timeline resume-position item-index field read",
+                    validatorMethod.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.IGET) return@mapNotNull null
+                        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+                        field.takeIf {
+                            it.definingClass.toString() == resumePositionDescriptor && it.type.toString() == "I"
+                        }
+                    }.distinctBy(FieldReference::toString),
+                )
+            val validatorItemIndexField =
+                requireExactlyOne(
+                    "NewX timeline resume-position item-index field definition",
+                    resumePositionClass.fields.filter { field ->
+                        field.toString() == validatorItemIndexFieldReference.toString()
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(validatorItemIndexField.accessFlags)) {
+                throw PatchException("NewX TimelineResumePosition item-index field is not public: $validatorItemIndexField")
+            }
+            val matcherReference =
+                requireExactlyOne(
+                    "NewX TimelineItem entry-id and sort-index matcher",
+                    validatorMethod.instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.INVOKE_STATIC &&
+                            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
+                        ) {
+                            return@mapNotNull null
+                        }
+                        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+                        val parameters = reference.parameterTypes.map(CharSequence::toString)
+                        if (parameters.size != 3 || parameters[1] != STRING_DESCRIPTOR ||
+                            parameters[2] != "J" || reference.returnType.toString() != "Z"
+                        ) {
+                            return@mapNotNull null
+                        }
+                        val itemClass = runCatching { mutableClassDefBy(parameters[0]) }.getOrNull()
+                            ?: return@mapNotNull null
+                        reference.takeIf { AccessFlags.INTERFACE.isSet(itemClass.accessFlags) }
+                    }.distinctBy(MethodReference::toString),
+                )
+            val itemDescriptor = matcherReference.parameterTypes.first().toString()
+            requireExactlyOne(
+                "NewX TimelineItem matcher method definition",
+                mutableClassDefBy(matcherReference.definingClass).methods.filter { method ->
+                    AccessFlags.STATIC.isSet(method.accessFlags) &&
+                        method.name == matcherReference.name &&
+                        method.parameterTypes.map(CharSequence::toString) ==
+                            matcherReference.parameterTypes.map(CharSequence::toString) &&
+                        method.returnType.toString() == "Z"
+                },
+            )
+
+            val eventHolderLoad =
+                requireExactlyOne(
+                    "NewX save event holder load",
+                    saveMethod.instructions.withIndex().filter { indexedInstruction ->
+                        if (indexedInstruction.index >= mapPutIndex ||
+                            indexedInstruction.value.opcode != Opcode.IGET_OBJECT
+                        ) {
+                            return@filter false
+                        }
+                        val field = indexedInstruction.value.getReference<FieldReference>() ?: return@filter false
+                        val registers = indexedInstruction.value as? TwoRegisterInstruction ?: return@filter false
+                        field.type.toString() == holderDescriptor.toString() &&
+                            registers.registerA == saveHolderRegister
+                    },
+                )
+            val eventHolderField =
+                eventHolderLoad.value.getReference<FieldReference>()
+                    ?: throw PatchException("NewX save event holder load has no field reference")
+            val eventType = eventHolderField.definingClass.toString()
+            val eventRegister = (eventHolderLoad.value as TwoRegisterInstruction).registerB
+            val eventHolderFieldDefinition =
+                requireExactlyOne(
+                    "NewX save event holder field definition",
+                    mutableClassDefBy(eventType).fields.filter { field ->
+                        field.toString() == eventHolderField.toString()
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(eventHolderFieldDefinition.accessFlags)) {
+                throw PatchException("NewX save event holder field is not public: $eventHolderField")
+            }
+            val eventRowsField =
+                requireExactlyOne(
+                    "NewX save event visible-rows field",
+                    mutableClassDefBy(eventType).fields.filter { field ->
+                        !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                            field.type.toString() == ARRAY_LIST_DESCRIPTOR
+                    },
+                )
+            if (!AccessFlags.PUBLIC.isSet(eventRowsField.accessFlags)) {
+                throw PatchException("NewX save event visible-rows field is not public: $eventRowsField")
+            }
+            val eventRegisterWrite =
+                (eventHolderLoad.index + 1 until mapPutIndex).firstOrNull { index ->
+                    saveMethod.instructions[index].destinationRegisterOrNull() == eventRegister
+                }
+            if (eventRegisterWrite != null) {
+                throw PatchException(
+                    "NewX save event register v$eventRegister is overwritten before map put at instruction $eventRegisterWrite",
+                )
+            }
+
             // Skipping the write must not skip the rest of the save method: 12.34 keeps working on the
             // timeline state after the map put. The skip branch targets the instruction after the put,
             // which is only correct when nothing consumes the put's result.
@@ -849,6 +1657,75 @@ val restoreTimelinePositionPatch =
             val accountIdArgument = saveLocalBase + 5
             val indexArgument = saveLocalBase + 7
             val offsetArgument = saveLocalBase + 8
+            if (componentClass.methods.any { method -> method.name == SAVE_ANCHOR_BRIDGE_NAME }) {
+                throw PatchException("NewX timeline component already has $SAVE_ANCHOR_BRIDGE_NAME: $componentDescriptor")
+            }
+            val saveAnchorBridge =
+                MutableMethod(
+                    ImmutableMethod(
+                        componentDescriptor,
+                        SAVE_ANCHOR_BRIDGE_NAME,
+                        listOf(ImmutableMethodParameter(eventType, emptySet(), null)),
+                        "V",
+                        AccessFlags.PUBLIC.value or AccessFlags.FINAL.value or AccessFlags.SYNTHETIC.value,
+                        emptySet(),
+                        emptySet(),
+                        MutableMethodImplementation(16),
+                    ),
+                )
+            componentClass.methods.add(saveAnchorBridge)
+            saveAnchorBridge.insertHook(0, relocateBranchTargets = false) {
+                iget(0, saveAnchorBridge.p0Register, stateFlowField)
+                checkCast(0, stateGetValueReference.definingClass.toString())
+                invokeVirtual(stateGetValueReference, 0)
+                moveResult(0, OBJECT_DESCRIPTOR)
+                instanceOf(1, 0, successStateType.toString())
+                ifEqz(1, Target.Local(SAVE_ANCHOR_RETURN_LABEL))
+                checkCast(0, successStateType.toString())
+                iget(
+                    0,
+                    0,
+                    fieldReference(
+                        "$successStateType->${successItemsField.name}:${successItemsField.type}",
+                    ),
+                )
+                iget(
+                    8,
+                    saveAnchorBridge.p0Register + 1,
+                    fieldReference("$eventType->${eventRowsField.name}:$ARRAY_LIST_DESCRIPTOR"),
+                )
+                iget(9, saveAnchorBridge.p0Register + 1, eventHolderField)
+                iget(10, saveAnchorBridge.p0Register, clockFieldDefinition)
+                invokeInterface(clockNowReference, 10)
+                moveResult(10, INSTANT_DESCRIPTOR)
+                invokeStatic(factoryReference, 0, 8, 9, 10)
+                moveResult(11, resumePositionDescriptor)
+                move(12, saveAnchorBridge.p0Register, componentDescriptor)
+                iget(12, 12, repositoryField)
+                invokeInterface(timelineGetterReference, 12)
+                moveResult(0, timelineTypeDescriptor)
+                invokeInterface(methodReference(timelineIdentityGetterReference), 12)
+                moveResult(1, timelineIdentityDescriptor)
+                iget(1, 1, timelineIdentityField)
+                invokeVirtual(
+                    methodReference("$componentDescriptor->$ACCOUNT_ID_BRIDGE_NAME()J"),
+                    saveAnchorBridge.p0Register,
+                )
+                moveResult(2, "J")
+                ifEqz(11, Target.Local(SAVE_ANCHOR_NULL_LABEL))
+                iget(4, 11, resumeEntryIdFieldReference)
+                iget(5, 11, resumeSortIndexFieldReference)
+                iget(7, 11, validatorItemIndexFieldReference)
+                goto(Target.Local(SAVE_ANCHOR_SUCCESS_LABEL))
+                label(SAVE_ANCHOR_NULL_LABEL)
+                constInt(4, 0)
+                constLong(5, 0L)
+                constInt(7, 0)
+                label(SAVE_ANCHOR_SUCCESS_LABEL)
+                invokeStatic(methodReference(SAVE_ANCHOR_DESCRIPTOR), 0, 1, 2, 3, 4, 5, 6, 7)
+                label(SAVE_ANCHOR_RETURN_LABEL)
+                returnVoid()
+            }
             saveMethod.insertHook(
                 index = mapPutIndex,
                 // Plain insertion used to leave an incoming branch on the map write, which keeps skipping
@@ -902,11 +1779,155 @@ val restoreTimelinePositionPatch =
                     indexArgument,
                     offsetArgument,
                 )
+                move(timelineArgument, saveMethod.p0Register, componentDescriptor)
+                move(identityArgument, eventRegister, eventType)
+                invokeVirtual(
+                    methodReference("$componentDescriptor->$SAVE_ANCHOR_BRIDGE_NAME($eventType)V"),
+                    timelineArgument,
+                    identityArgument,
+                )
                 label(SAVE_SKIPPED_LABEL)
                 move(saveMapRegister, spilledMap, OBJECT_DESCRIPTOR)
                 move(saveTimelineRegister, spilledKey, OBJECT_DESCRIPTOR)
                 // Not loaded: skip only the map put (the original instruction). Loaded: fall into the put.
                 ifEqz(loadedFlag, Target.AfterOriginal(1))
+            }
+
+            if (componentClass.methods.any { method -> method.name == RESTORE_ANCHOR_BRIDGE_NAME }) {
+                throw PatchException(
+                    "NewX timeline component already has $RESTORE_ANCHOR_BRIDGE_NAME: $componentDescriptor",
+                )
+            }
+            val restoreAnchorBridge =
+                MutableMethod(
+                    ImmutableMethod(
+                        componentDescriptor,
+                        RESTORE_ANCHOR_BRIDGE_NAME,
+                        emptyList(),
+                        holderDescriptor.toString(),
+                        AccessFlags.PUBLIC.value or AccessFlags.FINAL.value or AccessFlags.SYNTHETIC.value,
+                        emptySet(),
+                        emptySet(),
+                        MutableMethodImplementation(16),
+                    ),
+                )
+            componentClass.methods.add(restoreAnchorBridge)
+            restoreAnchorBridge.insertHook(0, relocateBranchTargets = false) {
+                iget(5, restoreAnchorBridge.p0Register, repositoryField)
+                invokeInterface(timelineGetterReference, 5)
+                moveResult(0, timelineTypeDescriptor)
+                invokeInterface(methodReference(timelineIdentityGetterReference), 5)
+                moveResult(1, timelineIdentityDescriptor)
+                iget(1, 1, timelineIdentityField)
+                invokeVirtual(
+                    methodReference("$componentDescriptor->$ACCOUNT_ID_BRIDGE_NAME()J"),
+                    restoreAnchorBridge.p0Register,
+                )
+                moveResult(2, "J")
+                invokeStatic(
+                    methodReference(PENDING_ANCHOR_ENTRY_ID_DESCRIPTOR),
+                    0,
+                    1,
+                    2,
+                    3,
+                )
+                moveResult(4, STRING_DESCRIPTOR)
+                ifEqz(4, Target.Local(RESTORE_ANCHOR_NULL_LABEL))
+                iget(5, restoreAnchorBridge.p0Register, stateFlowField)
+                checkCast(5, stateGetValueReference.definingClass.toString())
+                invokeVirtual(stateGetValueReference, 5)
+                moveResult(5, OBJECT_DESCRIPTOR)
+                instanceOf(12, 5, successStateType.toString())
+                ifEqz(12, Target.Local(RESTORE_ANCHOR_NULL_LABEL))
+                checkCast(5, successStateType.toString())
+                iget(
+                    6,
+                    5,
+                    fieldReference(
+                        "$successStateType->${successItemsField.name}:${successItemsField.type}",
+                    ),
+                )
+                invokeStatic(
+                    methodReference(PENDING_ANCHOR_SORT_INDEX_DESCRIPTOR),
+                    0,
+                    1,
+                    2,
+                    3,
+                )
+                moveResult(7, "J")
+                invokeInterface(methodReference("$LIST_DESCRIPTOR->size()I"), 6)
+                moveResult(10, "I")
+                constInt(9, 0)
+                label(RESTORE_ANCHOR_LOOP_LABEL)
+                ifGe(9, 10, Target.Local(RESTORE_ANCHOR_NOT_FOUND_LABEL))
+                invokeInterface(methodReference("$LIST_DESCRIPTOR->get(I)$OBJECT_DESCRIPTOR"), 6, 9)
+                moveResult(11, OBJECT_DESCRIPTOR)
+                checkCast(11, itemDescriptor)
+                invokeStatic(matcherReference, 11, 4, 7, 8)
+                moveResult(12, "Z")
+                ifNez(12, Target.Local(RESTORE_ANCHOR_CONSUME_LABEL))
+                intAddLiteral8(9, 9, 1)
+                goto(Target.Local(RESTORE_ANCHOR_LOOP_LABEL))
+                label(RESTORE_ANCHOR_NOT_FOUND_LABEL)
+                constInt(9, -1)
+                goto(Target.Local(RESTORE_ANCHOR_GONE_LABEL))
+                label(RESTORE_ANCHOR_CONSUME_LABEL)
+                label(RESTORE_ANCHOR_GONE_LABEL)
+                invokeStatic(
+                    methodReference(CONSUME_ANCHOR_DESCRIPTOR),
+                    0,
+                    1,
+                    2,
+                    3,
+                    9,
+                )
+                moveResult(13, "[I")
+                ifEqz(13, Target.Local(RESTORE_ANCHOR_NULL_LABEL))
+                constInt(14, 0)
+                aget(9, 13, 14)
+                constInt(14, 1)
+                aget(10, 13, 14)
+                newInstance(11, holderDescriptor.toString())
+                invokeDirect(methodReference(holderConstructorReference), 11, 9, 10)
+                returnObject(11)
+                label(RESTORE_ANCHOR_NULL_LABEL)
+                constInt(4, 0)
+                returnObject(4)
+            }
+
+            var postLoadHookMethod = postLoadMethod
+            var postLoadResultRegister = 0
+            if (postLoadHookMethod.p0Register == 0) {
+                val originalRegisterCount =
+                    postLoadHookMethod.implementation?.registerCount
+                        ?: throw PatchException("NewX timeline post-load method has no implementation")
+                val expandedPostLoadMethod =
+                    postLoadHookMethod.cloneMutable(
+                        additionalRegisters = postLoadHookMethod.numberOfParameterRegisters + 1,
+                    )
+                componentClass.methods.remove(postLoadHookMethod)
+                componentClass.methods.add(expandedPostLoadMethod)
+                postLoadHookMethod = expandedPostLoadMethod
+                postLoadResultRegister = originalRegisterCount
+            }
+            if (postLoadResultRegister >= postLoadHookMethod.p0Register || postLoadResultRegister > 15) {
+                throw PatchException(
+                    "NewX timeline post-load hook has no encodable low result register in " +
+                        "$postLoadHookMethod: result=v$postLoadResultRegister, p0=v${postLoadHookMethod.p0Register}",
+                )
+            }
+            // X invokes this from a Compose SideEffect while Success. A null result leaves its
+            // remembered applied flag false, so the next composition retries without consuming the anchor.
+            postLoadHookMethod.insertHook(index = 0, relocateBranchTargets = false) {
+                invokeVirtual(
+                    methodReference(
+                        "$componentDescriptor->$RESTORE_ANCHOR_BRIDGE_NAME()${holderDescriptor}",
+                    ),
+                    postLoadHookMethod.p0Register,
+                )
+                moveResult(postLoadResultRegister, holderDescriptor.toString())
+                ifEqz(postLoadResultRegister, Target.Original)
+                returnObject(postLoadResultRegister)
             }
         }
     }

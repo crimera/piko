@@ -9,6 +9,8 @@ import app.morphe.extension.newx.settings.NewXLogger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.settings.SettingsRegistry;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public final class TimelineScrollPositionStore {
     private static final String PREFERENCES_NAME = "piko_newx_timeline_positions";
     private static final String RESTORE_TIMELINE_POSITION_SETTING =
@@ -17,6 +19,9 @@ public final class TimelineScrollPositionStore {
             "newx.profile.restore_position";
     private static final String INDEX_SUFFIX = ".index";
     private static final String OFFSET_SUFFIX = ".offset";
+    private static final String ENTRY_ID_SUFFIX = ".entry_id";
+    private static final String SORT_INDEX_SUFFIX = ".sort_index";
+    private static final String ITEM_INDEX_SUFFIX = ".item_index";
     private static final String PROFILE_KEY_PREFIX = "profile.";
     private static final String TIMELINE_KEY_PREFIX = "timeline.";
     private static final Object SAVE_LOCK = new Object();
@@ -26,6 +31,16 @@ public final class TimelineScrollPositionStore {
     private static String lastSavedKey;
     private static int lastSavedIndex = -1;
     private static int lastSavedOffset = -1;
+    private static SharedPreferences lastAnchorPreferences;
+    private static String lastAnchorKey;
+    private static String lastAnchorEntryId;
+    private static long lastAnchorSortIndex;
+    private static int lastAnchorItemIndex;
+    private static boolean hasLastAnchor;
+    private static String stagedEntryId;
+    private static long stagedSortIndex;
+    private static final ConcurrentHashMap<String, PendingAnchor> pendingAnchors =
+            new ConcurrentHashMap<>();
 
     private TimelineScrollPositionStore() {
     }
@@ -35,7 +50,7 @@ public final class TimelineScrollPositionStore {
         long accountId = lastAccountId;
         if (accountId <= 0) return null;
         // Refresh has no account in scope, so only restore after a scoped hook established one.
-        return restore(timeline, profileId, accountId);
+        return restoreInternal(timeline, profileId, accountId, false);
     }
 
     @Nullable
@@ -43,6 +58,16 @@ public final class TimelineScrollPositionStore {
             Enum<?> timeline,
             @Nullable String profileId,
             long accountId
+    ) {
+        return restoreInternal(timeline, profileId, accountId, true);
+    }
+
+    @Nullable
+    private static int[] restoreInternal(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            long accountId,
+            boolean armAnchor
     ) {
         String timelineName = timeline == null ? null : timeline.name();
         if (accountId <= 0) {
@@ -80,6 +105,7 @@ public final class TimelineScrollPositionStore {
 
             SharedPreferences preferences = preferences();
             if (preferences == null) {
+                if (armAnchor) pendingAnchors.remove(key);
                 if (NewXLogger.isLoggingEnabled()) {
                     NewXLogger.logger("NewX restore miss timeline=" + timelineName + " account=" + accountId
                             + " reason=no-preferences");
@@ -92,6 +118,7 @@ public final class TimelineScrollPositionStore {
             String indexKey = key + INDEX_SUFFIX;
             int index = preferences.getInt(indexKey, -1);
             if (index < 0) {
+                if (armAnchor) pendingAnchors.remove(key);
                 if (NewXLogger.isLoggingEnabled()) {
                     NewXLogger.logger("NewX restore miss timeline=" + timelineName + " account=" + accountId
                             + " key=" + key
@@ -101,6 +128,20 @@ public final class TimelineScrollPositionStore {
             }
 
             int offset = preferences.getInt(key + OFFSET_SUFFIX, 0);
+            if (armAnchor) {
+                String entryId = preferences.getString(key + ENTRY_ID_SUFFIX, null);
+                if (entryId == null) {
+                    pendingAnchors.remove(key);
+                } else {
+                    pendingAnchors.put(key, new PendingAnchor(
+                            entryId,
+                            preferences.getLong(key + SORT_INDEX_SUFFIX, 0L),
+                            preferences.getInt(key + ITEM_INDEX_SUFFIX, 0),
+                            index,
+                            offset
+                    ));
+                }
+            }
             if (NewXLogger.isLoggingEnabled()) {
                 NewXLogger.logger("NewX restore hit timeline=" + timelineName + " account=" + accountId
                         + " key=" + key
@@ -111,6 +152,196 @@ public final class TimelineScrollPositionStore {
             NewXLogger.printException(() -> "Failed to restore NewX timeline position account=" + accountId,
                     exception);
             return null;
+        }
+    }
+
+    public static void saveAnchor(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            long accountId,
+            @Nullable String entryId,
+            long sortIndex,
+            int itemIndex
+    ) {
+        boolean loggingEnabled = NewXLogger.isLoggingEnabled();
+        String timelineName = timeline == null ? null : timeline.name();
+        if (accountId <= 0) return;
+        lastAccountId = accountId;
+
+        try {
+            String key = accountStorageKeyFor(timelineName, profileId, accountId);
+            if (key == null) return;
+
+            SharedPreferences preferences = preferences();
+            if (preferences == null) return;
+
+            synchronized (SAVE_LOCK) {
+                if (hasLastAnchor && preferences == lastAnchorPreferences && key.equals(lastAnchorKey)
+                        && equal(entryId, lastAnchorEntryId)
+                        && sortIndex == lastAnchorSortIndex && itemIndex == lastAnchorItemIndex) {
+                    return;
+                }
+                SharedPreferences.Editor editor = preferences.edit();
+                if (entryId == null) {
+                    editor.remove(key + ENTRY_ID_SUFFIX)
+                            .remove(key + SORT_INDEX_SUFFIX)
+                            .remove(key + ITEM_INDEX_SUFFIX);
+                } else {
+                    editor.putString(key + ENTRY_ID_SUFFIX, entryId)
+                            .putLong(key + SORT_INDEX_SUFFIX, sortIndex)
+                            .putInt(key + ITEM_INDEX_SUFFIX, itemIndex);
+                }
+                editor.apply();
+                lastAnchorPreferences = preferences;
+                lastAnchorKey = key;
+                lastAnchorEntryId = entryId;
+                lastAnchorSortIndex = sortIndex;
+                lastAnchorItemIndex = itemIndex;
+                hasLastAnchor = true;
+            }
+
+            if (loggingEnabled) {
+                String detail = entryId == null
+                        ? "reason=no-anchor"
+                        : "entryId=" + entryId + " sortIndex=" + sortIndex + " itemIndex=" + itemIndex;
+                NewXLogger.logger("NewX save-anchor timeline=" + timelineName + " account=" + accountId
+                        + " key=" + key + " " + detail);
+            }
+        } catch (Exception exception) {
+            NewXLogger.printException(() -> "Failed to save NewX timeline anchor account=" + accountId,
+                    exception);
+        }
+    }
+
+    @Nullable
+    public static String pendingAnchorEntryId(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            long accountId
+    ) {
+        String key = pendingAnchorKey(timeline, profileId, accountId);
+        if (key == null) return null;
+        PendingAnchor pending = pendingAnchors.get(key);
+        return pending == null ? null : pending.entryId;
+    }
+
+    public static long pendingAnchorSortIndex(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            long accountId
+    ) {
+        String key = pendingAnchorKey(timeline, profileId, accountId);
+        if (key == null) return 0L;
+        PendingAnchor pending = pendingAnchors.get(key);
+        return pending == null ? 0L : pending.sortIndex;
+    }
+
+    @Nullable
+    public static int[] consumeAnchor(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            long accountId,
+            int foundItemIndex
+    ) {
+        String timelineName = timeline == null ? null : timeline.name();
+        String key = pendingAnchorKey(timeline, profileId, accountId);
+        if (key == null) return null;
+        PendingAnchor pending = pendingAnchors.remove(key);
+        if (pending == null) return null;
+
+        boolean loggingEnabled = NewXLogger.isLoggingEnabled();
+        if (foundItemIndex < 0) {
+            if (loggingEnabled) {
+                NewXLogger.logger("NewX anchor timeline=" + timelineName + " account=" + accountId
+                        + " found=" + foundItemIndex + " savedItem=" + pending.itemIndex
+                        + " savedIndex=" + pending.savedIndex + " reason=post-gone -> top");
+            }
+            return new int[]{0, 0};
+        }
+
+        stagedEntryId = pending.entryId;
+        stagedSortIndex = pending.sortIndex;
+        if (loggingEnabled) {
+            NewXLogger.logger("NewX anchor timeline=" + timelineName + " account=" + accountId
+                    + " found=" + foundItemIndex + " savedItem=" + pending.itemIndex
+                    + " -> relocate-by-key entryId=" + pending.entryId);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static String takeStagedAnchorEntryId() {
+        String entryId = stagedEntryId;
+        stagedEntryId = null;
+        return entryId;
+    }
+
+    public static long stagedAnchorSortIndex() {
+        return stagedSortIndex;
+    }
+
+    @Nullable
+    private static String pendingAnchorKey(
+            Enum<?> timeline,
+            @Nullable String profileId,
+            long accountId
+    ) {
+        if (accountId <= 0) return null;
+        try {
+            return accountStorageKeyFor(timeline == null ? null : timeline.name(), profileId, accountId);
+        } catch (Exception exception) {
+            NewXLogger.printException(() -> "Failed to resolve NewX timeline anchor account=" + accountId,
+                    exception);
+            return null;
+        }
+    }
+
+    @Nullable
+    private static String accountStorageKeyFor(
+            @Nullable String timelineName,
+            @Nullable String profileId,
+            long accountId
+    ) {
+        boolean restoreTimelinePosition = SettingsRegistry.getBooleanOrDefault(
+                RESTORE_TIMELINE_POSITION_SETTING,
+                true
+        );
+        boolean restoreProfilePosition = SettingsRegistry.getBooleanOrDefault(
+                RESTORE_PROFILE_POSITION_SETTING,
+                false
+        );
+        return accountStorageKey(
+                accountId,
+                timelineName,
+                profileId,
+                restoreTimelinePosition,
+                restoreProfilePosition
+        );
+    }
+
+    private static boolean equal(@Nullable String first, @Nullable String second) {
+        return first == null ? second == null : first.equals(second);
+    }
+
+    private static final class PendingAnchor {
+        private final String entryId;
+        private final long sortIndex;
+        private final int itemIndex;
+        private final int savedIndex;
+        private final int savedOffset;
+
+        private PendingAnchor(
+                String entryId,
+                long sortIndex,
+                int itemIndex,
+                int savedIndex,
+                int savedOffset
+        ) {
+            this.entryId = entryId;
+            this.sortIndex = sortIndex;
+            this.itemIndex = itemIndex;
+            this.savedIndex = savedIndex;
+            this.savedOffset = savedOffset;
         }
     }
 
