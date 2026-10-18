@@ -25,9 +25,13 @@ dependencies {
     compileOnly(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
     compileOnly(libs.appcompat)
+    // Runtime copy is packed once in the shared extension, relocated away from X's Media3.
+    compileOnly(project(path = ":extensions:shared:media3", configuration = "shadowedMedia3"))
 
     testImplementation(project(":extensions:newx:stub"))
     testImplementation(libs.piko.extension.library)
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20250517")
+    testImplementation(project(path = ":extensions:shared:media3", configuration = "shadowedMedia3"))
+    testImplementation("org.robolectric:robolectric:4.17")
 }

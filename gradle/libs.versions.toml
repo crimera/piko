@@ -20,6 +20,7 @@ annotation = { module = "androidx.annotation:annotation", version.ref = "annotat
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 media3-muxer = { module = "androidx.media3:media3-muxer", version.ref = "media3" }
+media3-extractor = { module = "androidx.media3:media3-extractor", version.ref = "media3" }
 
 [plugins]
 android-library = { id = "com.android.library" }
