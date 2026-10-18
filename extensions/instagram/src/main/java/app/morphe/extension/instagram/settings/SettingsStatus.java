@@ -126,6 +126,10 @@ public class SettingsStatus {
     public static void hideStoriesTray() {
         hideStoriesTray = true;
     }
+    public static boolean hideHiddenRequests = false;
+    public static void hideHiddenRequests() {
+        hideHiddenRequests = true;
+    }
     public static boolean hideNotesTray = false;
     public static void hideNotesTray() {
         hideNotesTray = true;
@@ -178,7 +182,7 @@ public class SettingsStatus {
         hideReshareButton = true;
     }
     public static boolean distractionFreeSection() {
-        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideHiddenRequests || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
     //Misc section.
@@ -303,6 +307,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
         FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
         FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);
+        FLAGS.put(str("piko_hide_hidden_requests"),SettingsStatus.hideHiddenRequests);
         FLAGS.put(str("piko_disable_comments"),SettingsStatus.disableComments);
         FLAGS.put(str("piko_disable_explore"),SettingsStatus.disableExplore);
         FLAGS.put(str("piko_disable_highlights"),SettingsStatus.disableHighlights);
