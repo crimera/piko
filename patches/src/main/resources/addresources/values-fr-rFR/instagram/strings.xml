@@ -147,6 +147,7 @@
     <string name="piko_inbox_lock">Verrouillage de la boîte de réception</string>
     <string name="piko_inbox_lock_desc">Masque votre boîte de réception derrière votre empreinte digitale, votre visage ou le verrouillage de l\'écran chaque fois que vous ouvrez l\'application</string>
     <string name="piko_inbox_lock_notifications">Bloquer les notifications</string>
+    <string name="piko_inbox_lock_notifications_desc">Lorsque le verrouillage de la boîte de réception est activé, les notifications de messages masquent l\'expéditeur et le contenu, et la bannière de notification de message dans l\'application reste masquée</string>
     <string name="piko_inbox_lock_notification">Nouveau message</string>
     <string name="piko_inbox_lock_unlock">Déverrouiller</string>
     <string name="piko_inbox_lock_prompt">Déverrouillez vos messages</string>

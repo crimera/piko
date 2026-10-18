@@ -98,6 +98,8 @@
     <string name="piko_hide_notes_tray_desc">Сховує панель нотаток у розділі повідомлень</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Приховати кнопку створення групи в меню поширення</string>
     <string name="piko_hide_reels_follow_button">Приховати кнопку підписки в Reels</string>
+    <string name="piko_hide_share_button">Приховати кнопку «Поділитися»</string>
+    <string name="piko_hide_save_buttons">Приховати кнопки збереження</string>
     <string name="piko_hide_reshare_button">Приховати кнопку «Поширити» (Репост)</string>
     <string name="piko_hide_reels_follow_button_desc">Видаляє кнопку підписки з рядка автора Reels</string>
     <string name="piko_disable_video_autoplay">Вимкнути автовідтворення відео</string>
@@ -145,6 +147,7 @@
     <string name="piko_inbox_lock">Блокування папки «Вхідні»</string>
     <string name="piko_inbox_lock_desc">Ховає вашу папку «Вхідні» за відбитком пальця, розпізнаванням обличчя або блокуванням екрана щоразу, коли ви відкриваєте додаток</string>
     <string name="piko_inbox_lock_notifications">Блокувати сповіщення</string>
+    <string name="piko_inbox_lock_notifications_desc">Поки діє блокування папки «Вхідні», сповіщення про повідомлення приховують відправника та вміст, а банер повідомлень у додатку залишається прихованим</string>
     <string name="piko_inbox_lock_notification">Нове повідомлення</string>
     <string name="piko_inbox_lock_unlock">Розблокувати</string>
     <string name="piko_inbox_lock_prompt">Розблокуйте ваші повідомлення</string>
