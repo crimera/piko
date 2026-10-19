@@ -85,6 +85,9 @@ public class ListPref extends ListPreference {
         }else if (key == Settings.NATIVE_READER_MODE_THEME.key) {
             entries = ResourceUtils.getStringArray("piko_array_readermode_themes");
             entriesValues = ResourceUtils.getStringArray("piko_array_readermode_themes_val");
+        }else if (key == Settings.TIMELINE_REPLY_LIKE_RATIO_MODE.key) {
+            entries = ResourceUtils.getStringArray("piko_array_reply_like_ratio");
+            entriesValues = ResourceUtils.getStringArray("piko_array_reply_like_ratio_val");
         }
 
         setEntries(entries);
