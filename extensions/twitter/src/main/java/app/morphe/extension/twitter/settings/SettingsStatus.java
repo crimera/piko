@@ -51,6 +51,7 @@ public class SettingsStatus {
     public static boolean enableUndoPosts = false;
     public static boolean enableForcePip = false;
     public static boolean showSourceLabel = false;
+    public static boolean replyLikeRatio = false;
     public static boolean hideImmersivePlayer = false;
     public static boolean enableVidAutoAdvance = false;
 
@@ -306,6 +307,10 @@ public class SettingsStatus {
         showSourceLabel = true;
     }
 
+    public static void replyLikeRatio() {
+        replyLikeRatio = true;
+    }
+
     public static void hideImmersivePlayer() {
         hideImmersivePlayer = true;
     }
@@ -410,7 +415,7 @@ public class SettingsStatus {
 
 
     public static boolean enableTimelineSection() {
-        return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
+        return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD || replyLikeRatio);
     }
 
     public static boolean enableMiscSection() {
