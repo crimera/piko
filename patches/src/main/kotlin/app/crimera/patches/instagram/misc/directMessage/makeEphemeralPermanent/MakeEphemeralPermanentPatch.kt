@@ -38,6 +38,7 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
+import app.morphe.util.matchSingle
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -49,6 +50,7 @@ private const val EXTENSION = "$PATCHES_DESCRIPTOR/dm/EphemeralMediaPatch;"
 internal object EphemeralMediaJsonParserFingerprint : Fingerprint(
     name = "unsafeParseFromJson",
     returnType = "Ljava/lang/Object;",
+    parameters = listOf("L"),
     filters = listOf(
         // The key switch of the parser loop.
         opcode(Opcode.IF_EQ),
@@ -92,6 +94,10 @@ val makeEphemeralPermanentPatch =
             suppressEphemeralMediaReceipts()
 
             EphemeralMediaJsonParserFingerprint.let {
+                markServerResponseParsers(it.method.parameterTypes.single().toString())
+                if (it.method.implementation!!.registerCount > 16) {
+                    throw PatchException("Ephemeral parser argument requires a range invoke")
+                }
                 val ifEq = it.instructionMatches.first()
                 val expireAtField = it.instructionMatches[5].fieldReference
                 val viewModeField = it.instructionMatches[8].fieldReference
@@ -106,7 +112,7 @@ val makeEphemeralPermanentPatch =
                     iget-object v0, v$ephemeralMediaRegister, $expireAtField
                     iget-object v1, v$ephemeralMediaRegister, $viewModeField
                     
-                    invoke-static {v0, v1}, $EXTENSION->makeEphemeralMediaPermanent(Ljava/lang/Long;Ljava/lang/String;)Ljava/lang/String;
+                    invoke-static {v0, v1, p1}, $EXTENSION->makeEphemeralMediaPermanent(Ljava/lang/Long;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/String;
                     move-result-object v1                        
                     
                     iput-object v1, v$ephemeralMediaRegister, $viewModeField
@@ -128,6 +134,24 @@ val makeEphemeralPermanentPatch =
             enableSettings("unlimitedReplaysOnEphemeralMedia")
         }
     }
+
+context(_: BytecodePatchContext)
+private fun markServerResponseParsers(parserType: String) {
+    val match = Fingerprint(
+        filters = listOf(
+            string("AutoResponseParserUtil.wrapStream"),
+            methodCall(parameters = listOf("Ljava/io/InputStream;"), returnType = parserType),
+            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        ),
+    ).matchSingle()
+    val result = match.instructionMatches.last()
+    val register = result.instruction.registersUsed.single()
+    // Mark the HTTP parser itself; local message deserializers create different instances.
+    match.method.addInstructions(
+        result.index + 1,
+        "invoke-static/range {v$register .. v$register}, $PATCHES_DESCRIPTOR/dm/EphemeralMediaCaption;->markServerParser(Ljava/lang/Object;)V",
+    )
+}
 
 private object EphemeralMediaSeenReceiptFingerprint : Fingerprint(
     filters = listOf(

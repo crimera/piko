@@ -19,9 +19,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.utils.Pref;
@@ -38,18 +41,30 @@ public final class EphemeralMediaCaption {
     private static final String IMAGE_URL_CLASS = "com.instagram.model.mediasize.ExtendedImageUrl";
     private static final String CAPTION_TAG = "piko_ephemeral_caption";
     private static final String MODE_PERMANENT = "permanent";
+    private static final String MODE_KEEP_IN_CHAT = "keep_in_chat";
+    private static final Set<Object> SERVER_PARSERS =
+            Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
     private static final long MICROS = 1_000_000L;
     private static final int SEARCH_DEPTH = 3;
     private static final int SEARCH_LIMIT = 1500;
 
     private EphemeralMediaCaption() { }
 
-    /** Called while a message is parsed, before its view mode is changed, so it still has the mode it was sent with. */
-    public static void record(Long expireAt, String viewMode) {
+    /** Marks parsers of raw HTTP response bytes, including the unmodified HTTP disk cache. */
+    public static void markServerParser(Object parser) {
+        if (parser != null) SERVER_PARSERS.add(parser);
+    }
+
+    /** Records the mode before conversion, even when captions are hidden. */
+    public static void record(Long expireAt, String viewMode, Object parser) {
         try {
-            if (expireAt == null || viewMode == null || !Pref.ephemeralMediaCaption()) return;
+            if (expireAt == null || viewMode == null) return;
             if (expireAt * 1000 < System.currentTimeMillis()) return;
-            // Once saved, the message comes back as permanent, so only the first mode seen is the real one.
+            // Local message JSON may already contain Piko's replacement value.
+            if (MODE_PERMANENT.equals(viewMode) && SERVER_PARSERS.contains(parser)) {
+                viewMode = MODE_KEEP_IN_CHAT;
+            }
+            // A saved message may already be converted; retain any known original mode.
             String saved = EphemeralModesPref.get(expireAt);
             if (saved.isEmpty() || (saved.equals(MODE_PERMANENT) && !viewMode.equals(MODE_PERMANENT))) {
                 EphemeralModesPref.put(expireAt, viewMode);
@@ -89,7 +104,9 @@ public final class EphemeralMediaCaption {
         switch (EphemeralModesPref.get(expireAt)) {
             case "once": how = str("piko_ephemeral_received_once"); break;
             case "replayable": how = str("piko_ephemeral_received_twice"); break;
-            case MODE_PERMANENT: how = str("piko_ephemeral_received_chat"); break;
+            case MODE_KEEP_IN_CHAT: how = str("piko_ephemeral_received_chat"); break;
+            // Permanent can also be a previously converted message with no original-mode record.
+            case MODE_PERMANENT: how = str("piko_ephemeral_received_unknown"); break;
             default: return null;
         }
 

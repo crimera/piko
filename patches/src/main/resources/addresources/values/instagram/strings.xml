@@ -169,6 +169,7 @@
     <string name="piko_ephemeral_received_once">Received to view once</string>
     <string name="piko_ephemeral_received_twice">Received to view twice</string>
     <string name="piko_ephemeral_received_chat">Received to keep in chat</string>
+    <string name="piko_ephemeral_received_unknown">Original viewing mode unknown</string>
     <string name="piko_ephemeral_available_until">available until %s</string>
     <string name="piko_ephemeral_expired">expired</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
