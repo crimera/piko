@@ -503,4 +503,20 @@ public class Pref {
     public static boolean inboxLockNotifications() {
         return SharedPref.getBooleanPref(Settings.INBOX_LOCK_NOTIFICATIONS);
     }
+
+    public static boolean hiddenChats() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS);
+    }
+
+    public static boolean hiddenChatsMute() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS_MUTE);
+    }
+
+    public static int hiddenChatsTaps() {
+        try {
+            return Integer.parseInt(SharedPref.getStringPref(Settings.HIDDEN_CHATS_TAPS));
+        } catch (NumberFormatException e) {
+            return 3;
+        }
+    }
 }

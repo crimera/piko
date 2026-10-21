@@ -159,6 +159,16 @@
     <string name="piko_inbox_lock_unlock">Unlock</string>
     <string name="piko_inbox_lock_prompt">Unlock your messages</string>
     <string name="piko_inbox_lock_no_lock">Set a screen lock on your device to use Inbox lock</string>
+    <string name="piko_hidden_chats">Hidden chats</string>
+    <string name="piko_hidden_chats_desc">Adds a hide option to the chat long-press menu that moves the chat to a private inbox, separate for each account. Turn on Inbox lock to protect it</string>
+    <string name="piko_hidden_chats_hidden">Chat hidden</string>
+    <string name="piko_hidden_chats_unhidden">Chat unhidden</string>
+    <string name="piko_hidden_chats_opened">Hidden chats</string>
+    <string name="piko_hidden_chats_closed">Back to your inbox</string>
+    <string name="piko_hidden_chats_mute">Mute hidden chats</string>
+    <string name="piko_hidden_chats_mute_desc">Don\'t show notifications for messages from chats you have hidden</string>
+    <string name="piko_hidden_chats_taps">Taps to open hidden chats</string>
+    <string name="piko_hidden_chats_taps_desc">Tap the messages button this many times in a row to switch between your inbox and your hidden chats</string>
     <string name="piko_unlock_plus_benefits">Unlock Plus benefits</string>
     <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
 
