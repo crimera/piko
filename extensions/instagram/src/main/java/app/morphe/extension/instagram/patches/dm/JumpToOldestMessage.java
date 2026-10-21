@@ -21,7 +21,7 @@ import app.morphe.extension.shared.Utils;
 public final class JumpToOldestMessage {
     private static final long SCROLL_STEP_MS = 60;
     private static final long TOP_POLL_MS = 250;
-    private static final long TOP_IDLE_LIMIT_MS = 4000;
+    private static final long TOP_IDLE_LIMIT_MS = 30000;
 
     private static final Handler HANDLER = new Handler(Looper.getMainLooper());
     private static boolean running;
@@ -32,38 +32,47 @@ public final class JumpToOldestMessage {
     public static void toggle(View anchor) {
         try {
             if (running) {
-                running = false;
+                stop();
                 Utils.showToastShort(str("piko_jump_oldest_cancelled"));
                 return;
             }
             View list = anchor.getRootView().findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "message_list"));
-            if (list == null) {
+            if (list == null || !list.isAttachedToWindow() || !list.isShown()) {
                 return;
             }
             running = true;
             Utils.showToastShort(str("piko_jump_oldest_started"));
             step(list, 0);
         } catch (Throwable t) {
-            running = false;
+            stop();
             Logger.printException(() -> "JumpToOldestMessage.toggle failed", t);
         }
+    }
+
+    private static void stop() {
+        running = false;
+        HANDLER.removeCallbacksAndMessages(null);
     }
 
     private static void step(View list, long idleMs) {
         if (!running) return;
         try {
+            if (!list.isAttachedToWindow() || !list.isShown()) {
+                stop();
+                return;
+            }
             if (list.canScrollVertically(-1)) {
                 list.scrollBy(0, -list.getHeight());
                 HANDLER.postDelayed(() -> step(list, 0), SCROLL_STEP_MS);
             } else if (idleMs >= TOP_IDLE_LIMIT_MS) {
-                // The list did not grow while waiting at the top, so there are no older messages.
-                running = false;
-                Utils.showToastShort(str("piko_jump_oldest_done"));
+                // A quiet list cannot distinguish the oldest message from a stalled page load.
+                stop();
+                Utils.showToastShort(str("piko_jump_oldest_stopped"));
             } else {
                 HANDLER.postDelayed(() -> step(list, idleMs + TOP_POLL_MS), TOP_POLL_MS);
             }
         } catch (Throwable t) {
-            running = false;
+            stop();
             Logger.printException(() -> "JumpToOldestMessage.step failed", t);
         }
     }
