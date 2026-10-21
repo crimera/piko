@@ -182,8 +182,8 @@
     <string name="piko_ephemeral_received_twice">Received to view twice</string>
     <string name="piko_ephemeral_received_chat">Received to keep in chat</string>
     <string name="piko_ephemeral_received_unknown">Original viewing mode unknown</string>
-    <string name="piko_ephemeral_available_until">available until %s</string>
-    <string name="piko_ephemeral_expired">expired</string>
+    <string name="piko_ephemeral_available_until">Available until %s</string>
+    <string name="piko_ephemeral_expired">Expired</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
     <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
 
