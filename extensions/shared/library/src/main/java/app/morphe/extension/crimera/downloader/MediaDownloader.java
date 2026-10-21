@@ -141,15 +141,20 @@ public class MediaDownloader {
                 }
             } else {
                 // Anything that needs rewriting is fetched to the cache first, then remuxed into place.
-                downloadToCache(request.url, cacheFiles, builder, notificationId);
-                if (request.audioUrl != null) {
-                    downloadToCache(request.audioUrl, cacheFiles, builder, notificationId);
-                }
+                boolean downloadedToCache = false;
                 try {
+                    downloadToCache(request.url, cacheFiles, builder, notificationId);
+                    if (request.audioUrl != null) {
+                        downloadToCache(request.audioUrl, cacheFiles, builder, notificationId);
+                    }
+                    downloadedToCache = true;
                     Mp4Remuxer.write(cacheFiles, openOutput(outputDocumentUri), request.metadata);
-                } catch (Exception | LinkageError remuxException) {
-                    PikoUtils.logger(remuxException);
+                } catch (Exception | LinkageError downloadException) {
+                    PikoUtils.logger(downloadException);
                     if (request.audioUrl == null) {
+                        if (!downloadedToCache) {
+                            throw downloadException;
+                        }
                         // Only the metadata was lost: the file itself is complete.
                         copyRawFile(cacheFiles.get(0), outputDocumentUri);
                     } else if (request.fallbackUrl != null) {
@@ -157,7 +162,7 @@ public class MediaDownloader {
                             download(request.fallbackUrl, output, builder, notificationId);
                         }
                     } else {
-                        throw new IOException("Could not merge video and audio", remuxException);
+                        throw new IOException("Could not download or merge video and audio", downloadException);
                     }
                 }
             }
