@@ -9,9 +9,28 @@ package app.crimera.patches.instagram.misc.telemetry
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
+import app.morphe.util.findInstructionIndicesReversedOrThrow
+import app.morphe.util.getReference
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import org.w3c.dom.Element
+
+private fun Instruction.isFalcoLogCall(): Boolean =
+    (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) &&
+        getReference<MethodReference>()?.let {
+            it.definingClass == "Lcom/facebook/falco/fabric/FFSingletonJNILogger;" &&
+                it.name.startsWith("log") && it.returnType == "V"
+        } == true
+
+private object FalcoLogCallerFingerprint : Fingerprint(
+    custom = { method, _ ->
+        method.implementation?.instructions?.any { it.isFalcoLogCall() } == true
+    },
+)
 
 /**
  * Manifest patch to:
@@ -186,10 +205,12 @@ val disableBackgroundAndTelemetryPatch =
                 )
             }
 
-            // 2. Suppress event collection at the root (Falco / FFSingletonJNILogger)
-            mutableClassDefByOrNull("Lcom/facebook/falco/fabric/FFSingletonJNILogger;")?.let { cls ->
-                cls.methods.filter { it.implementation != null && it.name.startsWith("log") }.forEach { method ->
-                    method.addInstructions(0, "return-void")
+            // Falco log methods are native. Skip their calls while preserving queue cleanup in callers.
+            FalcoLogCallerFingerprint.matchAll().forEach { match ->
+                match.method.apply {
+                    findInstructionIndicesReversedOrThrow { isFalcoLogCall() }.forEach { index ->
+                        replaceInstruction(index, "nop")
+                    }
                 }
             }
 
