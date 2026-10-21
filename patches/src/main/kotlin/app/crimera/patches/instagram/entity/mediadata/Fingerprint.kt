@@ -165,16 +165,47 @@ internal object AudioIntfMapperFingerprint : Fingerprint(
     ),
 )
 
-internal object VideoVersionsGetterFingerprint : Fingerprint(
+/**
+ * Media's getter of a value of its media dict, under the dict key: it returns the dict's cached
+ * field, or reads the value from the native tree when that field is still null.
+ */
+internal fun mediaDictGetterFingerprint(key: String, type: String) = Fingerprint(
     definingClass = MEDIA_CLASS_NAME,
-    returnType = "Ljava/util/List;",
+    returnType = type,
     parameters = listOf(),
     filters = listOf(
-        string("video_versions"),
+        string(key),
         // Extended media data.
         fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
-        fieldAccess(type = "Ljava/util/List;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        fieldAccess(type = type, opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
     ),
+)
+
+internal val VideoVersionsGetterFingerprint = mediaDictGetterFingerprint("video_versions", "Ljava/util/List;")
+
+internal val VideoDashManifestGetterFingerprint = mediaDictGetterFingerprint("video_dash_manifest", "Ljava/lang/String;")
+
+/** Media's has_audio getter: the same shape, except its key is loaded after the two reads. */
+internal object HasAudioGetterFingerprint : Fingerprint(
+    definingClass = MEDIA_CLASS_NAME,
+    returnType = "Ljava/lang/Boolean;",
+    parameters = listOf(),
+    filters = listOf(
+        // Extended media data.
+        fieldAccess(opcode = Opcode.IGET_OBJECT),
+        fieldAccess(type = "Ljava/lang/Boolean;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        string("has_audio"),
+    ),
+)
+
+internal object GetVideoDashManifestExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getVideoDashManifest",
+)
+
+internal object HasAudioTrackExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "hasAudioTrack",
 )
 
 internal object TakenAtGetterFingerprint : Fingerprint(

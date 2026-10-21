@@ -826,6 +826,14 @@ public class ScreenBuilder {
 
         addPreference(
                 helper.switchPreference(
+                        str("piko_prefer_dash_format"),
+                        str("piko_prefer_dash_format_desc"),
+                        Settings.PREFER_DASH_FORMAT
+                )
+        );
+
+        addPreference(
+                helper.switchPreference(
                         str("piko_embed_download_metadata"),
                         str("piko_embed_download_metadata_desc"),
                         Settings.EMBED_DOWNLOAD_METADATA

@@ -342,6 +342,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
     }
 
+    public static boolean preferDashFormat() {
+        return SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT);
+    }
+
     public static String downloadFileNameTemplate() {
         return removeLineBreaks(SharedPref.getStringPref(Settings.DOWNLOAD_FILE_NAME_TEMPLATE));
     }

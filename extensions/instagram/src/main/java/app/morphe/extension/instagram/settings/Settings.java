@@ -96,6 +96,7 @@ public class Settings {
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false);
     public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false);
+    public static final BooleanSetting PREFER_DASH_FORMAT = new BooleanSetting("prefer_dash_format", true);
     public static final StringSetting DOWNLOAD_FILE_NAME_TEMPLATE =
             new StringSetting("download_file_name_template", DownloadFileNameFormatter.DEFAULT_TEMPLATE);
     // Should be kept empty by default as its handled in `StorageUtils.java`
