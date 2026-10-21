@@ -358,6 +358,10 @@
 
     <string name="piko_action_bar_button_settings_icon">Settings icon</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">Jump to oldest message icon</string>
+    <string name="piko_jump_oldest_started">Jumping to the oldest message, tap again to cancel</string>
+    <string name="piko_jump_oldest_cancelled">Cancelled</string>
+    <string name="piko_jump_oldest_stopped">Stopped waiting for older messages. Tap again to retry.</string>
     <string name="piko_action_bar_button_profile_info_icon">Profile info icon</string>
     <string name="piko_action_bar_button_create_icon">Create icon</string>
     <string name="piko_action_bar_button_notifications_icon">Notifications icon</string>
