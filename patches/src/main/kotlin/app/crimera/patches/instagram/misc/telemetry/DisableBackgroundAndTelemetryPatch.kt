@@ -43,6 +43,7 @@ val disableBackgroundManifestPatch =
     resourcePatch(
         name = "Disable background components",
         description = "Disables background services, receivers, tracking providers, and forces single-process execution.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
@@ -173,7 +174,7 @@ val disableBackgroundAndTelemetryPatch =
     bytecodePatch(
         name = "Disable background processes and telemetry",
         description = "Completely strips background sync, secondary daemons, analytics uploaders, tracking providers, and internal metric generation.",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(disableBackgroundManifestPatch)
