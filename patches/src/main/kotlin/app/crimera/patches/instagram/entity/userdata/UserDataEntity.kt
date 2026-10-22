@@ -46,6 +46,7 @@ val userDataEntity =
                 }
                 removeInstructions(0, instructions.size)
                 addInstructions(
+                    0,
                     """
                     iget-object v0, p0, $userObjectField
                     return-object v0
