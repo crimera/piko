@@ -171,6 +171,7 @@ public class MediaDownloader {
             final int finalNotificationId = notificationId;
             final String finalFileName = request.fileName;
             final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
+            final String completedToast = request.completedToast != null ? request.completedToast : downloadCompletedString;
 
             mainHandler.post(() -> {
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
@@ -182,7 +183,7 @@ public class MediaDownloader {
                 notificationManager.notify(finalNotificationId, builder.build());
 
                 try {
-                    PikoUtils.toast(downloadCompletedString);
+                    PikoUtils.toast(completedToast);
                 } catch (Exception ignored) {}
             });
         } catch (Exception e) {

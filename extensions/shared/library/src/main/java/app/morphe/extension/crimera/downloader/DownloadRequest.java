@@ -18,6 +18,8 @@ public class DownloadRequest {
     public String audioUrl;
     /** A complete file to download instead when merging the audio fails; null fails the download. */
     public String fallbackUrl;
+    /** Shown once the file is saved, instead of the usual completion toast; null for that one. */
+    public String completedToast;
 
     public DownloadRequest(String url, String subFolder, String fileName) {
         this.url = url;

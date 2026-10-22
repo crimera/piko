@@ -234,6 +234,7 @@
     <string name="piko_download_file_name_token_variant_suffix">Variant</string>
     <string name="piko_download_current_media">Download current media</string>
     <string name="piko_download_as_image">Download as image</string>
+    <string name="piko_saved_at">Saved at %s</string>
     <string name="piko_video_variants">Video variants</string>
     <string name="piko_image_variants">Image variants</string>
     <string name="piko_download_audio">Download audio</string>
