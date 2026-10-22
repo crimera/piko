@@ -69,7 +69,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.10.0](https://github.com/crimera/piko/releases/tag/v3.10.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;137 patches total
+> **[v3.11.0-dev.1](https://github.com/crimera/piko/releases/tag/v3.11.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;141 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
@@ -160,12 +160,12 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;62 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;66 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 447.0.0.55.81 |
+| 452.1.0.53.64 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
@@ -184,6 +184,8 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
 | [Disable ads](#disable-ads) |  |  |
 | [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
+| [Disable background components](#disable-background-components) | Disables background services, receivers, and tracking providers. |  |
+| [Disable background processes and telemetry](#disable-background-processes-and-telemetry) | Completely strips background sync, secondary daemons, analytics uploaders, tracking providers, and internal metric generation. |  |
 | [Disable comments](#disable-comments) | Disables comments and hides comment buttons and counts on posts and reels. |  |
 | [Disable discover people](#disable-discover-people) | Hides suggested accounts |  |
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
@@ -201,8 +203,10 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Filter stories](#filter-stories) | Filter stories to hide based on different categories |  |
 | [Focus Lock](#focus-lock) | Commitment mode for cutting down on Instagram. Pick what to block (Reels, Explore) and a duration; once locked those protections are forced on and cannot be switched off. Reels shared with you still open. Unlocking early requires a 24 hour cooling-off period, and resetting or importing settings is blocked while locked. |  |
 | [Friendship status indicator](#friendship-status-indicator) | Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click |  |
+| [Hidden chats](#hidden-chats) | Adds an option to the chat menu that moves the chat to a private inbox, opened by tapping the messages button several times. |  |
 | [Hide Reels follow button](#hide-reels-follow-button) | Removes the follow button from Reels. |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
+| [Hide hidden requests](#hide-hidden-requests) | Hides the hidden requests (spam) button in the message requests page |  |
 | [Hide notes tray](#hide-notes-tray) | Hides notes tray in DM section |  |
 | [Hide reshare button](#hide-reshare-button) | Hides the reshare button from both posts and reels. |  |
 | [Hide save buttons](#hide-save-buttons) | Hides save buttons on posts and reels |  |
