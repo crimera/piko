@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
@@ -65,6 +66,7 @@ val customizeNewXTimelineTabsPatch =
         name = "NewX: Customize timeline tabs",
         description = "Lets you hide the For You or Following tab from the NewX home timeline.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 

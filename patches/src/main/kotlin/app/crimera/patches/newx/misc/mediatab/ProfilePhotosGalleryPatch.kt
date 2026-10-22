@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.mediatab
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.inlineactions.newXThumbnailCachePatch
 import app.crimera.patches.common.flatMapParallel
@@ -1696,6 +1697,7 @@ val newXProfilePhotosGalleryPatch =
         name = "NewX: Gallery profile Photos tab",
         description = "Replaces the profile Photos timeline with a three-column media gallery.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch, newXDefaultMediaTabPatch, newXThumbnailCachePatch)
 

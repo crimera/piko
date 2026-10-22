@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
 import app.crimera.patches.settings.injectRead
@@ -246,6 +247,7 @@ val restoreTimelinePositionPatch =
         name = "NewX: Restore timeline position",
         description = "Persists supported timeline positions, then restores them after the app process restarts.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_TIMELINE_POSITION)
 
         val restoreTimelinePosition =

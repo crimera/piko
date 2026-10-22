@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
@@ -81,6 +82,7 @@ val restorePinnedHomeTabPatch =
         name = "NewX: Restore pinned home tab",
         description = "Reopens the pinned list, topic or community tab you last viewed when the app starts.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXToggle(

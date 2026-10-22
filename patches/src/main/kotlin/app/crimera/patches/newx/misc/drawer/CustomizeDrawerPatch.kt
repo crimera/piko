@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.drawer
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.MultiChoiceSettingDefinition
@@ -1398,6 +1399,7 @@ val customizeNewXDrawerPatch =
         name = "NewX: Customize drawer items",
         description = "Lets you hide selected items from the NewX navigation drawer, and optionally add Messages and Grok shortcuts.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXSettingsPatch)
         dependsOn(drawerResourceNamesPatch)

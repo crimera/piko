@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.mediasheet
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.settings.Categories
@@ -106,6 +107,7 @@ val customizeNewXMediaSheetPatch =
         name = "NewX: Customize media menu items",
         description = "Lets you hide selected items from the NewX photo and video long-press menu.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hiddenItems =

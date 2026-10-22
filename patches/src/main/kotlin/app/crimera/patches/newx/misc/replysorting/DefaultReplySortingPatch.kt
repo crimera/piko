@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.replysorting
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.settings.choice
@@ -235,6 +236,7 @@ val newXDefaultReplySortingPatch =
         name = "NewX: Set default reply sorting",
         description = "Lets you choose the default reply sorting order for NewX post detail.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXSettings {

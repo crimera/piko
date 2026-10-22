@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.common.flatMapParallel
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
@@ -149,6 +150,7 @@ val newXForYouTopicFilterPatch =
         name = "NewX: Filter For You by topic",
         description = "Restricts the NewX For You timeline to selected topics.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 

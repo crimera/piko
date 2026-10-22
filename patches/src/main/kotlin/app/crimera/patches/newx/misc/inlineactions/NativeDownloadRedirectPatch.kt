@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.inlineactions
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
@@ -118,6 +119,7 @@ val newXNativeDownloadRedirectPatch =
             "Saves media downloaded with NewX's own download buttons into the folders chosen " +
                 "for the download feature, using the configured filename template.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(
             newXInlineDownloadButtonPatch,

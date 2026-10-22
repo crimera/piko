@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.models.resolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.newXPostMediaModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
@@ -47,6 +48,7 @@ val newXShowSensitiveMediaPatch =
         name = "NewX: Show sensitive media",
         description = "Shows sensitive media without requiring confirmation in NewX.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXPostMediaModelResolutionPatch)
 

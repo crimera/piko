@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.blur
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
 import app.crimera.patches.settings.ToggleSettingDefinition
@@ -230,6 +231,7 @@ val newXDisableBlurPatch =
         description =
             "Disables Haze blur in NewX Compose UI while preserving configured fallback tint and scrim effects.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val disableBlur =

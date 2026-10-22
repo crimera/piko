@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.settings.group
@@ -97,6 +98,7 @@ val newXHideTimelineTabsBarPatch =
         name = "NewX: Hide timeline tabs bar",
         description = "Removes the For You and Following tabs bar from NewX home timelines, with an option to hide the add-tab (+) button.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val (hideTimelineTabsBar, hideTimelineAddTab) =

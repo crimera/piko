@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.postoptions
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
@@ -93,6 +94,7 @@ val customizeNewXPostOptionsPatch =
         name = "NewX: Customize post menu items",
         description = "Lets you hide selected items from the NewX post menu.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
 

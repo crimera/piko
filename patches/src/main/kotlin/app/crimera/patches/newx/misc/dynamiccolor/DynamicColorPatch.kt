@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.dynamiccolor
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.settings.choice
@@ -194,6 +195,7 @@ val dynamicColorPatch =
             "Chooses between the original NewX colors and the Material You, high-contrast, " +
                 "and Dim themes.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
 

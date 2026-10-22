@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.serverlogging
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
@@ -163,6 +164,7 @@ val newXServerLoggingPatch =
         description = "Captures parsed NewX server errors in memory and exports them on demand.",
         default = false,
     ) {
+        unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 

@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.navbar.packedSwitchCases
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
@@ -602,6 +603,7 @@ val newXHidePostDividersPatch =
         name = "NewX: Hide post dividers",
         description = "Removes post and reply dividers shown in NewX timelines.",
     ) {
+        unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hidePostDividers =

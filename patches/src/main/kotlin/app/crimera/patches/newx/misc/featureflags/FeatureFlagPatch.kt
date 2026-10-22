@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.featureflags
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
@@ -137,6 +138,7 @@ val featureFlagPatch =
         name = "NewX: Feature switch overrides",
         description = "Adds searchable, typed NewX feature switch overrides.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXSettings {

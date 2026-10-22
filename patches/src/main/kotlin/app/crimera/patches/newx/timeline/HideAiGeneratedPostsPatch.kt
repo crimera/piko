@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.choice
 import app.crimera.patches.settings.multiChoice
@@ -38,6 +39,7 @@ val newXHideAiGeneratedPostsPatch =
         name = "NewX: Hide AI-generated posts",
         description = "Hides selected AI-generated posts from NewX timelines.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineModelAdapterPatch, newXPostModelResolutionPatch, newXTimelineFilterPatch)
 

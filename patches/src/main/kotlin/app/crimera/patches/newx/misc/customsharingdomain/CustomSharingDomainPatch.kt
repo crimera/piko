@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.customsharingdomain
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXTextInput
@@ -275,6 +276,7 @@ val newXCustomSharingDomainPatch =
         name = "NewX: Custom sharing domain",
         description = "Allows for using domains like fxtwitter when sharing tweets/posts.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXTextInput(

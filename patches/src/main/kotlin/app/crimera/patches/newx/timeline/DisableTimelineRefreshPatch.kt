@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
 import app.crimera.patches.settings.injectRead
@@ -156,6 +157,7 @@ val disableTimelineRefreshPatch =
         name = "NewX: Disable automatic timeline refresh",
         description = "Prevents automatic timeline jumps on startup and foregrounding.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val disableTimelineRefresh =

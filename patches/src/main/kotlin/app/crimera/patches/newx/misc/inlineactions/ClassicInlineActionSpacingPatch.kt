@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.inlineactions
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.models.NewXInlineActionKindShape
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionBarLayout
 import app.crimera.patches.newx.models.INLINE_ACTION_BAR_SCOPE
@@ -69,6 +70,7 @@ val classicInlineActionSpacingPatch =
                 "size, so hiding an action never leaves a gap.",
         default = true,
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
 

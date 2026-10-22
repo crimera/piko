@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.profiletabs
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.OBJECT_MOVE_OPCODES
@@ -118,6 +119,7 @@ val customizeNewXProfileTabsPatch =
         name = "NewX: Customize profile tabs",
         description = "Reorder and hide the tabs shown on profile screens.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 

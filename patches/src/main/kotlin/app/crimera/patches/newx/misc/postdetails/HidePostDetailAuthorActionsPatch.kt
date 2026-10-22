@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.postdetails
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
@@ -300,6 +301,7 @@ val newXHidePostDetailAuthorActionsPatch =
         name = "NewX: Hide post author actions",
         description = "Hides the Follow and Message buttons for post authors on post details.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hidePostDetailAuthorActions =

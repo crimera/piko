@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.bringbacktwitter
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.requireAtMostOne
 import app.morphe.patcher.patch.resourcePatch
@@ -27,6 +28,7 @@ val bringBackTwitterPatch =
         description = "Bring back old Twitter icons and name",
         default = false,
     ) {
+        unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
 
         dependsOn(addResourcesPatch, restoreTwitterTopBarLogoPatch)

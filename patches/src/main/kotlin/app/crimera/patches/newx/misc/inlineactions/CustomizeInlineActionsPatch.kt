@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.inlineactions
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.models.requirePublicFields
 import app.crimera.patches.newx.models.resolveMutableMethodOwner
 import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
@@ -38,6 +39,7 @@ val customizeNewXInlineActionsPatch =
         name = "NewX: Customize inline actions",
         description = "Lets you hide selected actions from NewX post action bars.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch, newXInlineActionBarModelResolutionPatch)
 

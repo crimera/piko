@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.postdetails
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.InjectedSettingRead
 import app.crimera.patches.settings.SettingReadRegisterConstraint
@@ -936,6 +937,7 @@ val newXHidePostReplyBarPatch =
         name = "NewX: Hide post reply bar",
         description = "Hides the persistent post-detail reply bar while keeping the compose button available.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hidePostReplyBar =

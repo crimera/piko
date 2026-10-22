@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.navbar
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.newx.misc.drawer.isDrawerRowRenderer
 import app.crimera.patches.newx.misc.drawer.isStringResourceLookup
@@ -122,6 +123,7 @@ val customizeNewXNavBarPatch =
         name = "NewX: Customize navigation bar",
         description = "Reorder, hide, and replace NewX bottom navigation bar items.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 

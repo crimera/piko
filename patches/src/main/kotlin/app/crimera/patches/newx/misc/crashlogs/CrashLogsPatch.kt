@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.crashlogs
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
@@ -53,6 +54,7 @@ val newXCrashLogsPatch =
         name = "NewX: Crash logs",
         description = "Saves crash logs and shows a notification with share and copy actions.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch, newXCrashLogsResourcePatch)
 

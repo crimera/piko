@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.inlineactions
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionBarModels
@@ -102,6 +103,7 @@ val newXInlineDownloadButtonPatch =
             "Adds a Download button below NewX posts and saves media to a folder you choose, " +
                 "with a customizable filename template.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(
             customizeNewXInlineActionsPatch,

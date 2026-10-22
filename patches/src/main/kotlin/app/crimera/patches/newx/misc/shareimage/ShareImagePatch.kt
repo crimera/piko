@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.shareimage
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.postoptions.SHARE_IMAGE_ACTION
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
 import app.crimera.patches.newx.models.fieldForToStringLabel
@@ -55,6 +56,7 @@ val newXShareImagePatch =
         description = "Adds a rendered-image share action to NewX post menus.",
         default= false,
     ) {
+        unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXToggle(

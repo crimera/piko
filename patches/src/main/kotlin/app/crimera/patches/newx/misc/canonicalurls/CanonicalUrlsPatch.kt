@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.canonicalurls
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.newXPostModelResolutionPatch
@@ -131,6 +132,7 @@ val newXCanonicalUrlsPatch =
         description =
             "Opens the expanded (canonical) URL directly when clicking links instead of the shortened t.co link.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXPostModelResolutionPatch, newXExtensionPatch)
 

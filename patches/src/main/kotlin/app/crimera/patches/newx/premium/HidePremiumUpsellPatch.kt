@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.premium
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
 import app.crimera.patches.settings.injectRead
@@ -198,6 +199,7 @@ val hidePremiumUpsellPatch =
         name = "NewX: Hide premium upsell",
         description = "Hides the premium upsell chip from the NewX home top bar.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hidePremiumUpsell =

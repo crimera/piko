@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.customfont
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.action
 import app.crimera.patches.settings.group
@@ -123,6 +124,7 @@ val customFontPatch =
         name = "NewX: Custom font",
         description = "Customise font style",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXSettings {

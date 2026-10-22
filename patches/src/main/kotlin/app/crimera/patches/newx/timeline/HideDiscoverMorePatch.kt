@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.models.newXTimelineModelAdapterPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.settingStrings
@@ -14,6 +15,7 @@ val newXHideDiscoverMorePatch =
         name = "NewX: Hide Discover more",
         description = "Removes the Discover more module from post-detail timelines.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineModelAdapterPatch, newXTimelineFilterPatch)
 

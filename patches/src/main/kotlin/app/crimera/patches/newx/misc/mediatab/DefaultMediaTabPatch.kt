@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.mediatab
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.choice
 import app.crimera.patches.settings.settingStrings
@@ -145,6 +146,7 @@ val newXDefaultMediaTabPatch =
         name = "NewX: Set default media tab",
         description = "Lets you choose the default sub-tab (Photos or Videos) for the NewX profile media tab.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXSingleChoice(

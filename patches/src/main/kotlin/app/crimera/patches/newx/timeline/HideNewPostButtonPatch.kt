@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.settings.returnVoidIfEnabled
@@ -169,6 +170,7 @@ val hideNewPostButtonPatch =
         name = "NewX: Hide compose button",
         description = "Removes the compose button from NewX timelines.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hideNewPostButton =

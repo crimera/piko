@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.videoscrolling
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
 import app.crimera.patches.settings.ToggleSettingDefinition
@@ -181,6 +182,7 @@ val newXDisableVideoScrollingPatch =
         description =
             "Disables vertical swipes in the NewX video player while keeping playback controls and other gestures available.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val disableVideoScrolling =
