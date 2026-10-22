@@ -34,6 +34,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -41,7 +42,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
-private const val ANDROID_SCOPE = "Lcom/x/android/"
 private const val URT_UI_SCOPE = "Lcom/x/urt/ui/"
 private const val COMPOSE_RUNTIME_INTERNAL_SCOPE = "Landroidx/compose/runtime/internal/"
 private const val MATERIAL3_SCOPE = "Landroidx/compose/material3/"
@@ -54,20 +54,58 @@ private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val TIMELINE_HEADER_KEY_ANCHOR = "timeline_header_key"
 private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
-/** The synthetic Compose lambda wraps the post content in the optional divider container. */
-private object NewXPostDividerRendererFingerprint : Fingerprint(
-    definingClass = ANDROID_SCOPE,
-    name = "invoke",
-    parameters = listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR),
-    returnType = OBJECT_DESCRIPTOR,
-    custom = { method, classDef ->
-        val packageRelativeName = classDef.type.removePrefix(ANDROID_SCOPE)
-        classDef.type.startsWith(ANDROID_SCOPE) &&
-            !packageRelativeName.contains('/') &&
-            classDef.methods.any(Method::isPostDividerWrapperConstructor) &&
-            method.instructions.count(Instruction::isPostDividerCall) in 1..2
-    },
+/** Resolve the content/divider implementation, not an R8-merged synthetic caller. */
+private object NewXPostDividerHelperFingerprint : Fingerprint(
+    returnType = "V",
+    custom = { method, _ -> method.isPostDividerContentHelper() },
 )
+
+/** The boolean must guard only the Material divider after the captured content was rendered. */
+internal fun Method.isPostDividerContentHelper(): Boolean {
+    if (!AccessFlags.STATIC.isSet(accessFlags) || returnType != "V") return false
+    val parameters = parameterDescriptors()
+    if (parameters.count { it == MODIFIER_DESCRIPTOR } != 1 ||
+        parameters.count { it == "Z" } != 1 ||
+        parameters.count { it == COMPOSER_DESCRIPTOR } != 1 ||
+        parameters.count { it.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) } != 1 ||
+        parameters.none { it == INSETS_DESCRIPTOR } ||
+        parameters.any {
+            it !in setOf(MODIFIER_DESCRIPTOR, "Z", COMPOSER_DESCRIPTOR, INSETS_DESCRIPTOR) &&
+                !it.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE)
+        }
+    ) return false
+    val implementation = implementation ?: return false
+    val code = instructions.toList()
+    val parameterStart = implementation.registerCount - parameters.size
+    val contentRegister = parameterStart + parameters.indexOfFirst { it.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) }
+    val visibleRegister = parameterStart + parameters.indexOf("Z")
+    val contentCalls = code.indices.filter { index ->
+        val call = code[index].getReference<MethodReference>() ?: return@filter false
+        call.definingClass.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) &&
+            call.name == "invoke" && call.parameterTypes.map(CharSequence::toString) ==
+            listOf(OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR) && call.returnType == OBJECT_DESCRIPTOR &&
+            code[index].opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
+            code[index].registersUsed.firstOrNull()?.let {
+                code.valueReachesRegister(-1, contentRegister, index, it)
+            } == true
+    }
+    if (contentCalls.size != 1) return false
+    val dividers = code.indices.filter { code[it].isMaterial3DividerCall() }
+    if (dividers.size != 1) return false
+    val contentIndex = contentCalls.single()
+    val dividerIndex = dividers.single()
+    val addresses = code.runningFold(0) { offset, instruction -> offset + instruction.codeUnits }
+    return code.indices.count { index ->
+        val branch = code[index]
+        index > contentIndex && index < dividerIndex && branch.opcode == Opcode.IF_EQZ &&
+            (branch as? OneRegisterInstruction)?.registerA == visibleRegister &&
+            code.take(index).none { it.destinationRegisterOrNull() == visibleRegister } &&
+            (branch as? OffsetInstruction)?.let {
+                val target = addresses[index] + it.codeOffset
+                target > addresses[dividerIndex] && target in addresses.dropLast(1)
+            } == true
+    } == 1
+}
 
 /** The reply facepile draws another connector behind the stacked reply avatars. */
 private object NewXReplyFacepileDividerFingerprint : Fingerprint(
@@ -105,34 +143,6 @@ private data class ReplyFacepileDrawCall(
     val inputModifierRegister: Int,
     val resultRegister: Int,
 )
-
-/**
- * The divider wrapper captures (modifier, boolean, post model, layout data) and, before 12.30, a
- * trailing changed-flag int. R8 dropped the trailing int on 12.30, so accept either arity.
- */
-private fun Method.isPostDividerWrapperConstructor(): Boolean =
-    name == "<init>" &&
-        parameterTypes.map(CharSequence::toString).let { parameters ->
-            (parameters.size == 4 || parameters.size == 5) &&
-                parameters[0] == MODIFIER_DESCRIPTOR &&
-                parameters[1] == "Z" &&
-                parameters[2].isObjectDescriptor() &&
-                parameters[3].isObjectDescriptor() &&
-                (parameters.size == 4 || parameters[4] == INSETS_DESCRIPTOR)
-        }
-
-private fun Instruction.isPostDividerCall(): Boolean {
-    if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
-    val reference = getReference<MethodReference>() ?: return false
-    val parameters = reference.parameterTypes.map(CharSequence::toString)
-    return reference.returnType == "V" &&
-        parameters.size == 6 &&
-        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
-        parameters.count { it == "Z" } == 1 &&
-        parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
-        parameters.count { it == INSETS_DESCRIPTOR } == 2 &&
-        parameters.count { it.startsWith(COMPOSE_RUNTIME_INTERNAL_SCOPE) } == 1
-}
 
 private fun Instruction.isDrawModifierCall(): Boolean {
     if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
@@ -235,7 +245,6 @@ private fun Method.hasReplyFacepileDividerFlow(): Boolean {
     }
 }
 
-private fun String.isObjectDescriptor(): Boolean = startsWith('L') && endsWith(';')
 
 private fun Instruction.isLazyListItemCall(): Boolean {
     if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
@@ -396,19 +405,6 @@ private fun Instruction.isMaterial3DividerCall(): Boolean {
         "J" in parameters &&
         COMPOSER_DESCRIPTOR in parameters &&
         MODIFIER_DESCRIPTOR in parameters
-}
-
-private fun resolvePostDividerHelper(method: Method): MethodReference {
-    val helperReferences =
-        method.instructions
-            .mapNotNull { instruction ->
-                if (!instruction.isPostDividerCall()) return@mapNotNull null
-                instruction.getReference<MethodReference>()
-            }.distinctBy(MethodReference::toString)
-    return requireExactlyOne(
-        label = "NewX post divider helper",
-        candidates = helperReferences,
-    )
 }
 
 /**
@@ -616,11 +612,10 @@ val newXHidePostDividersPatch =
         execute {
             val renderer =
                 requireExactlyOne(
-                    label = "NewX post divider renderer",
-                    candidates = NewXPostDividerRendererFingerprint.scopedMatchAllOrNull().orEmpty(),
+                    label = "NewX post content divider helper",
+                    candidates = NewXPostDividerHelperFingerprint.scopedMatchAllOrNull().orEmpty(),
                 )
-            val dividerHelper = resolvePostDividerHelper(renderer.method)
-            patchPostDividerHelper(dividerHelper, hidePostDividers)
+            patchPostDividerHelper(renderer.method, hidePostDividers)
 
             patchReplyFacepileDivider(hidePostDividers)
             patchTimelineModuleDividers(hidePostDividers)

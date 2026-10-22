@@ -892,7 +892,8 @@ val restoreTimelinePositionPatch =
                         if (instruction.opcode != Opcode.INSTANCE_OF) return@mapNotNull null
                         instruction.getReference<TypeReference>()?.type
                     }.distinct().filter { stateType ->
-                        val stateClass = mutableClassDefBy(stateType)
+                        // Platform interfaces (for example Collection) are not APK-defined state classes.
+                        val stateClass = classDefByOrNull(stateType) ?: return@filter false
                         stateClass.interfaces.contains(stateInterface) &&
                             stateClass.fields.any { field ->
                                 !AccessFlags.STATIC.isSet(field.accessFlags) &&

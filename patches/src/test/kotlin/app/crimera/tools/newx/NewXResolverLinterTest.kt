@@ -7,6 +7,9 @@ import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.isLegacyInlineActionKindModelConstructor
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
+import app.crimera.patches.newx.timeline.isPostDividerContentHelper
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
+import com.android.tools.smali.dexlib2.Opcode
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
 import app.crimera.patches.newx.timeline.readsArrayListFromParameter
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
@@ -31,6 +34,37 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
+    @Test
+    fun `post divider discovery survives merged callers and rejects unguarded drawing`() {
+        // Both 12.35 prod and 12.36 beta have this same helper; only their synthetic callers moved.
+        assertTrue(dividerContentFixture(guarded = true).isPostDividerContentHelper())
+        assertFalse(dividerContentFixture(guarded = false).isPostDividerContentHelper())
+        assertFalse(dividerContentFixture(guarded = true, overwriteVisibility = true).isPostDividerContentHelper())
+    }
+
+    private fun dividerContentFixture(guarded: Boolean, overwriteVisibility: Boolean = false): Method {
+        val implementation = MethodImplementationBuilder(15)
+        implementation.addInstruction(
+            "invoke-virtual {v12, v11, v0}, Landroidx/compose/runtime/internal/Fixture;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;".toInstruction(),
+        )
+        if (overwriteVisibility) implementation.addInstruction("const/4 v14, 0x0".toInstruction())
+        if (guarded) {
+            implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 14, implementation.getLabel("afterDivider")))
+        }
+        implementation.addInstruction(
+            "invoke-static/range {v0 .. v6}, Landroidx/compose/material3/Fixture;->draw(FIIJLandroidx/compose/runtime/Composer;Landroidx/compose/ui/Modifier;)V".toInstruction(),
+        )
+        implementation.addLabel("afterDivider")
+        implementation.addInstruction("return-void".toInstruction())
+        return ImmutableMethod(
+            "Lfixture/MovedContentDivider;", "render",
+            listOf("I", "I", "Landroidx/compose/runtime/Composer;", "Landroidx/compose/runtime/internal/Fixture;", "Landroidx/compose/ui/Modifier;", "Z")
+                .map { ImmutableMethodParameter(it, emptySet(), null) },
+            "V", AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+            emptySet<ImmutableAnnotation>(), emptySet<HiddenApiRestriction>(), implementation.methodImplementation,
+        )
+    }
+
     @Test
     fun `new-post resolver survives null-check churn and rejects modifier lookalike`() {
         val controlRenderer = newPostRendererFixture(namedNullCheck = true, directModifier = true)

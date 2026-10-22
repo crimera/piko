@@ -113,6 +113,8 @@ private fun MutableMethod.insertReplySortingDefault(
  * TimelineRankingMode.Relevance before the repository factory call.
  */
 private object NewXComposeReplySortingFingerprint : ShapeFingerprint(
+    // The repository lookup can precede or follow the Relevance seed after R8 scheduling.
+    strings = listOf("timelineRepository"),
     name = "invokeSuspend",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
@@ -127,7 +129,6 @@ private object NewXComposeReplySortingFingerprint : ShapeFingerprint(
                 opcode = Opcode.SGET_OBJECT,
                 name = "Relevance",
             ),
-            string("timelineRepository"),
         ),
 )
 
