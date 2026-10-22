@@ -138,6 +138,13 @@ public class MediaDownloader {
                         throw new IOException("Could not open download file");
                     }
                     download(request.url, output, builder, notificationId);
+                } catch (IOException downloadException) {
+                    if (request.fallbackUrl == null) throw downloadException;
+                    PikoUtils.logger(downloadException);
+                    try (OutputStream output = new BufferedOutputStream(openOutput(outputDocumentUri))) {
+                        download(request.fallbackUrl, output, builder, notificationId);
+                    }
+                    request.completedToast = null;
                 }
             } else {
                 // Anything that needs rewriting is fetched to the cache first, then remuxed into place.

@@ -271,6 +271,7 @@ public class DownloadUtils {
                 EmbedCover embed = EmbedCover.largerThan(shortcode, mediaId, coverShortSide);
                 Utils.runOnMainThread(() -> {
                     if (embed != null) {
+                        request.fallbackUrl = request.url;
                         request.url = embed.url;
                         request.completedToast = str("piko_saved_at", embed.width + "x" + embed.height);
                     }
