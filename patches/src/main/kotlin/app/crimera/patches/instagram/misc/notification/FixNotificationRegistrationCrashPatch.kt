@@ -13,9 +13,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.getFreeRegisterProvider
-import app.morphe.util.matchSingle
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.getFreeRegisterProvider
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val PENDING_INTENT_CLASS = "Landroid/app/PendingIntent;"

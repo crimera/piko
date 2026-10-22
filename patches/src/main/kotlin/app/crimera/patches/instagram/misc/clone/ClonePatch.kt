@@ -16,7 +16,7 @@ import app.morphe.util.asSequence
 import app.morphe.util.findElementByAttributeValue
 import app.morphe.util.findMutableMethodOf
 import app.morphe.util.forEachChildElement
-import app.morphe.util.getReference
+import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction

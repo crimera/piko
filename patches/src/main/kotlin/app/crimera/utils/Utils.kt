@@ -17,9 +17,9 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValue
-import app.morphe.util.getReference
+import app.morphe.patcher.util.getReference
 import app.morphe.util.inputStreamFromBundledResource
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderInstruction

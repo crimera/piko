@@ -16,7 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 
 private object BenefitCheckLoggingFingerprint : Fingerprint(
     strings = listOf("is_benefit_active"),

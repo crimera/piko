@@ -15,11 +15,11 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.util.findFreeRegister
-import app.morphe.util.getReference
-import app.morphe.util.matchSingle
-import app.morphe.util.p0Register
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.StringReference

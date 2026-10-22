@@ -34,10 +34,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.util.findFreeRegister
+import app.morphe.patcher.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstructionOrThrow
-import app.morphe.util.matchSingle
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 

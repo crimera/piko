@@ -16,12 +16,12 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.getReference
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.getReference
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
-import app.morphe.util.matchSingle
-import app.morphe.util.registersUsed
-import app.morphe.util.writeRegister
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
+import app.morphe.patcher.util.writeRegister
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference

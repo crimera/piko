@@ -16,7 +16,7 @@ import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.getReference
+import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import kotlin.properties.Delegates
 

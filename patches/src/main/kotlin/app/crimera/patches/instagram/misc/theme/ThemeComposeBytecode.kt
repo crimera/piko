@@ -11,7 +11,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.util.p0Register
+import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 context(patchContext: BytecodePatchContext)

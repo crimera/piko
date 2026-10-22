@@ -13,8 +13,8 @@ import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.registersUsed
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.registersUsed
+import app.morphe.patcher.util.matchSingle
 
 @Suppress("unused")
 val hookOverflowMenuButton =

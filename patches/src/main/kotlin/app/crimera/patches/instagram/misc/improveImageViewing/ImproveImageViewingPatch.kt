@@ -12,7 +12,7 @@ import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.registersUsed
 
 @Suppress("unused")
 val improveImageViewingPatch =

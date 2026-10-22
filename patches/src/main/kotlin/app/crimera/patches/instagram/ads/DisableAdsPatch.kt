@@ -24,7 +24,7 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val MEDIA_CLASS = "Lcom/instagram/feed/media/Media;"

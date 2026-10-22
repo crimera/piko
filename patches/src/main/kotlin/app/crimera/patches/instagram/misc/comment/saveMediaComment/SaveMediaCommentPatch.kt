@@ -21,7 +21,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 
 @Suppress("unused")
 val saveMediaCommentPatch =

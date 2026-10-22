@@ -20,7 +20,7 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
+import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
 
 internal object ShareSheetItemsBinderFingerprint : Fingerprint(

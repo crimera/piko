@@ -16,8 +16,8 @@ import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.util.addInstructionsAtControlFlowLabel
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
