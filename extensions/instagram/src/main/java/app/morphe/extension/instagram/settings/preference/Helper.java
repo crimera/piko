@@ -115,6 +115,8 @@ public class Helper {
 
     public Preference navigationBarPreference(String title, String summary) {
         NavigationBarPreference preference = new NavigationBarPreference(context);
+        preference.setPersistent(false);
+        preference.setKey("piko_navigation_tabs");
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setSingleLineTitle(false);
@@ -123,6 +125,7 @@ public class Helper {
 
     public Preference navigationStartupPreference(String title, String summary) {
         NavigationStartupPreference preference = new NavigationStartupPreference(context);
+        preference.setKey("piko_navigation_startup_tab");
         preference.setTitle(title);
         preference.setDialogTitle(title);
         preference.setSummary(summary);

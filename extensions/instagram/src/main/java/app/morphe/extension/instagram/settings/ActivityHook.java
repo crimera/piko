@@ -39,10 +39,17 @@ public class ActivityHook {
     }
 
     public static void startPikoActivity(String fragment_name,String title){
+        startPikoActivity(fragment_name, title, null);
+    }
+
+    public static void startPikoActivity(String fragment_name, String title, String targetPreferenceKey){
         Context context = PikoUtils.getContext();
         Intent intent = new Intent(context, SettingsActivity.class);
         intent.putExtra(Constants.PIKO_FRAGMENT_NAME, fragment_name);
         intent.putExtra(Constants.PIKO_FRAGMENT_TITLE, title);
+        if (targetPreferenceKey != null && !targetPreferenceKey.isEmpty()) {
+            intent.putExtra(Constants.PIKO_SEARCH_TARGET_PREFERENCE_KEY, targetPreferenceKey);
+        }
         launchActivity(context,intent);
     }
 

@@ -371,6 +371,9 @@
 
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
+    <string name="piko_settings_search_hint">Search</string>
+    <string name="piko_settings_search_clear">Clear search</string>
+    <string name="piko_settings_search_no_results">No results found</string>
 
     <!-- Font Section -->
     <string name="piko_category_font">Font</string>

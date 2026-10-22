@@ -49,6 +49,54 @@ public class ScreenBuilder {
         this.helper = helper;
     }
 
+    public void buildFragment(String fragmentName) {
+        if (Constants.PIKO_FRAGMENT_SETTINGS.equals(fragmentName)) {
+            buildSettingsPage();
+        } else if (Constants.PIKO_FRAGMENT_ADS.equals(fragmentName)) {
+            buildAdsSection();
+        } else if (Constants.PIKO_FRAGMENT_GHOST.equals(fragmentName)) {
+            ghostSection();
+        } else if (Constants.PIKO_FRAGMENT_STORY.equals(fragmentName)) {
+            storySection();
+        } else if (Constants.PIKO_FRAGMENT_LINKS.equals(fragmentName)) {
+            linksSection();
+        } else if (Constants.PIKO_FRAGMENT_DISTRACTION_FREE.equals(fragmentName)) {
+            distractionFreeSection();
+        } else if (Constants.PIKO_FRAGMENT_MISC.equals(fragmentName)) {
+            buildMiscSection();
+        } else if (Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA.equals(fragmentName)) {
+            buildDownloadSection();
+        } else if (Constants.PIKO_FRAGMENT_NAV_BTNS.equals(fragmentName)) {
+            buildNavigationSection();
+        } else if (Constants.PIKO_FRAGMENT_DEV_OPTIONS.equals(fragmentName)) {
+            buildDeveloperSection();
+        } else if (Constants.PIKO_FRAGMENT_ABOUT.equals(fragmentName)) {
+            aboutSection(SettingsStatus.FLAGS);
+        } else if (Constants.PIKO_FRAGMENT_ACTION_BAR.equals(fragmentName)) {
+            buildActionBarSection();
+        } else if (Constants.PIKO_FRAGMENT_DM.equals(fragmentName)) {
+            dmSection();
+        } else if (Constants.PIKO_FRAGMENT_FILTER_CONTENT.equals(fragmentName)) {
+            filterContentSection();
+        } else if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
+            buildRecommendedFlagsSection();
+        } else if (Constants.PIKO_FRAGMENT_FOCUS_LOCK.equals(fragmentName)) {
+            buildFocusLockSection();
+        } else if (Constants.PIKO_FRAGMENT_INSTANTS.equals(fragmentName)) {
+            buildInstantsSection();
+        } else if (Constants.PIKO_FRAGMENT_FONT.equals(fragmentName)) {
+            buildFontSection();
+        }
+    }
+
+    public void buildFragmentForSearch(String fragmentName) {
+        if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
+            buildRecommendedFlagsSection(false);
+        } else {
+            buildFragment(fragmentName);
+        }
+    }
+
     private void addPreference(Preference pref) {
         addPreference(null, pref);
     }
@@ -973,7 +1021,10 @@ public class ScreenBuilder {
     }
 
     public void buildRecommendedFlagsSection() {
+        buildRecommendedFlagsSection(true);
+    }
 
+    private void buildRecommendedFlagsSection(boolean notifyErrors) {
         long lastModified = RecommendedFlags.getLastModified();
         String lastModifiedAtString = "";
         if (lastModified > 0L) {
@@ -990,7 +1041,7 @@ public class ScreenBuilder {
                     "piko_rec_flags_refresh_file"
             )
         );
-        List<Flag> recFlags = RecommendedFlags.getFlags();
+        List<Flag> recFlags = RecommendedFlags.getFlags(notifyErrors);
         // The flag names will be English only,
         // as I want to keep it as a live service
         // rather than triggering new build
@@ -1025,7 +1076,7 @@ public class ScreenBuilder {
                 helper.buttonPreference(
                         appVersionText,
                         "",
-                        appVersionText
+                        Constants.PIKO_APP_VERSION_PREFERENCE
                 )
         );
 
@@ -1033,7 +1084,7 @@ public class ScreenBuilder {
                 helper.buttonPreference(
                         patchVersionText,
                         "",
-                        patchVersionText
+                        Constants.PIKO_PATCH_VERSION_PREFERENCE
                 )
         );
 
@@ -1070,6 +1121,7 @@ public class ScreenBuilder {
         );
 
         PreferenceCategory category = addCategory(str("piko_patch_info_title"));
+        category.setKey(Constants.PIKO_PATCH_INFO_PREFERENCE_CATEGORY);
         String enabledStr = str("piko_patch_enabled");
         String disabledStr = str("piko_patch_disabled");
 

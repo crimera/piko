@@ -35,6 +35,10 @@ public class Constants {
 
     public static final String PIKO_FRAGMENT_TITLE = "piko_frag_title";
     public static final String PIKO_FRAGMENT_NAME = "piko_frag_name";
+    public static final String PIKO_SEARCH_TARGET_PREFERENCE_KEY = "piko_search_target_preference_key";
+    public static final String PIKO_APP_VERSION_PREFERENCE = "piko_app_version_preference";
+    public static final String PIKO_PATCH_VERSION_PREFERENCE = "piko_patch_version_preference";
+    public static final String PIKO_PATCH_INFO_PREFERENCE_CATEGORY = "piko_patch_info_preference_category";
 
     public static final String PIKO_FRAGMENT_SETTINGS = "piko_frag_settings";
     public static final String PIKO_FRAGMENT_ADS = "piko_frag_ads";
