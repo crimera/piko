@@ -10,7 +10,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 
 internal object ReelOnDoubleTapFingerprint : Fingerprint(
     parameters = listOf("Landroid/view/MotionEvent;"),

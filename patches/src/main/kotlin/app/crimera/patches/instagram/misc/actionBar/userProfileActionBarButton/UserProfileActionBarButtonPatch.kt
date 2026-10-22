@@ -23,10 +23,10 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.getFreeRegisterProvider
+import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.addInstructionsAtControlFlowLabel
-import app.morphe.util.getFreeRegisterProvider
-import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction

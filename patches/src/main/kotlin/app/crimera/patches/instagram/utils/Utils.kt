@@ -13,7 +13,7 @@ import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.util.getReference
+import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference

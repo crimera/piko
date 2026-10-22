@@ -17,8 +17,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.matchSingle
 
 private const val HIDE_SHARE_BUTTON = "$PREF_CALL_DESCRIPTOR->hideShareButton()Z"
 

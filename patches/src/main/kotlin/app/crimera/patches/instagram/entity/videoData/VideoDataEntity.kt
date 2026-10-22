@@ -9,7 +9,7 @@ package app.crimera.patches.instagram.entity.videoData
 import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 
 val videoDataEntity =
     bytecodePatch(

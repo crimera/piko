@@ -17,9 +17,9 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValue
-import app.morphe.util.getReference
+import app.morphe.patcher.util.getReference
 import app.morphe.util.inputStreamFromBundledResource
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderInstruction
@@ -48,7 +48,7 @@ fun ResourcePatchContext.replaceXmlResources(
             val targetFile = "res/$sourceFile"
 
             // If target file doesn't exist, use copyResources as fallback
-            if (!get("res").resolve(sourceFile).exists()) {
+            if (!get(targetFile).exists()) {
                 copyResources(sourceResourceDirectory, resourceGroup)
                 return@forEach
             }
@@ -85,7 +85,7 @@ fun ResourcePatchContext.replaceStringsInFile(
     resourceGroups.forEach { resourceGroup ->
         resourceGroup.resources.forEach { resource ->
             val sourcePath = "${resourceGroup.resourceDirectoryName}/$resource"
-            val sourceFile = get("res").resolve(sourcePath)
+            val sourceFile = get("res/$sourcePath")
             if (sourceFile.exists()) {
                 var content = sourceFile.readText()
 

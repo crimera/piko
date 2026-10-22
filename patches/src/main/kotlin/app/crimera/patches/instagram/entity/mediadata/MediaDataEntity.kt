@@ -19,7 +19,7 @@ import app.crimera.utils.changeString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 
 val mediaDataEntity =
     bytecodePatch(

@@ -14,7 +14,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
 
 val userDataEntity =
@@ -46,6 +46,7 @@ val userDataEntity =
                 }
                 removeInstructions(0, instructions.size)
                 addInstructions(
+                    0,
                     """
                     iget-object v0, p0, $userObjectField
                     return-object v0

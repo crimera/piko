@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.registersUsed
 
 internal object StoryRingBuilderFingerprint : Fingerprint(
     returnType = "V",

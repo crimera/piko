@@ -10,7 +10,7 @@ import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.matchSingle
 
 val developerOptionsEntity =
     bytecodePatch(

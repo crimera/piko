@@ -11,13 +11,12 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.PatchException
-import app.morphe.util.matchSingle
-import app.morphe.util.registersUsed
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 object TigonServiceLayerStartRequestFingerprint : Fingerprint(

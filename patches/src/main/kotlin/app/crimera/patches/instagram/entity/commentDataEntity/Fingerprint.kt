@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.StringComparisonType
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
@@ -61,7 +62,12 @@ internal object GetCommentUserDataExtension : Fingerprint(
 // --------------------
 
 internal object RandomGetCommentObjectMediaFingerprint : Fingerprint(
-    strings = listOf("commentId=", "parentCommentId=", "sourceMediaId=", "photo_comment_child_missing_overlay_info"),
+    strings = listOf(
+        string("commentId="),
+        string("parentCommentId=", StringComparisonType.CONTAINS),
+        string("sourceMediaId=", StringComparisonType.CONTAINS),
+        string("photo_comment_child_missing_overlay_info"),
+    ),
     filters = listOf(
         // Comment photo wrapper.
         methodCall(

@@ -41,9 +41,9 @@ import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
-import app.morphe.util.findFreeRegister
-import app.morphe.util.matchSingle
-import app.morphe.util.p0Register
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method

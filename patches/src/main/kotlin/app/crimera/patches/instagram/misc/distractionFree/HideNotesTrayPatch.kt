@@ -18,7 +18,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
+import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
