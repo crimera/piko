@@ -16,8 +16,10 @@ public class DownloadRequest {
     public DownloadMetadata metadata;
     /** A separate audio file to merge into the video at {@link #url}, as DASH serves it; null for a complete file. */
     public String audioUrl;
-    /** A complete file to download instead when merging the audio fails; null fails the download. */
+    /** A complete file to download if the primary download or audio merge fails; null fails the download. */
     public String fallbackUrl;
+    /** Shown once the file is saved, instead of the usual completion toast; null for that one. */
+    public String completedToast;
 
     public DownloadRequest(String url, String subFolder, String fileName) {
         this.url = url;

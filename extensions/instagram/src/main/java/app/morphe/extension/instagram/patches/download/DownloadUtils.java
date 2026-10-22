@@ -49,6 +49,7 @@ import app.morphe.extension.crimera.downloader.MediaDownloader;
 import app.morphe.extension.crimera.downloader.DownloadMetadata;
 import app.morphe.extension.crimera.downloader.DownloadRequest;
 import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.crimera.PikoUtils;
 
 import com.instagram.common.session.UserSession;
@@ -245,7 +246,7 @@ public class DownloadUtils {
                 mediaUrl = mediaData.getMediaLink();
             }
             String fileName = username + "_" + mediaData.getDownloadFilename(mediaType);
-            downloader.enqueue(buildMediaRequest(
+            DownloadRequest request = buildMediaRequest(
                     mediaInfo,
                     mediaData,
                     position,
@@ -254,7 +255,29 @@ public class DownloadUtils {
                     subFolder,
                     fileName,
                     null
-            ));
+            );
+            // A video's picture, a photo story with music's among them, comes from its embed page
+            // when that lists it larger than the app's cover. A carousel's page answers for the
+            // post, never a child; without a download folder, enqueue asks for one at once.
+            if (!mediaType.equals(MediaType.IMAGE) || !mediaData.isVideo()
+                    || mediaInfo.getCarouselSize() > 1 || !StorageUtils.checkStoragePermissions()) {
+                downloader.enqueue(request);
+                return;
+            }
+            int coverShortSide = ((MediaInterface) mediaData.getImageVariants().get(0)).shortSide();
+            String shortcode = mediaData.getShortcode();
+            String mediaId = mediaData.getPostID();
+            Utils.runOnBackgroundThread(() -> {
+                EmbedCover embed = EmbedCover.largerThan(shortcode, mediaId, coverShortSide);
+                Utils.runOnMainThread(() -> {
+                    if (embed != null) {
+                        request.fallbackUrl = request.url;
+                        request.url = embed.url;
+                        request.completedToast = str("piko_saved_at", embed.width + "x" + embed.height);
+                    }
+                    downloader.enqueue(request);
+                });
+            });
 
         } else if (position == -1) {
             int carouselSize = mediaInfo.getCarouselSize();

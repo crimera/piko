@@ -138,6 +138,13 @@ public class MediaDownloader {
                         throw new IOException("Could not open download file");
                     }
                     download(request.url, output, builder, notificationId);
+                } catch (IOException downloadException) {
+                    if (request.fallbackUrl == null) throw downloadException;
+                    PikoUtils.logger(downloadException);
+                    try (OutputStream output = new BufferedOutputStream(openOutput(outputDocumentUri))) {
+                        download(request.fallbackUrl, output, builder, notificationId);
+                    }
+                    request.completedToast = null;
                 }
             } else {
                 // Anything that needs rewriting is fetched to the cache first, then remuxed into place.
@@ -171,6 +178,7 @@ public class MediaDownloader {
             final int finalNotificationId = notificationId;
             final String finalFileName = request.fileName;
             final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
+            final String completedToast = request.completedToast != null ? request.completedToast : downloadCompletedString;
 
             mainHandler.post(() -> {
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
@@ -182,7 +190,7 @@ public class MediaDownloader {
                 notificationManager.notify(finalNotificationId, builder.build());
 
                 try {
-                    PikoUtils.toast(downloadCompletedString);
+                    PikoUtils.toast(completedToast);
                 } catch (Exception ignored) {}
             });
         } catch (Exception e) {
