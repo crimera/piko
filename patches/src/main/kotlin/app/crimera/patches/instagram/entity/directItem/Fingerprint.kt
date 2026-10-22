@@ -15,6 +15,7 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal const val DIRECT_ITEM_CLASS = "$ENTITY_CLASS/DirectItem;"
 
@@ -51,8 +52,29 @@ internal object FieldXmaExtension : Fingerprint(name = "fieldXma", definingClass
 internal object FieldXmaLinkExtension : Fingerprint(name = "fieldXmaLink", definingClass = DIRECT_ITEM_CLASS)
 
 internal object DirectItemDispatchFingerprint : Fingerprint(
-    name = "unsafeParseFromJson",
-    strings = listOf("item_id", "client_context", "user_id", "text", "timestamp", "hide_in_thread", "thread_key"),
+    returnType = "V",
+    parameters = listOf("L", "L", "Ljava/lang/String;"),
+    filters = listOf("item_id", "client_context", "timestamp", "user_id", "text", "hide_in_thread", "thread_key").map { string(it) },
+)
+
+internal object SentByViewerKeyFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = listOf("I"),
+    filters = listOf(string("is_sent_by_viewer")),
+)
+
+internal fun sentByViewerFieldFingerprint(definingClass: String, keyGetter: MethodReference) = Fingerprint(
+    definingClass = definingClass,
+    filters = listOf(
+        methodCall(reference = keyGetter),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        methodCall(smali = "Ljava/lang/String;->equals(Ljava/lang/Object;)Z", location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        methodCall(parameters = emptyList(), returnType = "Z", opcode = Opcode.INVOKE_VIRTUAL, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
+        fieldAccess(type = "Z", opcode = Opcode.IPUT_BOOLEAN, location = MatchAfterImmediately()),
+    ),
 )
 
 private val FIELD_WRITE_OPCODES = listOf(
@@ -80,7 +102,6 @@ private fun jsonKeyFilters(key: String, branch: Opcode) = listOf(
  */
 internal fun jsonKeyFieldFingerprint(key: String, definingClass: String) = Fingerprint(
     definingClass = definingClass,
-    name = "unsafeParseFromJson",
     filters = jsonKeyFilters(key, Opcode.IF_EQZ) + fieldAccess(opcodes = FIELD_WRITE_OPCODES),
 )
 
@@ -89,7 +110,6 @@ internal fun jsonKeyFieldFingerprint(key: String, definingClass: String) = Finge
  */
 internal fun jsonSharedKeyFingerprint(key: String, definingClass: String) = Fingerprint(
     definingClass = definingClass,
-    name = "unsafeParseFromJson",
     filters = jsonKeyFilters(key, Opcode.IF_NEZ),
 )
 

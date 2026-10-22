@@ -55,8 +55,8 @@ val disableTypingStatusPatch =
 
             DMOnTextChangedFingerprint.let {
                 val index = it.instructionMatches.first().index
-                val nextInstruction = it.method.getInstruction<OneRegisterInstruction>(index + 1)
-                val register = nextInstruction.registerA
+                val originalInstruction = it.method.getInstruction<OneRegisterInstruction>(index)
+                val register = originalInstruction.registerA
                 it.method.addInstructionsWithLabels(
                     index,
                     """
@@ -65,7 +65,7 @@ val disableTypingStatusPatch =
                     if-eqz v$register, :piko
                     return-void
                     """.trimIndent(),
-                    ExternalLabel("piko", nextInstruction),
+                    ExternalLabel("piko", originalInstruction),
                 )
             }
 

@@ -39,7 +39,7 @@ private fun suggestionFlagReads(key: String, reads: Int) = List(reads) {
 internal object MutualFollowersResponseFingerprint : Fingerprint(
     name = "unsafeParseFromJson",
     returnType = "Ljava/lang/Object;",
-    strings = listOf("mutual_followers", "suggested_users", "show_see_all_followers_button"),
+    strings = listOf("suggested_users", "show_see_all_followers_button"),
     filters = listOf(
         methodCall(returnType = "Ljava/lang/String;"),
         opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
@@ -186,5 +186,13 @@ internal object ReelsSuggestedUsersExitFingerprint : Fingerprint(
         // Native suggested users classifier.
         methodCall(definingClass = "this", parameters = listOf("L"), returnType = "Z", opcode = Opcode.INVOKE_STATIC),
         string("android_purge_26_q3_ClipsSuggestedUsersItemDelegateImpl_onExitClipsViewer"),
+    ),
+)
+
+internal object ReelsItemTypeFingerprint : Fingerprint(
+    name = "<clinit>",
+    filters = listOf(
+        string("NETEGO_SUGGESTED_USERS"),
+        string("SUGGESTED_USERS"),
     ),
 )

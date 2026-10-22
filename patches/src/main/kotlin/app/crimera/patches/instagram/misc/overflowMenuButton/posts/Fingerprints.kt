@@ -14,6 +14,7 @@ import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_C
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.newInstance
@@ -38,10 +39,20 @@ internal object EnumButtonClassFingerprint : Fingerprint(
 internal object AddFeedButtonFingerprint : Fingerprint(
     strings = listOf("TEXT_POST_APP_INACTIVE"),
     filters = listOf(
-        // Feed overflow menu options.
         newInstance("Ljava/util/ArrayList;"),
         methodCall(smali = "Ljava/util/ArrayList;-><init>()V", location = MatchAfterImmediately()),
         fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        opcode(Opcode.CHECK_CAST, location = MatchAfterImmediately()),
+    ),
+)
+
+internal object AddFeedButtonFactoryFingerprint : Fingerprint(
+    strings = listOf("TEXT_POST_APP_INACTIVE"),
+    filters = listOf(
+        // Feed overflow menu options.
+        methodCall(returnType = "Ljava/util/ArrayList;", parameters = emptyList(), opcode = Opcode.INVOKE_STATIC),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterWithin(1)),
         // Overflow menu creator.
         opcode(Opcode.CHECK_CAST, location = MatchAfterImmediately()),
     ),
@@ -63,8 +74,11 @@ internal object FeedButtonGetMediaFingerprint : Fingerprint(
     parameters = listOf("L"),
     returnType = MEDIA_CLASS_NAME,
     filters = listOf(
-        // Lazily created media.
-        methodCall(name = "getValue", returnType = "Ljava/lang/Object;"),
+        // The lazy media is unwrapped by a shared helper.
+        fieldAccess(definingClass = "this", opcode = Opcode.IGET_OBJECT),
+        methodCall(parameters = listOf("L"), returnType = MEDIA_CLASS_NAME, opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        opcode(Opcode.RETURN_OBJECT, location = MatchAfterImmediately()),
     ),
 )
 

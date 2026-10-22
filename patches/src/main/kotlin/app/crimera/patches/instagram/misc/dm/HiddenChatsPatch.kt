@@ -25,6 +25,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -73,14 +74,14 @@ private object BadgeStateBuilderFingerprint : Fingerprint(
             (method.implementation?.instructions?.count {
                 val call = it.getReference<MethodReference>()
                 call?.definingClass == "Ljava/lang/Math;" && call.name == "min"
-            } ?: 0) >= 3
+            } ?: 0) >= 2
     },
 )
 
 // Works the badge state out from a message event, with a list of its own: it makes a state and a badge from it.
 private object BadgeEventFingerprint : Fingerprint(
     returnType = "V",
-    parameters = listOf("Ljava/lang/Long;", "Ljava/lang/String;"),
+    parameters = listOf("Ljava/lang/String;"),
     custom = { method, _ ->
         method.implementation?.instructions?.let { code ->
             code.any { it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == badgeType } &&
@@ -268,7 +269,7 @@ val hiddenChatsPatch =
                 )
             }
 
-            BadgeStateBuilderFingerprint.method.apply {
+            BadgeStateBuilderFingerprint.matchSingle().method.apply {
                 val session = instructions.first { it.getReference<FieldReference>()?.type == USER_SESSION_CLASS }
                     .let { (it as OneRegisterInstruction).registerA }
                 // The hidden chats are taken out of the two lists the state is made from, right after each is read.
@@ -296,7 +297,7 @@ val hiddenChatsPatch =
             }
 
             BadgeJobFingerprint.method.addInstruction(0, "invoke-static {p0}, $EXTENSION_CLASS->badgeJob(Ljava/lang/Object;)V")
-            BadgeEventFingerprint.method.apply {
+            BadgeEventFingerprint.matchSingle().method.apply {
                 // The chats it counts come from a list of its own: the hidden ones are taken out of it right where it is read.
                 val session = instructions.first { it.getReference<FieldReference>()?.type == USER_SESSION_CLASS }
                     .let { (it as OneRegisterInstruction).registerA }

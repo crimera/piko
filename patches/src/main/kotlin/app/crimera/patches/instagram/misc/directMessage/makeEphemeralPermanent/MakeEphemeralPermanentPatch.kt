@@ -171,21 +171,28 @@ private fun ephemeralMediaReceiptProducerFingerprint(eventType: String) = Finger
         methodCall(opcode = Opcode.INVOKE_VIRTUAL, parameters = listOf(USER_MODEL_CLASS_NAME), returnType = "Z"),
         newInstance(eventType),
         methodCall(name = "<init>", location = MatchAfterImmediately()),
-        fieldAccess(definingClass = eventType, opcode = Opcode.IPUT_OBJECT, location = MatchAfterImmediately()),
     ),
 )
 
 context(patchContext: BytecodePatchContext)
 private fun suppressEphemeralMediaReceipts() {
     val eventType = EphemeralMediaSeenReceiptFingerprint.instructionMatches.first().typeReference
-    val producerMatch = ephemeralMediaReceiptProducerFingerprint(eventType).match()
+    val producerMatch = ephemeralMediaReceiptProducerFingerprint(eventType).matchSingle()
     val producer = producerMatch.method
     val unseenCall = producerMatch.instructionMatches[1]
     val unseenReference = unseenCall.methodReference
-    val itemRegister = unseenCall.instruction.registersUsed.first()
     val creationIndex = producerMatch.instructionMatches[2].index
+    // The last item getter replaces its receiver with the client-context String on 451.
+    // Suppress the receipt while the receiver still contains the DirectItem.
+    val index = producer.indexOfFirstInstructionReversedOrThrow(creationIndex) {
+        opcode == Opcode.INVOKE_VIRTUAL && getReference<MethodReference>()?.let {
+            it.definingClass == unseenReference.definingClass &&
+                it.parameterTypes.isEmpty() && it.returnType == "Ljava/lang/String;"
+        } == true
+    }
+    val itemRegister = producer.getInstruction(index).registersUsed.single()
     val sessionRegister = producer.getInstruction(
-        producer.indexOfFirstInstructionReversedOrThrow(creationIndex) {
+        producer.indexOfFirstInstructionReversedOrThrow(index) {
             opcode == Opcode.INVOKE_STATIC &&
                 getReference<MethodReference>()?.parameterTypes?.firstOrNull()?.toString() == USER_SESSION_CLASS
         },
@@ -211,10 +218,10 @@ private fun suppressEphemeralMediaReceipts() {
         ExternalLabel("piko_native_unread", unseen.getInstruction(0)),
     )
 
-    val index = producerMatch.instructionMatches.last().index
     val register = producer.getFreeRegisterProvider(
         index = index,
         numberOfFreeRegistersNeeded = 1,
+        *intArrayOf(itemRegister, sessionRegister),
     ).getFreeRegister()
     // Stop before enqueueing: returning from the network handler would leave its queued task unfinished.
     producer.addInstructionsWithLabels(

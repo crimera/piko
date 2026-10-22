@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CL
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchFirst
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
@@ -34,10 +35,11 @@ object EditMediaInfoGetCurrentMediaIdFingerprint : Fingerprint(
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
         opcode(Opcode.IF_GE, location = MatchAfterImmediately()),
         methodCall(
-            parameters = listOf("Ljava/util/List;", "I"),
-            returnType = MEDIA_CLASS_NAME,
+            smali = "Ljava/util/List;->get(I)Ljava/lang/Object;",
             location = MatchAfterImmediately(),
         ),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        checkCast(MEDIA_CLASS_NAME, location = MatchAfterImmediately()),
     ),
 )
 

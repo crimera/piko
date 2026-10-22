@@ -21,6 +21,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.addInstructionsAtControlFlowLabel
@@ -32,11 +33,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 private const val ACTIVITY_CLASS = "Landroid/app/Activity;"
 private const val IG_LINEAR_LAYOUT_CLASS = "Lcom/instagram/common/ui/base/IgLinearLayout;"
-
-internal object ProfileActionBarRelatedFingerprint : Fingerprint(
-    strings = listOf("notifications_entry_point_impression", "impression_cast_to_tv"),
-    returnType = "V",
-)
 
 internal object ProfileHeaderRelatedFingerprint : Fingerprint(
     strings = listOf("profile_user_id", "click_point", "user_profile_header"),
@@ -95,11 +91,18 @@ val userProfileActionBarButtonPatch =
         dependsOn(decoderEntity)
 
         execute {
-            val actionBarRelatedClass = ProfileActionBarRelatedFingerprint.originalClassDef
+            val actionBarRelatedClass = classDefBy(
+                ProfileActionBarBuilderFingerprint.originalMethod.parameterTypes[BUILDER_ACTION_BAR_RELATED_PARAMETER].toString(),
+            )
+            val profileHeaderClass = ProfileHeaderRelatedFingerprint.matchAll()
+                .map { it.originalClassDef }
+                .distinctBy { it.type }
+                .singleOrNull { candidate -> actionBarRelatedClass.fields.any { it.type == candidate.type } }
+                ?: throw PatchException("Expected one profile header referenced by the action bar")
             val profileHeaderFieldInActionBarRelatedClass =
-                actionBarRelatedClass.fields.single { it.type == ProfileHeaderRelatedFingerprint.originalClassDef.type }
+                actionBarRelatedClass.fields.single { it.type == profileHeaderClass.type }
             val userDetailViewModelFieldInProfileHeaderRelatedClass =
-                ProfileHeaderRelatedFingerprint.originalClassDef.fields.single { it.type == USER_DETAIL_VIEW_MODEL_CLASS }
+                profileHeaderClass.fields.single { it.type == USER_DETAIL_VIEW_MODEL_CLASS }
             val userDataFieldInUserDetailClass =
                 classDefBy(USER_DETAIL_VIEW_MODEL_CLASS).fields.single { it.type == USER_MODEL_CLASS_NAME }
 

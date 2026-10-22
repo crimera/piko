@@ -30,6 +30,7 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.p0Register
+import app.morphe.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
 
 @Suppress("unused")
@@ -66,9 +67,10 @@ val downloadMediaPatch =
                 GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef.fields.singleOrNull {
                     it.type == "Landroid/app/Activity;" && !AccessFlags.STATIC.isSet(it.accessFlags)
                 } ?: throw PatchException("Expected one DM saver activity field")
-            DirectThreadMediaSaveFingerprint.method.apply {
-                if (p0Register < 2) {
-                    throw PatchException("DM media saver needs two local registers")
+            (DirectThreadMediaSaveFingerprint.matchOrNull(GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef)
+                ?: DirectThreadMediaPermissionCheckFingerprint.matchSingle()).method.apply {
+                if (p0Register < 2 || parameterTypes[1].toString() != appActivityField.definingClass) {
+                    throw PatchException("Unexpected DM media saver parameters or local registers")
                 }
                 addInstructionsWithLabels(
                     0,

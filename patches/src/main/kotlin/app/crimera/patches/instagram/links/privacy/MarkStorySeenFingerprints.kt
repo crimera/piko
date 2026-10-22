@@ -14,6 +14,7 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.newInstance
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
@@ -169,6 +170,13 @@ internal object StoryHeaderBindingFingerprint : Fingerprint(
     strings = listOf(STORY_HEADER_BIND_TRACE),
 )
 
+internal object StoryToolbarBindingFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
+    returnType = "V",
+    parameters = listOf("L", USER_SESSION_CLASS, REEL_ITEM_CLASS, "L", "L", "L", "L", "L", "L", "I", "Z"),
+    filters = listOf(string("ReelViewerItemBinder.bindToolbarViews")),
+)
+
 /**
  * Root view of a story view holder, stored by its constructor.
  */
@@ -204,6 +212,19 @@ internal object StandardStoryProgressFingerprint : Fingerprint(
             opcode = Opcode.INVOKE_DIRECT,
             location = MatchAfterImmediately(),
         ),
+    ),
+)
+
+internal object DelegatedStoryProgressFingerprint : Fingerprint(
+    returnType = "V",
+    parameters = listOf("L", "I"),
+    filters = listOf(
+        methodCall(definingClass = "this", parameters = listOf("F"), returnType = "V", opcode = Opcode.INVOKE_DIRECT),
+        // The segmented progress update is delegated to a separate holder.
+        methodCall(parameters = listOf("L", "L"), returnType = "V", opcode = Opcode.INVOKE_VIRTUAL),
+        opcode(Opcode.RETURN_VOID, location = MatchAfterImmediately()),
+        methodCall(parameters = listOf(REEL_ITEM_CLASS, "L", "Z"), returnType = "V", opcode = Opcode.INVOKE_INTERFACE),
+        methodCall(definingClass = "this", parameters = listOf("L"), returnType = "V", opcode = Opcode.INVOKE_DIRECT),
     ),
 )
 

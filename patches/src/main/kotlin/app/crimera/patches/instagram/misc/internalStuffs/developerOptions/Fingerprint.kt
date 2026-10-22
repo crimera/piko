@@ -25,6 +25,7 @@ internal object FragmentNavigatorTransitionFingerprint : Fingerprint(
 internal object FragmentNavigatorConstructorFingerprint : Fingerprint(
     classFingerprint = FragmentNavigatorTransitionFingerprint,
     name = "<init>",
+    parameters = listOf("Landroidx/fragment/app/FragmentActivity;", "L"),
 )
 
 internal object FragmentNavigatorSetFragmentFingerprint : Fingerprint(

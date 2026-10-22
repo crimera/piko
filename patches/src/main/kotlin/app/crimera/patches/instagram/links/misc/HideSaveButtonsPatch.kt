@@ -12,24 +12,16 @@ import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.feedUfiStateField
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.resource.ResourceType
-import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import app.morphe.util.matchSingle
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 @Suppress("unused")
@@ -43,44 +35,22 @@ val hideSaveButtonsPatch = bytecodePatch(
     execute {
         val saveField = feedUfiStateField(", isSaveEnabled=")
 
-        // Download media creates a separate component inside the same native save branch,
-        // so the Litho renderer skips only the final save insertion.
-        val lithoMatch = Fingerprint(
-            filters = listOf(
-                fieldAccess(reference = saveField, opcode = Opcode.IGET_BOOLEAN),
-                opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
-                resourceLiteral(ResourceType.ID, "row_feed_button_save"),
-            ),
-        ).matchSingle()
-        val renderers = Fingerprint(
-            filters = listOf(
-                fieldAccess(reference = saveField, opcode = Opcode.IGET_BOOLEAN),
-                opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
-            ),
-        ).matchAll(3..3).filter { it.originalMethod != lithoMatch.originalMethod }
-
-        lithoMatch.method.apply {
-            val end = getInstruction<BuilderOffsetInstruction>(lithoMatch.instructionMatches[1].index).target.location.index
-            // Last insertion of the save branch, after the download component.
-            val addIndex = indexOfFirstInstructionReversedOrThrow(
-                end - 1,
-                methodCall(smali = "Ljava/util/AbstractCollection;->add(Ljava/lang/Object;)Z"),
-            )
-            val scratch = findFreeRegister(addIndex, getInstruction(addIndex).registersUsed)
-            addInstructionsWithLabels(
-                addIndex,
-                """
-                invoke-static {}, $PREF_DESCRIPTOR->hideSaveButtons()Z
-                move-result v$scratch
-                if-nez v$scratch, :skip_save
-                """.trimIndent(),
-                ExternalLabel("skip_save", getInstruction(end)),
-            )
+        // Save-only component factories return null when disabled; view renderers skip their binding branch.
+        val renderers = listOf(Opcode.IF_EQZ, Opcode.IF_NEZ).flatMap { branch ->
+            Fingerprint(
+                filters = listOf(
+                    fieldAccess(reference = saveField, opcode = Opcode.IGET_BOOLEAN),
+                    opcode(branch, location = MatchAfterWithin(2)),
+                ),
+            ).matchAll(2..2)
         }
 
         renderers.forEach { match ->
             val readIndex = match.instructionMatches.first().index
             val value = match.instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA
+            if (match.instructionMatches.last().instruction.registersUsed != listOf(value)) {
+                throw PatchException("Save renderer branches on an unexpected register: ${match.method}")
+            }
             match.method.addInstructions(
                 readIndex + 1,
                 """

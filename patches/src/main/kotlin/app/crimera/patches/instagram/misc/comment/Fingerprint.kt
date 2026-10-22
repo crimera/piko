@@ -70,7 +70,7 @@ internal object CommentButtonClickCheckFingerprint : Fingerprint(
         opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
         methodCall(smali = "Ljava/util/AbstractCollection;->isEmpty()Z", location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
-        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        opcode(Opcode.IF_EQZ, location = MatchAfterWithin(1)),
     ),
 )
 

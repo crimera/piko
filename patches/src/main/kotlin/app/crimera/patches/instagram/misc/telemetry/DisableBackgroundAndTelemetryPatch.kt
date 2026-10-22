@@ -10,12 +10,20 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.string
 import app.morphe.util.findInstructionIndicesReversedOrThrow
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import org.w3c.dom.Element
 
@@ -32,20 +40,67 @@ private object FalcoLogCallerFingerprint : Fingerprint(
     },
 )
 
+private object ComponentStartupFingerprint : Fingerprint(
+    definingClass = "/InstagramApplicationForMainProcess;",
+    name = "initializeAllColdStartJobs",
+    returnType = "V",
+    filters = listOf(
+        methodCall(definingClass = "Lcom/facebook/common/build/BuildConstants;", parameters = emptyList(), returnType = "I"),
+        opcode(Opcode.MOVE_RESULT),
+        methodCall(definingClass = "Ljava/io/File;", name = "exists", returnType = "Z"),
+        opcode(Opcode.IF_NE),
+        methodCall(definingClass = "Ljava/io/File;", name = "lastModified", returnType = "J"),
+        opcode(Opcode.IF_GEZ),
+        string("Android PackageManager returned version code: %d, apk version code is: %d"),
+        methodCall(parameters = listOf("Landroid/content/Context;"), returnType = "V"),
+    ),
+)
+
+private val refreshDisabledComponentsPatch = bytecodePatch {
+    execute {
+        val match = ComponentStartupFingerprint.matchSingle()
+        val instructions = match.method.implementation!!.instructions
+        val versionResultIndex = match.instructionMatches[1].index
+        val guardIndex = match.instructionMatches[3].index
+        val guard = instructions[guardIndex] as BuilderOffsetInstruction
+        val timestampGuard = instructions[match.instructionMatches[5].index] as BuilderOffsetInstruction
+        val refreshIndex = match.instructionMatches.last().index
+        val registers = guard.registersUsed
+        val versionRegister = instructions[versionResultIndex].registersUsed.single()
+        val constant = instructions.take(guardIndex).lastOrNull {
+            it.opcode.setsRegister() && it.registersUsed.firstOrNull() == registers.lastOrNull()
+        }
+        val versionWriteIndex = instructions.take(guardIndex).indexOfLast {
+            it.opcode.setsRegister() && it.registersUsed.firstOrNull() == versionRegister
+        }
+        if (registers.size != 2 || registers.first() != versionRegister ||
+            versionWriteIndex != versionResultIndex ||
+            (constant as? WideLiteralInstruction)?.wideLiteral != 1L ||
+            guard.target.location.index != refreshIndex + 1 ||
+            timestampGuard.target.location.index != refreshIndex + 1
+        ) {
+            throw PatchException("Could not resolve the component refresh version guard")
+        }
+        // Reuse the native update-time check so same-version APK updates reset persisted enabled overrides once.
+        match.method.replaceInstruction(guardIndex, "nop")
+    }
+}
+
 /**
  * Manifest patch to:
  * - Disable all persistent background daemons (:mqtt, :fbns, :fdidsync, :pretosproc, :honolulu, etc.)
  * - Disable cross-app tracking content providers (USDID, FamilyID, PhoneID, InstallReferrer)
  * - Disable background sync workers, telemetry upload services, and boot/connectivity receivers
- * - Strip isolated secondary processes from all components while keeping Android OS declarations intact
+ * - Preserve component processes and prevent the component manager from re-enabling blocked components
  */
 val disableBackgroundManifestPatch =
     resourcePatch(
         name = "Disable background components",
-        description = "Disables background services, receivers, tracking providers, and forces single-process execution.",
+        description = "Disables background services, receivers, and tracking providers.",
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
+        dependsOn(refreshDisabledComponentsPatch)
 
         execute {
             document("AndroidManifest.xml").use { document ->
@@ -134,8 +189,19 @@ val disableBackgroundManifestPatch =
                         if (shouldDisable) {
                             elem.setAttribute("android:enabled", "false")
                             elem.setAttribute("android:exported", "false")
-                            if (elem.hasAttribute("android:process")) {
-                                elem.removeAttribute("android:process")
+                            // The component manager overrides android:enabled unless its metadata also disables the component.
+                            val metadata = elem.getElementsByTagName("meta-data")
+                            for (key in listOf("default-state", "cmp_manager.persist_state")) {
+                                val entry =
+                                    (0 until metadata.length)
+                                        .map { metadata.item(it) as Element }
+                                        .firstOrNull { it.getAttribute("android:name") == key }
+                                        ?: document.createElement("meta-data").apply {
+                                            setAttribute("android:name", key)
+                                            elem.appendChild(this)
+                                        }
+                                entry.removeAttribute("android:resource")
+                                entry.setAttribute("android:value", "false")
                             }
                             val intentFilters = elem.getElementsByTagName("intent-filter")
                             for (j in intentFilters.length - 1 downTo 0) {
@@ -148,17 +214,6 @@ val disableBackgroundManifestPatch =
                 disableElements("service")
                 disableElements("receiver")
                 disableElements("provider")
-
-                for (tag in listOf("activity", "service", "receiver", "provider")) {
-                    val elements = appNode.getElementsByTagName(tag)
-                    for (i in elements.length - 1 downTo 0) {
-                        val elem = elements.item(i) as Element
-                        val proc = elem.getAttribute("android:process")
-                        if (blockedProcesses.contains(proc) || proc.startsWith(":")) {
-                            elem.removeAttribute("android:process")
-                        }
-                    }
-                }
             }
         }
     }
@@ -183,22 +238,25 @@ val disableBackgroundAndTelemetryPatch =
             // 1. Neutralize HTTP telemetry uploaders
             val simpleUploader =
                 Fingerprint(
-                    name = "HZG",
+                    returnType = "V",
+                    parameters = listOf("L", "L", "L"),
                     custom = { _, classDef -> classDef.endsWith("/IGAnalytics2SimpleUploader;") },
                 )
             val taskUploader =
                 Fingerprint(
-                    name = "HZG",
+                    returnType = "V",
+                    parameters = listOf("L", "L", "L"),
                     custom = { _, classDef -> classDef.endsWith("/IgAnalytics2TaskBasedUploader;") },
                 )
             val privacyUploader =
                 Fingerprint(
-                    name = "HZG",
+                    returnType = "V",
+                    parameters = listOf("L", "L", "L"),
                     custom = { _, classDef -> classDef.endsWith("/PrivacyControlledUploader;") },
                 )
 
             listOf(simpleUploader, taskUploader, privacyUploader).forEach { fp ->
-                fp.method.addInstructions(
+                fp.matchSingle().method.addInstructions(
                     0,
                     """
                     return-void
@@ -223,25 +281,34 @@ val disableBackgroundAndTelemetryPatch =
             }
 
             // 4. Suppress EventBuilder (isSampled -> false, report -> return-void)
-            listOf("LX/1fX;", "LX/3r7;", "LX/3hf;").forEach { className ->
-                mutableClassDefByOrNull(className)?.let { cls ->
-                    cls.methods.find { it.implementation != null && it.name == "isSampled" }?.addInstructions(
-                        0,
-                        """
-                        const/4 v0, 0x0
-                        return v0
-                        """.trimIndent(),
-                    )
-                    cls.methods.find { it.implementation != null && it.name == "report" }?.addInstructions(0, "return-void")
-                }
+            Fingerprint(
+                name = "isSampled",
+                returnType = "Z",
+                parameters = emptyList(),
+                custom = { method, classDef ->
+                    method.implementation != null && "Lcom/facebook/quicklog/EventBuilder;" in classDef.interfaces
+                },
+            ).matchAll().forEach { match ->
+                match.method.addInstructions(
+                    0,
+                    """
+                    const/4 v0, 0x0
+                    return v0
+                    """.trimIndent(),
+                )
+            }
+            Fingerprint(
+                name = "report",
+                returnType = "V",
+                parameters = emptyList(),
+                custom = { method, classDef ->
+                    method.implementation != null && "Lcom/facebook/quicklog/EventBuilder;" in classDef.interfaces
+                },
+            ).matchAll().forEach { match ->
+                match.method.addInstructions(0, "return-void")
             }
 
-            // 5. Suppress reportEvent in direct telemetry reporters
-            mutableClassDefByOrNull("LX/5UN;")?.let { cls ->
-                cls.methods.find { it.implementation != null && it.name == "reportEvent" }?.addInstructions(0, "return-void")
-            }
-
-            // 6. Neutralize FbnsInitBroadcastReceiver.onReceive
+            // 5. Neutralize FbnsInitBroadcastReceiver.onReceive
             mutableClassDefByOrNull("Lcom/instagram/push/FbnsInitBroadcastReceiver;")?.let { cls ->
                 cls.methods.find { it.implementation != null && it.name == "onReceive" }?.addInstructions(
                     0,
@@ -249,7 +316,7 @@ val disableBackgroundAndTelemetryPatch =
                 )
             }
 
-            // 7. Neutralize other push & component management receivers
+            // 6. Neutralize other push & component management receivers
             listOf(
                 "Lcom/instagram/appcomponentmanager/IgAppComponentReceiver;",
                 "Lcom/instagram/notifications/push/fbns/IgPushSdkFbnsReceiverShim;",

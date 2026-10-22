@@ -13,7 +13,8 @@ import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import app.morphe.util.registersUsed
+import app.morphe.util.matchSingle
 
 @Suppress("unused")
 val hookOverflowMenuButton =
@@ -28,10 +29,10 @@ val hookOverflowMenuButton =
 
             AddFeedButtonExtensionFingerprint.changeFirstString(AddFeedOverflowOptionFingerprint.originalMethod.name)
 
-            AddFeedButtonFingerprint.let {
-                val arrayListRegister = it.instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA
+            (AddFeedButtonFingerprint.matchOrNull() ?: AddFeedButtonFactoryFingerprint.matchSingle()).let {
+                val arrayListRegister = it.instructionMatches[1].instruction.registersUsed.single()
                 val checkCastIndex = it.instructionMatches.last().index
-                val checkCastRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
+                val checkCastRegister = it.instructionMatches.last().instruction.registersUsed.single()
 
                 it.method.addInstructions(
                     checkCastIndex + 1,

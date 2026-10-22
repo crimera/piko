@@ -16,11 +16,13 @@ import app.crimera.patches.instagram.utils.Constants.ORIGINAL_SOUND_DATA_INTF
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
@@ -109,9 +111,9 @@ internal object GetMoreExtendedDataExtensionFingerprint : Fingerprint(
     name = "getMoreExtendedData",
 )
 
-internal object GetPostTypeExtensionFingerprint : Fingerprint(
+internal object GetPostTypeKeyExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
-    name = "getPostType",
+    name = "getPostTypeKey",
 )
 
 // -----------------------------------
@@ -126,12 +128,14 @@ internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprin
     ),
 )
 
-internal object AslSessionRelatedFingerprint : Fingerprint(
+internal object MediaIsVideoFingerprint : Fingerprint(
+    parameters = listOf(MEDIA_CLASS_NAME),
     returnType = "V",
-    strings = listOf("asl_session_id", "is_carousel"),
+    strings = listOf("is_carousel"),
     filters = listOf(
-        string("is_video"),
-        methodCall(definingClass = MEDIA_CLASS_NAME, parameters = listOf(), returnType = "Z", location = MatchAfterImmediately()),
+        methodCall(definingClass = MEDIA_CLASS_NAME, parameters = listOf(), returnType = "Z"),
+        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
+        string("is_video", location = MatchAfterImmediately()),
     ),
 )
 
@@ -241,7 +245,7 @@ internal object ProductInfoMapperFingerprint : Fingerprint(
     strings = listOf("product_suggestions", "product_tags"),
     filters = listOf(
         string("product_type"),
-        fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
     ),
 )
 
@@ -272,7 +276,7 @@ internal object CommentToStringFingerprint : Fingerprint(
     filters = listOf(
         // Comment text.
         fieldAccess(definingClass = "this", type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT),
-        opcode(Opcode.FILLED_NEW_ARRAY, location = MatchAfterImmediately()),
+        opcode(Opcode.FILLED_NEW_ARRAY, location = MatchAfterWithin(1)),
         string("Comment{mCreatedAtSeconds=%d, mUser=@%s, mText=\'%s\'}"),
     ),
 )
@@ -280,19 +284,31 @@ internal object CommentToStringFingerprint : Fingerprint(
 /**
  * Media helper method returning the comment of a media.
  */
-internal fun mediaCommentGetterFingerprint(commentClass: String) = Fingerprint(
-    definingClass = MEDIAEXT_CLASS_NAME,
-    returnType = commentClass,
+internal object MediaCaptionGetterFingerprint : Fingerprint(
+    definingClass = MEDIA_CLASS_NAME,
+    parameters = emptyList(),
+    returnType = "L",
+    filters = listOf(string("caption")),
 )
 
-/**
- * Media helper method building the track data from a MusicInfo.
- */
-internal object TrackContainerBuilderFingerprint : Fingerprint(
+internal fun mediaCommentGetterFingerprint(commentClass: String, captionGetter: MethodReference) = Fingerprint(
     definingClass = MEDIAEXT_CLASS_NAME,
-    filters = listOf(
-        methodCall(name = "<init>", parameters = listOf(MUSIC_INFO_CLASS), opcode = Opcode.INVOKE_DIRECT),
-    ),
+    parameters = listOf(MEDIA_CLASS_NAME),
+    returnType = commentClass,
+    filters = listOf(methodCall(reference = captionGetter)),
+)
+
+internal fun mediaMetadataGetterFingerprint(key: String) = Fingerprint(
+    definingClass = MEDIA_CLASS_NAME,
+    parameters = emptyList(),
+    returnType = "L",
+    strings = listOf(key),
+)
+
+internal fun musicInfoGetterFingerprint(metadataClass: String) = Fingerprint(
+    definingClass = metadataClass,
+    parameters = emptyList(),
+    returnType = MUSIC_INFO_CLASS,
 )
 
 /**

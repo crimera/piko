@@ -10,26 +10,35 @@ import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
 import app.morphe.util.p0Register
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 context(patchContext: BytecodePatchContext)
 internal fun installLegacyNativeThemeModeSync() {
-    val match = LegacyDarkModeOnResumeFingerprint.match()
+    val delegatedMatch = LegacyDarkModeOnResumeFingerprint.matchOrNull(
+        LegacyDarkModeFragmentConstructorFingerprint.originalClassDef,
+    )
+    val match = delegatedMatch ?: InlineLegacyDarkModeOnResumeFingerprint.matchSingle()
     val method = match.method
     val idField = match.instructionMatches[0].fieldReference
     val selectedIdIndex = match.instructionMatches[0].index
     val factoryCall = match.instructionMatches[1]
-    val rowNewIndex = factoryCall.index
-    val (listenerRegister, selectedIdRegister) = factoryCall.instruction.registersUsed
+    val arguments = factoryCall.instruction.registersUsed
+    val rowNewIndex = if (delegatedMatch != null) factoryCall.index else factoryCall.index - 1
+    val (listenerRegister, selectedIdRegister) =
+        if (delegatedMatch != null) arguments else arguments.drop(1)
 
     val items = legacyRadioItemsFingerprint(idField.definingClass).match().instructionMatches
     fun idFor(index: Int, label: String) =
@@ -42,7 +51,16 @@ internal fun installLegacyNativeThemeModeSync() {
             systemId = idFor(4, "System-default"),
         )
 
-    val rowRegister = inlineLegacyRadioRowFactory(method, factoryCall)
+    val rowRegister = if (delegatedMatch != null) {
+        inlineLegacyRadioRowFactory(method, factoryCall)
+    } else {
+        val allocation = method.getInstruction(rowNewIndex)
+        if (allocation.opcode != Opcode.NEW_INSTANCE ||
+            allocation.registersUsed != listOf(arguments.first()) ||
+            allocation.getReference<TypeReference>()?.type != factoryCall.methodReference.definingClass
+        ) throw PatchException("Expected the inline theme RadioGroup allocation before its constructor")
+        arguments.first()
+    }
     val packedIdsRegister =
         method.findFreeRegister(
             rowNewIndex,

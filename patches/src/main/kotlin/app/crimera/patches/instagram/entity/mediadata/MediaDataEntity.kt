@@ -15,9 +15,11 @@ import app.crimera.patches.instagram.entity.videoData.videoDataEntity
 import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
+import app.crimera.utils.changeString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.matchSingle
 
 val mediaDataEntity =
     bytecodePatch(
@@ -62,7 +64,7 @@ val mediaDataEntity =
 
             // Extracting method is video used in media class.
             IsVideoExtensionFingerprint.changeFirstString(
-                AslSessionRelatedFingerprint.instructionMatches.last().methodReference.name,
+                MediaIsVideoFingerprint.matchSingle().instructionMatches.first().methodReference.name,
             )
 
             // Extraction of the media list.
@@ -84,12 +86,23 @@ val mediaDataEntity =
             CommentToStringFingerprint.let {
                 GetDescriptionTextExtensionFingerprint.changeStringAt(1, it.instructionMatches.first().fieldReference.name)
                 GetDescriptionTextExtensionFingerprint.changeFirstString(
-                    mediaCommentGetterFingerprint(it.originalClassDef.type).originalMethod.name,
+                    mediaCommentGetterFingerprint(
+                        it.originalClassDef.type,
+                        MediaCaptionGetterFingerprint.matchSingle().originalMethod,
+                    ).matchSingle().originalMethod.name,
                 )
             }
 
-            // Extraction of trackInfo: the media helper method that builds a container from a MusicInfo.
-            GetTrackDataIntfExtensionFingerprint.changeFirstString(TrackContainerBuilderFingerprint.originalMethod.name)
+            // Both metadata interfaces expose MusicInfo without requiring a user session.
+            listOf("clips", "music").forEach { kind ->
+                val key = "${kind}_metadata"
+                val metadataGetter = mediaMetadataGetterFingerprint(key).matchSingle().originalMethod
+                GetTrackDataIntfExtensionFingerprint.changeString("${kind}Metadata", metadataGetter.name)
+                GetTrackDataIntfExtensionFingerprint.changeString(
+                    if (kind == "clips") "clipsMusicInfo" else "musicInfo",
+                    musicInfoGetterFingerprint(metadataGetter.returnType).matchSingle().originalMethod.name,
+                )
+            }
 
             // Message audio (voice notes): media -> audio interface -> url. The interface is taken
             // from the "audio_src" getter, since its name changes between builds.
@@ -104,7 +117,7 @@ val mediaDataEntity =
                 GetImageVariantsExtensionFingerprint.changeFirstString(it.name)
             }
 
-            GetPostTypeExtensionFingerprint.changeFirstString(
+            GetPostTypeKeyExtensionFingerprint.changeFirstString(
                 ProductInfoMapperFingerprint.instructionMatches.last().fieldReference.name,
             )
         }

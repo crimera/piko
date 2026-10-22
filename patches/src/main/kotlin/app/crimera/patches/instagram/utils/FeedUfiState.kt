@@ -70,17 +70,16 @@ context(_: BytecodePatchContext)
 internal fun hideFeedUfiStates(preferenceCall: String, vararg labels: String) {
     labels.forEach { label ->
         val field = feedUfiStateField(label)
-        val constructorMatch = Fingerprint(
-            definingClass = field.definingClass,
-            name = "<init>",
+        val stateBuilderMatch = Fingerprint(
+            returnType = field.definingClass,
             filters = listOf(fieldAccess(reference = field, opcode = Opcode.IPUT_BOOLEAN)),
         ).matchSingle()
-        val constructor = constructorMatch.method
-        val writeIndex = constructorMatch.instructionMatches.first().index
-        val write = constructor.getInstruction(writeIndex)
+        val stateBuilder = stateBuilderMatch.method
+        val writeIndex = stateBuilderMatch.instructionMatches.first().index
+        val write = stateBuilder.getInstruction(writeIndex)
         val registers = write.registersUsed
-        val scratch = constructor.findFreeRegister(writeIndex, registers)
-        constructor.addInstructionsWithLabels(
+        val scratch = stateBuilder.findFreeRegister(writeIndex, registers)
+        stateBuilder.addInstructionsWithLabels(
             writeIndex,
             """
             $preferenceCall

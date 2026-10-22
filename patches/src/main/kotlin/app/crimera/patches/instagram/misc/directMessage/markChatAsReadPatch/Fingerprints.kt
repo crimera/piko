@@ -36,6 +36,11 @@ internal object GetMessageCursorFieldNameExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_NAME,
 )
 
+internal object GetThreadInfoFieldNameExtensionFingerprint : Fingerprint(
+    name = "getThreadInfoFieldName",
+    definingClass = EXTENSION_CLASS_NAME,
+)
+
 internal object GetButtonEnumClassNameExtensionFingerprint : Fingerprint(
     name = "getButtonEnumClassName",
     definingClass = EXTENSION_CLASS_NAME,
@@ -43,11 +48,11 @@ internal object GetButtonEnumClassNameExtensionFingerprint : Fingerprint(
 
 // --------------------------------------
 internal object DmInfoJsonParserFingerprint : Fingerprint(
-    name = "unsafeParseFromJson",
-    returnType = "Ljava/lang/Object;",
+    returnType = "V",
+    parameters = listOf("L", "L", "Ljava/lang/String;"),
     filters = listOf(
         string("visual_messages_newest_cursor"),
-        fieldAccess(opcode = Opcode.IPUT_OBJECT),
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
     ),
 )
 

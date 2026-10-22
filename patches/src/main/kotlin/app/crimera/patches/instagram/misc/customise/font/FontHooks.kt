@@ -13,6 +13,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -103,20 +104,33 @@ internal fun MutableMethod.hookResolvedTypefaces() {
  * hooked rather than only the first: a second, non-converging construction site is then still
  * covered instead of silently keeping the app's own font.
  */
+context(context: BytecodePatchContext)
 internal fun MutableMethod.hookWrappedTypeface() {
     // Last index first, so earlier indices stay valid while instructions are inserted.
     findInstructionIndicesReversedOrThrow(
-        methodCall(definingClass = returnType, name = "<init>", opcode = Opcode.INVOKE_DIRECT),
+        {
+            val reference = getReference<MethodReference>()
+            opcode == Opcode.INVOKE_DIRECT && reference?.name == "<init>" &&
+                reference.parameterTypes.firstOrNull()?.toString() in listOf(TYPEFACE_CLASS, "Ljava/lang/Object;") &&
+                (reference.definingClass == returnType ||
+                    returnType in context.classDefBy(reference.definingClass).interfaces)
+        },
     ).forEach { wrapIndex ->
         // The instance is the first register of the constructor call, the typeface the second. The
         // insertion goes on the call itself, not on the `new-instance` before it, which is where the
         // branches land.
-        val typefaceRegister = getInstruction(wrapIndex).registersUsed[1]
+        val constructor = getInstruction(wrapIndex)
+        val typefaceRegister = constructor.registersUsed[1]
+        val apply = if (constructor.getReference<MethodReference>()!!.parameterTypes.first().toString() == TYPEFACE_CLASS) {
+            APPLY_CUSTOM_FONT
+        } else {
+            "$CUSTOM_FONT_DESCRIPTOR->applyWrappedTypeface(Ljava/lang/Object;)Ljava/lang/Object;"
+        }
 
         addInstructions(
             wrapIndex,
             """
-            invoke-static {v$typefaceRegister}, $APPLY_CUSTOM_FONT
+            invoke-static/range {v$typefaceRegister .. v$typefaceRegister}, $apply
             move-result-object v$typefaceRegister
             """.trimIndent(),
         )

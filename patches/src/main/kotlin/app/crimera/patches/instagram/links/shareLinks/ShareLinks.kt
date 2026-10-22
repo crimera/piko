@@ -19,6 +19,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
@@ -65,9 +68,11 @@ internal fun hookShareLinks(
         StoryItemThirdPartySharingUrlResponseImplFingerprint.takeIf { STORY !in skip },
         LiveThirdPartySharingUrlResponseImplFingerprint.takeIf { LIVE !in skip },
     ).forEach { fingerprint ->
-        // The URL is used by the last matched instruction, a field write or the return.
-        val index = fingerprint.instructionMatches.last().index
-        fingerprint.method.addInstructions(index, hook(fingerprint.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA))
+        val match = fingerprint.matchSingle()
+        val urlUse = match.instructionMatches.single {
+            it.instruction.opcode == Opcode.IPUT_OBJECT || it.instruction.opcode == Opcode.RETURN_OBJECT
+        }
+        match.method.addInstructions(urlUse.index, hook(urlUse.instruction.registersUsed.first()))
     }
 
     if (HIGHLIGHT !in skip) {

@@ -15,12 +15,13 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.util.matchSingle
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 object TigonServiceLayerStartRequestFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/api/tigon/TigonServiceLayer;",
-    name = "startRequest",
     filters = listOf(
         fieldAccess(type = "Ljava/net/URI;", opcode = Opcode.IGET_OBJECT),
         methodCall(smali = "Ljava/net/URI;->getHost()Ljava/lang/String;", location = MatchAfterImmediately()),
@@ -35,9 +36,14 @@ val interceptUriPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            TigonServiceLayerStartRequestFingerprint.let {
+            TigonServiceLayerStartRequestFingerprint.matchSingle().let {
                 val uriIndex = it.instructionMatches.first().index
-                val uriRegister = it.instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA
+                val fieldRegisters = it.instructionMatches.first().instruction.registersUsed
+                val hostRegisters = it.instructionMatches.last().instruction.registersUsed
+                if (fieldRegisters.size != 2 || hostRegisters != listOf(fieldRegisters[0])) {
+                    throw PatchException("Expected the request URI field to reach getHost")
+                }
+                val uriRegister = fieldRegisters[0]
 
                 it.method.addInstructions(
                     uriIndex + 1,

@@ -14,12 +14,6 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val TARGET_STRING_ARRAY =
-    arrayOf(
-        "XDTPermalinkResponse",
-        "profile_to_share_url",
-    )
-
 private const val HIGHLIGHT_SHARE_ENDPOINT_STRING =
     "third_party_sharing/%s/get_story_highlights_to_share_url/"
 private const val HIGHLIGHT_PERMALINK_ACTION_STRING = "create_highlight_permalink_share_url"
@@ -27,16 +21,16 @@ private const val HIGHLIGHT_PERMALINK_ACTION_STRING = "create_highlight_permalin
 internal object PermalinkResponseJsonParserFingerprint : Fingerprint(
     name = "unsafeParseFromJson",
     filters = listOf(
-        string(TARGET_STRING_ARRAY[0]),
-        opcode(Opcode.IPUT_OBJECT),
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+        string("PermalinkResponseImpl"),
     ),
 )
 
 internal object ProfileUrlResponseJsonParserFingerprint : Fingerprint(
     name = "unsafeParseFromJson",
     filters = listOf(
-        string(TARGET_STRING_ARRAY[1]),
-        opcode(Opcode.IPUT_OBJECT),
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+        string("ProfileThirdPartySharingUrlResponseImpl"),
     ),
 )
 

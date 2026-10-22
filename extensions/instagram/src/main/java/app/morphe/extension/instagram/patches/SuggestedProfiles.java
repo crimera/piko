@@ -38,6 +38,12 @@ public final class SuggestedProfiles {
         return DISABLED && suggested;
     }
 
+    public static boolean hideReelsSuggestedUsers(Enum<?> itemType) {
+        if (!DISABLED || itemType == null) return false;
+        String type = itemType.name();
+        return "SUGGESTED_USERS".equals(type) || "NETEGO_SUGGESTED_USERS".equals(type);
+    }
+
     public static boolean hideActivityFeedSuggestions(String category) {
         return DISABLED && !"FOLLOW_REQUEST".equals(category);
     }

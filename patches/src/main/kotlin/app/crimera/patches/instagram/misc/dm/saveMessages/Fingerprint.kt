@@ -6,11 +6,13 @@
 
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
+import app.crimera.patches.instagram.entity.directItem.DirectItemDispatchFingerprint
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.newInstance
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
@@ -25,11 +27,17 @@ internal object DeltaThreadIdFieldExtensionFingerprint : Fingerprint(
 )
 
 internal object DirectItemJsonParserFingerprint : Fingerprint(
+    classFingerprint = DirectItemDispatchFingerprint,
     name = "unsafeParseFromJson",
     returnType = "Ljava/lang/Object;",
+    parameters = listOf("L"),
     filters = listOf(
-        string("item_id"),
-        string("hide_in_thread"),
+        methodCall(
+            definingClass = "this",
+            parameters = listOf("L", "L", "Ljava/lang/String;"),
+            returnType = "V",
+            opcode = Opcode.INVOKE_STATIC,
+        ),
         opcode(Opcode.RETURN_OBJECT),
     ),
 )

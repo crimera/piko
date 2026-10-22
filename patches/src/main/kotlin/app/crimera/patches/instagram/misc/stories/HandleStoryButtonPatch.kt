@@ -15,13 +15,19 @@ import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.matchSingle
+import app.morphe.util.getReference
+import app.morphe.util.p0Register
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 // Story menu output list allocation.
 private val STORY_MENU_LIST_FILTERS = listOf(
@@ -34,6 +40,14 @@ object AddStoryButtonFingerprint : Fingerprint(
     returnType = "[Ljava/lang/CharSequence;",
     parameters = listOf("L"),
     strings = listOf("[INTERNAL] Pause Playback"),
+    filters = STORY_MENU_LIST_FILTERS,
+)
+
+private object ExtractedStoryButtonFingerprint : Fingerprint(
+    classFingerprint = SelfStoryAddStoryButtonFingerprint,
+    returnType = "[Ljava/lang/CharSequence;",
+    parameters = listOf("L"),
+    strings = listOf("location_story_action_sheet"),
     filters = STORY_MENU_LIST_FILTERS,
 )
 
@@ -63,19 +77,20 @@ val handleStoryButtonPatch =
         execute {
 
             val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
-            listOf(SelfStoryAddStoryButtonFingerprint, AddStoryButtonFingerprint).forEach { fingerprint ->
-                fingerprint.matchSingle().let {
-                    val listIndex = it.instructionMatches.last().index
-                    val arrayListRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
+            listOf(
+                SelfStoryAddStoryButtonFingerprint.matchSingle(),
+                AddStoryButtonFingerprint.matchOrNull() ?: ExtractedStoryButtonFingerprint.matchSingle(),
+            ).forEach {
+                val listIndex = it.instructionMatches.last().index
+                val arrayListRegister = it.instructionMatches.last().instruction.registersUsed.single()
 
-                    it.method.addInstructions(
-                        listIndex + 1,
-                        """
-                        invoke-static/range {v$arrayListRegister .. v$arrayListRegister}, $STORY_BUTTON_EXTENSION_CLASS->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
-                        move-result-object v$arrayListRegister
-                        """.trimIndent(),
-                    )
-                }
+                it.method.addInstructions(
+                    listIndex + 1,
+                    """
+                    invoke-static/range {v$arrayListRegister .. v$arrayListRegister}, $STORY_BUTTON_EXTENSION_CLASS->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+                    move-result-object v$arrayListRegister
+                    """.trimIndent(),
+                )
             }
 
             val onClickFingerprints = listOf(SelfStoryOnCLickStoryButtonFingerprint, OnCLickStoryButtonFingerprint)
@@ -87,12 +102,18 @@ val handleStoryButtonPatch =
                     val charSequence = "Ljava/lang/CharSequence;"
 
                     val classFields = classDef.fields
-                    val reelItemField = classFields.first { it.type == reelItemClassName }
-                    val appActivityField = classFields.first { it.type == appActivity }
-                    val reelItemMediaField = classDefBy(reelItemClassName).fields.last { it.type == MEDIA_CLASS_NAME }
+                    val reelItemField = classFields.single { it.type == reelItemClassName }
+                    val appActivityField = classFields.single { it.type == appActivity }
+                    val reelItemMediaField = instructions.mapNotNull { it.getReference<FieldReference>() }
+                        .filter { it.definingClass == reelItemClassName && it.type == MEDIA_CLASS_NAME }
+                        .distinctBy { it.toString() }
+                        .singleOrNull() ?: throw PatchException("Expected one story menu media field")
 
                     val characterSequenceParameterIndex = parameters.indexOfLast { it.type == charSequence }
                     val selfClassParameterIndex = parameters.indexOfLast { it.type == classDef.type }
+                    if (!AccessFlags.STATIC.isSet(accessFlags) || p0Register < 4 ||
+                        characterSequenceParameterIndex < 0 || selfClassParameterIndex < 0
+                    ) throw PatchException("Unexpected story menu click parameters or local registers")
 
                     // Hard coding registries as it's going to be the first line in the method.
                     addInstructionsWithLabels(

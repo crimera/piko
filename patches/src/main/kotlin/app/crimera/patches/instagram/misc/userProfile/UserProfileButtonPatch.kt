@@ -24,7 +24,7 @@ val userProfileButtonPatch =
                 addInstructions(
                     moveResObj + 1,
                     """
-                    invoke-static {p1,p2}, ${PATCHES_DESCRIPTOR}/userprofile/UserProfileButton;->addButtons(Landroid/view/ViewGroup;Ljava/lang/Object;)V
+                    invoke-static/range {p1 .. p2}, ${PATCHES_DESCRIPTOR}/userprofile/UserProfileButton;->addButtons(Landroid/view/ViewGroup;Ljava/lang/Object;)V
                     """.trimIndent(),
                 )
             }

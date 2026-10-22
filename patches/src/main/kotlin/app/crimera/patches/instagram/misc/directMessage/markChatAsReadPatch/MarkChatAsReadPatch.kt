@@ -17,8 +17,14 @@ import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.getReference
+import app.morphe.util.matchSingle
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 @Suppress("unused")
 val markChatAsReadPatch =
@@ -43,9 +49,8 @@ val markChatAsReadPatch =
                 }
             }
 
-            GetMessageCursorFieldNameExtensionFingerprint.changeFirstString(
-                DmInfoJsonParserFingerprint.instructionMatches.last().fieldReference.name,
-            )
+            val messageCursorField = DmInfoJsonParserFingerprint.matchSingle().instructionMatches.last().fieldReference
+            GetMessageCursorFieldNameExtensionFingerprint.changeFirstString(messageCursorField.name)
 
             // -------------------------
 
@@ -74,7 +79,19 @@ val markChatAsReadPatch =
                 method.apply {
                     val buttonParameterIndex = parameters.indexOfFirst { it.type == buttonEnumClassName } + 1
                     val directThreadKeyParameterIndex = parameters.indexOfFirst { it.type == directThreadKeyClassName } + 1
-                    val threadInfoParameterIndex = directThreadKeyParameterIndex - 2
+                    val threadInfoField = instructions
+                        .filter { it.opcode == Opcode.IGET_OBJECT }
+                        .mapNotNull { it.getReference<FieldReference>() }
+                        .filter { it.type == messageCursorField.definingClass }
+                        .distinct()
+                        .singleOrNull() ?: throw PatchException("Could not resolve the chat menu thread info field")
+                    val threadInfoClass = classDefBy(threadInfoField.definingClass)
+                    val threadInfoParameters = parameters.indices.filter {
+                        parameters[it].type == threadInfoClass.type || parameters[it].type in threadInfoClass.interfaces
+                    }
+                    val threadInfoParameterIndex = (threadInfoParameters.singleOrNull()
+                        ?: throw PatchException("Could not resolve the chat menu thread info parameter")) + 1
+                    GetThreadInfoFieldNameExtensionFingerprint.changeFirstString(threadInfoField.name)
 
                     // Hard coding register names as these instructions
                     // will be added on the first line.

@@ -55,6 +55,32 @@ internal object LegacyDarkModeOnResumeFingerprint : Fingerprint(
     ),
 )
 
+internal object InlineLegacyDarkModeOnResumeFingerprint : Fingerprint(
+    classFingerprint = LegacyDarkModeFragmentConstructorFingerprint,
+    name = "onResume",
+    returnType = "V",
+    parameters = emptyList(),
+    filters = listOf(
+        fieldAccess(type = STRING_DESCRIPTOR, opcode = Opcode.IGET_OBJECT),
+        methodCall(
+            name = "<init>",
+            parameters = listOf(RADIO_GROUP_LISTENER_DESCRIPTOR, STRING_DESCRIPTOR, LIST_DESCRIPTOR),
+            opcode = Opcode.INVOKE_DIRECT,
+            location = MatchAfterWithin(5),
+        ),
+        methodCall(
+            definingClass = "Ljava/util/AbstractCollection;",
+            name = "add",
+            location = MatchAfterImmediately(),
+        ),
+        methodCall(
+            parameters = listOf(COLLECTION_DESCRIPTOR),
+            returnType = "V",
+            location = MatchAfterImmediately(),
+        ),
+    ),
+)
+
 internal fun legacyRadioRowFactoryFingerprint(factory: MethodReference) = Fingerprint(
     definingClass = factory.definingClass,
     name = factory.name,

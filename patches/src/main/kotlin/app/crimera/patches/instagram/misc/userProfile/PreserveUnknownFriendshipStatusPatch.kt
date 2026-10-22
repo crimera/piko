@@ -12,6 +12,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionFilter
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -88,13 +89,11 @@ val preserveUnknownFriendshipStatusPatch = bytecodePatch(
 
         // A null followed-by keeps the existing relationship.
         Fingerprint(
-            returnType = USER_MODEL_CLASS_NAME,
-            parameters = listOf("L"),
             filters = listOf(
                 methodCall(reference = followedByGetter),
                 opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
                 // Converts the nullable value to false.
-                methodCall(parameters = listOf("Ljava/lang/Object;"), returnType = "Z", location = MatchAfterImmediately()),
+                methodCall(parameters = listOf("Ljava/lang/Object;"), returnType = "Z", location = MatchAfterWithin(4)),
                 opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
                 updaterCall(),
             ),
@@ -109,11 +108,21 @@ val preserveUnknownFriendshipStatusPatch = bytecodePatch(
         }
 
         // Suggested user update.
-        Fingerprint(
+        val legacySuggestedUserUpdate = Fingerprint(
             parameters = emptyList(),
             returnType = "V",
             filters = nullableFollowedByUpdateFilters(updaterCall()),
-        ).preserveNullableFollowedBy()
+        )
+        val suggestedUserUpdate = if (legacySuggestedUserUpdate.matchOrNull() != null) {
+            legacySuggestedUserUpdate
+        } else {
+            Fingerprint(
+                parameters = listOf("L"),
+                returnType = "Ljava/lang/Object;",
+                filters = nullableFollowedByUpdateFilters(updaterCall()),
+            )
+        }
+        suggestedUserUpdate.preserveNullableFollowedBy()
 
         // Inbox suggestions update.
         Fingerprint(

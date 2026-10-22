@@ -22,6 +22,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
+import app.morphe.util.matchSingle
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -99,7 +100,8 @@ val viewStoriesAnonymouslyPatch =
             val reelTypeClass = ReelTypeFingerprint.originalClassDef.type
             val reelTypeField = classDefBy(reelModelClass).fields.single { it.type == reelTypeClass }
 
-            val headerBindingMethod = StoryHeaderBindingFingerprint.method
+            val headerBindingMethod = StoryHeaderBindingFingerprint.matchOrNull()?.method
+                ?: StoryToolbarBindingFingerprint.matchSingle().method
             val holderClass = headerBindingMethod.parameterTypes[STORY_HEADER_HOLDER_PARAMETER].toString()
             addStoryHeaderCaptureHook(headerBindingMethod)
             addStoryHeaderBridgeHook(
@@ -110,24 +112,25 @@ val viewStoriesAnonymouslyPatch =
                 reelTypeField,
             )
 
+            val standardProgressMethod = StandardStoryProgressFingerprint.matchOrNull()?.method
+                ?: DelegatedStoryProgressFingerprint.matchSingle().method
             listOf(
                 Triple(
-                    PromptStoryProgressFingerprint,
+                    PromptStoryProgressFingerprint.method,
                     "captureFromPromptProgress",
                     PromptStoryProgressExtensionFingerprint,
                 ),
                 Triple(
-                    StandardStoryProgressFingerprint,
+                    standardProgressMethod,
                     "captureFromStandardProgress",
                     StandardStoryProgressExtensionFingerprint,
                 ),
                 Triple(
-                    CompactStoryProgressFingerprint,
+                    CompactStoryProgressFingerprint.method,
                     "captureFromCompactProgress",
                     CompactStoryProgressExtensionFingerprint,
                 ),
-            ).forEach { (progressFingerprint, bridgeMethodName, extensionFingerprint) ->
-                val progressMethod = progressFingerprint.method
+            ).forEach { (progressMethod, bridgeMethodName, extensionFingerprint) ->
                 val progressFields = classDefBy(progressMethod.definingClass).fields
                 addStoryProgressCaptureHook(progressMethod, bridgeMethodName)
                 addStoryProgressBridgeHook(

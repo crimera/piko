@@ -60,7 +60,7 @@ val hideStoriesTrayPatch =
                         if-eqz v$freeRegister, :piko
                         const v$storiesTrayViewGroupRegistry, 0x0
                         """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(targetIndex + 1)),
+                        ExternalLabel("piko", getInstruction(targetIndex)),
                     )
 
                     enableSettings("hideStoriesTray")

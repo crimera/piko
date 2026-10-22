@@ -15,6 +15,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.FRAGMENT_ACTIVITY
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
@@ -48,7 +49,7 @@ private fun reelMenuBuilderFingerprint(mediaExtraDataField: FieldReference) = Fi
         // Menu builder.
         newInstance("L", location = MatchAfterImmediately()),
         fieldAccess(reference = mediaExtraDataField, opcode = Opcode.IGET_OBJECT),
-        newInstance("Ljava/util/ArrayList;", location = MatchAfterImmediately()),
+        newInstance("Ljava/util/ArrayList;", location = MatchAfterWithin(1)),
     ),
 )
 
