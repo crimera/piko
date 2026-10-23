@@ -16,8 +16,8 @@ import app.morphe.patcher.Match
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -83,7 +83,7 @@ private object NewXTimelineAddTabButtonFingerprint : Fingerprint(
     returnType = "V",
     // Resource ids shift whenever the app adds a string (12.32 moved `add_tab` by one), so the id is
     // resolved by name at match time.
-    filters = listOf(literal({ getResourceId(ResourceType.STRING, ADD_TAB_STRING_RESOURCE_NAME) })),
+    filters = listOf(literal({ resourceId(ResourceType.STRING, ADD_TAB_STRING_RESOURCE_NAME) })),
     custom = { method, classDef ->
         val packageRelativeName = classDef.type.removePrefix(HOME_TABBED_SCOPE)
         classDef.type.startsWith(HOME_TABBED_SCOPE) &&

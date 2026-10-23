@@ -354,7 +354,7 @@ private fun resolveForYouTabHook(
                     method.name == originalMethod.name &&
                         method.returnType == originalMethod.returnType &&
                         method.parameterTypes == originalMethod.parameterTypes
-                } as? MutableMethod ?: throw PatchException(
+                } ?: throw PatchException(
                     "NewX modern For You tab event hook is not mutable: $originalMethod",
                 )
                 val refreshBridges = mutableClass.methods.mapNotNull { method ->
@@ -919,8 +919,7 @@ private fun patchHomeFilterGroupConstructor() {
         )
     }
 
-    val constructor = constructors.single() as? MutableMethod
-        ?: throw PatchException("NewX HomeTimelineFilters group constructor is not mutable")
+    val constructor = constructors.single()
     val filterTypeParameterIndex = constructor.parameterIndexForField(filterTypeField)
     val optionsParameterIndex = constructor.parameterIndexForField(
         optionsField,

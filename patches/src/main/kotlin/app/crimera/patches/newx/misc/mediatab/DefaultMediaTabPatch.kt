@@ -107,7 +107,7 @@ internal fun isPendingSubTabStore(
 ): Boolean {
     if (instruction.opcode != Opcode.IPUT_OBJECT) return false
     val field = (instruction as? ReferenceInstruction)?.reference as? FieldReference ?: return false
-    return field.type.toString() == tabTypeDescriptor
+    return field.type == tabTypeDescriptor
 }
 
 /** Returns the one argument register for a one-argument flow factory call. */

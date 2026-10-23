@@ -30,9 +30,9 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.hasResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
+import app.morphe.patcher.resource.hasResourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
@@ -332,9 +332,9 @@ private fun resolveNavBarDestination(
     spec: NavBarDestinationSpec,
     rows: List<DrawerRowCall>,
 ): ResolvedNavBarDestination {
-    val titleResourceId = getResourceId(ResourceType.STRING, spec.titleResourceName)
+    val titleResourceId = resourceId(ResourceType.STRING, spec.titleResourceName)
     val alternateTitleResourceId =
-        spec.alternateTitleResourceName?.let { getResourceId(ResourceType.STRING, it) }
+        spec.alternateTitleResourceName?.let { resourceId(ResourceType.STRING, it) }
     val titleResourceIds = listOfNotNull(titleResourceId, alternateTitleResourceId).toSet()
     val matches = rows.filter { it.titleResourceId.toLong() in titleResourceIds }
     val row =
@@ -345,7 +345,7 @@ private fun resolveNavBarDestination(
     val mutableMethodCandidates =
         context.mutableClassDefBy(row.method.definingClass).methods.filter { method ->
             method.name == row.method.name &&
-                method.returnType.toString() == row.method.returnType.toString() &&
+                method.returnType == row.method.returnType &&
                 method.parameterTypes.map(CharSequence::toString) ==
                 row.method.parameterTypes.map(CharSequence::toString)
         }
@@ -356,7 +356,7 @@ private fun resolveNavBarDestination(
         ) { it.toString() }
     return ResolvedNavBarDestination(
         spec = spec,
-        titleResourceId = titleResourceId.toLong(),
+        titleResourceId = titleResourceId,
         iconField = row.iconField,
         method = mutableMethod,
         callIndex = row.callIndex,
@@ -437,7 +437,7 @@ private fun injectSettingsRegistrations(
 context(context: BytecodePatchContext)
 internal fun resolveIconDrawables(fields: Collection<FieldReference>): Map<String, Int> {
     val drawables = mutableMapOf<String, Int>()
-    fields.groupBy { field -> field.definingClass.toString() }.forEach { (classType, classFields) ->
+    fields.groupBy { field -> field.definingClass }.forEach { (classType, classFields) ->
         val iconClass = context.mutableClassDefBy(classType)
         val initializers =
             iconClass.methods.filter { method ->
@@ -445,7 +445,7 @@ internal fun resolveIconDrawables(fields: Collection<FieldReference>): Map<Strin
             }
         val initializer =
             requireExactlyOne("NewX icon initializer for $classType", initializers) { it.toString() }
-        val iconTypes = classFields.map { field -> field.type.toString() }.distinct()
+        val iconTypes = classFields.map { field -> field.type }.distinct()
         val iconType = requireExactlyOne("NewX icon type for $classType", iconTypes)
         val available = initializer.resolveIconDrawableMap(iconType)
         classFields.forEach { field ->
@@ -473,7 +473,7 @@ internal fun MutableMethod.resolveIconDrawableMap(iconType: String): Map<String,
         if (instruction.opcode == Opcode.INVOKE_DIRECT) {
             val reference = instruction.getReference<MethodReference>()
             val registers = instruction.registersUsed
-            if (reference?.definingClass?.toString() == iconType &&
+            if (reference?.definingClass == iconType &&
                 reference.name == "<init>" &&
                 reference.parameterTypes.map { it.toString() } == listOf("I") &&
                 registers.size == 2 &&
@@ -488,7 +488,7 @@ internal fun MutableMethod.resolveIconDrawableMap(iconType: String): Map<String,
         val register = (instruction as? OneRegisterInstruction)?.registerA
         val resource = drawableResource
         if (field != null && register != null && resource != null &&
-            field.type.toString() == iconType && register == allocationRegister
+            field.type == iconType && register == allocationRegister
         ) {
             drawables[field.toString()] = resource
             allocationRegister = null

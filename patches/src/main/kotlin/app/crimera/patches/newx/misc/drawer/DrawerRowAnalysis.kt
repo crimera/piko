@@ -11,7 +11,7 @@ private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val ICONS_DESCRIPTOR_PREFIX = "Lcom/x/icons/"
 
 internal fun MethodReference.isStringResourceLookup(): Boolean =
-    returnType.toString() == "Ljava/lang/String;" &&
+    returnType == "Ljava/lang/String;" &&
         parameterTypes.map(CharSequence::toString) == listOf(COMPOSER_DESCRIPTOR, "I")
 
 /**
@@ -20,7 +20,7 @@ internal fun MethodReference.isStringResourceLookup(): Boolean =
  */
 internal fun MethodReference.isDrawerRowRenderer(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
-    return returnType.toString() == "V" &&
+    return returnType == "V" &&
         parameters.size in 8..10 &&
         parameters[0] == STRING_DESCRIPTOR &&
         parameters[1].startsWith(ICONS_DESCRIPTOR_PREFIX) &&

@@ -23,8 +23,8 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -59,7 +59,7 @@ private object NewXPostDetailAuthorActionRendererFingerprint : Fingerprint(
     definingClass = POST_ITEM_SCOPE,
     returnType = "V",
     filters = listOf(
-        literal({ getResourceId(ResourceType.STRING, MESSAGE_BUTTON_RESOURCE_NAME) }),
+        literal({ resourceId(ResourceType.STRING, MESSAGE_BUTTON_RESOURCE_NAME) }),
     ),
     custom = { method, _ -> method.isPostDetailAuthorActionRendererContract() },
 )
@@ -78,7 +78,7 @@ private data class MessageButtonLocation(val buttonCallIndex: Int)
 private fun resolveMessageButtonLocation(method: Method): MessageButtonLocation {
     val instructions = method.implementation?.instructions?.toList()
         ?: throw PatchException("NewX post-detail author action renderer has no body: $method")
-    val messageResourceId = getResourceId(ResourceType.STRING, MESSAGE_BUTTON_RESOURCE_NAME).toInt()
+    val messageResourceId = resourceId(ResourceType.STRING, MESSAGE_BUTTON_RESOURCE_NAME).toInt()
     val resourceLiteralIndex = requireExactlyOne(
         label = "NewX post-detail Message resource in $method",
         candidates = instructions.withIndex().filter { (_, instruction) ->
@@ -184,7 +184,7 @@ private fun resolveStringButtonCall(
 
 context(context: BytecodePatchContext)
 private fun resolveFollowButtonCall(method: Method): Int {
-    val followResourceId = getResourceId(ResourceType.STRING, FOLLOW_RESOURCE_NAME).toInt()
+    val followResourceId = resourceId(ResourceType.STRING, FOLLOW_RESOURCE_NAME).toInt()
     val instructions = method.implementation?.instructions?.toList()
         ?: throw PatchException("NewX post-detail author action renderer has no body: $method")
     val candidates = buildList {

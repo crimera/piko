@@ -74,23 +74,19 @@ val classicInlineActionSpacingPatch =
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)
 
-        val nativeSpacing =
-            newXSettings {
-                category(Categories.POST_ACTIONS_MEDIA) {
-                    toggle(
-                        id = NATIVE_INLINE_ACTION_SPACING_SETTING,
-                        strings = settingStrings("piko_newx_native_inline_action_spacing"),
-                        order = 110,
-                        defaultValue = false,
-                    )
-                }
+        // Contribute even when the target already ships the classic layout.
+        newXSettings {
+            category(Categories.POST_ACTIONS_MEDIA) {
+                toggle(
+                    id = NATIVE_INLINE_ACTION_SPACING_SETTING,
+                    strings = settingStrings("piko_newx_native_inline_action_spacing"),
+                    order = 110,
+                    defaultValue = false,
+                )
             }
+        }
 
         execute {
-            // Contributed even when the target already ships the classic layout, so the setting
-            // exists on every supported release.
-            nativeSpacing
-
             val layout = resolvedNewXInlineActionBarLayout()
             if (layout.shape == NewXInlineActionKindShape.BOOLEAN_CLASSIC) {
                 // Validated classic target: the app already renders this spacing.
@@ -111,7 +107,7 @@ private fun patchClassicInlineActionSpacing(layout: ResolvedNewXInlineActionBarL
                 method.parameterTypes.size == 3 &&
                     method.parameterTypes[1].toString() == "Ljava/util/List;" &&
                     method.parameterTypes[2].toString() == "J" &&
-                    method.returnType.toString().startsWith("L")
+                    method.returnType.startsWith("L")
             },
         ).scopedMatchAll(),
     ).originalMethod

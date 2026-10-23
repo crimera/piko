@@ -418,7 +418,7 @@ private fun patchPostDividerHelper(
     helper: MethodReference,
     setting: ToggleSettingDefinition,
 ) {
-    val helperClass = context.mutableClassDefBy(helper.definingClass.toString())
+    val helperClass = context.mutableClassDefBy(helper.definingClass)
     val parameterTypes = helper.parameterTypes.map(CharSequence::toString)
     val method =
         requireExactlyOne(

@@ -21,8 +21,8 @@ import app.crimera.patches.newx.misc.navbar.NewXTabDataFingerprint
 import app.crimera.patches.newx.misc.navbar.resolveIconField
 import app.crimera.patches.newx.misc.navbar.resolveNavBarItemContent
 import app.crimera.patches.newx.misc.navbar.resolveTitleResourceIdAtRowCall
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.crimera.patches.newx.misc.navbar.resolveComponentTabChangeMethod
 import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.crimera.patches.newx.misc.navbar.validateNewXNavBarTabData
@@ -60,7 +60,6 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -122,7 +121,6 @@ private val drawerResourceNamesPatch =
         description = "Resolves stable names for dynamically discovered drawer strings.",
         default = false,
     ) {
-        dependsOn(resourceMappingPatch)
 
         execute {
             document("res/values/public.xml").use { publicXml ->
@@ -599,7 +597,7 @@ private fun drawerCatalogEntries(calls: List<DrawerRendererCall>): List<DrawerCa
         val iconRegister = call.call.startRegister + iconParameterIndex
         val iconField =
             call.method.instructions.resolveIconField(call.index, iconRegister)
-                ?.takeIf { field -> field.type.toString().startsWith("Lcom/x/icons/") }
+                ?.takeIf { field -> field.type.startsWith("Lcom/x/icons/") }
         call.method.instructions.resolveDrawerTitleResourceIds(
             callIndex = call.index,
             call = call.call,
@@ -677,8 +675,8 @@ private fun injectDynamicDrawerOptions(
 
 private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
-    return definingClass.toString() == renderer.definingClass.toString() &&
-        returnType.toString() == "V" &&
+    return definingClass == renderer.definingClass &&
+        returnType == "V" &&
         parameters.size == 4 &&
         parameters[0].startsWith("Landroidx/compose/material3/") &&
         parameters[1] == FUNCTION1_DESCRIPTOR &&
@@ -710,7 +708,7 @@ private fun MutableMethod.findDrawerFooterCalls(
             ?: return@mapNotNull null
         val isRequestedRenderer =
             footerRenderer.toSmaliDescriptor() == renderer.toSmaliDescriptor()
-        if (footerRenderer.definingClass.toString() != renderer.definingClass.toString() ||
+        if (footerRenderer.definingClass != renderer.definingClass ||
             (!isRequestedRenderer && !footerRenderer.isDrawerRowRenderer()) ||
             call.registerCount != footerRenderer.parameterTypes.size
         ) {
@@ -789,7 +787,7 @@ private fun resolveDrawerFooterTarget(
             mutableClass.methods
                 .filter { method ->
                     method.name == "invoke" &&
-                        method.returnType.toString() == OBJECT_DESCRIPTOR &&
+                        method.returnType == OBJECT_DESCRIPTOR &&
                         method.parameterTypes.map(CharSequence::toString) ==
                             List(3) { OBJECT_DESCRIPTOR }
                 }.forEach { method ->
@@ -893,11 +891,11 @@ private sealed interface DrawerRowIcon {
     val type: String
 
     data class Field(val reference: FieldReference) : DrawerRowIcon {
-        override val type: String get() = reference.type.toString()
+        override val type: String get() = reference.type
     }
 
     data class Accessor(val getter: MethodReference) : DrawerRowIcon {
-        override val type: String get() = getter.returnType.toString()
+        override val type: String get() = getter.returnType
     }
 }
 
@@ -1006,7 +1004,7 @@ private data class ProfileRowAnchor(
  * and the emission.
  */
 private fun MutableMethod.findProfileRowCall(): ProfileRowAnchor {
-    val profileTitleId = getResourceId(ResourceType.STRING, "drawer_profile_title")
+    val profileTitleId = resourceId(ResourceType.STRING, "drawer_profile_title")
     val candidates = instructions.indices.mapNotNull { index ->
         val instruction = instructions[index]
         if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@mapNotNull null
@@ -1063,10 +1061,10 @@ private fun List<Instruction>.resolveTabChangeFunction(
             instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
         ) continue
         val reference = instruction.getReference<MethodReference>() ?: continue
-        if (reference.definingClass.toString() != FUNCTION1_DESCRIPTOR ||
+        if (reference.definingClass != FUNCTION1_DESCRIPTOR ||
             reference.name != "invoke" ||
             reference.parameterTypes.map(CharSequence::toString) != listOf(OBJECT_DESCRIPTOR) ||
-            reference.returnType.toString() != OBJECT_DESCRIPTOR
+            reference.returnType != OBJECT_DESCRIPTOR
         ) continue
         val receiver = instruction.registersUsed.firstOrNull() ?: continue
         val field = resolveRegisterField(receiver, index) ?: continue
@@ -1103,7 +1101,7 @@ private fun resolveDrawerTabNavigation(
     val dispatcherClasses = classDefFlatMap { classDef ->
         classDef.methods.filter { method ->
             if (method.name != "invoke" ||
-                method.returnType.toString() != OBJECT_DESCRIPTOR ||
+                method.returnType != OBJECT_DESCRIPTOR ||
                 method.parameterTypes.isNotEmpty() ||
                 method.implementation == null
             ) return@filter false
@@ -1116,7 +1114,7 @@ private fun resolveDrawerTabNavigation(
             val hasSwitch =
                 methodInstructions.any { instruction -> instruction.opcode == Opcode.PACKED_SWITCH }
             readsCommunities && hasSwitch
-        }.map { classDef.type.toString() }
+        }.map { classDef.type }
     }
     val dispatcherClass = requireExactlyOne("NewX drawer click dispatcher", dispatcherClasses)
     val dispatcher =
@@ -1124,7 +1122,7 @@ private fun resolveDrawerTabNavigation(
             label = "NewX drawer click dispatcher invoke",
             candidates = context.mutableClassDefBy(dispatcherClass).methods.filter { method ->
                 method.name == "invoke" &&
-                    method.returnType.toString() == OBJECT_DESCRIPTOR &&
+                    method.returnType == OBJECT_DESCRIPTOR &&
                     method.parameterTypes.isEmpty() &&
                     method.implementation != null
             },
@@ -1154,7 +1152,7 @@ private fun resolveDrawerTabNavigation(
                 instruction.opcode != Opcode.INVOKE_VIRTUAL_RANGE
             ) return@firstOrNull false
             val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
-            reference.returnType.toString() == "V" &&
+            reference.returnType == "V" &&
                 reference.parameterTypes.map(CharSequence::toString) ==
                 listOf(FUNCTION2_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
         }
@@ -1181,7 +1179,7 @@ private fun resolveDrawerTabNavigation(
                 instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
             ) return@firstOrNull false
             val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
-            reference.returnType.toString() == "V" &&
+            reference.returnType == "V" &&
                 reference.parameterTypes.map(CharSequence::toString) == listOf(OBJECT_DESCRIPTOR)
         } ?: throw PatchException("NewX Communities drawer click has no drawer close call: $dispatcher")
     val closerInstruction = dispatcherInstructions[closerIndex]
@@ -1217,8 +1215,8 @@ private fun resolveDrawerTabNavigation(
             ?: throw PatchException("NewX drawer close field has no field reference: $dispatcher")
     // The dispatcher receiver owns both the close field and (12.27-12.28) the tab change method.
     // 12.29 moved only the tab change out; the capture target stays the close-field owner.
-    val componentClass = closerField.definingClass.toString()
-    if (closerField.type.toString() != closerMethod.definingClass.toString()) {
+    val componentClass = closerField.definingClass
+    if (closerField.type != closerMethod.definingClass) {
         throw PatchException(
             "NewX drawer close field type changed: field=${closerField.type}, " +
                 "method=${closerMethod.definingClass}",
@@ -1252,11 +1250,11 @@ private fun resolveDrawerTabNavigation(
             label = "NewX drawer close argument",
             candidates =
                 (prologueArgFields + listOfNotNull(inlineArgField))
-                    .filter { it.type.toString().startsWith("Lcom/x/main/api/") }
+                    .filter { it.type.startsWith("Lcom/x/main/api/") }
                     .distinctBy(FieldReference::toString),
             describe = { it.toString() },
         )
-    if (!closerArgField.type.toString().startsWith("Lcom/x/main/api/")) {
+    if (!closerArgField.type.startsWith("Lcom/x/main/api/")) {
         throw PatchException(
             "NewX drawer close argument is not a stable API type: $closerArgField",
         )
@@ -1303,7 +1301,7 @@ private fun hookDrawerTabComponent(componentClass: String) {
                     instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
                     instruction.getReference<MethodReference>()?.let { reference ->
                         reference.name == "<init>" &&
-                            reference.definingClass.toString() == superType
+                            reference.definingClass == superType
                     } == true
             }
         if (superCallIndex < 0) {

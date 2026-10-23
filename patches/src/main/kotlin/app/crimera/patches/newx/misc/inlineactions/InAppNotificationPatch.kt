@@ -189,7 +189,7 @@ private fun resolveLiteralClass(
 ): ClassDef {
     val candidates = classDefs.filter { classDef ->
         classDef.type.startsWith(MODEL_SCOPE) &&
-            classDef.superclass?.toString() == baseDescriptor &&
+            classDef.superclass == baseDescriptor &&
             classDef.methods.any { method ->
                 method.hasStringAnchors("Literal(text=", ")")
             }
@@ -351,7 +351,7 @@ private fun Method.hasStringAnchors(vararg anchors: String): Boolean {
 }
 
 private fun Method.matches(reference: MethodReference): Boolean =
-    definingClass.toString() == reference.definingClass.toString() &&
+    definingClass == reference.definingClass &&
         name == reference.name &&
-        returnType.toString() == reference.returnType.toString() &&
+        returnType == reference.returnType &&
         parameterTypes.map(CharSequence::toString) == reference.parameterTypes.map(CharSequence::toString)

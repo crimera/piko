@@ -120,14 +120,14 @@ internal fun validateNewXNavBarTabData(match: Match): NewXNavBarTabData {
     val spacesReference =
         match.instructionMatches[2].instruction.getReference<FieldReference>()
             ?: throw PatchException("NewX tabData SPACES anchor has no field reference")
-    val tabTypeDescriptor = entriesReference.definingClass.toString()
+    val tabTypeDescriptor = entriesReference.definingClass
     if (entriesReference.name != "getEntries" ||
         entriesReference.parameterTypes.isNotEmpty() ||
-        entriesReference.returnType.toString() != "Lkotlin/enums/EnumEntries;" ||
-        communityReference.definingClass.toString() != tabTypeDescriptor ||
-        communityReference.type.toString() != tabTypeDescriptor ||
-        spacesReference.definingClass.toString() != tabTypeDescriptor ||
-        spacesReference.type.toString() != tabTypeDescriptor ||
+        entriesReference.returnType != "Lkotlin/enums/EnumEntries;" ||
+        communityReference.definingClass != tabTypeDescriptor ||
+        communityReference.type != tabTypeDescriptor ||
+        spacesReference.definingClass != tabTypeDescriptor ||
+        spacesReference.type != tabTypeDescriptor ||
         communityReference.name != "COMMUNITIES" ||
         spacesReference.name != "SPACES"
     ) {
@@ -321,13 +321,13 @@ internal fun resolveTabChangeMethods(tabData: NewXNavBarTabData): List<MutableMe
         classDefFlatMap { classDef ->
             classDef.methods.mapNotNull { method ->
                 if (method.implementation == null) return@mapNotNull null
-                if (method.returnType.toString() != "V") return@mapNotNull null
+                if (method.returnType != "V") return@mapNotNull null
                 if (method.parameterTypes.size !in 1..2) return@mapNotNull null
                 val parameters = method.parameterTypes.map(CharSequence::toString)
                 if (parameters.firstOrNull() != tabData.navigationType) return@mapNotNull null
                 if (!parameters.isTabChangeSignature()) return@mapNotNull null
                 if (!method.hasStackNavigationCall()) return@mapNotNull null
-                TabChangeMethodKey(classDef.type.toString(), method.name, parameters)
+                TabChangeMethodKey(classDef.type, method.name, parameters)
             }
         }
     if (matches.isEmpty()) {
@@ -362,7 +362,7 @@ internal fun resolveComponentTabChangeMethod(
     val candidates =
         context.mutableClassDefBy(componentClass).methods.filter { method ->
             method.implementation != null &&
-                method.returnType.toString() == "V" &&
+                method.returnType == "V" &&
                 method.parameterTypes.map(CharSequence::toString) == listOf(navigationType) &&
                 method.hasStackNavigationCall()
         }
@@ -374,7 +374,7 @@ private fun mutableTabChangeMethod(key: TabChangeMethodKey): MutableMethod {
     val candidates =
         context.mutableClassDefBy(key.definingClass).methods.filter { method ->
             method.name == key.name &&
-                method.returnType.toString() == "V" &&
+                method.returnType == "V" &&
                 method.parameterTypes.map(CharSequence::toString) == key.parameterTypes
         }
     return requireExactlyOne("NewX tab change method ${key.name}", candidates) { it.toString() }
@@ -384,7 +384,7 @@ context(context: BytecodePatchContext)
 internal fun resolveTabDataValueConstructor(tabDataValueType: String): MethodReference {
     val classDef = context.mutableClassDefBy(tabDataValueType)
     val instanceFields = classDef.fields.filter { !com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(it.accessFlags) }
-    val fieldTypes = instanceFields.map { it.type.toString() }.sorted()
+    val fieldTypes = instanceFields.map { it.type }.sorted()
     
     val primaryConstructors = classDef.methods.filter { method ->
         method.name == "<init>" && method.parameterTypes.map { it.toString() }.sorted() == fieldTypes
@@ -411,8 +411,8 @@ internal fun Method.hasStackNavigationCall(): Boolean {
         }
         val reference = call.getReference<MethodReference>() ?: return@any false
         call.registersUsed.firstOrNull() == fieldLoad.registerA &&
-            field.type.toString() == reference.definingClass.toString() &&
-            reference.returnType.toString() == "V" &&
+            field.type == reference.definingClass &&
+            reference.returnType == "V" &&
             // The navigator's (Function2, Function1) parameters swapped order in 12.33 alpha.02.
             reference.parameterTypes.map(CharSequence::toString).sorted() ==
                 listOf(FUNCTION1_DESCRIPTOR, FUNCTION2_DESCRIPTOR)
@@ -427,7 +427,7 @@ internal fun Method.hasStackNavigationCall(): Boolean {
  * the resolved renderer call is what proves the class identity.
  */
 private fun Method.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean =
-    returnType.toString() == "V" &&
+    returnType == "V" &&
         parameterTypes.map(CharSequence::toString).isNavBarItemContentConstructor(tabData)
 
 private fun List<String>.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean =
@@ -448,7 +448,7 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
             var contentClass = false
             val renderers = mutableListOf<ImmutableMethodReference>()
             classDef.methods.forEach { method ->
-                if (method.returnType.toString() != "V") return@forEach
+                if (method.returnType != "V") return@forEach
                 // The item renderer takes five parameters; the content constructors take three or four.
                 if (method.parameterTypes.size !in 3..5) return@forEach
                 val parameters = method.parameterTypes.map(CharSequence::toString)
@@ -462,7 +462,7 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
                 ) {
                     renderers +=
                         ImmutableMethodReference(
-                            classDef.type.toString(),
+                            classDef.type,
                             method.name,
                             parameters,
                             "V",
@@ -473,7 +473,7 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
             if (renderers.isEmpty() && !contentClass) {
                 emptyList()
             } else {
-                listOf(NavBarItemScanHit(classDef.type.toString(), renderers, contentClass))
+                listOf(NavBarItemScanHit(classDef.type, renderers, contentClass))
             }
         }
     val rendererCandidates = scan.flatMap { it.renderers }
@@ -591,7 +591,7 @@ internal fun MutableMethod.resolveNavigationTabIcons(
         instructions
             .filter { instruction ->
                 instruction.opcode == Opcode.SGET_OBJECT &&
-                    instruction.getReference<FieldReference>()?.type?.toString() == "[I"
+                    instruction.getReference<FieldReference>()?.type == "[I"
             }.mapNotNull { instruction -> instruction.getReference<FieldReference>() }
             .distinctBy(FieldReference::toString)
     val mappingField =
@@ -645,7 +645,7 @@ internal fun resolveEnumSwitchCases(
     initializer.instructions.forEachIndexed { index, instruction ->
         if (instruction.opcode == Opcode.SGET_OBJECT) {
             val reference = instruction.getReference<FieldReference>()
-            if (reference?.type?.toString() == navigationType) lastEnumFieldName = reference.name
+            if (reference?.type == navigationType) lastEnumFieldName = reference.name
         }
         if (instruction.opcode != Opcode.APUT) return@forEachIndexed
         val registers = instruction as? ThreeRegisterInstruction ?: return@forEachIndexed
@@ -688,7 +688,7 @@ internal fun List<Instruction>.resolveCaseIconField(
             (instruction as? OneRegisterInstruction)?.registerA == iconRegister
         ) {
             val reference = instruction.getReference<FieldReference>()
-            if (reference?.type?.toString()?.startsWith(ICONS_DESCRIPTOR_PREFIX) == true) {
+            if (reference?.type?.startsWith(ICONS_DESCRIPTOR_PREFIX) == true) {
                 return reference
             }
         }
@@ -710,7 +710,7 @@ internal fun List<Instruction>.resolveDefaultIconField(
         if (instruction.destinationRegisterOrNull() != iconRegister) continue
         if (instruction.opcode != Opcode.SGET_OBJECT) return null
         return instruction.getReference<FieldReference>()
-            ?.takeIf { reference -> reference.type.toString().startsWith(ICONS_DESCRIPTOR_PREFIX) }
+            ?.takeIf { reference -> reference.type.startsWith(ICONS_DESCRIPTOR_PREFIX) }
     }
     return null
 }

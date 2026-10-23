@@ -227,8 +227,8 @@ val hidePremiumUpsellPatch =
                             ?: throw PatchException("NewX home-nav upsell composable lost its state parameter")
                     val stateRegister =
                         p0Register +
-                            parameterDescriptors().take(stateIndex).sumOf { descriptor ->
-                                if (descriptor == "J" || descriptor == "D") 2 else 1 as Int
+                            parameterDescriptors().take(stateIndex).fold(0) { width, descriptor ->
+                                width + if (descriptor == "J" || descriptor == "D") 2 else 1
                             }
                     val read =
                         hidePremiumUpsell.injectRead(

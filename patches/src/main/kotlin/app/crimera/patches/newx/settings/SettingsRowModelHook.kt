@@ -14,8 +14,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
@@ -62,7 +62,7 @@ internal class SettingsRowModelTarget(
 
 context(context: BytecodePatchContext)
 internal fun resolveSettingsRowModelTarget(): SettingsRowModelTarget? {
-    val titleResourceId = getResourceId(ResourceType.STRING, STRING_RESOURCE_NAME)
+    val titleResourceId = resourceId(ResourceType.STRING, STRING_RESOURCE_NAME)
     val builders =
         Fingerprint(
             // R8 can merge this builder outside the settings package; the resource index scopes it.
@@ -215,7 +215,7 @@ internal fun patchSettingsRowModel(
                 },
         )
     val iconGetter = pikoIcon(target.method.parameterTypes[target.iconParameterIndex].toString())
-    val titleResourceId = getResourceId(ResourceType.STRING, STRING_RESOURCE_NAME)
+    val titleResourceId = resourceId(ResourceType.STRING, STRING_RESOURCE_NAME)
     val parameterStart = mutable.p0Register + 1
     val titleParameter = parameterStart
     val iconParameter = parameterStart + target.iconParameterIndex

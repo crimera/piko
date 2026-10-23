@@ -80,7 +80,7 @@ private object CoilImageLoaderProviderFingerprint : Fingerprint(
     ),
     custom = { method, _ ->
         AccessFlags.STATIC.isSet(method.accessFlags) &&
-            method.returnType.toString().startsWith(COIL_SCOPE)
+            method.returnType.startsWith(COIL_SCOPE)
     },
 )
 
@@ -89,7 +89,7 @@ private fun coilImageLoaderMemoryCacheFingerprint(imageLoaderDescriptor: String)
     definingClass = COIL_SCOPE,
     parameters = emptyList(),
     custom = { method, classDef ->
-        val owner = classDef.type.toString()
+        val owner = classDef.type
         val isResolvedLoaderOwner =
             owner == imageLoaderDescriptor ||
                 classDef.interfaces.any { it.toString() == imageLoaderDescriptor }
@@ -97,7 +97,7 @@ private fun coilImageLoaderMemoryCacheFingerprint(imageLoaderDescriptor: String)
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
             method.parameterTypes.isEmpty() &&
             isResolvedLoaderOwner &&
-            method.returnType.toString().startsWith(MEMORY_CACHE_SCOPE)
+            method.returnType.startsWith(MEMORY_CACHE_SCOPE)
     },
 )
 
@@ -280,17 +280,17 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
     val provider = providerMatch.originalMethod
     val loaderMatch = requireExactlyOne(
         "Coil image-loader memory-cache getter",
-        coilImageLoaderMemoryCacheFingerprint(provider.returnType.toString())
+        coilImageLoaderMemoryCacheFingerprint(provider.returnType)
             .scopedMatchAllOrNull()
             .orEmpty(),
     )
     val loader = loaderMatch.originalMethod
-    val memoryCacheDescriptor = loader.returnType.toString()
+    val memoryCacheDescriptor = loader.returnType
     val memoryCacheClass = context.mutableClassDefBy(memoryCacheDescriptor)
 
     val memoryLookup = resolveMemoryLookup(memoryCacheClass)
     val keyDescriptor = memoryLookup.parameterTypes.single().toString()
-    val valueDescriptor = memoryLookup.returnType.toString()
+    val valueDescriptor = memoryLookup.returnType
     val keyClass = context.mutableClassDefBy(keyDescriptor)
     val valueClass = context.mutableClassDefBy(valueDescriptor)
 
@@ -298,42 +298,42 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
         "Coil strong memory-cache field",
         memoryCacheClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                context.hasCacheKeyAccessor(field.type.toString())
+                context.hasCacheKeyAccessor(field.type)
         },
     )
     val weakCacheField = requireExactlyOne(
         "Coil weak memory-cache field",
         memoryCacheClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                field.type.toString() != OBJECT_DESCRIPTOR &&
+                field.type != OBJECT_DESCRIPTOR &&
                 field.toString() != strongCacheField.toString() &&
-                context.hasWeakCacheBackingShape(field.type.toString())
+                context.hasWeakCacheBackingShape(field.type)
         },
     )
-    val weakCacheClass = context.mutableClassDefBy(weakCacheField.type.toString())
+    val weakCacheClass = context.mutableClassDefBy(weakCacheField.type)
     val mapBackingField = requireExactlyOne(
         "Coil weak memory-cache backing field",
         weakCacheClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                field.type.toString() == OBJECT_DESCRIPTOR
+                field.type == OBJECT_DESCRIPTOR
         },
     )
     val keyStringField = requireExactlyOne(
         "Coil memory-cache key string field",
         keyClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                field.type.toString() == STRING_DESCRIPTOR
+                field.type == STRING_DESCRIPTOR
         },
     )
     val imageField = requireExactlyOne(
         "Coil memory-cache image field",
         valueClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                context.isCoilImageType(field.type.toString())
+                context.isCoilImageType(field.type)
         },
     )
 
-    val strongCacheClass = context.mutableClassDefBy(strongCacheField.type.toString())
+    val strongCacheClass = context.mutableClassDefBy(strongCacheField.type)
     val strongMapFields = resolveCoilStrongMapFields(
         memoryLookup,
         strongCacheField.toString(),
@@ -349,11 +349,11 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
             strongCacheClass.methods.filter { method ->
                 !AccessFlags.STATIC.isSet(method.accessFlags) &&
                     method.parameterTypes.isEmpty() &&
-                    context.isSetAccessorReturnType(method.returnType.toString())
+                    context.isSetAccessorReturnType(method.returnType)
             },
         )
         val keyAccessorClass =
-            context.classDefByOrNull(keyAccessor.definingClass.toString())
+            context.classDefByOrNull(keyAccessor.definingClass)
                 ?: throw PatchException(
                     "NewX Coil memory-cache key accessor owner has no class definition: " +
                         keyAccessor.definingClass,
@@ -363,14 +363,14 @@ private fun resolveCoilThumbnailRuntime(): CoilThumbnailRuntime {
     }
     val converterMatch = requireExactlyOne(
         "Coil image-to-Bitmap converter",
-        coilBitmapConverterFingerprint(imageField.type.toString())
+        coilBitmapConverterFingerprint(imageField.type)
             .scopedMatchAllOrNull()
             .orEmpty(),
     )
 
     return CoilThumbnailRuntime(
         provider = provider.toString(),
-        loaderOwner = loader.definingClass.toString(),
+        loaderOwner = loader.definingClass,
         loader = loader.toString(),
         cacheKeys = cacheKeys?.toString(),
         cacheKeysInterface = cacheKeysInterface,
@@ -394,7 +394,7 @@ private fun resolveMemoryLookup(memoryCacheClass: ClassDef): Method {
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
             method.parameterTypes.size == 1 &&
             context.isMemoryKeyType(method.parameterTypes.single().toString()) &&
-            context.isMemoryValueType(method.returnType.toString())
+            context.isMemoryValueType(method.returnType)
     }
     return requireExactlyOne("Coil memory-cache lookup", matches)
 }
@@ -433,7 +433,7 @@ private fun resolveCoilStrongMapFields(
         val wrapperCast = instructions.getOrNull(index + 2) ?: continue
         if (wrapperCast.opcode != Opcode.CHECK_CAST) continue
         if ((wrapperCast as? OneRegisterInstruction)?.registerA != wrapperTarget) continue
-        val wrapperCastType = wrapperCast.getReference<TypeReference>()?.type?.toString() ?: continue
+        val wrapperCastType = wrapperCast.getReference<TypeReference>()?.type ?: continue
 
         val mapRead = instructions.getOrNull(index + 3) ?: continue
         if (mapRead.opcode != Opcode.IGET_OBJECT) continue
@@ -445,7 +445,7 @@ private fun resolveCoilStrongMapFields(
         val mapCast = instructions.getOrNull(index + 4) ?: continue
         if (mapCast.opcode != Opcode.CHECK_CAST) continue
         if ((mapCast as? OneRegisterInstruction)?.registerA != mapTarget) continue
-        val mapCastType = mapCast.getReference<TypeReference>()?.type?.toString() ?: continue
+        val mapCastType = mapCast.getReference<TypeReference>()?.type ?: continue
         if (mapCastType != MAP_DESCRIPTOR && mapCastType != LINKED_MAP_DESCRIPTOR) continue
 
         return CoilStrongMapFields(
@@ -462,7 +462,7 @@ private fun BytecodePatchContext.hasCacheKeyAccessor(descriptor: String): Boolea
     return classDef.methods.count { method ->
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
             method.parameterTypes.isEmpty() &&
-            isSetAccessorReturnType(method.returnType.toString())
+            isSetAccessorReturnType(method.returnType)
     } == 1
 }
 
@@ -476,29 +476,29 @@ private fun BytecodePatchContext.isSetAccessorReturnType(descriptor: String): Bo
     if (descriptor == SET_DESCRIPTOR || descriptor in SET_IMPLEMENTATION_DESCRIPTORS) return true
     val classDef = classDefByOrNull(descriptor) ?: return false
     if (classDef.interfaces.any { it.toString() == SET_DESCRIPTOR }) return true
-    val superclass = classDef.superclass?.toString() ?: return false
+    val superclass = classDef.superclass ?: return false
     return isSetAccessorReturnType(superclass)
 }
 
 private fun BytecodePatchContext.hasWeakCacheBackingShape(descriptor: String): Boolean {
     val classDef = classDefByOrNull(descriptor) ?: return false
     val instanceFields = classDef.fields.filterNot { AccessFlags.STATIC.isSet(it.accessFlags) }
-    return instanceFields.count { it.type.toString() == OBJECT_DESCRIPTOR } == 1 &&
-        instanceFields.any { it.type.toString() == INTEGER_DESCRIPTOR }
+    return instanceFields.count { it.type == OBJECT_DESCRIPTOR } == 1 &&
+        instanceFields.any { it.type == INTEGER_DESCRIPTOR }
 }
 
 private fun BytecodePatchContext.isMemoryKeyType(descriptor: String): Boolean {
     val classDef = classDefByOrNull(descriptor) ?: return false
     val instanceFields = classDef.fields.filterNot { AccessFlags.STATIC.isSet(it.accessFlags) }
-    return instanceFields.count { it.type.toString() == STRING_DESCRIPTOR } == 1 &&
-        instanceFields.any { it.type.toString() == MAP_DESCRIPTOR }
+    return instanceFields.count { it.type == STRING_DESCRIPTOR } == 1 &&
+        instanceFields.any { it.type == MAP_DESCRIPTOR }
 }
 
 private fun BytecodePatchContext.isMemoryValueType(descriptor: String): Boolean {
     val classDef = classDefByOrNull(descriptor) ?: return false
     val instanceFields = classDef.fields.filterNot { AccessFlags.STATIC.isSet(it.accessFlags) }
-    return instanceFields.count { it.type.toString() == MAP_DESCRIPTOR } == 1 &&
-        instanceFields.any { field -> isCoilImageType(field.type.toString()) }
+    return instanceFields.count { it.type == MAP_DESCRIPTOR } == 1 &&
+        instanceFields.any { field -> isCoilImageType(field.type) }
 }
 
 private fun BytecodePatchContext.isCoilImageType(descriptor: String): Boolean {
@@ -506,11 +506,11 @@ private fun BytecodePatchContext.isCoilImageType(descriptor: String): Boolean {
     return classDef.methods.any { method ->
         method.name == "getWidth" &&
             method.parameterTypes.isEmpty() &&
-            method.returnType.toString() == INTEGER_DESCRIPTOR
+            method.returnType == INTEGER_DESCRIPTOR
     } && classDef.methods.any { method ->
         method.name == "getHeight" &&
             method.parameterTypes.isEmpty() &&
-            method.returnType.toString() == INTEGER_DESCRIPTOR
+            method.returnType == INTEGER_DESCRIPTOR
     }
 }
 

@@ -102,7 +102,7 @@ private fun newXUrtRepositoryRequestFingerprint(requestCall: MethodReference) =
         definingClass = URT_REPOSITORY_PACKAGE,
         name = requestCall.name,
         parameters = requestCall.parameterTypes.map(CharSequence::toString),
-        returnType = requestCall.returnType.toString(),
+        returnType = requestCall.returnType,
         custom = { method, _ -> method.implementation != null },
     )
 
@@ -133,7 +133,7 @@ private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
                     ?: return@mapIndexedNotNull null
             index.takeIf {
                 reference.name == "AUTO_REFRESH" &&
-                    reference.type.toString().startsWith("L")
+                    reference.type.startsWith("L")
             }
         }
         val refreshRequestCalls = instructions.mapIndexedNotNull { index, instruction ->
@@ -144,7 +144,7 @@ private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
                 reference.definingClass.startsWith(URT_REPOSITORY_PACKAGE) &&
                     reference.parameterTypes.size == 2 &&
                     reference.parameterTypes.all { it.toString().startsWith("L") } &&
-                    reference.returnType.toString() == "V"
+                    reference.returnType == "V"
             }
         }
         autoRefreshFieldReads.size == 1 && refreshRequestCalls.size == 1
@@ -255,7 +255,7 @@ val disableTimelineRefreshPatch =
                     val reference = indexedInstruction.value.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
                         ?: return@filter false
                     reference.name == "AUTO_REFRESH" &&
-                        reference.type.toString().startsWith("L")
+                        reference.type.startsWith("L")
                 }
             if (autoRefreshFieldCandidates.size != 1) {
                 throw PatchException(
@@ -271,7 +271,7 @@ val disableTimelineRefreshPatch =
             val autoRefreshFieldReference =
                 autoRefreshFieldCandidate.value.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
                     ?: throw PatchException("NewX URT automatic-refresh request-type read has no field reference")
-            val autoRefreshTypeDescriptor = autoRefreshFieldReference.type.toString()
+            val autoRefreshTypeDescriptor = autoRefreshFieldReference.type
             val autoRefreshRegister = autoRefreshFieldInstruction.registerA
             val requestCallCandidate =
                 autoRefreshEventMethod.instructions.withIndex().firstOrNull { indexedInstruction ->
@@ -286,7 +286,7 @@ val disableTimelineRefreshPatch =
                         reference.parameterTypes.firstOrNull()?.toString() == autoRefreshTypeDescriptor &&
                         reference.parameterTypes.getOrNull(1)?.toString()?.startsWith("L") == true &&
                         reference.parameterTypes.size == 2 &&
-                        reference.returnType.toString() == "V"
+                        reference.returnType == "V"
                 } ?: throw PatchException("NewX URT automatic-refresh request call was not found")
             val requestCallReference =
                 requestCallCandidate.value.getReference<MethodReference>()
@@ -324,7 +324,7 @@ val disableTimelineRefreshPatch =
             val repositoryClass = mutableClassDefBy(repoDescriptor)
             val timelineGetterMatches =
                 repositoryClass.methods.filter { method ->
-                    val returnType = method.returnType.toString()
+                    val returnType = method.returnType
                     method.parameterTypes.isEmpty() &&
                         returnType.startsWith("L") &&
                         runCatching { mutableClassDefBy(returnType).superclass == ENUM_DESCRIPTOR }.getOrDefault(false)
@@ -336,7 +336,7 @@ val disableTimelineRefreshPatch =
                 )
             }
             val timelineGetter = timelineGetterMatches.single()
-            val timelineEnumDescriptor = timelineGetter.returnType.toString()
+            val timelineEnumDescriptor = timelineGetter.returnType
             val timelineEnumFieldNames =
                 mutableClassDefBy(timelineEnumDescriptor).fields.map { it.name }.toSet()
             val missingTimelineNames =
@@ -356,23 +356,23 @@ val disableTimelineRefreshPatch =
                 requireExactlyOne(
                     "NewX URT repository timeline identity getter",
                     repositoryClass.methods.filter { method ->
-                        val returnType = method.returnType.toString()
+                        val returnType = method.returnType
                         method.parameterTypes.isEmpty() &&
                             returnType.startsWith(TIMELINE_MODEL_PACKAGE) &&
                             returnType != timelineEnumDescriptor &&
                             runCatching {
                                 mutableClassDefBy(returnType).fields.count { field ->
-                                    field.type.toString() == STRING_DESCRIPTOR
+                                    field.type == STRING_DESCRIPTOR
                                 } == 1
                             }.getOrDefault(false)
                     },
                 )
-            val timelineIdentityDescriptor = timelineIdentityGetter.returnType.toString()
+            val timelineIdentityDescriptor = timelineIdentityGetter.returnType
             val timelineIdentityField =
                 requireExactlyOne(
                     "NewX URT timeline identity field",
                     mutableClassDefBy(timelineIdentityDescriptor).fields.filter { field ->
-                        field.type.toString() == STRING_DESCRIPTOR
+                        field.type == STRING_DESCRIPTOR
                     },
                 )
             if (!AccessFlags.PUBLIC.isSet(timelineIdentityField.accessFlags)) {
@@ -384,7 +384,7 @@ val disableTimelineRefreshPatch =
                 "$repoDescriptor->${timelineGetter.name}()$timelineEnumDescriptor"
             val flowGetterCandidates =
                 repositoryClass.methods.mapNotNull { method ->
-                    val flowDescriptor = method.returnType.toString()
+                    val flowDescriptor = method.returnType
                     if (method.parameterTypes.isNotEmpty() ||
                         !flowDescriptor.startsWith("Lkotlinx/coroutines/flow/")
                     ) {
@@ -394,14 +394,14 @@ val disableTimelineRefreshPatch =
                         method.instructions.mapNotNull { instruction ->
                             if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
                             instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()
-                                ?.takeIf { it.definingClass.toString() == repoDescriptor }
+                                ?.takeIf { it.definingClass == repoDescriptor }
                         }.distinctBy { "${it.definingClass}->${it.name}:${it.type}" }
                     val dataField =
                         requireAtMostOne(
                             label = "NewX URT repository data field read",
                             candidates = fieldReads,
                         ) ?: return@mapNotNull null
-                    val dataFieldClass = runCatching { mutableClassDefBy(dataField.type.toString()) }.getOrNull()
+                    val dataFieldClass = runCatching { mutableClassDefBy(dataField.type) }.getOrNull()
                         ?: return@mapNotNull null
                     if (flowDescriptor !in dataFieldClass.interfaces.map(CharSequence::toString)) {
                         return@mapNotNull null
@@ -411,7 +411,7 @@ val disableTimelineRefreshPatch =
                     val listGetters =
                         flowClass.methods.filter { candidate ->
                             candidate.parameterTypes.isEmpty() &&
-                                isAssignableTo(candidate.returnType.toString(), LIST_DESCRIPTOR)
+                                isAssignableTo(candidate.returnType, LIST_DESCRIPTOR)
                         }
                     val listGetter =
                         requireAtMostOne(
@@ -431,17 +431,17 @@ val disableTimelineRefreshPatch =
             }
             val (timelineDataGetter, _, timelineDataFlowListGetter) =
                 flowGetterCandidates.single()
-            val timelineDataFlowDescriptor = timelineDataGetter.returnType.toString()
+            val timelineDataFlowDescriptor = timelineDataGetter.returnType
             val repositoryTimelineDataGetterReference =
                 "$repoDescriptor->${timelineDataGetter.name}()$timelineDataFlowDescriptor"
             val timelineDataFlowListGetterReference =
                 "$timelineDataFlowDescriptor->${timelineDataFlowListGetter.name}()Ljava/util/List;"
-            val eventRepositoryClass = mutableClassDefBy(requestCallReference.definingClass.toString())
+            val eventRepositoryClass = mutableClassDefBy(requestCallReference.definingClass)
             val eventTimelineDataGetterMatches =
                 eventRepositoryClass.methods.filter { method ->
                     method.name == timelineDataGetter.name &&
                         method.parameterTypes.isEmpty() &&
-                        method.returnType.toString() == timelineDataFlowDescriptor
+                        method.returnType == timelineDataFlowDescriptor
                 }
             if (eventTimelineDataGetterMatches.size != 1) {
                 throw PatchException(

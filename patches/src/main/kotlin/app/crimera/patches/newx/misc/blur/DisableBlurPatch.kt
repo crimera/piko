@@ -161,7 +161,7 @@ private fun Method.isHazeBlurEnabledRecorder(): Boolean {
     return instructions.any { instruction ->
         instruction.opcode == Opcode.INVOKE_INTERFACE &&
             instruction.getReference<MethodReference>()?.let { reference ->
-                reference.definingClass.toString() == COLLECTION_DESCRIPTOR && reference.name == "add"
+                reference.definingClass == COLLECTION_DESCRIPTOR && reference.name == "add"
             } == true
     }
 }
@@ -170,9 +170,9 @@ context(context: BytecodePatchContext)
 private fun resolveHazeBlurEnabledRecorder(): MutableMethod {
     val recorderClasses = mutableListOf<String>()
     context.classDefForEach { classDef ->
-        if (!classDef.type.toString().startsWith(HAZE_SCOPE)) return@classDefForEach
+        if (!classDef.type.startsWith(HAZE_SCOPE)) return@classDefForEach
         if (classDef.methods.any { method -> method.implementation != null && method.isHazeBlurEnabledRecorder() }) {
-            recorderClasses += classDef.type.toString()
+            recorderClasses += classDef.type
         }
     }
     val recorderClass =

@@ -127,8 +127,8 @@ val restorePinnedHomeTabPatch =
                         .distinctBy { call -> "${call.navigationField}|${call.select}" },
                 )
             val routeRead = requireExactlyOne("NewX home tab route read", tabChange.tabRouteReads())
-            val routeType = routeRead.tabConfigField.definingClass.toString()
-            val tabConfigType = routeRead.tabConfigField.type.toString()
+            val routeType = routeRead.tabConfigField.definingClass
+            val tabConfigType = routeRead.tabConfigField.type
             // The route wraps the sealed tab config (For You, Following, pinned, ...), never a concrete tab.
             val tabConfigFlags = mutableClassDefBy(tabConfigType).accessFlags
             if (!AccessFlags.ABSTRACT.isSet(tabConfigFlags) || AccessFlags.INTERFACE.isSet(tabConfigFlags)) {

@@ -23,8 +23,8 @@ import app.morphe.patcher.patch.BytecodePatchBuilder
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
@@ -475,7 +475,7 @@ private fun actionContinuationLabel(index: Int): String = "piko_newx_post_option
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String, iconType: String): FieldReference {
-    val drawableId = getResourceId(ResourceType.DRAWABLE, resourceName)
+    val drawableId = resourceId(ResourceType.DRAWABLE, resourceName)
     val fields =
         Fingerprint(
             name = "<clinit>",

@@ -410,7 +410,7 @@ private fun resolveInlineActionBarModels(
         ?: throw PatchException(
             "NewX canonical-post class was not found: ${postModels.canonicalPostDescriptor}",
         )
-    val canonicalPostInterfaceDescriptor = canonicalPostClass.interfaces.singleOrNull()?.toString()
+    val canonicalPostInterfaceDescriptor = canonicalPostClass.interfaces.singleOrNull()
         ?: throw PatchException(
             "Expected one NewX canonical-post interface in $canonicalPostClass: " +
                 canonicalPostClass.interfaces.joinToString(),

@@ -288,7 +288,7 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
                 instruction.opcode == Opcode.INVOKE_STATIC &&
                     it.definingClass == method.definingClass &&
                     it.parameterTypes.map(CharSequence::toString) == listOf(ITERABLE_DESCRIPTOR) &&
-                    isJavaListType(it.returnType.toString())
+                    isJavaListType(it.returnType)
             }
         }
         if (fallbackCalls.size != 1) return@mapNotNull null
@@ -557,7 +557,7 @@ private fun isJavaListType(type: String, visitedTypes: MutableSet<String>): Bool
     if (!visitedTypes.add(type)) return false
     val definition = runCatching { context.mutableClassDefBy(type) }.getOrNull() ?: return false
     if (definition.interfaces.any { interfaceType ->
-            isJavaListType(interfaceType.toString(), visitedTypes)
+            isJavaListType(interfaceType, visitedTypes)
         }
     ) {
         return true

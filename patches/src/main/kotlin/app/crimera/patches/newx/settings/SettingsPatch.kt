@@ -19,10 +19,10 @@ import app.morphe.patcher.literal
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patcher.resource.ResourceType
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.resourceId
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -165,7 +165,7 @@ internal val newXSettingsPatch =
 
 context(_: BytecodePatchContext)
 internal fun resolveSettingsIconField(iconType: String): FieldReference {
-    val drawableId = getResourceId(ResourceType.DRAWABLE, "ic_vector_settings_stroke")
+    val drawableId = resourceId(ResourceType.DRAWABLE, "ic_vector_settings_stroke")
     val fingerprint =
         Fingerprint(
             definingClass = "Lcom/x/icons/",

@@ -275,7 +275,7 @@ val restoreTimelinePositionPatch =
                     "NewX UserIdentifier serializer class",
                     NewXUserIdentifierSerializerFingerprint.scopedMatchAll(),
                 )
-            val userIdentifierSerializerDescriptor = userIdentifierSerializerMatch.originalClassDef.type.toString()
+            val userIdentifierSerializerDescriptor = userIdentifierSerializerMatch.originalClassDef.type
             val userIdentifierDeserializer =
                 requireExactlyOne(
                     "NewX UserIdentifier deserializer",
@@ -290,14 +290,14 @@ val restoreTimelinePositionPatch =
                     "NewX UserIdentifier deserializer allocation type",
                     userIdentifierDeserializer.instructions.mapNotNull { instruction ->
                         if (instruction.opcode != Opcode.NEW_INSTANCE) return@mapNotNull null
-                        instruction.getReference<TypeReference>()?.type?.toString()
+                        instruction.getReference<TypeReference>()?.type
                     },
                 )
             val userIdentifierIdField =
                 requireExactlyOne(
                     "NewX UserIdentifier account-id field",
                     mutableClassDefBy(userIdentifierDescriptor).fields.filter { field ->
-                        !AccessFlags.STATIC.isSet(field.accessFlags) && field.type.toString() == "J"
+                        !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == "J"
                     },
                 )
             if (!AccessFlags.PUBLIC.isSet(userIdentifierIdField.accessFlags)) {
@@ -324,8 +324,8 @@ val restoreTimelinePositionPatch =
                     if (instruction.opcode != Opcode.IGET) return@mapNotNull null
                     val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
                     field.takeIf {
-                        it.definingClass.toString() == holderDescriptor &&
-                            it.type.toString() == "I"
+                        it.definingClass == holderDescriptor &&
+                            it.type == "I"
                     }
                 }.distinctBy(FieldReference::toString)
             if (holderPositionFields.size != 2) {
@@ -398,10 +398,10 @@ val restoreTimelinePositionPatch =
                 getterMethod.instructions.withIndex().filter { indexedInstruction ->
                     if (indexedInstruction.value.opcode != Opcode.INVOKE_VIRTUAL) return@filter false
                     val reference = indexedInstruction.value.getReference<MethodReference>() ?: return@filter false
-                    reference.definingClass.toString() == CONCURRENT_HASH_MAP_DESCRIPTOR &&
+                    reference.definingClass == CONCURRENT_HASH_MAP_DESCRIPTOR &&
                         reference.name == "get" &&
                         reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
-                        reference.returnType.toString() == "Ljava/lang/Object;"
+                        reference.returnType == "Ljava/lang/Object;"
                 }
             val mapGetCandidate = requireExactlyOne("NewX timeline-position map read", mapGetCandidates)
             val mapGetIndex = mapGetCandidate.index
@@ -434,7 +434,7 @@ val restoreTimelinePositionPatch =
                             .getOrNull(indexedInstruction.index - 1)
                             ?.getReference<MethodReference>()
                             ?: return@mapNotNull null
-                    val returnType = methodReference.returnType.toString()
+                    val returnType = methodReference.returnType
                     if (!returnType.startsWith("L")) return@mapNotNull null
                     val isEnum =
                         runCatching { mutableClassDefBy(returnType).superclass == ENUM_DESCRIPTOR }
@@ -455,7 +455,7 @@ val restoreTimelinePositionPatch =
                     getterMethod.instructions.mapNotNull { instruction ->
                         if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
                         val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-                        field.takeIf { it.type.toString() == CONCURRENT_HASH_MAP_DESCRIPTOR }
+                        field.takeIf { it.type == CONCURRENT_HASH_MAP_DESCRIPTOR }
                     },
                 )
             val componentDescriptor = getterMatch.originalMethod.definingClass
@@ -464,7 +464,7 @@ val restoreTimelinePositionPatch =
                     "NewX timeline component UserIdentifier field",
                     mutableClassDefBy(componentDescriptor).fields.filter { field ->
                         !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                            field.type.toString() == userIdentifierDescriptor
+                            field.type == userIdentifierDescriptor
                     },
                 )
             if (!AccessFlags.PUBLIC.isSet(componentAccountField.accessFlags)) {
@@ -505,18 +505,18 @@ val restoreTimelinePositionPatch =
                         if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
                         val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
                         field.takeIf {
-                            it.definingClass.toString() == componentDescriptor &&
-                                it.type.toString() == mapField.definingClass.toString()
+                            it.definingClass == componentDescriptor &&
+                                it.type == mapField.definingClass
                         }
                     },
                 )
-            if (mapField.definingClass.toString() == componentDescriptor) {
+            if (mapField.definingClass == componentDescriptor) {
                 throw PatchException("NewX timeline-position map unexpectedly belongs to the component")
             }
             if (!AccessFlags.PUBLIC.isSet(
                     requireExactlyOne(
                         "NewX timeline-position map field definition",
-                        mutableClassDefBy(mapField.definingClass.toString()).fields.filter { field ->
+                        mutableClassDefBy(mapField.definingClass).fields.filter { field ->
                             field.toString() == mapField.toString()
                         },
                     ).accessFlags,
@@ -540,18 +540,18 @@ val restoreTimelinePositionPatch =
                 requireExactlyOne(
                     "NewX timeline identity getter",
                     repositoryClass.methods.filter { method ->
-                        val returnType = method.returnType.toString()
+                        val returnType = method.returnType
                         method.parameterTypes.isEmpty() &&
                             returnType.startsWith("Lcom/x/models/timelines/") &&
-                            returnType != timelineGetterReference.returnType.toString() &&
+                            returnType != timelineGetterReference.returnType &&
                             runCatching {
                                 mutableClassDefBy(returnType).fields.count { field ->
-                                    field.type.toString() == STRING_DESCRIPTOR
+                                    field.type == STRING_DESCRIPTOR
                                 } == 1
                             }.getOrDefault(false)
                     },
                 )
-            val timelineIdentityDescriptor = timelineIdentityGetter.returnType.toString()
+            val timelineIdentityDescriptor = timelineIdentityGetter.returnType
             val timelineIdentityGetterReference =
                 "${timelineGetterReference.definingClass}->${timelineIdentityGetter.name}()" +
                     timelineIdentityDescriptor
@@ -559,7 +559,7 @@ val restoreTimelinePositionPatch =
                 requireExactlyOne(
                     "NewX timeline identity field",
                     mutableClassDefBy(timelineIdentityDescriptor).fields.filter { field ->
-                        field.type.toString() == STRING_DESCRIPTOR
+                        field.type == STRING_DESCRIPTOR
                     },
                 )
             if (!AccessFlags.PUBLIC.isSet(timelineIdentityField.accessFlags)) {
@@ -572,8 +572,8 @@ val restoreTimelinePositionPatch =
                         if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
                         val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
                         field.takeIf {
-                            it.definingClass.toString() == componentDescriptor &&
-                                it.type.toString() == timelineGetterReference.definingClass.toString()
+                            it.definingClass == componentDescriptor &&
+                                it.type == timelineGetterReference.definingClass
                         }
                     },
                 )
@@ -780,11 +780,11 @@ val restoreTimelinePositionPatch =
                 saveMethod.instructions.withIndex().filter { indexedInstruction ->
                     if (indexedInstruction.value.opcode != Opcode.INVOKE_VIRTUAL) return@filter false
                     val reference = indexedInstruction.value.getReference<MethodReference>() ?: return@filter false
-                    reference.definingClass.toString() == CONCURRENT_HASH_MAP_DESCRIPTOR &&
+                    reference.definingClass == CONCURRENT_HASH_MAP_DESCRIPTOR &&
                         reference.name == "put" &&
                         reference.parameterTypes.map(CharSequence::toString) ==
                             listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
-                        reference.returnType.toString() == "Ljava/lang/Object;"
+                        reference.returnType == "Ljava/lang/Object;"
                 }
             val mapPutCandidate = requireExactlyOne("NewX timeline-position map write", mapPutCandidates)
             val mapPutIndex = mapPutCandidate.index
@@ -859,7 +859,7 @@ val restoreTimelinePositionPatch =
                         val flowRead = saveMethod.instructions[index]
                         if (flowRead.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
                         val flowField = flowRead.getReference<FieldReference>() ?: return@mapNotNull null
-                        if (flowField.definingClass.toString() != componentDescriptor) return@mapNotNull null
+                        if (flowField.definingClass != componentDescriptor) return@mapNotNull null
                         val flowCast = saveMethod.instructions.getOrNull(index + 1)
                         val getValue = saveMethod.instructions.getOrNull(index + 2)
                         val result = saveMethod.instructions.getOrNull(index + 3)
@@ -873,10 +873,10 @@ val restoreTimelinePositionPatch =
                         }
                         val getValueReference = getValue.getReference<MethodReference>() ?: return@mapNotNull null
                         val flowType = flowCast.getReference<TypeReference>()?.type ?: return@mapNotNull null
-                        if (getValueReference.definingClass.toString() != flowType ||
+                        if (getValueReference.definingClass != flowType ||
                             getValueReference.name != "getValue" ||
                             getValueReference.parameterTypes.isNotEmpty() ||
-                            getValueReference.returnType.toString() != OBJECT_DESCRIPTOR
+                            getValueReference.returnType != OBJECT_DESCRIPTOR
                         ) {
                             return@mapNotNull null
                         }
@@ -886,7 +886,7 @@ val restoreTimelinePositionPatch =
                     }.distinctBy { (field, getter, state) -> "$field|$getter|$state" },
                 )
             val (stateFlowField, stateGetValueReference, stateInterface) = stateRead
-            val timelineTypeDescriptor = timelineGetterReference.returnType.toString()
+            val timelineTypeDescriptor = timelineGetterReference.returnType
             // Success is the one state checked in this method that carries the timeline type.
             val successStateType =
                 requireExactlyOne(
@@ -900,7 +900,7 @@ val restoreTimelinePositionPatch =
                         stateClass.interfaces.contains(stateInterface) &&
                             stateClass.fields.any { field ->
                                 !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                                    field.type.toString() == timelineTypeDescriptor
+                                    field.type == timelineTypeDescriptor
                             }
                     },
                 )
@@ -910,7 +910,7 @@ val restoreTimelinePositionPatch =
                     "NewX timeline Success items field",
                     mutableClassDefBy(successStateType).fields.filter { field ->
                         !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                            isAssignableTo(field.type.toString(), LIST_DESCRIPTOR)
+                            isAssignableTo(field.type, LIST_DESCRIPTOR)
                     },
                 )
             if (!AccessFlags.PUBLIC.isSet(successItemsField.accessFlags)) {
@@ -928,17 +928,17 @@ val restoreTimelinePositionPatch =
                         strings = listOf("TimelineResumePosition(entryId="),
                     ).scopedMatchAll(),
                 )
-            val resumePositionDescriptor = resumePositionMatch.originalClassDef.type.toString()
+            val resumePositionDescriptor = resumePositionMatch.originalClassDef.type
             val resumePositionClass = mutableClassDefBy(resumePositionDescriptor)
             val resumeEntryIdField =
                 requireExactlyOne(
                     "NewX TimelineResumePosition entry-id field",
-                    resumePositionClass.fields.filter { field -> field.type.toString() == STRING_DESCRIPTOR },
+                    resumePositionClass.fields.filter { field -> field.type == STRING_DESCRIPTOR },
                 )
             val resumeSortIndexField =
                 requireExactlyOne(
                     "NewX TimelineResumePosition sort-index field",
-                    resumePositionClass.fields.filter { field -> field.type.toString() == "J" },
+                    resumePositionClass.fields.filter { field -> field.type == "J" },
                 )
             listOf(resumeEntryIdField, resumeSortIndexField).forEach { field ->
                 if (!AccessFlags.PUBLIC.isSet(field.accessFlags)) {
@@ -961,11 +961,11 @@ val restoreTimelinePositionPatch =
                         ?: return@filter false
                     reference.parameterTypes.map(CharSequence::toString) ==
                         listOf(
-                            successItemsField.type.toString(),
+                            successItemsField.type,
                             ARRAY_LIST_DESCRIPTOR,
-                            holderDescriptor.toString(),
+                            holderDescriptor,
                             INSTANT_DESCRIPTOR,
-                        ) && reference.returnType.toString() == resumePositionDescriptor
+                        ) && reference.returnType == resumePositionDescriptor
                 }
             val factoryCall = requireAtMostOne("NewX timeline resume-position factory call", factoryMethodCandidates)
             val (factoryReference, clockNowReference) = if (factoryCall != null) {
@@ -983,13 +983,13 @@ val restoreTimelinePositionPatch =
                 val clock = clockInstruction?.getReference<MethodReference>()
                     ?: throw PatchException("NewX timeline clock now() call was not found before the factory")
                 if (clockInstruction.opcode != Opcode.INVOKE_INTERFACE || clock.name != "now" ||
-                    clock.parameterTypes.isNotEmpty() || clock.returnType.toString() != INSTANT_DESCRIPTOR
+                    clock.parameterTypes.isNotEmpty() || clock.returnType != INSTANT_DESCRIPTOR
                 ) throw PatchException("Unexpected NewX timeline clock now() call: $clock")
                 reference to clock
             } else {
                 val extracted = resolveInlineResumePositionFactory(
                     saveMethod,
-                    listOf(successItemsField.type.toString(), ARRAY_LIST_DESCRIPTOR, holderDescriptor.toString(), INSTANT_DESCRIPTOR),
+                    listOf(successItemsField.type, ARRAY_LIST_DESCRIPTOR, holderDescriptor, INSTANT_DESCRIPTOR),
                     resumePositionDescriptor,
                     successItemsField,
                     saveHolderRegister,
@@ -1005,7 +1005,7 @@ val restoreTimelinePositionPatch =
                     "NewX timeline clock field definition",
                     componentClass.fields.filter { field ->
                         !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                            field.type.toString() == clockNowReference.definingClass.toString()
+                            field.type == clockNowReference.definingClass
                     },
                 )
 
@@ -1013,7 +1013,7 @@ val restoreTimelinePositionPatch =
                 componentClass.methods.filter { method ->
                     !AccessFlags.STATIC.isSet(method.accessFlags) &&
                         method.parameterTypes.isEmpty() &&
-                        method.returnType.toString() == holderDescriptor.toString() &&
+                        method.returnType == holderDescriptor &&
                         method.implementation != null &&
                         method.instructions.any { instruction ->
                             if (instruction.opcode != Opcode.INVOKE_STATIC &&
@@ -1024,7 +1024,7 @@ val restoreTimelinePositionPatch =
                             val reference = instruction.getReference<MethodReference>() ?: return@any false
                             reference.parameterTypes.map(CharSequence::toString) ==
                                 listOf(resumePositionDescriptor, LIST_DESCRIPTOR) &&
-                                reference.returnType.toString() == "Z"
+                                reference.returnType == "Z"
                         }
                 }
             val postLoadMethod = requireExactlyOne("NewX timeline post-load holder method", postLoadCandidates)
@@ -1032,20 +1032,20 @@ val restoreTimelinePositionPatch =
             val componentInterfaceDescriptor =
                 requireExactlyOne(
                     "NewX timeline component interface",
-                    componentClass.interfaces.map { it.toString() }.filter { interfaceDescriptor ->
+                    componentClass.interfaces.map { it }.filter { interfaceDescriptor ->
                         val interfaceDefinition = mutableClassDefBy(interfaceDescriptor)
                         AccessFlags.INTERFACE.isSet(interfaceDefinition.accessFlags) &&
                             interfaceDefinition.methods.any { method ->
                                 !AccessFlags.STATIC.isSet(method.accessFlags) &&
                                     method.name == getterMethod.name &&
                                     method.parameterTypes.isEmpty() &&
-                                    method.returnType.toString() == holderDescriptor.toString()
+                                    method.returnType == holderDescriptor
                             } &&
                             interfaceDefinition.methods.any { method ->
                                 !AccessFlags.STATIC.isSet(method.accessFlags) &&
                                     method.name == postLoadMethod.name &&
                                     method.parameterTypes.isEmpty() &&
-                                    method.returnType.toString() == holderDescriptor.toString()
+                                    method.returnType == holderDescriptor
                             }
                     },
                 )
@@ -1057,7 +1057,7 @@ val restoreTimelinePositionPatch =
                         !AccessFlags.STATIC.isSet(method.accessFlags) &&
                             method.name == getterMethod.name &&
                             method.parameterTypes.isEmpty() &&
-                            method.returnType.toString() == holderDescriptor.toString()
+                            method.returnType == holderDescriptor
                     },
                 )
             val interfacePostLoadMethod =
@@ -1067,7 +1067,7 @@ val restoreTimelinePositionPatch =
                         !AccessFlags.STATIC.isSet(method.accessFlags) &&
                             method.name == postLoadMethod.name &&
                             method.parameterTypes.isEmpty() &&
-                        method.returnType.toString() == holderDescriptor.toString()
+                        method.returnType == holderDescriptor
                     },
                 )
 
@@ -1085,10 +1085,10 @@ val restoreTimelinePositionPatch =
                             }
                             val postLoadReference = instruction.getReference<MethodReference>()
                                 ?: return@instructionLoop
-                            if (postLoadReference.definingClass.toString() != componentInterfaceDescriptor ||
+                            if (postLoadReference.definingClass != componentInterfaceDescriptor ||
                                 postLoadReference.name != interfacePostLoadMethod.name ||
                                 postLoadReference.parameterTypes.isNotEmpty() ||
-                                postLoadReference.returnType.toString() != holderDescriptor.toString()
+                                postLoadReference.returnType != holderDescriptor
                             ) {
                                 return@instructionLoop
                             }
@@ -1118,7 +1118,7 @@ val restoreTimelinePositionPatch =
                                 ?: return@instructionLoop
                             if (scrollReference.name != "i" ||
                                 scrollReference.parameterTypes.map(CharSequence::toString) != listOf("I", "I") ||
-                                scrollReference.returnType.toString() != "V"
+                                scrollReference.returnType != "V"
                             ) {
                                 return@instructionLoop
                             }
@@ -1135,8 +1135,8 @@ val restoreTimelinePositionPatch =
                                         ?: return@mapNotNull null
                                     val registers = holderLoad as? TwoRegisterInstruction
                                         ?: return@mapNotNull null
-                                    if (field.definingClass.toString() != holderDescriptor.toString() ||
-                                        field.type.toString() != "I" ||
+                                    if (field.definingClass != holderDescriptor ||
+                                        field.type != "I" ||
                                         registers.registerB != holderRegister
                                     ) {
                                         return@mapNotNull null
@@ -1152,14 +1152,14 @@ val restoreTimelinePositionPatch =
 
                             candidates.add(
                                 PostLoadScrollCallSite(
-                                    methodOwner = classDef.type.toString(),
+                                    methodOwner = classDef.type,
                                     methodName = method.name,
                                     methodParameters = method.parameterTypes.map(CharSequence::toString),
-                                    methodReturnType = method.returnType.toString(),
+                                    methodReturnType = method.returnType,
                                     postLoadInvokeIndex = postLoadInvokeIndex,
                                     scrollInvokeIndex = firstInvokeIndex,
                                     moveResultRegister = holderRegister,
-                                    scrollStateType = scrollReference.definingClass.toString(),
+                                    scrollStateType = scrollReference.definingClass,
                                     scrollStateRegister = scrollArguments.first(),
                                 ),
                             )
@@ -1185,7 +1185,7 @@ val restoreTimelinePositionPatch =
                         method.name == postLoadScrollCallSite.methodName &&
                             method.parameterTypes.map(CharSequence::toString) ==
                                 postLoadScrollCallSite.methodParameters &&
-                            method.returnType.toString() == postLoadScrollCallSite.methodReturnType
+                            method.returnType == postLoadScrollCallSite.methodReturnType
                     },
                 )
             val postLoadCallSiteImplementation = postLoadCallSiteMethod.implementation
@@ -1216,14 +1216,14 @@ val restoreTimelinePositionPatch =
                         strings = listOf("RegularItem(entryId="),
                     ).scopedMatchAll(),
                 )
-            val rowKeyDescriptor = rowKeyMatch.originalClassDef.type.toString()
+            val rowKeyDescriptor = rowKeyMatch.originalClassDef.type
             val rowKeyConstructor =
                 requireExactlyOne(
                     "NewX RegularItem row-key constructor",
                     mutableClassDefBy(rowKeyDescriptor).methods.filter { method ->
                         method.name == "<init>" &&
                             method.parameterTypes.map(CharSequence::toString) == listOf(STRING_DESCRIPTOR, "J") &&
-                            method.returnType.toString() == "V"
+                            method.returnType == "V"
                     },
                 )
             val rowKeyConstructorReference =
@@ -1233,17 +1233,17 @@ val restoreTimelinePositionPatch =
             val scrollPositionCandidates =
                 scrollStateClass.fields.mapNotNull { scrollPositionField ->
                     if (AccessFlags.STATIC.isSet(scrollPositionField.accessFlags) ||
-                        !scrollPositionField.type.toString().startsWith("L")
+                        !scrollPositionField.type.startsWith("L")
                     ) {
                         return@mapNotNull null
                     }
                     val positionClass =
-                        runCatching { mutableClassDefBy(scrollPositionField.type.toString()) }.getOrNull()
+                        runCatching { mutableClassDefBy(scrollPositionField.type) }.getOrNull()
                             ?: return@mapNotNull null
                     val keyFields =
                         positionClass.fields.filter { field ->
                             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                                field.type.toString() == OBJECT_DESCRIPTOR
+                                field.type == OBJECT_DESCRIPTOR
                         }
                     if (keyFields.size != 1) return@mapNotNull null
                     scrollPositionField to
@@ -1287,8 +1287,8 @@ val restoreTimelinePositionPatch =
 
             val delegatingTimelineWrappers =
                 classDefFlatMap { classDef ->
-                    val classDescriptor = classDef.type.toString()
-                    if (classDescriptor == componentDescriptor.toString() ||
+                    val classDescriptor = classDef.type
+                    if (classDescriptor == componentDescriptor ||
                         classDef.interfaces.none { it.toString() == componentInterfaceDescriptor }
                     ) {
                         return@classDefFlatMap emptyList()
@@ -1296,7 +1296,7 @@ val restoreTimelinePositionPatch =
                     if (classDef.methods.any { method ->
                             method.name == postLoadMethod.name &&
                                 method.parameterTypes.isEmpty() &&
-                                method.returnType.toString() == holderDescriptor.toString()
+                                method.returnType == holderDescriptor
                         }
                     ) {
                         return@classDefFlatMap emptyList()
@@ -1307,7 +1307,7 @@ val restoreTimelinePositionPatch =
                             !AccessFlags.STATIC.isSet(method.accessFlags) &&
                                 method.name == getterMethod.name &&
                                 method.parameterTypes.isEmpty() &&
-                                method.returnType.toString() == holderDescriptor.toString()
+                                method.returnType == holderDescriptor
                         }
                     if (wrapperGetterMethods.isEmpty()) return@classDefFlatMap emptyList()
 
@@ -1338,7 +1338,7 @@ val restoreTimelinePositionPatch =
                     val delegateGetter = delegateInvoke.getReference<MethodReference>()
                         ?: return@classDefFlatMap emptyList()
                     if (delegateGetter.parameterTypes.isNotEmpty() ||
-                        delegateGetter.returnType.toString() != componentInterfaceDescriptor
+                        delegateGetter.returnType != componentInterfaceDescriptor
                     ) {
                         return@classDefFlatMap emptyList()
                     }
@@ -1359,10 +1359,10 @@ val restoreTimelinePositionPatch =
                     }
                     val interfaceGetter = interfaceInvoke.getReference<MethodReference>()
                         ?: return@classDefFlatMap emptyList()
-                    if (interfaceGetter.definingClass.toString() != componentInterfaceDescriptor ||
+                    if (interfaceGetter.definingClass != componentInterfaceDescriptor ||
                         interfaceGetter.name != interfaceGetterMethod.name ||
                         interfaceGetter.parameterTypes.isNotEmpty() ||
-                        interfaceGetter.returnType.toString() != holderDescriptor.toString()
+                        interfaceGetter.returnType != holderDescriptor
                     ) {
                         return@classDefFlatMap emptyList()
                     }
@@ -1451,7 +1451,7 @@ val restoreTimelinePositionPatch =
                 if (wrapperClass.methods.any { method ->
                         method.name == postLoadMethod.name &&
                             method.parameterTypes.isEmpty() &&
-                            method.returnType.toString() == holderDescriptor.toString()
+                            method.returnType == holderDescriptor
                     }
                 ) {
                     throw PatchException(
@@ -1464,7 +1464,7 @@ val restoreTimelinePositionPatch =
                             wrapper.classDescriptor,
                             postLoadMethod.name,
                             emptyList(),
-                            holderDescriptor.toString(),
+                            holderDescriptor,
                             AccessFlags.PUBLIC.value or AccessFlags.FINAL.value,
                             emptySet(),
                             emptySet(),
@@ -1486,7 +1486,7 @@ val restoreTimelinePositionPatch =
                     }
                     moveResult(0, componentInterfaceDescriptor)
                     invokeInterface(componentPostLoadReference, 0)
-                    moveResult(0, holderDescriptor.toString())
+                    moveResult(0, holderDescriptor)
                     returnObject(0)
                 }
             }
@@ -1504,7 +1504,7 @@ val restoreTimelinePositionPatch =
                         reference.takeIf {
                             it.parameterTypes.map(CharSequence::toString) ==
                                 listOf(resumePositionDescriptor, LIST_DESCRIPTOR) &&
-                                it.returnType.toString() == "Z"
+                                it.returnType == "Z"
                         }
                     }.distinctBy(MethodReference::toString),
                 )
@@ -1516,7 +1516,7 @@ val restoreTimelinePositionPatch =
                             method.name == validatorReference.name &&
                             method.parameterTypes.map(CharSequence::toString) ==
                                 validatorReference.parameterTypes.map(CharSequence::toString) &&
-                            method.returnType.toString() == validatorReference.returnType.toString()
+                            method.returnType == validatorReference.returnType
                     },
                 )
             val validatorItemIndexFieldReference =
@@ -1526,7 +1526,7 @@ val restoreTimelinePositionPatch =
                         if (instruction.opcode != Opcode.IGET) return@mapNotNull null
                         val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
                         field.takeIf {
-                            it.definingClass.toString() == resumePositionDescriptor && it.type.toString() == "I"
+                            it.definingClass == resumePositionDescriptor && it.type == "I"
                         }
                     }.distinctBy(FieldReference::toString),
                 )
@@ -1552,7 +1552,7 @@ val restoreTimelinePositionPatch =
                         val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
                         val parameters = reference.parameterTypes.map(CharSequence::toString)
                         if (parameters.size != 3 || parameters[1] != STRING_DESCRIPTOR ||
-                            parameters[2] != "J" || reference.returnType.toString() != "Z"
+                            parameters[2] != "J" || reference.returnType != "Z"
                         ) {
                             return@mapNotNull null
                         }
@@ -1569,7 +1569,7 @@ val restoreTimelinePositionPatch =
                         method.name == matcherReference.name &&
                         method.parameterTypes.map(CharSequence::toString) ==
                             matcherReference.parameterTypes.map(CharSequence::toString) &&
-                        method.returnType.toString() == "Z"
+                        method.returnType == "Z"
                 },
             )
 
@@ -1584,14 +1584,14 @@ val restoreTimelinePositionPatch =
                         }
                         val field = indexedInstruction.value.getReference<FieldReference>() ?: return@filter false
                         val registers = indexedInstruction.value as? TwoRegisterInstruction ?: return@filter false
-                        field.type.toString() == holderDescriptor.toString() &&
+                        field.type == holderDescriptor &&
                             registers.registerA == saveHolderRegister
                     },
                 )
             val eventHolderField =
                 eventHolderLoad.value.getReference<FieldReference>()
                     ?: throw PatchException("NewX save event holder load has no field reference")
-            val eventType = eventHolderField.definingClass.toString()
+            val eventType = eventHolderField.definingClass
             val eventRegister = (eventHolderLoad.value as TwoRegisterInstruction).registerB
             val eventHolderFieldDefinition =
                 requireExactlyOne(
@@ -1608,7 +1608,7 @@ val restoreTimelinePositionPatch =
                     "NewX save event visible-rows field",
                     mutableClassDefBy(eventType).fields.filter { field ->
                         !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                            field.type.toString() == ARRAY_LIST_DESCRIPTOR
+                            field.type == ARRAY_LIST_DESCRIPTOR
                     },
                 )
             if (!AccessFlags.PUBLIC.isSet(eventRowsField.accessFlags)) {
@@ -1641,8 +1641,8 @@ val restoreTimelinePositionPatch =
                 saveMethod.instructions.withIndex().filter { indexedInstruction ->
                     if (indexedInstruction.value.opcode != Opcode.IGET_BOOLEAN) return@filter false
                     val field = indexedInstruction.value.getReference<FieldReference>() ?: return@filter false
-                    field.type.toString() == "Z" &&
-                        field.definingClass.toString().startsWith("Landroidx/compose/foundation/layout/") &&
+                    field.type == "Z" &&
+                        field.definingClass.startsWith("Landroidx/compose/foundation/layout/") &&
                         saveMethod.instructions.getOrNull(indexedInstruction.index + 1)?.opcode == Opcode.IF_EQZ
                 }
             val layoutPolicyGateIndex =
@@ -1687,12 +1687,12 @@ val restoreTimelinePositionPatch =
             componentClass.methods.add(saveAnchorBridge)
             saveAnchorBridge.insertHook(0, relocateBranchTargets = false) {
                 iget(0, saveAnchorBridge.p0Register, stateFlowField)
-                checkCast(0, stateGetValueReference.definingClass.toString())
+                checkCast(0, stateGetValueReference.definingClass)
                 invokeVirtual(stateGetValueReference, 0)
                 moveResult(0, OBJECT_DESCRIPTOR)
-                instanceOf(1, 0, successStateType.toString())
+                instanceOf(1, 0, successStateType)
                 ifEqz(1, Target.Local(SAVE_ANCHOR_RETURN_LABEL))
-                checkCast(0, successStateType.toString())
+                checkCast(0, successStateType)
                 iget(
                     0,
                     0,
@@ -1747,7 +1747,7 @@ val restoreTimelinePositionPatch =
                 move(spilledKey, saveTimelineRegister, OBJECT_DESCRIPTOR)
                 move(saveMapRegister, saveMethod.p0Register, OBJECT_DESCRIPTOR)
                 iget(saveMapRegister, saveMapRegister, stateFlowField)
-                checkCast(saveMapRegister, stateGetValueReference.definingClass.toString())
+                checkCast(saveMapRegister, stateGetValueReference.definingClass)
                 invokeVirtual(stateGetValueReference, saveMapRegister)
                 moveResult(saveMapRegister, OBJECT_DESCRIPTOR)
                 instanceOf(saveTimelineRegister, saveMapRegister, successStateType)
@@ -1815,7 +1815,7 @@ val restoreTimelinePositionPatch =
                         componentDescriptor,
                         RESTORE_ANCHOR_BRIDGE_NAME,
                         emptyList(),
-                        holderDescriptor.toString(),
+                        holderDescriptor,
                         AccessFlags.PUBLIC.value or AccessFlags.FINAL.value or AccessFlags.SYNTHETIC.value,
                         emptySet(),
                         emptySet(),
@@ -1845,12 +1845,12 @@ val restoreTimelinePositionPatch =
                 moveResult(4, STRING_DESCRIPTOR)
                 ifEqz(4, Target.Local(RESTORE_ANCHOR_NULL_LABEL))
                 iget(5, restoreAnchorBridge.p0Register, stateFlowField)
-                checkCast(5, stateGetValueReference.definingClass.toString())
+                checkCast(5, stateGetValueReference.definingClass)
                 invokeVirtual(stateGetValueReference, 5)
                 moveResult(5, OBJECT_DESCRIPTOR)
-                instanceOf(12, 5, successStateType.toString())
+                instanceOf(12, 5, successStateType)
                 ifEqz(12, Target.Local(RESTORE_ANCHOR_NULL_LABEL))
-                checkCast(5, successStateType.toString())
+                checkCast(5, successStateType)
                 iget(
                     6,
                     5,
@@ -1898,7 +1898,7 @@ val restoreTimelinePositionPatch =
                 aget(9, 13, 14)
                 constInt(14, 1)
                 aget(10, 13, 14)
-                newInstance(11, holderDescriptor.toString())
+                newInstance(11, holderDescriptor)
                 invokeDirect(methodReference(holderConstructorReference), 11, 9, 10)
                 returnObject(11)
                 label(RESTORE_ANCHOR_NULL_LABEL)
@@ -1936,7 +1936,7 @@ val restoreTimelinePositionPatch =
                     ),
                     postLoadHookMethod.p0Register,
                 )
-                moveResult(postLoadResultRegister, holderDescriptor.toString())
+                moveResult(postLoadResultRegister, holderDescriptor)
                 ifEqz(postLoadResultRegister, Target.Original)
                 returnObject(postLoadResultRegister)
             }

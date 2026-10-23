@@ -135,7 +135,7 @@ val customizeNewXProfileTabsPatch =
         execute {
             val target = resolveProfileTabListTarget()
             val tabField = resolveProfileTabField(target.pageConfigType)
-            val tabs = resolveProfileTabSpecs(tabField.type.toString())
+            val tabs = resolveProfileTabSpecs(tabField.type)
 
             injectProfileTabFilterHook(
                 method = target.method,
@@ -223,7 +223,7 @@ internal fun MutableMethod.injectProfileTabIdBridgeBody(tabField: FieldReference
         throw PatchException("NewX profile tab id bridge has an unexpected signature: $this")
     }
     insertHook(index = 0, relocateBranchTargets = false) {
-        checkCast(p0Register, tabField.definingClass.toString())
+        checkCast(p0Register, tabField.definingClass)
         iget(p0Register, p0Register, tabField)
         // `Enum.name()` is a stable framework contract; the field descriptor is the
         // release-specific part resolved above.
@@ -365,9 +365,9 @@ private fun resolveProfileTabField(pageConfigType: String): FieldReference {
     val enumFields =
         pageConfig.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                field.type.toString().startsWith("L") &&
-                field.type.toString().endsWith(";") &&
-                context.classDefByOrNull(field.type.toString())?.superclass == ENUM_DESCRIPTOR
+                field.type.startsWith("L") &&
+                field.type.endsWith(";") &&
+                context.classDefByOrNull(field.type)?.superclass == ENUM_DESCRIPTOR
         }
     return requireExactlyOne("NewX profile page config tab field for $pageConfigType", enumFields) { field ->
         "${field.definingClass}->${field.name}:${field.type}"
@@ -392,7 +392,7 @@ private fun resolveProfileTabSpecs(tabEnumType: String): List<ProfileTabSpec> {
     instructions.forEachIndexed { index, instruction ->
         if (instruction.opcode != Opcode.INVOKE_DIRECT) return@forEachIndexed
         val reference = instruction.getReference<MethodReference>() ?: return@forEachIndexed
-        if (reference.definingClass.toString() != tabEnumType) return@forEachIndexed
+        if (reference.definingClass != tabEnumType) return@forEachIndexed
         if (reference.name != "<init>") return@forEachIndexed
         if (reference.parameterTypes.map(CharSequence::toString) != listOf(STRING_DESCRIPTOR, "I", "I")) {
             return@forEachIndexed
@@ -443,7 +443,7 @@ private fun List<Instruction>.resolveStoredEnumConstant(
         if (instruction.opcode != Opcode.SPUT_OBJECT) continue
         if ((instruction as? OneRegisterInstruction)?.registerA != instanceRegister) continue
         val field = instruction.getReference<FieldReference>() ?: return null
-        if (field.definingClass.toString() != enumType || field.type.toString() != enumType) return null
+        if (field.definingClass != enumType || field.type != enumType) return null
         return field.name
     }
     return null
@@ -479,7 +479,7 @@ private fun Instruction.isStaticCallTo(
 ): Boolean {
     if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
     val reference = getReference<MethodReference>() ?: return false
-    if (reference.definingClass.toString() != owner || reference.name != name) return false
+    if (reference.definingClass != owner || reference.name != name) return false
     return reference.parameterTypes.map(CharSequence::toString) == parameterTypes
 }
 

@@ -1107,9 +1107,9 @@ private fun resolveLegacyCardNavigationShape(
         ?: throw PatchException("Card URL getter call is missing")
     val reference = getter.getReference<MethodReference>()
     if (getter.opcode != Opcode.INVOKE_VIRTUAL ||
-        reference?.definingClass?.toString() != cardUrlActionType ||
+        reference?.definingClass != cardUrlActionType ||
         reference.parameterTypes.isNotEmpty() ||
-        reference.returnType.toString() != STRING_DESCRIPTOR
+        reference.returnType != STRING_DESCRIPTOR
     ) {
         throw PatchException("Card URL getter call is not the card URL accessor: $getter")
     }
@@ -1141,8 +1141,8 @@ private fun resolveInlinedCardNavigationShape(
         ?: throw PatchException("Card URL field read is missing")
     val field = read.getReference<FieldReference>()
     if (read.opcode != Opcode.IGET_OBJECT ||
-        field?.definingClass?.toString() != cardUrlActionType ||
-        field.type.toString() != STRING_DESCRIPTOR
+        field?.definingClass != cardUrlActionType ||
+        field.type != STRING_DESCRIPTOR
     ) {
         throw PatchException("Card URL field read is not the card URL field: $read")
     }

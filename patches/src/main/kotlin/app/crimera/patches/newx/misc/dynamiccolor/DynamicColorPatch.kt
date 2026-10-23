@@ -1349,7 +1349,7 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
             }
 
         val darkConstructionCount = classInitializer.findDarkSchemeConstructions(
-            schemeClass.type.toString(),
+            schemeClass.type,
             darkSchemeEntryConstructors(schemeClass.methods, constructor),
         ).size == 1
         schemeResolution += "$field: singleton shape=$darkConstructionCount"
@@ -1386,7 +1386,7 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
         )
     val darkSchemeConstructions =
         classInitializer.findDarkSchemeConstructions(
-            schemeClass.type.toString(),
+            schemeClass.type,
             darkSchemeEntryConstructors(schemeClass.methods, constructor),
         )
     val darkConstruction =

@@ -369,7 +369,7 @@ private fun List<Instruction>.navigationInsetsReadsBefore(callIndex: Int): List<
                 ?: return@mapNotNull null
             if (
                 field.definingClass != provider.returnType ||
-                    !field.type.toString().startsWith(FOUNDATION_LAYOUT_SCOPE)
+                    !field.type.startsWith(FOUNDATION_LAYOUT_SCOPE)
             ) {
                 return@mapNotNull null
             }
@@ -511,10 +511,7 @@ private fun resolvePostDetailReplyBarContainers(renderer: Match): Pair<MutableMe
             candidates = minimalMutableClass.methods.filter { method ->
                 method.matches(minimalContainerCaller)
             },
-        ) as? MutableMethod
-            ?: throw PatchException(
-                "NewX minimal reply-bar composition caller is not mutable: $minimalContainerCaller",
-            )
+        )
 
     val postDetailMutableClass = context.mutableClassDefBy(postDetailContainer.definingClass)
     val postDetailMutableMethod =
@@ -523,10 +520,7 @@ private fun resolvePostDetailReplyBarContainers(renderer: Match): Pair<MutableMe
             candidates = postDetailMutableClass.methods.filter { method ->
                 method.matches(postDetailContainer)
             },
-        ) as? MutableMethod
-            ?: throw PatchException(
-                "NewX post-detail reply-bar container is not mutable: $postDetailContainer",
-            )
+        )
 
     return minimalMutableMethod to postDetailMutableMethod
 }
@@ -680,10 +674,7 @@ private fun resolveImmersiveActionBarSafeAreaHook(
             candidates = context.mutableClassDefBy(originalMethod.definingClass).methods.filter { candidate ->
                 candidate.matches(originalMethod)
             },
-        ) as? MutableMethod
-            ?: throw PatchException(
-                "NewX immersive-media action-bar renderer is not mutable: $originalMethod",
-            )
+        )
     val instructions = method.instructions.toList()
     val actionBarCallIndex =
         requireExactlyOne(
@@ -742,7 +733,7 @@ private fun resolveImmersiveActionBarSafeAreaHook(
                 val field = instruction.getReference<FieldReference>() ?: return@filter false
                 instruction.opcode == Opcode.IGET_OBJECT &&
                     registers.registerA == insetsRegister &&
-                    field.type.toString().startsWith(FOUNDATION_LAYOUT_SCOPE)
+                    field.type.startsWith(FOUNDATION_LAYOUT_SCOPE)
             },
         )
     val navigationBarsRead = instructions[navigationBarsReadIndex] as TwoRegisterInstruction
@@ -795,10 +786,10 @@ internal fun applyImmersiveActionBarSafeAreaHook(
         // The old smali hardcoded `invoke-static/range {vC .. vC}`; the typed API emits the 35c
         // form while the Composer register fits four bits and that same range form when it does not.
         invokeStatic(hook.windowInsetsHolderProvider, hook.composerRegister)
-        moveResult(settingRead.register, hook.windowInsetsHolderProvider.returnType.toString())
+        moveResult(settingRead.register, hook.windowInsetsHolderProvider.returnType)
         iget(settingRead.register, settingRead.register, hook.navigationBarsField)
         invokeStatic(hook.insetsPaddingCall, hook.modifierRegister, settingRead.register)
-        moveResult(hook.modifierRegister, hook.insetsPaddingCall.returnType.toString())
+        moveResult(hook.modifierRegister, hook.insetsPaddingCall.returnType)
     }
 }
 
@@ -866,10 +857,7 @@ private fun resolvePhotoViewerNavigationFallbackHook(
                 context.mutableClassDefBy(originalMethod.definingClass).methods.filter { method ->
                     method.matches(originalMethod)
                 },
-        ) as? MutableMethod
-            ?: throw PatchException(
-                "NewX photo-viewer controls renderer is not mutable: $originalMethod",
-            )
+        )
     val instructions = method.instructions.toList()
     val actionBarCalls = method.inlineActionBarRenderCallIndices()
     val minimalComposerCalls = method.callSiteIndices(minimalContainer)

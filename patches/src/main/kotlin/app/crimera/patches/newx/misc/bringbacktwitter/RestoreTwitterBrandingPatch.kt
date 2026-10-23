@@ -114,7 +114,7 @@ val bringBackTwitterPatch =
             document("res/drawable/ic_logo_x.xml").use { doc ->
                 doc.getElementsByTagName("vector").item(0)?.let { vector ->
                     (vector as Element).setAttribute("android:height", "96.0dp")
-                    (vector as Element).setAttribute("android:width", "96.0dp")
+                    vector.setAttribute("android:width", "96.0dp")
                 }
             }
 

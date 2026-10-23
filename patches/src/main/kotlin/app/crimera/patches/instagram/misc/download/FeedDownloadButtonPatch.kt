@@ -36,11 +36,10 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patcher.resource.ResourceType
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.p0Register
@@ -180,7 +179,6 @@ val feedDownloadButtonPatch =
             originalSoundDataIntfEntity,
             trackDataIntfEntity,
             decoderEntity,
-            resourceMappingPatch,
             // Loads `SettingsStatus` at startup and registers the download settings screen.
             settingsPatch,
             addResourcesPatch,
@@ -193,12 +191,12 @@ val feedDownloadButtonPatch =
             // Only applied through "Download media", which enables the download section itself.
             enableSettings("feedDownloadButton")
 
-            val saveButtonId = getResourceId(ResourceType.ID, "row_feed_button_save")
+            val saveButtonId = resourceId(ResourceType.ID, "row_feed_button_save")
             val stateType = hookFeedRowBinder(saveButtonId)
             pinMainFeedToViewUfi()
             injectLithoDownloadButton(
                 saveButtonId,
-                getResourceId(ResourceType.DRAWABLE, "instagram_download_outline_24"),
+                resourceId(ResourceType.DRAWABLE, "instagram_download_outline_24"),
                 stateType,
             )
         }

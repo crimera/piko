@@ -189,7 +189,7 @@ private fun List<Instruction>.resolveHomeTabListFactory(
         return null
     }
     if (factory.registersUsed != listOf(arrayRegister)) return null
-    val returnType = reference.returnType.toString()
+    val returnType = reference.returnType
     if (!returnType.startsWith("L") || !returnType.endsWith(';') || returnType == OBJECT_DESCRIPTOR) {
         return null
     }

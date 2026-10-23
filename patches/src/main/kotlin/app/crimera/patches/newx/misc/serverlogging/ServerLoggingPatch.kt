@@ -68,7 +68,7 @@ private object SubmitWorkHandlerFingerprint : Fingerprint(
             val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
             field.takeIf {
                 instruction.opcode == Opcode.IGET_OBJECT &&
-                    field.type.toString() == THROWABLE_DESCRIPTOR
+                    field.type == THROWABLE_DESCRIPTOR
             }
         }
         parameterTypes.size == 8 &&
@@ -218,7 +218,7 @@ private fun patchServerErrorConstructors() {
         val toStringMethods = errorClass.methods.filter { method ->
             method.name == "toString" &&
                 method.parameterTypes.isEmpty() &&
-                method.returnType.toString() == STRING_DESCRIPTOR
+                method.returnType == STRING_DESCRIPTOR
         }
         if (toStringMethods.size != 1) {
             throw PatchException(
@@ -281,7 +281,7 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
     val throwableReads = instructions.mapIndexedNotNull { index, instruction ->
         val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
         if (instruction.opcode != Opcode.IGET_OBJECT ||
-            field.type.toString() != THROWABLE_DESCRIPTOR
+            field.type != THROWABLE_DESCRIPTOR
         ) {
             return@mapIndexedNotNull null
         }
@@ -299,7 +299,7 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
     val failureEventFields = findEventFields(instructions, POST_FAILURE_FIELD_NAME)
     val throwableRead = throwableReads.single()
     val resultFailureField = throwableRead.field
-    if (!resultFailureField.definingClass.toString().isObjectDescriptor()) {
+    if (!resultFailureField.definingClass.isObjectDescriptor()) {
         throw PatchException(
             "NewX submit failure result owner is not an object descriptor: $resultFailureField",
         )
@@ -328,9 +328,9 @@ private fun patchSubmitFailureMethod(method: MutableMethod) {
             1 -> {
                 val successEvent = requireExactlyOne("NewX POST_SUCCESS event", successEventFields)
                 if (
-                    failureEvent.field.definingClass.toString() !=
-                        successEvent.field.definingClass.toString() ||
-                        failureEvent.field.type.toString() != successEvent.field.type.toString()
+                    failureEvent.field.definingClass !=
+                        successEvent.field.definingClass ||
+                        failureEvent.field.type != successEvent.field.type
                 ) {
                     throw PatchException(
                         "NewX submit events use different enum types: " +
@@ -401,7 +401,7 @@ private fun findPostOperationRegister(
     if (instruction.opcode != Opcode.SGET_OBJECT) return null
     val field = instruction.getReference<FieldReference>() ?: return null
     if (field.name != POST_OPERATION_FIELD_NAME) return null
-    if (field.type.toString() != field.definingClass.toString()) return null
+    if (field.type != field.definingClass) return null
 
     val sget = instruction as? OneRegisterInstruction
         ?: throw PatchException("NewX submit operation read has no destination at $index")

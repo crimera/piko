@@ -23,8 +23,8 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -89,7 +89,7 @@ private object MediaSheetBuilderFingerprint : Fingerprint(
     // use the literal index; the lazy patcher literal resolves the same id at match time.
     filters =
         MEDIA_SHEET_BUILDER_ANCHORS.map { name ->
-            literal({ getResourceId(ResourceType.STRING, name) })
+            literal({ resourceId(ResourceType.STRING, name) })
         },
 )
 
@@ -143,7 +143,7 @@ private fun validateMediaSheetResources() {
     // The extension compares resource entry names, so a missing or renamed label must fail the
     // patch instead of leaving a dead option in the settings screen.
     MEDIA_SHEET_OPTIONS.forEach { (resourceName, _) ->
-        getResourceId(ResourceType.STRING, resourceName)
+        resourceId(ResourceType.STRING, resourceName)
     }
 }
 
@@ -151,7 +151,7 @@ context(context: BytecodePatchContext)
 private fun resolveMediaSheetLabelModel(match: Match): ResolvedMediaSheetLabel {
     val method = match.method
     val anchorName = MEDIA_SHEET_BUILDER_ANCHOR
-    val anchorResourceId = getResourceId(ResourceType.STRING, anchorName)
+    val anchorResourceId = resourceId(ResourceType.STRING, anchorName)
     val anchorIndices =
         method.instructions.mapIndexedNotNull { index, instruction ->
             index.takeIf {

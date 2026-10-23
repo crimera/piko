@@ -54,7 +54,7 @@ private fun isComposeStateCall(instruction: Instruction, inputRegister: Int): Bo
     val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference ?: return false
     return reference.definingClass.startsWith("Landroidx/compose/runtime/") &&
         reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
-        reference.returnType.toString().startsWith("Landroidx/compose/runtime/") &&
+        reference.returnType.startsWith("Landroidx/compose/runtime/") &&
         instruction.registersUsed == listOf(inputRegister)
 }
 

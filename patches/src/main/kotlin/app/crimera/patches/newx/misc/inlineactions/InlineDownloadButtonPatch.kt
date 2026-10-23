@@ -403,7 +403,7 @@ val newXInlineDownloadButtonPatch =
                     ) {
                         val method = instruction.getReference<MethodReference>()
                         if (method?.parameterTypes?.map { it.toString() } == listOf(MODIFIER, "F") &&
-                            method?.returnType == MODIFIER
+                            method.returnType == MODIFIER
                         ) {
                             index to instruction
                         } else null
