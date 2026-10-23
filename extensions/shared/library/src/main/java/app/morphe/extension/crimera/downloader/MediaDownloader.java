@@ -151,11 +151,14 @@ public class MediaDownloader {
                 boolean downloadedToCache = false;
                 try {
                     downloadToCache(request.url, cacheFiles, builder, notificationId);
+                    List<File> inputs = new ArrayList<>(cacheFiles);
                     if (request.audioUrl != null) {
                         downloadToCache(request.audioUrl, cacheFiles, builder, notificationId);
+                        File audio = cacheFiles.get(cacheFiles.size() - 1);
+                        inputs.add(request.audioToAacLc ? toAacLc(audio, cacheFiles) : audio);
                     }
                     downloadedToCache = true;
-                    Mp4Remuxer.write(cacheFiles, openOutput(outputDocumentUri), request.metadata);
+                    Mp4Remuxer.write(inputs, openOutput(outputDocumentUri), request.metadata);
                 } catch (Exception | LinkageError downloadException) {
                     PikoUtils.logger(downloadException);
                     if (request.audioUrl == null) {
@@ -264,6 +267,21 @@ public class MediaDownloader {
         cacheFiles.add(cacheFile);
         try (OutputStream output = new BufferedOutputStream(new FileOutputStream(cacheFile))) {
             download(url, output, builder, notificationId);
+        }
+    }
+
+    /**
+     * {@code audio} re-encoded as AAC-LC in a new cache file, or {@code audio} itself when it has
+     * no xHE-AAC track or the conversion fails: the video then keeps its sound as served.
+     */
+    private File toAacLc(File audio, List<File> cacheFiles) {
+        try {
+            File converted = File.createTempFile("piko-download-", ".m4a", context.getCacheDir());
+            cacheFiles.add(converted);
+            return AacLcTranscoder.transcodeXheAac(audio, converted) ? converted : audio;
+        } catch (Exception | LinkageError e) {
+            PikoUtils.logger(e);
+            return audio;
         }
     }
 

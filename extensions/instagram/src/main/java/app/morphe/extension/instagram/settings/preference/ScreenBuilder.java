@@ -882,6 +882,14 @@ public class ScreenBuilder {
 
         addPreference(
                 helper.switchPreference(
+                        str("piko_dash_audio_aac_lc"),
+                        str("piko_dash_audio_aac_lc_desc"),
+                        Settings.DASH_AUDIO_AAC_LC
+                )
+        );
+
+        addPreference(
+                helper.switchPreference(
                         str("piko_embed_download_metadata"),
                         str("piko_embed_download_metadata_desc"),
                         Settings.EMBED_DOWNLOAD_METADATA
