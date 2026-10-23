@@ -17,6 +17,9 @@ android {
 }
 
 dependencies {
+    // Shared in-app logging and themeable settings UI. `api` so app extension modules compile
+    // against them through this module, and so both are dexed into the shared bundle.
+    api(libs.piko.extension.library)
     implementation(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
     compileOnly(libs.appcompat)

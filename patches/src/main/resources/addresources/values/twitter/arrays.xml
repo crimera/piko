@@ -173,7 +173,7 @@
     <string-array name="piko_array_inlinetabs_val">
         <item>Reply</item>
         <item>Retweet</item>
-        <item>Retweet</item>
+        <item>Favorite</item>
         <item>ViewCount</item>
         <item>AddRemoveBookmarks</item>
         <item>TwitterShare</item>

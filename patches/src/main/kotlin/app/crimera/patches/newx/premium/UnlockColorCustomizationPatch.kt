@@ -1,0 +1,171 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ */
+
+package app.crimera.patches.newx.premium
+
+import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.insertHook
+import app.crimera.patches.common.scopedMatchAllOrNull
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.Match
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.registersUsed
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+
+// Parent packages move between releases (12.32 inserted `legacy/`), so the scope is the feature
+// segment only, matched anywhere in the descriptor. The Function6 bridge shape alone is not unique:
+// unrelated settings screens (privacy/chats/notifications) share it, so the feature segment is
+// the discriminator and the premium-result shape below is the cardinality guard.
+private const val DISPLAY_SETTINGS_SCOPE = "/accessibility/display/"
+private const val FUNCTION6_DESCRIPTOR = "Lkotlin/jvm/functions/Function6;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val BOOLEAN_DESCRIPTOR = "Ljava/lang/Boolean;"
+private const val CONTINUATION_DESCRIPTOR = "Lkotlin/coroutines/Continuation;"
+
+/**
+ * The display settings state combines the premium flow with the theme preferences before the
+ * Compose screen consumes it. The fifth Function6 argument is the all-tier premium result; it is
+ * copied into DisplaySettingsState and controls whether the color selector is enabled.
+ */
+private fun premiumResultIndices(
+    instructions: List<Instruction>,
+    constructedType: String,
+): List<Int> =
+    instructions.indices.filter { invokeIndex ->
+        val invoke = instructions[invokeIndex]
+        if (invoke.opcode != Opcode.INVOKE_VIRTUAL) return@filter false
+
+        val reference = invoke.getReference<MethodReference>() ?: return@filter false
+        if (
+            reference.definingClass != BOOLEAN_DESCRIPTOR ||
+                reference.name != "booleanValue" ||
+                reference.returnType != "Z" ||
+                reference.parameterTypes.isNotEmpty()
+        ) {
+            return@filter false
+        }
+
+        val booleanCast = instructions.getOrNull(invokeIndex - 1)
+        if (
+            booleanCast?.opcode != Opcode.CHECK_CAST ||
+                booleanCast.getReference<TypeReference>()?.type != BOOLEAN_DESCRIPTOR
+        ) {
+            return@filter false
+        }
+
+        val castRegister = booleanCast.registersUsed.firstOrNull()
+        val invokeRegister = invoke.registersUsed.firstOrNull()
+        if (castRegister == null || castRegister != invokeRegister) return@filter false
+
+        val resultIndex = invokeIndex + 1
+        val result = instructions.getOrNull(resultIndex)
+        if (result?.opcode != Opcode.MOVE_RESULT) return@filter false
+        if (result.registersUsed.firstOrNull() == null) return@filter false
+
+        val continuationCast = instructions.getOrNull(invokeIndex + 2)
+        if (
+            continuationCast?.opcode != Opcode.CHECK_CAST ||
+                continuationCast.getReference<TypeReference>()?.type != CONTINUATION_DESCRIPTOR
+        ) {
+            return@filter false
+        }
+
+        val newLambda = instructions.getOrNull(invokeIndex + 3)
+        newLambda?.opcode == Opcode.NEW_INSTANCE &&
+            newLambda.getReference<TypeReference>()?.type == constructedType
+    }
+
+private fun isDisplaySettingsStateCombiner(method: Method, classDef: ClassDef): Boolean {
+    if (!classDef.interfaces.contains(FUNCTION6_DESCRIPTOR)) return false
+
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    return premiumResultIndices(instructions, classDef.type).isNotEmpty()
+}
+
+private object NewXDisplaySettingsPremiumStateFingerprint : Fingerprint(
+    definingClass = DISPLAY_SETTINGS_SCOPE,
+    returnType = OBJECT_DESCRIPTOR,
+    parameters = List(6) { OBJECT_DESCRIPTOR },
+    custom = { method, classDef -> isDisplaySettingsStateCombiner(method, classDef) },
+)
+
+/**
+ * The Function6 bridge carries one premium-result case per display-settings coroutine. 12.33
+ * alpha.02 merged the legacy and current screens' combiners into one bridge with a two-case
+ * switch, so every case is patched; each must own exactly one state write after its result.
+ */
+private fun unlockColorCustomization(match: Match) {
+    val instructions = match.method.instructions.toList()
+    val resultIndices = premiumResultIndices(instructions, match.originalClassDef.type)
+    if (resultIndices.isEmpty()) {
+        throw PatchException(
+            "Expected at least one NewX display-settings premium result: ${match.originalMethod}",
+        )
+    }
+
+    val overrides =
+        resultIndices.mapIndexed { position, resultIndex ->
+            val nextResultIndex = resultIndices.getOrNull(position + 1) ?: instructions.size
+            val resultRegister =
+                instructions[resultIndex].registersUsed.firstOrNull()
+                    ?: throw PatchException("NewX display-settings premium result has no destination register")
+            val stateWriteIndices =
+                (resultIndex + 1 until nextResultIndex).filter { index ->
+                    instructions[index].opcode == Opcode.IPUT_BOOLEAN
+                }
+            if (stateWriteIndices.size != 1) {
+                throw PatchException(
+                    "Expected one NewX display-settings premium state write after result " +
+                        "$resultIndex, found ${stateWriteIndices.size}: ${match.originalMethod}",
+                )
+            }
+            stateWriteIndices.single() to resultRegister
+        }
+
+    // Override the value immediately before it is stored; never split invoke/move-result.
+    // `constInt` is register-aware, so it picks the same encoding the old `const/4`-vs-`const/16`
+    // choice produced. `relocateBranchTargets = false` keeps the plain-insertion semantics of the
+    // previous `addInstruction`: an incoming label stays on the store, so a path that branched
+    // straight to it still skips the override. Highest index first keeps the others valid.
+    overrides.sortedByDescending { (stateWriteIndex, _) -> stateWriteIndex }
+        .forEach { (stateWriteIndex, resultRegister) ->
+            match.method.insertHook(
+                index = stateWriteIndex,
+                relocateBranchTargets = false,
+            ) {
+                constInt(resultRegister, 1)
+            }
+        }
+}
+
+@Suppress("unused")
+val newXUnlockColorCustomizationPatch =
+    bytecodePatch(
+        name = "NewX: Unlock color customization",
+        description = "Unlocks the built-in app color selector for non-Premium users.",
+    ) {
+        compatibleWith(COMPATIBILITY_NEW_X)
+
+        execute {
+            val matches = NewXDisplaySettingsPremiumStateFingerprint.scopedMatchAllOrNull().orEmpty()
+            if (matches.size != 1) {
+                throw PatchException(
+                    "Expected one NewX display-settings state combiner, found ${matches.size}: " +
+                        matches.joinToString { it.originalMethod.toString() },
+                )
+            }
+            unlockColorCustomization(matches.single())
+        }
+    }
+

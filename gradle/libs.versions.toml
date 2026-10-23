@@ -8,14 +8,20 @@ annotation = "1.9.1"
 appcompat = "1.7.1"
 media3 = "1.11.0"
 shadow = "9.6.1"
+# Keep the published coordinate; settings.gradle.kts substitutes the sibling source in composite builds.
+piko-library = "0.10.0"
 
 [libraries]
 morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }
 morphe-extensions-library = { module = "app.morphe:morphe-extensions-library", version.ref = "morphe-patches-library" }
+# One release carries both artifacts, so they share one version.
+piko-patches-library = { module = "app.crimera:piko-patches-library", version.ref = "piko-library" }
+piko-extension-library = { module = "app.crimera:piko-extension-library", version.ref = "piko-library" }
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 media3-muxer = { module = "androidx.media3:media3-muxer", version.ref = "media3" }
+media3-extractor = { module = "androidx.media3:media3-extractor", version.ref = "media3" }
 
 [plugins]
 android-library = { id = "com.android.library" }

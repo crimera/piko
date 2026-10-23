@@ -28,6 +28,10 @@ dependencies {
         exclude(group = "androidx.annotation")
         exclude(group = "org.jetbrains.kotlin")
     }
+    media3Artifacts(libs.media3.extractor) {
+        exclude(group = "androidx.annotation")
+        exclude(group = "org.jetbrains.kotlin")
+    }
 }
 
 val extractedClasses = layout.buildDirectory.dir("media3-classes")

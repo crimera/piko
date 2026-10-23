@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.links.privacy
 
+import app.crimera.patches.common.parameterRegisterStart
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions

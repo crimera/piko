@@ -30,7 +30,7 @@ public class SettingsStatus {
     public static boolean storyFilters = false;
     public static void storyFilters(){storyFilters = true;}
     public static boolean filterContentSection(){return storyFilters; }
-    
+
     //Ghost section.
     public static boolean viewStoriesAnonymously = false;
     public static void viewStoriesAnonymously() {
@@ -157,7 +157,7 @@ public class SettingsStatus {
         focusLock = true;
     }
     public static boolean disableVideoAutoplay = false;
-    public static void disableVideoAutoplay() { disableVideoAutoplay = true;    
+    public static void disableVideoAutoplay() { disableVideoAutoplay = true;
     }
     public static boolean disableDoubleTapLike = false;
     public static void disableDoubleTapLike() {
@@ -220,7 +220,7 @@ public class SettingsStatus {
     public static boolean customFont = false;
     public static void customFont() { customFont = true; }
     public static boolean fontSection(){ return customFont; }
-    
+
     //Download section.
     public static boolean downloadMedia = false;
     public static void downloadMedia() {downloadMedia = true;}
@@ -241,7 +241,7 @@ public class SettingsStatus {
     public static void instantsDownload() {
         instantsDownload = true;
     }
-    
+
     //Navigation Section
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }

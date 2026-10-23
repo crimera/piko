@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.theme
 
+import app.crimera.patches.common.parameterRegisterStart
 import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Match

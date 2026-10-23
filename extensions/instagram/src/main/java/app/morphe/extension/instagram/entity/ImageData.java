@@ -8,7 +8,7 @@
 package app.morphe.extension.instagram.entity;
 
 import com.instagram.model.mediasize.ExtendedImageUrl;
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 public class ImageData implements MediaInterface {
     private final ExtendedImageUrl obj;
