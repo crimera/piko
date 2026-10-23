@@ -156,8 +156,6 @@
     <string name="piko_newx_disable_blur_title">Disable Compose blur</string>
     <string name="piko_newx_disable_blur_summary">Removes blur from NewX Compose UI while keeping configured background tint and scrim effects</string>
 
-    <string name="piko_newx_share_image_title">Share post as image</string>
-    <string name="piko_newx_share_image_summary">Adds a rendered-image share action to post menus</string>
     <string name="piko_newx_browse_tweet_object_title">Browse tweet object</string>
     <string name="piko_newx_browse_tweet_object_summary">Adds a debug option to inspect the tweet object in post menus</string>
 

@@ -53,7 +53,6 @@ private const val HANDLE_OPTION_ACTION_SIGNATURE = "handleOptionAction($OBJECT_D
 private const val OPTIONS_LIST_PARAMETER_REGISTER_OFFSET = 3
 
 internal const val BROWSE_OBJECT_ACTION = "None"
-internal const val SHARE_IMAGE_ACTION = "ViewDebugDialog"
 internal const val FILTERED_REPLIES_ACTION = "ServerFeedbackAction"
 
 /** NewX icon resource initialization emits the field assignment within this small block. */

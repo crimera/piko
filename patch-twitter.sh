@@ -52,7 +52,6 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   --exclusive \
   -e "NewX: Remove ads" \
   -e "NewX: Browse tweet object" \
-  -e "NewX: Share post as image" \
   -e "NewX: Customize inline actions" \
   -e "NewX: Classic inline action spacing" \
   -e "NewX: Unlock downloads" \
