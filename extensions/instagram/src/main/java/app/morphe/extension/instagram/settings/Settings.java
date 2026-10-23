@@ -37,6 +37,7 @@ public class Settings {
     public static final BooleanSetting VIEW_LIVE_ANONYMOUSLY = new BooleanSetting("view_live_anonymously", false);
     public static final BooleanSetting DISABLE_SCREENSHOT_DETECTION = new BooleanSetting("disable_screenshot_detection", false);
     public static final BooleanSetting VIEW_DM_ANONYMOUSLY = new BooleanSetting("view_dm_anonymously", false);
+    public static final BooleanSetting MARK_AS_READ_AFTER_REPLY = new BooleanSetting("mark_as_read_after_reply", false);
     public static final BooleanSetting INSTANTS_DOWNLOAD = new BooleanSetting("instants_download", false);
     public static final BooleanSetting SAVE_DELETED_MESSAGES = new BooleanSetting("save_deleted_messages", false);
     public static final BooleanSetting DISABLE_STORIES = new BooleanSetting("disable_stories", false);

@@ -107,22 +107,26 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.ENABLE_MARK_CHAT_AS_READ) && SettingsStatus.markChatAsRead;
     }
 
+    public static boolean markAsReadAfterReply() {
+        return SharedPref.getBooleanPref(Settings.MARK_AS_READ_AFTER_REPLY) && SettingsStatus.markAsReadAfterReply;
+    }
+
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
         return shouldBlockDmSeen(
                 SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
                 Pref.getTurnOnAllGhostModes(),
-                enableMarkChatAsReadOption()
+                enableMarkChatAsReadOption() || markAsReadAfterReply()
         );
     }
 
     static boolean shouldBlockDmSeen(
             boolean viewDmAnonymously,
             boolean allGhostModes,
-            boolean manualReadOptionEnabled
+            boolean explicitReadEnabled
     ) {
-        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
+        if (explicitReadEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
         return viewDmAnonymously || allGhostModes;

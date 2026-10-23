@@ -52,12 +52,16 @@ public class SettingsStatus {
     public static void viewDmAnonymously() {
         viewDmAnonymously = true;
     }
+    public static boolean markAsReadAfterReply = false;
+    public static void markAsReadAfterReply() {
+        markAsReadAfterReply = true;
+    }
     public static boolean saveDeletedMessages = false;
     public static void saveDeletedMessages() {
         saveDeletedMessages = true;
     }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously || markAsReadAfterReply);
     }
 
     //DM section
@@ -319,6 +323,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_focus_lock"), SettingsStatus.focusLock);
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
+        FLAGS.put(str("piko_mark_as_read_after_reply"), SettingsStatus.markAsReadAfterReply);
         FLAGS.put(str("piko_save_deleted_messages"),SettingsStatus.saveDeletedMessages);
         FLAGS.put(str("piko_disable_screenshot_detection"),SettingsStatus.disableScreenshotDetection);
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);

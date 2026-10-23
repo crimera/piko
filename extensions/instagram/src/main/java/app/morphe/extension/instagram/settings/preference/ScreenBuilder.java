@@ -417,6 +417,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.markAsReadAfterReply) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_mark_as_read_after_reply"),
+                            str("piko_mark_as_read_after_reply_desc"),
+                            Settings.MARK_AS_READ_AFTER_REPLY
+                    )
+            );
+        }
 
     }
 
