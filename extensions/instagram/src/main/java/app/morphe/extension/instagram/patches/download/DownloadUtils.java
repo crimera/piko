@@ -56,6 +56,15 @@ import com.instagram.common.session.UserSession;
 
 public class DownloadUtils {
 
+    private static MediaDownloader downloadAllDownloader;
+
+    private static synchronized MediaDownloader getDownloadAllDownloader(Context context) {
+        if (downloadAllDownloader == null) {
+            downloadAllDownloader = new MediaDownloader(context);
+        }
+        return downloadAllDownloader;
+    }
+
     public static String getSubfolderName(String username){
         boolean SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
         return SPLIT_BY_USERNAME ? username : null;
@@ -226,7 +235,9 @@ public class DownloadUtils {
             Utils.showToastShort(str("piko_no_internet"));
             return;
         }
-        MediaDownloader downloader = new MediaDownloader(context);
+        MediaDownloader downloader = position == -1
+                ? getDownloadAllDownloader(context)
+                : new MediaDownloader(context);
         String username = mediaInfo.getUserData().getUsername();
         String subFolder = getSubfolderName(username);
 
@@ -280,13 +291,14 @@ public class DownloadUtils {
 
         } else if (position == -1) {
             int carouselSize = mediaInfo.getCarouselSize();
+            List<DownloadRequest> requests = new ArrayList<>(carouselSize);
 
             for (int index = 0; index < carouselSize; index++) {
                 MediaData currentMediaData = mediaInfo.getMediaAt(index);
                 String fileName = username + "_"
                         + currentMediaData.getDownloadFilename(MediaType.ANY);
                 String mediaUrl = currentMediaData.getMediaLink();
-                downloader.enqueue(buildMediaRequest(
+                requests.add(buildMediaRequest(
                         mediaInfo,
                         currentMediaData,
                         index,
@@ -297,6 +309,7 @@ public class DownloadUtils {
                         null
                 ));
             }
+            downloader.enqueueBatch(requests);
         } else {
             Utils.showToastShort("There is nothing to download");
         }

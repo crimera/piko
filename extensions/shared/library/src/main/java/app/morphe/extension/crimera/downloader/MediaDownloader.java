@@ -31,12 +31,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
 import app.morphe.extension.crimera.PikoUtils;
@@ -44,14 +44,14 @@ import app.morphe.extension.shared.Utils;
 
 public class MediaDownloader {
     private static final String CHANNEL_ID = "media_download_channel";
+    private static final int CONNECT_TIMEOUT_MS = 15_000;
+    private static final int READ_TIMEOUT_MS = 30_000;
     // Separate downloader instances must reserve names before another request can choose them.
     private static final Object CREATE_DOCUMENT_LOCK = new Object();
     private final Context context;
     private final NotificationManager notificationManager;
-    private final LinkedBlockingQueue<DownloadRequest> queue = new LinkedBlockingQueue<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private boolean isDownloading = false;
 
     public MediaDownloader(Context context) {
         Context resolvedContext = context != null ? context : Utils.getContext();
@@ -76,21 +76,22 @@ public class MediaDownloader {
     }
 
     public void enqueue(DownloadRequest request) {
+        enqueueBatch(Collections.singletonList(request));
+    }
+
+    /** Saves the whole batch before starting the next request on this downloader. */
+    public void enqueueBatch(List<DownloadRequest> requests) {
+        List<DownloadRequest> batch = new ArrayList<>(requests);
+        if (batch.isEmpty()) return;
         if (!StorageUtils.checkStoragePermissions()) {
             StorageUtils.allowStorageAccess();
             return;
         }
-        queue.add(request);
-        processNext();
-    }
-
-    private void processNext() {
-        if (isDownloading || queue.isEmpty()) return;
-        isDownloading = true;
-        DownloadRequest request = queue.poll();
-        if (request != null) {
-            executor.execute(() -> runDownloadTask(request));
-        }
+        executor.execute(() -> {
+            for (DownloadRequest request : batch) {
+                runDownloadTask(request);
+            }
+        });
     }
 
     private void runDownloadTask(DownloadRequest request) {
@@ -98,20 +99,20 @@ public class MediaDownloader {
         Uri outputDocumentUri = null;
         List<File> cacheFiles = new ArrayList<>();
         boolean downloadCompleted = false;
-        Notification.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder = new Notification.Builder(context, CHANNEL_ID);
-        } else {
-            builder = new Notification.Builder(context);
-        }
-        builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                .setContentTitle(ExtensionStrings.DOWNLOAD_ONGOING + request.fileName)
-                .setOngoing(true) // Keeps notification un-swipable during download execution.
-                .setProgress(100, 0, false);
-
-        notificationManager.notify(notificationId, builder.build());
-
         try {
+            Notification.Builder builder;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder = new Notification.Builder(context, CHANNEL_ID);
+            } else {
+                builder = new Notification.Builder(context);
+            }
+            builder.setSmallIcon(android.R.drawable.stat_sys_download)
+                    .setContentTitle(ExtensionStrings.DOWNLOAD_ONGOING + request.fileName)
+                    .setOngoing(true) // Keeps notification un-swipable during download execution.
+                    .setProgress(100, 0, false);
+
+            notificationManager.notify(notificationId, builder.build());
+
             synchronized (CREATE_DOCUMENT_LOCK) {
                 Uri targetDirectoryUri = getTargetDirectoryUri(request);
                 request.fileName = DownloadFileNames.findAvailable(
@@ -196,23 +197,25 @@ public class MediaDownloader {
                     PikoUtils.toast(completedToast);
                 } catch (Exception ignored) {}
             });
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (!downloadCompleted && outputDocumentUri != null) {
                 try {
                     DocumentsContract.deleteDocument(context.getContentResolver(), outputDocumentUri);
                 } catch (Exception ignored) {}
             }
-            showToast(ExtensionStrings.DOWNLOAD_ERROR + e.getMessage());
-            notificationManager.cancel(notificationId);
             PikoUtils.logger(e);
+            try {
+                showToast(ExtensionStrings.DOWNLOAD_ERROR + e.getMessage());
+                notificationManager.cancel(notificationId);
+            } catch (Exception notificationException) {
+                PikoUtils.logger(notificationException);
+            }
         } finally {
             for (File file : cacheFiles) {
                 if (file.exists() && !file.delete()) {
                     PikoUtils.logger(new IOException("Could not delete download cache file"));
                 }
             }
-            isDownloading = false;
-            processNext();
         }
     }
 
@@ -251,6 +254,8 @@ public class MediaDownloader {
             throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         try {
+            conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+            conn.setReadTimeout(READ_TIMEOUT_MS);
             conn.connect();
             try (InputStream input = new BufferedInputStream(conn.getInputStream())) {
                 copyDownload(input, output, conn.getContentLength(), builder, notificationId);
