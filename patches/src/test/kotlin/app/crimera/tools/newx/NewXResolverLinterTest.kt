@@ -8,6 +8,10 @@ import app.crimera.patches.newx.models.isLegacyInlineActionKindModelConstructor
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isPostDividerContentHelper
+import app.crimera.patches.newx.settings.resolveSettingsRowModelTargetInMethod
+import app.crimera.patches.newx.timeline.resolveInlineResumePositionFactory
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.Opcode
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
@@ -24,6 +28,8 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.immutable.ImmutableAnnotation
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
+import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef
+import com.android.tools.smali.dexlib2.immutable.ImmutableField
 import java.nio.file.Files
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
@@ -34,6 +40,121 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
+    @Test
+    fun `settings model discovery follows the title through list builders and ignores unrelated rows`() {
+        val titleClass = ImmutableClassDef(
+            "Lfixture/ResourceText;", AccessFlags.PUBLIC.value, "Lfixture/Text;", emptyList(), null, emptySet(),
+            listOf(ImmutableField("Lfixture/ResourceText;", "resource", "I", AccessFlags.PUBLIC.value, null, emptySet(), emptySet())),
+            emptyList(),
+        )
+        listOf("Ljava/lang/Object;", "Ljava/util/List;").forEach { returnType ->
+            val target = resolveSettingsRowModelTargetInMethod(settingsModelBuilderFixture(returnType), 1) { titleClass }
+            assertEquals("Lfixture/Row;", target?.method?.definingClass)
+            assertEquals(5, target?.clickParameterIndex)
+            assertEquals(8, target?.maskParameterIndex)
+        }
+        assertEquals(null, resolveSettingsRowModelTargetInMethod(settingsModelBuilderFixture("Ljava/util/List;", overwriteTitle = true), 1) { titleClass })
+    }
+
+    private fun settingsModelBuilderFixture(returnType: String, overwriteTitle: Boolean = false): Method {
+        val implementation = MethodImplementationBuilder(24)
+        fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
+        add("new-instance v0, Lfixture/ResourceText;")
+        add("const v1, 0x12345678")
+        repeat(5) { add("nop") }
+        add("invoke-direct {v0, v1}, Lfixture/ResourceText;-><init>(I)V")
+        add("move-object/from16 v11, v0")
+        if (overwriteTitle) add("const/16 v11, 0x0")
+        val parameters = "Lfixture/Text;Lfixture/Text;Lcom/x/icons/Fixture;Lfixture/Auxiliary;ZLkotlin/jvm/functions/Function0;Lfixture/Destination;Lfixture/Menu;I"
+        add("new-instance v10, Lfixture/Row;")
+        add("invoke-direct/range {v10 .. v19}, Lfixture/Row;-><init>($parameters)V")
+        // An unrelated row after the anchor must not become another constructor candidate.
+        add("const/16 v11, 0x0")
+        add("new-instance v10, Lfixture/UnrelatedRow;")
+        add("invoke-direct/range {v10 .. v19}, Lfixture/UnrelatedRow;-><init>($parameters)V")
+        add("const/4 v0, 0x0")
+        add("return-object v0")
+        return ImmutableMethod(
+            "Lfixture/RepackagedBuilder;", "build", emptyList(), returnType, AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+            emptySet<ImmutableAnnotation>(), emptySet<HiddenApiRestriction>(), implementation.methodImplementation,
+        )
+    }
+
+    @Test
+    fun `inline resume factory preserves self-read inputs and rejects escaping branches`() {
+        val extracted = resolveInlineResumePositionFactory(
+            inlineResumeFactoryFixture(escape = false),
+            listOf("Ljava/util/List;", "Ljava/util/ArrayList;", "Lfixture/Holder;", "Lkotlin/time/Instant;"),
+            "Lfixture/Resume;",
+            ImmutableFieldReference("Lfixture/Owner;", "items", "Ljava/util/List;"),
+            2,
+        ).method
+        val code = extracted.instructions.toList()
+        assertEquals(Opcode.RETURN_OBJECT, code.last().opcode)
+        assertTrue(code.any { it.opcode == Opcode.INVOKE_DIRECT_RANGE })
+        // Repeated register operands must not erase an input: iget v2,v2 consumes the holder.
+        assertEquals(Opcode.MOVE_OBJECT, code[2].opcode)
+        val offsets = code.runningFold(0) { offset, instruction -> offset + instruction.codeUnits }
+        val branchIndex = code.indexOfFirst { it.opcode == Opcode.IF_EQZ }
+        val branch = code[branchIndex] as com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
+        assertEquals(offsets[code.lastIndex], offsets[branchIndex] + branch.codeOffset)
+        listOf(
+            inlineResumeFactoryFixture(escape = true),
+            inlineResumeFactoryFixture(escape = false, seed = 1),
+            inlineResumeFactoryFixture(escape = false, bypassSeed = true),
+        ).forEach { source ->
+            assertFailsWith<PatchException> {
+                resolveInlineResumePositionFactory(
+                    source,
+                    listOf("Ljava/util/List;", "Ljava/util/ArrayList;", "Lfixture/Holder;", "Lkotlin/time/Instant;"),
+                    "Lfixture/Resume;",
+                    ImmutableFieldReference("Lfixture/Owner;", "items", "Ljava/util/List;"),
+                    2,
+                )
+            }
+        }
+    }
+
+    private fun inlineResumeFactoryFixture(escape: Boolean, seed: Int = 0, bypassSeed: Boolean = false): Method {
+        val implementation = MethodImplementationBuilder(15)
+        fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
+        add("iget-object v0, v14, Lfixture/Owner;->items:Ljava/util/List;")
+        add("iget-object v1, v14, Lfixture/Owner;->rows:Ljava/util/ArrayList;")
+        add("iget-object v2, v14, Lfixture/Owner;->holder:Lfixture/Holder;")
+        add("const/4 v3, 0x1")
+        if (bypassSeed) implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 14, implementation.getLabel("seeded")))
+        add("const/4 v3, $seed")
+        implementation.addLabel("seeded")
+        add("const/4 v4, 0x0")
+        add("iget-object v5, v14, Lfixture/Owner;->clock:Lfixture/Clock;")
+        add("invoke-interface {v5}, Lfixture/Clock;->now()Lkotlin/time/Instant;")
+        add("move-result-object v12")
+        add("move/from16 v11, v3")
+        add("move v11, v3")
+        implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 3, implementation.getLabel(if (escape) "outside" else "end")))
+        add("iget v2, v2, Lfixture/Holder;->index:I")
+        add("invoke-interface {v0}, Ljava/util/List;->size()I")
+        add("invoke-virtual {v1}, Ljava/util/ArrayList;->size()I")
+        add("const-string v6, \"entry\"")
+        add("const-wide/16 v7, 0x0")
+        add("const/4 v9, 0x0")
+        add("const/4 v10, 0x1")
+        add("const/4 v11, 0x0")
+        add("new-instance v5, Lfixture/Resume;")
+        add("invoke-direct/range {v5 .. v12}, Lfixture/Resume;-><init>(Ljava/lang/String;JIIILkotlin/time/Instant;)V")
+        add("move-object v4, v5")
+        implementation.addLabel("end")
+        add("nop")
+        implementation.addLabel("outside")
+        add("return-void")
+        return ImmutableMethod(
+            "Lfixture/Owner;", "save",
+            listOf("Lfixture/Holder;", "Lfixture/Owner;").map { ImmutableMethodParameter(it, emptySet(), null) },
+            "V", AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+            emptySet<ImmutableAnnotation>(), emptySet<HiddenApiRestriction>(), implementation.methodImplementation,
+        )
+    }
+
     @Test
     fun `post divider discovery survives merged callers and rejects unguarded drawing`() {
         // Both 12.35 prod and 12.36 beta have this same helper; only their synthetic callers moved.

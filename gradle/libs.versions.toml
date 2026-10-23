@@ -9,7 +9,7 @@ appcompat = "1.7.1"
 media3 = "1.11.0"
 shadow = "9.6.1"
 # Keep the published coordinate; settings.gradle.kts substitutes the sibling source in composite builds.
-piko-library = "0.10.0"
+piko-library = "0.10.0-dev.2"
 
 [libraries]
 morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }

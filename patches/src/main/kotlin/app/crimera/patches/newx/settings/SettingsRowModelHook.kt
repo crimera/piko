@@ -7,8 +7,10 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
-import app.crimera.patches.common.ShapeFingerprint
+import app.morphe.patcher.Fingerprint
 import app.crimera.patches.common.scopedMatchAllOrNull
+import app.crimera.patches.common.valueReachesRegister
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -16,9 +18,12 @@ import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22b
+import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
@@ -28,9 +33,6 @@ private const val STRING_RESOURCE_NAME = "settings_additional_resources_item_tit
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val ICONS_SCOPE = "Lcom/x/icons/"
 private const val ORIGINAL_LABEL = "piko_newx_settings_row_model_original"
-
-/** Instructions searched after the title literal for the title model's `(I)V` constructor. */
-private const val TITLE_CONSTRUCTOR_WINDOW = 4
 
 private val GET_SETTINGS_TITLE_RES_ID_DESCRIPTOR =
     "$COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsTitleResId()I"
@@ -62,93 +64,109 @@ context(context: BytecodePatchContext)
 internal fun resolveSettingsRowModelTarget(): SettingsRowModelTarget? {
     val titleResourceId = getResourceId(ResourceType.STRING, STRING_RESOURCE_NAME)
     val builders =
-        ShapeFingerprint(
-            returnType = "Ljava/lang/Object;",
-            parameters = emptyList(),
+        Fingerprint(
+            // R8 can merge this builder outside the settings package; the resource index scopes it.
             filters = listOf(literal(titleResourceId)),
         ).scopedMatchAllOrNull().orEmpty()
 
     val targets =
         builders.mapNotNull { match ->
-            val instructions = match.method.implementation?.instructions?.toList() ?: return@mapNotNull null
-            val literalIndex = match.instructionMatches.single().index
-            // The text model is built right at the literal: const, then `invoke-direct <init>(I)V`.
-            val titleConstructor =
-                instructions
-                    .drop(literalIndex + 1)
-                    .take(TITLE_CONSTRUCTOR_WINDOW)
-                    .firstNotNullOfOrNull { instruction ->
-                        instruction.getReference<MethodReference>()?.takeIf { reference ->
-                            instruction.opcode == Opcode.INVOKE_DIRECT &&
-                                reference.name == "<init>" &&
-                                reference.parameterTypes.map(CharSequence::toString) == listOf("I")
-                        }
-                    } ?: return@mapNotNull null
-
-            val invokedConstructors =
-                instructions
-                    .drop(literalIndex + 1)
-                    .mapNotNull { instruction ->
-                        instruction.getReference<MethodReference>()?.takeIf { reference ->
-                            (instruction.opcode == Opcode.INVOKE_DIRECT ||
-                                instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
-                                reference.name == "<init>" &&
-                                reference.definingClass != titleConstructor.definingClass
-                        }
-                    }.distinctBy(MethodReference::toString)
-
-            val titleClass =
-                context.classDefByOrNull(titleConstructor.definingClass)
-                    ?: return@mapNotNull null
-            val titleBaseType = titleClass.superclass ?: return@mapNotNull null
-            // The builder calls the Kotlin default-argument constructor (trailing mask `I`) or the
-            // full one; the layout is judged on the parameters without the mask.
-            val models =
-                invokedConstructors.mapNotNull { reference ->
-                    val parameters = reference.parameterTypes.map(CharSequence::toString)
-                    val maskIndex = if (parameters.lastOrNull() == "I") parameters.lastIndex else -1
-                    val layout =
-                        rowModelLayout(
-                            if (maskIndex >= 0) parameters.dropLast(1) else parameters,
-                            titleBaseType,
-                        ) ?: return@mapNotNull null
-                    Triple(reference, layout, maskIndex)
-                }
-            requireAtMostOne(
-                label = "NewX settings row model constructor in ${match.method}",
-                candidates = models,
-                describe = { (reference, _, _) -> reference.toString() },
-            )?.let { (constructor, layout, maskIndex) ->
-                val titleResourceField =
-                    requireExactlyOne(
-                        label = "NewX settings text-model resource field",
-                        candidates =
-                            titleClass.fields.filter { field ->
-                                field.type == "I" && !AccessFlags.STATIC.isSet(field.accessFlags)
-                            },
-                    )
-                SettingsRowModelTarget(
-                    method = constructor,
-                    titleType = titleClass.type,
-                    titleResourceField =
-                        ImmutableFieldReference(titleClass.type, titleResourceField.name, "I"),
-                    titleConstructor =
-                        ImmutableMethodReference(
-                            titleConstructor.definingClass,
-                            titleConstructor.name,
-                            titleConstructor.parameterTypes,
-                            titleConstructor.returnType,
-                        ),
-                    iconParameterIndex = layout.iconIndex,
-                    clickParameterIndex = layout.clickIndex,
-                    maskParameterIndex = maskIndex,
-                )
+            resolveSettingsRowModelTargetInMethod(match.method, match.instructionMatches.single().index) {
+                context.classDefByOrNull(it)
             }
         }
     return requireAtMostOne(
         label = "NewX settings row model target",
         candidates = targets.distinctBy { target -> target.method.toString() },
     )
+}
+
+internal fun resolveSettingsRowModelTargetInMethod(
+    method: Method,
+    literalIndex: Int,
+    classDefinition: (String) -> ClassDef?,
+): SettingsRowModelTarget? {
+    val instructions = method.instructions.toList()
+    val literalRegister = instructions[literalIndex].registersUsed.single()
+    val titleConstructorIndex = requireAtMostOne(
+        "NewX settings resource-backed title constructor in $method",
+        instructions.indices.filter { index ->
+            if (index <= literalIndex) return@filter false
+            val instruction = instructions[index]
+            val reference = instruction.getReference<MethodReference>() ?: return@filter false
+            instruction.opcode in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) &&
+                reference.name == "<init>" &&
+                reference.parameterTypes.map(CharSequence::toString) == listOf("I") &&
+                instruction.registersUsed.getOrNull(1)?.let { argument ->
+                    instructions.valueReachesRegister(literalIndex, literalRegister, index, argument)
+                } == true
+        },
+    ) ?: return null
+    val titleConstructor = instructions[titleConstructorIndex].getReference<MethodReference>()!!
+    val titleRegister = instructions[titleConstructorIndex].registersUsed.first()
+
+    val invokedConstructors =
+        instructions
+            .mapIndexedNotNull { index, instruction ->
+                instruction.getReference<MethodReference>()?.takeIf { reference ->
+                    index > titleConstructorIndex &&
+                    (instruction.opcode == Opcode.INVOKE_DIRECT ||
+                        instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
+                        reference.name == "<init>" &&
+                        reference.definingClass != titleConstructor.definingClass &&
+                        instruction.registersUsed.getOrNull(1)?.let { argument ->
+                            instructions.valueReachesRegister(titleConstructorIndex, titleRegister, index, argument)
+                        } == true
+                }
+            }.distinctBy(MethodReference::toString)
+
+    val titleClass =
+        classDefinition(titleConstructor.definingClass) ?: return null
+    val titleBaseType = titleClass.superclass ?: return null
+    // The builder calls the Kotlin default-argument constructor (trailing mask `I`) or the
+    // full one; the layout is judged on the parameters without the mask.
+    val models =
+        invokedConstructors.mapNotNull { reference ->
+            val parameters = reference.parameterTypes.map(CharSequence::toString)
+            val maskIndex = if (parameters.lastOrNull() == "I") parameters.lastIndex else -1
+            val layout =
+                rowModelLayout(
+                    if (maskIndex >= 0) parameters.dropLast(1) else parameters,
+                    titleBaseType,
+                ) ?: return@mapNotNull null
+            Triple(reference, layout, maskIndex)
+        }
+    requireAtMostOne(
+        label = "NewX settings row model constructor in $method",
+        candidates = models,
+        describe = { (reference, _, _) -> reference.toString() },
+    )?.let { (constructor, layout, maskIndex) ->
+        val titleResourceField =
+            requireExactlyOne(
+                label = "NewX settings text-model resource field",
+                candidates =
+                    titleClass.fields.filter { field ->
+                        field.type == "I" && !AccessFlags.STATIC.isSet(field.accessFlags)
+                    },
+            )
+        return SettingsRowModelTarget(
+            method = constructor,
+            titleType = titleClass.type,
+            titleResourceField =
+                ImmutableFieldReference(titleClass.type, titleResourceField.name, "I"),
+            titleConstructor =
+                ImmutableMethodReference(
+                    titleConstructor.definingClass,
+                    titleConstructor.name,
+                    titleConstructor.parameterTypes,
+                    titleConstructor.returnType,
+                ),
+            iconParameterIndex = layout.iconIndex,
+            clickParameterIndex = layout.clickIndex,
+            maskParameterIndex = maskIndex,
+        )
+    }
+    return null
 }
 
 private data class RowModelLayout(
@@ -166,6 +184,7 @@ private fun rowModelLayout(
     titleBaseType: String,
 ): RowModelLayout? {
     val descriptors = parameters.map(CharSequence::toString)
+    if (descriptors.any { it == "J" || it == "D" }) return null
     if (descriptors.size < 6 || descriptors.take(2) != listOf(titleBaseType, titleBaseType)) return null
     if (descriptors.takeLast(1) == listOf("I")) return null
     val iconIndex = descriptors.indexOfFirst { it.startsWith(ICONS_SCOPE) }
