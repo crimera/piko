@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.premium
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
 import app.crimera.patches.settings.injectRead
@@ -10,7 +11,7 @@ import app.crimera.patches.common.hasComposeShape
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -23,8 +24,8 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.util.getReference
-import app.morphe.util.p0Register
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -198,6 +199,7 @@ val hidePremiumUpsellPatch =
         name = "NewX: Hide premium upsell",
         description = "Hides the premium upsell chip from the NewX home top bar.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hidePremiumUpsell =

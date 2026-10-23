@@ -20,12 +20,11 @@ object Constants {
             appIconColor = 0xFC483C,
             targets =
                 listOf(
-                    // Stable
                     AppTarget(
-                        version = "439.0.0.37.89",
+                        version = "452.1.0.53.64",
                         versionCodes =
                             mapOf(
-                                ARM64_V8A to 384510827,
+                                ARM64_V8A to 385811006,
                             ),
                     ),
                 ),
@@ -33,7 +32,6 @@ object Constants {
 
     // Instagram classes.
     const val FRAGMENT_ACTIVITY = "Landroidx/fragment/app/FragmentActivity;"
-    const val FRIENDSHIP_STATUS_CLASS = "Lcom/instagram/user/model/FriendshipStatus;"
     const val EDIT_MEDIA_INFO_FRAGMENT_CLASS = "Linstagram/features/creation/fragment/EditMediaInfoFragment;"
     const val EXTENDED_IMAGE_URL_CLASS = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"
     const val MEDIA_OPTIONS_CLASS = "Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"

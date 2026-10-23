@@ -7,6 +7,7 @@ import app.crimera.patches.settings.SettingsGroupDefinition
 import app.crimera.patches.settings.SingleChoiceSettingDefinition
 import app.crimera.patches.settings.TextInputSettingDefinition
 import app.crimera.patches.settings.ToggleSettingDefinition
+import app.morphe.patcher.patch.Patch
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.file.Files
@@ -124,6 +125,21 @@ internal object SettingsAggregateValidator {
 }
 
 internal object NewXContributionDiscovery {
+    fun discoverSelectablePatches(): List<Patch<*>> {
+        val outputRoot = Path.of(Categories::class.java.protectionDomain.codeSource.location.toURI())
+        return discoverPatchClasses(outputRoot).flatMap { className ->
+            Class.forName(className).declaredMethods
+                .filter { method ->
+                    java.lang.reflect.Modifier.isStatic(method.modifiers) &&
+                        java.lang.reflect.Modifier.isPublic(method.modifiers) &&
+                        method.parameterCount == 0 &&
+                        Patch::class.java.isAssignableFrom(method.returnType)
+                }
+                .map { it.invoke(null) as Patch<*> }
+                .filter { it.name != null }
+        }.distinct()
+    }
+
     private const val PACKAGE_PATH = "app/crimera/patches/newx"
     // The index lives in piko-patches-library; only the NewX patch classes are scanned from this
     // module's own output.

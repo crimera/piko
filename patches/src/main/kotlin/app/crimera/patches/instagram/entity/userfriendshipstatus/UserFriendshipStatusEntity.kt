@@ -6,8 +6,7 @@
 
 package app.crimera.patches.instagram.entity.userfriendshipstatus
 
-import app.crimera.utils.changeFirstString
-import app.crimera.utils.changeStringAt
+import app.crimera.utils.changeString
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -19,9 +18,9 @@ val userFriendshipStatusEntity =
 
         execute {
 
-            FriendshipStatusMappingsFingerprint.method.apply {
-                GetMappingsFingerprint.changeFirstString(classNameToExtension(definingClass))
-                GetMappingsFingerprint.changeStringAt(1, name)
-            }
+            val mapping = FriendshipStatusMapperFingerprint.originalMethod
+            GetMappingsFingerprint.changeString("classname", classNameToExtension(mapping.definingClass))
+            GetMappingsFingerprint.changeString("methodname", mapping.name)
+            GetMappingsFingerprint.changeString("friendshipstatusclass", classNameToExtension(FRIENDSHIP_STATUS_CLASS))
         }
     }

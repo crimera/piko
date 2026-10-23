@@ -8,19 +8,15 @@ package app.crimera.patches.instagram.misc.distractionFree.doubleTap
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.OpcodesFilter
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.Opcode
+import app.morphe.patcher.util.matchSingle
 
-internal object ReelOnFlingFingerprint : Fingerprint(
-    parameters = listOf("Landroid/view/MotionEvent;", "Landroid/view/MotionEvent;", "F", "F"),
-    name = "onFling",
-    filters =
-        OpcodesFilter.opcodesToFilters(
-            Opcode.IF_EQZ,
-            Opcode.IF_EQZ,
-        ),
+internal object ReelOnDoubleTapFingerprint : Fingerprint(
+    parameters = listOf("Landroid/view/MotionEvent;"),
+    returnType = "Z",
+    name = "onDoubleTap",
+    strings = listOf("android_purge_26_q3_ClipsItemGestureDetector_onDoubleTap"),
 )
 
 @Suppress("unused")
@@ -32,13 +28,9 @@ val disableDoubleTapOnReelPatch =
 
         execute {
 
-            ReelOnFlingFingerprint.apply {
-                classDef.methods.first { it.name == "onDoubleTap" }.apply {
-                    addInstructions(
-                        0,
-                        DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapReel"),
-                    )
-                }
-            }
+            ReelOnDoubleTapFingerprint.matchSingle().method.addInstructions(
+                0,
+                DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapReel"),
+            )
         }
     }

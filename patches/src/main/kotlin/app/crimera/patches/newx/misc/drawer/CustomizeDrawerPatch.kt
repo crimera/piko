@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.drawer
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.MultiChoiceSettingDefinition
@@ -49,8 +50,8 @@ import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.common.resolveIntegerLiterals
 import app.crimera.patches.common.valueReachesRegister
 import app.crimera.patches.common.writesObjectRegister
-import app.crimera.patches.utils.scopedMatchAll
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
@@ -64,10 +65,10 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
-import app.morphe.util.getReference
-import app.morphe.util.numberOfParameterRegisters
-import app.morphe.util.p0Register
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.numberOfParameterRegisters
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
@@ -1398,6 +1399,7 @@ val customizeNewXDrawerPatch =
         name = "NewX: Customize drawer items",
         description = "Lets you hide selected items from the NewX navigation drawer, and optionally add Messages and Grok shortcuts.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXSettingsPatch)
         dependsOn(drawerResourceNamesPatch)

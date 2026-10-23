@@ -149,12 +149,20 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_COMMENTS);
     }
 
+    public static boolean hideCommentButtons() {
+        return lockable(Settings.DISABLE_COMMENTS) && SettingsStatus.disableComments;
+    }
+
     public static boolean limitFollowingFeed() {
         return SharedPref.getBooleanPref(Settings.LIMIT_FOLLOWING_FEED);
     }
 
     public static boolean hideStoriesTray() {
         return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+    }
+
+    public static boolean hideHiddenRequests() {
+        return lockable(Settings.HIDE_HIDDEN_REQUESTS) && SettingsStatus.hideHiddenRequests;
     }
 
     public static boolean hideNotesTray() {
@@ -229,8 +237,24 @@ public class Pref {
         return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT.key, value);
     }
 
+    public static boolean ephemeralMediaCaption() {
+        return SharedPref.getBooleanPref(Settings.EPHEMERAL_MEDIA_CAPTION);
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
+    }
+
+    public static boolean hideShareButton() {
+        return SharedPref.getBooleanPref(Settings.HIDE_SHARE_BUTTON) && SettingsStatus.hideShareButton;
+    }
+
+    public static boolean hideSaveButtons() {
+        return SharedPref.getBooleanPref(Settings.HIDE_SAVE_BUTTONS) && SettingsStatus.hideSaveButtons;
+    }
+
+    public static boolean showSaveButton(boolean original) {
+        return original && !hideSaveButtons();
     }
 
     public static boolean hideReshareButton() {
@@ -257,10 +281,6 @@ public class Pref {
     }
     public static boolean allowUserNetworkCertificate() {
         return SharedPref.getBooleanPref(Settings.ALLOW_USER_NETWORK_CERTIFICATE);
-    }
-
-    public static int buildAge(int appAge) {
-        return SharedPref.getBooleanPref(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1 : appAge;
     }
 
     public static boolean disableAnalytics() {
@@ -320,6 +340,10 @@ public class Pref {
 
     public static boolean embedDownloadMetadata() {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
+    public static boolean preferDashFormat() {
+        return SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT);
     }
 
     public static String downloadFileNameTemplate() {
@@ -476,5 +500,27 @@ public class Pref {
         return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
     }
 
-    //end
+    public static boolean inboxLock() {
+        return SharedPref.getBooleanPref(Settings.INBOX_LOCK);
+    }
+
+    public static boolean inboxLockNotifications() {
+        return SharedPref.getBooleanPref(Settings.INBOX_LOCK_NOTIFICATIONS);
+    }
+
+    public static boolean hiddenChats() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS);
+    }
+
+    public static boolean hiddenChatsMute() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS_MUTE);
+    }
+
+    public static int hiddenChatsTaps() {
+        try {
+            return Integer.parseInt(SharedPref.getStringPref(Settings.HIDDEN_CHATS_TAPS));
+        } catch (NumberFormatException e) {
+            return 3;
+        }
+    }
 }

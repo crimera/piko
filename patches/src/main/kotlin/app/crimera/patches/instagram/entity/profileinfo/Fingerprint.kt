@@ -7,8 +7,10 @@
 package app.crimera.patches.instagram.entity.profileinfo
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
-import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS = "$ENTITY_CLASS/ProfileInfo;"
 
@@ -34,17 +36,14 @@ internal object GetUserDataExtensionFingerprint : Fingerprint(
 
 // This fingerprint will also be using for follow back indicator patch && settings button && profile more options
 object ProfileUserInfoViewBinderFingerprint : Fingerprint(
-    strings = listOf("ProfileUserInfoViewBinder.newView"),
+    filters = listOf(
+        string("ProfileUserInfoViewBinder.newView"),
+        opcode(Opcode.MOVE_RESULT_OBJECT),
+    ),
 )
 
 internal object ProfileRelatedDetailsFingerprint : Fingerprint(
     returnType = "V",
     parameters = listOf(),
     strings = listOf("is_self", "trigger", "content_source", "destination"),
-)
-
-internal object GetUsernameFromUserDetailViewModelFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    definingClass = USER_DETAIL_VIEW_MODEL_CLASS,
-    strings = listOf("INVALID_USER_NAME"),
 )

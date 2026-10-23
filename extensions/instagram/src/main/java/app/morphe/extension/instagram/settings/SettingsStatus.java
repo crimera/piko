@@ -12,29 +12,6 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 public class SettingsStatus {
     public static TreeMap<String,Boolean> FLAGS = new TreeMap();
 
-    // Developer section.
-    public static boolean enableDeveloperOptions = false;
-    public static void enableDeveloperOptions() {
-        enableDeveloperOptions = true;
-    }
-    public static boolean removeBuildExpirePopup = false;
-    public static void removeBuildExpirePopup() {
-        removeBuildExpirePopup = true;
-    }
-    public static boolean unlockEmployeeOptions = false;
-    public static void unlockEmployeeOptions() {
-        unlockEmployeeOptions = true;
-    }
-    public static boolean allowUserNetworkCertificate = false;
-    public static void allowUserNetworkCertificate() {
-        allowUserNetworkCertificate = true;
-    }
-    public static boolean recommendedFlags = false;
-    public static void recommendedFlags() {recommendedFlags = true;}
-    public static boolean developerOptionsSection() {
-        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup || recommendedFlags);
-    }
-
     //Ads section.
     public static boolean disableAds = false;
     public static void disableAds() {
@@ -49,20 +26,12 @@ public class SettingsStatus {
         return (disableAds || hideSuggestedContent);
     }
 
-    //Links section.
-    public static boolean openLinksExternally = false;
-    public static void openLinksExternally() {
-        openLinksExternally = true;
-    }
-    public static boolean sanitizeShareLinks = false;
-    public static void sanitizeShareLinks() {sanitizeShareLinks = true;}
-    public static boolean customSharingDomain = false;
-    public static void customSharingDomain() {customSharingDomain = true;}
-    public static boolean linksSection() {
-        return (openLinksExternally || sanitizeShareLinks || customSharingDomain);
-    }
+    //Filter content
+    public static boolean storyFilters = false;
+    public static void storyFilters(){storyFilters = true;}
+    public static boolean filterContentSection(){return storyFilters; }
 
-
+    //Ghost section.
     public static boolean viewStoriesAnonymously = false;
     public static void viewStoriesAnonymously() {
         viewStoriesAnonymously = true;
@@ -83,10 +52,6 @@ public class SettingsStatus {
     public static void viewDmAnonymously() {
         viewDmAnonymously = true;
     }
-    public static boolean instantsDownload = false;
-    public static void instantsDownload() {
-        instantsDownload = true;
-    }
     public static boolean saveDeletedMessages = false;
     public static void saveDeletedMessages() {
         saveDeletedMessages = true;
@@ -95,6 +60,54 @@ public class SettingsStatus {
         return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
     }
 
+    //DM section
+    public static boolean unlimitedReplaysOnEphemeralMedia = false;
+    public static void unlimitedReplaysOnEphemeralMedia() {unlimitedReplaysOnEphemeralMedia = true;}
+    public static boolean markChatAsRead = false;
+    public static void markChatAsRead() { markChatAsRead = true; }
+    public static boolean inboxLock = false;
+    public static void inboxLock() { inboxLock = true; }
+    public static boolean hiddenChats = false;
+    public static void hiddenChats() { hiddenChats = true; }
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats ;}
+
+    //Story section
+    public static boolean customiseStoryTimestamp = false;
+    public static void customiseStoryTimestamp() {
+        customiseStoryTimestamp = true;
+    }
+    public static boolean viewStoryMentions = false;
+    public static void viewStoryMentions() {
+        viewStoryMentions = true;
+    }
+    public static boolean disableStoryFlipping = false;
+    public static void disableStoryFlipping() {
+        disableStoryFlipping = true;
+    }
+    public static boolean loopStory = false;
+    public static void loopStory() {
+        loopStory = true;
+    }
+    public static boolean customiseStoryRingSize = false;
+    public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
+    public static boolean storySection() {
+        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize);
+    }
+
+    //Links section.
+    public static boolean openLinksExternally = false;
+    public static void openLinksExternally() {
+        openLinksExternally = true;
+    }
+    public static boolean sanitizeShareLinks = false;
+    public static void sanitizeShareLinks() {sanitizeShareLinks = true;}
+    public static boolean customSharingDomain = false;
+    public static void customSharingDomain() {customSharingDomain = true;}
+    public static boolean linksSection() {
+        return (openLinksExternally || sanitizeShareLinks || customSharingDomain);
+    }
+
+    //Distraction-Free section.
     public static boolean disableStories = false;
     public static void disableStories() {
         disableStories = true;
@@ -114,6 +127,10 @@ public class SettingsStatus {
     public static boolean hideStoriesTray = false;
     public static void hideStoriesTray() {
         hideStoriesTray = true;
+    }
+    public static boolean hideHiddenRequests = false;
+    public static void hideHiddenRequests() {
+        hideHiddenRequests = true;
     }
     public static boolean hideNotesTray = false;
     public static void hideNotesTray() {
@@ -139,6 +156,9 @@ public class SettingsStatus {
     public static void focusLock() {
         focusLock = true;
     }
+    public static boolean disableVideoAutoplay = false;
+    public static void disableVideoAutoplay() { disableVideoAutoplay = true;
+    }
     public static boolean disableDoubleTapLike = false;
     public static void disableDoubleTapLike() {
         disableDoubleTapLike = true;
@@ -147,8 +167,24 @@ public class SettingsStatus {
     public static void hideReelsFollowButton() {
         hideReelsFollowButton = true;
     }
+    public static boolean disableDiscoverPeople = false;
+    public static void disableDiscoverPeople() {
+        disableDiscoverPeople = true;
+    }
+    public static boolean hideShareButton = false;
+    public static void hideShareButton() {
+        hideShareButton = true;
+    }
+    public static boolean hideSaveButtons = false;
+    public static void hideSaveButtons() {
+        hideSaveButtons = true;
+    }
+    public static boolean hideReshareButton = false;
+    public static void hideReshareButton() {
+        hideReshareButton = true;
+    }
     public static boolean distractionFreeSection() {
-        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling || disableSwipeToCreate || focusLock);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideHiddenRequests || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
     //Misc section.
@@ -156,90 +192,79 @@ public class SettingsStatus {
     public static void unlockPlusBenefits() { unlockPlusBenefits = true; }
     public static boolean changeLikeAnimation = false;
     public static void changeLikeAnimation() { changeLikeAnimation = true; }
-    public static boolean customiseStoryRingSize = false;
-    public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() { disableAnalytics = true; }
-    public static boolean disableDiscoverPeople = false;
-    public static void disableDiscoverPeople() {
-        disableDiscoverPeople = true;
-    }
     public static boolean followBackIndicator = false;
     public static void followBackIndicator() { followBackIndicator = true; }
     public static boolean followListNonFollowerBadge = false;
     public static void followListNonFollowerBadge() { followListNonFollowerBadge = true; }
-    public static boolean viewStoryMentions = false;
-    public static void viewStoryMentions() {
-        viewStoryMentions = true;
-    }
-    public static boolean disableStoryFlipping = false;
-    public static void disableStoryFlipping() {
-        disableStoryFlipping = true;
-    }
-    public static boolean loopStory = false;
-    public static void loopStory() {
-        loopStory = true;
-    }
-    public static boolean customiseStoryTimestamp = false;
-    public static void customiseStoryTimestamp() {
-        customiseStoryTimestamp = true;
-    }
     public static boolean improveImageViewing = false;
     public static void improveImageViewing() {
         improveImageViewing = true;
-    }
-    public static boolean hideReshareButton = false;
-    public static void hideReshareButton() {
-        hideReshareButton = true;
     }
     public static boolean copyCommentButton = false;
     public static void copyCommentButton() {
         copyCommentButton = true;
     }
-    public static boolean saveMediaCommentButton = false;
-    public static void saveMediaCommentButton() {
-        saveMediaCommentButton = true;
-    }
     public static boolean removeEmptyBottomSpace = false;
     public static void removeEmptyBottomSpace() {
         removeEmptyBottomSpace = true;
     }
-    public static boolean disableVideoAutoplay = false;
-    public static void disableVideoAutoplay() { disableVideoAutoplay = true; }
     public static boolean moreOptionsOnPost = false;
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || followListNonFollowerBadge || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton || customFont);}
+    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || followBackIndicator || followListNonFollowerBadge || customFont);}
 
-    //DM section
-    public static boolean unlimitedReplaysOnEphemeralMedia = false;
-    public static void unlimitedReplaysOnEphemeralMedia() {unlimitedReplaysOnEphemeralMedia = true;}
-    public static boolean markChatAsRead = false;
-    public static void markChatAsRead() { markChatAsRead = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages ;}
+    //Font section.
+    public static boolean customFont = false;
+    public static void customFont() { customFont = true; }
+    public static boolean fontSection(){ return customFont; }
 
     //Download section.
     public static boolean downloadMedia = false;
     public static void downloadMedia() {downloadMedia = true;}
+     public static boolean saveMediaCommentButton = false;
+    public static void saveMediaCommentButton() {
+        saveMediaCommentButton = true;
+    }
+    public static boolean feedDownloadButton = false;
+    public static void feedDownloadButton() {feedDownloadButton = true;}
     public static boolean downloadVoiceMessage = false;
     public static void downloadVoiceMessage() { downloadVoiceMessage = true; }
     public static boolean downloadWithExternalDownloader = false;
     public static void downloadWithExternalDownloader() { downloadWithExternalDownloader = true; }
-    public static boolean downloadSection(){return (SettingsStatus.downloadMedia || SettingsStatus.downloadWithExternalDownloader);}
+    public static boolean downloadSection(){return (SettingsStatus.downloadMedia || saveMediaCommentButton || SettingsStatus.downloadWithExternalDownloader);}
 
+    //Instants Section
+    public static boolean instantsDownload = false;
+    public static void instantsDownload() {
+        instantsDownload = true;
+    }
+
+    //Navigation Section
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
 
-    // Filter content
-    public static boolean storyFilters = false;
-    public static void storyFilters(){storyFilters = true;}
-    public static boolean filterContentSection(){return storyFilters; }
+    // Developer section.
+    public static boolean enableDeveloperOptions = false;
+    public static void enableDeveloperOptions() {
+        enableDeveloperOptions = true;
+    }
+    public static boolean unlockEmployeeOptions = false;
+    public static void unlockEmployeeOptions() {
+        unlockEmployeeOptions = true;
+    }
+    public static boolean allowUserNetworkCertificate = false;
+    public static void allowUserNetworkCertificate() {
+        allowUserNetworkCertificate = true;
+    }
+    public static boolean recommendedFlags = false;
+    public static void recommendedFlags() {recommendedFlags = true;}
+    public static boolean developerOptionsSection() {
+        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || recommendedFlags);
+    }
 
-    // Font section.
-    public static boolean customFont = false;
-    public static void customFont() { customFont = true; }
-    public static boolean fontSection(){ return customFont; }
 
 
         public static void loadStatusMap(){
@@ -249,6 +274,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_category_hide_navigation_buttons"),SettingsStatus.hideNavigationButtons);
 
         FLAGS.put(str("piko_category_downloads"),SettingsStatus.downloadMedia);
+        FLAGS.put(str("piko_feed_download_button"),SettingsStatus.feedDownloadButton);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
@@ -258,6 +284,8 @@ public class SettingsStatus {
         FLAGS.put(str("piko_save_media_comment"),SettingsStatus.saveMediaCommentButton);
         FLAGS.put(str("piko_copy_comment"),SettingsStatus.copyCommentButton);
         FLAGS.put(str("piko_hide_reshare_button"),SettingsStatus.hideReshareButton);
+        FLAGS.put(str("piko_hide_save_buttons"), SettingsStatus.hideSaveButtons);
+        FLAGS.put(str("piko_hide_share_button"), SettingsStatus.hideShareButton);
         FLAGS.put(str("piko_improve_image_viewing"),SettingsStatus.improveImageViewing);
         FLAGS.put(str("piko_unlimited_replays"),SettingsStatus.unlimitedReplaysOnEphemeralMedia);
 
@@ -273,6 +301,8 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_change_like_animation"),SettingsStatus.changeLikeAnimation);
         FLAGS.put(str("piko_unlock_plus_benefits"),SettingsStatus.unlockPlusBenefits);
+        FLAGS.put(str("piko_inbox_lock"),SettingsStatus.inboxLock);
+        FLAGS.put(str("piko_hidden_chats"),SettingsStatus.hiddenChats);
 
         FLAGS.put(str("piko_disable_double_tap_to_like"),SettingsStatus.disableDoubleTapLike);
         FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);
@@ -280,6 +310,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
         FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
         FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);
+        FLAGS.put(str("piko_hide_hidden_requests"),SettingsStatus.hideHiddenRequests);
         FLAGS.put(str("piko_disable_comments"),SettingsStatus.disableComments);
         FLAGS.put(str("piko_disable_explore"),SettingsStatus.disableExplore);
         FLAGS.put(str("piko_disable_highlights"),SettingsStatus.disableHighlights);
@@ -289,27 +320,16 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
         FLAGS.put(str("piko_save_deleted_messages"),SettingsStatus.saveDeletedMessages);
-        FLAGS.put(str("piko_view_live_anonymously"),SettingsStatus.disableScreenshotDetection);
+        FLAGS.put(str("piko_disable_screenshot_detection"),SettingsStatus.disableScreenshotDetection);
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);
-        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.viewLiveAnonymously);
+        FLAGS.put(str("piko_view_live_anonymously"),SettingsStatus.viewLiveAnonymously);
         FLAGS.put(str("piko_view_stories_anonymously"),SettingsStatus.viewStoriesAnonymously);
         FLAGS.put(str("piko_instants_title"),SettingsStatus.instantsDownload);
 
         FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
         FLAGS.put(str("piko_custom_sharing_domain"),SettingsStatus.customSharingDomain);
         FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);
-        FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
-        FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
-        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
-        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
-        FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
-        FLAGS.put(str("piko_category_downloads"),SettingsStatus.downloadMedia);
-        FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
-        FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
-        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
-        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
         FLAGS.put(str("piko_enable_dev_options"),SettingsStatus.enableDeveloperOptions);
-        FLAGS.put(str("piko_remove_build_expire_popup"),SettingsStatus.removeBuildExpirePopup);
         FLAGS.put(str("piko_enable_emp_options"),SettingsStatus.unlockEmployeeOptions);
         FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
 

@@ -30,14 +30,20 @@ public class Constants {
     public static final String AB_CREATE = "CREATE";
     public static final String AB_NOTIFICATIONS = "NOTIFICATIONS";
     public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
+    public static final String AB_JUMP_OLDEST_ICON = "JUMP_OLDEST_ICON";
     public static final String AB_PROFILE_INFO_ICON = "PROFILE_INFO_ICON";
 
     public static final String PIKO_FRAGMENT_TITLE = "piko_frag_title";
     public static final String PIKO_FRAGMENT_NAME = "piko_frag_name";
+    public static final String PIKO_SEARCH_TARGET_PREFERENCE_KEY = "piko_search_target_preference_key";
+    public static final String PIKO_APP_VERSION_PREFERENCE = "piko_app_version_preference";
+    public static final String PIKO_PATCH_VERSION_PREFERENCE = "piko_patch_version_preference";
+    public static final String PIKO_PATCH_INFO_PREFERENCE_CATEGORY = "piko_patch_info_preference_category";
 
     public static final String PIKO_FRAGMENT_SETTINGS = "piko_frag_settings";
     public static final String PIKO_FRAGMENT_ADS = "piko_frag_ads";
     public static final String PIKO_FRAGMENT_GHOST = "piko_frag_ghost";
+    public static final String PIKO_FRAGMENT_STORY = "piko_frag_story";
     public static final String PIKO_FRAGMENT_LINKS = "piko_frag_links";
     public static final String PIKO_FRAGMENT_DISTRACTION_FREE = "piko_frag_distraction_free";
     public static final String PIKO_FRAGMENT_FOCUS_LOCK = "piko_frag_focus_lock";

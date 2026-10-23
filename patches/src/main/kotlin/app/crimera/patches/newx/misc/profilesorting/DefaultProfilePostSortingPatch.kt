@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.profilesorting
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.choice
 import app.crimera.patches.newx.settings.newXSingleChoice
@@ -15,7 +16,7 @@ import app.crimera.patches.newx.utils.Constants.PROFILE_POST_SORTING_RESOLVER_DE
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -72,6 +73,7 @@ val newXDefaultProfilePostSortingPatch =
         name = "NewX: Set default profile post sorting",
         description = "Lets you choose whether profile posts open sorted by the most recent or popular posts.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXSingleChoice(

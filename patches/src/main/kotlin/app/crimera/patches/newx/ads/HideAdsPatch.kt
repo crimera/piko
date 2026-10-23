@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.ads
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.settings.toggle
@@ -14,6 +15,7 @@ val newXHideAdsPatch =
         name = "NewX: Remove ads",
         description = "Filters promoted posts and modules from NewX timelines.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineAdModelAdapterPatch, newXTimelineFilterPatch)
 

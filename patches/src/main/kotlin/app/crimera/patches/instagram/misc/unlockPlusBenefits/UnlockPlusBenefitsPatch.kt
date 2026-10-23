@@ -13,13 +13,24 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.util.matchSingle
+
+private object BenefitCheckLoggingFingerprint : Fingerprint(
+    strings = listOf("is_benefit_active"),
+)
 
 internal object ActiveBenefitCheckerFingerprint : Fingerprint(
+    classFingerprint = BenefitCheckLoggingFingerprint,
     parameters = listOf("Ljava/lang/String;"),
     returnType = "Z",
-    strings = listOf("is_benefit_active"),
+    filters = listOf(
+        // Active benefits.
+        methodCall(smali = "Ljava/util/Set;->contains(Ljava/lang/Object;)Z"),
+        methodCall(smali = "Ljava/util/concurrent/atomic/AtomicReference;->get()Ljava/lang/Object;"),
+    ),
 )
 
 @Suppress("unused")
@@ -27,13 +38,13 @@ val unlockPlusBenefitsPatch =
     bytecodePatch(
         name = "Unlock Plus benefits",
         description = "Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(settingsPatch)
         execute {
 
-            ActiveBenefitCheckerFingerprint.method.apply {
+            ActiveBenefitCheckerFingerprint.matchSingle().method.apply {
 
                 addInstructionsWithLabels(
                     0,

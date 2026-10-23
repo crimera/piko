@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.returnVoidIfEnabled
 import app.crimera.patches.settings.settingStrings
@@ -7,7 +8,7 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.hasComposeShape
 import app.crimera.patches.common.parameterDescriptors
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
 import app.morphe.patcher.patch.PatchException
@@ -36,6 +37,7 @@ val hideNewPostPillPatch =
         name = "NewX: Hide new posts pill",
         description = "Hides the new posts pill in NewX timelines.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
 
         val hideNewPostPill =

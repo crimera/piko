@@ -11,8 +11,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
-import com.android.tools.smali.dexlib2.Opcode
 
 val userProfileButtonPatch =
     bytecodePatch(
@@ -22,11 +20,11 @@ val userProfileButtonPatch =
 
         execute {
             ProfileUserInfoViewBinderFingerprint.method.apply {
-                val moveResObj = indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)
+                val moveResObj = ProfileUserInfoViewBinderFingerprint.instructionMatches.last().index
                 addInstructions(
                     moveResObj + 1,
                     """
-                    invoke-static {p1,p2}, ${PATCHES_DESCRIPTOR}/userprofile/UserProfileButton;->addButtons(Landroid/view/ViewGroup;Ljava/lang/Object;)V
+                    invoke-static/range {p1 .. p2}, ${PATCHES_DESCRIPTOR}/userprofile/UserProfileButton;->addButtons(Landroid/view/ViewGroup;Ljava/lang/Object;)V
                     """.trimIndent(),
                 )
             }

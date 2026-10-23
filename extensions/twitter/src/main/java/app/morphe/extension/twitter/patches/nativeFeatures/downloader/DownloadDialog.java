@@ -244,7 +244,7 @@ public class DownloadDialog {
      */
     private static View createIconButton(Context context, @Nullable String iconName, @Nullable Integer accentColor,
                                          Runnable onClick) {
-        int tint = accentColor != null ? accentColor : Utils.getAppForegroundColor();
+        int tint = accentColor != null ? accentColor : primaryTextColor(context);
         int attrId = ResourceUtils.getIdentifier(ResourceType.DRAWABLE, iconName);
 
         ImageButton imageButton = new ImageButton(context);

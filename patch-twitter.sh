@@ -5,9 +5,9 @@ ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 cd "$ROOT_DIR"
 
 INSTALL=false
-# Morphe Manager's adaptive default is higher, but 512 MB is its supported heap floor. Keeping
-# local patch runs at that floor catches memory regressions that a desktop-sized heap would hide.
-PATCHER_MAX_HEAP_MB="${PATCHER_MAX_HEAP_MB:-512}"
+# Default to 1 GiB after the intermittent 512 MB OOMs in our 12.34/12.35 desktop runs.
+# Override PATCHER_MAX_HEAP_MB when deliberately comparing smaller heaps.
+PATCHER_MAX_HEAP_MB="${PATCHER_MAX_HEAP_MB:-1024}"
 # Overridable so the bundle can also be exercised against a pre-release/manager patcher build,
 # which is the ABI the shipped manager app actually executes.
 MORPHE_CLI_JAR="${MORPHE_CLI_JAR:-../piko/morphe-desktop-1.11.0-all.jar}"

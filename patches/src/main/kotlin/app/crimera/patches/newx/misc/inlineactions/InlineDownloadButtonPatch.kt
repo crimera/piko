@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.inlineactions
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionBarModels
@@ -40,8 +41,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.ShapeFingerprint
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -55,13 +55,13 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.util.cloneMutable
-import app.morphe.util.getReference
-import app.morphe.util.numberOfParameterRegisters
-import app.morphe.util.p0Register
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.numberOfParameterRegisters
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
@@ -102,6 +102,7 @@ val newXInlineDownloadButtonPatch =
             "Adds a Download button below NewX posts and saves media to a folder you choose, " +
                 "with a customizable filename template.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(
             customizeNewXInlineActionsPatch,
@@ -826,14 +827,14 @@ private fun MutableClass.requireHelper(
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String): FieldReference {
-    val resourceId = getResourceId(ResourceType.DRAWABLE, resourceName)
+    val iconResourceId = resourceId(ResourceType.DRAWABLE, resourceName)
     val fields =
-        ShapeFingerprint(
+        Fingerprint(
             name = "<clinit>",
             returnType = "V",
             parameters = emptyList(),
-            filters = listOf(literal(resourceId)),
-        ).scopedMatchAll().map { match ->
+            filters = listOf(literal(iconResourceId)),
+        ).matchAll().map { match ->
             val literalIndex = requireExactlyOne(
                 "NewX $resourceName drawable resource literal in ${match.originalMethod}",
                 match.instructionMatches,

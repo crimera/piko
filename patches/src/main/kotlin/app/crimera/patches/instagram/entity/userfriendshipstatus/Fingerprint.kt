@@ -7,9 +7,7 @@
 package app.crimera.patches.instagram.entity.userfriendshipstatus
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
-import app.crimera.patches.instagram.utils.Constants.FRIENDSHIP_STATUS_CLASS
 import app.morphe.patcher.Fingerprint
-import com.android.tools.smali.dexlib2.AccessFlags
 
 internal const val EXTENSION_CLASS = "$ENTITY_CLASS/UserFriendshipStatus;"
 
@@ -18,8 +16,10 @@ internal object GetMappingsFingerprint : Fingerprint(
     name = "getMappings",
 )
 
-internal object FriendshipStatusMappingsFingerprint : Fingerprint(
+internal const val FRIENDSHIP_STATUS_CLASS = "Lcom/instagram/api/schemas/RelationshipInfoDict;"
+
+internal object FriendshipStatusMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
     parameters = listOf(FRIENDSHIP_STATUS_CLASS),
-    accessFlags = listOf(AccessFlags.STATIC, AccessFlags.PUBLIC),
+    strings = listOf("blocking", "followed_by", "following", "incoming_request"),
 )

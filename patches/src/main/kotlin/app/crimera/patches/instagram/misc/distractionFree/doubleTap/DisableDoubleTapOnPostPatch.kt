@@ -16,6 +16,11 @@ object PostOnSingleTapConfirmedFingerprint : Fingerprint(
     name = "onSingleTapConfirmed",
 )
 
+internal object PostOnDoubleTapFingerprint : Fingerprint(
+    classFingerprint = PostOnSingleTapConfirmedFingerprint,
+    name = "onDoubleTap",
+)
+
 @Suppress("unused")
 val disableDoubleTapOnPostPatch =
     bytecodePatch(
@@ -25,13 +30,9 @@ val disableDoubleTapOnPostPatch =
 
         execute {
 
-            PostOnSingleTapConfirmedFingerprint.apply {
-                classDef.methods.first { it.name == "onDoubleTap" }.apply {
-                    addInstructions(
-                        0,
-                        DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapPost"),
-                    )
-                }
-            }
+            PostOnDoubleTapFingerprint.method.addInstructions(
+                0,
+                DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapPost"),
+            )
         }
     }

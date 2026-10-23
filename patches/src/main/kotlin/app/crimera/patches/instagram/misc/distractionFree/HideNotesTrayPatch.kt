@@ -13,18 +13,22 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
-import app.morphe.util.findFreeRegister
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 object NotesTrayBuilderConstructorFingerprint : Fingerprint(
     filters =
-        listOf(resourceLiteral(ResourceType.ID, "cf_hub_recycler_view")),
+        listOf(
+            resourceLiteral(ResourceType.ID, "cf_hub_recycler_view"),
+            // Notes tray view.
+            fieldAccess(opcode = Opcode.IPUT_OBJECT),
+        ),
 )
 
 @Suppress("unused")
@@ -40,15 +44,11 @@ val hideNotesTrayPatch =
 
             NotesTrayBuilderConstructorFingerprint.apply {
 
-                val notesRecyclerViewIDIndex = instructionMatches.first().index
                 method.apply {
-
-                    val notesRecyclerViewIndex = indexOfFirstInstruction(notesRecyclerViewIDIndex, Opcode.IPUT_OBJECT)
-                    val notesRecyclerViewInstruction = getInstruction(notesRecyclerViewIndex)
-                    val notesTrayRegister = notesRecyclerViewInstruction.registersUsed[0]
+                    val notesRecyclerViewIndex = instructionMatches.last().index
+                    val iPutObjectInstruction = getInstruction<TwoRegisterInstruction>(notesRecyclerViewIndex)
+                    val notesTrayRegister = iPutObjectInstruction.registerA
                     val freeRegister = findFreeRegister(notesRecyclerViewIndex)
-
-                    val iPutObjectInstruction = getInstruction(notesRecyclerViewIndex)
 
                     addInstructionsWithLabels(
                         notesRecyclerViewIndex,

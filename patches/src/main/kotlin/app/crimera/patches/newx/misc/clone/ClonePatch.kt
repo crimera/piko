@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.clone
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringOption
@@ -29,6 +30,7 @@ val clonePatch = resourcePatch(
             + "This allows you to install the patched X alongside the original X or other patched X.",
     default = false,
 ) {
+    unsupportedOnMount(default = false)
     compatibleWith(COMPATIBILITY_NEW_X)
 
     val packageName by stringOption(

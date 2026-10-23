@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: ⚡ NewX bug or feature
+    url: https://github.com/crimera/piko-newx/issues
+    about: Issues for the New X Android patches currently under development. (Versions 12.20.0-prod.01 and later)

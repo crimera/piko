@@ -39,17 +39,13 @@ public class ViewStoryMentionsPatch {
                         boolean isVerified = userData.isVerified();
 
                         IgdsPeopleCell cell = new IgdsPeopleCell(context);
-
-                        cell.A0A(fullName, isVerified);
-                        cell.A08(username);
-                        cell.A06(lowResDP, null);
-
-                        cell.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
+                        View.OnClickListener openProfile = v ->
                                 PikoUtils.openUrl("instagram://user?username=" + username, true);
-                            }
-                        });
+
+                        setPrimaryText(cell, fullName, isVerified);
+                        setSupportingText(cell, username);
+                        setProfileImage(cell, lowResDP, openProfile);
+                        cell.setOnClickListener(openProfile);
 
                         peopleCells.add(cell);
                     } catch (Exception ex){
@@ -66,4 +62,10 @@ public class ViewStoryMentionsPatch {
         }
     }
 
+    // The patch injects calls to the native methods resolved from the target apk.
+    private static void setPrimaryText(IgdsPeopleCell cell, CharSequence text, boolean verified) {}
+
+    private static void setSupportingText(IgdsPeopleCell cell, CharSequence text) {}
+
+    private static void setProfileImage(IgdsPeopleCell cell, ImageUrl image, View.OnClickListener listener) {}
 }

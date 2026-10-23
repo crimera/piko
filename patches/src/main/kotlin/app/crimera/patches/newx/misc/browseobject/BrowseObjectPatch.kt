@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.browseobject
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.postoptions.BROWSE_OBJECT_ACTION
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
 import app.crimera.patches.newx.settings.Categories
@@ -20,6 +21,7 @@ val newXBrowseObjectPatch =
         description = "Adds a debug option to browse the tweet object in NewX post menus.",
         default = false,
     ) {
+        unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
 
         newXSettings {

@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.bringbacktwitter
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.requireAtMostOne
 import app.morphe.patcher.patch.resourcePatch
@@ -27,6 +28,7 @@ val bringBackTwitterPatch =
         description = "Bring back old Twitter icons and name",
         default = false,
     ) {
+        unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
 
         dependsOn(addResourcesPatch, restoreTwitterTopBarLogoPatch)
@@ -106,10 +108,9 @@ val bringBackTwitterPatch =
 
             // Notification icons reuse the white bird vector under different names.
             // (copyResources is name-matched, so this copy happens in res directly.)
-            val drawableDir = get("res").resolve("drawable")
-            val whiteBird = drawableDir.resolve("ic_vector_twitter_white.xml")
-            whiteBird.copyTo(drawableDir.resolve("ic_stat_x.xml"), overwrite = true)
-            whiteBird.copyTo(drawableDir.resolve("ic_logo_x.xml"), overwrite = true)
+            val whiteBird = get("res/drawable/ic_vector_twitter_white.xml")
+            whiteBird.copyTo(get("res/drawable/ic_stat_x.xml", copy = false), overwrite = true)
+            whiteBird.copyTo(get("res/drawable/ic_logo_x.xml", copy = false), overwrite = true)
             document("res/drawable/ic_logo_x.xml").use { doc ->
                 doc.getElementsByTagName("vector").item(0)?.let { vector ->
                     (vector as Element).setAttribute("android:height", "96.0dp")
@@ -130,7 +131,8 @@ val bringBackTwitterPatch =
 
             listOf("mipmap-anydpi", "mipmap-anydpi-v26").forEach { dir ->
                 listOf("ic_launcher.xml", "ic_launcher_round.xml").forEach { file ->
-                    val launcherXml = get("res").resolve("$dir/$file")
+                    // Resource files are decoded on exact-path reads, not by resolving from `res`.
+                    val launcherXml = get("res/$dir/$file")
                     if (launcherXml.exists()) {
                         document("res/$dir/$file").use { doc ->
                             doc.getElementsByTagName("foreground").item(0)?.let {
@@ -145,20 +147,17 @@ val bringBackTwitterPatch =
             }
 
             sizes.forEach { size ->
-                val mipmapDir = get("res").resolve("mipmap-$size")
-                if (mipmapDir.exists()) {
-                    val twitterIcon = mipmapDir.resolve("ic_launcher_twitter.webp")
-                    val twitterRoundIcon = mipmapDir.resolve("ic_launcher_twitter_round.webp")
-                    if (twitterIcon.exists()) {
-                        twitterIcon.copyTo(mipmapDir.resolve("ic_launcher.webp"), overwrite = true)
-                    }
-                    if (twitterRoundIcon.exists()) {
-                        twitterRoundIcon.copyTo(mipmapDir.resolve("ic_launcher_round.webp"), overwrite = true)
-                    }
+                val twitterIcon = get("res/mipmap-$size/ic_launcher_twitter.webp")
+                val twitterRoundIcon = get("res/mipmap-$size/ic_launcher_twitter_round.webp")
+                if (twitterIcon.exists()) {
+                    twitterIcon.copyTo(get("res/mipmap-$size/ic_launcher.webp", copy = false), overwrite = true)
+                }
+                if (twitterRoundIcon.exists()) {
+                    twitterRoundIcon.copyTo(get("res/mipmap-$size/ic_launcher_round.webp", copy = false), overwrite = true)
                 }
             }
 
-            val animatedSplashVector = get("res").resolve("drawable/\$splash_screen_icon_animated__0.xml")
+            val animatedSplashVector = get("res/drawable/\$splash_screen_icon_animated__0.xml")
             if (animatedSplashVector.exists()) {
                 val birdPath =
                     document("res/drawable/splash_screen_icon.xml").use { doc ->
@@ -174,7 +173,7 @@ val bringBackTwitterPatch =
             }
 
             // Replace splash icon & colors
-            val stylesXml = get("res").resolve("values/styles.xml")
+            val stylesXml = get("res/values/styles.xml")
             if (stylesXml.exists()) {
                 document("res/values/styles.xml").use { document ->
                     val styleElement =
@@ -189,7 +188,7 @@ val bringBackTwitterPatch =
             }
 
             // Android 13+ may suppress the splash icon unless icon display is preferred.
-            val v31StylesXml = get("res").resolve("values-v31/styles.xml")
+            val v31StylesXml = get("res/values-v31/styles.xml")
             if (v31StylesXml.exists()) {
                 document("res/values-v31/styles.xml").use { document ->
                     val splashStyle = document.childNodes.findElementByAttributeValue("name", "Theme.SplashScreen")
@@ -210,13 +209,9 @@ val bringBackTwitterPatch =
     }
 
 private fun app.morphe.patcher.patch.ResourcePatchContext.ensureDefaultBrandingColors() {
-    val values = get("res/values")
-    if (!values.isDirectory) {
-        Files.createDirectories(values.toPath())
-    }
-
-    val colorsFile = values.resolve("colors.xml")
+    val colorsFile = get("res/values/colors.xml")
     if (!colorsFile.exists()) {
+        Files.createDirectories(colorsFile.toPath().parent)
         FileWriter(colorsFile).use { writer ->
             writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
         }
@@ -253,14 +248,10 @@ private fun app.morphe.patcher.patch.ResourcePatchContext.ensureDefaultBrandingC
 }
 
 private fun app.morphe.patcher.patch.ResourcePatchContext.ensureNightSplashBackground() {
-    val valuesNight = get("res/values-night")
-    if (!valuesNight.isDirectory) {
-        Files.createDirectories(valuesNight.toPath())
-    }
-
     val colorsPath = "res/values-night/colors.xml"
-    val colorsFile = valuesNight.resolve("colors.xml")
+    val colorsFile = get(colorsPath)
     if (!colorsFile.exists()) {
+        Files.createDirectories(colorsFile.toPath().parent)
         FileWriter(colorsFile).use { writer ->
             writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
         }

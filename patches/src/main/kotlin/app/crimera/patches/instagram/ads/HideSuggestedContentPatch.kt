@@ -12,28 +12,34 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 internal object FeedItemParseFromJsonFingerprint : Fingerprint(
+    name = "unsafeParseFromJson",
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("L"),
     strings =
         listOf(
-            "suggested_businesses",
             "clips_netego",
             "stories_netego",
-            "in_feed_survey",
             "bloks_netego",
             "suggested_igd_channels",
             "suggested_top_accounts",
             "suggested_users",
         ),
-    custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
+    filters = listOf(
+        methodCall(returnType = "Ljava/lang/String;"),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        methodCall(smali = "Ljava/lang/String;->hashCode()I", location = MatchAfterImmediately()),
+    ),
 )
 
 @Suppress("unused")
@@ -47,26 +53,10 @@ val hideSuggestedContentPatch =
         dependsOn(settingsPatch)
         execute {
 
-            FeedItemParseFromJsonFingerprint.apply {
-                val strIndex = stringMatches[0].index
-                method.apply {
-                    val indexOfFirstString = indexOfFirstInstruction(Opcode.CONST_STRING_JUMBO)
-
-                    val jsonParserKeyInstruction =
-                        instructions.last {
-                            it.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                                it.location.index < indexOfFirstString
-                        }
-                    val moveResultObjectIndex = jsonParserKeyInstruction.location.index
-                    val strRegister = jsonParserKeyInstruction.registersUsed[0]
-
-                    addInstructions(
-                        moveResultObjectIndex + 1,
-                        """
-                        ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(strRegister,strRegister)}
-                        """.trimIndent(),
-                    )
-                }
+            FeedItemParseFromJsonFingerprint.matchSingle().let { match ->
+                val keyIndex = match.instructionMatches[1].index
+                val keyRegister = match.instructionMatches[1].getInstruction<OneRegisterInstruction>().registerA
+                match.method.addInstructions(keyIndex + 1, Constants.JSONPARSER_CHECK_DESCRIPTOR.format(keyRegister, keyRegister))
             }
 
             enableSettings("hideSuggestedContent")

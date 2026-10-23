@@ -14,10 +14,12 @@ import java.util.HashSet;
 
 import android.content.Context;
 
+import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.legacydownloader.MediaType;
 import app.morphe.extension.instagram.constants.PostType;
 
+import com.instagram.api.schemas.MusicInfo;
 import com.instagram.common.session.UserSession;
 
 public class MediaData extends Entity {
@@ -94,8 +96,6 @@ public class MediaData extends Entity {
     public PostType getPostType() {
         try{
             String postType = this.getPostTypeKey().toLowerCase();
-            //TODO: for some reason clips are not recogonised.
-            // Need to fix it later.
             if(postType.equals("clips")){
                 return PostType.REEL;
             }
@@ -112,7 +112,7 @@ public class MediaData extends Entity {
     }
 
     private String getPostTypeKey() throws Exception {
-        return (String) super.getField(this.getMoreExtendedData(), "A7Q");
+        return (String) super.getField(this.getMoreExtendedData(), "fieldName");
     }
 
     private List<MediaData> getCarouselMediaData() throws Exception {
@@ -273,6 +273,43 @@ public class MediaData extends Entity {
         return imageList;
     }
 
+    // Through the app's getter, not the dict field it caches into: that field can stay null until
+    // the getter has run once.
+    private String getVideoDashManifest() throws Exception {
+        return (String) super.getMethod(this.getExtendedData(), "methodName");
+    }
+
+    /** Whether the video has a sound track, by the app's has_audio flag; true when the flag is missing. */
+    public boolean hasAudioTrack() throws Exception {
+        Boolean hasAudio = (Boolean) super.getMethod(this.getExtendedData(), "methodName");
+        return hasAudio == null || hasAudio;
+    }
+
+    /**
+     * The media's DASH video renditions (see {@link DashVideoData}) that keep its sound: empty
+     * when the manifest lists no audio for a video that has some, since that would save it
+     * silent, and without a manifest or on any failure.
+     */
+    public List<DashVideoData> getDashVideos() {
+        try {
+            List<DashVideoData> videos = DashVideoData.parse(this.getVideoDashManifest());
+            boolean silent = !videos.isEmpty() && videos.get(0).getAudioUrl() == null && this.hasAudioTrack();
+            return silent ? new ArrayList<>() : videos;
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not read the DASH manifest", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /** The sharpest DASH rendition when it beats the progressive file the media downloads as by default; null otherwise. */
+    public DashVideoData getSharperDashVideo() throws Exception {
+        List<DashVideoData> videos = this.getDashVideos();
+        if (videos.isEmpty()) return null;
+        List<VideoData> progressive = this.getVideoVariants();
+        int progressiveShortSide = progressive == null || progressive.isEmpty() ? 0 : progressive.get(0).shortSide();
+        return videos.get(0).shortSide() > progressiveShortSide ? videos.get(0) : null;
+    }
+
     public String getVideoLink() throws Exception {
         List<VideoData> videoDataList = this.getVideoVariants();
         if(videoDataList!=null){
@@ -304,10 +341,17 @@ public class MediaData extends Entity {
     }
 
     private TrackDataIntf getTrackDataIntf() throws Exception {
-        Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A0F", this.obj);
+        Object metadata = super.getMethod(this.obj, "clipsMetadata");
+        Object result;
+        if (metadata != null) {
+            result = super.getMethod(metadata, "clipsMusicInfo");
+        } else {
+            metadata = super.getMethod(this.obj, "musicMetadata");
+            if (metadata == null) return null;
+            result = super.getMethod(metadata, "musicInfo");
+        }
         if (result != null) {
-            return new TrackDataIntf(result);
+            return new TrackDataIntf((MusicInfo) result);
         }
         return null;
     }

@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline.postfilter
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.customScreen
 import app.crimera.patches.settings.settingStrings
@@ -14,6 +15,7 @@ val postFilterPatch =
         name = "NewX: Filter posts by keyword",
         description = "Filters NewX posts using user-defined words and phrases.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineTextModelAdapterPatch, newXTimelineFilterPatch)
 

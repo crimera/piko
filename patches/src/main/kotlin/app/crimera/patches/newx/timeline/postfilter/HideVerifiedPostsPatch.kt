@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.timeline.postfilter
 
+import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.postoptions.FILTERED_REPLIES_ACTION
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
 import app.crimera.patches.newx.settings.Categories
@@ -24,6 +25,7 @@ val newXHideVerifiedPostsPatch =
         name = "NewX: Hide posts by verified account type",
         description = "Hides posts and replies authored by selected timeline-reported verification types.",
     ) {
+        unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineTextModelAdapterPatch, newXTimelineFilterPatch)
 

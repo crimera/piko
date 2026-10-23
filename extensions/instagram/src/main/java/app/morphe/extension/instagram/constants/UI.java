@@ -37,6 +37,7 @@ import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 public class UI {
 
     public static final String DRAWABLE_DOWNLOAD_ICON = "instagram_download_outline_24";
+    public static final String DRAWABLE_LOCK_ICON = "instagram_lock_pano_outline_24";
     public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
@@ -45,16 +46,20 @@ public class UI {
     public static final String DRAWABLE_GHOST_ICON = "piko_ghost_icon";
     public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
     public static final String DRAWABLE_HISTORY_ICON = "instagram_history_outline_24";
+    public static final String DRAWABLE_STORY_ICON = "instagram_story_outline_24";
     public static final String DRAWABLE_SHAPES_ICON = "fb_ic_more_shapes_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
     public static final String DRAWABLE_COLLECTIONS_ICON = "instagram_collections_pano_outline_24";
     public static final String DRAWABLE_EYE_STROKE_ICON = "design_ic_visibility_off";
     public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
+    public static final String DRAWABLE_INSTANTS_ICON = "instagram_app_instants_outline_24";
     public static final String DRAWABLE_SHARE_TO_DIRECT = "tab_prism_direct_drawable";
     public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
     public static final String DRAWABLE_ARROW_BACK =
             "instagram_arrow_left_pano_outline_24";
+    public static final String DRAWABLE_SEARCH = "instagram_search_outline_24";
+    public static final String DRAWABLE_CLEAR = "instagram_x_outline_24";
     public static final String DRAWABLE_CHEVRON_RIGHT =
             "instagram_chevron_right_outline_16";
     public static final String DRAWABLE_CHEVRON_RIGHT_RTL =
@@ -96,6 +101,13 @@ public class UI {
             return dark ? 0xffb3b3b3 : 0xff737373;
         }
         return dark ? Color.WHITE : Color.BLACK;
+    }
+
+    public static int getBackgroundColor() {
+        int primaryBackground = getThemedColour("igds_color_primary_background");
+        return isDarkMode()
+                ? ResourceUtils.getColor("igds_prism_black", primaryBackground)
+                : primaryBackground;
     }
 
     public static boolean isDarkMode() {
