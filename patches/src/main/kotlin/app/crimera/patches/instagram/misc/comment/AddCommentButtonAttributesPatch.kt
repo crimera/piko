@@ -37,10 +37,11 @@ fun addButtonAttribute(
     drawableLateral: Long,
     button2CheckFingerprint: Fingerprint,
     buttonInstanceFingerprint: Fingerprint,
-) {
+    stringIdMethod: String? = null,
+): String {
     // Previously added buttons changed the method.
     CommentActionButtonFingerprint.clearMatch()
-    CommentActionButtonFingerprint.method.apply {
+    return CommentActionButtonFingerprint.method.run {
         val matches = CommentActionButtonFingerprint.instructionMatches
         val existingButtonIndex = matches[0].index
         val existingButtonClass = matches[0].fieldReference.definingClass
@@ -49,6 +50,10 @@ fun addButtonAttribute(
         val isEqualsClass = matches[1].methodReference.definingClass
         val compareButtonRegister = isEqualsInstruction.registersUsed[0]
         val ourButtonRegister = isEqualsInstruction.registersUsed[1]
+        // Added Piko strings receive their resource IDs when the APK resources are rebuilt.
+        val loadStringId = stringIdMethod?.let {
+            "invoke-static {}, $it\nmove-result v$ourButtonRegister"
+        } ?: "const v$ourButtonRegister, $stringLateral"
 
         val buttonStyleClass = matches[5].fieldReference.definingClass
 
@@ -88,7 +93,7 @@ fun addButtonAttribute(
             move-result v$ourButtonRegister
             
             if-eqz v$ourButtonRegister, :next_button
-            const v$ourButtonRegister, $stringLateral
+            $loadStringId
             new-instance v$stringInitRegister, $stringInitClass
             invoke-direct {v$stringInitRegister, v$ourButtonRegister}, $stringInitClass-><init>(I)V
             
@@ -110,6 +115,7 @@ fun addButtonAttribute(
 
         // Dynamically inject super class to  our extension class
         buttonInstanceFingerprint.classDef.setSuperClass(bundleClass)
+        stringInitClass.toString()
     }
 }
 

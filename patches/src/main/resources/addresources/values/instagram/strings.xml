@@ -135,7 +135,7 @@
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server. May reduce performance, increase app data size, or cause the app to switch to an older layout</string>
     <string name="piko_copy_comment">Copy comment</string>
-    <string name="piko_copy_comment_desc">Adds a button to copy comments on posts and reels</string>
+    <string name="piko_copy_comment_desc">Adds buttons to copy comments and their authors’ usernames on posts and reels</string>
     <string name="piko_comment_copied_success">Comment copied</string>
     <string name="piko_comment_copied_failed">No text found to copy</string>
     <string name="piko_copy_username">Copy username</string>
