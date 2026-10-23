@@ -185,7 +185,8 @@ public final class Mp4Remuxer {
             buffer.limit(bytesRead);
             // Mp4Muxer writes no sync table for audio, so every audio sample counts as a sync
             // sample. DASH xHE-AAC has one only every few seconds: a seek into a merged file can
-            // start the decoder on a dependent frame and click briefly. Accepted.
+            // start the decoder on a dependent frame and click briefly. Accepted, and AAC-LC from
+            // DownloadRequest.audioToAacLc has no dependent frames.
             int flags = (extractor.getSampleFlags() & MediaExtractor.SAMPLE_FLAG_SYNC) != 0
                     ? C.BUFFER_FLAG_KEY_FRAME
                     : 0;

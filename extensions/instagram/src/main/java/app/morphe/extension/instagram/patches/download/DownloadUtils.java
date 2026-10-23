@@ -103,9 +103,8 @@ public class DownloadUtils {
                             data.getUrl(),
                             subFolder,
                             fileName,
-                            data.getVariantTag()
+                            data
                     );
-                    request.audioUrl = data.getAudioUrl();
                     enqueueDownload(context, request);
                 } catch (Exception e) {
                     PikoUtils.logger(e);
@@ -305,8 +304,9 @@ public class DownloadUtils {
     }
 
     /**
-     * The request for one media. A video with no variant chosen downloads as the sharpest DASH
-     * rendition, with its audio merged in, when that is sharper than the progressive file.
+     * The request for one media, as {@code variant} when one was chosen. A video with none chosen
+     * downloads as the sharpest DASH rendition, with its audio merged in, when that is sharper
+     * than the progressive file, which it falls back to; a chosen DASH rendition has no fallback.
      */
     private static DownloadRequest buildMediaRequest(
             MediaData rootMediaData,
@@ -316,7 +316,7 @@ public class DownloadUtils {
             String mediaUrl,
             String subFolder,
             String fallbackFileName,
-            String variantTag
+            MediaInterface variant
     ) throws Exception {
         boolean isVideo = mediaType.equals(MediaType.VIDEO)
                 || (mediaType.equals(MediaType.ANY) && childMediaData.isVideo());
@@ -324,7 +324,10 @@ public class DownloadUtils {
         String progressiveUrl = mediaUrl;
         String audioUrl = null;
 
-        DashVideoData dashVideo = isVideo && variantTag == null && Pref.preferDashFormat()
+        String variantTag = variant == null ? null : variant.getVariantTag();
+        DashVideoData dashVideo = variant instanceof DashVideoData
+                ? (DashVideoData) variant
+                : isVideo && variant == null && Pref.preferDashFormat()
                 ? childMediaData.getSharperDashVideo()
                 : null;
         if (dashVideo != null) {
@@ -367,7 +370,10 @@ public class DownloadUtils {
 
         DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
         request.audioUrl = audioUrl;
-        if (audioUrl != null) request.fallbackUrl = progressiveUrl;
+        if (audioUrl != null) {
+            request.audioToAacLc = Pref.dashAudioAacLc();
+            if (variant == null) request.fallbackUrl = progressiveUrl;
+        }
         if (!isVideo || !Pref.embedDownloadMetadata()) {
             return request;
         }

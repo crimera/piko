@@ -16,6 +16,8 @@ public class DownloadRequest {
     public DownloadMetadata metadata;
     /** A separate audio file to merge into the video at {@link #url}, as DASH serves it; null for a complete file. */
     public String audioUrl;
+    /** Re-encodes xHE-AAC audio at {@link #audioUrl} as AAC-LC, which every player decodes; false merges it as served. */
+    public boolean audioToAacLc;
     /** A complete file to download if the primary download or audio merge fails; null fails the download. */
     public String fallbackUrl;
     /** Shown once the file is saved, instead of the usual completion toast; null for that one. */

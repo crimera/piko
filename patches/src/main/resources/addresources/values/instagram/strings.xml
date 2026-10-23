@@ -218,6 +218,8 @@
     <string name="piko_download_username_folder_desc">Creates subfolders based on username</string>
     <string name="piko_prefer_dash_format">Prefer DASH format</string>
     <string name="piko_prefer_dash_format_desc">Downloads videos as the sharpest DASH rendition Instagram lists, up to 1080p AV1, instead of the 720p H.264 file</string>
+    <string name="piko_dash_audio_aac_lc">Convert DASH audio to AAC</string>
+    <string name="piko_dash_audio_aac_lc_desc">With Prefer DASH format on, re-encodes the xHE-AAC sound of DASH downloads as AAC-LC at 192 kbps, which every player can play</string>
     <string name="piko_embed_download_metadata">Embed video metadata</string>
     <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
     <string name="piko_download_file_name_template">Filename format</string>

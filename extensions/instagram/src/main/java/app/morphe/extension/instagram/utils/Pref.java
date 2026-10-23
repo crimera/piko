@@ -346,6 +346,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT);
     }
 
+    public static boolean dashAudioAacLc() {
+        return SharedPref.getBooleanPref(Settings.DASH_AUDIO_AAC_LC);
+    }
+
     public static String downloadFileNameTemplate() {
         return removeLineBreaks(SharedPref.getStringPref(Settings.DOWNLOAD_FILE_NAME_TEMPLATE));
     }
