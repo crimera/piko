@@ -685,8 +685,6 @@ public class SettingsActivity extends Activity {
 
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-
             View rootView = getView();
             listView = null;
             if (rootView != null) {
@@ -720,6 +718,9 @@ public class SettingsActivity extends Activity {
                     && !targetPreferenceKey.isEmpty()) {
                 scrollToPreference(listView, targetPreferenceKey);
             }
+
+            // Build the search screen before binding so a queued rebind cannot reset restored scroll state.
+            super.onActivityCreated(savedInstanceState);
         }
 
         private PreferenceScreen buildScreen(String fragmentName) {
