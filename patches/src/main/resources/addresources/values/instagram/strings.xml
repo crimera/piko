@@ -205,6 +205,8 @@
     <string name="piko_disable_story_flipping_desc">Disable automatic flipping/moving to next story</string>
     <string name="piko_loop_story">Loop story</string>
     <string name="piko_loop_story_desc">Replay the current story when it ends</string>
+    <string name="piko_hide_story_follow_button">Hide story follow button</string>
+    <string name="piko_hide_story_follow_button_desc">Hides the follow button at the top of stories from accounts you do not follow</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
