@@ -99,3 +99,10 @@ one-off literal-name assertion or new test file is needed.
   all invoke the existing `Utils.setPreferenceTitlesToMultiLine` definition.
 - No installation or device interaction by the agent. Ask the user to open
   root settings, a category and settings search before retrying timeline restore.
+
+## Published follow-up
+
+The library fix was rebased onto current `dev` as `81152d9` and pushed. Release
+workflow run `39964788817` succeeded, publishing both Piko Maven artifacts as
+`0.10.1-dev.1` (release commit `e0c1ac5`). The consumer pin now uses this actual
+published version, replacing the local-only `0.10.0-dev.2` placeholder.
