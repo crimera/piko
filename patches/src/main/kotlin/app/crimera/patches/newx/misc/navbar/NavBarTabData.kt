@@ -9,10 +9,10 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
-import app.morphe.util.getReference
-import app.morphe.util.numberOfParameterRegisters
-import app.morphe.util.p0Register
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.numberOfParameterRegisters
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne

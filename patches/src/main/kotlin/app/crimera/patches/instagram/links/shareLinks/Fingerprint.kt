@@ -7,48 +7,70 @@
 package app.crimera.patches.instagram.links.shareLinks
 
 import app.morphe.patcher.Fingerprint
-
-internal val TARGET_STRING_ARRAY =
-    arrayOf(
-        "XDTPermalinkResponse",
-        "profile_to_share_url",
-    )
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 private const val HIGHLIGHT_SHARE_ENDPOINT_STRING =
     "third_party_sharing/%s/get_story_highlights_to_share_url/"
 private const val HIGHLIGHT_PERMALINK_ACTION_STRING = "create_highlight_permalink_share_url"
 
 internal object PermalinkResponseJsonParserFingerprint : Fingerprint(
-    strings = listOf(TARGET_STRING_ARRAY[0]),
-    custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
+    name = "unsafeParseFromJson",
+    filters = listOf(
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+        string("PermalinkResponseImpl"),
+    ),
 )
 
 internal object ProfileUrlResponseJsonParserFingerprint : Fingerprint(
-    strings = listOf(TARGET_STRING_ARRAY[1]),
-    custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
+    name = "unsafeParseFromJson",
+    filters = listOf(
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+        string("ProfileThirdPartySharingUrlResponseImpl"),
+    ),
 )
 
 internal object AudioUrlResponseJsonParserFingerprint : Fingerprint(
-    strings = listOf("audio_to_share_url"),
-    custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
+    name = "unsafeParseFromJson",
+    filters = listOf(
+        string("audio_to_share_url"),
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+    ),
 )
 
 internal object StoryItemThirdPartySharingUrlResponseImplFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     definingClass = "StoryItemThirdPartySharingUrlResponseImpl;",
+    filters = listOf(opcode(Opcode.RETURN_OBJECT)),
 )
 
 internal object LiveThirdPartySharingUrlResponseImplFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     definingClass = "Lcom/instagram/api/schemas/LiveThirdPartySharingUrlResponseImpl;",
+    filters = listOf(opcode(Opcode.RETURN_OBJECT)),
 )
 
 internal object HighlightShareUrlRequestFingerprint : Fingerprint(
     strings = listOf(HIGHLIGHT_SHARE_ENDPOINT_STRING, HIGHLIGHT_PERMALINK_ACTION_STRING),
+    filters = listOf(
+        // Share URL callback.
+        opcode(Opcode.NEW_INSTANCE),
+    ),
+)
+
+/**
+ * Share URL callback of the highlight request, where the URL is read from the response.
+ */
+internal fun highlightShareUrlCallbackFingerprint(callbackType: String) = Fingerprint(
+    definingClass = callbackType,
+    returnType = "V",
+    parameters = listOf("Ljava/lang/Object;"),
+    filters = listOf(
+        methodCall(returnType = "Ljava/lang/String;", opcode = Opcode.INVOKE_INTERFACE),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+    ),
 )

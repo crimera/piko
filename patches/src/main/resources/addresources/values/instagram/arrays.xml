@@ -15,6 +15,13 @@
         <item>timeleft</item>
     </string-array>
 
+    <string-array name="piko_array_hidden_chats_taps">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
     <string-array name="piko_array_focus_lock_duration">
         <item>@string/piko_focus_lock_duration_1_minute</item>
         <item>@string/piko_focus_lock_duration_5_minutes</item>
@@ -138,11 +145,13 @@
     <string-array name="piko_array_action_bar_chat">
         <item>@string/piko_action_bar_button_settings_icon</item>
         <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+        <item>@string/piko_action_bar_button_jump_oldest_icon</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_chat_val">
         <item>SETTINGS_ICON</item>
         <item>GHOST_MODE_ICON</item>
+        <item>JUMP_OLDEST_ICON</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_inbox">

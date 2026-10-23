@@ -47,18 +47,16 @@ public class Links {
     private static final boolean DISABLE_COMMENTS;
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
-    private static final boolean DISABLE_HIGHLIGHTS;
     private static final List<String> META_PACKAGES;
     private static final ShareLinkSanitizer SHARE_LINK_SANITIZER = new ShareLinkSanitizer(
             "instagram.com",
             Arrays.asList("comment_id", "img_index", "open_comments", "story_media_id"),
-            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si", "stkn")
+            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si", "stkn", "mdxt", "cplk", "obrf", "vrfl", "rpxt")
     );
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
-        DISABLE_HIGHLIGHTS = Pref.disableHighlights() && SettingsStatus.disableHighlights;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
@@ -164,8 +162,6 @@ public class Links {
                         || path.contains("/feed/injected_reels_media/")
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
-                } else if (path.contains("/highlights_tray")) {
-                    shouldBlockUri = DISABLE_HIGHLIGHTS || FocusLock.isForced(Settings.DISABLE_HIGHLIGHTS);
                 }
 
             }
@@ -189,6 +185,16 @@ public class Links {
             Logger.printException(() -> "sanitizeUrl failed: ", e);
         }
         return url;
+    }
+
+    public static String sanitizeSharedUrl(String url) {
+        return SettingsStatus.sanitizeShareLinks ? sanitizeUrl(url) : url;
+    }
+
+    public static String processSharedUrl(String url) {
+        // Clean the original Instagram URL before changing its host.
+        String sanitizedUrl = sanitizeSharedUrl(url);
+        return SettingsStatus.customSharingDomain ? changeDomain(sanitizedUrl) : sanitizedUrl;
     }
 
     public static String changeDomain(String url) {

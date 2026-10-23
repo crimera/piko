@@ -8,193 +8,81 @@ package app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
-import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.common.declaredParameterRegister
+import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.proxy.mutableTypes.MutableField
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.getFreeRegisterProvider
+import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getFreeRegisterProvider
-import app.morphe.util.addInstructionsAtControlFlowLabel
-import app.morphe.util.getReference
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val ACTIVITY_CLASS = "Landroid/app/Activity;"
 private const val IG_LINEAR_LAYOUT_CLASS = "Lcom/instagram/common/ui/base/IgLinearLayout;"
 
-internal fun findProfileActionBarBuilderMethod(
-    candidates: List<IndexedValue<MethodReference>>,
-    expectedParameterTypes: List<String>,
-    methodsInDefiningClass: (String) -> Iterable<MutableMethod>,
-): MutableMethod {
-    val matchingCandidates =
-        candidates.filter { candidate ->
-            candidate.value.parameterTypes == expectedParameterTypes &&
-                candidate.value.returnType == "V"
-        }
-    val candidate =
-        matchingCandidates.singleOrNull()
-            ?: throw PatchException(
-                "Expected exactly one profile action bar builder invocation, found ${matchingCandidates.size}",
-            )
-    val reference = candidate.value
-    val matchingDefinitions =
-        methodsInDefiningClass(reference.definingClass).filter { method ->
-            method.definingClass == reference.definingClass &&
-                method.name == reference.name &&
-                method.parameterTypes == expectedParameterTypes &&
-                method.returnType == "V" &&
-                AccessFlags.STATIC.isSet(method.accessFlags)
-        }
-
-    val definition =
-        matchingDefinitions.singleOrNull()
-            ?: throw PatchException(
-                "Expected exactly one matching method in the profile action bar builder class, " +
-                    "found ${matchingDefinitions.count()}",
-            )
-
-    return definition
-}
-
-private fun MethodReference.isRemoveAllViews(): Boolean =
-    definingClass == "Landroid/view/ViewGroup;" &&
-        name == "removeAllViews" &&
-        parameterTypes.isEmpty() &&
-        returnType == "V"
-
-private fun MethodReference.isListIterator(): Boolean =
-    definingClass == "Ljava/util/List;" &&
-        name == "iterator" &&
-        parameterTypes.isEmpty() &&
-        returnType == "Ljava/util/Iterator;"
-
-private fun registerComesFromParameter(
-    method: MutableMethod,
-    instructionIndex: Int,
-    register: Int,
-    parameterRegister: Int,
-): Boolean {
-    var currentRegister = register
-    if (currentRegister == parameterRegister) return true
-
-    for (index in instructionIndex - 1 downTo 0) {
-        val instruction = method.instructions[index]
-        val registerInstruction = instruction as? OneRegisterInstruction ?: continue
-        if (!instruction.opcode.setsRegister() || registerInstruction.registerA != currentRegister) continue
-        if (
-            instruction.opcode !in
-            setOf(
-                Opcode.MOVE_OBJECT,
-                Opcode.MOVE_OBJECT_FROM16,
-                Opcode.MOVE_OBJECT_16,
-            )
-        ) {
-            return false
-        }
-        val moveInstruction = instruction as? TwoRegisterInstruction ?: return false
-        currentRegister = moveInstruction.registerB
-        if (currentRegister == parameterRegister) return true
-    }
-
-    return false
-}
-
-private fun findProfileActionBarInjectionIndex(
-    method: MutableMethod,
-    layoutParameterRegisters: List<Int>,
-    listParameterRegister: Int,
-): Int {
-    if (layoutParameterRegisters.size != 2) {
-        throw PatchException(
-            "Expected two profile action bar layout parameter registers, " +
-                "found ${layoutParameterRegisters.size}",
-        )
-    }
-    val removeAllViewsCalls =
-        method.instructions.mapIndexedNotNull { index, instruction ->
-            val reference =
-                (instruction as? ReferenceInstruction)?.reference as? MethodReference
-                    ?: return@mapIndexedNotNull null
-            if (!reference.isRemoveAllViews()) return@mapIndexedNotNull null
-            val registers = instruction.registersUsed
-            if (registers.size != 1) {
-                throw PatchException("removeAllViews invocation has an unexpected register count")
-            }
-            IndexedValue(index, registers.single())
-        }
-    if (
-        removeAllViewsCalls.size != 2 ||
-        removeAllViewsCalls[1].index != removeAllViewsCalls[0].index + 1
-    ) {
-        throw PatchException(
-            "Expected exactly two consecutive removeAllViews invocations, " +
-                "found ${removeAllViewsCalls.size}",
-        )
-    }
-    removeAllViewsCalls.zip(layoutParameterRegisters).forEach { (call, parameter) ->
-        if (!registerComesFromParameter(method, call.index, call.value, parameter)) {
-            throw PatchException("removeAllViews invocation does not use its layout parameter")
-        }
-    }
-
-    val iteratorIndex = removeAllViewsCalls.last().index + 1
-    val iteratorInstruction = method.instructions.getOrNull(iteratorIndex)
-        ?: throw PatchException("Profile action bar builder has no instruction after removeAllViews")
-    val iteratorReference =
-        (iteratorInstruction as? ReferenceInstruction)?.reference as? MethodReference
-            ?: throw PatchException("Instruction after removeAllViews is not a method invocation")
-    val iteratorRegisters = iteratorInstruction.registersUsed
-    if (
-        !iteratorReference.isListIterator() ||
-        iteratorRegisters.size != 1 ||
-        !registerComesFromParameter(
-            method,
-            iteratorIndex,
-            iteratorRegisters.single(),
-            listParameterRegister,
-        )
-    ) {
-        throw PatchException("Expected List.iterator from the list parameter after removeAllViews")
-    }
-
-    return iteratorIndex
-}
-
-internal object ProfileActionBarRelatedFingerprint : Fingerprint(
-    strings = listOf("notifications_entry_point_impression", "impression_cast_to_tv"),
-    returnType = "V",
-)
-
 internal object ProfileHeaderRelatedFingerprint : Fingerprint(
     strings = listOf("profile_user_id", "click_point", "user_profile_header"),
     returnType = "V",
-    custom = { methodDef, _ ->
-        methodDef.parameters.size == 3
-    },
+    parameters = listOf("L", "L", "L"),
 )
 
-internal object ProfileActionBarFingerprint : Fingerprint(
-    definingClass = "Lcom/instagram/profile/actionbar/ProfileActionBar;",
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+/**
+ * Builds the profile action bar buttons, after removing the previous ones from both layouts.
+ */
+internal object ProfileActionBarBuilderFingerprint : Fingerprint(
+    returnType = "V",
+    parameters = listOf(
+        ACTIVITY_CLASS,
+        "Landroid/content/Context;",
+        USER_SESSION_CLASS,
+        IG_LINEAR_LAYOUT_CLASS,
+        IG_LINEAR_LAYOUT_CLASS,
+        "L",
+        "Ljava/util/List;",
+        "Lkotlin/jvm/functions/Function1;",
+    ),
+    filters = listOf(
+        methodCall(smali = "Landroid/view/ViewGroup;->removeAllViews()V"),
+        methodCall(smali = "Landroid/view/ViewGroup;->removeAllViews()V", location = MatchAfterImmediately()),
+        // Buttons of the action bar.
+        methodCall(smali = "Ljava/util/List;->iterator()Ljava/util/Iterator;", location = MatchAfterImmediately()),
+    ),
 )
+
+/**
+ * Creates an action bar icon from its model.
+ */
+internal object ProfileActionIconFactoryFingerprint : Fingerprint(
+    classFingerprint = ProfileActionBarBuilderFingerprint,
+    returnType = "Landroid/widget/ImageView;",
+    parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, "L", "L"),
+    filters = listOf(
+        // Drawable of the model.
+        fieldAccess(type = "I", opcode = Opcode.IGET),
+        opcode(Opcode.RETURN_OBJECT),
+    ),
+)
+
+// Static profile action bar builder parameters.
+private const val BUILDER_ACTIVITY_PARAMETER = 0
+private const val BUILDER_USER_SESSION_PARAMETER = 2
+private const val BUILDER_LAYOUT_PARAMETER = 4
+private const val BUILDER_ACTION_BAR_RELATED_PARAMETER = 5
 
 val userProfileActionBarButtonPatch =
     bytecodePatch(
@@ -204,91 +92,32 @@ val userProfileActionBarButtonPatch =
         dependsOn(decoderEntity)
 
         execute {
-            val profileHeaderFieldInActionBarRelatedClass: MutableField
-
-            ProfileActionBarRelatedFingerprint.apply {
-                val matchingFields = classDef.fields.filter { it.type == ProfileHeaderRelatedFingerprint.classDef.type }
-                profileHeaderFieldInActionBarRelatedClass =
-                    matchingFields.singleOrNull()
-                        ?: throw PatchException(
-                            "Expected exactly one profile header field in the action bar related class, found ${matchingFields.size}",
-                        )
-            }
-
-            val userDetailViewModelFields =
-                ProfileHeaderRelatedFingerprint.classDef.fields.filter {
-                    it.type == USER_DETAIL_VIEW_MODEL_CLASS
-                }
-            val userDetailViewModelFieldInProfileHeaderRelatedClass: MutableField =
-                userDetailViewModelFields.singleOrNull()
-                    ?: throw PatchException(
-                        "Expected exactly one user detail view model field in the profile header class, found ${userDetailViewModelFields.size}",
-                    )
-
-            val userDetailsClassFields = classDefBy { it.type == USER_DETAIL_VIEW_MODEL_CLASS }.fields
-
-            val userDataFields = userDetailsClassFields.filter { it.type == USER_MODEL_CLASS_NAME }
+            val actionBarRelatedClass = classDefBy(
+                ProfileActionBarBuilderFingerprint.originalMethod.parameterTypes[BUILDER_ACTION_BAR_RELATED_PARAMETER].toString(),
+            )
+            val profileHeaderClass = ProfileHeaderRelatedFingerprint.matchAll()
+                .map { it.originalClassDef }
+                .distinctBy { it.type }
+                .singleOrNull { candidate -> actionBarRelatedClass.fields.any { it.type == candidate.type } }
+                ?: throw PatchException("Expected one profile header referenced by the action bar")
+            val profileHeaderFieldInActionBarRelatedClass =
+                actionBarRelatedClass.fields.single { it.type == profileHeaderClass.type }
+            val userDetailViewModelFieldInProfileHeaderRelatedClass =
+                profileHeaderClass.fields.single { it.type == USER_DETAIL_VIEW_MODEL_CLASS }
             val userDataFieldInUserDetailClass =
-                userDataFields.singleOrNull()
-                    ?: throw PatchException(
-                        "Expected exactly one user model field in the user detail view model, found ${userDataFields.size}",
-                    )
+                classDefBy(USER_DETAIL_VIEW_MODEL_CLASS).fields.single { it.type == USER_MODEL_CLASS_NAME }
 
-            val profileActionBarBuilderMethod =
-                ProfileActionBarFingerprint.method.run {
-                    val expectedBuilderParameterTypes =
-                        listOf(
-                            "Landroid/app/Activity;",
-                            "Landroid/content/Context;",
-                            USER_SESSION_CLASS,
-                            IG_LINEAR_LAYOUT_CLASS,
-                            IG_LINEAR_LAYOUT_CLASS,
-                            ProfileActionBarRelatedFingerprint.classDef.type,
-                            "Ljava/util/List;",
-                            "Lkotlin/jvm/functions/Function1;",
-                        )
-                    findProfileActionBarBuilderMethod(
-                        candidates =
-                            instructions.mapIndexedNotNull { index, instruction ->
-                                if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) {
-                                    null
-                                } else {
-                                    instruction.getReference<MethodReference>()?.let { IndexedValue(index, it) }
-                                }
-                            },
-                        expectedParameterTypes = expectedBuilderParameterTypes,
-                        methodsInDefiningClass = { definingClass ->
-                            mutableClassDefBy(definingClass).methods
-                        },
-                    )
-                }
-
-            val iconFactory = mutableClassDefBy(profileActionBarBuilderMethod.definingClass).methods
-                .filter { method ->
-                    method.returnType == "Landroid/widget/ImageView;" && method.parameterTypes.size == 4 &&
-                        method.parameterTypes.take(3) == listOf(
-                            "Landroid/content/Context;", USER_SESSION_CLASS,
-                            ProfileActionBarRelatedFingerprint.classDef.type,
-                        )
-                }.singleOrNull()
-                ?: throw PatchException("Expected one profile action icon factory")
-            iconFactory.apply {
-                val modelRegister = declaredParameterRegister(this, 3)
-                val drawableField = instructions.filter { instruction ->
-                    instruction.opcode == Opcode.IGET &&
-                        instruction.registersUsed.size == 2 && instruction.registersUsed[1] == modelRegister
-                }.mapNotNull { it.getReference<FieldReference>() }
-                    .filter { it.definingClass == parameterTypes.last() && it.type == "I" }
-                    .singleOrNull()
-                    ?: throw PatchException("Expected one profile action drawable field")
-                val returnInstruction = instructions.withIndex().filter { it.value.opcode == Opcode.RETURN_OBJECT }
-                    .singleOrNull() ?: throw PatchException("Expected one profile action icon return")
-                val viewRegister = returnInstruction.value.registersUsed.single()
-                val registers = getFreeRegisterProvider(returnInstruction.index, 2, modelRegister, viewRegister)
+            ProfileActionIconFactoryFingerprint.let {
+                val drawableRead = it.instructionMatches.first().getInstruction<TwoRegisterInstruction>()
+                val modelRegister = drawableRead.registerB
+                val drawableField = it.instructionMatches.first().fieldReference
+                val returnIndex = it.instructionMatches.last().index
+                val viewRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
+                val registers = it.method.getFreeRegisterProvider(returnIndex, 2, modelRegister, viewRegister)
                 val viewCopy = registers.getFreeRegister()
                 val drawableCopy = registers.getFreeRegister()
-                addInstructionsAtControlFlowLabel(
-                    returnInstruction.index,
+                it.method.addInstructionsAtControlFlowLabel(
+                    returnIndex,
                     """
                     move-object/from16 v$viewCopy, v$modelRegister
                     iget v$drawableCopy, v$viewCopy, $drawableField
@@ -298,41 +127,12 @@ val userProfileActionBarButtonPatch =
                 )
             }
 
-            profileActionBarBuilderMethod.apply {
-                fun uniqueParameterIndex(type: String): Int {
-                    val matches = parameterTypes.withIndex().filter { it.value == type }
-                    return matches.singleOrNull()?.index
-                        ?: throw PatchException(
-                            "Expected exactly one $type parameter in the profile action bar builder, " +
-                                "found ${matches.size}",
-                        )
-                }
-
-                val layoutParameterIndices =
-                    parameterTypes.withIndex().filter {
-                        it.value == IG_LINEAR_LAYOUT_CLASS
-                    }.map { it.index }
-                if (layoutParameterIndices.size != 2) {
-                    throw PatchException(
-                        "Expected two profile action bar layout parameters, found ${layoutParameterIndices.size}",
-                    )
-                }
-                val activityRegister = declaredParameterRegister(this, uniqueParameterIndex(ACTIVITY_CLASS))
-                val userSessionRegister = declaredParameterRegister(this, uniqueParameterIndex(USER_SESSION_CLASS))
-                val layoutRegisters = layoutParameterIndices.map { declaredParameterRegister(this, it) }
-                val actionBarRelatedRegister =
-                    declaredParameterRegister(
-                        this,
-                        uniqueParameterIndex(ProfileActionBarRelatedFingerprint.classDef.type),
-                    )
-                val listRegister = declaredParameterRegister(this, uniqueParameterIndex("Ljava/util/List;"))
-                val layoutRegister = layoutRegisters.last()
-                val injectionIndex =
-                    findProfileActionBarInjectionIndex(
-                        method = this,
-                        layoutParameterRegisters = layoutRegisters,
-                        listParameterRegister = listRegister,
-                    )
+            ProfileActionBarBuilderFingerprint.method.apply {
+                val activityRegister = p0Register + BUILDER_ACTIVITY_PARAMETER
+                val userSessionRegister = p0Register + BUILDER_USER_SESSION_PARAMETER
+                val layoutRegister = p0Register + BUILDER_LAYOUT_PARAMETER
+                val actionBarRelatedRegister = p0Register + BUILDER_ACTION_BAR_RELATED_PARAMETER
+                val injectionIndex = ProfileActionBarBuilderFingerprint.instructionMatches.last().index
                 val resumeInstruction = getInstruction(injectionIndex)
                 val freeRegisterProvider =
                     getFreeRegisterProvider(

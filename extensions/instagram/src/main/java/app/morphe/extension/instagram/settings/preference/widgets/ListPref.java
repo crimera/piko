@@ -60,6 +60,9 @@ public class ListPref extends ListPreference {
             if (key == Settings.CUSTOMISE_STORY_TIMESTAMP.key) {
                 entries = ResourceUtils.getStringArray("piko_array_customise_story_timestamp");
                 entriesValues = ResourceUtils.getStringArray("piko_array_customise_story_timestamp_val");
+            } else if (key == Settings.HIDDEN_CHATS_TAPS.key) {
+                entries = ResourceUtils.getStringArray("piko_array_hidden_chats_taps");
+                entriesValues = entries;
             } else if (key == Settings.CHANGE_LIKE_ANIMATION.key) {
                 entries = ResourceUtils.getStringArray("piko_array_change_like_animation");
                 entriesValues = ResourceUtils.getStringArray("piko_array_change_like_animation_val");

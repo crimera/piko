@@ -30,7 +30,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -94,7 +96,7 @@ public class MediaDownloader {
     private void runDownloadTask(DownloadRequest request) {
         int notificationId = (int) System.currentTimeMillis();
         Uri outputDocumentUri = null;
-        File cacheFile = null;
+        List<File> cacheFiles = new ArrayList<>();
         boolean downloadCompleted = false;
         Notification.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -130,38 +132,45 @@ public class MediaDownloader {
             builder.setContentTitle(downloadStartString);
             notificationManager.notify(notificationId, builder.build());
             showToast(downloadStartString);
-            HttpURLConnection conn = null;
-            try {
-                URL url = new URL(request.url);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.connect();
-
-                int length = conn.getContentLength();
-                if (request.metadata == null) {
-                    try (InputStream input = new BufferedInputStream(conn.getInputStream());
-                         OutputStream output = context.getContentResolver().openOutputStream(outputDocumentUri)) {
-                        if (output == null) {
-                            throw new IOException("Could not open download file");
-                        }
-                        copyDownload(input, output, length, builder, notificationId);
+            if (request.audioUrl == null && request.metadata == null) {
+                try (OutputStream output = context.getContentResolver().openOutputStream(outputDocumentUri)) {
+                    if (output == null) {
+                        throw new IOException("Could not open download file");
                     }
-                } else {
-                    cacheFile = File.createTempFile("piko-download-", ".mp4", context.getCacheDir());
-                    try (InputStream input = new BufferedInputStream(conn.getInputStream());
-                         OutputStream output = new BufferedOutputStream(new FileOutputStream(cacheFile))) {
-                        copyDownload(input, output, length, builder, notificationId);
+                    download(request.url, output, builder, notificationId);
+                } catch (IOException downloadException) {
+                    if (request.fallbackUrl == null) throw downloadException;
+                    PikoUtils.logger(downloadException);
+                    try (OutputStream output = new BufferedOutputStream(openOutput(outputDocumentUri))) {
+                        download(request.fallbackUrl, output, builder, notificationId);
                     }
-
-                    try {
-                        writeMetadata(cacheFile, outputDocumentUri, request.metadata);
-                    } catch (Exception | LinkageError remuxException) {
-                        PikoUtils.logger(remuxException);
-                        copyRawFile(cacheFile, outputDocumentUri);
-                    }
+                    request.completedToast = null;
                 }
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
+            } else {
+                // Anything that needs rewriting is fetched to the cache first, then remuxed into place.
+                boolean downloadedToCache = false;
+                try {
+                    downloadToCache(request.url, cacheFiles, builder, notificationId);
+                    if (request.audioUrl != null) {
+                        downloadToCache(request.audioUrl, cacheFiles, builder, notificationId);
+                    }
+                    downloadedToCache = true;
+                    Mp4Remuxer.write(cacheFiles, openOutput(outputDocumentUri), request.metadata);
+                } catch (Exception | LinkageError downloadException) {
+                    PikoUtils.logger(downloadException);
+                    if (request.audioUrl == null) {
+                        if (!downloadedToCache) {
+                            throw downloadException;
+                        }
+                        // Only the metadata was lost: the file itself is complete.
+                        copyRawFile(cacheFiles.get(0), outputDocumentUri);
+                    } else if (request.fallbackUrl != null) {
+                        try (OutputStream output = new BufferedOutputStream(openOutput(outputDocumentUri))) {
+                            download(request.fallbackUrl, output, builder, notificationId);
+                        }
+                    } else {
+                        throw new IOException("Could not download or merge video and audio", downloadException);
+                    }
                 }
             }
             downloadCompleted = true;
@@ -169,6 +178,7 @@ public class MediaDownloader {
             final int finalNotificationId = notificationId;
             final String finalFileName = request.fileName;
             final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
+            final String completedToast = request.completedToast != null ? request.completedToast : downloadCompletedString;
 
             mainHandler.post(() -> {
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
@@ -180,7 +190,7 @@ public class MediaDownloader {
                 notificationManager.notify(finalNotificationId, builder.build());
 
                 try {
-                    PikoUtils.toast(downloadCompletedString);
+                    PikoUtils.toast(completedToast);
                 } catch (Exception ignored) {}
             });
         } catch (Exception e) {
@@ -193,8 +203,10 @@ public class MediaDownloader {
             notificationManager.cancel(notificationId);
             PikoUtils.logger(e);
         } finally {
-            if (cacheFile != null && cacheFile.exists() && !cacheFile.delete()) {
-                PikoUtils.logger(new IOException("Could not delete download cache file"));
+            for (File file : cacheFiles) {
+                if (file.exists() && !file.delete()) {
+                    PikoUtils.logger(new IOException("Could not delete download cache file"));
+                }
             }
             isDownloading = false;
             processNext();
@@ -231,30 +243,42 @@ public class MediaDownloader {
         output.flush();
     }
 
-    private void writeMetadata(File inputFile, Uri outputUri, DownloadMetadata metadata)
+    /** Fetches {@code url} into {@code output}, reporting progress on the notification. */
+    private void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
             throws IOException {
-        ParcelFileDescriptor descriptor = context.getContentResolver()
-                .openFileDescriptor(outputUri, "rwt");
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        try {
+            conn.connect();
+            try (InputStream input = new BufferedInputStream(conn.getInputStream())) {
+                copyDownload(input, output, conn.getContentLength(), builder, notificationId);
+            }
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    /** Fetches {@code url} into a new cache file, added to {@code cacheFiles} first so a failed fetch is cleaned up too. */
+    private void downloadToCache(String url, List<File> cacheFiles, Notification.Builder builder, int notificationId)
+            throws IOException {
+        File cacheFile = File.createTempFile("piko-download-", ".mp4", context.getCacheDir());
+        cacheFiles.add(cacheFile);
+        try (OutputStream output = new BufferedOutputStream(new FileOutputStream(cacheFile))) {
+            download(url, output, builder, notificationId);
+        }
+    }
+
+    /** Opens the download document for writing from its start, whatever an earlier attempt left in it. */
+    private FileOutputStream openOutput(Uri outputUri) throws IOException {
+        ParcelFileDescriptor descriptor = context.getContentResolver().openFileDescriptor(outputUri, "rwt");
         if (descriptor == null) {
             throw new IOException("Could not open download file");
         }
-        MetadataMuxer.write(
-                inputFile,
-                new ParcelFileDescriptor.AutoCloseOutputStream(descriptor),
-                metadata
-        );
+        return new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
     }
 
     private void copyRawFile(File inputFile, Uri outputUri) throws IOException {
         try (InputStream input = new BufferedInputStream(new FileInputStream(inputFile))) {
-            ParcelFileDescriptor descriptor = context.getContentResolver()
-                    .openFileDescriptor(outputUri, "rwt");
-            if (descriptor == null) {
-                throw new IOException("Could not reopen download file");
-            }
-            try (OutputStream output = new BufferedOutputStream(
-                    new ParcelFileDescriptor.AutoCloseOutputStream(descriptor)
-            )) {
+            try (OutputStream output = new BufferedOutputStream(openOutput(outputUri))) {
                 byte[] buffer = new byte[8192];
                 int count;
                 while ((count = input.read(buffer)) != -1) {

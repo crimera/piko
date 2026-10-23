@@ -8,6 +8,9 @@ package app.crimera.patches.instagram.entity.messageInfoEntity
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "$ENTITY_CLASS/MessageInfo;"
 
@@ -17,5 +20,9 @@ internal object GetAudioMediaExtension : Fingerprint(
 )
 
 internal object StellaDirectMessagingServiceAudioRelatedFingerprint : Fingerprint(
-    strings = listOf("prepare audio source link"),
+    filters = listOf(
+        string("prepare audio source link"),
+        // Voice media of the message.
+        fieldAccess(opcode = Opcode.IGET_OBJECT),
+    ),
 )

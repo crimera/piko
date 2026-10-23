@@ -12,9 +12,9 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.util.cloneMutable
-import app.morphe.util.getReference
-import app.morphe.util.numberOfParameterRegisters
-import app.morphe.util.p0Register
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.numberOfParameterRegisters
+import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef

@@ -23,6 +23,8 @@ public class FragmentHook {
             actionBarTitleKey = "piko_category_ads";
         }else if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
             actionBarTitleKey = "piko_category_ghost";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_STORY)){
+            actionBarTitleKey = "piko_category_story";
         }else if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
             actionBarTitleKey = "piko_category_links";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)){

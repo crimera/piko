@@ -59,7 +59,7 @@ public class FollowListHook {
 
             UserData userData = new UserData(userObj);
             UserFriendshipStatus friendshipStatus = userData.getUserFriendshipStatus();
-            boolean doesntFollowBack = Boolean.FALSE.equals(friendshipStatus.getFollowBackStatus());
+            boolean doesntFollowBack = Boolean.FALSE.equals(friendshipStatus.getMappings().get("followed_by"));
             if (!doesntFollowBack) return;
 
             FrameLayout avatar = findAvatar(row);

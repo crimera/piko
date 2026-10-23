@@ -16,8 +16,6 @@
     <string name="piko_enable_emp_options_desc">Unlocks all employee options used for testing</string>
     <string name="piko_allow_user_network_certificate">Allow user network certificate</string>
     <string name="piko_allow_user_network_certificate_desc">Allows user network certificate for whitehat testing</string>
-    <string name="piko_remove_build_expire_popup">Remove build expire popup</string>
-    <string name="piko_remove_build_expire_popup_desc">Removes the popup that appears after a while, when the app version ages</string>
     <string name="piko_export_dev_overrides">Export overrides</string>
     <string name="piko_import_dev_overrides">Import overrides</string>
     <string name="piko_import_id_mapping">Import mapping files</string>
@@ -55,6 +53,7 @@
     <string name="piko_disable_comments">Disable comments</string>
     <string name="piko_limit_following_feed">Limit feed to following profiles</string>
     <string name="piko_limit_following_feed_desc">Filters the home feed to display only content from profiles you follow.</string>
+    <string name="piko_disable_discover_people">Hide suggested accounts</string>
     <string name="piko_focus_lock">Focus Lock</string>
     <string name="piko_focus_lock_desc">Force distraction free settings on for a set time</string>
     <string name="piko_focus_lock_targets">Settings to lock</string>
@@ -99,11 +98,17 @@
     <string name="piko_disable_swipe_to_create_desc">Prevents opening the creation screen by swiping right on the home tab.</string>
     <string name="piko_hide_stories_tray">Hide stories tray</string>
     <string name="piko_hide_stories_tray_desc">Hide stories tray from main feed</string>
+    <string name="piko_hide_hidden_requests">Hide hidden requests</string>
+    <string name="piko_hide_hidden_requests_desc">Hides the hidden requests (spam) button in the message requests page</string>
     <string name="piko_hide_notes_tray">Hide notes tray</string>
     <string name="piko_hide_notes_tray_desc">Hides notes tray in DM section</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Hide group creation button on sharesheet</string>
     <string name="piko_hide_reels_follow_button">Hide Reels follow button</string>
+    <string name="piko_hide_share_button">Hide share button</string>
+    <string name="piko_hide_save_buttons">Hide save buttons</string>
+    <string name="piko_hide_reshare_button">Hide reshare button</string>
     <string name="piko_hide_reels_follow_button_desc">Removes the follow button from the Reels author row</string>
+    <string name="piko_disable_video_autoplay">Disable video autoplay</string>
     <string name="piko_disable_double_tap_like_post">Disable double tap like on post</string>
     <string name="piko_disable_double_tap_like_reel">Disable double tap like on reel</string>
     <string name="piko_disable_double_tap_like_comment">Disable double tap like on comment</string>
@@ -117,7 +122,6 @@
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytic cache</string>
     <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers</string>
-    <string name="piko_disable_discover_people">Hide suggested accounts</string>
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
     <string name="piko_follow_back_indicator_desc">Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click</string>
     <string name="piko_fbi_color_indicator">Enable colored friendship status indicator</string>
@@ -128,25 +132,12 @@
     <string name="piko_friendship_status">Friendship status</string>
     <string name="piko_follow_list_non_follower_badge">Show non-followers in Following list</string>
     <string name="piko_follow_list_non_follower_badge_desc">Adds a badge to rows in your own Following list for accounts that don\'t follow you back</string>
-    <string name="piko_view_story_mentions">View story mentions</string>
-    <string name="piko_vsm_title">Story mentions</string>
-    <string name="piko_vsm_no_mentions">No mentions on this story</string>
-    <string name="piko_disable_story_flipping">Disable story flipping</string>
-    <string name="piko_disable_story_flipping_desc">Disable automatic flipping/moving to next story</string>
-    <string name="piko_loop_story">Loop story</string>
-    <string name="piko_loop_story_desc">Replay the current story when it ends</string>
-    <string name="piko_disable_video_autoplay">Disable video autoplay</string>
-    <string name="piko_customise_story_timestamp">Customise story timestamp</string>
-    <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server. May reduce performance, increase app data size, or cause the app to switch to an older layout</string>
-    <string name="piko_hide_reshare_button">Hide reshare button</string>
     <string name="piko_copy_comment">Copy comment</string>
     <string name="piko_copy_comment_desc">Adds a button to copy comments on posts and reels</string>
     <string name="piko_comment_copied_success">Comment copied</string>
     <string name="piko_comment_copied_failed">No text found to copy</string>
-    <string name="piko_save_media_comment">Save media comment</string>
-    <string name="piko_save_media_comment_desc">Adds a button to save media comments on posts and reels</string>
     <string name="piko_copy_username">Copy username</string>
     <string name="piko_copy_full_name">Copy full name</string>
     <string name="piko_copy_user_id">Copy user id</string>
@@ -160,26 +151,73 @@
     <string name="piko_copied">Copied</string>
     <string name="piko_more_profile_options">More profile options</string>
     <string name="piko_remove_empty_bottom_space">Remove empty bottom space</string>
+    <string name="piko_inbox_lock">Inbox lock</string>
+    <string name="piko_inbox_lock_desc">Hides your inbox behind your fingerprint, face or screen lock every time you open the app</string>
+    <string name="piko_inbox_lock_notifications">Block notifications</string>
+    <string name="piko_inbox_lock_notifications_desc">While Inbox lock is up, message notifications hide the sender and content, and the in-app message banner stays hidden</string>
+    <string name="piko_inbox_lock_notification">New message</string>
+    <string name="piko_inbox_lock_unlock">Unlock</string>
+    <string name="piko_inbox_lock_prompt">Unlock your messages</string>
+    <string name="piko_inbox_lock_no_lock">Set a screen lock on your device to use Inbox lock</string>
+    <string name="piko_hidden_chats">Hidden chats</string>
+    <string name="piko_hidden_chats_desc">Adds a hide option to the chat long-press menu that moves the chat to a private inbox, separate for each account. Turn on Inbox lock to protect it</string>
+    <string name="piko_hidden_chats_hidden">Chat hidden</string>
+    <string name="piko_hidden_chats_unhidden">Chat unhidden</string>
+    <string name="piko_hidden_chats_opened">Hidden chats</string>
+    <string name="piko_hidden_chats_closed">Back to your inbox</string>
+    <string name="piko_hidden_chats_mute">Mute hidden chats</string>
+    <string name="piko_hidden_chats_mute_desc">Don\'t show notifications for messages from chats you have hidden</string>
+    <string name="piko_hidden_chats_taps">Taps to open hidden chats</string>
+    <string name="piko_hidden_chats_taps_desc">Tap the messages button this many times in a row to switch between your inbox and your hidden chats</string>
     <string name="piko_unlock_plus_benefits">Unlock Plus benefits</string>
     <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
-    <string name="piko_customise_story_ring_size">Customise story ring size</string>
-    <string name="piko_customise_story_ring_size_desc">Change the size of story ring by a percentage (Default: 100)</string>
 
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
+    <string name="piko_ephemeral_caption">Show how ephemeral media was received</string>
+    <string name="piko_ephemeral_caption_desc">Adds a line under photos and videos that were sent as ephemeral media saying how they were sent and until when they are available</string>
+    <string name="piko_ephemeral_received_once">Received to view once</string>
+    <string name="piko_ephemeral_received_twice">Received to view twice</string>
+    <string name="piko_ephemeral_received_chat">Received to keep in chat</string>
+    <string name="piko_ephemeral_received_unknown">Original viewing mode unknown</string>
+    <string name="piko_ephemeral_available_until">Available until %s</string>
+    <string name="piko_ephemeral_expired">Expired</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
     <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
+
+    <!-- Story Section -->
+    <string name="piko_category_story">Story</string>
+    <string name="piko_view_story_mentions">View story mentions</string>
+    <string name="piko_vsm_title">Story mentions</string>
+    <string name="piko_vsm_no_mentions">No mentions on this story</string>
+    <string name="piko_mark_story_seen">Mark as seen</string>
+    <string name="piko_story_seen_pending">Marking as seen</string>
+    <string name="piko_story_seen_sent">Marked as seen</string>
+    <string name="piko_customise_story_timestamp">Customise story timestamp</string>
+    <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
+    <string name="piko_customise_story_ring_size">Customise story ring size</string>
+    <string name="piko_customise_story_ring_size_desc">Change the size of story ring by a percentage (Default: 100)</string>
+    <string name="piko_disable_story_flipping">Disable story flipping</string>
+    <string name="piko_disable_story_flipping_desc">Disable automatic flipping/moving to next story</string>
+    <string name="piko_loop_story">Loop story</string>
+    <string name="piko_loop_story_desc">Replay the current story when it ends</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
     <string name="piko_category_downloads">Downloads</string>
     <string name="piko_enable_download">Enable download</string>
+    <string name="piko_feed_download_button">Download button on feed posts</string>
+    <string name="piko_feed_download_button_desc">Adds a download icon beside the save button on feed posts</string>
+    <string name="piko_save_media_comment">Save media comment</string>
+    <string name="piko_save_media_comment_desc">Adds a button to save media comments on posts and reels</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
     <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
     <string name="piko_download_username_folder">Split media by username</string>
     <string name="piko_download_username_folder_desc">Creates subfolders based on username</string>
+    <string name="piko_prefer_dash_format">Prefer DASH format</string>
+    <string name="piko_prefer_dash_format_desc">Downloads videos as the sharpest DASH rendition Instagram lists, up to 1080p AV1, instead of the 720p H.264 file</string>
     <string name="piko_embed_download_metadata">Embed video metadata</string>
     <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
     <string name="piko_download_file_name_template">Filename format</string>
@@ -196,6 +234,7 @@
     <string name="piko_download_file_name_token_variant_suffix">Variant</string>
     <string name="piko_download_current_media">Download current media</string>
     <string name="piko_download_as_image">Download as image</string>
+    <string name="piko_saved_at">Saved at %s</string>
     <string name="piko_video_variants">Video variants</string>
     <string name="piko_image_variants">Image variants</string>
     <string name="piko_download_audio">Download audio</string>
@@ -322,12 +361,19 @@
 
     <string name="piko_action_bar_button_settings_icon">Settings icon</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">Jump to oldest message icon</string>
+    <string name="piko_jump_oldest_started">Jumping to the oldest message, tap again to cancel</string>
+    <string name="piko_jump_oldest_cancelled">Cancelled</string>
+    <string name="piko_jump_oldest_stopped">Stopped waiting for older messages. Tap again to retry.</string>
     <string name="piko_action_bar_button_profile_info_icon">Profile info icon</string>
     <string name="piko_action_bar_button_create_icon">Create icon</string>
     <string name="piko_action_bar_button_notifications_icon">Notifications icon</string>
 
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
+    <string name="piko_settings_search_hint">Search</string>
+    <string name="piko_settings_search_clear">Clear search</string>
+    <string name="piko_settings_search_no_results">No results found</string>
 
     <!-- Font Section -->
     <string name="piko_category_font">Font</string>
@@ -352,7 +398,6 @@
     <string name="piko_rec_flags_no_file">Recommended flags file not found</string>
     <string name="piko_rec_flags_refresh_file">Refresh flags</string>
     <string name="piko_rec_flags_last_modified_at">Last modified: %s</string>
-
 
     <!-- Story filters -->
     <string name="piko_category_filter_content">Content filters</string>
@@ -469,7 +514,4 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">activity</string>
-    <string name="piko_mark_story_seen">Mark as seen</string>
-    <string name="piko_story_seen_pending">Marking as seen</string>
-    <string name="piko_story_seen_sent">Marked as seen</string>
 </resources>

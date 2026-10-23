@@ -14,6 +14,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
@@ -22,7 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.patches.feed.ChangeLikeAnimationPatch;
-import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.shared.Logger;
@@ -31,6 +31,7 @@ import app.morphe.extension.shared.Utils;
 public final class LikeAnimationPreference extends ListPref {
     private int selectedIndex;
     private ImageView preview;
+    private TextView unavailablePreview;
     private Drawable animation;
     private AnimatorSet defaultAnimation;
     private final Runnable playPreview = this::playPreview;
@@ -62,6 +63,14 @@ public final class LikeAnimationPreference extends ListPref {
         preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
         preview.setContentDescription(str("piko_like_animation_preview"));
         header.addView(preview, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, InstagramPreferenceStyle.dp(context, 128)));
+
+        unavailablePreview = new TextView(context);
+        unavailablePreview.setText(str("piko_like_animation_preview_unavailable"));
+        unavailablePreview.setTextColor(InstagramPreferenceStyle.secondaryTextColor());
+        unavailablePreview.setGravity(Gravity.CENTER);
+        unavailablePreview.setVisibility(View.GONE);
+        header.addView(unavailablePreview, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, InstagramPreferenceStyle.dp(context, 128)));
 
         builder.setCustomTitle(header);
@@ -145,6 +154,8 @@ public final class LikeAnimationPreference extends ListPref {
             animation = null;
         }
         if (preview != null) {
+            preview.setVisibility(View.VISIBLE);
+            unavailablePreview.setVisibility(View.GONE);
             preview.removeCallbacks(playPreview);
             preview.setImageDrawable(null);
             preview.clearColorFilter();
@@ -155,8 +166,9 @@ public final class LikeAnimationPreference extends ListPref {
     }
 
     private void showUnavailablePreview() {
-        UI.setThemedIcon(preview, UI.DRAWABLE_FRAME_CROSSED_ICON);
-        preview.setContentDescription(str("piko_like_animation_preview_unavailable"));
+        preview.setImageDrawable(null);
+        preview.setVisibility(View.GONE);
+        unavailablePreview.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -165,6 +177,7 @@ public final class LikeAnimationPreference extends ListPref {
         super.onDialogClosed(false);
         stopPreview();
         preview = null;
+        unavailablePreview = null;
         if (positiveResult) {
             String value = getEntryValues()[selectedIndex].toString();
             if (callChangeListener(value)) setValue(value);

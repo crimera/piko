@@ -18,11 +18,11 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.util.addInstructionsAtControlFlowLabel
-import app.morphe.util.cloneParameters
-import app.morphe.util.getReference
-import app.morphe.util.p0Register
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.cloneParameters
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -198,7 +198,7 @@ val featureFlagPatch =
                     lookupMethod = repositoryResolution.lookupMethod,
                 )
                 requireAccessorMatches(accessor, matches)
-                matches.forEach { it.cloneParameters(repository).hookReturns(accessor) }
+                matches.forEach { it.cloneParameters().hookReturns(accessor) }
             }
         }
     }

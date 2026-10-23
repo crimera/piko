@@ -10,19 +10,29 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.literal
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.addInstructionsAtControlFlowLabel
-import app.morphe.util.indexOfFirstInstructionOrThrow
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.string
+import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private const val PREF_CLASS_DESCRIPTOR = "Lapp/morphe/extension/instagram/utils/Pref;"
 
-// AuthorInfoUseCase.shouldShowFollowButton(ClipsViewerConfig)
-private object ReelsShouldShowFollowButtonFingerprint : Fingerprint(
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
-    returnType = "Z",
-    strings = listOf("android_purge_26_q3_AuthorInfoUseCase_shouldShowFollowButton"),
+// AuthorInfoUseCase.shouldShowFollowButton(ClipsViewerConfig), inlined in the Reels UFI state.
+private object ReelsInlineFollowButtonFingerprint : Fingerprint(
+    returnType = "L",
+    filters = listOf(
+        string("android_purge_26_q3_AuthorInfoUseCase_shouldShowFollowButton"),
+        literal(1),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        literal(0, location = MatchAfterImmediately()),
+        string("android_purge_26_q3_FollowUseCase_getUiState"),
+    ),
 )
 
 @Suppress("unused")
@@ -36,15 +46,16 @@ val hideReelsFollowButtonPatch =
         dependsOn(settingsPatch)
 
         execute {
-            ReelsShouldShowFollowButtonFingerprint.method.apply {
-                val returnIndex = indexOfFirstInstructionOrThrow { opcode == Opcode.RETURN }
-
-                addInstructionsAtControlFlowLabel(
-                    returnIndex,
+            ReelsInlineFollowButtonFingerprint.matchSingle().let {
+                // Both follow results merge after the disabled result.
+                val disabledIndex = it.instructionMatches[3].index
+                val register = it.instructionMatches[3].getInstruction<OneRegisterInstruction>().registerA
+                it.method.addInstructionsAtControlFlowLabel(
+                    disabledIndex + 1,
                     """
-                        invoke-static {v0}, $PREF_CLASS_DESCRIPTOR->showReelsFollowButton(Z)Z
-                        move-result v0
-                    """,
+                    invoke-static/range {v$register .. v$register}, $PREF_CLASS_DESCRIPTOR->showReelsFollowButton(Z)Z
+                    move-result v$register
+                """,
                 )
             }
 

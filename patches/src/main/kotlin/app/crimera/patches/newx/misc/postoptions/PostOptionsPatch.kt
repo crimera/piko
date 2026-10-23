@@ -11,6 +11,7 @@ import app.crimera.patches.common.isObjectDescriptor
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireExactlyOne
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.util.cloneParameters
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -24,9 +25,9 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.util.getReference
-import app.morphe.util.p0Register
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -261,9 +262,7 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
     val stateType =
         requireSingleMatch("NewX post-options state", PostOptionsStateFingerprint.matchAll())
             .originalClassDef.type
-    val renderer =
-        requireSingleMatch(
-            "NewX post-options label renderer",
+    val rendererFingerprint =
             Fingerprint(
                 filters =
                     listOf(
@@ -282,8 +281,24 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
                         ),
                         opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
                     ),
-            ).matchAll(),
-        )
+            )
+    val originalRenderer = requireSingleMatch(
+        "NewX post-options label renderer",
+        rendererFingerprint.matchAll(),
+    ).method
+    val iconCheckRegister = originalRenderer.implementation?.registerCount
+        ?: throw PatchException("NewX post-options label renderer has no implementation")
+    if (iconCheckRegister > 255) {
+        throw PatchException("NewX post-options icon check requires a byte-encodable register")
+    }
+    // cloneParameters copies the arguments into their old slots. The new parameter slots are
+    // unused by the original body, so this hook does not depend on finding a dead live-frame local.
+    originalRenderer.cloneParameters()
+    rendererFingerprint.clearMatch()
+    val renderer = requireSingleMatch(
+        "NewX post-options label renderer after parameter preservation",
+        rendererFingerprint.matchAll(),
+    )
     val mapGet = renderer.instructionMatches[1].instruction
     val labelResult = renderer.instructionMatches[2].instruction as? OneRegisterInstruction
         ?: throw PatchException("NewX post-options Map.get has no object result register")
@@ -345,9 +360,7 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
             moveResult(labelResult.registerA, STRING_DESCRIPTOR)
         }
 
-        // The icon checks run in registration order and share one dead low register; the
-        // emitted formats (`if-eqz` 21t, `move-result` 11x, `sget-object` 21c) all encode it.
-        val iconCheckRegister = scratchRegister()
+        // The icon checks share the reserved byte register; if-eqz and move-result both encode it.
         contributions.forEachIndexed { index, contribution ->
             if (index > 0) label(iconContinuationLabel(index))
             invokeStatic(

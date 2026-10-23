@@ -9,9 +9,10 @@ package app.crimera.patches.instagram.misc.overflowMenuButton.posts
 import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
+import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 
 context(patchContext: BytecodePatchContext)
@@ -29,7 +30,10 @@ fun addOverflowMenuButtonAttributes(
         classFields.add(field)
 
         method.apply {
-            val lastInvokeDirectIndex = instructions.last { it.opcode == Opcode.INVOKE_DIRECT }.location.index
+            // After the last native option is initialized and stored.
+            val lastInvokeDirectIndex = indexOfFirstInstructionReversedOrThrow(
+                methodCall(definingClass = MEDIA_OPTIONS_CLASS, name = "<init>", opcode = Opcode.INVOKE_DIRECT),
+            )
 
             addInstructions(
                 lastInvokeDirectIndex + 2,

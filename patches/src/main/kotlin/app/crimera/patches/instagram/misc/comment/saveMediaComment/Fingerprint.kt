@@ -6,10 +6,14 @@
 
 package app.crimera.patches.instagram.misc.comment.saveMediaComment
 
-import app.crimera.patches.instagram.entity.commentDataEntity.CHAT_CONTEXT_BUTTON_SUPER_CLASS
-import app.crimera.patches.instagram.misc.comment.copyComment.CopyTextChatButtonToStringFingerprint
 import app.crimera.patches.instagram.utils.Constants.COMMENT_BUTTON_EXTENSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val COMMENT_COPY_EXTENSION_CLASS = "${COMMENT_BUTTON_EXTENSION_CLASS}/saveMediaButton"
 internal const val BUTTON_EXTENSION_CLASS = "${COMMENT_COPY_EXTENSION_CLASS}/SaveMediaButton;"
@@ -26,16 +30,14 @@ internal object InitSaveMediaButtonExtensionFingerprint : Fingerprint(
     definingClass = BUTTON_EXTENSION_CLASS,
 )
 
-internal object SaveMediaChatButtonToStringFingerprint : Fingerprint(
-    name = "toString",
-    returnType = "Ljava/lang/String;",
-    strings = listOf("SaveMedia"),
-    custom = { _, classDef ->
-        classDef.superclass == CHAT_CONTEXT_BUTTON_SUPER_CLASS
-    },
-)
-
-internal object SaveMediaChatButtonInitFingerprint : Fingerprint(
-    classFingerprint = SaveMediaChatButtonToStringFingerprint,
-    name = "<init>",
+internal object ChatButtonActionsFingerprint : Fingerprint(
+    name = "<clinit>",
+    strings = listOf("COPY_TEXT", "save_media"),
+    filters = listOf(
+        string("SAVE_MEDIA"),
+        methodCall(opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        // Save media action.
+        fieldAccess(opcode = Opcode.SPUT_OBJECT, location = MatchAfterImmediately()),
+    ),
 )

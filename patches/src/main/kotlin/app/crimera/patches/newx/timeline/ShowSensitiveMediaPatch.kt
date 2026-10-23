@@ -19,9 +19,9 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.cloneMutable
-import app.morphe.util.getReference
-import app.morphe.util.numberOfParameterRegisters
-import app.morphe.util.numberOfParameterRegistersLogical
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.numberOfParameterRegisters
+import app.morphe.patcher.util.numberOfParameterRegistersLogical
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction

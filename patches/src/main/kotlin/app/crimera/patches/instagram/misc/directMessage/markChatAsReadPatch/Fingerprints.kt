@@ -6,12 +6,13 @@
 
 package app.crimera.patches.instagram.misc.directMessage.markChatAsReadPatch
 
-import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 const val EXTENSION_CLASS_NAME = "${PATCHES_DESCRIPTOR}/dm/MarkChatAsRead;"
 
@@ -35,6 +36,11 @@ internal object GetMessageCursorFieldNameExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_NAME,
 )
 
+internal object GetThreadInfoFieldNameExtensionFingerprint : Fingerprint(
+    name = "getThreadInfoFieldName",
+    definingClass = EXTENSION_CLASS_NAME,
+)
+
 internal object GetButtonEnumClassNameExtensionFingerprint : Fingerprint(
     name = "getButtonEnumClassName",
     definingClass = EXTENSION_CLASS_NAME,
@@ -42,23 +48,26 @@ internal object GetButtonEnumClassNameExtensionFingerprint : Fingerprint(
 
 // --------------------------------------
 internal object DmInfoJsonParserFingerprint : Fingerprint(
-    strings = listOf("visual_messages_newest_cursor"),
-    custom = { methodDef, _ ->
-        methodDef.returnType != "V"
-    },
+    returnType = "V",
+    parameters = listOf("L", "L", "Ljava/lang/String;"),
+    filters = listOf(
+        string("visual_messages_newest_cursor"),
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+    ),
 )
 
 internal object ThreadLongPressButtonsEnumInitFingerprint : Fingerprint(
-    strings = listOf("MARK_AS_READ", "LEAVE", "NFB_SETTINGS"),
+    name = "<clinit>",
+    strings = listOf("LEAVE", "NFB_SETTINGS"),
+    filters = listOf(
+        string("MARK_AS_READ"),
+        fieldAccess(definingClass = "this", opcode = Opcode.SPUT_OBJECT),
+    ),
 )
 
 internal object ThreadLongPressMuteButtonBuilderFingerprint : Fingerprint(
     returnType = "V",
-    custom = { methodDef, _ ->
-        methodDef.parameters.size == 3 &&
-            methodDef.parameters.first().type == USER_SESSION_CLASS &&
-            methodDef.parameters.last().type == "Ljava/util/List;"
-    },
+    parameters = listOf(USER_SESSION_CLASS, "L", "Ljava/util/List;"),
     filters =
         listOf(
             literal(0),

@@ -198,6 +198,11 @@ public class CustomFont {
         return replacementFor(original);
     }
 
+    // Compose's result interface carries the platform typeface as Object on newer versions.
+    public static Object applyWrappedTypeface(Object original) {
+        return original instanceof Typeface ? apply((Typeface) original) : original;
+    }
+
     /**
      * Injected wherever the app sets a typeface on its text views, paints and platform spans.
      * {@code null} draws in the platform default, so it is substituted as that.

@@ -6,28 +6,28 @@
 
 package app.crimera.patches.instagram.misc.changeLikeAnimation
 
-import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.settings.IgFragmentActivityOnCreate
+import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.fieldReference
+import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeString
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
 
@@ -46,47 +46,60 @@ internal object XDTUserActivationMetadataImplInitFingerprint : Fingerprint(
 private const val LIKE_VIEW = "Lcom/instagram/ui/mediaactions/LikeActionView;"
 private const val CONTEXT = "Landroid/content/Context;"
 
+private object SetUpCustomLikesAnimationFingerprint : Fingerprint(
+    definingClass = LIKE_VIEW,
+    name = "setUpCustomLikesAnimation",
+    returnType = "V",
+    parameters = listOf("L"),
+    filters = listOf(
+        // Animation drawable factory.
+        methodCall(opcode = Opcode.INVOKE_STATIC, parameters = listOf(CONTEXT, "L")),
+    ),
+)
+
+private object ConfigureLikeAnimationFingerprint : Fingerprint(
+    definingClass = LIKE_VIEW,
+    returnType = "V",
+    parameters = listOf(USER_SESSION_CLASS, "L"),
+    filters = listOf(
+        methodCall(definingClass = "this", name = "setUpCustomLikesAnimation"),
+        // Default heart drawable factory instance.
+        fieldAccess(opcode = Opcode.SGET_OBJECT),
+        methodCall(opcode = Opcode.INVOKE_VIRTUAL, parameters = listOf(CONTEXT)),
+    ),
+)
+
+private object LikeAnimationStartFingerprint : Fingerprint(
+    definingClass = LIKE_VIEW,
+    name = "onAnimationStart",
+    filters = listOf(
+        // Default heart color initialization.
+        methodCall(opcode = Opcode.INVOKE_VIRTUAL, parameters = listOf(CONTEXT), returnType = "V"),
+    ),
+)
+
+private object LikeAnimationPlaybackFingerprint : Fingerprint(
+    definingClass = LIKE_VIEW,
+    returnType = "V",
+    parameters = listOf("Z", "F"),
+    filters = listOf(
+        // Native animation start.
+        methodCall(opcode = Opcode.INVOKE_VIRTUAL, parameters = emptyList(), returnType = "V"),
+    ),
+)
+
 context(context: BytecodePatchContext)
 private fun installAnimationRendering(animationType: String) {
-    val setup = Fingerprint(name = "setUpCustomLikesAnimation", definingClass = LIKE_VIEW)
-        .matchAll(0..Int.MAX_VALUE).singleOrNull()?.method
-        ?: throw PatchException("Expected one custom like animation setup")
-    val renderType = setup.parameterTypes.singleOrNull()?.toString()
-        ?: throw PatchException("Unexpected custom like animation setup signature")
-    val renderClass = context.classDefBy(renderType)
-    if (renderClass.superclass != "Ljava/lang/Enum;") {
-        throw PatchException("Expected a like animation rendering enum")
-    }
-    val mapper = renderClass.methods.singleOrNull {
+    val factory = SetUpCustomLikesAnimationFingerprint.instructionMatches.first().methodReference
+    val renderType = SetUpCustomLikesAnimationFingerprint.originalMethod.parameterTypes.first().toString()
+    val mapper = context.classDefBy(renderType).methods.singleOrNull {
         it.parameterTypes == listOf(animationType) && it.returnType == renderType &&
             AccessFlags.PUBLIC.isSet(it.accessFlags) && AccessFlags.STATIC.isSet(it.accessFlags)
     } ?: throw PatchException("Expected one like animation enum mapper")
-    val configure = Fingerprint(
-        definingClass = LIKE_VIEW,
-        parameters = listOf(USER_SESSION_CLASS, renderType),
-        returnType = "V",
-    ).matchAll(0..Int.MAX_VALUE).singleOrNull()?.method
-        ?: throw PatchException("Expected one like animation view configuration method")
-    if (configure.instructions.none { it.getReference<MethodReference>()?.toString() == setup.toString() }) {
-        throw PatchException("Like animation view configuration does not call custom animation setup")
-    }
-    val defaultFactory = configure.instructions.filter { it.opcode == Opcode.INVOKE_VIRTUAL }
-        .mapNotNull { it.getReference<MethodReference>() }.singleOrNull {
-            it.parameterTypes == listOf(CONTEXT) &&
-                context.classDefByOrNull(it.returnType)?.superclass == "Landroid/graphics/drawable/Drawable;"
-        } ?: throw PatchException("Expected one default heart drawable factory")
-    val factoryInstance = configure.instructions.filter { it.opcode == Opcode.SGET_OBJECT }
-        .mapNotNull { it.getReference<FieldReference>() }.singleOrNull {
-            it.type == defaultFactory.definingClass
-        } ?: throw PatchException("Expected one default heart factory instance")
-    val defaultStart = Fingerprint(name = "onAnimationStart", definingClass = LIKE_VIEW)
-        .matchAll(0..Int.MAX_VALUE).singleOrNull()?.method
-        ?: throw PatchException("Expected one default heart animation start callback")
-    val colorize = defaultStart.instructions.filter { it.opcode == Opcode.INVOKE_VIRTUAL }
-        .mapNotNull { it.getReference<MethodReference>() }.singleOrNull {
-            it.definingClass == defaultFactory.returnType &&
-                it.parameterTypes == listOf(CONTEXT) && it.returnType == "V"
-        } ?: throw PatchException("Expected one default heart color initialization call")
+    val configure = ConfigureLikeAnimationFingerprint.method
+    val factoryInstance = ConfigureLikeAnimationFingerprint.instructionMatches[1].fieldReference
+    val defaultFactory = ConfigureLikeAnimationFingerprint.instructionMatches[2].methodReference
+    val colorize = LikeAnimationStartFingerprint.instructionMatches.first().methodReference
     for (method in listOf(defaultFactory, colorize)) {
         val targetClass = context.classDefBy(method.definingClass)
         if (!AccessFlags.PUBLIC.isSet(targetClass.accessFlags) || targetClass.methods.none {
@@ -142,29 +155,14 @@ private fun installAnimationRendering(animationType: String) {
         return-object p0
         """.trimIndent(),
     )
-    val factory = setup.instructions.filter { it.opcode == Opcode.INVOKE_STATIC }
-        .mapNotNull { it.getReference<MethodReference>() }.singleOrNull {
-            it.parameterTypes == listOf(CONTEXT, renderType) && it.returnType.startsWith("L")
-        } ?: throw PatchException("Expected one like animation drawable factory")
-    val factoryMethod = context.classDefBy(factory.definingClass).methods.singleOrNull {
-        it.toString() == factory.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
-            AccessFlags.STATIC.isSet(it.accessFlags)
-    } ?: throw PatchException("Like animation drawable factory is not public static")
-
-    val drawableTypes = mutableSetOf<String>()
-    var type = factoryMethod.returnType
-    while (type != "Landroid/graphics/drawable/Drawable;") {
-        if (!drawableTypes.add(type)) throw PatchException("Invalid animation drawable hierarchy")
-        type = context.classDefByOrNull(type)?.superclass
-            ?: throw PatchException("Like animation factory does not return a Drawable")
+    if (context.classDefBy(factory.definingClass).methods.none {
+            it.toString() == factory.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
+                AccessFlags.STATIC.isSet(it.accessFlags)
+        }) {
+        throw PatchException("Like animation drawable factory is not public static")
     }
-    val playback = Fingerprint(definingClass = LIKE_VIEW, parameters = listOf("Z", "F"), returnType = "V")
-        .matchAll(0..Int.MAX_VALUE).singleOrNull()?.method
-        ?: throw PatchException("Expected one like animation playback method")
-    val start = playback.instructions.filter { it.opcode == Opcode.INVOKE_VIRTUAL }
-        .mapNotNull { it.getReference<MethodReference>() }.singleOrNull {
-            it.definingClass in drawableTypes && it.parameterTypes.isEmpty() && it.returnType == "V"
-        } ?: throw PatchException("Expected one native animation start call")
+
+    val start = LikeAnimationPlaybackFingerprint.instructionMatches.first().methodReference
     val controls = context.classDefBy(start.definingClass).methods
     if (controls.none { it.toString() == start.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) }) {
         throw PatchException("Native animation start method is not public")
@@ -210,7 +208,7 @@ val changeLikeAnimationPatch =
         execute {
             IgFragmentActivityOnCreate.method.apply {
                 addInstruction(
-                    indexOfFirstInstruction(Opcode.RETURN_VOID),
+                    indexOfFirstInstructionOrThrow(Opcode.RETURN_VOID),
                     "invoke-static {}, $EXTENSION_CLASS_DESCRIPTOR->onActivityCreated()V",
                 )
             }

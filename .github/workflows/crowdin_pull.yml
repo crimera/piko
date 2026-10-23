@@ -23,7 +23,7 @@ jobs:
           clean: true
 
       - name: Pull strings from Crowdin
-        uses: crowdin/github-action@v2
+        uses: crowdin/github-action@v3
         with:
           config: crowdin.yml
           upload_sources: false
@@ -53,7 +53,7 @@ jobs:
           clean: true
 
       - name: Download translations onto dev
-        uses: crowdin/github-action@v2
+        uses: crowdin/github-action@v3
         with:
           config: crowdin.yml
           upload_sources: false

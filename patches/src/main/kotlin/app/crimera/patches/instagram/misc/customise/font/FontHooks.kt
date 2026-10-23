@@ -8,21 +8,28 @@ package app.crimera.patches.instagram.misc.customise.font
 
 import app.crimera.patches.common.declaredParameterRegister
 import app.crimera.patches.instagram.utils.Constants.CUSTOM_FONT_DESCRIPTOR
+import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
-import app.morphe.util.getReference
-import app.morphe.util.registersUsed
+import app.morphe.util.findInstructionIndicesReversed
+import app.morphe.util.findInstructionIndicesReversedOrThrow
+import app.morphe.patcher.util.getReference
+import app.morphe.util.indexOfFirstInstruction
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
@@ -66,15 +73,15 @@ internal val PLATFORM_TEXT_WIDGETS =
  * Each return is replaced rather than preceded, since a return is often a branch target.
  */
 internal fun MutableMethod.hookResolvedTypefaces() {
-    val descriptorRegister = declaredParameterRegister(this, 0)
+    val descriptorRegister = p0Register + if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1
     if (isOverwritten(descriptorRegister)) {
         throw PatchException(
             "$definingClass->$name writes over the font descriptor it was passed",
         )
     }
 
-    returnIndices().forEach { index ->
-        val register = getInstruction(index).registersUsed[0]
+    findInstructionIndicesReversedOrThrow(Opcode.RETURN_OBJECT).forEach { index ->
+        val register = getInstruction<OneRegisterInstruction>(index).registerA
         replaceInstruction(
             index,
             "invoke-static {v$descriptorRegister, v$register}, $APPLY_CUSTOM_FONT_FOR_DESCRIPTOR",
@@ -98,33 +105,33 @@ internal fun MutableMethod.hookResolvedTypefaces() {
  * hooked rather than only the first: a second, non-converging construction site is then still
  * covered instead of silently keeping the app's own font.
  */
+context(context: BytecodePatchContext)
 internal fun MutableMethod.hookWrappedTypeface() {
-    val wrapperType = returnType
-    val wrapIndices =
-        instructions
-            .filter {
-                it.opcode == Opcode.INVOKE_DIRECT &&
-                    it.getReference<MethodReference>()?.let { reference ->
-                        reference.name == "<init>" && reference.definingClass == wrapperType
-                    } == true
-            }
-            .map { it.location.index }
-
-    if (wrapIndices.isEmpty()) {
-        throw PatchException("$definingClass->$name has no $wrapperType constructor call to hook")
-    }
-
     // Last index first, so earlier indices stay valid while instructions are inserted.
-    wrapIndices.sortedDescending().forEach { wrapIndex ->
+    findInstructionIndicesReversedOrThrow(
+        {
+            val reference = getReference<MethodReference>()
+            opcode == Opcode.INVOKE_DIRECT && reference?.name == "<init>" &&
+                reference.parameterTypes.firstOrNull()?.toString() in listOf(TYPEFACE_CLASS, "Ljava/lang/Object;") &&
+                (reference.definingClass == returnType ||
+                    returnType in context.classDefBy(reference.definingClass).interfaces)
+        },
+    ).forEach { wrapIndex ->
         // The instance is the first register of the constructor call, the typeface the second. The
         // insertion goes on the call itself, not on the `new-instance` before it, which is where the
         // branches land.
-        val typefaceRegister = getInstruction(wrapIndex).registersUsed[1]
+        val constructor = getInstruction(wrapIndex)
+        val typefaceRegister = constructor.registersUsed[1]
+        val apply = if (constructor.getReference<MethodReference>()!!.parameterTypes.first().toString() == TYPEFACE_CLASS) {
+            APPLY_CUSTOM_FONT
+        } else {
+            "$CUSTOM_FONT_DESCRIPTOR->applyWrappedTypeface(Ljava/lang/Object;)Ljava/lang/Object;"
+        }
 
         addInstructions(
             wrapIndex,
             """
-            invoke-static {v$typefaceRegister}, $APPLY_CUSTOM_FONT
+            invoke-static/range {v$typefaceRegister .. v$typefaceRegister}, $apply
             move-result-object v$typefaceRegister
             """.trimIndent(),
         )
@@ -136,8 +143,8 @@ internal fun MutableMethod.hookWrappedTypeface() {
  * repository for, and the one it returns, are left as they are.
  */
 internal fun MutableMethod.markAsContentFontResolver() {
-    returnIndices().forEach { index ->
-        val register = getInstruction(index).registersUsed[0]
+    findInstructionIndicesReversedOrThrow(Opcode.RETURN_OBJECT).forEach { index ->
+        val register = getInstruction<OneRegisterInstruction>(index).registerA
 
         replaceInstruction(index, "invoke-static/range {v$register .. v$register}, $END_CONTENT_FONT_REQUEST")
         addInstructions(
@@ -204,10 +211,7 @@ private val PAINT_CLASSES = setOf("Landroid/graphics/Paint;", "Landroid/text/Tex
 /** Passes the typeface of every `Paint.setTypeface` call the method makes through the custom font. */
 internal fun MutableMethod.hookPaintTypefaceCalls() {
     // Last index first, so earlier indices stay valid while instructions are inserted.
-    instructions
-        .filter { it.isPaintTypefaceCall() }
-        .map { it.location.index }
-        .sortedDescending()
+    findInstructionIndicesReversedOrThrow { isPaintTypefaceCall() }
         .forEach { callIndex ->
             // The paint is the first register of the call, the typeface the second.
             val register = getInstruction(callIndex).registersUsed[1]
@@ -265,27 +269,27 @@ internal fun Instruction.createsOneOf(replacements: Replacements) =
  * constructor call there is one the subclass lacks.
  */
 internal fun MutableMethod.replaceCreations(replacements: Replacements) {
-    val creations = instructions.filter { it.createsOneOf(replacements) }
-    val created = creations.map { it.registersUsed[0] }.toSet()
+    val creations = findInstructionIndicesReversed { createsOneOf(replacements) }
+    val created = creations.map { getInstruction<OneRegisterInstruction>(it).registerA }.toSet()
     val constructions =
-        instructions.filter { instruction ->
-            (instruction.opcode == Opcode.INVOKE_DIRECT || instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
-                instruction.getReference<MethodReference>()?.let {
+        findInstructionIndicesReversed {
+            (opcode == Opcode.INVOKE_DIRECT || opcode == Opcode.INVOKE_DIRECT_RANGE) &&
+                getReference<MethodReference>()?.let {
                     it.name == "<init>" && it.definingClass in replacements
                 } == true &&
-                instruction.registersUsed[0] in created
+                registersUsed[0] in created
         }
     val supported =
         constructions.all {
-            val reference = it.getReference<MethodReference>()!!
+            val reference = getInstruction(it).getReference<MethodReference>()!!
             reference.parameterTypes.map(CharSequence::toString) in
                 replacements.getValue(reference.definingClass).second
         }
     if (constructions.isEmpty() || !supported) return
 
     // Last index first, so earlier indices stay valid while instructions are replaced.
-    (creations + constructions).sortedByDescending { it.location.index }.forEach { instruction ->
-        val index = instruction.location.index
+    (creations + constructions).sortedDescending().forEach { index ->
+        val instruction = getInstruction(index)
         val registers = instruction.registersUsed
         if (instruction.opcode == Opcode.NEW_INSTANCE) {
             val replacement = replacements.getValue(instruction.getReference<TypeReference>()!!.type).first
@@ -307,45 +311,19 @@ internal fun MutableMethod.replaceCreations(replacements: Replacements) {
 }
 
 /**
- * Hooks React Native's "Optimistic VF App Lite" font registration, found by walking back from its
- * log string to the nearest call that turns a `Context` into a `Typeface` - the same way piko's
- * closed Force System Font patch (#1795) found it.
+ * Hooks React Native's "Optimistic VF App Lite" font registration, at the result of its resolved font getter.
  */
-internal fun MutableMethod.hookReactNativeFontRegistration(stringIndex: Int) {
-    val searchStart = maxOf(0, stringIndex - 12)
-    val factoryIndex =
-        (searchStart until stringIndex).lastOrNull { index ->
-            val reference = getInstruction(index).getReference<MethodReference>()
-            getInstruction(index).opcode == Opcode.INVOKE_VIRTUAL &&
-                reference?.returnType == TYPEFACE_CLASS &&
-                reference.parameterTypes.singleOrNull()?.toString() == "Landroid/content/Context;"
-        } ?: throw PatchException(
-            "$definingClass->$name has no Typeface factory call to hook",
-        )
-
-    val resultIndex = factoryIndex + 1
-    if (getInstruction(resultIndex).opcode != Opcode.MOVE_RESULT_OBJECT) {
-        throw PatchException(
-            "$definingClass->$name's Typeface factory result has an unexpected shape",
-        )
-    }
-    val register = getInstruction(resultIndex).registersUsed[0]
+internal fun MutableMethod.hookReactNativeFontRegistration(result: Match.InstructionMatch) {
+    val register = result.getInstruction<OneRegisterInstruction>().registerA
 
     addInstructions(
-        resultIndex + 1,
+        result.index + 1,
         """
-        invoke-static {v$register}, $APPLY_CUSTOM_FONT
+        invoke-static/range {v$register .. v$register}, $APPLY_CUSTOM_FONT
         move-result-object v$register
         """.trimIndent(),
     )
 }
-
-/** Return instruction indices, last one first so earlier indices stay valid while patching. */
-private fun MutableMethod.returnIndices() =
-    instructions
-        .filter { it.opcode == Opcode.RETURN_OBJECT }
-        .map { it.location.index }
-        .reversed()
 
 /**
  * Whether anything in the method writes over a register it was handed a parameter in.
@@ -355,7 +333,6 @@ private fun MutableMethod.returnIndices() =
  * DisableAutoScrollPatch.kt.
  */
 private fun MutableMethod.isOverwritten(register: Int) =
-    instructions.any {
-        it.opcode.setsRegister() && it.opcode != Opcode.CHECK_CAST &&
-            it.registersUsed.firstOrNull() == register
-    }
+    indexOfFirstInstruction {
+        opcode.setsRegister() && opcode != Opcode.CHECK_CAST && registersUsed.firstOrNull() == register
+    } >= 0

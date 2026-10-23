@@ -6,23 +6,16 @@
 
 package app.crimera.patches.instagram.entity.userdata
 
-import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.entity.userfriendshipstatus.userFriendshipStatusEntity
-import app.crimera.patches.instagram.utils.Constants.FRIENDSHIP_STATUS_CLASS
+import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.extensionToClassName
-import app.crimera.utils.fieldExtractor
-import app.crimera.utils.getReference
-import app.crimera.utils.methodExtractor
-import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodReference
-import com.android.tools.smali.dexlib2.iface.reference.Reference
+import app.morphe.patcher.util.matchSingle
+import com.android.tools.smali.dexlib2.AccessFlags
 
 val userDataEntity =
     bytecodePatch(
@@ -31,25 +24,34 @@ val userDataEntity =
         dependsOn(decoderEntity, userFriendshipStatusEntity)
 
         execute {
+            GetUsernameExtensionFingerprint.changeFirstString(UserNameLiveTreeUserDictFingerprint.originalMethod.name)
+            GetUserIdExtensionFingerprint.changeFirstString(
+                UserIdLiveTreeUserDictFingerprint.instructionMatches.last().methodReference.name,
+            )
+            GetFullNameExtensionFingerprint.changeFirstString(FullNameLiveTreeUserDictFingerprint.originalMethod.name)
+            GetUserFriendshipStatusExtensionFingerprint.changeFirstString(
+                FriendshipStatusLiveTreeUserDictFingerprint.matchSingle().originalMethod.name,
+            )
+            GetBioExtensionFingerprint.changeFirstString(BiographyLiveTreeUserDictFingerprint.originalMethod.name)
+            GetProfilePictureUrlExtensionFingerprint.changeFirstString(HDProfileInfoUserTreeDictFingerprint.originalMethod.name)
+            GetLowResProfilePictureExtensionFingerprint.changeFirstString(
+                LowResProfilePictureUserTreeDictFingerprint.originalMethod.name,
+            )
+            IsVerifiedExtensionFingerprint.changeFirstString(IsVerifiedUserTreeDictFingerprint.originalMethod.name)
 
-            fun Fingerprint.getMethodName(): String = method.name
-
-            // Pin the getter class before any fingerprint resolves.
-            userModelClass =
-                if (classDefByOrNull(LIVE_TREE_USER_DICT_CLASS) != null) LIVE_TREE_USER_DICT_CLASS else USER_MODEL_CLASS_NAME
-
-            GetUsernameExtensionFingerprint.changeFirstString(UserNameLiveTreeUserDictFingerprint.getMethodName())
-            GetFullNameExtensionFingerprint.changeFirstString(FullNameLiveTreeUserDictFingerprint.getMethodName())
-            GetUserFriendshipStatusExtensionFingerprint.changeFirstString(FriendshipStatusLiveTreeUserDictFingerprint.getMethodName())
-            GetBioExtensionFingerprint.changeFirstString(BiographyLiveTreeUserDictFingerprint.getMethodName())
-            GetProfilePictureUrlExtensionFingerprint.changeFirstString(HDProfileInfoUserTreeDictFingerprint.getMethodName())
-            GetLowResProfilePictureExtensionFingerprint.changeFirstString(LowResProfilePictureUserTreeDictFingerprint.getMethodName())
-            IsVerifiedExtensionFingerprint.changeFirstString(IsVerifiedUserTreeDictFingerprint.getMethodName())
-
-            SelectHighlightsCoverFragmentOnCreateFingerprint.method.apply {
-                val firstIGetObjectIndex = indexOfFirstInstruction(Opcode.IGET_OBJECT)
-                val mutableUserDictIntfFieldName = getInstruction(firstIGetObjectIndex).fieldExtractor().name
-                GetAdditionalUserInfoExtensionFingerprint.changeFirstString(mutableUserDictIntfFieldName)
+            // The user object itself carries the additional user info.
+            GetAdditionalUserInfoExtensionFingerprint.method.apply {
+                val userObjectField = GetAdditionalUserInfoExtensionFingerprint.classDef.fields.single {
+                    it.type == "Ljava/lang/Object;" && !AccessFlags.STATIC.isSet(it.accessFlags)
+                }
+                removeInstructions(0, instructions.size)
+                addInstructions(
+                    0,
+                    """
+                    iget-object v0, p0, $userObjectField
+                    return-object v0
+                    """.trimIndent(),
+                )
             }
         }
     }
