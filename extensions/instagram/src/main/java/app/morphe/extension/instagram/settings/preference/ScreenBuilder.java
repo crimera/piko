@@ -716,15 +716,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.unlockPlusBenefits) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_unlock_plus_benefits"),
-                            str("piko_unlock_plus_benefits_desc"),
-                            Settings.UNLOCK_PLUS_BENEFITS
-                    )
-            );
-        }
         if (SettingsStatus.changeLikeAnimation) {
             addPreference(
                     helper.listPreference(
@@ -809,6 +800,15 @@ public class ScreenBuilder {
                             str("piko_remove_empty_bottom_space"),
                             "",
                             Settings.REMOVE_EMPTY_BOTTOM_SPACE
+                    )
+            );
+        }
+        if (SettingsStatus.unlockPlusBenefits) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_unlock_plus_benefits"),
+                            str("piko_unlock_plus_benefits_desc"),
+                            Settings.UNLOCK_PLUS_BENEFITS
                     )
             );
         }
