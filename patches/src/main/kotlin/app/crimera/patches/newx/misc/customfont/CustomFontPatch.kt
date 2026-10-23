@@ -18,8 +18,8 @@ import app.crimera.patches.newx.utils.Constants.FONT_CLASS
 import app.crimera.patches.newx.utils.Constants.FONT_UPDATE_DESCRIPTOR
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.utils.scopedMatchAll
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction

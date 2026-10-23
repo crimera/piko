@@ -41,8 +41,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.ShapeFingerprint
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -56,8 +55,8 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
@@ -828,14 +827,14 @@ private fun MutableClass.requireHelper(
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String): FieldReference {
-    val resourceId = getResourceId(ResourceType.DRAWABLE, resourceName)
+    val iconResourceId = resourceId(ResourceType.DRAWABLE, resourceName)
     val fields =
-        ShapeFingerprint(
+        Fingerprint(
             name = "<clinit>",
             returnType = "V",
             parameters = emptyList(),
-            filters = listOf(literal(resourceId)),
-        ).scopedMatchAll().map { match ->
+            filters = listOf(literal(iconResourceId)),
+        ).matchAll().map { match ->
             val literalIndex = requireExactlyOne(
                 "NewX $resourceName drawable resource literal in ${match.originalMethod}",
                 match.instructionMatches,

@@ -2,8 +2,8 @@ package app.crimera.patches.newx.models
 
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAll
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall

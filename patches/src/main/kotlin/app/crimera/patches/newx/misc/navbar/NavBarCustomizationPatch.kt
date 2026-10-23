@@ -22,7 +22,7 @@ import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.common.valueReachesRegister
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext

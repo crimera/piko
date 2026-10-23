@@ -8,7 +8,7 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.hasComposeShape
 import app.crimera.patches.common.parameterDescriptors
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
 import app.morphe.patcher.patch.PatchException

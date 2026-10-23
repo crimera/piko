@@ -7,8 +7,8 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
-import app.crimera.patches.utils.ShapeFingerprint
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.ShapeFingerprint
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException

@@ -3,7 +3,7 @@ package app.crimera.patches.newx.models
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException

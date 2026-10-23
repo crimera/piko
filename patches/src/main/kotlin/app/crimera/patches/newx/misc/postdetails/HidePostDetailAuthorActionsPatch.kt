@@ -9,7 +9,7 @@ import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.common.valueReachesRegister
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X

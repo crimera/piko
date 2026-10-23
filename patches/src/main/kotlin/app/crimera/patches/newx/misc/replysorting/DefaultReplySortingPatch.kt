@@ -21,8 +21,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.ShapeFingerprint
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
@@ -32,7 +31,6 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -113,15 +111,13 @@ private fun MutableMethod.insertReplySortingDefault(
  * Targets the NewX Compose post-detail timeline repository initialization that seeds
  * TimelineRankingMode.Relevance before the repository factory call.
  */
-private object NewXComposeReplySortingFingerprint : ShapeFingerprint(
+private object NewXComposeReplySortingFingerprint : Fingerprint(
     name = "invokeSuspend",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
-    custom = { method, classDef ->
-        !AccessFlags.STATIC.isSet(method.accessFlags) &&
-            classDef.superclass == "Lkotlin/coroutines/jvm/internal/SuspendLambda;" &&
-            classDef.interfaces.contains("Lkotlin/jvm/functions/Function2;")
-    },
+    isStatic = false,
+    superclass = "Lkotlin/coroutines/jvm/internal/SuspendLambda;",
+    interfaces = listOf("Lkotlin/jvm/functions/Function2;"),
     filters =
         listOf(
             fieldAccess(
@@ -139,17 +135,17 @@ private object NewXComposeReplySortingFingerprint : ShapeFingerprint(
  * of the contract either: 12.33 alpha.02 un-merged the callback's `invoke` switch into private
  * per-case methods (`B(Object)`) while keeping the same body.
  */
-private object NewXComposeReplySortingSelectionFingerprint : ShapeFingerprint(
+private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
-    custom = { method, classDef ->
-        !AccessFlags.STATIC.isSet(method.accessFlags) &&
-            classDef.superclass == "Lkotlin/jvm/internal/FunctionReferenceImpl;" &&
-            classDef.interfaces.contains("Lkotlin/jvm/functions/Function1;") &&
-            method.implementation?.instructions?.any { instruction ->
-                val reference = (instruction as? ReferenceInstruction)?.reference
-                reference is StringReference && reference.string == "timelineRepository"
-            } == true
+    isStatic = false,
+    superclass = "Lkotlin/jvm/internal/FunctionReferenceImpl;",
+    interfaces = listOf("Lkotlin/jvm/functions/Function1;"),
+    custom = { method, _ ->
+        method.implementation?.instructions?.any { instruction ->
+            val reference = (instruction as? ReferenceInstruction)?.reference
+            reference is StringReference && reference.string == "timelineRepository"
+        } == true
     },
     filters =
         listOf(
@@ -161,10 +157,11 @@ private object NewXComposeReplySortingSelectionFingerprint : ShapeFingerprint(
  * Targets the Compose state initializer that seeds the reply-sorting sheet with
  * `mutableStateOf(TimelineRankingMode.Relevance)`.
  */
-private object NewXComposeReplySortingUiStateFingerprint : ShapeFingerprint(
+private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
     name = "invoke",
     returnType = "Ljava/lang/Object;",
     parameters = emptyList(),
+    interfaces = listOf("Lkotlin/jvm/functions/Function0;"),
     filters =
         listOf(
             fieldAccess(
@@ -172,12 +169,11 @@ private object NewXComposeReplySortingUiStateFingerprint : ShapeFingerprint(
                 name = "Relevance",
             ),
         ),
-    custom = { method, classDef ->
+    custom = { method, _ ->
         val instructions = method.implementation?.instructions?.toList()
-        classDef.interfaces.contains("Lkotlin/jvm/functions/Function0;") &&
-            instructions?.withIndex()?.any { (index, _) ->
-                isComposeStateInitializer(instructions, index)
-            } == true
+        instructions?.withIndex()?.any { (index, _) ->
+            isComposeStateInitializer(instructions, index)
+        } == true
     },
 )
 
@@ -270,7 +266,7 @@ val newXDefaultReplySortingPatch =
             val match =
                 requireExactlyOne(
                     label = "NewX Compose reply sorting initializer",
-                    candidates = NewXComposeReplySortingFingerprint.scopedMatchAllOrNull().orEmpty(),
+                    candidates = NewXComposeReplySortingFingerprint.matchAllOrNull().orEmpty(),
                 )
             val method = match.method
             val targetSgetCandidates = match.instructionMatches.filter { matchedInstruction ->
@@ -350,7 +346,7 @@ val newXDefaultReplySortingPatch =
                 requireExactlyOne(
                     label = "NewX Compose reply sorting selection handler",
                     candidates = NewXComposeReplySortingSelectionFingerprint
-                        .scopedMatchAllOrNull()
+                        .matchAllOrNull()
                         .orEmpty(),
                 )
             val selectionMethod = selectionMatch.method
@@ -454,7 +450,7 @@ val newXDefaultReplySortingPatch =
             // Patch the Compose reply sorting UI state initializer so the button label
             // and sheet selection reflect the configured default instead of Relevance.
             val uiStateMatches = NewXComposeReplySortingUiStateFingerprint
-                .scopedMatchAllOrNull()
+                .matchAllOrNull()
                 .orEmpty()
             val uiStateCandidates =
                 uiStateMatches.flatMap { candidate ->

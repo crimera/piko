@@ -1,7 +1,7 @@
 package app.crimera.patches.newx.misc.serverlogging
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups

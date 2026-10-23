@@ -14,7 +14,7 @@ import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.MEDIA_SHEET_FILTER_DESCRIPTOR
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions

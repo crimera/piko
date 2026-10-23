@@ -14,7 +14,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.instructions

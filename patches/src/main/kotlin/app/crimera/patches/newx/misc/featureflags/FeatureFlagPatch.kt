@@ -1,7 +1,7 @@
 package app.crimera.patches.newx.misc.featureflags
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
 import app.crimera.patches.settings.action

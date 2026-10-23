@@ -6,7 +6,7 @@ import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext

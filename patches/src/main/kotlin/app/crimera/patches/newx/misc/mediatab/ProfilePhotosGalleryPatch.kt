@@ -12,7 +12,7 @@ import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.crimera.bytecode.Block
 import app.crimera.bytecode.Target

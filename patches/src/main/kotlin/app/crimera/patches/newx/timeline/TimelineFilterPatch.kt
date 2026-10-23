@@ -6,7 +6,7 @@ import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.p0Register
 

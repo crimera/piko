@@ -19,7 +19,7 @@ import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.common.hasComposeShape
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.valueReachesRegister
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess

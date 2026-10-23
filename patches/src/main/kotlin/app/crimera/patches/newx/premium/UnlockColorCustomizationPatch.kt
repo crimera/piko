@@ -8,7 +8,7 @@ package app.crimera.patches.newx.premium
 
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.insertHook
-import app.crimera.patches.utils.scopedMatchAllOrNull
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
