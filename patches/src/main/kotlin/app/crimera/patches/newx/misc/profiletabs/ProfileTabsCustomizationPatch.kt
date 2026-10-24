@@ -67,26 +67,6 @@ private val PROFILE_TAB_STABLE_STRINGS =
 /** Constant names the enum must declare before its title literals are trusted. */
 private val REQUIRED_PROFILE_TAB_IDS = listOf("Posts", "Replies")
 
-/**
- * Enum constants that are still resolved and title-validated but never registered with the editor
- * catalog, so the editor does not list them.
- *
- * Under the default combined-posts/highlights layout the builder emits one `All` page whose
- * sub-tabs carry `Posts`, and under the default photos/videos layout it emits one `Videos` page
- * whose sub-tabs carry `Photos`; standalone `Photos`/`Media`/`Posts` pages only exist for other
- * feature-switch combinations. None of them is the top-level page the default profile moves, so
- * only the movable entries stay in the editor. In the non-combined builds this also means the
- * app's top-level `Posts` page cannot be reordered or hidden (it still renders in the app order).
- */
-private val EDITOR_HIDDEN_PROFILE_TAB_IDS = listOf("Photos", "Media", "Posts")
-
-/**
- * Editor title overrides: the registered id stays the key (it is the stored id and the id the
- * runtime filter matches), but the editor labels it with the app's own localized title of the
- * mapped constant. The default profile layout labels the combined `Videos` page as `Media`.
- */
-private val EDITOR_TITLE_SOURCE = mapOf("Videos" to "Media")
-
 private val INVOKE_OPCODES =
     setOf(
         Opcode.INVOKE_STATIC,
@@ -233,27 +213,21 @@ internal fun MutableMethod.injectProfileTabIdBridgeBody(tabField: FieldReference
     }
 }
 
+/**
+ * Registers every constant of the tab enum with its own localized title. Which pages the builder
+ * emits depends on feature switches; the editor lists the canonical set and the runtime filter
+ * only reorders or hides pages the app actually built.
+ */
 context(context: BytecodePatchContext)
 private fun injectProfileTabsRegistration(tabs: List<ProfileTabSpec>) {
     val registerTab = methodReference(PROFILE_TAB_REGISTER_DESCRIPTOR)
-    val tabsById = tabs.associateBy { tab -> tab.id }
     SettingsRegistrationState.inject(context) {
-        tabs.filterNot { tab -> tab.id in EDITOR_HIDDEN_PROFILE_TAB_IDS }
-            .forEach { tab ->
-                constString(0, tab.id)
-                constInt(1, editorTitleResourceId(tab, tabsById))
-                invokeStatic(registerTab, 0, 1)
-            }
+        tabs.forEach { tab ->
+            constString(0, tab.id)
+            constInt(1, tab.titleResourceId)
+            invokeStatic(registerTab, 0, 1)
+        }
     }
-}
-
-/** Title resource for [tab], overridden through [EDITOR_TITLE_SOURCE] when the id has a source. */
-private fun editorTitleResourceId(tab: ProfileTabSpec, tabsById: Map<String, ProfileTabSpec>): Int {
-    val sourceId = EDITOR_TITLE_SOURCE[tab.id] ?: return tab.titleResourceId
-    return tabsById[sourceId]?.titleResourceId
-        ?: throw PatchException(
-            "NewX profile tab ${tab.id} needs the $sourceId title but that constant was not resolved",
-        )
 }
 
 context(context: BytecodePatchContext)
