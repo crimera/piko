@@ -73,10 +73,10 @@ public final class SettingsActivity {
     }
 
     @SuppressLint("ResourceType")
-    public static void setupOnActivity(Activity activity) {
+    public static void setupOnActivity(Activity activity, Bundle savedInstanceState) {
         Controller controller = new Controller(activity);
         sControllers.put(activity, controller);
-        controller.setup(null);
+        controller.setup(savedInstanceState);
 
         if (activity != null && activity.getApplication() != null) {
             activity.getApplication().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {

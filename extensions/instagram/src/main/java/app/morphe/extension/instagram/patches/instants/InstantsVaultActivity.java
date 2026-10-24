@@ -104,11 +104,16 @@ public final class InstantsVaultActivity {
         private List<String[]> items;
         private String filter = "";
         private FrameLayout content;
+        private EditText searchField;
+        private TextView clearAllButton;
         private float density;
         private int tileSize;
         private ThumbLoader thumbs;
         private final Handler ui = new Handler(Looper.getMainLooper());
         private final Runnable rebuild = this::rebuildContent;
+        private final View.OnLayoutChangeListener contentLayoutListener =
+                (view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                        updateTileSize(right - left);
 
         private final List<Tile> tiles = new ArrayList<>();
         private ScrollView scroll;
@@ -156,9 +161,13 @@ public final class InstantsVaultActivity {
             root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
             InstagramPreferenceStyle.applySystemBarStyle(activity);
             root.addView(buildToolbar());
-            if (!items.isEmpty()) root.addView(buildSearchField());
+            if (!items.isEmpty()) {
+                searchField = buildSearchField();
+                root.addView(searchField);
+            }
 
             content = new FrameLayout(activity);
+            content.addOnLayoutChangeListener(contentLayoutListener);
             root.addView(content, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
             rebuildContent();
@@ -195,6 +204,7 @@ public final class InstantsVaultActivity {
 
         void onDestroy() {
             ui.removeCallbacksAndMessages(null);
+            if (content != null) content.removeOnLayoutChangeListener(contentLayoutListener);
             releaseTiles();
             if (thumbs != null) {
                 thumbs.shutdown();
@@ -242,6 +252,9 @@ public final class InstantsVaultActivity {
         }
 
         private void rebuildContent() {
+            int controlsVisibility = items.isEmpty() ? View.GONE : View.VISIBLE;
+            if (searchField != null) searchField.setVisibility(controlsVisibility);
+            if (clearAllButton != null) clearAllButton.setVisibility(controlsVisibility);
             releaseTiles();
             content.removeAllViews();
             List<String[]> visible = visibleItems();
@@ -266,6 +279,21 @@ public final class InstantsVaultActivity {
         private void scheduleSweep() {
             ui.removeCallbacks(sweep);
             ui.post(sweep);
+        }
+
+        private void updateTileSize(int width) {
+            int availableWidth = width - content.getPaddingLeft() - content.getPaddingRight();
+            int size = (availableWidth - dp(2) * (COLUMNS + 1)) / COLUMNS;
+            if (size <= 0 || size == tileSize) return;
+
+            tileSize = size;
+            for (Tile tile : tiles) {
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) tile.view.getLayoutParams();
+                params.width = size;
+                params.height = size;
+                tile.view.setLayoutParams(params);
+            }
+            scheduleSweep();
         }
 
         private void sweepVisible() {
@@ -377,7 +405,9 @@ public final class InstantsVaultActivity {
         private LinearLayout buildGroupedBody(List<String[]> source) {
             Map<String, List<String[]>> groups = new LinkedHashMap<>();
             for (String[] row : source) {
-                String senderId = row[6] != null && !row[6].isEmpty() ? row[6] : "unknown";
+                String userId = row.length > 6 ? row[6] : null;
+                String senderId = userId != null && !userId.isEmpty()
+                        ? userId : "name:" + (row[1] == null ? "" : row[1]);
                 List<String[]> list = groups.get(senderId);
                 if (list == null) {
                     list = new ArrayList<>();
@@ -485,13 +515,17 @@ public final class InstantsVaultActivity {
 
             if (!items.isEmpty()) {
                 TextView clear = new TextView(activity);
+                clearAllButton = clear;
                 clear.setText(str("piko_instants_clear_all"));
                 clear.setTextColor(themed("igds_color_error_or_destructive", 0xFFFF5C5C));
                 clear.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
                 clear.setOnClickListener(v -> confirm(str("piko_instants_clear_all_confirm"), str("piko_instants_clear_all"),
                         () -> {
-                            PikoInstantsDb.getInstance(activity).clearAll();
-                            setup();
+                            PikoInstantsDb db = PikoInstantsDb.getInstance(activity);
+                            db.clearAll();
+                            items = db.getAll();
+                            pruneThumbCache();
+                            rebuildContent();
                         }));
                 bar.addView(clear);
             }

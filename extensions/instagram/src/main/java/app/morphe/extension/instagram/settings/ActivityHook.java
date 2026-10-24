@@ -111,7 +111,7 @@ public class ActivityHook {
         return isPikoIntent(activity.getIntent());
     }
 
-    public static boolean create(Activity activity) {
+    public static boolean create(Activity activity, Bundle savedInstanceState) {
         Intent intent = activity == null ? null : activity.getIntent();
         if (!isPikoIntent(intent)) return false;
 
@@ -122,7 +122,7 @@ public class ActivityHook {
             }
         }
 
-        return dispatchLaunch(activity, intent);
+        return dispatchLaunch(activity, intent, savedInstanceState);
     }
 
     public static boolean onBackPressed(Activity activity) {
@@ -143,10 +143,10 @@ public class ActivityHook {
     private static void handleNewIntent(Activity activity, Intent newIntent) {
         if (!isPikoIntent(newIntent)) return;
         activity.setIntent(newIntent);
-        dispatchLaunch(activity, newIntent);
+        dispatchLaunch(activity, newIntent, null);
     }
 
-    private static boolean dispatchLaunch(Activity activity, Intent intent) {
+    private static boolean dispatchLaunch(Activity activity, Intent intent, Bundle savedInstanceState) {
         String launchType = intent.getStringExtra(EXTRA_PIKO_LAUNCH_TYPE);
         if (launchType == null && LAUNCH_TYPE_SETTINGS.equals(intent.getStringExtra(EXTRA_SHORTCUT))) {
             launchType = LAUNCH_TYPE_SETTINGS;
@@ -157,7 +157,7 @@ public class ActivityHook {
 
         switch (launchType) {
             case LAUNCH_TYPE_SETTINGS:
-                SettingsActivity.setupOnActivity(activity);
+                SettingsActivity.setupOnActivity(activity, savedInstanceState);
                 break;
             case LAUNCH_TYPE_DELETED_MESSAGES:
                 DeletedMessagesActivity.setupOnActivity(activity);

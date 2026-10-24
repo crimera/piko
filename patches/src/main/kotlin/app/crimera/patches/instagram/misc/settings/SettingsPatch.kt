@@ -110,7 +110,7 @@ val settingsPatch =
                 addInstructionsWithLabels(
                     overrideIndex,
                     """
-                        invoke-static/range { v$thisRegister .. v$thisRegister }, $ACTIVITY_SETTINGS_CLASS/ActivityHook;->create(Landroid/app/Activity;)Z
+                        invoke-static/range { v$thisRegister .. v${thisRegister + 1} }, $ACTIVITY_SETTINGS_CLASS/ActivityHook;->create(Landroid/app/Activity;Landroid/os/Bundle;)Z
                         move-result v$freeRegister
                         if-eqz v$freeRegister, :not_piko
                         return-void

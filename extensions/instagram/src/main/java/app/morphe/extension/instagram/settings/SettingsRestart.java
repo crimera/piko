@@ -31,10 +31,6 @@ public final class SettingsRestart {
             return;
         }
 
-        requestRestartOnTaskRemoved();
-    }
-
-    public static synchronized void requestRestartOnTaskRemoved() {
         pendingRestart = true;
         flushPreferences();
     }

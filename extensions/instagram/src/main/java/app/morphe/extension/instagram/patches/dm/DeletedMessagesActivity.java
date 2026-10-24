@@ -10,6 +10,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
@@ -138,6 +139,25 @@ public final class DeletedMessagesActivity {
             sControllers.put(activity, controller);
         }
         controller.setup();
+        if (activity.getApplication() != null) {
+            activity.getApplication().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+                @Override public void onActivityCreated(Activity a, Bundle b) {}
+                @Override public void onActivityStarted(Activity a) {}
+                @Override public void onActivityResumed(Activity a) {}
+                @Override public void onActivityPaused(Activity a) {}
+                @Override public void onActivityStopped(Activity a) {}
+                @Override public void onActivitySaveInstanceState(Activity a, Bundle b) {}
+                @Override
+                public void onActivityDestroyed(Activity a) {
+                    if (a == activity) {
+                        a.getApplication().unregisterActivityLifecycleCallbacks(this);
+                        synchronized (sControllers) {
+                            sControllers.remove(activity);
+                        }
+                    }
+                }
+            });
+        }
     }
 
     public static boolean handleBackPressed(Activity activity) {
@@ -481,6 +501,12 @@ public final class DeletedMessagesActivity {
                                 Utils.showToastShort(str("piko_copied_media_link"));
                             } else {
                                 Uri uri = Uri.parse(url);
+                                // Captured message text can also start with "http" without using a web scheme.
+                                String scheme = uri.getScheme();
+                                if (scheme == null
+                                        || !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))) {
+                                    return;
+                                }
                                 boolean igLink = url.contains("instagram.com/reel/")
                                         || url.contains("instagram.com/p/")
                                         || url.contains("instagram.com/tv/");

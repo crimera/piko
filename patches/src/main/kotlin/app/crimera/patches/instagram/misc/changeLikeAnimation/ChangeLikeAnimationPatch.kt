@@ -209,7 +209,7 @@ val changeLikeAnimationPatch =
             IgFragmentActivityOnCreate.method.apply {
                 addInstruction(
                     indexOfFirstInstructionOrThrow(Opcode.RETURN_VOID),
-                    "invoke-static {}, $EXTENSION_CLASS_DESCRIPTOR->onActivityCreated()V",
+                    "invoke-static {p0}, $EXTENSION_CLASS_DESCRIPTOR->onActivityCreated(Landroid/app/Activity;)V",
                 )
             }
 
