@@ -55,6 +55,8 @@
     <string name="piko_disable_comments">Disable comments</string>
     <string name="piko_limit_following_feed">Limit feed to following profiles</string>
     <string name="piko_limit_following_feed_desc">Filters the home feed to display only content from profiles you follow.</string>
+    <string name="piko_hide_feed_posts">Hide feed posts</string>
+    <string name="piko_hide_feed_posts_desc">Hides posts from the home feed</string>
     <string name="piko_disable_discover_people">Hide suggested accounts</string>
     <string name="piko_focus_lock">Focus Lock</string>
     <string name="piko_focus_lock_desc">Force distraction free settings on for a set time</string>

@@ -161,6 +161,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.LIMIT_FOLLOWING_FEED);
     }
 
+    public static boolean hideFeedPosts() {
+        return SharedPref.getBooleanPref(Settings.HIDE_FEED_POSTS) && SettingsStatus.hideFeedPosts;
+    }
+
     public static boolean hideStoriesTray() {
         return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }

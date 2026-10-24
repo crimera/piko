@@ -148,6 +148,10 @@ public class SettingsStatus {
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
     }
+    public static boolean hideFeedPosts = false;
+    public static void hideFeedPosts() {
+        hideFeedPosts = true;
+    }
     public static boolean hideGroupCreationOnSharesheet = false;
     public static void hideGroupCreationOnSharesheet() {
         hideGroupCreationOnSharesheet = true;
@@ -192,7 +196,7 @@ public class SettingsStatus {
         hideReshareButton = true;
     }
     public static boolean distractionFreeSection() {
-        return (hideReelsFollowButton || disableDoubleTapLike || hideHiddenRequests || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideHiddenRequests || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideFeedPosts || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
     //Misc section.
@@ -317,6 +321,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);
         FLAGS.put(str("piko_hide_reels_follow_button"),SettingsStatus.hideReelsFollowButton);
         FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
+        FLAGS.put(str("piko_hide_feed_posts"),SettingsStatus.hideFeedPosts);
         FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
         FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);
         FLAGS.put(str("piko_hide_hidden_requests"),SettingsStatus.hideHiddenRequests);

@@ -526,6 +526,15 @@ public class ScreenBuilder {
                     Settings.DISABLE_COMMENTS
             );
         }
+        if (SettingsStatus.hideFeedPosts) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_feed_posts"),
+                            str("piko_hide_feed_posts_desc"),
+                            Settings.HIDE_FEED_POSTS
+                    )
+            );
+        }
         if (SettingsStatus.limitFollowingFeed) {
             addLockableSwitch(
                     str("piko_limit_following_feed"),
