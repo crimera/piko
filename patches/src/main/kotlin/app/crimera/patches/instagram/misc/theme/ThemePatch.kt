@@ -55,6 +55,7 @@ val themePatch =
                 forceWhiteOnMediaChrome()
                 preserveCreationButtonContrast()
                 preserveLightClipsComposerContrast()
+                forceBlackStoryBackground()
                 preserveLightOverflowStampBackgrounds()
                 applyLegacyTheme(amoled == true)
 

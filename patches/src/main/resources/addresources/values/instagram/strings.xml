@@ -38,6 +38,8 @@
     <string name="piko_disable_typing_status">Disable typing status</string>
     <string name="piko_disable_screenshot_detection">Disable screenshot detection</string>
     <string name="piko_view_dm_anonymously">View direct messages anonymously</string>
+    <string name="piko_mark_as_read_after_reply">Mark as read after reply</string>
+    <string name="piko_mark_as_read_after_reply_desc">Mark a chat as read after you send a reply, even when viewing direct messages anonymously or using all ghost modes</string>
     <string name="piko_view_dm_anonymously_desc">When enabled, others can\'t see when you\'ve read their messages. When both this setting and Turn on all ghost modes are disabled, Instagram\'s Show read receipts setting is used</string>
     <string name="piko_turn_on_all_ghost_modes">Turn on all ghost modes</string>
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
@@ -98,6 +100,8 @@
     <string name="piko_disable_swipe_to_create_desc">Prevents opening the creation screen by swiping right on the home tab.</string>
     <string name="piko_hide_stories_tray">Hide stories tray</string>
     <string name="piko_hide_stories_tray_desc">Hide stories tray from main feed</string>
+    <string name="piko_hide_hidden_requests">Hide hidden requests</string>
+    <string name="piko_hide_hidden_requests_desc">Hides the hidden requests (spam) button in the message requests page</string>
     <string name="piko_hide_notes_tray">Hide notes tray</string>
     <string name="piko_hide_notes_tray_desc">Hides notes tray in DM section</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Hide group creation button on sharesheet</string>
@@ -133,7 +137,7 @@
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server. May reduce performance, increase app data size, or cause the app to switch to an older layout</string>
     <string name="piko_copy_comment">Copy comment</string>
-    <string name="piko_copy_comment_desc">Adds a button to copy comments on posts and reels</string>
+    <string name="piko_copy_comment_desc">Adds buttons to copy comments and their authors’ usernames on posts and reels</string>
     <string name="piko_comment_copied_success">Comment copied</string>
     <string name="piko_comment_copied_failed">No text found to copy</string>
     <string name="piko_copy_username">Copy username</string>
@@ -157,6 +161,16 @@
     <string name="piko_inbox_lock_unlock">Unlock</string>
     <string name="piko_inbox_lock_prompt">Unlock your messages</string>
     <string name="piko_inbox_lock_no_lock">Set a screen lock on your device to use Inbox lock</string>
+    <string name="piko_hidden_chats">Hidden chats</string>
+    <string name="piko_hidden_chats_desc">Adds a hide option to the chat long-press menu that moves the chat to a private inbox, separate for each account. Turn on Inbox lock to protect it</string>
+    <string name="piko_hidden_chats_hidden">Chat hidden</string>
+    <string name="piko_hidden_chats_unhidden">Chat unhidden</string>
+    <string name="piko_hidden_chats_opened">Hidden chats</string>
+    <string name="piko_hidden_chats_closed">Back to your inbox</string>
+    <string name="piko_hidden_chats_mute">Mute hidden chats</string>
+    <string name="piko_hidden_chats_mute_desc">Don\'t show notifications for messages from chats you have hidden</string>
+    <string name="piko_hidden_chats_taps">Taps to open hidden chats</string>
+    <string name="piko_hidden_chats_taps_desc">Tap the messages button this many times in a row to switch between your inbox and your hidden chats</string>
     <string name="piko_unlock_plus_benefits">Unlock Plus benefits</string>
     <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
 
@@ -164,6 +178,14 @@
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
+    <string name="piko_ephemeral_caption">Show how ephemeral media was received</string>
+    <string name="piko_ephemeral_caption_desc">Adds a line under photos and videos that were sent as ephemeral media saying how they were sent and until when they are available</string>
+    <string name="piko_ephemeral_received_once">Received to view once</string>
+    <string name="piko_ephemeral_received_twice">Received to view twice</string>
+    <string name="piko_ephemeral_received_chat">Received to keep in chat</string>
+    <string name="piko_ephemeral_received_unknown">Original viewing mode unknown</string>
+    <string name="piko_ephemeral_available_until">Available until %s</string>
+    <string name="piko_ephemeral_expired">Expired</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
     <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
 
@@ -183,6 +205,8 @@
     <string name="piko_disable_story_flipping_desc">Disable automatic flipping/moving to next story</string>
     <string name="piko_loop_story">Loop story</string>
     <string name="piko_loop_story_desc">Replay the current story when it ends</string>
+    <string name="piko_hide_story_follow_button">Hide story follow button</string>
+    <string name="piko_hide_story_follow_button_desc">Hides the follow button at the top of stories from accounts you do not follow</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
@@ -196,6 +220,10 @@
     <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
     <string name="piko_download_username_folder">Split media by username</string>
     <string name="piko_download_username_folder_desc">Creates subfolders based on username</string>
+    <string name="piko_prefer_dash_format">Prefer DASH format</string>
+    <string name="piko_prefer_dash_format_desc">Downloads videos as the sharpest DASH rendition Instagram lists, up to 1080p AV1, instead of the 720p H.264 file</string>
+    <string name="piko_dash_audio_aac_lc">Convert DASH audio to AAC</string>
+    <string name="piko_dash_audio_aac_lc_desc">With Prefer DASH format on, re-encodes the xHE-AAC sound of DASH downloads as AAC-LC at 192 kbps, which every player can play</string>
     <string name="piko_embed_download_metadata">Embed video metadata</string>
     <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
     <string name="piko_download_file_name_template">Filename format</string>
@@ -212,6 +240,7 @@
     <string name="piko_download_file_name_token_variant_suffix">Variant</string>
     <string name="piko_download_current_media">Download current media</string>
     <string name="piko_download_as_image">Download as image</string>
+    <string name="piko_saved_at">Saved at %s</string>
     <string name="piko_video_variants">Video variants</string>
     <string name="piko_image_variants">Image variants</string>
     <string name="piko_download_audio">Download audio</string>
@@ -338,12 +367,19 @@
 
     <string name="piko_action_bar_button_settings_icon">Settings icon</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">Jump to oldest message icon</string>
+    <string name="piko_jump_oldest_started">Jumping to the oldest message, tap again to cancel</string>
+    <string name="piko_jump_oldest_cancelled">Cancelled</string>
+    <string name="piko_jump_oldest_stopped">Stopped waiting for older messages. Tap again to retry.</string>
     <string name="piko_action_bar_button_profile_info_icon">Profile info icon</string>
     <string name="piko_action_bar_button_create_icon">Create icon</string>
     <string name="piko_action_bar_button_notifications_icon">Notifications icon</string>
 
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
+    <string name="piko_settings_search_hint">Search</string>
+    <string name="piko_settings_search_clear">Clear search</string>
+    <string name="piko_settings_search_no_results">No results found</string>
 
     <!-- Font Section -->
     <string name="piko_category_font">Font</string>

@@ -14,9 +14,9 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -63,7 +63,7 @@ val inboxLockPatch =
 
         execute {
             instagramInitHook.fingerprint.method.apply {
-                val superIndex = instructions.indexOfFirst { it.opcode == Opcode.INVOKE_SUPER }
+                val superIndex = indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)
                 addInstruction(superIndex + 1, "invoke-static {}, $EXTENSION_CLASS->init()V")
             }
 

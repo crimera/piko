@@ -8,24 +8,29 @@ package app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton
 
 import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.addFlags
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.PatchException
-import app.morphe.util.getReference
-import app.morphe.util.registersUsed
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
+import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 object BindMainFeedActionBarFingerprint : Fingerprint(
-    strings = listOf("BindMainFeedActionBar"),
+    filters = listOf(string("BindMainFeedActionBar")),
     returnType = "Ljava/lang/Object;",
 )
 
@@ -36,30 +41,49 @@ private object HomeActionModelFingerprint : Fingerprint(
 
 val hideHomeActionButtonsPatch = bytecodePatch {
     execute {
-        val method = HomeActionModelFingerprint.matchAll(0..Int.MAX_VALUE)
-            .singleOrNull()?.method
-            ?: throw PatchException("Expected one home action model builder")
+        val method = HomeActionModelFingerprint.matchSingle().method
         val callIndex = method.instructions.withIndex().filter { (_, instruction) ->
             val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
             reference?.parameterTypes?.map(CharSequence::toString) ==
-                listOf("Lcom/instagram/common/session/UserSession;", "I") &&
+                listOf(USER_SESSION_CLASS, "I") &&
                 reference.returnType == "Ljava/lang/String;"
         }.singleOrNull()?.index
             ?: throw PatchException("Expected one home action name lookup")
         val result = method.getInstruction(callIndex + 1)
-        val nullCheck = method.getInstruction(callIndex + 2)
-        if (result.opcode != Opcode.MOVE_RESULT_OBJECT ||
-            result.registersUsed.size != 1 || nullCheck.opcode != Opcode.IF_EQZ ||
-            nullCheck.registersUsed.singleOrNull() != result.registersUsed.single()
-        ) throw PatchException("Expected home action name null guard")
+        if (result.opcode != Opcode.MOVE_RESULT_OBJECT || result.registersUsed.size != 1) {
+            throw PatchException("Expected home action name result")
+        }
         val register = result.registersUsed.single()
-        method.addInstructions(
-            callIndex + 2,
-            """
+        val next = method.getInstruction(callIndex + 2)
+        val filter = """
             invoke-static/range {v$register .. v$register}, $ACTIONBAR_DESCRIPTOR->filterHomeAction(Ljava/lang/String;)Ljava/lang/String;
             move-result-object v$register
-            """.trimIndent(),
-        )
+            """.trimIndent()
+        if (next.opcode == Opcode.IF_EQZ && next.registersUsed == listOf(register)) {
+            method.addInstructions(callIndex + 2, filter)
+        } else {
+            // Newer versions collect names before building the action buttons.
+            val append = next.getReference<MethodReference>()
+            val loop = method.getInstruction(callIndex + 3) as? BuilderOffsetInstruction
+            val loopTarget = loop?.target?.location?.index
+            val loopHead = loopTarget?.let { method.getInstruction(it) }
+            val hasNext = loopHead?.getReference<MethodReference>()
+            if (next.opcode != Opcode.INVOKE_VIRTUAL ||
+                append?.definingClass != "Ljava/util/AbstractCollection;" || append.name != "add" ||
+                append.parameterTypes.map(CharSequence::toString) != listOf("Ljava/lang/Object;") ||
+                append.returnType != "Z" || next.registersUsed.size != 2 ||
+                next.registersUsed[1] != register || next.registersUsed[0] == register ||
+                loop?.opcode != Opcode.GOTO || loopTarget == null || loopTarget >= callIndex ||
+                loopHead?.opcode != Opcode.INVOKE_INTERFACE || loopHead.registersUsed.size != 1 ||
+                hasNext?.definingClass != "Ljava/util/Iterator;" || hasNext.name != "hasNext" ||
+                hasNext.parameterTypes.isNotEmpty() || hasNext.returnType != "Z"
+            ) throw PatchException("Expected home action name null guard or collection loop")
+            method.addInstructionsWithLabels(
+                callIndex + 2,
+                "$filter\nif-eqz v$register, :next_action",
+                ExternalLabel("next_action", loop),
+            )
+        }
     }
 }
 
@@ -71,29 +95,45 @@ val mainFeedActionBarButtonPatch =
 
         execute {
 
-            BindMainFeedActionBarFingerprint.matchAll(1..1).single().method.apply {
-                val code = instructions.toList()
-                val markerIndex = code.withIndex().singleOrNull { (_, instruction) ->
-                    instruction.getReference<StringReference>()?.string == "BindMainFeedActionBar"
-                }?.index ?: throw PatchException("Expected one main feed action bar binding marker")
-                val containerIndex = (markerIndex + 1 until code.size - 2).singleOrNull { index ->
+            val binding = BindMainFeedActionBarFingerprint.matchSingle().method
+            val actionBar = "Linstagram/features/feed/mainfeed/actionbar/MainFeedActionBar;"
+            val candidates = mutableListOf(binding)
+            // Newer versions move the layout update into a method on the action bar itself.
+            val calls = binding.instructions.mapNotNull {
+                it.getReference<MethodReference>()?.takeIf { reference ->
+                    reference.definingClass == actionBar && reference.returnType == "V" &&
+                        USER_SESSION_CLASS in reference.parameterTypes
+                }
+            }.distinctBy { it.toString() }
+            for (call in calls) {
+                candidates += mutableClassDefBy(actionBar).methods.single { method ->
+                    method.name == call.name && method.parameterTypes == call.parameterTypes &&
+                        method.returnType == call.returnType
+                }
+            }
+            val containers = candidates.flatMap { method ->
+                val code = method.instructions.toList()
+                (0 until code.size - 2).mapNotNull { index ->
                     val read = code[index]
                     val field = read.getReference<FieldReference>()
                     val visibility = code[index + 2].getReference<MethodReference>()
-                    read.opcode == Opcode.IGET_OBJECT &&
-                        field?.definingClass == "Linstagram/features/feed/mainfeed/actionbar/MainFeedActionBar;" &&
-                        field.type == "Landroid/widget/LinearLayout;" &&
+                    if (read.opcode == Opcode.IGET_OBJECT &&
+                        field?.definingClass == actionBar && field.type == "Landroid/widget/LinearLayout;" &&
                         code[index + 1].opcode == Opcode.IF_EQZ &&
                         visibility?.name == "setVisibility" && visibility.parameterTypes == listOf("I") &&
                         visibility.returnType == "V" &&
                         code[index + 2].registersUsed.firstOrNull() == read.registersUsed.firstOrNull()
-                } ?: throw PatchException("Expected one main feed action button container")
-                val layoutRegister = code[containerIndex].registersUsed.first()
-                addInstruction(
-                    containerIndex + 1,
-                    "invoke-static/range {v$layoutRegister .. v$layoutRegister}, $ACTIONBAR_DESCRIPTOR->mainFeedActionBarButton(Landroid/view/ViewGroup;)V",
-                )
-                addFlags("mainFeedActionBarFlags")
+                    ) method to index else null
+                }
             }
+            val (method, index) = containers.singleOrNull()
+                ?: throw PatchException("Expected one main feed action button container")
+            val layoutRegister = method.getInstruction(index).registersUsed.first()
+            method.addInstruction(
+                index + 1,
+                "invoke-static/range {v$layoutRegister .. v$layoutRegister}, " +
+                    "$ACTIONBAR_DESCRIPTOR->mainFeedActionBarButton(Landroid/view/ViewGroup;)V",
+            )
+            addFlags("mainFeedActionBarFlags")
         }
     }

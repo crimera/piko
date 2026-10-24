@@ -52,12 +52,16 @@ public class SettingsStatus {
     public static void viewDmAnonymously() {
         viewDmAnonymously = true;
     }
+    public static boolean markAsReadAfterReply = false;
+    public static void markAsReadAfterReply() {
+        markAsReadAfterReply = true;
+    }
     public static boolean saveDeletedMessages = false;
     public static void saveDeletedMessages() {
         saveDeletedMessages = true;
     }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously || markAsReadAfterReply);
     }
 
     //DM section
@@ -67,7 +71,9 @@ public class SettingsStatus {
     public static void markChatAsRead() { markChatAsRead = true; }
     public static boolean inboxLock = false;
     public static void inboxLock() { inboxLock = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock ;}
+    public static boolean hiddenChats = false;
+    public static void hiddenChats() { hiddenChats = true; }
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats ;}
 
     //Story section
     public static boolean customiseStoryTimestamp = false;
@@ -88,8 +94,12 @@ public class SettingsStatus {
     }
     public static boolean customiseStoryRingSize = false;
     public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
+    public static boolean hideStoryFollowButton = false;
+    public static void hideStoryFollowButton() {
+        hideStoryFollowButton = true;
+    }
     public static boolean storySection() {
-        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize);
+        return (customiseStoryTimestamp || viewStoryMentions || disableStoryFlipping || loopStory || customiseStoryRingSize || hideStoryFollowButton);
     }
 
     //Links section.
@@ -125,6 +135,10 @@ public class SettingsStatus {
     public static boolean hideStoriesTray = false;
     public static void hideStoriesTray() {
         hideStoriesTray = true;
+    }
+    public static boolean hideHiddenRequests = false;
+    public static void hideHiddenRequests() {
+        hideHiddenRequests = true;
     }
     public static boolean hideNotesTray = false;
     public static void hideNotesTray() {
@@ -178,7 +192,7 @@ public class SettingsStatus {
         hideReshareButton = true;
     }
     public static boolean distractionFreeSection() {
-        return (hideReelsFollowButton || disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
+        return (hideReelsFollowButton || disableDoubleTapLike || hideHiddenRequests || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableVideoAutoplay || disableDiscoverPeople || hideGroupCreationOnSharesheet || hideReshareButton || hideSaveButtons || hideShareButton || disableReelsScrolling || disableSwipeToCreate || focusLock);
     }
 
     //Misc section.
@@ -286,6 +300,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_customise_story_timestamp"),SettingsStatus.customiseStoryTimestamp);
         FLAGS.put(str("piko_disable_story_flipping"),SettingsStatus.disableStoryFlipping);
         FLAGS.put(str("piko_loop_story"),SettingsStatus.loopStory);
+        FLAGS.put(str("piko_hide_story_follow_button"),SettingsStatus.hideStoryFollowButton);
         FLAGS.put(str("piko_view_story_mentions"),SettingsStatus.viewStoryMentions);
         FLAGS.put(str("piko_follow_back_indicator"),SettingsStatus.followBackIndicator);
         FLAGS.put(str("piko_follow_list_non_follower_badge"),SettingsStatus.followListNonFollowerBadge);
@@ -296,6 +311,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_change_like_animation"),SettingsStatus.changeLikeAnimation);
         FLAGS.put(str("piko_unlock_plus_benefits"),SettingsStatus.unlockPlusBenefits);
         FLAGS.put(str("piko_inbox_lock"),SettingsStatus.inboxLock);
+        FLAGS.put(str("piko_hidden_chats"),SettingsStatus.hiddenChats);
 
         FLAGS.put(str("piko_disable_double_tap_to_like"),SettingsStatus.disableDoubleTapLike);
         FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);
@@ -303,6 +319,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
         FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
         FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);
+        FLAGS.put(str("piko_hide_hidden_requests"),SettingsStatus.hideHiddenRequests);
         FLAGS.put(str("piko_disable_comments"),SettingsStatus.disableComments);
         FLAGS.put(str("piko_disable_explore"),SettingsStatus.disableExplore);
         FLAGS.put(str("piko_disable_highlights"),SettingsStatus.disableHighlights);
@@ -311,6 +328,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_focus_lock"), SettingsStatus.focusLock);
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
+        FLAGS.put(str("piko_mark_as_read_after_reply"), SettingsStatus.markAsReadAfterReply);
         FLAGS.put(str("piko_save_deleted_messages"),SettingsStatus.saveDeletedMessages);
         FLAGS.put(str("piko_disable_screenshot_detection"),SettingsStatus.disableScreenshotDetection);
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);

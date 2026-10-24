@@ -58,7 +58,8 @@ public class EphemeralMediaPatch {
         return context == null ? null : context.getSharedPreferences("piko_ephemeral_media_viewed", Context.MODE_PRIVATE);
     }
 
-    public static String makeEphemeralMediaPermanent(Long expireAt, String viewMode) {
+    public static String makeEphemeralMediaPermanent(Long expireAt, String viewMode, Object parser) {
+        EphemeralMediaCaption.record(expireAt, viewMode, parser);
         try {
             if (expireAt == null || !MAKE_EPHEMERAL_MEDIA_PERMANENT) return viewMode;
 

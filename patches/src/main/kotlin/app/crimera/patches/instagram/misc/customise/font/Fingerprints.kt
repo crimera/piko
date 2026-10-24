@@ -7,6 +7,12 @@
 package app.crimera.patches.instagram.misc.customise.font
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 /**
  * The typeface repository method every classic text component goes through to resolve
@@ -37,6 +43,12 @@ internal object LegacyStoryFontFingerprint : Fingerprint(
 
 /** React Native's registration of the "Optimistic VF App Lite" variable font. */
 internal object ReactNativeFontRegistrationFingerprint : Fingerprint(
-    strings = listOf("Optimistic VF App Lite "),
-    custom = { method, _ -> method.parameters.isEmpty() && method.returnType.startsWith("L") },
+    parameters = emptyList(),
+    returnType = "L",
+    filters = listOf(
+        // Resolved font getter.
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, parameters = emptyList(), returnType = TYPEFACE_CLASS),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        string("Optimistic VF App Lite ", MatchAfterWithin(3)),
+    ),
 )

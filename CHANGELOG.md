@@ -1,3 +1,26 @@
+## [3.11.0-dev.1](https://github.com/crimera/piko/compare/v3.10.0...v3.11.0-dev.1) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **ci:** Normalize Gradle Windows wrapper line endings ([571b62c](https://github.com/crimera/piko/commit/571b62c209a97d50ca181341e87040b42dffcac7))
+* **Instagram:** Add `obrf`, `vrfl`, `rpxt` to link sanitization list ([#2118](https://github.com/crimera/piko/issues/2118)) ([e76e726](https://github.com/crimera/piko/commit/e76e726af81bb8a52172a7b3ac3b0012257cd041))
+* **Instagram:** Sanitize `cplk` tracking parameter ([#2117](https://github.com/crimera/piko/issues/2117)) ([404ad37](https://github.com/crimera/piko/commit/404ad3748f5ee899bca89a2eec587fc9e73ca61d))
+* **Instagram:** Sanitize `mdxt` tracking parameter ([#2113](https://github.com/crimera/piko/issues/2113)) ([537d5bf](https://github.com/crimera/piko/commit/537d5bf988a6253abe2a735a3f946567ccda04a0))
+
+### ✨ New Features
+
+* **Instagram:** Add a setting to hide the hidden requests button ([#2126](https://github.com/crimera/piko/issues/2126)) ([e624f25](https://github.com/crimera/piko/commit/e624f25879ab2f3590a75a34160f944c1731a70f)), closes [#2123](https://github.com/crimera/piko/issues/2123)
+* **Instagram:** Add better quality video downloads ([#2133](https://github.com/crimera/piko/issues/2133)) ([eb10d6a](https://github.com/crimera/piko/commit/eb10d6ac0df35106dcac40f2e04e889799fc5da4))
+* **Instagram:** Add search Piko settings ([e0d9935](https://github.com/crimera/piko/commit/e0d9935263b78443de83c28617b39d829bf1bb45))
+* **Instagram:** Disable background daemons, sync services, and telemetry ([#2145](https://github.com/crimera/piko/issues/2145)) ([0f44c77](https://github.com/crimera/piko/commit/0f44c7795fd0a0333ada8355b95e6043a8416be7))
+* **Instagram:** Download photo stories with music at upload size ([#2159](https://github.com/crimera/piko/issues/2159)) ([15696ae](https://github.com/crimera/piko/commit/15696ae3995e3a3af0ccd001ad01dd006eaff454))
+* **Instagram:** Hide chats in a private inbox ([#2108](https://github.com/crimera/piko/issues/2108)) ([39155fd](https://github.com/crimera/piko/commit/39155fd4950ae2cf48c6f1412f4a9413c89cce77))
+* **Instagram:** Show how ephemeral media was received ([#2100](https://github.com/crimera/piko/issues/2100)) ([460267b](https://github.com/crimera/piko/commit/460267bd58fd0624e5f78e0ec57cbd0bc090d3e1))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Add support for 452.1.0.53.64 ([761d795](https://github.com/crimera/piko/commit/761d79599d3114c06bf489a7e4368a43f3f608fb))
+
 ## [3.10.0](https://github.com/crimera/piko/compare/v3.9.0...v3.10.0) (2026-10-10)
 
 ### 🐛 Bug Fixes

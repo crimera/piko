@@ -20,12 +20,11 @@ object Constants {
             appIconColor = 0xFC483C,
             targets =
                 listOf(
-                    // Stable
                     AppTarget(
-                        version = "447.0.0.55.81",
+                        version = "452.1.0.53.64",
                         versionCodes =
                             mapOf(
-                                ARM64_V8A to 385311895,
+                                ARM64_V8A to 385811006,
                             ),
                     ),
                 ),

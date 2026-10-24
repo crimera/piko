@@ -16,7 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getFreeRegisterProvider
+import app.morphe.patcher.util.getFreeRegisterProvider
 
 @Suppress("unused")
 val viewDmAnonymouslyPatch =

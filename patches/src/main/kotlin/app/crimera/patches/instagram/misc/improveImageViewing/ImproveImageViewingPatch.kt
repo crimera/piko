@@ -11,11 +11,8 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.Opcode
+import app.morphe.patcher.util.registersUsed
 
 @Suppress("unused")
 val improveImageViewingPatch =
@@ -35,8 +32,8 @@ val improveImageViewingPatch =
 
             ReturnExtendedImageUrlFingerprint.method.apply {
 
-                val firstIfNe = indexOfFirstInstruction(Opcode.IF_NE)
-                val ifNeRegisters = getInstruction(firstIfNe).registersUsed
+                val firstIfNe = ReturnExtendedImageUrlFingerprint.instructionMatches.last().index
+                val ifNeRegisters = ReturnExtendedImageUrlFingerprint.instructionMatches.last().instruction.registersUsed
 
                 val heightRegister = ifNeRegisters[0]
                 val widthRegister = ifNeRegisters[1]
@@ -57,9 +54,9 @@ val improveImageViewingPatch =
                 """.trimIndent()
 
             SetDPIMetricsFingerprint.method.apply {
-                val filledNewArrayIndex = indexOfFirstInstruction(Opcode.FILLED_NEW_ARRAY)
+                val filledNewArrayIndex = SetDPIMetricsFingerprint.instructionMatches.last().index
 
-                val registers = getInstruction(filledNewArrayIndex).registersUsed
+                val registers = SetDPIMetricsFingerprint.instructionMatches.last().instruction.registersUsed
 
                 val heightRegister = registers[1].toString()
                 val widthRegister = registers[2].toString()

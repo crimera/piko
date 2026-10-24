@@ -14,13 +14,11 @@ import app.crimera.patches.instagram.utils.hideFeedUfiStates
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.matchSingle
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.matchSingle
 
 private const val HIDE_SHARE_BUTTON = "$PREF_CALL_DESCRIPTOR->hideShareButton()Z"
 
@@ -40,15 +38,11 @@ val hideShareButtonPatch = bytecodePatch(
         )
 
         val reels = Fingerprint(
-            accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
             returnType = "Z",
+            parameters = listOf("Lcom/instagram/clips/intf/ClipsViewerConfig;", "L", "L", "L"),
             filters = listOf(string("android_purge_26_q3_UfiUseCase_shouldShowShareButton")),
-            custom = { method, _ ->
-                "Lcom/instagram/clips/intf/ClipsViewerConfig;" in method.parameterTypes
-            },
         ).matchSingle().method
         val scratch = reels.findFreeRegister(0)
-        if (scratch > 15) throw PatchException("No encodable register for the Reels share setting")
         // Instagram's false result selects the hidden state for both the button and count.
         reels.addInstructionsWithLabels(
             0,

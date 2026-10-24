@@ -23,9 +23,9 @@ val profileInfoEntity =
 
         execute {
 
-            ProfileUserInfoViewBinderFingerprint.method.apply {
-                mutableClassDefBy(parameters[1].type).apply {
-                    val profileRelatedDetailsClass = ProfileRelatedDetailsFingerprint.classDef
+            ProfileUserInfoViewBinderFingerprint.originalMethod.apply {
+                classDefBy(parameterTypes[1].toString()).apply {
+                    val profileRelatedDetailsClass = ProfileRelatedDetailsFingerprint.originalClassDef
 
                     val profileRelatedDetailsFieldName = fields.last { it.type == profileRelatedDetailsClass.type }.name
                     GetProfileRelatedDetailsExtensionFingerprint.changeFirstString(profileRelatedDetailsFieldName)

@@ -7,46 +7,29 @@
 package app.crimera.patches.instagram.misc.comment
 
 import app.crimera.patches.instagram.entity.decoder.COMMENT_BUTTON_CLASS
-import app.crimera.patches.instagram.entity.commentDataEntity.CHAT_CONTEXT_BUTTON_SUPER_CLASS
-import app.crimera.utils.extensionToClassName
-import app.crimera.utils.fieldExtractor
-import app.crimera.utils.methodExtractor
+import app.crimera.patches.instagram.utils.fieldReference
+import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.resource.ResourceType
-import app.morphe.patcher.resource.resourceId
-import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.indexOfFirstLiteralInstruction
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.Method
-import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import app.morphe.util.indexOfFirstInstructionReversedOrThrow
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
+import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
 
-internal fun nativeChatButtonResources(constructor: Method): Pair<Long, Long> {
-    val code = constructor.implementation?.instructions?.toList()
-        ?: throw PatchException("Chat button constructor has no implementation")
-    val callIndex = code.indexOfLast { instruction ->
-        instruction.opcode == Opcode.INVOKE_DIRECT && instruction.getReference<MethodReference>()?.let {
-            it.definingClass == CHAT_CONTEXT_BUTTON_SUPER_CLASS && it.name == "<init>" &&
-                it.parameterTypes.size == 4 && it.parameterTypes.drop(1).map { type -> type.toString() } == listOf("I", "I", "Z")
-        } == true
+/**
+ * String and drawable resources of a native chat button, from its constructor.
+ */
+context(_: BytecodePatchContext)
+internal fun nativeChatButtonResources(constructor: Fingerprint): Pair<Long, Long> =
+    constructor.matchSingle().let {
+        val drawable = it.instructionMatches[1].getInstruction<WideLiteralInstruction>().wideLiteral
+        val string = it.instructionMatches[2].getInstruction<WideLiteralInstruction>().wideLiteral
+        string to drawable
     }
-    val registers = code.getOrNull(callIndex)?.registersUsed.orEmpty()
-    if (registers.size != 5) throw PatchException("Expected native chat button resource arguments")
-
-    fun literal(register: Int): Long = code.take(callIndex).filter { it.registersUsed == listOf(register) }
-        .singleOrNull()?.let { (it as? NarrowLiteralInstruction)?.narrowLiteral?.toLong() }
-        ?.takeIf { it > 0 } ?: throw PatchException("Expected one chat button resource literal for v$register")
-
-    return literal(registers[3]) to literal(registers[2])
-}
 
 context(patchContext: BytecodePatchContext)
 fun addButtonAttribute(
@@ -54,34 +37,28 @@ fun addButtonAttribute(
     drawableLateral: Long,
     button2CheckFingerprint: Fingerprint,
     buttonInstanceFingerprint: Fingerprint,
-) {
-    AddCommentButtonFingerprint.method.apply {
-        val drawableId = resourceId(ResourceType.DRAWABLE, "instagram_eye_off_outline_24")
-        val drawableIndex = indexOfFirstLiteralInstruction(drawableId)
+    stringIdMethod: String? = null,
+): String {
+    // Previously added buttons changed the method.
+    CommentActionButtonFingerprint.clearMatch()
+    return CommentActionButtonFingerprint.method.run {
+        val matches = CommentActionButtonFingerprint.instructionMatches
+        val existingButtonIndex = matches[0].index
+        val existingButtonClass = matches[0].fieldReference.definingClass
 
-        val arrayAddInstruction =
-            instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL && it.location.index < drawableIndex }
-        val existingButtonSGetObjectInstruction =
-            instructions.last {
-                it.opcode == Opcode.SGET_OBJECT &&
-                    it.location.index < drawableIndex
-            }
-
-        val existingButtonClass =
-            extensionToClassName(existingButtonSGetObjectInstruction.fieldExtractor().definingClass)
-
-        val isEqualsInstruction =
-            instructions.last { it.opcode == Opcode.INVOKE_STATIC && it.location.index < drawableIndex }
-        val isEqualsClass = extensionToClassName(isEqualsInstruction.methodExtractor().definingClass)
+        val isEqualsInstruction = matches[1].instruction
+        val isEqualsClass = matches[1].methodReference.definingClass
         val compareButtonRegister = isEqualsInstruction.registersUsed[0]
         val ourButtonRegister = isEqualsInstruction.registersUsed[1]
+        // Added Piko strings receive their resource IDs when the APK resources are rebuilt.
+        val loadStringId = stringIdMethod?.let {
+            "invoke-static {}, $it\nmove-result v$ourButtonRegister"
+        } ?: "const v$ourButtonRegister, $stringLateral"
 
-        val buttonStyleInstruction = getInstruction(indexOfFirstInstruction(drawableIndex, Opcode.SGET_OBJECT))
-        val buttonStyleClass = extensionToClassName(buttonStyleInstruction.fieldExtractor().definingClass)
+        val buttonStyleClass = matches[5].fieldReference.definingClass
 
-        val gotoIndex = indexOfFirstInstruction(drawableIndex, Opcode.GOTO)
-        val bundleInstruction = getInstruction(gotoIndex - 1)
-        val bundleMethodRef = bundleInstruction.getReference<MethodReference>()!!
+        val bundleInstruction = matches[7].instruction
+        val bundleMethodRef = matches[7].methodReference
         val bundleClass = bundleMethodRef.definingClass
         val bundleParameters = bundleMethodRef.parameterTypes
         val bundleRegisters = bundleInstruction.registersUsed
@@ -100,15 +77,23 @@ fun addButtonAttribute(
         val buttonInvokeRelatedClass = bundleParameters[3]
         val buttonInvokeRelatedRegister = bundleRegisters[4]
 
+        // The button list addition, before the existing buttons.
+        val arrayAddInstruction = getInstruction(
+            indexOfFirstInstructionReversedOrThrow(
+                existingButtonIndex,
+                methodCall(smali = "Ljava/util/AbstractCollection;->add(Ljava/lang/Object;)Z"),
+            ),
+        )
+
         addInstructionsWithLabels(
-            existingButtonSGetObjectInstruction.location.index + 1,
+            existingButtonIndex + 1,
             """
             sget-object v$ourButtonRegister, ${button2CheckFingerprint.classDef.fields.first()}
             invoke-static {v$compareButtonRegister, v$ourButtonRegister}, $isEqualsClass->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
             move-result v$ourButtonRegister
             
             if-eqz v$ourButtonRegister, :next_button
-            const v$ourButtonRegister, $stringLateral
+            $loadStringId
             new-instance v$stringInitRegister, $stringInitClass
             invoke-direct {v$stringInitRegister, v$ourButtonRegister}, $stringInitClass-><init>(I)V
             
@@ -130,6 +115,7 @@ fun addButtonAttribute(
 
         // Dynamically inject super class to  our extension class
         buttonInstanceFingerprint.classDef.setSuperClass(bundleClass)
+        stringInitClass.toString()
     }
 }
 

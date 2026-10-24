@@ -9,7 +9,6 @@ package app.crimera.patches.instagram.misc.overflowMenuButton.posts
 import app.crimera.patches.instagram.entity.decoder.CURRENT_MEDIA_FIELD
 import app.crimera.patches.instagram.entity.decoder.MEDIA_ADD_INFO_CLASS_NAME
 import app.crimera.patches.instagram.misc.download.FeedButtonOnClickFingerprint
-import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.FRAGMENT_ACTIVITY
@@ -19,7 +18,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.util.matchSingle
 
 @Suppress("unused")
 val hookOverflowMenuButtonOnClickPatch =
@@ -37,10 +36,7 @@ val hookOverflowMenuButtonOnClickPatch =
                     val appActivityField = classFields.first { it.type == FRAGMENT_ACTIVITY }
                     val userSessionField = classFields.first { it.type == USER_SESSION_CLASS }
 
-                    val getMediaObjectMethod =
-                        classDef.methods.first {
-                            AccessFlags.FINAL.isSet(it.accessFlags) && it.implementation?.registerCount == 1
-                        }
+                    val getMediaObjectMethod = FeedButtonGetMediaFingerprint.matchSingle().originalMethod
 
                     val mediaExtraDataField = classDef.fields.first { it.type == MEDIA_ADD_INFO_CLASS_NAME }
 

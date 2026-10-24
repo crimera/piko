@@ -8,28 +8,38 @@ package app.crimera.patches.instagram.misc.notification
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.util.getReference
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
-private const val ILLEGAL_STATE_EXCEPTION = "Ljava/lang/IllegalStateException;"
 private const val REMIND_ME_ACTION = "direct_remind_me"
 
 // Builds a message notification and its actions; the like action skips itself without "x", the remind me action does not.
 private object DirectNotificationBuilderFingerprint : Fingerprint(
+    strings = listOf("notification_builder_start"),
     filters =
         listOf(
-            string("notification_builder_start"),
-            string(REMIND_ME_ACTION),
+            // The check that throws when "x" is null sits just before the action starts.
+            opcode(Opcode.IF_EQZ),
+            string(REMIND_ME_ACTION, location = MatchAfterWithin(5)),
+            // Resolve the constructed action before looking for its insertion.
+            methodCall(
+                name = "<init>",
+                parameters = listOf("Landroid/app/PendingIntent;", "Ljava/lang/CharSequence;", "I"),
+                returnType = "V",
+            ),
         ),
 )
 
@@ -41,36 +51,48 @@ val fixDirectNotificationActionCrashPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            DirectNotificationBuilderFingerprint.method.apply {
-                val code = instructions
+            val match = DirectNotificationBuilderFingerprint.matchSingle()
+            match.method.apply {
                 val implementation = implementation!!
-
-                val actionIndex = code.indexOfFirst { it.getReference<StringReference>()?.string == REMIND_ME_ACTION }
-                if (actionIndex < 0) throw PatchException("Missing the remind me notification action")
-
-                // The check that throws when "x" is null sits just before the action starts.
-                val guardIndex =
-                    (actionIndex - 1 downTo maxOf(actionIndex - 8, 0)).firstOrNull {
-                        code[it].opcode == Opcode.IF_EQZ
-                    } ?: throw PatchException("Missing the \"x\" check of the remind me action")
-                val guard = code[guardIndex] as BuilderOffsetInstruction
-                if (code[guard.target.location.index].getReference<TypeReference>()?.type != ILLEGAL_STATE_EXCEPTION) {
-                    throw PatchException("The \"x\" check of the remind me action does not throw")
+                val guardIndex = match.instructionMatches.first().index
+                val constructorIndex = match.instructionMatches.last().index
+                val constructor = getInstruction(constructorIndex)
+                val actionType = ((constructor as ReferenceInstruction).reference as MethodReference).definingClass
+                val actionRegister = constructor.registersUsed.first()
+                val nextIndex = constructorIndex + 1
+                val next = getInstruction(nextIndex)
+                val addIndex = if (next.opcode == Opcode.IGET_OBJECT) nextIndex + 1 else nextIndex
+                val insertion = getInstruction(addIndex)
+                val reference = (insertion as? ReferenceInstruction)?.reference as? MethodReference
+                    ?: throw PatchException("Could not resolve notification action insertion")
+                val registers = insertion.registersUsed
+                val insertsAction = if (addIndex == nextIndex) {
+                    reference.parameterTypes == listOf(actionType) && reference.returnType == "V"
+                } else {
+                    reference.toString() == "Ljava/util/AbstractCollection;->add(Ljava/lang/Object;)Z" &&
+                        next.registersUsed.first() == registers.firstOrNull() &&
+                        next.registersUsed.first() != actionRegister
                 }
-
-                // The action ends when it is added to the list of actions of the notification.
-                val addIndex =
-                    (actionIndex + 1 until code.size).firstOrNull {
-                        val method = code[it].getReference<MethodReference>()
-                        code[it].opcode == Opcode.INVOKE_VIRTUAL && method?.name == "add" && method.returnType == "Z"
-                    } ?: throw PatchException("Missing where the remind me action is added")
-
+                if (insertion.opcode != Opcode.INVOKE_VIRTUAL || registers.size != 2 ||
+                    registers.last() != actionRegister || !insertsAction
+                ) {
+                    throw PatchException("Notification insertion does not consume the constructed action")
+                }
+                val continuation = addIndex + 1
+                // Both native feature guards and the null-link guard must skip the same action.
+                val nativeSkips = implementation.instructions.take(guardIndex).count {
+                    it is BuilderOffsetInstruction && it.opcode in setOf(Opcode.IF_EQZ, Opcode.IF_NEZ, Opcode.IF_NE, Opcode.IF_GE) &&
+                        it.target.location.index == continuation
+                }
+                if (nativeSkips < 2) {
+                    throw PatchException("Notification action continuation does not match native guards")
+                }
                 implementation.replaceInstruction(
                     guardIndex,
                     BuilderInstruction21t(
                         Opcode.IF_EQZ,
-                        guard.registersUsed.single(),
-                        implementation.newLabelForIndex(addIndex + 1),
+                        match.instructionMatches.first().instruction.registersUsed.single(),
+                        implementation.newLabelForIndex(continuation),
                     ),
                 )
             }

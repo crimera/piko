@@ -12,20 +12,21 @@ import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 
 internal object ProfileHeaderBinderFingerprint : Fingerprint(
     name = "bindView",
     returnType = "V",
     parameters = listOf("I", "Landroid/view/View;", "Ljava/lang/Object;", "Ljava/lang/Object;"),
-    filters = listOf(string("ProfileHeaderBinderGroup.bindView")),
-    custom = { method, _ -> !AccessFlags.STATIC.isSet(method.accessFlags) },
+    filters = listOf(
+        string("ProfileHeaderBinderGroup.bindView"),
+        opcode(Opcode.RETURN_VOID),
+    ),
 )
 
 @Suppress("unused")
@@ -37,11 +38,8 @@ val disableHighlightsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            ProfileHeaderBinderFingerprint.matchAll(1..1).single().method.apply {
-                val returnIndex = instructions.withIndex()
-                    .filter { it.value.opcode == Opcode.RETURN_VOID }
-                    .singleOrNull()?.index
-                    ?: throw PatchException("Expected one profile header binder return")
+            ProfileHeaderBinderFingerprint.matchSingle().method.apply {
+                val returnIndex = ProfileHeaderBinderFingerprint.instructionMatches.last().index
                 val extension = "$PATCHES_DESCRIPTOR/userprofile/ProfileHighlights;"
 
                 // Replace the return so branches to it also pass through the visibility hook.

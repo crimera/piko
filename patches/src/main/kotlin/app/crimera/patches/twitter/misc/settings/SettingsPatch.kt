@@ -26,8 +26,10 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.util.findFreeRegister
-import app.morphe.util.getReference
+import app.morphe.patcher.util.cloneParameters
+import app.morphe.patcher.util.numberOfParameterRegistersLogical
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -77,19 +79,18 @@ val settingsPatch =
             }
 
             SettingsPreferenceFingerprint.let {
-                it.method.apply {
-                    val index = it.instructionMatches.first().index
+                it.method.cloneParameters().apply {
+                    val index = it.instructionMatches.first().index + numberOfParameterRegistersLogical
                     val register = getInstruction<TwoRegisterInstruction>(index).registerA
-                    val freeRegister = findFreeRegister(index + 1, register)
 
                     addInstructionsWithLabels(
                         index + 1,
                         """
                             invoke-static { v$register }, $ACTIVITY_HOOK_CLASS->startSettingsActivity(Ljava/lang/String;)Z
-                            move-result v$freeRegister
-                            if-eqz v$freeRegister, :ignore
-                            const/4 v$freeRegister, 0x1
-                            return v$freeRegister
+                            move-result p0
+                            if-eqz p0, :ignore
+                            const/4 p0, 0x1
+                            return p0
                             :ignore
                             nop
                         """,

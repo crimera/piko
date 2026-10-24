@@ -19,7 +19,7 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutab
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patcher.util.smali.toInstructions
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c

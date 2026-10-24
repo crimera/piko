@@ -23,8 +23,8 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.util.getFreeRegisterProvider
-import app.morphe.util.getReference
+import app.morphe.patcher.util.getFreeRegisterProvider
+import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference

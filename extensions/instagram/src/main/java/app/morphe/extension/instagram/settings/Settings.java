@@ -37,11 +37,13 @@ public class Settings {
     public static final BooleanSetting VIEW_LIVE_ANONYMOUSLY = new BooleanSetting("view_live_anonymously", false);
     public static final BooleanSetting DISABLE_SCREENSHOT_DETECTION = new BooleanSetting("disable_screenshot_detection", false);
     public static final BooleanSetting VIEW_DM_ANONYMOUSLY = new BooleanSetting("view_dm_anonymously", false);
+    public static final BooleanSetting MARK_AS_READ_AFTER_REPLY = new BooleanSetting("mark_as_read_after_reply", false);
     public static final BooleanSetting INSTANTS_DOWNLOAD = new BooleanSetting("instants_download", false);
     public static final BooleanSetting SAVE_DELETED_MESSAGES = new BooleanSetting("save_deleted_messages", false);
     public static final BooleanSetting DISABLE_STORIES = new BooleanSetting("disable_stories", false);
     public static final BooleanSetting DISABLE_HIGHLIGHTS = new BooleanSetting("disable_highlights", false);
     public static final BooleanSetting HIDE_STORIES_TRAY = new BooleanSetting("hide_stories_tray", false);
+    public static final BooleanSetting HIDE_HIDDEN_REQUESTS = new BooleanSetting("hide_hidden_requests", false);
     public static final BooleanSetting DISABLE_EXPLORE = new BooleanSetting("disable_explore", false);
     public static final BooleanSetting DISABLE_COMMENTS = new BooleanSetting("disable_comments", false);
     public static final BooleanSetting FOLLOW_BACK_INDICATOR = new BooleanSetting("follow_back_indicator", true);
@@ -50,13 +52,18 @@ public class Settings {
     public static final BooleanSetting VIEW_STORY_MENTIONS = new BooleanSetting("view_story_mentions", true);
     public static final BooleanSetting DISABLE_STORY_FLIPPING = new BooleanSetting("disable_story_flipping", false);
     public static final BooleanSetting LOOP_STORY = new BooleanSetting("loop_story", false);
+    public static final BooleanSetting HIDE_STORY_FOLLOW_BUTTON = new BooleanSetting("hide_story_follow_button", false);
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default");
     public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", false);
+    public static final BooleanSetting EPHEMERAL_MEDIA_CAPTION = new BooleanSetting("ephemeral_media_caption", false);
     public static final BooleanSetting HIDE_SHARE_BUTTON = new BooleanSetting("hide_share_button", false);
     public static final BooleanSetting HIDE_SAVE_BUTTONS = new BooleanSetting("hide_save_buttons", false);
     public static final BooleanSetting HIDE_RESHARE_BUTTON = new BooleanSetting("hide_reshare_button", false);
     public static final BooleanSetting INBOX_LOCK = new BooleanSetting("inbox_lock", false);
     public static final BooleanSetting INBOX_LOCK_NOTIFICATIONS = new BooleanSetting("inbox_lock_notifications", false);
+    public static final BooleanSetting HIDDEN_CHATS = new BooleanSetting("hidden_chats", false);
+    public static final StringSetting HIDDEN_CHATS_TAPS = new StringSetting("hidden_chats_taps", "3");
+    public static final BooleanSetting HIDDEN_CHATS_MUTE = new BooleanSetting("hidden_chats_mute", true);
     public static final BooleanSetting HIDE_REELS_FOLLOW_BUTTON = new BooleanSetting("hide_reels_follow_button", false);
     public static final BooleanSetting IMPROVE_IMAGE_VIEWING = new BooleanSetting("improve_image_viewing", false);
     public static final BooleanSetting COMMENT_COPY_BUTTON = new BooleanSetting("comment_copy_button", true);
@@ -91,6 +98,8 @@ public class Settings {
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false);
     public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false);
+    public static final BooleanSetting PREFER_DASH_FORMAT = new BooleanSetting("prefer_dash_format", true);
+    public static final BooleanSetting DASH_AUDIO_AAC_LC = new BooleanSetting("dash_audio_aac_lc", false);
     public static final StringSetting DOWNLOAD_FILE_NAME_TEMPLATE =
             new StringSetting("download_file_name_template", DownloadFileNameFormatter.DEFAULT_TEMPLATE);
     // Should be kept empty by default as its handled in `StorageUtils.java`

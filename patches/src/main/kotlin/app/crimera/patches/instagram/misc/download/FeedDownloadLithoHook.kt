@@ -6,323 +6,261 @@
 
 package app.crimera.patches.instagram.misc.download
 
-import app.crimera.patches.shared.declaredParameterRegister
+import app.crimera.patches.instagram.utils.fieldReference
+import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.writeRegister
+import app.morphe.util.indexOfFirstInstructionOrThrow
+import app.morphe.util.indexOfFirstInstructionReversedOrThrow
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction31i
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
-/** Kotlin event handler type the UFI `ON_CLICK` setter takes. */
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val CONTEXT_DESCRIPTOR = "Landroid/content/Context;"
-
-private const val BUTTON_VIEW_CLASS = "android.widget.Button"
-
-private const val DOWNLOAD_CONTENT_DESCRIPTION = "Download"
 private const val CENTER_SCALE_TYPE =
     "Landroid/widget/ImageView\$ScaleType;->CENTER:Landroid/widget/ImageView\$ScaleType;"
 private const val COMPONENT_LIST_ADD = "Ljava/util/AbstractCollection;->add($OBJECT_DESCRIPTOR)Z"
 private const val INTEGER_VALUE_OF = "$INTEGER_DESCRIPTOR->valueOf(I)$INTEGER_DESCRIPTOR"
-
 private const val CLICK_HANDLER_DESCRIPTOR =
     "Lapp/morphe/extension/instagram/patches/download/FeedDownloadClickFunction;"
 private const val CLICK_HANDLER_CONSTRUCTOR =
     "$CLICK_HANDLER_DESCRIPTOR-><init>($CONTEXT_DESCRIPTOR$USER_SESSION_DESCRIPTOR$OBJECT_DESCRIPTOR)V"
-private const val FEED_DOWNLOAD_ENABLED = "$DOWNLOAD_UTILS_DESCRIPTOR->isFeedDownloadButtonEnabled()Z"
+private const val DOWNLOAD_ICON_METHOD = "pikoCreateDownloadIcon"
 
-/**
- * Litho UFI surfaces (e.g. the contextual profile feed) reject views added by hand, so the
- * download icon is built into the component tree as a second icon node ahead of the save icon.
- * Every obfuscated member is resolved from the instructions that build the save icon, and the
- * save icon's component-call registers, rebuilt right after the injection point, stage every invoke.
- */
+private fun saveIconFingerprint(saveButtonId: Long, stateType: String) = Fingerprint(
+    parameters = listOf("L", "L", "L", stateType, "Z"),
+    returnType = "L",
+    filters = listOf(
+        // Neutral icon style, before save state and event handlers are attached.
+        fieldAccess(opcode = Opcode.SGET_OBJECT),
+        fieldAccess(opcode = Opcode.SGET_OBJECT, location = MatchAfterImmediately()),
+        methodCall(parameters = listOf("L", "L"), opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        opcode(Opcode.CONST, MatchAfterImmediately()),
+        methodCall(parameters = listOf("L", "I"), returnType = "J", location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_WIDE, MatchAfterImmediately()),
+        methodCall(parameters = listOf("L", "J"), returnType = "L", location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        methodCall(parameters = listOf("L", "Ljava/lang/CharSequence;"), opcode = Opcode.INVOKE_STATIC),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        string("android.widget.Button", MatchAfterImmediately()),
+        methodCall(parameters = listOf("L", "Ljava/lang/String;"), location = MatchAfterImmediately()),
+        literal(saveButtonId, location = MatchAfterWithin(4)),
+        methodCall(parameters = listOf("L", "I"), location = MatchAfterImmediately()),
+        methodCall(parameters = listOf("L", FUNCTION1_DESCRIPTOR)),
+        opcode(Opcode.CONST),
+        methodCall(parameters = listOf("L", "I"), returnType = "I", location = MatchAfterImmediately()),
+        opcode(Opcode.CONST, MatchAfterWithin(1)),
+        methodCall(parameters = listOf("L", "I"), returnType = "I", location = MatchAfterImmediately()),
+        methodCall(
+            name = "<init>",
+            parameters = listOf("Landroid/widget/ImageView\$ScaleType;", "L", INTEGER_DESCRIPTOR, "I", "I", "Z"),
+        ),
+    ),
+)
+
+/** The download component is added by the caller, independently of the save helper's visibility. */
 context(patchContext: BytecodePatchContext)
 internal fun injectLithoDownloadButton(
     saveButtonId: Long,
     downloadDrawableId: Long,
     stateType: String,
 ) {
-    val iconWrapperConstructor =
-        requireOne(
-            "UFI icon wrapper constructor",
-            buildList {
-                patchContext.classDefForEach { classDef ->
-                    classDef.methods.filterTo(this) { method ->
-                        val parameters = method.parameterTypes.map { it.toString() }
-                        method.name == "<init>" &&
-                            parameters.size in 5..6 &&
-                            parameters[0] == "Landroid/widget/ImageView\$ScaleType;" &&
-                            parameters[1].startsWith("L") &&
-                            parameters.subList(2, 5) == listOf(INTEGER_DESCRIPTOR, "I", "I") &&
-                            (parameters.size == 5 || parameters[5] == "Z")
-                    }
-                }
-            },
-        )
-    val iconWrapperClass = iconWrapperConstructor.definingClass
-    val nodeType = iconWrapperConstructor.parameterTypes[1].toString()
-    val componentType =
-        requireOne(
-            "UFI component base constructor",
-            iconWrapperConstructor.implementation?.instructions?.toList().orEmpty()
-                .filter { it.opcode == Opcode.INVOKE_DIRECT }
-                .mapNotNull { it.getReference<MethodReference>() }
-                .filter { it.name == "<init>" && it.parameterTypes.isEmpty() && it.definingClass != iconWrapperClass }
-                .map { it.definingClass }.distinct(),
-        )
-
-    val builder =
-        requireOne(
-            "UFI litho component builder",
-            Fingerprint(filters = listOf(literal(saveButtonId)))
-                .matchAll()
-                .filter { match ->
-                    match.method.implementation?.instructions?.any { it.methodRef()?.definingClass == iconWrapperClass } == true
-                }.map { it.method },
-        )
-    val instructions =
-        builder.implementation?.instructions?.toList()
-            ?: throw PatchException("Litho UFI builder $builder has no implementation")
-
-    val saveIndex =
-        instructions.indexOfFirst { it is Instruction31i && it.wideLiteral == saveButtonId }
-    if (saveIndex < 0) throw PatchException("No save-button literal in $builder")
-
-    fun indexAfterSave(
-        what: String,
-        after: Int = saveIndex,
-        matches: (MethodReference) -> Boolean,
-    ): Int =
-        (after + 1 until instructions.size).firstOrNull { index -> instructions[index].methodRef()?.let(matches) == true }
-            ?: throw PatchException("No $what after index $after in $builder")
-
-    fun setterIndex(valueType: String) =
-        indexAfterSave("icon setter taking $valueType") { reference ->
-            reference.returnType == nodeType &&
-                reference.parameterTypes.map { it.toString() } == listOf(nodeType, valueType)
-        }
-
-    val idSetter = instructions[setterIndex("I")].methodRef()!!
-    val onClickIndex = setterIndex(FUNCTION1_DESCRIPTOR)
-    val onClickSetter = instructions[onClickIndex].methodRef()!!
-
-    // The content description is set two instructions before the button view class is loaded. The
-    // node passed to ON_CLICK has no click props yet, so the download node does not inherit them.
-    val viewClassIndex =
-        (saveIndex - 1 downTo 0).firstOrNull { instructions[it].getReference<StringReference>()?.string == BUTTON_VIEW_CLASS }
-            ?: throw PatchException("No \"$BUTTON_VIEW_CLASS\" before the save literal in $builder")
-    val descriptionSetter =
-        instructions.getOrNull(viewClassIndex - 2)?.methodRef()
-            ?: throw PatchException("No content description setter before index $viewClassIndex in $builder")
-    val nodeRegister =
-        instructions[onClickIndex].registers().firstOrNull()
-            ?: throw PatchException("ON_CLICK call at $onClickIndex has no node in $builder")
-
-    // The factory call takes seven consecutive registers; the last five are staged by the moves
-    // right before it.
-    val wrapperIndex =
-        indexAfterSave("icon wrapper construction", after = onClickIndex) {
-            it.definingClass == iconWrapperClass && it.name == "<init>"
-        }
-    val factoryIndex =
-        indexAfterSave("component factory call", after = wrapperIndex) { it.returnType == componentType }
-    val factory = instructions[factoryIndex].methodRef()!!
-    val call = instructions[factoryIndex].registers()
-    if (call.size != 7) throw PatchException("Unexpected component factory call shape in $builder: ${call.size} registers")
-    if (call != (call.first()..call.last()).toList()) {
-        throw PatchException("Non-consecutive component factory registers in $builder")
-    }
-
-    // Reuse the staging register only if it is dead until the native assignment
-    // and its source remains unchanged.
-    val wrapperCall = instructions[wrapperIndex].registers()
-    if (wrapperCall.size != iconWrapperConstructor.parameterTypes.size + 1 ||
-        wrapperCall.take(6) != call.drop(1) ||
-        wrapperCall != (wrapperCall.first()..wrapperCall.last()).toList()
+    val save = saveIconFingerprint(saveButtonId, stateType).matchSingle()
+    val matches = save.instructionMatches
+    val neutralStyle = matches[0].fieldReference
+    val alignment = matches[1].fieldReference
+    val alignmentSetter = matches[2].methodReference
+    val heightResource = matches[4].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
+    val heightAccessor = matches[5].methodReference
+    val heightSetter = matches[7].methodReference
+    val descriptionSetter = matches[9].methodReference
+    val classSetter = matches[12].methodReference
+    val idSetter = matches[14].methodReference
+    val onClickSetter = matches[15].methodReference
+    val dimensionAttribute = matches[16].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
+    val themeAccessor = matches[17].methodReference
+    val tintAttribute = matches[18].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
+    val iconConstructor = matches[20].methodReference
+    val contextType = save.originalMethod.parameterTypes.first().toString()
+    val nodeType = onClickSetter.parameterTypes.first().toString()
+    if (neutralStyle.definingClass != nodeType ||
+        listOf(alignmentSetter, heightSetter, descriptionSetter, classSetter, idSetter, onClickSetter).any {
+            it.parameterTypes.first().toString() != nodeType || it.returnType != nodeType
+        } || themeAccessor != matches[19].methodReference ||
+        iconConstructor.parameterTypes[1].toString() != nodeType ||
+        save.originalMethod.returnType != iconConstructor.definingClass
     ) {
-        throw PatchException("Unexpected icon wrapper registers in $builder")
+        throw PatchException("Unexpected native save icon style in ${save.originalMethod}")
     }
-    val wrapperFlagSource =
-        if (wrapperCall.size == 7) {
-            val flagRegister = wrapperCall.last()
-            val assignmentIndex =
-                (wrapperIndex - 1 downTo onClickIndex).firstOrNull { index ->
-                    instructions[index].opcode.setsRegister() &&
-                        instructions[index].registersUsed.firstOrNull() == flagRegister
-                } ?: throw PatchException("No native icon flag assignment in $builder")
-            val assignment = instructions[assignmentIndex]
-            if (assignment.opcode !in listOf(Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16)) {
-                throw PatchException("Unexpected native icon flag assignment in $builder")
-            }
-            val source = assignment.registersUsed[1]
-            if (instructions.subList(onClickIndex, assignmentIndex).any { flagRegister in it.registers() } ||
-                instructions.subList(onClickIndex, wrapperIndex).any {
-                    it.opcode.setsRegister() && it.registersUsed.firstOrNull() == source
-                } || source in call
-            ) {
-                throw PatchException("Native icon flag registers are not safe to reuse in $builder")
-            }
-            source
-        } else {
-            null
-        }
+    val contextGetter = requireOne(
+        "component context accessor",
+        patchContext.classDefBy(themeAccessor.parameterTypes.first().toString()).methods.filter {
+            it.parameterTypes.isEmpty() && it.returnType == CONTEXT_DESCRIPTOR
+        },
+    )
 
-    val sources =
-        call.drop(2).map { destination ->
-            (factoryIndex - 1 downTo (factoryIndex - 8).coerceAtLeast(0))
-                .firstNotNullOfOrNull { index ->
-                    (instructions[index] as? TwoRegisterInstruction)?.takeIf { it.registerA == destination }?.registerB
-                } ?: throw PatchException("No source move for component argument v$destination in $builder")
-        }
-    val userSessionRegister = sources[2]
-
-    val listAddIndex =
-        indexAfterSave("icon list add", after = factoryIndex) {
-            it.name == "add" && it.returnType == "Z" && it.parameterTypes.map { type -> type.toString() } == listOf(OBJECT_DESCRIPTOR)
-        }
-    val listRegister =
-        instructions[listAddIndex].registers().firstOrNull()
-            ?: throw PatchException("Icon list add at $listAddIndex has no receiver in $builder")
-
-    val stateRegister =
-        instructions
-            .firstOrNull { it.opcode == Opcode.CHECK_CAST && it.getReference<TypeReference>()?.type == stateType }
-            ?.let { (it as OneRegisterInstruction).registerA }
-            ?: throw PatchException("No check-cast to $stateType in $builder")
-
-    // The save icon's size and tint come from two theme attribute lookups; reuse them.
-    val themeCalls =
-        (saveIndex until factoryIndex).mapNotNull { index ->
-            val reference = instructions[index].methodRef() ?: return@mapNotNull null
-            val parameters = reference.parameterTypes.map { it.toString() }
-            if (instructions[index].opcode == Opcode.INVOKE_STATIC &&
-                reference.returnType == "I" &&
-                parameters.size == 2 &&
-                parameters[1] == "I"
-            ) {
-                index to reference
-            } else {
-                null
-            }
-        }
-    if (themeCalls.size != 2 || !themeCalls[0].second.sameSignatureAs(themeCalls[1].second)) {
-        throw PatchException("Expected two matching theme attribute lookups in $builder, found ${themeCalls.size}")
+    val caller = Fingerprint(
+        definingClass = save.originalMethod.definingClass,
+        parameters = listOf("L"),
+        filters = listOf(
+            methodCall(reference = save.originalMethod),
+            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+            methodCall(parameters = listOf("L", "L", "L", "L", USER_SESSION_DESCRIPTOR, "Z", "Z")),
+            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+            opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
+            methodCall(smali = COMPONENT_LIST_ADD, location = MatchAfterImmediately()),
+        ),
+    ).matchSingle()
+    val builder = caller.method
+    val callMatches = caller.instructionMatches
+    val saveIndex = callMatches[0].index
+    val saveCall = callMatches[0].instruction.registersUsed
+    val factoryIndex = callMatches[2].index
+    val factory = callMatches[2].methodReference
+    val call = callMatches[2].instruction.registersUsed
+    val listRegister = callMatches[5].instruction.registersUsed.first()
+    val instructions = builder.instructions.toList()
+    if (call.size != 7 || call != (call.first()..call.last()).toList() ||
+        call.any { it in saveCall } || listRegister in call
+    ) {
+        throw PatchException("Unexpected component factory registers in $builder")
     }
-    val themeAccessor = themeCalls[0].second
+    // All staging registers must be overwritten before the native path reads them again.
+    call.forEach { register ->
+        val firstUse = instructions.subList(saveIndex, factoryIndex).firstOrNull { register in it.registersUsed }
+        if (firstUse == null || !firstUse.opcode.setsRegister() || firstUse.registersUsed.first() != register) {
+            throw PatchException("Live component staging register v$register in $builder")
+        }
+    }
+    val sources = call.drop(2).mapIndexed { offset, destination ->
+        val move = instructions[factoryIndex - 5 + offset]
+        if (move.opcode !in listOf(Opcode.MOVE_FROM16, Opcode.MOVE_OBJECT_FROM16) ||
+            (move as TwoRegisterInstruction).registerA != destination
+        ) {
+            throw PatchException("Unexpected component argument staging in $builder")
+        }
+        move.registerB
+    }
+    if (sources.any { it in call }) throw PatchException("Component sources overlap staging registers in $builder")
+    val category = builder.getInstruction(factoryIndex - 6)
+    if (category.opcode != Opcode.SGET_OBJECT || category.registersUsed.single() != call[0]) {
+        throw PatchException("Missing native component category in $builder")
+    }
+    val categoryField = category.getReference<FieldReference>()!!
 
-    fun attributeLiteral(callIndex: Int): Int =
-        (callIndex - 1 downTo (callIndex - 4).coerceAtLeast(0))
-            .firstNotNullOfOrNull { (instructions[it] as? Instruction31i)?.wideLiteral?.toInt() }
-            ?: throw PatchException("No theme attribute constant before index $callIndex in $builder")
+    val owner = patchContext.mutableClassDefBy(save.originalClassDef)
+    if (owner.methods.any { it.name == DOWNLOAD_ICON_METHOD }) throw PatchException("Download icon helper already exists")
+    val helper = ImmutableMethod(
+        owner.type,
+        DOWNLOAD_ICON_METHOD,
+        listOf(contextType, USER_SESSION_DESCRIPTOR, stateType).map { ImmutableMethodParameter(it, emptySet(), null) },
+        iconConstructor.definingClass,
+        AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
+        emptySet(),
+        emptySet(),
+        MutableMethodImplementation(13),
+    ).toMutable().apply {
+        addInstructions(
+            0,
+            """
+                invoke-static {}, $DOWNLOAD_UTILS_DESCRIPTOR->isFeedDownloadButtonEnabled()Z
+                move-result v0
+                if-eqz v0, :disabled
+                invoke-interface {p0}, $contextGetter
+                move-result-object v1
+                new-instance v0, $CLICK_HANDLER_DESCRIPTOR
+                invoke-direct {v0, v1, p1, p2}, $CLICK_HANDLER_CONSTRUCTOR
 
-    val dimensionAttribute = attributeLiteral(themeCalls[0].first)
-    val tintAttribute = attributeLiteral(themeCalls[1].first)
+                sget-object v2, $neutralStyle
+                sget-object v3, $alignment
+                invoke-static {v2, v3}, $alignmentSetter
+                move-result-object v2
+                const v3, $heightResource
+                invoke-static {p0, v3}, $heightAccessor
+                move-result-wide v3
+                invoke-static {v2, v3, v4}, $heightSetter
+                move-result-object v2
+                const-string v3, "Download"
+                invoke-static {v2, v3}, $descriptionSetter
+                move-result-object v2
+                const-string v3, "android.widget.Button"
+                invoke-static {v2, v3}, $classSetter
+                move-result-object v2
+                const/4 v3, -1
+                invoke-static {v2, v3}, $idSetter
+                move-result-object v2
+                invoke-static {v2, v0}, $onClickSetter
+                move-result-object v5
 
-    if (builder.parameterTypes.size != 1) throw PatchException("Expected one parameter on $builder")
-    val componentContext = declaredParameterRegister(builder, 0)
-    val contextGetter =
-        requireOne(
-            "component context accessor",
-            patchContext.classDefBy(themeAccessor.parameterTypes[0].toString()).methods.filter { method ->
-                method.parameterTypes.isEmpty() && method.returnType == CONTEXT_DESCRIPTOR
-            },
+                const v3, $dimensionAttribute
+                invoke-static {p0, v3}, $themeAccessor
+                move-result v8
+                const v3, $tintAttribute
+                invoke-static {p0, v3}, $themeAccessor
+                move-result v6
+                invoke-static {v6}, $INTEGER_VALUE_OF
+                move-result-object v6
+                sget-object v4, $CENTER_SCALE_TYPE
+                const v7, ${downloadDrawableId.toInt()}
+                const/4 v9, 0
+                new-instance v3, ${iconConstructor.definingClass}
+                invoke-direct/range {v3 .. v9}, $iconConstructor
+                return-object v3
+                :disabled
+                const/4 v0, 0
+                return-object v0
+            """.trimIndent(),
         )
-
-    val excluded =
-        (builder.parameterBlock() + nodeRegister + stateRegister + listRegister + call + wrapperCall +
-            sources + listOfNotNull(wrapperFlagSource)).distinct()
-    val scratch = builder.reserveFreeRegisters(onClickIndex, 7, maximum = 255, excluded = excluded)
-    val flag = scratch[0] // also the constant staging register
-    val handler = scratch[1]
-    val context = scratch[2]
-    val node = scratch[3] // the download icon node, then the finished component
-    val scaleType = scratch[4]
-    val dimension = scratch[5]
-    val tint = scratch[6]
-
+    }
+    owner.methods.add(helper)
     builder.addInstructionsWithLabels(
-        onClickIndex,
+        saveIndex,
         """
-            invoke-static {}, $FEED_DOWNLOAD_ENABLED
-            move-result v$flag
-            if-eqz v$flag, :skip
-
-            new-instance v$handler, $CLICK_HANDLER_DESCRIPTOR
-            invoke-interface/range ${registerRange(componentContext)}, $contextGetter
-            move-result-object v$context
-            ${moveObject(call[1], handler)}
-            ${moveObject(call[2], context)}
-            ${moveObject(call[3], userSessionRegister)}
-            ${moveObject(call[4], stateRegister)}
-            invoke-direct/range ${registerRange(call[1], call[4])}, $CLICK_HANDLER_CONSTRUCTOR
-
-            const v$flag, -1
-            ${moveObject(call[1], nodeRegister)}
-            ${moveInt(call[2], flag)}
-            invoke-static/range ${registerRange(call[1], call[2])}, $idSetter
-            move-result-object v$node
-
-            const-string v$flag, "$DOWNLOAD_CONTENT_DESCRIPTION"
-            ${moveObject(call[1], node)}
-            ${moveObject(call[2], flag)}
-            invoke-static/range ${registerRange(call[1], call[2])}, $descriptionSetter
-            move-result-object v$node
-
-            ${moveObject(call[1], node)}
-            ${moveObject(call[2], handler)}
-            invoke-static/range ${registerRange(call[1], call[2])}, $onClickSetter
-            move-result-object v$node
-
-            sget-object v$scaleType, $CENTER_SCALE_TYPE
-
-            const v$flag, $dimensionAttribute
-            ${moveObject(call[1], componentContext)}
-            ${moveInt(call[2], flag)}
-            invoke-static/range ${registerRange(call[1], call[2])}, $themeAccessor
-            move-result v$dimension
-
-            const v$flag, $tintAttribute
-            ${moveObject(call[1], componentContext)}
-            ${moveInt(call[2], flag)}
-            invoke-static/range ${registerRange(call[1], call[2])}, $themeAccessor
-            move-result v$tint
-            invoke-static/range ${registerRange(tint)}, $INTEGER_VALUE_OF
-            move-result-object v$tint
-
-            const v$flag, ${downloadDrawableId.toInt()}
-            new-instance v${call[1]}, $iconWrapperClass
-            ${moveObject(call[2], scaleType)}
-            ${moveObject(call[3], node)}
-            ${moveObject(call[4], tint)}
-            ${moveInt(call[5], flag)}
-            ${moveInt(call[6], dimension)}
-            ${wrapperFlagSource?.let { moveInt(wrapperCall.last(), it) }.orEmpty()}
-            invoke-direct/range ${registerRange(wrapperCall.first(), wrapperCall.last())}, $iconWrapperConstructor
-
+            ${moveObject(call[0], saveCall[1])}
+            ${moveObject(call[1], sources[2])}
+            ${moveObject(call[2], saveCall[4])}
+            invoke-static/range ${registerRange(call[0], call[2])}, $helper
+            move-result-object v${call[1]}
+            if-eqz v${call[1]}, :save
+            sget-object v${call[0]}, $categoryField
             ${moveObject(call[2], sources[0])}
             ${moveObject(call[3], sources[1])}
             ${moveObject(call[4], sources[2])}
             ${moveInt(call[5], sources[3])}
             ${moveInt(call[6], sources[4])}
-            invoke-static/range ${registerRange(call[0], call[6])}, $factory
-            move-result-object v$node
-
-            ${moveObject(call[1], listRegister)}
-            ${moveObject(call[2], node)}
-            invoke-virtual/range ${registerRange(call[1], call[2])}, $COMPONENT_LIST_ADD
+            invoke-static/range ${registerRange(call.first(), call.last())}, $factory
+            move-result-object v${call[1]}
+            if-eqz v${call[1]}, :save
+            ${moveObject(call[2], listRegister)}
+            ${moveObject(call[3], call[1])}
+            invoke-virtual/range ${registerRange(call[2], call[3])}, $COMPONENT_LIST_ADD
         """.trimIndent(),
-        ExternalLabel("skip", builder.getInstruction(onClickIndex)),
+        ExternalLabel("save", builder.getInstruction(saveIndex)),
     )
 }

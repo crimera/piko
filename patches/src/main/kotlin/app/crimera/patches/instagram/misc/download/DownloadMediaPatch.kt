@@ -24,16 +24,14 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 @Suppress("unused")
 val downloadMediaPatch =
@@ -65,36 +63,28 @@ val downloadMediaPatch =
             addOverflowMenuButtonAttributes("PIKO_DOWNLOAD", "downloadOverflowButton")
 
             // DM media downloader.
-            GetDirectThreadMediaSaverModuleNameFingerprint.apply {
-                matchAll(1..1)
-                val appActivityField = classDef.fields.singleOrNull {
+            val appActivityField =
+                GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef.fields.singleOrNull {
                     it.type == "Landroid/app/Activity;" && !AccessFlags.STATIC.isSet(it.accessFlags)
                 } ?: throw PatchException("Expected one DM saver activity field")
-                val saveMethod = classDef.methods.singleOrNull { candidate ->
-                    candidate.returnType == "V" && AccessFlags.STATIC.isSet(candidate.accessFlags) &&
-                        candidate.parameterTypes.size == 5 && candidate.parameterTypes[1] == classDef.type &&
-                        candidate.parameterTypes.last() == "Z" && candidate.instructions.any {
-                            it.getReference<StringReference>()?.string == "android.permission.WRITE_EXTERNAL_STORAGE"
-                        }
-                } ?: throw PatchException("Expected one DM media save entry point")
-                saveMethod.apply {
-                    if (parameterRegisterStart(this) < 2) {
-                        throw PatchException("DM media saver needs two local registers")
-                    }
-                    addInstructionsWithLabels(
-                        0,
-                        """
-                        move-object/from16 v0, p1
-                        iget-object v0, v0, $appActivityField
-                        move-object/from16 v1, p2
-                        invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
-                        move-result v1
-                        if-nez v1, :piko
-                        return-void
-                        """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(0)),
-                    )
+            (DirectThreadMediaSaveFingerprint.matchOrNull(GetDirectThreadMediaSaverModuleNameFingerprint.originalClassDef)
+                ?: DirectThreadMediaPermissionCheckFingerprint.matchSingle()).method.apply {
+                if (p0Register < 2 || parameterTypes[1].toString() != appActivityField.definingClass) {
+                    throw PatchException("Unexpected DM media saver parameters or local registers")
                 }
+                addInstructionsWithLabels(
+                    0,
+                    """
+                    move-object/from16 v0, p1
+                    iget-object v0, v0, $appActivityField
+                    move-object/from16 v1, p2
+                    invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
+                    move-result v1
+                    if-nez v1, :piko
+                    return-void
+                    """.trimIndent(),
+                    ExternalLabel("piko", getInstruction(0)),
+                )
             }
 
             enableSettings("downloadMedia")

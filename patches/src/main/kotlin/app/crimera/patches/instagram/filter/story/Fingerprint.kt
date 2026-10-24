@@ -8,7 +8,6 @@ package app.crimera.patches.instagram.filter.story
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
-import com.android.tools.smali.dexlib2.AccessFlags
 
 internal object PopulateStoryTrayFingerprint : Fingerprint(
     returnType = "V",
@@ -17,5 +16,4 @@ internal object PopulateStoryTrayFingerprint : Fingerprint(
         "Ljava/util/List;", "Ljava/util/List;", "Z", "Z",
     ),
     filters = listOf(string("ReelStore.maybeAddNewTrayReelResponseItemIntfs")),
-    custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
 )

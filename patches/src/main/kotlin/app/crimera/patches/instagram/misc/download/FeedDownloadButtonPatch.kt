@@ -19,17 +19,21 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.shared.declaredParameterRegister
-import app.crimera.patches.shared.parameterRegisterStart
+import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeString
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
@@ -37,19 +41,12 @@ import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
-import app.morphe.util.findFreeRegister
-import app.morphe.util.getReference
-import app.morphe.util.matchSingle
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.p0Register
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.BuilderInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.Method
 
 internal const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 internal const val INTEGER_DESCRIPTOR = "Ljava/lang/Integer;"
@@ -80,34 +77,15 @@ internal fun <T> requireOne(
             "Expected one $label, found ${candidates.size}: ${candidates.joinToString { describe(it).toString() }}",
         )
 
-internal fun MethodReference.sameSignatureAs(other: MethodReference): Boolean =
-    name == other.name &&
-        returnType == other.returnType &&
-        parameterTypes.map { it.toString() } == other.parameterTypes.map { it.toString() }
-
-internal fun BuilderInstruction.methodRef(): MethodReference? =
-    (this as? ReferenceInstruction)?.reference as? MethodReference
-
-/** Register words an invoke or move instruction reads, in operand order. */
-internal fun BuilderInstruction.registers(): List<Int> =
-    when (this) {
-        is FiveRegisterInstruction ->
-            listOf(registerC, registerD, registerE, registerF, registerG).take(registerCount)
-
-        is RegisterRangeInstruction -> (startRegister until startRegister + registerCount).toList()
-        is TwoRegisterInstruction -> listOf(registerA, registerB)
-        is OneRegisterInstruction -> listOf(registerA)
-        else -> emptyList()
-    }
-
 internal fun MutableMethod.parameterRegister(descriptor: String): Int {
     val index = parameterTypes.indexOfFirst { it.toString() == descriptor }
     if (index < 0) throw PatchException("Method $this has no $descriptor parameter")
-    return declaredParameterRegister(this, index)
+    return p0Register + (if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1) +
+        parameterTypes.take(index).sumOf { if (it.toString() == "J" || it.toString() == "D") 2 else 1 }
 }
 
 internal fun MutableMethod.parameterBlock(): List<Int> =
-    (parameterRegisterStart(this) until (implementation?.registerCount ?: 0)).toList()
+    (p0Register until (implementation?.registerCount ?: 0)).toList()
 
 /**
  * Reserves [count] distinct registers that are dead at [index] and no higher than [maximum]
@@ -157,10 +135,36 @@ private object CurrentMediaIndexFingerprint : Fingerprint(
     name = "currentMediaIndex",
 )
 
-private class UserSessionSource(
-    val type: String,
-    val register: Int,
-    val field: FieldReference,
+private fun feedRowHolderConstructorFingerprint(saveButtonId: Long) = Fingerprint(
+    name = "<init>",
+    returnType = "V",
+    parameters = listOf(VIEW_DESCRIPTOR),
+    filters = listOf(
+        methodCall(name = "<init>", opcode = Opcode.INVOKE_DIRECT),
+        // Root view.
+        fieldAccess(
+            definingClass = "this",
+            type = VIEW_DESCRIPTOR,
+            opcode = Opcode.IPUT_OBJECT,
+            location = MatchAfterImmediately(),
+        ),
+        literal(saveButtonId),
+    ),
+)
+
+private fun feedUfiBindFingerprint(holderType: String, stateType: String) = Fingerprint(
+    returnType = "V",
+    parameters = listOf("L", "L", stateType, holderType),
+)
+
+/** The UFI renderer selector, which returns the static `Integer` that follows the "view" string constant. */
+private object FeedUfiRendererSelectorFingerprint : Fingerprint(
+    returnType = INTEGER_DESCRIPTOR,
+    strings = listOf(MAIN_FEED_MODULE, LITHO_UFI_VARIANT),
+    filters = listOf(
+        string(VIEW_UFI_VARIANT),
+        fieldAccess(type = INTEGER_DESCRIPTOR, opcode = Opcode.SGET_OBJECT, location = MatchAfterWithin(7)),
+    ),
 )
 
 val feedDownloadButtonPatch =
@@ -208,30 +212,10 @@ val feedDownloadButtonPatch =
  */
 context(patchContext: BytecodePatchContext)
 private fun hookFeedRowBinder(saveButtonId: Long): String {
-    val holderMatch =
-        Fingerprint(
-            name = "<init>",
-            returnType = "V",
-            parameters = listOf(VIEW_DESCRIPTOR),
-            filters = listOf(literal(saveButtonId)),
-        ).matchSingle()
-    val holderClass = holderMatch.classDef
+    val holderMatch = feedRowHolderConstructorFingerprint(saveButtonId).matchSingle()
+    val holderClass = holderMatch.originalClassDef
     val holderType = holderClass.type
-
-    // The root view is the only field assigned directly from the constructor's `View` parameter.
-    val viewRegister = holderMatch.method.parameterRegister(VIEW_DESCRIPTOR)
-    val rootViewField =
-        requireOne(
-            "root view field of $holderType",
-            holderMatch.method.implementation
-                ?.instructions
-                .orEmpty()
-                .mapNotNull { instruction ->
-                    if (instruction.opcode != Opcode.IPUT_OBJECT) return@mapNotNull null
-                    if ((instruction as TwoRegisterInstruction).registerA != viewRegister) return@mapNotNull null
-                    instruction.getReference<FieldReference>()?.takeIf { it.definingClass == holderType }
-                }.distinctBy { it.toString() },
-        )
+    val rootViewField = holderMatch.instructionMatches[1].fieldReference
 
     val stateType =
         requireOne(
@@ -255,41 +239,11 @@ private fun hookFeedRowBinder(saveButtonId: Long): String {
     CurrentMediaIndexFingerprint.changeString("feedViewStateField", viewStateField.name)
     CurrentMediaIndexFingerprint.changeString("feedCurrentMediaField", CURRENT_MEDIA_FIELD.name)
 
-    val bindCandidates = mutableListOf<MethodReference>()
-    patchContext.classDefForEach { classDef ->
-        classDef.methods.forEach { method ->
-            val parameters = method.parameterTypes.map { it.toString() }
-            if (method.returnType == "V" && holderType in parameters && stateType in parameters) {
-                bindCandidates.add(method)
-            }
-        }
-    }
-    val bindReference = requireOne("feed UFI bind method", bindCandidates)
-    val bindClass = patchContext.mutableClassDefBy(bindReference.definingClass)
-    val bind = bindClass.methods.first { it.sameSignatureAs(bindReference) }
-
-    // 448 keeps the session in a binder field, 439 passes it through a parameter whose type
-    // exposes exactly one `UserSession`. Prefer the binder's own field.
-    val binderSessionFields = bindClass.fields.filter { it.type == USER_SESSION_DESCRIPTOR }
-    val sessionSource =
-        when (binderSessionFields.size) {
-            0 ->
-                requireOne(
-                    "UserSession source of $bind",
-                    bind.parameterTypes.indices.mapNotNull { index ->
-                        val type = bind.parameterTypes[index].toString()
-                        val field =
-                            patchContext
-                                .classDefByOrNull(type)
-                                ?.fields
-                                ?.singleOrNull { it.type == USER_SESSION_DESCRIPTOR }
-                        field?.let { UserSessionSource(type, declaredParameterRegister(bind, index), it) }
-                    },
-                )
-
-            1 -> UserSessionSource(bindClass.type, parameterRegisterStart(bind), binderSessionFields.single())
-            else -> throw PatchException("Expected at most one UserSession field on ${bindClass.type}")
-        }
+    val bind = feedUfiBindFingerprint(holderType, stateType).matchSingle().method
+    val sessionField = requireOne(
+        "UserSession field of ${bind.definingClass}",
+        patchContext.classDefBy(bind.definingClass).fields.filter { it.type == USER_SESSION_DESCRIPTOR },
+    )
 
     val holderRegister = bind.parameterRegister(holderType)
     val stateRegister = bind.parameterRegister(stateType)
@@ -304,8 +258,8 @@ private fun hookFeedRowBinder(saveButtonId: Long): String {
             iget-object v$rootView, v$rootView, $rootViewField
             ${moveObject(state, stateRegister)}
             iget-object v$media, v$state, $mediaField
-            ${moveObject(userSession, sessionSource.register)}
-            iget-object v$userSession, v$userSession, ${sessionSource.field}
+            ${moveObject(userSession, bind.p0Register)}
+            iget-object v$userSession, v$userSession, $sessionField
             invoke-static {v$rootView, v$media, v$userSession, v$state}, $ADD_FEED_DOWNLOAD_BUTTON
         """.trimIndent(),
     )
@@ -315,42 +269,13 @@ private fun hookFeedRowBinder(saveButtonId: Long): String {
 
 /**
  * Only the view UFI renderer creates the holder [hookFeedRowBinder] hooks, so the main feed is
- * pinned to it; other modules keep the original selector result. 439 has a static and an instance
- * selector, and both are pinned.
+ * pinned to it; other modules keep the original selector result.
  */
 context(patchContext: BytecodePatchContext)
 private fun pinMainFeedToViewUfi() {
-    val selectors =
-        Fingerprint(
-            returnType = INTEGER_DESCRIPTOR,
-            strings = listOf(MAIN_FEED_MODULE, LITHO_UFI_VARIANT, VIEW_UFI_VARIANT),
-        ).matchAll(1..2)
-
-    // The selector returns the static `Integer` that follows the "view" string constant.
-    val viewVariantField =
-        requireOne(
-            "view UFI variant field",
-            selectors
-                .map { selector ->
-                    val instructions = selector.method.implementation?.instructions.orEmpty()
-                    val viewStringIndex =
-                        instructions.indexOfFirst { it.getReference<StringReference>()?.string == VIEW_UFI_VARIANT }
-                    if (viewStringIndex < 0) throw PatchException("No \"$VIEW_UFI_VARIANT\" case in ${selector.method}")
-                    requireOne(
-                        "view UFI variant field of ${selector.method}",
-                        instructions
-                            .drop(viewStringIndex + 1)
-                            .take(8)
-                            .mapNotNull { instruction ->
-                                if (instruction.opcode != Opcode.SGET_OBJECT) return@mapNotNull null
-                                instruction.getReference<FieldReference>()?.takeIf { it.type == INTEGER_DESCRIPTOR }
-                            }.distinctBy { it.toString() },
-                    )
-                }.distinctBy { it.toString() },
-        )
-
-    selectors.forEach { selector ->
-        val method = selector.method
+    FeedUfiRendererSelectorFingerprint.let {
+        val viewVariantField = it.instructionMatches.last().fieldReference
+        val method = it.method
         val moduleRegister = method.parameterRegister(STRING_DESCRIPTOR)
         val (expected, module) = method.reserveFreeRegisters(0, 2, maximum = 15)
 

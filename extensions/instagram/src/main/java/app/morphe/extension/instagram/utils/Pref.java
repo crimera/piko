@@ -107,22 +107,26 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.ENABLE_MARK_CHAT_AS_READ) && SettingsStatus.markChatAsRead;
     }
 
+    public static boolean markAsReadAfterReply() {
+        return SharedPref.getBooleanPref(Settings.MARK_AS_READ_AFTER_REPLY) && SettingsStatus.markAsReadAfterReply;
+    }
+
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
         return shouldBlockDmSeen(
                 SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
                 Pref.getTurnOnAllGhostModes(),
-                enableMarkChatAsReadOption()
+                enableMarkChatAsReadOption() || markAsReadAfterReply()
         );
     }
 
     static boolean shouldBlockDmSeen(
             boolean viewDmAnonymously,
             boolean allGhostModes,
-            boolean manualReadOptionEnabled
+            boolean explicitReadEnabled
     ) {
-        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
+        if (explicitReadEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
         return viewDmAnonymously || allGhostModes;
@@ -159,6 +163,10 @@ public class Pref {
 
     public static boolean hideStoriesTray() {
         return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+    }
+
+    public static boolean hideHiddenRequests() {
+        return lockable(Settings.HIDE_HIDDEN_REQUESTS) && SettingsStatus.hideHiddenRequests;
     }
 
     public static boolean hideNotesTray() {
@@ -233,6 +241,10 @@ public class Pref {
         return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT.key, value);
     }
 
+    public static boolean ephemeralMediaCaption() {
+        return SharedPref.getBooleanPref(Settings.EPHEMERAL_MEDIA_CAPTION);
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
@@ -302,6 +314,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.LOOP_STORY);
     }
 
+    public static int storyFollowButtonState(int original) {
+        return SharedPref.getBooleanPref(Settings.HIDE_STORY_FOLLOW_BUTTON) ? 0 : original;
+    }
+
     public static boolean viewStoryMentions() {
         return SharedPref.getBooleanPref(Settings.VIEW_STORY_MENTIONS);
     }
@@ -332,6 +348,14 @@ public class Pref {
 
     public static boolean embedDownloadMetadata() {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
+    public static boolean preferDashFormat() {
+        return SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT);
+    }
+
+    public static boolean dashAudioAacLc() {
+        return SharedPref.getBooleanPref(Settings.DASH_AUDIO_AAC_LC);
     }
 
     public static String downloadFileNameTemplate() {
@@ -494,5 +518,21 @@ public class Pref {
 
     public static boolean inboxLockNotifications() {
         return SharedPref.getBooleanPref(Settings.INBOX_LOCK_NOTIFICATIONS);
+    }
+
+    public static boolean hiddenChats() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS);
+    }
+
+    public static boolean hiddenChatsMute() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS_MUTE);
+    }
+
+    public static int hiddenChatsTaps() {
+        try {
+            return Integer.parseInt(SharedPref.getStringPref(Settings.HIDDEN_CHATS_TAPS));
+        } catch (NumberFormatException e) {
+            return 3;
+        }
     }
 }
