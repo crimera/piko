@@ -392,13 +392,12 @@ public final class InstantsVaultActivity {
         private TextView centeredMessage(CharSequence text) {
             TextView tv = new TextView(activity);
             tv.setText(text);
-            tv.setTextColor(themed("igds_color_secondary_text", 0xFF8E8E8E));
+            tv.setTextColor(themed("igds_color_secondary_text", 0xFFB0B0B0));
             tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
             tv.setGravity(Gravity.CENTER);
-            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-            lp.gravity = Gravity.CENTER;
-            tv.setLayoutParams(lp);
+            tv.setPadding(dp(24), dp(24), dp(24), dp(24));
+            tv.setLayoutParams(new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             return tv;
         }
 
