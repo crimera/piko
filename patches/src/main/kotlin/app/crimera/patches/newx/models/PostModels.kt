@@ -728,21 +728,37 @@ context(context: BytecodePatchContext)
 private fun resolveInlineActionKindLayoutLambda(
     entryModels: ResolvedNewXInlineActionModels,
 ): Method =
-    requireExactlyOne(
-        "NewX inline-action kind layout lambda",
+    resolveInlineActionKindLayoutMethod(
         Fingerprint(
             definingClass = INLINE_ACTION_BAR_SCOPE,
             name = "invoke",
             returnType = "Ljava/lang/Object;",
-            parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
+            // The lambda may acquire a layout receiver. Consumers depend on the entry field
+            // read and the uniquely validated kind construction below, not its erased arity.
             filters = listOf(
                 fieldAccess(
                     opcode = Opcode.IGET_OBJECT,
                     reference = entryModels.inlineActionTypeField,
                 ),
             ),
-        ).scopedMatchAll(),
-    ).originalMethod
+        ).scopedMatchAll().map { it.originalMethod },
+        entryModels.inlineActionTypeField,
+    )
+
+internal fun resolveInlineActionKindLayoutMethod(
+    methods: Collection<Method>,
+    actionTypeField: FieldReference,
+): Method = requireExactlyOne(
+    "NewX inline-action kind layout lambda",
+    methods.filter { method ->
+        method.definingClass.startsWith(INLINE_ACTION_BAR_SCOPE) &&
+            method.name == "invoke" && method.returnType == "Ljava/lang/Object;" &&
+            method.implementation?.instructions?.any { instruction ->
+                instruction.opcode == Opcode.IGET_OBJECT &&
+                    instruction.getReference<FieldReference>()?.toString() == actionTypeField.toString()
+            } == true
+    },
+)
 
 context(context: BytecodePatchContext)
 private fun resolveInlineActionKindOverride(

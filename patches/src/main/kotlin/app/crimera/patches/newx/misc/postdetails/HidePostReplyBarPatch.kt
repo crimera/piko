@@ -15,6 +15,9 @@ import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.INTEGER_LITERAL_OPCODES
+import app.crimera.patches.common.INTEGER_MOVE_OPCODES
+import app.crimera.patches.common.OBJECT_MOVE_OPCODES
 import app.crimera.patches.common.scopedMatchAll
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -30,9 +33,13 @@ import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
+import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -235,39 +242,11 @@ private fun Method.isPostDetailReplyBarRenderer(): Boolean {
 }
 
 private fun Method.isPhotoViewerControlsRenderer(): Boolean {
-    val parameters = parameterTypes.map(CharSequence::toString)
-    val hasKnownParameterShape =
-        when (parameters.size) {
-            10 ->
-                parameters[0].startsWith(INLINE_ACTION_BAR_SCOPE) &&
-                    parameters[1] == "Z" &&
-                    parameters[2].startsWith(COMPOSER_MINIMAL_SCOPE) &&
-                    parameters[3].startsWith(HAZE_SCOPE) &&
-                    parameters[4] == MODIFIER_DESCRIPTOR &&
-                    parameters[5] == "Ljava/lang/String;" &&
-                    parameters[6] == "Ljava/lang/String;" &&
-                    parameters[7] == FUNCTION1_DESCRIPTOR &&
-                    parameters[8] == COMPOSER_DESCRIPTOR &&
-                    parameters[9] == "I"
-
-            11 ->
-                parameters[0].startsWith(HAZE_SCOPE) &&
-                    parameters[1].startsWith(INLINE_ACTION_BAR_SCOPE) &&
-                    parameters[2].startsWith(COMPOSER_MINIMAL_SCOPE) &&
-                    parameters[3] == FUNCTION1_DESCRIPTOR &&
-                    parameters[4] == "Z" &&
-                    parameters[5] == MODIFIER_DESCRIPTOR &&
-                    parameters[6] == FUNCTION1_DESCRIPTOR &&
-                    parameters[7] == "Ljava/lang/String;" &&
-                    parameters[8] == "Ljava/lang/String;" &&
-                    parameters[9] == COMPOSER_DESCRIPTOR &&
-                    parameters[10] == "I"
-
-            else -> false
-        }
+    // The caller edge to the resolved container supplies the domain anchor. Auxiliary Compose
+    // parameters are not consumed by this hook; their count and order cannot identify the UI.
+    // The resolver below additionally proves call order and a common native fallback target.
     return AccessFlags.STATIC.isSet(accessFlags) &&
         returnType == "V" &&
-        hasKnownParameterShape &&
         inlineActionBarRenderCallIndices().size == 1 &&
         navigationInsetsCallIndices().size == 1
 }
@@ -604,29 +583,293 @@ private fun Method.isImmersiveMediaControlsShape(): Boolean {
         navigationInsetsCallIndices().size == 1
 }
 
-/**
- * Where the renderer decides whether the reply composer is present. Older releases call the
- * minimal-composer container directly; 12.31.0-alpha.04 hands it to an animated-visibility
- * content lambda instantiated in the renderer, so a `new-instance` of a class that calls the
- * container is the same anchor one hop down.
- */
-private fun Method.replyComposerAnchorIndices(
+/** Reaching definitions include every CFG predecessor, not the preceding textual assignment. */
+private class ReplyControlFlow(val method: Method) {
+    private val implementation = method.implementation
+        ?: throw PatchException("NewX reply content has no code: $method")
+    val instructions = implementation.instructions.toList()
+    private val offsets = instructions.runningFold(0) { offset, instruction -> offset + instruction.codeUnits }
+    private val indicesByOffset = offsets.withIndex().associate { it.value to it.index }
+    val parameterStart = implementation.registerCount - method.parameterTypes.sumOf {
+        if (it.toString() in setOf("J", "D")) 2 else 1
+    } - if (AccessFlags.STATIC.isSet(method.accessFlags)) 0 else 1
+
+    init {
+        if (implementation.tryBlocks.isNotEmpty()) {
+            throw PatchException("NewX reply content proof does not support exception edges: $method")
+        }
+    }
+
+    private fun indexAt(offset: Int): Int = indicesByOffset[offset]?.takeIf { it in instructions.indices }
+        ?: throw PatchException("Invalid NewX reply content branch at $offset in $method")
+
+    private fun target(index: Int): Int =
+        indexAt(offsets[index] + (instructions[index] as OffsetInstruction).codeOffset)
+
+    private fun switchCases(index: Int) =
+        (instructions[target(index)] as? SwitchPayload)?.switchElements
+            ?: throw PatchException("Missing NewX reply content switch payload in $method at $index")
+
+    private fun successors(index: Int): List<Int> {
+        val instruction = instructions[index]
+        if (instruction.opcode in setOf(Opcode.RETURN_VOID, Opcode.RETURN, Opcode.RETURN_WIDE, Opcode.RETURN_OBJECT, Opcode.THROW) ||
+            instruction is SwitchPayload
+        ) {
+            return emptyList()
+        }
+        if (instruction.opcode in setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)) return listOf(target(index))
+        if (instruction.opcode in setOf(Opcode.PACKED_SWITCH, Opcode.SPARSE_SWITCH)) {
+            return switchCases(index).map { indexAt(offsets[index] + it.offset) } + (index + 1)
+        }
+        if (instruction.opcode in CONDITIONAL_BRANCH_OPCODES) return listOf(target(index), index + 1)
+        return listOf(index + 1).filter { it in instructions.indices }
+    }
+
+    private val predecessors by lazy {
+        Array(instructions.size) { mutableListOf<Int>() }.also { predecessors ->
+            instructions.indices.forEach { index -> successors(index).forEach { predecessors[it].add(index) } }
+        }
+    }
+
+    fun reachable(
+        skip: Int? = null,
+        constant: ((Int, Int) -> Int?)? = null,
+        requiredDispatch: Int? = null,
+    ): Set<Int> {
+        val pending = mutableListOf(0)
+        return buildSet {
+            while (pending.isNotEmpty()) {
+                val index = pending.removeAt(pending.lastIndex)
+                if (index == skip || !add(index)) continue
+                val instruction = instructions[index]
+                if (constant != null && instruction.opcode in setOf(Opcode.PACKED_SWITCH, Opcode.SPARSE_SWITCH)) {
+                    val value = constant(index, (instruction as OneRegisterInstruction).registerA)
+                        ?: throw PatchException("Unknown NewX reply content switch selector in $method at $index")
+                    val selected = requireAtMostOne(
+                        "NewX reply content dispatch $method selector=$value",
+                        switchCases(index).filter { it.key == value },
+                    )
+                    pending.add(selected?.let { indexAt(offsets[index] + it.offset) } ?: (index + 1))
+                    continue
+                }
+                if (constant != null && instruction.opcode in CONDITIONAL_BRANCH_OPCODES) {
+                    val left = constant(index, (instruction as OneRegisterInstruction).registerA)
+                    val right = if (instruction is TwoRegisterInstruction) constant(index, instruction.registerB) else 0
+                    if (index == requiredDispatch && (left == null || right == null)) {
+                        throw PatchException("Unknown NewX reply content initial discriminator in $method at $index")
+                    }
+                    if (left != null && right != null) {
+                        val taken = when (instruction.opcode) {
+                            Opcode.IF_EQ, Opcode.IF_EQZ -> left == right
+                            Opcode.IF_NE, Opcode.IF_NEZ -> left != right
+                            Opcode.IF_LT, Opcode.IF_LTZ -> left < right
+                            Opcode.IF_GE, Opcode.IF_GEZ -> left >= right
+                            Opcode.IF_GT, Opcode.IF_GTZ -> left > right
+                            Opcode.IF_LE, Opcode.IF_LEZ -> left <= right
+                            else -> throw PatchException("Unsupported NewX reply content branch in $method at $index")
+                        }
+                        pending.add(if (taken) target(index) else index + 1)
+                        continue
+                    }
+                }
+                pending.addAll(successors(index))
+            }
+        }
+    }
+
+    private val reachableIndices by lazy { reachable() }
+
+    // Negative origins encode entry registers; nonnegative origins identify instructions.
+    fun origin(before: Int, register: Int): Int? {
+        if (before !in reachableIndices) return null
+        val pending = mutableListOf(before to register)
+        val visited = mutableSetOf<Pair<Int, Int>>()
+        val origins = mutableSetOf<Int>()
+        while (pending.isNotEmpty()) {
+            val edge = pending.removeAt(pending.lastIndex)
+            if (!visited.add(edge)) continue
+            val (index, tracked) = edge
+            if (index == 0) origins.add(-tracked - 1)
+            for (previous in predecessors[index]) {
+                if (previous !in reachableIndices) continue
+                val instruction = instructions[previous]
+                val destination = (instruction as? OneRegisterInstruction)?.registerA
+                if (instruction.opcode.setsWideRegister() && (destination == tracked || destination == tracked - 1)) return null
+                if (!instruction.opcode.setsRegister() || destination != tracked || instruction.opcode == Opcode.CHECK_CAST) {
+                    pending.add(previous to tracked)
+                } else if (instruction.opcode in INTEGER_MOVE_OPCODES || instruction.opcode in OBJECT_MOVE_OPCODES) {
+                    pending.add(previous to (instruction as TwoRegisterInstruction).registerB)
+                } else {
+                    origins.add(previous)
+                }
+            }
+        }
+        // Multiple reaching definitions mean an unknown value, not an invalid unrelated call.
+        // The proof consumer must reject unknown selectors; allocation searches may ignore them.
+        return origins.singleOrNull()
+    }
+
+    fun literal(before: Int, register: Int): Int? = origin(before, register)?.takeIf { it >= 0 }?.let { index ->
+        (instructions[index] as? NarrowLiteralInstruction)?.narrowLiteral
+            ?.takeIf { instructions[index].opcode in INTEGER_LITERAL_OPCODES }
+    }
+}
+
+/** Only the constructed instance's selected arm may anchor an animated composer. */
+private fun ReplyControlFlow.allocatedContentCallsComposer(
+    allocationIndex: Int,
     minimalContainer: Method,
-    hostsComposer: (String) -> Boolean,
-): List<Int> =
-    implementation?.instructions?.mapIndexedNotNull { index, instruction ->
+    classByType: (String) -> ClassDef?,
+): Boolean {
+    val type = instructions[allocationIndex].getReference<TypeReference>()?.type ?: return false
+    val definition = classByType(type) ?: return false
+    if (definition.methods.none { it.callSiteIndices(minimalContainer).isNotEmpty() }) return false
+    val entry = requireExactlyOne(
+        "NewX reply content erased invoke in $type",
+        definition.methods.filter { method ->
+            method.name == "invoke" && method.returnType == "Ljava/lang/Object;" &&
+                method.parameterTypes.all { it.toString() == "Ljava/lang/Object;" } &&
+                !AccessFlags.STATIC.isSet(method.accessFlags)
+        },
+    )
+    if (entry.callSiteIndices(minimalContainer).isEmpty()) {
+        throw PatchException("NewX reply content $type delegates its composer through an unproven helper: $entry")
+    }
+    val constructorIndex = requireExactlyOne(
+        "NewX reply content constructor for allocation $allocationIndex in $method",
+        instructions.indices.filter { index ->
+            val instruction = instructions[index]
+            val reference = instruction.getReference<MethodReference>() ?: return@filter false
+            instruction.opcode in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) &&
+                reference.definingClass == type && reference.name == "<init>" &&
+                instruction.registersUsed.firstOrNull()?.let { origin(index, it) == allocationIndex } == true
+        },
+    )
+    val constructorReference = instructions[constructorIndex].getReference<MethodReference>()!!
+    val constructor = requireExactlyOne(
+        "NewX reply content constructor $constructorReference",
+        definition.methods.filter { constructorReference.matches(it) },
+    )
+    val constructorFlow = ReplyControlFlow(constructor)
+    val entryFlow = ReplyControlFlow(entry)
+    val discriminatorTypes = setOf("B", "S", "C", "I", "Z")
+    val hasScalarCapture = definition.fields.any { it.type in discriminatorTypes && !AccessFlags.STATIC.isSet(it.accessFlags) }
+    // A merged callback must dispatch on its capture before entering a case. Unknown expressions
+    // at that boundary cannot be treated as permission to explore every unrelated R8 case.
+    val dispatchIndex = entryFlow.instructions.indexOfFirst { it.opcode in BRANCH_OPCODES }
+    var dispatchProven = !hasScalarCapture
+    val selected = entryFlow.reachable(requiredDispatch = dispatchIndex.takeIf { hasScalarCapture }, constant = { branchIndex, register ->
+        entryFlow.literal(branchIndex, register) ?: run {
+            val readIndex = entryFlow.origin(branchIndex, register)?.takeIf { it >= 0 } ?: return@run null
+            val read = entryFlow.instructions[readIndex]
+            val field = read.getReference<FieldReference>() ?: return@run null
+            if (read.opcode !in setOf(Opcode.IGET, Opcode.IGET_BYTE, Opcode.IGET_SHORT, Opcode.IGET_CHAR, Opcode.IGET_BOOLEAN) ||
+                field.definingClass != type ||
+                entryFlow.origin(readIndex, (read as TwoRegisterInstruction).registerB) != -entryFlow.parameterStart - 1
+            ) return@run null
+            if (definition.fields.none { it.toString() == field.toString() && AccessFlags.FINAL.isSet(it.accessFlags) }) {
+                throw PatchException("Unproven NewX reply content discriminator $field in $entry")
+            }
+            val storeIndex = requireExactlyOne(
+                "NewX reply content discriminator initialization $field in $constructor",
+                constructorFlow.instructions.indices.filter { index ->
+                    val instruction = constructorFlow.instructions[index]
+                    instruction.opcode in setOf(Opcode.IPUT, Opcode.IPUT_BYTE, Opcode.IPUT_SHORT, Opcode.IPUT_CHAR, Opcode.IPUT_BOOLEAN) &&
+                        instruction.getReference<FieldReference>()?.toString() == field.toString()
+                },
+            )
+            val store = constructorFlow.instructions[storeIndex] as TwoRegisterInstruction
+            if (constructorFlow.origin(storeIndex, store.registerB) != -constructorFlow.parameterStart - 1 ||
+                constructorFlow.reachable(skip = storeIndex).any {
+                    constructorFlow.instructions[it].opcode == Opcode.RETURN_VOID
+                }
+            ) throw PatchException("NewX reply discriminator initialization does not dominate construction: $constructor")
+            val source = constructorFlow.origin(storeIndex, store.registerA)
+                ?: throw PatchException("Unknown NewX reply discriminator source in $constructor")
+            val value = if (source >= 0) {
+                constructorFlow.literal(storeIndex, store.registerA)
+            } else {
+                val word = -source - 1 - constructorFlow.parameterStart
+                if (word <= 0) null else instructions[constructorIndex].registersUsed.getOrNull(word)?.let {
+                    literal(constructorIndex, it)
+                }
+            } ?: throw PatchException("Unknown NewX reply discriminator argument for $field at $constructorIndex in $method")
+            if (branchIndex == dispatchIndex) dispatchProven = true
+            when (field.type) {
+                "B" -> value.toByte().toInt()
+                "S" -> value.toShort().toInt()
+                "C" -> value.toChar().code
+                "I" -> value
+                "Z" -> value.takeIf { it == 0 || it == 1 }
+                    ?: throw PatchException("Invalid NewX reply boolean discriminator $value for $field")
+                else -> throw PatchException("Unsupported NewX reply discriminator representation: $field")
+            }
+        }
+    })
+    if (!dispatchProven) throw PatchException("NewX reply content first dispatch is not a proven scalar capture: $entry")
+    val calls = entry.callSiteIndices(minimalContainer).filter { it in selected }
+    if (calls.isEmpty()) return false
+    requireExactlyOne("NewX selected reply content composer call in $entry", calls)
+    if (selected.none { index ->
+            val instruction = entryFlow.instructions[index]
+            instruction.opcode == Opcode.CHECK_CAST && instruction.getReference<TypeReference>()?.type ==
+                "Landroidx/compose/animation/AnimatedVisibilityScope;"
+        }
+    ) throw PatchException("NewX reply content is not an AnimatedVisibility scope: $entry")
+
+    val wrapperIndex = requireExactlyOne(
+        "NewX reply content Compose wrapper in $method",
+        instructions.indices.filter { index ->
+            val instruction = instructions[index]
+            val reference = instruction.getReference<MethodReference>() ?: return@filter false
+            if (!instruction.isStaticInvocation() || !reference.definingClass.startsWith("Landroidx/compose/runtime/internal/") ||
+                !reference.returnType.startsWith("Landroidx/compose/runtime/internal/") ||
+                COMPOSER_DESCRIPTOR !in reference.parameterTypes.map(CharSequence::toString)
+            ) return@filter false
+            reference.parameterTypes.indices.any { parameter ->
+                reference.parameterTypes[parameter].toString() == "Lkotlin/Function;" &&
+                    instruction.argumentRegister(reference, parameter)?.let { origin(index, it) == allocationIndex } == true
+            }
+        },
+    )
+    if (instructions.getOrNull(wrapperIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+        throw PatchException("NewX reply content wrapper has no result in $method at $wrapperIndex")
+    }
+    requireExactlyOne(
+        "NewX animated reply content consumer in $method",
+        instructions.indices.filter { index ->
+            val instruction = instructions[index]
+            val reference = instruction.getReference<MethodReference>() ?: return@filter false
+            if (!instruction.isStaticInvocation() || !reference.definingClass.startsWith("Landroidx/compose/animation/") ||
+                reference.returnType != "V" || COMPOSER_DESCRIPTOR !in reference.parameterTypes.map(CharSequence::toString)
+            ) return@filter false
+            reference.parameterTypes.indices.any { parameter ->
+                reference.parameterTypes[parameter].toString() == instructions[wrapperIndex].getReference<MethodReference>()!!.returnType &&
+                    instruction.argumentRegister(reference, parameter)?.let { origin(index, it) == wrapperIndex + 1 } == true
+            }
+        },
+    )
+    return true
+}
+
+/** Direct container invocation or a proven selected AnimatedVisibility content invocation. */
+internal fun Method.replyComposerAnchorIndices(
+    minimalContainer: Method,
+    classByType: (String) -> ClassDef?,
+): List<Int> {
+    val flow by lazy { ReplyControlFlow(this) }
+    return implementation?.instructions?.mapIndexedNotNull { index, instruction ->
         when {
             instruction.isStaticInvocation() ->
                 index.takeIf {
                     instruction.getReference<MethodReference>()?.matches(minimalContainer) == true
                 }
             instruction.opcode == Opcode.NEW_INSTANCE ->
-                index.takeIf {
-                    instruction.getReference<TypeReference>()?.type?.let(hostsComposer) == true
-                }
+                index.takeIf { flow.allocatedContentCallsComposer(index, minimalContainer, classByType) }
             else -> null
         }
     }.orEmpty()
+}
 
 private fun Instruction.argumentRegister(
     reference: MethodReference,
@@ -648,14 +891,6 @@ context(context: BytecodePatchContext)
 private fun resolveImmersiveActionBarSafeAreaHook(
     minimalContainer: MutableMethod,
 ): ImmersiveActionBarSafeAreaHook? {
-    val composerHosts = mutableMapOf<String, Boolean>()
-    val hostsComposer = { type: String ->
-        composerHosts.getOrPut(type) {
-            context.classDefByOrNull(type)?.methods?.any { host ->
-                host.callSiteIndices(minimalContainer).isNotEmpty()
-            } == true
-        }
-    }
     val originalMethod =
         requireAtMostOne(
             label = "NewX immersive-media action-bar renderer",
@@ -684,7 +919,7 @@ private fun resolveImmersiveActionBarSafeAreaHook(
     val minimalComposerCallIndex =
         requireExactlyOne(
             label = "NewX immersive-media reply-composer anchor in $method",
-            candidates = method.replyComposerAnchorIndices(minimalContainer, hostsComposer),
+            candidates = method.replyComposerAnchorIndices(minimalContainer) { context.classDefByOrNull(it) },
         )
     val navigationInsetsCallIndex =
         requireExactlyOne(
@@ -842,13 +1077,63 @@ private fun ToggleSettingDefinition.injectReadBeforeActionBar(hook: ImmersiveAct
 context(context: BytecodePatchContext)
 private fun resolvePhotoViewerNavigationFallbackHook(
     minimalContainer: MutableMethod,
-): PhotoViewerNavigationFallbackHook {
+    immersiveHook: ImmersiveActionBarSafeAreaHook?,
+): PhotoViewerNavigationFallbackHook? {
+    val directCallers = buildList<Method> {
+        context.classDefForEach { classDef ->
+            if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
+            classDef.methods.forEach { method ->
+                if (method.callSiteIndices(minimalContainer).isNotEmpty()) add(method)
+            }
+        }
+    }
+    val candidates = directCallers.filter { it.isPhotoViewerControlsRenderer() }
+    // 12.37 renders PHOTO/VIDEO/GIF through the shared immersive chrome; the legacy photo host with
+    // its native-spacer fallback is gone. The photo hook is omitted only when no media method calls
+    // the container directly, the immersive safe-area hook resolved, and that immersive renderer is
+    // the sole media-scope inline-action row render, so every media action row stays covered.
+    // Anything else falls through to the fail-closed diagnostic below.
+    if (candidates.isEmpty() && directCallers.isEmpty() && immersiveHook != null) {
+        val mediaRowRenderers = buildList<Method> {
+            context.classDefForEach { classDef ->
+                if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
+                classDef.methods.forEach { method ->
+                    if (method.inlineActionBarRenderCallIndices().isNotEmpty()) add(method)
+                }
+            }
+        }
+        val onlyRowRenderer = requireAtMostOne(
+            label = "NewX media inline-action row renderer (immersive-only reply shape)",
+            candidates = mediaRowRenderers,
+        )
+        if (onlyRowRenderer != null && immersiveHook.method.matches(onlyRowRenderer)) return null
+    }
+    val missingCapability = if (candidates.isEmpty()) {
+        val containerCallers = mutableListOf<String>()
+        val actionRowConsumers = mutableListOf<String>()
+        context.classDefForEach { definition ->
+            definition.methods.forEach { method ->
+                val composerCalls = method.callSiteIndices(minimalContainer)
+                if (composerCalls.isNotEmpty()) containerCallers.add("$method at $composerCalls")
+                val rowCalls = method.inlineActionBarRenderCallIndices()
+                if (rowCalls.isNotEmpty()) actionRowConsumers.add("$method at $rowCalls")
+            }
+        }
+        "NewX media reply-bar capability is not proven: no direct photo/native-navigation-fallback " +
+            "renderer for $minimalContainer. Direct media callers: $directCallers. " +
+            "Selected immersive safe-area renderer: ${immersiveHook?.method ?: "absent"}. " +
+            "All direct container callers: $containerCallers. All action-row consumers: $actionRowConsumers. " +
+            "A selected animated content path proves its own immersive hook, not removal of the " +
+            "legacy photo surface or closed coverage of media action-row consumption. " +
+            "The historical compact composer has no native spacer and cannot replace that contract. " +
+            "Refusing to omit the required photo hook"
+    } else {
+        "NewX photo-viewer controls renderer with native navigation fallback"
+    }
     val originalMethod =
-        findUniqueCaller(
-            target = minimalContainer,
-            scope = MEDIA_SCOPE,
-            label = "NewX photo-viewer controls renderer",
-            predicate = Method::isPhotoViewerControlsRenderer,
+        requireExactlyOne(
+            label = missingCapability,
+            candidates = candidates,
         )
     val method =
         requireExactlyOne(
@@ -943,10 +1228,10 @@ val newXHidePostReplyBarPatch =
             val (minimalContainer, postDetailSheetContainer) = resolvePostDetailReplyBarContainers(renderer)
             val postDetailNavigationInsetsHook =
                 resolvePostDetailNavigationInsetsHook(postDetailSheetContainer)
-            val photoViewerNavigationFallbackHook =
-                resolvePhotoViewerNavigationFallbackHook(minimalContainer)
             val immersiveActionBarSafeAreaHook =
                 resolveImmersiveActionBarSafeAreaHook(minimalContainer)
+            val photoViewerNavigationFallbackHook =
+                resolvePhotoViewerNavigationFallbackHook(minimalContainer, immersiveActionBarSafeAreaHook)
 
             val postDetailInsetApplication =
                 postDetailSheetContainer.classifyInsetApplication(postDetailNavigationInsetsHook.callIndex)
@@ -968,7 +1253,7 @@ val newXHidePostReplyBarPatch =
                 )
                 hidePostReplyBar.returnVoidIfEnabled(postDetailSheetContainer, 0)
             }
-            photoViewerNavigationFallbackHook.let { hook ->
+            photoViewerNavigationFallbackHook?.let { hook ->
                 hidePostReplyBar.branchIfEnabled(hook.method, hook.gateIndex, hook.fallback)
             }
             immersiveActionBarSafeAreaHook?.let { hook ->

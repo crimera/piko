@@ -1015,17 +1015,7 @@ val restoreTimelinePositionPatch =
                         method.parameterTypes.isEmpty() &&
                         method.returnType == holderDescriptor &&
                         method.implementation != null &&
-                        method.instructions.any { instruction ->
-                            if (instruction.opcode != Opcode.INVOKE_STATIC &&
-                                instruction.opcode != Opcode.INVOKE_STATIC_RANGE
-                            ) {
-                                return@any false
-                            }
-                            val reference = instruction.getReference<MethodReference>() ?: return@any false
-                            reference.parameterTypes.map(CharSequence::toString) ==
-                                listOf(resumePositionDescriptor, LIST_DESCRIPTOR) &&
-                                reference.returnType == "Z"
-                        }
+                        resolveResumePositionValidation(method, resumePositionDescriptor, ::classDefByOrNull) != null
                 }
             val postLoadMethod = requireExactlyOne("NewX timeline post-load holder method", postLoadCandidates)
 
@@ -1491,45 +1481,9 @@ val restoreTimelinePositionPatch =
                 }
             }
 
-            val validatorReference =
-                requireExactlyOne(
-                    "NewX timeline resume-position validator reference",
-                    postLoadMethod.instructions.mapNotNull { instruction ->
-                        if (instruction.opcode != Opcode.INVOKE_STATIC &&
-                            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
-                        ) {
-                            return@mapNotNull null
-                        }
-                        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
-                        reference.takeIf {
-                            it.parameterTypes.map(CharSequence::toString) ==
-                                listOf(resumePositionDescriptor, LIST_DESCRIPTOR) &&
-                                it.returnType == "Z"
-                        }
-                    }.distinctBy(MethodReference::toString),
-                )
-            val validatorMethod =
-                requireExactlyOne(
-                    "NewX timeline resume-position validator method",
-                    mutableClassDefBy(validatorReference.definingClass).methods.filter { method ->
-                        AccessFlags.STATIC.isSet(method.accessFlags) &&
-                            method.name == validatorReference.name &&
-                            method.parameterTypes.map(CharSequence::toString) ==
-                                validatorReference.parameterTypes.map(CharSequence::toString) &&
-                            method.returnType == validatorReference.returnType
-                    },
-                )
-            val validatorItemIndexFieldReference =
-                requireExactlyOne(
-                    "NewX timeline resume-position item-index field read",
-                    validatorMethod.instructions.mapNotNull { instruction ->
-                        if (instruction.opcode != Opcode.IGET) return@mapNotNull null
-                        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-                        field.takeIf {
-                            it.definingClass == resumePositionDescriptor && it.type == "I"
-                        }
-                    }.distinctBy(FieldReference::toString),
-                )
+            val validation = resolveResumePositionValidation(postLoadMethod, resumePositionDescriptor, ::classDefByOrNull)
+                ?: throw PatchException("NewX timeline post-load method lost its resume validator: $postLoadMethod")
+            val validatorItemIndexFieldReference = validation.itemIndexField
             val validatorItemIndexField =
                 requireExactlyOne(
                     "NewX timeline resume-position item-index field definition",
@@ -1540,28 +1494,11 @@ val restoreTimelinePositionPatch =
             if (!AccessFlags.PUBLIC.isSet(validatorItemIndexField.accessFlags)) {
                 throw PatchException("NewX TimelineResumePosition item-index field is not public: $validatorItemIndexField")
             }
-            val matcherReference =
-                requireExactlyOne(
-                    "NewX TimelineItem entry-id and sort-index matcher",
-                    validatorMethod.instructions.mapNotNull { instruction ->
-                        if (instruction.opcode != Opcode.INVOKE_STATIC &&
-                            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
-                        ) {
-                            return@mapNotNull null
-                        }
-                        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
-                        val parameters = reference.parameterTypes.map(CharSequence::toString)
-                        if (parameters.size != 3 || parameters[1] != STRING_DESCRIPTOR ||
-                            parameters[2] != "J" || reference.returnType != "Z"
-                        ) {
-                            return@mapNotNull null
-                        }
-                        val itemClass = runCatching { mutableClassDefBy(parameters[0]) }.getOrNull()
-                            ?: return@mapNotNull null
-                        reference.takeIf { AccessFlags.INTERFACE.isSet(itemClass.accessFlags) }
-                    }.distinctBy(MethodReference::toString),
-                )
+            val matcherReference = validation.matcher
             val itemDescriptor = matcherReference.parameterTypes.first().toString()
+            if (classDefByOrNull(itemDescriptor)?.accessFlags?.let(AccessFlags.INTERFACE::isSet) != true) {
+                throw PatchException("NewX TimelineItem matcher no longer takes an interface: $matcherReference")
+            }
             requireExactlyOne(
                 "NewX TimelineItem matcher method definition",
                 mutableClassDefBy(matcherReference.definingClass).methods.filter { method ->

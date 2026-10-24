@@ -5,12 +5,12 @@ ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 cd "$ROOT_DIR"
 
 INSTALL=false
-# Default to 1 GiB after the intermittent 512 MB OOMs in our 12.34/12.35 desktop runs.
+# Default to 2 GiB: 1 GiB OOMed in apkzlib align/sign on 12.35/12.37 (512 MB on 12.34/12.35).
 # Override PATCHER_MAX_HEAP_MB when deliberately comparing smaller heaps.
-PATCHER_MAX_HEAP_MB="${PATCHER_MAX_HEAP_MB:-1024}"
+PATCHER_MAX_HEAP_MB="${PATCHER_MAX_HEAP_MB:-2048}"
 # Overridable so the bundle can also be exercised against a pre-release/manager patcher build,
 # which is the ABI the shipped manager app actually executes.
-MORPHE_CLI_JAR="${MORPHE_CLI_JAR:-../piko/morphe-desktop-1.11.0-all.jar}"
+MORPHE_CLI_JAR="${MORPHE_CLI_JAR:-../piko/morphe-desktop-1.19.0-all.jar}"
 FASTDEPLOY_PLATFORM_TOOLS_VERSION="${FASTDEPLOY_PLATFORM_TOOLS_VERSION:-36.0.0}"
 FASTDEPLOY_PLATFORM_TOOLS_DIR="${FASTDEPLOY_PLATFORM_TOOLS_DIR:-${HOME}/.cache/piko/platform-tools-${FASTDEPLOY_PLATFORM_TOOLS_VERSION}}"
 
@@ -82,7 +82,6 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -e "NewX: Server error logging" \
   -e "NewX: Crash logs" \
   -e "NewX: Filter posts by keyword" \
-  -e "NewX: Force highest video/audio quality" \
   -e "NewX: Filter For You by topic" \
   -e "NewX: Hide timeline tabs bar" \
   -e "NewX: Customize timeline tabs" \
@@ -97,6 +96,8 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -e "NewX: Show poll results" \
   -e "NewX: Customize post menu items" \
   -e "NewX: Customize media menu items" \
+  -e "NewX: Customize profile tabs" \
+  -e "NewX: Restore pinned home tab" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \

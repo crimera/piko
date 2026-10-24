@@ -10,6 +10,7 @@ import app.crimera.patches.newx.models.ResolvedNewXInlineDownloadModels
 import app.crimera.patches.newx.models.ResolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.ResolvedNewXPostModels
 import app.crimera.patches.newx.models.firstParameterSlot
+import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.models.isInlineActionEntryRenderer
 import app.crimera.patches.newx.models.ResolvedNewXTimelineModels
 import app.crimera.patches.newx.models.newXTimelineModelResolutionPatch
@@ -37,6 +38,7 @@ import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.Target
+import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
@@ -68,14 +70,16 @@ import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
-private const val RESOURCES_DESCRIPTOR = "Landroid/content/res/Resources;"
 private const val EXTENSION = "Lapp/morphe/extension/newx/misc/InlineDownloadButton;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val PRESENTER_POST_HELPER = "getPresenterPost"
@@ -305,12 +309,16 @@ val newXInlineDownloadButtonPatch =
             )
             inlineRenderer.method.apply {
                 requireStatic("NewX inline-action entry renderer")
-                // Icon-size float slot; Compose inserts auxiliary params between releases. The
-                // helper returns a p-index, so the absolute register is p0 plus that slot.
-                val sizeRegister = p0Register + firstParameterSlot("F")
-                insertHook(0, relocateBranchTargets = false) {
-                    val entryRegister = scratchRegister()
-                    val workRegister = scratchRegister()
+                val (hookIndex, sizeRegister) = resolveInlineIconSizeHook(this)
+                insertHook(
+                    hookIndex,
+                    excludedRegisters = listOf(p0Register, sizeRegister),
+                    relocateBranchTargets = false,
+                ) {
+                    // A computed size can live above v15, with only one low scratch available.
+                    // The emitter stages non-consecutive arguments safely for invoke/range.
+                    val entryRegister = scratchRegister(RegisterLimit.BYTE)
+                    val workRegister = scratchRegister(RegisterLimit.BYTE)
                     move(entryRegister, p0Register, OBJECT_DESCRIPTOR)
                     move(workRegister, sizeRegister, "F")
                     invokeStatic(
@@ -517,6 +525,77 @@ val newXInlineDownloadButtonPatch =
         }
     }
 
+/** Resolve the actual size value, never mutate the shared sizing object or invent a default. */
+context(context: BytecodePatchContext)
+private fun resolveInlineIconSizeHook(method: MutableMethod): Pair<Int, Int> =
+    resolveInlineIconSizeHook(method) { type -> context.classDefByOrNull(type) }
+
+internal fun resolveInlineIconSizeHook(
+    method: MutableMethod,
+    classByType: (String) -> ClassDef?,
+): Pair<Int, Int> {
+    if ("F" in method.parameterTypes.map(CharSequence::toString)) {
+        // Preserve the direct-parameter contract on historical targets.
+        return 0 to (method.p0Register + method.firstParameterSlot("F"))
+    }
+    val sizingClass = requireExactlyOne(
+        "NewX inline-action sizing parameter in $method",
+        method.parameterTypes.mapNotNull { type -> classByType(type.toString()) }
+            .filter { classDef ->
+                classDef.methods.any { candidate ->
+                    candidate.name == "toString" && candidate.parameterTypes.isEmpty() &&
+                        candidate.implementation?.instructions?.mapNotNull {
+                            it.getReference<StringReference>()?.string
+                        }?.containsAll(listOf("InlineActionSizing(counterFontSize=", ", iconSize=")) == true
+                }
+            },
+    )
+    val sizeField = requireExactlyOne(
+        "NewX inline-action sizing float field in ${sizingClass.type}",
+        sizingClass.fields.filter { it.type == "F" && !AccessFlags.STATIC.isSet(it.accessFlags) },
+    )
+    val getter = requireExactlyOne(
+        "NewX inline-action icon-size getter in ${sizingClass.type}",
+        sizingClass.methods.filter { candidate ->
+            val code = candidate.implementation?.instructions?.toList().orEmpty()
+            val read = code.getOrNull(0) as? TwoRegisterInstruction
+            val returned = code.getOrNull(1) as? OneRegisterInstruction
+            candidate.parameterTypes.isEmpty() && candidate.returnType == "F" &&
+                !AccessFlags.STATIC.isSet(candidate.accessFlags) && code.size == 2 &&
+                code[0].opcode == Opcode.IGET && code[1].opcode == Opcode.RETURN &&
+                code[0].getReference<FieldReference>()?.toString() == sizeField.toString() &&
+                read != null && read.registerB == candidate.implementation!!.registerCount - 1 &&
+                read.registerA == returned?.registerA
+        },
+    )
+    val instructions = method.instructions.toList()
+    val sizingRegister = method.p0Register + method.firstParameterSlot(sizingClass.type)
+    val callIndex = requireExactlyOne(
+        "NewX inline-action icon-size getter call in $method",
+        instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
+                    instruction.getReference<MethodReference>()?.toString() == getter.toString() &&
+                    instruction.registersUsed.singleOrNull() == sizingRegister
+            }
+        },
+    )
+    // Parameters must still denote this entry and this sizing object on every incoming path.
+    if (instructions.take(callIndex).any { instruction ->
+            if (!instruction.opcode.setsRegister()) return@any false
+            val destination = (instruction as OneRegisterInstruction).registerA
+            listOf(method.p0Register, sizingRegister).any { register ->
+                destination == register || (instruction.opcode.setsWideRegister() && destination + 1 == register)
+            }
+        }
+    ) throw PatchException("NewX inline-action sizing or entry parameter overwritten before $getter in $method")
+    val result = instructions.getOrNull(callIndex + 1)
+    if (result?.opcode != Opcode.MOVE_RESULT) {
+        throw PatchException("NewX inline-action size getter has no float result in $method")
+    }
+    return (callIndex + 2) to (result as OneRegisterInstruction).registerA
+}
+
 /**
  * The shared inline-action-bar layout lambda builds one kind model per entry and classifies
  * TwitterShare as Countless because this release's native kind switch has no TwitterShare arm.
@@ -583,21 +662,13 @@ private fun patchInlineActionKindOverride(
         )
     }
 
-    // The entry must still be the first argument of the render call the constructor feeds, so the
-    // register is live and unmodified at the rewrite point.
-    requireExactlyOne(
-        "NewX inline-action render call for v$entryRegister in $layoutMethod",
-        layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
-            val reference = instruction.getReference<MethodReference>()
-                ?: return@mapIndexedNotNull null
-            index.takeIf {
-                index > constructorIndex &&
-                    instruction.opcode in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) &&
-                    reference.parameterTypes.firstOrNull()?.toString() ==
-                    entryModels.inlineActionEntryDescriptor &&
-                    instruction.registersUsed.firstOrNull() == entryRegister
-            }
-        },
+    // Render arguments can be staged through object moves when the layout gains a receiver.
+    // Follow the entry value rather than requiring the render's register to keep its number.
+    resolveInlineActionKindRenderCall(
+        layoutMethod,
+        constructorIndex,
+        entryRegister,
+        entryModels.inlineActionEntryDescriptor,
     )
 
     val parameterRegisters = layoutMethod.p0Register until
@@ -619,12 +690,73 @@ private fun patchInlineActionKindOverride(
     }
 }
 
+/** Proves the entry's staging window without assuming register identity or linearizing joins. */
+internal fun resolveInlineActionKindRenderCall(
+    method: Method,
+    constructorIndex: Int,
+    entryRegister: Int,
+    entryDescriptor: String,
+): Int {
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    val offsets = instructions.runningFold(0) { offset, instruction -> offset + instruction.codeUnits }
+    val incomingTargets = mutableSetOf<Int>()
+    instructions.forEachIndexed { index, instruction ->
+        val branch = instruction as? OffsetInstruction
+            ?: return@forEachIndexed
+        val target = offsets[index] + branch.codeOffset
+        incomingTargets += target
+        if (instruction.opcode == Opcode.PACKED_SWITCH || instruction.opcode == Opcode.SPARSE_SWITCH) {
+            val payload = instructions.getOrNull(offsets.indexOf(target)) as? SwitchPayload
+                ?: throw PatchException("NewX inline-action switch payload was not found: $method")
+            payload.switchElements.forEach { incomingTargets += offsets[index] + it.offset }
+        }
+    }
+    method.implementation?.tryBlocks?.forEach { block ->
+        block.exceptionHandlers.forEach { incomingTargets += it.handlerCodeAddress }
+    }
+    return requireExactlyOne(
+        "NewX inline-action render call for v$entryRegister in $method",
+        instructions.mapIndexedNotNull { index, instruction ->
+            val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+            if (index <= constructorIndex ||
+                instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) ||
+                reference.parameterTypes.firstOrNull()?.toString() != entryDescriptor
+            ) return@mapIndexedNotNull null
+            // Incoming edges to the original constructor are allowed by the hook's label policy;
+            // any edge into the staging window, including directly to render, needs a CFG proof.
+            if (incomingTargets.any { it > offsets[constructorIndex] && it <= offsets[index] }) {
+                return@mapIndexedNotNull null
+            }
+            if (method.implementation?.tryBlocks?.any { block ->
+                    block.startCodeAddress < offsets[index] &&
+                        block.startCodeAddress + block.codeUnitCount > offsets[constructorIndex]
+                } == true
+            ) return@mapIndexedNotNull null
+            val aliases = mutableSetOf(entryRegister)
+            for (position in constructorIndex + 1 until index) {
+                val current = instructions[position]
+                if (current is OffsetInstruction ||
+                    !current.opcode.canContinue()
+                ) return@mapIndexedNotNull null
+                if (current.opcode in setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)) {
+                    val move = current as TwoRegisterInstruction
+                    val carriesEntry = move.registerB in aliases
+                    aliases.remove(move.registerA)
+                    if (carriesEntry) aliases += move.registerA
+                } else if (current.opcode.setsRegister() && current.opcode != Opcode.CHECK_CAST) {
+                    val destination = (current as OneRegisterInstruction).registerA
+                    aliases.remove(destination)
+                    if (current.opcode.setsWideRegister()) aliases.remove(destination + 1)
+                }
+            }
+            index.takeIf { instruction.registersUsed.firstOrNull() in aliases }
+        },
+    )
+}
+
 /**
- * The inline-action bar dispatches two gesture events through the presenter handler. The tap event
- * also carries resources for the presenter's limited-action messaging; the long-press event carries
- * only the action entry. Both implement the event interface, so resolve the long-press event as the
- * one that implements the event interface, exposes the action entry, and exposes no resources.
- * Resolve it semantically rather than by its obfuscated name.
+ * Press-state events can carry the same entry as long clicks. Resolve the semantic long-click
+ * payload, its consumption by this handler, and its construction/dispatch through Function1.
  */
 context(context: BytecodePatchContext)
 private fun resolveInlineLongPressEventType(
@@ -633,30 +765,95 @@ private fun resolveInlineLongPressEventType(
 ): String {
     val eventInterfaceDescriptor = eventHandler.parameterTypes.lastOrNull()?.toString()
         ?: throw PatchException("NewX inline event handler has no event parameter: $eventHandler")
-    val instructions = eventHandler.implementation?.instructions
+    val instructions = eventHandler.implementation?.instructions?.toList()
         ?: throw PatchException("NewX inline event handler has no implementation: $eventHandler")
 
-    return requireExactlyOne(
+    val label = "DidLongClickInlineActionEntry(inlineActionEntry="
+    val eventClass = requireExactlyOne(
         "NewX inline-action long-press event",
         instructions
             .filter { instruction -> instruction.opcode == Opcode.INSTANCE_OF }
             .mapNotNull { instruction -> instruction.getReference<TypeReference>()?.type }
             .distinct()
-            .filter { type ->
-                val eventClass = context.classDefByOrNull(type) ?: return@filter false
-                val carriesActionEntry = eventClass.exposesGetter(actionEntryDescriptor)
-                val carriesResources = eventClass.exposesGetter(RESOURCES_DESCRIPTOR)
-                eventClass.interfaces.any { descriptor ->
+            .mapNotNull { type -> context.classDefByOrNull(type) }
+            .filter { candidate ->
+                candidate.interfaces.any { descriptor ->
                     descriptor.toString() == eventInterfaceDescriptor
-                } && carriesActionEntry && !carriesResources
+                } && candidate.methods.any { method ->
+                    method.name == "toString" && method.parameterTypes.isEmpty() &&
+                        method.implementation?.instructions?.any {
+                            it.getReference<StringReference>()?.string == label
+                        } == true
+                }
             },
     )
+    val description = requireExactlyOne(
+        "NewX inline-action long-press description in ${eventClass.type}",
+        eventClass.methods.filter { it.name == "toString" && it.parameterTypes.isEmpty() },
+    )
+    val entryField = description.fieldForToStringLabel(label)
+    if (entryField.type != actionEntryDescriptor) {
+        throw PatchException("NewX inline-action long-press payload is not an action entry: $entryField")
+    }
+    val entryGetters = eventClass.methods.filter { method ->
+        val code = method.implementation?.instructions?.toList().orEmpty()
+        val read = code.getOrNull(0) as? TwoRegisterInstruction
+        val returned = code.getOrNull(1) as? OneRegisterInstruction
+        method.parameterTypes.isEmpty() && method.returnType == actionEntryDescriptor &&
+            !AccessFlags.STATIC.isSet(method.accessFlags) && code.size == 2 &&
+            code[0].opcode == Opcode.IGET_OBJECT && code[1].opcode == Opcode.RETURN_OBJECT &&
+            code[0].getReference<FieldReference>()?.toString() == entryField.toString() &&
+            read != null && read.registerB == method.implementation!!.registerCount - 1 &&
+            read.registerA == returned?.registerA
+    }.map { it.toString() }.toSet()
+    requireExactlyOne(
+        "NewX inline-action long-press payload consumer in $eventHandler",
+        instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                (instruction.opcode == Opcode.IGET_OBJECT &&
+                    instruction.getReference<FieldReference>()?.toString() == entryField.toString()) ||
+                    (instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
+                        instruction.getReference<MethodReference>()?.toString() in entryGetters)
+            }
+        },
+    )
+    val constructor = requireExactlyOne(
+        "NewX inline-action long-press constructor in ${eventClass.type}",
+        eventClass.methods.filter {
+            it.name == "<init>" && it.parameterTypes.map(CharSequence::toString) == listOf(actionEntryDescriptor)
+        },
+    )
+    requireExactlyOne(
+        "NewX inline-action long-press callback dispatch",
+        Fingerprint(
+            filters = listOf(methodCall(smali = constructor.toString())),
+            custom = { method, _ -> hasInlineActionEventDispatch(method, constructor) },
+        ).scopedMatchAll(),
+    )
+    return eventClass.type
 }
 
-private fun ClassDef.exposesGetter(returnType: String): Boolean =
-    methods.any { method ->
-        method.parameterTypes.isEmpty() && method.returnType == returnType
+/** The native callback constructs an entry event and immediately sends that object to Function1. */
+internal fun hasInlineActionEventDispatch(method: Method, constructor: MethodReference): Boolean {
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    return instructions.indices.any { index ->
+        val call = instructions[index]
+        if (call.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) ||
+            call.getReference<MethodReference>()?.toString() != constructor.toString()
+        ) return@any false
+        val eventRegister = call.registersUsed.firstOrNull() ?: return@any false
+        // newx-resolver-lint: allow instruction-order adjacent-dispatch because the validated callback constructs and immediately sends this event.
+        val allocation = instructions.getOrNull(index - 1) ?: return@any false
+        val dispatch = instructions.getOrNull(index + 1) ?: return@any false
+        allocation.opcode == Opcode.NEW_INSTANCE &&
+            allocation.getReference<TypeReference>()?.type == constructor.definingClass &&
+            (allocation as? OneRegisterInstruction)?.registerA == eventRegister &&
+            dispatch.opcode in setOf(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE) &&
+            dispatch.getReference<MethodReference>()?.toString() ==
+            "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;" &&
+            dispatch.registersUsed.getOrNull(1) == eventRegister
     }
+}
 
 context(context: BytecodePatchContext)
 private fun patchPostModelBridges(

@@ -1,15 +1,30 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
+import app.crimera.patches.newx.misc.postdetails.replyComposerAnchorIndices
 import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
 import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
 import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.isLegacyInlineActionKindModelConstructor
+import app.crimera.patches.newx.models.resolveInlineActionKindLayoutMethod
+import app.crimera.patches.newx.misc.inlineactions.resolveInlineActionKindRenderCall
+import app.crimera.patches.newx.misc.inlineactions.resolveInlineIconSizeHook
+import app.crimera.patches.newx.misc.inlineactions.hasInlineActionEventDispatch
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isPostDividerContentHelper
 import app.crimera.patches.newx.settings.resolveSettingsRowModelTargetInMethod
 import app.crimera.patches.newx.timeline.resolveInlineResumePositionFactory
+import app.crimera.patches.newx.timeline.resolveResumePositionValidation
+import app.crimera.patches.newx.premium.resolveVideoDownloadSubscriptionResults
+import app.crimera.patches.newx.premium.resolveTimelineDownloadSubscriptionResults
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction10t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderPackedSwitchPayload
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
+import app.crimera.patches.newx.misc.postoptions.postOptionsParameterOffset
+import app.crimera.patches.newx.misc.postoptions.postOptionsFeedbackLookups
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
@@ -40,6 +55,617 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
+    @Test
+    fun `reply content anchor follows the constructed case and requires consumed wrapper content`() {
+        for (selectorType in listOf("B", "I")) {
+            for (conditionalDispatch in listOf(false, true)) {
+                for (shape in listOf("selected", "otherCase", "unconsumed")) {
+                    val (host, target, classes) = replyContentFixture(selectorType, conditionalDispatch, shape)
+                    val description = "$selectorType conditional=$conditionalDispatch $shape"
+                    if (shape == "unconsumed") {
+                        val error = assertFailsWith<PatchException>(description) {
+                            host.replyComposerAnchorIndices(target, classes::get)
+                        }
+                        assertTrue(error.message.orEmpty().contains("animated reply content consumer"), description)
+                        continue
+                    }
+                    assertEquals(
+                        if (shape == "selected") listOf(0) else emptyList(),
+                        host.replyComposerAnchorIndices(target, classes::get),
+                        description,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun replyContentFixture(
+        selectorType: String,
+        conditionalDispatch: Boolean,
+        shape: String,
+    ): Triple<Method, Method, Map<String, ImmutableClassDef>> {
+        fun method(
+            owner: String,
+            name: String,
+            parameters: List<String>,
+            returnType: String,
+            registers: Int,
+            static: Boolean = false,
+            body: MethodImplementationBuilder.() -> Unit,
+        ) = ImmutableMethod(
+            owner, name, parameters.map { ImmutableMethodParameter(it, emptySet(), null) }, returnType,
+            AccessFlags.PUBLIC.value or (if (static) AccessFlags.STATIC.value else 0) or
+                (if (name == "<init>") AccessFlags.CONSTRUCTOR.value else 0),
+            emptySet(), emptySet(), MethodImplementationBuilder(registers).apply(body).methodImplementation,
+        )
+        fun MethodImplementationBuilder.add(instruction: String) = addInstruction(instruction.toInstruction())
+
+        val content = "Lfixture/MergedReplyContent;"
+        val composer = "Landroidx/compose/runtime/Composer;"
+        val scalarSuffix = if (selectorType == "B") "-byte" else ""
+        val target = method(
+            "Lcom/x/composer/minimal/Fixture;", "container",
+            listOf("Lcom/x/composer/minimal/State;", "Ldev/chrisbanes/haze/Fixture;",
+                "Landroidx/compose/ui/Modifier;", "Z", "Lkotlin/jvm/functions/Function1;", composer, "I", "I"),
+            "V", 8, static = true,
+        ) { add("return-void") }
+        val constructor = method(content, "<init>", listOf("J", selectorType), "V", 6) {
+            add("move-object v0, v2")
+            add("move v1, v5")
+            add("iput$scalarSuffix v1, v0, $content->selector:$selectorType")
+            add("invoke-direct {v0}, Ljava/lang/Object;-><init>()V")
+            add("return-void")
+        }
+        // Resolving the class or an arbitrary constructor instead of the actual invocation chooses
+        // this unrelated case and breaks the positive fixture.
+        val decoyConstructor = method(content, "<init>", listOf("Ljava/lang/Object;"), "V", 2) {
+            add("const/4 v1, 0x1")
+            add("iput$scalarSuffix v1, v0, $content->selector:$selectorType")
+            add("invoke-direct {v0}, Ljava/lang/Object;-><init>()V")
+            add("return-void")
+        }
+        val invoke = method(content, "invoke", List(3) { "Ljava/lang/Object;" }, "Ljava/lang/Object;", 13) {
+            add("move-object v1, v9")
+            add("iget$scalarSuffix v0, v1, $content->selector:$selectorType")
+            if (conditionalDispatch) {
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("composer")))
+            } else {
+                addInstruction(BuilderInstruction31t(Opcode.PACKED_SWITCH, 0, getLabel("payload")))
+            }
+            addLabel("unrelated")
+            add("const/4 v0, 0x0")
+            add("invoke-static {}, Lfixture/OtherContent;->render()V")
+            // This return must terminate reachability, not fall through into another merged case.
+            add("return-object v0")
+            addLabel("composer")
+            add("check-cast v10, Landroidx/compose/animation/AnimatedVisibilityScope;")
+            (1..8).forEach { add("const/4 v$it, 0x0") }
+            add("invoke-static/range {v1 .. v8}, $target")
+            add("return-object v1")
+            if (!conditionalDispatch) {
+                addLabel("payload")
+                addInstruction(BuilderPackedSwitchPayload(0, listOf(getLabel("composer"), getLabel("unrelated"))))
+            }
+        }
+        val host = method("Lfixture/ReplyMedia;", "render", listOf(composer), "V", 12, static = true) {
+            add("new-instance v0, $content")
+            add("const-wide/16 v1, 0x0")
+            add("const/4 v4, ${if (shape == "otherCase") "0x1" else "0x0"}")
+            add("move v3, v4")
+            add("move-object v5, v0")
+            add("move-wide v6, v1")
+            add("move v8, v3")
+            add("invoke-direct/range {v5 .. v8}, $content-><init>(J$selectorType)V")
+            add("const/4 v1, 0x0")
+            add("invoke-static {v1, v5, v11}, Landroidx/compose/runtime/internal/Fixture;->wrap(" +
+                "ILkotlin/Function;$composer)Landroidx/compose/runtime/internal/FixtureContent;")
+            add("move-result-object v0")
+            add("move-object v6, v0")
+            if (shape == "unconsumed") add("const/4 v6, 0x0")
+            add("invoke-static {v6, v11}, Landroidx/compose/animation/Fixture;->render(" +
+                "Landroidx/compose/runtime/internal/FixtureContent;$composer)V")
+            add("return-void")
+        }
+        val definition = ImmutableClassDef(
+            content, AccessFlags.PUBLIC.value or AccessFlags.FINAL.value, "Ljava/lang/Object;",
+            listOf("Lkotlin/jvm/functions/Function3;"), null, emptySet(),
+            listOf(ImmutableField(content, "selector", selectorType,
+                AccessFlags.PUBLIC.value or AccessFlags.FINAL.value, null, emptySet(), emptySet())),
+            listOf(constructor, decoyConstructor, invoke),
+        )
+        return Triple(host, target, mapOf(content to definition))
+    }
+
+    @Test
+    fun `download capabilities require direct premium or the captured coroutine policy before mutation`() {
+        val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
+        val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
+        val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
+        listOf("direct", "relocated", "unrelatedTry").forEach { shape ->
+            val (handler, classes) = downloadCapabilityFixture(shape)
+            val before = handler.instructions.map { it.opcode }
+            assertEquals(if (shape == "direct") 3 else 2,
+                resolveVideoDownloadSubscriptionResults(handler, premium, offline, feature, classes::get).size)
+            assertEquals(before, handler.instructions.map { it.opcode })
+        }
+        // A valid quota policy elsewhere must not stand in for the captured handler's call path.
+        listOf("disconnected", "unknown", "missingResult", "wideCapture", "wrongDispatch", "selectedTry").forEach { failure ->
+            val (handler, classes) = downloadCapabilityFixture(failure)
+            val before = handler.instructions.map { it.opcode }
+            val error = assertFailsWith<PatchException>(failure) {
+                resolveVideoDownloadSubscriptionResults(handler, premium, offline, feature, classes::get)
+            }
+            if (failure == "selectedTry") assertTrue(error.message.orEmpty().contains("selected coroutine path overlaps exception region"))
+            assertEquals(before, handler.instructions.map { it.opcode })
+        }
+    }
+
+    @Test
+    fun `timeline offline coverage follows both captured event arms when direct gates relocate`() {
+        val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
+        val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
+        val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
+        listOf("direct", "relocated", "secondDisconnected", "secondOtherSelector").forEach { shape ->
+            val (handler, classes) = timelineDownloadCapabilityFixture(shape)
+            val before = handler.instructions.map { it.opcode }
+            if (shape == "direct" || shape == "relocated") {
+                assertEquals(if (shape == "direct") 9 else 7,
+                    resolveTimelineDownloadSubscriptionResults(handler, premium, offline, feature, classes::get).size)
+            } else {
+                val error = assertFailsWith<PatchException>(shape) {
+                    resolveTimelineDownloadSubscriptionResults(handler, premium, offline, feature, classes::get)
+                }
+                // The first arm is valid in every fixture. Failure must concern the uncovered
+                // sibling or its actual dispatch, not merely a missing shared marker/checker.
+                assertTrue(error.message.orEmpty().contains(
+                    if (shape == "secondDisconnected") "timeline offline coroutine" else "selector=6",
+                ), error.message)
+            }
+            assertEquals(before, handler.instructions.map { it.opcode }, shape)
+        }
+    }
+
+    private fun timelineDownloadCapabilityFixture(shape: String): Pair<MutableMethod, Map<String, ImmutableClassDef>> {
+        // Reuse the real captured-handler -> adapter -> premium/Allowed graph, including its
+        // selector-preserving create/invoke/suspend methods. Only the event callback is new.
+        val (_, classes) = downloadCapabilityFixture("relocated")
+        val implementation = MethodImplementationBuilder(12)
+        val callback = "Lfixture/TimelineCallback;"
+        val host = "Lfixture/DownloadHandler;"
+        val coroutine = "Lfixture/DownloadCoroutine;"
+        fun add(instruction: String) = implementation.downloadInstruction(instruction)
+        add("iget-object v1, v10, $callback->host:$host")
+        add("iget-object v0, v1, $host->subscriptions:Lcom/x/subscriptions/Fixture;")
+        (List(6) { "feature" } + "premium").forEach { gate ->
+            add("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->$gate()Z")
+            add("move-result v2")
+        }
+        fun saveArm(second: Boolean) {
+            if (shape == "direct") {
+                add("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->offline()Z")
+                add("move-result v2")
+            } else {
+                add("new-instance v3, $coroutine")
+                add("move-object v4, v1")
+                if (second && shape == "secondDisconnected") add("const/4 v4, 0x0")
+                add("const/4 v5, 0x0")
+                add("const/4 v6, ${if (second && shape == "secondOtherSelector") "0x6" else "0x7"}")
+                add("invoke-direct {v3, v4, v5, v6}, $coroutine-><init>(Ljava/lang/Object;Lkotlin/coroutines/Continuation;B)V")
+                add("invoke-static {v3}, Lkotlinx/coroutines/Fixture;->launch(Lkotlin/jvm/functions/Function2;)V")
+            }
+            implementation.addInstruction(BuilderInstruction10t(Opcode.GOTO, implementation.getLabel("done")))
+        }
+        add("instance-of v2, v11, Lfixture/SaveFirst;")
+        add("const-string v8, \"download_video_to_offline\"")
+        implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, implementation.getLabel("second")))
+        saveArm(second = false)
+        implementation.addLabel("second")
+        add("instance-of v2, v11, Lfixture/SaveSecond;")
+        implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, implementation.getLabel("removal")))
+        saveArm(second = true)
+        implementation.addLabel("removal")
+        add("instance-of v2, v11, Lfixture/Remove;")
+        implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 2, implementation.getLabel("done")))
+        add("const-string v8, \"remove_video_from_offline\"")
+        implementation.addLabel("done")
+        add("const/4 v0, 0x0")
+        add("return-object v0")
+        return MutableMethod(ImmutableMethod(
+            callback, "invoke", listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)),
+            "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
+        )) to classes
+    }
+
+    private fun MethodImplementationBuilder.downloadInstruction(instruction: String) =
+        addInstruction(instruction.toInstruction())
+
+    private fun downloadCapabilityFixture(shape: String): Pair<MutableMethod, Map<String, ImmutableClassDef>> {
+        fun method(owner: String, name: String, parameters: List<String>, returnType: String, registers: Int,
+                   body: MethodImplementationBuilder.() -> Unit): ImmutableMethod = ImmutableMethod(
+            owner, name, parameters.map { ImmutableMethodParameter(it, emptySet(), null) }, returnType,
+            AccessFlags.PUBLIC.value or if (name == "<init>") AccessFlags.CONSTRUCTOR.value else 0,
+            emptySet(), emptySet(), MethodImplementationBuilder(registers).apply(body).methodImplementation,
+        )
+        fun MethodImplementationBuilder.dispatch(register: Int, exceptionScope: String? = null, body: MethodImplementationBuilder.() -> Unit) {
+            addInstruction(BuilderInstruction31t(Opcode.PACKED_SWITCH, register, getLabel("payload")))
+            if (exceptionScope == "unrelated") {
+                addLabel("tryStart")
+                downloadInstruction("invoke-static {}, Lfixture/Unrelated;->mayThrow()V")
+                addLabel("tryEnd")
+            }
+            downloadInstruction("return-object v0")
+            addLabel("selected")
+            if (exceptionScope == "selected") addLabel("tryStart")
+            body()
+            if (exceptionScope == "selected") addLabel("tryEnd")
+            if (exceptionScope != null) {
+                addLabel("catch")
+                downloadInstruction("move-exception v0")
+                downloadInstruction("return-object v0")
+                addCatch("Ljava/lang/Exception;", getLabel("tryStart"), getLabel("tryEnd"), getLabel("catch"))
+            }
+            addLabel("payload")
+            addInstruction(BuilderPackedSwitchPayload(7, listOf(getLabel("selected"))))
+        }
+        val coroutine = "Lfixture/DownloadCoroutine;"
+        val handlerType = "Lfixture/DownloadHandler;"
+        val quota = "Lfixture/Quota;"
+        val adapter = "Lfixture/OfflineAdapter;"
+        val permission = "Lfixture/Permission;"
+        val constructorDescriptor = "$coroutine-><init>(Ljava/lang/Object;Lkotlin/coroutines/Continuation;B)V"
+        val createDescriptor = "$coroutine->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;"
+        val suspendDescriptor = "$coroutine->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;"
+        val handler = MutableMethod(method(handlerType, "event", listOf("Ljava/lang/Object;"), "V", 12) {
+            downloadInstruction("iget-object v0, v10, $handlerType->subscriptions:Lcom/x/subscriptions/Fixture;")
+            val gates = listOf("feature", "premium") + if (shape == "direct") listOf("offline") else emptyList()
+            gates.forEach { gate ->
+                downloadInstruction("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->$gate()Z")
+                if (shape != "missingResult" || gate != "premium") downloadInstruction("move-result v2")
+            }
+            if (shape == "unknown") {
+                downloadInstruction("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->unrelated()Z")
+                downloadInstruction("move-result v2")
+            }
+            downloadInstruction("const-string v0, \"download_video_to_offline\"")
+            downloadInstruction("new-instance v3, $coroutine")
+            downloadInstruction("move-object v4, v10")
+            // v4 is the upper half of this write; a scalar reaching-origin proof must kill it.
+            if (shape == "wideCapture") downloadInstruction("const-wide/16 v3, 0x0")
+            downloadInstruction("const/4 v5, 0x0")
+            downloadInstruction("const/4 v6, ${if (shape == "wrongDispatch") "0x6" else "0x7"}")
+            downloadInstruction("invoke-direct {v3, v4, v5, v6}, $constructorDescriptor")
+            downloadInstruction("invoke-static {v3}, Lkotlinx/coroutines/Fixture;->launch(Lkotlin/jvm/functions/Function2;)V")
+            downloadInstruction("const-string v0, \"download_video\"")
+            downloadInstruction("return-void")
+        })
+        val constructor = method(coroutine, "<init>", listOf("Ljava/lang/Object;", "Lkotlin/coroutines/Continuation;", "B"), "V", 4) {
+            downloadInstruction("iput-byte v3, v0, $coroutine->selector:B")
+            downloadInstruction("iput-object v1, v0, $coroutine->handler:Ljava/lang/Object;")
+            downloadInstruction("const/4 v1, 0x2")
+            downloadInstruction("invoke-direct {v0, v1, v2}, Lkotlin/coroutines/jvm/internal/SuspendLambda;-><init>(ILkotlin/coroutines/Continuation;)V")
+            downloadInstruction("return-void")
+        }
+        val create = method(coroutine, "create", listOf("Ljava/lang/Object;", "Lkotlin/coroutines/Continuation;"), "Lkotlin/coroutines/Continuation;", 8) {
+            downloadInstruction("iget-byte v0, v5, $coroutine->selector:B")
+            dispatch(0) {
+                downloadInstruction("new-instance v0, $coroutine")
+                downloadInstruction("iget-object v1, v5, $coroutine->handler:Ljava/lang/Object;")
+                downloadInstruction("move-object v2, v7")
+                downloadInstruction("const/4 v3, 0x7")
+                downloadInstruction("invoke-direct {v0, v1, v2, v3}, $constructorDescriptor")
+                downloadInstruction("return-object v0")
+            }
+        }
+        val invoke = method(coroutine, "invoke", listOf("Ljava/lang/Object;", "Ljava/lang/Object;"), "Ljava/lang/Object;", 5) {
+            downloadInstruction("iget-byte v0, v2, $coroutine->selector:B")
+            dispatch(0) {
+                downloadInstruction("invoke-virtual {v2, v3, v4}, $createDescriptor")
+                downloadInstruction("move-result-object v0")
+                downloadInstruction("invoke-virtual {v0, v3}, $suspendDescriptor")
+                downloadInstruction("move-result-object v0")
+                downloadInstruction("return-object v0")
+            }
+        }
+        val suspendMethod = method(coroutine, "invokeSuspend", listOf("Ljava/lang/Object;"), "Ljava/lang/Object;", 3) {
+            downloadInstruction("iget-byte v0, v1, $coroutine->selector:B")
+            val exceptionScope = when (shape) {
+                "unrelatedTry" -> "unrelated"
+                "selectedTry" -> "selected"
+                else -> null
+            }
+            dispatch(0, exceptionScope) {
+                downloadInstruction("invoke-direct {v1, v2}, $coroutine->step(Ljava/lang/Object;)Ljava/lang/Object;")
+                downloadInstruction("move-result-object v0")
+                downloadInstruction("return-object v0")
+            }
+        }
+        val step = method(coroutine, "step", listOf("Ljava/lang/Object;"), "Ljava/lang/Object;", 6) {
+            downloadInstruction("iget-object v0, v4, $coroutine->handler:Ljava/lang/Object;")
+            downloadInstruction("check-cast v0, $handlerType")
+            downloadInstruction("iget-object v1, v0, $handlerType->policy:$adapter")
+            downloadInstruction("const-string v2, \"post-key\"")
+            downloadInstruction("invoke-virtual {v1, v2, v4}, $adapter->policy(Ljava/lang/String;Lkotlin/coroutines/jvm/internal/ContinuationImpl;)Ljava/lang/Enum;")
+            downloadInstruction("move-result-object v0")
+            downloadInstruction("return-object v0")
+        }
+        val policy = method(adapter, "policy", listOf("Ljava/lang/String;", "Lkotlin/coroutines/jvm/internal/ContinuationImpl;"), "Ljava/lang/Enum;", 5) {
+            if (shape != "disconnected") {
+                downloadInstruction("iget-object v0, v2, $adapter->quota:$quota")
+                downloadInstruction("const/4 v1, 0x0")
+                downloadInstruction("invoke-virtual {v0, v1}, $quota->check(I)$permission")
+                downloadInstruction("move-result-object v0")
+            } else downloadInstruction("const/4 v0, 0x0")
+            downloadInstruction("return-object v0")
+        }
+        val check = method(quota, "check", listOf("I"), permission, 4) {
+            downloadInstruction("iget-object v0, v2, $quota->subscriptions:Lcom/x/subscriptions/Fixture;")
+            downloadInstruction("invoke-virtual {v0}, Lcom/x/subscriptions/Fixture;->offline()Z")
+            downloadInstruction("move-result v0")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("free")))
+            downloadInstruction("sget-object v0, $permission->Allowed:$permission")
+            downloadInstruction("return-object v0")
+            addLabel("free")
+            downloadInstruction("const-string v0, \"android_x_lite_offline_free_saves_enabled\"")
+            downloadInstruction("const-string v1, \"android_x_lite_offline_free_saves_limit\"")
+            downloadInstruction("sget-object v0, $permission->PremiumOnly:$permission")
+            downloadInstruction("return-object v0")
+        }
+        fun owner(type: String, superclass: String, methods: List<Method>) = ImmutableClassDef(
+            type, AccessFlags.PUBLIC.value, superclass, emptyList(), null, emptySet(), emptyList(), methods,
+        )
+        val classes = listOf(
+            owner(coroutine, "Lkotlin/coroutines/jvm/internal/SuspendLambda;", listOf(constructor, create, invoke, suspendMethod, step)),
+            owner(adapter, "Ljava/lang/Object;", listOf(policy)), owner(quota, "Ljava/lang/Object;", listOf(check)),
+        ).associateBy { it.type }
+        return handler to classes
+    }
+
+    @Test
+    fun `inline sizing resolver marks the native getter result and rejects invalid producers`() {
+        val (renderer, classes) = inlineSizingFixture()
+        val consumer = renderer.instructions.indexOfFirst { it.opcode == Opcode.INVOKE_STATIC }
+        // Real no-F renderer path: the native sizing getter produces the float passed downstream.
+        assertEquals(consumer to 7, resolveInlineIconSizeHook(renderer, classes::get))
+        val (legacy, legacyClasses) = inlineSizingFixture("directFloat")
+        assertEquals(0 to 15, resolveInlineIconSizeHook(legacy, legacyClasses::get))
+        listOf("getterOverwrite", "entryOverwrite", "sizingOverwrite", "missingResult", "duplicateCall").forEach { failure ->
+            val (source, fixtureClasses) = inlineSizingFixture(failure)
+            assertFailsWith<PatchException>(failure) {
+                resolveInlineIconSizeHook(source, fixtureClasses::get)
+            }
+        }
+    }
+
+    private fun inlineSizingFixture(failure: String? = null): Pair<MutableMethod, Map<String, ImmutableClassDef>> {
+        val sizing = "Lfixture/ActionSizing;"
+        val auxiliary = "Lfixture/AuxiliarySizing;"
+        fun method(owner: String, name: String, parameters: List<String>, result: String, registers: Int,
+                   static: Boolean = false, body: MethodImplementationBuilder.() -> Unit) = ImmutableMethod(
+            owner, name, parameters.map { ImmutableMethodParameter(it, emptySet(), null) }, result,
+            AccessFlags.PUBLIC.value or (if (static) AccessFlags.STATIC.value else 0), emptySet(), emptySet(),
+            MethodImplementationBuilder(registers).apply(body).methodImplementation,
+        )
+        fun MethodImplementationBuilder.add(instruction: String) = addInstruction(instruction.toInstruction())
+        fun sizingClass(owner: String, semantic: Boolean): ImmutableClassDef {
+            val getter = method(owner, "read", emptyList(), "F", 1) {
+                if (semantic && failure == "getterOverwrite") add("const/4 v0, 0x0")
+                add("iget v0, v0, $owner->size:F")
+                add("return v0")
+            }
+            val description = method(owner, "toString", emptyList(), "Ljava/lang/String;", 2) {
+                if (semantic) {
+                    add("const-string v0, \"InlineActionSizing(counterFontSize=\"")
+                    add("const-string v0, \", iconSize=\"")
+                } else {
+                    add("const-string v0, \"UnrelatedSizing(size=\"")
+                }
+                add("return-object v0")
+            }
+            return ImmutableClassDef(
+                owner, AccessFlags.PUBLIC.value, "Ljava/lang/Object;", emptyList(), null, emptySet(),
+                listOf(ImmutableField(owner, "size", "F", AccessFlags.PUBLIC.value, null, emptySet(), emptySet())),
+                listOf(getter, description),
+            )
+        }
+        val renderer = method(
+            "Lfixture/EntryRenderer;", "render",
+            listOf("Lfixture/Entry;", "J", auxiliary, if (failure == "directFloat") "F" else sizing),
+            "V", 16, static = true,
+        ) {
+            add("move-object v1, v11")
+            if (failure == "entryOverwrite") add("const/16 v11, 0x0")
+            if (failure == "sizingOverwrite") add("const/16 v15, 0x0")
+            if (failure != "directFloat") {
+                add("invoke-virtual/range {v15 .. v15}, $sizing->read()F")
+                add(if (failure == "missingResult") "nop" else "move-result v7")
+                if (failure == "duplicateCall") {
+                    add("invoke-virtual {v15}, $sizing->read()F")
+                    add("move-result v7")
+                }
+            }
+            val nativeSize = if (failure == "directFloat") 15 else 7
+            add("invoke-static {v$nativeSize}, Lfixture/NativeIcon;->render(F)V")
+            add("return-void")
+        }
+        return MutableMethod(renderer) to mapOf(sizing to sizingClass(sizing, true), auxiliary to sizingClass(auxiliary, false))
+    }
+
+    @Test
+    fun `inline event callback dispatches the constructed event not another captured object`() {
+        val event = "Lfixture/LongClick;"
+        val constructor = ImmutableMethodReference(event, "<init>", listOf("Lfixture/Entry;"), "V")
+        fun callback(range: Boolean, failure: String? = null): Method {
+            val implementation = MethodImplementationBuilder(6)
+            fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
+            add("new-instance v1, ${if (failure == "wrongAllocation") "Lfixture/PressState;" else event}")
+            add(if (range) "invoke-direct/range {v1 .. v2}, $constructor" else "invoke-direct {v1, v2}, $constructor")
+            if (failure == "overwrite") add("move-object v1, v3")
+            val invoke = "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;"
+            add(when {
+                failure == "wrongArgument" -> "invoke-interface {v0, v3}, $invoke"
+                range -> "invoke-interface/range {v0 .. v1}, $invoke"
+                else -> "invoke-interface {v0, v1}, $invoke"
+            })
+            add("return-object v0")
+            return ImmutableMethod(
+                "Lfixture/RepackagedCallback;", "invoke",
+                listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)),
+                "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
+            )
+        }
+        listOf(false, true).forEach { range ->
+            assertTrue(hasInlineActionEventDispatch(callback(range), constructor))
+            listOf("wrongAllocation", "wrongArgument", "overwrite").forEach { failure ->
+                assertFalse(hasInlineActionEventDispatch(callback(range, failure), constructor), failure)
+            }
+        }
+    }
+
+    @Test
+    fun `inline layout discovery and kind hook follow receiver churn and reject unproven staging`() {
+        val field = ImmutableFieldReference("Lfixture/Entry;", "action", "Lfixture/Action;")
+        val decoy = inlineKindLayoutFixture(3, unrelatedField = true)
+        listOf(2, 3).forEach { arity ->
+            val source = inlineKindLayoutFixture(arity)
+            val resolved = resolveInlineActionKindLayoutMethod(listOf(decoy, source), field)
+            val instructions = resolved.instructions.toList()
+            val constructor = instructions.indices.single { index ->
+                isInlineActionKindModelConstructor(instructions[index]) { it == "Lfixture/Kind;" }
+            }
+            // Exercises the same semantic selection and render proof used before production emission.
+            assertEquals(instructions.lastIndex - 1, resolveInlineActionKindRenderCall(resolved, constructor, 2, "Lfixture/Entry;"))
+        }
+        assertFailsWith<PatchException> { resolveInlineActionKindLayoutMethod(listOf(decoy), field) }
+        assertFailsWith<PatchException> {
+            resolveInlineActionKindLayoutMethod(listOf(inlineKindLayoutFixture(2), inlineKindLayoutFixture(3)), field)
+        }
+        listOf("overwrite", "wideOverwrite", "incoming", "outgoing").forEach { failure ->
+            val source = resolveInlineActionKindLayoutMethod(listOf(inlineKindLayoutFixture(3, failure)), field)
+            val instructions = source.instructions.toList()
+            val constructor = instructions.indices.single { index ->
+                isInlineActionKindModelConstructor(instructions[index]) { it == "Lfixture/Kind;" }
+            }
+            assertFailsWith<PatchException>(failure) {
+                resolveInlineActionKindRenderCall(source, constructor, 2, "Lfixture/Entry;")
+            }
+        }
+    }
+
+    private fun inlineKindLayoutFixture(
+        arity: Int,
+        failure: String? = null,
+        unrelatedField: Boolean = false,
+    ): Method {
+        val implementation = MethodImplementationBuilder(24)
+        fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
+        add("check-cast v2, Lfixture/Entry;")
+        val fieldName = if (unrelatedField) "unrelated" else "action"
+        add("iget-object v9, v2, Lfixture/Entry;->$fieldName:Lfixture/Action;")
+        if (failure == "incoming") {
+            implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 9, implementation.getLabel("render")))
+        }
+        add("new-instance v14, Lfixture/ParentData;")
+        add("invoke-direct {v14, v11, v4, v12}, Lfixture/ParentData;-><init>(ZZLfixture/Kind;)V")
+        if (arity == 3) {
+            // Actual 12.37 staging: preserve the old v1, copy entry, then overwrite entry's register.
+            add("move-object v12, v1")
+            add("move-object v1, v2")
+            add("move-object v2, v13")
+        }
+        if (failure == "outgoing") {
+            implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 9, implementation.getLabel("exit")))
+        }
+        if (failure == "overwrite") add("const/4 v1, 0x0")
+        if (failure == "wideOverwrite") add("const-wide/16 v0, 0x0")
+        implementation.addLabel("render")
+        val renderRegister = if (arity == 3) 1 else 2
+        add("invoke-static {v$renderRegister}, Lfixture/Renderer;->render(Lfixture/Entry;)V")
+        implementation.addLabel("exit")
+        add("return-object v0")
+        return ImmutableMethod(
+            "Lcom/x/inlineactionbar/Fixture;", "invoke",
+            List(arity) { ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null) },
+            "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(),
+            implementation.methodImplementation,
+        )
+    }
+
+    @Test
+    fun `post options feedback lookup accepts virtual concrete maps without confusing receiver or result`() {
+        listOf("Ljava/util/Map;", "Ljava/util/LinkedHashMap;").forEach { mapType ->
+            val field = ImmutableFieldReference("Lfixture/State;", "feedback", mapType)
+            listOf("valid", "wrongReceiver", "missingResult").forEach { shape ->
+                val code = MethodImplementationBuilder(6)
+                code.addInstruction("iget-object v0, v4, Lfixture/State;->feedback:$mapType".toInstruction())
+                val invoke = if (mapType == "Ljava/util/Map;") "invoke-interface" else "invoke-virtual"
+                val receiver = if (shape == "wrongReceiver") 3 else 0
+                code.addInstruction("$invoke {v$receiver, v5}, $mapType->get(Ljava/lang/Object;)Ljava/lang/Object;".toInstruction())
+                code.addInstruction((if (shape == "missingResult") "const/4 v2, 0x0" else "move-result-object v2").toInstruction())
+                code.addInstruction("return-object v2".toInstruction())
+                val method = ImmutableMethod("Lfixture/Renderer;", "render",
+                    listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)), "Ljava/lang/Object;",
+                    AccessFlags.PUBLIC.value, emptySet(), emptySet(), code.methodImplementation)
+                val lookups = postOptionsFeedbackLookups(method, field) { it in setOf("Ljava/util/Map;", "Ljava/util/LinkedHashMap;") }
+                assertEquals(if (shape == "valid") listOf(5 to 2) else emptyList(),
+                    lookups.map { it.actionRegister to it.labelRegister })
+            }
+        }
+    }
+
+    @Test
+    fun `post options constructor follows the semantic field input across auxiliary type and parameter churn`() {
+        val optionsField = ImmutableFieldReference("Lfixture/State;", "options", "Ljava/util/List;")
+        listOf("Ljava/util/Map;", "Ljava/util/LinkedHashMap;").forEach { auxiliaryType ->
+            assertEquals(4, postOptionsParameterOffset(postOptionsConstructorFixture(auxiliaryType), optionsField))
+        }
+        assertEquals(4, postOptionsParameterOffset(
+            postOptionsConstructorFixture("Ljava/util/LinkedHashMap;", filterOptions = true), optionsField,
+        ))
+        listOf(
+            postOptionsConstructorFixture("Ljava/util/LinkedHashMap;", overwriteOptions = true),
+            postOptionsConstructorFixture("Ljava/util/Map;", conditionalStore = true),
+            postOptionsConstructorFixture("Ljava/util/Map;", filterOptions = true, unrelatedFilter = true),
+        ).forEach { constructor ->
+            assertFailsWith<PatchException> { postOptionsParameterOffset(constructor, optionsField) }
+        }
+    }
+
+    private fun postOptionsConstructorFixture(
+        auxiliaryType: String,
+        overwriteOptions: Boolean = false,
+        conditionalStore: Boolean = false,
+        filterOptions: Boolean = false,
+        unrelatedFilter: Boolean = false,
+    ): Method {
+        val implementation = MethodImplementationBuilder(16)
+        fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
+        add("invoke-direct {v10}, Ljava/lang/Object;-><init>()V")
+        add("move-object v0, v10")
+        add("move-object v1, v14")
+        // A second List field and parameter must not select the wrong list input.
+        add("iput-object v15, v0, Lfixture/State;->unrelated:Ljava/util/List;")
+        if (conditionalStore) {
+            implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 13, implementation.getLabel("store")))
+        }
+        if (overwriteOptions) add("const/4 v1, 0x0")
+        if (filterOptions) {
+            val filterOwner = if (unrelatedFilter) "Lfixture/Unrelated;" else
+                app.crimera.patches.newx.utils.Constants.POST_OPTIONS_FILTER_DESCRIPTOR
+            add("invoke-static {v1, v2}, $filterOwner->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;")
+            add("move-result-object v1")
+        }
+        implementation.addLabel("store")
+        add("iput-object v1, v0, Lfixture/State;->options:Ljava/util/List;")
+        add("return-void")
+        return ImmutableMethod(
+            "Lfixture/State;", "<init>",
+            listOf("J", auxiliaryType, "Ljava/util/List;", "Ljava/util/List;")
+                .map { ImmutableMethodParameter(it, emptySet(), null) },
+            "V", AccessFlags.PUBLIC.value or AccessFlags.CONSTRUCTOR.value,
+            emptySet(), emptySet(), implementation.methodImplementation,
+        )
+    }
+
     @Test
     fun `settings model discovery follows the title through list builders and ignores unrelated rows`() {
         val titleClass = ImmutableClassDef(
@@ -81,14 +707,84 @@ class NewXResolverLinterTest {
     }
 
     @Test
+    fun `resume validator follows the list index and matcher when the helper is inlined`() {
+        listOf(false, true).forEach { inlined ->
+            val (source, classes) = resumeValidatorFixture(inlined)
+            val validation = resolveResumePositionValidation(source, "Lfixture/Resume;", classes::get)!!
+            assertEquals("itemIndex", validation.itemIndexField.name)
+            assertEquals("matches", validation.matcher.name)
+        }
+        listOf("index", "item").forEach { overwrite ->
+            val (source, classes) = resumeValidatorFixture(true, overwrite)
+            assertFailsWith<PatchException> {
+                resolveResumePositionValidation(source, "Lfixture/Resume;", classes::get)
+            }
+        }
+    }
+
+    private fun resumeValidatorFixture(
+        inlined: Boolean,
+        overwrite: String? = null,
+    ): Pair<Method, Map<String, ImmutableClassDef>> {
+        fun validatorBody(implementation: MethodImplementationBuilder, listRegister: Int, returnObject: Boolean) {
+            fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
+            add("iget v0, v6, Lfixture/Resume;->rowIndex:I")
+            add("iget v0, v6, Lfixture/Resume;->itemIndex:I")
+            if (overwrite == "index") add("const/4 v0, 0x0")
+            add("invoke-static {v$listRegister, v0}, Lkotlin/collections/CollectionsKt;->getOrNull(Ljava/util/List;I)Ljava/lang/Object;")
+            add("move-result-object v2")
+            add("check-cast v2, Lfixture/Item;")
+            if (overwrite == "item") add("const/4 v2, 0x0")
+            add("iget-object v3, v6, Lfixture/Resume;->entryId:Ljava/lang/String;")
+            add("iget-wide v4, v6, Lfixture/Resume;->sortIndex:J")
+            add("invoke-static {v2, v3, v4, v5}, Lfixture/Matcher;->matches(Lfixture/Item;Ljava/lang/String;J)Z")
+            add("move-result v0")
+            if (returnObject) add("const/4 v0, 0x0")
+            add(if (returnObject) "return-object v0" else "return v0")
+        }
+        val helperCode = MethodImplementationBuilder(8)
+        validatorBody(helperCode, 7, false)
+        val helper = ImmutableMethod(
+            "Lfixture/Validator;", "validate",
+            listOf("Lfixture/Resume;", "Ljava/util/List;").map { ImmutableMethodParameter(it, emptySet(), null) },
+            "Z", AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(), helperCode.methodImplementation,
+        )
+        val sourceCode = MethodImplementationBuilder(8)
+        sourceCode.addInstruction("iget-object v6, v7, Lfixture/Owner;->resume:Lfixture/Resume;".toInstruction())
+        sourceCode.addInstruction("iget-object v1, v7, Lfixture/Owner;->items:Ljava/util/List;".toInstruction())
+        if (inlined) validatorBody(sourceCode, 1, true) else {
+            sourceCode.addInstruction("invoke-static {v6, v1}, Lfixture/Validator;->validate(Lfixture/Resume;Ljava/util/List;)Z".toInstruction())
+            sourceCode.addInstruction("move-result v0".toInstruction())
+            sourceCode.addInstruction("const/4 v0, 0x0".toInstruction())
+            sourceCode.addInstruction("return-object v0".toInstruction())
+        }
+        val source = ImmutableMethod(
+            "Lfixture/Owner;", "postLoad", emptyList(), "Lfixture/Holder;", AccessFlags.PUBLIC.value,
+            emptySet(), emptySet(), sourceCode.methodImplementation,
+        )
+        val helperClass = ImmutableClassDef(
+            "Lfixture/Validator;", AccessFlags.PUBLIC.value, "Ljava/lang/Object;", emptyList(), null,
+            emptySet(), emptyList(), listOf(helper),
+        )
+        return source to mapOf(helperClass.type to helperClass)
+    }
+
+    @Test
     fun `inline resume factory preserves self-read inputs and rejects escaping branches`() {
-        val extracted = resolveInlineResumePositionFactory(
-            inlineResumeFactoryFixture(escape = false),
+        fun extract(source: Method) = resolveInlineResumePositionFactory(
+            source,
             listOf("Ljava/util/List;", "Ljava/util/ArrayList;", "Lfixture/Holder;", "Lkotlin/time/Instant;"),
             "Lfixture/Resume;",
             ImmutableFieldReference("Lfixture/Owner;", "items", "Ljava/util/List;"),
             2,
         ).method
+        val extracted = extract(inlineResumeFactoryFixture(escape = false))
+        val nonzeroSeed = extract(inlineResumeFactoryFixture(escape = false, seed = 1))
+        assertTrue(nonzeroSeed.instructions.any {
+            it.opcode == Opcode.CONST_4 &&
+                (it as? com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction)?.registerA == 3 &&
+                (it as? com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction)?.narrowLiteral == 1
+        })
         val code = extracted.instructions.toList()
         assertEquals(Opcode.RETURN_OBJECT, code.last().opcode)
         assertTrue(code.any { it.opcode == Opcode.INVOKE_DIRECT_RANGE })
@@ -100,7 +796,6 @@ class NewXResolverLinterTest {
         assertEquals(offsets[code.lastIndex], offsets[branchIndex] + branch.codeOffset)
         listOf(
             inlineResumeFactoryFixture(escape = true),
-            inlineResumeFactoryFixture(escape = false, seed = 1),
             inlineResumeFactoryFixture(escape = false, bypassSeed = true),
         ).forEach { source ->
             assertFailsWith<PatchException> {

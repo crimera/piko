@@ -14,47 +14,19 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.POST_OPTIONS_FILTER_DESCRIPTOR
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.common.scopedMatchAll
-import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
-import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
-private const val POST_OPTIONS_STATE_PREFIX = "PostOptionsState(showOptionsDialog="
-private const val POST_OPTIONS_LIST_PREFIX = ", options="
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val POST_OPTIONS_FILTER_METHOD =
     "$POST_OPTIONS_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;"
-
-private object CustomizePostOptionsStateFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    filters =
-        listOf(
-            app.morphe.patcher.string(POST_OPTIONS_STATE_PREFIX),
-            app.morphe.patcher.string(POST_OPTIONS_LIST_PREFIX),
-        ),
-)
-
-private fun stateConstructorParameters() =
-    listOf(
-        "Z",
-        "L",
-        LIST_DESCRIPTOR,
-        "Ljava/util/Map;",
-        "Lkotlinx/coroutines/flow/",
-        "Lkotlin/jvm/functions/Function1;",
-        "L",
-        "L",
-    )
 
 // Every hidden ID must resolve to a real PostActionType entry. Aliased entries are
 // listed so renames fail closed at patch time instead of silently keeping the row.
@@ -158,29 +130,15 @@ private fun validateHiddenEnums() {
 
 context(context: BytecodePatchContext)
 private fun injectPostOptionsFilter(hiddenItems: MultiChoiceSettingDefinition) {
-    val stateMatch = requireExactlyOne(
-        "NewX post-options state",
-        CustomizePostOptionsStateFingerprint.scopedMatchAll().toList(),
-    )
-    val stateType = stateMatch.originalClassDef.type
-    val constructorMatch = requireExactlyOne(
-        "NewX post-options state constructor",
-        Fingerprint(
-            classFingerprint = CustomizePostOptionsStateFingerprint,
-            name = "<init>",
-            returnType = "V",
-            parameters = stateConstructorParameters(),
-        ).scopedMatchAll().toList(),
-    )
-    check(constructorMatch.originalClassDef.type == stateType) {
-        "NewX post-options state constructor owner changed: ${constructorMatch.originalMethod}"
-    }
+    val state = resolvePostOptionsStateConstructor()
+    val constructorMatch = state.match
+    val stateType = constructorMatch.originalClassDef.type
 
     val mutableClass = context.mutableClassDefBy(stateType)
     val method = constructorMatch.method.cloneMutable(additionalRegisters = 2)
     mutableClass.methods.remove(constructorMatch.method)
     mutableClass.methods.add(method)
-    val listStoreIndex = method.postOptionsListStoreIndex(stateType)
+    val listStoreIndex = postOptionsListStoreIndex(method, state.optionsField)
     // Never assume p-names map to constructor params: cloning and earlier injections
     // can shuffle params into moves, so derive the options register from the store itself.
     val optionsRegister = method.postOptionsListValueRegister(listStoreIndex)
@@ -227,16 +185,4 @@ private fun MutableMethod.postOptionsListValueRegister(storeIndex: Int): Int {
     }
     return (store as? TwoRegisterInstruction)?.registerA
         ?: throw PatchException("NewX post-options list store has no value register: $store")
-}
-
-private fun MutableMethod.postOptionsListStoreIndex(stateType: String): Int {
-    val candidates = instructions.mapIndexedNotNull { index, instruction ->
-        if (instruction.opcode != Opcode.IPUT_OBJECT) return@mapIndexedNotNull null
-        val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
-        if (field.definingClass != stateType || field.type != LIST_DESCRIPTOR) {
-            return@mapIndexedNotNull null
-        }
-        index
-    }
-    return requireExactlyOne("NewX post-options list store", candidates)
 }

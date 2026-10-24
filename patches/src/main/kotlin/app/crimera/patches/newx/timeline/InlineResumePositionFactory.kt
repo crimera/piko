@@ -111,27 +111,29 @@ internal fun resolveInlineResumePositionFactory(
     if (code.any { it.opcode == Opcode.PACKED_SWITCH || it.opcode == Opcode.SPARSE_SWITCH }) {
         throw PatchException("NewX inline resume-position seed dominance crosses a switch")
     }
-    if (constants.any { register ->
+    val constantSeeds = constants.associateWith { register ->
             // newx-resolver-lint: allow instruction-order raw-last because the definition must dominate entry with no later write
             val definition = (0 until start).lastOrNull { index ->
                 val instruction = code[index]
                 val destination = (instruction as? OneRegisterInstruction)?.registerA
                 instruction.opcode.setsRegister() &&
                     (destination == register || instruction.opcode.setsWideRegister() && destination == register - 1)
-            } ?: return@any true
+            } ?: throw PatchException("NewX inline resume-position input v$register has no definition in $source")
             val instruction = code[definition]
-            register >= firstParameter ||
+            if (register >= firstParameter ||
                 instruction.opcode !in setOf(Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16) ||
-                (instruction as? NarrowLiteralInstruction)?.narrowLiteral != 0 ||
                 code.indices.any { index ->
                     if (index in definition until start) return@any false
                     val branch = code[index] as? OffsetInstruction ?: return@any false
                     val target = offsets[index] + branch.codeOffset
                     target > offsets[definition] && target <= offsets[start]
-                }
-        }
-    ) {
-        throw PatchException("NewX inline resume-position factory has unbound inputs: $constants")
+                }) {
+                throw PatchException(
+                    "NewX inline resume-position input v$register is not a dominating narrow constant in $source",
+                )
+            }
+            // Hoisted booleans, nulls and integer seeds retain their original value, not an assumed zero.
+            (instruction as NarrowLiteralInstruction).narrowLiteral
     }
     val localCount = body.flatMap { instruction ->
         instruction.registersUsed + if (instruction.opcode.setsWideRegister()) {
@@ -150,7 +152,7 @@ internal fun resolveInlineResumePositionFactory(
     )
     method.insertHook(0, relocateBranchTargets = false) {
         arguments.forEachIndexed { index, register -> move(register, method.p0Register + index, parameterTypes[index]) }
-        constants.forEach { constInt(it, 0) }
+        constantSeeds.forEach { (register, value) -> constInt(register, value) }
     }
     return InlineResumePositionFactory(method, code[clockIndex].getReference<MethodReference>()!!)
 }

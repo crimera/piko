@@ -3,11 +3,14 @@ package app.crimera.patches.newx.misc.postoptions
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
+import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.crimera.patches.newx.settings.newXSettingsPatch
+import app.crimera.patches.newx.utils.Constants.POST_OPTIONS_FILTER_DESCRIPTOR
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.isObjectDescriptor
+import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireExactlyOne
 import app.morphe.patcher.Fingerprint
@@ -27,9 +30,12 @@ import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -48,9 +54,6 @@ private const val ADD_OPTION_SIGNATURE = "addOption($LIST_DESCRIPTOR)$LIST_DESCR
 private const val LABEL_FOR_SIGNATURE = "labelFor($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)$STRING_DESCRIPTOR"
 private const val USES_ICON_SIGNATURE = "usesIcon($OBJECT_DESCRIPTOR)Z"
 private const val HANDLE_OPTION_ACTION_SIGNATURE = "handleOptionAction($OBJECT_DESCRIPTOR$OBJECT_DESCRIPTOR)Z"
-
-/** The options list is the third declared parameter of the state constructor, so it lives in `p3`. */
-private const val OPTIONS_LIST_PARAMETER_REGISTER_OFFSET = 3
 
 internal const val BROWSE_OBJECT_ACTION = "None"
 internal const val FILTERED_REPLIES_ACTION = "ServerFeedbackAction"
@@ -213,9 +216,10 @@ private fun validateActionCarriers(contributions: List<PostOptionContribution>) 
 
 context(_: BytecodePatchContext)
 private fun injectOptionList(contributions: List<PostOptionContribution>) {
-    val stateConstructor = resolveStateConstructor().method
+    val state = resolvePostOptionsStateConstructor()
+    val stateConstructor = state.match.method
     // Handler calls are chained on the options-list parameter, in registration order.
-    val listRegister = stateConstructor.p0Register + OPTIONS_LIST_PARAMETER_REGISTER_OFFSET
+    val listRegister = stateConstructor.p0Register + state.optionsParameterOffset
     stateConstructor.insertHook(0, relocateBranchTargets = false) {
         contributions.forEach { contribution ->
             invokeStatic(
@@ -227,59 +231,150 @@ private fun injectOptionList(contributions: List<PostOptionContribution>) {
     }
 }
 
+internal data class PostOptionsStateConstructor(
+    val match: Match,
+    val optionsField: FieldReference,
+    val optionsParameterOffset: Int,
+)
+
 context(_: BytecodePatchContext)
-private fun resolveStateConstructor(): Match {
+internal fun resolvePostOptionsStateConstructor(): PostOptionsStateConstructor {
     val stateMatch = requireSingleMatch("NewX post-options state", PostOptionsStateFingerprint.matchAll())
-    return requireSingleMatch(
+    val optionsField = stateMatch.fieldForToStringLabel(POST_OPTIONS_LIST_PREFIX)
+    // The hooks replace this field's value with a List, not an arbitrary concrete collection.
+    if (optionsField.type != LIST_DESCRIPTOR) {
+        throw PatchException("NewX post-options field no longer accepts List: $optionsField")
+    }
+    val constructor = requireSingleMatch(
         "NewX post-options state constructor",
         Fingerprint(
             classFingerprint = PostOptionsStateFingerprint,
             name = "<init>",
             returnType = "V",
             custom = { method, _ ->
-                val parameters = method.parameterDescriptors()
-                parameters.firstOrNull() == "Z" &&
-                    parameters.containsAll(
-                        listOf(
-                            LIST_DESCRIPTOR,
-                            "Ljava/util/Map;",
-                            "Lkotlin/jvm/functions/Function1;",
-                        ),
-                    ) &&
-                    parameters.any { descriptor ->
-                        descriptor.startsWith("Lkotlinx/coroutines/flow/")
-                    }
+                method.instructions.any { instruction ->
+                    instruction.opcode == Opcode.IPUT_OBJECT &&
+                        instruction.getReference<FieldReference>()?.toString() == optionsField.toString()
+                }
             },
         ).matchAll(),
-    ).also {
-        check(it.originalClassDef.type == stateMatch.originalClassDef.type)
+    )
+    return PostOptionsStateConstructor(
+        constructor,
+        optionsField,
+        postOptionsParameterOffset(constructor.originalMethod, optionsField),
+    )
+}
+
+/** Trace the actual options-field input; unrelated constructor parameters are not the hook ABI. */
+internal fun postOptionsParameterOffset(method: Method, optionsField: FieldReference): Int {
+    val code = method.instructions.toList()
+    val storeIndex = postOptionsListStoreIndex(method, optionsField)
+    if (method.implementation!!.tryBlocks.isNotEmpty() || code.take(storeIndex).any { it is OffsetInstruction }) {
+        throw PatchException("NewX post-options constructor has non-linear options initialization: $method")
+    }
+    val receiver = method.implementation!!.registerCount - method.numberOfParameterRegisters
+    val origins = mutableMapOf(receiver to 0)
+    var offset = 1
+    method.parameterTypes.forEach { type ->
+        if (type.toString() == LIST_DESCRIPTOR) origins[receiver + offset] = offset
+        offset += if (type.toString() in setOf("J", "D")) 2 else 1
+    }
+    var filteredInput: Int? = null
+    for (instruction in code.take(storeIndex)) {
+        val precedingFilterInput = filteredInput
+        filteredInput = null
+        val reference = instruction.getReference<MethodReference>()
+        if (reference != null && instruction.opcode in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) {
+            // Customize-post-menu runs before contribution finalization. Its own filter replaces
+            // the list but preserves which constructor parameter supplies it; arbitrary calls do not.
+            filteredInput = if (reference.toString() ==
+                "$POST_OPTIONS_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;"
+            ) origins[instruction.registersUsed.first()] else null
+            continue
+        }
+        val destination = instruction as? OneRegisterInstruction ?: continue
+        if (!instruction.opcode.setsRegister()) continue
+        val origin = when {
+            instruction.opcode in OBJECT_MOVE_OPCODES -> origins[(instruction as TwoRegisterInstruction).registerB]
+            instruction.opcode == Opcode.MOVE_RESULT_OBJECT -> precedingFilterInput
+            else -> null
+        }
+        origins.remove(destination.registerA)
+        if (instruction.opcode.setsWideRegister()) origins.remove(destination.registerA + 1)
+        if (origin != null) origins[destination.registerA] = origin
+    }
+    val store = code[storeIndex] as TwoRegisterInstruction
+    val parameter = origins[store.registerA]
+    if (origins[store.registerB] != 0 || parameter == null || parameter == 0) {
+        throw PatchException("NewX post-options field is not initialized from a List parameter: $method")
+    }
+    return parameter
+}
+
+internal fun postOptionsListStoreIndex(method: Method, optionsField: FieldReference): Int =
+    requireExactlyOne(
+        "NewX post-options list store in $method",
+        method.instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                instruction.opcode == Opcode.IPUT_OBJECT &&
+                    instruction.getReference<FieldReference>()?.toString() == optionsField.toString()
+            }
+        },
+    )
+
+internal data class PostOptionsFeedbackLookup(
+    val callIndex: Int,
+    val resultIndex: Int,
+    val actionRegister: Int,
+    val labelRegister: Int,
+)
+
+internal fun postOptionsFeedbackLookups(
+    method: Method,
+    feedbackField: FieldReference,
+    isMap: (String) -> Boolean,
+): List<PostOptionsFeedbackLookup> {
+    val code = method.instructions.toList()
+    return code.indices.mapNotNull { fieldIndex ->
+        val read = code[fieldIndex] as? TwoRegisterInstruction ?: return@mapNotNull null
+        if (read.opcode != Opcode.IGET_OBJECT ||
+            code[fieldIndex].getReference<FieldReference>()?.toString() != feedbackField.toString()
+        ) return@mapNotNull null
+        val call = code.getOrNull(fieldIndex + 1) ?: return@mapNotNull null
+        val reference = call.getReference<MethodReference>() ?: return@mapNotNull null
+        if (call.opcode !in setOf(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE,
+                Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) ||
+            reference.name != "get" || !isMap(reference.definingClass) ||
+            reference.parameterTypes.map(CharSequence::toString) != listOf(OBJECT_DESCRIPTOR) ||
+            reference.returnType != OBJECT_DESCRIPTOR
+        ) return@mapNotNull null
+        val arguments = call.registersUsed
+        if (arguments.size != 2 || arguments[0] != read.registerA) return@mapNotNull null
+        val result = code.getOrNull(fieldIndex + 2) as? OneRegisterInstruction ?: return@mapNotNull null
+        if (result.opcode != Opcode.MOVE_RESULT_OBJECT) return@mapNotNull null
+        PostOptionsFeedbackLookup(fieldIndex + 1, fieldIndex + 2, arguments[1], result.registerA)
     }
 }
 
-context(_: BytecodePatchContext)
+context(context: BytecodePatchContext)
 private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
-    val stateType =
-        requireSingleMatch("NewX post-options state", PostOptionsStateFingerprint.matchAll())
-            .originalClassDef.type
+    val state = requireSingleMatch("NewX post-options state", PostOptionsStateFingerprint.matchAll())
+    val feedbackField = state.fieldForToStringLabel(", feedbackPrompts=")
+    if (!context.isAssignableTo(feedbackField.type, "Ljava/util/Map;")) {
+        throw PatchException("NewX post-options feedback prompts are not a Map: $feedbackField")
+    }
+    val isMap = { type: String -> context.isAssignableTo(type, "Ljava/util/Map;") }
     val rendererFingerprint =
             Fingerprint(
                 filters =
                     listOf(
                         fieldAccess(
                             opcode = Opcode.IGET_OBJECT,
-                            definingClass = stateType,
-                            type = "Ljava/util/Map;",
+                            reference = feedbackField,
                         ),
-                        methodCall(
-                            opcode = Opcode.INVOKE_INTERFACE,
-                            definingClass = "Ljava/util/Map;",
-                            name = "get",
-                            parameters = listOf("Ljava/lang/Object;"),
-                            returnType = "Ljava/lang/Object;",
-                            location = MatchAfterImmediately(),
-                        ),
-                        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
                     ),
+                custom = { method, _ -> postOptionsFeedbackLookups(method, feedbackField, isMap).size == 1 },
             )
     val originalRenderer = requireSingleMatch(
         "NewX post-options label renderer",
@@ -298,16 +393,14 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         "NewX post-options label renderer after parameter preservation",
         rendererFingerprint.matchAll(),
     )
-    val mapGet = renderer.instructionMatches[1].instruction
-    val labelResult = renderer.instructionMatches[2].instruction as? OneRegisterInstruction
-        ?: throw PatchException("NewX post-options Map.get has no object result register")
-    val actionRegister = mapGet.registersUsed.getOrNull(1)
-        ?: throw PatchException("NewX post-options Map.get has no action register")
+    val lookup = requireExactlyOne("NewX post-options feedback lookup",
+        postOptionsFeedbackLookups(renderer.method, feedbackField, isMap))
+    val actionRegister = lookup.actionRegister
 
     val iconAssignmentCandidates =
         renderer.method.instructions.withIndex().filter { (index, instruction) ->
             instruction.opcode in OBJECT_MOVE_OPCODES &&
-                index < renderer.instructionMatches[1].index &&
+                index < lookup.callIndex &&
                 renderer.method.instructions.getOrNull(index + 1)?.opcode in
                 setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
         }
@@ -342,10 +435,10 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
 
     // The label and icon rewrites land in front of the instruction that consumes the resolved
     // label, so they run with both the action and the original label live.
-    val insertionIndex = renderer.instructionMatches[2].index + 1
+    val insertionIndex = lookup.resultIndex + 1
     renderer.method.insertHook(
         index = insertionIndex,
-        excludedRegisters = listOf(actionRegister, labelResult.registerA, iconResultRegister),
+        excludedRegisters = listOf(actionRegister, lookup.labelRegister, iconResultRegister),
         // A branch into the label lookup must run the rewrite too, or the custom options keep
         // their upstream label and icon.
         relocateBranchTargets = true,
@@ -354,9 +447,9 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
             invokeStatic(
                 methodReference("${contribution.handlerDescriptor}->$LABEL_FOR_SIGNATURE"),
                 actionRegister,
-                labelResult.registerA,
+                lookup.labelRegister,
             )
-            moveResult(labelResult.registerA, STRING_DESCRIPTOR)
+            moveResult(lookup.labelRegister, STRING_DESCRIPTOR)
         }
 
         // The icon checks share the reserved byte register; if-eqz and move-result both encode it.
