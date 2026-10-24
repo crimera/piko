@@ -17,12 +17,14 @@ import app.morphe.util.findElementByAttributeValue
 import app.morphe.util.findMutableMethodOf
 import app.morphe.util.forEachChildElement
 import app.morphe.patcher.util.getReference
+import app.morphe.util.findElementByAttributeValueOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableStringReference
 import org.w3c.dom.Element
+import org.w3c.dom.NodeList
 import kotlin.collections.forEach
 
 private const val ORIGINAL_PACKAGE_NAME = "com.instagram.android"
@@ -33,8 +35,7 @@ val clonePatch =
         name = "Clone",
         description =
             "Changes the package name and the app name. " +
-                "This allows you to install the patched app alongside the original Instagram app.\n" +
-                "Caution: Do not select the official Morphe's \"Change package name\" universal patch.",
+                "This allows you to install the patched app alongside the original Instagram app.",
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -46,7 +47,7 @@ val clonePatch =
             description = "A new package name for the patched app.",
             required = true,
         ) {
-            it!!.matches(Regex("^[a-z]\\w*(\\.[a-z]\\w*)+$"))
+            it?.matches(Regex("^[a-z]\\w*(\\.[a-z]\\w*)+$")) == true
         }
 
         val appName by stringOption(
@@ -84,10 +85,10 @@ val clonePatch =
                 val permissions = manifest.getElementsByTagName("permission")
                 val usesPermissions = manifest.getElementsByTagName("uses-permission")
 
-                permissions.asSequence().map { it as Element }.forEach {
+                permissions.elementsForEach {
                     val oldName = it.getAttribute("android:name")
                     if (oldName.startsWith('.')) {
-                        return@forEach
+                        return@elementsForEach
                     }
                     val newName = oldName.replace(ORIGINAL_PACKAGE_NAME, newPackageName)
                     it.setAttribute("android:name", newName)
@@ -99,8 +100,8 @@ val clonePatch =
                 }
 
                 // Rename provider authorities
-                val providers = manifest.getElementsByTagName("provider").asSequence().map { it as Element }
-                for (provider in providers) {
+                val application = manifest.getElementsByTagName("application").item(0) as Element
+                application.getElementsByTagName("provider").elementsForEach { provider ->
                     val oldAuthority = provider.getAttribute("android:authorities")
                     val newAuthority =
                         if (oldAuthority.startsWith("$ORIGINAL_PACKAGE_NAME.")) {
@@ -147,7 +148,22 @@ val clonePatch =
             }
             bytecodePatchContext = null
         }
+
+        finalize {
+            // Change a package name in shortcuts.xml added by SettingsResourcePatch.
+            // Run in the finalize block in case SettingsPatch is run after this patch.
+            document("res/xml/shortcuts.xml").use {
+                it.getElementsByTagName("intent")
+                    .findElementByAttributeValueOrThrow("android:targetPackage", ORIGINAL_PACKAGE_NAME)
+                    .setAttribute("android:targetPackage", packageName)
+            }
+        }
     }
+
+/**
+ * Use this only for `getElementsByTagName` (A [NodeList] in which every Node is an instance of [Element]).
+ */
+private fun NodeList.elementsForEach(action: (Element) -> Unit) = asSequence().map { it as Element }.forEach(action)
 
 // Taken from:
 // https://github.com/MorpheApp/morphe-patches/blob/a8a566774ec8b99c02ce60fdc81ff5258c3b0caf/patches/src/main/kotlin/app/morphe/patches/shared/misc/gms/GmsCoreSupportPatch.kt#L91
