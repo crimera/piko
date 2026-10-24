@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.settings.preference.fragments;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -109,7 +110,9 @@ public class RestorePrefFragment extends Fragment {
             startActivityForResult(intent, READ_REQUEST_CODE);
         } catch (Exception e) {
             Logger.printException(() -> "requestFileForRestore failure", e);
-            toast(str("piko_import_fail"));
+            toast(str(e instanceof ActivityNotFoundException
+                    ? "piko_file_picker_unavailable"
+                    : "piko_import_fail"));
             finishHost();
         }
     }
