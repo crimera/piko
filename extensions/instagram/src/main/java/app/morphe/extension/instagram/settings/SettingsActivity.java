@@ -59,6 +59,7 @@ public final class SettingsActivity {
 
     private static final int FRAGMENT_CONTAINER_ID = 1001;
     private static final String STATE_FRAGMENT_NAME = "piko_settings_fragment_name";
+    private static final String STATE_FRAGMENT_STATE = "piko_settings_fragment_state";
     private static final String STATE_DISPLAY_TITLE = "piko_settings_display_title";
     private static final String STATE_SEARCH_QUERY = "piko_settings_search_query";
     private static final String STATE_SEARCH_MODE = "piko_settings_search_mode";
@@ -235,6 +236,9 @@ public final class SettingsActivity {
             if (fragment == null && activity.getFragmentManager().findFragmentById(FRAGMENT_CONTAINER_ID) == null) {
                 fragment = new SettingsFragment();
                 fragment.setArguments(createFragmentArguments());
+                if (savedInstanceState != null) {
+                    fragment.setInitialSavedState(savedInstanceState.getParcelable(STATE_FRAGMENT_STATE));
+                }
                 activity.getFragmentManager().beginTransaction()
                         .replace(FRAGMENT_CONTAINER_ID, fragment)
                         .commit();
@@ -576,6 +580,16 @@ public final class SettingsActivity {
                     searchState == null ? restoredSearchMode : searchState.searchMode
             );
             outState.putString(STATE_TARGET_PREFERENCE_KEY, targetPreferenceKey);
+
+            // Instagram removes android:fragments during host creation, so keep our state under a Piko key.
+            android.app.Fragment fragment = activity.getFragmentManager()
+                    .findFragmentById(FRAGMENT_CONTAINER_ID);
+            if (fragment instanceof SettingsFragment) {
+                outState.putParcelable(
+                        STATE_FRAGMENT_STATE,
+                        activity.getFragmentManager().saveFragmentInstanceState(fragment)
+                );
+            }
         }
 
         public boolean exitSearchIfActive() {
