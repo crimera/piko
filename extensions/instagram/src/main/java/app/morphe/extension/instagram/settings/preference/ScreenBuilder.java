@@ -776,6 +776,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.profileCover) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_profile_cover"),
+                            str("piko_profile_cover_desc"),
+                            Settings.PROFILE_COVER
+                    )
+            );
+        }
         if (SettingsStatus.improveImageViewing) {
             addPreference(
                     helper.switchPreference(

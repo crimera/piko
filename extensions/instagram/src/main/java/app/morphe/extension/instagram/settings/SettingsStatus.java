@@ -206,6 +206,8 @@ public class SettingsStatus {
     public static void followBackIndicator() { followBackIndicator = true; }
     public static boolean followListNonFollowerBadge = false;
     public static void followListNonFollowerBadge() { followListNonFollowerBadge = true; }
+    public static boolean profileCover = false;
+    public static void profileCover() { profileCover = true; }
     public static boolean improveImageViewing = false;
     public static void improveImageViewing() {
         improveImageViewing = true;
@@ -222,7 +224,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || followBackIndicator || followListNonFollowerBadge || customFont);}
+    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || followBackIndicator || followListNonFollowerBadge || profileCover || customFont);}
 
     //Font section.
     public static boolean customFont = false;
@@ -304,6 +306,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_view_story_mentions"),SettingsStatus.viewStoryMentions);
         FLAGS.put(str("piko_follow_back_indicator"),SettingsStatus.followBackIndicator);
         FLAGS.put(str("piko_follow_list_non_follower_badge"),SettingsStatus.followListNonFollowerBadge);
+        FLAGS.put(str("piko_profile_cover"),SettingsStatus.profileCover);
         FLAGS.put(str("piko_disable_discover_people"),SettingsStatus.disableDiscoverPeople);
         FLAGS.put(str("piko_disable_analytics"),SettingsStatus.disableAnalytics);
         FLAGS.put(str("piko_customise_story_ring_size"),SettingsStatus.customiseStoryRingSize);
