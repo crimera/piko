@@ -220,6 +220,12 @@
     <string name="piko_pref_hide_post_inline_metrics_desc">Hides like, reposts etc counts on inline view</string>
     <string name="piko_pref_hide_post_detailed_metrics">Hide post detailed view metrics</string>
     <string name="piko_pref_hide_post_detailed_metrics_desc">Hides like, reposts etc counts on detailed view</string>
+    <string name="piko_pref_reply_like_ratio">Reply/Like ratio</string>
+    <string name="piko_pref_reply_like_ratio_desc">Show the replies-to-likes ratio in each post\'s action bar</string>
+    <string name="piko_reply_like_ratio_mode_off">Off</string>
+    <string name="piko_reply_like_ratio_mode_numbers">Numbers only</string>
+    <string name="piko_reply_like_ratio_mode_icon">Icon only</string>
+    <string name="piko_reply_like_ratio_mode_both">Icon and numbers</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Customization</string>

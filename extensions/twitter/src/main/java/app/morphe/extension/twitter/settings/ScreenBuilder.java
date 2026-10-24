@@ -962,6 +962,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.replyLikeRatio) {
+            addPreference(category,
+                    helper.listPreference(
+                            str("piko_pref_reply_like_ratio"),
+                            str("piko_pref_reply_like_ratio_desc"),
+                            Settings.TIMELINE_REPLY_LIKE_RATIO_MODE
+                    )
+            );
+        }
         if (SettingsStatus.hideLiveThreads) {
             addPreference(category,
                     helper.switchPreference(
