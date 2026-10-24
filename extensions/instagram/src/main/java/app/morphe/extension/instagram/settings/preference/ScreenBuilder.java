@@ -725,6 +725,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.rememberAutoScrollState) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_remember_auto_scroll_state"),
+                            str("piko_remember_auto_scroll_state_desc"),
+                            Settings.REMEMBER_AUTO_SCROLL_STATE
+                    )
+            );
+        }
         if (SettingsStatus.disableAnalytics) {
             addPreference(
                     helper.switchPreference(

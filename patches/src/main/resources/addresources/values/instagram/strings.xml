@@ -119,6 +119,8 @@
 
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Misc</string>
+    <string name="piko_remember_auto_scroll_state">Remember auto-scroll state</string>
+    <string name="piko_remember_auto_scroll_state_desc">Keeps Reels auto-scroll in the state you left it, instead of turning it off after Instagram restarts. This does not turn auto-scroll on by itself.</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disable analytics</string>

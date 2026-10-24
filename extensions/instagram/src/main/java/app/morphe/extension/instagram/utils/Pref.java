@@ -177,6 +177,10 @@ public class Pref {
         return lockable(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
 
+    public static boolean rememberAutoScrollState() {
+        return SharedPref.getBooleanPref(Settings.REMEMBER_AUTO_SCROLL_STATE);
+    }
+
     public static boolean disableSwipeToCreate() {
         return lockable(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
     }

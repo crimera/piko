@@ -222,7 +222,9 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || followBackIndicator || followListNonFollowerBadge || customFont);}
+    public static boolean rememberAutoScrollState = false;
+    public static void rememberAutoScrollState() { rememberAutoScrollState = true; }
+    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || followBackIndicator || followListNonFollowerBadge || rememberAutoScrollState || customFont);}
 
     //Font section.
     public static boolean customFont = false;
@@ -287,6 +289,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
         FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
+        FLAGS.put(str("piko_remember_auto_scroll_state"),SettingsStatus.rememberAutoScrollState);
         FLAGS.put(str("piko_disable_video_autoplay"),SettingsStatus.disableVideoAutoplay);
         FLAGS.put(str("piko_remove_empty_bottom_space"),SettingsStatus.removeEmptyBottomSpace);
         FLAGS.put(str("piko_save_media_comment"),SettingsStatus.saveMediaCommentButton);

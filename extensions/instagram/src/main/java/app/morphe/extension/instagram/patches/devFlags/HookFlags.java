@@ -75,6 +75,15 @@ public class HookFlags {
         }
     }
 
+    private static void rememberAutoScrollStateFlags() {
+        if (Pref.rememberAutoScrollState()) {
+            // ig_reels_android_hands_free_mode::per_session_autoscroll_enabled.
+            // Instagram resets auto-scroll every session when this is true, so override it to
+            // false and let the state the user left it in survive an app restart.
+            BOOL_FLAGS.put("83371::10", false);
+        }
+    }
+
     private static void addRecommendedFlags(){
         if(SettingsStatus.recommendedFlags) {
             Map<String, Boolean> recFlags = FlagsSharedPref.getAll();
@@ -85,6 +94,9 @@ public class HookFlags {
     }
 
     public static void load() {
+        // addFlags() inserts feature overrides at the start of this method, so they run
+        // before addRecommendedFlags() and an explicit recommended-flag choice still wins
+        // over a broad Piko setting.
         addRecommendedFlags();
     }
 
