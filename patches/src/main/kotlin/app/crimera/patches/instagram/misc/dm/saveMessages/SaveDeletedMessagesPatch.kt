@@ -37,7 +37,7 @@ val saveDeletedMessagesPatch =
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
         default = true,
     ) {
-        dependsOn(settingsPatch, directItemEntity, deletedMessagesResourcePatch)
+        dependsOn(settingsPatch, directItemEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
