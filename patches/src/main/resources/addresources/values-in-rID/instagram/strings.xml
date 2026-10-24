@@ -83,7 +83,6 @@
     <string name="piko_improve_image_viewing">Tingkatkan tampilan gambar</string>
     <string name="piko_improve_image_viewing_desc">Mengambil gambar dengan resolusi maksimum dari server. Mungkin mengurangi kinerja, menambah ukuran data aplikasi, atau menyebabkan aplikasi beralih ke tata letak yang lebih lama</string>
     <string name="piko_copy_comment">Salin komentar</string>
-    <string name="piko_copy_comment_desc">Menambahkan tombol untuk menyalin komentar pada postingan dan reel</string>
     <string name="piko_comment_copied_success">Komentar disalin</string>
     <string name="piko_comment_copied_failed">Tidak ada teks yang ditemukan untuk disalin</string>
     <string name="piko_copy_username">Salin nama pengguna</string>

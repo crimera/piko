@@ -35,6 +35,8 @@
     <string name="piko_disable_typing_status">입력 중 상태 비활성화</string>
     <string name="piko_disable_screenshot_detection">스크린샷 감지 비활성화</string>
     <string name="piko_view_dm_anonymously">다이렉트 메시지 몰래보기</string>
+    <string name="piko_mark_as_read_after_reply">답글 후 읽음으로 표시</string>
+    <string name="piko_mark_as_read_after_reply_desc">다이엑트 메시지를 몰래 보거나 모든 고스트 모드를 사용하는 경우에도, 답장을 보낸 후 채팅을 읽음 상태로 표시합니다</string>
     <string name="piko_view_dm_anonymously_desc">이 기능을 활성화하면, 다른 사람들이 내가 메시지를 읽었는지 확인할 수 없습니다. 이 설정과 ‘모든 고스트 모드 켜기’가 모두 비활성화되어 있으면 Instagram의 ‘읽음 확인 표시’ 설정이 적용됩니다</string>
     <string name="piko_turn_on_all_ghost_modes">모든 고스트 모드 켜기</string>
     <string name="piko_ghost_modes_on">고스트 모드: 켜짐</string>
@@ -94,6 +96,8 @@
     <string name="piko_disable_swipe_to_create_desc">홈 탭에서 오른쪽으로 스와이프하여 만들기 화면이 실행되는 것을 방지합니다</string>
     <string name="piko_hide_stories_tray">스토리 선반 숨기기</string>
     <string name="piko_hide_stories_tray_desc">메인 피드에서 스토리 선반을 숨깁니다</string>
+    <string name="piko_hide_hidden_requests">숨겨진 요청 숨기기</string>
+    <string name="piko_hide_hidden_requests_desc">메시지 요청 페이지에서 숨겨진 요청 (스팸) 버튼을 숨깁니다</string>
     <string name="piko_hide_notes_tray">메모 선반 숨기기</string>
     <string name="piko_hide_notes_tray_desc">메시지 섹션에서 메모 선반을 숨깁니다</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">공유 시트에서 그룹 만들기 버튼 숨기기</string>
@@ -128,7 +132,7 @@
     <string name="piko_improve_image_viewing">이미지 보기 개선</string>
     <string name="piko_improve_image_viewing_desc">서버에서 최대 해상도의 이미지를 가져옵니다\n\n성능이 저하되거나 앱의 데이터 크기가 증가할 수 있으며, 앱이 이전 레이아웃으로 전환될 수도 있습니다</string>
     <string name="piko_copy_comment">댓글 복사 버튼 추가</string>
-    <string name="piko_copy_comment_desc">게시물 및 릴스에서 댓글을 복사하는 버튼을 추가합니다</string>
+    <string name="piko_copy_comment_desc">게시물과 릴스에서 댓글 및 댓글 작성자 사용자 이름을 복사할 수 있는 버튼을 추가합니다</string>
     <string name="piko_comment_copied_success">댓글을 복사하였습니다</string>
     <string name="piko_comment_copied_failed">복사할 텍스트가 없습니다</string>
     <string name="piko_copy_username">사용자 이름 복사</string>
@@ -152,12 +156,30 @@
     <string name="piko_inbox_lock_unlock">잠금</string>
     <string name="piko_inbox_lock_prompt">메시지 잠금 해제</string>
     <string name="piko_inbox_lock_no_lock">받은 메시지함 잠금을 사용하려면 기기에 화면 잠금을 설정하세요</string>
+    <string name="piko_hidden_chats">숨겨진 채팅</string>
+    <string name="piko_hidden_chats_desc">채팅을 길게 탭했을 때 표시되는 메뉴에 숨기기 옵션을 추가하여 채팅을 계정별로 분리된 비공개 받은 편지함으로 이동합니다. 받은 편지함 잠금을 활성화하여 보호하십시오</string>
+    <string name="piko_hidden_chats_hidden">채팅이 숨겨졌습니다</string>
+    <string name="piko_hidden_chats_unhidden">채팅 숨김이 해제되었습니다</string>
+    <string name="piko_hidden_chats_opened">숨겨진 채팅</string>
+    <string name="piko_hidden_chats_closed">받은 메시지함으로 돌아가기</string>
+    <string name="piko_hidden_chats_mute">숨겨진 채팅 음소거</string>
+    <string name="piko_hidden_chats_mute_desc">숨겨진 채팅에서 받은 메시지의 알림을 표시하지 않습니다</string>
+    <string name="piko_hidden_chats_taps">탭하여 숨겨진 채팅 열기</string>
+    <string name="piko_hidden_chats_taps_desc">받은 편지함과 숨겨진 채팅 간에 전환하려면 메시지 버튼을 연속으로 다음 횟수만큼 탭하세요</string>
     <string name="piko_unlock_plus_benefits">플러스 혜택 잠금 해제</string>
     <string name="piko_unlock_plus_benefits_desc">로컬에서 확인되는 \'Plus\' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다</string>
     <!-- DM Section -->
     <string name="piko_category_dm">메시지</string>
     <string name="piko_unlimited_replays">일시적 미디어를 영구 보관</string>
     <string name="piko_unlimited_replays_desc">1~2 회만 볼 수 있는 미디어를 계속 볼 수 있게 변경합니다</string>
+    <string name="piko_ephemeral_caption">임시 미디어 수신 방식 표시</string>
+    <string name="piko_ephemeral_caption_desc">임시 미디어로 전송된 사진과 동영상 아래에 해당 미디어의 전송 방식과 열람 가능 기간을 표시하는 문구를 추가합니다</string>
+    <string name="piko_ephemeral_received_once">한 번 보기로 수신됨</string>
+    <string name="piko_ephemeral_received_twice">두 번 보기로 수신됨</string>
+    <string name="piko_ephemeral_received_chat">채팅에 보관하도록 수신됨</string>
+    <string name="piko_ephemeral_received_unknown">원래 열람 방식 알 수 없음</string>
+    <string name="piko_ephemeral_available_until">%s까지 사용 가능</string>
+    <string name="piko_ephemeral_expired">만료됨</string>
     <string name="piko_enable_mark_chat_as_read">채팅을 읽음으로 표시하는 옵션 활성화</string>
     <string name="piko_enable_mark_chat_as_read_desc">채팅을 길게 탭했을 경우에 읽음으로 표시할 수 있는 옵션을 표시합니다. 채팅을 읽음으로 표시하면 \'다이렉트 메시지 몰래보기’ 기능이 활성화되어 있더라도 상대방은 내가 메시지를 읽었다는 것을 확인할 수 있습니다</string>
     <!-- Story Section -->
@@ -176,6 +198,8 @@
     <string name="piko_disable_story_flipping_desc">스토리가 자동으로 다음으로 넘어가지 않도록 합니다</string>
     <string name="piko_loop_story">스토리 반복 재생</string>
     <string name="piko_loop_story_desc">현재 스토리가 끝나면 다시 재생합니다</string>
+    <string name="piko_hide_story_follow_button">스토리 팔로우 버튼 숨기기</string>
+    <string name="piko_hide_story_follow_button_desc">팔로우하지 않는 계정의 스토리 상단에 표시되는 팔로우 버튼을 숨깁니다</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">미디어 다운로드</string>
     <string name="piko_category_downloads">다운로드</string>
@@ -188,6 +212,10 @@
     <string name="piko_enable_direct_download_desc">옵션 선택 없이 현재 보고 있는 미디어를 즉시 다운로드합니다</string>
     <string name="piko_download_username_folder">사용자 이름별로 미디어 분류</string>
     <string name="piko_download_username_folder_desc">사용자 이름 기준으로 하위 폴더를 생성합니다</string>
+    <string name="piko_prefer_dash_format">DASH 형식 선호</string>
+    <string name="piko_prefer_dash_format_desc">720p H.264 파일 대신 Instagram에서 제공하는 가장 선명한 DASH 버전(최대 1080p AV1)으로 동영상을 다운로드할 수 있습니다</string>
+    <string name="piko_dash_audio_aac_lc">DASH 오디오를 AAC로 변환</string>
+    <string name="piko_dash_audio_aac_lc_desc">\'DASH 형식 선호\'를 활성화하면, DASH 다운로드의 xHE-AAC 오디오를 모든 플레이어에서 재생할 수 있는 192kbps AAC-LC 형식으로 다시 인코딩합니다</string>
     <string name="piko_embed_download_metadata">동영상 메타데이터 삽입</string>
     <string name="piko_embed_download_metadata_desc">다운로드한 MP4 파일에 자막, 게시물 링크, 크리에이터 및 업로드 날짜를 추가합니다</string>
     <string name="piko_download_file_name_template">파일 이름 형식</string>
@@ -204,6 +232,7 @@
     <string name="piko_download_file_name_token_variant_suffix">변형</string>
     <string name="piko_download_current_media">현재 미디어 다운로드</string>
     <string name="piko_download_as_image">이미지로 다운로드</string>
+    <string name="piko_saved_at">%s에 저장됨</string>
     <string name="piko_video_variants">동영상 변형</string>
     <string name="piko_image_variants">이미지 변형</string>
     <string name="piko_download_audio">오디오 다운로드</string>
@@ -319,11 +348,18 @@
     <string name="piko_action_bar_inbox">받은 메시지함 액션바 아이콘</string>
     <string name="piko_action_bar_button_settings_icon">설정 아이콘</string>
     <string name="piko_action_bar_button_ghost_mode_icon">고스트 모드 아이콘</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">가장 오래된 메시지로 이동 아이콘</string>
+    <string name="piko_jump_oldest_started">가장 오래된 메시지로 이동합니다. 다시 탭하면 취소됩니다</string>
+    <string name="piko_jump_oldest_cancelled">취소되었습니다</string>
+    <string name="piko_jump_oldest_stopped">이전 메시지를 불러오는 작업이 중단되었습니다. 다시 탭하면 재시도합니다</string>
     <string name="piko_action_bar_button_profile_info_icon">프로필 정보 아이콘</string>
     <string name="piko_action_bar_button_create_icon">만들기 아이콘</string>
     <string name="piko_action_bar_button_notifications_icon">알림 아이콘</string>
     <string name="piko_settings_on_action_bar">Piko 설정을 액션바로 이동</string>
     <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 액션바로 이동합니다</string>
+    <string name="piko_settings_search_hint">검색</string>
+    <string name="piko_settings_search_clear">검색 지우기</string>
+    <string name="piko_settings_search_no_results">검색 결과가 없습니다</string>
     <!-- Font Section -->
     <string name="piko_category_font">폰트</string>
     <string name="piko_custom_font">사용자 정의 폰트</string>
