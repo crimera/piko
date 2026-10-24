@@ -126,6 +126,16 @@
     "code" : "127260"
   },
   {
+    "name" : "Hide Meta AI",
+    "desc" : "Select Disable to hide Meta AI entry points and prompts. Also enable \"Hide Meta AI additional controls\". Set \"Add Meta AI in reels overflow menu\" and \"Add Meta AI reels description pills\" to Default",
+    "code" : "59918::2,59918::39,59918::46,59918::59,59918::61,62449::45,62485::0,62485::4,62485::5,62485::11,70108::0,71155::6,71628::0,72519::10,72519::11,72519::18,73643::0,73643::1,74933::17,74933::36,75278::0,75278::9,76479::0,77059::11,77059::14,78149::0,78149::1,78149::2,78970::1,78970::37,78970::38,80654::1,80654::37,91489::6,93548::1,93786::0,94598::84,96235::1,96543::0,105426::21,105426::27,105426::41,108911::19,109730::0,110316::0,110316::1,110316::11,119736::6,121836::0,122162::2,122162::3,128853::13,145349::1,145349::3"
+  },
+  {
+    "name" : "Hide Meta AI additional controls",
+    "desc" : "Select Enable to suppress Meta AI popups, search icons, suggestions and sharing targets. Also disable \"Hide Meta AI\"",
+    "code" : "75278::4,75278::5,92518::1,92518::2,92518::6,94598::56,94598::117,122162::1"
+  },
+  {
     "name" : "Add Meta AI in reels overflow menu",
     "desc" : "",
     "code" : "109730"
