@@ -3192,47 +3192,6 @@
       "options": []
     },
     {
-      "name": "NewX: Classic inline action spacing",
-      "description": "Lays out post action bars with the spacing NewX used before 12.28.0-alpha.04: counted actions share the row width and icon-only actions keep their intrinsic size, so hiding an action never leaves a gap.",
-      "default": true,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.twitter.android",
-          "name": "NewX",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#000000",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "12.34.0-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.35.0-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.36.1-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "NewX: Clone",
       "description": "Changes the package name and the app name. This allows you to install the patched X alongside the original X or other patched X.",
       "default": false,
