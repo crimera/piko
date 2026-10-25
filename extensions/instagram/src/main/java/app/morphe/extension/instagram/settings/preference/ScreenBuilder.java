@@ -25,6 +25,7 @@ import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
@@ -214,10 +215,13 @@ public class ScreenBuilder {
                     )
             );
             addPreference(
-                    helper.switchPreference(
-                            str("piko_directly_open_metaconfig"),
-                            str("piko_directly_open_metaconfig_desc"),
-                            Settings.DIRECTLY_OPEN_METACONFIG
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_directly_open_metaconfig"),
+                                    str("piko_directly_open_metaconfig_desc"),
+                                    Settings.DIRECTLY_OPEN_METACONFIG
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.DEVELOPER_OPTIONS)
                     )
             );
             addPreference(
@@ -308,10 +312,13 @@ public class ScreenBuilder {
                     )
             );
             addPreference(
-                    helper.switchPreference(
-                            str("piko_inbox_lock_notifications"),
-                            str("piko_inbox_lock_notifications_desc"),
-                            Settings.INBOX_LOCK_NOTIFICATIONS
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_inbox_lock_notifications"),
+                                    str("piko_inbox_lock_notifications_desc"),
+                                    Settings.INBOX_LOCK_NOTIFICATIONS
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.INBOX_LOCK)
                     )
             );
         }
@@ -325,17 +332,23 @@ public class ScreenBuilder {
                     )
             );
             addPreference(
-                    helper.listPreference(
-                            str("piko_hidden_chats_taps"),
-                            str("piko_hidden_chats_taps_desc"),
-                            Settings.HIDDEN_CHATS_TAPS
+                    helper.availableWhen(
+                            helper.listPreference(
+                                    str("piko_hidden_chats_taps"),
+                                    str("piko_hidden_chats_taps_desc"),
+                                    Settings.HIDDEN_CHATS_TAPS
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.HIDDEN_CHATS)
                     )
             );
             addPreference(
-                    helper.switchPreference(
-                            str("piko_hidden_chats_mute"),
-                            str("piko_hidden_chats_mute_desc"),
-                            Settings.HIDDEN_CHATS_MUTE
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_hidden_chats_mute"),
+                                    str("piko_hidden_chats_mute_desc"),
+                                    Settings.HIDDEN_CHATS_MUTE
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.HIDDEN_CHATS)
                     )
             );
         }
@@ -418,10 +431,14 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.markAsReadAfterReply) {
             addPreference(
-                    helper.switchPreference(
-                            str("piko_mark_as_read_after_reply"),
-                            str("piko_mark_as_read_after_reply_desc"),
-                            Settings.MARK_AS_READ_AFTER_REPLY
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_mark_as_read_after_reply"),
+                                    str("piko_mark_as_read_after_reply_desc"),
+                                    Settings.MARK_AS_READ_AFTER_REPLY
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY)
+                                    || SharedPref.getBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES)
                     )
             );
         }
@@ -699,10 +716,13 @@ public class ScreenBuilder {
         // PreferenceCategory category= addCategory(str("piko_category_misc"));
         if (MaterialYouTheme.isAmoledAvailable()) {
             addPreference(
-                    helper.switchPreference(
-                            str("piko_amoled_title"),
-                            "",
-                            Settings.AMOLED_THEME
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_amoled_title"),
+                                    "",
+                                    Settings.AMOLED_THEME
+                            ),
+                            () -> MaterialYouTheme.canEnableAmoled(context)
                     )
             );
         }
@@ -766,12 +786,19 @@ public class ScreenBuilder {
                             Settings.FOLLOW_BACK_INDICATOR
                     )
             );
-
+        }
+        if (SettingsStatus.followBackIndicator || SettingsStatus.followListNonFollowerBadge) {
             addPreference(
-                    helper.switchPreference(
-                            str("piko_fbi_color_indicator"),
-                            str("piko_fbi_color_indicator_desc"),
-                            Settings.FOLLOW_BACK_COLOR_INDICATOR
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_fbi_color_indicator"),
+                                    "",
+                                    Settings.FOLLOW_BACK_COLOR_INDICATOR
+                            ),
+                            () -> (SettingsStatus.followBackIndicator
+                                    && SharedPref.getBooleanPref(Settings.FOLLOW_BACK_INDICATOR))
+                                    || (SettingsStatus.followListNonFollowerBadge
+                                    && SharedPref.getBooleanPref(Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE))
                     )
             );
         }
@@ -856,10 +883,13 @@ public class ScreenBuilder {
 
         if (SettingsStatus.feedDownloadButton) {
             addPreference(
-                    helper.switchPreference(
-                            str("piko_feed_download_button"),
-                            str("piko_feed_download_button_desc"),
-                            Settings.FEED_DOWNLOAD_BUTTON
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_feed_download_button"),
+                                    str("piko_feed_download_button_desc"),
+                                    Settings.FEED_DOWNLOAD_BUTTON
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
                     )
             );
         }
@@ -898,10 +928,13 @@ public class ScreenBuilder {
         );
 
         addPreference(
-                helper.switchPreference(
-                        str("piko_dash_audio_aac_lc"),
-                        str("piko_dash_audio_aac_lc_desc"),
-                        Settings.DASH_AUDIO_AAC_LC
+                helper.availableWhen(
+                        helper.switchPreference(
+                                str("piko_dash_audio_aac_lc"),
+                                str("piko_dash_audio_aac_lc_desc"),
+                                Settings.DASH_AUDIO_AAC_LC
+                        ),
+                        () -> SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT)
                 )
         );
 
@@ -939,10 +972,13 @@ public class ScreenBuilder {
             );
 
             addPreference(
-                    helper.editTextPreference(
-                            str("piko_external_downloader_package_name"),
-                            Pref.externalDownloaderPackageName(),
-                            Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+                    helper.availableWhen(
+                            helper.editTextPreference(
+                                    str("piko_external_downloader_package_name"),
+                                    Pref.externalDownloaderPackageName(),
+                                    Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)
                     )
             );
         }

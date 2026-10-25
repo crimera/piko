@@ -12,6 +12,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -698,11 +699,14 @@ public final class SettingsActivity {
 
         Context context;
         private PreferenceManager preferenceManager;
+        private Helper helper;
         private String fragmentName = Constants.PIKO_FRAGMENT_SETTINGS;
         private String targetPreferenceKey;
         private ListView listView;
         private View searchEntryView;
         private boolean searchEntryAdded;
+        private final SharedPreferences.OnSharedPreferenceChangeListener dependencyListener =
+                (preferences, key) -> helper.updateDependencies(getPreferenceScreen());
 
         void updateNavigationArguments(String fragmentName, String targetPreferenceKey) {
             this.fragmentName = fragmentName == null
@@ -737,6 +741,9 @@ public final class SettingsActivity {
         @Override
         public void onResume() {
             super.onResume();
+            preferenceManager.getSharedPreferences()
+                    .registerOnSharedPreferenceChangeListener(dependencyListener);
+            helper.updateDependencies(getPreferenceScreen());
             refreshPreferenceSummary(
                     "piko_download_set_path",
                     StorageUtils::getCustomPathForDisplay
@@ -745,10 +752,14 @@ public final class SettingsActivity {
             if (preference instanceof SwitchPref) {
                 SwitchPref amoledPreference = (SwitchPref) preference;
                 amoledPreference.setChecked(MaterialYouTheme.isAmoledEnabled());
-                amoledPreference.setSwitchInteractionEnabled(
-                        MaterialYouTheme.canEnableAmoled(getActivity())
-                );
             }
+        }
+
+        @Override
+        public void onPause() {
+            preferenceManager.getSharedPreferences()
+                    .unregisterOnSharedPreferenceChangeListener(dependencyListener);
+            super.onPause();
         }
 
         @Override
@@ -829,7 +840,9 @@ public final class SettingsActivity {
 
         private PreferenceScreen buildScreen(String fragmentName) {
             PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
-            new ScreenBuilder(context, screen, new Helper(context)).buildFragment(fragmentName);
+            helper = new Helper(context);
+            new ScreenBuilder(context, screen, helper).buildFragment(fragmentName);
+            helper.updateDependencies(screen);
             return screen;
         }
 

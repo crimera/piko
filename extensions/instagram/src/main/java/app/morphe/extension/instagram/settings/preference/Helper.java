@@ -10,8 +10,12 @@ package app.morphe.extension.instagram.settings.preference;
 import android.app.Activity;
 import android.content.Context;
 import android.preference.Preference;
+import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import app.morphe.extension.instagram.patches.dm.InboxLock;
 
@@ -38,9 +42,36 @@ import  app.morphe.extension.instagram.patches.devFlags.FlagsSharedPref;
 
 public class Helper {
     private final Context context;
+    private final Map<Preference, BooleanSupplier> availabilityConditions = new LinkedHashMap<>();
 
     public Helper(Context context) {
         this.context = context;
+    }
+
+    public Preference availableWhen(Preference preference, BooleanSupplier condition) {
+        availabilityConditions.put(preference, condition);
+        updateAvailability(preference, condition.getAsBoolean());
+        return preference;
+    }
+
+    public void updateDependencies(PreferenceScreen screen) {
+        if (screen == null) return;
+
+        for (Map.Entry<Preference, BooleanSupplier> entry : availabilityConditions.entrySet()) {
+            Preference preference = entry.getKey();
+            if (screen.findPreference(preference.getKey()) == preference) {
+                updateAvailability(preference, entry.getValue().getAsBoolean());
+            }
+        }
+    }
+
+    private static void updateAvailability(Preference preference, boolean enabled) {
+        // Only presentation changes; the saved child value returns when its parent is enabled.
+        if (preference instanceof SwitchPref) {
+            ((SwitchPref) preference).setSwitchInteractionEnabled(enabled);
+        } else {
+            preference.setEnabled(enabled);
+        }
     }
 
     public Preference switchPreference(String title, String summary, BooleanSetting setting) {
@@ -49,11 +80,6 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        if (Settings.AMOLED_THEME.key.equals(setting.key)) {
-            preference.setSwitchInteractionEnabled(
-                    MaterialYouTheme.canEnableAmoled(context)
-            );
-        }
         return preference;
     }
 

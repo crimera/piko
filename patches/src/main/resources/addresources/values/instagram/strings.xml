@@ -11,7 +11,7 @@
     <string name="piko_enable_dev_options">Enable developer options</string>
     <string name="piko_enable_dev_options_desc">Unlocks developer option by long pressing home icon</string>
     <string name="piko_directly_open_metaconfig">Directly opens MetaConfig overrides</string>
-    <string name="piko_directly_open_metaconfig_desc">Directly opens MetaConfig overrides on long pressing home icon (needs developer options enabled)</string>
+    <string name="piko_directly_open_metaconfig_desc">Directly opens MetaConfig overrides on long pressing home icon</string>
     <string name="piko_enable_emp_options">Enable employee options</string>
     <string name="piko_enable_emp_options_desc">Unlocks all employee options used for testing</string>
     <string name="piko_allow_user_network_certificate">Allow user network certificate</string>
@@ -129,7 +129,6 @@
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
     <string name="piko_follow_back_indicator_desc">Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click</string>
     <string name="piko_fbi_color_indicator">Enable colored friendship status indicator</string>
-    <string name="piko_fbi_color_indicator_desc">Friendship status indicator needs to be enabled</string>
     <string name="piko_fbi_follows_you">Follows you</string>
     <string name="piko_fbi_doesnt_follows_you">Does not follow you</string>
     <string name="piko_fbi_following_each_other">Following each other</string>
@@ -164,7 +163,7 @@
     <string name="piko_inbox_lock_prompt">Unlock your messages</string>
     <string name="piko_inbox_lock_no_lock">Set a screen lock on your device to use Inbox lock</string>
     <string name="piko_hidden_chats">Hidden chats</string>
-    <string name="piko_hidden_chats_desc">Adds a hide option to the chat long-press menu that moves the chat to a private inbox, separate for each account. Turn on Inbox lock to protect it</string>
+    <string name="piko_hidden_chats_desc">Adds a hide option to the chat long-press menu that moves the chat to a private inbox, separate for each account.</string>
     <string name="piko_hidden_chats_hidden">Chat hidden</string>
     <string name="piko_hidden_chats_unhidden">Chat unhidden</string>
     <string name="piko_hidden_chats_opened">Hidden chats</string>
@@ -225,7 +224,7 @@
     <string name="piko_prefer_dash_format">Prefer DASH format</string>
     <string name="piko_prefer_dash_format_desc">Downloads videos as the sharpest DASH rendition Instagram lists, up to 1080p AV1, instead of the 720p H.264 file</string>
     <string name="piko_dash_audio_aac_lc">Convert DASH audio to AAC</string>
-    <string name="piko_dash_audio_aac_lc_desc">With Prefer DASH format on, re-encodes the xHE-AAC sound of DASH downloads as AAC-LC at 192 kbps, which every player can play</string>
+    <string name="piko_dash_audio_aac_lc_desc">Re-encodes the xHE-AAC sound of DASH downloads as AAC-LC at 192 kbps, which every player can play</string>
     <string name="piko_embed_download_metadata">Embed video metadata</string>
     <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
     <string name="piko_download_file_name_template">Filename format</string>

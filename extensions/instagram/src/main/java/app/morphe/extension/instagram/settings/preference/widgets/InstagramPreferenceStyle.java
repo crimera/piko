@@ -358,13 +358,16 @@ public final class InstagramPreferenceStyle {
     public static void bindText(Preference preference, View view) {
         Context context = view.getContext();
         boolean enabled = preference.isEnabled();
+        boolean chevron = view instanceof PreferenceRow
+                && ((PreferenceRow) view).trailingType == TRAILING_CHEVRON;
+        boolean useNormalColors = enabled || chevron;
 
         TextView title = view.findViewWithTag(TAG_TITLE);
         TextView summary = view.findViewWithTag(TAG_SUMMARY);
         View trailing = view.findViewWithTag(TAG_TRAILING);
 
-        int titleColor = enabled ? primaryTextColor() : disabledTextColor();
-        int summaryColor = enabled ? secondaryTextColor() : disabledTextColor();
+        int titleColor = useNormalColors ? primaryTextColor() : disabledTextColor();
+        int summaryColor = useNormalColors ? secondaryTextColor() : disabledTextColor();
 
         if (title != null) {
             title.setText(preference.getTitle());
@@ -387,7 +390,7 @@ public final class InstagramPreferenceStyle {
         if (trailing != null) {
             trailing.setEnabled(enabled);
             if (trailing instanceof ImageView) {
-                int trailingColor = enabled
+                int trailingColor = useNormalColors
                         ? UI.getThemedColour("igds_color_secondary_icon")
                         : disabledTextColor();
                 ((ImageView) trailing).setColorFilter(new PorterDuffColorFilter(
@@ -398,6 +401,9 @@ public final class InstagramPreferenceStyle {
             trailing.invalidate();
         }
 
+        if (chevron) {
+            view.setAlpha(enabled ? 1.0f : 0.5f);
+        }
         view.setEnabled(enabled);
     }
 
