@@ -30,7 +30,7 @@ import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.patches.focusLock.FocusLockTargets;
 import app.morphe.extension.instagram.settings.SettingsStatus;
-import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
@@ -156,7 +156,6 @@ public class ScreenBuilder {
         useSystemFont.setChecked(FontStorage.useSystemFont());
         useSystemFont.setOnPreferenceChangeListener((preference, newValue) -> {
             FontStorage.setUseSystemFont(Boolean.TRUE.equals(newValue));
-            Utils.showToastShort(str("piko_restart_app"));
             return true;
         });
         addPreference(useSystemFont);

@@ -9,7 +9,7 @@ package app.morphe.extension.instagram.patches.focusLock;
 import java.util.ArrayList;
 import java.util.List;
 
-import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 

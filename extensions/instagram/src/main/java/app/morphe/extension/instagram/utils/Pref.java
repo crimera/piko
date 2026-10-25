@@ -11,10 +11,11 @@ import java.util.Set;
 import java.util.HashSet;
 import android.content.Context;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.StringSetting;
 
 import app.morphe.extension.instagram.settings.Settings;
+import static app.morphe.extension.instagram.settings.RestartPolicy.NOT_REQUIRED;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
@@ -201,7 +202,7 @@ public class Pref {
     }
 
     public static BooleanSetting focusLockSelection(String key) {
-        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false);
+        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false, NOT_REQUIRED);
     }
 
     public static String focusLockDurationMinutes() {
@@ -214,11 +215,11 @@ public class Pref {
 
     /** Keys of the first released Focus Lock, read so a lock it wrote still counts. */
     public static boolean legacyFocusLockBlockReels() {
-        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false));
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false, NOT_REQUIRED));
     }
 
     public static boolean legacyFocusLockBlockExplore() {
-        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false));
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false, NOT_REQUIRED));
     }
 
     public static String focusLockFormat() {

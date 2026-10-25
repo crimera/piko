@@ -12,7 +12,7 @@ import android.text.format.DateFormat;
 
 import java.util.Date;
 
-import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
 

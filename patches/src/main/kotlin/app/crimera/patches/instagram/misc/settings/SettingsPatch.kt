@@ -67,6 +67,7 @@ val settingsPatch =
             sharedExtensionPatch,
             settingsResourcePatch,
             nativeSettingsSwitchStylePatch,
+            settingsTaskRemovalPatch,
             mainFeedActionBarButtonPatch,
             hideHomeActionButtonsPatch,
             userProfileActionBarButtonPatch,

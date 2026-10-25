@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.sharedPreference.BaseSharedPref;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.settings.StringSetting;
 
 import app.morphe.extension.instagram.constants.Constants;
 

@@ -31,8 +31,8 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.StringSetting;
 
 import  app.morphe.extension.instagram.patches.devFlags.FlagsSharedPref;
 
@@ -213,7 +213,7 @@ public class Helper {
                 }
 
                 if (saved) {
-                    SettingsRestart.markChanged(previousValue, newValue);
+                    SettingsRestart.markChanged(key, previousValue, newValue);
                 }
                 return saved;
             }

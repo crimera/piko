@@ -10,6 +10,7 @@ import android.content.Intent;
 
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.settings.SettingsRestart;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
 
 import java.util.ArrayList;
@@ -222,11 +223,11 @@ public final class NavigationBarPatch {
 
     public static boolean saveConfig(List<Tab> order, Set<Tab> visible, Tab startup) {
         Config normalized = normalize(order, visible, startup);
-        String previous = Pref.navigationTabs();
+        String previous = encodeConfig(loadConfig());
         String next = encodeConfig(normalized);
         if (Objects.equals(previous, next)) return true;
         if (!Pref.setNavigationTabs(next)) return false;
-        SettingsRestart.markChanged(previous, next);
+        SettingsRestart.markChanged(Settings.NAVIGATION_TABS.key, previous, next);
         return true;
     }
 
