@@ -31,7 +31,7 @@ public class Settings {
     public static final BooleanSetting ALLOW_USER_NETWORK_CERTIFICATE = new BooleanSetting("allow_user_network_certificate",false, REQUIRED);
     public static final BooleanSetting DISABLE_DISCOVER_PEOPLE = new BooleanSetting("disable_discover_people", true, REQUIRED);
     public static final BooleanSetting LIMIT_FOLLOWING_FEED = new BooleanSetting("limit_following_feed", false, REQUIRED);
-    public static final BooleanSetting HIDE_FEED_POSTS = new BooleanSetting("hide_feed_posts", false, NOT_REQUIRED);
+    public static final BooleanSetting HIDE_FEED_POSTS = new BooleanSetting("hide_feed_posts", false, REQUIRED);
     public static final BooleanSetting DISABLE_ANALYTICS = new BooleanSetting("disable_analytics", false, REQUIRED);
     public static final BooleanSetting TURN_ON_ALL_GHOST_MODES = new BooleanSetting("turn_on_all_ghost_modes", false, NOT_REQUIRED);
     public static final BooleanSetting VIEW_STORIES_ANONYMOUSLY = new BooleanSetting("view_stories_anonymously", false, NOT_REQUIRED);
@@ -43,7 +43,7 @@ public class Settings {
     public static final BooleanSetting SAVE_DELETED_MESSAGES = new BooleanSetting("save_deleted_messages", false, NOT_REQUIRED);
     public static final BooleanSetting DISABLE_STORIES = new BooleanSetting("disable_stories", false, REQUIRED);
     public static final BooleanSetting DISABLE_HIGHLIGHTS = new BooleanSetting("disable_highlights", false, NOT_REQUIRED);
-    public static final BooleanSetting HIDE_STORIES_TRAY = new BooleanSetting("hide_stories_tray", false, NOT_REQUIRED);
+    public static final BooleanSetting HIDE_STORIES_TRAY = new BooleanSetting("hide_stories_tray", false, REQUIRED);
     public static final BooleanSetting HIDE_HIDDEN_REQUESTS = new BooleanSetting("hide_hidden_requests", false, NOT_REQUIRED);
     public static final BooleanSetting DISABLE_EXPLORE = new BooleanSetting("disable_explore", false, REQUIRED);
     public static final BooleanSetting DISABLE_COMMENTS = new BooleanSetting("disable_comments", false, REQUIRED);
