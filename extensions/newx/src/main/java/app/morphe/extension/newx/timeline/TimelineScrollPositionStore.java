@@ -45,6 +45,27 @@ public final class TimelineScrollPositionStore {
     private TimelineScrollPositionStore() {
     }
 
+    /** Cheap admission check before the injected bridge builds a native resume anchor. */
+    public static boolean shouldSaveAnchor(@Nullable Enum<?> timeline, long accountId) {
+        if (timeline == null || accountId <= 0) return false;
+        String name = timeline.name();
+        try {
+            if (isHomeTimeline(name) || isPerIdTimeline(name)) {
+                return SettingsRegistry.getBooleanOrDefault(RESTORE_TIMELINE_POSITION_SETTING, true);
+            }
+            return name.startsWith("USER_PROFILE_")
+                    && SettingsRegistry.getBooleanOrDefault(RESTORE_PROFILE_POSITION_SETTING, false);
+        } catch (RuntimeException ignored) {
+            // This is only an optimization. Leave error handling to the existing save path.
+            return true;
+        }
+    }
+
+    /** A composition with no custom restore pending needs no repository or account lookups. */
+    public static boolean hasPendingAnchor() {
+        return !pendingAnchors.isEmpty();
+    }
+
     @Nullable
     public static int[] restore(Enum<?> timeline, @Nullable String profileId) {
         long accountId = lastAccountId;

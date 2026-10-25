@@ -2,6 +2,7 @@ package app.crimera.patches.newx.models
 
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.scopedMatchAll
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -21,6 +22,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import java.util.WeakHashMap
 
@@ -29,8 +31,10 @@ private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val COMPOSE_MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 internal const val INLINE_ACTION_BAR_SCOPE = "Lcom/x/inlineactionbar/"
 private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
+private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val ITERATOR_DESCRIPTOR = "Ljava/util/Iterator;"
 private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
 /**
  * Base post models: labels that are present whether or not the release keeps media or
@@ -69,6 +73,38 @@ private object InlineActionEntryModelWithCountFingerprint : Fingerprint(
     ),
 )
 
+private object InlineImageMediaModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("MediaContentImage(mediaId=")),
+)
+
+private object InlineGifMediaModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("MediaContentGif(mediaId=")),
+)
+
+private object InlineVideoMediaModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("MediaContentVideo(mediaId=")),
+)
+
+private object InlineMediaVariantModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("MediaVariant(url=")),
+)
+
 internal data class ResolvedNewXPostModels(
     val contextualPostDescriptor: String,
     val contextualCanonicalPostField: FieldReference,
@@ -102,6 +138,19 @@ internal data class ResolvedNewXInlineDownloadModels(
     val twitterShareActionField: FieldReference,
 )
 
+internal data class ResolvedNewXInlineMediaModels(
+    val sharedMediaBaseDescriptor: String,
+    val imageMediaDescriptor: String,
+    val imageUrlField: FieldReference,
+    val gifMediaDescriptor: String,
+    val gifVariantsField: FieldReference,
+    val videoMediaDescriptor: String,
+    val videoVariantsField: FieldReference,
+    val variantDescriptor: String,
+    val variantUrlField: FieldReference,
+    val variantContentTypeField: FieldReference,
+)
+
 /**
  * Handles for the shared inline-action-bar layout lambda. The injected download action reuses the
  * TwitterShare carrier for its icon/click semantics, but this release's layout switch does not map
@@ -133,6 +182,7 @@ private class PostModelResolutionState {
     private var inlineActionModels: ResolvedNewXInlineActionModels? = null
     private var inlineActionBarModels: ResolvedNewXInlineActionBarModels? = null
     private var inlineDownloadModels: ResolvedNewXInlineDownloadModels? = null
+    private var compositionMediaModels: ResolvedNewXInlineMediaModels? = null
     private var inlineActionKindOverride: ResolvedNewXInlineActionKindOverride? = null
     private var inlineActionKindOverrideResolved: Boolean = false
 
@@ -167,6 +217,13 @@ private class PostModelResolutionState {
     fun inlineDownloadModels(): ResolvedNewXInlineDownloadModels = synchronized(this) {
         inlineDownloadModels ?: resolveInlineDownloadModels(inlineActionModels()).also {
             inlineDownloadModels = it
+        }
+    }
+
+    context(context: BytecodePatchContext)
+    fun compositionMediaModels(): ResolvedNewXInlineMediaModels = synchronized(this) {
+        compositionMediaModels ?: resolveNewXInlineMediaModels().also {
+            compositionMediaModels = it
         }
     }
 
@@ -256,6 +313,10 @@ internal fun resolvedNewXInlineActionBarModels(): ResolvedNewXInlineActionBarMod
 context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineDownloadModels(): ResolvedNewXInlineDownloadModels =
     postModelResolutionState().inlineDownloadModels()
+
+context(context: BytecodePatchContext)
+internal fun resolvedNewXInlineMediaModels(): ResolvedNewXInlineMediaModels =
+    postModelResolutionState().compositionMediaModels()
 
 context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineActionKindOverride(): ResolvedNewXInlineActionKindOverride? =
@@ -722,6 +783,319 @@ private fun resolveInlineDownloadModels(
         inlineActionEntryConstructor = inlineActionEntryConstructor,
         twitterShareActionField = twitterShareActionField,
     )
+}
+
+context(context: BytecodePatchContext)
+private fun resolveNewXInlineMediaModels(): ResolvedNewXInlineMediaModels {
+    val imageMatch = requireExactlyOne(
+        "NewX inline image media model",
+        InlineImageMediaModelFingerprint.scopedMatchAll(),
+    )
+    val gifMatch = requireExactlyOne(
+        "NewX inline GIF media model",
+        InlineGifMediaModelFingerprint.scopedMatchAll(),
+    )
+    val videoMatch = requireExactlyOne(
+        "NewX inline video media model",
+        InlineVideoMediaModelFingerprint.scopedMatchAll(),
+    )
+    val variantMatch = requireExactlyOne(
+        "NewX inline media variant model",
+        InlineMediaVariantModelFingerprint.scopedMatchAll(),
+    )
+
+    val imageDescriptor = imageMatch.originalClassDef.type
+    val gifDescriptor = gifMatch.originalClassDef.type
+    val videoDescriptor = videoMatch.originalClassDef.type
+    val variantDescriptor = variantMatch.originalClassDef.type
+    val imageUrlField = imageMatch.fieldForToStringLabel(", imageUrl=")
+    val videoVariantsField = videoMatch.fieldForToStringLabel(", variants=")
+    val gifVariantsField = resolveInlineGifVariantsField(
+        gifMatch.originalMethod,
+        gifDescriptor,
+        videoVariantsField.type,
+    )
+    val variantUrlField = variantMatch.fieldForToStringLabel("MediaVariant(url=")
+    val variantContentTypeField = resolveInlineMediaVariantContentTypeField(
+        variantMatch.originalMethod,
+        variantDescriptor,
+        variantUrlField,
+    )
+
+    requireInlineMediaField(imageDescriptor, imageUrlField, "image URL", STRING_DESCRIPTOR)
+    requireInlineMediaField(gifDescriptor, gifVariantsField, "GIF variants")
+    requireInlineMediaField(videoDescriptor, videoVariantsField, "video variants")
+    requireInlineMediaVariantAccessors(
+        gifDescriptor,
+        gifVariantsField,
+        videoDescriptor,
+        videoVariantsField,
+    )
+    requireInlineMediaField(variantDescriptor, variantUrlField, "variant URL", STRING_DESCRIPTOR)
+    requireInlineMediaField(
+        variantDescriptor,
+        variantContentTypeField,
+        "variant content type",
+        STRING_DESCRIPTOR,
+    )
+    if (!context.isAssignableTo(gifVariantsField.type, LIST_DESCRIPTOR)) {
+        throw PatchException("NewX inline GIF variants are not a List: $gifVariantsField")
+    }
+    if (!context.isAssignableTo(videoVariantsField.type, LIST_DESCRIPTOR)) {
+        throw PatchException("NewX inline video variants are not a List: $videoVariantsField")
+    }
+
+    val imageHierarchy = superclassChain(imageDescriptor)
+    val sharedMediaBases = imageHierarchy.filter { candidate ->
+        candidate != OBJECT_DESCRIPTOR &&
+            context.isAssignableTo(gifDescriptor, candidate) &&
+            context.isAssignableTo(videoDescriptor, candidate)
+    }
+    val mostSpecificSharedBases = sharedMediaBases.filter { candidate ->
+        sharedMediaBases.none { other ->
+            other != candidate && context.isAssignableTo(other, candidate)
+        }
+    }
+    val sharedMediaBase = requireExactlyOne(
+        "NewX inline image/GIF/video common media base",
+        mostSpecificSharedBases,
+    )
+
+    return ResolvedNewXInlineMediaModels(
+        sharedMediaBaseDescriptor = sharedMediaBase,
+        imageMediaDescriptor = imageDescriptor,
+        imageUrlField = imageUrlField,
+        gifMediaDescriptor = gifDescriptor,
+        gifVariantsField = gifVariantsField,
+        videoMediaDescriptor = videoDescriptor,
+        videoVariantsField = videoVariantsField,
+        variantDescriptor = variantDescriptor,
+        variantUrlField = variantUrlField,
+        variantContentTypeField = variantContentTypeField,
+    )
+}
+
+/**
+ * The GIF `, variants=` label is another terminal packed-helper argument, so the shared label
+ * resolver cannot connect it to the following field read. Resolve the video slot first; the GIF
+ * toString must then contain exactly one instance read of that same collection type. Its exact
+ * field accessor must share the video's getter signature through a common model interface.
+ */
+internal fun resolveInlineGifVariantsField(
+    gifToString: Method,
+    gifDescriptor: String,
+    variantsFieldType: String,
+): FieldReference {
+    if (gifToString.definingClass != gifDescriptor) {
+        throw PatchException("NewX GIF media toString owner changed: $gifToString / $gifDescriptor")
+    }
+    val instructions = gifToString.implementation?.instructions?.toList()
+        ?: throw PatchException("NewX GIF media toString has no implementation: $gifToString")
+    requireExactlyOne(
+        "NewX GIF media toString variants label",
+        instructions.indices.filter { index ->
+            instructions[index].getReference<StringReference>()?.string == ", variants="
+        },
+    )
+    val fieldReads = instructions.mapIndexedNotNull { index, instruction ->
+        val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
+        if (
+            instruction.opcode == Opcode.IGET_OBJECT &&
+                field.definingClass == gifDescriptor && field.type == variantsFieldType
+        ) {
+            index to field
+        } else {
+            null
+        }
+    }
+    return requireExactlyOne(
+        "NewX GIF variants field read matching the video variants slot type",
+        fieldReads,
+    ).second
+}
+
+context(context: BytecodePatchContext)
+private fun requireInlineMediaVariantAccessors(
+    gifDescriptor: String,
+    gifVariantsField: FieldReference,
+    videoDescriptor: String,
+    videoVariantsField: FieldReference,
+) {
+    val gifGetter = requireDirectInlineVariantsGetter(gifDescriptor, gifVariantsField)
+    val videoGetter = requireDirectInlineVariantsGetter(videoDescriptor, videoVariantsField)
+    if (!sameMethodSignature(gifGetter, videoGetter)) {
+        throw PatchException(
+            "NewX GIF/video variants getters disagree: $gifGetter / $videoGetter",
+        )
+    }
+    val gifInterfaces = modelInterfaceHierarchy(gifDescriptor)
+    val videoInterfaces = modelInterfaceHierarchy(videoDescriptor)
+    val commonAccessorInterfaces = gifInterfaces.intersect(videoInterfaces).filter { descriptor ->
+        val interfaceClass = context.classDefByOrNull(descriptor) ?: return@filter false
+        AccessFlags.INTERFACE.isSet(interfaceClass.accessFlags) &&
+            interfaceClass.methods.any { method ->
+                AccessFlags.ABSTRACT.isSet(method.accessFlags) && sameMethodSignature(method, gifGetter)
+            }
+    }
+    requireExactlyOne(
+        "NewX GIF/video variants getter shared interface",
+        commonAccessorInterfaces,
+    )
+}
+
+context(context: BytecodePatchContext)
+private fun requireDirectInlineVariantsGetter(
+    modelDescriptor: String,
+    variantsField: FieldReference,
+): Method {
+    val modelClass = context.classDefByOrNull(modelDescriptor)
+        ?: throw PatchException("NewX inline media model class was not found: $modelDescriptor")
+    val getters = modelClass.methods.filter { method ->
+        if (
+            AccessFlags.STATIC.isSet(method.accessFlags) ||
+                method.parameterTypes.isNotEmpty() || method.returnType != variantsField.type
+        ) {
+            return@filter false
+        }
+        val code = method.implementation?.instructions?.toList() ?: return@filter false
+        if (code.size != 2 || code[0].opcode != Opcode.IGET_OBJECT || code[1].opcode != Opcode.RETURN_OBJECT) {
+            return@filter false
+        }
+        val read = code[0] as? TwoRegisterInstruction ?: return@filter false
+        val returned = code[1] as? OneRegisterInstruction ?: return@filter false
+        val registerCount = method.implementation?.registerCount ?: return@filter false
+        code[0].getReference<FieldReference>()?.toString() == variantsField.toString() &&
+            read.registerB == registerCount - 1 && returned.registerA == read.registerA
+    }
+    return requireExactlyOne("NewX inline media variants getter for $variantsField", getters)
+}
+
+context(context: BytecodePatchContext)
+private fun modelInterfaceHierarchy(modelDescriptor: String): Set<String> {
+    val interfaces = linkedSetOf<String>()
+    val pending = mutableListOf(modelDescriptor)
+    val visited = mutableSetOf<String>()
+    while (pending.isNotEmpty()) {
+        val descriptor = pending.removeAt(pending.lastIndex)
+        if (!visited.add(descriptor)) continue
+        val modelClass = context.classDefByOrNull(descriptor)
+            ?: throw PatchException("NewX inline media hierarchy class was not found: $descriptor")
+        modelClass.interfaces.forEach { interfaceDescriptor ->
+            if (interfaces.add(interfaceDescriptor)) pending += interfaceDescriptor
+        }
+        modelClass.superclass?.takeIf { it != OBJECT_DESCRIPTOR }?.let(pending::add)
+    }
+    return interfaces
+}
+
+private fun sameMethodSignature(first: Method, second: Method): Boolean =
+    first.name == second.name &&
+        first.parameterTypes.map(CharSequence::toString) == second.parameterTypes.map(CharSequence::toString) &&
+        first.returnType == second.returnType
+
+/**
+ * Resolves the remaining media-variant String field from its validated model schema. In current
+ * targets the `, contentType=` label is the final argument to a packed builder helper, while the
+ * content type value is appended by a later helper call; the shared label resolver cannot connect
+ * those calls. The URL still comes from that shared resolver, and only the verified two-String,
+ * boxed-bitrate instance schema makes its complement the content type without relying on order or
+ * obfuscated field names.
+ */
+internal fun resolveInlineMediaVariantContentTypeField(
+    variantToString: Method,
+    variantDescriptor: String,
+    variantUrlField: FieldReference,
+): FieldReference {
+    val instructions = variantToString.implementation?.instructions?.toList()
+        ?: throw PatchException("NewX media variant toString has no implementation: $variantToString")
+    listOf("MediaVariant(url=", ", bitRate=", ", contentType=").forEach { label ->
+        requireExactlyOne(
+            "NewX media variant toString label '$label'",
+            instructions.indices.filter { index ->
+                instructions[index].getReference<StringReference>()?.string == label
+            },
+        )
+    }
+    if (variantToString.definingClass != variantDescriptor) {
+        throw PatchException(
+            "NewX media variant toString owner changed: $variantToString / $variantDescriptor",
+        )
+    }
+    if (variantUrlField.definingClass != variantDescriptor || variantUrlField.type != STRING_DESCRIPTOR) {
+        throw PatchException("NewX media variant URL field changed: $variantUrlField")
+    }
+
+    val modelFieldReads = instructions.mapNotNull { instruction ->
+        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
+        field.takeIf { it.definingClass == variantDescriptor }?.let { instruction to it }
+    }
+    if (modelFieldReads.any { (instruction, _) -> instruction.opcode != Opcode.IGET_OBJECT }) {
+        throw PatchException(
+            "NewX media variant toString has a non-object instance field read: $variantToString",
+        )
+    }
+    val modelFields = modelFieldReads.map { it.second }.distinctBy(FieldReference::toString)
+    val stringFields = modelFields.filter { it.type == STRING_DESCRIPTOR }
+    val bitrateFields = modelFields.filter { it.type == "Ljava/lang/Integer;" }
+    if (modelFields.size != 3 || stringFields.size != 2 || bitrateFields.size != 1) {
+        throw PatchException(
+            "NewX media variant toString schema changed; expected two String fields and one boxed " +
+                "Integer field, found ${modelFields.joinToString()}: $variantToString",
+        )
+    }
+    if (variantUrlField !in stringFields) {
+        throw PatchException("NewX media variant URL is not a toString String field: $variantUrlField")
+    }
+    val contentTypeCandidates = stringFields.filter { it.toString() != variantUrlField.toString() }
+    return requireExactlyOne("NewX media variant content type field", contentTypeCandidates)
+}
+
+context(context: BytecodePatchContext)
+private fun requireInlineMediaField(
+    modelDescriptor: String,
+    field: FieldReference,
+    semanticName: String,
+    expectedType: String? = null,
+) {
+    if (expectedType != null && field.type != expectedType) {
+        throw PatchException("NewX inline $semanticName field has type ${field.type}: $field")
+    }
+    if (!context.isAssignableTo(modelDescriptor, field.definingClass)) {
+        throw PatchException(
+            "NewX inline $semanticName field owner ${field.definingClass} is outside " +
+                "$modelDescriptor hierarchy",
+        )
+    }
+    val declaringClass = context.classDefByOrNull(field.definingClass)
+        ?: throw PatchException("NewX inline $semanticName field owner was not found: $field")
+    val declaration = declaringClass.fields.singleOrNull { it.toString() == field.toString() }
+        ?: throw PatchException("NewX inline $semanticName field declaration was not found: $field")
+    if (AccessFlags.STATIC.isSet(declaration.accessFlags)) {
+        throw PatchException("NewX inline $semanticName field is static: $field")
+    }
+    if (!AccessFlags.PUBLIC.isSet(declaration.accessFlags)) {
+        throw PatchException("NewX inline $semanticName field is not public: $field")
+    }
+    context.mutableClassDefBy(field.definingClass).requirePublicFields(listOf(field))
+}
+
+context(context: BytecodePatchContext)
+private fun superclassChain(descriptor: String): List<String> {
+    val result = mutableListOf<String>()
+    var current: String? = descriptor
+    while (current != null && current != OBJECT_DESCRIPTOR) {
+        if (current in result) {
+            throw PatchException("NewX inline media hierarchy contains a cycle at $current")
+        }
+        result += current
+        current = context.classDefByOrNull(current)?.superclass
+            ?: if (result.last() == descriptor) {
+                throw PatchException("NewX inline media model class was not found: $descriptor")
+            } else {
+                null
+            }
+    }
+    return result
 }
 
 context(context: BytecodePatchContext)

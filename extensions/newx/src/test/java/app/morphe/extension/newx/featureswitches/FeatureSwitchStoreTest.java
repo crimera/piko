@@ -2,6 +2,7 @@ package app.morphe.extension.newx.featureswitches;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -111,6 +112,35 @@ public final class FeatureSwitchStoreTest {
                 List.class
         );
         assertEquals(List.of("first"), resolved);
+        assertSame(resolved, store.resolve(
+                "list", FeatureSwitchStore.ValueType.STRING_LIST, List.of("default"), List.class));
+        assertThrows(UnsupportedOperationException.class, resolved::clear);
+        store.setOverride("list", FeatureSwitchStore.ValueType.STRING_LIST, List.of("replacement"));
+        assertEquals(List.of("replacement"), store.resolve(
+                "list", FeatureSwitchStore.ValueType.STRING_LIST, List.of("default"), List.class));
+        assertEquals(List.of("first"), resolved);
+    }
+
+    @Test
+    public void repeatedObservationsKeepMutableInputsIsolatedAndTrackValueAndTypeChanges() {
+        FeatureSwitchStore store = new FeatureSwitchStore(new MemoryPersistence());
+        List<String> input = new ArrayList<>(List.of("first"));
+        store.resolve("flag", FeatureSwitchStore.ValueType.STRING_LIST, input, List.class);
+        store.resolve("flag", FeatureSwitchStore.ValueType.STRING_LIST,
+                new ArrayList<>(input), List.class);
+        FeatureSwitchStore.Entry before = store.snapshot("").get(0);
+
+        input.add("second");
+        assertEquals(List.of("first"), store.snapshot("").get(0).getObservedValue());
+        store.resolve("flag", FeatureSwitchStore.ValueType.STRING_LIST, input, List.class);
+        assertEquals(List.of("first", "second"), store.snapshot("").get(0).getObservedValue());
+        assertEquals(List.of("first"), before.getObservedValue());
+
+        store.resolve("flag", FeatureSwitchStore.ValueType.STRING, null, String.class);
+        store.resolve("flag", FeatureSwitchStore.ValueType.STRING, null, String.class);
+        FeatureSwitchStore.Entry after = store.snapshot("").get(0);
+        assertEquals(FeatureSwitchStore.ValueType.STRING, after.getType());
+        assertEquals(null, after.getObservedValue());
     }
 
     @Test

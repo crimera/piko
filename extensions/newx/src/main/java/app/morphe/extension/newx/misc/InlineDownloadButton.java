@@ -408,12 +408,12 @@ public final class InlineDownloadButton {
 
         try {
             Object canonicalPost = canonicalPost(post);
-            if (hasDownloadableMedia(mediaForCanonical(canonicalPost))) return true;
+            if (hasCompositionDownloadableMedia(mediaForCanonical(canonicalPost))) return true;
 
             Object repostedPost = getRepostedPost(post);
             if (repostedPost == null) return false;
             Object repostedCanonicalPost = getRepostedCanonicalPost(repostedPost);
-            return hasDownloadableMedia(mediaForCanonical(repostedCanonicalPost));
+            return hasCompositionDownloadableMedia(mediaForCanonical(repostedCanonicalPost));
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to check NewX post media", exception);
             return false;
@@ -576,10 +576,23 @@ public final class InlineDownloadButton {
         return false;
     }
 
+    private static boolean hasCompositionDownloadableMedia(List<?> media) {
+        if (media == null) return false;
+
+        for (Object item : media) {
+            if (isCompositionDownloadableMedia(item)) return true;
+        }
+        return false;
+    }
+
+    private static boolean isCompositionDownloadableMedia(Object media) {
+        throw unpatchedBridge("isCompositionDownloadableMedia");
+    }
+
     /**
-     * Checks only the fields needed to decide whether the media can be downloaded. This runs
-     * while the inline action list is being composed, so full download metadata and thumbnail
-     * URLs must stay on the click path in {@link #downloadItem}.
+     * Retained for click-time media selection. Composition eligibility uses the separate typed
+     * {@link #isCompositionDownloadableMedia(Object)} bridge, while full download metadata and
+     * thumbnail URLs remain on the click path in {@link #downloadItem}.
      */
     static boolean isDownloadableMedia(Object media) {
         if (media == null) return false;
@@ -613,12 +626,15 @@ public final class InlineDownloadButton {
 
             String url = value.substring(start, bitRateStart);
             String contentType = value.substring(contentTypeStart + 14, end);
-            if (NewXUtils.isHttpUrl(url) &&
-                    (contentType.equalsIgnoreCase("video/mp4") || NewXUtils.containsIgnoreCaseAscii(url, ".mp4"))) {
-                return true;
-            }
+            if (isHttpMp4Variant(url, contentType)) return true;
             offset = end + 1;
         }
+    }
+
+    static boolean isHttpMp4Variant(String url, String contentType) {
+        if (url == null || !NewXUtils.isHttpUrl(url)) return false;
+        return (contentType != null && contentType.equalsIgnoreCase("video/mp4")) ||
+                NewXUtils.containsIgnoreCaseAscii(url, ".mp4");
     }
 
     static List<DownloadItem> downloadItems(List<?> media) {

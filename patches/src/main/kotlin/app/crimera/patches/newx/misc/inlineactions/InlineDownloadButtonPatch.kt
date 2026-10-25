@@ -7,6 +7,7 @@ import app.crimera.patches.newx.models.ResolvedNewXInlineActionBarModels
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionKindOverride
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.ResolvedNewXInlineDownloadModels
+import app.crimera.patches.newx.models.ResolvedNewXInlineMediaModels
 import app.crimera.patches.newx.models.ResolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.ResolvedNewXPostModels
 import app.crimera.patches.newx.models.firstParameterSlot
@@ -22,6 +23,7 @@ import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
 import app.crimera.patches.newx.models.resolvedNewXInlineActionKindOverride
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.resolvedNewXInlineDownloadModels
+import app.crimera.patches.newx.models.resolvedNewXInlineMediaModels
 import app.crimera.patches.newx.models.resolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.newXInlineDownloadModelResolutionPatch
@@ -87,6 +89,7 @@ private const val CANONICAL_POST_HELPER = "getCanonicalPost"
 private const val CONTEXTUAL_POST_HELPER = "getContextualPost"
 private const val NO_CONTEXTUAL_POST_LABEL = "no_contextual_post"
 private const val POST_MEDIA_HELPER = "getPostMedia"
+private const val COMPOSITION_MEDIA_HELPER = "isCompositionDownloadableMedia"
 private const val REPOSTED_POST_HELPER = "getRepostedPost"
 private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
 private const val CREATE_ACTION_HELPER = "createDownloadAction"
@@ -260,6 +263,7 @@ val newXInlineDownloadButtonPatch =
             val entryModels = resolvedNewXInlineActionModels()
             val barModels = resolvedNewXInlineActionBarModels()
             val mediaModels = resolvedNewXPostMediaModels()
+            val inlineMediaModels = resolvedNewXInlineMediaModels()
             val downloadModels = resolvedNewXInlineDownloadModels()
             val kindOverrideModels = resolvedNewXInlineActionKindOverride()
             patchPostModelBridges(
@@ -267,6 +271,7 @@ val newXInlineDownloadButtonPatch =
                 entryModels,
                 barModels,
                 mediaModels,
+                inlineMediaModels,
                 downloadModels,
                 resolvedNewXTimelineModels(),
             )
@@ -861,6 +866,7 @@ private fun patchPostModelBridges(
     entryModels: ResolvedNewXInlineActionModels,
     barModels: ResolvedNewXInlineActionBarModels,
     mediaModels: ResolvedNewXPostMediaModels,
+    inlineMediaModels: ResolvedNewXInlineMediaModels,
     downloadModels: ResolvedNewXInlineDownloadModels,
     timelineModels: ResolvedNewXTimelineModels,
 ) {
@@ -899,6 +905,18 @@ private fun patchPostModelBridges(
         postModels.canonicalPostDescriptor,
         canonicalPostMediaField,
     )
+    val compositionMediaStub = extensionClass.requireBooleanHelper(
+        COMPOSITION_MEDIA_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+    )
+    val compositionMediaPredicate = patchCompositionMediaPredicate(
+        compositionMediaStub,
+        inlineMediaModels,
+    )
+    if (compositionMediaPredicate !== compositionMediaStub) {
+        extensionClass.methods.remove(compositionMediaStub)
+        extensionClass.methods.add(compositionMediaPredicate)
+    }
     extensionClass.portHelperBody(
         REPOSTED_POST_HELPER,
         listOf(OBJECT_DESCRIPTOR),
@@ -1019,6 +1037,20 @@ private fun MutableClass.requireHelper(
             method.name == name &&
                 method.parameterTypes.map { it.toString() } == parameters &&
                 method.returnType == "Ljava/lang/Object;"
+        },
+    )
+
+private fun MutableClass.requireBooleanHelper(
+    name: String,
+    parameters: List<String>,
+): MutableMethod =
+    requireExactlyOne(
+        "NewX inline helper $name",
+        methods.filter { method ->
+            method.name == name &&
+                method.parameterTypes.map { it.toString() } == parameters &&
+                method.returnType == "Z" &&
+                AccessFlags.STATIC.isSet(method.accessFlags)
         },
     )
 

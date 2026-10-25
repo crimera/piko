@@ -236,6 +236,46 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
+    public void usernameOnlyRuleDoesNotReadPostTextOrMentions() {
+        CountingModelAccess models = new CountingModelAccess();
+        FakePost post = post("clean body");
+        post.authorScreenName = "rezero";
+        PostFilterRule rule = new PostFilterRule("username", "rezero", false, true, true);
+
+        Object filtered = NewXTimelineFilter.filterPostsByKeyword(
+                items(post),
+                true,
+                PostFilterRuleStore.snapshotOf(List.of(rule)),
+                models
+        );
+
+        assertTrue(((List<?>) filtered).isEmpty());
+        assertEquals(0, models.postTextReads);
+        assertEquals(0, models.postMentionReads);
+        assertEquals(1, models.authorScreenNameReads);
+    }
+
+    @Test
+    public void contentOnlyRuleDoesNotReadAuthorScreenName() {
+        CountingModelAccess models = new CountingModelAccess();
+        FakePost post = post("clean body");
+        post.authorScreenName = "rezero";
+        PostFilterRule rule = new PostFilterRule("content", "blocked", true, false, true);
+
+        Object filtered = NewXTimelineFilter.filterPostsByKeyword(
+                items(post),
+                true,
+                PostFilterRuleStore.snapshotOf(List.of(rule)),
+                models
+        );
+
+        assertEquals(List.of(post), filtered);
+        assertEquals(1, models.postTextReads);
+        assertEquals(1, models.postMentionReads);
+        assertEquals(0, models.authorScreenNameReads);
+    }
+
+    @Test
     public void keepsReplyToUserMatchingUsernameRuleWhenAuthorDiffers() {
         FakePost reply = reply("@rezero clean body", "steven", "rezero");
 
@@ -332,6 +372,99 @@ public class NewXTimelineFilterTest {
         );
 
         assertEquals(List.of(replyToBlue, businessPost), filtered);
+    }
+
+    @Test
+    public void verifiedOnlyFilterDoesNotReadScreenNameWithoutWhitelist() {
+        CountingModelAccess models = new CountingModelAccess();
+        FakePost hidden = verifiedPost("hidden", VerifiedType.User, "hidden-id", "hidden");
+
+        Object filtered = NewXTimelineFilter.filterPostsByVerifiedType(
+                items(hidden),
+                Set.of("User"),
+                true,
+                false,
+                Set.of(),
+                models
+        );
+
+        assertTrue(((List<?>) filtered).isEmpty());
+        assertEquals(0, models.authorScreenNameReads);
+    }
+
+    @Test
+    public void successfulConversationAuthorshipPrepassAvoidsDuplicateReads() {
+        CountingModelAccess models = new CountingModelAccess();
+        FakePost child = verifiedPost("child", VerifiedType.NotVerified, "author-id", "author");
+        child.id = "child-id";
+        FakeModule conversation = module("conversationthread-1", item(child));
+
+        Object filtered = NewXTimelineFilter.filterPostsByVerifiedType(
+                items(conversation),
+                Set.of("User"),
+                false,
+                true,
+                Set.of(),
+                models
+        );
+
+        assertSame(conversation, ((List<?>) filtered).get(0));
+        assertEquals(1, models.postAuthorIdReads);
+        assertEquals(2, models.postIdReads);
+        assertEquals(2, models.repliedPostIdReads);
+    }
+
+    @Test
+    public void failedConversationAuthorshipPrepassRetriesForChild() {
+        CountingModelAccess models = new CountingModelAccess();
+        models.failFirstModuleItemRead = true;
+        FakePost child = verifiedPost("child", VerifiedType.NotVerified, "author-id", "author");
+        child.id = "child-id";
+        FakeModule conversation = module("conversationthread-1", item(child));
+
+        Object filtered = NewXTimelineFilter.filterPostsByVerifiedType(
+                items(conversation),
+                Set.of("User"),
+                false,
+                true,
+                Set.of(),
+                models
+        );
+
+        assertSame(conversation, ((List<?>) filtered).get(0));
+        assertEquals(2, models.moduleItemReads);
+        assertEquals(1, models.postAuthorIdReads);
+        assertEquals(2, models.postIdReads);
+        assertEquals(2, models.repliedPostIdReads);
+
+        CountingModelAccess authorshipReadModels = new CountingModelAccess();
+        authorshipReadModels.failFirstPostAuthorIdRead = true;
+        FakePost authorReadFailureChild = verifiedPost(
+                "child",
+                VerifiedType.NotVerified,
+                "author-id",
+                "author"
+        );
+        authorReadFailureChild.id = "child-author-read-failure-id";
+        FakeModule authorReadFailureConversation = module(
+                "conversationthread-2",
+                item(authorReadFailureChild)
+        );
+
+        Object authorReadFailureResult = NewXTimelineFilter.filterPostsByVerifiedType(
+                items(authorReadFailureConversation),
+                Set.of("User"),
+                false,
+                true,
+                Set.of(),
+                authorshipReadModels
+        );
+
+        assertSame(authorReadFailureConversation, ((List<?>) authorReadFailureResult).get(0));
+        assertEquals(2, authorshipReadModels.moduleItemReads);
+        assertEquals(2, authorshipReadModels.postAuthorIdReads);
+        assertEquals(3, authorshipReadModels.postIdReads);
+        assertEquals(2, authorshipReadModels.repliedPostIdReads);
     }
 
     @Test
@@ -1084,6 +1217,59 @@ public class NewXTimelineFilterTest {
         }
         @Override Object getAiDetectionSource(Object disclosure) {
             return ((FakeDisclosure) disclosure).source;
+        }
+    }
+
+    private static final class CountingModelAccess extends FakeModelAccess {
+        private int postTextReads;
+        private int postMentionReads;
+        private int authorScreenNameReads;
+        private int postIdReads;
+        private int postAuthorIdReads;
+        private int repliedPostIdReads;
+        private int moduleItemReads;
+        private boolean failFirstModuleItemRead;
+        private boolean failFirstPostAuthorIdRead;
+
+        @Override Object getModuleItem(Object wrapper) {
+            moduleItemReads++;
+            if (failFirstModuleItemRead && moduleItemReads == 1) {
+                throw new IllegalStateException("module child unavailable during authorship prepass");
+            }
+            return super.getModuleItem(wrapper);
+        }
+
+        @Override Object getPostId(Object post) {
+            postIdReads++;
+            return super.getPostId(post);
+        }
+
+        @Override Object getPostRepliedPostId(Object post) {
+            repliedPostIdReads++;
+            return super.getPostRepliedPostId(post);
+        }
+
+        @Override String getPostAuthorId(Object post) {
+            postAuthorIdReads++;
+            if (failFirstPostAuthorIdRead && postAuthorIdReads == 1) {
+                throw new IllegalStateException("post author unavailable during authorship prepass");
+            }
+            return super.getPostAuthorId(post);
+        }
+
+        @Override String getPostText(Object post) {
+            postTextReads++;
+            return super.getPostText(post);
+        }
+
+        @Override List<?> getPostMentions(Object post) {
+            postMentionReads++;
+            return super.getPostMentions(post);
+        }
+
+        @Override String getPostAuthorScreenName(Object post) {
+            authorScreenNameReads++;
+            return super.getPostAuthorScreenName(post);
         }
     }
 

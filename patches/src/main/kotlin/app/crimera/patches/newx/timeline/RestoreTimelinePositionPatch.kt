@@ -69,6 +69,10 @@ private const val SAVE_POSITION_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}JII)V"
 private const val SAVE_ANCHOR_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->saveAnchor(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}J${STRING_DESCRIPTOR}JI)V"
+private const val SHOULD_SAVE_ANCHOR_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->shouldSaveAnchor(${ENUM_DESCRIPTOR}J)Z"
+private const val HAS_PENDING_ANCHOR_DESCRIPTOR =
+    "$TIMELINE_POSITION_STORE_DESCRIPTOR->hasPendingAnchor()Z"
 private const val PENDING_ANCHOR_ENTRY_ID_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->pendingAnchorEntryId(${ENUM_DESCRIPTOR}${STRING_DESCRIPTOR}J)$STRING_DESCRIPTOR"
 private const val PENDING_ANCHOR_SORT_INDEX_DESCRIPTOR =
@@ -1623,31 +1627,20 @@ val restoreTimelinePositionPatch =
                 )
             componentClass.methods.add(saveAnchorBridge)
             saveAnchorBridge.insertHook(0, relocateBranchTargets = false) {
-                iget(0, saveAnchorBridge.p0Register, stateFlowField)
-                checkCast(0, stateGetValueReference.definingClass)
-                invokeVirtual(stateGetValueReference, 0)
-                moveResult(0, OBJECT_DESCRIPTOR)
-                instanceOf(1, 0, successStateType)
-                ifEqz(1, Target.Local(SAVE_ANCHOR_RETURN_LABEL))
-                checkCast(0, successStateType)
+                iget(4, saveAnchorBridge.p0Register, stateFlowField)
+                checkCast(4, stateGetValueReference.definingClass)
+                invokeVirtual(stateGetValueReference, 4)
+                moveResult(4, OBJECT_DESCRIPTOR)
+                instanceOf(5, 4, successStateType)
+                ifEqz(5, Target.Local(SAVE_ANCHOR_RETURN_LABEL))
+                checkCast(4, successStateType)
                 iget(
-                    0,
-                    0,
+                    4,
+                    4,
                     fieldReference(
                         "$successStateType->${successItemsField.name}:${successItemsField.type}",
                     ),
                 )
-                iget(
-                    8,
-                    saveAnchorBridge.p0Register + 1,
-                    fieldReference("$eventType->${eventRowsField.name}:$ARRAY_LIST_DESCRIPTOR"),
-                )
-                iget(9, saveAnchorBridge.p0Register + 1, eventHolderField)
-                iget(10, saveAnchorBridge.p0Register, clockFieldDefinition)
-                invokeInterface(clockNowReference, 10)
-                moveResult(10, INSTANT_DESCRIPTOR)
-                invokeStatic(factoryReference, 0, 8, 9, 10)
-                moveResult(11, resumePositionDescriptor)
                 move(12, saveAnchorBridge.p0Register, componentDescriptor)
                 iget(12, 12, repositoryField)
                 invokeInterface(timelineGetterReference, 12)
@@ -1660,6 +1653,22 @@ val restoreTimelinePositionPatch =
                     saveAnchorBridge.p0Register,
                 )
                 moveResult(2, "J")
+                // Keep the native map save and extension account tracking intact, but do not
+                // build an anchor for a disabled/unsupported persistence scope.
+                invokeStatic(methodReference(SHOULD_SAVE_ANCHOR_DESCRIPTOR), 0, 2, 3)
+                moveResult(5, "Z")
+                ifEqz(5, Target.Local(SAVE_ANCHOR_RETURN_LABEL))
+                iget(
+                    8,
+                    saveAnchorBridge.p0Register + 1,
+                    fieldReference("$eventType->${eventRowsField.name}:$ARRAY_LIST_DESCRIPTOR"),
+                )
+                iget(9, saveAnchorBridge.p0Register + 1, eventHolderField)
+                iget(10, saveAnchorBridge.p0Register, clockFieldDefinition)
+                invokeInterface(clockNowReference, 10)
+                moveResult(10, INSTANT_DESCRIPTOR)
+                invokeStatic(factoryReference, 4, 8, 9, 10)
+                moveResult(11, resumePositionDescriptor)
                 ifEqz(11, Target.Local(SAVE_ANCHOR_NULL_LABEL))
                 iget(4, 11, resumeEntryIdFieldReference)
                 iget(5, 11, resumeSortIndexFieldReference)
@@ -1761,6 +1770,11 @@ val restoreTimelinePositionPatch =
                 )
             componentClass.methods.add(restoreAnchorBridge)
             restoreAnchorBridge.insertHook(0, relocateBranchTargets = false) {
+                // This hook can be retried by a Compose SideEffect. A consumed/absent custom
+                // anchor must fall through to the original native restore without key work.
+                invokeStatic(methodReference(HAS_PENDING_ANCHOR_DESCRIPTOR))
+                moveResult(4, "Z")
+                ifEqz(4, Target.Local(RESTORE_ANCHOR_NULL_LABEL))
                 iget(5, restoreAnchorBridge.p0Register, repositoryField)
                 invokeInterface(timelineGetterReference, 5)
                 moveResult(0, timelineTypeDescriptor)
