@@ -35,6 +35,8 @@
     <string name="piko_disable_typing_status">Wyłącz status pisania</string>
     <string name="piko_disable_screenshot_detection">Wyłącz wykrywanie zrzutów ekranu</string>
     <string name="piko_view_dm_anonymously">Czytaj wiadomości anonimowo</string>
+    <string name="piko_mark_as_read_after_reply">Oznaczaj jako przeczytane po odpowiedzi</string>
+    <string name="piko_mark_as_read_after_reply_desc">Oznacza czat jako przeczytany po wysłaniu odpowiedzi, nawet podczas anonimowego przeglądania wiadomości prywatnych lub korzystania ze wszystkich trybów ducha</string>
     <string name="piko_view_dm_anonymously_desc">Gdy ta opcja jest włączona, inni nie widzą, kiedy odczytasz ich wiadomości. Jeśli zarówno to ustawienie, jak i \"Włącz wszystkie tryby ducha\" są wyłączone, zastosowane zostanie ustawienie Instagrama \"Pokaż potwierdzenia odczytu\"</string>
     <string name="piko_turn_on_all_ghost_modes">Włącz wszystkie tryby ducha</string>
     <string name="piko_ghost_modes_on">Tryb ducha: WŁĄCZONY</string>
@@ -94,6 +96,8 @@
     <string name="piko_disable_swipe_to_create_desc">Blokuje otwieranie ekranu tworzenia po przesunięciu w prawo na stronie głównej</string>
     <string name="piko_hide_stories_tray">Ukryj pasek relacji</string>
     <string name="piko_hide_stories_tray_desc">Ukrywa pasek z relacjami w aktualnościach</string>
+    <string name="piko_hide_hidden_requests">Ukryj ukryte prośby</string>
+    <string name="piko_hide_hidden_requests_desc">Ukrywa przycisk ukrytych próśb (spamu) na stronie próśb o wiadomość</string>
     <string name="piko_hide_notes_tray">Ukryj pasek notatek</string>
     <string name="piko_hide_notes_tray_desc">Ukrywa pasek notatek w sekcji wiadomości</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ukryj przycisk tworzenia grupy w menu udostępniania</string>
@@ -128,7 +132,7 @@
     <string name="piko_improve_image_viewing">Popraw jakość obrazów</string>
     <string name="piko_improve_image_viewing_desc">Pobiera z serwera obrazy w maksymalnej rozdzielczości. Może obniżyć wydajność, zwiększyć rozmiar danych aplikacji lub spowodować przełączenie aplikacji na starszy układ</string>
     <string name="piko_copy_comment">Kopiuj komentarz</string>
-    <string name="piko_copy_comment_desc">Dodaje przycisk pozwalający skopiować treść komentarza pod postami i rolkami</string>
+    <string name="piko_copy_comment_desc">Dodaje przyciski do kopiowania komentarzy i nazw użytkowników ich autorów pod postami oraz rolkami</string>
     <string name="piko_comment_copied_success">Skopiowano komentarz</string>
     <string name="piko_comment_copied_failed">Nie znaleziono tekstu do skopiowania</string>
     <string name="piko_copy_username">Kopiuj nazwę użytkownika</string>
@@ -152,12 +156,30 @@
     <string name="piko_inbox_lock_unlock">Odblokuj</string>
     <string name="piko_inbox_lock_prompt">Odblokuj wiadomości</string>
     <string name="piko_inbox_lock_no_lock">Ustaw blokadę ekranu na urządzeniu, aby korzystać z blokady skrzynki odbiorczej</string>
+    <string name="piko_hidden_chats">Ukryte czaty</string>
+    <string name="piko_hidden_chats_desc">Dodaje po przytrzymaniu czatu opcję ukrycia, która przenosi go do prywatnej skrzynki odbiorczej, osobnej dla każdego konta. Włącz blokadę skrzynki odbiorczej, aby ją zabezpieczyć</string>
+    <string name="piko_hidden_chats_hidden">Ukryto czat</string>
+    <string name="piko_hidden_chats_unhidden">Odkryto czat</string>
+    <string name="piko_hidden_chats_opened">Ukryte czaty</string>
+    <string name="piko_hidden_chats_closed">Powrót do skrzynki odbiorczej</string>
+    <string name="piko_hidden_chats_mute">Wycisz ukryte czaty</string>
+    <string name="piko_hidden_chats_mute_desc">Nie pokazuj powiadomień o wiadomościach z ukrytych czatów</string>
+    <string name="piko_hidden_chats_taps">Liczba dotknięć otwierająca ukryte czaty</string>
+    <string name="piko_hidden_chats_taps_desc">Dotknij przycisku wiadomości tyle razy z rzędu, aby przełączyć się między skrzynką odbiorczą a ukrytymi czatami</string>
     <string name="piko_unlock_plus_benefits">Odblokuj korzyści Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Wiadomości prywatne</string>
     <string name="piko_unlimited_replays">Zablokuj znikanie multimediów</string>
     <string name="piko_unlimited_replays_desc">Zmienia znikające zdjęcia i filmy na widoczne na stałe</string>
+    <string name="piko_ephemeral_caption">Pokaż tryb otrzymania znikających multimediów</string>
+    <string name="piko_ephemeral_caption_desc">Dodaje pod zdjęciami i filmami wysłanymi jako znikające multimedia wiersz z informacją o sposobie ich wysłania oraz czasie dostępności</string>
+    <string name="piko_ephemeral_received_once">Otrzymano do jednorazowego wyświetlenia</string>
+    <string name="piko_ephemeral_received_twice">Otrzymano do dwukrotnego wyświetlenia</string>
+    <string name="piko_ephemeral_received_chat">Otrzymano z zachowaniem na czacie</string>
+    <string name="piko_ephemeral_received_unknown">Oryginalny tryb wyświetlania nieznany</string>
+    <string name="piko_ephemeral_available_until">Dostępne do %s</string>
+    <string name="piko_ephemeral_expired">Wygasło</string>
     <string name="piko_enable_mark_chat_as_read">Włącz opcję oznaczania czatu jako przeczytanego</string>
     <string name="piko_enable_mark_chat_as_read_desc">Dodaje opcję oznaczenia czatu jako przeczytanego po jego przytrzymaniu. Gdy oznaczysz czat jako przeczytany, inni zobaczą, że ich wiadomości zostały odczytane, nawet jeśli włączono \"Czytaj wiadomości anonimowo\"</string>
     <!-- Story Section -->
@@ -176,6 +198,8 @@
     <string name="piko_disable_story_flipping_desc">Blokuje automatyczne przejście do następnej relacji po zakończeniu obecnej</string>
     <string name="piko_loop_story">Zapętl relację</string>
     <string name="piko_loop_story_desc">Odtwarzaj ponownie bieżącą relację po jej zakończeniu</string>
+    <string name="piko_hide_story_follow_button">Ukryj przycisk Obserwuj w relacjach</string>
+    <string name="piko_hide_story_follow_button_desc">Ukrywa przycisk \"Obserwuj\" na górze relacji z kont, których nie obserwujesz</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Pobieranie multimediów</string>
     <string name="piko_category_downloads">Pobrane</string>
@@ -188,6 +212,10 @@
     <string name="piko_enable_direct_download_desc">Pobiera przeglądane multimedia od razu bez wyświetlania okna opcji</string>
     <string name="piko_download_username_folder">Grupuj pobrania według nazwy użytkownika</string>
     <string name="piko_download_username_folder_desc">Tworzy osobne podfoldery dla każdego twórcy</string>
+    <string name="piko_prefer_dash_format">Preferuj format DASH</string>
+    <string name="piko_prefer_dash_format_desc">Pobiera filmy w najostrzejszej wersji DASH udostępnianej przez Instagram, do 1080p AV1, zamiast pliku 720p H.264</string>
+    <string name="piko_dash_audio_aac_lc">Konwertuj dźwięk DASH na AAC</string>
+    <string name="piko_dash_audio_aac_lc_desc">Gdy opcja \"Preferuj format DASH\" jest włączona, ponownie koduje dźwięk xHE-AAC z plików DASH do formatu AAC-LC 192 kb/s, który odtworzy każdy odtwarzacz</string>
     <string name="piko_embed_download_metadata">Osadź metadane filmu</string>
     <string name="piko_embed_download_metadata_desc">Dodaje opis, link do posta, twórcę i datę przesłania do pobranych plików MP4</string>
     <string name="piko_download_file_name_template">Format nazwy pliku</string>
@@ -204,6 +232,7 @@
     <string name="piko_download_file_name_token_variant_suffix">Wariant</string>
     <string name="piko_download_current_media">Pobierz aktualny plik</string>
     <string name="piko_download_as_image">Pobierz jako obraz</string>
+    <string name="piko_saved_at">Zapisano w %s</string>
     <string name="piko_video_variants">Warianty filmu</string>
     <string name="piko_image_variants">Warianty obrazu</string>
     <string name="piko_download_audio">Pobierz sam dźwięk</string>
@@ -319,11 +348,18 @@
     <string name="piko_action_bar_inbox">Ikony paska akcji skrzynki odbiorczej</string>
     <string name="piko_action_bar_button_settings_icon">Ikona ustawień</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ikona trybu ducha</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">Ikona przejścia do najstarszej wiadomości</string>
+    <string name="piko_jump_oldest_started">Przechodzenie do najstarszej wiadomości. Dotknij ponownie, aby anulować</string>
+    <string name="piko_jump_oldest_cancelled">Anulowano</string>
+    <string name="piko_jump_oldest_stopped">Przerwano oczekiwanie na starsze wiadomości. Dotknij ponownie, aby ponowić.</string>
     <string name="piko_action_bar_button_profile_info_icon">Ikona informacji o profilu</string>
     <string name="piko_action_bar_button_create_icon">Ikona tworzenia</string>
     <string name="piko_action_bar_button_notifications_icon">Ikona powiadomień</string>
     <string name="piko_settings_on_action_bar">Ustawienia Piko na pasku akcji</string>
     <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji aktualności</string>
+    <string name="piko_settings_search_hint">Szukaj</string>
+    <string name="piko_settings_search_clear">Wyczyść wyszukiwanie</string>
+    <string name="piko_settings_search_no_results">Brak wyników</string>
     <!-- Font Section -->
     <string name="piko_category_font">Czcionka</string>
     <string name="piko_custom_font">Własna czcionka</string>

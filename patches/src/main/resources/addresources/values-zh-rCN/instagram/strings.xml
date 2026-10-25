@@ -105,7 +105,6 @@
     <string name="piko_improve_image_viewing">提高图像分辨率</string>
     <string name="piko_improve_image_viewing_desc">从服务器获取最大分辨率图像。可能会降低性能，增加应用数据大小，或导致应用切换到旧布局</string>
     <string name="piko_copy_comment">复制评论</string>
-    <string name="piko_copy_comment_desc">在帖子和 Reels 上添加了一个用于复制评论的按钮</string>
     <string name="piko_comment_copied_success">已复制评论</string>
     <string name="piko_comment_copied_failed">找不到要复制的文本</string>
     <string name="piko_copy_username">复制用户名</string>

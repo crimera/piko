@@ -86,7 +86,6 @@
     <string name="piko_improve_image_viewing">Улучшить качество отображения контента</string>
     <string name="piko_improve_image_viewing_desc">Загружает изображения в максимальном разрешении с сервера. Может снизить производительность, увеличить размер данных приложения или привести к переключению на старый интерфейс</string>
     <string name="piko_copy_comment">Скопировать комментарий</string>
-    <string name="piko_copy_comment_desc">Добавляет кнопку для копирования комментариев в публикациях и Reels</string>
     <string name="piko_comment_copied_success">Комментарий копирован</string>
     <string name="piko_comment_copied_failed">Не найдено текста для копирования</string>
     <string name="piko_copy_username">Скопировать имя пользователя</string>
