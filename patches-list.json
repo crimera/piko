@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.11.0-dev.1",
+  "version": "3.11.0-dev.2",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -313,7 +313,7 @@
     },
     {
       "name": "Clone",
-      "description": "Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.\nCaution: Do not select the official Morphe's \"Change package name\" universal patch.",
+      "description": "Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.",
       "default": false,
       "category": null,
       "compatiblePackages": [
@@ -388,7 +388,7 @@
     },
     {
       "name": "Copy comment",
-      "description": "Adds a button to copy comments on posts and reels.",
+      "description": "Adds buttons to copy comments and their authors' usernames on posts and reels.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -1134,64 +1134,6 @@
       "options": []
     },
     {
-      "name": "Disable background components",
-      "description": "Disables background services, receivers, and tracking providers.",
-      "default": false,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable background processes and telemetry",
-      "description": "Completely strips background sync, secondary daemons, analytics uploaders, tracking providers, and internal metric generation.",
-      "default": false,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "Disable chirp font",
       "description": null,
       "default": true,
@@ -1454,6 +1396,35 @@
       "name": "Disable swipe to create",
       "description": "Prevents opening the creation screen by swiping right on the home tab.",
       "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable telemetry",
+      "description": "Disables analytics upload components and Falco event logging.",
+      "default": false,
       "category": null,
       "compatiblePackages": [
         {
@@ -2282,6 +2253,35 @@
       "options": []
     },
     {
+      "name": "Hide feed posts",
+      "description": "Hides posts from the home feed",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide followed by context",
       "description": "Hides followed by context under profile",
       "default": true,
@@ -2674,6 +2674,35 @@
       "options": []
     },
     {
+      "name": "Hide story follow button",
+      "description": "Hides the follow button at the top of stories.",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide suggested content",
       "description": "Hides suggested stories, reels, threads (Suggested posts will still be shown).",
       "default": true,
@@ -2930,6 +2959,35 @@
       "name": "Make ephemeral media permanent",
       "description": "Changes unexpired view once, view twice media to permanent view.",
       "default": false,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Mark as read after reply",
+      "description": "Adds an option to mark chats as read after replying while viewing DMs anonymously.",
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {

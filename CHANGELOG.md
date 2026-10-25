@@ -1,3 +1,39 @@
+## [3.11.0-dev.2](https://github.com/crimera/piko/compare/v3.11.0-dev.1...v3.11.0-dev.2) (2026-10-25)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Align recommended flag labels with their toggle states ([b49c06b](https://github.com/crimera/piko/commit/b49c06be84e6347bd3cc447f07f22c6e9b8d67ce))
+* **Instagram:** Correct restart policies and clear disabled media captions ([aceb512](https://github.com/crimera/piko/commit/aceb5127b7f8cd9e6c61cf95cb38dfdc604e298a))
+* **Instagram:** Keep home tray story system bars pure black ([20529a8](https://github.com/crimera/piko/commit/20529a8b4bd17211c57f7accefdc2c028bce4ab9))
+* **Instagram:** Keep story backgrounds pure black across themes ([707c1a9](https://github.com/crimera/piko/commit/707c1a983b7ad41aa1009e89b46be015ce0fde02))
+* **Instagram:** Localize story timestamps and remaining time ([e504c4d](https://github.com/crimera/piko/commit/e504c4d3475fea8b962e8355d1f4974c742bada5))
+* **Instagram:** Preserve settings scroll position after theme changes ([fd6ec7e](https://github.com/crimera/piko/commit/fd6ec7e119b6a04da59fa1a84343677313b44502))
+* **Instagram:** Preserve settings state across modal recreation ([0991518](https://github.com/crimera/piko/commit/099151895acba64fa42b08fc933ad34d7f9d5189))
+* **Instagram:** Restore behavior after mount install changes ([0bc1c9f](https://github.com/crimera/piko/commit/0bc1c9fc019a8d07daddb8d458c8eac65f347d71))
+* **Instagram:** Restore saved Instants empty-state layout ([52e56db](https://github.com/crimera/piko/commit/52e56dbb79dc501b8991c09beb3856728a2fcbc6))
+
+### ✨ New Features
+
+* **Instagram:** Add comment author username copying ([50a1427](https://github.com/crimera/piko/commit/50a142734c53a72cbb8d85a3576063fe90a16b37))
+* **Instagram:** Add flags to disable selected Plus features ([4043e90](https://github.com/crimera/piko/commit/4043e901cdb701ea9abadae13a5c86ffae421670))
+* **Instagram:** Add hide feed posts patch ([3578c4b](https://github.com/crimera/piko/commit/3578c4bfbc6ad4231960ab7b02f70b48e56136e6))
+* **Instagram:** Add mark as read after reply option ([c043bbc](https://github.com/crimera/piko/commit/c043bbcd61c12d7611c8caa94b9d4e42b3686e51))
+* **Instagram:** Add option to convert DASH audio to AAC-LC ([#2171](https://github.com/crimera/piko/issues/2171)) ([ebf7301](https://github.com/crimera/piko/commit/ebf7301ea5d4a63ccaaa47361d07713a783d0d4f))
+* **Instagram:** Add option to hide story follow button ([de269b3](https://github.com/crimera/piko/commit/de269b3428090c9608d5273cd3b1b462cb5eba17))
+* **Instagram:** Add recommended flags to hide Meta AI ([0c8eb70](https://github.com/crimera/piko/commit/0c8eb7077f6b8aa5283ee540bc896e0bb86e125b))
+* **Instagram:** Add recommended flags to hide Plus upsells ([492adf5](https://github.com/crimera/piko/commit/492adf545fad3d4fee8598739ac13b1380f86426))
+* **Instagram:** Add support for mount installation ([#2169](https://github.com/crimera/piko/issues/2169)) ([b628b64](https://github.com/crimera/piko/commit/b628b649ee8a43917a9557c8b6bda750428ccfb1))
+* **Instagram:** Queue Download All requests by post ([6fac70b](https://github.com/crimera/piko/commit/6fac70bb8f9fdf6cb3aae83dcad076de8c5df3ff))
+
+### 🔧 Improvements
+
+* **Instagram:** Clarify file picker unavailable errors ([1e9ffbf](https://github.com/crimera/piko/commit/1e9ffbf4529c040b9cc01e57ba14a9f82c7e5ae1))
+* **Instagram:** Consolidate telemetry patches ([6363dd8](https://github.com/crimera/piko/commit/6363dd8aa9590aa841fbc57e8cbed7949249b1e1))
+* **Instagram:** Move Plus benefits below empty bottom space setting ([2d09e37](https://github.com/crimera/piko/commit/2d09e373fb8c58e696e55ccfe2904f398cc3f8d8))
+* **Instagram:** Refine restart confirmation and require explicit restart policies ([1c39f36](https://github.com/crimera/piko/commit/1c39f369e077e6fc48fd35165f7cbe4ce834f53e))
+* **Instagram:** Refine settings row spacing ([8c0be72](https://github.com/crimera/piko/commit/8c0be72f11a9ca7cf508de16c18b8fcaa6c014b7))
+* **Instagram:** Use the native ads icon for ad settings ([4385aee](https://github.com/crimera/piko/commit/4385aee4121d13431e5fbc7e7a91b1b3588f8401))
+
 ## [3.11.0-dev.1](https://github.com/crimera/piko/compare/v3.10.0...v3.11.0-dev.1) (2026-10-22)
 
 ### 🐛 Bug Fixes

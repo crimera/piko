@@ -69,7 +69,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.11.0-dev.1](https://github.com/crimera/piko/releases/tag/v3.11.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;141 patches total
+> **[v3.11.0-dev.2](https://github.com/crimera/piko/releases/tag/v3.11.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;143 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
@@ -160,7 +160,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;66 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;68 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -174,8 +174,8 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Allow user network certificate](#allow-user-network-certificate) | Allows user network certificate for whitehat testing |  |
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
-| [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.<br>Caution: Do not select the official Morphe's "Change package name" universal patch. | • Package name<br>• App name |
-| [Copy comment](#copy-comment) | Adds a button to copy comments on posts and reels. |  |
+| [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app. | • Package name<br>• App name |
+| [Copy comment](#copy-comment) | Adds buttons to copy comments and their authors' usernames on posts and reels. |  |
 | [Custom font](#custom-font) | Adds an option to replace the app font with a font file from the device storage. |  |
 | [Custom sharing domain](#custom-sharing-domain) | Allows for using custom domains when sharing posts, reels and stories. |  |
 | [Customise story ring size](#customise-story-ring-size) |  |  |
@@ -184,8 +184,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
 | [Disable ads](#disable-ads) |  |  |
 | [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
-| [Disable background components](#disable-background-components) | Disables background services, receivers, and tracking providers. |  |
-| [Disable background processes and telemetry](#disable-background-processes-and-telemetry) | Completely strips background sync, secondary daemons, analytics uploaders, tracking providers, and internal metric generation. |  |
 | [Disable comments](#disable-comments) | Disables comments and hides comment buttons and counts on posts and reels. |  |
 | [Disable discover people](#disable-discover-people) | Hides suggested accounts |  |
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
@@ -195,6 +193,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
 | [Disable swipe to create](#disable-swipe-to-create) | Prevents opening the creation screen by swiping right on the home tab. |  |
+| [Disable telemetry](#disable-telemetry) | Disables analytics upload components and Falco event logging. |  |
 | [Disable typing status](#disable-typing-status) |  |  |
 | [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
@@ -205,6 +204,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Friendship status indicator](#friendship-status-indicator) | Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click |  |
 | [Hidden chats](#hidden-chats) | Adds an option to the chat menu that moves the chat to a private inbox, opened by tapping the messages button several times. |  |
 | [Hide Reels follow button](#hide-reels-follow-button) | Removes the follow button from Reels. |  |
+| [Hide feed posts](#hide-feed-posts) | Hides posts from the home feed |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide hidden requests](#hide-hidden-requests) | Hides the hidden requests (spam) button in the message requests page |  |
 | [Hide notes tray](#hide-notes-tray) | Hides notes tray in DM section |  |
@@ -212,12 +212,14 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Hide save buttons](#hide-save-buttons) | Hides save buttons on posts and reels |  |
 | [Hide share button](#hide-share-button) | Hides the share button on posts and reels |  |
 | [Hide stories tray](#hide-stories-tray) | Hides stories tray from main feed. |  |
+| [Hide story follow button](#hide-story-follow-button) | Hides the follow button at the top of stories. |  |
 | [Hide suggested content](#hide-suggested-content) | Hides suggested stories, reels, threads (Suggested posts will still be shown). |  |
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
 | [Inbox lock](#inbox-lock) | Asks for your fingerprint, face or screen lock before the inbox is shown. |  |
 | [Limit feed to following profiles](#limit-feed-to-following-profiles) | Filters the home feed to display only content from profiles you follow. |  |
 | [Loop story](#loop-story) | Replay the current story when it ends |  |
 | [Make ephemeral media permanent](#make-ephemeral-media-permanent) | Changes unexpired view once, view twice media to permanent view. |  |
+| [Mark as read after reply](#mark-as-read-after-reply) | Adds an option to mark chats as read after replying while viewing DMs anonymously. |  |
 | [Mark chat as read manually](#mark-chat-as-read-manually) | Adds option to mark a thread aka message as read manually |  |
 | [More options on post](#more-options-on-post) | Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc |  |
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
