@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">啟用開發者選項</string>
     <string name="piko_enable_dev_options_desc">長按主畫面圖示來開啟開發者選項</string>
     <string name="piko_directly_open_metaconfig">直接開啟 MetaConfig 設定覆蓋</string>
-    <string name="piko_directly_open_metaconfig_desc">長按主畫面圖示以直接開啟 MetaConfig 設定覆蓋（需啟用開發者選項）</string>
     <string name="piko_enable_emp_options">啟動員工選項</string>
     <string name="piko_enable_emp_options_desc">解鎖所有用於測試的員工選項</string>
     <string name="piko_allow_user_network_certificate">允許使用者網路憑證</string>

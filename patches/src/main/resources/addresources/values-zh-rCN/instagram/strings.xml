@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">启用开发者选项</string>
     <string name="piko_enable_dev_options_desc">长按主页图标解锁开发者选项</string>
     <string name="piko_directly_open_metaconfig">直接打开 MetaConfig 覆盖</string>
-    <string name="piko_directly_open_metaconfig_desc">在长按主页图标时直接打开 MetaConfig 覆盖 (需要启用开发者选项)</string>
     <string name="piko_enable_emp_options">启用员工选项</string>
     <string name="piko_enable_emp_options_desc">解锁所有用于测试的员工选项</string>
     <string name="piko_allow_user_network_certificate">允许用户网络证书</string>
@@ -97,7 +96,6 @@
     <string name="piko_follow_back_indicator">启用友谊状态指示器</string>
     <string name="piko_follow_back_indicator_desc">在个人资料页面上添加一个关注您的状态标签，并在点击时显示详细的友谊状态明细</string>
     <string name="piko_fbi_color_indicator">启用彩色好友状态指示器</string>
-    <string name="piko_fbi_color_indicator_desc">需要启用好友状态指示器</string>
     <string name="piko_fbi_follows_you">关注了你</string>
     <string name="piko_fbi_doesnt_follows_you">没有关注你</string>
     <string name="piko_fbi_following_each_other">互相关注</string>

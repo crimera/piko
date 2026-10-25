@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Włącz opcje programisty</string>
     <string name="piko_enable_dev_options_desc">Odblokowuje opcje programisty po przytrzymaniu ikony strony głównej</string>
     <string name="piko_directly_open_metaconfig">Bezpośrednio otwieraj MetaConfig</string>
-    <string name="piko_directly_open_metaconfig_desc">Otwiera nadpisania MetaConfig po przytrzymaniu ikony strony głównej (wymaga włączonych opcji programisty)</string>
     <string name="piko_enable_emp_options">Włącz opcje pracownicze</string>
     <string name="piko_enable_emp_options_desc">Odblokowuje wszystkie opcje pracownicze używane do testów</string>
     <string name="piko_allow_user_network_certificate">Zezwalaj na certyfikaty użytkownika</string>
@@ -122,7 +121,6 @@
     <string name="piko_follow_back_indicator">Włącz wskaźnik statusu relacji</string>
     <string name="piko_follow_back_indicator_desc">Dodaje etykietę ze statusem \"Obserwuje Cię\" na stronie profilu, a po dotknięciu wyświetla szczegółowe zestawienie statusu relacji</string>
     <string name="piko_fbi_color_indicator">Włącz kolorowy wskaźnik statusu relacji</string>
-    <string name="piko_fbi_color_indicator_desc">Wymaga włączonego wskaźnika statusu relacji</string>
     <string name="piko_fbi_follows_you">Obserwuje Cię</string>
     <string name="piko_fbi_doesnt_follows_you">Nie obserwuje Cię</string>
     <string name="piko_fbi_following_each_other">Obserwujecie się nawzajem</string>
@@ -157,7 +155,6 @@
     <string name="piko_inbox_lock_prompt">Odblokuj wiadomości</string>
     <string name="piko_inbox_lock_no_lock">Ustaw blokadę ekranu na urządzeniu, aby korzystać z blokady skrzynki odbiorczej</string>
     <string name="piko_hidden_chats">Ukryte czaty</string>
-    <string name="piko_hidden_chats_desc">Dodaje po przytrzymaniu czatu opcję ukrycia, która przenosi go do prywatnej skrzynki odbiorczej, osobnej dla każdego konta. Włącz blokadę skrzynki odbiorczej, aby ją zabezpieczyć</string>
     <string name="piko_hidden_chats_hidden">Ukryto czat</string>
     <string name="piko_hidden_chats_unhidden">Odkryto czat</string>
     <string name="piko_hidden_chats_opened">Ukryte czaty</string>
@@ -215,7 +212,6 @@
     <string name="piko_prefer_dash_format">Preferuj format DASH</string>
     <string name="piko_prefer_dash_format_desc">Pobiera filmy w najostrzejszej wersji DASH udostępnianej przez Instagram, do 1080p AV1, zamiast pliku 720p H.264</string>
     <string name="piko_dash_audio_aac_lc">Konwertuj dźwięk DASH na AAC</string>
-    <string name="piko_dash_audio_aac_lc_desc">Gdy opcja \"Preferuj format DASH\" jest włączona, ponownie koduje dźwięk xHE-AAC z plików DASH do formatu AAC-LC 192 kb/s, który odtworzy każdy odtwarzacz</string>
     <string name="piko_embed_download_metadata">Osadź metadane filmu</string>
     <string name="piko_embed_download_metadata_desc">Dodaje opis, link do posta, twórcę i datę przesłania do pobranych plików MP4</string>
     <string name="piko_download_file_name_template">Format nazwy pliku</string>

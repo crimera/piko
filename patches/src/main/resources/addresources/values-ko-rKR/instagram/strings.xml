@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">개발자 옵션 활성화</string>
     <string name="piko_enable_dev_options_desc">홈 아이콘을 길게 탭하여 개발자 옵션을 엽니다</string>
     <string name="piko_directly_open_metaconfig">MetaConfig 재정의 바로 열기</string>
-    <string name="piko_directly_open_metaconfig_desc">홈 아이콘을 길게 탭하였을 경우에 MetaConfig 재정의를 바로 엽니다 (개발자 옵션 활성화 필요)</string>
     <string name="piko_enable_emp_options">직원 옵션 활성화</string>
     <string name="piko_enable_emp_options_desc">테스트에 사용되는 모든 직원 옵션을 활성화합니다</string>
     <string name="piko_allow_user_network_certificate">사용자 네트워크 인증서 허용</string>
@@ -124,7 +123,6 @@
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
     <string name="piko_follow_back_indicator_desc">프로필 페이지에 맞팔 상태를 표시하는 라벨을 추가하고, 그 라벨을 탭하는 경우에 상세한 관계 상태 분석을 표시합니다</string>
     <string name="piko_fbi_color_indicator">색상이 있는 관계 상태 표시기 활성화</string>
-    <string name="piko_fbi_color_indicator_desc">관계 상태 표시기를 활성화해야 합니다</string>
     <string name="piko_fbi_follows_you">나를 팔로우하고 있음</string>
     <string name="piko_fbi_doesnt_follows_you">나를 팔로우하지 않음</string>
     <string name="piko_fbi_following_each_other">서로 팔로우하고 있음</string>
@@ -159,7 +157,6 @@
     <string name="piko_inbox_lock_prompt">메시지 잠금 해제</string>
     <string name="piko_inbox_lock_no_lock">받은 메시지함 잠금을 사용하려면 기기에 화면 잠금을 설정하세요</string>
     <string name="piko_hidden_chats">숨겨진 채팅</string>
-    <string name="piko_hidden_chats_desc">채팅을 길게 탭했을 때 표시되는 메뉴에 숨기기 옵션을 추가하여 채팅을 계정별로 분리된 비공개 받은 편지함으로 이동합니다. 받은 편지함 잠금을 활성화하여 보호하십시오</string>
     <string name="piko_hidden_chats_hidden">채팅이 숨겨졌습니다</string>
     <string name="piko_hidden_chats_unhidden">채팅 숨김이 해제되었습니다</string>
     <string name="piko_hidden_chats_opened">숨겨진 채팅</string>
@@ -217,7 +214,6 @@
     <string name="piko_prefer_dash_format">DASH 형식 선호</string>
     <string name="piko_prefer_dash_format_desc">720p H.264 파일 대신 Instagram에서 제공하는 가장 선명한 DASH 버전(최대 1080p AV1)으로 동영상을 다운로드할 수 있습니다</string>
     <string name="piko_dash_audio_aac_lc">DASH 오디오를 AAC로 변환</string>
-    <string name="piko_dash_audio_aac_lc_desc">\'DASH 형식 선호\'를 활성화하면, DASH 다운로드의 xHE-AAC 오디오를 모든 플레이어에서 재생할 수 있는 192kbps AAC-LC 형식으로 다시 인코딩합니다</string>
     <string name="piko_embed_download_metadata">동영상 메타데이터 삽입</string>
     <string name="piko_embed_download_metadata_desc">다운로드한 MP4 파일에 자막, 게시물 링크, 크리에이터 및 업로드 날짜를 추가합니다</string>
     <string name="piko_download_file_name_template">파일 이름 형식</string>
@@ -494,4 +490,8 @@
     <string name="piko_media_like">좋아요</string>
     <string name="piko_media_link">링크</string>
     <string name="piko_media_activity">활동</string>
+    <string name="piko_disable_telemetry">Telemetry 비활성화</string>
+    <string name="piko_patch_clone">복제</string>
+    <string name="piko_patch_theme">테마</string>
+    <string name="piko_patch_settings">설정 추가</string>
 </resources>

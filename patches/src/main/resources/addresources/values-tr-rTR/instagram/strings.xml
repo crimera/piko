@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Geliştirici seçeneklerini etkinleştir</string>
     <string name="piko_enable_dev_options_desc">Ana sayfa simgesine basılı tutarak geliştirici seçeneklerini etkinleştirir</string>
     <string name="piko_directly_open_metaconfig">MetaConfig geçersiz kılma ayarlarını doğrudan açar</string>
-    <string name="piko_directly_open_metaconfig_desc">Ana sayfa simgesine uzun basıldığında MetaConfig geçersiz kılma ayarlarını doğrudan açar (Geliştirici seçenekleri etkin olmalıdır).</string>
     <string name="piko_enable_emp_options">Çalışan seçeneklerini etkinleştir</string>
     <string name="piko_enable_emp_options_desc">Test için kullanılan tüm çalışan seçeneklerinin kilidini açar</string>
     <string name="piko_allow_user_network_certificate">Kullanıcı ağ sertifikasına izin ver</string>
@@ -120,7 +119,6 @@
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
     <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
     <string name="piko_fbi_color_indicator">Renkli arkadaşlık durumu göstergesini etkinleştir</string>
-    <string name="piko_fbi_color_indicator_desc">Arkadaşlık durumu göstergesinin etkinleştirilmesi gerekiyor</string>
     <string name="piko_fbi_follows_you">Seni takip ediyor</string>
     <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
     <string name="piko_fbi_following_each_other">Karşılıklı takip</string>
@@ -154,7 +152,6 @@
     <string name="piko_inbox_lock_prompt">Mesajlarınızın kilidini açın</string>
     <string name="piko_inbox_lock_no_lock">Gelen kutusu kilidini kullanmak için cihazınızda ekran kilidi ayarlayın</string>
     <string name="piko_hidden_chats">Gizli sohbetler</string>
-    <string name="piko_hidden_chats_desc">Sohbet menüsünde uzun basıldığında açılan menüye, sohbeti her hesap için ayrı bir özel gelen kutusuna taşıyan bir “gizle” seçeneği ekler. Gelen kutusunu korumak için Gelen Kutusu Kilidi\'ni etkinleştirin</string>
     <string name="piko_hidden_chats_hidden">Sohbet gizlendi</string>
     <string name="piko_hidden_chats_unhidden">Sohbet görünür</string>
     <string name="piko_hidden_chats_opened">Gizli sohbetler</string>

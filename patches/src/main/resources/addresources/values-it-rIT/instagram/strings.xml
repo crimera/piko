@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Attiva Opzioni sviluppatore</string>
     <string name="piko_enable_dev_options_desc">Sblocca le opzioni sviluppatore premendo a lungo l\'icona Home</string>
     <string name="piko_directly_open_metaconfig">Apre direttamente le sovrascritture delle MetaConfig</string>
-    <string name="piko_directly_open_metaconfig_desc">Apre direttamente le sovrascritture delle MetaConfig con una lunga pressione del tasto home (servono le opzioni sviluppatore abilitate)</string>
     <string name="piko_enable_emp_options">Abilita opzioni dipendenti</string>
     <string name="piko_enable_emp_options_desc">Sblocca tutte le opzioni per dipendenti utilizzate per i test</string>
     <string name="piko_allow_user_network_certificate">Consenti certificato di rete utente</string>
@@ -93,7 +92,6 @@
     <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>
     <string name="piko_follow_back_indicator_desc">Aggiunge un indicatore di follow a vicenda nella pagina di profilo e mostra uno stato dettagliato di stato di amicizia al click</string>
     <string name="piko_fbi_color_indicator">Abilita indicatore di stato dell\'amicizia colorato</string>
-    <string name="piko_fbi_color_indicator_desc">L\'indicatore dello stato di amicizia deve essere abilitato</string>
     <string name="piko_fbi_follows_you">Ti segue</string>
     <string name="piko_fbi_doesnt_follows_you">Non ti segue</string>
     <string name="piko_fbi_following_each_other">Vi seguite a vicenda</string>

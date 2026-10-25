@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Activar las opciones de desarrollador</string>
     <string name="piko_enable_dev_options_desc">Activa la opción de desarrollador al mantener pulsado el icono de inicio</string>
     <string name="piko_directly_open_metaconfig">Abre directamente las modificaciones de MetaConfig</string>
-    <string name="piko_directly_open_metaconfig_desc">Al mantener pulsado el icono de inicio, se abre directamente la configuración de MetaConfig (es necesario tener activadas las opciones de desarrollador).</string>
     <string name="piko_enable_emp_options">Activar menú de empleados</string>
     <string name="piko_enable_emp_options_desc">Desbloquea todas las opciones de empleados utilizadas para pruebas</string>
     <string name="piko_allow_user_network_certificate">Permitir certificado de red del usuario</string>
@@ -124,7 +123,6 @@
     <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
     <string name="piko_follow_back_indicator_desc">Agrega una etiqueta de estado \"Te sigue de vuelta\" en la página de perfil y muestra un desglose detallado del estado de amistad al hacer clic</string>
     <string name="piko_fbi_color_indicator">Habilite el indicador de estado de amistad de colores</string>
-    <string name="piko_fbi_color_indicator_desc">Es necesario habilitar el indicador de estado de amistad</string>
     <string name="piko_fbi_follows_you">Te sigue</string>
     <string name="piko_fbi_doesnt_follows_you">No te sigue</string>
     <string name="piko_fbi_following_each_other">Siguiéndose unos a otros</string>
@@ -159,7 +157,6 @@
     <string name="piko_inbox_lock_prompt">Desbloquea tus mensajes</string>
     <string name="piko_inbox_lock_no_lock">Establezca un bloqueo de pantalla en su dispositivo para usar el bloqueo de bandeja de entrada</string>
     <string name="piko_hidden_chats">Chats ocultos</string>
-    <string name="piko_hidden_chats_desc">Añade una opción de ocultar al menú de pulsación larga del chat que mueve el chat a una bandeja de entrada privada, separada para cada cuenta. Activa el bloqueo de bandeja de entrada para protegerlo</string>
     <string name="piko_hidden_chats_hidden">Chat oculto</string>
     <string name="piko_hidden_chats_unhidden">Chat desoculto</string>
     <string name="piko_hidden_chats_opened">Chats ocultos</string>
@@ -217,7 +214,6 @@
     <string name="piko_prefer_dash_format">Preferir el formato DASH</string>
     <string name="piko_prefer_dash_format_desc">Descarga vídeos en la versión DASH de mayor calidad que ofrece Instagram hasta 1080p en formato AV1, en lugar del archivo H.264 a 720p</string>
     <string name="piko_dash_audio_aac_lc">Convertir audio DASH a AAC</string>
-    <string name="piko_dash_audio_aac_lc_desc">Con Preferir formato DASH activado, recodifica el sonido xHE-AAC de las descargas DASH como AAC-LC a 192 kbps, que cualquier reproductor puede reproducir</string>
     <string name="piko_embed_download_metadata">Incruste metadatos de video</string>
     <string name="piko_embed_download_metadata_desc">Agrega el título, el enlace de la publicación, el creador y la fecha de carga a los archivos MP4 descargados</string>
     <string name="piko_download_file_name_template">Formato de nombre de archivo</string>

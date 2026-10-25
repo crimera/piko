@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">啟用開發者選項</string>
     <string name="piko_enable_dev_options_desc">長按主畫面圖示來開啟開發者選項</string>
     <string name="piko_directly_open_metaconfig">直接開啟 MetaConfig 設定覆蓋</string>
-    <string name="piko_directly_open_metaconfig_desc">長按主畫面圖示以直接開啟 MetaConfig 設定覆蓋（需啟用開發者選項）</string>
     <string name="piko_enable_emp_options">啟動員工選項</string>
     <string name="piko_enable_emp_options_desc">解鎖所有用於測試的員工選項</string>
     <string name="piko_allow_user_network_certificate">允許使用者網路憑證</string>
@@ -124,7 +123,6 @@
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
     <string name="piko_follow_back_indicator_desc">在個人檔案頁面新增「已追蹤你」狀態標籤，並在點擊時顯示詳細的好友關係狀態</string>
     <string name="piko_fbi_color_indicator">啟用彩色好友狀態指示器</string>
-    <string name="piko_fbi_color_indicator_desc">請啟用好友狀態顯示功能</string>
     <string name="piko_fbi_follows_you">已追蹤你</string>
     <string name="piko_fbi_doesnt_follows_you">未追蹤你</string>
     <string name="piko_fbi_following_each_other">互相追蹤中</string>
@@ -159,7 +157,6 @@
     <string name="piko_inbox_lock_prompt">解鎖你的訊息</string>
     <string name="piko_inbox_lock_no_lock">請先在裝置上設定螢幕鎖定，才能使用收件匣鎖定功能</string>
     <string name="piko_hidden_chats">隱藏的聊天室</string>
-    <string name="piko_hidden_chats_desc">在對話長按功能表中新增隱藏選項，將對話移至各帳號獨立的私密收件匣。開啟「收件匣鎖定」以進行保護</string>
     <string name="piko_hidden_chats_hidden">已隱藏訊息</string>
     <string name="piko_hidden_chats_unhidden">已取消隱藏訊息</string>
     <string name="piko_hidden_chats_opened">隱藏訊息</string>
@@ -217,7 +214,6 @@
     <string name="piko_prefer_dash_format">優先使用 DASH 格式</string>
     <string name="piko_prefer_dash_format_desc">下載影片時，優先採用 Instagram 所列最高支援 1080p AV1 的 DASH 格式，而非預設的 720p H.264 檔案</string>
     <string name="piko_dash_audio_aac_lc">將 DASH 音訊轉換為 AAC</string>
-    <string name="piko_dash_audio_aac_lc_desc">開啟優先使用 DASH 格式時，將 DASH 下載內容的 xHE-AAC 音訊重新編碼為廣泛相容的 192 kbps AAC-LC 格式</string>
     <string name="piko_embed_download_metadata">嵌入影片詮釋資料</string>
     <string name="piko_embed_download_metadata_desc">將內文、貼文連結、創作者與上傳日期新增至下載的 MP4 檔案中</string>
     <string name="piko_download_file_name_template">檔案名稱格式</string>
@@ -494,4 +490,8 @@
     <string name="piko_media_like">喜歡</string>
     <string name="piko_media_link">連結</string>
     <string name="piko_media_activity">活動</string>
+    <string name="piko_disable_telemetry">停用遙測</string>
+    <string name="piko_patch_clone">複製</string>
+    <string name="piko_patch_theme">佈景主題</string>
+    <string name="piko_patch_settings">新增設定</string>
 </resources>

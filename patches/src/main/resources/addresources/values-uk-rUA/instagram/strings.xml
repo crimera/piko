@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Увімкнути параметри розробника</string>
     <string name="piko_enable_dev_options_desc">Розблоковує параметри розробника довгим натисканням на значок «Головна»</string>
     <string name="piko_directly_open_metaconfig">Відкривати налаштування MetaConfig безпосередньо</string>
-    <string name="piko_directly_open_metaconfig_desc">Відкриває налаштування MetaConfig довгим натисканням на значок «Головна» (потребує увімкнених параметрів розробника)</string>
     <string name="piko_enable_emp_options">Увімкнути службові параметри</string>
     <string name="piko_enable_emp_options_desc">Розблоковує всі службові параметри, що використовуються для тестування</string>
     <string name="piko_allow_user_network_certificate">Дозволити користувацькі мережеві сертифікати</string>
@@ -51,6 +50,8 @@
     <string name="piko_disable_comments">Вимкнути коментарі</string>
     <string name="piko_limit_following_feed">Фільтрує головну стрічку, залишаючи лише контент від профілів, за якими ви стежите</string>
     <string name="piko_limit_following_feed_desc">Фільтрує головну стрічку, залишаючи лише контент від профілів, за якими ви стежите.</string>
+    <string name="piko_hide_feed_posts">Приховати дописи у стрічці</string>
+    <string name="piko_hide_feed_posts_desc">Приховує дописи з головної стрічки</string>
     <string name="piko_disable_discover_people">Приховати рекомендовані акаунти</string>
     <string name="piko_focus_lock">Блокування фокусу</string>
     <string name="piko_focus_lock_desc">Примусово вмикає налаштування без відволікань на встановлений час</string>
@@ -122,7 +123,6 @@
     <string name="piko_follow_back_indicator">Увімкнути індикатор взаємної підписки</string>
     <string name="piko_follow_back_indicator_desc">Додає позначку «Стежить за вами» на сторінці профілю та показує детальну інформацію про статус дружби після натискання</string>
     <string name="piko_fbi_color_indicator">Увімкнути кольоровий індикатор статусу дружби</string>
-    <string name="piko_fbi_color_indicator_desc">Потребує увімкненого індикатора статусу дружби</string>
     <string name="piko_fbi_follows_you">Стежить за вами</string>
     <string name="piko_fbi_doesnt_follows_you">Не стежить за вами</string>
     <string name="piko_fbi_following_each_other">Взаємна підписка</string>
@@ -157,7 +157,6 @@
     <string name="piko_inbox_lock_prompt">Розблокуйте ваші повідомлення</string>
     <string name="piko_inbox_lock_no_lock">Встановіть блокування екрана на вашому пристрої, щоб використовувати блокування папки «Вхідні»</string>
     <string name="piko_hidden_chats">Приховані чати</string>
-    <string name="piko_hidden_chats_desc">Додає опцію приховування в меню тривалого натискання на чат, яка переміщує його до приватної папки «Вхідні», окремо для кожного акаунта. Увімкніть блокування папки «Вхідні», щоб захистити його</string>
     <string name="piko_hidden_chats_hidden">Чат приховано</string>
     <string name="piko_hidden_chats_unhidden">Чат більше не приховано</string>
     <string name="piko_hidden_chats_opened">Приховані чати</string>
@@ -215,7 +214,6 @@
     <string name="piko_prefer_dash_format">Віддавати перевагу формату DASH</string>
     <string name="piko_prefer_dash_format_desc">Завантажує відео з найвищою чіткістю серед версій DASH від Instagram (до 1080p AV1) замість файлу 720p H.264</string>
     <string name="piko_dash_audio_aac_lc">Конвертувати аудіо DASH в AAC</string>
-    <string name="piko_dash_audio_aac_lc_desc">Коли ввімкнено «Віддавати перевагу формату DASH», перекодовує звук xHE-AAC із завантажень DASH у формат AAC-LC зі швидкістю 192 кбіт/с, який може відтворити будь-який плеєр</string>
     <string name="piko_embed_download_metadata">Вбудовувати метадані відео</string>
     <string name="piko_embed_download_metadata_desc">Додає підпис, посилання на допис, автора та дату вивантаження до завантажених файлів MP4</string>
     <string name="piko_download_file_name_template">Формат імені файлу</string>
@@ -304,6 +302,7 @@
     <string name="piko_fail_no_file">Файл не знайдено</string>
     <string name="piko_import_success">Успішно імпортовано</string>
     <string name="piko_import_fail">Помилка імпорту</string>
+    <string name="piko_file_picker_unavailable">Системний засіб вибору файлів недоступний</string>
     <string name="piko_restart_app">Застосунок потрібно перезапустити, щоб зміни набули чинності</string>
     <string name="piko_close">Закрити</string>
     <string name="piko_ok">ОК</string>

@@ -4,13 +4,12 @@
     <string name="piko_category_ads">Publicités</string>
     <string name="piko_disable_ads">Désactiver les publicités</string>
     <string name="piko_hide_suggested_content">Masquer le contenu suggéré</string>
-    <string name="piko_hide_suggested_content_desc">Masque les stories, reels et fils de discussion suggérés. (Les publications suggérées continueront toutefois à être affichées).</string>
+    <string name="piko_hide_suggested_content_desc">Masque les stories, reels et thread. (Les posts suggérés continueront toutefois à être affichées).</string>
     <!-- Developer Options Section -->
     <string name="piko_category_dev_options">Options développeurs</string>
     <string name="piko_enable_dev_options">Activer les options développeurs</string>
     <string name="piko_enable_dev_options_desc">Déverrouille les options développeurs en effectuant un appui long sur l\'icône d\'accueil</string>
     <string name="piko_directly_open_metaconfig">Ouvre directement les surcharges MetaConfig</string>
-    <string name="piko_directly_open_metaconfig_desc">Ouvre directement les surcharges MetaConfig en effectuant un appui long sur l\'icône d\'accueil (nécessite l\'activation des options développeur)</string>
     <string name="piko_enable_emp_options">Activer les options employé</string>
     <string name="piko_enable_emp_options_desc">Déverrouille toutes les options employé utilisées pour les tests</string>
     <string name="piko_allow_user_network_certificate">Autoriser le certificat réseau utilisateur</string>
@@ -36,7 +35,7 @@
     <string name="piko_disable_screenshot_detection">Désactiver la détection des captures d\'écran</string>
     <string name="piko_view_dm_anonymously">Voir les messages directs anonymement</string>
     <string name="piko_mark_as_read_after_reply">Marquer comme lu après avoir répondu</string>
-    <string name="piko_mark_as_read_after_reply_desc">Marque une discussion comme lue après l\'envoi d\'une réponse, même lorsque vous consultez les messages privés de façon anonyme ou que vous utilisez tous les modes fantôme</string>
+    <string name="piko_mark_as_read_after_reply_desc">Marque un chat comme lu après l\'envoi d\'une réponse, même lorsque vous consultez les messages privés de manière anonyme ou que vous utilisez l\'un des modes fantôme</string>
     <string name="piko_view_dm_anonymously_desc">Lorsque activée, les autres ne peuvent pas voir quand vous avez lu leurs messages. Lorsque ce paramètre et l\'option \'Activer tous les modes fantôme\' sont désactivés, c\'est le paramètre \'Afficher les accusés de réception\' d\'Instagram qui est utilisé</string>
     <string name="piko_turn_on_all_ghost_modes">Activer tous les modes fantôme</string>
     <string name="piko_ghost_modes_on">Mode fantôme : ACTIVÉ</string>
@@ -51,8 +50,8 @@
     <string name="piko_disable_comments">Désactiver les commentaires</string>
     <string name="piko_limit_following_feed">Limiter le fil aux comptes suivis</string>
     <string name="piko_limit_following_feed_desc">Filtre le fil d\'accueil pour n\'afficher que le contenu des comptes que vous suivez.</string>
-    <string name="piko_hide_feed_posts">Masquer les publications du fil</string>
-    <string name="piko_hide_feed_posts_desc">Masque les publications du fil d\'accueil</string>
+    <string name="piko_hide_feed_posts">Masquer les posts du fil</string>
+    <string name="piko_hide_feed_posts_desc">Masque les posts du fil d\'accueil</string>
     <string name="piko_disable_discover_people">Masquer les comptes suggérés</string>
     <string name="piko_focus_lock">Verrouillage de la mise au point</string>
     <string name="piko_focus_lock_desc">Forcer les paramètres sans distraction à rester activés pendant une durée définie</string>
@@ -124,7 +123,6 @@
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>
     <string name="piko_follow_back_indicator_desc">Ajoute un libellé indiquant qu\'un utilisateur vous suit en retour sur sa page de profil et affiche un aperçu détaillé du statut de votre relation lorsqu\'on clique dessus</string>
     <string name="piko_fbi_color_indicator">Activer l\'indicateur de statut d\'amitié coloré</string>
-    <string name="piko_fbi_color_indicator_desc">L\'indicateur de statut d\'amitié doit être activé</string>
     <string name="piko_fbi_follows_you">Vous suit</string>
     <string name="piko_fbi_doesnt_follows_you">Ne vous suit pas</string>
     <string name="piko_fbi_following_each_other">Suivi mutuel</string>
@@ -134,7 +132,7 @@
     <string name="piko_improve_image_viewing">Améliorer la visualisation des images</string>
     <string name="piko_improve_image_viewing_desc">Récupère les images en résolution maximale depuis le serveur. Peut réduire les performances, augmenter la taille des données de l\'application ou faire basculer l\'application vers une ancienne disposition</string>
     <string name="piko_copy_comment">Copier le commentaire</string>
-    <string name="piko_copy_comment_desc">Ajoute des boutons pour copier les commentaires et les noms d\'utilisateur de leurs auteurs sur les publications et les reels</string>
+    <string name="piko_copy_comment_desc">Ajoute des boutons permettant de copier les commentaires et les noms d\'utilisateur de leurs auteurs sur les posts et les reels</string>
     <string name="piko_comment_copied_success">Commentaire copié</string>
     <string name="piko_comment_copied_failed">Aucun texte à copier</string>
     <string name="piko_copy_username">Copier le nom d\'utilisateur</string>
@@ -159,7 +157,6 @@
     <string name="piko_inbox_lock_prompt">Déverrouillez vos messages</string>
     <string name="piko_inbox_lock_no_lock">Définir un verrouillage de l\'écran sur votre appareil pour utiliser le verrouillage de la boîte de réception</string>
     <string name="piko_hidden_chats">Chats masqués</string>
-    <string name="piko_hidden_chats_desc">Ajoute une option de masquage au menu qui apparaît lorsque vous appuyez longuement sur un chat. Cette option déplace le chat vers une boîte de réception privée, distincte pour chaque compte. Activez le verrouillage de la boîte de réception pour la protéger</string>
     <string name="piko_hidden_chats_hidden">Chat masqué</string>
     <string name="piko_hidden_chats_unhidden">Chat réaffiché</string>
     <string name="piko_hidden_chats_opened">Chats masqués</string>
@@ -200,16 +197,16 @@
     <string name="piko_disable_story_flipping_desc">Désactiver le défilement/passage automatique vers la prochaine story</string>
     <string name="piko_loop_story">Story en boucle</string>
     <string name="piko_loop_story_desc">Rejouer la story actuelle lorsqu\'elle se termine</string>
-    <string name="piko_hide_story_follow_button">Masquer le bouton S\'abonner des stories</string>
-    <string name="piko_hide_story_follow_button_desc">Masque le bouton S\'abonner en haut des stories des comptes que vous ne suivez pas</string>
+    <string name="piko_hide_story_follow_button">Masquer le bouton \'Suivre\' des story</string>
+    <string name="piko_hide_story_follow_button_desc">Masque le bouton \'Suivre\' en haut des stories des comptes que vous ne suivez pas</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Télécharger le média</string>
     <string name="piko_category_downloads">Téléchargements</string>
     <string name="piko_enable_download">Activer le téléchargement</string>
-    <string name="piko_feed_download_button">Bouton de téléchargement sur les publications du fil d\'actualité</string>
-    <string name="piko_feed_download_button_desc">Ajoute une icône de téléchargement à côté du bouton enregistrer sur les publications du fil d\'actualité</string>
+    <string name="piko_feed_download_button">Bouton de téléchargement sur les posts du fil</string>
+    <string name="piko_feed_download_button_desc">Ajoute une icône de téléchargement à côté du bouton enregistrer sur les posts du fil</string>
     <string name="piko_save_media_comment">Enregistrer les médias des commentaires</string>
-    <string name="piko_save_media_comment_desc">Ajoute un bouton pour enregistrer les médias des commentaires sur les publications et les reels</string>
+    <string name="piko_save_media_comment_desc">Ajoute un bouton pour enregistrer les médias des commentaires sur les posts et les reels</string>
     <string name="piko_enable_direct_download">Activer le téléchargement direct</string>
     <string name="piko_enable_direct_download_desc">Télécharge le média actuellement affiché sans demander d\'options</string>
     <string name="piko_download_username_folder">Séparer les médias par nom d\'utilisateur</string>
@@ -217,7 +214,6 @@
     <string name="piko_prefer_dash_format">Préférer le format DASH</string>
     <string name="piko_prefer_dash_format_desc">Télécharge les vidéos dans la version DASH de la meilleure qualité proposée par Instagram, jusqu\'en 1080p AV1, au lieu du fichier H.264 en 720p</string>
     <string name="piko_dash_audio_aac_lc">Convertir l\'audio DASH en AAC</string>
-    <string name="piko_dash_audio_aac_lc_desc">Avec Préférer le format DASH activé, réencode le son xHE-AAC des téléchargements DASH en AAC-LC à 192 kbps, lisible par tous les lecteurs</string>
     <string name="piko_embed_download_metadata">Intégrer les métadonnées de la vidéo</string>
     <string name="piko_embed_download_metadata_desc">Ajoute les sous-titres, le lien de la publication, le créateur et la date de mise en ligne aux fichiers MP4 téléchargés.</string>
     <string name="piko_download_file_name_template">Format du nom du fichier</string>
@@ -258,7 +254,7 @@
     <string name="piko_external_downloader_package_name_not_set">Veuillez définir le nom du paquet du téléchargeur externe</string>
     <string name="piko_download_voice_media">Télécharger le message vocal</string>
     <!-- Posts Section -->
-    <string name="piko_post_options">Options de publication</string>
+    <string name="piko_post_options">Options de post</string>
     <string name="piko_copy_post_description">Copier la description de la publication</string>
     <string name="piko_copy_post_owner_username">Copier le nom d\'utilisateur du propriétaire de la publication</string>
     <string name="piko_copy_post_owner_fullname">Copier le nom complet du propriétaire de la publication</string>
@@ -267,7 +263,7 @@
     <string name="piko_more_options">Plus d\'options</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Masquer les boutons de navigation</string>
-    <string name="piko_hide_navigation_feed">Masquer le bouton \"Fil d\'actualité\"</string>
+    <string name="piko_hide_navigation_feed">Masquer le bouton \'Fil\'</string>
     <string name="piko_hide_navigation_reels">Masquer le bouton \"Reels\"</string>
     <string name="piko_hide_navigation_direct">Masquer le bouton \"Messages\"</string>
     <string name="piko_hide_navigation_search">Masquer le bouton \"Rechercher\"</string>
@@ -306,7 +302,7 @@
     <string name="piko_fail_no_file">Fichier introuvable</string>
     <string name="piko_import_success">Importé avec succès</string>
     <string name="piko_import_fail">Échec de l\'importation</string>
-    <string name="piko_file_picker_unavailable">Sélecteur de fichiers système indisponible</string>
+    <string name="piko_file_picker_unavailable">Le sélecteur de fichiers du système est indisponible</string>
     <string name="piko_restart_app">L\'application doit être redémarrée pour que les modifications soient prises en compte</string>
     <string name="piko_close">Fermer</string>
     <string name="piko_ok">OK</string>

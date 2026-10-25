@@ -10,7 +10,7 @@
     <string name="piko_enable_dev_options">開発者向けオプションを有効化</string>
     <string name="piko_enable_dev_options_desc">[ホーム] タブを長押しすると、開発者向けのオプションが開きます</string>
     <string name="piko_directly_open_metaconfig">MetaConfig のオーバーライド画面を直接開く</string>
-    <string name="piko_directly_open_metaconfig_desc">ホームタブを長押しすると、MetaConfigのオーバーライド画面を直接開きます。開発者向けオプションを有効にする必要があります</string>
+    <string name="piko_directly_open_metaconfig_desc">ホームアイコンを長押しすると、MetaConfigの上書き設定を直接開きます</string>
     <string name="piko_enable_emp_options">社員向けオプションを有効化</string>
     <string name="piko_enable_emp_options_desc">テスト用の設定をすべて有効にします</string>
     <string name="piko_allow_user_network_certificate">ユーザーネットワーク証明書を許可</string>
@@ -124,7 +124,6 @@
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>
     <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、タップすると詳細なフォロー関係を表示します</string>
     <string name="piko_fbi_color_indicator">色付きの [フレンド状態の表示] を有効化</string>
-    <string name="piko_fbi_color_indicator_desc">[フレンド状態の表示] を有効にする必要があります</string>
     <string name="piko_fbi_follows_you">フォローされています</string>
     <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
     <string name="piko_fbi_following_each_other">相互フォロー</string>
@@ -159,7 +158,7 @@
     <string name="piko_inbox_lock_prompt">メッセージのロックを解除</string>
     <string name="piko_inbox_lock_no_lock">メッセージのロックを使用するには、端末に画面ロックを設定してください</string>
     <string name="piko_hidden_chats">非表示のチャット</string>
-    <string name="piko_hidden_chats_desc">チャットの長押しメニューに非表示オプションを追加し、チャットをアカウントごとに独立したプライベート受信トレイに移動できるようにします。保護するには、「メッセージのロック」を有効にしてください</string>
+    <string name="piko_hidden_chats_desc">チャットの長押しメニューに非表示オプションを追加し、チャットをアカウントごとに独立したプライベートメッセージトレイに移動できるようにします。</string>
     <string name="piko_hidden_chats_hidden">チャットを非表示にしました</string>
     <string name="piko_hidden_chats_unhidden">チャットの非表示を解除しました</string>
     <string name="piko_hidden_chats_opened">非表示のチャット</string>
@@ -217,7 +216,7 @@
     <string name="piko_prefer_dash_format">DASH形式を優先</string>
     <string name="piko_prefer_dash_format_desc">720p H.264ファイルではなく、最大1080p AV1までの、鮮明なDASHレンディションInstagramのリストとして動画をダウンロードします</string>
     <string name="piko_dash_audio_aac_lc">DASHオーディオをAACに変換</string>
-    <string name="piko_dash_audio_aac_lc_desc">すべてのプレーヤーが再生できる192kbpsでDASHダウンロードのxHE-AACサウンドを再エンコードします</string>
+    <string name="piko_dash_audio_aac_lc_desc">ダウンロードしたDASH動画のxHE-AAC音声を、すべてのプレーヤーで再生できる192 kbpsのAAC-LCに再エンコードします</string>
     <string name="piko_embed_download_metadata">メタデータを埋め込む</string>
     <string name="piko_embed_download_metadata_desc">ダウンロードしたMP4ファイルに、キャプション、投稿リンク、作成者、アップロード日を追加します</string>
     <string name="piko_download_file_name_template">ファイル名の形式</string>
@@ -494,4 +493,8 @@
     <string name="piko_media_like">いいね</string>
     <string name="piko_media_link">リンク</string>
     <string name="piko_media_activity">アクティビティ</string>
+    <string name="piko_disable_telemetry">テレメトリを無効化</string>
+    <string name="piko_patch_clone">クローン</string>
+    <string name="piko_patch_theme">テーマ</string>
+    <string name="piko_patch_settings">設定を追加</string>
 </resources>

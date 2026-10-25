@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">تفعيل خيارات المطورين</string>
     <string name="piko_enable_dev_options_desc">يفتح خِيار المطور بالضغط المطول على أيقونة الصفحة الرئيسة</string>
     <string name="piko_directly_open_metaconfig">فتح تجاوزات إعدادات MetaConfig مباشرةً</string>
-    <string name="piko_directly_open_metaconfig_desc">يفتح تجاوزات MetaConfig مباشرةً بالضغط المطول على أيقونة الصفحة الرئيسة (يتطلب تفعيل خيارات المطور)</string>
     <string name="piko_enable_emp_options">تفعيل خيارات الموظفين</string>
     <string name="piko_enable_emp_options_desc">يفتح جميع خيارات الموظفين المُستخدمة للاختبار</string>
     <string name="piko_allow_user_network_certificate">السماح بشهادات الشبكة الخاصة بالمستخدم</string>
