@@ -72,6 +72,7 @@ val themePatch =
                     installSystemDefaultUiModeHook()
                     installThemeLifecycleHooks()
                     installNativeThemeModeSync()
+                    installStorySystemBarHooks()
                 }
             } finally {
                 bytecodePatchContext = null
