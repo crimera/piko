@@ -93,17 +93,16 @@ public final class FeatureSwitchStore {
     }
 
     private static final class Observation {
-        volatile ValueType type;
-        @Nullable volatile Object value;
+        final ValueType type;
+        @Nullable final Object value;
 
         Observation(ValueType type, @Nullable Object value) {
             this.type = type;
             this.value = copyValue(value);
         }
 
-        void update(ValueType updatedType, @Nullable Object updatedValue) {
-            type = updatedType;
-            value = copyValue(updatedValue);
+        boolean matches(ValueType currentType, @Nullable Object currentValue) {
+            return type == currentType && Objects.equals(value, currentValue);
         }
     }
 
@@ -318,16 +317,20 @@ public final class FeatureSwitchStore {
     ) {
         Objects.requireNonNull(key);
         ensureLoaded();
-        observations.compute(key, (ignored, existing) -> {
-            if (existing == null) return new Observation(type, currentValue);
-            existing.update(type, currentValue);
-            return existing;
-        });
+        // Equal reads dominate UI feature checks. Immutable observations let them avoid
+        // a map write (and list copy); changed reads recheck under compute's per-key lock.
+        Observation observed = observations.get(key);
+        if (observed == null || !observed.matches(type, currentValue)) {
+            observations.compute(key, (ignored, existing) ->
+                    existing != null && existing.matches(type, currentValue)
+                            ? existing : new Observation(type, currentValue));
+        }
         OverrideValue override = overrides.get(key);
         if (override == null || override.type != type) return currentValue;
         if (!expectedType.isInstance(override.value)) return currentValue;
         @SuppressWarnings("unchecked")
-        T resolved = (T) copyValue(override.value);
+        // OverrideValue owns an immutable snapshot, including an unmodifiable list copy.
+        T resolved = (T) override.value;
         return resolved;
     }
 

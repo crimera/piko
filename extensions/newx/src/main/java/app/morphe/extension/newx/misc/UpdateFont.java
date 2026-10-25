@@ -114,16 +114,19 @@ public class UpdateFont {
             return value;
         }
 
-        SpannableStringBuilder result = new SpannableStringBuilder(value);
+        SpannableStringBuilder result = null;
         int index = 0;
-        while (index < result.length()) {
-            int end = findEmojiEnd(result, index);
+        while (index < value.length()) {
+            int end = findEmojiEnd(value, index);
             if (end == index) {
-                int codePoint = Character.codePointAt(result, index);
+                int codePoint = Character.codePointAt(value, index);
                 index += Character.charCount(codePoint);
                 continue;
             }
 
+            if (result == null) {
+                result = new SpannableStringBuilder(value);
+            }
             ReplacementSpan[] existingSpans =
                     result.getSpans(index, end, ReplacementSpan.class);
             for (ReplacementSpan existingSpan : existingSpans) {
@@ -139,7 +142,7 @@ public class UpdateFont {
             );
             index = end;
         }
-        return result;
+        return result == null ? value : result;
     }
 
     private static int findEmojiEnd(CharSequence text, int start) {

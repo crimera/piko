@@ -591,6 +591,7 @@ private static Object filterTimelineItems(
                     filterTimeline,
                     filterTimeline,
                     filterThread,
+                    false,
                     modelAccess
             );
         } catch (RuntimeException exception) {
@@ -625,6 +626,7 @@ private static Object filterTimelineItems(
                 filterTimeline,
                 filterTimeline,
                 filterThread,
+                false,
                 modelAccess
         );
         if (result.remove) return result;
@@ -648,6 +650,7 @@ private static Object filterTimelineItems(
             boolean filterVerified,
             boolean filterTimeline,
             boolean filterThread,
+            boolean authorshipAlreadyRecorded,
             TimelineModelAccess modelAccess
     ) {
         if (item == null) return FilterResult.keep(null);
@@ -662,20 +665,25 @@ private static Object filterTimelineItems(
             }
         }
         if (modelAccess.isPost(item)) {
-            if (verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty()
+            if (!authorshipAlreadyRecorded
+                    && verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty()
                     && (filterTimeline || filterThread)) {
                 notePostAuthorship(item, modelAccess);
             }
-            boolean needKeyword = ruleSnapshot != null && ruleSnapshot.hasEnabledRules();
+            boolean needContentKeyword = ruleSnapshot != null && ruleSnapshot.hasContentRules();
+            boolean needUsernameKeyword = ruleSnapshot != null && ruleSnapshot.hasUsernameRules();
+            boolean needKeyword = needContentKeyword || needUsernameKeyword;
             boolean needVerifiedAuthor = filterVerified && verifiedTypesToHide != null
                     && !verifiedTypesToHide.isEmpty();
             if (needKeyword || needVerifiedAuthor) {
                 try {
-                    String textForFilter = needKeyword ? modelAccess.getPostTextForFilter(item) : null;
-                    String authorScreenName = modelAccess.getPostAuthorScreenName(item);
                     if (needVerifiedAuthor && isVerifiedAuthorToHide(item, verifiedTypesToHide, whitelist, modelAccess)) {
                         return FilterResult.removeVerified();
                     }
+                    String textForFilter = needContentKeyword ? modelAccess.getPostTextForFilter(item) : null;
+                    String authorScreenName = needUsernameKeyword
+                            ? modelAccess.getPostAuthorScreenName(item)
+                            : null;
                     if (needKeyword && PostFilterMatcher.findMatchReason(textForFilter, authorScreenName, ruleSnapshot) != null) {
                         return FilterResult.remove();
                     }
@@ -832,9 +840,10 @@ private static Object filterTimelineItems(
             return FilterResult.keep(module);
         }
 
+        boolean authorshipPrepassComplete = false;
         if (conversationRootId != null && filterVerified
                 && verifiedTypesToHide != null && !verifiedTypesToHide.isEmpty()) {
-            noteModuleAuthorship(originalChildren, modelAccess);
+            authorshipPrepassComplete = noteModuleAuthorship(originalChildren, modelAccess);
         }
 
         List<Object> filteredChildren = null;
@@ -863,6 +872,7 @@ private static Object filterTimelineItems(
                         filterVerified,
                         filterTimeline,
                         filterThread,
+                        authorshipPrepassComplete,
                         modelAccess
                 );
             } catch (RuntimeException exception) {
@@ -966,33 +976,40 @@ private static Object filterTimelineItems(
 
     /**
      * Records authorship for every child before any filter decision, so the
-     * own-thread-reply walk sees siblings regardless of child order. Per-child
-     * failures only degrade the exemption back to hiding; they never throw.
+     * own-thread-reply walk sees siblings regardless of child order. Returns
+     * false after any child read or recording failure so the filter pass retries.
      */
-    private static void noteModuleAuthorship(List<?> children, TimelineModelAccess modelAccess) {
+    private static boolean noteModuleAuthorship(List<?> children, TimelineModelAccess modelAccess) {
+        boolean complete = true;
         for (Object child : children) {
             try {
                 if (child == null) continue;
                 Object item = modelAccess.getModuleItem(child);
-                if (modelAccess.isPost(item)) notePostAuthorship(item, modelAccess);
+                if (modelAccess.isPost(item) && !notePostAuthorship(item, modelAccess)) {
+                    complete = false;
+                }
             } catch (RuntimeException exception) {
                 logFailure("recording conversation authorship", exception);
+                complete = false;
             }
         }
+        return complete;
     }
 
-    private static void notePostAuthorship(Object post, TimelineModelAccess modelAccess) {
-        if (post == null) return;
+    private static boolean notePostAuthorship(Object post, TimelineModelAccess modelAccess) {
+        if (post == null) return false;
         try {
             String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
-            if (postId == null || postId.isEmpty()) return;
+            if (postId == null || postId.isEmpty()) return false;
             FilteredRepliesStore.shared().notePostAuthorship(
                     postId,
                     modelAccess.getPostAuthorId(post),
                     NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post))
             );
+            return true;
         } catch (RuntimeException exception) {
             logFailure("recording post authorship", exception);
+            return false;
         }
     }
 

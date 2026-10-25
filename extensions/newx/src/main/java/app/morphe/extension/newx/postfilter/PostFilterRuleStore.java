@@ -95,6 +95,14 @@ public final class PostFilterRuleStore {
         public boolean hasEnabledRules() {
             return !contentPhrases.isEmpty() || !usernamePhrases.isEmpty();
         }
+
+        public boolean hasContentRules() {
+            return !contentPhrases.isEmpty();
+        }
+
+        public boolean hasUsernameRules() {
+            return !usernamePhrases.isEmpty();
+        }
     }
 
     interface Persistence {

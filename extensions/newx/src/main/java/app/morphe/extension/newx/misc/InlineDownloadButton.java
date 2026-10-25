@@ -95,7 +95,9 @@ public final class InlineDownloadButton {
         try {
             boolean hasDownloadAction = containsDownloadAction(actions);
             if (hasDownloadAction) {
-                NewXLogger.printInfo(() -> "skip duplicate actions=" + actions.size());
+                if (NewXLogger.isLoggingEnabled()) {
+                    NewXLogger.printInfo(() -> "skip duplicate actions=" + actions.size());
+                }
                 return actions;
             }
 
@@ -106,15 +108,19 @@ public final class InlineDownloadButton {
                 hasMedia = hasMedia(post);
             }
             if (inspectMedia && !hasMedia) {
-                NewXLogger.printInfo(() -> "skip no-media actions=" + actions.size());
+                if (NewXLogger.isLoggingEnabled()) {
+                    NewXLogger.printInfo(() -> "skip no-media actions=" + actions.size());
+                }
                 return actions;
             }
 
             Object downloadAction = createDownloadAction();
             registerDownloadAction(downloadAction);
-            final boolean mediaAvailable = hasMedia;
-            NewXLogger.printInfo(() -> "add actions=" + actions.size() + " hasMedia=" + mediaAvailable
-                    + " download=" + System.identityHashCode(downloadAction));
+            if (NewXLogger.isLoggingEnabled()) {
+                final boolean mediaAvailable = hasMedia;
+                NewXLogger.printInfo(() -> "add actions=" + actions.size() + " hasMedia=" + mediaAvailable
+                        + " download=" + System.identityHashCode(downloadAction));
+            }
 
             List<Object> result = new ArrayList<>(actions.size() + 1);
             result.addAll(actions);
@@ -139,8 +145,10 @@ public final class InlineDownloadButton {
         if (!isEnabled()) return iconSize;
 
         boolean downloadAction = isDownloadAction(action);
-        NewXLogger.printInfo(() -> "mark action=" + System.identityHashCode(action)
-                + " download=" + downloadAction);
+        if (NewXLogger.isLoggingEnabled()) {
+            NewXLogger.printInfo(() -> "mark action=" + System.identityHashCode(action)
+                    + " download=" + downloadAction);
+        }
         return downloadAction ? -Math.abs(iconSize) : iconSize;
     }
 
@@ -160,7 +168,9 @@ public final class InlineDownloadButton {
         Boolean isDownload = CURRENT_ICON_IS_DOWNLOAD.get();
         CURRENT_ICON_IS_DOWNLOAD.remove();
         boolean useDownloadIcon = Boolean.TRUE.equals(isDownload);
-        NewXLogger.printInfo(() -> "select download=" + useDownloadIcon);
+        if (NewXLogger.isLoggingEnabled()) {
+            NewXLogger.printInfo(() -> "select download=" + useDownloadIcon);
+        }
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }
 
@@ -174,8 +184,10 @@ public final class InlineDownloadButton {
 
         CURRENT_ICON_IS_DOWNLOAD.remove();
         boolean useDownloadIcon = Float.floatToRawIntBits(markedIconSize) < 0;
-        NewXLogger.printInfo(() -> "select size=" + markedIconSize
-                + " download=" + useDownloadIcon);
+        if (NewXLogger.isLoggingEnabled()) {
+            NewXLogger.printInfo(() -> "select size=" + markedIconSize
+                    + " download=" + useDownloadIcon);
+        }
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }
 
@@ -395,7 +407,13 @@ public final class InlineDownloadButton {
         if (post == null) return false;
 
         try {
-            return !mediaFor(post).isEmpty();
+            Object canonicalPost = canonicalPost(post);
+            if (hasDownloadableMedia(mediaForCanonical(canonicalPost))) return true;
+
+            Object repostedPost = getRepostedPost(post);
+            if (repostedPost == null) return false;
+            Object repostedCanonicalPost = getRepostedCanonicalPost(repostedPost);
+            return hasDownloadableMedia(mediaForCanonical(repostedCanonicalPost));
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to check NewX post media", exception);
             return false;
@@ -526,11 +544,15 @@ public final class InlineDownloadButton {
         if (post == null) return java.util.Collections.emptyList();
 
         List<?> canonicalMedia = mediaForCanonical(canonicalPost(post));
+        if (hasDownloadableMedia(canonicalMedia)) return canonicalMedia;
+
         Object repostedPost = getRepostedPost(post);
-        List<?> repostedMedia = repostedPost == null
-                ? java.util.Collections.emptyList()
-                : mediaForCanonical(getRepostedCanonicalPost(repostedPost));
-        return selectMedia(canonicalMedia, repostedMedia);
+        if (repostedPost == null) return java.util.Collections.emptyList();
+
+        List<?> repostedMedia = mediaForCanonical(getRepostedCanonicalPost(repostedPost));
+        return hasDownloadableMedia(repostedMedia)
+                ? repostedMedia
+                : java.util.Collections.emptyList();
     }
 
     private static List<?> mediaForCanonical(Object canonicalPost) {
