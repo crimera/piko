@@ -192,8 +192,7 @@ public final class InstagramPreferenceStyle {
         PreferenceRow row = new PreferenceRow(context, trailingType);
         row.setOrientation(trailingType == TRAILING_SWITCH ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setMinimumHeight(dp(context, 78));
-        row.setPadding(dp(context, 17), dp(context, 10), dp(context, 17), dp(context, 10));
+        row.setPadding(dp(context, 15), dp(context, 10), dp(context, 15), dp(context, 10));
         row.setBackgroundColor(backgroundColor());
         row.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -686,6 +685,8 @@ public final class InstagramPreferenceStyle {
         }
 
         void setIcon(String iconResName) {
+            int horizontalPadding = dp(getContext(), iconResName != null ? 10 : 15);
+            setPadding(horizontalPadding, getPaddingTop(), horizontalPadding, getPaddingBottom());
             if (iconResName == null) {
                 if (iconView != null) {
                     iconView.setImageDrawable(null);
@@ -747,7 +748,7 @@ public final class InstagramPreferenceStyle {
         void setHasSummary(boolean hasSummary) {
             int topPadding = dp(getContext(), topPaddingDp(trailingType, hasSummary));
             int bottomPadding = dp(getContext(), bottomPaddingDp(trailingType, hasSummary));
-            setMinimumHeight(dp(getContext(), hasSummary ? 80 : 62));
+            setMinimumHeight(dp(getContext(), hasSummary ? 80 : 64));
             setPadding(getPaddingLeft(), topPadding, getPaddingRight(), bottomPadding);
         }
 

@@ -47,9 +47,9 @@ public class FocusLockDurationPreference extends Preference {
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.VERTICAL);
         row.setPadding(
-                InstagramPreferenceStyle.dp(context, 17),
+                InstagramPreferenceStyle.dp(context, 15),
                 InstagramPreferenceStyle.dp(context, 14),
-                InstagramPreferenceStyle.dp(context, 17),
+                InstagramPreferenceStyle.dp(context, 15),
                 InstagramPreferenceStyle.dp(context, 14)
         );
         row.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
