@@ -148,7 +148,7 @@ val hideFeedPostsPatch = bytecodePatch(
             move-result v${footerScratch.single()}
             if-nez v${footerScratch.single()}, :piko_feed_complete
             """.trimIndent(),
-            ExternalLabel("piko_feed_complete", footer.instructionMatches[7].instruction),
+            ExternalLabel("piko_feed_complete", footer.method.getInstruction(footer.instructionMatches[7].index)),
         )
 
         MainFeedLoadMoreFingerprint.matchSingle().method.stopHiddenFeedLoading()
