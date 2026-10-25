@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.11.0-dev.2",
+  "version": "3.11.0-dev.3",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -1080,7 +1080,7 @@
     {
       "name": "Disable analytics",
       "description": "Block analytics that are sent to Instagram/Facebook servers.",
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {
@@ -1308,7 +1308,7 @@
     {
       "name": "Disable screenshot detection",
       "description": "Disables screenshots detection in DM",
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {
@@ -1424,7 +1424,7 @@
     {
       "name": "Disable telemetry",
       "description": "Disables analytics upload components and Falco event logging.",
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {
@@ -2958,7 +2958,7 @@
     {
       "name": "Make ephemeral media permanent",
       "description": "Changes unexpired view once, view twice media to permanent view.",
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {
@@ -3945,7 +3945,7 @@
     {
       "name": "View DMs anonymously",
       "description": null,
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {
@@ -3974,7 +3974,7 @@
     {
       "name": "View live anonymously",
       "description": null,
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {
@@ -4003,7 +4003,7 @@
     {
       "name": "View stories anonymously",
       "description": null,
-      "default": false,
+      "default": true,
       "category": null,
       "compatiblePackages": [
         {

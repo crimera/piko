@@ -1,3 +1,14 @@
+## [3.11.0-dev.3](https://github.com/crimera/piko/compare/v3.11.0-dev.2...v3.11.0-dev.3) (2026-10-25)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix hide feed posts with Patcher 2.0.1 ([abfc1c7](https://github.com/crimera/piko/commit/abfc1c7c1310c40415729ef086feae818e8f4ccb))
+
+### 🔧 Improvements
+
+* **Instagram:** Respect settings dependencies ([a9f4ad0](https://github.com/crimera/piko/commit/a9f4ad065d2b5cb007233e6a9bf081a81de251b1))
+* **Instagram:** Restore recommended patches and complete patch status reporting ([eb8b4db](https://github.com/crimera/piko/commit/eb8b4db0e1c6a6f0c5e18301859622fe14e0f15c))
+
 ## [3.11.0-dev.2](https://github.com/crimera/piko/compare/v3.11.0-dev.1...v3.11.0-dev.2) (2026-10-25)
 
 ### 🐛 Bug Fixes
