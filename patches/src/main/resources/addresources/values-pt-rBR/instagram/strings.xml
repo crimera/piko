@@ -51,6 +51,8 @@
     <string name="piko_disable_comments">Desativar comentários</string>
     <string name="piko_limit_following_feed">Limitar feed aos perfis seguidos</string>
     <string name="piko_limit_following_feed_desc">Filtra o feed inicial para mostrar apenas conteúdo dos perfis que você segue.</string>
+    <string name="piko_hide_feed_posts">Ocultar publicações do feed</string>
+    <string name="piko_hide_feed_posts_desc">Oculta publicações do feed inicial</string>
     <string name="piko_disable_discover_people">Ocultar contas sugeridas</string>
     <string name="piko_focus_lock">Bloqueio de foco</string>
     <string name="piko_focus_lock_desc">Forçar a ativação das configurações sem distrações por um período determinado</string>
@@ -304,6 +306,7 @@
     <string name="piko_fail_no_file">Arquivo não encontrado</string>
     <string name="piko_import_success">Importado com sucesso</string>
     <string name="piko_import_fail">Importação falhou</string>
+    <string name="piko_file_picker_unavailable">Seletor de arquivos do sistema indisponível</string>
     <string name="piko_restart_app">O aplicativo precisa ser reiniciado para que as alterações sejam aplicadas</string>
     <string name="piko_close">Fechar</string>
     <string name="piko_ok">Ok</string>

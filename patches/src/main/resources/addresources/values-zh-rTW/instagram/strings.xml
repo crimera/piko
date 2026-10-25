@@ -51,6 +51,8 @@
     <string name="piko_disable_comments">停用留言</string>
     <string name="piko_limit_following_feed">僅顯示已追蹤的帳號的動態</string>
     <string name="piko_limit_following_feed_desc">篩選動態首頁，僅顯示您已追蹤的帳號所發布的內容。</string>
+    <string name="piko_hide_feed_posts">隱藏動態首頁貼文</string>
+    <string name="piko_hide_feed_posts_desc">隱藏動態首頁中的貼文</string>
     <string name="piko_disable_discover_people">隱藏建議帳號</string>
     <string name="piko_focus_lock">專注鎖</string>
     <string name="piko_focus_lock_desc">在指定時間內強制開啟「防干擾設定」</string>
@@ -304,6 +306,7 @@
     <string name="piko_fail_no_file">找不到檔案</string>
     <string name="piko_import_success">匯入成功</string>
     <string name="piko_import_fail">匯入失敗</string>
+    <string name="piko_file_picker_unavailable">無法使用系統檔案選擇器</string>
     <string name="piko_restart_app">需要重新啟動應用程式以套用變更</string>
     <string name="piko_close">關閉</string>
     <string name="piko_ok">確認</string>

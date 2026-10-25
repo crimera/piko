@@ -51,6 +51,8 @@
     <string name="piko_disable_comments">Desactivar comentarios</string>
     <string name="piko_limit_following_feed">Limitar feed a perfiles seguidos</string>
     <string name="piko_limit_following_feed_desc">Filtra el feed de inicio para mostrar solo contenido de los perfiles que sigues.</string>
+    <string name="piko_hide_feed_posts">Ocultar publicaciones del feed</string>
+    <string name="piko_hide_feed_posts_desc">Oculta las publicaciones del feed de inicio</string>
     <string name="piko_disable_discover_people">Ocultar cuentas sugeridas</string>
     <string name="piko_focus_lock">Bloqueo de Enfoque</string>
     <string name="piko_focus_lock_desc">Forzar la activación de configuraciones sin distracciones durante un tiempo determinado</string>
@@ -95,7 +97,7 @@
     <string name="piko_disable_swipe_to_create">Deshabilitar la función de deslizar para crear</string>
     <string name="piko_disable_swipe_to_create_desc">Impide abrir la pantalla de creación deslizando el dedo hacia la derecha en la pestaña de inicio.</string>
     <string name="piko_hide_stories_tray">Ocultar barra de historias</string>
-    <string name="piko_hide_stories_tray_desc">Ocultar la barra de historias del feed principal</string>
+    <string name="piko_hide_stories_tray_desc">Ocultar la bandeja de historias del feed principal</string>
     <string name="piko_hide_hidden_requests">Ocultar solicitudes ocultas</string>
     <string name="piko_hide_hidden_requests_desc">Oculta el botón de solicitudes ocultas (spam) en la página de solicitudes de mensajes</string>
     <string name="piko_hide_notes_tray">Ocultar barra de notas</string>
@@ -265,7 +267,7 @@
     <string name="piko_more_options">Más opciones</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Ocultar botones de navegación</string>
-    <string name="piko_hide_navigation_feed">Ocultar botón Feed</string>
+    <string name="piko_hide_navigation_feed">Ocultar botón de Feed</string>
     <string name="piko_hide_navigation_reels">Ocultar botón Reels</string>
     <string name="piko_hide_navigation_direct">Ocultar botón Directo</string>
     <string name="piko_hide_navigation_search">Ocultar botón Buscar</string>
@@ -304,6 +306,7 @@
     <string name="piko_fail_no_file">Archivo no encontrado</string>
     <string name="piko_import_success">Importado con éxito</string>
     <string name="piko_import_fail">Error al importar</string>
+    <string name="piko_file_picker_unavailable">Selector de archivos del sistema no disponible</string>
     <string name="piko_restart_app">La app necesita ser reiniciada para que los cambios se reflejen</string>
     <string name="piko_close">Cerrar</string>
     <string name="piko_ok">Aceptar</string>
