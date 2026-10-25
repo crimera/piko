@@ -62,7 +62,7 @@ val disableAnalyticsPatch =
     bytecodePatch(
         name = "Disable analytics",
         description = "Block analytics that are sent to Instagram/Facebook servers.",
-        default = false,
+        default = true,
     ) {
         dependsOn(settingsPatch, interceptUriPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)

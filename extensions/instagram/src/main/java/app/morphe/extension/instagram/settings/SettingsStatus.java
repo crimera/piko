@@ -12,6 +12,15 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 public class SettingsStatus {
     public static TreeMap<String,Boolean> FLAGS = new TreeMap();
 
+    public static boolean disableTelemetry = false;
+    public static void disableTelemetry() { disableTelemetry = true; }
+    public static boolean cloneApp = false;
+    public static void cloneApp() { cloneApp = true; }
+    public static boolean theme = false;
+    public static void theme() { theme = true; }
+    public static boolean addSettings = false;
+    public static void addSettings() { addSettings = true; }
+
     //Ads section.
     public static boolean disableAds = false;
     public static void disableAds() {
@@ -280,6 +289,11 @@ public class SettingsStatus {
 
 
         public static void loadStatusMap(){
+        FLAGS.put(str("piko_disable_telemetry"), SettingsStatus.disableTelemetry);
+        FLAGS.put(str("piko_patch_clone"), SettingsStatus.cloneApp);
+        FLAGS.put(str("piko_patch_theme"), SettingsStatus.theme);
+        FLAGS.put(str("piko_patch_settings"), SettingsStatus.addSettings);
+        FLAGS.put(str("piko_disable_reels_scrolling"), SettingsStatus.disableReelsScrolling);
         FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
         FLAGS.put(str("piko_hide_suggested_content"),SettingsStatus.hideSuggestedContent);
 

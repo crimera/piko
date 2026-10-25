@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.misc.clone
 
+import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -61,6 +63,7 @@ val clonePatch =
         var bytecodePatchContext: BytecodePatchContext? = null
 
         dependsOn(
+            settingsPatch,
             // Expose the bytecode context to use it within a ResourcePatch
             bytecodePatch {
                 execute {
@@ -132,6 +135,7 @@ val clonePatch =
             // the issue where video stories only play audio.
             // Also rename providers just in case.
             context(bytecodePatchContext!!) {
+                enableSettings("cloneApp")
                 transformStringReferences { string ->
                     if (string == ORIGINAL_PACKAGE_NAME) {
                         return@transformStringReferences newPackageName

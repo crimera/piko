@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.misc.telemetry
 
+import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -138,12 +140,14 @@ val disableTelemetryPatch =
     bytecodePatch(
         name = "Disable telemetry",
         description = "Disables analytics upload components and Falco event logging.",
-        default = false,
+        default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(disableTelemetryComponentsPatch)
+        dependsOn(settingsPatch, disableTelemetryComponentsPatch)
 
         execute {
+            enableSettings("disableTelemetry")
+
             // Falco log methods are native. Skip their calls while preserving queue cleanup in callers.
             FalcoLogCallerFingerprint.matchAll().forEach { match ->
                 match.method.apply {

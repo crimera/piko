@@ -85,7 +85,7 @@ val makeEphemeralPermanentPatch =
     bytecodePatch(
         name = "Make ephemeral media permanent",
         description = "Changes unexpired view once, view twice media to permanent view.",
-        default = false,
+        default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(settingsPatch, messageInfoEntity, saveAllMessagesPatch, directItemEntity, userDataEntity)

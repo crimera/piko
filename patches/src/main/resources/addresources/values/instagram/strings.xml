@@ -523,4 +523,8 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">activity</string>
+    <string name="piko_disable_telemetry">Disable telemetry</string>
+    <string name="piko_patch_clone">Clone</string>
+    <string name="piko_patch_theme">Theme</string>
+    <string name="piko_patch_settings">Add settings</string>
 </resources>

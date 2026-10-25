@@ -24,6 +24,7 @@ import app.crimera.patches.instagram.misc.notification.fixNotificationRegistrati
 import app.crimera.patches.instagram.misc.userProfile.preserveUnknownFriendshipStatusPatch
 import app.crimera.patches.instagram.misc.userProfile.userProfileButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -88,6 +89,7 @@ val settingsPatch =
         execute {
             addAppResources("shared")
             addAppResources("instagram")
+            enableSettings("addSettings")
 
             // Returning from a modal must restore the activity used for native themes.
             for (fingerprint in listOf(IgFragmentActivityOnCreate, IgFragmentActivityOnResume)) {
