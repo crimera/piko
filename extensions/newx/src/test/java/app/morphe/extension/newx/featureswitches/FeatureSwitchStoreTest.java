@@ -39,6 +39,31 @@ public final class FeatureSwitchStoreTest {
     }
 
     @Test
+    public void patchOverrideIsDefaultAndPersistedUserOverrideWins() {
+        String key = "piko_test_patch_override";
+        FeatureSwitchStore.registerPatchOverride(key, false);
+        FeatureSwitchStore store = new FeatureSwitchStore(new MemoryPersistence());
+
+        assertFalse(store.resolve(key, FeatureSwitchStore.ValueType.BOOLEAN, true, Boolean.class));
+        FeatureSwitchStore.Entry patchEntry = store.snapshot(key).get(0);
+        assertTrue(patchEntry.isOverridden());
+        assertFalse(patchEntry.hasUserOverride());
+        assertTrue(store.hasEntry(key));
+        assertThrows(
+                IllegalStateException.class,
+                () -> FeatureSwitchStore.registerPatchOverride(key, true)
+        );
+
+        store.setOverride(key, FeatureSwitchStore.ValueType.BOOLEAN, true);
+        assertTrue(store.resolve(key, FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class));
+        assertTrue(store.snapshot(key).get(0).hasUserOverride());
+
+        store.removeOverride(key);
+        assertFalse(store.resolve(key, FeatureSwitchStore.ValueType.BOOLEAN, true, Boolean.class));
+        assertFalse(store.snapshot(key).get(0).hasUserOverride());
+    }
+
+    @Test
     public void supportsEveryEditableValueType() {
         MemoryPersistence persistence = new MemoryPersistence();
         FeatureSwitchStore store = new FeatureSwitchStore(persistence);

@@ -157,7 +157,7 @@ public final class FeatureSwitchFragment extends CustomScreenFragment implements
                 entry.getKey(),
                 entry.getType(),
                 entry.getEffectiveValue(),
-                entry.isOverridden()
+                entry.hasUserOverride()
         );
     }
 
@@ -257,7 +257,7 @@ public final class FeatureSwitchFragment extends CustomScreenFragment implements
             String featureKey,
             FeatureSwitchStore.ValueType featureType,
             @Nullable Object effectiveValue,
-            boolean overridden
+            boolean hasUserOverride
     ) {
         Context context = requireContext();
         LinearLayout form = dialogForm(context);
@@ -296,7 +296,7 @@ public final class FeatureSwitchFragment extends CustomScreenFragment implements
                 .setSubtitle(featureKey)
                 .setBodyView(form);
         ButtonView remove = null;
-        if (overridden) {
+        if (hasUserOverride) {
             remove = new ButtonView(
                     context,
                     ButtonView.ButtonStyle.TEXT,

@@ -23,6 +23,7 @@ internal object Constants {
 
     const val EXTENSION_PACKAGE = "Lapp/morphe/extension/newx"
     const val SETTINGS_PACKAGE = "$EXTENSION_PACKAGE/settings"
+    const val FEATURE_SWITCH_STORE_DESCRIPTOR = "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchStore;"
 
     /**
      * The registry, renderer and widgets come from piko-extension-library (dexed into the shared

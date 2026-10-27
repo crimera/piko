@@ -25,6 +25,7 @@ public final class FeatureSwitchStore {
     private static final int SCHEMA_VERSION = 1;
     private static final String PERSISTENCE_KEY = "newx.advanced.feature_switches.overrides";
     private static final String SEEN_PERSISTENCE_KEY = "newx.advanced.feature_switches.seen";
+    private static final Map<String, OverrideValue> PATCH_OVERRIDES = new ConcurrentHashMap<>();
 
     public enum ValueType {
         BOOLEAN,
@@ -42,6 +43,7 @@ public final class FeatureSwitchStore {
         @Nullable private final Object observedValue;
         @Nullable private final Object effectiveValue;
         private final boolean overridden;
+        private final boolean hasUserOverride;
         private final boolean isNew;
 
         private Entry(
@@ -50,6 +52,7 @@ public final class FeatureSwitchStore {
                 @Nullable Object observedValue,
                 @Nullable Object effectiveValue,
                 boolean overridden,
+                boolean hasUserOverride,
                 boolean isNew
         ) {
             this.key = key;
@@ -57,6 +60,7 @@ public final class FeatureSwitchStore {
             this.observedValue = copyValue(observedValue);
             this.effectiveValue = copyValue(effectiveValue);
             this.overridden = overridden;
+            this.hasUserOverride = hasUserOverride;
             this.isNew = isNew;
         }
 
@@ -80,6 +84,10 @@ public final class FeatureSwitchStore {
 
         public boolean isOverridden() {
             return overridden;
+        }
+
+        public boolean hasUserOverride() {
+            return hasUserOverride;
         }
 
         public boolean isNew() {
@@ -141,6 +149,23 @@ public final class FeatureSwitchStore {
         return Holder.INSTANCE;
     }
 
+    /**
+     * Registers a patch-provided Boolean default. Persisted user overrides remain higher priority.
+     */
+    public static void registerPatchOverride(String key, boolean value) {
+        Objects.requireNonNull(key, "key");
+        if (key.isEmpty()) throw new IllegalArgumentException("Feature switch key must not be empty");
+
+        OverrideValue candidate = new OverrideValue(ValueType.BOOLEAN, value);
+        OverrideValue existing = PATCH_OVERRIDES.putIfAbsent(key, candidate);
+        if (existing != null && (existing.type != candidate.type || !Objects.equals(existing.value, candidate.value))) {
+            throw new IllegalStateException(
+                    "Conflicting patch overrides for NewX feature switch " + key +
+                            ": existing=" + existing.value + ", requested=" + candidate.value
+            );
+        }
+    }
+
     public static boolean resolveBoolean(String key, boolean currentValue) {
         return shared().resolve(key, ValueType.BOOLEAN, currentValue, Boolean.class);
     }
@@ -185,9 +210,14 @@ public final class FeatureSwitchStore {
         List<Entry> entries = new ArrayList<>();
         observations.forEach((key, observation) -> {
             if (!matchesQuery(key, normalizedQuery)) return;
-            OverrideValue override = overrides.get(key);
-            boolean overridden = override != null && override.type == observation.type;
-            Object effective = overridden ? override.value : observation.value;
+            OverrideValue userOverride = overrides.get(key);
+            boolean hasUserOverride = userOverride != null && userOverride.type == observation.type;
+            OverrideValue patchOverride = PATCH_OVERRIDES.get(key);
+            boolean hasPatchOverride = patchOverride != null && patchOverride.type == observation.type;
+            OverrideValue effectiveOverride =
+                    hasUserOverride ? userOverride : hasPatchOverride ? patchOverride : null;
+            boolean overridden = effectiveOverride != null;
+            Object effective = overridden ? effectiveOverride.value : observation.value;
             boolean isNew = sessionNewKeys != null ? sessionNewKeys.contains(key) : isKeyNew(key);
             entries.add(new Entry(
                     key,
@@ -195,13 +225,19 @@ public final class FeatureSwitchStore {
                     observation.value,
                     effective,
                     overridden,
+                    hasUserOverride,
                     isNew
             ));
         });
         overrides.forEach((key, override) -> {
             if (observations.containsKey(key) || !matchesQuery(key, normalizedQuery)) return;
             boolean isNew = sessionNewKeys != null ? sessionNewKeys.contains(key) : isKeyNew(key);
-            entries.add(new Entry(key, override.type, null, override.value, true, isNew));
+            entries.add(new Entry(key, override.type, null, override.value, true, true, isNew));
+        });
+        PATCH_OVERRIDES.forEach((key, override) -> {
+            if (observations.containsKey(key) || overrides.containsKey(key) || !matchesQuery(key, normalizedQuery)) return;
+            boolean isNew = sessionNewKeys != null ? sessionNewKeys.contains(key) : isKeyNew(key);
+            entries.add(new Entry(key, override.type, null, override.value, true, false, isNew));
         });
         entries.sort(
                 Comparator.comparing(Entry::isOverridden).reversed()
@@ -223,6 +259,7 @@ public final class FeatureSwitchStore {
             baselineEstablished = true;
             seenKeys.addAll(observations.keySet());
             seenKeys.addAll(overrides.keySet());
+            seenKeys.addAll(PATCH_OVERRIDES.keySet());
             persistSeen();
         }
     }
@@ -236,6 +273,9 @@ public final class FeatureSwitchStore {
             if (!seenKeys.contains(key)) unseen.add(key);
         });
         overrides.keySet().forEach(key -> {
+            if (!seenKeys.contains(key)) unseen.add(key);
+        });
+        PATCH_OVERRIDES.keySet().forEach(key -> {
             if (!seenKeys.contains(key)) unseen.add(key);
         });
         return Collections.unmodifiableSet(unseen);
@@ -256,6 +296,7 @@ public final class FeatureSwitchStore {
         synchronized (seenLock) {
             seenKeys.addAll(observations.keySet());
             seenKeys.addAll(overrides.keySet());
+            seenKeys.addAll(PATCH_OVERRIDES.keySet());
             persistSeen();
         }
     }
@@ -276,7 +317,7 @@ public final class FeatureSwitchStore {
 
     public boolean hasEntry(String key) {
         ensureLoaded();
-        return observations.containsKey(key) || overrides.containsKey(key);
+        return observations.containsKey(key) || overrides.containsKey(key) || PATCH_OVERRIDES.containsKey(key);
     }
 
     public void setOverride(String key, ValueType type, Object value) {
@@ -326,11 +367,18 @@ public final class FeatureSwitchStore {
                             ? existing : new Observation(type, currentValue));
         }
         OverrideValue override = overrides.get(key);
-        if (override == null || override.type != type) return currentValue;
-        if (!expectedType.isInstance(override.value)) return currentValue;
+        if (override != null && override.type == type && expectedType.isInstance(override.value)) {
+            @SuppressWarnings("unchecked")
+            T resolved = (T) override.value;
+            return resolved;
+        }
+        OverrideValue patchOverride = PATCH_OVERRIDES.get(key);
+        if (patchOverride == null || patchOverride.type != type || !expectedType.isInstance(patchOverride.value)) {
+            return currentValue;
+        }
         @SuppressWarnings("unchecked")
         // OverrideValue owns an immutable snapshot, including an unmodifiable list copy.
-        T resolved = (T) override.value;
+        T resolved = (T) patchOverride.value;
         return resolved;
     }
 
