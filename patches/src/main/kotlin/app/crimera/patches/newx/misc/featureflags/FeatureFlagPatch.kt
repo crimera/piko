@@ -1,6 +1,7 @@
 package app.crimera.patches.newx.misc.featureflags
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
+import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
@@ -140,6 +141,7 @@ val featureFlagPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        dependsOn(newXExtensionPatch)
 
         newXSettings {
             category(Categories.ADVANCED) {

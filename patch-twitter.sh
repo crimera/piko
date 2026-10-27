@@ -64,6 +64,7 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -e "NewX: Customize drawer items" \
   -e "NewX: Hide Spaces bar" \
   -e "NewX: Feature switch overrides" \
+  -e "NewX: Enable quality-of-life feature flags" \
   -e "NewX: Show sensitive media" \
   -e "NewX: Hide Discover more" \
   -e "NewX: Hide who to follow" \

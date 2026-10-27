@@ -7,12 +7,14 @@
 package app.crimera.patches.newx.misc.profilesorting
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
+import app.crimera.patches.newx.misc.featureflags.featureFlagPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.choice
 import app.crimera.patches.newx.settings.newXSingleChoice
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.PROFILE_POST_SORTING_RESOLVER_DESCRIPTOR
+import app.crimera.patches.newx.utils.setNewXFeatureFlag
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
@@ -75,6 +77,7 @@ val newXDefaultProfilePostSortingPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        dependsOn(featureFlagPatch)
 
         newXSingleChoice(
             id = "newx.post_actions_media.profile_post_sort_default",
@@ -90,6 +93,9 @@ val newXDefaultProfilePostSortingPatch =
         )
 
         execute {
+            setNewXFeatureFlag("x_lite_profile_timeline_sorting_enabled", enabled = true)
+            setNewXFeatureFlag("x_lite_profile_all_posts_tab_enabled", enabled = true)
+
             val matches = NewXProfilePostSortingStateFingerprint.scopedMatchAllOrNull().orEmpty()
             val match = requireExactlyOne("profile post sorting state initializer", matches)
             val method = match.method

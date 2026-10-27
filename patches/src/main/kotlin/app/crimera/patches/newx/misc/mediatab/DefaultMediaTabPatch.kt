@@ -7,12 +7,14 @@
 package app.crimera.patches.newx.misc.mediatab
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
+import app.crimera.patches.newx.misc.featureflags.featureFlagPatch
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.choice
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSingleChoice
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.MEDIA_TAB_RESOLVER_DESCRIPTOR
+import app.crimera.patches.newx.utils.setNewXFeatureFlag
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
@@ -148,6 +150,7 @@ val newXDefaultMediaTabPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        dependsOn(featureFlagPatch)
 
         newXSingleChoice(
             id = "newx.post_actions_media.media_tab_default",
@@ -163,6 +166,8 @@ val newXDefaultMediaTabPatch =
         )
 
         execute {
+            setNewXFeatureFlag("x_lite_profile_photos_videos_tabs_enabled", enabled = true)
+
             val matches =
                 NewXCombinedProfileTimelineInitialSubTabFingerprint.scopedMatchAllOrNull().orEmpty()
             val combinedMatch =
