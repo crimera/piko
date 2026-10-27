@@ -222,7 +222,15 @@
     <string name="piko_save_media_comment">Save media comment</string>
     <string name="piko_save_media_comment_desc">Adds a button to save media comments on posts and reels</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
-    <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
+    <string name="piko_enable_direct_download_desc">Download buttons on posts, reels and stories save the current media immediately</string>
+    <string name="piko_select_media_download">Select media to download</string>
+    <string name="piko_download_photo_number">Photo %d</string>
+    <string name="piko_download_video_number">Video %d</string>
+    <string name="piko_download_select_all">Select all</string>
+    <string name="piko_download_deselect_all">Deselect all</string>
+    <string name="piko_download_selected_count">Download (%d)</string>
+    <string name="piko_download_copy_link_for">Copy link for %s</string>
+    <string name="piko_media_link_unavailable">Media link unavailable</string>
     <string name="piko_download_username_folder">Split media by username</string>
     <string name="piko_download_username_folder_desc">Creates subfolders based on username</string>
     <string name="piko_prefer_dash_format">Prefer DASH format</string>

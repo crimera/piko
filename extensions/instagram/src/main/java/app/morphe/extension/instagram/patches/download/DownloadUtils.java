@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
@@ -159,7 +160,10 @@ public class DownloadUtils {
             options.add(str("piko_open_image_externally"));
         }
 
-        if (carouselSize > 1) options.add(str("piko_download_all"));
+        if (carouselSize > 1) {
+            options.add(str("piko_select_media_download"));
+            options.add(str("piko_download_all"));
+        }
 
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
@@ -182,6 +186,9 @@ public class DownloadUtils {
 
                     } else if (selectedOption.equals(str("piko_open_video_externally")) || selectedOption.equals(str("piko_open_image_externally"))) {
                         ActivityHook.handleUrlIntent(isCurrentMediaVideo, currentMediaData.getMediaLink());
+
+                    } else if (selectedOption.equals(str("piko_select_media_download"))) {
+                        DownloadSelectionSheet.show(context, mediaInfo);
 
                     } else if (selectedOption.equals(str("piko_download_all"))) {
                         downloadMedia(context, mediaInfo, -1, MediaType.ANY);
@@ -230,6 +237,34 @@ public class DownloadUtils {
             PikoUtils.logger(e);
             Logger.printException(() -> "Error at downloadPost", e);
         }
+    }
+
+    public static void showDownloadOptions(Context context, UserSession userSession, Object mediaObject, int position) {
+        try {
+            downloadDialogBox(context, new MediaData(mediaObject, userSession), Math.max(0, position));
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not show download options", e);
+            Utils.showToastShort(str("piko_download_failed_media"));
+        }
+    }
+
+    static void downloadSelectedMedia(Context context, MediaData mediaInfo, List<Integer> indexes) throws Exception {
+        if (indexes.isEmpty()) return;
+        if (!Utils.isNetworkConnected()) {
+            Utils.showToastShort(str("piko_no_internet"));
+            return;
+        }
+        int total = mediaInfo.getCarouselSize();
+        String username = mediaInfo.getUserData().getUsername();
+        String subFolder = getSubfolderName(username);
+        List<DownloadRequest> requests = new ArrayList<>(indexes.size());
+        for (int index : new TreeSet<>(indexes)) {
+            if (index < 0 || index >= total) throw new IllegalArgumentException("Invalid carousel index");
+            MediaData child = mediaInfo.getMediaAt(index);
+            requests.add(buildMediaRequest(mediaInfo, child, index, MediaType.ANY, child.getMediaLink(),
+                    subFolder, username + "_" + child.getDownloadFilename(MediaType.ANY), null));
+        }
+        getDownloadAllDownloader(context).enqueueBatch(requests);
     }
 
     // Position is set to -1 if we want to download all medias from the media info object.
@@ -294,25 +329,9 @@ public class DownloadUtils {
 
         } else if (position == -1) {
             int carouselSize = mediaInfo.getCarouselSize();
-            List<DownloadRequest> requests = new ArrayList<>(carouselSize);
-
-            for (int index = 0; index < carouselSize; index++) {
-                MediaData currentMediaData = mediaInfo.getMediaAt(index);
-                String fileName = username + "_"
-                        + currentMediaData.getDownloadFilename(MediaType.ANY);
-                String mediaUrl = currentMediaData.getMediaLink();
-                requests.add(buildMediaRequest(
-                        mediaInfo,
-                        currentMediaData,
-                        index,
-                        MediaType.ANY,
-                        mediaUrl,
-                        subFolder,
-                        fileName,
-                        null
-                ));
-            }
-            downloader.enqueueBatch(requests);
+            List<Integer> indexes = new ArrayList<>(carouselSize);
+            for (int index = 0; index < carouselSize; index++) indexes.add(index);
+            downloadSelectedMedia(context, mediaInfo, indexes);
         } else {
             Utils.showToastShort("There is nothing to download");
         }
