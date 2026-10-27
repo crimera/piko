@@ -215,6 +215,8 @@
     <string name="piko_enable_download">Enable download</string>
     <string name="piko_feed_download_button">Download button on feed posts</string>
     <string name="piko_feed_download_button_desc">Adds a download icon beside the save button on feed posts</string>
+    <string name="piko_reel_download_button">Download button on reels</string>
+    <string name="piko_reel_download_button_desc">Adds a download icon to the reels action column</string>
     <string name="piko_save_media_comment">Save media comment</string>
     <string name="piko_save_media_comment_desc">Adds a button to save media comments on posts and reels</string>
     <string name="piko_enable_direct_download">Enable direct download</string>

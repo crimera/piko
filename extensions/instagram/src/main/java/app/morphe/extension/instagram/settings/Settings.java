@@ -96,6 +96,7 @@ public class Settings {
 
     public static final BooleanSetting ENABLE_DOWNLOAD = new BooleanSetting("enable_download", true, REQUIRED);
     public static final BooleanSetting FEED_DOWNLOAD_BUTTON = new BooleanSetting("feed_download_button", true, NOT_REQUIRED);
+    public static final BooleanSetting REEL_DOWNLOAD_BUTTON = new BooleanSetting("reel_download_button", true, NOT_REQUIRED);
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false, REQUIRED);
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false, NOT_REQUIRED);
     public static final BooleanSetting EMBED_DOWNLOAD_METADATA = new BooleanSetting("embed_download_metadata", false, NOT_REQUIRED);

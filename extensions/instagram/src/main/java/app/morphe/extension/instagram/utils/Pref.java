@@ -19,6 +19,7 @@ import static app.morphe.extension.instagram.settings.RestartPolicy.NOT_REQUIRED
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
+import app.morphe.extension.instagram.patches.download.ReelDownload;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.shared.MarkChatAsReadScope;
@@ -264,6 +265,11 @@ public class Pref {
 
     public static boolean showSaveButton(boolean original) {
         return original && !hideSaveButtons();
+    }
+
+    // Reels need the native save state to build the download component even when save is hidden.
+    public static boolean showReelSaveButton(boolean original) {
+        return original && (!hideSaveButtons() || ReelDownload.isEnabled());
     }
 
     public static boolean hideReshareButton() {

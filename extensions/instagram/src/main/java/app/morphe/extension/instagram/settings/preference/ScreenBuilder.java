@@ -893,6 +893,18 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.reelDownloadButton) {
+            addPreference(
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_reel_download_button"),
+                                    str("piko_reel_download_button_desc"),
+                                    Settings.REEL_DOWNLOAD_BUTTON
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
+                    )
+            );
+        }
         if (SettingsStatus.saveMediaCommentButton) {
             addPreference(
                     helper.switchPreference(

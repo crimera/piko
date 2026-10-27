@@ -77,7 +77,7 @@ val hideSaveButtonsPatch = bytecodePatch(
             match.method.addInstructions(
                 enabledIndex + 1,
                 """
-                invoke-static/range {v$enabledRegister .. v$enabledRegister}, $PREF_DESCRIPTOR->showSaveButton(Z)Z
+                invoke-static/range {v$enabledRegister .. v$enabledRegister}, $PREF_DESCRIPTOR->showReelSaveButton(Z)Z
                 move-result v$enabledRegister
                 """.trimIndent(),
             )
