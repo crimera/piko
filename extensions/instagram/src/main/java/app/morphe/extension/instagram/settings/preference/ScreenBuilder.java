@@ -905,6 +905,18 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.storyDownloadButton) {
+            addPreference(
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_story_download_button"),
+                                    str("piko_story_download_button_desc"),
+                                    Settings.STORY_DOWNLOAD_BUTTON
+                            ),
+                            () -> SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
+                    )
+            );
+        }
         if (SettingsStatus.saveMediaCommentButton) {
             addPreference(
                     helper.switchPreference(

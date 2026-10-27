@@ -10,8 +10,11 @@ package app.morphe.extension.instagram.patches.download;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -543,6 +546,86 @@ public class DownloadUtils {
                 && typedValue.resourceId != 0) {
             button.setColorFilter(context.getColor(typedValue.resourceId));
         }
+    }
+
+    private static final Object STORY_DOWNLOAD_BUTTON_TAG = new Object();
+
+    public static void addStoryDownloadButton(View buttonsContainer, Object media, UserSession userSession) {
+        try {
+            if (!(buttonsContainer instanceof ViewGroup)) return;
+            ViewGroup row = (ViewGroup) buttonsContainer;
+            ImageView button = row.findViewWithTag(STORY_DOWNLOAD_BUTTON_TAG);
+            if (media == null || !SettingsStatus.storyDownloadButton || !Pref.enableDownload()
+                    || !SharedPref.getBooleanPref(Settings.STORY_DOWNLOAD_BUTTON)) {
+                if (button != null) row.removeView(button);
+                return;
+            }
+
+            if (button == null) {
+                button = createStoryDownloadButton(row);
+                if (button == null) return;
+            }
+            // Reset before the native binder applies any story-specific tint.
+            button.getDrawable().setTint(Color.WHITE);
+            button.setOnClickListener(v -> downloadStory(v, userSession, media, false));
+            button.setOnLongClickListener(v -> {
+                if (Pref.enableDirectDownload()) downloadStory(v, userSession, media, true);
+                return true;
+            });
+        } catch (Exception e) {
+            Logger.printException(() -> "addStoryDownloadButton failure", e);
+        }
+    }
+
+    private static ImageView createStoryDownloadButton(ViewGroup row) {
+        Context context = row.getContext();
+        int likeId = ResourceUtils.getIdentifier(context, ResourceType.ID, "toolbar_like_container");
+        View model = likeId == 0 ? null : row.findViewById(likeId);
+        if (model == null || model.getParent() != row) {
+            model = row.getChildCount() == 0 ? null : row.getChildAt(0);
+        }
+        if (model == null) return null;
+        int drawableId = ResourceUtils.getIdentifier(context, ResourceType.DRAWABLE, UI.DRAWABLE_DOWNLOAD_ICON);
+        if (drawableId == 0) return null;
+
+        ImageView button = new ImageView(context);
+        button.setTag(STORY_DOWNLOAD_BUTTON_TAG);
+        button.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        button.setImageDrawable(context.getDrawable(drawableId).mutate());
+        button.setContentDescription(str("piko_download_current_media"));
+        button.setPadding(model.getPaddingLeft(), model.getPaddingTop(), model.getPaddingRight(), model.getPaddingBottom());
+        row.addView(button, row.indexOfChild(model), cloneLayoutParams(model));
+        return button;
+    }
+
+    private static void downloadStory(View anchor, UserSession userSession, Object media, boolean chooser) {
+        try {
+            Activity activity = storyActivity(anchor);
+            if (chooser) {
+                downloadDialogBox(activity, new MediaData(media, userSession), 0);
+            } else {
+                downloadPost(activity, userSession, media, 0);
+            }
+        } catch (Exception e) {
+            Logger.printException(() -> "Error at story download", e);
+            Utils.showToastShort(e.getMessage());
+        }
+    }
+
+    // The toolbar uses an application context wrapper; its ancestors carry the hosting Activity.
+    private static Activity storyActivity(View view) {
+        for (View current = view; current != null; ) {
+            Context context = current.getContext();
+            while (context instanceof ContextWrapper) {
+                if (context instanceof Activity) return (Activity) context;
+                Context base = ((ContextWrapper) context).getBaseContext();
+                if (base == context) break;
+                context = base;
+            }
+            ViewParent parent = current.getParent();
+            current = parent instanceof View ? (View) parent : null;
+        }
+        throw new IllegalStateException("No activity found above the story download button");
     }
 
     private static void enqueueDownload(Context context, DownloadRequest request) {

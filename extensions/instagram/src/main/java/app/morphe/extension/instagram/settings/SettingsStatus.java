@@ -253,6 +253,8 @@ public class SettingsStatus {
     public static void feedDownloadButton() {feedDownloadButton = true;}
     public static boolean reelDownloadButton = false;
     public static void reelDownloadButton() {reelDownloadButton = true;}
+    public static boolean storyDownloadButton = false;
+    public static void storyDownloadButton() {storyDownloadButton = true;}
     public static boolean downloadVoiceMessage = false;
     public static void downloadVoiceMessage() { downloadVoiceMessage = true; }
     public static boolean downloadWithExternalDownloader = false;
@@ -304,6 +306,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_category_downloads"),SettingsStatus.downloadMedia);
         FLAGS.put(str("piko_feed_download_button"),SettingsStatus.feedDownloadButton);
         FLAGS.put(str("piko_reel_download_button"),SettingsStatus.reelDownloadButton);
+        FLAGS.put(str("piko_story_download_button"),SettingsStatus.storyDownloadButton);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
