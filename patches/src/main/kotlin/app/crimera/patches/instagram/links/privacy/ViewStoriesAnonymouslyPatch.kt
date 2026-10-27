@@ -62,7 +62,7 @@ val viewStoriesAnonymouslyPatch =
             }
             addStorySeenResultHooks(requestType, RequestSucceededExtensionFingerprint.method)
 
-            PendingStoriesEmptyFingerprint.let {
+            PendingStoriesEmptyFingerprint.match(StorySeenUriBuilderFingerprint.originalClassDef).let {
                 val returnIndex = it.instructionMatches.last().index
                 val seenRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
                 it.method.addInstructions(

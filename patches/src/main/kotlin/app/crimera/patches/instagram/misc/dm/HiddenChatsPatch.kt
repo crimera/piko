@@ -56,6 +56,7 @@ private object BadgeSetterFingerprint : Fingerprint(
     filters =
         listOf(
             fieldAccess(definingClass = "Lcom/instagram/notifications/badging/plugin/BadgingPluginImpl;"),
+            fieldAccess(definingClass = "Lcom/instagram/notifications/badging/plugin/BadgingPluginImpl;"),
         ),
     custom = { _, classDef ->
         classDef.fields.any { it.type == USER_SESSION_CLASS }

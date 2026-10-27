@@ -52,9 +52,9 @@ internal object StorySeenUriBuilderFingerprint : Fingerprint(
 
 /**
  * Whether no stories are pending to be marked as seen.
+ * Must be matched against with [StorySeenUriBuilderFingerprint].
  */
 internal object PendingStoriesEmptyFingerprint : Fingerprint(
-    classFingerprint = StorySeenUriBuilderFingerprint,
     returnType = "Z",
     parameters = listOf(),
     filters = List(3) {
@@ -250,7 +250,7 @@ internal object CompactStoryProgressFingerprint : Fingerprint(
 )
 
 internal object ReelTypeFingerprint : Fingerprint(
-    strings = listOf("ADS_REEL", "HIGHLIGHT_REEL", "NETEGO_REEL"),
+    strings = listOf("ReelType_unspecified", "ADS_REEL", "HIGHLIGHT_REEL", "NETEGO_REEL"),
 )
 
 internal object ExecutorSchedulerFingerprint : Fingerprint(

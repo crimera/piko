@@ -18,16 +18,13 @@ val reelResponseItemEntity =
     ) {
         dependsOn(decoderEntity)
         execute {
+            val classFields = classDefBy("Lcom/instagram/model/reels/ReelResponseItem;").fields
 
-            ReelResponseItemFingerprint.apply {
-                val classFields = originalClassDef.fields
+            val reelTypeFieldName = classFields.first { it.type == ReelTypeEnumInitFingerprint.originalClassDef.type }.name
+            GetReelTypeExtensionFingerprint.changeFirstString(reelTypeFieldName)
 
-                val reelTypeFieldName = classFields.first { it.type == ReelTypeEnumInitFingerprint.originalClassDef.type }.name
-                GetReelTypeExtensionFingerprint.changeFirstString(reelTypeFieldName)
-
-                val userFieldName = classFields.first { it.type == USER_MODEL_CLASS_NAME }.name
-                GetUserDataExtensionFingerprint.changeFirstString(userFieldName)
-            }
+            val userFieldName = classFields.first { it.type == USER_MODEL_CLASS_NAME }.name
+            GetUserDataExtensionFingerprint.changeFirstString(userFieldName)
 
             GetMediaCountExtensionFingerprint.changeFirstString(
                 ReelResponseItemIntfMapperFingerprint.instructionMatches.last().methodReference.name,

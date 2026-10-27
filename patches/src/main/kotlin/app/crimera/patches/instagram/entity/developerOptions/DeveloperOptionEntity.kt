@@ -18,7 +18,7 @@ val developerOptionsEntity =
     ) {
         execute {
             GetQuickExperimentHelperClassExtension.changeFirstString(
-                classNameToExtension(ExperimentsValueBuilderFingerprint.originalClassDef.type),
+                classNameToExtension(GetAllExperimentsFingerprint.originalClassDef.type),
             )
             GetAllExperimentsClassExtension.changeFirstString(GetAllExperimentsFingerprint.originalMethod.name)
 

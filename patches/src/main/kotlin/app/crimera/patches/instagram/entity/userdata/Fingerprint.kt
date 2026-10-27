@@ -93,6 +93,7 @@ internal object GetUserIdExtensionFingerprint : Fingerprint(
 
 internal object UserIdLiveTreeUserDictFingerprint : Fingerprint(
     definingClass = USER_MODEL_CLASS_NAME,
+    returnType = "Lcom/facebook/pando/TreeUpdaterJNI;",
     filters = listOf(
         string("strong_id__"),
         methodCall(
