@@ -6,8 +6,6 @@
 
 package app.crimera.patches.instagram.misc.clone
 
-import app.crimera.patches.instagram.misc.settings.settingsPatch
-import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -19,7 +17,6 @@ import app.morphe.util.findElementByAttributeValue
 import app.morphe.util.findMutableMethodOf
 import app.morphe.util.forEachChildElement
 import app.morphe.patcher.util.getReference
-import app.morphe.util.findElementByAttributeValueOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -63,7 +60,6 @@ val clonePatch =
         var bytecodePatchContext: BytecodePatchContext? = null
 
         dependsOn(
-            settingsPatch,
             // Expose the bytecode context to use it within a ResourcePatch
             bytecodePatch {
                 execute {
@@ -135,7 +131,6 @@ val clonePatch =
             // the issue where video stories only play audio.
             // Also rename providers just in case.
             context(bytecodePatchContext!!) {
-                enableSettings("cloneApp")
                 transformStringReferences { string ->
                     if (string == ORIGINAL_PACKAGE_NAME) {
                         return@transformStringReferences newPackageName
@@ -158,8 +153,8 @@ val clonePatch =
             // Run in the finalize block in case SettingsPatch is run after this patch.
             document("res/xml/shortcuts.xml").use {
                 it.getElementsByTagName("intent")
-                    .findElementByAttributeValueOrThrow("android:targetPackage", ORIGINAL_PACKAGE_NAME)
-                    .setAttribute("android:targetPackage", packageName)
+                    .findElementByAttributeValue("android:targetPackage", ORIGINAL_PACKAGE_NAME)
+                    ?.setAttribute("android:targetPackage", packageName)
             }
         }
     }

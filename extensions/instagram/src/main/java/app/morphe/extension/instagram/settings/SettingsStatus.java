@@ -14,8 +14,6 @@ public class SettingsStatus {
 
     public static boolean disableTelemetry = false;
     public static void disableTelemetry() { disableTelemetry = true; }
-    public static boolean cloneApp = false;
-    public static void cloneApp() { cloneApp = true; }
     public static boolean theme = false;
     public static void theme() { theme = true; }
     public static boolean addSettings = false;
@@ -294,7 +292,6 @@ public class SettingsStatus {
 
         public static void loadStatusMap(){
         FLAGS.put(str("piko_disable_telemetry"), SettingsStatus.disableTelemetry);
-        FLAGS.put(str("piko_patch_clone"), SettingsStatus.cloneApp);
         FLAGS.put(str("piko_patch_theme"), SettingsStatus.theme);
         FLAGS.put(str("piko_patch_settings"), SettingsStatus.addSettings);
         FLAGS.put(str("piko_disable_reels_scrolling"), SettingsStatus.disableReelsScrolling);
