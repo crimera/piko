@@ -178,40 +178,52 @@ public final class NewXUtils {
 
     public static Object invoke(Object target, String methodName) throws ReflectiveOperationException {
         if (target == null || methodName == null) return null;
-        return lookupMethod(target.getClass(), methodName).invoke(target);
+        Method method = lookupMethod(target.getClass(), methodName).method;
+        if (method == null) {
+            // Preserve strict lookup's original exception type and message.
+            return target.getClass().getMethod(methodName).invoke(target);
+        }
+        return method.invoke(target);
     }
 
-    private static final ConcurrentHashMap<MethodKey, Method> METHOD_CACHE =
+    private static final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, MethodResolution>> METHOD_CACHE =
             new ConcurrentHashMap<>();
 
-    private static final class MethodKey {
-        private final Class<?> owner;
-        private final String name;
+    private static final class MethodResolution {
+        private static final MethodResolution ABSENT = new MethodResolution(null);
 
-        private MethodKey(Class<?> owner, String name) {
-            this.owner = owner;
-            this.name = name;
-        }
+        private final Method method;
 
-        @Override public boolean equals(Object other) {
-            if (!(other instanceof MethodKey key)) return false;
-            return owner == key.owner && name.equals(key.name);
-        }
-
-        @Override public int hashCode() {
-            return owner.hashCode() * 31 + name.hashCode();
+        private MethodResolution(Method method) {
+            this.method = method;
         }
     }
 
-    private static Method lookupMethod(Class<?> owner, String name)
+    private static MethodResolution lookupMethod(Class<?> owner, String name)
             throws ReflectiveOperationException {
-        MethodKey key = new MethodKey(owner, name);
-        Method cached = METHOD_CACHE.get(key);
+        ConcurrentHashMap<String, MethodResolution> ownerCache = METHOD_CACHE.get(owner);
+        if (ownerCache == null) {
+            ConcurrentHashMap<String, MethodResolution> newCache = new ConcurrentHashMap<>();
+            ConcurrentHashMap<String, MethodResolution> raced = METHOD_CACHE.putIfAbsent(owner, newCache);
+            ownerCache = raced != null ? raced : newCache;
+        }
+
+        MethodResolution cached = ownerCache.get(name);
         if (cached != null) return cached;
-        // getMethod walks the hierarchy under a lock; cache per class-shape.
-        Method resolved = owner.getMethod(name);
-        Method raced = METHOD_CACHE.putIfAbsent(key, resolved);
-        return raced != null ? raced : resolved;
+
+        // getMethod walks the hierarchy under a lock; cache each class shape, including misses.
+        synchronized (ownerCache) {
+            cached = ownerCache.get(name);
+            if (cached != null) return cached;
+            try {
+                MethodResolution resolved = new MethodResolution(owner.getMethod(name));
+                ownerCache.put(name, resolved);
+                return resolved;
+            } catch (NoSuchMethodException ignored) {
+                ownerCache.put(name, MethodResolution.ABSENT);
+                return MethodResolution.ABSENT;
+            }
+        }
     }
 
     public static final class PresenterData {
@@ -235,7 +247,8 @@ public final class NewXUtils {
     public static Object invokeIfPresent(Object target, String methodName) {
         if (target == null || methodName == null) return null;
         try {
-            return invoke(target, methodName);
+            Method method = lookupMethod(target.getClass(), methodName).method;
+            return method == null ? null : method.invoke(target);
         } catch (Exception ignored) {
             return null;
         }
