@@ -45,6 +45,19 @@ val mediaDataEntity =
                 ImageInfoCandidatesMapperFingerprint.instructionMatches.first().methodReference.name,
             )
 
+            GetFirstFrameCandidatesExtensionFingerprint.changeString(
+                "additionalMethod",
+                ImageInfoAdditionalCandidatesMapperFingerprint.instructionMatches[0].methodReference.name,
+            )
+            GetFirstFrameCandidatesExtensionFingerprint.changeString(
+                "firstFrameMethod",
+                FirstFrameCandidatesMapperFingerprint.instructionMatches[0].methodReference.name,
+            )
+            GetFirstFrameCandidatesExtensionFingerprint.changeString(
+                "igtvFrameMethod",
+                FirstFrameCandidatesMapperFingerprint.instructionMatches[2].methodReference.name,
+            )
+
             // Extracting the get mention set method used media helper class.
             GetMentionSetExtensionFingerprint.changeFirstString(ReelsMentionGetterFingerprint.originalMethod.name)
             GetMentionSetExtensionFingerprint.changeStringAt(
@@ -115,6 +128,7 @@ val mediaDataEntity =
 
             ExtMediaDictImageInfoMapperFingerprint.instructionMatches[1].fieldReference.let {
                 GetImageVariantsExtensionFingerprint.changeFirstString(it.name)
+                GetFirstFrameCandidatesExtensionFingerprint.changeFirstString(it.name)
             }
 
             GetPostTypeKeyExtensionFingerprint.changeFirstString(

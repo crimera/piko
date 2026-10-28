@@ -10,6 +10,14 @@ package app.morphe.extension.instagram.patches.download;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
+import android.app.Notification;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -325,23 +333,48 @@ public class DownloadUtils {
             // when that lists it larger than the app's cover. A carousel's page answers for the
             // post, never a child; without a download folder, enqueue asks for one at once.
             if (!mediaType.equals(MediaType.IMAGE) || !mediaData.isVideo()
-                    || mediaInfo.getCarouselSize() > 1 || !StorageUtils.checkStoragePermissions()) {
+                    || !StorageUtils.checkStoragePermissions()) {
                 downloader.enqueue(request);
                 return;
             }
             MediaInterface cover = mediaData.getBestImage();
             int coverShortSide = cover == null ? 0 : cover.shortSide();
+            boolean single = mediaInfo.getCarouselSize() == 1;
             String shortcode = mediaData.getShortcode();
             String mediaId = mediaData.getPostID();
             Utils.runOnBackgroundThread(() -> {
-                EmbedCover embed = EmbedCover.largerThan(shortcode, mediaId, coverShortSide);
+                EmbedCover embed = single ? EmbedCover.largerThan(shortcode, mediaId, coverShortSide) : null;
+                long coverPixels = 0;
+                MediaInterface frameVideo = null;
+                try {
+                    coverPixels = embed != null ? (long) embed.width * embed.height
+                            : cover == null ? 0 : (long) cover.getWidth() * cover.getHeight();
+                    if (coverPixels > 0 && mediaData.isFirstFrameCover()) {
+                        List<MediaInterface> videos = new ArrayList<>();
+                        List<VideoData> progressive = mediaData.getVideoVariants();
+                        if (progressive != null) videos.addAll(progressive);
+                        videos.addAll(mediaData.getDashVideos());
+                        long bestPixels = coverPixels;
+                        for (MediaInterface video : videos) {
+                            long pixels = (long) video.getWidth() * video.getHeight();
+                            if (pixels > bestPixels && video.getUrl() != null) {
+                                frameVideo = video;
+                                bestPixels = pixels;
+                            }
+                        }
+                    }
+                } catch (Exception | LinkageError e) {
+                    PikoUtils.logger(e);
+                }
+                MediaDownloader coverDownloader = frameVideo == null ? downloader
+                        : firstFrameDownloader(context.getApplicationContext(), request, frameVideo, coverPixels);
                 Utils.runOnMainThread(() -> {
                     if (embed != null) {
                         request.fallbackUrl = request.url;
                         request.url = embed.url;
                         request.completedToast = str("piko_saved_at", embed.width + "x" + embed.height);
                     }
-                    downloader.enqueue(request);
+                    coverDownloader.enqueue(request);
                 });
             });
 
@@ -354,6 +387,66 @@ public class DownloadUtils {
             Utils.showToastShort("There is nothing to download");
         }
 
+    }
+
+    private static MediaDownloader firstFrameDownloader(Context context, DownloadRequest request,
+                                                        MediaInterface video, long coverPixels) {
+        return new MediaDownloader(context) {
+            private boolean attempted;
+
+            @Override
+            protected void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
+                    throws IOException {
+                if (attempted) {
+                    super.download(url, output, builder, notificationId);
+                    return;
+                }
+                attempted = true;
+                File source = null;
+                File picture = null;
+                Bitmap frame = null;
+                boolean extracted = false;
+                try {
+                    try {
+                        source = File.createTempFile("piko-cover-", ".mp4", context.getCacheDir());
+                        picture = File.createTempFile("piko-cover-", ".jpg", context.getCacheDir());
+                        try (OutputStream cached = new FileOutputStream(source)) {
+                            super.download(video.getUrl(), cached, builder, notificationId);
+                        }
+                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                        try {
+                            retriever.setDataSource(source.getAbsolutePath());
+                            frame = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST);
+                        } finally {
+                            retriever.release();
+                        }
+                        if (frame != null && (long) frame.getWidth() * frame.getHeight() > coverPixels) {
+                            try (OutputStream jpeg = new FileOutputStream(picture)) {
+                                extracted = frame.compress(Bitmap.CompressFormat.JPEG, 95, jpeg);
+                            }
+                        }
+                    } catch (Exception | LinkageError | OutOfMemoryError e) {
+                        extracted = false;
+                        PikoUtils.logger(e);
+                    }
+                    if (extracted) {
+                        // Finish encoding before writing the document so extraction failures leave it untouched.
+                        try (FileInputStream jpeg = new FileInputStream(picture)) {
+                            byte[] buffer = new byte[8192];
+                            int count;
+                            while ((count = jpeg.read(buffer)) != -1) output.write(buffer, 0, count);
+                        }
+                        request.completedToast = str("piko_saved_at", frame.getWidth() + "x" + frame.getHeight());
+                    } else {
+                        super.download(url, output, builder, notificationId);
+                    }
+                } finally {
+                    if (frame != null) frame.recycle();
+                    if (source != null) source.delete();
+                    if (picture != null) picture.delete();
+                }
+            }
+        };
     }
 
     /**

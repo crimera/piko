@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import android.content.Context;
+import android.net.Uri;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -271,6 +272,49 @@ public class MediaData extends Entity {
         List<ImageData> imageList = new ArrayList<>();
         variantList.forEach(item -> imageList.add(new ImageData(item)));
         return imageList;
+    }
+
+    private Object[] getFirstFrameCandidates() throws Exception {
+        Object imageInfo = super.getField(this.getMoreExtendedData(), "fieldName");
+        if (imageInfo == null) return new Object[0];
+        Class<?> imageInfoType = Class.forName("com.instagram.model.mediasize.ImageInfo");
+        Object additional = imageInfoType.getMethod("additionalMethod").invoke(imageInfo);
+        if (additional == null) return new Object[0];
+        Class<?> additionalType = Class.forName("com.instagram.model.mediasize.AdditionalCandidates");
+        return new Object[]{additionalType.getMethod("firstFrameMethod").invoke(additional),
+                additionalType.getMethod("igtvFrameMethod").invoke(additional)};
+    }
+
+    public boolean isFirstFrameCover() {
+        try {
+            ImageData cover = this.getBestImage();
+            if (cover == null) return false;
+            String coverAsset = imageAsset(cover.getUrl());
+            int width = cover.getWidth();
+            int height = cover.getHeight();
+            if (coverAsset == null || width <= 0 || height <= 0) return false;
+            for (Object candidate : this.getFirstFrameCandidates()) {
+                if (candidate == null) continue;
+                ImageData frame = new ImageData(candidate);
+                int fw = frame.getWidth();
+                int fh = frame.getHeight();
+                // A custom cover may coexist with first_frame: only the same image and aspect ratio qualify.
+                if (fw > 0 && fh > 0 && coverAsset.equals(imageAsset(frame.getUrl()))
+                        && Math.abs((double) fw * height - (double) fh * width) <= (double) fh * width * 0.02) {
+                    return true;
+                }
+            }
+        } catch (Exception | LinkageError ignored) {
+        }
+        return false;
+    }
+
+    private static String imageAsset(String url) {
+        if (url == null) return null;
+        String file = Uri.parse(url).getLastPathSegment();
+        if (file == null) return null;
+        int dot = file.lastIndexOf('.');
+        return dot > 0 ? file.substring(0, dot) : null;
     }
 
     // Through the app's getter, not the dict field it caches into: that field can stay null until

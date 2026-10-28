@@ -257,7 +257,7 @@ public class MediaDownloader {
     }
 
     /** Fetches {@code url} into {@code output}, reporting progress on the notification. */
-    private void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
+    protected void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
             throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         try {
