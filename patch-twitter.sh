@@ -28,7 +28,7 @@ if [[ ! -f "$MPP" ]]; then
 fi
 
 DEFAULT_APK="./apks/12.31.0-alpha.02.apk"
-OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
+OUTPUT_APK="${PATCH_OUTPUT_APK:-$HOME/Downloads/piko-twitter-patched.apk}"
 APK="$DEFAULT_APK"
 FLAGS=()
 for arg in "$@"; do
