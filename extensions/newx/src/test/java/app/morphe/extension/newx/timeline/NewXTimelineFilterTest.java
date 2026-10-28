@@ -527,6 +527,48 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
+    public void memoizedPassReusesResultsAndReplaysStoreWrites() {
+        CountingModelAccess models = new CountingModelAccess();
+        FakePost hidden = verifiedPost("hidden", VerifiedType.User, "hidden-author", "hidden");
+        FakePost visible = verifiedPost("visible", VerifiedType.NotVerified, "visible-author", "visible");
+        hidden.id = "hidden-id";
+        visible.id = "visible-id";
+        List<Object> input = items(module("home-conversation-1", item(hidden), item(visible)));
+        NewXTimelineFilter.ResultMemo memo = new NewXTimelineFilter.ResultMemo();
+
+        List<?> first = filterVerifiedMemoized(input, Set.of("User"), models, memo);
+        int moduleItemReads = models.moduleItemReads;
+        int postIdReads = models.postIdReads;
+        FilteredRepliesStore.shared().clear();
+        List<?> second = filterVerifiedMemoized(input, Set.of("User"), models, memo);
+
+        assertSame(first.get(0), second.get(0));
+        assertEquals(moduleItemReads, models.moduleItemReads);
+        assertEquals(postIdReads, models.postIdReads);
+        assertEquals("hidden-id", FilteredRepliesStore.shared().getReplies("visible-id").get(0).getPostId());
+        assertEquals("visible-author", FilteredRepliesStore.shared().authorIdFor("visible-id"));
+    }
+
+    @Test
+    public void memoizedPassReevaluatesOwnThreadDecisionsAndConfigChanges() {
+        FakePost reply = verifiedPost("reply", VerifiedType.User, "author", "author");
+        reply.id = "reply-id";
+        reply.repliedPostId = "head-id";
+        FakePost standalone = verifiedPost("standalone", VerifiedType.User, "other", "other");
+        standalone.id = "standalone-id";
+        List<Object> input = items(reply, standalone);
+        NewXTimelineFilter.ResultMemo memo = new NewXTimelineFilter.ResultMemo();
+
+        assertTrue(filterVerifiedMemoized(input, Set.of("User"), MODELS, memo).isEmpty());
+        FilteredRepliesStore.shared().notePostAuthorship("head-id", "author", null);
+        List<?> parentLoaded = filterVerifiedMemoized(input, Set.of("User"), MODELS, memo);
+        List<?> typesChanged = filterVerifiedMemoized(input, Set.of("Business"), MODELS, memo);
+
+        assertEquals(List.of(reply), parentLoaded);
+        assertEquals(List.of(reply, standalone), typesChanged);
+    }
+
+    @Test
     public void filtersHomeConversationModulesInThreadScope() {
         FakePost hidden = verifiedPost("hidden", VerifiedType.User, "hidden-id", "hidden");
         FakePost visible = verifiedPost("visible", VerifiedType.NotVerified, "visible-id", "visible");
@@ -1019,6 +1061,17 @@ public class NewXTimelineFilterTest {
             Set<String> whitelist
     ) {
         return filterByVerifiedType(input, typesToHide, whitelist, true, true);
+    }
+
+    private static List<?> filterVerifiedMemoized(
+            List<Object> input,
+            Set<String> typesToHide,
+            FakeModelAccess models,
+            NewXTimelineFilter.ResultMemo memo
+    ) {
+        return (List<?>) NewXTimelineFilter.filterTimelineItems(
+                input, false, false, null, Set.of(), false, typesToHide, Set.of(), true, true, models, memo
+        );
     }
 
     private static Object filterByVerifiedType(

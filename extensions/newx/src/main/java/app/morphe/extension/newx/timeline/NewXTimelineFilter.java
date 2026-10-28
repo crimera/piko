@@ -3,9 +3,13 @@ package app.morphe.extension.newx.timeline;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import app.morphe.extension.newx.filteredreplies.FilteredRepliesStore;
 import app.morphe.extension.newx.settings.NewXLogger;
@@ -27,6 +31,8 @@ public final class NewXTimelineFilter {
     private static final String VERIFIED_TYPE_UNKNOWN = "Unknown";
     private static final String DISCOVER_MORE_ENTRY_ID = "tweetdetailrelatedtweets";
     private static final int MAX_PARENT_HOPS = 32;
+    private static final ResultMemo RESULT_MEMO = new ResultMemo();
+    private static final ThreadLocal<Evaluation> CURRENT_EVALUATION = new ThreadLocal<>();
     private static final TimelineModelAccess PRODUCTION_MODEL_ACCESS = new TimelineModelAccess() {
         @Override boolean isModuleItem(Object value) { return isTimelineModuleItem(value); }
         @Override boolean isPost(Object value) { return isTimelinePost(value); }
@@ -183,7 +189,8 @@ public final class NewXTimelineFilter {
                 whitelist,
                 filterTimeline,
                 filterThread,
-                PRODUCTION_MODEL_ACCESS
+                PRODUCTION_MODEL_ACCESS,
+                RESULT_MEMO
         );
     }
 
@@ -488,6 +495,36 @@ private static Object filterTimelineItems(
             boolean filterThread,
             TimelineModelAccess modelAccess
     ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                verifiedTypesToHide,
+                whitelist,
+                filterTimeline,
+                filterThread,
+                modelAccess,
+                null
+        );
+    }
+
+    static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            Set<String> verifiedTypesToHide,
+            Set<String> whitelist,
+            boolean filterTimeline,
+            boolean filterThread,
+            TimelineModelAccess modelAccess,
+            ResultMemo memo
+    ) {
         if (timelineItems == null) return null;
         if (!filterPromotedItems
                 && !hideWhoToFollow
@@ -499,13 +536,27 @@ private static Object filterTimelineItems(
         }
         if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
 
+        if (memo != null) {
+            memo.beginPass(new FilterConfig(
+                    filterPromotedItems,
+                    hideWhoToFollow,
+                    ruleSnapshot,
+                    aiSourcesToHide,
+                    hideDiscoverMore,
+                    verifiedTypesToHide,
+                    whitelist,
+                    filterTimeline,
+                    filterThread,
+                    modelAccess
+            ));
+        }
         try {
             List<Object> filtered = null;
             List<Object> unchangedPrefix = null;
             List<?> sourceList = timelineItems instanceof List<?> list ? list : null;
             int index = 0;
             for (Object original : iterable) {
-                FilterResult result = filterObject(
+                FilterResult result = evaluateTopLevel(original, memo, () -> filterObject(
                         original,
                         filterPromotedItems,
                         hideWhoToFollow,
@@ -517,7 +568,7 @@ private static Object filterTimelineItems(
                         filterTimeline,
                         filterThread,
                         modelAccess
-                );
+                ));
                 boolean changed = result.remove || result.item != original;
                 if (!changed) {
                     if (filtered != null) filtered.add(original);
@@ -546,6 +597,171 @@ private static Object filterTimelineItems(
         } catch (RuntimeException exception) {
             logFailure("top-level timeline filtering", exception);
             return timelineItems;
+        } finally {
+            if (memo != null) memo.endPass();
+        }
+    }
+
+    /**
+     * Returns the memoized result for a top-level item seen in an earlier pass under the same
+     * configuration, replaying its FilteredRepliesStore writes in place. X re-emits the whole
+     * accumulated timeline on every page, so only new items are evaluated. Results that read
+     * the store or swallowed a failure are never cached.
+     */
+    private static FilterResult evaluateTopLevel(
+            Object original,
+            ResultMemo memo,
+            Supplier<FilterResult> filter
+    ) {
+        if (memo == null || original == null) return filter.get();
+        MemoEntry cached = memo.lookup(original);
+        if (cached != null) {
+            try {
+                for (Runnable effect : cached.effects) effect.run();
+                return cached.result;
+            } catch (RuntimeException exception) {
+                logFailure("replaying memoized timeline item", exception);
+                memo.forget(original);
+            }
+        }
+
+        Evaluation evaluation = new Evaluation();
+        CURRENT_EVALUATION.set(evaluation);
+        FilterResult result;
+        try {
+            result = filter.get();
+        } finally {
+            CURRENT_EVALUATION.remove();
+        }
+        if (evaluation.cacheable) memo.store(original, new MemoEntry(result, evaluation.effects));
+        return result;
+    }
+
+    /** The current item's result depends on mutable state or a failure; don't memoize it. */
+    private static void markUncacheable() {
+        Evaluation evaluation = CURRENT_EVALUATION.get();
+        if (evaluation != null) evaluation.cacheable = false;
+    }
+
+    /** Runs a FilteredRepliesStore write and records it for replay on memo hits. */
+    private static void applyStoreEffect(Runnable effect) {
+        effect.run();
+        Evaluation evaluation = CURRENT_EVALUATION.get();
+        if (evaluation != null) evaluation.effects.add(effect);
+    }
+
+    private static final class Evaluation {
+        private boolean cacheable = true;
+        private final List<Runnable> effects = new ArrayList<>(2);
+    }
+
+    private static final class MemoEntry {
+        private final FilterResult result;
+        private final List<Runnable> effects;
+
+        private MemoEntry(FilterResult result, List<Runnable> effects) {
+            this.result = result;
+            this.effects = effects.isEmpty() ? Collections.emptyList() : effects;
+        }
+    }
+
+    /** Inputs a memoized result was computed under; any change invalidates the memo. */
+    private static final class FilterConfig {
+        private final boolean filterPromotedItems;
+        private final boolean hideWhoToFollow;
+        private final PostFilterRuleStore.Snapshot ruleSnapshot;
+        private final Set<String> aiSourcesToHide;
+        private final boolean hideDiscoverMore;
+        private final Set<String> verifiedTypesToHide;
+        private final Set<String> whitelist;
+        private final boolean filterTimeline;
+        private final boolean filterThread;
+        private final TimelineModelAccess modelAccess;
+
+        private FilterConfig(
+                boolean filterPromotedItems,
+                boolean hideWhoToFollow,
+                PostFilterRuleStore.Snapshot ruleSnapshot,
+                Set<String> aiSourcesToHide,
+                boolean hideDiscoverMore,
+                Set<String> verifiedTypesToHide,
+                Set<String> whitelist,
+                boolean filterTimeline,
+                boolean filterThread,
+                TimelineModelAccess modelAccess
+        ) {
+            this.filterPromotedItems = filterPromotedItems;
+            this.hideWhoToFollow = hideWhoToFollow;
+            this.ruleSnapshot = ruleSnapshot;
+            this.aiSourcesToHide = aiSourcesToHide;
+            this.hideDiscoverMore = hideDiscoverMore;
+            this.verifiedTypesToHide = verifiedTypesToHide;
+            this.whitelist = whitelist;
+            this.filterTimeline = filterTimeline;
+            this.filterThread = filterThread;
+            this.modelAccess = modelAccess;
+        }
+
+        private boolean sameAs(FilterConfig other) {
+            // The rule store caches its snapshot, so identity tracks rule edits.
+            return other != null
+                    && filterPromotedItems == other.filterPromotedItems
+                    && hideWhoToFollow == other.hideWhoToFollow
+                    && ruleSnapshot == other.ruleSnapshot
+                    && Objects.equals(aiSourcesToHide, other.aiSourcesToHide)
+                    && hideDiscoverMore == other.hideDiscoverMore
+                    && Objects.equals(verifiedTypesToHide, other.verifiedTypesToHide)
+                    && Objects.equals(whitelist, other.whitelist)
+                    && filterTimeline == other.filterTimeline
+                    && filterThread == other.filterThread
+                    && modelAccess == other.modelAccess;
+        }
+    }
+
+    /**
+     * Identity-keyed results for top-level timeline items. Holds the lock for a whole pass so
+     * concurrent passes replay store writes in list order. Bounded by pruning to the items of
+     * the latest pass once it outgrows {@link #MAX_ENTRIES}.
+     */
+    static final class ResultMemo {
+        private static final int MAX_ENTRIES = 2048;
+
+        private final ReentrantLock lock = new ReentrantLock();
+        private final IdentityHashMap<Object, MemoEntry> entries = new IdentityHashMap<>();
+        private final Set<Object> seenThisPass = Collections.newSetFromMap(new IdentityHashMap<>());
+        private FilterConfig config;
+
+        private void beginPass(FilterConfig passConfig) {
+            lock.lock();
+            if (!passConfig.sameAs(config)) entries.clear();
+            config = passConfig;
+            seenThisPass.clear();
+        }
+
+        private void endPass() {
+            try {
+                if (entries.size() > MAX_ENTRIES) entries.keySet().retainAll(seenThisPass);
+                seenThisPass.clear();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private MemoEntry lookup(Object item) {
+            seenThisPass.add(item);
+            return entries.get(item);
+        }
+
+        private void store(Object item, MemoEntry entry) {
+            entries.put(item, entry);
+        }
+
+        private void forget(Object item) {
+            entries.remove(item);
+        }
+
+        int size() {
+            return entries.size();
         }
     }
 
@@ -595,6 +811,7 @@ private static Object filterTimelineItems(
                     modelAccess
             );
         } catch (RuntimeException exception) {
+            markUncacheable();
             logFailure("timeline item " + original.getClass().getSimpleName(), exception);
             return FilterResult.keep(original);
         }
@@ -746,6 +963,8 @@ private static Object filterTimelineItems(
         String parentId = NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post));
         if (parentId == null || parentId.isEmpty() || parentId.equals(postId)) return false;
 
+        // Reads authorship other items recorded; the answer can change as parents load.
+        markUncacheable();
         FilteredRepliesStore store = FilteredRepliesStore.shared();
         String current = parentId;
         for (int hop = 0; hop < MAX_PARENT_HOPS; hop++) {
@@ -876,6 +1095,7 @@ private static Object filterTimelineItems(
                         modelAccess
                 );
             } catch (RuntimeException exception) {
+                markUncacheable();
                 if (NewXLogger.isLoggingEnabled()) {
                     logFailure(
                             "timeline module child",
@@ -938,6 +1158,7 @@ private static Object filterTimelineItems(
                 filteredChildren.add(replacement);
                 changed = true;
             } catch (RuntimeException exception) {
+                markUncacheable();
                 if (NewXLogger.isLoggingEnabled()) {
                     logFailure(
                             "timeline module child reconstruction",
@@ -969,6 +1190,7 @@ private static Object filterTimelineItems(
             );
             return FilterResult.replace(modelAccess.copyModule(module, filteredChildren, displayType));
         } catch (RuntimeException exception) {
+            markUncacheable();
             logFailure("timeline module reconstruction", exception);
             return FilterResult.keep(module);
         }
@@ -989,6 +1211,7 @@ private static Object filterTimelineItems(
                     complete = false;
                 }
             } catch (RuntimeException exception) {
+                markUncacheable();
                 logFailure("recording conversation authorship", exception);
                 complete = false;
             }
@@ -1001,13 +1224,12 @@ private static Object filterTimelineItems(
         try {
             String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
             if (postId == null || postId.isEmpty()) return false;
-            FilteredRepliesStore.shared().notePostAuthorship(
-                    postId,
-                    modelAccess.getPostAuthorId(post),
-                    NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post))
-            );
+            String authorId = modelAccess.getPostAuthorId(post);
+            String parentId = NewXUtils.identifierToString(modelAccess.getPostRepliedPostId(post));
+            applyStoreEffect(() -> FilteredRepliesStore.shared().notePostAuthorship(postId, authorId, parentId));
             return true;
         } catch (RuntimeException exception) {
+            markUncacheable();
             logFailure("recording post authorship", exception);
             return false;
         }
@@ -1022,16 +1244,18 @@ private static Object filterTimelineItems(
         try {
             String postId = NewXUtils.identifierToString(modelAccess.getPostId(post));
             if (postId != null && !postId.isEmpty()) {
-                FilteredRepliesStore store = FilteredRepliesStore.shared();
-                store.associatePostWithRoot(conversationRootId, postId);
+                applyStoreEffect(() -> FilteredRepliesStore.shared()
+                        .associatePostWithRoot(conversationRootId, postId));
                 String parentPostId = NewXUtils.identifierToString(
                         modelAccess.getPostRepliedPostId(post)
                 );
                 if (parentPostId != null && !parentPostId.isEmpty()) {
-                    store.associatePostWithParent(postId, parentPostId);
+                    applyStoreEffect(() -> FilteredRepliesStore.shared()
+                            .associatePostWithParent(postId, parentPostId));
                 }
             }
         } catch (RuntimeException exception) {
+            markUncacheable();
             logFailure("associating post with conversation", exception);
         }
     }
@@ -1090,7 +1314,7 @@ private static Object filterTimelineItems(
             Object verifiedTypeObj = modelAccess.getPostAuthorVerifiedType(post);
             String verifiedType = verifiedTypeObj != null ? verifiedTypeObj.toString() : "";
             String text = modelAccess.getPostText(post);
-            FilteredRepliesStore.shared().record(
+            applyStoreEffect(() -> FilteredRepliesStore.shared().record(
                     conversationRootId,
                     new FilteredRepliesStore.FilteredReply(
                             replyId != null ? replyId : "",
@@ -1100,8 +1324,9 @@ private static Object filterTimelineItems(
                             text != null ? text : "",
                             System.currentTimeMillis()
                     )
-            );
+            ));
         } catch (RuntimeException exception) {
+            markUncacheable();
             logFailure("recording filtered reply", exception);
         }
     }
