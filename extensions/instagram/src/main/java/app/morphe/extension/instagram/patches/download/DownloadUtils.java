@@ -52,6 +52,7 @@ import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.VideoData;
 import app.morphe.extension.instagram.entity.VideoResolution;
 import app.morphe.extension.instagram.entity.VideoVariant;
+import app.morphe.extension.instagram.entity.ImageResolution;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
 import app.morphe.extension.instagram.entity.MediaInterface;
@@ -107,7 +108,7 @@ public class DownloadUtils {
             variantList = new ArrayList<>(VideoResolution.group(videos));
         }else{
             title = str("piko_image_variants");
-            variantList = new ArrayList<>(currentMediaData.getImageVariants());
+            variantList = new ArrayList<>(ImageResolution.group(currentMediaData.getImageVariants()));
         }
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
@@ -382,8 +383,24 @@ public class DownloadUtils {
                         : firstFrameDownloader(context.getApplicationContext(), request, frameVideo, coverPixels);
                 Utils.runOnMainThread(() -> {
                     if (embed != null) {
-                        if (request.fallbackUrl == null) request.fallbackUrl = request.url;
+                        String coverUrl = request.url;
+                        List<DownloadRequest.Source> coverSources = new ArrayList<>(request.fallbackSources);
+                        String fallbackUrl = request.fallbackUrl;
                         request.url = embed.url;
+                        request.fallbackUrl = null;
+                        request.fallbackSources.clear();
+                        addImageFallbacks(request, mediaData, embed.width, embed.height);
+                        // Keep the original cover and its peers after the embed's own resolution group.
+                        Set<String> seen = new HashSet<>();
+                        seen.add(request.url);
+                        for (DownloadRequest.Source source : request.fallbackSources) seen.add(source.url);
+                        if (coverUrl != null && !coverUrl.trim().isEmpty() && seen.add(coverUrl)) {
+                            request.fallbackSources.add(new DownloadRequest.Source(coverUrl, null));
+                        }
+                        for (DownloadRequest.Source source : coverSources) {
+                            if (seen.add(source.url)) request.fallbackSources.add(source);
+                        }
+                        if (!seen.contains(fallbackUrl)) request.fallbackUrl = fallbackUrl;
                         request.completedToast = str("piko_saved_at", embed.width + "x" + embed.height);
                     }
                     coverDownloader.enqueue(request);
@@ -540,10 +557,16 @@ public class DownloadUtils {
                     // A failed optional candidate must not prevent the selected download.
                 }
             }
+        } else if (variant instanceof ImageResolution) {
+            List<String> urls = ((ImageResolution) variant).getCandidateUrls();
+            for (int i = 1; i < urls.size(); i++) {
+                request.fallbackSources.add(new DownloadRequest.Source(urls.get(i), null));
+            }
         }
+        MediaInterface originalImage = null;
         if (!isVideo && variant == null && mediaType == MediaType.IMAGE && childMediaData.isVideo()) {
-            MediaInterface original = childMediaData.getBestOriginalImage();
-            if (original != null && !original.getUrl().equals(mediaUrl)) request.fallbackUrl = original.getUrl();
+            originalImage = childMediaData.getBestOriginalImage();
+            if (originalImage != null && !originalImage.getUrl().equals(mediaUrl)) request.fallbackUrl = originalImage.getUrl();
         }
         request.audioUrl = audioUrl;
         request.audioToAacLc = isVideo && Pref.dashAudioAacLc();
@@ -552,6 +575,18 @@ public class DownloadUtils {
             request.fallbackUrl = progressiveUrl;
         }
         if (isVideo && variant == null) addSameResolutionFallbacks(request, childMediaData);
+        if (!isVideo && variant == null && (mediaType == MediaType.ANY || mediaType == MediaType.IMAGE)) {
+            try {
+                MediaInterface image = childMediaData.getBestImage();
+                // Only use dimensions belonging to the URL already selected by the existing path.
+                if (image != null && request.url != null && request.url.equals(image.getUrl())) {
+                    addImageFallbacks(request, childMediaData, image.getWidth(), image.getHeight());
+                }
+            } catch (Exception | LinkageError ignored) {
+                // Optional alternatives must not prevent the original image from being saved.
+            }
+            addFinalImageFallbacks(request, childMediaData, originalImage);
+        }
         if (!isVideo || !Pref.embedDownloadMetadata()) {
             return request;
         }
@@ -576,6 +611,48 @@ public class DownloadUtils {
                     metadataException
             );
             return request;
+        }
+    }
+
+    private static void addFinalImageFallbacks(DownloadRequest request, MediaData mediaData,
+                                              MediaInterface image) {
+        if (image == null || request.fallbackUrl == null) return;
+        try {
+            if (!request.fallbackUrl.equals(image.getUrl())) return;
+            DownloadRequest fallback = new DownloadRequest(request.fallbackUrl, request.subFolder, request.fileName);
+            addImageFallbacks(fallback, mediaData, image.getWidth(), image.getHeight());
+            Set<String> seen = new HashSet<>();
+            seen.add(request.url);
+            seen.add(request.fallbackUrl);
+            for (DownloadRequest.Source source : request.fallbackSources) seen.add(source.url);
+            fallback.fallbackSources.removeIf(source -> !seen.add(source.url));
+            if (fallback.fallbackSources.isEmpty()) return;
+            // Sources run before fallbackUrl, so move the original cover ahead of its new peers.
+            request.fallbackSources.add(new DownloadRequest.Source(request.fallbackUrl, null));
+            request.fallbackSources.addAll(fallback.fallbackSources);
+            request.fallbackUrl = null;
+        } catch (Exception | LinkageError ignored) {
+            // Keep the legacy fallback if its dimensions or optional peers cannot be read.
+        }
+    }
+
+    private static void addImageFallbacks(DownloadRequest request, MediaData mediaData,
+                                          Integer width, Integer height) {
+        if (request.url != null && request.url.equals(request.fallbackUrl)) request.fallbackUrl = null;
+        if (width == null || height == null || width <= 0 || height <= 0) return;
+        try {
+            Set<String> seen = new HashSet<>();
+            seen.add(request.url);
+            seen.add(request.fallbackUrl);
+            for (ImageResolution resolution : ImageResolution.group(mediaData.getImageVariants())) {
+                if (!width.equals(resolution.getWidth()) || !height.equals(resolution.getHeight())) continue;
+                for (String url : resolution.getCandidateUrls()) {
+                    if (seen.add(url)) request.fallbackSources.add(new DownloadRequest.Source(url, null));
+                }
+                break;
+            }
+        } catch (Exception | LinkageError ignored) {
+            // Keep the initial image and legacy fallback when alternatives cannot be read.
         }
     }
 
