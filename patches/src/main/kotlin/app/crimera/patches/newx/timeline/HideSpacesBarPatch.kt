@@ -46,9 +46,8 @@ private val SPACES_BAR_CALLBACK_DESCRIPTORS =
     setOf(FUNCTION_ONE_DESCRIPTOR, FUNCTION_TWO_DESCRIPTOR)
 
 // Callback band between the prefix and the trailing (Function0, Composer, Int, Int) group.
-// Releases gained slots (12.26 alpha) and widened one to Function2 (12.31 alpha.04), so treat
-// the band as a family instead of enumerating tested shapes.
-private val SPACES_BAR_CALLBACK_COUNT_RANGE = 2..4
+// Releases add callbacks and widen them to Function2; cardinality is asserted on the renderer.
+private const val MINIMUM_SPACES_BAR_CALLBACK_COUNT = 2
 
 private fun Method.hasKnownSpacesBarSignature(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
@@ -56,7 +55,7 @@ private fun Method.hasKnownSpacesBarSignature(): Boolean {
 
     val callbackStart = 1 + SPACES_BAR_PREFIX.size
     val callbackEnd = parameters.size - SPACES_BAR_TAIL.size
-    if (callbackEnd - callbackStart !in SPACES_BAR_CALLBACK_COUNT_RANGE) return false
+    if (callbackEnd - callbackStart < MINIMUM_SPACES_BAR_CALLBACK_COUNT) return false
     if (parameters.subList(1, callbackStart) != SPACES_BAR_PREFIX) return false
     if (parameters.subList(callbackStart, callbackEnd).any { it !in SPACES_BAR_CALLBACK_DESCRIPTORS }) return false
     return parameters.subList(callbackEnd, parameters.size) == SPACES_BAR_TAIL
