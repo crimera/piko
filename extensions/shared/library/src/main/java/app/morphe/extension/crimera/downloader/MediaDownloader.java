@@ -99,7 +99,6 @@ public class MediaDownloader {
     private void runDownloadTask(DownloadRequest request) {
         int notificationId = (int) System.currentTimeMillis();
         Uri outputDocumentUri = null;
-        List<File> cacheFiles = new ArrayList<>();
         boolean downloadCompleted = false;
         try {
             Notification.Builder builder;
@@ -135,50 +134,7 @@ public class MediaDownloader {
             builder.setContentTitle(downloadStartString);
             notificationManager.notify(notificationId, builder.build());
             showToast(downloadStartString);
-            if (request.audioUrl == null && request.metadata == null) {
-                try (OutputStream output = context.getContentResolver().openOutputStream(outputDocumentUri)) {
-                    if (output == null) {
-                        throw new IOException("Could not open download file");
-                    }
-                    download(request.url, output, builder, notificationId);
-                } catch (IOException downloadException) {
-                    if (request.fallbackUrl == null) throw downloadException;
-                    PikoUtils.logger(downloadException);
-                    try (OutputStream output = new BufferedOutputStream(openOutput(outputDocumentUri))) {
-                        download(request.fallbackUrl, output, builder, notificationId);
-                    }
-                    request.completedToast = null;
-                }
-            } else {
-                // Anything that needs rewriting is fetched to the cache first, then remuxed into place.
-                boolean downloadedToCache = false;
-                try {
-                    downloadToCache(request.url, cacheFiles, builder, notificationId);
-                    List<File> inputs = new ArrayList<>(cacheFiles);
-                    if (request.audioUrl != null) {
-                        downloadToCache(request.audioUrl, cacheFiles, builder, notificationId);
-                        File audio = cacheFiles.get(cacheFiles.size() - 1);
-                        inputs.add(request.audioToAacLc ? toAacLc(audio, cacheFiles) : audio);
-                    }
-                    downloadedToCache = true;
-                    Mp4Remuxer.write(inputs, openOutput(outputDocumentUri), request.metadata);
-                } catch (Exception | LinkageError downloadException) {
-                    PikoUtils.logger(downloadException);
-                    if (request.audioUrl == null) {
-                        if (!downloadedToCache) {
-                            throw downloadException;
-                        }
-                        // Only the metadata was lost: the file itself is complete.
-                        copyRawFile(cacheFiles.get(0), outputDocumentUri);
-                    } else if (request.fallbackUrl != null) {
-                        try (OutputStream output = new BufferedOutputStream(openOutput(outputDocumentUri))) {
-                            download(request.fallbackUrl, output, builder, notificationId);
-                        }
-                    } else {
-                        throw new IOException("Could not download or merge video and audio", downloadException);
-                    }
-                }
-            }
+            downloadSources(request, outputDocumentUri, builder, notificationId);
             downloadCompleted = true;
 
             final int finalNotificationId = notificationId;
@@ -217,6 +173,59 @@ public class MediaDownloader {
             } catch (Exception notificationException) {
                 PikoUtils.logger(notificationException);
             }
+        }
+    }
+
+    private void downloadSources(DownloadRequest request, Uri outputUri,
+                                 Notification.Builder builder, int notificationId) throws Exception {
+        List<DownloadRequest.Source> sources = new ArrayList<>();
+        sources.add(new DownloadRequest.Source(request.url, request.audioUrl));
+        sources.addAll(request.fallbackSources);
+        if (request.fallbackUrl != null) sources.add(new DownloadRequest.Source(request.fallbackUrl, null));
+        for (int i = 0; i < sources.size(); i++) {
+            try {
+                downloadSource(sources.get(i), request, outputUri, builder, notificationId, i > 0);
+                if (i > 0) request.completedToast = null;
+                return;
+            } catch (Exception | LinkageError e) {
+                if (i == sources.size() - 1) throw e;
+                PikoUtils.logger(e);
+            }
+        }
+    }
+
+    private void downloadSource(DownloadRequest.Source source, DownloadRequest request, Uri outputUri,
+                                Notification.Builder builder, int notificationId, boolean retry) throws Exception {
+        if (source.audioUrl == null && request.metadata == null) {
+            // Plain downloads also support providers offering write-only streams, not seekable files.
+            OutputStream stream = retry
+                    ? context.getContentResolver().openOutputStream(outputUri, "wt")
+                    : context.getContentResolver().openOutputStream(outputUri);
+            if (stream == null) throw new IOException("Could not open download file");
+            try (OutputStream output = new BufferedOutputStream(stream)) {
+                download(source.url, output, builder, notificationId);
+            }
+            return;
+        }
+        // Cache and clean up each rendition independently so failed tracks never enter the next merge.
+        List<File> cacheFiles = new ArrayList<>();
+        boolean downloadedToCache = false;
+        try {
+            downloadToCache(source.url, cacheFiles, builder, notificationId);
+            List<File> inputs = new ArrayList<>(cacheFiles);
+            if (source.audioUrl != null) {
+                downloadToCache(source.audioUrl, cacheFiles, builder, notificationId);
+                File audio = cacheFiles.get(cacheFiles.size() - 1);
+                inputs.add(request.audioToAacLc ? toAacLc(audio, cacheFiles) : audio);
+            }
+            downloadedToCache = true;
+            Mp4Remuxer.write(inputs, openOutput(outputUri), request.metadata);
+        } catch (Exception | LinkageError e) {
+            if (source.audioUrl != null || !downloadedToCache
+                    || !Mp4Remuxer.isReadableVideo(cacheFiles.get(0))) throw e;
+            // Keep a readable original without metadata when rewriting it failed.
+            PikoUtils.logger(e);
+            copyRawFile(cacheFiles.get(0), outputUri);
         } finally {
             for (File file : cacheFiles) {
                 if (file.exists() && !file.delete()) {

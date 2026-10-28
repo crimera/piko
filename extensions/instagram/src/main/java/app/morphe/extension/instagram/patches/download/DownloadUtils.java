@@ -34,6 +34,9 @@ import java.lang.reflect.Field;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import app.morphe.extension.instagram.constants.Constants;
@@ -47,6 +50,8 @@ import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.VideoData;
+import app.morphe.extension.instagram.entity.VideoResolution;
+import app.morphe.extension.instagram.entity.VideoVariant;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
 import app.morphe.extension.instagram.entity.MediaInterface;
@@ -95,10 +100,11 @@ public class DownloadUtils {
         String title = "";
         if(mediaType.equals(MediaType.VIDEO)){
             title = str("piko_video_variants");
-            // DASH renditions first, sharpest on top, then the progressive files.
-            variantList = new ArrayList<>();
-            if (Pref.preferDashFormat()) variantList.addAll(currentMediaData.getDashVideos());
-            variantList.addAll(currentMediaData.getVideoVariants());
+            List<VideoVariant> videos = new ArrayList<>();
+            if (Pref.preferDashFormat()) videos.addAll(currentMediaData.getDashVideos());
+            List<VideoData> progressive = currentMediaData.getVideoVariants();
+            if (progressive != null) videos.addAll(progressive);
+            variantList = new ArrayList<>(VideoResolution.group(videos));
         }else{
             title = str("piko_image_variants");
             variantList = new ArrayList<>(currentMediaData.getImageVariants());
@@ -106,7 +112,13 @@ public class DownloadUtils {
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
         ArrayList<String> options = new ArrayList<>();
-        variantList.forEach(item -> options.add(item.getLabel()));
+        for (MediaInterface item : variantList) {
+            String label = item.getLabel();
+            if (item instanceof VideoResolution) {
+                label = item.shortSide() > 0 ? label : str("piko_unknown");
+            }
+            options.add(label);
+        }
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -452,7 +464,8 @@ public class DownloadUtils {
     /**
      * The request for one media, as {@code variant} when one was chosen. A video with none chosen
      * downloads as the sharpest DASH rendition, with its audio merged in, when that is sharper
-     * than the progressive file, which it falls back to; a chosen DASH rendition has no fallback.
+     * than the progressive file. Automatic downloads retry the same resolution before the
+     * existing progressive fallback; a chosen resolution only retries its own renditions.
      */
     private static DownloadRequest buildMediaRequest(
             MediaData rootMediaData,
@@ -468,7 +481,7 @@ public class DownloadUtils {
                 || (mediaType.equals(MediaType.ANY) && childMediaData.isVideo());
         String fileName = fallbackFileName;
         String progressiveUrl = mediaUrl;
-        String audioUrl = null;
+        String audioUrl = variant == null ? null : variant.getAudioUrl();
 
         String variantTag = variant == null ? null : variant.getVariantTag();
         DashVideoData dashVideo = variant instanceof DashVideoData
@@ -515,15 +528,30 @@ public class DownloadUtils {
         }
 
         DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
+        if (variant instanceof VideoResolution) {
+            List<VideoVariant> candidates = ((VideoResolution) variant).getCandidates();
+            for (int i = 1; i < candidates.size(); i++) {
+                try {
+                    VideoVariant candidate = candidates.get(i);
+                    String url = candidate.getUrl();
+                    if (url == null || url.trim().isEmpty()) continue;
+                    request.fallbackSources.add(new DownloadRequest.Source(url, candidate.getAudioUrl()));
+                } catch (Exception | LinkageError ignored) {
+                    // A failed optional candidate must not prevent the selected download.
+                }
+            }
+        }
         if (!isVideo && variant == null && mediaType == MediaType.IMAGE && childMediaData.isVideo()) {
             MediaInterface original = childMediaData.getBestOriginalImage();
             if (original != null && !original.getUrl().equals(mediaUrl)) request.fallbackUrl = original.getUrl();
         }
         request.audioUrl = audioUrl;
-        if (audioUrl != null) {
-            request.audioToAacLc = Pref.dashAudioAacLc();
-            if (variant == null) request.fallbackUrl = progressiveUrl;
+        request.audioToAacLc = isVideo && Pref.dashAudioAacLc();
+        if (variant == null && dashVideo != null
+                && progressiveUrl != null && !progressiveUrl.trim().isEmpty()) {
+            request.fallbackUrl = progressiveUrl;
         }
+        if (isVideo && variant == null) addSameResolutionFallbacks(request, childMediaData);
         if (!isVideo || !Pref.embedDownloadMetadata()) {
             return request;
         }
@@ -548,6 +576,45 @@ public class DownloadUtils {
                     metadataException
             );
             return request;
+        }
+    }
+
+    private static void addSameResolutionFallbacks(DownloadRequest request, MediaData mediaData) {
+        try {
+            List<VideoVariant> videos = new ArrayList<>();
+            if (Pref.preferDashFormat()) videos.addAll(mediaData.getDashVideos());
+            List<VideoData> progressive = mediaData.getVideoVariants();
+            if (progressive != null) videos.addAll(progressive);
+
+            List<String> primary = Arrays.asList(request.url, request.audioUrl);
+            for (VideoResolution resolution : VideoResolution.group(videos)) {
+                if (resolution.shortSide() <= 0) continue;
+                List<DownloadRequest.Source> sources = new ArrayList<>();
+                boolean containsPrimary = false;
+                for (VideoVariant candidate : resolution.getCandidates()) {
+                    try {
+                        String url = candidate.getUrl();
+                        String audio = candidate.getAudioUrl();
+                        if (url == null || url.trim().isEmpty()) continue;
+                        if (primary.equals(Arrays.asList(url, audio))) containsPrimary = true;
+                        sources.add(new DownloadRequest.Source(url, audio));
+                    } catch (Exception | LinkageError ignored) {
+                        // A failed optional candidate must not prevent the original download.
+                    }
+                }
+                if (!containsPrimary) continue;
+
+                Set<List<String>> seen = new HashSet<>();
+                seen.add(primary);
+                // Keep the legacy complete-file fallback last, even if it appears in this group.
+                if (request.fallbackUrl != null) seen.add(Arrays.asList(request.fallbackUrl, null));
+                for (DownloadRequest.Source source : sources) {
+                    if (seen.add(Arrays.asList(source.url, source.audioUrl))) request.fallbackSources.add(source);
+                }
+                return;
+            }
+        } catch (Exception | LinkageError e) {
+            PikoUtils.logger(e);
         }
     }
 
