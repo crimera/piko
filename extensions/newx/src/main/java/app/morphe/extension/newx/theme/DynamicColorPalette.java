@@ -1,8 +1,14 @@
 package app.morphe.extension.newx.theme;
 
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
+
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.settings.SettingsRegistry;
@@ -90,6 +96,8 @@ public final class DynamicColorPalette {
     private static final int CONTRAST_DARK_TRANSLUCENT_BACKGROUND = 0x80000000;
     private static final int CONTRAST_DARK_ELEVATED_BACKGROUND = 0xFF121314;
     private static final int CONTRAST_DARK_GLASS_BACKGROUND = 0xCC242424;
+    /** Holds IDs only; weak resource references keep this cache from retaining a context. */
+    private static ResourceIdCache resourceIdCache;
     private DynamicColorPalette() {
     }
 
@@ -531,16 +539,80 @@ public final class DynamicColorPalette {
         }
 
         Resources resources = context.getResources();
-        int resourceId = resources.getIdentifier(resourceName, "color", context.getPackageName());
-        if (resourceId == 0 && frameworkFallbackName != null) {
-            resourceId = resources.getIdentifier(frameworkFallbackName, "color", "android");
-        }
-        if (resourceId == 0) {
-            throw new IllegalStateException(
-                    "NewX dynamic color resource is missing on Android 12+: " + resourceName
-            );
-        }
+        int resourceId = resourceId(
+                resources,
+                context.getPackageName(),
+                resourceName,
+                frameworkFallbackName
+        );
         return resources.getColor(resourceId, context.getTheme());
+    }
+
+    /**
+     * Resolves and caches resource IDs while leaving values live through the current Theme.
+     * Configuration and AssetManager changes clear the ID map; value-only overlays keep resource
+     * IDs stable and are observed by the fresh getColor call in requiredColor.
+     */
+    static int resourceId(
+            Resources resources,
+            String packageName,
+            String resourceName,
+            String frameworkFallbackName
+    ) {
+        synchronized (DynamicColorPalette.class) {
+            AssetManager assets = resources.getAssets();
+            Configuration configuration = resources.getConfiguration();
+            ResourceIdCache cache = resourceIdCache;
+            if (cache == null
+                    || cache.resources.get() != resources
+                    || cache.assets.get() != assets
+                    || !cache.configuration.equals(configuration)) {
+                cache = new ResourceIdCache(resources, assets, configuration);
+                resourceIdCache = cache;
+            }
+
+            Map<String, Map<String, Integer>> packageIds = cache.ids.get(packageName);
+            Map<String, Integer> resourceIds = packageIds == null
+                    ? null
+                    : packageIds.get(resourceName);
+            Integer cached = resourceIds == null
+                    ? null
+                    : resourceIds.get(frameworkFallbackName);
+            if (cached != null) return cached;
+
+            int id = resources.getIdentifier(resourceName, "color", packageName);
+            if (id == 0 && frameworkFallbackName != null) {
+                id = resources.getIdentifier(frameworkFallbackName, "color", "android");
+            }
+            if (id == 0) {
+                throw new IllegalStateException(
+                        "NewX dynamic color resource is missing on Android 12+: " + resourceName
+                );
+            }
+            if (packageIds == null) {
+                packageIds = new HashMap<>();
+                cache.ids.put(packageName, packageIds);
+            }
+            if (resourceIds == null) {
+                resourceIds = new HashMap<>();
+                packageIds.put(resourceName, resourceIds);
+            }
+            resourceIds.put(frameworkFallbackName, id);
+            return id;
+        }
+    }
+
+    private static final class ResourceIdCache {
+        final WeakReference<Resources> resources;
+        final WeakReference<AssetManager> assets;
+        final Configuration configuration;
+        final Map<String, Map<String, Map<String, Integer>>> ids = new HashMap<>();
+
+        ResourceIdCache(Resources resources, AssetManager assets, Configuration configuration) {
+            this.resources = new WeakReference<>(resources);
+            this.assets = new WeakReference<>(assets);
+            this.configuration = new Configuration(configuration);
+        }
     }
 
     private static long pack(int argb) {

@@ -1,9 +1,27 @@
 package app.morphe.extension.newx.theme;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
+
+import android.content.res.Configuration;
+import android.content.res.Resources;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = 29, manifest = Config.NONE)
 public final class DynamicColorPaletteTest {
     private static final long ORIGINAL_SURFACE = 0xFF03030300000000L;
     private static final long BLACK_SURFACE = 0xFF00000000000000L;
@@ -121,5 +139,95 @@ public final class DynamicColorPaletteTest {
                 0xCCEEEEEE00000000L,
                 DynamicColorPalette.contrastLightColor(DynamicColorPalette.GLASS_BACKGROUND)
         );
+    }
+
+    @Test
+    public void resourceIdsUseFrameworkFallbackAndKeyItSeparately() {
+        Resources resources = new CountingResources(
+                RuntimeEnvironment.getApplication().getResources()
+        );
+        String packageName = RuntimeEnvironment.getApplication().getPackageName();
+        String missingAppName = "newx_test_missing_dynamic_color";
+        int black = resources.getIdentifier("black", "color", "android");
+        int white = resources.getIdentifier("white", "color", "android");
+
+        assertEquals(black, DynamicColorPalette.resourceId(
+                resources, packageName, missingAppName, "black"));
+        assertEquals(black, DynamicColorPalette.resourceId(
+                resources, packageName, missingAppName, "black"));
+        assertEquals(white, DynamicColorPalette.resourceId(
+                resources, packageName, missingAppName, "white"));
+        assertNotEquals(black, white);
+        assertEquals(black, DynamicColorPalette.resourceId(
+                resources, "android", "black", "white"));
+    }
+
+    @Test
+    public void missingResourceFailsAndDoesNotPoisonLaterFallbackLookup() {
+        CountingResources resources = new CountingResources(
+                RuntimeEnvironment.getApplication().getResources()
+        );
+        String packageName = RuntimeEnvironment.getApplication().getPackageName();
+        String missingAppName = "newx_test_missing_dynamic_color";
+
+        IllegalStateException error = assertThrows(IllegalStateException.class, () ->
+                DynamicColorPalette.resourceId(resources, packageName, missingAppName, null));
+        assertEquals(
+                "NewX dynamic color resource is missing on Android 12+: " + missingAppName,
+                error.getMessage()
+        );
+        assertEquals(
+                resources.getIdentifier("black", "color", "android"),
+                DynamicColorPalette.resourceId(resources, packageName, missingAppName, "black")
+        );
+    }
+
+    @Test
+    public void resourceIdCacheInvalidatesForConfigurationAndSerializesConcurrentReads()
+            throws Exception {
+        CountingResources resources = new CountingResources(
+                RuntimeEnvironment.getApplication().getResources()
+        );
+        int expected = resources.getIdentifier("black", "color", "android");
+        resources.identifierCalls = 0;
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        try {
+            List<Callable<Integer>> lookups = new ArrayList<>();
+            for (int i = 0; i < 8; i++) {
+                lookups.add(() -> DynamicColorPalette.resourceId(
+                        resources, "android", "black", null));
+            }
+            for (Future<Integer> result : executor.invokeAll(lookups)) {
+                assertEquals(expected, result.get().intValue());
+            }
+            assertEquals(1, resources.identifierCalls);
+
+            Configuration changed = new Configuration(resources.getConfiguration());
+            changed.fontScale = changed.fontScale == 1f ? 1.1f : 1f;
+            resources.updateConfiguration(changed, resources.getDisplayMetrics());
+            assertEquals(expected, DynamicColorPalette.resourceId(
+                    resources, "android", "black", null));
+            assertEquals(2, resources.identifierCalls);
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    private static final class CountingResources extends Resources {
+        int identifierCalls;
+
+        CountingResources(Resources resources) {
+            super(
+                    resources.getAssets(),
+                    resources.getDisplayMetrics(),
+                    new Configuration(resources.getConfiguration())
+            );
+        }
+
+        @Override
+        public int getIdentifier(String name, String defType, String defPackage) {
+            identifierCalls++;
+            return super.getIdentifier(name, defType, defPackage);
+        }
     }
 }
