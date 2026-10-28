@@ -10,6 +10,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.ContextWrapper;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -52,15 +53,16 @@ final class DownloadSelectionSheet {
     private final Button download;
     private final SheetBottomDialog.SlideDialog dialog;
 
-    static void show(Context context, MediaData media) throws Exception {
+    static void show(Context context, MediaData media, DialogInterface.OnDismissListener onDismiss) throws Exception {
         Activity activity = findActivity(context);
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             throw new IllegalStateException("No activity available for media selection");
         }
-        new DownloadSelectionSheet(activity, media).show();
+        new DownloadSelectionSheet(activity, media, onDismiss).show();
     }
 
-    private DownloadSelectionSheet(Activity activity, MediaData media) throws Exception {
+    private DownloadSelectionSheet(Activity activity, MediaData media,
+                                   DialogInterface.OnDismissListener onDismiss) throws Exception {
         context = InstagramPreferenceStyle.dialogContext(activity);
         int total = media.getCarouselSize();
         SheetBottomDialog.DraggableLinearLayout panel = SheetBottomDialog.createMainLayout(
@@ -95,7 +97,10 @@ final class DownloadSelectionSheet {
         });
         dialog = SheetBottomDialog.createSlideDialog(context, panel, 180);
         panel.setDialog(dialog);
-        dialog.setOnDismissListener(ignored -> thumbnails.close());
+        dialog.setOnDismissListener(d -> {
+            thumbnails.close();
+            if (onDismiss != null) onDismiss.onDismiss(d);
+        });
         panel.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override public void onViewAttachedToWindow(View view) {}
             @Override public void onViewDetachedFromWindow(View view) { thumbnails.close(); }

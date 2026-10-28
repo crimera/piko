@@ -11,6 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.ArrayList;
 import android.content.Context;
+import android.content.DialogInterface;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -51,15 +52,21 @@ public class StoryButton {
         return buttonList;
     }
 
+    public static boolean storyDialogAction(CharSequence buttonText, Context ctx, Object mediaObject,
+                                           DialogInterface.OnDismissListener onDismiss) {
+        if (buttonText.equals(str("piko_view_story_mentions"))) {
+            ViewStoryMentionsPatch.viewMentions(ctx, mediaObject, onDismiss);
+            return true;
+        } else if (buttonText.equals(str("piko_download_options")) || buttonText.equals(str("piko_category_download_media"))) {
+            DownloadUtils.showDownloadOptions(ctx, null, mediaObject, 0, onDismiss);
+            return true;
+        }
+        return false;
+    }
+
     public static boolean storyButtonAction(CharSequence buttonText, Context ctx, Object mediaObject){
         try {
-            if (buttonText.equals(str("piko_view_story_mentions"))) {
-                ViewStoryMentionsPatch.viewMentions(ctx, mediaObject);
-                return true;
-            } else if (buttonText.equals(str("piko_download_options")) || buttonText.equals(str("piko_category_download_media"))) {
-                DownloadUtils.showDownloadOptions(ctx,null,mediaObject,0);
-                return true;
-            } else if (buttonText.equals(str("piko_debug"))) {
+            if (buttonText.equals(str("piko_debug"))) {
                 ObjectBrowser.browseObject(ctx, new MediaData(mediaObject));
                 return true;
             } else if (buttonText.equals(str("piko_download_with_external_downloader"))) {

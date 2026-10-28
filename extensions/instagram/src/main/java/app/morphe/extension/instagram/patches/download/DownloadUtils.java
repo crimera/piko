@@ -78,7 +78,8 @@ public class DownloadUtils {
             Context context,
             MediaData mediaInfo,
             int position,
-            MediaType mediaType
+            MediaType mediaType,
+            DialogInterface.OnDismissListener onDismiss
     ) throws Exception {
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
         String username = mediaInfo.getUserData().getUsername();
@@ -128,6 +129,7 @@ public class DownloadUtils {
             }
         });
 
+        dialog.setOnDismissListener(onDismiss);
         dialog.setTitle(title);
         dialog.setNegativeButton(str("piko_close"), (d, which) -> d.dismiss());
         dialog.setCancelable(true);
@@ -138,7 +140,8 @@ public class DownloadUtils {
 
     }
 
-    private static void downloadDialogBox(Context context, MediaData mediaInfo, int position) throws Exception {
+    private static void downloadDialogBox(Context context, MediaData mediaInfo, int position,
+                                          DialogInterface.OnDismissListener onDismiss) throws Exception {
         int carouselSize = mediaInfo.getCarouselSize();
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
         String username = mediaInfo.getUserData().getUsername();
@@ -166,6 +169,7 @@ public class DownloadUtils {
         }
 
         CharSequence[] items = options.toArray(new CharSequence[0]);
+        boolean[] childDialogShown = {false};
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
             @Override
@@ -188,7 +192,8 @@ public class DownloadUtils {
                         ActivityHook.handleUrlIntent(isCurrentMediaVideo, currentMediaData.getMediaLink());
 
                     } else if (selectedOption.equals(str("piko_select_media_download"))) {
-                        DownloadSelectionSheet.show(context, mediaInfo);
+                        DownloadSelectionSheet.show(context, mediaInfo, onDismiss);
+                        childDialogShown[0] = true;
 
                     } else if (selectedOption.equals(str("piko_download_all"))) {
                         downloadMedia(context, mediaInfo, -1, MediaType.ANY);
@@ -197,10 +202,12 @@ public class DownloadUtils {
                         downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
 
                     } else if (selectedOption.equals(str("piko_video_variants"))) {
-                        buildVariantDialogBox(context, mediaInfo, position, MediaType.VIDEO);
+                        buildVariantDialogBox(context, mediaInfo, position, MediaType.VIDEO, onDismiss);
+                        childDialogShown[0] = true;
 
                     } else if (selectedOption.equals(str("piko_image_variants"))) {
-                        buildVariantDialogBox(context, mediaInfo, position, MediaType.IMAGE);
+                        buildVariantDialogBox(context, mediaInfo, position, MediaType.IMAGE, onDismiss);
+                        childDialogShown[0] = true;
 
                     }
                 } catch (Exception e) {
@@ -212,6 +219,10 @@ public class DownloadUtils {
         });
 
 
+        // A replacement dialog owns the dismissal until the user finishes there.
+        dialog.setOnDismissListener(d -> {
+            if (!childDialogShown[0] && onDismiss != null) onDismiss.onDismiss(d);
+        });
         dialog.setTitle(str("piko_download_options"));
         dialog.setNegativeButton(str("piko_close"), (d, which) -> d.dismiss());
         dialog.setCancelable(true);
@@ -230,7 +241,7 @@ public class DownloadUtils {
             if (ENABLE_DIRECT_DOWNLOAD) {
                 downloadMedia(context, mediaInfo, position, MediaType.ANY);
             } else {
-                downloadDialogBox(context, mediaInfo, position);
+                downloadDialogBox(context, mediaInfo, position, null);
             }
 
         } catch (Exception e) {
@@ -240,11 +251,17 @@ public class DownloadUtils {
     }
 
     public static void showDownloadOptions(Context context, UserSession userSession, Object mediaObject, int position) {
+        showDownloadOptions(context, userSession, mediaObject, position, null);
+    }
+
+    public static void showDownloadOptions(Context context, UserSession userSession, Object mediaObject, int position,
+                                           DialogInterface.OnDismissListener onDismiss) {
         try {
-            downloadDialogBox(context, new MediaData(mediaObject, userSession), Math.max(0, position));
+            downloadDialogBox(context, new MediaData(mediaObject, userSession), Math.max(0, position), onDismiss);
         } catch (Exception e) {
             Logger.printException(() -> "Could not show download options", e);
             Utils.showToastShort(str("piko_download_failed_media"));
+            if (onDismiss != null) onDismiss.onDismiss(null);
         }
     }
 
@@ -621,7 +638,7 @@ public class DownloadUtils {
         try {
             Activity activity = storyActivity(anchor);
             if (chooser) {
-                downloadDialogBox(activity, new MediaData(media, userSession), 0);
+                downloadDialogBox(activity, new MediaData(media, userSession), 0, null);
             } else {
                 downloadPost(activity, userSession, media, 0);
             }

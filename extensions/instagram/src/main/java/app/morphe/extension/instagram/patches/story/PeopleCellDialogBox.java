@@ -10,6 +10,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,8 @@ import app.morphe.extension.instagram.entity.InstagramDialogBox;
 
 public class PeopleCellDialogBox {
     public static void showPeopleDialog(@NonNull Context context,
-                                       @Nullable ArrayList<IgdsPeopleCell> peopleCells) {
+                                       @Nullable ArrayList<IgdsPeopleCell> peopleCells,
+                                       @Nullable DialogInterface.OnDismissListener onDismiss) {
         InstagramDialogBox builder = new InstagramDialogBox(context);
         builder.setTitle(str("piko_vsm_title"));
         builder.setNegativeButton(str("piko_close"), (dialog, which) -> dialog.dismiss());
@@ -49,6 +51,7 @@ public class PeopleCellDialogBox {
             builder.setMessage(str("piko_vsm_no_mentions"));
         }
 
+        builder.setOnDismissListener(onDismiss);
         Dialog dialog = builder.getDialog();
         if (hasMentions) {
             ListView list = dialog.findViewById(android.R.id.list);

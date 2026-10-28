@@ -100,10 +100,13 @@ val handleStoryButtonPatch =
                     val reelItemClassName = "Lcom/instagram/model/reels/ReelItem;"
                     val appActivity = "Landroid/app/Activity;"
                     val charSequence = "Ljava/lang/CharSequence;"
+                    val dismissListener = "Landroid/content/DialogInterface\$OnDismissListener;"
 
                     val classFields = classDef.fields
                     val reelItemField = classFields.single { it.type == reelItemClassName }
                     val appActivityField = classFields.single { it.type == appActivity }
+                    val dismissListenerField = classFields.singleOrNull { it.type == dismissListener }
+                        ?: throw PatchException("Expected one story menu dismiss listener field")
                     val reelItemMediaField = instructions.mapNotNull { it.getReference<FieldReference>() }
                         .filter { it.definingClass == reelItemClassName && it.type == MEDIA_CLASS_NAME }
                         .distinctBy { it.toString() }
@@ -111,7 +114,10 @@ val handleStoryButtonPatch =
 
                     val characterSequenceParameterIndex = parameters.indexOfLast { it.type == charSequence }
                     val selfClassParameterIndex = parameters.indexOfLast { it.type == classDef.type }
-                    if (!AccessFlags.STATIC.isSet(accessFlags) || p0Register < 4 ||
+                    val dismissListenerParameterIndex = parameters.indices.singleOrNull {
+                        parameters[it].type == dismissListener
+                    } ?: throw PatchException("Expected one story menu dismiss listener parameter")
+                    if (!AccessFlags.STATIC.isSet(accessFlags) || p0Register < 5 ||
                         characterSequenceParameterIndex < 0 || selfClassParameterIndex < 0
                     ) throw PatchException("Unexpected story menu click parameters or local registers")
 
@@ -125,6 +131,14 @@ val handleStoryButtonPatch =
                         iget-object v2, v1, $appActivityField
                         iget-object v3, v1, $reelItemField
                         iget-object v3, v3, $reelItemMediaField
+                        move-object/from16 v4, p$dismissListenerParameterIndex
+                        invoke-static {v0,v2,v3,v4}, $STORY_BUTTON_EXTENSION_CLASS->storyDialogAction($charSequence Landroid/content/Context;Ljava/lang/Object;$dismissListener)Z
+                        move-result v4
+                        if-eqz v4, :other_buttons
+                        const/4 v4, 0x0
+                        iput-object v4, v1, $dismissListenerField
+                        return-void
+                        :other_buttons
                         invoke-static {v0,v2,v3}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;)Z
                         move-result v0
                         if-eqz v0, :piko
