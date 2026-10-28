@@ -93,7 +93,7 @@ public class DownloadUtils {
             variantList.addAll(currentMediaData.getVideoVariants());
         }else{
             title = str("piko_image_variants");
-            variantList = currentMediaData.getImageVariants();
+            variantList = new ArrayList<>(currentMediaData.getImageVariants());
         }
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
@@ -329,7 +329,8 @@ public class DownloadUtils {
                 downloader.enqueue(request);
                 return;
             }
-            int coverShortSide = ((MediaInterface) mediaData.getImageVariants().get(0)).shortSide();
+            MediaInterface cover = mediaData.getBestImage();
+            int coverShortSide = cover == null ? 0 : cover.shortSide();
             String shortcode = mediaData.getShortcode();
             String mediaId = mediaData.getPostID();
             Utils.runOnBackgroundThread(() -> {

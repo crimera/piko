@@ -256,7 +256,7 @@ public class MediaData extends Entity {
         return videoList;
     }
 
-    public List getVideoVariants() throws Exception {
+    public List<VideoData> getVideoVariants() throws Exception {
         try {
             return this.getVideoVariantsV2();
         } catch (Exception e) {
@@ -264,7 +264,7 @@ public class MediaData extends Entity {
         }
     }
 
-    public List getImageVariants() throws Exception {
+    public List<ImageData> getImageVariants() throws Exception {
         Object imageInfoObject = (Object) super.getField(this.getMoreExtendedData(), "fieldName");
         List variantList = (List) super.getMethod(imageInfoObject, "methodName");
 
@@ -305,27 +305,53 @@ public class MediaData extends Entity {
     public DashVideoData getSharperDashVideo() throws Exception {
         List<DashVideoData> videos = this.getDashVideos();
         if (videos.isEmpty()) return null;
-        List<VideoData> progressive = this.getVideoVariants();
-        int progressiveShortSide = progressive == null || progressive.isEmpty() ? 0 : progressive.get(0).shortSide();
+        VideoData progressive = this.getBestVideo();
+        int progressiveShortSide = progressive == null ? 0 : progressive.shortSide();
         return videos.get(0).shortSide() > progressiveShortSide ? videos.get(0) : null;
     }
 
-    public String getVideoLink() throws Exception {
-        List<VideoData> videoDataList = this.getVideoVariants();
-        if(videoDataList!=null){
-            return videoDataList.get(0).getUrl();
+    private static <T extends MediaInterface> T highestResolution(List<T> variants) throws Exception {
+        T best = null;
+        long bestResolution = -1;
+        long bestPixels = -1;
+        if (variants == null) return null;
+        for (T variant : variants) {
+            if (variant == null) continue;
+            String url = variant.getUrl();
+            if (url == null || url.trim().isEmpty()) continue;
+            Integer width = variant.getWidth();
+            Integer height = variant.getHeight();
+            boolean known = width != null && height != null && width > 0 && height > 0;
+            long pixels = known ? (long) width * height : 0;
+            long resolution = variant.getMediaType() == MediaType.VIDEO
+                    ? known ? Math.min(width, height) : 0
+                    : pixels;
+            if (resolution > bestResolution || (resolution == bestResolution && pixels > bestPixels)) {
+                best = variant;
+                bestResolution = resolution;
+                bestPixels = pixels;
+            }
         }
-        return null;
-    }
-    
-    public String getImageLink() throws Exception {
-        List<ImageData> imageDataList = this.getImageVariants();
-        if(imageDataList!=null){
-            return imageDataList.get(0).getUrl();
-        }
-        return null;
+        return best;
     }
 
+    public VideoData getBestVideo() throws Exception {
+        return highestResolution(this.getVideoVariants());
+    }
+
+    public ImageData getBestImage() throws Exception {
+        return highestResolution(this.getImageVariants());
+    }
+
+    public String getVideoLink() throws Exception {
+        VideoData video = this.getBestVideo();
+        return video == null ? null : video.getUrl();
+    }
+
+    public String getImageLink() throws Exception {
+        ImageData image = this.getBestImage();
+        return image == null ? null : image.getUrl();
+    }
 
     public String getMediaLink() throws Exception {
         return this.isVideo() ? this.getVideoLink() : this.getImageLink();
