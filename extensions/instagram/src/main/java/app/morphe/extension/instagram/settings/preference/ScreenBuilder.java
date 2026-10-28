@@ -881,38 +881,11 @@ public class ScreenBuilder {
                 )
         );
 
-        if (SettingsStatus.feedDownloadButton) {
+        if (SettingsStatus.feedDownloadButton || SettingsStatus.reelDownloadButton
+                || SettingsStatus.storyDownloadButton) {
             addPreference(
                     helper.availableWhen(
-                            helper.switchPreference(
-                                    str("piko_feed_download_button"),
-                                    str("piko_feed_download_button_desc"),
-                                    Settings.FEED_DOWNLOAD_BUTTON
-                            ),
-                            () -> SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
-                    )
-            );
-        }
-        if (SettingsStatus.reelDownloadButton) {
-            addPreference(
-                    helper.availableWhen(
-                            helper.switchPreference(
-                                    str("piko_reel_download_button"),
-                                    str("piko_reel_download_button_desc"),
-                                    Settings.REEL_DOWNLOAD_BUTTON
-                            ),
-                            () -> SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
-                    )
-            );
-        }
-        if (SettingsStatus.storyDownloadButton) {
-            addPreference(
-                    helper.availableWhen(
-                            helper.switchPreference(
-                                    str("piko_story_download_button"),
-                                    str("piko_story_download_button_desc"),
-                                    Settings.STORY_DOWNLOAD_BUTTON
-                            ),
+                            new DownloadButtonPreference(context),
                             () -> SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD)
                     )
             );
