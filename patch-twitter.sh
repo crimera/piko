@@ -5,6 +5,12 @@ ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 cd "$ROOT_DIR"
 
 INSTALL=false
+# --recompile skips patching and installing: it compiles the installed X with the usage profile
+# it has collected, like Android's idle background dexopt. Run it after using X for a while.
+RECOMPILE=false
+for arg in "$@"; do
+  [[ "$arg" == --recompile ]] && RECOMPILE=true
+done
 # Default to 2 GiB: 1 GiB OOMed in apkzlib align/sign on 12.35/12.37 (512 MB on 12.34/12.35).
 # Override PATCHER_MAX_HEAP_MB when deliberately comparing smaller heaps.
 PATCHER_MAX_HEAP_MB="${PATCHER_MAX_HEAP_MB:-2048}"
@@ -21,7 +27,7 @@ fi
 
 VER=$(grep "^version" gradle.properties | cut -d= -f2 | tr -d ' ')
 MPP="patches/build/libs/patches-${VER}.mpp"
-if [[ ! -f "$MPP" ]]; then
+if [[ "$RECOMPILE" != true && ! -f "$MPP" ]]; then
   echo "Missing patch bundle: $MPP" >&2
   echo "Build it first with: ./gradlew :patches:build" >&2
   exit 1
@@ -36,6 +42,8 @@ for arg in "$@"; do
     --install|--fastdeploy)
       INSTALL=true
       ;;
+    --recompile)
+      ;;
     *.apk|*.apkm|*.apks)
       APK="$arg"
       ;;
@@ -45,6 +53,7 @@ for arg in "$@"; do
   esac
 done
 
+if [[ "$RECOMPILE" != true ]]; then
 echo "Patcher JVM heap limit: ${PATCHER_MAX_HEAP_MB} MB"
 java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -p "$MPP" \
@@ -105,8 +114,9 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -- \
   "$APK"
   # -e "NewX: Collect AI-filter training posts" \
+fi
 
-if [[ "$INSTALL" != true ]]; then
+if [[ "$INSTALL" != true && "$RECOMPILE" != true ]]; then
   exit 0
 fi
 
@@ -158,6 +168,25 @@ if [[ "$ADB_VERSION" != "$FASTDEPLOY_PLATFORM_TOOLS_VERSION" ]]; then
   exit 1
 fi
 
+PACKAGE=com.twitter.android
+
+print_compile_state() {
+  "$ADB_BIN" shell dumpsys package dexopt \
+    | awk -v pkg="[$PACKAGE]" 'index($0, pkg) { found=1; next } found && /status=/ { print "Compile state:" $0; exit }'
+}
+
+if [[ "$RECOMPILE" == true ]]; then
+  # X's profile saver writes periodically; SIGUSR1 makes a running X save its usage profile now.
+  if "$ADB_BIN" shell su -c id 2>/dev/null | grep -q 'uid=0'; then
+    "$ADB_BIN" shell "su -c 'pid=\$(pidof $PACKAGE) && kill -s USR1 \$pid'" || true
+    sleep 2
+  fi
+  echo "Recompiling $PACKAGE with its saved usage profile"
+  "$ADB_BIN" shell cmd package compile -m speed-profile -f "$PACKAGE"
+  print_compile_state
+  exit 0
+fi
+
 echo "Checking fast deploy support"
 FASTDEPLOY_PROBE=$("$ADB_BIN" install --fastdeploy -r "${OUTPUT_APK}.probe.apk" 2>&1 || true)
 if grep -Eq 'Fast Deploy .*ignoring|fastdeploy is disabled' <<<"$FASTDEPLOY_PROBE"; then
@@ -168,3 +197,49 @@ fi
 
 echo "Installing APK with fast deploy: $OUTPUT_APK"
 "$ADB_BIN" install --fastdeploy -r "$OUTPUT_APK"
+
+# Patching rewrites X's dex files, which invalidates its bundled baseline profile, so a fresh
+# install stays at `verify` (interpreted/JIT) until idle background dexopt. Rebuild the profile
+# for the patched APK on the device and compile it now. Needs root for profman and the app's
+# profile slot; set SKIP_BASELINE_COMPILE=1 to skip.
+if [[ "${SKIP_BASELINE_COMPILE:-0}" == 1 ]]; then
+  exit 0
+fi
+
+REMOTE_RULES=/data/local/tmp/piko-baseline-rules.txt
+REMOTE_SCRIPT=/data/local/tmp/piko-baseline.sh
+
+if ! "$ADB_BIN" shell su -c id 2>/dev/null | grep -q 'uid=0'; then
+  echo "Skipping baseline profile: device has no root (adb shell su)." >&2
+  echo "X will compile itself during idle background dexopt instead." >&2
+  exit 0
+fi
+
+BASELINE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/piko-baseline.XXXXXX")
+trap 'rm -rf "${DOWNLOAD_DIR:-}" "$BASELINE_DIR"' EXIT
+echo "Extracting baseline profile rules from $APK"
+python3 -I scripts/baseline_profile_rules.py "$APK" > "$BASELINE_DIR/rules.txt"
+
+cat > "$BASELINE_DIR/apply.sh" <<EOF
+set -e
+base=\$(pm path $PACKAGE | sed -n 's/^package://p' | grep '/base.apk\$')
+user=\$(am get-current-user)
+current=/data/misc/profiles/cur/\$user/$PACKAGE/primary.prof
+generated=/data/local/tmp/piko-baseline.prof
+rm -f "\$generated"
+/apex/com.android.art/bin/profman --create-profile-from=$REMOTE_RULES \
+  --apk="\$base" --dex-location="\$base" --reference-profile-file="\$generated"
+# A fresh install leaves an empty current profile; cat keeps its owner and SELinux label.
+cat "\$generated" > "\$current"
+rm -f "\$generated" $REMOTE_RULES $REMOTE_SCRIPT
+EOF
+
+"$ADB_BIN" push -q "$BASELINE_DIR/rules.txt" "$REMOTE_RULES"
+"$ADB_BIN" push -q "$BASELINE_DIR/apply.sh" "$REMOTE_SCRIPT"
+echo "Building baseline profile for the patched APK"
+"$ADB_BIN" shell "su -c 'sh $REMOTE_SCRIPT'"
+echo "Compiling $PACKAGE with speed-profile"
+"$ADB_BIN" shell cmd package compile -m speed-profile -f "$PACKAGE"
+print_compile_state
+echo "After using X for a few minutes, run: $0 --recompile"
+
