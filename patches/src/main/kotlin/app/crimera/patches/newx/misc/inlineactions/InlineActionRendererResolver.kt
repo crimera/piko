@@ -426,11 +426,20 @@ internal fun Method.provesValueFromInstruction(
     targetRegister: Int,
 ): Boolean = valueProvenanceAt(targetIndex, targetRegister, sourceRegister, sourceIndex)
 
+/** A branch-local load need not dominate a shared renderer's other color-selection branches. */
+internal fun Method.provesValueFromInstructionOnSourcePaths(
+    sourceIndex: Int,
+    sourceRegister: Int,
+    targetIndex: Int,
+    targetRegister: Int,
+): Boolean = valueProvenanceAt(targetIndex, targetRegister, sourceRegister, sourceIndex, sourcePathsOnly = true)
+
 private fun Method.valueProvenanceAt(
     targetIndex: Int,
     targetRegister: Int,
     originRegister: Int,
     originInstruction: Int?,
+    sourcePathsOnly: Boolean = false,
 ): Boolean {
     val implementation = implementation ?: return false
     val code = implementation.instructions.toList()
@@ -441,9 +450,10 @@ private fun Method.valueProvenanceAt(
     val input = arrayOfNulls<IntArray>(code.size)
     val initial = IntArray(implementation.registerCount) { UNKNOWN_VALUE }
     if (originInstruction == null) initial[originRegister] = PARAMETER_VALUE
-    input[0] = initial
+    val startIndex = if (sourcePathsOnly) originInstruction ?: return false else 0
+    input[startIndex] = initial
     val work = ArrayDeque<Int>()
-    work.add(0)
+    work.add(startIndex)
     while (work.isNotEmpty()) {
         val index = work.removeFirst()
         val inState = input[index] ?: continue
@@ -543,7 +553,8 @@ private fun List<Instruction>.controlFlowEdges(): List<List<FlowEdge>>? {
                 }
                 (cases + listOfNotNull((index + 1).takeIf { it < size }?.let { FlowEdge(it, false) })).distinct()
             }
-            opcode.name.startsWith("IF_") -> {
+            opcode.format in setOf(com.android.tools.smali.dexlib2.Format.Format21t,
+                com.android.tools.smali.dexlib2.Format.Format22t) -> {
                 val destination = branchTarget ?: return null
                 if (index + 1 >= size) return null
                 listOf(FlowEdge(destination, false), FlowEdge(index + 1, false)).distinct()

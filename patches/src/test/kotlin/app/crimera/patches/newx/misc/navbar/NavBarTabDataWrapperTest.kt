@@ -5,16 +5,23 @@ package app.crimera.patches.newx.misc.navbar
 // candidates and failed the "Customize navigation bar" patch.
 
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableAnnotation
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
@@ -48,6 +55,58 @@ class NavBarTabDataWrapperTest {
                 .findTabDataWrapperInitIndex(anchorIndex = 0, mapRegister = 5)
         }
         assertTrue(ambiguous.message.orEmpty().contains("found 2"), ambiguous.message)
+    }
+
+    @Test
+    fun `filter reuses the consumed map register when every four-bit register is live`() {
+        val consumerParameters = List(6) { "Ljava/lang/Object;" }
+        val consumerDescriptor = consumerParameters.joinToString(separator = "")
+        val implementation = MethodImplementationBuilder(6).apply {
+            addInstruction(
+                (
+                    "invoke-static/range {v0 .. v5}, " +
+                        "Lfixture/Consumer;->consume($consumerDescriptor)V"
+                    ).toInstruction(),
+            )
+            addInstruction("return-void".toInstruction())
+        }.methodImplementation
+        val method =
+            MutableMethod(
+                ImmutableMethod(
+                    "Lfixture/NavBarBuilder;",
+                    "build",
+                    emptyList<ImmutableMethodParameter>(),
+                    "V",
+                    AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                    emptySet<ImmutableAnnotation>(),
+                    emptySet<HiddenApiRestriction>(),
+                    implementation,
+                ),
+            )
+
+        injectNavBarFilter(
+            TabDataFilterTarget(
+                method = method,
+                insertionIndex = 0,
+                tabDataRegister = 5,
+                resultType = "Ljava/util/LinkedHashMap;",
+            ),
+        )
+
+        val instructions = method.instructions.toList()
+        assertEquals(Opcode.INVOKE_STATIC, instructions[0].opcode)
+        assertEquals(
+            "Lapp/morphe/extension/newx/misc/NavBarFilter;->filter(Ljava/util/Map;)Ljava/util/Map;",
+            instructions[0].getReference<MethodReference>().toString(),
+        )
+        assertEquals(listOf(5), instructions[0].registersUsed)
+        assertEquals(Opcode.MOVE_RESULT_OBJECT, instructions[1].opcode)
+        assertEquals(5, (instructions[1] as OneRegisterInstruction).registerA)
+        assertEquals(Opcode.CHECK_CAST, instructions[2].opcode)
+        assertEquals(5, (instructions[2] as OneRegisterInstruction).registerA)
+        assertEquals(Opcode.INVOKE_STATIC_RANGE, instructions[3].opcode)
+        assertEquals((0..5).toList(), instructions[3].registersUsed)
+        assertFalse(instructions.any { it.opcode == Opcode.MOVE_OBJECT })
     }
 
     /** Builds a void static method from smali lines, terminated by return-void. */

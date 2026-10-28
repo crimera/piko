@@ -715,6 +715,31 @@ private class ReplyControlFlow(val method: Method) {
     }
 }
 
+private fun ReplyControlFlow.parameterRegister(parameterIndex: Int): Int? {
+    if (parameterIndex !in method.parameterTypes.indices) return null
+    var register = parameterStart + if (AccessFlags.STATIC.isSet(method.accessFlags)) 0 else 1
+    method.parameterTypes.take(parameterIndex).forEach { parameter ->
+        register += if (parameter.toString() in setOf("J", "D")) 2 else 1
+    }
+    return register
+}
+
+private fun ReplyControlFlow.parameterIndexForRegister(register: Int): Int? = requireAtMostOne(
+    "NewX reply parameter for v$register in $method",
+    method.parameterTypes.indices.filter { parameterRegister(it) == register },
+)
+
+private fun Instruction.invokedArgumentRegister(
+    reference: MethodReference,
+    parameterIndex: Int,
+): Int? {
+    val receiverCount = if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) 0 else 1
+    val argumentIndex = receiverCount + reference.parameterTypes.take(parameterIndex).sumOf { parameter ->
+        if (parameter.toString() in setOf("J", "D")) 2 else 1
+    }
+    return registersUsed.getOrNull(argumentIndex)
+}
+
 /** Only the constructed instance's selected arm may anchor an animated composer. */
 private fun ReplyControlFlow.allocatedContentCallsComposer(
     allocationIndex: Int,
@@ -732,9 +757,6 @@ private fun ReplyControlFlow.allocatedContentCallsComposer(
                 !AccessFlags.STATIC.isSet(method.accessFlags)
         },
     )
-    if (entry.callSiteIndices(minimalContainer).isEmpty()) {
-        throw PatchException("NewX reply content $type delegates its composer through an unproven helper: $entry")
-    }
     val constructorIndex = requireExactlyOne(
         "NewX reply content constructor for allocation $allocationIndex in $method",
         instructions.indices.filter { index ->
@@ -807,15 +829,100 @@ private fun ReplyControlFlow.allocatedContentCallsComposer(
         }
     })
     if (!dispatchProven) throw PatchException("NewX reply content first dispatch is not a proven scalar capture: $entry")
-    val calls = entry.callSiteIndices(minimalContainer).filter { it in selected }
-    if (calls.isEmpty()) return false
-    requireExactlyOne("NewX selected reply content composer call in $entry", calls)
-    if (selected.none { index ->
-            val instruction = entryFlow.instructions[index]
+    val directCalls = entry.callSiteIndices(minimalContainer).filter { it in selected }
+    val (composerProofFlow, composerProofIndexes, composerCalls) = if (directCalls.isNotEmpty()) {
+        Triple(entryFlow, selected, directCalls)
+    } else {
+        val helperRoutes = selected.mapNotNull { helperCallIndex ->
+            val instruction = entryFlow.instructions[helperCallIndex]
+            val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+            if (instruction.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) ||
+                reference.definingClass != type || reference.name == "<init>" ||
+                entryFlow.origin(helperCallIndex, instruction.registersUsed.firstOrNull() ?: return@mapNotNull null) !=
+                    -entryFlow.parameterStart - 1
+            ) return@mapNotNull null
+            val helper = requireExactlyOne(
+                "NewX reply content helper $reference",
+                definition.methods.filter { reference.matches(it) },
+            )
+            val calls = helper.callSiteIndices(minimalContainer)
+            if (calls.isEmpty()) return@mapNotNull null
+            val helperFlow = ReplyControlFlow(helper)
+            val composerCall = requireExactlyOne("NewX helper reply composer call in $helper", calls)
+            val composerReference = helperFlow.instructions[composerCall].getReference<MethodReference>()
+                ?: throw PatchException("NewX helper reply composer call has no reference: $helper")
+            val composerParameter = requireExactlyOne(
+                "NewX helper Composer parameter in $helper",
+                composerReference.parameterTypes.indices.filter {
+                    composerReference.parameterTypes[it].toString() == COMPOSER_DESCRIPTOR
+                },
+            )
+            val composerRegister = helperFlow.instructions[composerCall]
+                .invokedArgumentRegister(composerReference, composerParameter)
+                ?: throw PatchException("NewX helper reply composer register is unavailable: $helper")
+            val helperComposerOrigin = helperFlow.origin(composerCall, composerRegister)
+                ?: throw PatchException("Unproven NewX helper Composer origin in $helper")
+            if (helperComposerOrigin >= 0) {
+                throw PatchException(
+                    "NewX reply composer is not forwarded from a helper parameter: $helper " +
+                        "(register=v$composerRegister, origin=$helperComposerOrigin)",
+                )
+            }
+            val helperParameterIndex = helperFlow.parameterIndexForRegister(-helperComposerOrigin - 1)
+                ?: throw PatchException("NewX helper Composer source is not a parameter in $helper")
+            // Function3 composable callbacks are (AnimatedVisibilityScope, Composer, changed).
+            if (entry.parameterTypes.size != 3) {
+                throw PatchException("Unexpected NewX Function3 composer forwarding shape: $entry -> $helper")
+            }
+            val forwardedRegister = instruction.invokedArgumentRegister(reference, helperParameterIndex)
+                ?: throw PatchException("NewX reply helper Composer argument is unavailable: $entry")
+            val entryComposerRegister = entryFlow.parameterRegister(1)
+                ?: throw PatchException("NewX reply Function3 Composer parameter is unavailable: $entry")
+            if (entryFlow.origin(helperCallIndex, forwardedRegister) != -entryComposerRegister - 1) {
+                throw PatchException("NewX reply helper does not forward the Function3 Composer in $entry")
+            }
+            if (entryFlow.instructions.getOrNull(helperCallIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT ||
+                selected.none { returnIndex ->
+                    val returned = entryFlow.instructions[returnIndex]
+                    returned.opcode == Opcode.RETURN_OBJECT &&
+                        entryFlow.origin(returnIndex, (returned as OneRegisterInstruction).registerA) == helperCallIndex + 1
+                }
+            ) throw PatchException("NewX reply content helper result is not returned by $entry")
+            Triple(helperFlow, helperFlow.reachable(), calls)
+        }
+        val selectedHelperCalls = selected.filter { helperCallIndex ->
+            val instruction = entryFlow.instructions[helperCallIndex]
+            val reference = instruction.getReference<MethodReference>() ?: return@filter false
+            instruction.opcode in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) &&
+                reference.definingClass == type && reference.name != "<init>"
+        }
+        if (helperRoutes.isEmpty()) {
+            if (selectedHelperCalls.isEmpty()) return false
+            val candidates = selected.mapNotNull { index ->
+                val instruction = entryFlow.instructions[index]
+                val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+                if (instruction.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE)) return@mapNotNull null
+                "$index $reference registers=${instruction.registersUsed} " +
+                    "receiverOrigin=${entryFlow.origin(index, instruction.registersUsed.first())} expected=${-entryFlow.parameterStart - 1}"
+            }
+            throw PatchException("No valid selected NewX reply helper route in $entry: candidates=$candidates")
+        }
+        val helperRoute = requireExactlyOne(
+            "NewX selected reply content composer helper in $entry",
+            helperRoutes,
+        )
+        helperRoute
+    }
+    requireExactlyOne(
+        "NewX selected reply content composer call in ${composerProofFlow.method}",
+        composerCalls,
+    )
+    if (composerProofIndexes.none { index ->
+            val instruction = composerProofFlow.instructions[index]
             instruction.opcode == Opcode.CHECK_CAST && instruction.getReference<TypeReference>()?.type ==
                 "Landroidx/compose/animation/AnimatedVisibilityScope;"
         }
-    ) throw PatchException("NewX reply content is not an AnimatedVisibility scope: $entry")
+    ) throw PatchException("NewX reply content is not an AnimatedVisibility scope: ${composerProofFlow.method}")
 
     val wrapperIndex = requireExactlyOne(
         "NewX reply content Compose wrapper in $method",

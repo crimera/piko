@@ -151,7 +151,7 @@ val customizeNewXNavBarPatch =
             val tabDataMatch = requireExactlyOne("NewX tabData builder", tabDataMatches)
             val tabData = validateNewXNavBarTabData(tabDataMatch)
 
-            injectNavBarFilter(tabDataMatch)
+            injectNavBarFilter(resolveNewXNavBarFilterTarget(tabDataMatch))
 
             val drawerRows = resolveDrawerRowCalls()
             val destinations =
@@ -183,19 +183,23 @@ val customizeNewXNavBarPatch =
  * Filters and reorders the tab map before the landing component consumes it. The extension reads
  * the editor-managed order and hidden items from its own settings.
  */
-private fun injectNavBarFilter(match: Match) {
-    val target = resolveNewXNavBarFilterTarget(match)
+internal fun injectNavBarFilter(target: TabDataFilterTarget) {
+    if (target.tabDataRegister > 0xff) {
+        throw PatchException(
+            "NewX tabData register v${target.tabDataRegister} exceeds the 8-bit " +
+                "in-place filter encoding limit",
+        )
+    }
+
     target.method.insertHook(
         index = target.insertionIndex,
-        excludedRegisters = listOf(target.tabDataRegister),
         relocateBranchTargets = false,
     ) {
-        val workRegister = scratchRegister()
-        move(workRegister, target.tabDataRegister, OBJECT_DESCRIPTOR)
-        invokeStatic(methodReference(TAB_DATA_FILTER_DESCRIPTOR), workRegister)
-        moveResult(workRegister, MAP_DESCRIPTOR)
-        checkCast(workRegister, target.resultType)
-        move(target.tabDataRegister, workRegister, OBJECT_DESCRIPTOR)
+        // The map is consumed by the immediately following constructor. Reuse its argument
+        // register as the filter's result so dense constructors need no live-range scratch.
+        invokeStatic(methodReference(TAB_DATA_FILTER_DESCRIPTOR), target.tabDataRegister)
+        moveResult(target.tabDataRegister, MAP_DESCRIPTOR)
+        checkCast(target.tabDataRegister, target.resultType)
     }
 }
 

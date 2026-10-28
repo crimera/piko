@@ -16,6 +16,9 @@ import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.requireAtMostOne
+import app.crimera.patches.common.destinationRegisterOrNull
+import app.crimera.patches.common.valueReachesRegister
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -26,6 +29,8 @@ import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
 import com.android.tools.smali.dexlib2.iface.Method
@@ -191,8 +196,12 @@ private fun resolvePostTextModels(
     val mentionMatch = MentionEntityModelFingerprint.requireSingle("mention-entity model")
     val mentionDescriptor = mentionMatch.originalClassDef.type
     val mentionStartIdxField = mentionMatch.fieldForToStringLabel(", startIdx=")
-    val mentionEndIdxField = mentionMatch.fieldForToStringLabel(", endIdx=")
-    val mentionScreenNameField = mentionMatch.fieldForToStringLabel(", screenName=")
+    val mentionEndIdxField = mentionMatch.originalMethod.fieldForToStringLabelThroughAppendHelper(", endIdx=") {
+        context.classDefByOrNull(it)
+    } ?: mentionMatch.fieldForToStringLabel(", endIdx=")
+    val mentionScreenNameField = mentionMatch.originalMethod.fieldForToStringLabelThroughAppendHelper(", screenName=") {
+        context.classDefByOrNull(it)
+    } ?: mentionMatch.fieldForToStringLabel(", screenName=")
     mentionStartIdxField.requireType(INTEGER_DESCRIPTOR, "mention start index")
     mentionEndIdxField.requireType(INTEGER_DESCRIPTOR, "mention end index")
     mentionScreenNameField.requireType(STRING_DESCRIPTOR, "mention screen name")
@@ -241,6 +250,222 @@ private fun resolvePostTextModels(
         authorVerifiedTypeGetter = authorVerifiedTypeGetter,
         authorIdGetter = authorIdGetter,
     )
+}
+
+/**
+ * Handles model toString helpers that append the builder's next value inside a static formatter.
+ * The label-to-value association is proven from the formatter's StringBuilder append order and
+ * the call-site field register; no obfuscated helper identity is used.
+ */
+internal fun Method.fieldForToStringLabelThroughAppendHelper(
+    label: String,
+    classByType: (String) -> com.android.tools.smali.dexlib2.iface.ClassDef?,
+): FieldReference? {
+    val methodImplementation = implementation ?: return null
+    val code = methodImplementation.instructions.toList()
+    // Append order is meaningful only on a single straight-line formatting path.
+    if (code.any { it is com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction } ||
+        methodImplementation.tryBlocks.isNotEmpty()
+    ) throw PatchException("NewX model formatter label proof requires a straight-line body: $this")
+    val labelIndices = code.indices.filter { index ->
+        code[index].getReference<StringReference>()?.string == label
+    }
+    if (labelIndices.isEmpty()) return null
+    val labelIndex = requireExactlyOne("NewX model label '$label' in $this", labelIndices)
+    val labelRegister = (code[labelIndex] as? OneRegisterInstruction)?.registerA
+        ?: throw PatchException("NewX model label '$label' has no register in $this")
+
+    val directLabelAppends = code.indices.filter { index ->
+        if (index <= labelIndex) return@filter false
+        val reference = code[index].getReference<MethodReference>() ?: return@filter false
+        reference.isStringBuilderAppend("Ljava/lang/String;") &&
+            code[index].invokedArgumentRegister(reference, 0)?.let { argument ->
+                code.valueReachesRegister(labelIndex, labelRegister, index, argument)
+            } == true
+    }
+    val formatterCalls = code.indices.filter { index ->
+        if (index <= labelIndex) return@filter false
+        val instruction = code[index]
+        if (instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) return@filter false
+        val reference = instruction.getReference<MethodReference>() ?: return@filter false
+        reference.returnType == STRING_DESCRIPTOR &&
+            reference.parameterTypes.count { it.toString() == "Ljava/lang/StringBuilder;" } == 1
+    }
+
+    val candidateProofs = mutableListOf<String>()
+    val fields = formatterCalls.flatMap { formatterIndex ->
+        val reference = code[formatterIndex].getReference<MethodReference>()!!
+        val formatterClass = classByType(reference.definingClass)
+            ?: throw PatchException("NewX model formatter owner was not found: ${reference.definingClass}")
+        val formatter = requireExactlyOne(
+            "NewX model formatter $reference",
+            formatterClass.methods.filter { it.toString() == reference.toString() },
+        )
+        if (!AccessFlags.STATIC.isSet(formatter.accessFlags)) {
+            throw PatchException("NewX model formatter is not static: $formatter")
+        }
+        val builderParameter = requireExactlyOne(
+            "NewX StringBuilder parameter in $formatter",
+            reference.parameterTypes.indices.filter { reference.parameterTypes[it].toString() == "Ljava/lang/StringBuilder;" },
+        )
+        val builderArgument = code[formatterIndex].invokedArgumentRegister(reference, builderParameter)
+            ?: throw PatchException("NewX model formatter has no builder argument: $formatter")
+        val labelArgumentCandidate = requireAtMostOne("NewX formatter argument for '$label' in $this",
+            reference.parameterTypes.indices.filter { parameter ->
+            reference.parameterTypes[parameter].toString() == STRING_DESCRIPTOR &&
+                code[formatterIndex].invokedArgumentRegister(reference, parameter)?.let { argument ->
+                    code.valueReachesRegister(labelIndex, labelRegister, formatterIndex, argument)
+                } == true
+        })
+        val directAppend = requireAtMostOne("NewX direct append for '$label' in $this", directLabelAppends.filter { appendIndex ->
+            if (appendIndex >= formatterIndex) return@filter false
+            val append = code[appendIndex]
+            val builder = append.registersUsed.firstOrNull() ?: return@filter false
+                builder == builderArgument &&
+                code.subList(appendIndex + 1, formatterIndex).none { it.destinationRegisterOrNull() == builder }
+        })
+        val labelArgument = labelArgumentCandidate.takeIf { directAppend == null }
+        if (labelArgument == null && directAppend == null) return@flatMap emptyList()
+        candidateProofs.add("call=$formatterIndex labelArgument=$labelArgument directAppend=$directAppend")
+
+        val formatterCode = formatter.implementation?.instructions?.toList()
+            ?: throw PatchException("NewX model formatter has no body: $formatter")
+        if (formatterCode.any { it is com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction } ||
+            formatter.implementation!!.tryBlocks.isNotEmpty()
+        ) throw PatchException("NewX append-order proof requires a straight-line formatter: $formatter")
+        val builderRegister = formatter.parameterRegister(builderParameter)
+            ?: throw PatchException("NewX model formatter builder register is unavailable: $formatter")
+        val appends = formatterCode.indices.filter { index ->
+            val append = formatterCode[index].getReference<MethodReference>() ?: return@filter false
+            append.definingClass == "Ljava/lang/StringBuilder;" && append.name == "append" &&
+                append.parameterTypes.size == 1 && append.returnType == "Ljava/lang/StringBuilder;" &&
+                formatterCode[index].registersUsed.firstOrNull()?.let { receiver ->
+                    formatterCode.valueReachesRegister(-1, builderRegister, index, receiver)
+                } == true
+        }
+        if (appends.isEmpty()) {
+            throw PatchException(
+                "NewX model formatter has no builder append for '$label' in $formatter " +
+                    "(builder=v$builderRegister)",
+            )
+        }
+
+        val labelAppend = if (labelArgument != null) {
+            val labelParameterRegister = formatter.parameterRegister(labelArgument)
+                ?: throw PatchException("NewX model formatter label register is unavailable: $formatter")
+            requireExactlyOne(
+                "NewX formatter append for model label '$label' in $formatter",
+                appends.filter { appendIndex ->
+                    val append = formatterCode[appendIndex].getReference<MethodReference>()!!
+                    append.parameterTypes.single().toString() == STRING_DESCRIPTOR &&
+                        formatterCode[appendIndex].invokedArgumentRegister(append, 0)?.let { argument ->
+                            formatterCode.valueReachesRegister(-1, labelParameterRegister, appendIndex, argument)
+                        } == true
+                },
+            )
+        } else {
+            appends.first()
+        }
+        val valueAppend = if (labelArgument == null) {
+            labelAppend
+        } else {
+            appends.filter { it > labelAppend }.minOrNull()
+                ?: throw PatchException("NewX formatter has no value append after '$label' in $formatter")
+        }
+        val valueReference = formatterCode[valueAppend].getReference<MethodReference>()!!
+        val valueRegister = formatterCode[valueAppend].invokedArgumentRegister(valueReference, 0)
+            ?: throw PatchException("NewX formatter value append has no value register: $formatter")
+        val valueParameter = formatter.parameterIndexForRegister(valueRegister)
+            ?: throw PatchException("NewX formatter appends a non-parameter value for '$label': $formatter")
+        val callArgument = code[formatterIndex].invokedArgumentRegister(reference, valueParameter)
+            ?: throw PatchException("NewX formatter value argument is unavailable for '$label': $formatter")
+        val startIndex = if (directAppend != null) directAppend + 1 else labelIndex + 1
+        val fieldIndexes = code.indices.filter { fieldIndex ->
+            if (fieldIndex !in startIndex until formatterIndex) return@filter false
+            val instruction = code[fieldIndex]
+            if (instruction.opcode !in setOf(Opcode.IGET, Opcode.IGET_WIDE, Opcode.IGET_OBJECT,
+                    Opcode.IGET_BOOLEAN, Opcode.IGET_BYTE, Opcode.IGET_CHAR, Opcode.IGET_SHORT)
+            ) return@filter false
+            val field = instruction.getReference<FieldReference>() ?: return@filter false
+            val registers = instruction as? TwoRegisterInstruction ?: return@filter false
+            val destination = (instruction as? OneRegisterInstruction)?.registerA ?: return@filter false
+            val receiverRegister = methodImplementation.registerCount -
+                parameterTypes.sumOf { parameter -> if (parameter.toString() in setOf("J", "D")) 2 else 1 } - 1
+            field.definingClass == definingClass &&
+                code.formatterFieldValueReaches(fieldIndex, destination, formatterIndex, callArgument) &&
+                field.type == reference.parameterTypes[valueParameter].toString() &&
+                code.valueReachesRegister(-1, receiverRegister, fieldIndex, registers.registerB)
+        }
+        candidateProofs[candidateProofs.lastIndex] +=
+            " valueParameter=$valueParameter callArgument=$callArgument fieldIndexes=$fieldIndexes"
+        fieldIndexes.mapNotNull { fieldIndex -> code[fieldIndex].getReference<FieldReference>() }
+    }
+    if (fields.isEmpty()) {
+        if (candidateProofs.isNotEmpty()) {
+            throw PatchException(
+                "NewX model formatter could not prove a field after '$label' in $this: $candidateProofs",
+            )
+        }
+        return null
+    }
+    return requireExactlyOne("NewX model field for '$label' in $this", fields.distinctBy(FieldReference::toString))
+}
+
+/** Formatting values may move between registers, but must not be overwritten before append. */
+private fun List<Instruction>.formatterFieldValueReaches(
+    fieldIndex: Int,
+    fieldRegister: Int,
+    callIndex: Int,
+    argumentRegister: Int,
+): Boolean {
+    val aliases = mutableSetOf(fieldRegister)
+    val moves = setOf(Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16,
+        Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
+    for (index in fieldIndex + 1 until callIndex) {
+        val instruction = this[index]
+        if (instruction.opcode == Opcode.CHECK_CAST) continue
+        val sourceIsAlias = instruction.opcode in moves &&
+            (instruction as TwoRegisterInstruction).registerB in aliases
+        val destination = if (instruction.opcode.setsRegister()) {
+            (instruction as OneRegisterInstruction).registerA
+        } else null
+        destination?.let { destination ->
+            aliases.remove(destination)
+            if (instruction.opcode.setsWideRegister()) aliases.remove(destination + 1)
+            if (sourceIsAlias) aliases.add(destination)
+        }
+    }
+    return argumentRegister in aliases
+}
+
+private fun Method.parameterRegister(parameterIndex: Int): Int? {
+    if (parameterIndex !in parameterTypes.indices) return null
+    val implementation = implementation ?: return null
+    var register = implementation.registerCount - parameterTypes.sumOf { parameter ->
+        if (parameter.toString() in setOf("J", "D")) 2 else 1
+    } - if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1
+    parameterTypes.take(parameterIndex).forEach { parameter ->
+        register += if (parameter.toString() in setOf("J", "D")) 2 else 1
+    }
+    return register
+}
+
+private fun Method.parameterIndexForRegister(register: Int): Int? = requireAtMostOne(
+    "NewX formatter parameter for v$register in $this",
+    parameterTypes.indices.filter { parameterRegister(it) == register },
+)
+
+private fun MethodReference.isStringBuilderAppend(valueType: String): Boolean =
+    definingClass == "Ljava/lang/StringBuilder;" && name == "append" &&
+        parameterTypes.map(CharSequence::toString) == listOf(valueType) &&
+        returnType == "Ljava/lang/StringBuilder;"
+
+private fun Instruction.invokedArgumentRegister(reference: MethodReference, parameterIndex: Int): Int? {
+    val receiverCount = if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) 0 else 1
+    val argumentIndex = receiverCount + reference.parameterTypes.take(parameterIndex).sumOf { parameter ->
+        if (parameter.toString() in setOf("J", "D")) 2 else 1
+    }
+    return registersUsed.getOrNull(argumentIndex)
 }
 
 context(context: BytecodePatchContext)

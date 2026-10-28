@@ -34,7 +34,6 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -750,16 +749,9 @@ private fun isMoveObject(instruction: Instruction): Boolean =
         instruction.opcode == Opcode.MOVE_OBJECT_16
 
 private fun writesRegister(instruction: Instruction, register: Int): Boolean {
-    val destination =
-        when {
-            isMoveObject(instruction) -> (instruction as? TwoRegisterInstruction)?.registerA
-            instruction.opcode == Opcode.IGET_OBJECT -> (instruction as? TwoRegisterInstruction)?.registerA
-            instruction.opcode.name.startsWith("MOVE_RESULT") ||
-                instruction.opcode == Opcode.NEW_INSTANCE ||
-                instruction.opcode.name.startsWith("CONST") -> (instruction as? OneRegisterInstruction)?.registerA
-            else -> null
-        }
-    return destination == register
+    if (!instruction.opcode.setsRegister()) return false
+    val destination = instruction.registersUsed.firstOrNull() ?: return false
+    return destination == register || instruction.opcode.setsWideRegister() && destination + 1 == register
 }
 
 // Reads the destination of a const/4, const/16, or const/high16 instruction.
@@ -1243,10 +1235,8 @@ private fun resolveViewerFlags(hostMethod: Method, constructorDescriptor: String
     )
 }
 
-// Reads a flags int constant feeding a call-site argument register. Looks back
-// over instructions provably free of register writes (consts to other registers,
-// invokes, branches, returns, field stores); any other shape aborts the site so a
-// stale value can never be picked up. Uses the const format interfaces directly
+// Reads a flags int constant without crossing a write to either tracked register slot.
+// Uses the const format interfaces directly
 // because the shared OneRegisterInstruction cast does not resolve against
 // dexlib2 instruction objects in this runtime.
 private fun nearbyFlagsConstant(
@@ -1260,18 +1250,8 @@ private fun nearbyFlagsConstant(
         if (constDestination(prior) == flagsRegister) {
             return (prior as? NarrowLiteralInstruction)?.narrowLiteral
         }
-        val name = prior.opcode.name
-        val sideEffectFree = name.startsWith("CONST") ||
-            name.startsWith("INVOKE") ||
-            name.startsWith("IF_") ||
-            name.startsWith("GOTO") ||
-            name.startsWith("RETURN") ||
-            name == "NOP" ||
-            name.startsWith("MONITOR") ||
-            name.startsWith("IPUT") ||
-            name.startsWith("SPUT") ||
-            name == "THROW"
-        if (!sideEffectFree) return null
+        // Result-producing invokes do not write a DEX register until move-result.
+        if (prior.opcode.format.isPayloadFormat || writesRegister(prior, flagsRegister)) return null
     }
     return null
 }

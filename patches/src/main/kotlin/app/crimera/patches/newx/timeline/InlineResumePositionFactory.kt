@@ -323,7 +323,6 @@ private fun resumeFactorySuccessors(code: List<Instruction>): List<List<Int>> {
     val indexByOffset = offsets.dropLast(1).withIndex().associate { (index, offset) -> offset to index }
     return code.mapIndexed { index, instruction ->
         val opcode = instruction.opcode
-        val name = opcode.toString()
         val target = (instruction as? OffsetInstruction)?.let {
             indexByOffset[offsets[index] + it.codeOffset]
                 ?: throw PatchException("NewX inline resume-position branch escapes factory at $index")
@@ -336,7 +335,7 @@ private fun resumeFactorySuccessors(code: List<Instruction>): List<List<Int>> {
                 Opcode.RETURN_WIDE,
                 Opcode.THROW,
             ) -> emptyList()
-            name.startsWith("GOTO") -> listOf(target ?: throw PatchException("NewX inline resume-position goto has no target"))
+            !opcode.canContinue() -> listOf(target ?: throw PatchException("NewX inline resume-position goto has no target"))
             target != null -> listOf(target, index + 1)
             else -> listOf(index + 1)
         }.also { successors ->
@@ -351,13 +350,18 @@ internal fun resumeFactoryInputs(code: List<Instruction>): Set<Int> {
     val indexByOffset = offsets.dropLast(1).withIndex().associate { it.value to it.index }
     val successors = code.mapIndexed { index, instruction ->
         val opcode = instruction.opcode
-        val name = opcode.toString()
-        if (opcode == Opcode.MOVE_EXCEPTION || !(name.startsWith("INVOKE_") || name.startsWith("MOVE_") || name.startsWith("CONST") ||
-                name.startsWith("IF_") || name.startsWith("GOTO") || opcode in setOf(
-                    Opcode.MOVE,
+        if (!(opcode in INVOKE_OPCODES || opcode in MOVE_OPCODES || opcode in setOf(
+                    Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16,
+                    Opcode.MOVE_RESULT, Opcode.MOVE_RESULT_WIDE, Opcode.MOVE_RESULT_OBJECT,
+                    Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST, Opcode.CONST_HIGH16,
+                    Opcode.CONST_WIDE_16, Opcode.CONST_WIDE_32, Opcode.CONST_WIDE, Opcode.CONST_WIDE_HIGH16,
+                    Opcode.CONST_STRING, Opcode.CONST_STRING_JUMBO, Opcode.CONST_CLASS,
+                    Opcode.CONST_METHOD_HANDLE, Opcode.CONST_METHOD_TYPE,
+                    Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32,
                     Opcode.IGET, Opcode.IGET_OBJECT, Opcode.IGET_WIDE, Opcode.CHECK_CAST,
                     Opcode.NEW_INSTANCE, Opcode.INSTANCE_OF, Opcode.ADD_INT_LIT8, Opcode.RETURN_OBJECT, Opcode.NOP,
-                ))
+                ) || opcode.format in setOf(com.android.tools.smali.dexlib2.Format.Format21t,
+                    com.android.tools.smali.dexlib2.Format.Format22t))
         ) throw PatchException("Unsupported NewX inline resume-position instruction: $opcode")
         val target = (instruction as? OffsetInstruction)?.let {
             indexByOffset[offsets[index] + it.codeOffset]
@@ -365,7 +369,7 @@ internal fun resumeFactoryInputs(code: List<Instruction>): Set<Int> {
         }
         when {
             opcode == Opcode.RETURN_OBJECT -> emptyList()
-            name.startsWith("GOTO") -> listOf(target!!)
+            !opcode.canContinue() -> listOf(target!!)
             target != null -> listOf(target, index + 1)
             else -> listOf(index + 1)
         }.also { successors ->

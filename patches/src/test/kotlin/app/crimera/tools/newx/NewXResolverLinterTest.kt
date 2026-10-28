@@ -1,6 +1,11 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
+import app.crimera.patches.newx.misc.dynamiccolor.isDefaultPaletteConstructorAdapter
+import app.crimera.patches.newx.misc.dynamiccolor.isMediaViewerButtonContent
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
+import app.crimera.patches.newx.misc.dynamiccolor.defaultPaletteConstructorRejection
 import app.crimera.patches.newx.misc.postdetails.replyComposerAnchorIndices
 import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
 import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
@@ -17,6 +22,7 @@ import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isPostDividerContentHelper
 import app.crimera.patches.newx.settings.resolveSettingsRowModelTargetInMethod
 import app.crimera.patches.newx.timeline.resolveInlineResumePositionFactory
+import app.crimera.patches.newx.timeline.postfilter.fieldForToStringLabelThroughAppendHelper
 import app.crimera.patches.newx.timeline.resumeFactoryInputs
 import app.crimera.patches.newx.timeline.wideReadHighRegisters
 import app.crimera.patches.newx.timeline.resolveResumePositionValidation
@@ -63,10 +69,221 @@ import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
     @Test
+    fun `branch local tint must survive every path from its load without dominating other colors`() {
+        fun candidate(clobber: Boolean): Method {
+            val body = MethodImplementationBuilder(4).apply {
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 3, getLabel("otherColor")))
+                addInstruction("sget-wide v0, Lfixture/Colors;->active:J".toInstruction())
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 3, getLabel("shared")))
+                if (clobber) addInstruction("const-wide/16 v0, 0x0".toInstruction())
+                else addInstruction("nop".toInstruction())
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("shared")))
+                addLabel("otherColor")
+                addInstruction("sget-wide v0, Lfixture/Colors;->other:J".toInstruction())
+                addLabel("shared")
+                addInstruction("invoke-static {v0, v1}, Lfixture/Renderer;->render(J)V".toInstruction())
+                addInstruction("return-void".toInstruction())
+            }.methodImplementation
+            return ImmutableMethod("Lfixture/Tints;", "render",
+                listOf(ImmutableMethodParameter("Z", emptySet(), null)), "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(), body)
+        }
+        assertFalse(candidate(false).provesValueFromInstruction(1, 0, 6, 0))
+        assertTrue(candidate(false).provesValueFromInstructionOnSourcePaths(1, 0, 6, 0))
+        assertFalse(candidate(true).provesValueFromInstructionOnSourcePaths(1, 0, 6, 0))
+    }
+
+    @Test
+    fun `media button content accepts auxiliary parameters but requires icon and text semantics`() {
+        val composer = "Landroidx/compose/runtime/Composer;"
+        val modifier = "Landroidx/compose/ui/Modifier;"
+        fun candidate(extraParameters: List<String>, text: Boolean = true, defaultTint: Boolean = false): Method {
+            val parameters = listOf(composer, "I") + extraParameters
+            val implementation = MethodImplementationBuilder(16 + parameters.size).apply {
+                addInstruction("const/16 v8, ${if (defaultTint) "0x8" else "0x0"}".toInstruction())
+                addInstruction(("invoke-static/range {v0 .. v8}, Lfixture/Icon;->render(" +
+                    "Lcom/x/icons/b;Ljava/lang/String;${modifier}JZ${composer}II)V").toInstruction())
+                if (text) addInstruction(("invoke-static {v0, v1, v2, v3}, " +
+                    "Landroidx/compose/material3/Fixture;->text(Ljava/lang/String;${modifier}J)V").toInstruction())
+                addInstruction("return-void".toInstruction())
+            }.methodImplementation
+            return ImmutableMethod("Lfixture/Button;", "render",
+                parameters.map { ImmutableMethodParameter(it, emptySet(), null) }, "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(), implementation)
+        }
+        assertTrue(candidate(emptyList()).isMediaViewerButtonContent())
+        assertTrue(candidate(listOf(modifier, "Lkotlin/jvm/functions/Function0;", "Ljava/lang/String;", "Z"))
+            .isMediaViewerButtonContent())
+        assertFalse(candidate(emptyList(), text = false).isMediaViewerButtonContent())
+        assertFalse(candidate(listOf("Ljava/lang/String;"), defaultTint = true).isMediaViewerButtonContent())
+    }
+
+    @Test
+    fun `mention fields follow values appended by the semantic toString formatter`() {
+        val owner = "Lfixture/Mention;"
+        val formatterOwner = "Lfixture/Formatter;"
+        fun method(
+            type: String,
+            name: String,
+            parameters: List<String>,
+            returnType: String,
+            registers: Int,
+            static: Boolean = false,
+            body: MethodImplementationBuilder.() -> Unit,
+        ) = ImmutableMethod(
+            type,
+            name,
+            parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+            returnType,
+            AccessFlags.PUBLIC.value or (if (static) AccessFlags.STATIC.value else 0),
+            emptySet(),
+            emptySet(),
+            MethodImplementationBuilder(registers).apply(body).methodImplementation,
+        )
+        fun MethodImplementationBuilder.add(instruction: String) = addInstruction(instruction.toInstruction())
+
+        fun toStringMethod(shape: String = "direct") = method(owner, "toString", emptyList(), "Ljava/lang/String;", 6) {
+            add("new-instance v0, Ljava/lang/StringBuilder;")
+            add("const-string v1, \"MentionEntity(userId=\"")
+            add("invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V")
+            add("iget-object v1, v5, $owner->userId:Ljava/lang/Object;")
+            add("invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;")
+            add("const-string v1, \", startIdx=\"")
+            add("invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+            add("iget v1, v5, $owner->start:I")
+            add("invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;")
+            add("const-string v1, \", endIdx=\"")
+            add("invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+            add("const-string v1, \", screenName=\"")
+            add("const-string v2, \")\"")
+            if (shape == "alias") {
+                add("iget v3, v5, $owner->end:I")
+                add("move v2, v3")
+                add("move v3, v2")
+                add("const-string v2, \" )\"")
+            } else {
+                add("iget v3, v5, $owner->end:I")
+            }
+            if (shape == "overwritten") add("const/4 v3, 0x0")
+            if (shape == "arithmeticOverwrite") add("add-int/lit8 v3, v3, 0x1")
+            add("iget-object v4, v5, $owner->screenName:Ljava/lang/String;")
+            // Label and value are deliberately not adjacent helper parameters.
+            add("invoke-static {v3, v1, v2, v4, v0}, $formatterOwner->write(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/StringBuilder;)Ljava/lang/String;")
+            add("move-result-object v4")
+            add("return-object v4")
+        }
+        val formatter = method(
+            formatterOwner,
+            "write",
+            listOf("I", "Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/StringBuilder;"),
+            "Ljava/lang/String;",
+            5,
+            static = true,
+        ) {
+            add("invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;")
+            add("invoke-virtual {v4, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+            add("invoke-virtual {v4, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+            add("invoke-virtual {v4, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+            add("invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;")
+            add("move-result-object v0")
+            add("return-object v0")
+        }
+        val formatterClass = ImmutableClassDef(
+            formatterOwner,
+            AccessFlags.PUBLIC.value,
+            "Ljava/lang/Object;",
+            emptyList(),
+            null,
+            emptySet(),
+            emptyList(),
+            listOf(formatter),
+        )
+
+        assertEquals(
+            "$owner->end:I",
+            toStringMethod().fieldForToStringLabelThroughAppendHelper(", endIdx=") { type ->
+                formatterClass.takeIf { it.type == type }
+            }?.toString(),
+        )
+        assertEquals(
+            "$owner->screenName:Ljava/lang/String;",
+            toStringMethod().fieldForToStringLabelThroughAppendHelper(", screenName=") { type ->
+                formatterClass.takeIf { it.type == type }
+            }?.toString(),
+        )
+        assertEquals("$owner->end:I", toStringMethod("alias")
+            .fieldForToStringLabelThroughAppendHelper(", endIdx=") { formatterClass }?.toString())
+        assertFailsWith<PatchException> {
+            toStringMethod("overwritten").fieldForToStringLabelThroughAppendHelper(", endIdx=") { formatterClass }
+        }
+        assertFailsWith<PatchException> {
+            toStringMethod("arithmeticOverwrite").fieldForToStringLabelThroughAppendHelper(", endIdx=") { formatterClass }
+        }
+    }
+
+    @Test
+    fun `theme palette default constructor requires proven forwarding of customized color slots`() {
+        val primary = "Lfixture/Palette;-><init>(Z${"J".repeat(17)})V"
+        val valid = defaultPaletteConstructorFixture()
+        assertEquals(null, valid.defaultPaletteConstructorRejection(primary))
+        val misrouted = defaultPaletteConstructorFixture(misrouteToken = 13)
+        assertTrue(misrouted.defaultPaletteConstructorRejection(primary).orEmpty().isNotEmpty())
+        assertEquals(null, defaultPaletteConstructorFixture(shape = "redundant")
+            .defaultPaletteConstructorRejection(primary))
+        for (shape in listOf("bypass", "clobber", "narrowClobber")) {
+            assertTrue(defaultPaletteConstructorFixture(shape = shape)
+                .defaultPaletteConstructorRejection(primary) != null, shape)
+        }
+    }
+
+    private fun defaultPaletteConstructorFixture(misrouteToken: Int? = null, shape: String = "direct"): ImmutableMethod {
+        val palette = "Lfixture/Palette;"
+        val primary = "$palette-><init>(Z${"J".repeat(17)})V"
+        val implementation = MethodImplementationBuilder(72).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            add("const/high16 v0, 0x10000")
+            add("and-int v0, v71, v0")
+            addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("default")))
+            add("move-wide/from16 v33, v53")
+            addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("forwarded")))
+            addLabel("default")
+            add("move-wide/from16 v33, v69")
+            addLabel("forwarded")
+            add("move-wide/from16 v35, v63")
+            add("move-object/from16 v1, v37")
+            add("move/from16 v2, v38")
+            if (shape == "bypass") {
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 0, getLabel("delegate")))
+            }
+            (0..14).forEach { token ->
+                val source = if (token == misrouteToken) 39 + (token - 1) * 2 else 39 + token * 2
+                add("move-wide/from16 v${3 + token * 2}, v$source")
+            }
+            if (shape == "redundant") add("move-wide/from16 v29, v65")
+            if (shape == "clobber") add("const-wide/16 v29, 0x0")
+            if (shape == "narrowClobber") add("const/16 v30, 0x0")
+            addLabel("delegate")
+            add("invoke-direct/range {v1 .. v36}, $primary")
+            add("return-void")
+        }.methodImplementation
+        val parameters = listOf("Z") + List(16) { "J" } + "I"
+        return ImmutableMethod(
+            palette,
+            "<init>",
+            parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.CONSTRUCTOR.value,
+            emptySet(),
+            emptySet(),
+            implementation,
+        )
+    }
+
+    @Test
     fun `reply content anchor follows the constructed case and requires consumed wrapper content`() {
         for (selectorType in listOf("B", "I")) {
             for (conditionalDispatch in listOf(false, true)) {
-                for (shape in listOf("selected", "otherCase", "unconsumed")) {
+                for (shape in listOf("selected", "helperDelegation", "reorderedHelper", "otherCase", "unconsumed")) {
                     val (host, target, classes) = replyContentFixture(selectorType, conditionalDispatch, shape)
                     val description = "$selectorType conditional=$conditionalDispatch $shape"
                     if (shape == "unconsumed") {
@@ -77,7 +294,7 @@ class NewXResolverLinterTest {
                         continue
                     }
                     assertEquals(
-                        if (shape == "selected") listOf(0) else emptyList(),
+                        if (shape in setOf("selected", "helperDelegation", "reorderedHelper")) listOf(0) else emptyList(),
                         host.replyComposerAnchorIndices(target, classes::get),
                         description,
                     )
@@ -145,9 +362,19 @@ class NewXResolverLinterTest {
             // This return must terminate reachability, not fall through into another merged case.
             add("return-object v0")
             addLabel("composer")
-            add("check-cast v10, Landroidx/compose/animation/AnimatedVisibilityScope;")
-            (1..8).forEach { add("const/4 v$it, 0x0") }
-            add("invoke-static/range {v1 .. v8}, $target")
+            if (shape in setOf("helperDelegation", "reorderedHelper")) {
+                if (shape == "reorderedHelper") {
+                    add("const/4 v2, 0x0")
+                    add("invoke-direct {v9, v11, v10, v12, v2}, $content->renderContent(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)Ljava/lang/Object;")
+                } else {
+                    add("invoke-direct/range {v9 .. v12}, $content->renderContent(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
+                }
+                add("move-result-object v1")
+            } else {
+                add("check-cast v10, Landroidx/compose/animation/AnimatedVisibilityScope;")
+                (1..8).forEach { add("const/4 v$it, 0x0") }
+                add("invoke-static/range {v1 .. v8}, $target")
+            }
             add("return-object v1")
             if (!conditionalDispatch) {
                 addLabel("payload")
@@ -173,12 +400,26 @@ class NewXResolverLinterTest {
                 "Landroidx/compose/runtime/internal/FixtureContent;$composer)V")
             add("return-void")
         }
+        val helperParameters = List(3) { "Ljava/lang/Object;" } + if (shape == "reorderedHelper") listOf("I") else emptyList()
+        val helper = method(content, "renderContent", helperParameters, "Ljava/lang/Object;", 12 + if (shape == "reorderedHelper") 1 else 0) {
+            val scopeRegister = if (shape == "reorderedHelper") 10 else 9
+            val composerRegister = if (shape == "reorderedHelper") 9 else 10
+            add("check-cast v$scopeRegister, Landroidx/compose/animation/AnimatedVisibilityScope;")
+            add("check-cast v$composerRegister, $composer")
+            (0..4).forEach { add("const/4 v$it, 0x0") }
+            add("move-object v5, v$composerRegister")
+            add("const/4 v6, 0x0")
+            add("const/4 v7, 0x0")
+            add("invoke-static/range {v0 .. v7}, $target")
+            add("const/4 v0, 0x0")
+            add("return-object v0")
+        }
         val definition = ImmutableClassDef(
             content, AccessFlags.PUBLIC.value or AccessFlags.FINAL.value, "Ljava/lang/Object;",
             listOf("Lkotlin/jvm/functions/Function3;"), null, emptySet(),
             listOf(ImmutableField(content, "selector", selectorType,
                 AccessFlags.PUBLIC.value or AccessFlags.FINAL.value, null, emptySet(), emptySet())),
-            listOf(constructor, decoyConstructor, invoke),
+            listOf(constructor, decoyConstructor, invoke, helper),
         )
         return Triple(host, target, mapOf(content to definition))
     }
@@ -188,7 +429,7 @@ class NewXResolverLinterTest {
         val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
         val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
         val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
-        listOf("direct", "relocated", "unrelatedTry").forEach { shape ->
+        listOf("direct", "relocated", "unrelatedTry", "dispatchPolicy").forEach { shape ->
             val (handler, classes) = downloadCapabilityFixture(shape)
             val before = handler.instructions.map { it.opcode }
             assertEquals(if (shape == "direct") 3 else 2,
@@ -373,16 +614,33 @@ class NewXResolverLinterTest {
                 downloadInstruction("return-object v0")
             }
         }
-        val suspendMethod = method(coroutine, "invokeSuspend", listOf("Ljava/lang/Object;"), "Ljava/lang/Object;", 3) {
-            downloadInstruction("iget-byte v0, v1, $coroutine->selector:B")
+        val suspendMethod = method(
+            coroutine,
+            "invokeSuspend",
+            listOf("Ljava/lang/Object;"),
+            "Ljava/lang/Object;",
+            if (shape == "dispatchPolicy") 5 else 3,
+        ) {
+            downloadInstruction(
+                "iget-byte v0, ${if (shape == "dispatchPolicy") "v3" else "v1"}, $coroutine->selector:B",
+            )
             val exceptionScope = when (shape) {
                 "unrelatedTry" -> "unrelated"
                 "selectedTry" -> "selected"
                 else -> null
             }
             dispatch(0, exceptionScope) {
-                downloadInstruction("invoke-direct {v1, v2}, $coroutine->step(Ljava/lang/Object;)Ljava/lang/Object;")
-                downloadInstruction("move-result-object v0")
+                if (shape == "dispatchPolicy") {
+                    downloadInstruction("iget-object v0, v3, $coroutine->handler:Ljava/lang/Object;")
+                    downloadInstruction("check-cast v0, $handlerType")
+                    downloadInstruction("iget-object v1, v0, $handlerType->policy:$adapter")
+                    downloadInstruction("const-string v2, \"post-key\"")
+                    downloadInstruction("invoke-virtual {v1, v2, v3}, $adapter->policy(Ljava/lang/String;Lkotlin/coroutines/jvm/internal/ContinuationImpl;)Ljava/lang/Enum;")
+                    downloadInstruction("move-result-object v0")
+                } else {
+                    downloadInstruction("invoke-direct {v1, v2}, $coroutine->step(Ljava/lang/Object;)Ljava/lang/Object;")
+                    downloadInstruction("move-result-object v0")
+                }
                 downloadInstruction("return-object v0")
             }
         }
