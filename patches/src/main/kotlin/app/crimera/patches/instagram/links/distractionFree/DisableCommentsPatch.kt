@@ -45,7 +45,7 @@ private object ReelsCommentStateFingerprint : Fingerprint(
 val disableCommentsPatch =
     bytecodePatch(
         name = "Disable comments",
-        description = "Disables comments and hides comment buttons and counts on posts and reels.",
+        description = "Disables comments and hides comment buttons on posts, reels and stories",
     ) {
         dependsOn(settingsPatch, interceptUriPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -77,6 +77,7 @@ val disableCommentsPatch =
                 """.trimIndent(),
             )
 
+            hideStoryComments(HIDE_COMMENT_BUTTONS)
             enableSettings("disableComments")
         }
     }

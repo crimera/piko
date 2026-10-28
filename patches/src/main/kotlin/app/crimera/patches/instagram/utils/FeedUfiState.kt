@@ -27,18 +27,18 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 /**
- * Feed UFI state toString(), matching the boolean value appended after [label].
+ * State toString(), matching the boolean value appended after [label].
  */
-private fun feedUfiStateToStringFingerprint(label: String) = Fingerprint(
+private fun booleanStateToStringFingerprint(marker: String, label: String) = Fingerprint(
     name = "toString",
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    filters = listOf(
-        string("MediaUfiUiState(mediaForActionHandler="),
-        string(label),
+    filters = buildList {
+        add(string(marker))
+        if (label != marker) add(string(label))
         // Large state objects first move the value out of a temporary register.
-        methodCall(smali = "Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;", location = MatchAfterWithin(2)),
-    ),
+        add(methodCall(smali = "Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;", location = MatchAfterWithin(2)))
+    },
 )
 
 /**
@@ -46,7 +46,12 @@ private fun feedUfiStateToStringFingerprint(label: String) = Fingerprint(
  */
 context(_: BytecodePatchContext)
 internal fun feedUfiStateField(label: String): FieldReference {
-    val toStringMatch = feedUfiStateToStringFingerprint(label).matchSingle()
+    return booleanStateField("MediaUfiUiState(mediaForActionHandler=", label)
+}
+
+context(_: BytecodePatchContext)
+internal fun booleanStateField(marker: String, label: String): FieldReference {
+    val toStringMatch = booleanStateToStringFingerprint(marker, label).matchSingle()
     val toString = toStringMatch.method
     var index = toStringMatch.instructionMatches.last().index
     var register = toStringMatch.instructionMatches.last().instruction.registersUsed[1]
@@ -58,7 +63,7 @@ internal fun feedUfiStateField(label: String): FieldReference {
         when (read.opcode) {
             Opcode.MOVE, Opcode.MOVE_FROM16, Opcode.MOVE_16 -> register = (read as TwoRegisterInstruction).registerB
             Opcode.IGET_BOOLEAN -> return read.getReference<FieldReference>()!!
-            else -> throw PatchException("Unexpected feed UFI state instruction: ${read.opcode}")
+            else -> throw PatchException("Unexpected boolean state instruction: ${read.opcode}")
         }
     }
 }
