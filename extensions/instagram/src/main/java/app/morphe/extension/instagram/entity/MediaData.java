@@ -274,7 +274,7 @@ public class MediaData extends Entity {
         return imageList;
     }
 
-    private Object[] getFirstFrameCandidates() throws Exception {
+    private Object[] getAdditionalImageCandidates() throws Exception {
         Object imageInfo = super.getField(this.getMoreExtendedData(), "fieldName");
         if (imageInfo == null) return new Object[0];
         Class<?> imageInfoType = Class.forName("com.instagram.model.mediasize.ImageInfo");
@@ -282,31 +282,33 @@ public class MediaData extends Entity {
         if (additional == null) return new Object[0];
         Class<?> additionalType = Class.forName("com.instagram.model.mediasize.AdditionalCandidates");
         return new Object[]{additionalType.getMethod("firstFrameMethod").invoke(additional),
-                additionalType.getMethod("igtvFrameMethod").invoke(additional)};
+                additionalType.getMethod("igtvFrameMethod").invoke(additional),
+                additionalType.getMethod("smartFrameMethod").invoke(additional)};
     }
 
     public boolean isFirstFrameCover() {
         try {
             ImageData cover = this.getBestImage();
             if (cover == null) return false;
-            String coverAsset = imageAsset(cover.getUrl());
-            int width = cover.getWidth();
-            int height = cover.getHeight();
-            if (coverAsset == null || width <= 0 || height <= 0) return false;
-            for (Object candidate : this.getFirstFrameCandidates()) {
-                if (candidate == null) continue;
-                ImageData frame = new ImageData(candidate);
-                int fw = frame.getWidth();
-                int fh = frame.getHeight();
-                // A custom cover may coexist with first_frame: only the same image and aspect ratio qualify.
-                if (fw > 0 && fh > 0 && coverAsset.equals(imageAsset(frame.getUrl()))
-                        && Math.abs((double) fw * height - (double) fh * width) <= (double) fh * width * 0.02) {
-                    return true;
-                }
+            Object[] candidates = this.getAdditionalImageCandidates();
+            for (int i = 0; i < Math.min(2, candidates.length); i++) {
+                if (candidates[i] != null && sameCover(cover, new ImageData(candidates[i]))) return true;
             }
         } catch (Exception | LinkageError ignored) {
         }
         return false;
+    }
+
+    private static boolean sameCover(ImageData cover, ImageData candidate) throws Exception {
+        String asset = imageAsset(cover.getUrl());
+        int width = cover.getWidth();
+        int height = cover.getHeight();
+        int cw = candidate.getWidth();
+        int ch = candidate.getHeight();
+        // Additional frames may show a different image or aspect ratio.
+        return asset != null && width > 0 && height > 0 && cw > 0 && ch > 0
+                && asset.equals(imageAsset(candidate.getUrl()))
+                && Math.abs((double) cw * height - (double) ch * width) <= (double) ch * width * 0.02;
     }
 
     private static String imageAsset(String url) {
@@ -383,8 +385,29 @@ public class MediaData extends Entity {
         return highestResolution(this.getVideoVariants());
     }
 
-    public ImageData getBestImage() throws Exception {
+    public ImageData getBestOriginalImage() throws Exception {
         return highestResolution(this.getImageVariants());
+    }
+
+    public ImageData getBestImage() throws Exception {
+        ImageData original = this.getBestOriginalImage();
+        ImageData best = original;
+        if (original == null) return null;
+        try {
+            if (!this.isVideo()) return original;
+            long bestPixels = (long) original.getWidth() * original.getHeight();
+            for (Object value : this.getAdditionalImageCandidates()) {
+                if (value == null) continue;
+                ImageData candidate = new ImageData(value);
+                long pixels = (long) candidate.getWidth() * candidate.getHeight();
+                if (pixels > bestPixels && sameCover(original, candidate)) {
+                    best = candidate;
+                    bestPixels = pixels;
+                }
+            }
+        } catch (Exception | LinkageError ignored) {
+        }
+        return best;
     }
 
     public String getVideoLink() throws Exception {

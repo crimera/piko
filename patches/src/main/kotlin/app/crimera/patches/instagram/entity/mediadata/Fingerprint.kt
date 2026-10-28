@@ -41,9 +41,9 @@ internal object GetImageVariantsExtensionFingerprint : Fingerprint(
     name = "getImageVariants",
 )
 
-internal object GetFirstFrameCandidatesExtensionFingerprint : Fingerprint(
+internal object GetAdditionalImageCandidatesExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
-    name = "getFirstFrameCandidates",
+    name = "getAdditionalImageCandidates",
 )
 
 internal object GetVideoVariantsV1ExtensionFingerprint : Fingerprint(
@@ -275,7 +275,7 @@ internal object ImageInfoAdditionalCandidatesMapperFingerprint : Fingerprint(
     ),
 )
 
-internal object FirstFrameCandidatesMapperFingerprint : Fingerprint(
+internal object AdditionalImageCandidatesMapperFingerprint : Fingerprint(
     parameters = listOf("Lcom/instagram/model/mediasize/AdditionalCandidates;"),
     returnType = "Ljava/util/Map;",
     filters = listOf(
@@ -285,6 +285,9 @@ internal object FirstFrameCandidatesMapperFingerprint : Fingerprint(
         methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
             returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
         string("igtv_first_frame"),
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
+        string("smart_frame"),
     ),
 )
 

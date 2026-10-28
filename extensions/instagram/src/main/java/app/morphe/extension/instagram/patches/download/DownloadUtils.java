@@ -370,7 +370,7 @@ public class DownloadUtils {
                         : firstFrameDownloader(context.getApplicationContext(), request, frameVideo, coverPixels);
                 Utils.runOnMainThread(() -> {
                     if (embed != null) {
-                        request.fallbackUrl = request.url;
+                        if (request.fallbackUrl == null) request.fallbackUrl = request.url;
                         request.url = embed.url;
                         request.completedToast = str("piko_saved_at", embed.width + "x" + embed.height);
                     }
@@ -515,6 +515,10 @@ public class DownloadUtils {
         }
 
         DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
+        if (!isVideo && variant == null && mediaType == MediaType.IMAGE && childMediaData.isVideo()) {
+            MediaInterface original = childMediaData.getBestOriginalImage();
+            if (original != null && !original.getUrl().equals(mediaUrl)) request.fallbackUrl = original.getUrl();
+        }
         request.audioUrl = audioUrl;
         if (audioUrl != null) {
             request.audioToAacLc = Pref.dashAudioAacLc();

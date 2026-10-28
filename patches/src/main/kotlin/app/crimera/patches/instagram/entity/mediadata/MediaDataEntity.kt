@@ -45,17 +45,21 @@ val mediaDataEntity =
                 ImageInfoCandidatesMapperFingerprint.instructionMatches.first().methodReference.name,
             )
 
-            GetFirstFrameCandidatesExtensionFingerprint.changeString(
+            GetAdditionalImageCandidatesExtensionFingerprint.changeString(
                 "additionalMethod",
                 ImageInfoAdditionalCandidatesMapperFingerprint.instructionMatches[0].methodReference.name,
             )
-            GetFirstFrameCandidatesExtensionFingerprint.changeString(
+            GetAdditionalImageCandidatesExtensionFingerprint.changeString(
                 "firstFrameMethod",
-                FirstFrameCandidatesMapperFingerprint.instructionMatches[0].methodReference.name,
+                AdditionalImageCandidatesMapperFingerprint.instructionMatches[0].methodReference.name,
             )
-            GetFirstFrameCandidatesExtensionFingerprint.changeString(
+            GetAdditionalImageCandidatesExtensionFingerprint.changeString(
                 "igtvFrameMethod",
-                FirstFrameCandidatesMapperFingerprint.instructionMatches[2].methodReference.name,
+                AdditionalImageCandidatesMapperFingerprint.instructionMatches[2].methodReference.name,
+            )
+            GetAdditionalImageCandidatesExtensionFingerprint.changeString(
+                "smartFrameMethod",
+                AdditionalImageCandidatesMapperFingerprint.instructionMatches[4].methodReference.name,
             )
 
             // Extracting the get mention set method used media helper class.
@@ -128,7 +132,7 @@ val mediaDataEntity =
 
             ExtMediaDictImageInfoMapperFingerprint.instructionMatches[1].fieldReference.let {
                 GetImageVariantsExtensionFingerprint.changeFirstString(it.name)
-                GetFirstFrameCandidatesExtensionFingerprint.changeFirstString(it.name)
+                GetAdditionalImageCandidatesExtensionFingerprint.changeFirstString(it.name)
             }
 
             GetPostTypeKeyExtensionFingerprint.changeFirstString(
