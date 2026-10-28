@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
@@ -27,6 +29,26 @@ public final class DynamicColorPaletteTest {
     private static final long BLACK_SURFACE = 0xFF00000000000000L;
     private static final long WHITE_SURFACE = 0xFFFFFFFF00000000L;
     private static final long DIM_SURFACE = 0xFF15202B00000000L;
+
+    @Test
+    public void cachedHostThemeFollowsPreferenceChangesInEveryStore() {
+        Context context = RuntimeEnvironment.getApplication();
+        SharedPreferences host = context.getSharedPreferences(
+                context.getPackageName() + "_preferences", Context.MODE_PRIVATE);
+        SharedPreferences legacy = context.getSharedPreferences("x_app_preferences", Context.MODE_PRIVATE);
+        host.edit().putString("dark_mode_state", "1").putString("dark_mode_appearance", "dim").commit();
+        assertEquals(TwitterTheme.DIM, TwitterTheme.fromContext(context));
+
+        host.edit().putString("dark_mode_appearance", "lights_out").apply();
+        assertEquals(TwitterTheme.LIGHTS_OUT, TwitterTheme.fromContext(context));
+
+        host.edit().remove("dark_mode_appearance").commit();
+        legacy.edit().putString("dark_mode_appearance", "dim").commit();
+        assertEquals(TwitterTheme.DIM, TwitterTheme.fromContext(context));
+
+        host.edit().putString("dark_mode_state", "0").commit();
+        assertEquals(TwitterTheme.STANDARD, TwitterTheme.fromContext(context));
+    }
 
     @Test
     public void themeNormalizationRecognizesAllChooserOptions() {

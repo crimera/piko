@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /** Resolves X/Twitter's effective theme and accent from its own preference state. */
 public enum TwitterTheme {
     STANDARD("Twitter.Standard", false),
@@ -22,6 +25,18 @@ public enum TwitterTheme {
     private static final String FORCED_DARK_NIGHT_MODE = "1";
     private static final String DIM_APPEARANCE = "dim";
     private static final String LIGHTS_OUT_APPEARANCE = "lights_out";
+
+    // Theme reads run for every post's action bar while scrolling. Cache the resolved strings
+    // and drop them whenever any of the three stores changes; system night mode stays live.
+    private static final Object CACHE_LOCK = new Object();
+    private static final Map<String, String> CACHED_VALUES = new HashMap<>();
+    private static final SharedPreferences[] NO_STORES = new SharedPreferences[0];
+    // Stores hold listeners weakly; this static reference keeps it registered.
+    private static final SharedPreferences.OnSharedPreferenceChangeListener INVALIDATE_CACHE =
+            (preferences, key) -> invalidateCache();
+    private static Context cachedContext;
+    private static SharedPreferences[] watchedStores = NO_STORES;
+    private static long cacheGeneration;
 
     public enum Accent {
         BLUE("blue", 0xFF1D9BF0, 0xFFFFFFFF),
@@ -111,13 +126,57 @@ public enum TwitterTheme {
             String key,
             String defaultValue
     ) {
-        String value = preferenceString(preferences(context), key, null);
-        if (value == null) {
-            value = preferenceString(morphePreferences(context), key, null);
+        Context preferenceContext = preferenceContext(context);
+        long generation;
+        synchronized (CACHE_LOCK) {
+            if (preferenceContext != cachedContext) watch(preferenceContext);
+            if (CACHED_VALUES.containsKey(key)) {
+                String cached = CACHED_VALUES.get(key);
+                return cached == null ? defaultValue : cached;
+            }
+            generation = cacheGeneration;
         }
-        return value == null
-                ? preferenceString(legacyPreferences(context), key, defaultValue)
-                : value;
+
+        String value = preferenceString(preferences(preferenceContext), key, null);
+        if (value == null) {
+            value = preferenceString(morphePreferences(preferenceContext), key, null);
+        }
+        if (value == null) {
+            value = preferenceString(legacyPreferences(preferenceContext), key, null);
+        }
+
+        synchronized (CACHE_LOCK) {
+            // A change landed while reading; the next call reads again.
+            if (generation == cacheGeneration && preferenceContext == cachedContext) {
+                CACHED_VALUES.put(key, value);
+            }
+        }
+        return value == null ? defaultValue : value;
+    }
+
+    private static void watch(Context preferenceContext) {
+        for (SharedPreferences store : watchedStores) {
+            store.unregisterOnSharedPreferenceChangeListener(INVALIDATE_CACHE);
+        }
+        SharedPreferences[] stores = {
+                preferences(preferenceContext),
+                morphePreferences(preferenceContext),
+                legacyPreferences(preferenceContext),
+        };
+        for (SharedPreferences store : stores) {
+            store.registerOnSharedPreferenceChangeListener(INVALIDATE_CACHE);
+        }
+        watchedStores = stores;
+        cachedContext = preferenceContext;
+        CACHED_VALUES.clear();
+        cacheGeneration++;
+    }
+
+    private static void invalidateCache() {
+        synchronized (CACHE_LOCK) {
+            CACHED_VALUES.clear();
+            cacheGeneration++;
+        }
     }
 
     private static Context preferenceContext(Context context) {
