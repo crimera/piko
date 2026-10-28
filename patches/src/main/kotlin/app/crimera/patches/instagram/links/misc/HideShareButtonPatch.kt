@@ -12,20 +12,27 @@ import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.hideFeedUfiStates
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.registersUsed
+import com.android.tools.smali.dexlib2.Opcode
 
 private const val HIDE_SHARE_BUTTON = "$PREF_CALL_DESCRIPTOR->hideShareButton()Z"
 
 @Suppress("unused")
 val hideShareButtonPatch = bytecodePatch(
     name = "Hide share button",
-    description = "Hides the share button on posts and reels",
+    description = "Hides the share button on posts, reels and stories",
 ) {
     dependsOn(settingsPatch)
     compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -55,6 +62,48 @@ val hideShareButtonPatch = bytecodePatch(
             """.trimIndent(),
             ExternalLabel("original", reels.getInstruction(0)),
         )
+        val storyComponent = Fingerprint(
+            returnType = "Ljava/lang/String;",
+            parameters = emptyList(),
+            filters = listOf(string("StoryReshareButtonViewComponent")),
+        ).matchSingle().originalMethod.definingClass
+        // The component has separate button and label visibility gates, shared by
+        // both layouts. Leave its independent layout-selection boolean untouched.
+        val storyStates = listOf(
+            listOf(methodCall(smali = "Landroid/view/View;->getContentDescription()Ljava/lang/CharSequence;", location = MatchAfterImmediately())),
+            listOf(
+                fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+                methodCall(name = "getValue", parameters = emptyList(), returnType = "Ljava/lang/Object;", location = MatchAfterImmediately()),
+            ),
+        ).map { tail ->
+            Fingerprint(
+                definingClass = storyComponent,
+                returnType = "V",
+                parameters = listOf("Ljava/lang/Object;"),
+                filters = listOf(
+                    fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN),
+                    opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+                ) + tail,
+            ).matchSingle()
+        }
+        storyStates.sortedByDescending { it.instructionMatches.first().index }.forEach { match ->
+            val read = match.instructionMatches.first()
+            val registers = read.instruction.registersUsed
+            if (registers.size != 2 || match.instructionMatches[1].instruction.registersUsed != listOf(registers[0])) {
+                throw PatchException("Unexpected story share visibility branch")
+            }
+            val visible = registers[0]
+            match.method.addInstructionsWithLabels(
+                read.index + 1,
+                """
+                if-eqz v$visible, :original
+                $HIDE_SHARE_BUTTON
+                move-result v$visible
+                xor-int/lit8 v$visible, v$visible, 0x1
+                """.trimIndent(),
+                ExternalLabel("original", match.method.getInstruction(read.index + 1)),
+            )
+        }
         enableSettings("hideShareButton")
     }
 }
