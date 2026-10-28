@@ -46,6 +46,7 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -292,8 +293,7 @@ val newXInlineDownloadButtonPatch =
                 )
             }
 
-            val inlineRenderer = requireExactlyOne(
-                "NewX inline-action entry renderer",
+            val staticInlineRenderers =
                 Fingerprint(
                     returnType = "V",
                     custom = { method, _ ->
@@ -310,29 +310,92 @@ val newXInlineDownloadButtonPatch =
                                 reference = entryModels.inlineActionEnabledField,
                             ),
                         ),
-                ).scopedMatchAll(),
-            )
-            inlineRenderer.method.apply {
-                requireStatic("NewX inline-action entry renderer")
-                val (hookIndex, sizeRegister) = resolveInlineIconSizeHook(this)
-                insertHook(
+                ).scopedMatchAllOrNull().orEmpty()
+            val capturedInlineRenderers = capturedInlineActionRendererCandidates(entryModels)
+            val rendererMethod =
+                requireExactlyOne(
+                    "NewX inline-action entry renderer across direct and captured shapes",
+                    staticInlineRenderers.map { match -> match.originalMethod } +
+                        capturedInlineRenderers.map { candidate -> candidate.method },
+                )
+            val staticRenderer = staticInlineRenderers.singleOrNull { match ->
+                match.originalMethod == rendererMethod
+            }
+            if (staticRenderer != null) {
+                staticRenderer.method.apply {
+                    requireStatic("NewX inline-action entry renderer")
+                    val (hookIndex, sizeRegister) = resolveInlineIconSizeHook(this)
+                    insertHook(
+                        hookIndex,
+                        excludedRegisters = listOf(p0Register, sizeRegister),
+                        relocateBranchTargets = false,
+                    ) {
+                        // A computed size can live above v15, with only one low scratch available.
+                        // The emitter stages non-consecutive arguments safely for invoke/range.
+                        val entryRegister = scratchRegister(RegisterLimit.BYTE)
+                        val workRegister = scratchRegister(RegisterLimit.BYTE)
+                        move(entryRegister, p0Register, OBJECT_DESCRIPTOR)
+                        move(workRegister, sizeRegister, "F")
+                        invokeStatic(
+                            methodReference("$EXTENSION->markIconSize(Ljava/lang/Object;F)F"),
+                            entryRegister,
+                            workRegister,
+                        )
+                        moveResult(workRegister, "F")
+                        move(sizeRegister, workRegister, "F")
+                    }
+                }
+            } else {
+                val capturedCandidate = requireExactlyOne(
+                    "NewX captured inline-action renderer candidate",
+                    capturedInlineRenderers.filter { candidate -> candidate.method == rendererMethod },
+                )
+                val mutableRenderer = requireExactlyOne(
+                    "NewX mutable captured inline-action renderer",
+                    mutableClassDefBy(capturedCandidate.owner.type).methods.filter { method ->
+                        method.name == capturedCandidate.method.name &&
+                            method.parameterTypes == capturedCandidate.method.parameterTypes &&
+                            method.returnType == capturedCandidate.method.returnType
+                    },
+                )
+                val capturedRenderer =
+                    resolveCapturedInlineActionEntryRenderer(
+                        mutableRenderer,
+                        capturedCandidate.owner,
+                        entryModels,
+                    )
+                val iconSizeReadIndex = capturedRenderer.iconSizeReadIndex
+                    ?: throw PatchException("NewX captured inline-action icon-size read was not resolved")
+                val iconSizeRegister = capturedRenderer.iconSizeRegister
+                    ?: throw PatchException("NewX captured inline-action icon-size register was not resolved")
+                val hookIndex = iconSizeReadIndex + 1
+                if (!capturedRenderer.method.hasOnlyFallThroughInto(hookIndex)) {
+                    throw PatchException(
+                        "NewX captured inline-action size hook has an unproven incoming edge: " +
+                            "${capturedRenderer.method} at $hookIndex",
+                    )
+                }
+                capturedRenderer.method.insertHook(
                     hookIndex,
-                    excludedRegisters = listOf(p0Register, sizeRegister),
+                    excludedRegisters =
+                        listOf(
+                            capturedRenderer.method.p0Register,
+                            capturedRenderer.entryRegister,
+                            iconSizeRegister,
+                        ),
                     relocateBranchTargets = false,
                 ) {
-                    // A computed size can live above v15, with only one low scratch available.
-                    // The emitter stages non-consecutive arguments safely for invoke/range.
                     val entryRegister = scratchRegister(RegisterLimit.BYTE)
                     val workRegister = scratchRegister(RegisterLimit.BYTE)
-                    move(entryRegister, p0Register, OBJECT_DESCRIPTOR)
-                    move(workRegister, sizeRegister, "F")
+                    move(entryRegister, capturedRenderer.entryRegister, OBJECT_DESCRIPTOR)
+                    move(workRegister, iconSizeRegister, "F")
                     invokeStatic(
                         methodReference("$EXTENSION->markIconSize(Ljava/lang/Object;F)F"),
                         entryRegister,
                         workRegister,
                     )
                     moveResult(workRegister, "F")
-                    move(sizeRegister, workRegister, "F")
+                    move(iconSizeRegister, workRegister, "F")
                 }
             }
 

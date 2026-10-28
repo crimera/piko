@@ -5,20 +5,25 @@ import app.crimera.patches.newx.misc.postdetails.replyComposerAnchorIndices
 import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
 import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
 import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
+import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.isLegacyInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.resolveInlineActionKindLayoutMethod
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineActionKindRenderCall
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineIconSizeHook
+import app.crimera.patches.newx.misc.inlineactions.isCapturedInlineActionEntryRenderer
 import app.crimera.patches.newx.misc.inlineactions.hasInlineActionEventDispatch
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isPostDividerContentHelper
 import app.crimera.patches.newx.settings.resolveSettingsRowModelTargetInMethod
 import app.crimera.patches.newx.timeline.resolveInlineResumePositionFactory
+import app.crimera.patches.newx.timeline.resumeFactoryInputs
+import app.crimera.patches.newx.timeline.wideReadHighRegisters
 import app.crimera.patches.newx.timeline.resolveResumePositionValidation
 import app.crimera.patches.newx.premium.resolveVideoDownloadSubscriptionResults
 import app.crimera.patches.newx.premium.resolveTimelineDownloadSubscriptionResults
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction10t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderPackedSwitchPayload
@@ -30,6 +35,8 @@ import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReferen
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.Opcode
 import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
+import app.crimera.patches.newx.timeline.isNewPostFabHostCandidate
+import app.crimera.patches.newx.timeline.primaryPostFabRendererCallIndices
 import app.crimera.patches.newx.timeline.readsArrayListFromParameter
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
 import app.crimera.tools.lint.ResolverLinter
@@ -771,6 +778,14 @@ class NewXResolverLinterTest {
 
     @Test
     fun `inline resume factory preserves self-read inputs and rejects escaping branches`() {
+        val wideInvokeInput = MethodImplementationBuilder(3).apply {
+            addInstruction("invoke-static {v0, v1}, Lfixture/Time;->consume(J)V".toInstruction())
+            addInstruction("const/4 v2, 0x0".toInstruction())
+            addInstruction("return-object v2".toInstruction())
+        }.methodImplementation.instructions.toList()
+        assertEquals(setOf(1), wideInvokeInput.first().wideReadHighRegisters())
+        assertEquals(setOf(0), resumeFactoryInputs(wideInvokeInput))
+
         fun extract(source: Method) = resolveInlineResumePositionFactory(
             source,
             listOf("Ljava/util/List;", "Ljava/util/ArrayList;", "Lfixture/Holder;", "Lkotlin/time/Instant;"),
@@ -784,6 +799,19 @@ class NewXResolverLinterTest {
             it.opcode == Opcode.CONST_4 &&
                 (it as? com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction)?.registerA == 3 &&
                 (it as? com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction)?.narrowLiteral == 1
+        })
+        val wideOverlapSpill = extract(inlineResumeFactoryFixture(escape = false, wideOverlapSpill = true))
+        assertTrue(wideOverlapSpill.instructions.any { it.opcode == Opcode.NOP })
+        val constantWideOverlap = extract(
+            inlineResumeFactoryFixture(escape = false, constantWideOverlapInput = true),
+        )
+        assertTrue(constantWideOverlap.instructions.any {
+            it.opcode == Opcode.MOVE_OBJECT && it.registersUsed == listOf(5, 14)
+        })
+        assertTrue(constantWideOverlap.instructions.any {
+            it.opcode in setOf(Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST) &&
+                (it as? com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction)?.registerA == 14 &&
+                (it as? com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction)?.narrowLiteral == 0
         })
         val code = extracted.instructions.toList()
         assertEquals(Opcode.RETURN_OBJECT, code.last().opcode)
@@ -810,7 +838,13 @@ class NewXResolverLinterTest {
         }
     }
 
-    private fun inlineResumeFactoryFixture(escape: Boolean, seed: Int = 0, bypassSeed: Boolean = false): Method {
+    private fun inlineResumeFactoryFixture(
+        escape: Boolean,
+        seed: Int = 0,
+        bypassSeed: Boolean = false,
+        wideOverlapSpill: Boolean = false,
+        constantWideOverlapInput: Boolean = false,
+    ): Method {
         val implementation = MethodImplementationBuilder(15)
         fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
         add("iget-object v0, v14, Lfixture/Owner;->items:Ljava/util/List;")
@@ -822,8 +856,18 @@ class NewXResolverLinterTest {
         implementation.addLabel("seeded")
         add("const/4 v4, 0x0")
         add("iget-object v5, v14, Lfixture/Owner;->clock:Lfixture/Clock;")
+        if (constantWideOverlapInput) add("const/4 v14, 0x0")
         add("invoke-interface {v5}, Lfixture/Clock;->now()Lkotlin/time/Instant;")
         add("move-result-object v12")
+        if (constantWideOverlapInput) {
+            add("move-object v5, v14")
+            add("const-wide/16 v13, 0x0")
+        }
+        if (wideOverlapSpill) {
+            add("move-object/from16 v5, v7")
+            add("const-wide/16 v6, 0x0")
+            add("move-object/from16 v7, v5")
+        }
         add("move/from16 v11, v3")
         add("move v11, v3")
         implementation.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 3, implementation.getLabel(if (escape) "outside" else "end")))
@@ -906,6 +950,114 @@ class NewXResolverLinterTest {
         assertEquals(
             listOf(true, false),
             listOf(renderer, lookalike).map(Method::isNewPostButtonRendererCandidate),
+        )
+    }
+
+    @Test
+    fun `captured inline-action resolver follows the captured entry through field reads`() {
+        val entryType = "Lfixture/InlineEntry;"
+        val actionType = "Lfixture/ActionType;"
+        val models = ResolvedNewXInlineActionModels(
+            entryType,
+            ImmutableFieldReference(entryType, "actionType", actionType),
+            ImmutableFieldReference(entryType, "enabled", "Z"),
+            actionType,
+        )
+        val (owner, renderer) = capturedInlineActionRendererFixture(entryBaseRegister = 4)
+        val (decoyOwner, decoyRenderer) = capturedInlineActionRendererFixture(entryBaseRegister = 8)
+
+        assertTrue(renderer.isCapturedInlineActionEntryRenderer(owner, models))
+        assertFalse(decoyRenderer.isCapturedInlineActionEntryRenderer(decoyOwner, models))
+    }
+
+    @Test
+    fun `post FAB host is found by its menu and renderer contract`() {
+        val host = postFabHostFixture(includeMenuContract = true)
+        val lookalike = postFabHostFixture(includeMenuContract = false)
+
+        assertEquals(listOf(0), host.primaryPostFabRendererCallIndices())
+        assertTrue(host.isNewPostFabHostCandidate())
+        assertFalse(lookalike.isNewPostFabHostCandidate())
+    }
+
+    private fun capturedInlineActionRendererFixture(entryBaseRegister: Int): Pair<ImmutableClassDef, Method> {
+        val ownerType = "Lfixture/CapturedActionRenderer;"
+        val entryType = "Lfixture/InlineEntry;"
+        val actionType = "Lfixture/ActionType;"
+        val implementation = MethodImplementationBuilder(10).apply {
+            addInstruction("iget-object v5, v$entryBaseRegister, $ownerType->entry:$entryType".toInstruction())
+            addInstruction("iget-object v6, v5, $entryType->actionType:$actionType".toInstruction())
+            addInstruction("iget-boolean v7, v5, $entryType->enabled:Z".toInstruction())
+            addInstruction("invoke-static {v6}, Lfixture/ActionRenderer;->render($actionType)V".toInstruction())
+            addInstruction("const/4 v0, 0x0".toInstruction())
+            addInstruction("return-object v0".toInstruction())
+        }.methodImplementation
+        val renderer = ImmutableMethod(
+            ownerType,
+            "invoke",
+            List(5) { ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null) },
+            "Ljava/lang/Object;",
+            AccessFlags.PUBLIC.value,
+            emptySet(),
+            emptySet(),
+            implementation,
+        )
+        val owner = ImmutableClassDef(
+            ownerType,
+            AccessFlags.PUBLIC.value,
+            "Ljava/lang/Object;",
+            listOf("Lkotlin/jvm/functions/Function5;"),
+            null,
+            emptySet(),
+            listOf(ImmutableField(ownerType, "entry", entryType, AccessFlags.PRIVATE.value, null, emptySet(), emptySet())),
+            listOf(renderer),
+        )
+        return owner to renderer
+    }
+
+    private fun postFabHostFixture(includeMenuContract: Boolean): Method {
+        val rendererParameters = if (includeMenuContract) {
+            listOf(
+                "Ljava/lang/String;",
+                "Landroidx/compose/ui/Modifier;",
+                "Landroidx/compose/runtime/Composer;",
+                "J",
+                "J",
+                "Lkotlin/jvm/functions/Function0;",
+                "Lkotlin/jvm/functions/Function0;",
+            )
+        } else {
+            listOf(
+                "Ljava/lang/String;",
+                "Landroidx/compose/ui/Modifier;",
+                "Landroidx/compose/runtime/Composer;",
+                "J",
+                "Lkotlin/jvm/functions/Function0;",
+            )
+        }
+        val implementation = MethodImplementationBuilder(16).apply {
+            val reference = "Lfixture/ui/Renderer;->draw(${rendererParameters.joinToString("")})V"
+            val lastRegister = rendererParameters.sumOf { type -> if (type == "J" || type == "D") 2 else 1 } - 1
+            addInstruction("invoke-static/range {v0 .. v$lastRegister}, $reference".toInstruction())
+            addInstruction("return-void".toInstruction())
+        }.methodImplementation
+        return ImmutableMethod(
+            "Lfixture/ui/ComposeHost;",
+            "changedName",
+            listOf(
+                "I",
+                "Landroidx/compose/runtime/Composer;",
+                "Landroidx/compose/ui/Modifier;",
+                "Ljava/util/List;",
+                "Lkotlin/jvm/functions/Function0;",
+                "Lkotlin/jvm/functions/Function0;",
+                "Lkotlin/jvm/functions/Function1;",
+            ).map { type -> ImmutableMethodParameter(type, emptySet(), null) },
+            "V",
+            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+            emptySet(),
+            emptySet(),
+            implementation,
         )
     }
 

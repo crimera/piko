@@ -9,6 +9,10 @@ import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.settings.singleChoice
 import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
+import app.crimera.patches.newx.misc.inlineactions.capturedInlineActionRendererCandidates
+import app.crimera.patches.newx.misc.inlineactions.resolveCapturedInlineActionEntryRenderer
+import app.crimera.patches.newx.misc.inlineactions.hasOnlyFallThroughInto
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.models.firstParameterSlot
 import app.crimera.patches.newx.models.isInlineActionEntryRenderer
@@ -26,6 +30,7 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
@@ -965,9 +970,8 @@ private fun patchInlineActionTints() {
     val models = resolvedNewXInlineActionModels()
     val inlineActionEntryClass = context.mutableClassDefBy(models.inlineActionEntryDescriptor)
     val actionTypeField = models.inlineActionTypeField
-    val enabledField = models.inlineActionEnabledField
     val actionTypeDescriptor = models.postActionTypeDescriptor
-    val entryMatches =
+    val staticEntryMatches =
         Fingerprint(
             returnType = "V",
             custom = { method, _ ->
@@ -975,23 +979,61 @@ private fun patchInlineActionTints() {
             },
             filters = listOf(
                 fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
-                fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
+                fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = models.inlineActionEnabledField),
             ),
-        ).scopedMatchAll()
-    val entryMethod =
-        requireExactlyOne("NewX inline action entry renderer", entryMatches).method
-    val tintReference =
-        entryMethod.instructions.mapNotNull { instruction ->
+        ).scopedMatchAllOrNull().orEmpty()
+    val capturedEntryMatches = capturedInlineActionRendererCandidates(models)
+    val selectedRenderer = requireExactlyOne(
+        "NewX inline action renderer across direct and captured shapes",
+        staticEntryMatches.map { match -> match.originalMethod } +
+            capturedEntryMatches.map { candidate -> candidate.method },
+    )
+    val staticEntryMatch = staticEntryMatches.singleOrNull { match -> match.originalMethod == selectedRenderer }
+    val capturedEntryMatch = if (staticEntryMatch == null) {
+        requireExactlyOne(
+            "NewX captured inline action renderer candidate",
+            capturedEntryMatches.filter { candidate -> candidate.method == selectedRenderer },
+        )
+    } else null
+    val entryMethod = if (staticEntryMatch != null) {
+        staticEntryMatch.method
+    } else {
+        val candidate = requireNotNull(capturedEntryMatch)
+        requireExactlyOne(
+            "NewX mutable captured inline action renderer",
+            context.mutableClassDefBy(candidate.method.definingClass).methods.filter { method ->
+                method.name == candidate.method.name &&
+                    method.parameterTypes == candidate.method.parameterTypes &&
+                    method.returnType == candidate.method.returnType
+            },
+        )
+    }
+    val capturedRenderer = if (capturedEntryMatch == null) null else {
+        resolveCapturedInlineActionEntryRenderer(
+            entryMethod,
+            capturedEntryMatch.owner,
+            models,
+            resolveIconSize = false,
+        )
+    }
+    val tintReference = if (capturedRenderer != null) {
+        capturedRenderer.tintRenderer
+    } else {
+        requireExactlyOne(
+            "NewX inline action tint renderer call in $entryMethod",
+            entryMethod.instructions.mapNotNull { instruction ->
             if (instruction.opcode != Opcode.INVOKE_STATIC &&
                 instruction.opcode != Opcode.INVOKE_STATIC_RANGE
             ) {
-                return@mapNotNull null
+                    return@mapNotNull null
             }
             instruction.getReference<MethodReference>()
-    }.singleOrNull { reference ->
-            reference.parameterTypes.firstOrNull() == actionTypeDescriptor &&
-                reference.returnType == "V"
-        } ?: throw PatchException("NewX inline action tint renderer call not found: $entryMethod")
+            }.filter { reference ->
+                reference.parameterTypes.firstOrNull()?.toString() == actionTypeDescriptor &&
+                    reference.returnType == "V"
+            },
+        )
+    }
     val tintMethod = tintReference.resolveMutableMethod("NewX inline action tint renderer")
     val unfavoriteReads = tintMethod.instructions.withIndex().filter { indexed ->
         indexed.value.opcode == Opcode.SGET_OBJECT &&
@@ -1028,40 +1070,92 @@ private fun patchInlineActionTints() {
                     reference.definingClass.hasComposableLambdaInvoke()
             }.distinctBy(MethodReference::toString)
     val likeComposableConstructor =
-        requireExactlyOne("NewX like icon composable constructor", likeComposableConstructors)
+        requireAtMostOne("NewX standalone like icon composable constructor", likeComposableConstructors)
+    val unifiedLikeRendererCandidates =
+        if (likeComposableConstructor == null) tintMethod.unifiedLikeButtonRendererCalls() else emptyList()
 
-    // First wide long slot (the tint timestamp); Compose inserts auxiliary params between
-    // releases, so resolve the slot instead of hardcoding p2. The renderer is static, so the
-    // parameter slot is `p0` plus the slot index.
-    if (!AccessFlags.STATIC.isSet(entryMethod.accessFlags)) {
-        throw PatchException("NewX inline action entry renderer is unexpectedly instance: $entryMethod")
-    }
-    val tintSlot = entryMethod.firstParameterSlot("J")
-    val tintRegister = entryMethod.p0Register + tintSlot
-    val contentRegister = entryMethod.resolveInlineActionContentRegister(tintRegister)
-
-    entryMethod.insertHook(
-        index = 0,
-        // The old insertion never moved labels off the first instruction, so a branch that
-        // reached the method head kept skipping the tint and has to keep doing so.
-        relocateBranchTargets = false,
-    ) {
-        invokeStatic(methodReference(INLINE_ACTION_TINT_METHOD), tintRegister, tintRegister + 1)
-        moveResult(tintRegister, "J")
-    }
-    if (contentRegister != null) {
-        entryMethod.insertHook(index = 0, relocateBranchTargets = false) {
-            invokeStatic(
-                methodReference(INLINE_ACTION_CONTENT_TINT_METHOD),
-                contentRegister,
-                contentRegister + 1,
+    if (capturedRenderer == null) {
+        // Historical renderers receive both colors as composable parameters. Resolve the wide
+        // slots from the ABI instead of tying them to one lowered parameter count.
+        if (!AccessFlags.STATIC.isSet(entryMethod.accessFlags)) {
+            throw PatchException("NewX inline action entry renderer is unexpectedly instance: $entryMethod")
+        }
+        val tintRegister = entryMethod.p0Register + entryMethod.firstParameterSlot("J")
+        val contentRegister = entryMethod.resolveInlineActionContentRegister(tintRegister)
+        entryMethod.insertHook(0, relocateBranchTargets = false) {
+            invokeStatic(methodReference(INLINE_ACTION_TINT_METHOD), tintRegister, tintRegister + 1)
+            moveResult(tintRegister, "J")
+        }
+        if (contentRegister != null) {
+            entryMethod.insertHook(index = 0, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference(INLINE_ACTION_CONTENT_TINT_METHOD),
+                    contentRegister,
+                    contentRegister + 1,
+                )
+                moveResult(contentRegister, "J")
+            }
+        }
+    } else {
+        val colorLoads = buildList {
+            add(
+                Triple(
+                    capturedRenderer.tintReadIndex,
+                    capturedRenderer.tintRegister,
+                    INLINE_ACTION_TINT_METHOD,
+                ),
             )
-            moveResult(contentRegister, "J")
+            if (capturedRenderer.contentTintReadIndex != null && capturedRenderer.contentTintRegister != null) {
+                add(
+                    Triple(
+                        capturedRenderer.contentTintReadIndex,
+                        capturedRenderer.contentTintRegister,
+                        INLINE_ACTION_CONTENT_TINT_METHOD,
+                    ),
+                )
+            }
+        }
+        colorLoads.sortedByDescending { (readIndex, _, _) -> readIndex }.forEach { (readIndex, register, method) ->
+            val hookIndex = readIndex + 1
+            if (!entryMethod.hasOnlyFallThroughInto(hookIndex)) {
+                throw PatchException(
+                    "NewX captured inline-action tint hook has an unproven incoming edge: " +
+                        "$entryMethod at $hookIndex",
+                )
+            }
+            entryMethod.insertHook(hookIndex, relocateBranchTargets = false) {
+                invokeStatic(methodReference(method), register, register + 1)
+                moveResult(register, "J")
+            }
         }
     }
-    val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteRead.index)
-    patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
+    val activatedTint = tintMethod.injectActivatedLikeTint(unfavoriteRead.index)
+    if (likeComposableConstructor != null) {
+        patchLikeIconComposable(likeComposableConstructor.definingClass, activatedTint.field)
+    } else {
+        requireExactlyOne(
+            "NewX unified like-button renderer receiving the activated tint",
+            unifiedLikeRendererCandidates.filter { candidate ->
+                candidate.index == activatedTint.rendererCallIndex
+            },
+        )
+    }
 }
+
+/** The unified icon/button composable consumes two action callbacks and both tint planes. */
+private fun MutableMethod.unifiedLikeButtonRendererCalls(): List<IndexedValue<Instruction>> =
+    instructions.withIndex().filter { indexed ->
+        val instruction = indexed.value
+        if (instruction.opcode != Opcode.INVOKE_STATIC && instruction.opcode != Opcode.INVOKE_STATIC_RANGE) {
+            return@filter false
+        }
+        val reference = instruction.getReference<MethodReference>() ?: return@filter false
+        val parameters = reference.parameterTypes.map(CharSequence::toString)
+        instruction.isComposeRendererCall() &&
+            COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR in parameters &&
+            parameters.count { parameter -> parameter == FUNCTION0_DESCRIPTOR } >= 2 &&
+            parameters.count { parameter -> parameter == "J" } >= 3
+    }
 
 /**
  * The count color the host may override (the media viewer passes plain white), found by data
@@ -2576,31 +2670,26 @@ private fun Instruction.isComposeRendererCall(): Boolean {
         "J" in parameters
 }
 
-private fun MutableMethod.wideColorFeedsComposeRenderer(
+private data class ResolvedActivatedLikeTint(
+    val field: FieldReference,
+    val rendererCallIndex: Int,
+)
+
+private fun MutableMethod.composeRendererCallsForWideValue(
     loadIndex: Int,
     loadRegister: Int,
-): Boolean {
-    val aliases = mutableSetOf(loadRegister)
+): List<IndexedValue<Instruction>> {
     val methodInstructions = instructions.toList()
-    for (indexed in methodInstructions.withIndex().drop(loadIndex + 1)) {
-        val instruction = indexed.value
-        if (instruction.opcode in WIDE_MOVE_OPCODES) {
-            val move = instruction as? TwoRegisterInstruction
-            if (move != null && move.registerB in aliases) {
-                aliases += move.registerA
-            }
-        }
-        if (instruction.isComposeRendererCall()) {
-            val reference = instruction.getReference<MethodReference>() ?: continue
-            if (instruction.wideArgumentStarts(reference).any { it in aliases }) {
-                return true
-            }
+    return methodInstructions.withIndex().filter { indexed ->
+        if (indexed.index <= loadIndex || !indexed.value.isComposeRendererCall()) return@filter false
+        val reference = indexed.value.getReference<MethodReference>() ?: return@filter false
+        indexed.value.wideArgumentStarts(reference).any { targetRegister ->
+            provesValueFromInstruction(loadIndex, loadRegister, indexed.index, targetRegister)
         }
     }
-    return false
 }
 
-private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldReference {
+private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): ResolvedActivatedLikeTint {
     val methodInstructions = instructions.toList()
     val unfavoriteRead = methodInstructions.getOrNull(unfavoriteIndex)
         ?: throw PatchException("NewX Unfavorite enum read is out of bounds: $this")
@@ -2675,7 +2764,7 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldRe
             }.filter { indexed ->
                 val colorRegister = (indexed.value as? OneRegisterInstruction)?.registerA
                     ?: return@filter false
-                wideColorFeedsComposeRenderer(indexed.index, colorRegister)
+                composeRendererCallsForWideValue(indexed.index, colorRegister).isNotEmpty()
             }
         }
     }
@@ -2685,6 +2774,10 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldRe
         ?: throw PatchException("NewX activated-like tint field is missing: $this")
     val colorRegister = (colorLoad.value as? OneRegisterInstruction)?.registerA
         ?: throw PatchException("NewX activated-like tint is not a one-register wide load: $this")
+    val rendererCallIndex = requireExactlyOne(
+        "NewX activated-like tint Compose renderer call",
+        composeRendererCallsForWideValue(colorLoad.index, colorRegister),
+    ).index
     insertHook(
         index = colorLoad.index + 1,
         // The old insertion left labels on the active-branch color load, so the tint still covers
@@ -2698,7 +2791,7 @@ private fun MutableMethod.injectActivatedLikeTint(unfavoriteIndex: Int): FieldRe
         )
         moveResult(colorRegister, "J")
     }
-    return activeLikeField
+    return ResolvedActivatedLikeTint(activeLikeField, rendererCallIndex)
 }
 
 private fun List<Instruction>.resolveBooleanNormalizationValue(
