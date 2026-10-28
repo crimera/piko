@@ -25,6 +25,7 @@ val newXQualityOfLifeFeatureFlagsPatch =
             setNewXFeatureFlag("x_lite_profile_photos_videos_tabs_enabled", enabled = true)
             setNewXFeatureFlag("x_lite_share_post_screenshot_enabled", enabled = true)
             setNewXFeatureFlag("grok_android_analyze_timelines_enabled", enabled = true)
+            setNewXFeatureFlag("android_x_lite_persistent_bottom_nav_enabled", enabled = false)
             setNewXFeatureFlag("android_home_timeline_status_injections_deeplink_enabled", enabled = false)
             setNewXFeatureFlag("android_home_timeline_status_injections_from_notifications_enabled", enabled = false)
         }
