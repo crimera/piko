@@ -1,0 +1,1031 @@
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/AutoTranslate.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/AutoTranslate.java
+new file mode 100644
+index 0000000..2d9565d
+--- /dev/null
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/AutoTranslate.java
+@@ -0,0 +1,612 @@
++package app.morphe.extension.twitter.patches.autotranslate;
++
++import android.content.Context;
++import android.graphics.Rect;
++import android.os.Handler;
++import android.os.Looper;
++import android.os.SystemClock;
++import android.preference.Preference;
++import android.preference.PreferenceGroup;
++import android.preference.SwitchPreference;
++import android.text.SpannableStringBuilder;
++import android.text.Spanned;
++import android.text.SpannedString;
++import android.text.style.ClickableSpan;
++import android.text.style.ForegroundColorSpan;
++import android.text.style.RelativeSizeSpan;
++import android.util.LruCache;
++import android.view.View;
++import android.widget.TextView;
++import android.view.MotionEvent;
++import android.text.StaticLayout;
++import com.twitter.tweetview.core.QuoteView;
++import android.view.ViewTreeObserver;
++import com.twitter.model.core.e;
++import com.twitter.ui.widget.TextContentView;
++import java.lang.ref.WeakReference;
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.Locale;
++import java.util.WeakHashMap;
++import java.util.concurrent.ArrayBlockingQueue;
++import java.util.concurrent.ThreadPoolExecutor;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.CountDownLatch;
++import java.util.concurrent.atomic.AtomicBoolean;
++
++/** Experimental, version-specific UI hook for X 12.19.1 / Piko. */
++public final class AutoTranslate {
++    private static final int TAG = 0x7e0a70a1;
++    private static final int WATCH_TAG = 0x7e0a70a2;
++    private static final String PREFS = "x_auto_translate_it";
++    private static final Handler MAIN = new Handler(Looper.getMainLooper());
++    private static final ThreadPoolExecutor WORKERS = new ThreadPoolExecutor(
++            4, 4, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(24));
++    private static final WeakHashMap<View, Boolean> VIEWS = new WeakHashMap<>();
++    private static final HashMap<String, ArrayList<Waiter>> IN_FLIGHT = new HashMap<>();
++    private static final HashMap<String, Long> FAILURES = new HashMap<>();
++    private static final HashMap<String, Integer> ATTEMPTS = new HashMap<>();
++    private static final HashMap<String, Runnable> RETRY_TASKS = new HashMap<>();
++    private static final LruCache<String, String> CACHE = new LruCache<String, String>(512 * 1024) {
++        @Override protected int sizeOf(String key, String value) { return 2 * (key.length() + value.length()); }
++    };
++    private static long pausedUntil;
++    private static String pausedMessage = "Traduzione in pausa";
++    private static final HashMap<String, String> FAILURE_MESSAGES = new HashMap<>();
++
++    private static final class Binding {
++        final WeakReference<View> view;
++        final long id;
++        final String language;
++        int revision;
++        CharSequence original;
++        String key;
++        String translated;
++        boolean originalShown;
++        Runnable scheduled;
++        CharSequence rendered;
++        CharSequence quoteDescription;
++        ClickableSpan pressed;
++        int pressedRevision;
++        float downX, downY;
++        Binding(View view, long id, String language) {
++            this.view = new WeakReference<>(view);
++            this.id = id;
++            this.language = language;
++        }
++    }
++
++    private static final class Waiter {
++        final WeakReference<Binding> binding;
++        final int revision;
++        Waiter(Binding value) { binding = new WeakReference<>(value); revision = value.revision; }
++    }
++
++    private static boolean enabled(Context context) {
++        return context.getSharedPreferences(PREFS, 0).getBoolean("enabled", true);
++    }
++
++    /** Called before the app formats a particular tweet. Hidden content is excluded. */
++    public static void capture(View view, e tweet, boolean hidden) {
++        try {
++            if (!(view instanceof TextContentView) && !(view instanceof QuoteView) && !(view instanceof TextView)) return;
++            View textView = view;
++            Binding previous = (Binding) view.getTag(TAG);
++            if (previous != null && previous.scheduled != null) { MAIN.removeCallbacks(previous.scheduled); previous.scheduled = null; }
++            if (hidden || tweet == null || tweet.a == null) {
++                view.setTag(TAG, null);
++                return;
++            }
++            String language = tweet.a.r == null ? "und" : tweet.a.r.toLowerCase(Locale.ROOT);
++            long id = tweet.a.H1;
++            if (previous == null || previous.id != id || !previous.language.equals(language)) {
++                view.setTag(TAG, new Binding(textView, id, language));
++            }
++            VIEWS.put(textView, Boolean.TRUE);
++            if (view.getTag(WATCH_TAG) == null) {
++                Watcher watcher = new Watcher(textView);
++                view.setTag(WATCH_TAG, watcher);
++                view.addOnAttachStateChangeListener(watcher);
++                if (view.getWindowToken() != null) watcher.register();
++            }
++        } catch (Throwable ignored) { /* A failed optional hook must preserve normal rendering. */ }
++    }
++
++    /** Replaces one text setter, retaining the app's original text and spans. */
++    public static void bind(TextContentView view, CharSequence text) { bindView(view, text); }
++
++    /** Final focal-post setter, including the native deferred-attachment path. */
++    public static void bindFocal(TextView view, CharSequence text, TextView.BufferType type) { bindView(view, text); }
++
++    public static void clearFocal(View view) {
++        try {
++            Binding binding = (Binding) view.getTag(TAG);
++            if (binding != null && binding.scheduled != null) MAIN.removeCallbacks(binding.scheduled);
++            view.setTag(TAG, null);
++            VIEWS.remove(view);
++        } catch (Throwable ignored) { }
++    }
++
++    private static void bindView(View view, CharSequence text) {
++        write(view, text);
++        if (!(view instanceof QuoteView)) describeView(view, text);
++        try {
++            Binding binding = (Binding) view.getTag(TAG);
++            if (binding == null) return;
++            if (binding.scheduled != null) { MAIN.removeCallbacks(binding.scheduled); binding.scheduled = null; }
++            String plain = text == null ? "" : text.toString();
++            String key = binding.id + "\u0000" + binding.language + "\u0000it\u0000" + plain;
++            boolean changed = !key.equals(binding.key);
++            binding.revision++;
++            binding.key = key;
++            binding.original = text instanceof Spanned ? new SpannedString(text) : plain;
++            if (changed) { binding.originalShown = false; binding.translated = null; }
++            if (!eligible(view, binding)) return;
++            String cached = CACHE.get(key);
++            if (cached != null) { binding.translated = cached; render(binding, null); return; }
++            long now = SystemClock.elapsedRealtime();
++            Long failedUntil = FAILURES.get(key);
++            if (now < pausedUntil || (failedUntil != null && now < failedUntil)) {
++                render(binding, now < pausedUntil ? pausedMessage : FAILURE_MESSAGES.get(key));
++                return;
++            }
++            schedule(binding);
++        } catch (Throwable ignored) { }
++    }
++
++    private static void schedule(Binding binding) {
++        View view = binding.view.get();
++        if (view == null || binding.original == null || binding.translated != null || !eligible(view, binding)) return;
++        if (binding.scheduled != null) return;
++        if (IN_FLIGHT.containsKey(binding.key)) { request(binding); return; }
++        long now = SystemClock.elapsedRealtime();
++        Long failedUntil = FAILURES.get(binding.key);
++        if (now < pausedUntil || (failedUntil != null && now < failedUntil)) return;
++        final Waiter waiter = new Waiter(binding);
++        binding.scheduled = new Runnable() {
++            @Override public void run() {
++                try {
++                    Binding value = current(waiter);
++                    if (value != null) {
++                        value.scheduled = null;
++                        if (visible(value.view.get())) request(value);
++                    }
++                } catch (Throwable ignored) { }
++            }
++        };
++        MAIN.postDelayed(binding.scheduled, 60);
++    }
++
++    private static final class Watcher implements View.OnAttachStateChangeListener, ViewTreeObserver.OnScrollChangedListener {
++        final WeakReference<View> view;
++        ViewTreeObserver observer;
++        Watcher(View value) { view = new WeakReference<>(value); }
++        void register() {
++            View value = view.get();
++            if (value == null) return;
++            ViewTreeObserver next = value.getViewTreeObserver();
++            if (next == observer) return;
++            unregister();
++            observer = next;
++            observer.addOnScrollChangedListener(this);
++        }
++        void unregister() {
++            if (observer != null && observer.isAlive()) observer.removeOnScrollChangedListener(this);
++            observer = null;
++        }
++        @Override public void onViewAttachedToWindow(View value) { register(); onScrollChanged(); }
++        @Override public void onViewDetachedFromWindow(View value) {
++            unregister();
++            Binding binding = (Binding) value.getTag(TAG);
++            if (binding != null && binding.scheduled != null) { MAIN.removeCallbacks(binding.scheduled); binding.scheduled = null; }
++        }
++        @Override public void onScrollChanged() {
++            try {
++                View value = view.get();
++                if (value != null) {
++                    Binding binding = (Binding) value.getTag(TAG);
++                    if (binding != null) schedule(binding);
++                }
++            } catch (Throwable ignored) { }
++        }
++    }
++
++    private static boolean eligible(View view, Binding binding) {
++        if (!enabled(view.getContext()) || "it".equals(binding.language)
++                || binding.language.startsWith("it-") || "zxx".equals(binding.language)) return false;
++        String plain = binding.original.toString();
++        if (plain.length() > 6000) return false;
++        int letters = 0;
++        for (int i = 0; i < plain.length() && letters < 3; i++) {
++            if (Character.isLetter(plain.charAt(i))) letters++;
++        }
++        return letters >= 3;
++    }
++
++    private static boolean visible(View view) {
++        return view != null && view.getWindowToken() != null && view.isShown()
++                && view.getGlobalVisibleRect(new Rect());
++    }
++
++    private static Binding current(Waiter waiter) {
++        Binding binding = waiter.binding.get();
++        if (binding == null || binding.revision != waiter.revision) return null;
++        View view = binding.view.get();
++        return view != null && view.getTag(TAG) == binding && matchesQuote(view, binding) && enabled(view.getContext()) ? binding : null;
++    }
++
++    private static void request(final Binding binding) {
++        final String key = binding.key;
++        ArrayList<Waiter> waiting = IN_FLIGHT.get(key);
++        if (waiting != null) {
++            for (Waiter waiter : waiting) {
++                if (waiter.binding.get() == binding && waiter.revision == binding.revision) return;
++            }
++            waiting.add(new Waiter(binding));
++            render(binding, RETRY_TASKS.containsKey(key) ? "Traduzione in preparazione… riprovo automaticamente" : "Traduzione in corso…");
++            return;
++        }
++        long now = SystemClock.elapsedRealtime();
++        Long failedUntil = FAILURES.get(key);
++        if (now < pausedUntil || (failedUntil != null && now < failedUntil)) {
++            render(binding, now < pausedUntil ? pausedMessage : FAILURE_MESSAGES.get(key));
++            return;
++        }
++        waiting = new ArrayList<>();
++        waiting.add(new Waiter(binding));
++        IN_FLIGHT.put(key, waiting);
++        final String source = binding.language;
++        final String original = binding.original.toString();
++        render(binding, "Traduzione in corso…");
++        startNetwork(key, source, original);
++    }
++
++    private static void startNetwork(final String key, final String source, final String original) {
++        try {
++            WORKERS.execute(new Runnable() {
++                @Override public void run() {
++                    String translated = null;
++                    Exception error = null;
++                    try {
++                        final CountDownLatch gate = new CountDownLatch(1);
++                        final AtomicBoolean allowed = new AtomicBoolean(false);
++                        MAIN.post(new Runnable() {
++                            @Override public void run() {
++                                try {
++                                    ArrayList<Waiter> waiting = IN_FLIGHT.get(key);
++                                    if (waiting != null && SystemClock.elapsedRealtime() >= pausedUntil) {
++                                        for (Waiter waiter : waiting) {
++                                            Binding value = current(waiter);
++                                            if (value != null && visible(value.view.get())) { allowed.set(true); break; }
++                                        }
++                                    }
++                                } finally { gate.countDown(); }
++                            }
++                        });
++                        if (gate.await(2, TimeUnit.SECONDS) && allowed.get())
++                            translated = TranslationClient.translate(source, original);
++                    }
++                    catch (Exception failure) { error = failure; }
++                    final String result = translated;
++                    final Exception failure = error;
++                    MAIN.post(new Runnable() {
++                        @Override public void run() { finish(key, result, failure); }
++                    });
++                }
++            });
++        } catch (RuntimeException rejected) { finish(key, null, rejected); }
++    }
++
++    private static boolean hasVisibleWaiter(String key) {
++        ArrayList<Waiter> waiting = IN_FLIGHT.get(key);
++        if (waiting == null) return false;
++        for (Waiter waiter : waiting) {
++            Binding value = current(waiter);
++            if (value != null && visible(value.view.get())) return true;
++        }
++        return false;
++    }
++
++    private static void clearRetry(String key) {
++        Runnable task = RETRY_TASKS.remove(key);
++        if (task != null) MAIN.removeCallbacks(task);
++    }
++
++    private static void cancelCycle(String key, String status) {
++        clearRetry(key);
++        ATTEMPTS.remove(key);
++        ArrayList<Waiter> waiting = IN_FLIGHT.remove(key);
++        if (waiting != null) for (Waiter waiter : waiting) {
++            Binding value = current(waiter);
++            if (value != null) render(value, status);
++        }
++    }
++
++    private static void finish(final String key, String translated, Exception error) {
++        ArrayList<Waiter> waiting = IN_FLIGHT.get(key);
++        if (waiting == null) return;
++        clearRetry(key);
++        if (translated == null && error instanceof TranslationClient.Unavailable) {
++            if (!hasVisibleWaiter(key)) { cancelCycle(key, null); return; }
++            Integer previous = ATTEMPTS.get(key);
++            int failures = previous == null ? 1 : previous + 1;
++            ATTEMPTS.put(key, failures);
++            if (failures < 3 && SystemClock.elapsedRealtime() >= pausedUntil && hasVisibleWaiter(key)) {
++                Binding first = null;
++                for (Waiter waiter : waiting) {
++                    Binding candidate = current(waiter);
++                    if (candidate != null) { first = candidate; break; }
++                }
++                if (first != null) {
++                    final String source = first.language;
++                    final String original = first.original.toString();
++                    Runnable task = new Runnable() {
++                        @Override public void run() {
++                            RETRY_TASKS.remove(key);
++                            if (SystemClock.elapsedRealtime() < pausedUntil) { cancelCycle(key, pausedMessage); return; }
++                            if (!hasVisibleWaiter(key)) { cancelCycle(key, null); return; }
++                            startNetwork(key, source, original);
++                        }
++                    };
++                    RETRY_TASKS.put(key, task);
++                    for (Waiter waiter : waiting) {
++                        Binding value = current(waiter);
++                        if (value != null) render(value, "Traduzione in preparazione… riprovo automaticamente");
++                    }
++                    MAIN.postDelayed(task, failures == 1 ? 1000 : 2500);
++                    return;
++                }
++            }
++        }
++        IN_FLIGHT.remove(key);
++        ATTEMPTS.remove(key);
++        if (translated != null) CACHE.put(key, translated);
++        else if (error != null) {
++            long now = SystemClock.elapsedRealtime();
++            if (FAILURES.size() >= 128) { FAILURES.clear(); FAILURE_MESSAGES.clear(); }
++            FAILURE_MESSAGES.put(key, TranslationClient.describe(error));
++            FAILURES.put(key, now + 60000);
++            if (error instanceof TranslationClient.Failure) {
++                int status = ((TranslationClient.Failure) error).status;
++                if (status == 429 || status == 302 || status == 403) {
++                    pausedUntil = now + 60000;
++                    pausedMessage = TranslationClient.describe(error);
++                }
++            }
++        }
++        for (Waiter waiter : waiting) {
++            Binding value = current(waiter);
++            if (value == null) continue;
++            value.translated = translated;
++            render(value, translated == null && error != null ? TranslationClient.describe(error) : null);
++        }
++    }
++
++    private static void render(Binding binding, String status) {
++        try { renderChecked(binding, status); }
++        catch (Throwable ignored) {
++            View view = binding.view.get();
++            if (view != null && view.getTag(TAG) == binding && binding.original != null && matchesQuote(view, binding)) {
++                try {
++                    write(view, binding.original);
++                    describeView(view, binding.original);
++                } catch (Throwable ignoredAgain) { }
++            }
++        }
++    }
++
++    private static void renderChecked(Binding binding, String status) {
++        View view = binding.view.get();
++        if (view == null || view.getTag(TAG) != binding || binding.original == null || !matchesQuote(view, binding)) return;
++        if (!enabled(view.getContext())) { write(view, binding.original); return; }
++        String translated = binding.translated;
++        if (translated != null && translated.equals(binding.original.toString())) {
++            write(view, binding.original);
++            describeView(view, binding.original);
++            binding.rendered = binding.original;
++            return;
++        }
++        CharSequence mainText = translated != null && !binding.originalShown ? translated : binding.original;
++        SpannableStringBuilder output = new SpannableStringBuilder("");
++        if (appendStatus(output, binding, status)) output.append('\n');
++        int bodyStart = output.length();
++        output.append(mainText);
++        if (translated != null && !binding.originalShown && binding.original instanceof Spanned) {
++            Spanned original = (Spanned) binding.original;
++            for (ClickableSpan span : original.getSpans(0, original.length(), ClickableSpan.class)) {
++                int start = original.getSpanStart(span), end = original.getSpanEnd(span);
++                if (start < 0 || end <= start) continue;
++                String label = original.subSequence(start, end).toString();
++                int at = translated.indexOf(label);
++                if (at >= 0 && translated.indexOf(label, at + 1) < 0) output.setSpan(span, bodyStart + at, bodyStart + at + label.length(), 33);
++            }
++        }
++        write(view, output);
++        describeView(view, output);
++        binding.rendered = output;
++    }
++
++    private static String sourceLanguageName(String language) {
++        if (language == null || language.isEmpty() || "und".equals(language) || "auto".equals(language)) return "non rilevata";
++        try {
++            Locale locale = Locale.forLanguageTag(language);
++            String name = locale.getDisplayLanguage(Locale.ITALIAN);
++            if (name.isEmpty() || name.equalsIgnoreCase(locale.getLanguage())) return "non rilevata";
++            return name.toLowerCase(Locale.ITALIAN);
++        } catch (RuntimeException ignored) { return "non rilevata"; }
++    }
++
++    private static boolean appendStatus(SpannableStringBuilder output, Binding binding, String status) {
++        int start = output.length();
++        if (binding.translated != null) {
++            output.append("Lingua originale: ").append(sourceLanguageName(binding.language)).append("  ");
++            output.setSpan(new ForegroundColorSpan(0xff90a4ae), start, output.length(), 33);
++            int action = output.length();
++            output.append(binding.originalShown ? "Mostra traduzione" : "Mostra originale");
++            output.setSpan(new ToggleSpan(binding), action, output.length(), 33);
++        } else if (status != null) {
++            output.append(status);
++            if (status.startsWith("Traduzione non ")) {
++                output.append(" · ");
++                int action = output.length();
++                output.append("Riprova");
++                output.setSpan(new RetrySpan(binding), action, output.length(), 33);
++            }
++        }
++        if (output.length() > start) {
++            output.setSpan(new RelativeSizeSpan(0.8f), start, output.length(), 33);
++            return true;
++        }
++        return false;
++    }
++
++    private static boolean matchesQuote(View view, Binding binding) {
++        if (!(view instanceof QuoteView)) return true;
++        QuoteView quote = (QuoteView) view;
++        return quote.a != null && quote.a.a != null && quote.a.a.H1 == binding.id && binding.language.equals(quote.a.a.r == null ? "und" : quote.a.a.r.toLowerCase(Locale.ROOT)) && quote.P == null;
++    }
++
++    private static void describeView(View view, CharSequence text) {
++        Binding binding = (Binding) view.getTag(TAG);
++        if (view instanceof QuoteView && binding != null && binding.quoteDescription != null) {
++            String base = binding.quoteDescription.toString();
++            String original = binding.original == null ? "" : binding.original.toString();
++            int at = original.isEmpty() ? -1 : base.indexOf(original);
++            if (at >= 0) text = base.substring(0, at) + text + base.substring(at + original.length());
++            else if (!base.isEmpty()) text = base + "\n" + text;
++        }
++        view.setContentDescription(text);
++    }
++
++    private static void write(View view, CharSequence text) {
++        if (view instanceof TextContentView) ((TextContentView) view).setTextWithVisibility(text);
++        else if (view instanceof TextView) ((TextView) view).setText(text, TextView.BufferType.SPANNABLE);
++        else if (view instanceof QuoteView) {
++            QuoteView quote = (QuoteView) view;
++            quote.O = text;
++            quote.T = null;
++            quote.requestLayout();
++            quote.invalidate();
++        }
++    }
++
++    /** Called after QuoteView finishes binding its own quoted model and formatted body. */
++    public static void bindQuote(QuoteView view) {
++        try {
++            Binding previous = (Binding) view.getTag(TAG);
++            if (view.a == null || view.a.a == null || view.O == null || view.P != null) {
++                if (previous != null && previous.scheduled != null) MAIN.removeCallbacks(previous.scheduled);
++                view.setTag(TAG, null);
++                return;
++            }
++            // The native binder may skip formatting an unchanged model. Do not translate our header again.
++            if (previous != null && matchesQuote(view, previous) && view.O == previous.rendered) {
++                if (enabled(view.getContext())) schedule(previous);
++                return;
++            }
++            CharSequence original = view.O;
++            capture(view, view.a, false);
++            Binding binding = (Binding) view.getTag(TAG);
++            if (binding != null) binding.quoteDescription = view.getContentDescription();
++            bindView(view, original);
++        } catch (Throwable ignored) { }
++    }
++
++    private static ClickableSpan quoteAction(QuoteView view, MotionEvent event) {
++        StaticLayout layout = view.T;
++        if (layout == null || !(layout.getText() instanceof Spanned)) return null;
++        float x = event.getX() - view.t0, y = event.getY() - view.V0;
++        if (y < 0 || y >= layout.getHeight() || x < 0 || x >= layout.getWidth()) return null;
++        int line = layout.getLineForVertical((int) y);
++        if (line >= view.n1 || x < layout.getLineLeft(line) || x > layout.getLineRight(line)) return null;
++        int offset = layout.getOffsetForHorizontal(line, x);
++        Spanned text = (Spanned) layout.getText();
++        for (ClickableSpan span : text.getSpans(offset, offset, ClickableSpan.class)) {
++            if ((span instanceof ToggleSpan || span instanceof RetrySpan) && offset >= text.getSpanStart(span) && offset < text.getSpanEnd(span)) return span;
++        }
++        return null;
++    }
++
++    /** Consume only translation action taps; normal quote/media taps keep their native behavior. */
++    public static boolean quoteTouch(QuoteView view, MotionEvent event) {
++        try {
++            Binding binding = (Binding) view.getTag(TAG);
++            if (binding == null || !matchesQuote(view, binding) || !enabled(view.getContext())) return false;
++            int action = event.getActionMasked();
++            if (action == MotionEvent.ACTION_DOWN) {
++                binding.pressed = quoteAction(view, event);
++                binding.pressedRevision = binding.revision;
++                binding.downX = event.getX(); binding.downY = event.getY();
++                return binding.pressed != null;
++            }
++            ClickableSpan pressed = binding.pressed;
++            if (pressed == null) return false;
++            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
++                binding.pressed = null;
++                if (action == MotionEvent.ACTION_UP && binding.pressedRevision == binding.revision && quoteAction(view, event) == pressed) pressed.onClick(view);
++            } else if (action == MotionEvent.ACTION_MOVE) {
++                float slop = android.view.ViewConfiguration.get(view.getContext()).getScaledTouchSlop();
++                if (Math.abs(event.getX() - binding.downX) > slop || Math.abs(event.getY() - binding.downY) > slop) binding.pressed = null;
++            }
++            return true;
++        } catch (Throwable ignored) { return false; }
++    }
++
++    private static final class RetrySpan extends com.twitter.ui.view.a {
++        private final Binding binding;
++        RetrySpan(Binding binding) { super(0); this.binding = binding; }
++        @Override public void onClick(View view) {
++            try {
++                if (view.getTag(TAG) != binding || !enabled(view.getContext())) return;
++                FAILURES.remove(binding.key);
++                FAILURE_MESSAGES.remove(binding.key);
++                request(binding); // Global service cooldowns still apply.
++            } catch (Throwable ignored) { }
++        }
++    }
++
++    private static final class ToggleSpan extends com.twitter.ui.view.a {
++        private final Binding binding;
++        ToggleSpan(Binding binding) { super(0); this.binding = binding; }
++        @Override public void onClick(View view) {
++            try {
++                if (view.getTag(TAG) != binding) return;
++                binding.originalShown = !binding.originalShown;
++                render(binding, null);
++            } catch (Throwable ignored) { }
++        }
++    }
++
++    /** Returned to Piko's own preference builder so its normal search index sees it. */
++    public static Preference preference(PreferenceGroup group) {
++        final Context context = group.getContext();
++        SwitchPreference toggle = new SwitchPreference(context);
++        toggle.setKey("x_auto_translate_posts_it");
++        toggle.setTitle("Traduzione automatica in italiano");
++        toggle.setSummary("Traduce il testo dei post tramite Google online, usando l’interfaccia web come TWP. Il testo viene inviato a Google. Tocca Mostra originale per rileggere il post.");
++        toggle.setPersistent(false);
++        toggle.setChecked(enabled(context));
++        toggle.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
++            @Override public boolean onPreferenceChange(Preference preference, Object value) {
++                final boolean on = Boolean.TRUE.equals(value);
++                context.getSharedPreferences(PREFS, 0).edit().putBoolean("enabled", on).apply();
++                for (View view : new ArrayList<>(VIEWS.keySet())) {
++                    Binding binding = (Binding) view.getTag(TAG);
++                    if (binding == null || binding.original == null || !matchesQuote(view, binding)) continue;
++                    if (binding.scheduled != null) { MAIN.removeCallbacks(binding.scheduled); binding.scheduled = null; }
++                    if (on) bindView(view, binding.original);
++                    else {
++                        binding.revision++;
++                        write(view, binding.original);
++                        describeView(view, binding.original);
++                    }
++                }
++                if (!on) {
++                    for (String key : new ArrayList<>(RETRY_TASKS.keySet())) cancelCycle(key, null);
++                }
++                return true;
++            }
++        });
++        return toggle;
++    }
++}
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationClient.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationClient.java
+new file mode 100644
+index 0000000..6b52a50
+--- /dev/null
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationClient.java
+@@ -0,0 +1,146 @@
++package app.morphe.extension.twitter.patches.autotranslate;
++
++import java.io.ByteArrayOutputStream;
++import java.io.IOException;
++import java.io.InputStream;
++import java.io.OutputStream;
++import java.net.HttpURLConnection;
++import java.net.URL;
++import java.util.Locale;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++import org.json.JSONArray;
++
++/** Independent implementation of the web transport used by TWP.
++ * Only supplied post text and language are sent. No X account credentials.
++ */
++public final class TranslationClient {
++    private static final String BOOTSTRAP = "https://translate.googleapis.com/_/translate_http/_/js/k=translate_http.tr.en_US.YusFYy3P_ro.O/am=AAg/d=1/exm=el_conf/ed=1/rs=AN8SPfq1Hb8iJRleQqQc8zhdzXmF9E56eQ/m=el_main";
++    private static final String ENDPOINT = "https://translate-pa.googleapis.com/v1/translateHtml";
++    private static final Pattern AUTH = Pattern.compile("['\"]x-goog-api-key['\"]\\s*:\\s*['\"](\\w{39})['\"]", Pattern.CASE_INSENSITIVE);
++    private static final Pattern ORIGINAL = Pattern.compile("<i\\b[^>]*>.*?</i\\s*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
++    private static final Pattern TAGS = Pattern.compile("<[^>]*>");
++    private static final Pattern ENTITIES = Pattern.compile("&(#(?:[xX][0-9a-fA-F]+|[0-9]+)|amp|lt|gt|quot|apos|nbsp);");
++    private static String auth;
++    private static long authTime;
++    private static long authFailureUntil;
++    private static Exception authFailure;
++
++    private static HttpURLConnection open(String url) throws IOException {
++        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
++        c.setConnectTimeout(7000);
++        c.setReadTimeout(10000);
++        c.setUseCaches(false);
++        c.setInstanceFollowRedirects(false);
++        c.setRequestProperty("Accept", "application/json,text/javascript,*/*");
++        c.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 9) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36");
++        return c;
++    }
++
++    private static String read(HttpURLConnection c, int max, String stage) throws Exception {
++        int status = c.getResponseCode();
++        if (status != 200) throw new Failure(status, stage);
++        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
++        try (InputStream input = c.getInputStream()) {
++            byte[] buffer = new byte[4096];
++            for (int count; (count = input.read(buffer)) != -1;) {
++                if (bytes.size() + count > max) throw new IOException("Response too large");
++                bytes.write(buffer, 0, count);
++            }
++        }
++        return bytes.toString("UTF-8");
++    }
++
++    // One bootstrap for concurrent workers; also bound failures to avoid a request storm.
++    private static synchronized String authorization() throws Exception {
++        long now = System.nanoTime();
++        if (auth != null && now - authTime < 20L * 60 * 1000000000) return auth;
++        if (authFailure != null && now < authFailureUntil) throw authFailure;
++        HttpURLConnection c = open(BOOTSTRAP);
++        try {
++            Matcher match = AUTH.matcher(read(c, 4194304, "accesso"));
++            if (!match.find()) throw new IOException("Google bootstrap changed");
++            auth = match.group(1);
++            authTime = System.nanoTime();
++            authFailure = null;
++            return auth;
++        } catch (Exception error) {
++            authFailure = error;
++            authFailureUntil = System.nanoTime() + 60L * 1000000000;
++            throw error;
++        } finally { c.disconnect(); }
++    }
++
++    public static String requestBody(String source, String text) throws Exception {
++        String language = source == null ? "auto" : source.toLowerCase(Locale.ROOT);
++        if (!language.matches("[a-z]{2,3}(-[a-z]{2,4})?") || "und".equals(language)) language = "auto";
++        if (text == null || text.trim().isEmpty() || text.length() > 6000) throw new IOException("Invalid post text");
++        String html = "<pre>" + text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;") + "</pre>";
++        return new JSONArray().put(new JSONArray().put(new JSONArray().put(html)).put(language).put("it")).put("te").toString();
++    }
++
++    public static String translate(String source, String text) throws Exception {
++        byte[] body = requestBody(source, text).getBytes("UTF-8");
++        String token = authorization();
++        HttpURLConnection c = open(ENDPOINT);
++        try {
++            c.setRequestMethod("POST");
++            c.setDoOutput(true);
++            c.setRequestProperty("Content-Type", "application/json+protobuf");
++            c.setRequestProperty("X-Goog-Api-Key", token);
++            c.setFixedLengthStreamingMode(body.length);
++            try (OutputStream output = c.getOutputStream()) { output.write(body); }
++            return parse(read(c, 524288, "traduzione"));
++        } finally { c.disconnect(); }
++    }
++
++    public static String parse(String body) throws Exception {
++        JSONArray root = new JSONArray(body);
++        JSONArray translations = root.getJSONArray(0);
++        if (translations.length() != 1 || !(translations.get(0) instanceof String)) throw new Unavailable();
++        String html = translations.getString(0);
++        // Some responses annotate translated sentences with an italic original.
++        html = ORIGINAL.matcher(html).replaceAll("");
++        html = html.replaceAll("(?i)<br\\s*/?>", "\n");
++        html = TAGS.matcher(html).replaceAll("");
++        Matcher entities = ENTITIES.matcher(html);
++        StringBuffer result = new StringBuffer();
++        while (entities.find()) {
++            String name = entities.group(1), replacement = entities.group();
++            if ("amp".equals(name)) replacement = "&";
++            else if ("lt".equals(name)) replacement = "<";
++            else if ("gt".equals(name)) replacement = ">";
++            else if ("quot".equals(name)) replacement = "\"";
++            else if ("apos".equals(name)) replacement = "'";
++            else if ("nbsp".equals(name)) replacement = "\u00a0";
++            else if (name.startsWith("#")) {
++                try {
++                    boolean hex = name.length() > 2 && (name.charAt(1) == 'x' || name.charAt(1) == 'X');
++                    int point = Integer.parseInt(name.substring(hex ? 2 : 1), hex ? 16 : 10);
++                    if (Character.isValidCodePoint(point) && !(point >= 0xd800 && point <= 0xdfff)) replacement = new String(Character.toChars(point));
++                } catch (IllegalArgumentException ignored) { }
++            }
++            entities.appendReplacement(result, Matcher.quoteReplacement(replacement));
++        }
++        entities.appendTail(result);
++        if (result.toString().trim().isEmpty()) throw new Unavailable();
++        return result.toString();
++    }
++
++    public static final class Unavailable extends IOException { }
++    public static final class Failure extends IOException {
++        public final int status;
++        public final String stage;
++        Failure(int status, String stage) { super("Google HTTP " + status + " (" + stage + ")"); this.status = status; this.stage = stage; }
++    }
++    public static String describe(Exception error) {
++        if (error instanceof Failure) { Failure f = (Failure) error; return "Traduzione non disponibile (Google " + f.status + ", " + f.stage + ")"; }
++        if (error instanceof java.net.SocketTimeoutException) return "Traduzione non disponibile (timeout Google)";
++        if (error instanceof java.net.UnknownHostException) return "Traduzione non disponibile (DNS Google)";
++        if (error instanceof javax.net.ssl.SSLException) return "Traduzione non disponibile (TLS Google)";
++        if (error instanceof Unavailable) return "Traduzione non ancora disponibile";
++        if (error instanceof org.json.JSONException) return "Traduzione non disponibile (risposta Google non valida)";
++        if ("Google bootstrap changed".equals(error.getMessage())) return "Traduzione non disponibile (accesso Google cambiato)";
++        return "Traduzione non disponibile (Google: " + error.getClass().getSimpleName() + ")";
++    }
++}
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java
+index 4444418..0a9d5a4 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java
+@@ -446,6 +446,10 @@ public class ScreenBuilder {
+ 
+         category = preferenceCategory(str("piko_title_native_translator"));
+ 
++        if (SettingsStatus.autoTranslate) {
++            addPreference(category, app.morphe.extension.twitter.patches.autotranslate.AutoTranslate.preference(category));
++        }
++
+         if (SettingsStatus.nativeTranslator) {
+             addPreference(category,
+                     helper.switchPreference(
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java
+index 4f1e919..ebc82ad 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java
+@@ -74,6 +74,8 @@ public class SettingsStatus {
+     public static boolean browseObject = false;
+     public static boolean nativeDownloader = false;
+     public static boolean nativeTranslator = false;
++    public static boolean autoTranslate = false;
++    public static void autoTranslate() { autoTranslate = true; }
+     public static boolean nativeReaderMode = false;
+     public static boolean shareImage = false;
+     public static boolean hideNudgeButton = false;
+@@ -422,7 +424,7 @@ public class SettingsStatus {
+     }
+ 
+     public static boolean enableNativeSection() {
+-        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || nativeReaderMode || shareImage);
++        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || autoTranslate || nativeReaderMode || shareImage);
+     }
+ 
+     public static boolean enableDownloadSection() {
+diff --git a/extensions/twitter/stub/src/main/java/com/twitter/model/core/d.java b/extensions/twitter/stub/src/main/java/com/twitter/model/core/d.java
+new file mode 100644
+index 0000000..7228e32
+--- /dev/null
++++ b/extensions/twitter/stub/src/main/java/com/twitter/model/core/d.java
+@@ -0,0 +1,2 @@
++package com.twitter.model.core;
++public class d { public String r; public long H1; }
+diff --git a/extensions/twitter/stub/src/main/java/com/twitter/model/core/e.java b/extensions/twitter/stub/src/main/java/com/twitter/model/core/e.java
+new file mode 100644
+index 0000000..4fce233
+--- /dev/null
++++ b/extensions/twitter/stub/src/main/java/com/twitter/model/core/e.java
+@@ -0,0 +1,2 @@
++package com.twitter.model.core;
++public class e { public d a; }
+diff --git a/extensions/twitter/stub/src/main/java/com/twitter/tweetview/core/QuoteView.java b/extensions/twitter/stub/src/main/java/com/twitter/tweetview/core/QuoteView.java
+new file mode 100644
+index 0000000..236ddd5
+--- /dev/null
++++ b/extensions/twitter/stub/src/main/java/com/twitter/tweetview/core/QuoteView.java
+@@ -0,0 +1,9 @@
++package com.twitter.tweetview.core;
++public class QuoteView extends android.view.View {
++ public com.twitter.model.core.e a;
++ public CharSequence O;
++ public String P;
++ public android.text.StaticLayout T;
++ public int t0, V0, n1;
++ public QuoteView(android.content.Context context) { super(context); }
++}
+diff --git a/extensions/twitter/stub/src/main/java/com/twitter/ui/view/a.java b/extensions/twitter/stub/src/main/java/com/twitter/ui/view/a.java
+new file mode 100644
+index 0000000..ae07653
+--- /dev/null
++++ b/extensions/twitter/stub/src/main/java/com/twitter/ui/view/a.java
+@@ -0,0 +1,4 @@
++package com.twitter.ui.view;
++public abstract class a extends android.text.style.ClickableSpan {
++    public a(int value) { }
++}
+diff --git a/extensions/twitter/stub/src/main/java/com/twitter/ui/widget/TextContentView.java b/extensions/twitter/stub/src/main/java/com/twitter/ui/widget/TextContentView.java
+new file mode 100644
+index 0000000..cb2e158
+--- /dev/null
++++ b/extensions/twitter/stub/src/main/java/com/twitter/ui/widget/TextContentView.java
+@@ -0,0 +1,6 @@
++package com.twitter.ui.widget;
++public class TextContentView extends android.view.View {
++    public TextContentView(android.content.Context context) { super(context); }
++    public void setTextWithVisibility(CharSequence text) { }
++    public CharSequence getText() { return ""; }
++}
+diff --git a/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/AutoTranslatePatch.kt b/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/AutoTranslatePatch.kt
+new file mode 100644
+index 0000000..ed03bee
+--- /dev/null
++++ b/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/AutoTranslatePatch.kt
+@@ -0,0 +1,165 @@
++/*
++ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
++ *
++ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
++ */
++
++package app.crimera.patches.twitter.timeline.autotranslate
++
++import app.crimera.patches.shared.declaredParameterRegister
++import app.crimera.patches.twitter.misc.settings.settingsPatch
++import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
++import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
++import app.crimera.patches.twitter.utils.enableSettings
++import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
++import app.morphe.patcher.extensions.InstructionExtensions.instructions
++import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
++import app.morphe.patcher.patch.BytecodePatchContext
++import app.morphe.patcher.patch.PatchException
++import app.morphe.patcher.patch.bytecodePatch
++import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
++import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
++import com.android.tools.smali.dexlib2.AccessFlags
++import com.android.tools.smali.dexlib2.Opcode
++import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
++import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
++import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
++import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
++import com.android.tools.smali.dexlib2.iface.reference.FieldReference
++import com.android.tools.smali.dexlib2.iface.reference.MethodReference
++import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
++import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
++
++private const val HELPER = "$PATCHES_DESCRIPTOR/autotranslate/AutoTranslate;"
++private const val CORE = "Lcom/twitter/tweetview/core/ui/textcontent/"
++private const val FOCAL = "Lcom/twitter/tweetview/focal/ui/textcontent/"
++private const val TWEET = "Lcom/twitter/model/core/e;"
++private const val QUOTE = "Lcom/twitter/tweetview/core/QuoteView;"
++private const val BODY = "Lcom/twitter/ui/widget/TextContentView;"
++private const val TEXT = "Ljava/lang/CharSequence;"
++private const val TEXT_VIEW = "Landroid/widget/TextView;"
++private const val BUFFER = "Landroid/widget/TextView\$BufferType;"
++
++private fun unexpected(message: String): Nothing =
++    throw PatchException("Google auto translate: $message (expected an unmodified X 12.19.1 rendering path)")
++
++context(context: BytecodePatchContext)
++private fun exactMethod(owner: String, name: String, parameters: List<String>, result: String = "V"): MutableMethod =
++    context.mutableClassDefBy(owner).methods.singleOrNull {
++        it.name == name && it.parameterTypes.map(CharSequence::toString) == parameters && it.returnType == result
++    } ?: unexpected("missing or ambiguous $owner->$name")
++
++private fun MutableMethod.assertNotHooked() {
++    if (instructions.any { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.definingClass == HELPER }) {
++        unexpected("$definingClass->$name already contains automatic translation hooks")
++    }
++}
++
++private fun registers(vararg values: Int): String {
++    if (values.any { it !in 0..15 }) unexpected("hook registers no longer fit invoke-static/35c")
++    return values.joinToString(", ") { "v$it" }
++}
++
++private fun MutableMethod.replaceSetter(
++    owner: String,
++    name: String,
++    parameters: List<String>,
++    helperName: String,
++    textRegister: Int? = null,
++) {
++    val matches = instructions.indices.filter { index ->
++        val instruction = instructions[index] as? Instruction35c ?: return@filter false
++        val reference = instruction.reference as? MethodReference ?: return@filter false
++        instruction.opcode == Opcode.INVOKE_VIRTUAL && reference.definingClass == owner &&
++            reference.name == name && reference.parameterTypes.map(CharSequence::toString) == parameters &&
++            reference.returnType == "V" && (textRegister == null || instruction.registerD == textRegister)
++    }
++    val index = matches.singleOrNull() ?: unexpected("missing or ambiguous final setter in $definingClass->${this.name}")
++    val instruction = instructions[index] as Instruction35c
++    val args = if (parameters.size == 1) registers(instruction.registerC, instruction.registerD)
++        else registers(instruction.registerC, instruction.registerD, instruction.registerE)
++    replaceInstruction(index, "invoke-static {$args}, $HELPER->$helperName($owner${parameters.joinToString("")})V")
++}
++
++/** Version-specific descriptors are intentional: the Legacy X target is frozen at 12.19.1. */
++@Suppress("unused")
++val googleAutoTranslatePatch = bytecodePatch(
++    name = "Google auto translate (Italian)",
++    description = "Automatically translates visible timeline, quoted and opened posts into Italian through Google's web service. Sends post text to Google.",
++    default = false,
++) {
++    compatibleWith(COMPATIBILITY_X)
++    dependsOn(settingsPatch)
++
++    execute {
++        val capture = exactMethod("${CORE}o;", "g", listOf(
++            "Landroid/content/Context;", TWEET, "Lcom/twitter/model/core/entity/g1;",
++            "Lcom/twitter/ui/view/m;", "${CORE}b;", "Z", "Z",
++        ))
++        val body = exactMethod("${CORE}d;", "f", listOf(TEXT))
++        val focal = exactMethod("${FOCAL}f;", "f", listOf(TEXT))
++        val attached = exactMethod("${FOCAL}f\$b;", "onViewAttachedToWindow", listOf("Landroid/view/View;"))
++        val quote = exactMethod(QUOTE, "l", listOf(TWEET, "Lcom/twitter/ui/renderable/i;", "Ljava/lang/Integer;"))
++        listOf(capture, body, focal, attached, quote).forEach { it.assertNotHooked() }
++
++        capture.apply {
++            val index = instructions.indices.singleOrNull { index ->
++                val instruction = instructions[index]
++                val field = (instruction as? ReferenceInstruction)?.reference as? FieldReference
++                instruction.opcode == Opcode.IGET_OBJECT && field?.definingClass == "${CORE}o;" &&
++                    field.name == "a" && field.type == "Landroid/view/View;"
++            } ?: unexpected("missing or ambiguous formatter view read")
++            val view = (instructions[index] as TwoRegisterInstruction).registerA
++            val args = registers(view, declaredParameterRegister(this, 1), declaredParameterRegister(this, 6))
++            addInstructions(index + 1, "invoke-static {$args}, $HELPER->capture(Landroid/view/View;${TWEET}Z)V")
++        }
++
++        body.replaceSetter(BODY, "setTextWithVisibility", listOf(TEXT), "bind")
++
++        // Preserve the intermediate null-text reset and native selection/movement setup.
++        focal.replaceSetter(TEXT_VIEW, "setText", listOf(TEXT, BUFFER), "bindFocal", declaredParameterRegister(focal, 0))
++        attached.replaceSetter(TEXT_VIEW, "setText", listOf(TEXT, BUFFER), "bindFocal")
++        focal.apply {
++            val index = instructions.indices.singleOrNull { index ->
++                val reference = (instructions[index] as? ReferenceInstruction)?.reference as? MethodReference
++                instructions[index].opcode == Opcode.INVOKE_VIRTUAL && reference?.definingClass == "Landroid/view/View;" &&
++                    reference.name == "setVisibility" && reference.parameterTypes.map(CharSequence::toString) == listOf("I")
++            } ?: unexpected("missing or ambiguous empty focal visibility path")
++            val view = (instructions[index] as Instruction35c).registerC
++            addInstructions(index, "invoke-static {${registers(view)}}, $HELPER->clearFocal(Landroid/view/View;)V")
++        }
++
++        quote.apply {
++            val index = instructions.indices.singleOrNull { index ->
++                val field = (instructions[index] as? ReferenceInstruction)?.reference as? FieldReference
++                instructions[index].opcode == Opcode.IPUT_BOOLEAN && field?.definingClass == QUOTE && field.name == "Q" && field.type == "Z"
++            } ?: unexpected("missing or ambiguous completed quote layout flag")
++            val view = (instructions[index] as TwoRegisterInstruction).registerB
++            addInstructions(index + 1, "invoke-static {${registers(view)}}, $HELPER->bindQuote($QUOTE)V")
++        }
++
++        mutableClassDefBy(QUOTE).apply {
++            if (methods.any { it.name == "onTouchEvent" && it.parameterTypes.map(CharSequence::toString) == listOf("Landroid/view/MotionEvent;") }) {
++                unexpected("QuoteView already handles onTouchEvent; refusing to overwrite it")
++            }
++            val nativeSuper = superclass ?: unexpected("QuoteView has no superclass")
++            methods.add(ImmutableMethod(type, "onTouchEvent",
++                listOf(ImmutableMethodParameter("Landroid/view/MotionEvent;", null, null)), "Z",
++                AccessFlags.PUBLIC.value, null, null, MutableMethodImplementation(3),
++            ).toMutable().apply {
++                addInstructions(0, """
++                    invoke-static {p0, p1}, $HELPER->quoteTouch(${QUOTE}Landroid/view/MotionEvent;)Z
++                    move-result v0
++                    if-eqz v0, :native_touch
++                    const/4 v0, 0x1
++                    return v0
++                    :native_touch
++                    invoke-super {p0, p1}, $nativeSuper->onTouchEvent(Landroid/view/MotionEvent;)Z
++                    move-result v0
++                    return v0
++                """.trimIndent())
++            })
++        }
++        enableSettings("autoTranslate")
++    }
++}
