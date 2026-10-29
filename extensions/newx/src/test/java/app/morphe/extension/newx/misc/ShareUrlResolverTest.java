@@ -95,7 +95,7 @@ public final class ShareUrlResolverTest {
         };
 
         assertEquals(
-                "https://x.com/intent/user?user_id=1234567890",
+                "https://x.com/i/user/1234567890",
                 ShareUrlResolver.rewriteProfileUrl("https://x.com/jack", profile)
         );
     }
@@ -105,7 +105,7 @@ public final class ShareUrlResolverTest {
         enablePermanentLinks();
 
         assertEquals(
-                "https://x.com/intent/user?user_id=1234567890",
+                "https://x.com/i/user/1234567890",
                 ShareUrlResolver.rewriteSharedUrl("https://x.com/i/user/1234567890")
         );
     }

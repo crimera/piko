@@ -99,7 +99,7 @@ public final class ShareUrlResolver {
             if (userId == null) userId = profileUserIdFromUrl(urlString);
             if (userId == null) return urlString;
 
-            return rewriteCustomDomain(permanentUrl("/intent/user", "user_id=" + userId));
+            return rewriteCustomDomain(permanentUrl("/i/user/" + userId, null));
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to rewrite NewX profile link", exception);
             return urlString;
@@ -120,7 +120,7 @@ public final class ShareUrlResolver {
 
         Matcher profile = PROFILE_USER_PATH.matcher(path);
         if (profile.matches()) {
-            return permanentUrl("/intent/user", "user_id=" + profile.group(1));
+            return permanentUrl("/i/user/" + profile.group(1), null);
         }
         return urlString;
     }

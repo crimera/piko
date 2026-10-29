@@ -266,6 +266,20 @@ internal object ProfileNavigationUrlFingerprint : Fingerprint(
     custom = { method, _ -> method.hasProfileNavigationUrlFlow() },
 )
 
+internal object ProfileUserStringFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    parameters = emptyList(),
+    returnType = STRING_DESCRIPTOR,
+    filters = listOf(string("ProfileUser(id=")),
+)
+
+internal object ProfileShareUrlFingerprint : Fingerprint(
+    definingClass = "Lcom/x/share/api/",
+    parameters = emptyList(),
+    returnType = STRING_DESCRIPTOR,
+    filters = listOf(string("https://x.com/")),
+)
+
 private data class ProfileModelResult(
     val resultIndex: Int,
     val register: Int,
@@ -429,6 +443,7 @@ internal val newXSharedUrlRewritePatch =
             hookShareAttributionUrlBuilder()
             hookPostNavigationUrls()
             hookProfileNavigationUrls()
+            hookProfileShareUrl()
         }
     }
 
@@ -587,6 +602,59 @@ private fun hookPostNavigationUrls() {
         val returnInstruction = method.instructions[returnIndex] as? OneRegisterInstruction
             ?: throw PatchException("Expected a one-register URL return in $method")
         method.addSharedUrlRewrite(returnIndex, returnInstruction.registerA)
+    }
+}
+
+context(_: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookProfileShareUrl() {
+    val profileType = ProfileUserStringFingerprint
+        .requireSingleMatch("NewX profile user model")
+        .originalMethod.definingClass
+    val candidates = ProfileShareUrlFingerprint.scopedMatchAllOrNull().orEmpty().filter { match ->
+        match.originalMethod.profileShareModelReads(profileType).size == 1
+    }
+    val match = requireExactlyOne("NewX profile share URL getter", candidates)
+    val original = match.method
+    val target = original.reserveProfileSnapshotRegister()
+    val method = target.method
+    val modelRead = requireExactlyOne(
+        "NewX profile share model read in $method",
+        method.profileShareModelReads(profileType),
+    )
+    val returns = method.instructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
+    }
+    val returnIndex = requireExactlyOne("NewX profile share URL return in $method", returns)
+    if (modelRead.first + 1 in method.instructions.branchTargetIndices() ||
+        returnIndex in method.instructions.branchTargetIndices()
+    ) {
+        throw PatchException("NewX profile share URL getter has an unexpected branch target: $method")
+    }
+    val returnRegister = (method.instructions[returnIndex] as OneRegisterInstruction).registerA
+    method.insertHook(index = returnIndex, relocateBranchTargets = false) {
+        invokeStatic(methodReference(REWRITE_PROFILE_URL_METHOD), returnRegister, target.snapshotRegister)
+        moveResult(returnRegister, STRING_DESCRIPTOR)
+    }
+    method.insertHook(index = modelRead.first + 1, relocateBranchTargets = false) {
+        move(target.snapshotRegister, modelRead.second, OBJECT_DESCRIPTOR)
+    }
+    match.classDef.methods.remove(original)
+    match.classDef.methods.add(method)
+}
+
+private fun Method.profileShareModelReads(profileType: String): List<Pair<Int, Int>> {
+    val code = implementation?.instructions?.toList() ?: return emptyList()
+    return code.mapIndexedNotNull { index, instruction ->
+        if (instruction.opcode != Opcode.IGET_OBJECT) return@mapIndexedNotNull null
+        val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
+        val read = instruction as? TwoRegisterInstruction ?: return@mapIndexedNotNull null
+        if (field.definingClass != definingClass || field.type != profileType) return@mapIndexedNotNull null
+        val next = code.getOrNull(index + 1) as? TwoRegisterInstruction ?: return@mapIndexedNotNull null
+        val nextField = code[index + 1].getReference<FieldReference>() ?: return@mapIndexedNotNull null
+        if (code[index + 1].opcode != Opcode.IGET_OBJECT || next.registerB != read.registerA ||
+            nextField.definingClass != profileType || nextField.type != STRING_DESCRIPTOR
+        ) return@mapIndexedNotNull null
+        index to read.registerA
     }
 }
 
