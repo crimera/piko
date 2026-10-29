@@ -84,12 +84,20 @@ private val STATIC_INVOKE_OPCODES = setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_ST
 private fun Method.hasInvoke(reference: (MethodReference) -> Boolean): Boolean =
     invokeReferences().any { (_, candidate) -> reference(candidate) }
 
+internal fun hasObjectAndIntParameterShape(
+    parameterTypes: List<CharSequence>,
+    objectType: String? = null,
+): Boolean {
+    val descriptors = parameterTypes.map(CharSequence::toString)
+    return descriptors.size == 2 &&
+        descriptors.count { it.startsWith("L") && (objectType == null || it == objectType) } == 1 &&
+        descriptors.count { it == "I" } == 1
+}
+
 internal fun isLaunchRevealRenderer(method: Method): Boolean =
     AccessFlags.STATIC.isSet(method.accessFlags) &&
         method.returnType == "V" &&
-        method.parameterTypes.size == 2 &&
-        method.parameterTypes[0].toString().startsWith("L") &&
-        method.parameterTypes[1].toString() == "I" &&
+        hasObjectAndIntParameterShape(method.parameterTypes) &&
         method.hasInvoke { reference ->
             reference.definingClass == SURFACE_CONTROL_BUILDER_DESCRIPTOR &&
                 reference.name == "build" &&
@@ -120,7 +128,7 @@ private fun isLaunchRevealCallback(method: Method): Boolean {
     val staticCalls = method.staticInvokeReferences().map { it.second }
     val revealTargets =
         staticCalls.filter { reference ->
-            reference.parameterTypes.map(CharSequence::toString) == listOf(callbackParameter, "I") &&
+            hasObjectAndIntParameterShape(reference.parameterTypes, callbackParameter) &&
                 reference.returnType == "V"
         }
     val fallbackTargets =
@@ -207,11 +215,13 @@ private val restoreTwitterLaunchRevealPatch =
                 )
 
             val callbackMethod = callback.method
+            val rendererObjectParameter =
+                renderer.parameterTypes.single { it.toString().startsWith("L") }.toString()
             val fallbackCalls =
                 callbackMethod.staticInvokeReferences().filter { (_, reference) ->
                     reference.definingClass == renderer.definingClass &&
                         reference.parameterTypes.map(CharSequence::toString) ==
-                            listOf(renderer.parameterTypes.first().toString()) &&
+                            listOf(rendererObjectParameter) &&
                         reference.returnType == "V"
                 }
             val fallbackCall =

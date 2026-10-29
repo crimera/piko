@@ -1,6 +1,7 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
+import app.crimera.patches.newx.misc.bringbacktwitter.hasObjectAndIntParameterShape
 import app.crimera.patches.newx.misc.bringbacktwitter.isLaunchRevealRenderer
 import app.crimera.patches.newx.misc.bringbacktwitter.resolveLaunchRevealRenderer
 import app.crimera.patches.newx.misc.dynamiccolor.isDefaultPaletteConstructorAdapter
@@ -86,24 +87,34 @@ class NewXResolverLinterTest {
                     addInstruction("return-void".toInstruction())
                 }.methodImplementation,
             )
-        val renderer =
+        fun renderer(
+            parameters: List<String>,
+            hasBuilder: Boolean = true,
+            hasAttachedSurface: Boolean = true,
+        ): Method =
             ImmutableMethod(
                 "Lfixture/LaunchRevealRenderer;",
                 "render",
-                listOf(
-                    ImmutableMethodParameter("Landroid/view/View;", emptySet(), null),
-                    ImmutableMethodParameter("I", emptySet(), null),
-                ),
+                parameters.map { ImmutableMethodParameter(it, emptySet(), null) },
                 "V",
                 AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
                 emptySet<ImmutableAnnotation>(),
                 emptySet<HiddenApiRestriction>(),
                 MethodImplementationBuilder(4).apply {
-                    addInstruction("invoke-virtual {v2}, Landroid/view/SurfaceControl\$Builder;->build()Landroid/view/SurfaceControl;".toInstruction())
-                    addInstruction("invoke-interface {v0, v3}, Landroid/view/AttachedSurfaceControl;->buildReparentTransaction(Landroid/view/SurfaceControl;)Landroid/view/SurfaceControl\$Transaction;".toInstruction())
+                    if (hasBuilder) {
+                        addInstruction("invoke-virtual {v2}, Landroid/view/SurfaceControl\$Builder;->build()Landroid/view/SurfaceControl;".toInstruction())
+                    }
+                    if (hasAttachedSurface) {
+                        addInstruction("invoke-interface {v0, v3}, Landroid/view/AttachedSurfaceControl;->buildReparentTransaction(Landroid/view/SurfaceControl;)Landroid/view/SurfaceControl\$Transaction;".toInstruction())
+                    }
                     addInstruction("return-void".toInstruction())
                 }.methodImplementation,
             )
+        val renderer = renderer(listOf("Landroid/view/View;", "I"))
+        val swappedRenderer = renderer(listOf("I", "Landroid/view/View;"))
+        val invalidRenderer = renderer(listOf("Landroid/view/View;", "Ljava/lang/String;"))
+        val missingBuilderRenderer = renderer(listOf("Landroid/view/View;", "I"), hasBuilder = false)
+        val missingAttachedSurfaceRenderer = renderer(listOf("Landroid/view/View;", "I"), hasAttachedSurface = false)
 
         assertNull(resolveLaunchRevealRenderer(emptyList(), emptyList()))
         assertFailsWith<PatchException> {
@@ -111,6 +122,13 @@ class NewXResolverLinterTest {
         }
         assertTrue(isLaunchRevealRenderer(renderer))
         assertEquals(renderer, resolveLaunchRevealRenderer(listOf(marker), listOf(renderer)))
+        assertTrue(isLaunchRevealRenderer(swappedRenderer))
+        assertEquals(swappedRenderer, resolveLaunchRevealRenderer(listOf(marker), listOf(swappedRenderer)))
+        assertFalse(isLaunchRevealRenderer(invalidRenderer))
+        assertFalse(isLaunchRevealRenderer(missingBuilderRenderer))
+        assertFalse(isLaunchRevealRenderer(missingAttachedSurfaceRenderer))
+        assertTrue(hasObjectAndIntParameterShape(listOf("I", "Lfixture/Callback;"), "Lfixture/Callback;"))
+        assertFalse(hasObjectAndIntParameterShape(listOf("I", "Lfixture/OtherCallback;"), "Lfixture/Callback;"))
     }
 
     @Test
@@ -1341,6 +1359,25 @@ class NewXResolverLinterTest {
         val findings = lint("val selected = candidates.first()")
 
         assertEquals(listOf(ResolverLinter.Rule.RAW_FIRST), findings.map { it.rule })
+    }
+
+    @Test
+    fun `guarded single on filtered object types is reported`() {
+        val findings =
+            lint(
+                """
+                fun hasObjectAndIntParameterShape(parameterTypes: List<CharSequence>, objectType: String? = null): Boolean {
+                    val descriptors = parameterTypes.map(CharSequence::toString)
+                    val objectTypes = descriptors.filter { it.startsWith("L") }
+                    return descriptors.size == 2 &&
+                        objectTypes.size == 1 &&
+                        (objectType == null || objectTypes.single() == objectType) &&
+                        descriptors.count { it == "I" } == 1
+                }
+                """.trimIndent(),
+            )
+
+        assertEquals(listOf(ResolverLinter.Rule.RAW_SINGLE), findings.map { it.rule })
     }
 
     @Test
