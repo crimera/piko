@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -391,7 +392,12 @@ public final class PostTranslator {
         // Align with the tray header's 24dp inset.
         int inset = PikoTheme.dpToPx(activity, 24f);
         body.setPadding(inset, PikoTheme.dpToPx(activity, 12f), inset, 0);
-        sheet.setScrollableBodyView(body);
+        // Measure selectable text at its full content height rather than letting it
+        // consume the ScrollView's viewport hint and scroll internally.
+        LinearLayout content = new LinearLayout(activity);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.addView(body, new LinearLayout.LayoutParams(-1, -2));
+        sheet.setScrollableBodyView(content);
 
         // Only read and written on the UI thread.
         String[] translatedText = new String[1];
@@ -460,28 +466,28 @@ public final class PostTranslator {
         }
     }
 
-    /**
-     * The part of the post text X renders: the display range (code points, as X's own renderer
-     * applies it) drops leading reply mentions and trailing media/quote links, and t.co links are
-     * shown as their display URLs. Falls back to the raw text when the model cannot be read.
-     */
+    /** Uses the complete note body when available, otherwise the post's displayed text range. */
     static String visibleText(Object post, String text) {
-        if (post == null || text == null || text.isEmpty()) return text;
+        if (post == null) return text;
         try {
-            String visible = text;
-            Object range = readDisplayTextRange(post);
-            if (range != null) {
-                int count = text.codePointCount(0, text.length());
-                int start = Math.max(0, Math.min(readRangeStart(range), count));
-                int end = Math.max(start, Math.min(readRangeEnd(range), count));
-                if (end > start) {
-                    visible = text.substring(
-                            text.offsetByCodePoints(0, start),
-                            text.offsetByCodePoints(0, end)
-                    );
+            String noteText = readNoteText(post);
+            boolean hasNoteText = noteText != null && !noteText.trim().isEmpty();
+            int start = 0;
+            int end = text == null ? 0 : text.codePointCount(0, text.length());
+            Object entityList;
+            if (hasNoteText) {
+                entityList = readNoteEntityList(post);
+            } else {
+                if (text == null || text.isEmpty()) return text;
+                Object range = readDisplayTextRange(post);
+                if (range != null) {
+                    start = readRangeStart(range);
+                    end = readRangeEnd(range);
                 }
+                entityList = readEntityList(post);
             }
-            Object entityList = readEntityList(post);
+
+            String visible = selectVisibleText(text, noteText, start, end);
             List<?> urls = entityList == null ? null : readUrlEntities(entityList);
             if (urls != null) {
                 for (Object entity : urls) {
@@ -497,6 +503,20 @@ public final class PostTranslator {
             NewXLogger.printException(() -> "Failed to read the visible NewX post text", exception);
             return text;
         }
+    }
+
+    /** Uses a note's full body; ordinary posts continue to honor X's code-point display range. */
+    static String selectVisibleText(String text, String noteText, int start, int end) {
+        if (noteText != null && !noteText.trim().isEmpty()) return noteText.trim();
+        if (text == null || text.isEmpty()) return text;
+
+        int count = text.codePointCount(0, text.length());
+        start = Math.max(0, Math.min(start, count));
+        end = Math.max(start, Math.min(end, count));
+        if (end > start) {
+            return text.substring(text.offsetByCodePoints(0, start), text.offsetByCodePoints(0, end)).trim();
+        }
+        return text.trim();
     }
 
     private static Object readPostIdOrNull(Object post) {
@@ -523,6 +543,14 @@ public final class PostTranslator {
     }
 
     private static Object readPostModel(Object presenter) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static String readNoteText(Object post) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static Object readNoteEntityList(Object post) {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 

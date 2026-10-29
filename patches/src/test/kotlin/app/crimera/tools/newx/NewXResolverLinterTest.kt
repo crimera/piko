@@ -29,6 +29,7 @@ import app.crimera.patches.newx.timeline.wideReadHighRegisters
 import app.crimera.patches.newx.timeline.resolveResumePositionValidation
 import app.crimera.patches.newx.premium.resolveVideoDownloadSubscriptionResults
 import app.crimera.patches.newx.premium.resolveTimelineDownloadSubscriptionResults
+import app.crimera.patches.newx.translation.resolveNotePostBodyTextField
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
@@ -2090,6 +2091,87 @@ class NewXResolverLinterTest {
                 isInlineActionKindModelConstructor(instruction, ::isKindEnum)
             },
         )
+    }
+
+    @Test
+    fun `note post text field resolver survives outlined formatter order`() {
+        fun constString(register: Int, value: String) =
+            ("""const-string v$register, "$value""" + '"').toInstruction()
+
+        val bodyToString =
+            ImmutableMethod(
+                "Lfixture/NotePostBody;",
+                "toString",
+                emptyList<ImmutableMethodParameter>(),
+                "Ljava/lang/String;",
+                AccessFlags.PUBLIC.value,
+                emptySet<ImmutableAnnotation>(),
+                emptySet<HiddenApiRestriction>(),
+                MethodImplementationBuilder(5).apply {
+                    addInstruction("new-instance v0, Ljava/lang/StringBuilder;".toInstruction())
+                    addInstruction(constString(1, "NotePost(postEntityList="))
+                    addInstruction(
+                        "invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V"
+                            .toInstruction(),
+                    )
+                    addInstruction(
+                        "iget-object v1, p0, Lfixture/NotePostBody;->postEntityList:Lfixture/PostEntityList;"
+                            .toInstruction(),
+                    )
+                    addInstruction(
+                        "invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;"
+                            .toInstruction(),
+                    )
+                    addInstruction(constString(1, ", richTextEntity="))
+                    addInstruction(
+                        "invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+                            .toInstruction(),
+                    )
+                    addInstruction(
+                        "iget-object v1, p0, Lfixture/NotePostBody;->richTextEntity:Ljava/util/List;"
+                            .toInstruction(),
+                    )
+                    addInstruction(
+                        "invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;"
+                            .toInstruction(),
+                    )
+                    // R8 emits the text label before the inline-media label, but delays reading
+                    // the String field until it invokes the formatter helper.
+                    addInstruction(constString(1, ", text="))
+                    addInstruction(
+                        "invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+                            .toInstruction(),
+                    )
+                    addInstruction(constString(1, ", inlineMedia="))
+                    addInstruction(constString(2, ")"))
+                    addInstruction(
+                        "iget-object v3, p0, Lfixture/NotePostBody;->text:Ljava/lang/String;"
+                            .toInstruction(),
+                    )
+                    addInstruction(
+                        "iget-object p0, p0, Lfixture/NotePostBody;->inlineMedia:Ljava/util/List;"
+                            .toInstruction(),
+                    )
+                    addInstruction(
+                        (
+                            "invoke-static {v3, v1, v2, v0, p0}, " +
+                            "Lfixture/NotePostFormatter;->format(" +
+                            "Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;" +
+                            "Ljava/lang/StringBuilder;Ljava/util/List;)Ljava/lang/String;"
+                        ).toInstruction(),
+                    )
+                    addInstruction("move-result-object p0".toInstruction())
+                    addInstruction("return-object p0".toInstruction())
+                }.methodImplementation,
+            )
+
+        val expected =
+            ImmutableFieldReference(
+                "Lfixture/NotePostBody;",
+                "text",
+                "Ljava/lang/String;",
+            )
+        assertEquals(expected.toString(), bodyToString.resolveNotePostBodyTextField().toString())
     }
 
     private fun moduleDividerBuilderFixture(): List<Instruction> =

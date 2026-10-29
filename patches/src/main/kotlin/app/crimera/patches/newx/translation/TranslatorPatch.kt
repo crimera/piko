@@ -93,6 +93,8 @@ private const val POLL_TRANSLATION_FEATURE_FLAG = "grok_translations_poll_transl
 
 private const val NO_POLL_LABEL = "piko_translation_no_poll"
 private const val NO_CANONICAL_POST_LABEL = "piko_translation_no_canonical_post"
+private const val NO_NOTE_TRANSLATION_TEXT_LABEL = "piko_translation_no_note_text"
+private const val NO_NOTE_TRANSLATION_ENTITIES_LABEL = "piko_translation_no_note_entities"
 
 private val FIELD_READ_OPCODES =
     setOf(
@@ -135,6 +137,28 @@ private object UrlEntityFingerprint : Fingerprint(
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
     filters = listOf(string("UrlEntity(displayUrl=")),
+)
+
+private object NotePostFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/notes/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(
+        string("NotePost(isExpandable="),
+        string(", noteTweetResult="),
+    ),
+)
+
+private object NotePostBodyFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/notes/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(
+        string("NotePost(postEntityList="),
+        string(", text="),
+    ),
 )
 
 private object GrokTranslateRequestFingerprint : Fingerprint(
@@ -326,6 +350,45 @@ private fun patchDisplayTextBridges(
     val rangeGetter = interfaceGetter("NewX post display-range getter", rangeMatch.originalClassDef.type)
     val entityListGetter = interfaceGetter("NewX post entity-list getter", entityListMatch.originalClassDef.type)
 
+    val notePostMatch =
+        NotePostFingerprint.scopedMatchAllOrNull().orEmpty().let { matches ->
+            requireExactlyOne("NewX note post model", matches)
+        }
+    val notePostDescriptor = notePostMatch.originalClassDef.type
+    val noteResultField = notePostMatch.toStringField(", noteTweetResult=")
+    exposeField(noteResultField)
+    val noteResultBase = context.mutableClassDefByOrNull(noteResultField.type)
+        ?: throw PatchException("NewX note translation result type is unavailable: ${noteResultField.type}")
+    requirePublicClass(noteResultField.type)
+    if (!AccessFlags.INTERFACE.isSet(noteResultBase.accessFlags) &&
+        !AccessFlags.ABSTRACT.isSet(noteResultBase.accessFlags)
+    ) {
+        throw PatchException("NewX note translation result type is not an interface or abstract class: $noteResultBase")
+    }
+    val notePostBodyMatch =
+        NotePostBodyFingerprint.scopedMatchAllOrNull().orEmpty().filter { match ->
+            context.isAssignableTo(match.originalClassDef.type, noteResultField.type)
+        }.let { matches ->
+            requireExactlyOne("NewX note translation body model", matches)
+        }
+    val notePostBodyDescriptor = notePostBodyMatch.originalClassDef.type
+    val noteTextField = notePostBodyMatch.method.resolveNotePostBodyTextField()
+    val noteEntityListField = notePostBodyMatch.toStringField("NotePost(postEntityList=")
+    if (noteTextField.type != STRING_DESCRIPTOR) {
+        throw PatchException("NewX note translation body text is not a String: $noteTextField")
+    }
+    if (noteEntityListField.type != entityListMatch.originalClassDef.type) {
+        throw PatchException(
+            "NewX note translation entity list does not match the post entity-list model: " +
+                "$noteEntityListField vs ${entityListMatch.originalClassDef.type}",
+        )
+    }
+    requirePublicClass(notePostDescriptor)
+    requirePublicClass(notePostBodyDescriptor)
+    exposeField(noteTextField)
+    exposeField(noteEntityListField)
+    val notePostGetter = interfaceGetter("NewX post note-body getter", notePostDescriptor)
+
     val resultAccessor =
         context.mutableClassDefBy(timelineModels.postDescriptor)
             .resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
@@ -366,6 +429,41 @@ private fun patchDisplayTextBridges(
     getterBridge("readDisplayTextRange", rangeGetter)
     getterBridge("readEntityList", entityListGetter)
 
+    fun noteFieldBridge(name: String, returnType: String, field: FieldReference, nullLabel: String) {
+        val bridge = extensionClass.requireBridge(name, OBJECT_DESCRIPTOR, returnType)
+            .withLocals(extensionClass, 1)
+        bridge.patchBridge {
+            val post = bridge.p0Register
+            val isNoteBody = 0
+            checkCast(post, notePostGetter.reference.definingClass)
+            invokeGetter(notePostGetter, post)
+            moveResult(post, notePostGetter.reference.returnType)
+            ifEqz(post, Target.Local(nullLabel))
+            checkCast(post, notePostDescriptor)
+            iget(post, post, noteResultField)
+            instanceOf(isNoteBody, post, notePostBodyDescriptor)
+            ifEqz(isNoteBody, Target.Local(nullLabel))
+            checkCast(post, notePostBodyDescriptor)
+            iget(post, post, field)
+            returnObject(post)
+            label(nullLabel)
+            constInt(isNoteBody, 0)
+            returnObject(isNoteBody)
+        }
+    }
+    noteFieldBridge(
+        "readNoteText",
+        STRING_DESCRIPTOR,
+        noteTextField,
+        NO_NOTE_TRANSLATION_TEXT_LABEL,
+    )
+    noteFieldBridge(
+        "readNoteEntityList",
+        OBJECT_DESCRIPTOR,
+        noteEntityListField,
+        NO_NOTE_TRANSLATION_ENTITIES_LABEL,
+    )
+
     fun fieldBridge(name: String, owner: String, field: FieldReference, returnType: String) {
         val bridge = extensionClass.requireBridge(name, OBJECT_DESCRIPTOR, returnType)
         bridge.patchBridge {
@@ -392,6 +490,22 @@ private fun patchDisplayTextBridges(
 context(context: BytecodePatchContext)
 private fun Match.toStringField(label: String): FieldReference =
     method.outlinedToStringField(label) ?: fieldForToStringLabel(label)
+
+/**
+ * The concrete note body reads its text field after the `, inlineMedia=` label, then passes both
+ * values to an outlined formatter. Since the text label is not adjacent to the field read, use the
+ * model invariant that text is the only String-typed instance field read in this `toString`.
+ */
+internal fun Method.resolveNotePostBodyTextField(): FieldReference {
+    val candidates =
+        instructions.mapNotNull { instruction ->
+            if (instruction.opcode !in FIELD_READ_OPCODES) return@mapNotNull null
+            instruction.getReference<FieldReference>()
+        }.filter { field ->
+            field.definingClass == definingClass && field.type == STRING_DESCRIPTOR
+        }.distinctBy { field -> field.toString() }
+    return requireExactlyOne("NewX note post body text field in $this", candidates)
+}
 
 context(context: BytecodePatchContext)
 private fun Method.outlinedToStringField(label: String): FieldReference? {
