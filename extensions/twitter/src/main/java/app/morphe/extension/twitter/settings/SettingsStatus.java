@@ -74,6 +74,8 @@ public class SettingsStatus {
     public static boolean browseObject = false;
     public static boolean nativeDownloader = false;
     public static boolean nativeTranslator = false;
+    public static boolean autoTranslate = false;
+    public static void autoTranslate() { autoTranslate = true; }
     public static boolean nativeReaderMode = false;
     public static boolean shareImage = false;
     public static boolean hideNudgeButton = false;
@@ -422,7 +424,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableNativeSection() {
-        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || nativeReaderMode || shareImage);
+        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || autoTranslate || nativeReaderMode || shareImage);
     }
 
     public static boolean enableDownloadSection() {
