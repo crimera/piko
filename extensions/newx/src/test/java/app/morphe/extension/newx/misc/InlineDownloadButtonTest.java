@@ -529,11 +529,14 @@ public final class InlineDownloadButtonTest {
         DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
         assertEquals("Phot0_detective", context.screenName);
         assertEquals("2088553803364843766", context.id);
+        assertEquals("2044418450530181120", context.userId);
         assertEquals("写真集探偵", context.sourceUserDisplayName);
-        // {userName} and {name} must describe the same account as {id}, not the quoting author.
+        // {userName}, {userId}, and {name} must describe the source account, not the retweeter.
         assertEquals("写真集探偵", context.name);
         assertEquals("Phot0_detective_2088553803364843766.jpg",
                 DownloadFileName.render(null, context, 0, 1, "jpg"));
+        assertEquals("Phot0_detective_2088553803364843766.jpg",
+                DownloadFileName.render("{userName}_{id}", context, 0, 1, "jpg"));
     }
 
     @Test
@@ -566,6 +569,9 @@ public final class InlineDownloadButtonTest {
         DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
         assertEquals("chachironi3", context.screenName);
         assertEquals("2088279482146898407", context.id);
+        assertNull(context.userId);
+        assertEquals("chachironi3_2088279482146898407.jpg",
+                DownloadFileName.render("{userId}_{id}", context, 0, 1, "jpg"));
         // No source display name in the lineage: leave {name} empty rather than the author's name.
         assertNull(context.name);
     }
@@ -581,6 +587,7 @@ public final class InlineDownloadButtonTest {
         DownloadFileName.PostContext context = DownloadFileName.PostContext.from(post);
         assertEquals("hige_hurai", context.screenName);
         assertEquals("2088221458740969716", context.id);
+        assertEquals("1423483994084048906", context.userId);
         assertEquals("Hige Hurai", context.name);
     }
 
@@ -609,6 +616,11 @@ public final class InlineDownloadButtonTest {
                 DownloadFileName.render("{displayName}", post, 0, 1, "jpg"));
         assertEquals(DownloadFileName.render("{userName}", post, 0, 1, "jpg"),
                 DownloadFileName.render("{screenName}", post, 0, 1, "jpg"));
+        assertTrue(DownloadFileName.editorTokens().contains("userId"));
+        assertEquals("1234567890_1234567890123456789.jpg",
+                DownloadFileName.render("{userId}_{id}", post, 0, 1, "jpg"));
+        assertEquals("jack_1234567890123456789.jpg",
+                DownloadFileName.render(null, post, 0, 1, "jpg"));
     }
 
     @Test
@@ -683,6 +695,7 @@ public final class InlineDownloadButtonTest {
     public void sanitizerStripsSegmentsThatCouldEscapeTheChosenFolder() {
         DownloadFileName.PostContext post = new DownloadFileName.PostContext(
                 "../../etc/passwd",
+                "1234567890",
                 "..\\..\\evil",
                 "a/b",
                 "2026-01-31-123456",

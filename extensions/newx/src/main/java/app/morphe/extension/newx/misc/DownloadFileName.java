@@ -22,6 +22,7 @@ public final class DownloadFileName {
     static final String DEFAULT_TEMPLATE = "{userName}_{id}";
 
     static final String TOKEN_ID = "id";
+    static final String TOKEN_USER_ID = "userId";
     static final String TOKEN_USER_NAME = "userName";
     /** Pre-rename token for the same value, kept so saved templates still render. */
     static final String TOKEN_SCREEN_NAME_LEGACY = "screenName";
@@ -36,6 +37,7 @@ public final class DownloadFileName {
     /** Tokens offered as chips in the template editor, in insertion order. */
     private static final String[] EDITOR_TOKENS = {
             TOKEN_ID,
+            TOKEN_USER_ID,
             TOKEN_USER_NAME,
             TOKEN_NAME,
             TOKEN_TIMESTAMP,
@@ -64,6 +66,7 @@ public final class DownloadFileName {
     /** Post-level template values, resolved once per download action. */
     public static final class PostContext {
         final String id;
+        final String userId;
         final String screenName;
         final String name;
         final String timestamp;
@@ -73,6 +76,7 @@ public final class DownloadFileName {
 
         PostContext(
                 String id,
+                String userId,
                 String screenName,
                 String name,
                 String timestamp,
@@ -81,6 +85,7 @@ public final class DownloadFileName {
                 String sourceUserDisplayName
         ) {
             this.id = id;
+            this.userId = userId;
             this.screenName = screenName;
             this.name = name;
             this.timestamp = timestamp;
@@ -101,6 +106,7 @@ public final class DownloadFileName {
         public static PostContext fromText(String postText) {
             return new PostContext(
                     NewXUtils.rawSourcePostId(postText),
+                    NewXUtils.rawSourceUserId(postText),
                     NewXUtils.rawSourceScreenName(postText),
                     NewXUtils.rawSourceDisplayName(postText),
                     normalizeTimestamp(ToStringParser.fieldValue(postText, "timestamp")),
@@ -117,6 +123,7 @@ public final class DownloadFileName {
         static PostContext sample() {
             return new PostContext(
                     "1234567890123456789",
+                    "1234567890",
                     "jack",
                     "Jack",
                     "2026-01-31-123456",
@@ -131,6 +138,8 @@ public final class DownloadFileName {
             switch (token) {
                 case TOKEN_ID:
                     return id;
+                case TOKEN_USER_ID:
+                    return userId;
                 case TOKEN_USER_NAME:
                 case TOKEN_SCREEN_NAME_LEGACY:
                     return screenName;
@@ -152,6 +161,7 @@ public final class DownloadFileName {
 
         static boolean isKnownToken(String token) {
             return token.equals(TOKEN_ID)
+                    || token.equals(TOKEN_USER_ID)
                     || token.equals(TOKEN_USER_NAME)
                     || token.equals(TOKEN_SCREEN_NAME_LEGACY)
                     || token.equals(TOKEN_NAME)
@@ -189,6 +199,9 @@ public final class DownloadFileName {
             @Nullable String resolution
     ) {
         String pattern = template == null || template.trim().isEmpty() ? DEFAULT_TEMPLATE : template;
+        if (post.userId == null && pattern.contains("{" + TOKEN_USER_ID + "}")) {
+            pattern = pattern.replace("{" + TOKEN_USER_ID + "}", "{" + TOKEN_USER_NAME + "}");
+        }
         String resolvedExtension = sanitizeSegment(extension, "bin");
         String stem = sanitizeSegment(
                 renderTokens(pattern, post, index, resolvedExtension, resolution),

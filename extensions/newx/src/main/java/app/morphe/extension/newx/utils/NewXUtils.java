@@ -334,6 +334,41 @@ public final class NewXUtils {
     }
 
     /**
+     * Resolves the author ID associated with the media being saved. Reposts and media carrying
+     * source lineage must use the original source account, not the account that reposted it.
+     */
+    public static String rawSourceUserId(Object post) {
+        return rawSourceUserId(postText(post));
+    }
+
+    /** Text form of {@link #rawSourceUserId(Object)} for callers holding a cached model string. */
+    public static String rawSourceUserId(String postText) {
+        String originalPostText = originalRepostedPostText(postText);
+        String originalUserId = rawAuthorUserId(originalPostText);
+        if (originalUserId != null) return originalUserId;
+
+        String sourceUserId = normalizeUserIdentifier(
+                sourceMediaField(postText, "sourceUserIdentifier")
+        );
+        if (sourceUserId != null) return sourceUserId;
+
+        // A source handle without its ID is still better than incorrectly pairing it with the
+        // retweeter's ID. Keep the ID absent and let the filename renderer fall back to the handle.
+        if (originalPostText != null && rawAuthorField(originalPostText, "screenName") != null) {
+            return null;
+        }
+        if (sourceMediaField(postText, "sourcePostIdentifier") != null &&
+                sourceMediaScreenName(postText) != null) {
+            return null;
+        }
+
+        String canonicalUserId = rawAuthorUserId(canonicalPostText(postText));
+        if (canonicalUserId != null) return canonicalUserId;
+
+        return rawAuthorUserId(postText);
+    }
+
+    /**
      * Resolves the author handle before filename sanitization. Suspended-account posts expose a
      * placeholder author, so the media mention/expanded-URL fallbacks are tried first.
      */
@@ -401,6 +436,23 @@ public final class NewXUtils {
 
         String author = ToStringParser.fieldValue(text, "author");
         return author == null ? null : ToStringParser.fieldValue(author, fieldName);
+    }
+
+    private static String rawAuthorUserId(String text) {
+        return normalizeUserIdentifier(rawAuthorField(text, "id"));
+    }
+
+    private static String normalizeUserIdentifier(String value) {
+        if (value == null) return null;
+
+        String candidate = value.trim();
+        if (candidate.matches("[0-9]+")) return candidate;
+
+        String nestedId = ToStringParser.fieldValue(candidate, "id");
+        if (nestedId != null && nestedId.matches("[0-9]+")) return nestedId;
+
+        String nestedValue = ToStringParser.fieldValue(candidate, "value");
+        return nestedValue != null && nestedValue.matches("[0-9]+") ? nestedValue : null;
     }
 
     private static String postText(Object post) {
