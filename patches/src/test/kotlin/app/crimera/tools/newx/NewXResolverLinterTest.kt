@@ -1,6 +1,8 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
+import app.crimera.patches.newx.misc.bringbacktwitter.isLaunchRevealRenderer
+import app.crimera.patches.newx.misc.bringbacktwitter.resolveLaunchRevealRenderer
 import app.crimera.patches.newx.misc.dynamiccolor.isDefaultPaletteConstructorAdapter
 import app.crimera.patches.newx.misc.dynamiccolor.isMediaViewerButtonContent
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
@@ -63,9 +65,53 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
+    @Test
+    fun `launch reveal marker fails closed while renderer matching follows its SurfaceControl work`() {
+        val marker =
+            ImmutableMethod(
+                "Lfixture/LaunchRevealMarker;",
+                "marker",
+                emptyList<ImmutableMethodParameter>(),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                emptySet<ImmutableAnnotation>(),
+                emptySet<HiddenApiRestriction>(),
+                MethodImplementationBuilder(1).apply {
+                    addInstruction("const-string v0, \"LaunchReveal\"".toInstruction())
+                    addInstruction("return-void".toInstruction())
+                }.methodImplementation,
+            )
+        val renderer =
+            ImmutableMethod(
+                "Lfixture/LaunchRevealRenderer;",
+                "render",
+                listOf(
+                    ImmutableMethodParameter("Landroid/view/View;", emptySet(), null),
+                    ImmutableMethodParameter("I", emptySet(), null),
+                ),
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                emptySet<ImmutableAnnotation>(),
+                emptySet<HiddenApiRestriction>(),
+                MethodImplementationBuilder(4).apply {
+                    addInstruction("invoke-virtual {v2}, Landroid/view/SurfaceControl\$Builder;->build()Landroid/view/SurfaceControl;".toInstruction())
+                    addInstruction("invoke-interface {v0, v3}, Landroid/view/AttachedSurfaceControl;->buildReparentTransaction(Landroid/view/SurfaceControl;)Landroid/view/SurfaceControl\$Transaction;".toInstruction())
+                    addInstruction("return-void".toInstruction())
+                }.methodImplementation,
+            )
+
+        assertNull(resolveLaunchRevealRenderer(emptyList(), emptyList()))
+        assertFailsWith<PatchException> {
+            resolveLaunchRevealRenderer(listOf(marker), emptyList())
+        }
+        assertTrue(isLaunchRevealRenderer(renderer))
+        assertEquals(renderer, resolveLaunchRevealRenderer(listOf(marker), listOf(renderer)))
+    }
+
     @Test
     fun `branch local tint must survive every path from its load without dominating other colors`() {
         fun candidate(clobber: Boolean): Method {
