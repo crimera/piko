@@ -12,18 +12,24 @@ import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.isAssignableTo
+import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.crimera.patches.common.valueReachesRegister
+import app.crimera.patches.newx.misc.canonicalurls.resolveUrlEntityFields
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.postoptions.TRANSLATE_ACTION
 import app.crimera.patches.newx.misc.postoptions.newXPostOption
+import app.crimera.patches.newx.models.ResolvedNewXPostModels
 import app.crimera.patches.newx.models.ResolvedNewXTimelineModels
 import app.crimera.patches.newx.models.fieldForToStringLabel
+import app.crimera.patches.newx.models.newXPostModelResolutionPatch
 import app.crimera.patches.newx.models.newXTimelineModelResolutionPatch
 import app.crimera.patches.newx.models.patchBridge
 import app.crimera.patches.newx.models.requireBridge
 import app.crimera.patches.newx.models.requirePublicFields
+import app.crimera.patches.newx.models.resolveFieldAccessor
+import app.crimera.patches.newx.models.resolvedNewXPostModels
 import app.crimera.patches.newx.models.resolvedNewXTimelineModels
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
@@ -86,6 +92,18 @@ private const val POST_AUTO_TRANSLATION_FEATURE_FLAG = "grok_translations_post_a
 private const val POLL_TRANSLATION_FEATURE_FLAG = "grok_translations_poll_translation_is_enabled"
 
 private const val NO_POLL_LABEL = "piko_translation_no_poll"
+private const val NO_CANONICAL_POST_LABEL = "piko_translation_no_canonical_post"
+
+private val FIELD_READ_OPCODES =
+    setOf(
+        Opcode.IGET,
+        Opcode.IGET_WIDE,
+        Opcode.IGET_OBJECT,
+        Opcode.IGET_BOOLEAN,
+        Opcode.IGET_BYTE,
+        Opcode.IGET_CHAR,
+        Opcode.IGET_SHORT,
+    )
 
 private object TranslatedPostFingerprint : Fingerprint(
     definingClass = "Lcom/x/groktranslate/",
@@ -101,6 +119,22 @@ private object PostEntityListFingerprint : Fingerprint(
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
     filters = listOf(string("PostEntityList(mentions=")),
+)
+
+private object DisplayTextRangeFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/text/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("DisplayTextRange(startIdx=")),
+)
+
+private object UrlEntityFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/text/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("UrlEntity(displayUrl=")),
 )
 
 private object GrokTranslateRequestFingerprint : Fingerprint(
@@ -176,7 +210,7 @@ val newXTranslatorPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
-        dependsOn(newXExtensionPatch, newXTimelineModelResolutionPatch)
+        dependsOn(newXExtensionPatch, newXTimelineModelResolutionPatch, newXPostModelResolutionPatch)
 
         newXSettings {
             category(Categories.CONTENT) {
@@ -216,7 +250,9 @@ val newXTranslatorPatch =
         )
 
         execute {
-            patchPostMenuBridges(resolvedNewXTimelineModels())
+            val timelineModels = resolvedNewXTimelineModels()
+            patchPostMenuBridges(timelineModels)
+            patchDisplayTextBridges(timelineModels, resolvedNewXPostModels())
             val path = resolveTranslationPath()
             patchTranslationBridges(path)
             patchInlineRequest(path)
@@ -244,6 +280,177 @@ private fun patchPostMenuBridges(timelineModels: ResolvedNewXTimelineModels) {
         moveResult(post, timelineModels.postIdGetter.returnType)
         returnObject(post)
     }
+}
+
+/**
+ * Bridges for the text X actually renders: the post's display range (which hides leading reply
+ * mentions and trailing media/quote links) and its URL entities (t.co links shown as display URLs).
+ * The range and entity getters are resolved on the post interface shared by the canonical post and
+ * the inline translation presenter's model.
+ */
+context(context: BytecodePatchContext)
+private fun patchDisplayTextBridges(
+    timelineModels: ResolvedNewXTimelineModels,
+    postModels: ResolvedNewXPostModels,
+) {
+    val extensionClass = context.mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
+
+    val rangeMatch = DisplayTextRangeFingerprint.scopedMatchAllOrNull().orEmpty().let { matches ->
+        requireExactlyOne("NewX display text range model", matches)
+    }
+    val rangeStartField = rangeMatch.toStringField("DisplayTextRange(startIdx=")
+    val rangeEndField = rangeMatch.toStringField(", endIdx=")
+    val entityListMatch = PostEntityListFingerprint.scopedMatchAllOrNull().orEmpty().let { matches ->
+        requireExactlyOne("NewX post entity-list model", matches)
+    }
+    val urlsField = entityListMatch.toStringField(", urls=")
+    val urlEntityMatch = UrlEntityFingerprint.scopedMatchAllOrNull().orEmpty().let { matches ->
+        requireExactlyOne("NewX URL entity model", matches)
+    }
+    val urlEntityFields = resolveUrlEntityFields(urlEntityMatch)
+    val urlField = urlEntityFields.url
+    val displayUrlField = urlEntityFields.displayUrl
+    listOf(rangeStartField, rangeEndField, urlsField, urlField, displayUrlField).forEach { exposeField(it) }
+    listOf(rangeMatch, entityListMatch, urlEntityMatch).forEach { requirePublicClass(it.originalClassDef.type) }
+
+    val postMethods = context.methodsForModel(postModels.canonicalPostDescriptor)
+    fun interfaceGetter(label: String, returnType: String): ResolvedGetter =
+        requireExactlyOne(
+            label,
+            postMethods.filter { method ->
+                method.parameterTypes.isEmpty() && method.returnType == returnType &&
+                    context.mutableClassDefByOrNull(method.definingClass)
+                        ?.let { AccessFlags.INTERFACE.isSet(it.accessFlags) } == true
+            },
+        ).toResolvedGetter(context).also { exposeGetter(it) }
+    val rangeGetter = interfaceGetter("NewX post display-range getter", rangeMatch.originalClassDef.type)
+    val entityListGetter = interfaceGetter("NewX post entity-list getter", entityListMatch.originalClassDef.type)
+
+    val resultAccessor =
+        context.mutableClassDefBy(timelineModels.postDescriptor)
+            .resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
+    context.mutableClassDefBy(postModels.contextualPostDescriptor)
+        .requirePublicFields(listOf(postModels.contextualCanonicalPostField))
+    val readCanonicalPost = extensionClass.requireBridge("readCanonicalPost", OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
+        .withLocals(extensionClass, 1)
+    readCanonicalPost.patchBridge {
+        val post = readCanonicalPost.p0Register
+        val isContextual = 0
+        checkCast(post, timelineModels.postDescriptor)
+        val getter = resultAccessor.getter
+        if (getter == null) {
+            iget(post, post, resultAccessor.field)
+        } else {
+            invokeVirtual(getter, post)
+            moveResult(post, resultAccessor.field.type)
+        }
+        instanceOf(isContextual, post, postModels.contextualPostDescriptor)
+        ifEqz(isContextual, Target.Local(NO_CANONICAL_POST_LABEL))
+        iget(post, post, postModels.contextualCanonicalPostField)
+        returnObject(post)
+        label(NO_CANONICAL_POST_LABEL)
+        constInt(isContextual, 0)
+        returnObject(isContextual)
+    }
+
+    fun getterBridge(name: String, getter: ResolvedGetter) {
+        val bridge = extensionClass.requireBridge(name, OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
+        bridge.patchBridge {
+            val value = bridge.p0Register
+            checkCast(value, getter.reference.definingClass)
+            invokeGetter(getter, value)
+            moveResult(value, getter.reference.returnType)
+            returnObject(value)
+        }
+    }
+    getterBridge("readDisplayTextRange", rangeGetter)
+    getterBridge("readEntityList", entityListGetter)
+
+    fun fieldBridge(name: String, owner: String, field: FieldReference, returnType: String) {
+        val bridge = extensionClass.requireBridge(name, OBJECT_DESCRIPTOR, returnType)
+        bridge.patchBridge {
+            val value = bridge.p0Register
+            checkCast(value, owner)
+            iget(value, value, field)
+            if (returnType == "I") returnValue(value) else returnObject(value)
+        }
+    }
+    fieldBridge("readRangeStart", rangeMatch.originalClassDef.type, rangeStartField, "I")
+    fieldBridge("readRangeEnd", rangeMatch.originalClassDef.type, rangeEndField, "I")
+    fieldBridge("readUrlEntities", entityListMatch.originalClassDef.type, urlsField, LIST_DESCRIPTOR)
+    fieldBridge("readUrlEntityUrl", urlEntityMatch.originalClassDef.type, urlField, STRING_DESCRIPTOR)
+    fieldBridge("readUrlEntityDisplayUrl", urlEntityMatch.originalClassDef.type, displayUrlField, STRING_DESCRIPTOR)
+}
+
+/**
+ * The model field printed after [label] in this match's `toString`. R8 may outline small
+ * `toString` bodies into a shared static `StringBuilder` helper (e.g. `m(int, String, int, String,
+ * String)` building `p1 + p0 + p3 + p2 + p4`); then the field is the argument the helper appends
+ * immediately after the label's argument. That trace is exact, so it wins: the generic label lookup
+ * pairs labels with reads by instruction order and picked `endIdx` for `startIdx` on 12.38.
+ */
+context(context: BytecodePatchContext)
+private fun Match.toStringField(label: String): FieldReference =
+    method.outlinedToStringField(label) ?: fieldForToStringLabel(label)
+
+context(context: BytecodePatchContext)
+private fun Method.outlinedToStringField(label: String): FieldReference? {
+    val instructions = instructions.toList()
+    fun definedAt(register: Int, callIndex: Int, matches: (Int) -> Boolean): List<Int> =
+        instructions.indices.filter { index ->
+            index < callIndex && matches(index) &&
+                instructions.valueReachesRegister(
+                    index,
+                    (instructions[index] as OneRegisterInstruction).registerA,
+                    callIndex,
+                    register,
+                )
+        }
+    val candidates = instructions.withIndex().flatMap { (callIndex, call) ->
+        if (call.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) return@flatMap emptyList()
+        val helper = call.getReference<MethodReference>() ?: return@flatMap emptyList()
+        val appendOrder = context.classDefByOrNull(helper.definingClass)?.methods
+            ?.singleOrNull { it.toReference().toString() == helper.toString() }
+            ?.stringBuilderParameterOrder() ?: return@flatMap emptyList()
+        val arguments = call.registersUsed
+        val labelSlots = arguments.indices.filter { slot ->
+            definedAt(arguments[slot], callIndex) { index ->
+                instructions[index].getReference<StringReference>()?.string == label
+            }.isNotEmpty()
+        }
+        labelSlots.flatMap { labelSlot ->
+            val fieldSlot = appendOrder.getOrNull(appendOrder.indexOf(labelSlot) + 1) ?: return@flatMap emptyList()
+            val register = arguments.getOrNull(fieldSlot) ?: return@flatMap emptyList()
+            definedAt(register, callIndex) { index ->
+                instructions[index].opcode in FIELD_READ_OPCODES &&
+                    instructions[index].getReference<FieldReference>()?.definingClass == definingClass
+            }.mapNotNull { index -> instructions[index].getReference<FieldReference>() }
+        }
+    }.distinctBy { it.toString() }
+    return requireAtMostOne("NewX outlined toString field for '$label' in $this", candidates)
+}
+
+/**
+ * Parameter slots of a static `StringBuilder` helper in the order they are written: the
+ * `StringBuilder(String)` seed, then each `append`. Null unless every write reads a parameter.
+ */
+private fun Method.stringBuilderParameterOrder(): List<Int>? {
+    if (!AccessFlags.STATIC.isSet(accessFlags)) return null
+    val implementation = implementation ?: return null
+    val parameterStart = implementation.registerCount - parameterTypes.sumOf { type ->
+        if (type.toString() == "J" || type.toString() == "D") 2 else 1
+    }
+    val order = mutableListOf<Int>()
+    for (instruction in implementation.instructions) {
+        val reference = instruction.getReference<MethodReference>() ?: continue
+        if (reference.definingClass != "Ljava/lang/StringBuilder;") continue
+        val isWrite = (reference.name == "<init>" && reference.parameterTypes.size == 1) || reference.name == "append"
+        if (!isWrite) continue
+        val slot = instruction.registersUsed.getOrNull(1)?.minus(parameterStart) ?: return null
+        if (slot < 0) return null
+        order += slot
+    }
+    return order.takeIf { it.isNotEmpty() }
 }
 
 context(context: BytecodePatchContext)
@@ -640,6 +847,13 @@ private fun patchTranslationBridges(path: ResolvedTranslationPath) {
         }
     }
     modelStringBridge("readText", path.modelTextGetter)
+    val readPostModel = extensionClass.requireBridge("readPostModel", OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
+    readPostModel.patchBridge {
+        val value = readPostModel.p0Register
+        checkCast(value, path.presenterDescriptor)
+        iget(value, value, path.presenterModelField)
+        returnObject(value)
+    }
     modelStringBridge("readSourceLanguage", path.modelSourceGetter)
 
     val readPollChoices = extensionClass.requireBridge("readPollChoices", OBJECT_DESCRIPTOR, LIST_DESCRIPTOR)

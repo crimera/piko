@@ -99,7 +99,7 @@ public final class PostTranslator {
                 return true;
             }
 
-            String text = readPostTextOrNull(post);
+            String text = visibleText(readCanonicalPostOrNull(post), readPostTextOrNull(post));
             if (text == null || text.trim().isEmpty()) {
                 Utils.showToastShort("This post has no text to translate");
                 return true;
@@ -125,7 +125,7 @@ public final class PostTranslator {
         try {
             publishLoading(callback);
 
-            String text = readText(presenter);
+            String text = visibleText(readPostModel(presenter), readText(presenter));
             String sourceLanguage = normalizeLanguage(readSourceLanguage(presenter));
             List<String> pollChoices = snapshotPollChoices(readPollChoices(presenter));
             if ((text == null || text.trim().isEmpty()) && pollChoices.isEmpty()) {
@@ -452,6 +452,53 @@ public final class PostTranslator {
         }
     }
 
+    private static Object readCanonicalPostOrNull(Object post) {
+        try {
+            return readCanonicalPost(post);
+        } catch (ClassCastException exception) {
+            return null;
+        }
+    }
+
+    /**
+     * The part of the post text X renders: the display range (code points, as X's own renderer
+     * applies it) drops leading reply mentions and trailing media/quote links, and t.co links are
+     * shown as their display URLs. Falls back to the raw text when the model cannot be read.
+     */
+    static String visibleText(Object post, String text) {
+        if (post == null || text == null || text.isEmpty()) return text;
+        try {
+            String visible = text;
+            Object range = readDisplayTextRange(post);
+            if (range != null) {
+                int count = text.codePointCount(0, text.length());
+                int start = Math.max(0, Math.min(readRangeStart(range), count));
+                int end = Math.max(start, Math.min(readRangeEnd(range), count));
+                if (end > start) {
+                    visible = text.substring(
+                            text.offsetByCodePoints(0, start),
+                            text.offsetByCodePoints(0, end)
+                    );
+                }
+            }
+            Object entityList = readEntityList(post);
+            List<?> urls = entityList == null ? null : readUrlEntities(entityList);
+            if (urls != null) {
+                for (Object entity : urls) {
+                    String url = readUrlEntityUrl(entity);
+                    String displayUrl = readUrlEntityDisplayUrl(entity);
+                    if (url != null && !url.isEmpty() && displayUrl != null && !displayUrl.isEmpty()) {
+                        visible = visible.replace(url, displayUrl);
+                    }
+                }
+            }
+            return visible.trim();
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to read the visible NewX post text", exception);
+            return text;
+        }
+    }
+
     private static Object readPostIdOrNull(Object post) {
         try {
             return readPostId(post);
@@ -467,6 +514,43 @@ public final class PostTranslator {
 
     // Replaced at patch time with a typed read of the timeline post's id getter.
     private static Object readPostId(Object post) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    // Display-text bridges, replaced at patch time with typed post-model reads.
+    private static Object readCanonicalPost(Object timelinePost) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static Object readPostModel(Object presenter) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static Object readDisplayTextRange(Object post) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static int readRangeStart(Object range) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static int readRangeEnd(Object range) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static Object readEntityList(Object post) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static List<?> readUrlEntities(Object entityList) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static String readUrlEntityUrl(Object entity) {
+        throw new IllegalStateException("Unpatched translation bridge");
+    }
+
+    private static String readUrlEntityDisplayUrl(Object entity) {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 

@@ -89,7 +89,7 @@ private object CardUrlActionModelFingerprint : Fingerprint(
     filters = listOf(string("Url(url=")),
 )
 
-private data class UrlEntityFields(
+internal data class UrlEntityFields(
     val type: String,
     val displayUrl: FieldReference,
     val expandedUrl: FieldReference,
@@ -247,7 +247,7 @@ private fun resolveCanonicalUrlMatches(urlEntityFields: UrlEntityFields): Canoni
     )
 }
 
-private fun resolveUrlEntityFields(match: Match): UrlEntityFields {
+internal fun resolveUrlEntityFields(match: Match): UrlEntityFields {
     val owner = match.originalClassDef.type
     val instructions = match.originalMethod.implementation?.instructions?.toList()
         ?: throw PatchException("URL entity toString method has no implementation")
