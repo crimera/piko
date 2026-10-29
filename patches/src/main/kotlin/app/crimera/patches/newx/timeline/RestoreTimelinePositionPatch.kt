@@ -138,15 +138,6 @@ private const val RESTORE_ANCHOR_EXACT_LABEL = "piko_newx_restore_anchor_exact"
 private const val RESTORE_ANCHOR_NOT_FOUND_LABEL = "piko_newx_restore_anchor_not_found"
 private const val RESTORE_ANCHOR_CONSUME_LABEL = "piko_newx_restore_anchor_consume"
 
-private val SUPPORTED_TIMELINE_POSITION_VERSIONS = setOf("12.34.0-prod.01", "12.35.0-prod.01")
-private val COMPATIBILITY_TIMELINE_POSITION =
-    COMPATIBILITY_NEW_X.excluding(
-        *COMPATIBILITY_NEW_X.targets
-            .filterNot { target -> target.version in SUPPORTED_TIMELINE_POSITION_VERSIONS }
-            .map { target -> target.version }
-            .toTypedArray(),
-    )
-
 private object NewXUserIdentifierSerializerFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/",
     name = "<clinit>",
@@ -279,7 +270,7 @@ val restoreTimelinePositionPatch =
         description = "Persists supported timeline positions, then restores them after the app process restarts.",
     ) {
         unsupportedOnMount()
-        compatibleWith(COMPATIBILITY_TIMELINE_POSITION)
+        compatibleWith(COMPATIBILITY_NEW_X)
 
         val restoreTimelinePosition =
             newXToggle(
