@@ -8,10 +8,12 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.isAssignableTo
+import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
@@ -29,7 +31,9 @@ import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
@@ -61,6 +65,11 @@ private const val IS_FOR_YOU_FILTER_REFRESH_PENDING_DESCRIPTOR =
     "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isForYouFilterRefreshPending()Z"
 private const val IS_TIMELINE_DATA_EMPTY_DESCRIPTOR =
     "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty($LIST_DESCRIPTOR)Z"
+private const val MARK_RESTORE_REFRESH_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->markRestoreRefresh()V"
+private const val CONSUME_RESTORE_REFRESH_CLEAR_CACHE_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->consumeRestoreRefreshClearCache($ENUM_DESCRIPTOR)Z"
+private const val CLEAR_CACHE_INSTRUCTION_TYPE_NAME = "TimelineClearCache"
 private const val RESTORE_TIMELINE_POSITION_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR$STRING_DESCRIPTOR)[I"
 private const val URT_SUPPRESS_LABEL = "piko_newx_refresh_urt_suppress"
@@ -150,6 +159,16 @@ private object NewXUrtAutoRefreshEventFingerprint : Fingerprint(
         autoRefreshFieldReads.size == 1 && refreshRequestCalls.size == 1
     },
 )
+
+// The Apollo type object for the URT TimelineClearCache instruction; its <clinit> names it.
+private object NewXTimelineClearCacheTypeFingerprint : Fingerprint(
+    definingClass = "Lcom/x/android/type/",
+    name = "<clinit>",
+    strings = listOf(CLEAR_CACHE_INSTRUCTION_TYPE_NAME),
+)
+
+private fun FieldReference.isSameField(other: FieldReference): Boolean =
+    definingClass == other.definingClass && name == other.name && type == other.type
 
 @Suppress("unused")
 val disableTimelineRefreshPatch =
@@ -523,6 +542,8 @@ val disableTimelineRefreshPatch =
                     moveResult(settingRegister, "[I")
                     ifEqz(settingRegister, Target.Original)
                     sget(requestRegister, fieldReference(repositoryViewportAwareAutoRefreshFieldReference))
+                    // The converted refresh's ClearCache must not drop the restored rows.
+                    invokeStatic(methodReference(MARK_RESTORE_REFRESH_DESCRIPTOR))
                     goto(Target.Original)
                 }
             }
@@ -579,6 +600,102 @@ val disableTimelineRefreshPatch =
                 moveResult(settingRead.register, "Z")
                 ifNez(settingRead.register, Target.Original)
                 returnVoid()
+            }
+
+            // The one URT method that reads the ClearCache type sets a flag that makes X drop cached entries.
+            val clearCacheTypeMatch =
+                requireExactlyOne(
+                    "NewX URT TimelineClearCache type",
+                    NewXTimelineClearCacheTypeFingerprint.scopedMatchAll(),
+                )
+            val clearCacheTypeClass = clearCacheTypeMatch.originalClassDef.type
+            val clearCacheTypeFieldCandidates =
+                clearCacheTypeMatch.originalMethod.implementation?.instructions?.toList().orEmpty()
+                    .mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.SPUT_OBJECT) return@mapNotNull null
+                        instruction.getReference<FieldReference>()?.takeIf { reference ->
+                            reference.definingClass == clearCacheTypeClass
+                        }
+                    }
+            val clearCacheTypeField =
+                requireExactlyOne("NewX URT TimelineClearCache type field", clearCacheTypeFieldCandidates)
+            // Scan immutably and by package: mutable proxies for every APK class exhaust patch-time memory.
+            val clearCacheReaderCandidates =
+                classDefFlatMap { classDef ->
+                    if (!classDef.type.startsWith(URT_REPOSITORY_PACKAGE)) return@classDefFlatMap emptyList()
+                    classDef.methods.filter { method ->
+                        method.implementation?.instructions?.any { instruction ->
+                            instruction.opcode == Opcode.SGET_OBJECT &&
+                                instruction.getReference<FieldReference>()?.isSameField(clearCacheTypeField) == true
+                        } == true
+                    }
+                }
+            val clearCacheReader =
+                requireExactlyOne("NewX URT ClearCache instruction reader", clearCacheReaderCandidates)
+            val clearCacheReaderMethod =
+                requireExactlyOne(
+                    "NewX URT ClearCache instruction reader method",
+                    mutableClassDefBy(clearCacheReader.definingClass).methods.filter { method ->
+                        method.name == clearCacheReader.name &&
+                            method.returnType == clearCacheReader.returnType &&
+                            method.parameterTypes.map(CharSequence::toString) ==
+                                clearCacheReader.parameterTypes.map(CharSequence::toString)
+                    },
+                )
+            val clearCacheReaderInstructions = clearCacheReaderMethod.instructions.toList()
+            val clearCacheTypeReadIndex =
+                requireExactlyOne(
+                    "NewX URT ClearCache type read",
+                    clearCacheReaderInstructions.withIndex().filter { (_, instruction) ->
+                        instruction.opcode == Opcode.SGET_OBJECT &&
+                            instruction.getReference<FieldReference>()?.isSameField(clearCacheTypeField) == true
+                    }.map { it.index },
+                )
+            val clearCacheIfEqzIndex =
+                (clearCacheTypeReadIndex + 1..minOf(clearCacheTypeReadIndex + 6, clearCacheReaderInstructions.lastIndex))
+                    .firstOrNull { index -> clearCacheReaderInstructions[index].opcode == Opcode.IF_EQZ }
+                    ?: throw PatchException(
+                        "NewX URT ClearCache type read at index $clearCacheTypeReadIndex has no if-eqz within six instructions",
+                    )
+            // The flag is the literal 1 written in the fall-through, before the goto that leaves the response.
+            val clearCacheFlagWriteIndex =
+                requireExactlyOne(
+                    "NewX URT ClearCache flag write",
+                    clearCacheReaderInstructions.withIndex()
+                        .drop(clearCacheIfEqzIndex + 1)
+                        .takeWhile { (_, instruction) ->
+                            instruction.opcode !in setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
+                        }
+                        .filter { (_, instruction) ->
+                            instruction.opcode in setOf(Opcode.CONST_4, Opcode.CONST_16) &&
+                                (instruction as? NarrowLiteralInstruction)?.narrowLiteral == 1
+                        }
+                        .map { it.index },
+                )
+            val clearCacheFlagRegister =
+                (clearCacheReaderInstructions[clearCacheFlagWriteIndex] as OneRegisterInstruction).registerA
+            val clearCacheRequestTypeField =
+                requireExactlyOne(
+                    "NewX URT ClearCache request-type field",
+                    mutableClassDefBy(clearCacheReaderMethod.definingClass).fields.filter { field ->
+                        !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == requestTypeDescriptor
+                    },
+                )
+            clearCacheReaderMethod.insertHook(
+                index = clearCacheFlagWriteIndex + 1,
+                // The flag register carries the ClearCache answer past the consume call.
+                excludedRegisters = listOf(clearCacheFlagRegister),
+                // Only the ClearCache path falls into this write. The goto after it is shared, so
+                // branches onto it must keep skipping the hook.
+                relocateBranchTargets = false,
+            ) {
+                val typeRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+                move(typeRegister, clearCacheReaderMethod.p0Register, clearCacheReaderMethod.definingClass)
+                iget(typeRegister, typeRegister, clearCacheRequestTypeField)
+                invokeStatic(methodReference(CONSUME_RESTORE_REFRESH_CLEAR_CACHE_DESCRIPTOR), typeRegister)
+                moveResult(typeRegister, "Z")
+                ifEqz(typeRegister, Target.Original)
+                constInt(clearCacheFlagRegister, 0)
             }
         }
     }
