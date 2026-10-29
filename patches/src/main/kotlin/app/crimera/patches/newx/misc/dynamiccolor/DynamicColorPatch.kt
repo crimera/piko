@@ -1840,9 +1840,9 @@ private fun patchMediaViewerTextColors() {
     context.classDefForEach { classDef ->
         if (classDef.type.startsWith(MEDIA_VIEWER_CHROME_PACKAGE)) chromeClasses += classDef.type
     }
-    // Older targets (12.27 prod) have no immersive chrome, so there is no media viewer text to
-    // theme. A chrome that exists but has no matching Text calls is drift and fails below.
-    if (chromeClasses.isEmpty()) return
+    if (chromeClasses.isEmpty()) {
+        throw PatchException("NewX media viewer immersive chrome is missing")
+    }
     var hookCount = 0
     for (descriptor in chromeClasses) {
         for (method in context.mutableClassDefBy(descriptor).methods) {
@@ -2024,7 +2024,7 @@ private fun MutableMethod.hookExactWhiteIconTints(): Int {
 
 /**
  * The author name in the media viewer is the user row's name composable, which takes two strings
- * (name, handle). Builds without that shape (12.31) skip it, so it is only claimed where it exists and passes its color through to material Text. The viewer passes explicit sRGB
+ * (name, handle) and passes its color through to material Text. The viewer passes explicit sRGB
  * white to it, so only that exact white is routed through the palette.
  */
 context(context: BytecodePatchContext)
@@ -2035,8 +2035,7 @@ private fun patchMediaViewerUserNameColors() {
                 listOf("Ljava/lang/String;", "Ljava/lang/String;") &&
                 method.implementation?.instructions?.any { it.isMaterialTextCall() } == true
         }
-    // 12.31 has no (String, String) user row composable, so the element is skipped there.
-    val method = requireAtMostOne("NewX media viewer author name", nameMethods) ?: return
+    val method = requireExactlyOne("NewX media viewer author name", nameMethods)
     if (method.hookMaterialTextColors() == 0) {
         throw PatchException("NewX media viewer author name has no Text calls to theme: $method")
     }
@@ -2164,9 +2163,9 @@ private fun patchMediaViewerRichTextColors() {
             }
         }
     }
-    // Older viewers (12.29 prod) have no shared rich-text call; their body text stays untouched
-    // instead of failing the whole theme patch on a declared target.
-    if (hookCount == 0) return
+    if (hookCount == 0) {
+        throw PatchException("NewX media viewer rich text has no shared rich-text calls to theme")
+    }
 }
 
 /**

@@ -23,7 +23,6 @@ import app.crimera.patches.newx.misc.navbar.resolveNavBarItemContent
 import app.crimera.patches.newx.misc.navbar.resolveTitleResourceIdAtRowCall
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
-import app.crimera.patches.newx.misc.navbar.resolveComponentTabChangeMethod
 import app.crimera.patches.newx.misc.navbar.toSmaliDescriptor
 import app.crimera.patches.newx.misc.navbar.validateNewXNavBarTabData
 import app.crimera.patches.newx.misc.navbar.resolveIconDrawables
@@ -86,7 +85,6 @@ private const val DRAWER_TAB_DONE_LABEL = "piko_drawer_tab_done"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
-private const val FUNCTION2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
@@ -192,16 +190,6 @@ private val NEWX_DRAWER_MENU_ITEM_WITH_AUXILIARY_CONTENT_PARAMETERS =
         "I",
     )
 
-private val NEWX_DRAWER_FOOTER_ITEM_PARAMETERS =
-    listOf(
-        "I",
-        COMPOSER_DESCRIPTOR,
-        "L",
-        "L",
-        "Ljava/lang/String;",
-        FUNCTION0_DESCRIPTOR,
-    )
-
 // 12.25 moved footer rows to the shared title/icon/click renderer.
 private val NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS =
     listOf(
@@ -246,12 +234,6 @@ private object NewXDrawerMenuItemWithAuxiliaryContentFingerprint : Fingerprint(
 )
 
 // FOOTER ROWS: settings/help/feedback/media/imprint/debug pass their localized title.
-private object NewXDrawerFooterItemFingerprint : Fingerprint(
-    classFingerprint = NewXDrawerContentClassFingerprint,
-    returnType = "V",
-    parameters = NEWX_DRAWER_FOOTER_ITEM_PARAMETERS,
-)
-
 private object NewXDrawerSharedFooterItemFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
@@ -1037,8 +1019,7 @@ private fun MutableMethod.findProfileRowCall(): ProfileRowAnchor {
 private data class DrawerTabNavigation(
     val componentClass: String,
     val enumType: String,
-    val tabChangeDescriptor: String?,
-    val tabChangeFunctionField: FieldReference?,
+    val tabChangeFunctionField: FieldReference,
     val closerField: FieldReference,
     val closerMethod: MethodReference,
     val closerArgField: FieldReference,
@@ -1047,9 +1028,8 @@ private data class DrawerTabNavigation(
 private val CASE_END_OPCODES = setOf(Opcode.RETURN_OBJECT, Opcode.RETURN_VOID, Opcode.THROW)
 
 /**
- * Resolves the 12.29+ tab change shape: a captured Function1 field invoked with the tab in the
- * Communities click. Returns the invoke index and the field it loads, or null for older releases
- * that push the stack frame inline.
+ * Resolves the tab change: a captured Function1 field invoked with the tab in the Communities
+ * click. Returns the invoke index and the field it loads, or null if there is none.
  */
 private fun List<Instruction>.resolveTabChangeFunction(
     communitiesIndex: Int,
@@ -1087,10 +1067,10 @@ private fun List<Instruction>.resolveRegisterField(
 }
 
 /**
- * Resolves the tab-open contract for the drawer shortcuts: the tab change method shared with
- * the navigation bar patch, plus the drawer-close triple extracted from the Communities drawer
- * click (stack push, then close). The Communities case proves both the close field on the tab
- * component and the close argument without hardcoding obfuscated owners.
+ * Resolves the tab-open contract for the drawer shortcuts: the captured tab change function, plus
+ * the drawer-close triple extracted from the Communities drawer click (tab change, then close).
+ * The Communities case proves both the close field on the tab component and the close argument
+ * without hardcoding obfuscated owners.
  */
 context(context: BytecodePatchContext)
 private fun resolveDrawerTabNavigation(
@@ -1144,33 +1124,13 @@ private fun resolveDrawerTabNavigation(
             index > communitiesIndex &&
                 dispatcherInstructions[index].opcode in CASE_END_OPCODES
         } ?: dispatcherInstructions.size
-    val stackPushIndex =
-        dispatcherInstructions.indices.firstOrNull { index ->
-            if (index <= communitiesIndex || index >= caseEndIndex) return@firstOrNull false
-            val instruction = dispatcherInstructions[index]
-            if (instruction.opcode != Opcode.INVOKE_VIRTUAL &&
-                instruction.opcode != Opcode.INVOKE_VIRTUAL_RANGE
-            ) return@firstOrNull false
-            val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
-            reference.returnType == "V" &&
-                reference.parameterTypes.map(CharSequence::toString) ==
-                listOf(FUNCTION2_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
-        }
-    // 12.29 routes the tab change through a captured Function1 field on the drawer component
-    // instead of pushing the stack frame inline.
+    // The tab change is a captured Function1 field on the drawer component, invoked in the case.
     val tabChangeFunction =
-        if (stackPushIndex == null) {
-            dispatcherInstructions.resolveTabChangeFunction(communitiesIndex, caseEndIndex)
-                ?: throw PatchException(
-                    "NewX Communities drawer click has neither a tab stack push nor a tab " +
-                        "change function: $dispatcher",
-                )
-        } else {
-            null
-        }
-    val tabChangeIndex =
-        stackPushIndex ?: tabChangeFunction?.first
-            ?: throw PatchException("NewX Communities drawer click has no tab change: $dispatcher")
+        dispatcherInstructions.resolveTabChangeFunction(communitiesIndex, caseEndIndex)
+            ?: throw PatchException(
+                "NewX Communities drawer click has no tab change function: $dispatcher",
+            )
+    val tabChangeIndex = tabChangeFunction.first
     val closerIndex =
         dispatcherInstructions.indices.firstOrNull { index ->
             if (index <= tabChangeIndex || index >= caseEndIndex) return@firstOrNull false
@@ -1213,8 +1173,7 @@ private fun resolveDrawerTabNavigation(
         ) { "$it:${dispatcherInstructions[it].getReference<FieldReference>()}" }
             .let { dispatcherInstructions[it].getReference<FieldReference>() }
             ?: throw PatchException("NewX drawer close field has no field reference: $dispatcher")
-    // The dispatcher receiver owns both the close field and (12.27-12.28) the tab change method.
-    // 12.29 moved only the tab change out; the capture target stays the close-field owner.
+    // The capture target is the close-field owner.
     val componentClass = closerField.definingClass
     if (closerField.type != closerMethod.definingClass) {
         throw PatchException(
@@ -1259,23 +1218,10 @@ private fun resolveDrawerTabNavigation(
             "NewX drawer close argument is not a stable API type: $closerArgField",
         )
     }
-    val tabChangeDescriptor =
-        if (tabChangeFunction == null) {
-            val method =
-                resolveComponentTabChangeMethod(componentClass, tabData.navigationType)
-                    ?: throw PatchException(
-                        "NewX tab component $componentClass has no tab change method",
-                    )
-            "${method.definingClass}->${method.name}(" +
-                "${method.parameterTypes.joinToString("")})${method.returnType}"
-        } else {
-            null
-        }
     return DrawerTabNavigation(
         componentClass = componentClass,
         enumType = tabData.navigationType,
-        tabChangeDescriptor = tabChangeDescriptor,
-        tabChangeFunctionField = tabChangeFunction?.second,
+        tabChangeFunctionField = tabChangeFunction.second,
         closerField = closerField,
         closerMethod = closerMethod,
         closerArgField = closerArgField,
@@ -1365,24 +1311,14 @@ private fun replaceDrawerTabOpenerBody(
         sget(1, fieldReference("$DRAWER_TAB_OPENER_DESCRIPTOR->component:$OBJECT_DESCRIPTOR"))
         ifEqz(1, Target.Local(DRAWER_TAB_DONE_LABEL))
         checkCast(1, navigation.componentClass)
-        val tabChangeDescriptor = navigation.tabChangeDescriptor
-        if (tabChangeDescriptor != null) {
-            invokeVirtual(methodReference(tabChangeDescriptor), 1, 0)
-        } else {
-            val field =
-                navigation.tabChangeFunctionField
-                    ?: throw PatchException(
-                        "Drawer tab change is missing on ${navigation.componentClass}",
-                    )
-            iget(2, 1, field)
-            invokeInterface(
-                methodReference(
-                    "$FUNCTION1_DESCRIPTOR->invoke($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR",
-                ),
-                2,
-                0,
-            )
-        }
+        iget(2, 1, navigation.tabChangeFunctionField)
+        invokeInterface(
+            methodReference(
+                "$FUNCTION1_DESCRIPTOR->invoke($OBJECT_DESCRIPTOR)$OBJECT_DESCRIPTOR",
+            ),
+            2,
+            0,
+        )
         sget(0, navigation.closerArgField)
         iget(2, 1, navigation.closerField)
         invokeInterface(navigation.closerMethod, 2, 0)
@@ -1498,8 +1434,7 @@ val customizeNewXDrawerPatch =
 
             // FOOTER ROWS: settings/help/feedback/media/imprint/debug render with a title.
             val footerMatches =
-                (NewXDrawerFooterItemFingerprint.scopedMatchAllOrNull().orEmpty() +
-                    NewXDrawerSharedFooterItemFingerprint.scopedMatchAllOrNull().orEmpty())
+                NewXDrawerSharedFooterItemFingerprint.scopedMatchAllOrNull().orEmpty()
                     .distinctBy { it.originalMethod.toString() }
             if (footerMatches.size > 1) {
                 throw PatchException(

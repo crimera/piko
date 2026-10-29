@@ -110,12 +110,6 @@ private data class NavigationInsetsHook(
     val continuation: Instruction,
 )
 
-private data class PhotoViewerNavigationFallbackHook(
-    val method: MutableMethod,
-    val gateIndex: Int,
-    val fallback: Instruction,
-)
-
 internal data class ImmersiveActionBarSafeAreaHook(
     val method: MutableMethod,
     val actionBarCallIndex: Int,
@@ -239,16 +233,6 @@ private fun Method.isPostDetailReplyBarRenderer(): Boolean {
     return parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
         parameters.count { it == "Ljava/lang/String;" } == 1 &&
         parameters.any { it.startsWith(HAZE_SCOPE) }
-}
-
-private fun Method.isPhotoViewerControlsRenderer(): Boolean {
-    // The caller edge to the resolved container supplies the domain anchor. Auxiliary Compose
-    // parameters are not consumed by this hook; their count and order cannot identify the UI.
-    // The resolver below additionally proves call order and a common native fallback target.
-    return AccessFlags.STATIC.isSet(accessFlags) &&
-        returnType == "V" &&
-        inlineActionBarRenderCallIndices().size == 1 &&
-        navigationInsetsCallIndices().size == 1
 }
 
 private fun Method.inlineActionBarRenderCallIndices(): List<Int> =
@@ -1177,15 +1161,15 @@ private fun ToggleSettingDefinition.injectReadBeforeActionBar(hook: ImmersiveAct
 }
 
 /**
- * The photo viewer chooses between the reply composer and a native navigation-bar spacer after
- * rendering its action bar. Resolve the existing no-composer branch from call order and control
- * flow so the hide setting can select it without recreating Compose inset behavior.
+ * Proves the immersive-only reply shape: no media method calls the minimal reply container
+ * directly, and the immersive safe-area renderer is the sole media-scope inline-action row render,
+ * so every media action row stays covered. Any other shape fails closed.
  */
 context(context: BytecodePatchContext)
-private fun resolvePhotoViewerNavigationFallbackHook(
+private fun requireImmersiveOnlyPhotoViewerReply(
     minimalContainer: MutableMethod,
     immersiveHook: ImmersiveActionBarSafeAreaHook?,
-): PhotoViewerNavigationFallbackHook? {
+) {
     val directCallers = buildList<Method> {
         context.classDefForEach { classDef ->
             if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
@@ -1194,13 +1178,7 @@ private fun resolvePhotoViewerNavigationFallbackHook(
             }
         }
     }
-    val candidates = directCallers.filter { it.isPhotoViewerControlsRenderer() }
-    // 12.37 renders PHOTO/VIDEO/GIF through the shared immersive chrome; the legacy photo host with
-    // its native-spacer fallback is gone. The photo hook is omitted only when no media method calls
-    // the container directly, the immersive safe-area hook resolved, and that immersive renderer is
-    // the sole media-scope inline-action row render, so every media action row stays covered.
-    // Anything else falls through to the fail-closed diagnostic below.
-    if (candidates.isEmpty() && directCallers.isEmpty() && immersiveHook != null) {
+    if (directCallers.isEmpty() && immersiveHook != null) {
         val mediaRowRenderers = buildList<Method> {
             context.classDefForEach { classDef ->
                 if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
@@ -1213,101 +1191,23 @@ private fun resolvePhotoViewerNavigationFallbackHook(
             label = "NewX media inline-action row renderer (immersive-only reply shape)",
             candidates = mediaRowRenderers,
         )
-        if (onlyRowRenderer != null && immersiveHook.method.matches(onlyRowRenderer)) return null
+        if (onlyRowRenderer != null && immersiveHook.method.matches(onlyRowRenderer)) return
     }
-    val missingCapability = if (candidates.isEmpty()) {
-        val containerCallers = mutableListOf<String>()
-        val actionRowConsumers = mutableListOf<String>()
-        context.classDefForEach { definition ->
-            definition.methods.forEach { method ->
-                val composerCalls = method.callSiteIndices(minimalContainer)
-                if (composerCalls.isNotEmpty()) containerCallers.add("$method at $composerCalls")
-                val rowCalls = method.inlineActionBarRenderCallIndices()
-                if (rowCalls.isNotEmpty()) actionRowConsumers.add("$method at $rowCalls")
-            }
+    val containerCallers = mutableListOf<String>()
+    val actionRowConsumers = mutableListOf<String>()
+    context.classDefForEach { definition ->
+        definition.methods.forEach { method ->
+            val composerCalls = method.callSiteIndices(minimalContainer)
+            if (composerCalls.isNotEmpty()) containerCallers.add("$method at $composerCalls")
+            val rowCalls = method.inlineActionBarRenderCallIndices()
+            if (rowCalls.isNotEmpty()) actionRowConsumers.add("$method at $rowCalls")
         }
-        "NewX media reply-bar capability is not proven: no direct photo/native-navigation-fallback " +
-            "renderer for $minimalContainer. Direct media callers: $directCallers. " +
+    }
+    throw PatchException(
+        "NewX media reply-bar capability is not proven for $minimalContainer. " +
+            "Direct media callers: $directCallers. " +
             "Selected immersive safe-area renderer: ${immersiveHook?.method ?: "absent"}. " +
-            "All direct container callers: $containerCallers. All action-row consumers: $actionRowConsumers. " +
-            "A selected animated content path proves its own immersive hook, not removal of the " +
-            "legacy photo surface or closed coverage of media action-row consumption. " +
-            "The historical compact composer has no native spacer and cannot replace that contract. " +
-            "Refusing to omit the required photo hook"
-    } else {
-        "NewX photo-viewer controls renderer with native navigation fallback"
-    }
-    val originalMethod =
-        requireExactlyOne(
-            label = missingCapability,
-            candidates = candidates,
-        )
-    val method =
-        requireExactlyOne(
-            label = "NewX mutable photo-viewer controls renderer",
-            candidates =
-                context.mutableClassDefBy(originalMethod.definingClass).methods.filter { method ->
-                    method.matches(originalMethod)
-                },
-        )
-    val instructions = method.instructions.toList()
-    val actionBarCalls = method.inlineActionBarRenderCallIndices()
-    val minimalComposerCalls = method.callSiteIndices(minimalContainer)
-    val navigationInsetCalls = method.navigationInsetsCallIndices()
-    val actionBarCall =
-        requireExactlyOne(
-            label = "NewX photo-viewer action-bar call in $method",
-            candidates = actionBarCalls,
-        )
-    val minimalComposerCall =
-        requireExactlyOne(
-            label = "NewX photo-viewer reply-composer call in $method",
-            candidates = minimalComposerCalls,
-        )
-    val navigationInsetCall =
-        requireExactlyOne(
-            label = "NewX photo-viewer navigation-inset call in $method",
-            candidates = navigationInsetCalls,
-        )
-    if (!(actionBarCall < minimalComposerCall && minimalComposerCall < navigationInsetCall)) {
-        throw PatchException(
-            "Unexpected photo-viewer control-flow order in $method: action bar at $actionBarCall, " +
-                "reply composer at $minimalComposerCall, navigation inset at $navigationInsetCall",
-        )
-    }
-
-    val fallbackBranches =
-        (actionBarCall + 1 until minimalComposerCall).mapNotNull { index ->
-            val instruction = instructions[index]
-            if (instruction.opcode !in CONDITIONAL_BRANCH_OPCODES) return@mapNotNull null
-            val branch = instruction as? BuilderOffsetInstruction
-                ?: throw PatchException(
-                    "Photo-viewer conditional branch is not mutable at $index in $method: " +
-                        instruction,
-                )
-            val target = branch.target.location.instruction ?: return@mapNotNull null
-            val targetIndex = branch.target.location.index
-            Triple(index, targetIndex, target).takeIf {
-                targetIndex in (minimalComposerCall + 1)..navigationInsetCall
-            }
-        }
-    val fallbackTargets = fallbackBranches.distinctBy { (_, targetIndex, _) -> targetIndex }
-    if (fallbackBranches.isEmpty()) {
-        throw PatchException(
-            "Expected at least one photo-viewer reply gate in $method, found none",
-        )
-    }
-    val fallbackTarget =
-        requireExactlyOne(
-            label = "NewX photo-viewer navigation fallback target in $method",
-            candidates = fallbackTargets,
-        )
-
-    return PhotoViewerNavigationFallbackHook(
-        method = method,
-        // newx-resolver-lint: allow instruction-order raw-first because bytecode order is the contract.
-        gateIndex = fallbackBranches.minOf { (index, _, _) -> index },
-        fallback = fallbackTarget.third,
+            "All direct container callers: $containerCallers. All action-row consumers: $actionRowConsumers",
     )
 }
 
@@ -1337,8 +1237,7 @@ val newXHidePostReplyBarPatch =
                 resolvePostDetailNavigationInsetsHook(postDetailSheetContainer)
             val immersiveActionBarSafeAreaHook =
                 resolveImmersiveActionBarSafeAreaHook(minimalContainer)
-            val photoViewerNavigationFallbackHook =
-                resolvePhotoViewerNavigationFallbackHook(minimalContainer, immersiveActionBarSafeAreaHook)
+            requireImmersiveOnlyPhotoViewerReply(minimalContainer, immersiveActionBarSafeAreaHook)
 
             val postDetailInsetApplication =
                 postDetailSheetContainer.classifyInsetApplication(postDetailNavigationInsetsHook.callIndex)
@@ -1359,9 +1258,6 @@ val newXHidePostReplyBarPatch =
                     postDetailNavigationInsetsHook.continuation,
                 )
                 hidePostReplyBar.returnVoidIfEnabled(postDetailSheetContainer, 0)
-            }
-            photoViewerNavigationFallbackHook?.let { hook ->
-                hidePostReplyBar.branchIfEnabled(hook.method, hook.gateIndex, hook.fallback)
             }
             immersiveActionBarSafeAreaHook?.let { hook ->
                 // 12.29's new immersive renderer owns the visible likes/repost/share row. Pad that

@@ -348,70 +348,62 @@ private fun resolveVideoTabHooks(
     downloader: ResolvedNewXNativeDownloader,
     postDescriptor: String,
 ): List<NativeDownloadHook> {
-    // The legacy video-tab implementation carries a second handler through 12.30; 12.31 removes
-    // that package, so a release has either the current handler alone or both surfaces.
-    val handlers = NewXVideoTabDownloadHandlerFingerprint.scopedMatchAll()
-    if (handlers.size !in 1..2) {
-        throw PatchException(
-            "Expected one or two NewX video-tab download handlers, found ${handlers.size}: " +
-                handlers.joinToString { it.originalMethod.toString() },
-        )
-    }
-
-    return handlers.flatMap { match ->
-        val method = match.method
-        val post = resolveVideoTabPost(method, postDescriptor)
-        buildList {
-            val nativeDispatch =
-                requireExactlyOne(
-                    "NewX video-tab native download dispatch in $method",
-                    method.nativeDispatchCandidates(),
-                )
-            val nativeRegisters = method.instructions[nativeDispatch.first].registersUsed
-            if (nativeRegisters.size < 3) {
-                throw PatchException(
-                    "NewX video-tab native download dispatch has an unexpected register range in $method",
-                )
-            }
-            add(
-                NativeDownloadHook(
-                    method = method,
-                    insertionIndex = nativeDispatch.first,
-                    post = post,
-                    urlRegister = nativeRegisters[1],
-                    mimeRegister = nativeRegisters[2],
-                    returnsObject = false,
-                ),
+    val method =
+        requireExactlyOne(
+            "NewX video-tab download handler",
+            NewXVideoTabDownloadHandlerFingerprint.scopedMatchAll(),
+        ).method
+    val post = resolveVideoTabPost(method, postDescriptor)
+    return buildList {
+        val nativeDispatch =
+            requireExactlyOne(
+                "NewX video-tab native download dispatch in $method",
+                method.nativeDispatchCandidates(),
             )
-
-            val watermarkedIndex =
-                requireExactlyOne(
-                    "NewX video-tab watermarked download dispatch in $method",
-                    method.instructions.mapIndexedNotNull { index, instruction ->
-                        val reference = instruction.getReference<MethodReference>()
-                            ?: return@mapIndexedNotNull null
-                        index.takeIf {
-                            reference.toString() == downloader.watermarkedDispatch.toString()
-                        }
-                    },
-                )
-            val watermarkedRegisters = method.instructions[watermarkedIndex].registersUsed
-            if (watermarkedRegisters.size < 3) {
-                throw PatchException(
-                    "NewX video-tab watermarked dispatch has an unexpected register range in $method",
-                )
-            }
-            add(
-                NativeDownloadHook(
-                    method = method,
-                    insertionIndex = watermarkedIndex,
-                    post = post,
-                    urlRegister = watermarkedRegisters[1],
-                    mimeRegister = watermarkedRegisters[2],
-                    returnsObject = false,
-                ),
+        val nativeRegisters = method.instructions[nativeDispatch.first].registersUsed
+        if (nativeRegisters.size < 3) {
+            throw PatchException(
+                "NewX video-tab native download dispatch has an unexpected register range in $method",
             )
         }
+        add(
+            NativeDownloadHook(
+                method = method,
+                insertionIndex = nativeDispatch.first,
+                post = post,
+                urlRegister = nativeRegisters[1],
+                mimeRegister = nativeRegisters[2],
+                returnsObject = false,
+            ),
+        )
+
+        val watermarkedIndex =
+            requireExactlyOne(
+                "NewX video-tab watermarked download dispatch in $method",
+                method.instructions.mapIndexedNotNull { index, instruction ->
+                    val reference = instruction.getReference<MethodReference>()
+                        ?: return@mapIndexedNotNull null
+                    index.takeIf {
+                        reference.toString() == downloader.watermarkedDispatch.toString()
+                    }
+                },
+            )
+        val watermarkedRegisters = method.instructions[watermarkedIndex].registersUsed
+        if (watermarkedRegisters.size < 3) {
+            throw PatchException(
+                "NewX video-tab watermarked dispatch has an unexpected register range in $method",
+            )
+        }
+        add(
+            NativeDownloadHook(
+                method = method,
+                insertionIndex = watermarkedIndex,
+                post = post,
+                urlRegister = watermarkedRegisters[1],
+                mimeRegister = watermarkedRegisters[2],
+                returnsObject = false,
+            ),
+        )
     }
 }
 

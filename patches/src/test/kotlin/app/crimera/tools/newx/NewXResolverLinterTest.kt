@@ -11,7 +11,6 @@ import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
 import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
 import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
-import app.crimera.patches.newx.models.isLegacyInlineActionKindModelConstructor
 import app.crimera.patches.newx.models.resolveInlineActionKindLayoutMethod
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineActionKindRenderCall
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineIconSizeHook
@@ -40,7 +39,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.Opcode
-import app.crimera.patches.newx.timeline.isNewPostButtonRendererCandidate
 import app.crimera.patches.newx.timeline.isNewPostFabHostCandidate
 import app.crimera.patches.newx.timeline.primaryPostFabRendererCallIndices
 import app.crimera.patches.newx.timeline.readsArrayListFromParameter
@@ -1184,34 +1182,6 @@ class NewXResolverLinterTest {
     }
 
     @Test
-    fun `new-post resolver survives null-check churn and rejects modifier lookalike`() {
-        val controlRenderer = newPostRendererFixture(namedNullCheck = true, directModifier = true)
-        val controlLookalike = newPostRendererFixture(namedNullCheck = true, directModifier = false)
-        val targetRenderer = newPostRendererFixture(namedNullCheck = false, directModifier = true)
-        val targetLookalike = newPostRendererFixture(namedNullCheck = false, directModifier = false)
-
-        assertEquals(
-            listOf(true, false),
-            listOf(controlRenderer, controlLookalike).map(Method::isNewPostButtonRendererCandidate),
-        )
-        assertEquals(
-            listOf(true, false),
-            listOf(targetRenderer, targetLookalike).map(Method::isNewPostButtonRendererCandidate),
-        )
-    }
-
-    @Test
-    fun `new-post resolver survives 12-29 compose-flag ABI and conditional default modifier`() {
-        val renderer = newPostRendererComposeFlagFixture(directModifier = true)
-        val lookalike = newPostRendererComposeFlagFixture(directModifier = false)
-
-        assertEquals(
-            listOf(true, false),
-            listOf(renderer, lookalike).map(Method::isNewPostButtonRendererCandidate),
-        )
-    }
-
-    @Test
     fun `captured inline-action resolver follows the captured entry through field reads`() {
         val entryType = "Lfixture/InlineEntry;"
         val actionType = "Lfixture/ActionType;"
@@ -2076,39 +2046,6 @@ class NewXResolverLinterTest {
         )
     }
 
-    @Test
-    fun `inline-action legacy boolean kind model does not match the enum model`() {
-        // Regression for the 12.29 IconOnly fix breaking 12.28 prod: 12.27/12.28-alpha.01 use
-        // `(Z)` and 12.28-alpha.04/prod use `(ZZZ)`. The enum resolver must ignore both, and the
-        // legacy resolver must accept both while rejecting the enum and layout constructors.
-        val singleBoolean =
-            "invoke-direct {v3, v9}, Lcom/x/inlineactionbar/v0;-><init>(Z)V".toInstruction()
-        val threeBoolean =
-            "invoke-direct {v1, v11, v3, v13}, Lcom/x/inlineactionbar/y0;-><init>(ZZZ)V"
-                .toInstruction()
-        val enumModel =
-            "invoke-direct {v3, v12, v4, v13}, Lcom/x/inlineactionbar/d1;-><init>(ZZLcom/x/inlineactionbar/f1;)V"
-                .toInstruction()
-        val layoutConstructor =
-            "invoke-direct {v3, v4, v5, v4, v15}, Landroidx/compose/foundation/layout/b3;-><init>(FFFF)V"
-                .toInstruction()
-
-        fun isKindEnum(descriptor: String) = descriptor == "Lcom/x/inlineactionbar/f1;"
-
-        assertEquals(
-            listOf(false, false, true, false),
-            listOf(singleBoolean, threeBoolean, enumModel, layoutConstructor).map { instruction ->
-                isInlineActionKindModelConstructor(instruction, ::isKindEnum)
-            },
-        )
-        assertEquals(
-            listOf(true, true, false, false),
-            listOf(singleBoolean, threeBoolean, enumModel, layoutConstructor).map { instruction ->
-                isLegacyInlineActionKindModelConstructor(instruction)
-            },
-        )
-    }
-
     private fun moduleDividerBuilderFixture(): List<Instruction> =
         listOf(
             // Divider item: a non-foundation adapter discriminator whose case block draws a divider.
@@ -2184,125 +2121,4 @@ class NewXResolverLinterTest {
 
     private fun lint(source: String): List<ResolverLinter.Finding> =
         ResolverLinter.lintSource("Fixture.kt", source)
-
-    private fun newPostRendererComposeFlagFixture(directModifier: Boolean): Method {
-        val implementation = MethodImplementationBuilder(14)
-        implementation.addInstruction(
-            "invoke-virtual {v10}, Ljava/lang/Object;->getClass()Ljava/lang/Class;".toInstruction(),
-        )
-        implementation.addInstruction(
-            "invoke-interface {v2}, Lfixture/Visibility;->isVisible()Z".toInstruction(),
-        )
-        implementation.addInstruction("move-result v0".toInstruction())
-        if (directModifier) {
-            // 12.29's default-modifier branch overwrites the Modifier parameter slot (v9 = p0) before
-            // the alias, so provenance must short-circuit on reaching the parameter register.
-            implementation.addInstruction(
-                (
-                    "sget-object v9, Lfixture/CompanionModifier;->Companion:" +
-                        "Landroidx/compose/ui/Modifier;"
-                ).toInstruction(),
-            )
-            implementation.addInstruction("move-object v1, v9".toInstruction())
-        } else {
-            implementation.addInstruction(
-                (
-                    "sget-object v1, Lfixture/CompanionModifier;->Companion:" +
-                        "Landroidx/compose/ui/Modifier;"
-                ).toInstruction(),
-            )
-        }
-        implementation.addInstruction(
-            (
-                "invoke-static/range {v0 .. v8}, Landroidx/compose/animation/Fixture;->render(" +
-                    "ZLandroidx/compose/ui/Modifier;Lfixture/Enter;Lfixture/Exit;" +
-                    "Ljava/lang/String;Lkotlin/jvm/functions/Function3;" +
-                    "Landroidx/compose/runtime/Composer;II)V"
-            ).toInstruction(),
-        )
-        implementation.addInstruction("return-void".toInstruction())
-
-        val parameters =
-            listOf(
-                "Landroidx/compose/ui/Modifier;",
-                "Lkotlin/jvm/functions/Function0;",
-                "Landroidx/compose/runtime/Composer;",
-                "I",
-                "I",
-            ).map { type -> ImmutableMethodParameter(type, emptySet(), null) }
-        return ImmutableMethod(
-            "Lfixture/NewPostRenderer;",
-            "render",
-            parameters,
-            "V",
-            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
-            emptySet<ImmutableAnnotation>(),
-            emptySet<HiddenApiRestriction>(),
-            implementation.methodImplementation,
-        )
-    }
-
-    private fun newPostRendererFixture(
-        namedNullCheck: Boolean,
-        directModifier: Boolean,
-    ): Method {
-        val implementation = MethodImplementationBuilder(14)
-        if (namedNullCheck) {
-            implementation.addInstruction("const-string v9, \"onClick\"".toInstruction())
-            implementation.addInstruction(
-                (
-                    "invoke-static {v13, v9}, " +
-                        "Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(" +
-                        "Ljava/lang/Object;Ljava/lang/String;)V"
-                ).toInstruction(),
-            )
-        } else {
-            implementation.addInstruction(
-                "invoke-virtual {v13}, Ljava/lang/Object;->getClass()Ljava/lang/Class;".toInstruction(),
-            )
-        }
-        implementation.addInstruction(
-            "invoke-interface {v2}, Lfixture/Visibility;->isVisible()Z".toInstruction(),
-        )
-        implementation.addInstruction("move-result v0".toInstruction())
-        if (directModifier) {
-            implementation.addInstruction("move-object v1, v12".toInstruction())
-        } else {
-            implementation.addInstruction(
-                (
-                    "invoke-static {v11, v12}, Lfixture/RecommendedModifiers;->create(" +
-                        "Landroidx/compose/runtime/Composer;Landroidx/compose/ui/Modifier;)" +
-                        "Landroidx/compose/ui/Modifier;"
-                ).toInstruction(),
-            )
-            implementation.addInstruction("move-result-object v1".toInstruction())
-        }
-        implementation.addInstruction(
-            (
-                "invoke-static/range {v0 .. v8}, Landroidx/compose/animation/Fixture;->render(" +
-                    "ZLandroidx/compose/ui/Modifier;Lfixture/Enter;Lfixture/Exit;" +
-                    "Ljava/lang/String;Lkotlin/jvm/functions/Function3;" +
-                    "Landroidx/compose/runtime/Composer;II)V"
-            ).toInstruction(),
-        )
-        implementation.addInstruction("return-void".toInstruction())
-
-        val parameters =
-            listOf(
-                "I",
-                "Landroidx/compose/runtime/Composer;",
-                "Landroidx/compose/ui/Modifier;",
-                "Lkotlin/jvm/functions/Function0;",
-            ).map { type -> ImmutableMethodParameter(type, emptySet(), null) }
-        return ImmutableMethod(
-            "Lfixture/NewPostRenderer;",
-            "render",
-            parameters,
-            "V",
-            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
-            emptySet<ImmutableAnnotation>(),
-            emptySet<HiddenApiRestriction>(),
-            implementation.methodImplementation,
-        )
-    }
 }

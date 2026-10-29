@@ -17,7 +17,6 @@ import app.crimera.patches.newx.utils.Constants.MEDIA_TAB_RESOLVER_DESCRIPTOR
 import app.crimera.patches.newx.utils.setNewXFeatureFlag
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
@@ -51,11 +50,10 @@ private const val MEDIA_TAB_RESOLVER_METHOD_DESCRIPTOR =
  * The seed value is routed through [MediaTabResolver.getEnumDefault] so the configured
  * default (Photos) wins while every other tab keeps its stock primary type.
  *
- * 12.29 adds an optional second tab-type store: when the requested initial sub-tab is not yet
- * in the loaded tab list the constructor stages it in a plain field that the tab-types
- * collector applies once the tab becomes available. That store is routed through the same
- * resolver so the configured default also wins on the deferred path. Older releases seed the
- * selected sub-tab flow directly and store no plain tab-type field.
+ * 12.29 adds a second tab-type store: when the requested initial sub-tab is not yet in the
+ * loaded tab list the constructor stages it in a plain field that the tab-types collector
+ * applies once the tab becomes available. That store is routed through the same resolver so the
+ * configured default also wins on the deferred path.
  */
 
 /** True when [classDef] is a combined timeline component (implements the combined-timeline contract). */
@@ -100,8 +98,7 @@ internal fun isInitialSubTabSeed(
 /**
  * True when [instruction] stores the pending initial sub-tab (12.29 shape): a plain tab-type
  * field written when the requested initial sub-tab is not yet in the loaded tab list. The
- * tab-types collector applies that field once the tab becomes available. Older releases seed
- * the selected-sub-tab flow directly and store no plain tab-type field.
+ * tab-types collector applies that field once the tab becomes available.
  */
 internal fun isPendingSubTabStore(
     instruction: Instruction,
@@ -199,51 +196,49 @@ val newXDefaultMediaTabPatch =
             // 12.29 can stage an initial sub-tab that is not yet in the loaded tab list in a
             // plain tab-type field, which the tab-types collector applies once the tab becomes
             // available. Route that pending store through the same resolver so the configured
-            // default also wins on the deferred path. Older releases have no such store. The
-            // store sits at a branch merge (the stock value bypasses anything placed immediately
-            // before it), so re-read the stored field after the iput and write the resolved value
-            // back; every path through the constructor executes that sequence exactly once. The
-            // pending injection goes in first (higher index) so the seed index below stays valid.
+            // default also wins on the deferred path. The store sits at a branch merge (the stock
+            // value bypasses anything placed immediately before it), so re-read the stored field
+            // after the iput and write the resolved value back; every path through the constructor
+            // executes that sequence exactly once. The pending injection goes in first (higher
+            // index) so the seed index below stays valid.
             val pendingStoreCandidates =
                 methodInstructions.withIndex().filter { (_, instruction) ->
                     isPendingSubTabStore(instruction, tabTypeDescriptor)
                 }
             val pendingStore =
-                requireAtMostOne(
+                requireExactlyOne(
                     label = "combined profile timeline pending sub-tab store",
                     candidates = pendingStoreCandidates,
                 )
-            if (pendingStore != null) {
-                val pendingStoreInstruction =
-                    pendingStore.value as? TwoRegisterInstruction
-                        ?: throw PatchException(
-                            "Combined profile timeline pending sub-tab store is not a " +
-                                "two-register iput: ${pendingStore.value}",
-                        )
-                val pendingField =
-                    (pendingStore.value as? ReferenceInstruction)?.reference as? FieldReference
-                        ?: throw PatchException(
-                            "Combined profile timeline pending sub-tab store has no field " +
-                                "reference: ${pendingStore.value}",
-                        )
-                val pendingValueRegister = pendingStoreInstruction.registerA
-                val pendingObjectRegister = pendingStoreInstruction.registerB
-
-                method.insertHook(
-                    index = pendingStore.index + 1,
-                    // The old plain insertion left any incoming label on the instruction behind the
-                    // store, so a branch that targeted it kept skipping the rewrite.
-                    relocateBranchTargets = false,
-                ) {
-                    iget(pendingValueRegister, pendingObjectRegister, pendingField)
-                    invokeStatic(
-                        methodReference(MEDIA_TAB_RESOLVER_METHOD_DESCRIPTOR),
-                        pendingValueRegister,
+            val pendingStoreInstruction =
+                pendingStore.value as? TwoRegisterInstruction
+                    ?: throw PatchException(
+                        "Combined profile timeline pending sub-tab store is not a " +
+                            "two-register iput: ${pendingStore.value}",
                     )
-                    moveResult(pendingValueRegister, OBJECT_DESCRIPTOR)
-                    checkCast(pendingValueRegister, tabTypeDescriptor)
-                    iput(pendingValueRegister, pendingObjectRegister, pendingField)
-                }
+            val pendingField =
+                (pendingStore.value as? ReferenceInstruction)?.reference as? FieldReference
+                    ?: throw PatchException(
+                        "Combined profile timeline pending sub-tab store has no field " +
+                            "reference: ${pendingStore.value}",
+                    )
+            val pendingValueRegister = pendingStoreInstruction.registerA
+            val pendingObjectRegister = pendingStoreInstruction.registerB
+
+            method.insertHook(
+                index = pendingStore.index + 1,
+                // The old plain insertion left any incoming label on the instruction behind the
+                // store, so a branch that targeted it kept skipping the rewrite.
+                relocateBranchTargets = false,
+            ) {
+                iget(pendingValueRegister, pendingObjectRegister, pendingField)
+                invokeStatic(
+                    methodReference(MEDIA_TAB_RESOLVER_METHOD_DESCRIPTOR),
+                    pendingValueRegister,
+                )
+                moveResult(pendingValueRegister, OBJECT_DESCRIPTOR)
+                checkCast(pendingValueRegister, tabTypeDescriptor)
+                iput(pendingValueRegister, pendingObjectRegister, pendingField)
             }
 
             // The 12.29 seed instruction is the `:cond_3` branch target for the "initial sub-tab

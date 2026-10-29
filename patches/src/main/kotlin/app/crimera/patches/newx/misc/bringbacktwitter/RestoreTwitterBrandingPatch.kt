@@ -31,7 +31,7 @@ val bringBackTwitterPatch =
         unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
 
-        dependsOn(addResourcesPatch, restoreTwitterTopBarLogoPatch)
+        dependsOn(addResourcesPatch)
 
         execute {
             val hasPullToRefreshLogo = get("res/raw/x_refresh_logo.json").exists()

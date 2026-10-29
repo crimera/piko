@@ -15,7 +15,6 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.requireExactlyOne
-import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -998,56 +997,19 @@ val restoreTimelinePositionPatch =
             val resumeSortIndexFieldReference =
                 fieldReference("$resumePositionDescriptor->${resumeSortIndexField.name}:J")
 
-            val factoryMethodCandidates =
-                saveMethod.instructions.withIndex().filter { indexedInstruction ->
-                    if (indexedInstruction.value.opcode != Opcode.INVOKE_STATIC &&
-                        indexedInstruction.value.opcode != Opcode.INVOKE_STATIC_RANGE
-                    ) {
-                        return@filter false
-                    }
-                    val reference = indexedInstruction.value.getReference<MethodReference>()
-                        ?: return@filter false
-                    reference.parameterTypes.map(CharSequence::toString) ==
-                        listOf(
-                            successItemsField.type,
-                            ARRAY_LIST_DESCRIPTOR,
-                            holderDescriptor,
-                            INSTANT_DESCRIPTOR,
-                        ) && reference.returnType == resumePositionDescriptor
-                }
-            val factoryCall = requireAtMostOne("NewX timeline resume-position factory call", factoryMethodCandidates)
-            val (factoryReference, clockNowReference) = if (factoryCall != null) {
-                val reference = factoryCall.value.getReference<MethodReference>()
-                    ?: throw PatchException("NewX timeline resume-position factory has no method reference")
-                val arguments = factoryCall.value.invokeArgumentRegisters()
-                if (arguments.size != 4) {
-                    throw PatchException("NewX timeline resume-position factory has unexpected argument registers: $arguments")
-                }
-                val result = saveMethod.instructions.getOrNull(factoryCall.index - 1)
-                if (result?.opcode != Opcode.MOVE_RESULT_OBJECT ||
-                    (result as? OneRegisterInstruction)?.registerA != arguments[3]
-                ) throw PatchException("NewX timeline resume-position factory's Instant argument is not the preceding invoke result")
-                val clockInstruction = saveMethod.instructions.getOrNull(factoryCall.index - 2)
-                val clock = clockInstruction?.getReference<MethodReference>()
-                    ?: throw PatchException("NewX timeline clock now() call was not found before the factory")
-                if (clockInstruction.opcode != Opcode.INVOKE_INTERFACE || clock.name != "now" ||
-                    clock.parameterTypes.isNotEmpty() || clock.returnType != INSTANT_DESCRIPTOR
-                ) throw PatchException("Unexpected NewX timeline clock now() call: $clock")
-                reference to clock
-            } else {
-                val extracted = resolveInlineResumePositionFactory(
-                    saveMethod,
-                    listOf(successItemsField.type, ARRAY_LIST_DESCRIPTOR, holderDescriptor, INSTANT_DESCRIPTOR),
-                    resumePositionDescriptor,
-                    successItemsField,
-                    saveHolderRegister,
-                )
-                if (componentClass.methods.any { it.name == extracted.method.name }) {
-                    throw PatchException("NewX timeline component already has ${extracted.method.name}")
-                }
-                componentClass.methods.add(extracted.method)
-                extracted.method to extracted.clock
+            val extracted = resolveInlineResumePositionFactory(
+                saveMethod,
+                listOf(successItemsField.type, ARRAY_LIST_DESCRIPTOR, holderDescriptor, INSTANT_DESCRIPTOR),
+                resumePositionDescriptor,
+                successItemsField,
+                saveHolderRegister,
+            )
+            if (componentClass.methods.any { it.name == extracted.method.name }) {
+                throw PatchException("NewX timeline component already has ${extracted.method.name}")
             }
+            componentClass.methods.add(extracted.method)
+            val factoryReference = extracted.method
+            val clockNowReference = extracted.clock
             val clockFieldDefinition =
                 requireExactlyOne(
                     "NewX timeline clock field definition",

@@ -1,6 +1,5 @@
 package app.crimera.patches.newx.models
 
-import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.scopedMatchAll
@@ -184,7 +183,6 @@ private class PostModelResolutionState {
     private var inlineDownloadModels: ResolvedNewXInlineDownloadModels? = null
     private var compositionMediaModels: ResolvedNewXInlineMediaModels? = null
     private var inlineActionKindOverride: ResolvedNewXInlineActionKindOverride? = null
-    private var inlineActionKindOverrideResolved: Boolean = false
 
     context(context: BytecodePatchContext)
     fun postModelAnchors(): ResolvedNewXPostModelAnchors = synchronized(this) {
@@ -228,12 +226,10 @@ private class PostModelResolutionState {
     }
 
     context(context: BytecodePatchContext)
-    fun inlineActionKindOverride(): ResolvedNewXInlineActionKindOverride? = synchronized(this) {
-        if (!inlineActionKindOverrideResolved) {
-            inlineActionKindOverride = resolveInlineActionKindOverride(inlineActionModels())
-            inlineActionKindOverrideResolved = true
+    fun inlineActionKindOverride(): ResolvedNewXInlineActionKindOverride = synchronized(this) {
+        inlineActionKindOverride ?: resolveInlineActionKindOverride(inlineActionModels()).also {
+            inlineActionKindOverride = it
         }
-        inlineActionKindOverride
     }
 }
 
@@ -319,7 +315,7 @@ internal fun resolvedNewXInlineMediaModels(): ResolvedNewXInlineMediaModels =
     postModelResolutionState().compositionMediaModels()
 
 context(context: BytecodePatchContext)
-internal fun resolvedNewXInlineActionKindOverride(): ResolvedNewXInlineActionKindOverride? =
+internal fun resolvedNewXInlineActionKindOverride(): ResolvedNewXInlineActionKindOverride =
     postModelResolutionState().inlineActionKindOverride()
 
 /**
@@ -1137,27 +1133,16 @@ internal fun resolveInlineActionKindLayoutMethod(
 context(context: BytecodePatchContext)
 private fun resolveInlineActionKindOverride(
     entryModels: ResolvedNewXInlineActionModels,
-): ResolvedNewXInlineActionKindOverride? {
+): ResolvedNewXInlineActionKindOverride {
     // The download action is injected with the TwitterShare carrier so it keeps the native share
     // slot's icon/click wiring. 12.29's action-bar layout classifies TwitterShare as Countless
     // because its kind switch has no entry for it, which reserves a wider slot than the icon-only
     // layout. Resolve the shared layout lambda and the kind model it constructs so the patch can
     // rewrite only the injected action's kind. The action-type field read grounds the lambda as
     // the one that consumes the inline-action entries.
-    //
-    // Older targets keep a boolean-only kind model with no IconOnly enum to rewrite:
-    // 12.27/12.28-alpha.01 use `(Z)`, 12.28-alpha.04/prod use `(ZZZ)`. Those releases worked
-    // without the override, so a validated legacy shape returns null and the patch skips the
-    // rewrite. Any other shape (no recognized kind constructor, or an ambiguous enum match)
-    // still fails closed.
     val layoutLambda = resolveInlineActionKindLayoutLambda(entryModels)
 
     val kindConstructor = resolveInlineActionEnumKindConstructor(layoutLambda)
-        ?: run {
-            // Boolean-only kind model: no IconOnly enum to rewrite. Validated shapes only.
-            resolveInlineActionBooleanKindConstructor(layoutLambda)
-            return null
-        }
     val kindEnumDescriptor = kindConstructor.parameterTypes.last().toString()
     val kindEnumClass = context.classDefByOrNull(kindEnumDescriptor)
         ?: throw PatchException("NewX inline-action kind enum was not found: $kindEnumDescriptor")
@@ -1183,7 +1168,7 @@ private fun resolveInlineActionKindOverride(
 context(context: BytecodePatchContext)
 private fun resolveInlineActionEnumKindConstructor(
     layoutLambda: Method,
-): MethodReference? {
+): MethodReference {
     val kindConstructors = layoutLambda.implementation
         ?.instructions
         ?.toList()
@@ -1197,35 +1182,13 @@ private fun resolveInlineActionEnumKindConstructor(
                 }
             }?.let { constructorIndex -> constructorIndex to instruction }
         }
-    val candidate = requireAtMostOne(
+    val candidate = requireExactlyOne(
         "NewX inline-action kind model constructor",
         kindConstructors,
-    ) ?: return null
+    )
     return candidate.second.getReference<MethodReference>()
         ?: throw PatchException(
             "NewX inline-action kind model constructor has no reference: ${candidate.second}",
-        )
-}
-
-context(context: BytecodePatchContext)
-private fun resolveInlineActionBooleanKindConstructor(
-    layoutLambda: Method,
-): MethodReference {
-    val legacyConstructors = layoutLambda.implementation
-        ?.instructions
-        ?.toList()
-        .orEmpty()
-        .mapIndexedNotNull { index, instruction ->
-            index.takeIf { isLegacyInlineActionKindModelConstructor(instruction) }
-        }
-    val constructorIndex = requireExactlyOne(
-        "NewX legacy inline-action boolean kind model constructor",
-        legacyConstructors,
-    )
-    return layoutLambda.implementation?.instructions?.toList()?.get(constructorIndex)
-        ?.getReference<MethodReference>()
-        ?: throw PatchException(
-            "NewX legacy inline-action boolean kind model constructor has no reference: ${layoutLambda}",
         )
 }
 
@@ -1246,19 +1209,4 @@ internal fun isInlineActionKindModelConstructor(
     val kindType = parameterTypes.last()
     if (kindType == "J" || kindType == "D") return false
     return isEnumType(kindType)
-}
-
-/**
- * Validated legacy shapes of the same kind model before 12.29 introduced the packed-slot enum:
- * `(Z)` on 12.27/12.28-alpha.01 and `(ZZZ)` on 12.28-alpha.04/prod. All parameters are boolean,
- * so the `Modifier` padding constructor (`FFFF`) and the enum model (`ZZ` + reference) never
- * match. Any other arity fails closed in the resolver instead of silently skipping.
- */
-internal fun isLegacyInlineActionKindModelConstructor(instruction: Instruction): Boolean {
-    if (instruction.opcode != Opcode.INVOKE_DIRECT) return false
-    val reference = instruction.getReference<MethodReference>() ?: return false
-    if (reference.name != "<init>") return false
-    val parameterTypes = reference.parameterTypes.map(CharSequence::toString)
-    if (parameterTypes.size != 1 && parameterTypes.size != 3) return false
-    return parameterTypes.all { it == "Z" }
 }

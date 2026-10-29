@@ -14,7 +14,6 @@ import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
 import app.crimera.patches.common.destinationRegisterOrNull
-import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -28,7 +27,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -174,14 +172,10 @@ internal data class TabDataFilterTarget(
     val resultType: String,
 )
 
-private const val TAB_DATA_ARG_INDEX = 9
-private const val STATE_TAB_DATA_PARAMETER_INDEX = 8
-private val STATE_CONSTRUCTOR_PARAMETER_COUNTS = setOf(16, 17, 18)
-private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
 private const val LINKED_HASH_MAP_DESCRIPTOR = "Ljava/util/LinkedHashMap;"
 
-/** Resolves the state constructor argument that receives the tab map. */
+/** Resolves the landing wrapper constructor argument that receives the tab map. */
 internal fun resolveNewXNavBarFilterTarget(match: Match): TabDataFilterTarget {
     val mapPutIndex = match.instructionMatches.last().index
     val mapPutInstruction = match.method.instructions.getOrNull(mapPutIndex)
@@ -203,29 +197,6 @@ internal fun resolveNewXNavBarFilterTarget(match: Match): TabDataFilterTarget {
         mapPut.registersUsed.firstOrNull()
             ?: throw PatchException("NewX tabData Map.put has no map register")
 
-    val stateInitIndex = match.method.findStateInitIndex(mapPutIndex)
-    if (stateInitIndex != null) {
-        val stateInitInstruction =
-            match.method.instructions.getOrNull(stateInitIndex) as? Instruction3rc
-                ?: throw PatchException("NewX tabData State constructor is not a range instruction")
-        if (stateInitInstruction.opcode != Opcode.INVOKE_DIRECT_RANGE) {
-            throw PatchException("NewX tabData State constructor is not invoke-direct/range")
-        }
-        if (TAB_DATA_ARG_INDEX !in 0 until stateInitInstruction.registerCount) {
-            throw PatchException(
-                "NewX tabData argument index $TAB_DATA_ARG_INDEX is outside the " +
-                    "${stateInitInstruction.registerCount}-register State constructor range",
-            )
-        }
-        return TabDataFilterTarget(
-            method = match.method,
-            insertionIndex = stateInitIndex,
-            tabDataRegister = stateInitInstruction.startRegister + TAB_DATA_ARG_INDEX,
-            resultType = MAP_DESCRIPTOR,
-        )
-    }
-
-    // 12.29+ wraps the tab map in a landing wrapper constructor instead of a state holder.
     val wrapperInitIndex = match.method.findTabDataWrapperInitIndex(mapPutIndex, mapRegister)
     val wrapperInitInstruction =
         match.method.instructions.getOrNull(wrapperInitIndex) as? Instruction35c
@@ -246,34 +217,6 @@ internal fun resolveNewXNavBarFilterTarget(match: Match): TabDataFilterTarget {
         tabDataRegister = wrapperInitInstruction.registersUsed[mapArgumentIndex + 1],
         resultType = LINKED_HASH_MAP_DESCRIPTOR,
     )
-}
-
-private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int? {
-    val candidates =
-        instructions
-            .drop(anchorIndex + 1)
-            .mapNotNull { instruction ->
-                if (instruction.opcode != Opcode.INVOKE_DIRECT_RANGE) return@mapNotNull null
-
-                val range = instruction as? Instruction3rc ?: return@mapNotNull null
-                val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
-                val parameters = reference.parameterTypes.map { it.toString() }
-                if (reference.name != "<init>" ||
-                    reference.returnType != "V" ||
-                    parameters.size !in STATE_CONSTRUCTOR_PARAMETER_COUNTS ||
-                    range.registerCount != parameters.size + 1 ||
-                    parameters.getOrNull(0)?.startsWith("L") != true ||
-                    parameters.getOrNull(6) != LIST_DESCRIPTOR ||
-                    parameters.getOrNull(7) != MAP_DESCRIPTOR ||
-                    parameters.getOrNull(STATE_TAB_DATA_PARAMETER_INDEX) != MAP_DESCRIPTOR
-                ) {
-                    return@mapNotNull null
-                }
-
-                instruction.location.index
-            }
-
-    return requireAtMostOne("stable NewX tabData State constructor", candidates)
 }
 
 internal fun MutableMethod.findTabDataWrapperInitIndex(
@@ -352,22 +295,6 @@ internal data class TabChangeMethodKey(
     val name: String,
     val parameterTypes: List<String>,
 )
-
-/** Resolves a single navigation component's tab change method, or null when it has none (12.29+). */
-context(context: BytecodePatchContext)
-internal fun resolveComponentTabChangeMethod(
-    componentClass: String,
-    navigationType: String,
-): MutableMethod? {
-    val candidates =
-        context.mutableClassDefBy(componentClass).methods.filter { method ->
-            method.implementation != null &&
-                method.returnType == "V" &&
-                method.parameterTypes.map(CharSequence::toString) == listOf(navigationType) &&
-                method.hasStackNavigationCall()
-        }
-    return requireAtMostOne("NewX tab change method", candidates) { it.toString() }
-}
 
 context(context: BytecodePatchContext)
 private fun mutableTabChangeMethod(key: TabChangeMethodKey): MutableMethod {

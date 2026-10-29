@@ -21,10 +21,7 @@ internal object NewXDownloadEventHandlerFingerprint : Fingerprint(
     filters = listOf(string("download_video_to_offline")),
 )
 
-/**
- * Video-tab click handlers that run the media download/save path. Releases through 12.30 have a
- * second handler in the legacy video-tab implementation; 12.31 removed that package.
- */
+/** Video-tab click handler that runs the media download/save path. */
 internal object NewXVideoTabDownloadHandlerFingerprint : Fingerprint(
     definingClass = "Lcom/x/video/tab/",
     filters = listOf(string("subscriptions_watermarked_video_download_enabled")),

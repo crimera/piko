@@ -56,9 +56,8 @@ private val TIMELINE_TABS_TAIL =
 // overlaps between variants after the flag band widened.
 private val TIMELINE_TABS_LEADING_OBJECT_COUNTS = 1..2
 
-// Boolean flag slots between the callback prefix and the trailing group. Declared targets carry
-// two (through 12.31 alpha.02) or three (12.31 alpha.04), so match the band, not one shape.
-private val TIMELINE_TABS_FLAG_COUNT_RANGE = 2..3
+// Boolean flag slots between the callback prefix and the trailing group.
+private const val TIMELINE_TABS_FLAG_COUNT = 3
 
 private val TIMELINE_ADD_TAB_PARAMETERS =
     listOf(
@@ -179,7 +178,7 @@ private fun hasTimelineTabsParameters(
     val callbackStart = leadingObjects
     val flagStart = callbackStart + TIMELINE_TABS_CALLBACK_PREFIX.size
     val tailStart = parameters.size - TIMELINE_TABS_TAIL.size
-    if (tailStart - flagStart !in TIMELINE_TABS_FLAG_COUNT_RANGE) return false
+    if (tailStart - flagStart != TIMELINE_TABS_FLAG_COUNT) return false
     if (parameters.subList(callbackStart, flagStart) != TIMELINE_TABS_CALLBACK_PREFIX) return false
     if (parameters.subList(flagStart, tailStart).any { it != BOOLEAN_DESCRIPTOR }) return false
     return parameters.subList(tailStart, parameters.size) == TIMELINE_TABS_TAIL

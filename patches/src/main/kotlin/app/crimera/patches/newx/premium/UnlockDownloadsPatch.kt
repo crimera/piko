@@ -7,7 +7,6 @@ import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.OBJECT_MOVE_OPCODES
 import app.crimera.patches.common.INTEGER_MOVE_OPCODES
 import app.crimera.patches.common.scopedMatchAll
-import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -615,18 +614,6 @@ private fun requireMatches(
     )
 }
 
-private fun requireMatches(
-    label: String,
-    matches: Collection<Match>,
-    expectedCounts: IntRange,
-): Collection<Match> {
-    if (matches.size in expectedCounts) return matches
-    throw PatchException(
-        "Expected ${expectedCounts.first}..${expectedCounts.last} $label matches, " +
-            "found ${matches.size}: " + matches.joinToString { it.originalMethod.toString() },
-    )
-}
-
 @Suppress("unused")
 val newXDownloadPatch =
     bytecodePatch(
@@ -648,23 +635,17 @@ val newXDownloadPatch =
                 "NewX offline-video feature gate",
                 SubscriptionsFeaturesOfflineVideoEnabledFingerprint.scopedMatchAll(),
             )
-            val videoDownloadMatches =
-                NewXVideoTabDownloadHandlerFingerprint.scopedMatchAllOrNull().orEmpty()
-            val videoPlans = if (videoDownloadMatches.isNotEmpty()) {
-                requireMatches(
-                    "NewX video download handler",
-                    videoDownloadMatches,
-                    expectedCounts = 1..2,
-                ).map { match ->
-                    match.method to resolveVideoDownloadSubscriptionResults(
-                        match.method,
-                        premium.originalMethod,
-                        offlinePremium.originalMethod,
-                        offlineFeature.originalMethod,
-                        { descriptor -> classDefByOrNull(descriptor) },
-                    )
-                }
-            } else emptyList()
+            val videoHandler = requireExactlyOne(
+                "NewX video download handler",
+                NewXVideoTabDownloadHandlerFingerprint.scopedMatchAll(),
+            )
+            val videoResults = resolveVideoDownloadSubscriptionResults(
+                videoHandler.method,
+                premium.originalMethod,
+                offlinePremium.originalMethod,
+                offlineFeature.originalMethod,
+                { descriptor -> classDefByOrNull(descriptor) },
+            )
 
             val timelineHandler = requireExactlyOne(
                 "NewX timeline download handler",
@@ -678,7 +659,7 @@ val newXDownloadPatch =
                 { descriptor -> classDefByOrNull(descriptor) },
             )
 
-            videoPlans.forEach { (method, results) -> method.forceSubscriptionFeatureResults(results) }
+            videoHandler.method.forceSubscriptionFeatureResults(videoResults)
             timelineHandler.method.forceSubscriptionFeatureResults(timelineResults)
             listOf(premium, offlinePremium, offlineFeature).forEach(::forceBooleanResult)
 

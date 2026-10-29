@@ -45,9 +45,8 @@ private const val FOUNDATION_PARAMETER_PREFIX = "Landroidx/compose/foundation/"
 // R8 merges Compose's PagerKt into a repackaged library holder whose generated package and method
 // name move between releases (12.28: Lcom/google/android/play/core/appupdate/b;, 12.29:
 // Lcom/bumptech/glide/e;). Match the stable Compose ABI parameter roles and the non-obfuscated
-// orientation enum instead of the holder's identity. Compose's pager ABI dropped its page-size
-// float after 12.27, so accept both the 17- and 18-parameter arities. Prefix declarations use
-// Morphe's STARTS_WITH parameter semantics; primitives stay exact.
+// orientation enum instead of the holder's identity. Prefix declarations use Morphe's
+// STARTS_WITH parameter semantics; primitives stay exact.
 private val VERTICAL_PAGER_PARAMETERS_17 =
     listOf(
         PAGER_PARAMETER_PREFIX,
@@ -69,30 +68,8 @@ private val VERTICAL_PAGER_PARAMETERS_17 =
         "I",
     )
 
-private val VERTICAL_PAGER_PARAMETERS_18 =
-    listOf(
-        PAGER_PARAMETER_PREFIX,
-        MODIFIER_DESCRIPTOR,
-        LAYOUT_PARAMETER_PREFIX,
-        PAGER_PARAMETER_PREFIX,
-        "I",
-        "F",
-        UI_PARAMETER_PREFIX,
-        SNAPPING_PARAMETER_PREFIX,
-        "Z",
-        FUNCTION1_DESCRIPTOR,
-        "L",
-        SNAPPING_PARAMETER_PREFIX,
-        FOUNDATION_PARAMETER_PREFIX,
-        FUNCTION4_DESCRIPTOR,
-        COMPOSER_DESCRIPTOR,
-        "I",
-        "I",
-        "I",
-    )
-
 private fun isVerticalPagerMethod(method: Method): Boolean =
-    method.parameterTypes.getOrNull(if (method.parameterTypes.size == 18) 10 else 9)
+    method.parameterTypes.getOrNull(9)
         ?.toString()?.let { type ->
             type.startsWith(NESTED_SCROLL_PARAMETER_PREFIX) || type.startsWith(PAGER_PARAMETER_PREFIX)
         } == true && method.implementation?.instructions?.any { instruction ->
@@ -107,15 +84,6 @@ private object VerticalPager17Fingerprint : Fingerprint(
     parameters = VERTICAL_PAGER_PARAMETERS_17,
     custom = { method, _ -> isVerticalPagerMethod(method) },
 )
-
-private object VerticalPager18Fingerprint : Fingerprint(
-    returnType = "V",
-    parameters = VERTICAL_PAGER_PARAMETERS_18,
-    custom = { method, _ -> isVerticalPagerMethod(method) },
-)
-
-private val verticalPagerFingerprints =
-    listOf(VerticalPager17Fingerprint, VerticalPager18Fingerprint)
 
 private fun patchVerticalPager(
     match: Match,
@@ -195,10 +163,7 @@ val newXDisableVideoScrollingPatch =
             )
 
         execute {
-            val matches =
-                verticalPagerFingerprints
-                    .flatMap { fingerprint -> fingerprint.scopedMatchAllOrNull().orEmpty() }
-                    .distinctBy { match -> match.originalMethod }
+            val matches = VerticalPager17Fingerprint.scopedMatchAllOrNull().orEmpty()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one NewX VerticalPager implementation, found ${matches.size}: " +

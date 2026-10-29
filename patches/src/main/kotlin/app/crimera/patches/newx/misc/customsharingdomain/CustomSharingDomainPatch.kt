@@ -9,7 +9,6 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.Block
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.ShapeFingerprint
 import app.crimera.patches.common.scopedMatchAllOrNull
@@ -22,7 +21,6 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
-import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -67,18 +65,7 @@ internal object ShareSheetUrlConstructorFingerprint : Fingerprint(
     filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
 )
 
-/** Copy callback that writes the post URL to the clipboard (pre-12.28 post share flow). */
-internal object ShareSheetCopyCallbackFingerprint : Fingerprint(
-    definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
-    parameters = listOf(STRING_DESCRIPTOR),
-    returnType = "V",
-    filters = listOf(string("link"), string("copy_link")),
-)
-
-/**
- * DM share stub that replaced the copy path in 12.28. Proves contract move vs broken anchor:
- * old builds have both real impl (above) and stub; new builds have stub only.
- */
+/** DM share stub that replaced the post copy callback in 12.28. */
 internal object ShareSheetCopyStubFingerprint : Fingerprint(
     definingClass = DM_SHARESHEET_DESCRIPTOR_PREFIX,
     parameters = listOf(STRING_DESCRIPTOR),
@@ -317,32 +304,13 @@ private fun hookShareSheetPostUrls() {
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareSheetCopyCallbacks() {
-    val matches = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty()
-    if (matches.isEmpty()) {
-        // 12.28+: post copy moved into the share-sheet URL field (hookShareSheetPostUrls covers
-        // SEND + Compose copy via h.v/b0). The DM stub remains as a no-op. Validate the stub so
-        // an unknown breakage still fails closed instead of silently skipping.
-        requireExactlyOne(
-            label = "NewX share-sheet copy stub variant",
-            candidates = ShareSheetCopyStubFingerprint.scopedMatchAllOrNull().orEmpty(),
-        )
-        return
-    }
-    val selectedMatch =
-        requireExactlyOne(
-            label = "NewX share-sheet copy callback variant",
-            candidates = matches,
-        )
-    val method = selectedMatch.method
-    // `p1` is the callback's single String parameter (the URL to rewrite in place).
-    val urlRegister = method.p0Register + 1
-    method.insertHook(
-        index = 0,
-        // The old plain insert kept incoming labels on the original first instruction.
-        relocateBranchTargets = false,
-    ) {
-        rewriteDomain(urlRegister)
-    }
+    // 12.28+: post copy moved into the share-sheet URL field (hookShareSheetPostUrls covers
+    // SEND + Compose copy via h.v/b0). The DM stub remains as a no-op. Validate the stub so
+    // an unknown breakage still fails closed instead of silently skipping.
+    requireExactlyOne(
+        label = "NewX share-sheet copy stub variant",
+        candidates = ShareSheetCopyStubFingerprint.scopedMatchAllOrNull().orEmpty(),
+    )
 }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
@@ -354,15 +322,6 @@ private fun hookShareIntentBuilder() {
             candidates = movedMatches,
         )
     val helperMethod = selectedMatch.method
-    val oldCopy =
-        requireAtMostOne(
-            label = "NewX share-sheet copy callback variant",
-            candidates = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty(),
-        )
-    if (oldCopy != null) {
-        hookHelperCallSites(oldCopy.method.definingClass, helperMethod)
-        return
-    }
     val newOwner =
         ShareImplIntentBuilderFingerprint.requireSingleMatch("NewX share Intent owner")
     hookHelperCallSites(newOwner.method.definingClass, helperMethod)
