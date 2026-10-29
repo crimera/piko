@@ -25,6 +25,9 @@ import app.morphe.extension.shared.Utils;
  */
 public final class NewXUtils {
     private static WeakReference<Activity> resumedActivity = new WeakReference<>(null);
+    // A visible activity can be left without a resumed peer, e.g. after returning from a
+    // deeplinked MainActivity instance, so the last started activity backs up the resumed one.
+    private static WeakReference<Activity> startedActivity = new WeakReference<>(null);
     private static boolean lifecycleCallbacksRegistered;
     // Presenter shapes are fixed per class; cache the accessible field walk so
     // share/options lookups pay reflection once instead of per invocation.
@@ -47,11 +50,13 @@ public final class NewXUtils {
 
             @Override
             public void onActivityStarted(Activity activity) {
+                startedActivity = new WeakReference<>(activity);
             }
 
             @Override
             public void onActivityResumed(Activity activity) {
                 resumedActivity = new WeakReference<>(activity);
+                startedActivity = new WeakReference<>(activity);
             }
 
             @Override
@@ -61,6 +66,7 @@ public final class NewXUtils {
 
             @Override
             public void onActivityStopped(Activity activity) {
+                if (startedActivity.get() == activity) startedActivity.clear();
             }
 
             @Override
@@ -70,6 +76,7 @@ public final class NewXUtils {
             @Override
             public void onActivityDestroyed(Activity activity) {
                 clearActivity(activity);
+                if (startedActivity.get() == activity) startedActivity.clear();
             }
         });
         lifecycleCallbacksRegistered = true;
@@ -91,7 +98,21 @@ public final class NewXUtils {
         if (isUsable(activity)) return activity;
 
         activity = resumedActivity.get();
+        if (isUsable(activity)) return activity;
+
+        activity = startedActivity.get();
         return isUsable(activity) ? activity : null;
+    }
+
+    /** Lifecycle bookkeeping summary for diagnosing a failed activity lookup. */
+    public static String describeTrackedActivities() {
+        return "resumed=" + describe(resumedActivity.get()) + " started=" + describe(startedActivity.get());
+    }
+
+    private static String describe(Activity activity) {
+        if (activity == null) return "null";
+        return activity.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(activity))
+                + (activity.isFinishing() ? "[finishing]" : "") + (activity.isDestroyed() ? "[destroyed]" : "");
     }
 
     public static PresenterData findPresenterData(Object presenter, String valueTypeName)

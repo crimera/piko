@@ -299,6 +299,8 @@ public final class InlineDownloadButton {
             Context context = NewXUtils.findUsableActivity(null);
             Object post = getPresenterPost(presenter);
             if (context == null || post == null) {
+                NewXLogger.printInfo(() -> "inline download lookup failed post=" + (post != null)
+                        + " " + NewXUtils.describeTrackedActivities());
                 NewXInAppNotification.show("Could not find the selected post");
                 return true;
             }
