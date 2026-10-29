@@ -41,6 +41,11 @@ internal object GetImageVariantsExtensionFingerprint : Fingerprint(
     name = "getImageVariants",
 )
 
+internal object GetAdditionalImageCandidatesExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getAdditionalImageCandidates",
+)
+
 internal object GetVideoVariantsV1ExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
     name = "getVideoVariantsV1",
@@ -257,6 +262,32 @@ internal object ImageInfoCandidatesMapperFingerprint : Fingerprint(
         // Image candidates.
         methodCall(definingClass = "Lcom/instagram/model/mediasize/ImageInfo;", parameters = listOf(), returnType = "Ljava/util/List;"),
         string("candidates"),
+    ),
+)
+
+internal object ImageInfoAdditionalCandidatesMapperFingerprint : Fingerprint(
+    parameters = listOf("Lcom/instagram/model/mediasize/ImageInfo;"),
+    returnType = "Ljava/util/Map;",
+    filters = listOf(
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/ImageInfo;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/AdditionalCandidates;"),
+        string("additional_candidates"),
+    ),
+)
+
+internal object AdditionalImageCandidatesMapperFingerprint : Fingerprint(
+    parameters = listOf("Lcom/instagram/model/mediasize/AdditionalCandidates;"),
+    returnType = "Ljava/util/Map;",
+    filters = listOf(
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
+        string("first_frame"),
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
+        string("igtv_first_frame"),
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
+        string("smart_frame"),
     ),
 )
 

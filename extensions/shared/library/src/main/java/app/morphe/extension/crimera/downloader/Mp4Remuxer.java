@@ -31,8 +31,10 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Rewrites one or more MP4 files into a single MP4 without re-encoding: every audio and video
@@ -42,10 +44,61 @@ import java.util.Map;
 @UnstableApi
 public final class Mp4Remuxer {
     private static final int INITIAL_BUFFER_SIZE = 1024 * 1024;
+    private static final int MAX_SAMPLE_BUFFER_SIZE = 16 * 1024 * 1024;
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneOffset.UTC);
 
     private Mp4Remuxer() {
+    }
+
+    private static ByteBuffer ensureSampleBuffer(ByteBuffer buffer, long sampleSize) throws IOException {
+        if (sampleSize > MAX_SAMPLE_BUFFER_SIZE) {
+            throw new IOException("MP4 sample exceeds buffer limit");
+        }
+        if (buffer != null && sampleSize <= buffer.capacity()) return buffer;
+        int capacity = buffer == null ? INITIAL_BUFFER_SIZE : buffer.capacity();
+        // Geometric growth also bounds discarded buffers awaiting collection, even if each
+        // successive sample is slightly larger. No single sample buffer exceeds 16 MiB.
+        while (capacity < sampleSize) capacity *= 2;
+        try {
+            return ByteBuffer.allocateDirect(capacity);
+        } catch (OutOfMemoryError e) {
+            throw new IOException("Could not allocate MP4 sample buffer", e);
+        }
+    }
+
+    /** A failed rewrite may still leave a usable original, but only if its media can be read. */
+    static boolean isReadableVideo(File input) {
+        MediaExtractor extractor = new MediaExtractor();
+        try {
+            extractor.setDataSource(input.getAbsolutePath());
+            Set<Integer> videoTracks = new HashSet<>();
+            for (int i = 0; i < extractor.getTrackCount(); i++) {
+                String mime = extractor.getTrackFormat(i).getString(MediaFormat.KEY_MIME);
+                if (mime == null) continue;
+                if (mime.startsWith("video/")) videoTracks.add(i);
+                if (mime.startsWith("video/") || mime.startsWith("audio/")) extractor.selectTrack(i);
+            }
+            if (videoTracks.isEmpty()) return false;
+
+            boolean hasVideoSample = false;
+            ByteBuffer buffer = ensureSampleBuffer(null, INITIAL_BUFFER_SIZE);
+            while (extractor.getSampleTrackIndex() >= 0) {
+                int track = extractor.getSampleTrackIndex();
+                long size = extractor.getSampleSize();
+                if (size <= 0) return false;
+                buffer = ensureSampleBuffer(buffer, size);
+                buffer.clear();
+                if (extractor.readSampleData(buffer, 0) != size) return false;
+                if (videoTracks.contains(track)) hasVideoSample = true;
+                extractor.advance();
+            }
+            return hasVideoSample;
+        } catch (Exception | LinkageError ignored) {
+            return false;
+        } finally {
+            extractor.release();
+        }
     }
 
     /** Copies the tracks of {@code inputs} into {@code output}, which is closed afterwards. */
@@ -143,7 +196,7 @@ public final class Mp4Remuxer {
             Mp4Muxer muxer,
             List<Map<Integer, Integer>> outputTracks
     ) throws Exception {
-        ByteBuffer buffer = ByteBuffer.allocateDirect(INITIAL_BUFFER_SIZE);
+        ByteBuffer buffer = ensureSampleBuffer(null, INITIAL_BUFFER_SIZE);
         while (true) {
             int next = -1;
             long nextTime = Long.MAX_VALUE;
@@ -162,24 +215,12 @@ public final class Mp4Remuxer {
             int sourceTrack = extractor.getSampleTrackIndex();
 
             long sampleSize = extractor.getSampleSize();
-            if (sampleSize > Integer.MAX_VALUE) {
-                throw new IOException("MP4 sample is too large");
-            }
-            if (sampleSize > buffer.capacity()) {
-                int capacity = buffer.capacity();
-                while (capacity < sampleSize && capacity <= Integer.MAX_VALUE / 2) {
-                    capacity *= 2;
-                }
-                if (capacity < sampleSize) {
-                    capacity = (int) sampleSize;
-                }
-                buffer = ByteBuffer.allocateDirect(capacity);
-            }
+            buffer = ensureSampleBuffer(buffer, sampleSize);
 
             buffer.clear();
             int bytesRead = extractor.readSampleData(buffer, 0);
-            if (bytesRead < 0) {
-                return;
+            if (bytesRead < 0 || bytesRead != sampleSize) {
+                throw new IOException("Incomplete MP4 sample");
             }
             buffer.position(0);
             buffer.limit(bytesRead);

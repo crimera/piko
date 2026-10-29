@@ -10,6 +10,14 @@ package app.morphe.extension.instagram.patches.download;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
+import android.app.Notification;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -26,6 +34,9 @@ import java.lang.reflect.Field;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import app.morphe.extension.instagram.constants.Constants;
@@ -39,6 +50,9 @@ import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.VideoData;
+import app.morphe.extension.instagram.entity.VideoResolution;
+import app.morphe.extension.instagram.entity.VideoVariant;
+import app.morphe.extension.instagram.entity.ImageResolution;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
 import app.morphe.extension.instagram.entity.MediaInterface;
@@ -87,18 +101,25 @@ public class DownloadUtils {
         String title = "";
         if(mediaType.equals(MediaType.VIDEO)){
             title = str("piko_video_variants");
-            // DASH renditions first, sharpest on top, then the progressive files.
-            variantList = new ArrayList<>();
-            if (Pref.preferDashFormat()) variantList.addAll(currentMediaData.getDashVideos());
-            variantList.addAll(currentMediaData.getVideoVariants());
+            List<VideoVariant> videos = new ArrayList<>();
+            if (Pref.preferDashFormat()) videos.addAll(currentMediaData.getDashVideos());
+            List<VideoData> progressive = currentMediaData.getVideoVariants();
+            if (progressive != null) videos.addAll(progressive);
+            variantList = new ArrayList<>(VideoResolution.group(videos));
         }else{
             title = str("piko_image_variants");
-            variantList = currentMediaData.getImageVariants();
+            variantList = new ArrayList<>(ImageResolution.group(currentMediaData.getImageVariants()));
         }
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
         ArrayList<String> options = new ArrayList<>();
-        variantList.forEach(item -> options.add(item.getLabel()));
+        for (MediaInterface item : variantList) {
+            String label = item.getLabel();
+            if (item instanceof VideoResolution) {
+                label = item.shortSide() > 0 ? label : str("piko_unknown");
+            }
+            options.add(label);
+        }
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -325,22 +346,64 @@ public class DownloadUtils {
             // when that lists it larger than the app's cover. A carousel's page answers for the
             // post, never a child; without a download folder, enqueue asks for one at once.
             if (!mediaType.equals(MediaType.IMAGE) || !mediaData.isVideo()
-                    || mediaInfo.getCarouselSize() > 1 || !StorageUtils.checkStoragePermissions()) {
+                    || !StorageUtils.checkStoragePermissions()) {
                 downloader.enqueue(request);
                 return;
             }
-            int coverShortSide = ((MediaInterface) mediaData.getImageVariants().get(0)).shortSide();
+            MediaInterface cover = mediaData.getBestImage();
+            int coverShortSide = cover == null ? 0 : cover.shortSide();
+            boolean single = mediaInfo.getCarouselSize() == 1;
             String shortcode = mediaData.getShortcode();
             String mediaId = mediaData.getPostID();
             Utils.runOnBackgroundThread(() -> {
-                EmbedCover embed = EmbedCover.largerThan(shortcode, mediaId, coverShortSide);
+                EmbedCover embed = single ? EmbedCover.largerThan(shortcode, mediaId, coverShortSide) : null;
+                long coverPixels = 0;
+                MediaInterface frameVideo = null;
+                try {
+                    coverPixels = embed != null ? (long) embed.width * embed.height
+                            : cover == null ? 0 : (long) cover.getWidth() * cover.getHeight();
+                    if (coverPixels > 0 && mediaData.isFirstFrameCover()) {
+                        List<MediaInterface> videos = new ArrayList<>();
+                        List<VideoData> progressive = mediaData.getVideoVariants();
+                        if (progressive != null) videos.addAll(progressive);
+                        videos.addAll(mediaData.getDashVideos());
+                        long bestPixels = coverPixels;
+                        for (MediaInterface video : videos) {
+                            long pixels = (long) video.getWidth() * video.getHeight();
+                            if (pixels > bestPixels && video.getUrl() != null) {
+                                frameVideo = video;
+                                bestPixels = pixels;
+                            }
+                        }
+                    }
+                } catch (Exception | LinkageError e) {
+                    PikoUtils.logger(e);
+                }
+                MediaDownloader coverDownloader = frameVideo == null ? downloader
+                        : firstFrameDownloader(context.getApplicationContext(), request, frameVideo, coverPixels);
                 Utils.runOnMainThread(() -> {
                     if (embed != null) {
-                        request.fallbackUrl = request.url;
+                        String coverUrl = request.url;
+                        List<DownloadRequest.Source> coverSources = new ArrayList<>(request.fallbackSources);
+                        String fallbackUrl = request.fallbackUrl;
                         request.url = embed.url;
+                        request.fallbackUrl = null;
+                        request.fallbackSources.clear();
+                        addImageFallbacks(request, mediaData, embed.width, embed.height);
+                        // Keep the original cover and its peers after the embed's own resolution group.
+                        Set<String> seen = new HashSet<>();
+                        seen.add(request.url);
+                        for (DownloadRequest.Source source : request.fallbackSources) seen.add(source.url);
+                        if (coverUrl != null && !coverUrl.trim().isEmpty() && seen.add(coverUrl)) {
+                            request.fallbackSources.add(new DownloadRequest.Source(coverUrl, null));
+                        }
+                        for (DownloadRequest.Source source : coverSources) {
+                            if (seen.add(source.url)) request.fallbackSources.add(source);
+                        }
+                        if (!seen.contains(fallbackUrl)) request.fallbackUrl = fallbackUrl;
                         request.completedToast = str("piko_saved_at", embed.width + "x" + embed.height);
                     }
-                    downloader.enqueue(request);
+                    coverDownloader.enqueue(request);
                 });
             });
 
@@ -355,10 +418,71 @@ public class DownloadUtils {
 
     }
 
+    private static MediaDownloader firstFrameDownloader(Context context, DownloadRequest request,
+                                                        MediaInterface video, long coverPixels) {
+        return new MediaDownloader(context) {
+            private boolean attempted;
+
+            @Override
+            protected void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
+                    throws IOException {
+                if (attempted) {
+                    super.download(url, output, builder, notificationId);
+                    return;
+                }
+                attempted = true;
+                File source = null;
+                File picture = null;
+                Bitmap frame = null;
+                boolean extracted = false;
+                try {
+                    try {
+                        source = File.createTempFile("piko-cover-", ".mp4", context.getCacheDir());
+                        picture = File.createTempFile("piko-cover-", ".jpg", context.getCacheDir());
+                        try (OutputStream cached = new FileOutputStream(source)) {
+                            super.download(video.getUrl(), cached, builder, notificationId);
+                        }
+                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                        try {
+                            retriever.setDataSource(source.getAbsolutePath());
+                            frame = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST);
+                        } finally {
+                            retriever.release();
+                        }
+                        if (frame != null && (long) frame.getWidth() * frame.getHeight() > coverPixels) {
+                            try (OutputStream jpeg = new FileOutputStream(picture)) {
+                                extracted = frame.compress(Bitmap.CompressFormat.JPEG, 95, jpeg);
+                            }
+                        }
+                    } catch (Exception | LinkageError | OutOfMemoryError e) {
+                        extracted = false;
+                        PikoUtils.logger(e);
+                    }
+                    if (extracted) {
+                        // Finish encoding before writing the document so extraction failures leave it untouched.
+                        try (FileInputStream jpeg = new FileInputStream(picture)) {
+                            byte[] buffer = new byte[8192];
+                            int count;
+                            while ((count = jpeg.read(buffer)) != -1) output.write(buffer, 0, count);
+                        }
+                        request.completedToast = str("piko_saved_at", frame.getWidth() + "x" + frame.getHeight());
+                    } else {
+                        super.download(url, output, builder, notificationId);
+                    }
+                } finally {
+                    if (frame != null) frame.recycle();
+                    if (source != null) source.delete();
+                    if (picture != null) picture.delete();
+                }
+            }
+        };
+    }
+
     /**
      * The request for one media, as {@code variant} when one was chosen. A video with none chosen
      * downloads as the sharpest DASH rendition, with its audio merged in, when that is sharper
-     * than the progressive file, which it falls back to; a chosen DASH rendition has no fallback.
+     * than the progressive file. Automatic downloads retry the same resolution before the
+     * existing progressive fallback; a chosen resolution only retries its own renditions.
      */
     private static DownloadRequest buildMediaRequest(
             MediaData rootMediaData,
@@ -374,7 +498,7 @@ public class DownloadUtils {
                 || (mediaType.equals(MediaType.ANY) && childMediaData.isVideo());
         String fileName = fallbackFileName;
         String progressiveUrl = mediaUrl;
-        String audioUrl = null;
+        String audioUrl = variant == null ? null : variant.getAudioUrl();
 
         String variantTag = variant == null ? null : variant.getVariantTag();
         DashVideoData dashVideo = variant instanceof DashVideoData
@@ -421,10 +545,47 @@ public class DownloadUtils {
         }
 
         DownloadRequest request = new DownloadRequest(mediaUrl, subFolder, fileName);
+        if (variant instanceof VideoResolution) {
+            List<VideoVariant> candidates = ((VideoResolution) variant).getCandidates();
+            for (int i = 1; i < candidates.size(); i++) {
+                try {
+                    VideoVariant candidate = candidates.get(i);
+                    String url = candidate.getUrl();
+                    if (url == null || url.trim().isEmpty()) continue;
+                    request.fallbackSources.add(new DownloadRequest.Source(url, candidate.getAudioUrl()));
+                } catch (Exception | LinkageError ignored) {
+                    // A failed optional candidate must not prevent the selected download.
+                }
+            }
+        } else if (variant instanceof ImageResolution) {
+            List<String> urls = ((ImageResolution) variant).getCandidateUrls();
+            for (int i = 1; i < urls.size(); i++) {
+                request.fallbackSources.add(new DownloadRequest.Source(urls.get(i), null));
+            }
+        }
+        MediaInterface originalImage = null;
+        if (!isVideo && variant == null && mediaType == MediaType.IMAGE && childMediaData.isVideo()) {
+            originalImage = childMediaData.getBestOriginalImage();
+            if (originalImage != null && !originalImage.getUrl().equals(mediaUrl)) request.fallbackUrl = originalImage.getUrl();
+        }
         request.audioUrl = audioUrl;
-        if (audioUrl != null) {
-            request.audioToAacLc = Pref.dashAudioAacLc();
-            if (variant == null) request.fallbackUrl = progressiveUrl;
+        request.audioToAacLc = isVideo && Pref.dashAudioAacLc();
+        if (variant == null && dashVideo != null
+                && progressiveUrl != null && !progressiveUrl.trim().isEmpty()) {
+            request.fallbackUrl = progressiveUrl;
+        }
+        if (isVideo && variant == null) addSameResolutionFallbacks(request, childMediaData);
+        if (!isVideo && variant == null && (mediaType == MediaType.ANY || mediaType == MediaType.IMAGE)) {
+            try {
+                MediaInterface image = childMediaData.getBestImage();
+                // Only use dimensions belonging to the URL already selected by the existing path.
+                if (image != null && request.url != null && request.url.equals(image.getUrl())) {
+                    addImageFallbacks(request, childMediaData, image.getWidth(), image.getHeight());
+                }
+            } catch (Exception | LinkageError ignored) {
+                // Optional alternatives must not prevent the original image from being saved.
+            }
+            addFinalImageFallbacks(request, childMediaData, originalImage);
         }
         if (!isVideo || !Pref.embedDownloadMetadata()) {
             return request;
@@ -450,6 +611,87 @@ public class DownloadUtils {
                     metadataException
             );
             return request;
+        }
+    }
+
+    private static void addFinalImageFallbacks(DownloadRequest request, MediaData mediaData,
+                                              MediaInterface image) {
+        if (image == null || request.fallbackUrl == null) return;
+        try {
+            if (!request.fallbackUrl.equals(image.getUrl())) return;
+            DownloadRequest fallback = new DownloadRequest(request.fallbackUrl, request.subFolder, request.fileName);
+            addImageFallbacks(fallback, mediaData, image.getWidth(), image.getHeight());
+            Set<String> seen = new HashSet<>();
+            seen.add(request.url);
+            seen.add(request.fallbackUrl);
+            for (DownloadRequest.Source source : request.fallbackSources) seen.add(source.url);
+            fallback.fallbackSources.removeIf(source -> !seen.add(source.url));
+            if (fallback.fallbackSources.isEmpty()) return;
+            // Sources run before fallbackUrl, so move the original cover ahead of its new peers.
+            request.fallbackSources.add(new DownloadRequest.Source(request.fallbackUrl, null));
+            request.fallbackSources.addAll(fallback.fallbackSources);
+            request.fallbackUrl = null;
+        } catch (Exception | LinkageError ignored) {
+            // Keep the legacy fallback if its dimensions or optional peers cannot be read.
+        }
+    }
+
+    private static void addImageFallbacks(DownloadRequest request, MediaData mediaData,
+                                          Integer width, Integer height) {
+        if (request.url != null && request.url.equals(request.fallbackUrl)) request.fallbackUrl = null;
+        if (width == null || height == null || width <= 0 || height <= 0) return;
+        try {
+            Set<String> seen = new HashSet<>();
+            seen.add(request.url);
+            seen.add(request.fallbackUrl);
+            for (ImageResolution resolution : ImageResolution.group(mediaData.getImageVariants())) {
+                if (!width.equals(resolution.getWidth()) || !height.equals(resolution.getHeight())) continue;
+                for (String url : resolution.getCandidateUrls()) {
+                    if (seen.add(url)) request.fallbackSources.add(new DownloadRequest.Source(url, null));
+                }
+                break;
+            }
+        } catch (Exception | LinkageError ignored) {
+            // Keep the initial image and legacy fallback when alternatives cannot be read.
+        }
+    }
+
+    private static void addSameResolutionFallbacks(DownloadRequest request, MediaData mediaData) {
+        try {
+            List<VideoVariant> videos = new ArrayList<>();
+            if (Pref.preferDashFormat()) videos.addAll(mediaData.getDashVideos());
+            List<VideoData> progressive = mediaData.getVideoVariants();
+            if (progressive != null) videos.addAll(progressive);
+
+            List<String> primary = Arrays.asList(request.url, request.audioUrl);
+            for (VideoResolution resolution : VideoResolution.group(videos)) {
+                if (resolution.shortSide() <= 0) continue;
+                List<DownloadRequest.Source> sources = new ArrayList<>();
+                boolean containsPrimary = false;
+                for (VideoVariant candidate : resolution.getCandidates()) {
+                    try {
+                        String url = candidate.getUrl();
+                        String audio = candidate.getAudioUrl();
+                        if (url == null || url.trim().isEmpty()) continue;
+                        if (primary.equals(Arrays.asList(url, audio))) containsPrimary = true;
+                        sources.add(new DownloadRequest.Source(url, audio));
+                    } catch (Exception | LinkageError ignored) {
+                        // A failed optional candidate must not prevent the original download.
+                    }
+                }
+                if (!containsPrimary) continue;
+
+                Set<List<String>> seen = new HashSet<>();
+                seen.add(primary);
+                // Keep the legacy complete-file fallback last, even if it appears in this group.
+                if (request.fallbackUrl != null) seen.add(Arrays.asList(request.fallbackUrl, null));
+                for (DownloadRequest.Source source : sources) {
+                    if (seen.add(Arrays.asList(source.url, source.audioUrl))) request.fallbackSources.add(source);
+                }
+                return;
+            }
+        } catch (Exception | LinkageError e) {
+            PikoUtils.logger(e);
         }
     }
 
