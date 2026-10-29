@@ -123,6 +123,15 @@ internal object Groups {
             order = 300,
         )
 
+    val TRANSLATION =
+        SettingsGroupMetadata(
+            id = "newx.content.translation",
+            titleResourceName = "piko_newx_group_translation_title",
+            summaryResourceName = "piko_newx_group_translation_summary",
+            iconResourceName = "ic_vector_globe_stroke",
+            order = 350,
+        )
+
     val DEBUG_TOOLS =
         SettingsGroupMetadata(
             id = "newx.advanced.debug_tools",

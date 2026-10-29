@@ -491,4 +491,14 @@
     <string name="piko_newx_settings_search_clear">Clear search</string>
     <string name="piko_newx_settings_search_no_results">No results for \"%s\"</string>
 
+    <string name="piko_newx_group_translation_title">Translation</string>
+    <string name="piko_newx_group_translation_summary">Translate posts with free or custom translators</string>
+    <string name="piko_newx_translation_menu_option_title">Translate in post menu</string>
+    <string name="piko_newx_translation_menu_option_summary">Adds Translate to the post menu and shows the translation in a tray.</string>
+    <string name="piko_newx_translation_force_button_title">Force show translate button</string>
+    <string name="piko_newx_translation_force_button_summary">Shows X\'s inline translate button on every post, even ones X marks as not translatable.</string>
+    <string name="piko_newx_translation_inline_title">Use selected translator inline</string>
+    <string name="piko_newx_translation_inline_summary">X\'s inline translate button uses your selected translator instead of Grok. FxTwitter falls back to Google here.</string>
+    <string name="piko_newx_translation_translator_title">Translator</string>
+    <string name="piko_newx_translation_translator_summary">Choose a free or custom translator and the target language</string>
 </resources>

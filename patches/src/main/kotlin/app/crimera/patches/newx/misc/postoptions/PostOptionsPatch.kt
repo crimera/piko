@@ -57,6 +57,7 @@ private const val HANDLE_OPTION_ACTION_SIGNATURE = "handleOptionAction($OBJECT_D
 
 internal const val BROWSE_OBJECT_ACTION = "None"
 internal const val FILTERED_REPLIES_ACTION = "ServerFeedbackAction"
+internal const val TRANSLATE_ACTION = "ProtectedRetweetEdu"
 
 /** NewX icon resource initialization emits the field assignment within this small block. */
 private const val ICON_FIELD_INITIALIZATION_WINDOW = 4

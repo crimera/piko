@@ -5,6 +5,7 @@ import app.morphe.extension.crimera.theme.PikoTheme;
 import app.morphe.extension.newx.featureswitches.FeatureSwitchStore;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
 import app.morphe.extension.newx.timeline.ForYouTopicFilter;
+import app.morphe.extension.newx.translation.TranslatorConfig;
 import app.morphe.extension.newx.ui.NewXSettingsTheme;
 
 /** Binds the shared settings system to NewX: its logger, resources, theme and built-in settings. */
@@ -34,5 +35,6 @@ public final class NewXSettingsHost {
         FeatureSwitchStore.shared();
         ForYouTopicFilter.shared().enabled.get();
         PostFilterRuleStore.shared();
+        TranslatorConfig.shared();
     }
 }

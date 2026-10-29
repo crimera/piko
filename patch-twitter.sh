@@ -103,6 +103,7 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -e "NewX: Hide post reply bar" \
   -e "NewX: Hide post author actions" \
   -e "NewX: Show poll results" \
+  -e "NewX: Translator" \
   -e "NewX: Customize post menu items" \
   -e "NewX: Customize media menu items" \
   -e "NewX: Customize profile tabs" \
