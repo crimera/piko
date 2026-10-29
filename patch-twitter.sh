@@ -84,6 +84,8 @@ java "-Xmx${PATCHER_MAX_HEAP_MB}m" -jar "$MORPHE_CLI_JAR" patch \
   -e "NewX: Set default profile post sorting" \
   -e "NewX: Custom font" \
   -e "NewX: Custom sharing domain" \
+  -e "NewX: Remove share tracking parameters" \
+  -e "NewX: Permanent share links" \
   -e "NewX: Inline download button" \
   -e "NewX: Redirect downloads to chosen folder" \
   -e "NewX: Theme" \
