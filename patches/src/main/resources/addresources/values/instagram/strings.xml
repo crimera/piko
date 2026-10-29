@@ -172,6 +172,8 @@
 
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
+    <string name="piko_disable_disappearing_messages_gesture">Disable disappearing messages swipe</string>
+    <string name="piko_disable_disappearing_messages_gesture_desc">Prevents swiping up in a chat from enabling disappearing messages</string>
     <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
     <string name="piko_ephemeral_caption">Show how ephemeral media was received</string>

@@ -276,6 +276,16 @@ public class ScreenBuilder {
     public void dmSection() {
         if (!(SettingsStatus.dmSection())) return;
 
+        if (SettingsStatus.disableDisappearingMessagesGesture) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_disappearing_messages_gesture"),
+                            str("piko_disable_disappearing_messages_gesture_desc"),
+                            Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE
+                    )
+            );
+        }
+
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(
                     helper.switchPreference(

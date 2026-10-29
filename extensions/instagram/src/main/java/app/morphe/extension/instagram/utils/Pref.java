@@ -251,6 +251,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.EPHEMERAL_MEDIA_CAPTION);
     }
 
+    public static boolean disableDisappearingMessagesGesture() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE) && SettingsStatus.disableDisappearingMessagesGesture;
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }

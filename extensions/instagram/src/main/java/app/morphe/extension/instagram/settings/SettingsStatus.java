@@ -72,6 +72,8 @@ public class SettingsStatus {
     }
 
     //DM section
+    public static boolean disableDisappearingMessagesGesture = false;
+    public static void disableDisappearingMessagesGesture() { disableDisappearingMessagesGesture = true; }
     public static boolean unlimitedReplaysOnEphemeralMedia = false;
     public static void unlimitedReplaysOnEphemeralMedia() {unlimitedReplaysOnEphemeralMedia = true;}
     public static boolean markChatAsRead = false;
@@ -80,7 +82,7 @@ public class SettingsStatus {
     public static void inboxLock() { inboxLock = true; }
     public static boolean hiddenChats = false;
     public static void hiddenChats() { hiddenChats = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats ;}
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats || disableDisappearingMessagesGesture ;}
 
     //Story section
     public static boolean customiseStoryTimestamp = false;
@@ -314,6 +316,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_hide_share_button"), SettingsStatus.hideShareButton);
         FLAGS.put(str("piko_improve_image_viewing"),SettingsStatus.improveImageViewing);
         FLAGS.put(str("piko_unlimited_replays"),SettingsStatus.unlimitedReplaysOnEphemeralMedia);
+        FLAGS.put(str("piko_disable_disappearing_messages_gesture"), SettingsStatus.disableDisappearingMessagesGesture);
 
         FLAGS.put(str("piko_customise_story_timestamp"),SettingsStatus.customiseStoryTimestamp);
         FLAGS.put(str("piko_disable_story_flipping"),SettingsStatus.disableStoryFlipping);
