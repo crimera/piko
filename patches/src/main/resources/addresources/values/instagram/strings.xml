@@ -211,9 +211,6 @@
     <string name="piko_download_buttons">Show download buttons</string>
     <string name="piko_download_buttons_feed">Feed posts</string>
     <string name="piko_download_buttons_stories">Stories</string>
-    <string name="piko_feed_download_button">Download button on feed posts</string>
-    <string name="piko_reel_download_button">Download button on reels</string>
-    <string name="piko_story_download_button">Download button on stories</string>
     <string name="piko_save_media_comment">Save media comment</string>
     <string name="piko_save_media_comment_desc">Adds a button to save media comments on posts and reels</string>
     <string name="piko_enable_direct_download">Enable direct download</string>

@@ -301,9 +301,6 @@ public class SettingsStatus {
         FLAGS.put(str("piko_category_hide_navigation_buttons"),SettingsStatus.hideNavigationButtons);
 
         FLAGS.put(str("piko_category_downloads"),SettingsStatus.downloadMedia);
-        FLAGS.put(str("piko_feed_download_button"),SettingsStatus.feedDownloadButton);
-        FLAGS.put(str("piko_reel_download_button"),SettingsStatus.reelDownloadButton);
-        FLAGS.put(str("piko_story_download_button"),SettingsStatus.storyDownloadButton);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
@@ -324,7 +321,6 @@ public class SettingsStatus {
         FLAGS.put(str("piko_hide_story_follow_button"),SettingsStatus.hideStoryFollowButton);
         FLAGS.put(str("piko_view_story_mentions"),SettingsStatus.viewStoryMentions);
         FLAGS.put(str("piko_follow_back_indicator"),SettingsStatus.followBackIndicator);
-        FLAGS.put(str("piko_follow_list_non_follower_badge"),SettingsStatus.followListNonFollowerBadge);
         FLAGS.put(str("piko_disable_discover_people"),SettingsStatus.disableDiscoverPeople);
         FLAGS.put(str("piko_disable_analytics"),SettingsStatus.disableAnalytics);
         FLAGS.put(str("piko_customise_story_ring_size"),SettingsStatus.customiseStoryRingSize);
