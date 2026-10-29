@@ -21,21 +21,29 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.numberOfParameterRegisters
 import app.morphe.patcher.util.registersUsed
+import app.morphe.util.cloneMutable
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction31c
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val SHARE_URL_RESOLVER_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/ShareUrlResolver;"
-private const val CHANGE_DOMAIN_METHOD =
-    "$SHARE_URL_RESOLVER_DESCRIPTOR->changeDomain(Ljava/lang/String;)Ljava/lang/String;"
+private const val REWRITE_SHARED_URL_METHOD =
+    "$SHARE_URL_RESOLVER_DESCRIPTOR->rewriteSharedUrl(Ljava/lang/String;)Ljava/lang/String;"
+private const val REWRITE_PROFILE_URL_METHOD =
+    "$SHARE_URL_RESOLVER_DESCRIPTOR->rewriteProfileUrl(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/String;"
 private const val CUSTOM_DOMAIN_VALIDATOR_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/CustomSharingDomainValidator;"
 private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesheet/"
@@ -43,12 +51,15 @@ private const val SHARE_IMPL_DESCRIPTOR_PREFIX = "Lcom/x/share/impl/"
 private const val DM_SHARESHEET_DESCRIPTOR_PREFIX = "Lcom/x/dm/sharesheet/"
 private const val SHARE_API_I_DESCRIPTOR = "Lcom/x/share/api/i;"
 private const val NAVIGATION_DESCRIPTOR_PREFIX = "Lcom/x/navigation/"
+private const val PROFILE_MODEL_DESCRIPTOR_PREFIX = "Lcom/x/models/profile/"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val INTENT_CLASS = "Landroid/content/Intent;"
 private const val SHARE_STATUS_URL_PREFIX = "https://x.com/i/status/"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val INTENT_DESCRIPTOR = "Landroid/content/Intent;"
 private const val SEND_ACTION = "android.intent.action.SEND"
 private const val EXTRA_TEXT = "android.intent.extra.TEXT"
+private const val SHARE_ATTRIBUTION_QUERY_PARAMETER = "s="
 
 private data class ShareIntentCallSite(
     val instructionIndex: Int,
@@ -86,6 +97,14 @@ internal object MovedShareIntentBuilderFingerprint : ShapeFingerprint(
     returnType = INTENT_DESCRIPTOR,
     filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
     custom = { method, _ -> method.buildsActionSendIntentWithText() },
+)
+
+/** Appends the source code to an X URL. Hooking its result also covers direct share paths that
+ * construct an Intent without passing through the common share-Intent builder. */
+private object ShareAttributionUrlBuilderFingerprint : Fingerprint(
+    returnType = STRING_DESCRIPTOR,
+    filters = listOf(string(SHARE_ATTRIBUTION_QUERY_PARAMETER)),
+    custom = { method, _ -> method.isShareAttributionUrlBuilder() },
 )
 
 /** Proves ACTION_SEND seeds the Intent and EXTRA_TEXT keys the share text. */
@@ -129,6 +148,98 @@ private fun Method.buildsActionSendIntentWithText(): Boolean {
     return seedsAction && keysExtraText
 }
 
+internal fun Method.isShareAttributionUrlBuilder(): Boolean {
+    if (!AccessFlags.STATIC.isSet(accessFlags) || returnType != STRING_DESCRIPTOR) return false
+
+    val parameters = parameterTypes.map(CharSequence::toString)
+    if (parameters.size != 2 || parameters[0] != STRING_DESCRIPTOR) return false
+
+    val implementation = implementation ?: return false
+    val methodInstructions = implementation.instructions.toList()
+    fun hasStringLiteral(value: String): Boolean = methodInstructions.any { instruction ->
+        (instruction.opcode == Opcode.CONST_STRING || instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
+            instruction.getReference<StringReference>()?.string == value
+    }
+    val shareParameterCount = methodInstructions.count { instruction ->
+        (instruction.opcode == Opcode.CONST_STRING || instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
+            instruction.getReference<StringReference>()?.string == SHARE_ATTRIBUTION_QUERY_PARAMETER
+    }
+    if (!hasStringLiteral("?") || !hasStringLiteral("&") || shareParameterCount != 1) {
+        return false
+    }
+
+    val returnIndices = methodInstructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
+    }
+    if (returnIndices.size != 1) return false
+    val returnIndex = returnIndices.single()
+    val returnRegister =
+        (methodInstructions[returnIndex] as? OneRegisterInstruction)?.registerA ?: return false
+
+    val sourceUrlRegister = implementation.registerCount - numberOfParameterRegisters
+    val attributionRegister = sourceUrlRegister + 1
+    val codeRegisters = methodInstructions.mapIndexedNotNull { index, instruction ->
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (reference.definingClass != parameters[1] ||
+            reference.name != "getCode" ||
+            reference.parameterTypes.isNotEmpty() ||
+            reference.returnType != STRING_DESCRIPTOR ||
+            instruction.registersUsed != listOf(attributionRegister)
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val result = methodInstructions.getOrNull(index + 1)
+        if (result?.opcode != Opcode.MOVE_RESULT_OBJECT) return@mapIndexedNotNull null
+        (result as? OneRegisterInstruction)?.registerA
+    }.distinct()
+    if (codeRegisters.size != 1) return false
+
+    val queryParameterRegisters = mutableListOf<Int>()
+    methodInstructions.forEach { instruction ->
+        if (instruction.getReference<StringReference>()?.string != SHARE_ATTRIBUTION_QUERY_PARAMETER) {
+            return@forEach
+        }
+        instruction.stringConstantRegister()?.let(queryParameterRegisters::add)
+    }
+    if (queryParameterRegisters.size != 1) return false
+    val queryParameterRegister = queryParameterRegisters.single()
+
+    val concatResults = methodInstructions.mapIndexedNotNull { index, instruction ->
+        if (instruction.opcode != Opcode.INVOKE_STATIC &&
+            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (reference.returnType != STRING_DESCRIPTOR ||
+            reference.parameterTypes.size < 3 ||
+            reference.parameterTypes.any { it.toString() != STRING_DESCRIPTOR }
+        ) {
+            return@mapIndexedNotNull null
+        }
+        val arguments = instruction.registersUsed
+        if (sourceUrlRegister !in arguments ||
+            codeRegisters.single() !in arguments ||
+            queryParameterRegister !in arguments
+        ) {
+            return@mapIndexedNotNull null
+        }
+
+        val result = methodInstructions.getOrNull(index + 1)
+        if (result?.opcode != Opcode.MOVE_RESULT_OBJECT) return@mapIndexedNotNull null
+        val resultRegister = (result as? OneRegisterInstruction)?.registerA ?: return@mapIndexedNotNull null
+        resultRegister.takeIf { it == returnRegister }
+    }
+    return concatResults.size == 1
+}
+
+private fun Instruction.stringConstantRegister(): Int? =
+    when (opcode) {
+        Opcode.CONST_STRING -> (this as? Instruction21c)?.registerA
+        Opcode.CONST_STRING_JUMBO -> (this as? Instruction31c)?.registerA
+        else -> null
+    }
+
 /** Post share Intent builder owning status URL construction (12.28+ static helper). */
 internal object ShareImplIntentBuilderFingerprint : Fingerprint(
     definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
@@ -144,6 +255,20 @@ internal object PostNavigationUrlFingerprint : Fingerprint(
     returnType = STRING_DESCRIPTOR,
     filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
     custom = { method, _ -> method.hasStatusUrlReturnFlow() },
+)
+
+/** Profile URL route whose model carries the account ID alongside its mutable handle. */
+internal object ProfileNavigationUrlFingerprint : Fingerprint(
+    definingClass = NAVIGATION_DESCRIPTOR_PREFIX,
+    parameters = emptyList(),
+    returnType = STRING_DESCRIPTOR,
+    filters = listOf(string("https://x.com/")),
+    custom = { method, _ -> method.hasProfileNavigationUrlFlow() },
+)
+
+private data class ProfileModelResult(
+    val resultIndex: Int,
+    val register: Int,
 )
 
 /** Proves that the status URL marker contributes to the value returned by this getter. */
@@ -236,6 +361,39 @@ private fun Method.hasStatusUrlReturnFlow(): Boolean {
     return directResults.size + builderResults.size == 1
 }
 
+private fun Method.hasProfileNavigationUrlFlow(): Boolean = profileModelResults().size == 1
+
+/** Finds the normalized profile object consumed by the route's profile-variant branches. */
+private fun Method.profileModelResults(): List<ProfileModelResult> {
+    val methodInstructions = implementation?.instructions?.toList() ?: return emptyList()
+    return methodInstructions.mapIndexedNotNull { index, instruction ->
+        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+        if (!reference.returnType.startsWith(PROFILE_MODEL_DESCRIPTOR_PREFIX)) {
+            return@mapIndexedNotNull null
+        }
+
+        val resultIndex = index + 1
+        val resultInstruction = methodInstructions.getOrNull(resultIndex)
+        if (resultInstruction?.opcode != Opcode.MOVE_RESULT_OBJECT) return@mapIndexedNotNull null
+        val resultRegister = (resultInstruction as? OneRegisterInstruction)?.registerA
+            ?: return@mapIndexedNotNull null
+        val consumedAsProfile = methodInstructions.drop(resultIndex + 1).any { candidate ->
+            val type = candidate.getReference<TypeReference>()?.type
+                ?: return@any false
+            if (!type.startsWith(PROFILE_MODEL_DESCRIPTOR_PREFIX)) return@any false
+
+            when (candidate.opcode) {
+                Opcode.INSTANCE_OF ->
+                    (candidate as? TwoRegisterInstruction)?.registerB == resultRegister
+                Opcode.CHECK_CAST ->
+                    (candidate as? OneRegisterInstruction)?.registerA == resultRegister
+                else -> false
+            }
+        }
+        if (consumedAsProfile) ProfileModelResult(resultIndex, resultRegister) else null
+    }
+}
+
 private fun List<Instruction>.valueReachesReturn(
     resultIndex: Int,
     resultRegister: Int,
@@ -258,6 +416,23 @@ private fun List<Instruction>.valueReachesReturn(
 }
 
 @Suppress("unused")
+internal val newXSharedUrlRewritePatch =
+    bytecodePatch {
+        unsupportedOnMount()
+        compatibleWith(COMPATIBILITY_NEW_X)
+        dependsOn(newXExtensionPatch)
+
+        execute {
+            hookShareSheetPostUrls()
+            hookShareSheetCopyCallbacks()
+            hookShareIntentBuilder()
+            hookShareAttributionUrlBuilder()
+            hookPostNavigationUrls()
+            hookProfileNavigationUrls()
+        }
+    }
+
+@Suppress("unused")
 val newXCustomSharingDomainPatch =
     bytecodePatch(
         name = "NewX: Custom sharing domain",
@@ -268,21 +443,14 @@ val newXCustomSharingDomainPatch =
 
         newXTextInput(
             id = "newx.content.custom_sharing_domain",
-            category = Categories.CONTENT,
+            category = Categories.LINKS,
             strings = settingStrings("piko_newx_custom_sharing_domain"),
             order = 500,
             defaultValue = "",
             validatorClassDescriptor = CUSTOM_DOMAIN_VALIDATOR_DESCRIPTOR,
         )
 
-        dependsOn(newXExtensionPatch)
-
-        execute {
-            hookShareSheetPostUrls()
-            hookShareSheetCopyCallbacks()
-            hookShareIntentBuilder()
-            hookPostNavigationUrls()
-        }
+        dependsOn(newXSharedUrlRewritePatch)
     }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
@@ -327,6 +495,33 @@ private fun hookShareIntentBuilder() {
     hookHelperCallSites(newOwner.method.definingClass, helperMethod)
 }
 
+context(_: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookShareAttributionUrlBuilder() {
+    val method =
+        ShareAttributionUrlBuilderFingerprint
+            .requireSingleMatch("NewX share attribution URL builder")
+            .method
+    rewriteShareAttributionUrlBuilder(method)
+}
+
+internal fun rewriteShareAttributionUrlBuilder(method: MutableMethod) {
+    val returnIndices = method.instructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
+    }
+    if (returnIndices.size != 1) {
+        throw PatchException(
+            "Expected one returned attribution URL in NewX helper $method, found ${returnIndices.size}",
+        )
+    }
+    val returnIndex = returnIndices.single()
+    val returnRegister =
+        (method.instructions[returnIndex] as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException("Expected one returned attribution URL register in $method")
+    method.insertHook(index = returnIndex, relocateBranchTargets = true) {
+        rewriteSharedUrl(returnRegister)
+    }
+}
+
 context(context: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookHelperCallSites(shareClassDescriptor: String, helperMethod: MutableMethod) {
     val shareClass = context.classDefByOrNull(shareClassDescriptor)
@@ -360,7 +555,7 @@ private fun hookHelperCallSites(shareClassDescriptor: String, helperMethod: Muta
 
     methodsWithCalls.forEach { (method, callSites) ->
         callSites.asReversed().forEach { callSite ->
-            method.addDomainRewrite(callSite.instructionIndex, callSite.urlRegister)
+            method.addSharedUrlRewrite(callSite.instructionIndex, callSite.urlRegister)
         }
     }
 }
@@ -391,7 +586,115 @@ private fun hookPostNavigationUrls() {
         val returnIndex = returnIndices.single()
         val returnInstruction = method.instructions[returnIndex] as? OneRegisterInstruction
             ?: throw PatchException("Expected a one-register URL return in $method")
-        method.addDomainRewrite(returnIndex, returnInstruction.registerA)
+        method.addSharedUrlRewrite(returnIndex, returnInstruction.registerA)
+    }
+}
+
+context(_: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookProfileNavigationUrls() {
+    val match = ProfileNavigationUrlFingerprint.requireSingleMatch(
+        "NewX profile navigation URL getter",
+    )
+    val originalMethod = match.method
+    val target = originalMethod.reserveProfileSnapshotRegister()
+    match.classDef.methods.remove(originalMethod)
+    match.classDef.methods.add(target.method)
+    hookProfileNavigationUrl(target.method, target.snapshotRegister)
+}
+
+internal data class ProfileNavigationUrlHookTarget(
+    val method: MutableMethod,
+    val snapshotRegister: Int,
+)
+
+internal fun MutableMethod.reserveProfileSnapshotRegister(): ProfileNavigationUrlHookTarget {
+    val implementation =
+        implementation ?: throw PatchException("NewX profile URL getter has no implementation: $this")
+    val parameterRegisters = numberOfParameterRegisters
+    if (parameterRegisters == 0) {
+        throw PatchException("NewX profile URL getter has no instance receiver: $this")
+    }
+
+    val snapshotRegister = implementation.registerCount
+    val expanded = cloneMutable(additionalRegisters = parameterRegisters + 1)
+    val expandedImplementation =
+        expanded.implementation
+            ?: throw PatchException("Expanded NewX profile URL getter has no implementation: $this")
+    val firstParameterRegister = expandedImplementation.registerCount - expanded.numberOfParameterRegisters
+    if (snapshotRegister !in 0 until firstParameterRegister) {
+        throw PatchException(
+            "NewX profile snapshot register v$snapshotRegister is not a local in expanded getter $expanded",
+        )
+    }
+
+    return ProfileNavigationUrlHookTarget(expanded, snapshotRegister)
+}
+
+internal fun hookProfileNavigationUrl(method: MutableMethod, savedProfileRegister: Int) {
+    val implementation =
+        method.implementation ?: throw PatchException("NewX profile URL getter has no implementation: $method")
+    val firstParameterRegister = implementation.registerCount - method.numberOfParameterRegisters
+    if (savedProfileRegister !in 0 until firstParameterRegister) {
+        throw PatchException(
+            "NewX profile snapshot register v$savedProfileRegister is not a local in $method",
+        )
+    }
+
+    val profileResults = method.profileModelResults()
+    if (profileResults.size != 1) {
+        throw PatchException(
+            "Expected one normalized profile model in NewX profile URL getter $method, found " +
+                profileResults.size,
+        )
+    }
+
+    val profileResult = profileResults.single()
+    val saveIndex = profileResult.resultIndex + 1
+    val preexistingTargets = method.instructions.branchTargetIndices()
+    if (saveIndex in preexistingTargets) {
+        throw PatchException(
+            "NewX profile model snapshot has an incoming branch at $method instruction $saveIndex",
+        )
+    }
+
+    method.insertHook(
+        index = saveIndex,
+        relocateBranchTargets = false,
+    ) {
+        move(savedProfileRegister, profileResult.register, OBJECT_DESCRIPTOR)
+    }
+
+    val returnIndices = method.instructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
+    }
+    if (returnIndices.isEmpty()) {
+        throw PatchException("NewX profile URL getter has no object return: $method")
+    }
+    val branchTargets = method.instructions.branchTargetIndices()
+    val targetedReturns = returnIndices.filter { it in branchTargets }
+    if (targetedReturns.isNotEmpty()) {
+        throw PatchException(
+            "NewX profile URL getter has branch-targeted returns that cannot be rewritten in $method: " +
+                targetedReturns,
+        )
+    }
+
+    returnIndices.asReversed().forEach { returnIndex ->
+        val returnRegister =
+            (method.instructions[returnIndex] as? OneRegisterInstruction)?.registerA
+                ?: throw PatchException("Expected a one-register profile URL return in $method")
+        method.insertHook(
+            index = returnIndex,
+            excludedRegisters = listOf(returnRegister, savedProfileRegister),
+            relocateBranchTargets = false,
+        ) {
+            invokeStatic(
+                methodReference(REWRITE_PROFILE_URL_METHOD),
+                returnRegister,
+                savedProfileRegister,
+            )
+            moveResult(returnRegister, STRING_DESCRIPTOR)
+        }
     }
 }
 
@@ -431,7 +734,7 @@ private fun hookShareSheetUrlConstructor(method: MutableMethod) {
     // trending/lists, null). A plain insert before the store leaves the branch labels on the
     // original IPUT, so those paths would skip the rewrite. Insert at the control-flow label so
     // the branch targets run the rewrite before the store.
-    method.addDomainRewriteAtControlFlowLabel(fieldStoreIndex, valueRegister)
+    method.addSharedUrlRewriteAtControlFlowLabel(fieldStoreIndex, valueRegister)
 }
 
 private fun MutableMethod.findStatusUrlResultIndices(): List<Int> {
@@ -511,14 +814,30 @@ private fun MethodReference.matches(method: MutableMethod): Boolean =
         returnType == method.returnType &&
         parameterTypes.map(CharSequence::toString) == method.parameterTypes.map(CharSequence::toString)
 
+private fun List<Instruction>.branchTargetIndices(): Set<Int> {
+    val offsets = IntArray(size)
+    val indexByOffset = mutableMapOf<Int, Int>()
+    var codeOffset = 0
+    forEachIndexed { index, instruction ->
+        offsets[index] = codeOffset
+        indexByOffset[codeOffset] = index
+        codeOffset += instruction.codeUnits
+    }
+
+    return mapIndexedNotNull { index, instruction ->
+        val branch = instruction as? OffsetInstruction ?: return@mapIndexedNotNull null
+        indexByOffset[offsets[index] + branch.codeOffset]
+    }.toSet()
+}
+
 /**
  * Rewrites the URL held in [register] through the custom-domain resolver, in place.
  *
  * The API lowers the call to `invoke-static/range` by itself when [register] is above `v15`,
  * which is what the old hand written opcode choice did.
  */
-private fun Block.rewriteDomain(register: Int) {
-    invokeStatic(methodReference(CHANGE_DOMAIN_METHOD), register)
+private fun Block.rewriteSharedUrl(register: Int) {
+    invokeStatic(methodReference(REWRITE_SHARED_URL_METHOD), register)
     moveResult(register, STRING_DESCRIPTOR)
 }
 
@@ -526,8 +845,8 @@ private fun Block.rewriteDomain(register: Int) {
  * Rewrites the URL in front of [instructionIndex] keeping every incoming branch on the original
  * instruction, which is what the plain `addInstructions` this replaces did.
  */
-private fun MutableMethod.addDomainRewrite(instructionIndex: Int, register: Int) {
-    insertHook(index = instructionIndex, relocateBranchTargets = false) { rewriteDomain(register) }
+private fun MutableMethod.addSharedUrlRewrite(instructionIndex: Int, register: Int) {
+    insertHook(index = instructionIndex, relocateBranchTargets = false) { rewriteSharedUrl(register) }
 }
 
 /**
@@ -541,15 +860,15 @@ private fun MutableMethod.addDomainRewrite(instructionIndex: Int, register: Int)
  * label unplaced on 12.28.0-prod.01 (see docs/newx-typed-api-port.md), so this one site keeps the
  * library helper that is proven in production until that is fixed.
  */
-private fun MutableMethod.addDomainRewriteAtControlFlowLabel(instructionIndex: Int, register: Int) {
+private fun MutableMethod.addSharedUrlRewriteAtControlFlowLabel(instructionIndex: Int, register: Int) {
     addInstructionsAtControlFlowLabel(
         instructionIndex,
-        rewriteDomainInstructions(register),
+        rewriteSharedUrlInstructions(register),
     )
 }
 
-private fun rewriteDomainInstructions(register: Int): String =
+private fun rewriteSharedUrlInstructions(register: Int): String =
     """
-        invoke-static {v$register}, $CHANGE_DOMAIN_METHOD
+        invoke-static {v$register}, $REWRITE_SHARED_URL_METHOD
         move-result-object v$register
     """.trimIndent()

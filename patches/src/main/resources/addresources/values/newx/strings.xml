@@ -13,6 +13,8 @@
     <string name="piko_newx_category_appearance_summary">Customize colors and fonts</string>
     <string name="piko_newx_category_post_actions_media_title">Posts and media</string>
     <string name="piko_newx_category_post_actions_media_summary">Customize post actions, replies, media tabs, downloads, and sharing</string>
+    <string name="piko_newx_category_links_title">Links</string>
+    <string name="piko_newx_category_links_summary">Customize shared links and URL behavior</string>
     <string name="piko_newx_category_navigation_title">Navigation</string>
     <string name="piko_newx_category_navigation_summary">Customize navigation bar and drawer items</string>
     <string name="piko_newx_category_advanced_title">Advanced</string>
@@ -479,6 +481,10 @@
     <string name="piko_newx_custom_sharing_domain_title">Custom sharing domain</string>
     <string name="piko_newx_custom_sharing_domain_summary">Replace x.com with a custom domain (like fxtwitter.com) when sharing posts</string>
     <string name="piko_newx_custom_sharing_domain_invalid">Malformed custom sharing domain</string>
+    <string name="piko_newx_permanent_share_links_title">Use permanent links</string>
+    <string name="piko_newx_permanent_share_links_summary">Uses post and account IDs in shared URLs instead of usernames. Disabled by default.</string>
+    <string name="piko_newx_remove_share_tracking_query_title">Remove share tracking parameter</string>
+    <string name="piko_newx_remove_share_tracking_query_summary">Removes the a= and s= attribution parameters from shared X links while preserving other query parameters</string>
     <string name="piko_newx_canonical_urls_title">Use canonical URLs</string>
     <string name="piko_newx_canonical_urls_summary">Shows expanded URL names in posts and profiles and opens them instead of shortened t.co URLs</string>
 

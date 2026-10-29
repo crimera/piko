@@ -40,6 +40,15 @@ internal object Categories {
             order = 400,
         )
 
+    val LINKS =
+        SettingsCategory(
+            id = "newx.links",
+            titleResourceName = "piko_newx_category_links_title",
+            summaryResourceName = "piko_newx_category_links_summary",
+            iconResourceName = "ic_vector_globe_stroke",
+            order = 450,
+        )
+
     val NAVIGATION =
         SettingsCategory(
             id = "newx.navigation",
