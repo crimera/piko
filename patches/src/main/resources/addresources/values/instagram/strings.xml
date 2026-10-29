@@ -44,8 +44,6 @@
     <string name="piko_turn_on_all_ghost_modes">Turn on all ghost modes</string>
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
-    <string name="piko_ghost_modes_quick_toggle">Enable quick toggle for ghost modes</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">Adds a quick toggle in chat action bar to control ghost modes</string>
 
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Distraction free</string>
@@ -59,7 +57,6 @@
     <string name="piko_hide_feed_posts_desc">Hides posts from the home feed</string>
     <string name="piko_disable_discover_people">Hide suggested accounts</string>
     <string name="piko_focus_lock">Focus Lock</string>
-    <string name="piko_focus_lock_desc">Force distraction free settings on for a set time</string>
     <string name="piko_focus_lock_targets">Settings to lock</string>
     <string name="piko_focus_lock_reels_tab">Reels tab</string>
     <string name="piko_focus_lock_reels_tab_desc">Removes the Reels tab from the navigation bar. Reels shared with you still open.</string>
@@ -146,8 +143,6 @@
     <string name="piko_copy_user_id">Copy user id</string>
     <string name="piko_copy_bio">Copy bio</string>
     <string name="piko_view_profile_picture">View profile picture</string>
-    <string name="piko_copy_profile_link">Copy profile link</string>
-    <string name="piko_share_this_profile">Share this profile</string>
     <string name="piko_copy_links_from_bio">Copy links from bio</string>
     <string name="piko_no_links_in_bio">No links in this bio</string>
     <string name="piko_download_profile_picture">Download profile picture</string>
@@ -217,11 +212,8 @@
     <string name="piko_download_buttons_feed">Feed posts</string>
     <string name="piko_download_buttons_stories">Stories</string>
     <string name="piko_feed_download_button">Download button on feed posts</string>
-    <string name="piko_feed_download_button_desc">Adds a download icon beside the save button on feed posts</string>
     <string name="piko_reel_download_button">Download button on reels</string>
-    <string name="piko_reel_download_button_desc">Adds a download icon to the reels action column</string>
     <string name="piko_story_download_button">Download button on stories</string>
-    <string name="piko_story_download_button_desc">Adds a download icon beside the story reply field</string>
     <string name="piko_save_media_comment">Save media comment</string>
     <string name="piko_save_media_comment_desc">Adds a button to save media comments on posts and reels</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
@@ -272,8 +264,6 @@
     <string name="piko_download_set_path_failed">Failed to save download folder</string>
     <string name="piko_download_choose_folder">Choose a download folder to continue</string>
     <string name="piko_download_choose_folder_failed">Could not open folder picker</string>
-    <string name="piko_download_grant_permission">Choose a download folder to continue</string>
-    <string name="piko_download_grant_permission_failed">Could not open folder picker</string>
     <string name="piko_download_with_external_downloader">Download with external downloader</string>
     <string name="piko_external_downloader_package_name">External downloader package name</string>
     <string name="piko_external_downloader_package_name_not_found">External downloader package name not found</string>
@@ -291,11 +281,6 @@
 
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Hide navigation buttons</string>
-    <string name="piko_hide_navigation_feed">Hide Feed button</string>
-    <string name="piko_hide_navigation_reels">Hide Reels button</string>
-    <string name="piko_hide_navigation_direct">Hide Direct button</string>
-    <string name="piko_hide_navigation_search">Hide Search button</string>
-    <string name="piko_hide_navigation_create">Hide Create button</string>
     <string name="piko_category_navigation_tabs">Navigation bar</string>
     <string name="piko_navigation_tabs_title">Show and reorder tabs</string>
     <string name="piko_navigation_tabs_summary">Choose visible bottom tabs and drag to reorder them</string>
@@ -353,7 +338,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Change like animation</string>
     <string name="piko_change_like_animation_desc">Change the animation to one from existing Rings like animations</string>
-    <string name="piko_available_like_animation">Available like animations</string>
     <string name="piko_like_animation_random">Random</string>
     <string name="piko_like_animation_preview">Animation preview</string>
     <string name="piko_like_animation_preview_unavailable">Preview unavailable</string>
@@ -392,8 +376,6 @@
     <string name="piko_action_bar_button_create_icon">Create icon</string>
     <string name="piko_action_bar_button_notifications_icon">Notifications icon</string>
 
-    <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
-    <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
     <string name="piko_settings_search_hint">Search</string>
     <string name="piko_settings_search_clear">Clear search</string>
     <string name="piko_settings_search_no_results">No results found</string>
@@ -492,7 +474,6 @@
     <string name="piko_view_saved_instants">View saved Instants</string>
     <string name="piko_instants_vault_empty">No saved Instants yet. Open some Instants with capture enabled and they\'ll appear here.</string>
     <string name="piko_instants_link_unavailable">Media link not available.</string>
-    <string name="piko_instants_unknown_user">Unknown</string>
     <string name="piko_instants_delete_confirm">Remove this saved Instant?</string>
     <string name="piko_instants_clear_all">Clear all</string>
     <string name="piko_instants_clear_all_confirm">Remove all saved Instants?</string>
@@ -500,7 +481,6 @@
     <string name="piko_instants_title">Instants</string>
     <string name="piko_search_username">Search by username</string>
     <string name="piko_instants_no_matches">No saved Instants from that user.</string>
-    <string name="piko_instants_unavailable">Unavailable</string>
     <string name="piko_saved_on">Saved on</string>
 
     <!-- Save & view deleted (unsent) direct messages -->
@@ -522,7 +502,6 @@
     <string name="piko_someone">Someone</string>
     <string name="piko_deleted_messages_channel">Deleted messages</string>
     <string name="piko_deleted_messages_channel_desc">Notifies when a received message is unsent</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s deleted]</string>
     <string name="piko_media_deleted_generic">[deleted]</string>
     <string name="piko_media_unknown">media</string>
