@@ -21,10 +21,9 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.registersUsed
-import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
 private object ToggleDisappearingMessagesFingerprint : Fingerprint(
@@ -62,9 +61,8 @@ val disableDisappearingMessagesGesturePatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_INSTAGRAM)
 
     execute {
-        val toggle = ToggleDisappearingMessagesFingerprint.matchSingle()
-        DisappearingMessagesGestureFingerprint.matchSingle().apply {
-            if (instructionMatches[0].methodReference != toggle.instructionMatches[1].methodReference) {
+        DisappearingMessagesGestureFingerprint.apply {
+            if (instructionMatches[0].methodReference != ToggleDisappearingMessagesFingerprint.instructionMatches[1].methodReference) {
                 throw PatchException("Disappearing messages state check does not match the gesture controller")
             }
             val stateMatch = instructionMatches[1]

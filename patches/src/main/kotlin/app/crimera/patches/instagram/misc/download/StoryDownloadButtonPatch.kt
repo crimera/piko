@@ -12,16 +12,13 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.literal
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -34,35 +31,35 @@ private const val REEL_ITEM_DESCRIPTOR = "Lcom/instagram/model/reels/ReelItem;"
 
 val storyDownloadButtonPatch = bytecodePatch {
     compatibleWith(COMPATIBILITY_INSTAGRAM)
-    dependsOn(sharedExtensionPatch, settingsPatch, resourceMappingPatch)
+    dependsOn(sharedExtensionPatch, settingsPatch)
 
     execute {
-        hookStoryToolbarBinder(getResourceId(ResourceType.ID, "toolbar_buttons_container"))
+        hookStoryToolbarBinder()
         enableSettings("storyDownloadButton")
     }
 }
 
 context(patchContext: BytecodePatchContext)
-private fun hookStoryToolbarBinder(containerId: Long) {
+private fun hookStoryToolbarBinder() {
     val holder = Fingerprint(
         name = "<init>",
         returnType = "V",
-        filters = listOf(literal(containerId)),
-    ).matchSingle()
-    val instructions = holder.method.implementation!!.instructions.toList()
+        filters = listOf(resourceLiteral(ResourceType.ID, "toolbar_buttons_container")),
+    )
+    val instructions = holder.originalMethod.implementation!!.instructions.toList()
     val idIndex = holder.instructionMatches.single().index
     val resolveIndex = idIndex + 1
     val resolve = instructions.getOrNull(resolveIndex)?.getReference<MethodReference>()
     if (resolve?.returnType != VIEW_DESCRIPTOR ||
         instructions.getOrNull(resolveIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT
-    ) throw PatchException("Unexpected story buttons container lookup in ${holder.method}")
+    ) throw PatchException("Unexpected story buttons container lookup in ${holder.originalMethod}")
     val containerRegister = instructions[resolveIndex + 1].registersUsed.single()
     val storeIndex = resolveIndex + if (instructions.getOrNull(resolveIndex + 2)?.opcode == Opcode.CHECK_CAST) 3 else 2
     val store = instructions.getOrNull(storeIndex)
     val containerField = store?.getReference<FieldReference>()
     if (store?.opcode != Opcode.IPUT_OBJECT || store.registersUsed.firstOrNull() != containerRegister ||
-        containerField?.definingClass != holder.classDef.type || containerField.type != VIEW_DESCRIPTOR
-    ) throw PatchException("Unexpected story buttons container field in ${holder.method}")
+        containerField?.definingClass != holder.originalClassDef.type || containerField.type != VIEW_DESCRIPTOR
+    ) throw PatchException("Unexpected story buttons container field in ${holder.originalMethod}")
 
     val mediaGetters = patchContext.classDefBy(REEL_ITEM_DESCRIPTOR).methods.filter {
         it.parameterTypes.isEmpty() && it.returnType == MEDIA_DESCRIPTOR && !AccessFlags.STATIC.isSet(it.accessFlags)
@@ -80,7 +77,7 @@ private fun hookStoryToolbarBinder(containerId: Long) {
     patchContext.classDefForEach { classDef ->
         classDef.methods.forEach { method ->
             if (method.returnType == "V" &&
-                listOf(holder.classDef.type, REEL_ITEM_DESCRIPTOR, USER_SESSION_DESCRIPTOR).all { type ->
+                listOf(holder.originalClassDef.type, REEL_ITEM_DESCRIPTOR, USER_SESSION_DESCRIPTOR).all { type ->
                     method.parameterTypes.count { it.toString() == type } == 1
                 }
             ) candidates += method
@@ -101,7 +98,7 @@ private fun hookStoryToolbarBinder(containerId: Long) {
     binder.addInstructions(
         0,
         """
-        ${moveObject(container, binder.parameterRegister(holder.classDef.type))}
+        ${moveObject(container, binder.parameterRegister(holder.originalClassDef.type))}
         iget-object v$container, v$container, $containerField
         ${moveObject(media, binder.parameterRegister(REEL_ITEM_DESCRIPTOR))}
         if-eqz v$media, :piko_story_media

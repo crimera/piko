@@ -18,10 +18,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.getFreeRegisterProvider
+import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.indexOfFirstInstructionOrThrow
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
@@ -43,7 +42,7 @@ val saveDeletedMessagesPatch =
         execute {
 
             // Hook 1: REST/JSON path, inject at the return of the parser.
-            DirectItemJsonParserFingerprint.matchSingle().let {
+            DirectItemJsonParserFingerprint.let {
                 val returnObject = it.instructionMatches.last()
                 val itemRegister = returnObject.getInstruction<OneRegisterInstruction>().registerA
 

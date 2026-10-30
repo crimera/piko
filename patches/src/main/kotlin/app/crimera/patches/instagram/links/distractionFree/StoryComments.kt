@@ -19,7 +19,6 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -32,13 +31,13 @@ internal fun hideStoryComments(preferenceCall: String) {
             returnType = "Ljava/lang/String;",
             parameters = emptyList(),
             filters = listOf(string(marker)),
-        ).matchSingle().originalMethod.definingClass
+        ).originalMethod.definingClass
         val binding = Fingerprint(
             definingClass = component,
             returnType = "V",
             parameters = listOf("Ljava/lang/Object;"),
             filters = listOf(fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN)),
-        ).matchSingle()
+        )
         val read = binding.instructionMatches.single()
         val registers = read.instruction.registersUsed
         if (registers.size != 2 || binding.method.implementation!!.instructions.count {
@@ -65,7 +64,7 @@ internal fun hideStoryComments(preferenceCall: String) {
         returnType = "Ljava/lang/String;",
         parameters = emptyList(),
         filters = listOf(string("StoryCommentsDisplayViewComponent")),
-    ).matchSingle().originalMethod.definingClass
+    ).originalMethod.definingClass
     val binding = Fingerprint(
         definingClass = display,
         returnType = "V",
@@ -76,7 +75,7 @@ internal fun hideStoryComments(preferenceCall: String) {
             methodCall(opcode = Opcode.INVOKE_DIRECT, parameters = emptyList(), returnType = "V", location = MatchAfterImmediately()),
             opcode(Opcode.RETURN_VOID, location = MatchAfterImmediately()),
         ),
-    ).matchSingle()
+    )
     val hidden = binding.instructionMatches[1].instruction.registersUsed.singleOrNull()
         ?: throw PatchException("Expected one story comment display state register")
     if (binding.instructionMatches[0].instruction.registersUsed.firstOrNull() != hidden) {
@@ -104,7 +103,7 @@ private fun hideStoryCommentPreviews(preferenceCall: String) {
         returnType = "Ljava/util/List;",
         parameters = emptyList(),
         filters = listOf(string("story_comments")),
-    ).matchSingle().originalMethod
+    ).originalMethod
     // These two suppliers feed story previews, including sponsored comments. Captions
     // are built separately, so keep the shared caption/preview renderer running.
     val suppliers = Fingerprint(
@@ -135,7 +134,7 @@ private fun hideStoryCommentPreviews(preferenceCall: String) {
     val renderer = Fingerprint(
         returnType = "V",
         filters = listOf(fieldAccess(reference = buttonField, opcode = Opcode.IGET_BOOLEAN)),
-    ).matchSingle().method
+    ).method
     for ((field, expectedReads) in listOf(buttonField to 2, hintField to 3)) {
         val reads = renderer.implementation!!.instructions.withIndex().filter {
             it.value.opcode == Opcode.IGET_BOOLEAN && it.value.getReference<FieldReference>() == field

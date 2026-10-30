@@ -14,7 +14,6 @@ import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 
 // Heavily based on @brosssh work.
 // https://github.com/brosssh/instagram-morphe-patches-library/blob/dev/patch-library/src/main/kotlin/app/morphe/library/instagram/patches/FilterStoriesListPatch.kt
@@ -30,7 +29,7 @@ val filterStoriesPatch =
         dependsOn(settingsPatch, reelResponseItemEntity, userDataEntity)
         execute {
 
-            PopulateStoryTrayFingerprint.matchSingle().method.apply {
+            PopulateStoryTrayFingerprint.method.apply {
                 // The JSON parser is shared with profile highlights. Filter only the story tray
                 // after decoding, including cached responses, tail loads and the Following tray.
                 addInstructions(

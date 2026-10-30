@@ -14,11 +14,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -30,7 +29,7 @@ internal fun installLegacyNativeThemeModeSync() {
     val delegatedMatch = LegacyDarkModeOnResumeFingerprint.matchOrNull(
         LegacyDarkModeFragmentConstructorFingerprint.originalClassDef,
     )
-    val match = delegatedMatch ?: InlineLegacyDarkModeOnResumeFingerprint.matchSingle()
+    val match = delegatedMatch ?: InlineLegacyDarkModeOnResumeFingerprint.match()
     val method = match.method
     val idField = match.instructionMatches[0].fieldReference
     val selectedIdIndex = match.instructionMatches[0].index

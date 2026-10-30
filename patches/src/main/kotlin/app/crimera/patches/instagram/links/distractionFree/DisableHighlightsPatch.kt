@@ -16,7 +16,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 
 internal object ProfileHeaderBinderFingerprint : Fingerprint(
@@ -38,7 +37,7 @@ val disableHighlightsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            ProfileHeaderBinderFingerprint.matchSingle().method.apply {
+            ProfileHeaderBinderFingerprint.method.apply {
                 val returnIndex = ProfileHeaderBinderFingerprint.instructionMatches.last().index
                 val extension = "$PATCHES_DESCRIPTOR/userprofile/ProfileHighlights;"
 

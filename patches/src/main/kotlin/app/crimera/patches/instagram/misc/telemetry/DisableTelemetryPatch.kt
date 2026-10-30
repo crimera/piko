@@ -7,8 +7,8 @@
 package app.crimera.patches.instagram.misc.telemetry
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
-import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
@@ -17,10 +17,9 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.string
-import app.morphe.util.findInstructionIndicesReversedOrThrow
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
+import app.morphe.util.findInstructionIndicesReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
@@ -59,7 +58,7 @@ private object ComponentStartupFingerprint : Fingerprint(
 
 private val refreshComponentsPatch = bytecodePatch {
     execute {
-        val match = ComponentStartupFingerprint.matchSingle()
+        val match = ComponentStartupFingerprint.match()
         val instructions = match.method.implementation!!.instructions
         val versionResultIndex = match.instructionMatches[1].index
         val guardIndex = match.instructionMatches[3].index

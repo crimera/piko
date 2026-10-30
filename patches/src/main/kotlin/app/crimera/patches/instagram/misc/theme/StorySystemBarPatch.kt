@@ -18,19 +18,19 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.writeRegister
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
@@ -150,7 +150,7 @@ internal fun installStorySystemBarHooks() {
         parameters = storyBarApplyParameters,
         returnType = "V",
         filters = listOf(
-            literal(getResourceId(ResourceType.ATTR, "igds_color_primary_background")),
+            resourceLiteral(ResourceType.ATTR, "igds_color_primary_background"),
             methodCall(
                 parameters = listOf("Landroid/content/Context;", "I"),
                 returnType = "I",
@@ -167,7 +167,7 @@ internal fun installStorySystemBarHooks() {
     val applyMethod = backgroundFingerprint.method.copyStoryBarMethod(STORY_BAR_APPLY).apply {
         replaceInstruction(
             backgroundAttribute.index,
-            "const v$colorRegister, ${getResourceId(ResourceType.ATTR, "igds_color_stories_loading_background")}",
+            "const v$colorRegister, ${resourceId(ResourceType.ATTR, "igds_color_stories_loading_background")}",
         )
     }
     val wrapperMethod = wrapperFingerprint.method.copyStoryBarMethod(STORY_BAR_WRAPPER).apply {

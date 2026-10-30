@@ -17,7 +17,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -26,16 +25,17 @@ private const val SUGGESTED_PROFILES = "$PATCHES_DESCRIPTOR/SuggestedProfiles;"
 
 context(_: BytecodePatchContext)
 private fun Fingerprint.filterSuggestionFlags() {
-    val match = matchSingle()
-    match.instructionMatches.filter { it.instruction.opcode == Opcode.MOVE_RESULT }.asReversed().forEach {
-        val register = match.method.getInstruction<OneRegisterInstruction>(it.index).registerA
-        match.method.addInstructions(
-            it.index + 1,
-            """
-            invoke-static/range {v$register .. v$register}, $SUGGESTED_PROFILES->showSuggestedUsers(Z)Z
-            move-result v$register
-            """.trimIndent(),
-        )
+    method.apply {
+        instructionMatches.filter { it.instruction.opcode == Opcode.MOVE_RESULT }.asReversed().forEach {
+            val register = getInstruction<OneRegisterInstruction>(it.index).registerA
+            addInstructions(
+                it.index + 1,
+                """
+                invoke-static/range {v$register .. v$register}, $SUGGESTED_PROFILES->showSuggestedUsers(Z)Z
+                move-result v$register
+                """,
+            )
+        }
     }
 }
 
@@ -59,19 +59,19 @@ val disableDiscoverPeoplePatch =
             hideActivityFeedSuggestions()
             hideReelsSuggestions()
 
-            MutualFollowersResponseFingerprint.matchSingle().let { match ->
-                val keyIndex = match.instructionMatches[1].index
-                val register = match.instructionMatches[1].getInstruction<OneRegisterInstruction>().registerA
-                match.method.filterSuggestedSection(keyIndex + 1, register)
+            MutualFollowersResponseFingerprint.let {
+                val keyIndex = it.instructionMatches[1].index
+                val register = it.instructionMatches[1].getInstruction<OneRegisterInstruction>().registerA
+                it.method.filterSuggestedSection(keyIndex + 1, register)
             }
 
             FollowListSuggestionsFingerprint.filterSuggestionFlags()
             FollowRequestSuggestionsFingerprint.filterSuggestionFlags()
 
-            FriendingCenterResponseParserFingerprint.matchSingle().let { match ->
-                val index = match.instructionMatches.first().index
-                val register = match.instructionMatches.first().instruction.registersUsed.first()
-                match.method.filterSuggestedSection(index, register)
+            FriendingCenterResponseParserFingerprint.let {
+                val index = it.instructionMatches.first().index
+                val register = it.instructionMatches.first().instruction.registersUsed.first()
+                it.method.filterSuggestedSection(index, register)
             }
 
             enableSettings("disableDiscoverPeople")

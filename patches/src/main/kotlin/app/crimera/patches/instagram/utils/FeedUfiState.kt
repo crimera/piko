@@ -15,13 +15,12 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
-import app.morphe.util.indexOfFirstInstructionReversedOrThrow
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.writeRegister
+import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -51,7 +50,7 @@ internal fun feedUfiStateField(label: String): FieldReference {
 
 context(_: BytecodePatchContext)
 internal fun booleanStateField(marker: String, label: String): FieldReference {
-    val toStringMatch = booleanStateToStringFingerprint(marker, label).matchSingle()
+    val toStringMatch = booleanStateToStringFingerprint(marker, label).match()
     val toString = toStringMatch.method
     var index = toStringMatch.instructionMatches.last().index
     var register = toStringMatch.instructionMatches.last().instruction.registersUsed[1]
@@ -78,7 +77,7 @@ internal fun hideFeedUfiStates(preferenceCall: String, vararg labels: String) {
         val stateBuilderMatch = Fingerprint(
             returnType = field.definingClass,
             filters = listOf(fieldAccess(reference = field, opcode = Opcode.IPUT_BOOLEAN)),
-        ).matchSingle()
+        ).match()
         val stateBuilder = stateBuilderMatch.method
         val writeIndex = stateBuilderMatch.instructionMatches.first().index
         val write = stateBuilder.getInstruction(writeIndex)

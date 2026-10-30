@@ -19,14 +19,13 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -38,15 +37,19 @@ private const val EXTENSION_CLASS = "$PATCHES_DESCRIPTOR/dm/HiddenChats;"
 
 // Builds and shows the notification of a message push; it gets the account session, a callback and the chat id.
 private object MessageNotificationFingerprint : Fingerprint(
+    isStatic = false,
     returnType = "V",
-    filters =
-        listOf(
-            string("build_notification_start"),
-            string("after_notification_displayed_start"),
-        ),
-    custom = { method, _ ->
-        method.parameters.any { it.type == "Ljava/lang/Runnable;" }
-    },
+    parameters = listOf(
+        "L", // Account session
+        "Ljava/lang/Runnable;", // Callback
+        "Ljava/lang/String;", // Chat id
+        "Z",
+        "Z"
+    ),
+    filters = listOf(
+        string("build_notification_start"),
+        string("after_notification_displayed_start"),
+    ),
 )
 
 // Sets the unread count on the messages button; its class holds the account session and uses the badging plugin.
@@ -69,14 +72,13 @@ private var stateType = ""
 
 // Builds the badge state from the sorted chats; it cuts the list, drops the muted chats and caps the count.
 private object BadgeStateBuilderFingerprint : Fingerprint(
-    custom = { method, _ ->
-        method.returnType == stateType &&
-            method.parameters.isEmpty() &&
-            (method.implementation?.instructions?.count {
-                val call = it.getReference<MethodReference>()
-                call?.definingClass == "Ljava/lang/Math;" && call.name == "min"
-            } ?: 0) >= 2
-    },
+    returnType = stateType,
+    parameters = emptyList(),
+    filters =
+        listOf(
+            methodCall(definingClass = "Ljava/lang/Math;", name = "min"),
+            methodCall(definingClass = "Ljava/lang/Math;", name = "min"),
+        ),
 )
 
 // Works the badge state out from a message event, with a list of its own: it makes a state and a badge from it.
@@ -126,9 +128,9 @@ private object MenuButtonsEnumFingerprint : Fingerprint(
 // Opens the menu of a chat; the other opener of the labels (bulk actions) lives elsewhere and has no such call.
 private object MenuOpenFingerprint : Fingerprint(
     classFingerprint = MenuButtonsLabelsFingerprint,
+    isStatic = true,
     returnType = "V",
     custom = { method, _ ->
-        AccessFlags.STATIC.isSet(method.accessFlags) &&
             method.parameters.firstOrNull()?.type == "Landroid/graphics/RectF;" &&
             method.parameters.count { it.type == "Ljava/util/List;" } == 1
     },
@@ -153,7 +155,7 @@ private object MenuButtonActionFingerprint : Fingerprint(
 // The badge object holds the count and the state of the unread chats; the state is the field that is not a number or text.
 context(context: BytecodePatchContext)
 private fun badgeStateType(badgeType: String): String =
-    context.mutableClassDefBy(badgeType)
+    context.classDefBy(badgeType)
         .fields
         .first { it.type != "I" && it.type != "Ljava/lang/String;" }
         .type
@@ -161,7 +163,7 @@ private fun badgeStateType(badgeType: String): String =
 // The state keeps several lists of chats; the counted one is the second list its constructor receives.
 context(context: BytecodePatchContext)
 private fun countedListOf(stateType: String): String {
-    val constructor = context.mutableClassDefBy(stateType).methods.first { it.name == "<init>" }
+    val constructor = context.classDefBy(stateType).methods.first { it.name == "<init>" }
     val implementation = constructor.implementation!!
     // Parameters sit in the last registers (longs take two), so the register of the list is counted from there.
     fun width(type: String) = if (type == "J" || type == "D") 2 else 1
@@ -233,24 +235,15 @@ val hiddenChatsPatch =
             }
 
             MessageNotificationFingerprint.method.apply {
-                val thisOffset = if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1
-                val session = thisOffset
-                val callback = parameters.indexOfFirst { it.type == "Ljava/lang/Runnable;" } + thisOffset
-                val chat = parameters.indexOfFirst { it.type == "Ljava/lang/String;" } + thisOffset
-                val first = instructions.first()
-                // The parameter registers are above v15, so they are copied to v0-v2 (unused at the start) to be passed on.
                 addInstructionsWithLabels(
                     0,
                     """
-                    move-object/from16 v0, p$session
-                    move-object/from16 v1, p$callback
-                    move-object/from16 v2, p$chat
-                    invoke-static {v0, v1, v2}, $EXTENSION_CLASS->shouldMuteNotification(Ljava/lang/Object;Ljava/lang/Runnable;Ljava/lang/String;)Z
+                    invoke-static/range {p1 .. p3}, $EXTENSION_CLASS->shouldMuteNotification(Ljava/lang/Object;Ljava/lang/Runnable;Ljava/lang/String;)Z
                     move-result v0
                     if-eqz v0, :piko_continue
                     return-void
                     """.trimIndent(),
-                    ExternalLabel("piko_continue", first),
+                    ExternalLabel("piko_continue", instructions.first()),
                 )
             }
 
@@ -270,7 +263,7 @@ val hiddenChatsPatch =
                 )
             }
 
-            BadgeStateBuilderFingerprint.matchSingle().method.apply {
+            BadgeStateBuilderFingerprint.method.apply {
                 val session = instructions.first { it.getReference<FieldReference>()?.type == USER_SESSION_CLASS }
                     .let { (it as OneRegisterInstruction).registerA }
                 // The hidden chats are taken out of the two lists the state is made from, right after each is read.
@@ -298,7 +291,7 @@ val hiddenChatsPatch =
             }
 
             BadgeJobFingerprint.method.addInstruction(0, "invoke-static {p0}, $EXTENSION_CLASS->badgeJob(Ljava/lang/Object;)V")
-            BadgeEventFingerprint.matchSingle().method.apply {
+            BadgeEventFingerprint.method.apply {
                 // The chats it counts come from a list of its own: the hidden ones are taken out of it right where it is read.
                 val session = instructions.first { it.getReference<FieldReference>()?.type == USER_SESSION_CLASS }
                     .let { (it as OneRegisterInstruction).registerA }

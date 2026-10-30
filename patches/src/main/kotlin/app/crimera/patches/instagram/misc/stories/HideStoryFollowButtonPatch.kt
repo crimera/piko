@@ -19,7 +19,6 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -38,7 +37,7 @@ val hideStoryFollowButtonPatch = bytecodePatch(
     dependsOn(settingsPatch)
 
     execute {
-        val componentClass = StoryFollowButtonComponentFingerprint.matchSingle().originalMethod.definingClass
+        val componentClass = StoryFollowButtonComponentFingerprint.originalMethod.definingClass
         val binding = Fingerprint(
             definingClass = componentClass,
             returnType = "V",
@@ -49,7 +48,7 @@ val hideStoryFollowButtonPatch = bytecodePatch(
                 literal(8, location = MatchAfterImmediately()),
                 opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
             ),
-        ).matchSingle()
+        )
         val state = binding.instructionMatches[1]
         val register = state.instruction.registersUsed.singleOrNull()
             ?: throw PatchException("Expected one story follow button state register")

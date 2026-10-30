@@ -21,7 +21,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 
 @Suppress("unused")
 val saveMediaCommentPatch =
@@ -42,7 +41,7 @@ val saveMediaCommentPatch =
         )
         execute {
 
-            val action = ChatButtonActionsFingerprint.matchSingle().instructionMatches.last().fieldReference
+            val action = ChatButtonActionsFingerprint.instructionMatches.last().fieldReference
             val (stringLateral, drawableLateral) = nativeChatButtonResources(chatButtonConstructorFingerprint(action))
 
             addButtonAttribute(

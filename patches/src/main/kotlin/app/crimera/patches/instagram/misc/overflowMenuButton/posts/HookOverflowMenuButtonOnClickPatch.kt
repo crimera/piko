@@ -18,7 +18,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patcher.util.matchSingle
 
 @Suppress("unused")
 val hookOverflowMenuButtonOnClickPatch =
@@ -36,7 +35,7 @@ val hookOverflowMenuButtonOnClickPatch =
                     val appActivityField = classFields.first { it.type == FRAGMENT_ACTIVITY }
                     val userSessionField = classFields.first { it.type == USER_SESSION_CLASS }
 
-                    val getMediaObjectMethod = FeedButtonGetMediaFingerprint.matchSingle().originalMethod
+                    val getMediaObjectMethod = FeedButtonGetMediaFingerprint.originalMethod
 
                     val mediaExtraDataField = classDef.fields.first { it.type == MEDIA_ADD_INFO_CLASS_NAME }
 
