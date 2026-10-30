@@ -20,7 +20,7 @@ internal object StoryFlippingMethodFingerprint : Fingerprint(
     returnType = "V",
     definingClass = "Linstagram/features/stories/fragment/ReelViewerFragment;",
     strings = listOf("userSession"),
-    parameters = listOf("Ljava/lang/Object;"),
+    parameters = listOf("Lcom/instagram/model/reels/ReelItem;"),
 )
 
 @Suppress("unused")

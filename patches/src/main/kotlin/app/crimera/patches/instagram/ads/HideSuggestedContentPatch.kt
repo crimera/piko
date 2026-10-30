@@ -12,18 +12,18 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.getReference
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 internal object FeedItemParseFromJsonFingerprint : Fingerprint(
     name = "unsafeParseFromJson",
     returnType = "Ljava/lang/Object;",
+    parameters = listOf("L"),
     strings =
         listOf(
             "clips_netego",
@@ -33,7 +33,11 @@ internal object FeedItemParseFromJsonFingerprint : Fingerprint(
             "suggested_top_accounts",
             "suggested_users",
         ),
-    custom = { method, _ -> method.parameterTypes.size == 1 },
+    filters = listOf(
+        methodCall(returnType = "Ljava/lang/String;"),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        methodCall(smali = "Ljava/lang/String;->hashCode()I", location = MatchAfterImmediately()),
+    ),
 )
 
 @Suppress("unused")
@@ -47,19 +51,10 @@ val hideSuggestedContentPatch =
         dependsOn(settingsPatch)
         execute {
 
-            FeedItemParseFromJsonFingerprint.matchAll(1..1).single().method.apply {
-                val code = instructions
-                val hashIndex = code.indexOfFirst {
-                    it.getReference<MethodReference>()?.toString() == "Ljava/lang/String;->hashCode()I"
-                }
-                val keyIndex = (0 until hashIndex).lastOrNull { code[it].opcode == Opcode.MOVE_RESULT_OBJECT }
-                    ?: throw PatchException("Missing feed JSON key read")
-                val reader = code.getOrNull(keyIndex - 1)?.getReference<MethodReference>()
-                val keyRegister = code[keyIndex].registersUsed.single()
-                if (reader?.returnType != "Ljava/lang/String;" ||
-                    code[hashIndex].registersUsed != listOf(keyRegister) || keyRegister > 15
-                ) throw PatchException("Unexpected feed JSON key register")
-                addInstructions(keyIndex + 1, Constants.JSONPARSER_CHECK_DESCRIPTOR.format(keyRegister, keyRegister))
+            FeedItemParseFromJsonFingerprint.let {
+                val keyIndex = it.instructionMatches[1].index
+                val keyRegister = it.instructionMatches[1].getInstruction<OneRegisterInstruction>().registerA
+                it.method.addInstructions(keyIndex + 1, Constants.JSONPARSER_CHECK_DESCRIPTOR.format(keyRegister, keyRegister))
             }
 
             enableSettings("hideSuggestedContent")

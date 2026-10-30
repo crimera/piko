@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Включить параметры разработчика</string>
     <string name="piko_enable_dev_options_desc">Разблокирует параметры разработчика при долгом нажатии на значок «Домой»</string>
     <string name="piko_directly_open_metaconfig">Открыть настройки MetaConfig напрямую</string>
-    <string name="piko_directly_open_metaconfig_desc">Открывает настройки MetaConfig при долгом нажатии на значок «Домой» (требуется включение параметров разработчика)</string>
     <string name="piko_enable_emp_options">Включить служебные параметры</string>
     <string name="piko_enable_emp_options_desc">Открывает все служебные параметры, используемые для тестирования</string>
     <string name="piko_allow_user_network_certificate">Разрешить пользовательские сетевые сертификаты</string>
@@ -78,7 +77,6 @@
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
     <string name="piko_follow_back_indicator_desc">Добавляет на страницу профиля метку «Подписан(а) на вас» и показывает подробную информацию о статусе дружбы при нажатии</string>
     <string name="piko_fbi_color_indicator">Включить цветной индикатор статуса дружбы</string>
-    <string name="piko_fbi_color_indicator_desc">Индикатор статуса дружбы должен быть включен</string>
     <string name="piko_fbi_follows_you">Подписан на вас</string>
     <string name="piko_fbi_doesnt_follows_you">Не подписан на вас</string>
     <string name="piko_fbi_following_each_other">Взаимная подписка</string>
@@ -86,7 +84,6 @@
     <string name="piko_improve_image_viewing">Улучшить качество отображения контента</string>
     <string name="piko_improve_image_viewing_desc">Загружает изображения в максимальном разрешении с сервера. Может снизить производительность, увеличить размер данных приложения или привести к переключению на старый интерфейс</string>
     <string name="piko_copy_comment">Скопировать комментарий</string>
-    <string name="piko_copy_comment_desc">Добавляет кнопку для копирования комментариев в публикациях и Reels</string>
     <string name="piko_comment_copied_success">Комментарий копирован</string>
     <string name="piko_comment_copied_failed">Не найдено текста для копирования</string>
     <string name="piko_copy_username">Скопировать имя пользователя</string>

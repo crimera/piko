@@ -10,8 +10,12 @@ package app.morphe.extension.instagram.settings.preference;
 import android.app.Activity;
 import android.content.Context;
 import android.preference.Preference;
+import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import app.morphe.extension.instagram.patches.dm.InboxLock;
 
@@ -31,16 +35,43 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.StringSetting;
 
 import  app.morphe.extension.instagram.patches.devFlags.FlagsSharedPref;
 
 public class Helper {
     private final Context context;
+    private final Map<Preference, BooleanSupplier> availabilityConditions = new LinkedHashMap<>();
 
     public Helper(Context context) {
         this.context = context;
+    }
+
+    public Preference availableWhen(Preference preference, BooleanSupplier condition) {
+        availabilityConditions.put(preference, condition);
+        updateAvailability(preference, condition.getAsBoolean());
+        return preference;
+    }
+
+    public void updateDependencies(PreferenceScreen screen) {
+        if (screen == null) return;
+
+        for (Map.Entry<Preference, BooleanSupplier> entry : availabilityConditions.entrySet()) {
+            Preference preference = entry.getKey();
+            if (screen.findPreference(preference.getKey()) == preference) {
+                updateAvailability(preference, entry.getValue().getAsBoolean());
+            }
+        }
+    }
+
+    private static void updateAvailability(Preference preference, boolean enabled) {
+        // Only presentation changes; the saved child value returns when its parent is enabled.
+        if (preference instanceof SwitchPref) {
+            ((SwitchPref) preference).setSwitchInteractionEnabled(enabled);
+        } else {
+            preference.setEnabled(enabled);
+        }
     }
 
     public Preference switchPreference(String title, String summary, BooleanSetting setting) {
@@ -49,11 +80,6 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        if (Settings.AMOLED_THEME.key.equals(setting.key)) {
-            preference.setSwitchInteractionEnabled(
-                    MaterialYouTheme.canEnableAmoled(context)
-            );
-        }
         return preference;
     }
 
@@ -115,6 +141,8 @@ public class Helper {
 
     public Preference navigationBarPreference(String title, String summary) {
         NavigationBarPreference preference = new NavigationBarPreference(context);
+        preference.setPersistent(false);
+        preference.setKey("piko_navigation_tabs");
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setSingleLineTitle(false);
@@ -123,6 +151,7 @@ public class Helper {
 
     public Preference navigationStartupPreference(String title, String summary) {
         NavigationStartupPreference preference = new NavigationStartupPreference(context);
+        preference.setKey("piko_navigation_startup_tab");
         preference.setTitle(title);
         preference.setDialogTitle(title);
         preference.setSummary(summary);
@@ -187,9 +216,10 @@ public class Helper {
                     if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
                         return MaterialYouTheme.requestMaterialYouChange(context, val);
                     }
-                    boolean inboxLockKey = Settings.INBOX_LOCK.key.equals(key)
-                            || Settings.INBOX_LOCK_NOTIFICATIONS.key.equals(key);
-                    if (inboxLockKey && !val && InboxLock.mustConfirmToDisable() && context instanceof Activity) {
+                    boolean lockedKey = Settings.INBOX_LOCK.key.equals(key)
+                            || Settings.INBOX_LOCK_NOTIFICATIONS.key.equals(key)
+                            || Settings.HIDDEN_CHATS.key.equals(key);
+                    if (lockedKey && !val && InboxLock.mustConfirmToDisable() && context instanceof Activity) {
                         // Reject for now; the switch turns off once the device lock confirms it, so cancelling can't bypass the lock.
                         InboxLock.confirm((Activity) context, () -> {
                             if (setValue(preference, newValue)) ((SwitchPreference) preference).setChecked(false);
@@ -209,7 +239,7 @@ public class Helper {
                 }
 
                 if (saved) {
-                    SettingsRestart.markChanged(previousValue, newValue);
+                    SettingsRestart.markChanged(key, previousValue, newValue);
                 }
                 return saved;
             }

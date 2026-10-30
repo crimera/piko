@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">启用开发者选项</string>
     <string name="piko_enable_dev_options_desc">长按主页图标解锁开发者选项</string>
     <string name="piko_directly_open_metaconfig">直接打开 MetaConfig 覆盖</string>
-    <string name="piko_directly_open_metaconfig_desc">在长按主页图标时直接打开 MetaConfig 覆盖 (需要启用开发者选项)</string>
     <string name="piko_enable_emp_options">启用员工选项</string>
     <string name="piko_enable_emp_options_desc">解锁所有用于测试的员工选项</string>
     <string name="piko_allow_user_network_certificate">允许用户网络证书</string>
@@ -97,7 +96,6 @@
     <string name="piko_follow_back_indicator">启用友谊状态指示器</string>
     <string name="piko_follow_back_indicator_desc">在个人资料页面上添加一个关注您的状态标签，并在点击时显示详细的友谊状态明细</string>
     <string name="piko_fbi_color_indicator">启用彩色好友状态指示器</string>
-    <string name="piko_fbi_color_indicator_desc">需要启用好友状态指示器</string>
     <string name="piko_fbi_follows_you">关注了你</string>
     <string name="piko_fbi_doesnt_follows_you">没有关注你</string>
     <string name="piko_fbi_following_each_other">互相关注</string>
@@ -105,7 +103,6 @@
     <string name="piko_improve_image_viewing">提高图像分辨率</string>
     <string name="piko_improve_image_viewing_desc">从服务器获取最大分辨率图像。可能会降低性能，增加应用数据大小，或导致应用切换到旧布局</string>
     <string name="piko_copy_comment">复制评论</string>
-    <string name="piko_copy_comment_desc">在帖子和 Reels 上添加了一个用于复制评论的按钮</string>
     <string name="piko_comment_copied_success">已复制评论</string>
     <string name="piko_comment_copied_failed">找不到要复制的文本</string>
     <string name="piko_copy_username">复制用户名</string>

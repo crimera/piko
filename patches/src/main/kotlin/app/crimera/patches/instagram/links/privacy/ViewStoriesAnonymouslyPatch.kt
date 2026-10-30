@@ -14,27 +14,23 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.Fingerprint
+import app.crimera.patches.instagram.utils.fieldReference
+import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import app.morphe.patcher.util.getReference
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 @Suppress("unused")
 val viewStoriesAnonymouslyPatch =
     bytecodePatch(
         name = "View stories anonymously",
-        default = false,
+        default = true,
     ) {
         dependsOn(
             settingsPatch,
@@ -45,36 +41,30 @@ val viewStoriesAnonymouslyPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val pendingSeenClass = StorySeenUriBuilderFingerprint.classDef.type
-            val requestBuilder = StorySeenUriBuilderFingerprint.method
-            addNormalStorySeenObservationHook(requestBuilder)
-            addStorySeenResultHooks(requestBuilder, RequestSucceededExtensionFingerprint.method) {
-                mutableClassDefBy(it)
-            }
+            val pendingSeenClass = StorySeenUriBuilderFingerprint.originalClassDef.type
+            val requestBuilder = StorySeenUriBuilderFingerprint.originalMethod
+            val requestType = requestBuilder.returnType
 
-            val emptyStateMethods =
-                StorySeenUriBuilderFingerprint.classDef.methods.filter { candidate ->
-                    if (candidate.returnType != "Z" || candidate.parameterTypes.isNotEmpty()) {
-                        return@filter false
-                    }
-                    val emptyCalls =
-                        candidate.implementation?.instructions?.mapNotNull { instruction ->
-                            (instruction as? ReferenceInstruction)?.reference as? MethodReference
-                        }?.filter {
-                            it.name == "isEmpty" && it.parameterTypes.isEmpty() && it.returnType == "Z"
-                        }.orEmpty()
-                    emptyCalls.size == 3
-                }
-            val emptyStateMethod =
-                emptyStateMethods.singleOrNull()
-                    ?: throw PatchException(
-                        "Expected one structural pending-story empty check, found ${emptyStateMethods.size}",
-                    )
-            emptyStateMethod.apply {
-                val lastIfEqzIndex = instructions.last { it.opcode == Opcode.IF_EQZ }.location.index
-                val returnIndex = indexOfFirstInstruction(lastIfEqzIndex, Opcode.RETURN)
-                val seenRegister = getInstruction(returnIndex).registersUsed.single()
-                addInstructions(
+            StorySeenUriBuilderFingerprint.let {
+                val payloadRegister = it.method.getInstruction<FiveRegisterInstruction>(
+                    it.instructionMatches[2].index,
+                ).registerE
+                val returnIndex = it.instructionMatches.last().index
+                val requestRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
+
+                it.method.replaceInstruction(
+                    returnIndex,
+                    "invoke-static {v$requestRegister, p1, v$payloadRegister}, " +
+                        "$STORY_SEEN_BRIDGE_DESCRIPTOR->observeRequest(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V",
+                )
+                it.method.addInstruction(returnIndex + 1, "return-object v$requestRegister")
+            }
+            addStorySeenResultHooks(requestType, RequestSucceededExtensionFingerprint.method)
+
+            PendingStoriesEmptyFingerprint.match(StorySeenUriBuilderFingerprint.originalClassDef).let {
+                val returnIndex = it.instructionMatches.last().index
+                val seenRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
+                it.method.addInstructions(
                     returnIndex,
                     """
                     invoke-static {v$seenRegister}, $LINKS_DESCRIPTOR->setStorySeen(Z)Z
@@ -83,191 +73,74 @@ val viewStoriesAnonymouslyPatch =
                 )
             }
 
-            val consumedMethod = ConsumedStoryFingerprint.method
-            val reelParentClass = consumedMethod.parameterTypes[1].toString()
-            val consumedInstructions = consumedMethod.instructions
-            val mediaConversionEntry =
-                consumedInstructions.mapIndexedNotNull { index, instruction ->
-                    val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-                    if (
-                        instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
-                        instruction.registersUsed.size == 3 &&
-                        reference.definingClass == MEDIA_CLASS &&
-                        reference.parameterTypes == listOf(STRING_CLASS, "I") &&
-                        reference.returnType.startsWith("L")
-                    ) IndexedValue(index, reference) else null
-                }.singleOrNull()
-                    ?: throw PatchException("Expected one story media conversion call")
-            val mediaConversionIndex = mediaConversionEntry.index
-            val mediaConversion = mediaConversionEntry.value
-
-            val mediaField = deriveStoryMediaField(consumedMethod, mediaConversionIndex)
-            val localSeenReferences =
-                deriveLocalStorySeenReferences(
-                    consumedMethod,
-                    reelParentClass,
-                    mediaConversionIndex,
-                )
-            val reelModelField = localSeenReferences.reelModelField
+            val consumed = ConsumedStoryFingerprint.instructionMatches
+            val reelParentClass = ConsumedStoryFingerprint.originalMethod.parameterTypes[1].toString()
+            val excludedItemPredicate = consumed[0].methodReference
+            val reelModelField = consumed[6].fieldReference
             val reelModelClass = reelModelField.type
-            val itemSeenTimestampMethod = localSeenReferences.itemSeenTimestampMethod
-            val markLocalSeenMethod = localSeenReferences.markLocalSeenMethod
-            val predicates =
-                deriveStoryPredicateReferences(consumedMethod, reelModelClass, mediaConversionIndex)
-            val excludedItemPredicate = predicates.excludedItem
-            val regularStoryPredicate = predicates.regularStory
-            val excludedReelPredicate = predicates.excludedReel
+            val itemSeenTimestampMethod = consumed[7].methodReference
+            val markLocalSeenMethod = consumed[9].methodReference
+            val regularStoryPredicate = consumed[10].methodReference
+            val excludedReelPredicate = consumed[13].methodReference
+            val reelOwnerIdField = consumed[16].fieldReference
+            val mediaField = consumed[17].fieldReference
+            val mediaConversion = consumed[19].methodReference
+            val aggregate = consumed[24].methodReference
 
-            val aggregateEntry =
-                deriveAggregateInvocation(
-                    consumedMethod,
-                    mediaConversionIndex + 1,
-                    pendingSeenClass,
-                    mediaConversion.returnType,
-                )
             val aggregateMethod = addStoryAggregateBridge(
-                consumedMethod, mediaConversionIndex, aggregateEntry, mediaConversion.returnType,
-            ) { mutableClassDefBy(it) }
-            val reelOwnerIdField =
-                deriveReelOwnerIdField(
-                    consumedMethod,
-                    aggregateEntry.index,
-                    reelModelClass,
-                    aggregateEntry.ownerRegister,
-                )
-            val reelTypeClass = ReelTypeFingerprint.classDef.type
-            val reelTypeField =
-                mutableClassDefBy(reelModelClass).fields.filter { it.type == reelTypeClass }.singleOrNull()
-                    ?: throw PatchException("Could not derive the reel-type field")
-
-            val headerBindingMethod = StoryHeaderBindingFingerprint.method
-            if (!headerBindingMethod.isStoryHeaderBindingMethod(reelParentClass)) {
-                throw PatchException(
-                    "Story-header trace matched a method without the expected typed parameters",
-                )
-            }
-            fun uniqueHeaderParameterIndex(type: String, description: String): Int {
-                val matches =
-                    headerBindingMethod.parameterTypes.mapIndexedNotNull { index, parameterType ->
-                        if (parameterType.toString() == type) index else null
-                    }
-                return matches.singleOrNull()
-                    ?: throw PatchException(
-                        "Expected one story-header $description parameter, found ${matches.size}",
-                    )
-            }
-            val sessionParameterIndex =
-                uniqueHeaderParameterIndex(USER_SESSION_CLASS, "session")
-            val itemParameterIndex =
-                uniqueHeaderParameterIndex(REEL_ITEM_CLASS, "item")
-            val reelParameterIndex =
-                uniqueHeaderParameterIndex(reelParentClass, "reel")
-            val holderCandidates =
-                headerBindingMethod.parameterTypes.mapIndexedNotNull { index, parameterType ->
-                    val descriptor = parameterType.toString()
-                    if (!descriptor.startsWith("L") || descriptor in setOf(
-                            USER_SESSION_CLASS,
-                            REEL_ITEM_CLASS,
-                            reelParentClass,
-                        )
-                    ) {
-                        return@mapIndexedNotNull null
-                    }
-                    val fieldTypes = mutableClassDefBy(descriptor).fields.map { it.type }.toSet()
-                    if (
-                        fieldTypes.containsAll(
-                            setOf(USER_SESSION_CLASS, REEL_ITEM_CLASS, reelParentClass, VIEW_CLASS),
-                        )
-                    ) IndexedValue(index, descriptor) else null
-                }
-            val holderEntry =
-                holderCandidates.singleOrNull()
-                    ?: throw PatchException(
-                        "Expected one structurally typed story-header holder, found ${holderCandidates.size}",
-                    )
-            val holderClass = mutableClassDefBy(holderEntry.value)
-            val rootViewField =
-                deriveConstructorBoundRootViewField(holderEntry.value, holderClass.methods)
-                    ?: throw PatchException(
-                        "Could not derive the constructor-bound story root view",
-                    )
-            addStoryHeaderCaptureHook(
-                headerBindingMethod,
-                sessionParameterIndex,
-                itemParameterIndex,
-                reelParameterIndex,
-                holderEntry.index,
+                mutableClassDefBy(aggregate.definingClass),
+                aggregate,
+                mediaConversion.returnType,
+                consumed[21].methodReference,
+                consumed[22].instruction.getReference<TypeReference>()!!.type,
+                consumed[23].methodReference,
             )
+
+            val reelTypeClass = ReelTypeFingerprint.originalClassDef.type
+            val reelTypeField = classDefBy(reelModelClass).fields.single { it.type == reelTypeClass }
+
+            val headerBindingMethod = StoryHeaderBindingFingerprint.matchOrNull()?.method
+                ?: StoryToolbarBindingFingerprint.method
+            val holderClass = headerBindingMethod.parameterTypes[STORY_HEADER_HOLDER_PARAMETER].toString()
+            addStoryHeaderCaptureHook(headerBindingMethod)
             addStoryHeaderBridgeHook(
                 StoryHeaderBindingExtensionFingerprint.method,
-                holderEntry.value,
-                rootViewField,
+                holderClass,
+                storyRootViewField(holderClass),
                 reelModelField,
                 reelTypeField,
             )
 
+            val standardProgressMethod = StandardStoryProgressFingerprint.matchOrNull()?.method
+                ?: DelegatedStoryProgressFingerprint.method
             listOf(
                 Triple(
                     PromptStoryProgressFingerprint.method,
                     "captureFromPromptProgress",
-                    PromptStoryProgressExtensionFingerprint.method,
+                    PromptStoryProgressExtensionFingerprint,
                 ),
                 Triple(
-                    StandardStoryProgressFingerprint.matchAll(1..1).single().method,
+                    standardProgressMethod,
                     "captureFromStandardProgress",
-                    StandardStoryProgressExtensionFingerprint.method,
+                    StandardStoryProgressExtensionFingerprint,
                 ),
                 Triple(
                     CompactStoryProgressFingerprint.method,
                     "captureFromCompactProgress",
-                    CompactStoryProgressExtensionFingerprint.method,
+                    CompactStoryProgressExtensionFingerprint,
                 ),
-            ).forEach { (progressMethod, bridgeMethodName, extensionMethod) ->
-                val progressClass = mutableClassDefBy(progressMethod.definingClass)
-                val sessionField =
-                    progressClass.fields.filter { it.type == USER_SESSION_CLASS }.singleOrNull()
-                        ?: throw PatchException(
-                            "Expected one structurally typed story-progress session field",
-                        )
-                val itemField =
-                    progressClass.fields.filter { it.type == REEL_ITEM_CLASS }.singleOrNull()
-                        ?: throw PatchException(
-                            "Expected one structurally typed story-progress item field",
-                        )
-                val reelField =
-                    progressClass.fields.filter { it.type == reelParentClass }.singleOrNull()
-                        ?: throw PatchException(
-                            "Expected one structurally typed story-progress reel field",
-                        )
-                val progressHierarchy = buildList {
-                    val visitedClasses = mutableSetOf<String>()
-                    var classDescriptor: String? = progressMethod.definingClass
-                    while (
-                        classDescriptor != null &&
-                            classDescriptor != "Ljava/lang/Object;" &&
-                            visitedClasses.add(classDescriptor)
-                    ) {
-                        val hierarchyClass = mutableClassDefBy(classDescriptor)
-                        add(classDescriptor to hierarchyClass.methods)
-                        classDescriptor = hierarchyClass.superclass
-                    }
-                }
-                val rootViewField =
-                    deriveHierarchyConstructorBoundRootViewField(
-                        progressHierarchy,
-                    ) ?: throw PatchException(
-                        "Could not derive the constructor-bound story-progress root view",
-                    )
+            ).forEach { (progressMethod, bridgeMethodName, extensionFingerprint) ->
+                val progressFields = classDefBy(progressMethod.definingClass).fields
                 addStoryProgressCaptureHook(progressMethod, bridgeMethodName)
                 addStoryProgressBridgeHook(
-                    extensionMethod,
+                    extensionFingerprint.method,
                     progressMethod.definingClass,
-                    sessionField,
-                    itemField,
-                    reelField,
+                    progressFields.single { it.type == USER_SESSION_CLASS },
+                    progressFields.single { it.type == REEL_ITEM_CLASS },
+                    progressFields.single { it.type == reelParentClass },
                     reelModelField,
                     reelTypeField,
-                    rootViewField,
+                    storyRootViewField(progressMethod.definingClass),
                 )
             }
 
@@ -307,18 +180,11 @@ val viewStoriesAnonymouslyPatch =
                 return p2
                 """.trimIndent(),
             )
-            val storyIdMethod =
-                mutableClassDefBy(REEL_ITEM_CLASS).methods.filter {
-                    it.name == "getId" &&
-                        it.parameterTypes.isEmpty() &&
-                        it.returnType == STRING_CLASS
-                }.singleOrNull()
-                    ?: throw PatchException("Could not identify the stable ReelItem story id accessor")
             StoryIdExtensionFingerprint.method.addInstructions(
                 0,
                 """
                 check-cast p0, $REEL_ITEM_CLASS
-                invoke-virtual {p0}, $storyIdMethod
+                invoke-virtual {p0}, $REEL_ITEM_CLASS->getId()Ljava/lang/String;
                 move-result-object p0
                 return-object p0
                 """.trimIndent(),
@@ -372,83 +238,47 @@ val viewStoriesAnonymouslyPatch =
                 """.trimIndent(),
             )
 
-            val storeScheduleFingerprint =
-                object : Fingerprint(
-                    parameters = listOf(pendingSeenClass),
-                    returnType = "V",
-                    custom = { methodDef, _ ->
-                        methodDef.implementation?.instructions?.any { instruction ->
-                            instruction.getReference<MethodReference>()?.matches(requestBuilder) == true
-                        } == true
-                    },
-                ) {}
-            val storeScheduleMethod = storeScheduleFingerprint.method
-            val requestType = requestBuilder.returnType
-            val requestTypes = buildSet {
-                var type: String? = requestType
-                while (type != null && type != "Ljava/lang/Object;" && add(type)) {
-                    type = classDefBy(type).superclass
-                }
-            }
-            val scheduleReferences =
-                deriveRequestScheduleReferences(
-                    storeScheduleMethod,
-                    pendingSeenClass,
-                    requestBuilder,
-                    requestTypes,
+            storySeenScheduleFingerprint(pendingSeenClass, requestBuilder).instructionMatches.let {
+                val managerGetter = it.first().methodReference
+                val scheduleRequest = it.last().methodReference
+                ScheduleRequestExtensionFingerprint.method.addInstructions(
+                    0,
+                    """
+                    check-cast p0, $USER_SESSION_CLASS
+                    check-cast p1, $requestType
+                    invoke-static {p0}, $managerGetter
+                    move-result-object p0
+                    invoke-virtual {p0, p1}, $scheduleRequest
+                    return-void
+                    """.trimIndent(),
                 )
-            val managerGetter = scheduleReferences.managerGetter
-            val scheduleRequest = scheduleReferences.scheduleRequest
-            ScheduleRequestExtensionFingerprint.method.addInstructions(
-                0,
-                """
-                check-cast p0, $USER_SESSION_CLASS
-                check-cast p1, $requestType
-                invoke-static {p0}, $managerGetter
-                move-result-object p0
-                invoke-virtual {p0, p1}, $scheduleRequest
-                return-void
-                """.trimIndent(),
-            )
+            }
 
-            val schedulerMethod = ExecutorSchedulerFingerprint.method
-            val requestInterface = schedulerMethod.parameterTypes.first().toString()
-            val wrapperConstructor =
-                uniqueMethodReference(schedulerMethod, "executor request-wrapper constructor") {
-                    it.name == "<init>" && it.parameterTypes.firstOrNull() == requestInterface
-                }
-            val wrapperClass = mutableClassDefBy(wrapperConstructor.definingClass)
-            val wrappedRequestField =
-                wrapperClass.fields.filter { it.type == requestInterface }.singleOrNull()
-                    ?: throw PatchException("Could not derive the wrapped request field")
-            val wrapperRunMethod =
-                wrapperClass.methods.filter {
-                    it.name == "run" && it.parameterTypes.isEmpty() && it.returnType == "V"
-                }.singleOrNull()
-                    ?: throw PatchException("Could not derive the executor wrapper run method")
-            val executorRunHook =
-                deriveExecutorRunHook(wrapperRunMethod, wrappedRequestField, requestInterface)
-            val delegatedRunInstruction =
-                wrapperRunMethod.getInstruction(executorRunHook.delegatedRunIndex)
-            executorRunHook.exceptionHandlerIndexes.sortedDescending().forEach { handlerIndex ->
-                wrapperRunMethod.addInstruction(
+            val requestInterface = ExecutorSchedulerFingerprint.originalMethod.parameterTypes.first().toString()
+            val wrapperType = ExecutorSchedulerFingerprint.instructionMatches.last()
+                .instruction.getReference<TypeReference>()!!.type
+            executorWrapperRunFingerprint(wrapperType, requestInterface).let {
+                val delegatedRunIndex = it.instructionMatches[1].index
+                val requestRegister = it.instructionMatches[1].getInstruction<FiveRegisterInstruction>().registerC
+                val handlerIndex = it.instructionMatches.last().index
+
+                it.method.addInstruction(
                     handlerIndex + 1,
                     "invoke-static {}, $STORY_SEEN_SCOPE_DESCRIPTOR->exitActive()V",
                 )
+                it.method.replaceInstruction(
+                    delegatedRunIndex,
+                    "invoke-static {v$requestRegister}, $STORY_SEEN_SCOPE_DESCRIPTOR->enter(Ljava/lang/Object;)V",
+                )
+                it.method.addInstruction(
+                    delegatedRunIndex + 1,
+                    "invoke-interface {v$requestRegister}, $requestInterface->run()V",
+                )
+                it.method.addInstruction(
+                    delegatedRunIndex + 2,
+                    "invoke-static {v$requestRegister}, $STORY_SEEN_SCOPE_DESCRIPTOR->complete(Ljava/lang/Object;)V",
+                )
             }
-            val delegatedRunIndex = delegatedRunInstruction.location.index
-            wrapperRunMethod.replaceInstruction(
-                delegatedRunIndex,
-                "invoke-static {v${executorRunHook.requestRegister}}, $STORY_SEEN_SCOPE_DESCRIPTOR->enter(Ljava/lang/Object;)V",
-            )
-            wrapperRunMethod.addInstruction(
-                delegatedRunIndex + 1,
-                "invoke-interface {v${executorRunHook.requestRegister}}, $requestInterface->run()V",
-            )
-            wrapperRunMethod.addInstruction(
-                delegatedRunIndex + 2,
-                "invoke-static {v${executorRunHook.requestRegister}}, $STORY_SEEN_SCOPE_DESCRIPTOR->complete(Ljava/lang/Object;)V",
-            )
 
             enableSettings("viewStoriesAnonymously")
         }

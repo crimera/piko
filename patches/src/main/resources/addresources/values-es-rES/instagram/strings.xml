@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Activar las opciones de desarrollador</string>
     <string name="piko_enable_dev_options_desc">Activa la opción de desarrollador al mantener pulsado el icono de inicio</string>
     <string name="piko_directly_open_metaconfig">Abre directamente las modificaciones de MetaConfig</string>
-    <string name="piko_directly_open_metaconfig_desc">Al mantener pulsado el icono de inicio, se abre directamente la configuración de MetaConfig (es necesario tener activadas las opciones de desarrollador).</string>
     <string name="piko_enable_emp_options">Activar menú de empleados</string>
     <string name="piko_enable_emp_options_desc">Desbloquea todas las opciones de empleados utilizadas para pruebas</string>
     <string name="piko_allow_user_network_certificate">Permitir certificado de red del usuario</string>
@@ -35,6 +34,8 @@
     <string name="piko_disable_typing_status">Desactivar el estado de escribiendo</string>
     <string name="piko_disable_screenshot_detection">Desactivar la detección de capturas de pantalla</string>
     <string name="piko_view_dm_anonymously">Ver mensajes directos de forma anónima</string>
+    <string name="piko_mark_as_read_after_reply">Marcar como leído después de responder</string>
+    <string name="piko_mark_as_read_after_reply_desc">Marca un chat como leído después de enviar una respuesta, incluso cuando ves mensajes directos de forma anónima o usas todos los modos fantasma</string>
     <string name="piko_view_dm_anonymously_desc">Cuando está habilitado, otros no pueden ver cuándo has leído sus mensajes. Cuando tanto esta configuración como Activar todos los modos fantasma están deshabilitados, se utiliza la configuración Mostrar recibos leídos de Instagram</string>
     <string name="piko_turn_on_all_ghost_modes">Activa todos los recursos del Modo Fantasma</string>
     <string name="piko_ghost_modes_on">Modo Fantasma: Activado</string>
@@ -49,6 +50,8 @@
     <string name="piko_disable_comments">Desactivar comentarios</string>
     <string name="piko_limit_following_feed">Limitar feed a perfiles seguidos</string>
     <string name="piko_limit_following_feed_desc">Filtra el feed de inicio para mostrar solo contenido de los perfiles que sigues.</string>
+    <string name="piko_hide_feed_posts">Ocultar publicaciones del feed</string>
+    <string name="piko_hide_feed_posts_desc">Oculta las publicaciones del feed de inicio</string>
     <string name="piko_disable_discover_people">Ocultar cuentas sugeridas</string>
     <string name="piko_focus_lock">Bloqueo de Enfoque</string>
     <string name="piko_focus_lock_desc">Forzar la activación de configuraciones sin distracciones durante un tiempo determinado</string>
@@ -93,7 +96,9 @@
     <string name="piko_disable_swipe_to_create">Deshabilitar la función de deslizar para crear</string>
     <string name="piko_disable_swipe_to_create_desc">Impide abrir la pantalla de creación deslizando el dedo hacia la derecha en la pestaña de inicio.</string>
     <string name="piko_hide_stories_tray">Ocultar barra de historias</string>
-    <string name="piko_hide_stories_tray_desc">Ocultar la barra de historias del feed principal</string>
+    <string name="piko_hide_stories_tray_desc">Ocultar la bandeja de historias del feed principal</string>
+    <string name="piko_hide_hidden_requests">Ocultar solicitudes ocultas</string>
+    <string name="piko_hide_hidden_requests_desc">Oculta el botón de solicitudes ocultas (spam) en la página de solicitudes de mensajes</string>
     <string name="piko_hide_notes_tray">Ocultar barra de notas</string>
     <string name="piko_hide_notes_tray_desc">Oculta la bandeja de notas en la sección de mensajes directos</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ocultar el botón de creación de grupos en la hoja para compartir</string>
@@ -118,7 +123,6 @@
     <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
     <string name="piko_follow_back_indicator_desc">Agrega una etiqueta de estado \"Te sigue de vuelta\" en la página de perfil y muestra un desglose detallado del estado de amistad al hacer clic</string>
     <string name="piko_fbi_color_indicator">Habilite el indicador de estado de amistad de colores</string>
-    <string name="piko_fbi_color_indicator_desc">Es necesario habilitar el indicador de estado de amistad</string>
     <string name="piko_fbi_follows_you">Te sigue</string>
     <string name="piko_fbi_doesnt_follows_you">No te sigue</string>
     <string name="piko_fbi_following_each_other">Siguiéndose unos a otros</string>
@@ -128,7 +132,7 @@
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
     <string name="piko_improve_image_viewing_desc">Obtiene imágenes con la resolución máxima del servidor. Puede reducir el rendimiento, aumentar el tamaño de los datos de la aplicación o hacer que la aplicación cambie a un diseño más antiguo</string>
     <string name="piko_copy_comment">Copiar comentario</string>
-    <string name="piko_copy_comment_desc">Agrega un botón para copiar comentarios en publicaciones y Reels</string>
+    <string name="piko_copy_comment_desc">Añade botones para copiar comentarios y los nombres de usuario de sus autores en publicaciones y reels</string>
     <string name="piko_comment_copied_success">Comentario copiado</string>
     <string name="piko_comment_copied_failed">No se encontró texto para copiar</string>
     <string name="piko_copy_username">Copiar nombre de usuario</string>
@@ -152,12 +156,29 @@
     <string name="piko_inbox_lock_unlock">Desbloquear</string>
     <string name="piko_inbox_lock_prompt">Desbloquea tus mensajes</string>
     <string name="piko_inbox_lock_no_lock">Establezca un bloqueo de pantalla en su dispositivo para usar el bloqueo de bandeja de entrada</string>
+    <string name="piko_hidden_chats">Chats ocultos</string>
+    <string name="piko_hidden_chats_hidden">Chat oculto</string>
+    <string name="piko_hidden_chats_unhidden">Chat desoculto</string>
+    <string name="piko_hidden_chats_opened">Chats ocultos</string>
+    <string name="piko_hidden_chats_closed">Vuelve a tu bandeja de entrada</string>
+    <string name="piko_hidden_chats_mute">Silenciar chats ocultos</string>
+    <string name="piko_hidden_chats_mute_desc">No mostrar notificaciones de mensajes de chats que has ocultado</string>
+    <string name="piko_hidden_chats_taps">Toca para abrir chats ocultos</string>
+    <string name="piko_hidden_chats_taps_desc">Pulsa el botón de mensajes muchas veces seguidas para cambiar entre tu bandeja de entrada y tus chats ocultos</string>
     <string name="piko_unlock_plus_benefits">Desbloquear beneficios Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Desbloquea beneficios de la suscripción \"Plus\" verificados localmente. ÚSALO BAJO TU PROPIO RIESGO</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Mensaje Directo</string>
     <string name="piko_unlimited_replays">Convertir los medios efímeros en permanentes</string>
     <string name="piko_unlimited_replays_desc">Transforma medios de visualización única o doble en visualización permanente</string>
+    <string name="piko_ephemeral_caption">Muestra cómo se recibieron los medios temporales</string>
+    <string name="piko_ephemeral_caption_desc">Añade una línea debajo de las fotos y vídeos enviados como contenido temporal, indicando cómo se enviaron y hasta cuándo están disponibles</string>
+    <string name="piko_ephemeral_received_once">Recibido para ver una vez</string>
+    <string name="piko_ephemeral_received_twice">Recibido para ver dos veces</string>
+    <string name="piko_ephemeral_received_chat">Recibido para mantener en el chat</string>
+    <string name="piko_ephemeral_received_unknown">Modo de visualización original desconocido</string>
+    <string name="piko_ephemeral_available_until">Disponible hasta %s</string>
+    <string name="piko_ephemeral_expired">Caducado</string>
     <string name="piko_enable_mark_chat_as_read">Habilitar la opción de marcar el chat como leído</string>
     <string name="piko_enable_mark_chat_as_read_desc">Obtenga una opción, al presionar prolongadamente el chat, para marcarlo como leído. Cuando marcas un chat como leído, otros pueden ver que has leído sus mensajes, incluso cuando Ver mensajes directos de forma anónima está habilitado</string>
     <!-- Story Section -->
@@ -176,6 +197,8 @@
     <string name="piko_disable_story_flipping_desc">Desactiva saltar a la siguiente historia automáticamente</string>
     <string name="piko_loop_story">Historia en bucle</string>
     <string name="piko_loop_story_desc">Repite la historia actual cuando termine</string>
+    <string name="piko_hide_story_follow_button">Ocultar el botón de seguir en las historias</string>
+    <string name="piko_hide_story_follow_button_desc">Oculta el botón de seguir en la parte superior de las historias de cuentas que no sigues</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Descargar medios</string>
     <string name="piko_category_downloads">Descargas</string>
@@ -188,6 +211,9 @@
     <string name="piko_enable_direct_download_desc">Descarga el medio actual sin pedir opciones</string>
     <string name="piko_download_username_folder">Separar medios por nombre de usuario</string>
     <string name="piko_download_username_folder_desc">Crea subcarpetas basadas en el nombre de usuario</string>
+    <string name="piko_prefer_dash_format">Preferir el formato DASH</string>
+    <string name="piko_prefer_dash_format_desc">Descarga vídeos en la versión DASH de mayor calidad que ofrece Instagram hasta 1080p en formato AV1, en lugar del archivo H.264 a 720p</string>
+    <string name="piko_dash_audio_aac_lc">Convertir audio DASH a AAC</string>
     <string name="piko_embed_download_metadata">Incruste metadatos de video</string>
     <string name="piko_embed_download_metadata_desc">Agrega el título, el enlace de la publicación, el creador y la fecha de carga a los archivos MP4 descargados</string>
     <string name="piko_download_file_name_template">Formato de nombre de archivo</string>
@@ -204,6 +230,7 @@
     <string name="piko_download_file_name_token_variant_suffix">Variante</string>
     <string name="piko_download_current_media">Descargar este medio</string>
     <string name="piko_download_as_image">Descargar como imagen</string>
+    <string name="piko_saved_at">Guardado a las %s</string>
     <string name="piko_video_variants">Variantes de vídeo</string>
     <string name="piko_image_variants">Variantes de imagen</string>
     <string name="piko_download_audio">Descargar audio</string>
@@ -236,7 +263,7 @@
     <string name="piko_more_options">Más opciones</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Ocultar botones de navegación</string>
-    <string name="piko_hide_navigation_feed">Ocultar botón Feed</string>
+    <string name="piko_hide_navigation_feed">Ocultar botón de Feed</string>
     <string name="piko_hide_navigation_reels">Ocultar botón Reels</string>
     <string name="piko_hide_navigation_direct">Ocultar botón Directo</string>
     <string name="piko_hide_navigation_search">Ocultar botón Buscar</string>
@@ -275,6 +302,7 @@
     <string name="piko_fail_no_file">Archivo no encontrado</string>
     <string name="piko_import_success">Importado con éxito</string>
     <string name="piko_import_fail">Error al importar</string>
+    <string name="piko_file_picker_unavailable">Selector de archivos del sistema no disponible</string>
     <string name="piko_restart_app">La app necesita ser reiniciada para que los cambios se reflejen</string>
     <string name="piko_close">Cerrar</string>
     <string name="piko_ok">Aceptar</string>
@@ -319,11 +347,18 @@
     <string name="piko_action_bar_inbox">Iconos de la barra de acciones de la bandeja de entrada</string>
     <string name="piko_action_bar_button_settings_icon">Icono de configuración</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Icono de modo fantasma</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">Ir al icono de mensaje más antiguo</string>
+    <string name="piko_jump_oldest_started">Saltando al mensaje más antiguo, pulsa de nuevo para cancelar</string>
+    <string name="piko_jump_oldest_cancelled">Cancelado</string>
+    <string name="piko_jump_oldest_stopped">Se ha detenido la espera de mensajes antiguos. Toque de nuevo para reintentar.</string>
     <string name="piko_action_bar_button_profile_info_icon">Icono de información de perfil</string>
     <string name="piko_action_bar_button_create_icon">Crear icono</string>
     <string name="piko_action_bar_button_notifications_icon">Icono de notificaciones</string>
     <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
+    <string name="piko_settings_search_hint">Buscar</string>
+    <string name="piko_settings_search_clear">Borrar búsqueda</string>
+    <string name="piko_settings_search_no_results">No se encontraron resultados</string>
     <!-- Font Section -->
     <string name="piko_category_font">Fuente</string>
     <string name="piko_custom_font">Fuente personalizada</string>

@@ -121,9 +121,6 @@ public class FeedButton {
 
     private static void addDownloadButton(Object buttonAdderObject, ArrayList buttonlist) throws Exception {
         String DOWNLOAD_BUTTON_TEXT = str("piko_download_options");
-        if(Pref.enableDirectDownload()){
-            DOWNLOAD_BUTTON_TEXT = str("piko_category_download_media");
-        }
         addButton(MediaOption$Option.PIKO_DOWNLOAD, DOWNLOAD_BUTTON_TEXT, buttonAdderObject, buttonlist);
     }
 
@@ -161,7 +158,7 @@ public class FeedButton {
                 ObjectBrowser.browseObject(context, new MediaData(mediaObject, userSession));
 
             } else if (SettingsStatus.downloadMedia && pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) {
-                DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
+                DownloadUtils.showDownloadOptions(context, userSession, mediaObject, currentMediaIndex);
 
             } else if (SettingsStatus.moreOptionsOnPost && pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
                 MoreOptionsOnPostPatch.postMoreOptions(context, userSession, mediaObject, currentMediaIndex);

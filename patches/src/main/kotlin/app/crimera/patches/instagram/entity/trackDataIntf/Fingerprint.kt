@@ -8,6 +8,8 @@ package app.crimera.patches.instagram.entity.trackDataIntf
 
 import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.methodCall
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/TrackDataIntf;"
 internal const val IMMUTABLE_PANDO_AUDIO_FILTER_INFO_CLASS_DESCRIPTOR = "Lcom/instagram/api/schemas/ImmutablePandoAudioFilterInfo;"
@@ -23,6 +25,15 @@ internal object GetMappingsExtension : Fingerprint(
 )
 
 internal object TrackDataFromMusicInfoMethodFingerprint : Fingerprint(
-    definingClass = "Lcom/instagram/api/schemas/MusicInfo",
+    definingClass = "Lcom/instagram/api/schemas/MusicInfo;",
     returnType = "Lcom/instagram/api/schemas/TrackData;",
+)
+
+internal object AudioFilterInfoTreeUpdaterFingerprint : Fingerprint(
+    definingClass = IMMUTABLE_PANDO_AUDIO_FILTER_INFO_CLASS_DESCRIPTOR,
+    returnType = "Lcom/facebook/pando/TreeUpdaterJNI;",
+    filters = listOf(
+        // Mappings.
+        methodCall(opcode = Opcode.INVOKE_VIRTUAL),
+    ),
 )

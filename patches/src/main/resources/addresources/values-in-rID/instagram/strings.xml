@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Aktifkan pilihan pengembang</string>
     <string name="piko_enable_dev_options_desc">Membuka pilihan pengembang dengan menekan lama ikon beranda</string>
     <string name="piko_directly_open_metaconfig">Langsung membuka penggantian MetaConfig</string>
-    <string name="piko_directly_open_metaconfig_desc">Langsung membuka penggantian MetaConfig dengan menekan lama ikon beranda (butuh mengaktifkan pilihan pengembang)</string>
     <string name="piko_enable_emp_options">Aktifkan pilihan karyawan</string>
     <string name="piko_enable_emp_options_desc">Membuka semua pilihan karyawan yang digunakan untuk pengujian</string>
     <string name="piko_allow_user_network_certificate">Izinkan sertifikat jaringan pengguna</string>
@@ -75,7 +74,6 @@
     <string name="piko_follow_back_indicator">Aktifkan indikator status pertemanan</string>
     <string name="piko_follow_back_indicator_desc">Menambahkan label status mengikuti balik di halaman profil dan menampilkan rincian status pertemanan secara terperinci saat diklik</string>
     <string name="piko_fbi_color_indicator">Aktifkan indikator status pertemanan berwarna</string>
-    <string name="piko_fbi_color_indicator_desc">Indikator status pertemanan perlu diaktifkan</string>
     <string name="piko_fbi_follows_you">Mengikuti Anda</string>
     <string name="piko_fbi_doesnt_follows_you">Tidak mengikuti Anda</string>
     <string name="piko_fbi_following_each_other">Mengikuti satu sama lain</string>
@@ -83,7 +81,6 @@
     <string name="piko_improve_image_viewing">Tingkatkan tampilan gambar</string>
     <string name="piko_improve_image_viewing_desc">Mengambil gambar dengan resolusi maksimum dari server. Mungkin mengurangi kinerja, menambah ukuran data aplikasi, atau menyebabkan aplikasi beralih ke tata letak yang lebih lama</string>
     <string name="piko_copy_comment">Salin komentar</string>
-    <string name="piko_copy_comment_desc">Menambahkan tombol untuk menyalin komentar pada postingan dan reel</string>
     <string name="piko_comment_copied_success">Komentar disalin</string>
     <string name="piko_comment_copied_failed">Tidak ada teks yang ditemukan untuk disalin</string>
     <string name="piko_copy_username">Salin nama pengguna</string>

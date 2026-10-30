@@ -11,15 +11,19 @@ import android.graphics.Typeface;
 import android.net.Uri;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsRestart;
+import app.morphe.extension.instagram.settings.RestartPolicy;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 
@@ -84,8 +88,9 @@ public final class FontStorage {
      */
     public static void setUseSystemFont(boolean enabled) {
         boolean previous = useSystemFont();
-        SharedPref.setBooleanPref(Settings.USE_SYSTEM_FONT.key, enabled);
-        SettingsRestart.markChanged(previous, enabled);
+        if (SharedPref.setBooleanPref(Settings.USE_SYSTEM_FONT.key, enabled)) {
+            SettingsRestart.markChanged(Settings.USE_SYSTEM_FONT.key, previous, enabled);
+        }
     }
 
     // The file.
@@ -122,10 +127,11 @@ public final class FontStorage {
             return DeleteResult.NOT_FOUND;
         }
         try {
+            String previous = fingerprint(file);
             if (!file.delete()) {
                 return DeleteResult.FAILED;
             }
-            SettingsRestart.markChanged(true, false);
+            SettingsRestart.markChanged(FILE_NAME, RestartPolicy.REQUIRED, previous, null);
             return DeleteResult.DELETED;
         } catch (Exception e) {
             Logger.printException(() -> "Failed to delete the custom font", e);
@@ -175,12 +181,12 @@ public final class FontStorage {
                 return ImportResult.NOT_A_FONT;
             }
 
+            String previous = fingerprint(destination);
+            String next = fingerprint(temp);
             if (!temp.renameTo(destination)) {
                 throw new IOException("Could not move the imported font into place");
             }
-            // Unconditional, not the real previous/next: a replaced font's content can differ even
-            // when a font was already stored both before and after, so this always queues a restart.
-            SettingsRestart.markChanged(false, true);
+            SettingsRestart.markChanged(FILE_NAME, RestartPolicy.REQUIRED, previous, next);
             return ImportResult.ADDED;
         } catch (Exception e) {
             Logger.printException(() -> "Failed to add a custom font", e);
@@ -190,6 +196,20 @@ public final class FontStorage {
                 Logger.printException(() -> "Failed to remove a partly written font");
             }
         }
+    }
+
+    // Compare contents so replacing a font and restoring the original also cancels the prompt.
+    private static String fingerprint(File file) throws Exception {
+        if (!file.exists()) return null;
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream input = new FileInputStream(file)) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = input.read(buffer)) != -1) {
+                digest.update(buffer, 0, read);
+            }
+        }
+        return Arrays.toString(digest.digest());
     }
 
     /** A single read may hand back less than was asked for, even from a file that has it all. */

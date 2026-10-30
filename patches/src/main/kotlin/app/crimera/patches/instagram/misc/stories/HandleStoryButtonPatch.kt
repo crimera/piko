@@ -11,39 +11,59 @@ import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+
+// Story menu output list allocation.
+private val STORY_MENU_LIST_FILTERS = listOf(
+    methodCall(returnType = "Ljava/util/ArrayList;", parameters = listOf(), opcode = Opcode.INVOKE_STATIC),
+    opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+)
 
 // The method is obfuscated but this is where it adds buttons.
 object AddStoryButtonFingerprint : Fingerprint(
     returnType = "[Ljava/lang/CharSequence;",
+    parameters = listOf("L"),
     strings = listOf("[INTERNAL] Pause Playback"),
-    custom = { methodDef, _ ->
-        methodDef.parameters.size == 1
-    },
+    filters = STORY_MENU_LIST_FILTERS,
+)
+
+private object ExtractedStoryButtonFingerprint : Fingerprint(
+    classFingerprint = SelfStoryAddStoryButtonFingerprint,
+    returnType = "[Ljava/lang/CharSequence;",
+    parameters = listOf("L"),
+    strings = listOf("location_story_action_sheet"),
+    filters = STORY_MENU_LIST_FILTERS,
 )
 
 object SelfStoryAddStoryButtonFingerprint : Fingerprint(
     returnType = "[Ljava/lang/CharSequence;",
     strings = listOf("ReelOptionsOverflowHelper"),
+    filters = STORY_MENU_LIST_FILTERS,
 )
 
 // The method is obfuscated but this is where the onclick call executes.
 internal object OnCLickStoryButtonFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     strings = listOf("explore_viewer", "friendships/mute_friend_reel/%s/", "[INTERNAL] Pause Playback"),
 )
 
 internal object SelfStoryOnCLickStoryButtonFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     strings = listOf("story_interactions/bulk_story_like/", "[INTERNAL] Pause Playback"),
 )
@@ -57,35 +77,20 @@ val handleStoryButtonPatch =
         execute {
 
             val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
-            listOf(SelfStoryAddStoryButtonFingerprint, AddStoryButtonFingerprint).forEach { fingerprint ->
-                fingerprint.matchAll(1..1).single().method.apply {
-                    val code = instructions
-                    val arrayListRegister = code.mapNotNull { instruction ->
-                        val reference = instruction.getReference<MethodReference>()
-                        if (reference?.name == "toArray" &&
-                            reference.parameterTypes == listOf("[Ljava/lang/Object;") &&
-                            reference.returnType == "[Ljava/lang/Object;"
-                        ) instruction.registersUsed.firstOrNull() else null
-                    }.distinct().singleOrNull()
-                        ?: throw PatchException("Could not uniquely resolve the story menu output list")
-                    val allocationIndex = code.withIndex().singleOrNull { (index, instruction) ->
-                        val reference = instruction.getReference<MethodReference>()
-                        val result = code.getOrNull(index + 1)
-                        instruction.opcode in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) &&
-                            reference?.returnType == "Ljava/util/ArrayList;" &&
-                            reference.parameterTypes.isEmpty() &&
-                            result?.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                            result.registersUsed == listOf(arrayListRegister)
-                    }?.index ?: throw PatchException("Could not uniquely resolve the story menu list allocation")
+            listOf(
+                SelfStoryAddStoryButtonFingerprint.match(),
+                AddStoryButtonFingerprint.matchOrNull() ?: ExtractedStoryButtonFingerprint.match(),
+            ).forEach {
+                val listIndex = it.instructionMatches.last().index
+                val arrayListRegister = it.instructionMatches.last().instruction.registersUsed.single()
 
-                    addInstructions(
-                        allocationIndex + 2,
-                        """
-                        invoke-static/range {v$arrayListRegister .. v$arrayListRegister}, $STORY_BUTTON_EXTENSION_CLASS->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
-                        move-result-object v$arrayListRegister
-                        """.trimIndent(),
-                    )
-                }
+                it.method.addInstructions(
+                    listIndex + 1,
+                    """
+                    invoke-static/range {v$arrayListRegister .. v$arrayListRegister}, $STORY_BUTTON_EXTENSION_CLASS->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+                    move-result-object v$arrayListRegister
+                    """.trimIndent(),
+                )
             }
 
             val onClickFingerprints = listOf(SelfStoryOnCLickStoryButtonFingerprint, OnCLickStoryButtonFingerprint)
@@ -95,15 +100,26 @@ val handleStoryButtonPatch =
                     val reelItemClassName = "Lcom/instagram/model/reels/ReelItem;"
                     val appActivity = "Landroid/app/Activity;"
                     val charSequence = "Ljava/lang/CharSequence;"
+                    val dismissListener = "Landroid/content/DialogInterface\$OnDismissListener;"
 
                     val classFields = classDef.fields
-                    val reelItemField = classFields.first { it.type == reelItemClassName }
-                    val appActivityField = classFields.first { it.type == appActivity }
-                    val reelItemMediaField =
-                        mutableClassDefBy { it.type == reelItemClassName }.fields.last { it.type == MEDIA_CLASS_NAME }
+                    val reelItemField = classFields.single { it.type == reelItemClassName }
+                    val appActivityField = classFields.single { it.type == appActivity }
+                    val dismissListenerField = classFields.singleOrNull { it.type == dismissListener }
+                        ?: throw PatchException("Expected one story menu dismiss listener field")
+                    val reelItemMediaField = instructions.mapNotNull { it.getReference<FieldReference>() }
+                        .filter { it.definingClass == reelItemClassName && it.type == MEDIA_CLASS_NAME }
+                        .distinctBy { it.toString() }
+                        .singleOrNull() ?: throw PatchException("Expected one story menu media field")
 
                     val characterSequenceParameterIndex = parameters.indexOfLast { it.type == charSequence }
                     val selfClassParameterIndex = parameters.indexOfLast { it.type == classDef.type }
+                    val dismissListenerParameterIndex = parameters.indices.singleOrNull {
+                        parameters[it].type == dismissListener
+                    } ?: throw PatchException("Expected one story menu dismiss listener parameter")
+                    if (p0Register < 5 || characterSequenceParameterIndex < 0 || selfClassParameterIndex < 0) {
+                        throw PatchException("Unexpected story menu click parameters or local registers")
+                    }
 
                     // Hard coding registries as it's going to be the first line in the method.
                     addInstructionsWithLabels(
@@ -115,6 +131,14 @@ val handleStoryButtonPatch =
                         iget-object v2, v1, $appActivityField
                         iget-object v3, v1, $reelItemField
                         iget-object v3, v3, $reelItemMediaField
+                        move-object/from16 v4, p$dismissListenerParameterIndex
+                        invoke-static {v0,v2,v3,v4}, $STORY_BUTTON_EXTENSION_CLASS->storyDialogAction($charSequence Landroid/content/Context;Ljava/lang/Object;$dismissListener)Z
+                        move-result v4
+                        if-eqz v4, :other_buttons
+                        const/4 v4, 0x0
+                        iput-object v4, v1, $dismissListenerField
+                        return-void
+                        :other_buttons
                         invoke-static {v0,v2,v3}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;)Z
                         move-result v0
                         if-eqz v0, :piko

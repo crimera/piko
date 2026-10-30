@@ -10,6 +10,8 @@ package app.morphe.extension.instagram.constants;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
+import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.instagram.settings.ActivityHook;
 
 public class Constants {
     public static final String PIKO = "piko";
@@ -30,10 +32,15 @@ public class Constants {
     public static final String AB_CREATE = "CREATE";
     public static final String AB_NOTIFICATIONS = "NOTIFICATIONS";
     public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
+    public static final String AB_JUMP_OLDEST_ICON = "JUMP_OLDEST_ICON";
     public static final String AB_PROFILE_INFO_ICON = "PROFILE_INFO_ICON";
 
     public static final String PIKO_FRAGMENT_TITLE = "piko_frag_title";
     public static final String PIKO_FRAGMENT_NAME = "piko_frag_name";
+    public static final String PIKO_SEARCH_TARGET_PREFERENCE_KEY = "piko_search_target_preference_key";
+    public static final String PIKO_APP_VERSION_PREFERENCE = "piko_app_version_preference";
+    public static final String PIKO_PATCH_VERSION_PREFERENCE = "piko_patch_version_preference";
+    public static final String PIKO_PATCH_INFO_PREFERENCE_CATEGORY = "piko_patch_info_preference_category";
 
     public static final String PIKO_FRAGMENT_SETTINGS = "piko_frag_settings";
     public static final String PIKO_FRAGMENT_ADS = "piko_frag_ads";
@@ -55,6 +62,7 @@ public class Constants {
     public static final String PIKO_FRAGMENT_FONT = "piko_frag_font";
 
     public static void load() {
+        StorageUtils.setStorageAccessLauncher(ctx -> ActivityHook.launchFragment(ctx, "piko_download_set_path"));
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);
         ExtensionStrings.setDownloadOngoing(str("piko_downloading_media"));
         ExtensionStrings.setDownloadCompleted(str("piko_downloaded_media"));

@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Attiva Opzioni sviluppatore</string>
     <string name="piko_enable_dev_options_desc">Sblocca le opzioni sviluppatore premendo a lungo l\'icona Home</string>
     <string name="piko_directly_open_metaconfig">Apre direttamente le sovrascritture delle MetaConfig</string>
-    <string name="piko_directly_open_metaconfig_desc">Apre direttamente le sovrascritture delle MetaConfig con una lunga pressione del tasto home (servono le opzioni sviluppatore abilitate)</string>
     <string name="piko_enable_emp_options">Abilita opzioni dipendenti</string>
     <string name="piko_enable_emp_options_desc">Sblocca tutte le opzioni per dipendenti utilizzate per i test</string>
     <string name="piko_allow_user_network_certificate">Consenti certificato di rete utente</string>
@@ -50,6 +49,21 @@
     <string name="piko_limit_following_feed">Limita il feed ai profili seguiti</string>
     <string name="piko_limit_following_feed_desc">Filtra la home per visualizzare solo il contenuto dai profili che segui.</string>
     <string name="piko_disable_discover_people">Nascondi account suggeriti</string>
+    <string name="piko_focus_lock_duration">Blocca per</string>
+    <string name="piko_focus_lock_duration_1_minute">1 minuto</string>
+    <string name="piko_focus_lock_duration_5_minutes">5 minuti</string>
+    <string name="piko_focus_lock_duration_10_minutes">10 minuti</string>
+    <string name="piko_focus_lock_duration_30_minutes">30 minuti</string>
+    <string name="piko_focus_lock_duration_1_hour">1 ora</string>
+    <string name="piko_focus_lock_duration_2_hours">2 ore</string>
+    <string name="piko_focus_lock_duration_6_hours">6 ore</string>
+    <string name="piko_focus_lock_duration_12_hours">12 ore</string>
+    <string name="piko_focus_lock_duration_1_day">1 giorno</string>
+    <string name="piko_focus_lock_duration_3_days">3 giorni</string>
+    <string name="piko_focus_lock_duration_1_week">1 settimana</string>
+    <string name="piko_focus_lock_duration_2_weeks">2 settimane</string>
+    <string name="piko_focus_lock_duration_1_month">1 mese</string>
+    <string name="piko_focus_lock_duration_3_months">3 mesi</string>
     <string name="piko_disable_reels_scrolling">Disabilita Scorrimento Reels</string>
     <string name="piko_disable_reels_scrolling_desc">Disabilita il comportamento di scroll infinito nei Reel di Instagram, impedendo lo scorrimento verso il Reel successivo. Nota: su un\'installazione pulita, l\'animazione \'Suggerimento\' può apparire ma si fermerà da sola dopo pochi secondi.</string>
     <string name="piko_disable_swipe_to_create">Disabilita lo scorrimento per creare</string>
@@ -78,7 +92,6 @@
     <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>
     <string name="piko_follow_back_indicator_desc">Aggiunge un indicatore di follow a vicenda nella pagina di profilo e mostra uno stato dettagliato di stato di amicizia al click</string>
     <string name="piko_fbi_color_indicator">Abilita indicatore di stato dell\'amicizia colorato</string>
-    <string name="piko_fbi_color_indicator_desc">L\'indicatore dello stato di amicizia deve essere abilitato</string>
     <string name="piko_fbi_follows_you">Ti segue</string>
     <string name="piko_fbi_doesnt_follows_you">Non ti segue</string>
     <string name="piko_fbi_following_each_other">Vi seguite a vicenda</string>
@@ -86,7 +99,6 @@
     <string name="piko_improve_image_viewing">Migliora la visualizzazione delle immagini</string>
     <string name="piko_improve_image_viewing_desc">Recupera le immagini di massima risoluzione dal server. Può ridurre le prestazioni, aumentare la dimensione dei dati delle app o far passare l\'applicazione a un layout più vecchio</string>
     <string name="piko_copy_comment">Copia commento</string>
-    <string name="piko_copy_comment_desc">Aggiunge un pulsante per copiare i commenti sui post e sui reels</string>
     <string name="piko_comment_copied_success">Commento copiato</string>
     <string name="piko_comment_copied_failed">Nessun testo trovato da copiare</string>
     <string name="piko_copy_username">Copia il nome utente</string>
@@ -102,6 +114,10 @@
     <string name="piko_copied">Copiato</string>
     <string name="piko_more_profile_options">Altre opzioni del profilo</string>
     <string name="piko_remove_empty_bottom_space">Rimuovi spazio vuoto in basso</string>
+    <string name="piko_inbox_lock_notification">Nuovo messaggio</string>
+    <string name="piko_inbox_lock_unlock">Sblocca</string>
+    <string name="piko_inbox_lock_prompt">Sblocca i tuoi messaggi</string>
+    <string name="piko_inbox_lock_no_lock">Imposta un blocco schermo sul tuo dispositivo per usare il blocco Posta in arrivo</string>
     <string name="piko_unlock_plus_benefits">Sblocca i vantaggi Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Sblocca i vantaggi dell\'abbonamento \'Plus\' che vengono controllati in locale. USA A TUO RISCHIO</string>
     <!-- DM Section -->
@@ -111,6 +127,7 @@
     <string name="piko_enable_mark_chat_as_read">Abilita l\'opzione per contrassegnare la chat come letta</string>
     <string name="piko_enable_mark_chat_as_read_desc">Ottieni un\'opzione, premendo a lungo la chat per contrassegnarla come letta. Quando si contrassegna una chat come letta, altri possono vedere che hai letto i loro messaggi, anche quando Visualizza i messaggi diretti in modo anonimo è abilitato</string>
     <!-- Story Section -->
+    <string name="piko_category_story">Storia</string>
     <string name="piko_view_story_mentions">Visualizza le menzioni nella storia</string>
     <string name="piko_vsm_title">Menzioni nelle storie</string>
     <string name="piko_vsm_no_mentions">Nessuna menzione in questa storia</string>
@@ -268,6 +285,19 @@
     <string name="piko_settings_on_action_bar">Impostazioni Piko sulla barra delle azioni</string>
     <string name="piko_settings_on_action_bar_desc">Sposta l\'apertura delle impostazioni Piko nella barra delle azioni principale del feed</string>
     <!-- Font Section -->
+    <string name="piko_category_font">Font</string>
+    <string name="piko_custom_font">Font personalizzato</string>
+    <string name="piko_pref_add_font">Aggiungi font</string>
+    <string name="piko_pref_add_font_desc">Scegli un file di font (.ttf o .otf) dalla tua memoria</string>
+    <string name="piko_pref_add_font_success">Font Aggiunto con successo</string>
+    <string name="piko_pref_add_font_fail">Impossibile aggiungere il font</string>
+    <string name="piko_pref_add_font_invalid">Il file selezionato non è un font valido</string>
+    <string name="piko_pref_add_font_too_large">Il font selezionato è troppo grande</string>
+    <string name="piko_pref_delete_font">Elimina font</string>
+    <string name="piko_pref_delete_font_success">Font eliminato con successo</string>
+    <string name="piko_pref_delete_font_fail">Impossibile eliminare il font</string>
+    <string name="piko_pref_delete_font_warn">Nessun font personalizzato trovato da cancellare</string>
+    <string name="piko_use_system_font">Usa font di sistema</string>
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">Opzioni consigliate</string>
     <string name="piko_category_rec_flags_desc">Opzioni per sviluppatori suggerite dalla comunità</string>

@@ -6,12 +6,14 @@
 
 package app.crimera.patches.twitter.timeline.disableAutoScroll
 
+import app.crimera.patches.instagram.utils.typeReference
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -19,16 +21,16 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.findInstructionIndicesReversedOrThrow
-import app.morphe.util.getReference
-import app.morphe.util.matchSingle
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
@@ -40,18 +42,23 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableField
 
-private object DisableAutoScrollFingerprint : Fingerprint(
-    returnType = "V",
-    // Target method has a very large number of strings and resolves very slowly
-    // if unordered strings are declared due to out of order string matching.
-    filters = listOf(
-        string("applicationManager"),
-        string("releaseCompletable"),
-        string("preferences"),
-        string("twSystemClock"),
-        string("launchTracker"),
-        string("cold_start_launch_time_millis")
-    )
+private object HomeColdStartDecisionFingerprint : Fingerprint(
+    classFingerprint = Fingerprint(
+        returnType = "V",
+        // Target method has a very large number of strings and resolves very slowly
+        // if unordered strings are declared due to out of order string matching.
+        filters = listOf(
+            string("applicationManager"),
+            string("releaseCompletable"),
+            string("preferences"),
+            string("twSystemClock"),
+            string("launchTracker"),
+            string("cold_start_launch_time_millis")
+        ),
+    ),
+    isStatic = false,
+    returnType = "Z",
+    parameters = emptyList()
 )
 
 internal object HomeTimelineRestoreFingerprint : Fingerprint(
@@ -82,21 +89,19 @@ val disableAutoScrollPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val coldStart = DisableAutoScrollFingerprint.matchSingle().classDef.methods.singleOrNull {
-                it.returnType == "Z" && it.parameterTypes.isEmpty() &&
-                    !AccessFlags.STATIC.isSet(it.accessFlags) && (it.implementation?.registerCount ?: 0) > 1
-            } ?: throw PatchException("Could not uniquely resolve the home cold-start decision")
             // Preserve the original patch's shared home decision only while the setting is enabled.
-            coldStart.addInstructionsWithLabels(0, """
-                invoke-static {}, $PREF_DESCRIPTOR;->disableAutoTimelineScroll()Z
-                move-result v0
-                if-eqz v0, :native
-                const/4 v0, 0x0
-                return v0
-            """.trimIndent(), ExternalLabel("native", coldStart.getInstruction(0)))
+            HomeColdStartDecisionFingerprint.method.apply {
+                addInstructionsWithLabels(0, """
+                    invoke-static {}, $PREF_DESCRIPTOR;->disableAutoTimelineScroll()Z
+                    move-result v0
+                    if-eqz v0, :native
+                    const/4 v0, 0x0
+                    return v0
+                    """, ExternalLabel("native", getInstruction(0)))
+            }
 
             val (scope, forYouType) = preserveTimelinePosition()
-            HomeTimelineRenderFingerprint.matchSingle().method.apply {
+            HomeTimelineRenderFingerprint.method.apply {
                 val scrollIndex = instructions.withIndex().filter { (_, instruction) ->
                     instruction.opcode == Opcode.INVOKE_VIRTUAL &&
                         instruction.getReference<MethodReference>()?.let {
@@ -168,19 +173,16 @@ private object TimelineInstructionParserFingerprint : Fingerprint(
     filters = listOf(
         string("addEntries"),
         string("TimelineAddEntries"),
-        string("clearCache")
+        string("clearCache"),
+        opcode(Opcode.CONST_CLASS, location = InstructionLocation.MatchBeforeAnywhere()),
     )
 )
 
 context(context: BytecodePatchContext)
 internal fun preserveTimelineCache(forYouType: Int) {
-    val response = TimelineResponseFingerprint.matchSingle()
-    val factory = HomeRequestFactoryFingerprint.matchSingle().method
-    val parser = TimelineInstructionParserFingerprint.matchSingle().method.instructions.toList()
-    val cacheName = parser.indexOfFirst { it.getReference<StringReference>()?.string == "clearCache" }
-    val cacheClass = parser.take(cacheName).lastOrNull { it.opcode == Opcode.CONST_CLASS }
-        ?.getReference<TypeReference>()?.type
-        ?: throw PatchException("Could not resolve the clear-cache instruction type")
+    val response = TimelineResponseFingerprint
+    val factory = HomeRequestFactoryFingerprint.method
+    val cacheClass = TimelineInstructionParserFingerprint.instructionMatches.last().typeReference
     if (response.method.instructions.count {
             it.opcode == Opcode.INSTANCE_OF && it.getReference<TypeReference>()?.type == cacheClass
         } != 1
@@ -294,7 +296,7 @@ private object InitialTimelineLoadFingerprint : Fingerprint(
 
 context(context: BytecodePatchContext)
 internal fun preserveInitialTimelineLoad(forYouType: Int) {
-    val method = InitialTimelineLoadFingerprint.matchSingle().method
+    val method = InitialTimelineLoadFingerprint.method
     val code = method.instructions.toList()
     val typeIndex = method.findInstructionIndicesReversedOrThrow(
         fieldAccess(

@@ -8,19 +8,20 @@ package app.crimera.patches.instagram.entity.reelResponseItem
 
 import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.string
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/ReelResponseItem;"
 
-internal object ReelResponseItemFingerprint : Fingerprint(
-    definingClass = "ReelResponseItem;",
-)
-
 internal object ReelResponseItemIntfMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
-    strings = listOf("strong_id__", "media_count"),
-    custom = { methodDef, _ ->
-        methodDef.parameters.size == 2 && methodDef.parameters[1].type.endsWith("ReelResponseItemIntf;")
-    },
+    parameters = listOf("L", "ReelResponseItemIntf;"),
+    strings = listOf("strong_id__"),
+    filters = listOf(
+        string("media_count"),
+        methodCall(location = MatchAfterImmediately()),
+    ),
 )
 
 internal object ReelTypeEnumInitFingerprint : Fingerprint(

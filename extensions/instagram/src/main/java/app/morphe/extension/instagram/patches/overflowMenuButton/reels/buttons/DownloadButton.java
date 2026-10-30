@@ -18,6 +18,6 @@ public class DownloadButton extends ReelButton {
 
     @Override
     public void onClick(View view) {
-        DownloadUtils.downloadPost(this.context, null, this.mediaObject, this.currentMediaIndex);
+        DownloadUtils.showDownloadOptions(this.context, null, this.mediaObject, this.currentMediaIndex);
     }
 }

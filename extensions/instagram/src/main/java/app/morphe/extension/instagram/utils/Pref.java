@@ -11,13 +11,15 @@ import java.util.Set;
 import java.util.HashSet;
 import android.content.Context;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.StringSetting;
 
 import app.morphe.extension.instagram.settings.Settings;
+import static app.morphe.extension.instagram.settings.RestartPolicy.NOT_REQUIRED;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
+import app.morphe.extension.instagram.patches.download.ReelDownload;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.shared.MarkChatAsReadScope;
@@ -107,22 +109,26 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.ENABLE_MARK_CHAT_AS_READ) && SettingsStatus.markChatAsRead;
     }
 
+    public static boolean markAsReadAfterReply() {
+        return SharedPref.getBooleanPref(Settings.MARK_AS_READ_AFTER_REPLY) && SettingsStatus.markAsReadAfterReply;
+    }
+
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
         return shouldBlockDmSeen(
                 SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
                 Pref.getTurnOnAllGhostModes(),
-                enableMarkChatAsReadOption()
+                enableMarkChatAsReadOption() || markAsReadAfterReply()
         );
     }
 
     static boolean shouldBlockDmSeen(
             boolean viewDmAnonymously,
             boolean allGhostModes,
-            boolean manualReadOptionEnabled
+            boolean explicitReadEnabled
     ) {
-        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
+        if (explicitReadEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
         return viewDmAnonymously || allGhostModes;
@@ -157,8 +163,16 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.LIMIT_FOLLOWING_FEED);
     }
 
+    public static boolean hideFeedPosts() {
+        return SharedPref.getBooleanPref(Settings.HIDE_FEED_POSTS) && SettingsStatus.hideFeedPosts;
+    }
+
     public static boolean hideStoriesTray() {
         return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+    }
+
+    public static boolean hideHiddenRequests() {
+        return lockable(Settings.HIDE_HIDDEN_REQUESTS) && SettingsStatus.hideHiddenRequests;
     }
 
     public static boolean hideNotesTray() {
@@ -189,7 +203,7 @@ public class Pref {
     }
 
     public static BooleanSetting focusLockSelection(String key) {
-        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false);
+        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false, NOT_REQUIRED);
     }
 
     public static String focusLockDurationMinutes() {
@@ -202,11 +216,11 @@ public class Pref {
 
     /** Keys of the first released Focus Lock, read so a lock it wrote still counts. */
     public static boolean legacyFocusLockBlockReels() {
-        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false));
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false, NOT_REQUIRED));
     }
 
     public static boolean legacyFocusLockBlockExplore() {
-        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false));
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false, NOT_REQUIRED));
     }
 
     public static String focusLockFormat() {
@@ -233,6 +247,14 @@ public class Pref {
         return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT.key, value);
     }
 
+    public static boolean ephemeralMediaCaption() {
+        return SharedPref.getBooleanPref(Settings.EPHEMERAL_MEDIA_CAPTION);
+    }
+
+    public static boolean disableDisappearingMessagesGesture() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE) && SettingsStatus.disableDisappearingMessagesGesture;
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
@@ -247,6 +269,11 @@ public class Pref {
 
     public static boolean showSaveButton(boolean original) {
         return original && !hideSaveButtons();
+    }
+
+    // Reels need the native save state to build the download component even when save is hidden.
+    public static boolean showReelSaveButton(boolean original) {
+        return original && (!hideSaveButtons() || ReelDownload.isEnabled());
     }
 
     public static boolean hideReshareButton() {
@@ -302,6 +329,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.LOOP_STORY);
     }
 
+    public static int storyFollowButtonState(int original) {
+        return SharedPref.getBooleanPref(Settings.HIDE_STORY_FOLLOW_BUTTON) ? 0 : original;
+    }
+
     public static boolean viewStoryMentions() {
         return SharedPref.getBooleanPref(Settings.VIEW_STORY_MENTIONS);
     }
@@ -332,6 +363,14 @@ public class Pref {
 
     public static boolean embedDownloadMetadata() {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
+    public static boolean preferDashFormat() {
+        return SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT);
+    }
+
+    public static boolean dashAudioAacLc() {
+        return SharedPref.getBooleanPref(Settings.DASH_AUDIO_AAC_LC);
     }
 
     public static String downloadFileNameTemplate() {
@@ -494,5 +533,21 @@ public class Pref {
 
     public static boolean inboxLockNotifications() {
         return SharedPref.getBooleanPref(Settings.INBOX_LOCK_NOTIFICATIONS);
+    }
+
+    public static boolean hiddenChats() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS);
+    }
+
+    public static boolean hiddenChatsMute() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS_MUTE);
+    }
+
+    public static int hiddenChatsTaps() {
+        try {
+            return Integer.parseInt(SharedPref.getStringPref(Settings.HIDDEN_CHATS_TAPS));
+        } catch (NumberFormatException e) {
+            return 3;
+        }
     }
 }

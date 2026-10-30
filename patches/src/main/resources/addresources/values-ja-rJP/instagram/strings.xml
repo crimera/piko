@@ -10,7 +10,7 @@
     <string name="piko_enable_dev_options">開発者向けオプションを有効化</string>
     <string name="piko_enable_dev_options_desc">[ホーム] タブを長押しすると、開発者向けのオプションが開きます</string>
     <string name="piko_directly_open_metaconfig">MetaConfig のオーバーライド画面を直接開く</string>
-    <string name="piko_directly_open_metaconfig_desc">ホームタブを長押しすると、MetaConfigのオーバーライド画面を直接開きます。開発者向けオプションを有効にする必要があります</string>
+    <string name="piko_directly_open_metaconfig_desc">ホームアイコンを長押しすると、MetaConfigの上書き設定を直接開きます</string>
     <string name="piko_enable_emp_options">社員向けオプションを有効化</string>
     <string name="piko_enable_emp_options_desc">テスト用の設定をすべて有効にします</string>
     <string name="piko_allow_user_network_certificate">ユーザーネットワーク証明書を許可</string>
@@ -35,6 +35,8 @@
     <string name="piko_disable_typing_status">入力状態を非表示</string>
     <string name="piko_disable_screenshot_detection">スクリーンショットの検出を無効化</string>
     <string name="piko_view_dm_anonymously">DMを匿名で閲覧</string>
+    <string name="piko_mark_as_read_after_reply">返信後に既読</string>
+    <string name="piko_mark_as_read_after_reply_desc">匿名でDMを閲覧している場合でも、返信を送信した後にチャットを既読にします</string>
     <string name="piko_view_dm_anonymously_desc">有効にすると、メッセージを読んだことが相手に表示されません。この設定と「すべての匿名モードを有効化」の両方が無効の場合は、Instagramの「開封証明を表示」設定に従います</string>
     <string name="piko_turn_on_all_ghost_modes">すべての匿名モードを有効化</string>
     <string name="piko_ghost_modes_on">匿名モード：有効</string>
@@ -49,6 +51,8 @@
     <string name="piko_disable_comments">コメントを無効化</string>
     <string name="piko_limit_following_feed">フィードにフォロー中のアカウントのみ表示</string>
     <string name="piko_limit_following_feed_desc">ホームフィードにフォローしているアカウントの投稿のみ表示します。</string>
+    <string name="piko_hide_feed_posts">フィード投稿を非表示</string>
+    <string name="piko_hide_feed_posts_desc">ホームフィードから投稿を非表示にします</string>
     <string name="piko_disable_discover_people">おすすめのアカウントを非表示</string>
     <string name="piko_focus_lock">フォーカスロック</string>
     <string name="piko_focus_lock_desc">指定した期間、集中を妨げる機能の設定を強制的にオンにします</string>
@@ -94,6 +98,8 @@
     <string name="piko_disable_swipe_to_create_desc">ホームタブで右にスワイプしても、作成画面が開かないようにします。</string>
     <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
     <string name="piko_hide_stories_tray_desc">メインフィードからストーリーズ欄を非表示にします</string>
+    <string name="piko_hide_hidden_requests">「非表示のリクエスト」を非表示</string>
+    <string name="piko_hide_hidden_requests_desc">メッセージリクエストページの「非表示のリクエスト」ボタンを非表示にします</string>
     <string name="piko_hide_notes_tray">ノート欄を非表示</string>
     <string name="piko_hide_notes_tray_desc">DMのノート欄を非表示にします</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">シェアシートのグループ作成ボタンを非表示</string>
@@ -118,7 +124,6 @@
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>
     <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、タップすると詳細なフォロー関係を表示します</string>
     <string name="piko_fbi_color_indicator">色付きの [フレンド状態の表示] を有効化</string>
-    <string name="piko_fbi_color_indicator_desc">[フレンド状態の表示] を有効にする必要があります</string>
     <string name="piko_fbi_follows_you">フォローされています</string>
     <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
     <string name="piko_fbi_following_each_other">相互フォロー</string>
@@ -128,7 +133,7 @@
     <string name="piko_improve_image_viewing">画像を高画質で表示</string>
     <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します。動作が遅くなったり、アプリデータの容量が増えたり、古いレイアウトに切り替わったりする場合があります</string>
     <string name="piko_copy_comment">コメントをコピー</string>
-    <string name="piko_copy_comment_desc">投稿やリールのコメントをコピーするボタンを追加します</string>
+    <string name="piko_copy_comment_desc">投稿やリールにコメントと投稿者のユーザー名をコピーするボタンを追加します</string>
     <string name="piko_comment_copied_success">コメントをコピーしました</string>
     <string name="piko_comment_copied_failed">コピーするテキストが見つかりません</string>
     <string name="piko_copy_username">ユーザーネームをコピー</string>
@@ -152,12 +157,30 @@
     <string name="piko_inbox_lock_unlock">ロックを解除</string>
     <string name="piko_inbox_lock_prompt">メッセージのロックを解除</string>
     <string name="piko_inbox_lock_no_lock">メッセージのロックを使用するには、端末に画面ロックを設定してください</string>
+    <string name="piko_hidden_chats">非表示のチャット</string>
+    <string name="piko_hidden_chats_desc">チャットの長押しメニューに非表示オプションを追加し、チャットをアカウントごとに独立したプライベートメッセージトレイに移動できるようにします。</string>
+    <string name="piko_hidden_chats_hidden">チャットを非表示にしました</string>
+    <string name="piko_hidden_chats_unhidden">チャットの非表示を解除しました</string>
+    <string name="piko_hidden_chats_opened">非表示のチャット</string>
+    <string name="piko_hidden_chats_closed">メッセージに戻る</string>
+    <string name="piko_hidden_chats_mute">非表示のチャットをミュート</string>
+    <string name="piko_hidden_chats_mute_desc">非表示にしたチャットからのメッセージ通知を表示しません</string>
+    <string name="piko_hidden_chats_taps">タップして非表示のチャットを開く</string>
+    <string name="piko_hidden_chats_taps_desc">この連続メッセージボタンをタップすると、受信トレイと非表示のチャットを切り替えられます</string>
     <string name="piko_unlock_plus_benefits">Plus特典を有効化</string>
     <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">一時的なメディアを永続的にする</string>
     <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
+    <string name="piko_ephemeral_caption">一時的なメディアの受信方法を表示</string>
+    <string name="piko_ephemeral_caption_desc">一時的なメディアとして送信された写真や動画の下に、送信方法と利用可能期間を示す行を追加します</string>
+    <string name="piko_ephemeral_received_once">1回確認を受信しました</string>
+    <string name="piko_ephemeral_received_twice">2回確認を受信しました</string>
+    <string name="piko_ephemeral_received_chat">チャットを続けるために受信しました</string>
+    <string name="piko_ephemeral_received_unknown">元の表示モードが不明です</string>
+    <string name="piko_ephemeral_available_until">%sまで利用可能</string>
+    <string name="piko_ephemeral_expired">期限切れ</string>
     <string name="piko_enable_mark_chat_as_read">チャットを既読にするオプションを有効化</string>
     <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にするオプションを追加します。「DMを匿名で閲覧」が有効でも、手動で既読にすると相手に既読が表示されます</string>
     <!-- Story Section -->
@@ -176,6 +199,8 @@
     <string name="piko_disable_story_flipping_desc">次のストーリーに自動で移動しないようにします</string>
     <string name="piko_loop_story">ストーリーをループ再生</string>
     <string name="piko_loop_story_desc">終了時に現在のストーリーを再生します</string>
+    <string name="piko_hide_story_follow_button">ストーリーのフォローボタンを非表示</string>
+    <string name="piko_hide_story_follow_button_desc">フォローしていないアカウントのストーリーの上部にある「フォロー」ボタンを非表示にします</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">メディアのダウンロード</string>
     <string name="piko_category_downloads">ダウンロード</string>
@@ -188,6 +213,10 @@
     <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
     <string name="piko_download_username_folder">ユーザーネームごとにメディアを分ける</string>
     <string name="piko_download_username_folder_desc">ユーザーネームごとにサブフォルダを作成します</string>
+    <string name="piko_prefer_dash_format">DASH形式を優先</string>
+    <string name="piko_prefer_dash_format_desc">720p H.264ファイルではなく、最大1080p AV1までの、鮮明なDASHレンディションInstagramのリストとして動画をダウンロードします</string>
+    <string name="piko_dash_audio_aac_lc">DASHオーディオをAACに変換</string>
+    <string name="piko_dash_audio_aac_lc_desc">ダウンロードしたDASH動画のxHE-AAC音声を、すべてのプレーヤーで再生できる192 kbpsのAAC-LCに再エンコードします</string>
     <string name="piko_embed_download_metadata">メタデータを埋め込む</string>
     <string name="piko_embed_download_metadata_desc">ダウンロードしたMP4ファイルに、キャプション、投稿リンク、作成者、アップロード日を追加します</string>
     <string name="piko_download_file_name_template">ファイル名の形式</string>
@@ -204,6 +233,7 @@
     <string name="piko_download_file_name_token_variant_suffix">解像度</string>
     <string name="piko_download_current_media">現在のメディアをダウンロード</string>
     <string name="piko_download_as_image">画像としてダウンロード</string>
+    <string name="piko_saved_at">%sに保存しました</string>
     <string name="piko_video_variants">動画の解像度</string>
     <string name="piko_image_variants">画像の解像度</string>
     <string name="piko_download_audio">音声をダウンロード</string>
@@ -275,6 +305,7 @@
     <string name="piko_fail_no_file">ファイルが見つかりません</string>
     <string name="piko_import_success">インポートしました</string>
     <string name="piko_import_fail">インポートに失敗しました</string>
+    <string name="piko_file_picker_unavailable">システムファイルピッカーが利用できません</string>
     <string name="piko_restart_app">変更を適用するにはアプリの再起動が必要です</string>
     <string name="piko_close">閉じる</string>
     <string name="piko_ok">OK</string>
@@ -319,11 +350,18 @@
     <string name="piko_action_bar_inbox">メッセージタブに表示するアクション</string>
     <string name="piko_action_bar_button_settings_icon">設定</string>
     <string name="piko_action_bar_button_ghost_mode_icon">匿名モード</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">最も古いメッセージに移動</string>
+    <string name="piko_jump_oldest_started">最も古いメッセージに移動して、もう一度タップするとキャンセルします</string>
+    <string name="piko_jump_oldest_cancelled">キャンセルされました</string>
+    <string name="piko_jump_oldest_stopped">古いメッセージの待機を停止しました。もう一度タップして再試行してください。</string>
     <string name="piko_action_bar_button_profile_info_icon">プロフィール情報</string>
     <string name="piko_action_bar_button_create_icon">作成</string>
     <string name="piko_action_bar_button_notifications_icon">通知</string>
     <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
     <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
+    <string name="piko_settings_search_hint">検索</string>
+    <string name="piko_settings_search_clear">入力を削除</string>
+    <string name="piko_settings_search_no_results">一致する結果が見つかりませんでした</string>
     <!-- Font Section -->
     <string name="piko_category_font">フォント</string>
     <string name="piko_custom_font">カスタムフォント</string>
@@ -455,4 +493,8 @@
     <string name="piko_media_like">いいね</string>
     <string name="piko_media_link">リンク</string>
     <string name="piko_media_activity">アクティビティ</string>
+    <string name="piko_disable_telemetry">テレメトリを無効化</string>
+    <string name="piko_patch_clone">クローン</string>
+    <string name="piko_patch_theme">テーマ</string>
+    <string name="piko_patch_settings">設定を追加</string>
 </resources>

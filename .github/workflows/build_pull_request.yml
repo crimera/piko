@@ -30,3 +30,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew clean buildAndroid
+
+      - name: Upload patches bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: patches-bundle
+          path: patches/build/libs/*.mpp
+          if-no-files-found: error

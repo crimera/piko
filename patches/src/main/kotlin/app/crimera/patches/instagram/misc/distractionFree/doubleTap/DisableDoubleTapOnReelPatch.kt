@@ -7,10 +7,8 @@
 package app.crimera.patches.instagram.misc.distractionFree.doubleTap
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 
 internal object ReelOnDoubleTapFingerprint : Fingerprint(
@@ -18,10 +16,6 @@ internal object ReelOnDoubleTapFingerprint : Fingerprint(
     returnType = "Z",
     name = "onDoubleTap",
     strings = listOf("android_purge_26_q3_ClipsItemGestureDetector_onDoubleTap"),
-    custom = { _, classDef ->
-        classDef.superclass == "Landroid/view/GestureDetector\$SimpleOnGestureListener;" &&
-            classDef.fields.count { it.type == "Lcom/instagram/clips/intf/ClipsViewerConfig;" } == 1
-    },
 )
 
 @Suppress("unused")
@@ -33,14 +27,9 @@ val disableDoubleTapOnReelPatch =
 
         execute {
 
-            ReelOnDoubleTapFingerprint.matchAll(1..1).single().method.apply {
-                if (parameterRegisterStart(this) == 0) {
-                    throw PatchException("Reel double-tap handler requires a local register")
-                }
-                addInstructions(
-                    0,
-                    DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapReel"),
-                )
-            }
+            ReelOnDoubleTapFingerprint.method.addInstructions(
+                0,
+                DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapReel"),
+            )
         }
     }

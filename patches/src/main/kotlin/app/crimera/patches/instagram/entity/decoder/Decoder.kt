@@ -6,20 +6,16 @@
 
 package app.crimera.patches.instagram.entity.decoder
 
-import app.crimera.patches.instagram.entity.mediadata.AslSessionRelatedFingerprint
-import app.morphe.patcher.patch.PatchException
+import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import kotlin.properties.Delegates
 
-var MEDIA_CLASS_NAME: String by Delegates.notNull()
-    private set
+const val MEDIA_CLASS_NAME = "Lcom/instagram/feed/media/Media;"
 
-var MEDIAEXT_CLASS_NAME: String by Delegates.notNull()
-    private set
+const val MEDIAEXT_CLASS_NAME = "Lcom/instagram/feed/media/MediaExtKt;"
 
-var USER_MODEL_CLASS_NAME: String by Delegates.notNull()
-    private set
+const val USER_MODEL_CLASS_NAME = "Lcom/instagram/user/model/User;"
 
 var MEDIA_ADD_INFO_CLASS_NAME: String by Delegates.notNull()
     private set
@@ -35,20 +31,9 @@ val decoderEntity =
         description = "This patch is used hold class and field names that are commonly used",
     ) {
         execute {
-            MEDIA_CLASS_NAME = AslSessionRelatedFingerprint.method.parameters[0].type
-
-            val currentMediaFields =
-                EditMediaInfoGetCurrentMediaIdFingerprint.classDef.methods.mapNotNull { it.currentMediaIndexFieldOrNull() }
-            if (currentMediaFields.size != 1) {
-                throw PatchException("Expected exactly one current media index getter, found ${currentMediaFields.size}")
-            }
-            CURRENT_MEDIA_FIELD = currentMediaFields.single()
+            CURRENT_MEDIA_FIELD = EditMediaInfoGetCurrentMediaIdFingerprint.instructionMatches[2].fieldReference
             MEDIA_ADD_INFO_CLASS_NAME = CURRENT_MEDIA_FIELD.definingClass
 
-            COMMENT_BUTTON_CLASS = CommentButtonOnClickFingerprint.method.parameters[0].type
-
-            USER_MODEL_CLASS_NAME = UserTagInfoDictInitFingerprint.method.parameters[0].type
-
-            MEDIAEXT_CLASS_NAME = ReelsInlineQualitySurveyRelatedFingerprint.classDef.type
+            COMMENT_BUTTON_CLASS = CommentButtonOnClickFingerprint.originalMethod.parameterTypes[0].toString()
         }
     }

@@ -10,7 +10,6 @@
     <string name="piko_enable_dev_options">Geliştirici seçeneklerini etkinleştir</string>
     <string name="piko_enable_dev_options_desc">Ana sayfa simgesine basılı tutarak geliştirici seçeneklerini etkinleştirir</string>
     <string name="piko_directly_open_metaconfig">MetaConfig geçersiz kılma ayarlarını doğrudan açar</string>
-    <string name="piko_directly_open_metaconfig_desc">Ana sayfa simgesine uzun basıldığında MetaConfig geçersiz kılma ayarlarını doğrudan açar (Geliştirici seçenekleri etkin olmalıdır).</string>
     <string name="piko_enable_emp_options">Çalışan seçeneklerini etkinleştir</string>
     <string name="piko_enable_emp_options_desc">Test için kullanılan tüm çalışan seçeneklerinin kilidini açar</string>
     <string name="piko_allow_user_network_certificate">Kullanıcı ağ sertifikasına izin ver</string>
@@ -94,6 +93,8 @@
     <string name="piko_disable_swipe_to_create_desc">Ana sekmede sağa kaydırarak oluşturma ekranının açılmasını engeller.</string>
     <string name="piko_hide_stories_tray">Hikayeler tepsisini gizle</string>
     <string name="piko_hide_stories_tray_desc">Ana akıştan hikayeler tepsisini gizle</string>
+    <string name="piko_hide_hidden_requests">Gizli istekleri gizle</string>
+    <string name="piko_hide_hidden_requests_desc">Mesaj istekleri sayfasındaki “Gizli istekler (spam)” düğmesini gizler</string>
     <string name="piko_hide_notes_tray">Notlar tepsisini gizle</string>
     <string name="piko_hide_notes_tray_desc">DM kısmındaki notlar tepsisini gizler</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Paylaşım menüsündeki grup oluşturma düğmesini gizle</string>
@@ -118,7 +119,6 @@
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
     <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
     <string name="piko_fbi_color_indicator">Renkli arkadaşlık durumu göstergesini etkinleştir</string>
-    <string name="piko_fbi_color_indicator_desc">Arkadaşlık durumu göstergesinin etkinleştirilmesi gerekiyor</string>
     <string name="piko_fbi_follows_you">Seni takip ediyor</string>
     <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
     <string name="piko_fbi_following_each_other">Karşılıklı takip</string>
@@ -128,7 +128,6 @@
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan en yüksek çözünürlüklü görselleri çeker. Performansı düşürebilir, uygulama veri boyutunu artırabilir veya uygulamanın eski bir düzene geçmesine neden olabilir</string>
     <string name="piko_copy_comment">Yorumu kopyala</string>
-    <string name="piko_copy_comment_desc">Gönderi ve Reels videolarındaki yorumları kopyalamak için bir buton ekler</string>
     <string name="piko_comment_copied_success">Yorum kopyalandı</string>
     <string name="piko_comment_copied_failed">Kopyalanacak metin bulunamadı</string>
     <string name="piko_copy_username">Kullanıcı adını kopyala</string>
@@ -152,12 +151,29 @@
     <string name="piko_inbox_lock_unlock">Kilidi aç</string>
     <string name="piko_inbox_lock_prompt">Mesajlarınızın kilidini açın</string>
     <string name="piko_inbox_lock_no_lock">Gelen kutusu kilidini kullanmak için cihazınızda ekran kilidi ayarlayın</string>
+    <string name="piko_hidden_chats">Gizli sohbetler</string>
+    <string name="piko_hidden_chats_hidden">Sohbet gizlendi</string>
+    <string name="piko_hidden_chats_unhidden">Sohbet görünür</string>
+    <string name="piko_hidden_chats_opened">Gizli sohbetler</string>
+    <string name="piko_hidden_chats_closed">Gelen kutunuza geri dönün</string>
+    <string name="piko_hidden_chats_mute">Gizli sohbetleri sessize al</string>
+    <string name="piko_hidden_chats_mute_desc">Gizlediğiniz sohbetlerden gelen mesajlar için bildirimleri gösterme</string>
+    <string name="piko_hidden_chats_taps">Gizli sohbetleri açmak için dokun</string>
+    <string name="piko_hidden_chats_taps_desc">Gelen kutusu ile gizli sohbetler arasında geçiş yapmak için mesajlar düğmesine arka arkaya bu kadar kez dokunun</string>
     <string name="piko_unlock_plus_benefits">Plus abonelik avantajlarının kilidini aç</string>
     <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Mesajlar</string>
     <string name="piko_unlimited_replays">Kaybolan medyaları kalıcı yap</string>
     <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
+    <string name="piko_ephemeral_caption">Geçici medyanın nasıl alındığını gösterin</string>
+    <string name="piko_ephemeral_caption_desc">Geçici medya olarak gönderilen fotoğraf ve videoların altına, bunların nasıl gönderildiğini ve ne zamana kadar erişilebilir olacağını belirten bir satır ekler</string>
+    <string name="piko_ephemeral_received_once">Bir kez görüntülemek üzere alındı</string>
+    <string name="piko_ephemeral_received_twice">İki kez görüntülenmek üzere alındı</string>
+    <string name="piko_ephemeral_received_chat">Sohbette tutulmak üzere alındı</string>
+    <string name="piko_ephemeral_received_unknown">Orijinal görüntüleme modu bilinmiyor</string>
+    <string name="piko_ephemeral_available_until">%s tarihine kadar geçerlidir</string>
+    <string name="piko_ephemeral_expired">Süresi doldu</string>
     <string name="piko_enable_mark_chat_as_read">Sohbeti okundu olarak işaretle seçeneğini etkinleştir</string>
     <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine uzun basıldığında okundu olarak işaretleme seçeneği sunar. Bir sohbeti okundu olarak işaretlediğinizde, \"Mesajlar için hayalet modu\" etkin olsa bile başkaları mesajlarını okuduğunuzu görebilir</string>
     <!-- Story Section -->
@@ -188,6 +204,8 @@
     <string name="piko_enable_direct_download_desc">Mevcut görüntülenen medyayı seçenek sormadan indirir</string>
     <string name="piko_download_username_folder">Medyayı kullanıcı adına göre ayır</string>
     <string name="piko_download_username_folder_desc">Kullanıcı adına göre alt klasörler oluşturur</string>
+    <string name="piko_prefer_dash_format">DASH formatını tercih et</string>
+    <string name="piko_prefer_dash_format_desc">Videoları, Instagram’ın sunduğu en yüksek kaliteli DASH formatında, 720p H.264 dosyası yerine 1080p AV1 kalitesinde indirir</string>
     <string name="piko_embed_download_metadata">Video meta verilerini göm</string>
     <string name="piko_embed_download_metadata_desc">İndirilen MP4 dosyalarına açıklamayı, gönderi bağlantısını, oluşturucuyu ve yükleme tarihini ekler</string>
     <string name="piko_download_file_name_template">Dosya adı biçimi</string>
@@ -204,6 +222,7 @@
     <string name="piko_download_file_name_token_variant_suffix">Varyant</string>
     <string name="piko_download_current_media">Mevcut medyayı indir</string>
     <string name="piko_download_as_image">Resim olarak indir</string>
+    <string name="piko_saved_at">%s konumuna kaydedildi</string>
     <string name="piko_video_variants">Video varyantları</string>
     <string name="piko_image_variants">Resim varyantları</string>
     <string name="piko_download_audio">Ses olarak indir</string>
@@ -319,11 +338,18 @@
     <string name="piko_action_bar_inbox">Gelen kutusu eylem çubuğu simgeleri</string>
     <string name="piko_action_bar_button_settings_icon">Ayarlar simgesi</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Görünmez mod simgesi</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">En eski mesaja atlama simgesi</string>
+    <string name="piko_jump_oldest_started">En eski mesaja atlanıyor, iptal etmek için tekrar dokunun</string>
+    <string name="piko_jump_oldest_cancelled">İptal edildi</string>
+    <string name="piko_jump_oldest_stopped">Eski mesajları bekleme işlemi durduruldu. Tekrar denemek için tekrar dokunun.</string>
     <string name="piko_action_bar_button_profile_info_icon">Profil bilgisi simgesi</string>
     <string name="piko_action_bar_button_create_icon">Oluştur simgesi</string>
     <string name="piko_action_bar_button_notifications_icon">Bildirimler simgesi</string>
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
+    <string name="piko_settings_search_hint">Ara</string>
+    <string name="piko_settings_search_clear">Aramayı temizle</string>
+    <string name="piko_settings_search_no_results">Sonuç bulunamadı</string>
     <!-- Font Section -->
     <string name="piko_category_font">Yazı tipi</string>
     <string name="piko_custom_font">Özel yazı tipi</string>

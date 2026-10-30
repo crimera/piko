@@ -11,22 +11,19 @@ import app.crimera.patches.instagram.misc.ghostMode.DMSeenFingerprint
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
-import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 @Suppress("unused")
 val markChatAsReadPatch =
@@ -51,31 +48,13 @@ val markChatAsReadPatch =
                 }
             }
 
-            DmInfoJsonParserFingerprint.apply {
-                val strIndex = stringMatches.first().index
-                method.apply {
-                    val messageCursorIPutObjectIndex = indexOfFirstInstruction(strIndex, Opcode.IPUT_OBJECT)
-
-                    val messageCursorFieldName = getInstruction(messageCursorIPutObjectIndex).fieldExtractor().name
-                    GetMessageCursorFieldNameExtensionFingerprint.changeFirstString(messageCursorFieldName)
-                }
-            }
+            val messageCursorField = DmInfoJsonParserFingerprint.instructionMatches.last().fieldReference
+            GetMessageCursorFieldNameExtensionFingerprint.changeFirstString(messageCursorField.name)
 
             // -------------------------
 
-            val markAsReadButtonFieldRef: FieldReference
-            val buttonEnumClassName: String
-            ThreadLongPressButtonsEnumInitFingerprint.apply {
-                val strIndex = stringMatches.first().index
-                buttonEnumClassName = classDef.type
-                GetButtonEnumClassNameExtensionFingerprint.changeFirstString(classNameToExtension(buttonEnumClassName))
-
-                method.apply {
-                    val markAsReadButtonSPutObjectIndex = indexOfFirstInstruction(strIndex, Opcode.SPUT_OBJECT)
-
-                    markAsReadButtonFieldRef = getInstruction(markAsReadButtonSPutObjectIndex).getReference<FieldReference>()!!
-                }
-            }
+            val buttonEnumClassName = ThreadLongPressButtonsEnumInitFingerprint.instructionMatches.last().fieldReference.definingClass
+            GetButtonEnumClassNameExtensionFingerprint.changeFirstString(classNameToExtension(buttonEnumClassName))
 
             ThreadLongPressMuteButtonBuilderFingerprint.method.apply {
                 val listParameterIndex = parameterTypes.indexOf("Ljava/util/List;")
@@ -99,7 +78,19 @@ val markChatAsReadPatch =
                 method.apply {
                     val buttonParameterIndex = parameters.indexOfFirst { it.type == buttonEnumClassName } + 1
                     val directThreadKeyParameterIndex = parameters.indexOfFirst { it.type == directThreadKeyClassName } + 1
-                    val threadInfoParameterIndex = directThreadKeyParameterIndex - 2
+                    val threadInfoField = instructions
+                        .filter { it.opcode == Opcode.IGET_OBJECT }
+                        .mapNotNull { it.getReference<FieldReference>() }
+                        .filter { it.type == messageCursorField.definingClass }
+                        .distinct()
+                        .singleOrNull() ?: throw PatchException("Could not resolve the chat menu thread info field")
+                    val threadInfoClass = classDefBy(threadInfoField.definingClass)
+                    val threadInfoParameters = parameters.indices.filter {
+                        parameters[it].type == threadInfoClass.type || parameters[it].type in threadInfoClass.interfaces
+                    }
+                    val threadInfoParameterIndex = (threadInfoParameters.singleOrNull()
+                        ?: throw PatchException("Could not resolve the chat menu thread info parameter")) + 1
+                    GetThreadInfoFieldNameExtensionFingerprint.changeFirstString(threadInfoField.name)
 
                     // Hard coding register names as these instructions
                     // will be added on the first line.

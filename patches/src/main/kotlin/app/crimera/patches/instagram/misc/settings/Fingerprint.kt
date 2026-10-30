@@ -9,6 +9,10 @@ package app.crimera.patches.instagram.misc.settings
 import app.crimera.patches.instagram.utils.Constants.ACTIVITY_SETTINGS_STATUS_CLASS
 import app.crimera.patches.instagram.utils.Constants.HOOK_FLAGS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import com.android.tools.smali.dexlib2.Opcode
 
 internal object HookFlagsLoadFingerprint : Fingerprint(
     definingClass = HOOK_FLAGS_DESCRIPTOR,
@@ -24,11 +28,16 @@ internal object SettingsStatusLoadFingerprint : Fingerprint(
 internal object MainFeedFragmentOnCreateFingerprint : Fingerprint(
     name = "onCreate",
     strings = listOf("MainFeedFragment.onCreate"),
+    filters = listOf(
+        methodCall(smali = "Landroidx/fragment/app/Fragment;->requireContext()Landroid/content/Context;"),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+    ),
 )
 
 internal object IgFragmentActivityOnCreate : Fingerprint(
     name = "onCreate",
     definingClass = "Lcom/instagram/base/activity/IgFragmentActivity;",
+    filters = listOf(opcode(Opcode.RETURN_VOID)),
 )
 
 internal object IgFragmentActivityOnResume : Fingerprint(
@@ -36,4 +45,27 @@ internal object IgFragmentActivityOnResume : Fingerprint(
     definingClass = "Lcom/instagram/base/activity/IgFragmentActivity;",
     parameters = emptyList(),
     returnType = "V",
+    filters = listOf(opcode(Opcode.RETURN_VOID)),
+)
+
+internal object ModalActivityOnCreate : Fingerprint(
+    name = "onCreate",
+    definingClass = "Lcom/instagram/modal/ModalActivity;",
+    parameters = listOf("Landroid/os/Bundle;"),
+    returnType = "V",
+    strings = listOf("ModalActivity.onCreate"),
+)
+
+internal object ModalActivityOnPostCreate : Fingerprint(
+    name = "onPostCreate",
+    definingClass = "Lcom/instagram/modal/ModalActivity;",
+    parameters = listOf("Landroid/os/Bundle;"),
+    returnType = "V",
+)
+
+internal object ModalActivityInitStartingFragment : Fingerprint(
+    definingClass = "Lcom/instagram/modal/ModalActivity;",
+    parameters = listOf("Landroid/os/Bundle;"),
+    returnType = "V",
+    strings = listOf("ModalActivity.initializeStartingFragment"),
 )

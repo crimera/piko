@@ -42,7 +42,7 @@ public class UI {
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
     public static final String DRAWABLE_GEAR_ICON = "instagram_settings_pano_filled_24";
-    public static final String DRAWABLE_ADS_ICON = "instagram_shield_outline_24";
+    public static final String DRAWABLE_ADS_ICON = "instagram_ads_outline_24";
     public static final String DRAWABLE_GHOST_ICON = "piko_ghost_icon";
     public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
     public static final String DRAWABLE_HISTORY_ICON = "instagram_history_outline_24";
@@ -58,6 +58,8 @@ public class UI {
     public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
     public static final String DRAWABLE_ARROW_BACK =
             "instagram_arrow_left_pano_outline_24";
+    public static final String DRAWABLE_SEARCH = "instagram_search_outline_24";
+    public static final String DRAWABLE_CLEAR = "instagram_x_outline_24";
     public static final String DRAWABLE_CHEVRON_RIGHT =
             "instagram_chevron_right_outline_16";
     public static final String DRAWABLE_CHEVRON_RIGHT_RTL =
