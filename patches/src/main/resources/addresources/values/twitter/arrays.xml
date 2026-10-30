@@ -320,4 +320,17 @@
         <item>piko_debug</item>
     </string-array>
 
+    <string-array name="piko_array_reply_like_ratio">
+        <item>@string/piko_reply_like_ratio_mode_off</item>
+        <item>@string/piko_reply_like_ratio_mode_numbers</item>
+        <item>@string/piko_reply_like_ratio_mode_icon</item>
+        <item>@string/piko_reply_like_ratio_mode_both</item>
+    </string-array>
+    <string-array name="piko_array_reply_like_ratio_val">
+        <item>off</item>
+        <item>numbers</item>
+        <item>icon</item>
+        <item>both</item>
+    </string-array>
+
 </resources>
