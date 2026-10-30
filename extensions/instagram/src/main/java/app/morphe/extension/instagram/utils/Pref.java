@@ -10,6 +10,7 @@ package app.morphe.extension.instagram.utils;
 import java.util.Set;
 import java.util.HashSet;
 import android.content.Context;
+import android.content.res.Resources;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.BooleanSetting;
 import app.morphe.extension.instagram.settings.StringSetting;
@@ -27,6 +28,9 @@ import app.morphe.extension.shared.MarkChatAsReadScope;
 @SuppressWarnings("unused")
 public class Pref {
     private static final int MAX_IMAGE_SIZE = 4096;
+    // Instagram sizes image variants by the User-Agent's shorter screen side. At 2560 posts get
+    // their originals and grid tiles 750 px variants; from 2880 grid tiles get 1080 px.
+    private static final int USER_AGENT_SCREEN_SIZE = 2560;
 
     private static String removeLineBreaks(String value) {
         return value.replace("\r", "").replace("\n", "");
@@ -341,12 +345,17 @@ public class Pref {
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
 
-    public static int improveImageViewing(int defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
+    // Takes the width Instagram picks an image variant for. Full-screen views ask for the screen
+    // width capped at 1080; only those get the largest variant, so thumbnails stay small.
+    public static int imageVariantTargetWidth(int original) {
+        int fullScreenWidth = Math.min(Resources.getSystem().getDisplayMetrics().widthPixels, 1080);
+        return original >= fullScreenWidth && SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING)
+                ? MAX_IMAGE_SIZE
+                : original;
     }
 
-    public static Integer improveImageViewing(Integer defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
+    public static Integer userAgentScreenSize(Integer original) {
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? USER_AGENT_SCREEN_SIZE : original;
     }
 
     public static boolean enableDownload() {
