@@ -6,43 +6,42 @@
 
 package app.crimera.patches.instagram.misc.download
 
-import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.util.matchSingle
-import app.morphe.patcher.util.p0Register
-import app.morphe.patcher.util.registersUsed
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
-import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
-import com.android.tools.smali.dexlib2.iface.instruction.Instruction
-import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.literal
-import app.morphe.patcher.string
+import app.morphe.patcher.newInstance
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
+import app.morphe.patcher.string
+import app.morphe.patcher.util.getMutableMethod
 import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
+import app.morphe.patcher.util.registersUsed
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Field
 import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.util.MethodUtil
 
 private const val REEL_DOWNLOAD_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/ReelDownload;"
 
@@ -93,9 +92,9 @@ private val STATIC_INVOKE_OPCODES = setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_ST
  */
 val reelDownloadButtonPatch = bytecodePatch {
     compatibleWith(COMPATIBILITY_INSTAGRAM)
-    dependsOn(sharedExtensionPatch, settingsPatch, resourceMappingPatch)
+    dependsOn(sharedExtensionPatch, settingsPatch)
     execute {
-        injectReelDownloadButton(getResourceId(ResourceType.ID, REEL_SAVE_BUTTON_ID))
+        injectReelDownloadButton()
         enableSettings("reelDownloadButton")
     }
 }
@@ -115,8 +114,8 @@ private class ReelContextPath(
 private fun ClassDef.fieldsOfType(type: String): List<Field> = instanceFields.filter { it.type == type }
 
 context(patchContext: BytecodePatchContext)
-private fun injectReelDownloadButton(saveButtonId: Long) {
-    val render = reelSaveRender(saveButtonId)
+private fun injectReelDownloadButton() {
+    val render = ReelSaveButtonRenderFingerprint.method
     val componentType = render.definingClass
     val componentClass = patchContext.classDefBy(componentType)
     val composerType = render.parameterTypes.single().toString()
@@ -128,7 +127,7 @@ private fun injectReelDownloadButton(saveButtonId: Long) {
     val mediaPath = reelMediaPath(componentClass)
     val contextPath = reelContextPath(composerType)
 
-    val builder = reelSaveBuilder(componentType)
+    val builder = reelSaveBuilderFingerprint(componentType).originalMethod
     val builderCallSites = reelBuilderCallSites(builder, componentType)
 
     hookSaveRender(render, composerType, mediaPath.state.type)
@@ -169,24 +168,17 @@ private fun injectReelDownloadButton(saveButtonId: Long) {
 }
 
 /**
- * The save button component's render method: the only one that carries the `save_button` id literal
- * together with the `save_button` tag string.
+ * The save button component's render method: the only one that carries the [REEL_SAVE_BUTTON_ID]
+ * id literal together with the [REEL_SAVE_BUTTON_ID] tag string.
  */
-context(patchContext: BytecodePatchContext)
-private fun reelSaveRender(saveButtonId: Long): Method =
-    requireOne(
-        "reels save button render method",
-        Fingerprint(filters = listOf(literal(saveButtonId)))
-            .matchAll()
-            .map { it.method }
-            .filter { method ->
-                !AccessFlags.STATIC.isSet(method.accessFlags) &&
-                    method.parameterTypes.size == 1 &&
-                    method.implementation?.instructions.orEmpty().any {
-                        it.getReference<StringReference>()?.string == REEL_SAVE_BUTTON_ID
-                    }
-            },
+private object ReelSaveButtonRenderFingerprint : Fingerprint(
+    isStatic = false,
+    parameters = listOf("L"),
+    filters = listOf(
+        resourceLiteral(ResourceType.ID, REEL_SAVE_BUTTON_ID),
+        string(REEL_SAVE_BUTTON_ID),
     )
+)
 
 context(patchContext: BytecodePatchContext)
 private fun reelMediaPath(componentClass: ClassDef): ReelMediaPath =
@@ -214,20 +206,13 @@ private fun reelContextPath(composerType: String): ReelContextPath =
     )
 
 /** The method outside the component that returns it by constructing it. */
-context(patchContext: BytecodePatchContext)
-private fun reelSaveBuilder(componentType: String): Method =
-    requireOne(
-        "reels save component builder",
-        Fingerprint(returnType = componentType)
-            .matchAll()
-            .map { it.method }
-            .filter { method ->
-                method.definingClass != componentType &&
-                    method.implementation?.instructions.orEmpty().any {
-                        it.opcode == Opcode.NEW_INSTANCE && it.getReference<TypeReference>()?.type == componentType
-                    }
-            },
-    )
+private fun reelSaveBuilderFingerprint(componentType: String) = Fingerprint(
+    returnType = componentType,
+    filters = listOf(newInstance(componentType)),
+    custom = { _, classDef ->
+        classDef.type != componentType
+    }
+)
 
 private class BuilderCallSite(
     val method: Method,
@@ -263,11 +248,11 @@ private fun hookBuilderCallSites(
 ) {
     val caller = requireOne("caller of $builder", sites.map { it.method }.distinct())
     val instructions = caller.implementation!!.instructions.toList()
-    val mutableCaller = mutable(caller)
+    val mutableCaller = caller.getMutableMethod()
     val countBuilder = Fingerprint(
         definingClass = builder.definingClass,
         filters = listOf(string("save_count")),
-    ).matchSingle().method
+    ).method
     sites.sortedByDescending { it.index }.forEach { site ->
         val call = instructions[site.index]
         val result = instructions[site.index + 1]
@@ -347,19 +332,12 @@ private fun invokeOriginal(instruction: Instruction, method: MethodReference): S
     return "$opcode $operands, $method"
 }
 
-context(patchContext: BytecodePatchContext)
-private fun mutable(method: Method): MutableMethod =
-    requireOne("mutable method $method",
-        patchContext.mutableClassDefBy(method.definingClass).methods.filter { it.sameSignatureAs(method) })
-
 private fun MethodReference.sameSignatureAs(other: MethodReference): Boolean =
-    definingClass == other.definingClass && name == other.name &&
-        returnType == other.returnType &&
-        parameterTypes.map { it.toString() } == other.parameterTypes.map { it.toString() }
+    MethodUtil.methodSignaturesMatch(this, other)
 
 context(patchContext: BytecodePatchContext)
 private fun bridge(name: String, registers: Int, body: String) {
-    val original = Fingerprint(definingClass = REEL_DOWNLOAD_DESCRIPTOR, name = name).matchSingle().method
+    val original = Fingerprint(definingClass = REEL_DOWNLOAD_DESCRIPTOR, name = name).method
     val replacement = ImmutableMethod(
         original.definingClass, original.name, original.parameters, original.returnType,
         original.accessFlags, original.annotations, original.hiddenApiRestrictions,
@@ -416,13 +394,13 @@ private fun enumConstantName(constant: FieldReference): String? {
  */
 context(patchContext: BytecodePatchContext)
 private fun hookSaveRender(
-    render: Method,
+    render: MutableMethod,
     composerType: String,
     stateType: String,
 ) {
     val instructions = render.implementation?.instructions?.toList().orEmpty()
-    val thisRegister = mutable(render).p0Register
-    val composerRegister = mutable(render).parameterRegister(composerType)
+    val thisRegister = render.p0Register
+    val composerRegister = render.parameterRegister(composerType)
 
     fun staticCalls(matches: (MethodReference) -> Boolean): List<Int> =
         instructions.indices.filter { index ->
@@ -505,8 +483,7 @@ private fun hookSaveRender(
     instructions.indices.filter { instructions[it].opcode == Opcode.RETURN_OBJECT }.forEach {
         hooks += it to "invoke-static {}, $REEL_DOWNLOAD_DESCRIPTOR->end()V"
     }
-    val mutableRender = mutable(render)
     hooks.sortedByDescending { it.first }.forEach { (index, body) ->
-        mutableRender.addInstructions(index, body)
+        render.addInstructions(index, body)
     }
 }

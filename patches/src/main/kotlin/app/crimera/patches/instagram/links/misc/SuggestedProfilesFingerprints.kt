@@ -190,6 +190,7 @@ internal object ReelsSuggestedUsersExitFingerprint : Fingerprint(
 )
 
 internal object ReelsItemTypeFingerprint : Fingerprint(
+    superclass = "Ljava/lang/Enum;",
     name = "<clinit>",
     filters = listOf(
         string("NETEGO_SUGGESTED_USERS"),

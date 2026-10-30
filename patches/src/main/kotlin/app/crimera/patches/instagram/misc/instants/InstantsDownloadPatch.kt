@@ -15,7 +15,6 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 
 private const val INSTANTS_DOWNLOAD_HOOK_DESCRIPTOR = "$INSTANTS_DESCRIPTOR/InstantsDownloadHook;"
 
@@ -37,8 +36,8 @@ val instantsDownloadPatch =
 
         execute {
             val itemType = (InstantItemFingerprint.matchOrNull()
-                ?: InstantMediaItemFingerprint.matchSingle()).originalClassDef.type
-            val constructor = instantItemConstructorFingerprint(itemType).matchSingle().method
+                ?: InstantMediaItemFingerprint.match()).originalClassDef.type
+            val constructor = instantItemConstructorFingerprint(itemType).method
             if (constructor.parameterTypes.firstOrNull() != MEDIA_CLASS_NAME) {
                 throw PatchException("Expected the instant item's first constructor parameter to be Media")
             }

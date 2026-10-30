@@ -14,7 +14,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.getFreeRegisterProvider
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -56,12 +55,12 @@ val fixNotificationRegistrationCrashPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            NotificationTokenRegistrationFingerprint.matchSingle().let { match ->
-                match.method.apply {
+            NotificationTokenRegistrationFingerprint.let {
+                it.method.apply {
                     // Request code and flags share the zero register.
-                    val callIndex = match.instructionMatches.first().index
-                    val reference = match.instructionMatches.first().methodReference
-                    val registers = match.instructionMatches.first().instruction.registersUsed
+                    val callIndex = it.instructionMatches.first().index
+                    val reference = it.instructionMatches.first().methodReference
+                    val registers = it.instructionMatches.first().instruction.registersUsed
 
                     val flagsRegister =
                         getFreeRegisterProvider(

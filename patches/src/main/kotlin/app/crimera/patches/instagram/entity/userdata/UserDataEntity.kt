@@ -14,7 +14,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
 
 val userDataEntity =
@@ -30,7 +29,7 @@ val userDataEntity =
             )
             GetFullNameExtensionFingerprint.changeFirstString(FullNameLiveTreeUserDictFingerprint.originalMethod.name)
             GetUserFriendshipStatusExtensionFingerprint.changeFirstString(
-                FriendshipStatusLiveTreeUserDictFingerprint.matchSingle().originalMethod.name,
+                FriendshipStatusLiveTreeUserDictFingerprint.originalMethod.name,
             )
             GetBioExtensionFingerprint.changeFirstString(BiographyLiveTreeUserDictFingerprint.originalMethod.name)
             GetProfilePictureUrlExtensionFingerprint.changeFirstString(HDProfileInfoUserTreeDictFingerprint.originalMethod.name)

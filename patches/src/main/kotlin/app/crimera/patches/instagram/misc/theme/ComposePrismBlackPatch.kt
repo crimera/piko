@@ -10,9 +10,7 @@ import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -23,11 +21,11 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.util.findInstructionIndicesReversed
-import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
@@ -74,6 +72,9 @@ internal object ComposePrismBlackFingerprint : Fingerprint(
     ),
 )
 
+/**
+ * Matches two methods: SearchBarV1 and SearchBarV2.
+ */
 internal object ComposeSearchRowFingerprint : Fingerprint(
     returnType = "V",
     filters = listOf(
@@ -226,7 +227,7 @@ internal fun installComposePrismBlackRuntime(legacyAmoled: Boolean) {
 
 context(patchContext: BytecodePatchContext)
 private fun installComposeSearchRowBackgroundOverride() {
-    ComposeSearchRowFingerprint.let {
+    ComposeSearchRowFingerprint.matchAll(2..2).forEach {
         val paletteRead = it.instructionMatches.first()
         val alternateResult = it.instructionMatches.last()
         val register = paletteRead.getInstruction<OneRegisterInstruction>().registerA

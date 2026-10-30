@@ -16,21 +16,18 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
-import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patcher.util.writeRegister
-import app.morphe.util.indexOfFirstInstructionOrThrow
-import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
@@ -52,7 +49,7 @@ private const val CLICK_HANDLER_CONSTRUCTOR =
     "$CLICK_HANDLER_DESCRIPTOR-><init>($CONTEXT_DESCRIPTOR$USER_SESSION_DESCRIPTOR$OBJECT_DESCRIPTOR)V"
 private const val DOWNLOAD_ICON_METHOD = "pikoCreateDownloadIcon"
 
-private fun saveIconFingerprint(saveButtonId: Long, stateType: String) = Fingerprint(
+private fun saveIconFingerprint(stateType: String) = Fingerprint(
     parameters = listOf("L", "L", "L", stateType, "Z"),
     returnType = "L",
     filters = listOf(
@@ -70,7 +67,7 @@ private fun saveIconFingerprint(saveButtonId: Long, stateType: String) = Fingerp
         opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
         string("android.widget.Button", MatchAfterImmediately()),
         methodCall(parameters = listOf("L", "Ljava/lang/String;"), location = MatchAfterImmediately()),
-        literal(saveButtonId, location = MatchAfterWithin(4)),
+        resourceLiteral(ResourceType.ID, "row_feed_button_save", location = MatchAfterWithin(4)),
         methodCall(parameters = listOf("L", "I"), location = MatchAfterImmediately()),
         methodCall(parameters = listOf("L", FUNCTION1_DESCRIPTOR)),
         opcode(Opcode.CONST),
@@ -86,12 +83,8 @@ private fun saveIconFingerprint(saveButtonId: Long, stateType: String) = Fingerp
 
 /** The download component is added by the caller, independently of the save helper's visibility. */
 context(patchContext: BytecodePatchContext)
-internal fun injectLithoDownloadButton(
-    saveButtonId: Long,
-    downloadDrawableId: Long,
-    stateType: String,
-) {
-    val save = saveIconFingerprint(saveButtonId, stateType).matchSingle()
+internal fun injectLithoDownloadButton(stateType: String) {
+    val save = saveIconFingerprint(stateType)
     val matches = save.instructionMatches
     val neutralStyle = matches[0].fieldReference
     val alignment = matches[1].fieldReference
@@ -136,7 +129,7 @@ internal fun injectLithoDownloadButton(
             opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
             methodCall(smali = COMPONENT_LIST_ADD, location = MatchAfterImmediately()),
         ),
-    ).matchSingle()
+    )
     val builder = caller.method
     val callMatches = caller.instructionMatches
     val saveIndex = callMatches[0].index
@@ -227,7 +220,7 @@ internal fun injectLithoDownloadButton(
                 invoke-static {v6}, $INTEGER_VALUE_OF
                 move-result-object v6
                 sget-object v4, $CENTER_SCALE_TYPE
-                const v7, ${downloadDrawableId.toInt()}
+                const v7, ${resourceId(ResourceType.DRAWABLE, "instagram_download_outline_24").toInt()}
                 const/4 v9, 0
                 new-instance v3, ${iconConstructor.definingClass}
                 invoke-direct/range {v3 .. v9}, $iconConstructor

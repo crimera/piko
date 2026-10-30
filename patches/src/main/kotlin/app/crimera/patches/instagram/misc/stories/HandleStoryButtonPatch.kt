@@ -18,14 +18,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
@@ -59,11 +57,13 @@ object SelfStoryAddStoryButtonFingerprint : Fingerprint(
 
 // The method is obfuscated but this is where the onclick call executes.
 internal object OnCLickStoryButtonFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     strings = listOf("explore_viewer", "friendships/mute_friend_reel/%s/", "[INTERNAL] Pause Playback"),
 )
 
 internal object SelfStoryOnCLickStoryButtonFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     strings = listOf("story_interactions/bulk_story_like/", "[INTERNAL] Pause Playback"),
 )
@@ -78,8 +78,8 @@ val handleStoryButtonPatch =
 
             val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
             listOf(
-                SelfStoryAddStoryButtonFingerprint.matchSingle(),
-                AddStoryButtonFingerprint.matchOrNull() ?: ExtractedStoryButtonFingerprint.matchSingle(),
+                SelfStoryAddStoryButtonFingerprint.match(),
+                AddStoryButtonFingerprint.matchOrNull() ?: ExtractedStoryButtonFingerprint.match(),
             ).forEach {
                 val listIndex = it.instructionMatches.last().index
                 val arrayListRegister = it.instructionMatches.last().instruction.registersUsed.single()
@@ -117,9 +117,9 @@ val handleStoryButtonPatch =
                     val dismissListenerParameterIndex = parameters.indices.singleOrNull {
                         parameters[it].type == dismissListener
                     } ?: throw PatchException("Expected one story menu dismiss listener parameter")
-                    if (!AccessFlags.STATIC.isSet(accessFlags) || p0Register < 5 ||
-                        characterSequenceParameterIndex < 0 || selfClassParameterIndex < 0
-                    ) throw PatchException("Unexpected story menu click parameters or local registers")
+                    if (p0Register < 5 || characterSequenceParameterIndex < 0 || selfClassParameterIndex < 0) {
+                        throw PatchException("Unexpected story menu click parameters or local registers")
+                    }
 
                     // Hard coding registries as it's going to be the first line in the method.
                     addInstructionsWithLabels(

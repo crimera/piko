@@ -20,7 +20,6 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -103,7 +102,7 @@ val hideFeedPostsPatch = bytecodePatch(
     compatibleWith(COMPATIBILITY_INSTAGRAM)
 
     execute {
-        val match = MainFeedModelsFingerprint.matchSingle()
+        val match = MainFeedModelsFingerprint.match()
         val countRegisters = match.instructionMatches[2].instruction.registersUsed
         val moveRegisters = match.instructionMatches[4].instruction.registersUsed
         val branchRegisters = match.instructionMatches[5].instruction.registersUsed
@@ -130,7 +129,7 @@ val hideFeedPostsPatch = bytecodePatch(
             ExternalLabel("piko_original", match.method.getInstruction(insertIndex)),
         )
 
-        val footer = mainFeedFooterFingerprint(match.method.definingClass).matchSingle()
+        val footer = mainFeedFooterFingerprint(match.method.definingClass)
         val footerStart = footer.instructionMatches[1]
         val footerScratch = footer.instructionMatches[2].instruction.registersUsed
         val footerReceiver = footerStart.instruction.registersUsed
@@ -151,7 +150,7 @@ val hideFeedPostsPatch = bytecodePatch(
             ExternalLabel("piko_feed_complete", footer.method.getInstruction(footer.instructionMatches[7].index)),
         )
 
-        MainFeedLoadMoreFingerprint.matchSingle().method.stopHiddenFeedLoading()
+        MainFeedLoadMoreFingerprint.method.stopHiddenFeedLoading()
         enableSettings("hideFeedPosts")
     }
 }

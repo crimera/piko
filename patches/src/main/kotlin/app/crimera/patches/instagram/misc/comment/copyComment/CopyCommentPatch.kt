@@ -20,7 +20,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
 
 // Thanks to MyInsta.
@@ -64,15 +63,15 @@ val copyCommentPatch =
             )
             addButtonInterface(CopyUsernameButtonExtensionFingerprint)
 
-            commentButtonLabelFingerprint(stringClass).matchSingle().let { match ->
-                val getString = match.instructionMatches.last()
+            commentButtonLabelFingerprint(stringClass).let {
+                val getString = it.instructionMatches.last()
                 val registers = getString.instruction.registersUsed
                 val invoke = if (registers.all { it <= 15 }) {
                     "invoke-static {v${registers[0]}, v${registers[1]}}"
                 } else {
                     "invoke-static/range {v${registers[0]} .. v${registers[1]}}"
                 }
-                match.method.replaceInstruction(
+                it.method.replaceInstruction(
                     getString.index,
                     "$invoke, $COPY_USERNAME_BUTTON_EXTENSION_CLASS->getLabel(Landroid/content/Context;I)Ljava/lang/String;",
                 )

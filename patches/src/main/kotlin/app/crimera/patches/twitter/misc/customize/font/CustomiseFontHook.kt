@@ -18,7 +18,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
 private object CustomFontHookFingerprint : Fingerprint(
-    definingClass = "emoji2/text",
+    definingClass = "Landroidx/emoji2/text",
     filters =
         listOf(
             string("end should be < than charSequence length"),

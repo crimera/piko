@@ -24,7 +24,6 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val MEDIA_CLASS = "Lcom/instagram/feed/media/Media;"
@@ -76,13 +75,13 @@ val disableAdsPatch =
                 )
             }
 
-            val isAd = FeedAdInsertionFingerprint.matchSingle().instructionMatches.last().methodReference
+            val isAd = FeedAdInsertionFingerprint.instructionMatches.last().methodReference
 
             // Following can receive ads in the response itself, bypassing the injection hook above.
-            ContextualFeedFilterFingerprint.matchSingle().let { match ->
-                val getMedia = match.instructionMatches.last().methodReference
+            ContextualFeedFilterFingerprint.let {
+                val getMedia = it.instructionMatches.last().methodReference
 
-                match.method.addInstructionsWithLabels(
+                it.method.addInstructionsWithLabels(
                     1,
                     """
                     ${Constants.PREF_CALL_DESCRIPTOR}->disableAds()Z
@@ -98,7 +97,7 @@ val disableAdsPatch =
                     const/4 v0, 0x0
                     return v0
                     """.trimIndent(),
-                    ExternalLabel("piko_original", match.method.getInstruction(1)),
+                    ExternalLabel("piko_original", it.method.getInstruction(1)),
                 )
             }
 

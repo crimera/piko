@@ -21,10 +21,9 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.findFreeRegister
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val HIDE_SHARE_BUTTON = "$PREF_CALL_DESCRIPTOR->hideShareButton()Z"
@@ -48,7 +47,7 @@ val hideShareButtonPatch = bytecodePatch(
             returnType = "Z",
             parameters = listOf("Lcom/instagram/clips/intf/ClipsViewerConfig;", "L", "L", "L"),
             filters = listOf(string("android_purge_26_q3_UfiUseCase_shouldShowShareButton")),
-        ).matchSingle().method
+        ).method
         val scratch = reels.findFreeRegister(0)
         // Instagram's false result selects the hidden state for both the button and count.
         reels.addInstructionsWithLabels(
@@ -66,7 +65,7 @@ val hideShareButtonPatch = bytecodePatch(
             returnType = "Ljava/lang/String;",
             parameters = emptyList(),
             filters = listOf(string("StoryReshareButtonViewComponent")),
-        ).matchSingle().originalMethod.definingClass
+        ).originalMethod.definingClass
         // The component has separate button and label visibility gates, shared by
         // both layouts. Leave its independent layout-selection boolean untouched.
         val storyStates = listOf(
@@ -84,16 +83,16 @@ val hideShareButtonPatch = bytecodePatch(
                     fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN),
                     opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
                 ) + tail,
-            ).matchSingle()
+            )
         }
-        storyStates.sortedByDescending { it.instructionMatches.first().index }.forEach { match ->
-            val read = match.instructionMatches.first()
+        storyStates.sortedByDescending { it.instructionMatches.first().index }.forEach { fingerprint ->
+            val read = fingerprint.instructionMatches.first()
             val registers = read.instruction.registersUsed
-            if (registers.size != 2 || match.instructionMatches[1].instruction.registersUsed != listOf(registers[0])) {
+            if (registers.size != 2 || fingerprint.instructionMatches[1].instruction.registersUsed != listOf(registers[0])) {
                 throw PatchException("Unexpected story share visibility branch")
             }
             val visible = registers[0]
-            match.method.addInstructionsWithLabels(
+            fingerprint.method.addInstructionsWithLabels(
                 read.index + 1,
                 """
                 if-eqz v$visible, :original
@@ -101,7 +100,7 @@ val hideShareButtonPatch = bytecodePatch(
                 move-result v$visible
                 xor-int/lit8 v$visible, v$visible, 0x1
                 """.trimIndent(),
-                ExternalLabel("original", match.method.getInstruction(read.index + 1)),
+                ExternalLabel("original", fingerprint.method.getInstruction(read.index + 1)),
             )
         }
         enableSettings("hideShareButton")

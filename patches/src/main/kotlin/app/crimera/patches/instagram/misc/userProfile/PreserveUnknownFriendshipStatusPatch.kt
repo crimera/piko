@@ -15,14 +15,13 @@ import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -71,19 +70,19 @@ val preserveUnknownFriendshipStatusPatch = bytecodePatch(
             parameters = listOf(BOXED_BOOLEAN),
             returnType = "V",
             filters = listOf(string("is_following_current_user")),
-        ).matchSingle().originalMethod
+        ).originalMethod
         val updater = Fingerprint(
             definingClass = "Lcom/instagram/user/model/UserExtKt;",
             parameters = listOf(USER_MODEL_CLASS_NAME, "Z"),
             returnType = "V",
             filters = listOf(methodCall(reference = currentUserSetter)),
-        ).matchSingle().originalMethod
+        ).originalMethod
         val followedByGetter = Fingerprint(
             definingClass = USER_MODEL_CLASS_NAME,
             parameters = emptyList(),
             returnType = BOXED_BOOLEAN,
             filters = listOf(string("followed_by")),
-        ).matchSingle().originalMethod
+        ).originalMethod
 
         fun updaterCall() = methodCall(reference = updater, location = MatchAfterImmediately())
 
@@ -97,7 +96,7 @@ val preserveUnknownFriendshipStatusPatch = bytecodePatch(
                 opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
                 updaterCall(),
             ),
-        ).matchSingle().let {
+        ).let {
             val converterIndex = it.instructionMatches[2].index
             val sourceRegister = it.instructionMatches[1].getInstruction<OneRegisterInstruction>().registerA
             it.method.addInstructionsWithLabels(

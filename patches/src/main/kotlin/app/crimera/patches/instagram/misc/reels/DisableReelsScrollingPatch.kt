@@ -12,6 +12,7 @@ private object ClipsViewPagerImplGetViewAtIndexFingerprint : Fingerprint(
 )
 
 private object ClipsSwipeRefreshLayoutOnInterceptTouchEventFingerprint : Fingerprint (
+    name = "onInterceptTouchEvent",
     parameters = listOf("Landroid/view/MotionEvent;"),
     definingClass = "Linstagram/features/clips/viewer/ui/ClipsSwipeRefreshLayout;"
 )

@@ -28,25 +28,21 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.patches.all.misc.resources.getResourceId
-import app.morphe.patches.all.misc.resources.resourceMappingPatch
-import app.morphe.patcher.util.findFreeRegister
-import app.morphe.patcher.util.matchSingle
-import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.Method
 
 internal const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 internal const val INTEGER_DESCRIPTOR = "Ljava/lang/Integer;"
@@ -135,7 +131,7 @@ private object CurrentMediaIndexFingerprint : Fingerprint(
     name = "currentMediaIndex",
 )
 
-private fun feedRowHolderConstructorFingerprint(saveButtonId: Long) = Fingerprint(
+private object FeedRowHolderConstructorFingerprint : Fingerprint(
     name = "<init>",
     returnType = "V",
     parameters = listOf(VIEW_DESCRIPTOR),
@@ -148,7 +144,7 @@ private fun feedRowHolderConstructorFingerprint(saveButtonId: Long) = Fingerprin
             opcode = Opcode.IPUT_OBJECT,
             location = MatchAfterImmediately(),
         ),
-        literal(saveButtonId),
+        resourceLiteral(ResourceType.ID, "row_feed_button_save"),
     ),
 )
 
@@ -180,7 +176,6 @@ val feedDownloadButtonPatch =
             originalSoundDataIntfEntity,
             trackDataIntfEntity,
             decoderEntity,
-            resourceMappingPatch,
             // Loads `SettingsStatus` at startup and registers the download settings screen.
             settingsPatch,
             addResourcesPatch,
@@ -193,14 +188,9 @@ val feedDownloadButtonPatch =
             // Only applied through "Download media", which enables the download section itself.
             enableSettings("feedDownloadButton")
 
-            val saveButtonId = getResourceId(ResourceType.ID, "row_feed_button_save")
-            val stateType = hookFeedRowBinder(saveButtonId)
+            val stateType = hookFeedRowBinder()
             pinMainFeedToViewUfi()
-            injectLithoDownloadButton(
-                saveButtonId,
-                getResourceId(ResourceType.DRAWABLE, "instagram_download_outline_24"),
-                stateType,
-            )
+            injectLithoDownloadButton(stateType)
         }
     }
 
@@ -211,11 +201,11 @@ val feedDownloadButtonPatch =
  * @return the type of the row state the binder receives.
  */
 context(patchContext: BytecodePatchContext)
-private fun hookFeedRowBinder(saveButtonId: Long): String {
-    val holderMatch = feedRowHolderConstructorFingerprint(saveButtonId).matchSingle()
-    val holderClass = holderMatch.originalClassDef
+private fun hookFeedRowBinder(): String {
+    val holder = FeedRowHolderConstructorFingerprint
+    val holderClass = holder.originalClassDef
     val holderType = holderClass.type
-    val rootViewField = holderMatch.instructionMatches[1].fieldReference
+    val rootViewField = holder.instructionMatches[1].fieldReference
 
     val stateType =
         requireOne(
@@ -239,7 +229,7 @@ private fun hookFeedRowBinder(saveButtonId: Long): String {
     CurrentMediaIndexFingerprint.changeString("feedViewStateField", viewStateField.name)
     CurrentMediaIndexFingerprint.changeString("feedCurrentMediaField", CURRENT_MEDIA_FIELD.name)
 
-    val bind = feedUfiBindFingerprint(holderType, stateType).matchSingle().method
+    val bind = feedUfiBindFingerprint(holderType, stateType).method
     val sessionField = requireOne(
         "UserSession field of ${bind.definingClass}",
         patchContext.classDefBy(bind.definingClass).fields.filter { it.type == USER_SESSION_DESCRIPTOR },
