@@ -9,7 +9,9 @@ package app.crimera.patches.instagram.misc.customise.font
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.newInstance
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
@@ -50,5 +52,75 @@ internal object ReactNativeFontRegistrationFingerprint : Fingerprint(
         methodCall(opcode = Opcode.INVOKE_INTERFACE, parameters = emptyList(), returnType = TYPEFACE_CLASS),
         opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
         string("Optimistic VF App Lite ", MatchAfterWithin(3)),
+    )
+)
+
+internal fun paintTypefaceFingerprint(contentFontClasses: Set<String>) = Fingerprint(
+    filters = listOf(
+        anyInstruction(
+            methodCall(
+                definingClass = "Landroid/graphics/Paint;",
+                name = "setTypeface",
+                parameters = listOf(TYPEFACE_CLASS),
+            ),
+            methodCall(
+                definingClass = "Landroid/text/TextPaint;",
+                name = "setTypeface",
+                parameters = listOf(TYPEFACE_CLASS),
+            )
+        )
     ),
+    custom = { _, classDef ->
+        !classDef.type.startsWith(FONT_EXTENSION_PACKAGE)
+        && classDef.type !in contentFontClasses
+    }
+)
+
+internal fun platformSpanFingerprint(contentFontClasses: Set<String>) = Fingerprint(
+    filters = listOf(
+        anyInstruction(
+            newInstance("Landroid/text/style/TypefaceSpan;"),
+            newInstance("Landroid/text/style/TextAppearanceSpan;"),
+        )
+    )
+)
+
+internal const val EXTENSION_PACKAGE = "Lapp/morphe/extension/"
+
+internal fun contentFontResolverFingerprint(typefaceRepository: String) = Fingerprint(
+    returnType = TYPEFACE_CLASS,
+    filters = listOf(
+        methodCall(definingClass = typefaceRepository)
+    ),
+    custom = { method, classDef ->
+        !classDef.type.startsWith(FONT_EXTENSION_PACKAGE) &&
+            method.parameterTypes.firstOrNull() == typefaceRepository
+    },
+)
+
+internal val platformTextWidgetFingerprint = Fingerprint(
+    filters = listOf(
+        anyInstruction(
+            *PLATFORM_TEXT_WIDGETS.map { methodCall(definingClass = it) }.toTypedArray()
+        ),
+    ),
+    custom = { _, classDef ->
+        !classDef.type.startsWith(FONT_EXTENSION_PACKAGE) &&
+            classDef.superclass in PLATFORM_TEXT_WIDGETS
+    },
+)
+
+internal val pikoWidgetCreatorFingerprint = Fingerprint(
+    filters = listOf(
+        anyInstruction(
+            newInstance("Landroid/widget/TextView;"),
+            newInstance("Landroid/widget/Button;"),
+            newInstance("Landroid/widget/CheckBox;"),
+            newInstance("Landroid/widget/EditText;"),
+        ),
+    ),
+    custom = { _, classDef ->
+        classDef.type.startsWith(EXTENSION_PACKAGE) &&
+            !classDef.type.startsWith(FONT_EXTENSION_PACKAGE)
+    },
 )

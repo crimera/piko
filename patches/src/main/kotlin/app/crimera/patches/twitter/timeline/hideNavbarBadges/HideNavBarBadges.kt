@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 
-private object setBadgeNumberFingerprint : Fingerprint(
+private object BadgeNumberFingerprint : Fingerprint(
     definingClass = "/BadgeableTabView;",
     name = "setBadgeNumber",
 )
@@ -29,7 +29,7 @@ val hideNavBarBadgesPatch =
         dependsOn(settingsPatch)
 
         execute {
-            setBadgeNumberFingerprint.method.apply {
+            BadgeNumberFingerprint.method.apply {
                 addInstructions(
                     0,
                     """
