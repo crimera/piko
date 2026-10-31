@@ -27,8 +27,8 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -57,6 +57,9 @@ internal object FollowListConfigConstructorFingerprint : Fingerprint(
     returnType = "V",
     name = "<init>",
     parameters = listOf("Landroid/os/Bundle;", USER_SESSION_CLASS, FOLLOW_LIST_DATA_CLASS),
+    filters = listOf(
+        fieldAccess(type = FOLLOW_LIST_DATA_CLASS, opcode = Opcode.IPUT_OBJECT)
+    )
 )
 
 /**
@@ -85,7 +88,7 @@ val friendshipStatusIndicatorPatch =
     bytecodePatch(
         name = "Friendship status indicator",
         description =
-            "Adds a follows you back status label on the profile page and" +
+            "Adds a follows you back status label on the profile page and " +
                 "shows a detailed friendship status breakdown on click",
     ) {
 

@@ -124,7 +124,7 @@ internal object GetPostTypeKeyExtensionFingerprint : Fingerprint(
 // -----------------------------------
 
 internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
-    definingClass = "/InstagramMainActivity;",
+    definingClass = "Lcom/instagram/mainactivity/InstagramMainActivity;",
     filters = listOf(
         string("nme_ig_post_post_creation_notif"),
         // Mentioned user.

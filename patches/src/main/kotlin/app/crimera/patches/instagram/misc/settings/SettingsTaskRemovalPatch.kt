@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -88,12 +89,15 @@ internal val settingsTaskRemovalPatch = bytecodePatch {
             throw PatchException("Authentication service has unverified task lifecycle behavior")
         }
 
-        mutableClassDefBy(SETTINGS_RESTART).methods.single {
-            it.name == "taskServiceClassName" && it.parameterTypes.isEmpty() &&
-                it.returnType == "Ljava/lang/String;"
-        }.apply {
-            replaceInstruction(0, "const-string v0, \"$taskServiceName\"")
-        }
+        Fingerprint(
+            definingClass = SETTINGS_RESTART,
+            name = "taskServiceClassName",
+            returnType = "Ljava/lang/String;",
+            parameters = listOf()
+        ).method.replaceInstruction(
+            0,
+            "const-string v0, \"$taskServiceName\""
+        )
 
         // Reuse a registered, in-process bound service so mount installs need no manifest change.
         // Its constructor, account-authenticator creation and binder remain untouched.
