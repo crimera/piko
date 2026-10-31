@@ -13,7 +13,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.iface.ExceptionHandler
 import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.TryBlock
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -413,7 +415,7 @@ private fun Method.parameterRegister(parameterIndex: Int): Int {
     }
 }
 
-private fun Method.provesParameterValue(
+internal fun Method.provesParameterValue(
     targetIndex: Int,
     targetRegister: Int,
     parameterRegister: Int,
@@ -444,9 +446,11 @@ private fun Method.valueProvenanceAt(
     val implementation = implementation ?: return false
     val code = implementation.instructions.toList()
     if (targetIndex !in code.indices || originRegister !in 0 until implementation.registerCount ||
-        originInstruction != null && originInstruction !in code.indices || implementation.tryBlocks.isNotEmpty()
+        originInstruction != null && originInstruction !in code.indices
     ) return false
-    val edges = code.controlFlowEdges() ?: return false
+    // The expected token is the origin plus the requested word: a wide origin tokens its low and high words.
+    val originWord = originInstruction?.let { index -> code[index].sourceWordOffset(originRegister) ?: return false } ?: 0
+    val edges = code.controlFlowEdges(implementation.tryBlocks) ?: return false
     val input = arrayOfNulls<IntArray>(code.size)
     val initial = IntArray(implementation.registerCount) { UNKNOWN_VALUE }
     if (originInstruction == null) initial[originRegister] = PARAMETER_VALUE
@@ -468,14 +472,17 @@ private fun Method.valueProvenanceAt(
                 val movedValue = movedFrom?.let { inState.getOrElse(it) { UNKNOWN_VALUE } } ?: UNKNOWN_VALUE
                 outState[destination] = movedValue
                 if (instruction.opcode.setsWideRegister() && destination + 1 < outState.size) {
-                    outState[destination + 1] = UNKNOWN_VALUE
+                    // A wide move carries its high word; every other wide write leaves it unknown.
+                    val movedHigh = movedFrom?.takeIf { instruction.opcode in WIDE_MOVE_OPCODES }
+                        ?.let { inState.getOrElse(it + 1) { UNKNOWN_VALUE } } ?: UNKNOWN_VALUE
+                    outState[destination + 1] = movedHigh
                 }
             }
         }
         if (originInstruction == index && destination != null) {
             outState[destination] = index
             if (instruction.opcode.setsWideRegister() && destination + 1 < outState.size) {
-                outState[destination + 1] = UNKNOWN_VALUE
+                outState[destination + 1] = index + 1
             }
         }
         edges[index].forEach { edge ->
@@ -498,9 +505,21 @@ private fun Method.valueProvenanceAt(
         }
     }
     val state = input[targetIndex] ?: return false
-    val expected = originInstruction ?: PARAMETER_VALUE
+    val expected = originInstruction?.let { index -> index + originWord } ?: PARAMETER_VALUE
     return state.getOrElse(targetRegister) { UNKNOWN_VALUE } == expected
 }
+
+/** Word offset of [register] within this instruction's destination pair, or null when it is not a write source. */
+private fun Instruction.sourceWordOffset(register: Int): Int? {
+    val destination = destinationRegisterOrNull() ?: return null
+    return when {
+        register == destination -> 0
+        register == destination + 1 && opcode.setsWideRegister() -> 1
+        else -> null
+    }
+}
+
+private val WIDE_MOVE_OPCODES = setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
 
 private fun Instruction.destinationRegisterOrNull(): Int? {
     if (!opcode.setsRegister()) return null
@@ -531,10 +550,17 @@ private val MOVE_OPCODES = setOf(
 
 private data class FlowEdge(val target: Int, val exceptional: Boolean)
 
-private fun List<Instruction>.controlFlowEdges(): List<List<FlowEdge>>? {
+/**
+ * Decodes normal and exception edges. Each try range adds an exception edge from every
+ * throwing instruction it covers to each of its handlers; those edges carry the pre-instruction
+ * state. A malformed range or handler address fails closed.
+ */
+private fun List<Instruction>.controlFlowEdges(
+    tryBlocks: List<TryBlock<out ExceptionHandler>>,
+): List<List<FlowEdge>>? {
     val offsets = runningFold(0) { address, instruction -> address + instruction.codeUnits }
     val indexByOffset = offsets.dropLast(1).withIndex().associate { (index, offset) -> offset to index }
-    return mapIndexed { index, instruction ->
+    val normalEdges = mapIndexed { index, instruction ->
         val opcode = instruction.opcode
         val offset = offsets[index]
         fun target(offset: Int): Int? = indexByOffset[offset]
@@ -563,19 +589,96 @@ private fun List<Instruction>.controlFlowEdges(): List<List<FlowEdge>>? {
             else -> (index + 1).takeIf { it < size }?.let { listOf(FlowEdge(it, false)) }.orEmpty()
         }
     }
+    val edges = normalEdges.map { it.toMutableList() }
+    for (block in tryBlocks) {
+        if (block.codeUnitCount <= 0) return null
+        val start = indexByOffset[block.startCodeAddress] ?: return null
+        val endAddress = block.startCodeAddress + block.codeUnitCount
+        val end = if (endAddress == offsets.last()) size else (indexByOffset[endAddress] ?: return null)
+        if (start >= end) return null
+        if (block.exceptionHandlers.isEmpty()) return null
+        val handlers = block.exceptionHandlers.map { handler ->
+            indexByOffset[handler.handlerCodeAddress] ?: return null
+        }
+        for (index in start until end) {
+            if (!this[index].opcode.canThrow()) continue
+            handlers.forEach { handler -> edges[index] += FlowEdge(handler, true) }
+        }
+    }
+    return edges.map { it.distinct() }
 }
 
 internal fun MutableMethod.hasOnlyFallThroughInto(index: Int): Boolean {
     val implementation = implementation ?: return false
     if (implementation.tryBlocks.isNotEmpty() || index <= 0 || index >= instructions.size) return false
-    val edges = instructions.toList().controlFlowEdges() ?: return false
+    val edges = instructions.toList().controlFlowEdges(implementation.tryBlocks) ?: return false
     val predecessors = edges.flatMapIndexed { source, successors ->
         successors.filter { edge -> !edge.exceptional && edge.target == index }.map { source }
     }
     return predecessors == listOf(index - 1)
 }
 
-private fun Instruction.argumentRegister(reference: MethodReference, parameterIndex: Int): Int? {
+/**
+ * Successor indices over every edge, normal and exception. Null when the method cannot be decoded
+ * or a try block is malformed.
+ */
+internal fun Method.controlFlowSuccessors(): List<List<Int>>? {
+    val implementation = implementation ?: return null
+    val edges = implementation.instructions.toList().controlFlowEdges(implementation.tryBlocks) ?: return null
+    return edges.map { successors -> successors.map { it.target } }
+}
+
+/**
+ * Successor indices over normal (non-exceptional) edges. Exception edges from try ranges are
+ * excluded, so reachability over this table is an under-approximation. Null when the method cannot
+ * be decoded or a try block is malformed.
+ */
+internal fun Method.normalControlFlowSuccessors(): List<List<Int>>? {
+    val implementation = implementation ?: return null
+    val edges = implementation.instructions.toList().controlFlowEdges(implementation.tryBlocks) ?: return null
+    return edges.map { successors -> successors.filter { !it.exceptional }.map { it.target } }
+}
+
+/**
+ * Indices reachable from [entry] over this successor table, including the entry itself. Null when
+ * the entry or any successor is outside the table, so callers fail closed.
+ */
+internal fun List<List<Int>>.reachableIndicesFrom(entry: Int): Set<Int>? {
+    if (entry !in indices) return null
+    val reached = linkedSetOf<Int>()
+    val pending = ArrayDeque(listOf(entry))
+    while (pending.isNotEmpty()) {
+        val index = pending.removeFirst()
+        if (!reached.add(index)) continue
+        val successors = getOrNull(index) ?: return null
+        for (successor in successors) {
+            if (successor !in indices) return null
+            pending += successor
+        }
+    }
+    return reached
+}
+
+/** Entry index per case key of a packed or sparse switch, and the fallthrough index taken when no key matches. */
+internal data class SwitchEntries(val byKey: Map<Int, Int>, val fallthrough: Int)
+
+internal fun Method.switchEntries(switchIndex: Int): SwitchEntries? {
+    val implementation = implementation ?: return null
+    val code = implementation.instructions.toList()
+    val switch = code.getOrNull(switchIndex) ?: return null
+    if (switch.opcode != Opcode.PACKED_SWITCH && switch.opcode != Opcode.SPARSE_SWITCH) return null
+    val offsets = code.runningFold(0) { address, instruction -> address + instruction.codeUnits }
+    val indexByOffset = offsets.dropLast(1).withIndex().associate { (index, offset) -> offset to index }
+    val payloadIndex = indexByOffset[offsets[switchIndex] + (switch as OffsetInstruction).codeOffset] ?: return null
+    val payload = code.getOrNull(payloadIndex) as? SwitchPayload ?: return null
+    val byKey = payload.switchElements.associate { element ->
+        element.key to (indexByOffset[offsets[switchIndex] + element.offset] ?: return null)
+    }
+    val fallthrough = (switchIndex + 1).takeIf { it < code.size } ?: return null
+    return SwitchEntries(byKey, fallthrough)
+}
+
+internal fun Instruction.argumentRegister(reference: MethodReference, parameterIndex: Int): Int? {
     if (parameterIndex !in reference.parameterTypes.indices) return null
     val registers = registersUsed
     var word = if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) 0 else 1

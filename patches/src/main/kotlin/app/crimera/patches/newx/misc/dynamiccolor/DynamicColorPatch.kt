@@ -1382,11 +1382,9 @@ private const val TAB_TINT_METHOD = "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->tabTint(
 private const val TAB_SECONDARY_TINT_METHOD =
     "$DYNAMIC_COLOR_PALETTE_DESCRIPTOR->tabSecondaryTint(J)J"
 private const val TAB_RENDERER_SCOPE = "Lcom/x/ui/common/tabs/"
-private const val PROFILE_INDICATOR_SCOPE = "Landroidx/compose/foundation/text/"
 private const val INDICATOR_COLOR_LABEL = "indicatorColor"
 private const val COMPOSE_MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
-private const val JAVA_LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val COMPOSE_FOUNDATION_SCOPE = "Landroidx/compose/foundation/"
 
 /**
@@ -1395,7 +1393,7 @@ private const val COMPOSE_FOUNDATION_SCOPE = "Landroidx/compose/foundation/"
  * releases. Framework slot-table, density, and color-unpack reads are noise and excluded, as
  * are the resolved Horizon reads. Callers pass the resolved Horizon descriptor.
  */
-private val FRAMEWORK_OWNER_PREFIXES = listOf(
+internal val FRAMEWORK_OWNER_PREFIXES = listOf(
     "Landroidx/",
     "Lkotlin/",
     "Lkotlinx/",
@@ -1459,16 +1457,6 @@ private fun isTabIndicatorRenderer(method: Method): Boolean {
     } && hasFoundationBackground(instructions)
 }
 
-private fun isProfileTabIndicator(method: Method, horizon: String): Boolean {
-    val instructions = method.implementation?.instructions?.toList().orEmpty()
-    val reads = wideReadsByOwner(method, horizon)
-    // The profile indicator stopped reading the tab package's static width in 12.27;
-    // the semantic color-to-foundation-background flow remains unchanged.
-    if (reads.size != 1) return false
-    val ownerReads = reads.values.first()
-    return ownerReads.size == 1 && hasFoundationBackground(instructions)
-}
-
 private fun tabSlotColorsFingerprint(horizon: String) = Fingerprint(
     definingClass = TAB_RENDERER_SCOPE,
     custom = { method, _ -> isTabSlotColors(method, horizon) },
@@ -1479,53 +1467,42 @@ private object NewXTabIndicatorRendererFingerprint : Fingerprint(
     custom = { method, _ -> isTabIndicatorRenderer(method) },
 )
 
-private fun profileTabIndicatorFingerprint(horizon: String) = Fingerprint(
-    definingClass = PROFILE_INDICATOR_SCOPE,
-    returnType = "Ljava/lang/Object;",
-    custom = { method, classDef ->
-        // Do not include nested framework helpers such as text/selection; only the direct
-        // foundation/text lambda owns the profile indicator in the supported shapes.
-        classDef.type.removePrefix(PROFILE_INDICATOR_SCOPE).contains('/') == false &&
-            isProfileTabIndicator(method, horizon)
-    },
-)
-
 context(context: BytecodePatchContext)
 private fun patchTabTints(horizon: String) {
     val slots = tabSlotColorsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
     val indicatorMatches = NewXTabIndicatorRendererFingerprint.scopedMatchAllOrNull().orEmpty()
-    val profileMatches = profileTabIndicatorFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
     val slotMatch = requireAtMostOne("NewX tab slot renderer", slots)
     val indicatorMatch = requireAtMostOne("NewX tab indicator renderer", indicatorMatches)
-    val profileMatch = requireAtMostOne("NewX profile tab indicator", profileMatches)
-    val containerReference = slotMatch?.method?.resolveTabContainerReference(horizon)
-    // Releases without a dedicated profile painter share the container indicator for timeline
-    // and profile tabs; that sharing is proven by profile code calling the tabs container.
-    val sharingProof =
-        if (profileMatch == null && containerReference != null) {
-            profileSharesContainerIndicator(containerReference)
-        } else {
-            emptyList()
-        }
-    val sharingMatch =
-        requireAtMostOne("NewX profile/container indicator sharing proof", sharingProof)
-    val sharedIndicator = profileMatch == null && sharingMatch != null
-    if (
-        slotMatch != null &&
-            indicatorMatch != null &&
-            (profileMatch != null || sharedIndicator)
-    ) {
-        slotMatch.method.injectTabSlotTints(horizon)
-        indicatorMatch.method.injectTabIndicatorTint()
-        profileMatch?.method?.injectProfileTabIndicatorTint(horizon)
-        return
+    if (slotMatch == null || indicatorMatch == null) {
+        throw PatchException(
+            "NewX tab tint shapes are unmapped: slots=${slots.size}, " +
+                "indicator=${indicatorMatches.size} for $horizon: " +
+                (slots + indicatorMatches).joinToString(),
+        )
     }
-    throw PatchException(
-        "NewX tab tint shapes are unmapped: slots=${slots.size}, " +
-            "indicator=${indicatorMatches.size}, profile=${profileMatches.size} for $horizon: " +
-            (slots + indicatorMatches + profileMatches).joinToString(),
-    )
+    // Resolve every site before the first mutation: the slot tints and the indicator
+    // parameter tint must not shift the callback's instruction indices.
+    val site = resolveTabIndicatorTintSite(slotMatch.method, horizon) { descriptor ->
+        context.mutableClassDefByOrNull(descriptor)
+    }
+    val callbackMethod = site.method as? MutableMethod
+        ?: throw PatchException("NewX tab indicator callback is not mutable: ${site.method}")
+    if (
+        callbackMethod.isSameMethodAs(slotMatch.method) ||
+            callbackMethod.isSameMethodAs(indicatorMatch.method)
+    ) {
+        throw PatchException("NewX tab indicator callback shares a method with another tint site")
+    }
+    slotMatch.method.injectTabSlotTints(horizon)
+    indicatorMatch.method.injectTabIndicatorTint()
+    callbackMethod.injectTabIndicatorCallbackTint(site)
 }
+
+private fun Method.isSameMethodAs(other: Method): Boolean =
+    definingClass == other.definingClass &&
+        name == other.name &&
+        returnType == other.returnType &&
+        parameterTypes.map(CharSequence::toString) == other.parameterTypes.map(CharSequence::toString)
 
 /** The J field read is the indexable anchor; [isComposeModifierBackground] stays the shape check. */
 private object XdsChromeBackgroundFingerprint : Fingerprint(
@@ -2448,67 +2425,6 @@ private fun String.registerWidth(): Int = if (this == "J" || this == "D") 2 else
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 
-private fun MethodReference.isTabContainerRenderer(): Boolean {
-    val parameters = parameterTypes.map(CharSequence::toString)
-    return definingClass.startsWith(TAB_RENDERER_SCOPE) &&
-        returnType == "V" &&
-        COMPOSE_MODIFIER_DESCRIPTOR in parameters &&
-        COMPOSE_RUNTIME_COMPOSER_DESCRIPTOR in parameters &&
-        "J" in parameters &&
-        (
-            parameters.firstOrNull() == JAVA_LIST_DESCRIPTOR ||
-                (
-                    parameters.size == 7 &&
-                        parameters.firstOrNull()?.startsWith(TAB_RENDERER_SCOPE) == true &&
-                        parameters.count { parameter -> parameter == "Ljava/lang/String;" } == 1 &&
-                        parameters.count { parameter -> parameter == "J" } == 1 &&
-                        parameters.count { parameter -> parameter == FUNCTION0_DESCRIPTOR } == 1 &&
-                        parameters.count { parameter -> parameter == "I" } == 1
-                    )
-            )
-}
-
-private fun Instruction.firstStaticArgumentRegister(): Int? =
-    if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) {
-        registersUsed.firstOrNull()
-    } else {
-        null
-    }
-
-private fun MutableMethod.resolveTabContainerReference(horizon: String): MethodReference {
-    val calls = instructions.withIndex().filter { indexed ->
-        val instruction = indexed.value
-        (instruction.opcode == Opcode.INVOKE_STATIC ||
-            instruction.opcode == Opcode.INVOKE_STATIC_RANGE) &&
-            instruction.getReference<MethodReference>()?.let { reference ->
-                reference.isTabContainerRenderer() &&
-                    hasTabContainerArgumentFlow(indexed.index, reference, horizon)
-            } == true
-    }
-    val call = requireExactlyOne("NewX tabs container call in slot renderer", calls)
-    return call.value.getReference<MethodReference>()
-        ?: throw PatchException("NewX tabs container call reference is missing: $this")
-}
-
-private val OBJECT_MOVE_OPCODES =
-    setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
-
-private fun Instruction.objectDestinationRegister(): Int? =
-    when {
-        opcode in OBJECT_MOVE_OPCODES -> (this as? TwoRegisterInstruction)?.registerA
-        opcode == Opcode.IGET_OBJECT -> (this as? TwoRegisterInstruction)?.registerA
-        opcode == Opcode.AGET_OBJECT -> (this as? ThreeRegisterInstruction)?.registerA
-        opcode == Opcode.NEW_INSTANCE ||
-            opcode == Opcode.MOVE_RESULT_OBJECT ||
-            opcode == Opcode.SGET_OBJECT ||
-            opcode == Opcode.CHECK_CAST ||
-            opcode == Opcode.MOVE_EXCEPTION ||
-            opcode == Opcode.CONST_STRING ||
-            opcode == Opcode.CONST_STRING_JUMBO ||
-            opcode == Opcode.CONST_CLASS -> (this as? OneRegisterInstruction)?.registerA
-        else -> null
-    }
-
 private val TAB_WIDE_MOVE_OPCODES =
     setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16)
 
@@ -2542,185 +2458,6 @@ private fun List<Instruction>.invokeArgumentRegister(
     return getOrNull(callIndex)?.registersUsed?.getOrNull(wordOffset)
 }
 
-private fun List<Instruction>.wideArgumentFlowsFromPalette(
-    callIndex: Int,
-    argumentRegister: Int,
-    horizon: String,
-): Boolean {
-    val pending = mutableListOf(callIndex to argumentRegister)
-    val visited = mutableSetOf<Pair<Int, Int>>()
-    while (pending.isNotEmpty()) {
-        val (searchEnd, register) = pending.removeAt(pending.lastIndex)
-        if (!visited.add(searchEnd to register)) continue
-        val definitionIndex =
-            (searchEnd - 1 downTo 0).firstOrNull { index ->
-                this[index].wideDestinationRegister() == register
-            } ?: continue
-        val definition = this[definitionIndex]
-        when (definition.opcode) {
-            in TAB_WIDE_MOVE_OPCODES -> {
-                val sourceRegister = definition.wideSourceRegister() ?: continue
-                pending += definitionIndex to sourceRegister
-            }
-            Opcode.IGET_WIDE,
-            Opcode.SGET_WIDE,
-            -> {
-                val field = definition.getReference<FieldReference>() ?: continue
-                if (
-                    field.type == "J" &&
-                        field.definingClass != horizon &&
-                        FRAMEWORK_OWNER_PREFIXES.none(field.definingClass::startsWith)
-                ) {
-                    return true
-                }
-            }
-            else -> continue
-        }
-    }
-    return false
-}
-
-private fun List<Instruction>.objectArgumentFlowsFromDescriptor(
-    callIndex: Int,
-    argumentRegister: Int,
-    descriptor: String,
-    parameterRegister: Int? = null,
-): Boolean {
-    val pending = mutableListOf(callIndex to argumentRegister)
-    val visited = mutableSetOf<Pair<Int, Int>>()
-    while (pending.isNotEmpty()) {
-        val (searchEnd, register) = pending.removeAt(pending.lastIndex)
-        if (!visited.add(searchEnd to register)) continue
-            val definitionIndex =
-            (searchEnd - 1 downTo 0).firstOrNull { index ->
-                this[index].objectDestinationRegister() == register
-            } ?: return parameterRegister == register
-        val definition = this[definitionIndex]
-        if (definition.opcode in OBJECT_MOVE_OPCODES) {
-            val move = definition as? TwoRegisterInstruction ?: continue
-            pending += definitionIndex to move.registerB
-            continue
-        }
-        val producedDescriptor =
-            when (definition.opcode) {
-                Opcode.NEW_INSTANCE,
-                Opcode.CHECK_CAST,
-                -> definition.getReference<TypeReference>()?.type
-                Opcode.SGET_OBJECT,
-                Opcode.IGET_OBJECT,
-                -> definition.getReference<FieldReference>()?.type
-                Opcode.MOVE_RESULT_OBJECT ->
-                    this.getOrNull(definitionIndex - 1)
-                        ?.getReference<MethodReference>()
-                        ?.returnType
-                else -> null
-            }
-        if (producedDescriptor == descriptor) return true
-    }
-    return false
-}
-
-private fun MutableMethod.hasTabContainerArgumentFlow(
-    callIndex: Int,
-    reference: MethodReference,
-    horizon: String,
-): Boolean {
-    val parameters = reference.parameterTypes.map(CharSequence::toString)
-    val firstArgumentRegister =
-        instructions.invokeArgumentRegister(callIndex, reference, 0) ?: return false
-    if (parameters.firstOrNull() == JAVA_LIST_DESCRIPTOR) {
-        return instructions.objectArgumentFlowsFromList(callIndex, firstArgumentRegister) ||
-            (
-                parameterTypes.firstOrNull()?.toString()?.isListDescriptor() == true &&
-                    instructions.objectArgumentFlowsFromDescriptor(
-                        callIndex,
-                        firstArgumentRegister,
-                        parameterTypes.first().toString(),
-                        implementation?.registerCount?.minus(numberOfParameterRegisters),
-                    )
-                )
-    }
-    val wideParameterIndex = parameters.indexOfFirst { parameter -> parameter == "J" }
-    val wideArgumentRegister =
-        instructions.invokeArgumentRegister(callIndex, reference, wideParameterIndex)
-            ?: return false
-    return instructions.objectArgumentFlowsFromDescriptor(
-        callIndex,
-        firstArgumentRegister,
-        parameters.firstOrNull() ?: return false,
-    ) && instructions.wideArgumentFlowsFromPalette(callIndex, wideArgumentRegister, horizon)
-}
-
-private fun String.isListDescriptor(): Boolean =
-    this == JAVA_LIST_DESCRIPTOR ||
-        this == "Ljava/util/Collection;" ||
-        this == "Ljava/util/ArrayList;" ||
-        (startsWith("Ljava/util/") &&
-            (endsWith("List;") || endsWith("Collection;")))
-
-private fun List<Instruction>.listSourceDescriptor(
-    index: Int,
-): String? {
-    val instruction = this[index]
-    return when (instruction.opcode) {
-        Opcode.NEW_INSTANCE,
-        Opcode.CHECK_CAST,
-        -> instruction.getReference<TypeReference>()?.type
-        Opcode.SGET_OBJECT,
-        Opcode.IGET_OBJECT,
-        -> instruction.getReference<FieldReference>()?.type
-        Opcode.MOVE_RESULT_OBJECT ->
-            getOrNull(index - 1)?.getReference<MethodReference>()?.returnType
-        else -> null
-    }
-}
-
-private fun List<Instruction>.objectArgumentFlowsFromList(
-    callIndex: Int,
-    argumentRegister: Int,
-): Boolean {
-    val pending = mutableListOf(callIndex to argumentRegister)
-    val visited = mutableSetOf<Pair<Int, Int>>()
-    while (pending.isNotEmpty()) {
-        val (searchEnd, register) = pending.removeAt(pending.lastIndex)
-        if (!visited.add(searchEnd to register)) continue
-        val definitionIndex = (searchEnd - 1 downTo 0).firstOrNull { index ->
-            this[index].objectDestinationRegister() == register
-        } ?: continue
-        val definition = this[definitionIndex]
-        if (definition.opcode in OBJECT_MOVE_OPCODES) {
-            val move = definition as? TwoRegisterInstruction ?: continue
-            pending += definitionIndex to move.registerB
-            continue
-        }
-        if (listSourceDescriptor(definitionIndex)?.isListDescriptor() == true) return true
-    }
-    return false
-}
-
-context(context: BytecodePatchContext)
-private fun profileSharesContainerIndicator(containerReference: MethodReference): List<Match> =
-    Fingerprint(
-        definingClass = "Lcom/x/profile/",
-        custom = { method, _ ->
-            val instructions = method.implementation?.instructions?.toList().orEmpty()
-            val calls = instructions.withIndex().filter { indexed ->
-                val instruction = indexed.value
-                (instruction.opcode == Opcode.INVOKE_STATIC ||
-                    instruction.opcode == Opcode.INVOKE_STATIC_RANGE) &&
-                    instruction.getReference<MethodReference>()?.toString() ==
-                        containerReference.toString()
-            }
-            if (calls.size != 1) {
-                false
-            } else {
-                val call = calls[0]
-                call.value.firstStaticArgumentRegister()?.let { argumentRegister ->
-                    instructions.objectArgumentFlowsFromList(call.index, argumentRegister)
-                } == true
-            }
-        },
-    ).scopedMatchAllOrNull().orEmpty()
 private fun MutableMethod.injectTabSlotTints(horizon: String) {
     val reads =
         requireExactlyOne(
@@ -2772,32 +2509,15 @@ private fun MutableMethod.injectTabIndicatorTint() {
     }
 }
 
-private fun MutableMethod.injectProfileTabIndicatorTint(horizon: String) {
-    val reads = wideReadsByOwner(this, horizon)
-    val brandReads = reads.values.flatten()
-    val brandSites =
-        brandReads.filter { (index, _) ->
-            instructions.drop(index + 1).take(4).any { instruction ->
-                instruction.getReference<MethodReference>()?.let { reference ->
-                    reference.definingClass.startsWith(COMPOSE_FOUNDATION_SCOPE) &&
-                        reference.parameterTypes.getOrNull(0) == COMPOSE_MODIFIER_DESCRIPTOR &&
-                        "J" in reference.parameterTypes &&
-                        reference.returnType == COMPOSE_MODIFIER_DESCRIPTOR
-                } == true
-            }
-        }
-    val brandSite = requireExactlyOne("NewX profile tab indicator tint site", brandSites)
-    val colorRegister =
-        (brandSite.value as? OneRegisterInstruction)?.registerA
-            ?: throw PatchException("NewX profile tab indicator has no color register: $this")
+private fun MutableMethod.injectTabIndicatorCallbackTint(site: TabIndicatorTintSite) {
     insertHook(
-        index = brandSite.index + 1,
-        // The old insertion left labels on the brand color read: a branch that reached the read
-        // directly was not tinted before and is not tinted now.
+        index = site.loadIndex + 1,
+        // Labels stay on the original instruction, so a path that reaches another color read
+        // bypasses this tint, matching the slot tint policy.
         relocateBranchTargets = false,
     ) {
-        invokeStatic(methodReference(TAB_TINT_METHOD), colorRegister, colorRegister + 1)
-        moveResult(colorRegister, "J")
+        invokeStatic(methodReference(TAB_TINT_METHOD), site.colorRegister, site.colorRegister + 1)
+        moveResult(site.colorRegister, "J")
     }
 }
 

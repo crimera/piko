@@ -6,6 +6,10 @@
 
 package app.crimera.patches.newx.misc.replysorting
 
+import app.crimera.patches.newx.misc.inlineactions.normalControlFlowSuccessors
+import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
+import app.crimera.patches.newx.misc.inlineactions.reachableIndicesFrom
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
@@ -31,7 +35,9 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -227,6 +233,107 @@ private fun seedFeedsRequest(
     return false
 }
 
+/**
+ * A validated selection: the check-cast that narrows the selected callback parameter to the
+ * resolved ranking enum, and the field store of that same value. [register] is the store's value
+ * register, which holds the chosen enum on every incoming path to [storeIndex].
+ */
+internal data class ReplySortingSelectionSite(
+    val castIndex: Int,
+    val storeIndex: Int,
+    val register: Int,
+)
+
+/**
+ * Resolves the single cast-to-store tuple that persists the reply-sorting choice. The callback
+ * parameter is located from the instance-method register layout, and the cast and store are proven
+ * through the shared all-path provenance helpers, so branch-local moves and clobbers are handled
+ * without assuming adjacency or fixed registers.
+ */
+internal fun resolveReplySortingSelectionSite(
+    method: Method,
+    enumClass: String,
+    defaultUrtIndex: Int,
+): ReplySortingSelectionSite {
+    val implementation = method.implementation
+        ?: throw PatchException("Reply sorting selection handler has no implementation")
+    if (AccessFlags.STATIC.isSet(method.accessFlags) ||
+        method.parameterTypes.map(CharSequence::toString) != listOf("Ljava/lang/Object;")
+    ) {
+        throw PatchException(
+            "Unexpected reply sorting selection handler parameters: ${method.parameterTypes}",
+        )
+    }
+    // The receiver and the single Object argument occupy the last two registers.
+    val selectedParameterRegister = implementation.registerCount - 1
+    if (selectedParameterRegister < 1) {
+        throw PatchException("Invalid reply sorting selection handler register layout")
+    }
+
+    val instructions = implementation.instructions.toList()
+    val anchorInstruction = instructions.getOrNull(defaultUrtIndex)
+    if (anchorInstruction?.getReference<StringReference>()?.string != "defaultUrtTimelineComponent") {
+        throw PatchException(
+            "Reply sorting selection boundary index $defaultUrtIndex is not the defaultUrtTimelineComponent anchor in $method",
+        )
+    }
+    val castSites = instructions.withIndex().mapNotNull { (index, instruction) ->
+        if (index >= defaultUrtIndex || instruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
+        val cast = instruction as? OneRegisterInstruction ?: return@mapNotNull null
+        if (instruction.getReference<TypeReference>()?.type != enumClass) return@mapNotNull null
+        if (!method.provesParameterValue(index, cast.registerA, selectedParameterRegister)) {
+            return@mapNotNull null
+        }
+        index to cast.registerA
+    }
+
+    val successors = method.normalControlFlowSuccessors()
+        ?: throw PatchException("Reply sorting selection handler has unsupported control flow: $method")
+    val sites = castSites.flatMap { (castIndex, castRegister) ->
+        instructions.withIndex().mapNotNull { (storeIndex, instruction) ->
+            if (storeIndex <= castIndex || storeIndex >= defaultUrtIndex) return@mapNotNull null
+            if (instruction.opcode != Opcode.IPUT_OBJECT) return@mapNotNull null
+            val store = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
+            val fieldType = instruction.getReference<FieldReference>()?.type
+            if (fieldType != "Ljava/lang/Object;" && fieldType != enumClass) return@mapNotNull null
+            // A store in an unrelated returning arm cannot feed the boundary, so it is not a selection.
+            if (defaultUrtIndex !in successors.reachableIndicesFrom(storeIndex).orEmpty()) {
+                return@mapNotNull null
+            }
+            if (!method.provesValueFromInstruction(castIndex, castRegister, storeIndex, store.registerA)) {
+                return@mapNotNull null
+            }
+            ReplySortingSelectionSite(castIndex, storeIndex, store.registerA)
+        }
+    }
+
+    return requireExactlyOne(
+        label = "reply sorting selection cast-to-store site for $enumClass",
+        candidates = sites,
+        describe = { site ->
+            "$method cast@${site.castIndex} store@${site.storeIndex} " +
+                "field=${instructions[site.storeIndex].getReference<FieldReference>()} v${site.register}"
+        },
+    )
+}
+
+/**
+ * Remembers the chosen ranking mode immediately before the validated store. Branch targets are
+ * relocated so every incoming path to the store runs the remember call, and the original store and
+ * its later refresh stay intact.
+ */
+internal fun MutableMethod.installReplySortingSelectionHook(site: ReplySortingSelectionSite) {
+    insertHook(
+        index = site.storeIndex,
+        relocateBranchTargets = true,
+    ) {
+        invokeStatic(
+            methodReference("$REPLY_SORTING_RESOLVER_DESCRIPTOR->remember(Ljava/lang/Object;)V"),
+            site.register,
+        )
+    }
+}
+
 @Suppress("unused")
 val newXDefaultReplySortingPatch =
     bytecodePatch(
@@ -351,102 +458,24 @@ val newXDefaultReplySortingPatch =
                         .orEmpty(),
                 )
             val selectionMethod = selectionMatch.method
-            val selectionImplementation =
-                selectionMethod.implementation
-                    ?: throw PatchException("Reply sorting selection handler has no implementation")
-            val defaultUrtCandidates = selectionMatch.instructionMatches.filter { matchedInstruction ->
-                matchedInstruction.instruction.getReference<StringReference>()?.string ==
-                    "defaultUrtTimelineComponent"
-            }
+            // Resolve the anchor from the live method rather than the cached match indexes, so earlier
+            // mutations to this method cannot leave the boundary stale.
+            val defaultUrtCandidates =
+                selectionMethod.instructions.withIndex().filter { (_, instruction) ->
+                    instruction.getReference<StringReference>()?.string == "defaultUrtTimelineComponent"
+                }
             val defaultUrtAnchor =
                 requireExactlyOne(
                     label = "selection handler defaultUrtTimelineComponent anchor",
                     candidates = defaultUrtCandidates,
                 )
-            val defaultUrtIndex = defaultUrtAnchor.index
-            val selectionParameter =
-                requireExactlyOne(
-                    label = "reply sorting selection handler parameter",
-                    candidates = selectionMethod.parameterTypes,
+            val selectionSite =
+                resolveReplySortingSelectionSite(
+                    method = selectionMethod,
+                    enumClass = enumClass,
+                    defaultUrtIndex = defaultUrtAnchor.index,
                 )
-            if (selectionParameter != "Ljava/lang/Object;") {
-                throw PatchException(
-                    "Unexpected reply sorting selection handler parameters: " +
-                        selectionMethod.parameterTypes,
-                )
-            }
-            val parameterRegisterCount = selectionMethod.parameterTypes.sumOf { type ->
-                if (type == "J" || type == "D") 2 else 1
-            }
-            val selectedParameterRegister = selectionImplementation.registerCount - parameterRegisterCount
-            if (selectedParameterRegister < 0) {
-                throw PatchException("Invalid reply sorting selection handler register layout")
-            }
-
-            // The merged callback may move p1 into a local before casting it. Resolve the cast
-            // from parameter data flow rather than the receiver cast.
-            val selectionInstructions = selectionMethod.instructions
-            val directParameterCheckCasts =
-                selectionInstructions.withIndex()
-                    .filter { (index, instruction) ->
-                        index < defaultUrtIndex &&
-                            instruction.opcode == Opcode.CHECK_CAST &&
-                            (instruction as? OneRegisterInstruction)?.registerA == selectedParameterRegister
-                    }
-                    .map { it.index }
-            val objectMoveOpcodes =
-                setOf(
-                    Opcode.MOVE_OBJECT,
-                    Opcode.MOVE_OBJECT_FROM16,
-                    Opcode.MOVE_OBJECT_16,
-                )
-            val movedParameterCheckCasts =
-                selectionInstructions.withIndex().mapNotNull { (index, instruction) ->
-                    if (index >= defaultUrtIndex || instruction.opcode !in objectMoveOpcodes) return@mapNotNull null
-                    val move = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
-                    if (move.registerB != selectedParameterRegister) return@mapNotNull null
-                    val nextInstruction = selectionInstructions.getOrNull(index + 1) ?: return@mapNotNull null
-                    if (nextInstruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
-                    val checkCast = nextInstruction as? OneRegisterInstruction ?: return@mapNotNull null
-                    if (checkCast.registerA != move.registerA) return@mapNotNull null
-                    index + 1
-                }
-            val parameterCheckCastIndices =
-                (directParameterCheckCasts + movedParameterCheckCasts).distinct()
-            val rankingModeCheckCastIndices = parameterCheckCastIndices.filter { index ->
-                selectionInstructions[index]
-                    .getReference<TypeReference>()
-                    ?.type == enumClass
-            }
-            val checkCastIndex =
-                requireExactlyOne(
-                    label = "selection-parameter cast matching resolved reply ranking enum $enumClass",
-                    candidates = rankingModeCheckCastIndices,
-                )
-            val checkCastInstruction =
-                selectionInstructions[checkCastIndex] as? OneRegisterInstruction
-                    ?: throw PatchException("Reply sorting selection check-cast has no register")
-            val checkedType = checkCastInstruction.getReference<TypeReference>()?.type
-            if (checkedType != enumClass) {
-                throw PatchException(
-                    "Reply sorting selection parameter cast type $checkedType does not match " +
-                        "resolved reply ranking enum $enumClass",
-                )
-            }
-            val selectedRegister = checkCastInstruction.registerA
-
-            selectionMethod.insertHook(
-                index = checkCastIndex + 1,
-                // The check-cast is the only producer of the selected ranking mode, so a branch
-                // that targeted the instruction behind it must keep skipping the remember call,
-                // exactly as the plain insertion did.
-                relocateBranchTargets = false,
-            ) {
-                invokeStatic(
-                    methodReference("$REPLY_SORTING_RESOLVER_DESCRIPTOR->remember(Ljava/lang/Object;)V"),
-                    selectedRegister,
-                )
-            }
+            selectionMethod.installReplySortingSelectionHook(selectionSite)
 
             // Patch the Compose reply sorting UI state initializer so the button label
             // and sheet selection reflect the configured default instead of Relevance.

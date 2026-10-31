@@ -47,7 +47,17 @@ import app.crimera.patches.newx.timeline.isNewPostFabHostCandidate
 import app.crimera.patches.newx.timeline.primaryPostFabRendererCallIndices
 import app.crimera.patches.newx.timeline.readsArrayListFromParameter
 import app.crimera.patches.newx.timeline.timelineModuleDividerItemIndices
+import app.crimera.patches.newx.misc.dynamiccolor.resolveTabIndicatorTintSite
+import app.crimera.patches.newx.misc.replysorting.installReplySortingSelectionHook
+import app.crimera.patches.newx.misc.replysorting.resolveReplySortingSelectionSite
 import app.crimera.tools.lint.ResolverLinter
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -2282,6 +2292,537 @@ class NewXResolverLinterTest {
             emptySet<HiddenApiRestriction>(),
             implementation.methodImplementation,
         )
+    }
+
+    private val replyEnum = "Lfixture/RankingMode;"
+    private val tabHorizon = "Lcom/x/ui/horizon/Palette;"
+    private val xdsColors = "Lcom/x/ui/xds/XdsColors;"
+    private val backgroundMethod =
+        "Landroidx/compose/foundation/BackgroundKt;->background(Landroidx/compose/ui/Modifier;JLandroidx/compose/ui/graphics/Shape;)Landroidx/compose/ui/Modifier;"
+
+    @Test
+    fun `reply sorting selection resolves the validated cast-to-store tuple through every positive form`() {
+        for (shape in listOf("adjacent", "entryMove", "multiHop", "returningOverwrite", "unrelatedStore", "postCastMove", "tryUnrelated")) {
+            val method = replySelectionFixture(shape)
+            val instructions = method.implementation!!.instructions.toList()
+            val site = resolveReplySortingSelectionSite(method, replyEnum, method.defaultUrtIndex())
+            assertEquals(
+                instructions.subList(0, method.defaultUrtIndex()).indexOfLast { it.opcode == Opcode.IPUT_OBJECT },
+                site.storeIndex,
+                "$shape must select the store on the defaultUrt path, not an earlier returning arm",
+            )
+            assertEquals(Opcode.CHECK_CAST, instructions[site.castIndex].opcode, shape)
+            assertEquals(replyEnum, ((instructions[site.castIndex] as ReferenceInstruction).reference as TypeReference).type, shape)
+            assertEquals(Opcode.IPUT_OBJECT, instructions[site.storeIndex].opcode, shape)
+            assertEquals(site.register, (instructions[site.storeIndex] as TwoRegisterInstruction).registerA, shape)
+            assertTrue(site.storeIndex < method.defaultUrtIndex(), shape)
+        }
+    }
+
+    @Test
+    fun `reply sorting selection rejects wrong enum, reaching clobber, missing store, and ambiguous tuples`() {
+        for (shape in listOf("wrongEnum", "clobber", "noStore", "twoTuples", "onlyUnrelatedStore", "tryClobber")) {
+            val method = replySelectionFixture(shape)
+            assertFailsWith<PatchException>(shape) {
+                resolveReplySortingSelectionSite(method, replyEnum, method.defaultUrtIndex())
+            }
+        }
+    }
+
+    @Test
+    fun `reply sorting hook remembers the validated enum immediately before its store and keeps incoming branches on it`() {
+        val method = MutableMethod(replySelectionFixture("adjacent"))
+        val site = resolveReplySortingSelectionSite(method, replyEnum, method.defaultUrtIndex())
+
+        method.installReplySortingSelectionHook(site)
+
+        val code = method.instructions.toList()
+        val store = code.indexOfFirst { it.opcode == Opcode.IPUT_OBJECT }
+        assertEquals(site.storeIndex + 1, store, "the original store must shift past the inserted call")
+        val remember = code[store - 1]
+        assertEquals(Opcode.INVOKE_STATIC, remember.opcode)
+        val reference = (remember as ReferenceInstruction).reference as MethodReference
+        assertEquals("remember", reference.name)
+        assertEquals(listOf("Ljava/lang/Object;"), reference.parameterTypes.map(CharSequence::toString))
+        assertEquals(listOf(site.register), remember.registersUsed)
+        assertEquals(site.register, (code[store] as TwoRegisterInstruction).registerA)
+        val branch = code.first { it.opcode == Opcode.IF_EQZ } as BuilderOffsetInstruction
+        assertEquals(store - 1, branch.target.location.index, "the incoming branch must run remember before the store")
+    }
+
+    private fun Method.defaultUrtIndex(): Int = implementation!!.instructions.indexOfFirst { instruction ->
+        ((instruction as? ReferenceInstruction)?.reference as? StringReference)?.string == "defaultUrtTimelineComponent"
+    }
+
+    private fun replySelectionFixture(shape: String): ImmutableMethod {
+        val registers = 240
+        val parameter = registers - 1
+        val holder = "Lfixture/ReplyHolder;"
+        val implementation = MethodImplementationBuilder(registers).apply {
+            fun add(instruction: String) = addInstruction(instruction.toInstruction())
+            fun endSelection() {
+                add("const-string v6, \"defaultUrtTimelineComponent\"")
+                add("return-void")
+            }
+            // Copies the receiver into a low register and branches on a field read, so both arms are reachable.
+            fun unknownBranch(label: String) {
+                add("move-object/from16 v7, v238")
+                add("iget-boolean v5, v7, Lfixture/ReplySortingCallback;->inlined:Z")
+                addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 5, getLabel(label)))
+            }
+            // Unrelated arm 0 casts and stores the enum before the anchor, then returns; the selected
+            // fallthrough arm may or may not store it. Numeric order alone must not select arm 0.
+            fun unrelatedArmLayout(selectedStore: Boolean) {
+                add("move-object/from16 v0, v$parameter")
+                add("move-object/from16 v7, v238")
+                add("iget-byte v2, v7, Lfixture/ReplySortingCallback;->selector:B")
+                addInstruction(BuilderInstruction31t(Opcode.PACKED_SWITCH, 2, getLabel("payload")))
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("selected")))
+                addLabel("unrelated0")
+                add("check-cast v0, $replyEnum")
+                add("iput-object v0, v1, $holder->value:Ljava/lang/Object;")
+                add("return-void")
+                addLabel("selected")
+                if (selectedStore) {
+                    add("check-cast v0, $replyEnum")
+                    add("iput-object v0, v1, $holder->value:Ljava/lang/Object;")
+                }
+                add("const-string v6, \"defaultUrtTimelineComponent\"")
+                add("return-void")
+                addLabel("unrelated1")
+                add("return-void")
+                addLabel("payload")
+                addInstruction(BuilderPackedSwitchPayload(0, listOf(getLabel("unrelated0"), getLabel("unrelated1"))))
+            }
+            add("new-instance v1, $holder")
+            when (shape) {
+                "unrelatedStore" -> unrelatedArmLayout(selectedStore = true)
+                "onlyUnrelatedStore" -> unrelatedArmLayout(selectedStore = false)
+                "adjacent" -> {
+                    add("move-object/from16 v3, v$parameter")
+                    add("check-cast v3, $replyEnum")
+                    unknownBranch("store")
+                    add("nop")
+                    addLabel("store")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
+                "entryMove" -> {
+                    add("move-object/from16 v0, v$parameter")
+                    add("move-object/from16 v7, v238")
+                    add("iget-byte v2, v7, Lfixture/ReplySortingCallback;->selector:B")
+                    addInstruction(BuilderInstruction31t(Opcode.PACKED_SWITCH, 2, getLabel("payload")))
+                    add("check-cast v0, $replyEnum")
+                    add("iput-object v0, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                    addLabel("unrelated0")
+                    add("const/4 v0, 0x0")
+                    add("return-void")
+                    addLabel("unrelated1")
+                    add("const/4 v0, 0x1")
+                    add("return-void")
+                    addLabel("payload")
+                    addInstruction(BuilderPackedSwitchPayload(0, listOf(getLabel("unrelated0"), getLabel("unrelated1"))))
+                }
+                "multiHop" -> {
+                    add("move-object/16 v236, v$parameter")
+                    add("move-object/from16 v200, v236")
+                    add("move-object/from16 v3, v200")
+                    add("check-cast v3, $replyEnum")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
+                "returningOverwrite" -> {
+                    add("move-object/from16 v3, v$parameter")
+                    add("check-cast v3, $replyEnum")
+                    unknownBranch("overwrite")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                    addLabel("overwrite")
+                    add("const/4 v3, 0x0")
+                    add("return-void")
+                }
+                "postCastMove" -> {
+                    add("move-object/16 v200, v$parameter")
+                    add("check-cast v200, $replyEnum")
+                    add("move-object/from16 v3, v200")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
+                "tryUnrelated", "tryClobber" -> {
+                    // An unrelated call may throw into a handler that rejoins the store; only the clobbering handler breaks the alias.
+                    add("move-object/from16 v3, v$parameter")
+                    add("check-cast v3, $replyEnum")
+                    addLabel("tryStart")
+                    add("invoke-static {}, Lfixture/ReplyUnrelated;->ping()V")
+                    addLabel("tryEnd")
+                    addLabel("store")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                    addLabel("catch")
+                    if (shape == "tryClobber") add("const/4 v3, 0x0")
+                    addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("store")))
+                    addCatch("Ljava/lang/Throwable;", getLabel("tryStart"), getLabel("tryEnd"), getLabel("catch"))
+                }
+                "wrongEnum" -> {
+                    add("move-object/from16 v3, v$parameter")
+                    add("check-cast v3, Lfixture/OtherMode;")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
+                "clobber" -> {
+                    add("move-object/from16 v3, v$parameter")
+                    add("check-cast v3, $replyEnum")
+                    unknownBranch("store")
+                    add("const/4 v3, 0x0")
+                    addLabel("store")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
+                "noStore" -> {
+                    add("move-object/from16 v3, v$parameter")
+                    add("check-cast v3, $replyEnum")
+                    endSelection()
+                }
+                "twoTuples" -> {
+                    add("move-object/from16 v3, v$parameter")
+                    add("check-cast v3, $replyEnum")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    add("check-cast v3, $replyEnum")
+                    add("iput-object v3, v1, $holder->value:Ljava/lang/Object;")
+                    endSelection()
+                }
+                else -> error("unknown reply selection shape $shape")
+            }
+        }
+        return ImmutableMethod(
+            "Lfixture/ReplySortingCallback;", "invoke",
+            listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)), "V",
+            AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
+        )
+    }
+
+    @Test
+    fun `tab indicator tint follows the registry callback into the selected lambda arm across moved owners and selectors`() {
+        for ((lambdaType, selector) in listOf("Lfixture/tabs/LambdaA;" to 0x2a, "Lfixture/chrome/LambdaB;" to 7)) {
+            for (shape in listOf("plain", "moved", "range")) {
+                val (slot, classes) = tabIndicatorFixture(lambdaType, selector, shape)
+                val description = "$lambdaType $shape"
+                val site = resolveTabIndicatorTintSite(slot, tabHorizon, classes::get)
+                val invoke = classes.getValue(lambdaType).methods.single { it.name == "invoke" }
+                val instructions = invoke.implementation!!.instructions.toList()
+                assertEquals(invoke, site.method, description)
+                assertEquals(Opcode.SGET_WIDE, instructions[site.loadIndex].opcode, description)
+                assertTrue(
+                    (instructions[site.loadIndex] as ReferenceInstruction).reference.toString().endsWith("$xdsColors->brand:J"),
+                    description,
+                )
+                assertEquals((instructions[site.loadIndex] as OneRegisterInstruction).registerA, site.colorRegister, description)
+                assertEquals(Opcode.INVOKE_STATIC, instructions[site.callIndex].opcode, description)
+                assertEquals(
+                    "background",
+                    ((instructions[site.callIndex] as ReferenceInstruction).reference as MethodReference).name,
+                    description,
+                )
+                assertTrue(site.callIndex > site.loadIndex, description)
+            }
+        }
+    }
+
+    @Test
+    fun `tab indicator tint rejects disconnected overwritten and ambiguous callback paths`() {
+        for (variant in listOf(
+            "disconnected", "overwritten", "wrongSelector", "clobbered", "brandWrongCase", "ambiguous",
+            "mutableSelector", "statelessSwitch", "mutableCallback", "overwrittenSelector", "skippedSelector",
+            "catchClobber", "tryConstructor", "crossCaseCatch",
+        )) {
+            val (slot, classes) = tabIndicatorFixture("Lfixture/tabs/LambdaA;", 0x2a, "plain", variant)
+            assertFailsWith<PatchException>(variant) {
+                resolveTabIndicatorTintSite(slot, tabHorizon, classes::get)
+            }
+        }
+    }
+
+    /**
+     * Slot -> registry `<clinit>` -> Compose wrapper -> selector-driven lambda. [shape] moves the
+     * callback through copies or a range call and places a distant wide load. [variant] breaks one
+     * link of the chain for the negative cases.
+     */
+    private fun tabIndicatorFixture(
+        lambdaType: String,
+        selector: Int,
+        shape: String,
+        variant: String = "ok",
+    ): Pair<Method, Map<String, ImmutableClassDef>> {
+        val registry = "Lfixture/tabs/TabIndicatorRegistry;"
+        val wrapper = "Landroidx/compose/runtime/internal/ComposableLambdaImpl;"
+        val composer = "Landroidx/compose/runtime/Composer;"
+        val modifier = "Landroidx/compose/ui/Modifier;"
+        val objectType = "Ljava/lang/Object;"
+        val animation =
+            "Landroidx/compose/animation/AnimatedVisibilityKt;->AnimatedVisibility(ZLkotlin/jvm/functions/Function3;$composer$modifier" +
+                "I)V"
+        val written = if (variant == "disconnected") "offstage" else "indicator"
+        val field = "$registry->indicator:$objectType"
+        val publicStatic = AccessFlags.PUBLIC.value or AccessFlags.STATIC.value
+
+        fun method(
+            owner: String,
+            name: String,
+            parameters: List<String>,
+            returnType: String,
+            registers: Int,
+            static: Boolean,
+            body: MethodImplementationBuilder.() -> Unit,
+        ) = ImmutableMethod(
+            owner, name, parameters.map { ImmutableMethodParameter(it, emptySet(), null) }, returnType,
+            AccessFlags.PUBLIC.value or (if (static) AccessFlags.STATIC.value else 0) or
+                (if (name == "<init>" || name == "<clinit>") AccessFlags.CONSTRUCTOR.value else 0),
+            emptySet(), emptySet(), MethodImplementationBuilder(registers).apply(body).methodImplementation,
+        )
+        fun MethodImplementationBuilder.add(instruction: String) = addInstruction(instruction.toInstruction())
+
+        val slot = method(
+            "Lfixture/tabs/TabSlots;", "slot", listOf("Z", composer, modifier, "I"), "V", 9, true,
+        ) {
+            when (shape) {
+                "range" -> {
+                    add("move v4, v0")
+                    add("sget-object v5, $field")
+                    add("move-object v6, v1")
+                    add("move-object v7, v2")
+                    add("move v8, v3")
+                    add("invoke-static/range {v4 .. v8}, $animation")
+                }
+                "moved" -> {
+                    add("sget-object v5, $field")
+                    add("move-object v6, v5")
+                    add("move-object v4, v6")
+                    add("invoke-static {v0, v4, v1, v2, v3}, $animation")
+                }
+                else -> {
+                    add("sget-object v4, $field")
+                    add("invoke-static {v0, v4, v1, v2, v3}, $animation")
+                }
+            }
+            add("return-void")
+        }
+
+        val clinit = method(registry, "<clinit>", emptyList(), "V", 6, true) {
+            add("new-instance v0, $lambdaType")
+            if (variant == "statelessSwitch") {
+                add("invoke-direct {v0}, $lambdaType-><init>()V")
+            } else {
+                add("const/16 v1, ${if (variant == "wrongSelector") selector + 5 else selector}")
+                add("invoke-direct {v0, v1}, $lambdaType-><init>(B)V")
+            }
+            add("new-instance v2, $wrapper")
+            add("const/4 v3, 0x0")
+            add("const/4 v4, 0x1")
+            add("invoke-direct {v2, v3, v4, v0}, $wrapper-><init>(IZLjava/lang/Object;)V")
+            add("sput-object v2, $registry->$written:$objectType")
+            if (variant == "overwritten") {
+                add("const/4 v5, 0x0")
+                add("sput-object v5, $registry->$written:$objectType")
+            }
+            add("return-void")
+        }
+
+        val standardInvoke = method(
+            lambdaType, "invoke", listOf(objectType, objectType, objectType), objectType, 16, false,
+        ) {
+            add("const/4 v8, 0x0")
+            add("iget-byte v0, v12, $lambdaType->selector:B")
+            addInstruction(BuilderInstruction31t(Opcode.PACKED_SWITCH, 0, getLabel("payload")))
+            add("const/4 v1, 0x0")
+            add("return-object v1")
+            val selectedRead =
+                if (variant == "brandWrongCase") "$tabHorizon->surface:J" else "$xdsColors->brand:J"
+            val otherRead = when (variant) {
+                "brandWrongCase" -> "$xdsColors->brand:J"
+                "statelessSwitch" -> "$tabHorizon->surface:J"
+                else -> "$xdsColors->other:J"
+            }
+            addLabel("selected")
+            add("check-cast v13, $modifier")
+            add("sget-wide v2, $selectedRead")
+            if (variant == "clobbered") add("const-wide/16 v2, 0x0")
+            if (shape == "moved") {
+                repeat(3) { add("nop") }
+                add("move-wide/from16 v10, v2")
+            }
+            val (low, high) = if (shape == "moved") 10 to 11 else 2 to 3
+            add("invoke-static {v13, v$low, v$high, v8}, $backgroundMethod")
+            add("move-result-object v13")
+            if (variant == "ambiguous") {
+                add("sget-wide v2, $selectedRead")
+                add("invoke-static {v13, v2, v3, v8}, $backgroundMethod")
+                add("move-result-object v13")
+            }
+            add("return-object v13")
+            addLabel("other")
+            add("check-cast v13, $modifier")
+            add("sget-wide v2, $otherRead")
+            add("invoke-static {v13, v2, v3, v8}, $backgroundMethod")
+            add("move-result-object v13")
+            add("return-object v13")
+            addLabel("payload")
+            val firstKey = if (variant == "statelessSwitch") 1 else selector
+            addInstruction(BuilderPackedSwitchPayload(firstKey, listOf(getLabel("selected"), getLabel("other"))))
+        }
+
+        val wrapperClass = ImmutableClassDef(
+            wrapper, AccessFlags.PUBLIC.value, "Ljava/lang/Object;", emptyList(), null, emptySet(), emptyList(),
+            listOf(method(wrapper, "<init>", listOf("I", "Z", objectType), "V", 4, false) { add("return-void") }),
+        )
+        // Catch variants keep the same arms: the selected call sits in a try whose handler either preserves or clobbers
+        // the color register before rejoining the call, and the other arm carries an unrelated try.
+        val invoke = if (variant.startsWith("catch") || variant == "crossCaseCatch") {
+            method(lambdaType, "invoke", listOf(objectType, objectType, objectType), objectType, 16, false) {
+                add("const/4 v8, 0x0")
+                add("iget-byte v0, v12, $lambdaType->selector:B")
+                addInstruction(BuilderInstruction31t(Opcode.PACKED_SWITCH, 0, getLabel("payload")))
+                add("const/4 v1, 0x0")
+                add("return-object v1")
+                addLabel("selected")
+                add("check-cast v13, $modifier")
+                add("sget-wide v2, $xdsColors->brand:J")
+                addLabel("call")
+                addLabel("tryStart")
+                add("invoke-static {v13, v2, v3, v8}, $backgroundMethod")
+                addLabel("tryEnd")
+                add("move-result-object v13")
+                add("return-object v13")
+                addLabel("catch")
+                if (variant == "catchClobber") add("const-wide/16 v2, 0x0")
+                addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("call")))
+                addLabel("other")
+                add("check-cast v13, $modifier")
+                add("sget-wide v2, $xdsColors->other:J")
+                addLabel("otherStart")
+                add("invoke-static {v13, v2, v3, v8}, $backgroundMethod")
+                addLabel("otherEnd")
+                add("move-result-object v13")
+                add("return-object v13")
+                addLabel("otherCatch")
+                if (variant == "crossCaseCatch") {
+                    // The other case's handler enters the selected case's color call, sharing its scope.
+                    addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("call")))
+                } else {
+                    add("const/4 v1, 0x0")
+                    add("return-object v1")
+                }
+                addLabel("payload")
+                addInstruction(BuilderPackedSwitchPayload(selector, listOf(getLabel("selected"), getLabel("other"))))
+                addCatch("Ljava/lang/Throwable;", getLabel("tryStart"), getLabel("tryEnd"), getLabel("catch"))
+                addCatch("Ljava/lang/Throwable;", getLabel("otherStart"), getLabel("otherEnd"), getLabel("otherCatch"))
+            }
+        } else {
+            standardInvoke
+        }
+        // The synthetic selector is written only by its constructor, so it is final unless a variant says otherwise.
+        val selectorAccess =
+            AccessFlags.PRIVATE.value or (if (variant == "mutableSelector") 0 else AccessFlags.FINAL.value)
+        val constructor = if (variant == "statelessSwitch") {
+            method(lambdaType, "<init>", emptyList(), "V", 2, false) {
+                add("const/4 v0, 0x0")
+                add("iput-byte v0, v1, $lambdaType->selector:B")
+                add("return-void")
+            }
+        } else if (variant == "tryConstructor") {
+            // The only selector write sits in a try, so its dominance over the normal return is not proven.
+            method(lambdaType, "<init>", listOf("B"), "V", 3, false) {
+                addLabel("tryStart")
+                add("iput-byte v2, v1, $lambdaType->selector:B")
+                addLabel("tryEnd")
+                add("return-void")
+                addLabel("catch")
+                add("return-void")
+                addCatch("Ljava/lang/Throwable;", getLabel("tryStart"), getLabel("tryEnd"), getLabel("catch"))
+            }
+        } else {
+            method(lambdaType, "<init>", listOf("B"), "V", 3, false) {
+                // A nonzero selector returns before the only write, leaving the final field at its default 0.
+                if (variant == "skippedSelector") {
+                    addInstruction(BuilderInstruction21t(Opcode.IF_NEZ, 2, getLabel("return")))
+                }
+                add("iput-byte v2, v1, $lambdaType->selector:B")
+                if (variant == "overwrittenSelector") {
+                    // A second constructor write leaves the final field at 0 on every instance.
+                    add("const/4 v0, 0x0")
+                    add("iput-byte v0, v1, $lambdaType->selector:B")
+                }
+                if (variant == "skippedSelector") addLabel("return")
+                add("return-void")
+            }
+        }
+        val lambdaClass = ImmutableClassDef(
+            lambdaType, AccessFlags.PUBLIC.value or AccessFlags.FINAL.value, "Ljava/lang/Object;",
+            listOf("Lkotlin/jvm/functions/Function3;"), null, emptySet(),
+            listOf(ImmutableField(lambdaType, "selector", "B", selectorAccess, null, emptySet(), emptySet())),
+            listOf(constructor, invoke),
+        )
+        // The callback cache is a static singleton written once by <clinit>, so it is final unless a variant says otherwise.
+        val callbackAccess =
+            publicStatic or (if (variant == "mutableCallback") 0 else AccessFlags.FINAL.value)
+        val registryClass = ImmutableClassDef(
+            registry, AccessFlags.PUBLIC.value, "Ljava/lang/Object;", emptyList(), null, emptySet(),
+            listOf(
+                ImmutableField(registry, "indicator", objectType, callbackAccess, null, emptySet(), emptySet()),
+                ImmutableField(registry, "offstage", objectType, callbackAccess, null, emptySet(), emptySet()),
+            ),
+            listOf(clinit),
+        )
+        return slot to mapOf(registry to registryClass, wrapper to wrapperClass, lambdaType to lambdaClass)
+    }
+
+    @Test
+    fun `tab indicator tint survives an unrelated try and a catch that preserves the color alias`() {
+        val lambdaType = "Lfixture/tabs/LambdaA;"
+        val (slot, classes) = tabIndicatorFixture(lambdaType, 0x2a, "plain", "catchPreserves")
+        val site = resolveTabIndicatorTintSite(slot, tabHorizon, classes::get)
+        val invoke = classes.getValue(lambdaType).methods.single { it.name == "invoke" }
+        val instructions = invoke.implementation!!.instructions.toList()
+        fun reference(index: Int) = (instructions[index] as? ReferenceInstruction)?.reference?.toString().orEmpty()
+        assertEquals(
+            instructions.indexOfFirst { it.opcode == Opcode.SGET_WIDE && reference(instructions.indexOf(it)).endsWith("$xdsColors->brand:J") },
+            site.loadIndex,
+        )
+        assertEquals(
+            instructions.indexOfFirst { instruction ->
+                instruction.opcode == Opcode.INVOKE_STATIC &&
+                    ((instruction as? ReferenceInstruction)?.reference as? MethodReference)?.name == "background"
+            },
+            site.callIndex,
+        )
+    }
+
+    @Test
+    fun `wide source proof checks both words and rejects unrelated or overwritten sources on both proof paths`() {
+        fun wide(vararg lines: String): Method = ImmutableMethod(
+            "Lfixture/WideProof;", "probe", emptyList(), "J",
+            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(),
+            MethodImplementationBuilder(8).apply {
+                lines.forEach { addInstruction(it.toInstruction()) }
+            }.methodImplementation,
+        )
+
+        val intact = wide("const-wide v4, 0x1", "return-wide v4")
+        assertTrue(intact.provesValueFromInstruction(0, 4, 1, 4))
+        assertTrue(intact.provesValueFromInstruction(0, 5, 1, 5), "high word of a wide constant must be proven")
+        assertTrue(intact.provesValueFromInstructionOnSourcePaths(0, 4, 1, 4))
+        assertTrue(intact.provesValueFromInstructionOnSourcePaths(0, 5, 1, 5))
+        assertFalse(intact.provesValueFromInstruction(0, 6, 1, 4), "requested source register must be the destination")
+        assertFalse(intact.provesValueFromInstructionOnSourcePaths(0, 6, 1, 4))
+
+        val overwritten = wide("const-wide v4, 0x1", "const/4 v5, 0x0", "return-wide v4")
+        assertTrue(overwritten.provesValueFromInstruction(0, 4, 2, 4), "surviving low word stays proven")
+        assertFalse(overwritten.provesValueFromInstruction(0, 5, 2, 5), "clobbered high word must not be proven")
+        assertFalse(overwritten.provesValueFromInstructionOnSourcePaths(0, 5, 2, 5))
+
+        val fieldLoad = wide("iget-wide v4, v0, Lfixture/WideHolder;->value:J", "return-wide v4")
+        assertTrue(fieldLoad.provesValueFromInstruction(0, 4, 1, 4))
+        assertTrue(fieldLoad.provesValueFromInstruction(0, 5, 1, 5))
     }
 
     private fun lint(source: String): List<ResolverLinter.Finding> =
