@@ -10,6 +10,7 @@
     <string name="piko_enable_dev_options">개발자 옵션 활성화</string>
     <string name="piko_enable_dev_options_desc">홈 아이콘을 길게 탭하여 개발자 옵션을 엽니다</string>
     <string name="piko_directly_open_metaconfig">MetaConfig 재정의 바로 열기</string>
+    <string name="piko_directly_open_metaconfig_desc">홈 아이콘을 길게 탭하여 MetaConfig 재정의 설정을 바로 열 수 있습니다</string>
     <string name="piko_enable_emp_options">직원 옵션 활성화</string>
     <string name="piko_enable_emp_options_desc">테스트에 사용되는 모든 직원 옵션을 활성화합니다</string>
     <string name="piko_allow_user_network_certificate">사용자 네트워크 인증서 허용</string>
@@ -40,8 +41,6 @@
     <string name="piko_turn_on_all_ghost_modes">모든 고스트 모드 켜기</string>
     <string name="piko_ghost_modes_on">고스트 모드: 켜짐</string>
     <string name="piko_ghost_modes_default">고스트 모드: 기본값</string>
-    <string name="piko_ghost_modes_quick_toggle">고스트 모드에 대한 빠른 토글 활성화</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">고스트 모드를 제어할 수 있는 빠른 토글 버튼을 채팅 액션바에 추가합니다</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">방해 요소 제거</string>
     <string name="piko_disable_stories">스토리 비활성화</string>
@@ -54,7 +53,6 @@
     <string name="piko_hide_feed_posts_desc">홈 피드에서 게시물을 숨깁니다</string>
     <string name="piko_disable_discover_people">추천 계정 숨기기</string>
     <string name="piko_focus_lock">포커스 잠금</string>
-    <string name="piko_focus_lock_desc">설정된 시간 동안 방해 요소 제거 설정을 강제로 활성화합니다</string>
     <string name="piko_focus_lock_targets">잠금 설정</string>
     <string name="piko_focus_lock_reels_tab">릴스 탭</string>
     <string name="piko_focus_lock_reels_tab_desc">하단바에서 릴스 탭을 제거합니다. 공유받은 릴스는 계속 열 수 있습니다</string>
@@ -140,8 +138,6 @@
     <string name="piko_copy_user_id">사용자 ID 복사</string>
     <string name="piko_copy_bio">소개 복사</string>
     <string name="piko_view_profile_picture">프로필 사진 보기</string>
-    <string name="piko_copy_profile_link">프로필 링크 복사</string>
-    <string name="piko_share_this_profile">이 프로필 공유</string>
     <string name="piko_copy_links_from_bio">소개에 있는 링크 복사</string>
     <string name="piko_no_links_in_bio">이 소개에는 링크가 없습니다</string>
     <string name="piko_download_profile_picture">프로필 사진 다운로드</string>
@@ -157,6 +153,7 @@
     <string name="piko_inbox_lock_prompt">메시지 잠금 해제</string>
     <string name="piko_inbox_lock_no_lock">받은 메시지함 잠금을 사용하려면 기기에 화면 잠금을 설정하세요</string>
     <string name="piko_hidden_chats">숨겨진 채팅</string>
+    <string name="piko_hidden_chats_desc">채팅을 길게 탭했을 경우에 표시되는 메뉴에 숨기기 옵션을 추가합니다. 이 기능을 사용하면 채팅이 비공개 받은 메시지함으로 이동하며, 계정마다 별도로 관리됩니다</string>
     <string name="piko_hidden_chats_hidden">채팅이 숨겨졌습니다</string>
     <string name="piko_hidden_chats_unhidden">채팅 숨김이 해제되었습니다</string>
     <string name="piko_hidden_chats_opened">숨겨진 채팅</string>
@@ -169,6 +166,8 @@
     <string name="piko_unlock_plus_benefits_desc">로컬에서 확인되는 \'Plus\' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다</string>
     <!-- DM Section -->
     <string name="piko_category_dm">메시지</string>
+    <string name="piko_disable_disappearing_messages_gesture">사라지는 메시지 스와이프 비활성화</string>
+    <string name="piko_disable_disappearing_messages_gesture_desc">채팅 화면에서 위로 스와이프해도 사라지는 메시지 기능이 활성화되지 않도록 방지합니다</string>
     <string name="piko_unlimited_replays">일시적 미디어를 영구 보관</string>
     <string name="piko_unlimited_replays_desc">1~2 회만 볼 수 있는 미디어를 계속 볼 수 있게 변경합니다</string>
     <string name="piko_ephemeral_caption">임시 미디어 수신 방식 표시</string>
@@ -203,17 +202,27 @@
     <string name="piko_category_download_media">미디어 다운로드</string>
     <string name="piko_category_downloads">다운로드</string>
     <string name="piko_enable_download">다운로드 활성화</string>
-    <string name="piko_feed_download_button">피드 게시물에 다운로드 버튼 추가</string>
-    <string name="piko_feed_download_button_desc">피드 게시물 저장 버튼 옆에 다운로드 아이콘을 추가합니다</string>
+    <string name="piko_download_buttons">다운로드 버튼 표시</string>
+    <string name="piko_download_buttons_feed">피드 게시물</string>
+    <string name="piko_download_buttons_stories">스토리</string>
     <string name="piko_save_media_comment">미디어 댓글 저장 버튼 추가</string>
     <string name="piko_save_media_comment_desc">게시물 및 릴스에서 미디어 댓글을 저장하는 버튼을 추가합니다</string>
     <string name="piko_enable_direct_download">즉시 다운로드 활성화</string>
-    <string name="piko_enable_direct_download_desc">옵션 선택 없이 현재 보고 있는 미디어를 즉시 다운로드합니다</string>
+    <string name="piko_enable_direct_download_desc">게시물, 릴, 스토리에 있는 다운로드 버튼을 탭하면 현재 미디어가 즉시 저장됩니다</string>
+    <string name="piko_select_media_download">다운로드할 미디어 선택</string>
+    <string name="piko_download_photo_number">사진 %d</string>
+    <string name="piko_download_video_number">동영상 %d</string>
+    <string name="piko_download_select_all">모두 선택</string>
+    <string name="piko_download_deselect_all">모두 선택 해제</string>
+    <string name="piko_download_selected_count">다운로드 (%d)</string>
+    <string name="piko_download_copy_link_for">\'%s\'에 대한 링크 복사</string>
+    <string name="piko_media_link_unavailable">미디어 링크를 사용할 수 없습니다</string>
     <string name="piko_download_username_folder">사용자 이름별로 미디어 분류</string>
     <string name="piko_download_username_folder_desc">사용자 이름 기준으로 하위 폴더를 생성합니다</string>
     <string name="piko_prefer_dash_format">DASH 형식 선호</string>
     <string name="piko_prefer_dash_format_desc">720p H.264 파일 대신 Instagram에서 제공하는 가장 선명한 DASH 버전(최대 1080p AV1)으로 동영상을 다운로드할 수 있습니다</string>
     <string name="piko_dash_audio_aac_lc">DASH 오디오를 AAC로 변환</string>
+    <string name="piko_dash_audio_aac_lc_desc">DASH 다운로드 동영상의 xHE-AAC 오디오를 모든 플레이어에서 재생할 수 있는 192kbps AAC-LC 형식으로 다시 인코딩합니다</string>
     <string name="piko_embed_download_metadata">동영상 메타데이터 삽입</string>
     <string name="piko_embed_download_metadata_desc">다운로드한 MP4 파일에 자막, 게시물 링크, 크리에이터 및 업로드 날짜를 추가합니다</string>
     <string name="piko_download_file_name_template">파일 이름 형식</string>
@@ -246,8 +255,6 @@
     <string name="piko_download_set_path_failed">다운로드 폴더를 저장할 수 없습니다</string>
     <string name="piko_download_choose_folder">계속하려면 다운로드 폴더를 선택하세요</string>
     <string name="piko_download_choose_folder_failed">폴더 선택기를 실행할 수 없습니다</string>
-    <string name="piko_download_grant_permission">계속하려면 다운로드 폴더를 선택하세요</string>
-    <string name="piko_download_grant_permission_failed">폴더 선택기를 실행할 수 없습니다</string>
     <string name="piko_download_with_external_downloader">외부 다운로더 앱으로 다운로드</string>
     <string name="piko_external_downloader_package_name">외부 다운로더 앱 패키지명</string>
     <string name="piko_external_downloader_package_name_not_found">외부 다운로더 앱 패키지명을 찾을 수 없습니다</string>
@@ -263,11 +270,6 @@
     <string name="piko_more_options">옵션 더보기</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">하단바 버튼 숨기기</string>
-    <string name="piko_hide_navigation_feed">피드 버튼 숨기기</string>
-    <string name="piko_hide_navigation_reels">릴스 버튼 숨기기</string>
-    <string name="piko_hide_navigation_direct">메시지 버튼 숨기기</string>
-    <string name="piko_hide_navigation_search">검색 버튼 숨기기</string>
-    <string name="piko_hide_navigation_create">만들기 버튼 숨기기</string>
     <string name="piko_category_navigation_tabs">하단바</string>
     <string name="piko_navigation_tabs_title">탭 표시 및 순서 변경</string>
     <string name="piko_navigation_tabs_summary">표시할 하단바 탭을 선택하고 드래그하여 순서를 변경할 수 있습니다</string>
@@ -321,7 +323,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">좋아요 애니메이션 변경</string>
     <string name="piko_change_like_animation_desc">기존 링 애니메이션 중 하나로 변경합니다</string>
-    <string name="piko_available_like_animation">사용 가능한 애니메이션</string>
     <string name="piko_like_animation_random">무작위</string>
     <string name="piko_like_animation_preview">애니메이션 미리보기</string>
     <string name="piko_like_animation_preview_unavailable">미리보기를 사용할 수 없습니다</string>
@@ -354,8 +355,6 @@
     <string name="piko_action_bar_button_profile_info_icon">프로필 정보 아이콘</string>
     <string name="piko_action_bar_button_create_icon">만들기 아이콘</string>
     <string name="piko_action_bar_button_notifications_icon">알림 아이콘</string>
-    <string name="piko_settings_on_action_bar">Piko 설정을 액션바로 이동</string>
-    <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 액션바로 이동합니다</string>
     <string name="piko_settings_search_hint">검색</string>
     <string name="piko_settings_search_clear">검색 지우기</string>
     <string name="piko_settings_search_no_results">검색 결과가 없습니다</string>
@@ -446,7 +445,6 @@
     <string name="piko_view_saved_instants">저장된 인스턴트 보기</string>
     <string name="piko_instants_vault_empty">아직 저장된 인스턴트가 없습니다. 캡처를 활성화하여 인스턴트를 열면 여기에 표시됩니다</string>
     <string name="piko_instants_link_unavailable">미디어 링크를 사용할 수 없습니다</string>
-    <string name="piko_instants_unknown_user">알 수 없음</string>
     <string name="piko_instants_delete_confirm">이 저장된 인스턴트를 삭제하시겠습니까?</string>
     <string name="piko_instants_clear_all">모두 지우기</string>
     <string name="piko_instants_clear_all_confirm">저장된 인스턴트를 모두 삭제하시겠습니까?</string>
@@ -454,7 +452,6 @@
     <string name="piko_instants_title">인스턴트</string>
     <string name="piko_search_username">사용자 이름으로 검색</string>
     <string name="piko_instants_no_matches">해당 사용자의 저장된 인스턴트가 없습니다</string>
-    <string name="piko_instants_unavailable">사용할 수 없음</string>
     <string name="piko_saved_on">저장 날짜</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Instagram에서 열기</string>
@@ -475,7 +472,6 @@
     <string name="piko_someone">누군가</string>
     <string name="piko_deleted_messages_channel">삭제된 메시지</string>
     <string name="piko_deleted_messages_channel_desc">받은 메시지가 전송 취소되면 알림을 보냅니다</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s 삭제됨]</string>
     <string name="piko_media_deleted_generic">[삭제됨]</string>
     <string name="piko_media_unknown">미디어</string>
@@ -491,7 +487,6 @@
     <string name="piko_media_link">링크</string>
     <string name="piko_media_activity">활동</string>
     <string name="piko_disable_telemetry">Telemetry 비활성화</string>
-    <string name="piko_patch_clone">복제</string>
     <string name="piko_patch_theme">테마</string>
     <string name="piko_patch_settings">설정 추가</string>
 </resources>

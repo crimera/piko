@@ -10,6 +10,7 @@
     <string name="piko_enable_dev_options">啟用開發者選項</string>
     <string name="piko_enable_dev_options_desc">長按主畫面圖示來開啟開發者選項</string>
     <string name="piko_directly_open_metaconfig">直接開啟 MetaConfig 設定覆蓋</string>
+    <string name="piko_directly_open_metaconfig_desc">長按主頁圖示可直接開啟 MetaConfig 覆寫設定</string>
     <string name="piko_enable_emp_options">啟動員工選項</string>
     <string name="piko_enable_emp_options_desc">解鎖所有用於測試的員工選項</string>
     <string name="piko_allow_user_network_certificate">允許使用者網路憑證</string>
@@ -40,8 +41,6 @@
     <string name="piko_turn_on_all_ghost_modes">開啟所有幽靈模式</string>
     <string name="piko_ghost_modes_on">幽靈模式：開啟</string>
     <string name="piko_ghost_modes_default">幽靈模式：預設</string>
-    <string name="piko_ghost_modes_quick_toggle">啟用幽靈模式的快速切換功能</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">在操作列中新增一個切換按鈕以控制幽靈模式</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">免打擾選項</string>
     <string name="piko_disable_stories">停用限時動態</string>
@@ -54,7 +53,6 @@
     <string name="piko_hide_feed_posts_desc">隱藏動態首頁中的貼文</string>
     <string name="piko_disable_discover_people">隱藏建議帳號</string>
     <string name="piko_focus_lock">專注鎖</string>
-    <string name="piko_focus_lock_desc">在指定時間內強制開啟「防干擾設定」</string>
     <string name="piko_focus_lock_targets">鎖定設定</string>
     <string name="piko_focus_lock_reels_tab">Reels 分頁</string>
     <string name="piko_focus_lock_reels_tab_desc">移除導覽列上的 Reels 分頁。他人傳送給您的 Reels 仍可正常開啟。</string>
@@ -140,8 +138,6 @@
     <string name="piko_copy_user_id">複製使用者 ID</string>
     <string name="piko_copy_bio">複製個人簡介</string>
     <string name="piko_view_profile_picture">檢視個人檔案相片</string>
-    <string name="piko_copy_profile_link">複製個人檔案連結</string>
-    <string name="piko_share_this_profile">分享此個人檔案</string>
     <string name="piko_copy_links_from_bio">複製個人簡介中的連結</string>
     <string name="piko_no_links_in_bio">個人簡介中無連結</string>
     <string name="piko_download_profile_picture">下載個人頭像</string>
@@ -157,6 +153,7 @@
     <string name="piko_inbox_lock_prompt">解鎖你的訊息</string>
     <string name="piko_inbox_lock_no_lock">請先在裝置上設定螢幕鎖定，才能使用收件匣鎖定功能</string>
     <string name="piko_hidden_chats">隱藏的聊天室</string>
+    <string name="piko_hidden_chats_desc">在對話長按功能表中新增隱藏選項，將對話移至各帳號獨立的私密收件匣。</string>
     <string name="piko_hidden_chats_hidden">已隱藏訊息</string>
     <string name="piko_hidden_chats_unhidden">已取消隱藏訊息</string>
     <string name="piko_hidden_chats_opened">隱藏訊息</string>
@@ -169,6 +166,8 @@
     <string name="piko_unlock_plus_benefits_desc">解鎖在本機驗證的 Plus 專屬福利。使用時請自行承擔風險</string>
     <!-- DM Section -->
     <string name="piko_category_dm">私訊</string>
+    <string name="piko_disable_disappearing_messages_gesture">停用連續檢視模式滑動手勢</string>
+    <string name="piko_disable_disappearing_messages_gesture_desc">防止在對話中向上滑動時誤開啟連續檢視模式</string>
     <string name="piko_unlimited_replays">使限時媒體變為永久</string>
     <string name="piko_unlimited_replays_desc">將未過期的單次或雙次檢視媒體變更為永久檢視</string>
     <string name="piko_ephemeral_caption">顯示限時媒體的接收方式</string>
@@ -203,17 +202,27 @@
     <string name="piko_category_download_media">下載媒體</string>
     <string name="piko_category_downloads">下載</string>
     <string name="piko_enable_download">啟用下載</string>
-    <string name="piko_feed_download_button">貼文下載按鈕</string>
-    <string name="piko_feed_download_button_desc">在動態首頁貼文的儲存按鈕旁新增下載圖示</string>
+    <string name="piko_download_buttons">顯示下載按鈕</string>
+    <string name="piko_download_buttons_feed">動態首頁貼文</string>
+    <string name="piko_download_buttons_stories">限時動態</string>
     <string name="piko_save_media_comment">儲存媒體留言</string>
     <string name="piko_save_media_comment_desc">在貼文和 Reels 新增一個儲存媒體留言的按鈕</string>
     <string name="piko_enable_direct_download">啟用直接下載</string>
-    <string name="piko_enable_direct_download_desc">直接下載目前檢視的媒體，不詢問選項</string>
+    <string name="piko_enable_direct_download_desc">貼文、Reels 與限時動態上的下載按鈕將立即儲存目前播放或顯示的媒體</string>
+    <string name="piko_select_media_download">選擇要下載的媒體</string>
+    <string name="piko_download_photo_number">圖片 %d</string>
+    <string name="piko_download_video_number">影片 %d</string>
+    <string name="piko_download_select_all">選擇全部</string>
+    <string name="piko_download_deselect_all">取消全選</string>
+    <string name="piko_download_selected_count">已下載（%d）</string>
+    <string name="piko_download_copy_link_for">複製 %s 的連結</string>
+    <string name="piko_media_link_unavailable">媒體連結不可用</string>
     <string name="piko_download_username_folder">按使用者名稱分類媒體</string>
     <string name="piko_download_username_folder_desc">根據使用者名稱建立子資料夾</string>
     <string name="piko_prefer_dash_format">優先使用 DASH 格式</string>
     <string name="piko_prefer_dash_format_desc">下載影片時，優先採用 Instagram 所列最高支援 1080p AV1 的 DASH 格式，而非預設的 720p H.264 檔案</string>
     <string name="piko_dash_audio_aac_lc">將 DASH 音訊轉換為 AAC</string>
+    <string name="piko_dash_audio_aac_lc_desc">將 DASH 下載內容的 xHE-AAC 音訊重新編碼為廣泛相容的 192 kbps AAC-LC 格式</string>
     <string name="piko_embed_download_metadata">嵌入影片詮釋資料</string>
     <string name="piko_embed_download_metadata_desc">將內文、貼文連結、創作者與上傳日期新增至下載的 MP4 檔案中</string>
     <string name="piko_download_file_name_template">檔案名稱格式</string>
@@ -246,8 +255,6 @@
     <string name="piko_download_set_path_failed">無法儲存下載資料夾</string>
     <string name="piko_download_choose_folder">請選擇下載資料夾以繼續</string>
     <string name="piko_download_choose_folder_failed">無法開啟資料夾選擇器</string>
-    <string name="piko_download_grant_permission">請選擇下載資料夾以繼續</string>
-    <string name="piko_download_grant_permission_failed">無法開啟資料夾選擇器</string>
     <string name="piko_download_with_external_downloader">使用外部下載程式下載</string>
     <string name="piko_external_downloader_package_name">外部下載程式的套件名稱</string>
     <string name="piko_external_downloader_package_name_not_found">找不到外部下載程式</string>
@@ -263,11 +270,6 @@
     <string name="piko_more_options">更多選項</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">隱藏導覽按鈕</string>
-    <string name="piko_hide_navigation_feed">隱藏動態首頁按鈕</string>
-    <string name="piko_hide_navigation_reels">隱藏 Reels 按鈕</string>
-    <string name="piko_hide_navigation_direct">隱藏私訊按鈕</string>
-    <string name="piko_hide_navigation_search">隱藏搜尋按鈕</string>
-    <string name="piko_hide_navigation_create">隱藏建立按鈕</string>
     <string name="piko_category_navigation_tabs">導覽列</string>
     <string name="piko_navigation_tabs_title">顯示與重排分頁</string>
     <string name="piko_navigation_tabs_summary">選擇底部顯示的分頁並拖曳調整順序</string>
@@ -321,7 +323,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">變更「按讚」動畫</string>
     <string name="piko_change_like_animation_desc">將按讚動畫變更為現有的光圈按讚動畫之一</string>
-    <string name="piko_available_like_animation">可用的按讚動畫</string>
     <string name="piko_like_animation_random">隨機</string>
     <string name="piko_like_animation_preview">預覽動畫</string>
     <string name="piko_like_animation_preview_unavailable">無法預覽</string>
@@ -354,8 +355,6 @@
     <string name="piko_action_bar_button_profile_info_icon">個人檔案圖示</string>
     <string name="piko_action_bar_button_create_icon">建立圖示</string>
     <string name="piko_action_bar_button_notifications_icon">通知圖示</string>
-    <string name="piko_settings_on_action_bar">操作列上的 Piko 設定</string>
-    <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
     <string name="piko_settings_search_hint">搜尋</string>
     <string name="piko_settings_search_clear">清除搜尋</string>
     <string name="piko_settings_search_no_results">未找到結果</string>
@@ -446,7 +445,6 @@
     <string name="piko_view_saved_instants">檢視已儲存的 Instants</string>
     <string name="piko_instants_vault_empty">尚未儲存任何 Instants。啟用儲存 Instants 功能並且開啟任何 Instants，Instants 將會在這裡出現。</string>
     <string name="piko_instants_link_unavailable">媒體連結不可用。</string>
-    <string name="piko_instants_unknown_user">未知</string>
     <string name="piko_instants_delete_confirm">移除這個已儲存的 Instants 嗎？</string>
     <string name="piko_instants_clear_all">清除全部</string>
     <string name="piko_instants_clear_all_confirm">移除所有已儲存的 Instants 嗎？</string>
@@ -454,7 +452,6 @@
     <string name="piko_instants_title">Instants</string>
     <string name="piko_search_username">透過使用者名稱搜尋</string>
     <string name="piko_instants_no_matches">該位使用者沒有已儲存的 Instants。</string>
-    <string name="piko_instants_unavailable">無法使用</string>
     <string name="piko_saved_on">儲存於</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">在 Instagram 內開啟</string>
@@ -475,7 +472,6 @@
     <string name="piko_someone">有人</string>
     <string name="piko_deleted_messages_channel">已刪除訊息</string>
     <string name="piko_deleted_messages_channel_desc">當收到的訊息被收回時傳送通知</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s 已刪除]</string>
     <string name="piko_media_deleted_generic">[刪除]</string>
     <string name="piko_media_unknown">媒體</string>
@@ -491,7 +487,6 @@
     <string name="piko_media_link">連結</string>
     <string name="piko_media_activity">活動</string>
     <string name="piko_disable_telemetry">停用遙測</string>
-    <string name="piko_patch_clone">複製</string>
     <string name="piko_patch_theme">佈景主題</string>
     <string name="piko_patch_settings">新增設定</string>
 </resources>

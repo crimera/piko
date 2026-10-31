@@ -10,6 +10,7 @@
     <string name="piko_enable_dev_options">Geliştirici seçeneklerini etkinleştir</string>
     <string name="piko_enable_dev_options_desc">Ana sayfa simgesine basılı tutarak geliştirici seçeneklerini etkinleştirir</string>
     <string name="piko_directly_open_metaconfig">MetaConfig geçersiz kılma ayarlarını doğrudan açar</string>
+    <string name="piko_directly_open_metaconfig_desc">Ana ekran simgesine uzun basıldığında MetaConfig\'in geçersiz kılma ayarları doğrudan açılır</string>
     <string name="piko_enable_emp_options">Çalışan seçeneklerini etkinleştir</string>
     <string name="piko_enable_emp_options_desc">Test için kullanılan tüm çalışan seçeneklerinin kilidini açar</string>
     <string name="piko_allow_user_network_certificate">Kullanıcı ağ sertifikasına izin ver</string>
@@ -34,12 +35,12 @@
     <string name="piko_disable_typing_status">Yazıyor durumunu devre dışı bırak</string>
     <string name="piko_disable_screenshot_detection">Ekran görüntüsü tespitini devre dışı bırak</string>
     <string name="piko_view_dm_anonymously">Mesajları anonim olarak görüntüle</string>
+    <string name="piko_mark_as_read_after_reply">Yanıtladıktan sonra okundu olarak işaretle</string>
+    <string name="piko_mark_as_read_after_reply_desc">Bir yanıt gönderdikten sonra, direkt mesajları anonim olarak görüntülerken veya tüm gizlilik modlarını kullanırken bile sohbeti okundu olarak işaretleyin</string>
     <string name="piko_view_dm_anonymously_desc">Etkinleştirildiğinde, mesajlarını okuduğunuzu başkaları göremez. Hem bu ayar hem de \"Tüm hayalet modlarını aç\" ayarı devre dışı bırakıldığında, Instagram\'ın okundu bilgilerini göster ayarı kullanılır</string>
     <string name="piko_turn_on_all_ghost_modes">Tüm görünmez modları etkinleştir</string>
     <string name="piko_ghost_modes_on">Görünmez mod: Açık</string>
     <string name="piko_ghost_modes_default">Görünmez mod: Varsayılan</string>
-    <string name="piko_ghost_modes_quick_toggle">Görünmez modlar için hızlı geçişi etkinleştir</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">Sohbet eylem çubuğuna tüm görünmez modları kontrol eden bir buton ekler</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Odak modu</string>
     <string name="piko_disable_stories">Hikayeleri devre dışı bırak</string>
@@ -48,9 +49,10 @@
     <string name="piko_disable_comments">Yorumları devre dışı bırak</string>
     <string name="piko_limit_following_feed">Akışı takip edilen profillerle sınırla</string>
     <string name="piko_limit_following_feed_desc">Ana sayfa akışını yalnızca takip ettiğiniz profillerin içerikleriyle sınırlar</string>
+    <string name="piko_hide_feed_posts">Akış gönderilerini gizle</string>
+    <string name="piko_hide_feed_posts_desc">Ana akıştaki gönderileri gizler</string>
     <string name="piko_disable_discover_people">Önerilen hesapları gizle</string>
     <string name="piko_focus_lock">Odak Kilidi</string>
-    <string name="piko_focus_lock_desc">Belirli bir süre için dikkat dağıtıcı unsurları engelleyen ayarları zorla etkinleştir</string>
     <string name="piko_focus_lock_targets">Kilitlenecek ayarlar</string>
     <string name="piko_focus_lock_reels_tab">Reels sekmesi</string>
     <string name="piko_focus_lock_reels_tab_desc">Gezinme çubuğundan Reels sekmesini kaldırır. Sizinle paylaşılan Reels’ler hâlâ açılır.</string>
@@ -128,6 +130,7 @@
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan en yüksek çözünürlüklü görselleri çeker. Performansı düşürebilir, uygulama veri boyutunu artırabilir veya uygulamanın eski bir düzene geçmesine neden olabilir</string>
     <string name="piko_copy_comment">Yorumu kopyala</string>
+    <string name="piko_copy_comment_desc">Gönderiler ve Reels’larda yorumları ve yazarlarının kullanıcı adlarını kopyalamak için düğmeler ekler</string>
     <string name="piko_comment_copied_success">Yorum kopyalandı</string>
     <string name="piko_comment_copied_failed">Kopyalanacak metin bulunamadı</string>
     <string name="piko_copy_username">Kullanıcı adını kopyala</string>
@@ -135,8 +138,6 @@
     <string name="piko_copy_user_id">Kullanıcı kimliğini kopyala</string>
     <string name="piko_copy_bio">Biyografiyi kopyala</string>
     <string name="piko_view_profile_picture">Profil resmini görüntüle</string>
-    <string name="piko_copy_profile_link">Profil bağlantısını kopyala</string>
-    <string name="piko_share_this_profile">Bu profili paylaş</string>
     <string name="piko_copy_links_from_bio">Biyografideki bağlantıları kopyala</string>
     <string name="piko_no_links_in_bio">Bu biyografide bağlantı yok</string>
     <string name="piko_download_profile_picture">Profil resmini indir</string>
@@ -152,6 +153,7 @@
     <string name="piko_inbox_lock_prompt">Mesajlarınızın kilidini açın</string>
     <string name="piko_inbox_lock_no_lock">Gelen kutusu kilidini kullanmak için cihazınızda ekran kilidi ayarlayın</string>
     <string name="piko_hidden_chats">Gizli sohbetler</string>
+    <string name="piko_hidden_chats_desc">Sohbet menüsüne, sohbeti her hesap için ayrı bir özel gelen kutusuna taşıyan bir gizle seçeneği ekler.</string>
     <string name="piko_hidden_chats_hidden">Sohbet gizlendi</string>
     <string name="piko_hidden_chats_unhidden">Sohbet görünür</string>
     <string name="piko_hidden_chats_opened">Gizli sohbetler</string>
@@ -164,6 +166,8 @@
     <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Mesajlar</string>
+    <string name="piko_disable_disappearing_messages_gesture">Kaybolan mesajlar için kaydırma hareketini devre dışı bırak</string>
+    <string name="piko_disable_disappearing_messages_gesture_desc">Sohbette yukarı kaydırma hareketinin kaybolan mesaj özelliğini etkinleştirmesini engeller</string>
     <string name="piko_unlimited_replays">Kaybolan medyaları kalıcı yap</string>
     <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
     <string name="piko_ephemeral_caption">Geçici medyanın nasıl alındığını gösterin</string>
@@ -192,20 +196,33 @@
     <string name="piko_disable_story_flipping_desc">Sonraki hikayeye otomatik geçişi devre dışı bırakır</string>
     <string name="piko_loop_story">Hikayeyi döngüye al</string>
     <string name="piko_loop_story_desc">Mevcut hikaye bittiğinde yeniden oynatır</string>
+    <string name="piko_hide_story_follow_button">Hikayede takip et düğmesini gizle</string>
+    <string name="piko_hide_story_follow_button_desc">Takip etmediğiniz hesapların hikayelerinin üst kısmındaki takip et düğmesini gizler</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Medya indirme</string>
     <string name="piko_category_downloads">İndirmeler</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>
-    <string name="piko_feed_download_button">Akış gönderilerindeki indirme düğmesi</string>
-    <string name="piko_feed_download_button_desc">Akış gönderilerindeki kaydet düğmesinin yanına bir indirme simgesi ekler</string>
+    <string name="piko_download_buttons">İndirme düğmelerini göster</string>
+    <string name="piko_download_buttons_feed">Akış gönderileri</string>
+    <string name="piko_download_buttons_stories">Hikayeler</string>
     <string name="piko_save_media_comment">Yorum medyasını kaydet</string>
     <string name="piko_save_media_comment_desc">Gönderi ve Reels yorumlarındaki medya içeriklerini kaydetmek için bir buton ekler</string>
     <string name="piko_enable_direct_download">Doğrudan indirmeyi etkinleştir</string>
-    <string name="piko_enable_direct_download_desc">Mevcut görüntülenen medyayı seçenek sormadan indirir</string>
+    <string name="piko_enable_direct_download_desc">Gönderiler, Reels ve Hikayelerdeki indirme düğmeleri, mevcut medyayı anında kaydeder</string>
+    <string name="piko_select_media_download">İndirmek istediğiniz medyayı seçin</string>
+    <string name="piko_download_photo_number">Fotoğraf %d</string>
+    <string name="piko_download_video_number">Video %d</string>
+    <string name="piko_download_select_all">Tümünü seç</string>
+    <string name="piko_download_deselect_all">Tümünün seçimini kaldır</string>
+    <string name="piko_download_selected_count">İndir (%d)</string>
+    <string name="piko_download_copy_link_for">%s için bağlantıyı kopyala</string>
+    <string name="piko_media_link_unavailable">Medya bağlantısı mevcut değil</string>
     <string name="piko_download_username_folder">Medyayı kullanıcı adına göre ayır</string>
     <string name="piko_download_username_folder_desc">Kullanıcı adına göre alt klasörler oluşturur</string>
     <string name="piko_prefer_dash_format">DASH formatını tercih et</string>
     <string name="piko_prefer_dash_format_desc">Videoları, Instagram’ın sunduğu en yüksek kaliteli DASH formatında, 720p H.264 dosyası yerine 1080p AV1 kalitesinde indirir</string>
+    <string name="piko_dash_audio_aac_lc">DASH ses dosyasını AAC\'ye dönüştür</string>
+    <string name="piko_dash_audio_aac_lc_desc">DASH indirmelerindeki xHE-AAC sesini, her oynatıcıda çalınabilen 192 kbps\'lik AAC-LC formatında yeniden kodlar</string>
     <string name="piko_embed_download_metadata">Video meta verilerini göm</string>
     <string name="piko_embed_download_metadata_desc">İndirilen MP4 dosyalarına açıklamayı, gönderi bağlantısını, oluşturucuyu ve yükleme tarihini ekler</string>
     <string name="piko_download_file_name_template">Dosya adı biçimi</string>
@@ -238,8 +255,6 @@
     <string name="piko_download_set_path_failed">İndirme klasörü kaydedilemedi</string>
     <string name="piko_download_choose_folder">Devam etmek için bir indirme klasörü seçin</string>
     <string name="piko_download_choose_folder_failed">Klasör seçici açılamadı</string>
-    <string name="piko_download_grant_permission">Devam etmek için bir indirme klasörü seçin</string>
-    <string name="piko_download_grant_permission_failed">Klasör seçici açılamadı</string>
     <string name="piko_download_with_external_downloader">Harici indirici ile indir</string>
     <string name="piko_external_downloader_package_name">Harici indirici paket adı</string>
     <string name="piko_external_downloader_package_name_not_found">Harici indirici paket adı bulunamadı</string>
@@ -255,11 +270,6 @@
     <string name="piko_more_options">Daha fazla seçenek</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Gezinme butonlarını gizle</string>
-    <string name="piko_hide_navigation_feed">Akış butonunu gizle</string>
-    <string name="piko_hide_navigation_reels">Reels butonunu gizle</string>
-    <string name="piko_hide_navigation_direct">Mesajlar butonunu gizle</string>
-    <string name="piko_hide_navigation_search">Arama butonunu gizle</string>
-    <string name="piko_hide_navigation_create">Oluştur butonunu gizle</string>
     <string name="piko_category_navigation_tabs">Gezinme çubuğu</string>
     <string name="piko_navigation_tabs_title">Sekmeleri göster ve yeniden sırala</string>
     <string name="piko_navigation_tabs_summary">Görünür alt sekmeleri seçin ve yeniden sıralamak için sürükleyin</string>
@@ -294,6 +304,7 @@
     <string name="piko_fail_no_file">Dosya bulunamadı</string>
     <string name="piko_import_success">Başarıyla içe aktarıldı</string>
     <string name="piko_import_fail">İçe aktarma başarısız</string>
+    <string name="piko_file_picker_unavailable">Sistem dosya seçici kullanılamıyor</string>
     <string name="piko_restart_app">Değişikliklerin etkili olması için uygulamayı yeniden başlatın</string>
     <string name="piko_close">Kapat</string>
     <string name="piko_ok">Tamam</string>
@@ -312,7 +323,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Beğeni animasyonunu değiştir</string>
     <string name="piko_change_like_animation_desc">Animasyonu, mevcut halka benzeri animasyonlardan biriyle değiştirin</string>
-    <string name="piko_available_like_animation">Kullanılabilir beğeni animasyonları</string>
     <string name="piko_like_animation_random">Rastgele</string>
     <string name="piko_like_animation_preview">Animasyon önizlemesi</string>
     <string name="piko_like_animation_preview_unavailable">Önizleme kullanılamıyor</string>
@@ -345,8 +355,6 @@
     <string name="piko_action_bar_button_profile_info_icon">Profil bilgisi simgesi</string>
     <string name="piko_action_bar_button_create_icon">Oluştur simgesi</string>
     <string name="piko_action_bar_button_notifications_icon">Bildirimler simgesi</string>
-    <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
-    <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
     <string name="piko_settings_search_hint">Ara</string>
     <string name="piko_settings_search_clear">Aramayı temizle</string>
     <string name="piko_settings_search_no_results">Sonuç bulunamadı</string>
@@ -437,7 +445,6 @@
     <string name="piko_view_saved_instants">Kaydedilmiş Şipşaklar</string>
     <string name="piko_instants_vault_empty">Henüz kaydedilmiş Şipşak yok. Yakalama özelliği etkinleştirilmiş bazı Şipşakları açın; burada görünmeye başlayacaklar.</string>
     <string name="piko_instants_link_unavailable">Medya bağlantısı mevcut değil.</string>
-    <string name="piko_instants_unknown_user">Bilinmeyen</string>
     <string name="piko_instants_delete_confirm">Kaydedilmiş bu Şipşakları silmek ister misiniz?</string>
     <string name="piko_instants_clear_all">Tümünü temizle</string>
     <string name="piko_instants_clear_all_confirm">Kaydedilmiş tüm Şipşakları silmek ister misiniz?</string>
@@ -445,7 +452,6 @@
     <string name="piko_instants_title">Şipşaklar</string>
     <string name="piko_search_username">Kullanıcı adına göre ara</string>
     <string name="piko_instants_no_matches">Bu kullanıcıya ait kaydedilmiş Şipşaklar yok.</string>
-    <string name="piko_instants_unavailable">Mevcut değil</string>
     <string name="piko_saved_on">Kaydedildi</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Instagram\'da aç</string>
@@ -466,7 +472,6 @@
     <string name="piko_someone">Biri</string>
     <string name="piko_deleted_messages_channel">Silinen mesajlar</string>
     <string name="piko_deleted_messages_channel_desc">Alınan bir mesaj geri çekildiğinde bildirim gönderir</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s silindi]</string>
     <string name="piko_media_deleted_generic">[silindi]</string>
     <string name="piko_media_unknown">medya</string>
@@ -481,4 +486,7 @@
     <string name="piko_media_like">beğeni</string>
     <string name="piko_media_link">bağlantı</string>
     <string name="piko_media_activity">aktivite</string>
+    <string name="piko_disable_telemetry">Telemetriyi devre dışı bırak</string>
+    <string name="piko_patch_theme">Tema</string>
+    <string name="piko_patch_settings">Ayar ekle</string>
 </resources>

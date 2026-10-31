@@ -41,8 +41,6 @@
     <string name="piko_turn_on_all_ghost_modes">すべての匿名モードを有効化</string>
     <string name="piko_ghost_modes_on">匿名モード：有効</string>
     <string name="piko_ghost_modes_default">匿名モード：無効</string>
-    <string name="piko_ghost_modes_quick_toggle">匿名モードのクイック切替を有効化</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">チャット画面上部に匿名モードを切り替えるボタンを追加します</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">集中モード</string>
     <string name="piko_disable_stories">ストーリーズを非表示</string>
@@ -55,7 +53,6 @@
     <string name="piko_hide_feed_posts_desc">ホームフィードから投稿を非表示にします</string>
     <string name="piko_disable_discover_people">おすすめのアカウントを非表示</string>
     <string name="piko_focus_lock">フォーカスロック</string>
-    <string name="piko_focus_lock_desc">指定した期間、集中を妨げる機能の設定を強制的にオンにします</string>
     <string name="piko_focus_lock_targets">ロックする設定</string>
     <string name="piko_focus_lock_reels_tab">リールタブ</string>
     <string name="piko_focus_lock_reels_tab_desc">ナビゲーションバーからリールタブを非表示にします。共有されたリールは引き続き開けます。</string>
@@ -141,8 +138,6 @@
     <string name="piko_copy_user_id">ユーザーIDをコピー</string>
     <string name="piko_copy_bio">自己紹介をコピー</string>
     <string name="piko_view_profile_picture">プロフィール画像を表示</string>
-    <string name="piko_copy_profile_link">プロフィールリンクをコピー</string>
-    <string name="piko_share_this_profile">プロフィールを共有</string>
     <string name="piko_copy_links_from_bio">プロフィールからリンクをコピー</string>
     <string name="piko_no_links_in_bio">このプロフィールにリンクはありません</string>
     <string name="piko_download_profile_picture">プロフィール画像をダウンロード</string>
@@ -171,6 +166,8 @@
     <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
+    <string name="piko_disable_disappearing_messages_gesture">消えるメッセージのスワイプ操作を無効化</string>
+    <string name="piko_disable_disappearing_messages_gesture_desc">チャットで上にスワイプしても「消えるメッセージ」が有効にならなくなります</string>
     <string name="piko_unlimited_replays">一時的なメディアを永続的にする</string>
     <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
     <string name="piko_ephemeral_caption">一時的なメディアの受信方法を表示</string>
@@ -205,12 +202,21 @@
     <string name="piko_category_download_media">メディアのダウンロード</string>
     <string name="piko_category_downloads">ダウンロード</string>
     <string name="piko_enable_download">ダウンロードを有効化</string>
-    <string name="piko_feed_download_button">フィードにダウンロードボタンを表示</string>
-    <string name="piko_feed_download_button_desc">フィード投稿の保存ボタンの横にダウンロードアイコンを追加します</string>
+    <string name="piko_download_buttons">ダウンロードボタンを表示</string>
+    <string name="piko_download_buttons_feed">フィード投稿</string>
+    <string name="piko_download_buttons_stories">ストーリー</string>
     <string name="piko_save_media_comment">GIFコメントを保存</string>
     <string name="piko_save_media_comment_desc">投稿やリールのGIFコメントを保存するボタンを追加します</string>
     <string name="piko_enable_direct_download">直接ダウンロードを有効化</string>
-    <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
+    <string name="piko_enable_direct_download_desc">投稿、リール、ストーリーのダウンロードボタンで、現在のメディアをすぐに保存します</string>
+    <string name="piko_select_media_download">ダウンロードするメディアを選択</string>
+    <string name="piko_download_photo_number">写真 %d</string>
+    <string name="piko_download_video_number">動画 %d</string>
+    <string name="piko_download_select_all">全選択</string>
+    <string name="piko_download_deselect_all">全選択解除</string>
+    <string name="piko_download_selected_count">ダウンロード（%d）</string>
+    <string name="piko_download_copy_link_for">%sのリンクをコピー</string>
+    <string name="piko_media_link_unavailable">メディアリンクが利用できません</string>
     <string name="piko_download_username_folder">ユーザーネームごとにメディアを分ける</string>
     <string name="piko_download_username_folder_desc">ユーザーネームごとにサブフォルダを作成します</string>
     <string name="piko_prefer_dash_format">DASH形式を優先</string>
@@ -249,8 +255,6 @@
     <string name="piko_download_set_path_failed">ダウンロード先のフォルダの保存に失敗しました</string>
     <string name="piko_download_choose_folder">続行するにはダウンロード先のフォルダを選択してください</string>
     <string name="piko_download_choose_folder_failed">フォルダ選択画面を開けませんでした</string>
-    <string name="piko_download_grant_permission">続行するにはダウンロード先のフォルダを選択してください</string>
-    <string name="piko_download_grant_permission_failed">フォルダ選択画面を開けませんでした</string>
     <string name="piko_download_with_external_downloader">外部ダウンローダーでダウンロード</string>
     <string name="piko_external_downloader_package_name">外部ダウンローダーのパッケージ名</string>
     <string name="piko_external_downloader_package_name_not_found">外部ダウンローダーのパッケージ名が見つかりません</string>
@@ -266,11 +270,6 @@
     <string name="piko_more_options">追加のオプション</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">ナビゲーションボタンを非表示</string>
-    <string name="piko_hide_navigation_feed">フィードボタンを非表示</string>
-    <string name="piko_hide_navigation_reels">リールボタンを非表示</string>
-    <string name="piko_hide_navigation_direct">DMボタンを非表示</string>
-    <string name="piko_hide_navigation_search">検索ボタンを非表示</string>
-    <string name="piko_hide_navigation_create">作成ボタンを非表示</string>
     <string name="piko_category_navigation_tabs">ナビゲーションバー</string>
     <string name="piko_navigation_tabs_title">タブの表示と並べ替え</string>
     <string name="piko_navigation_tabs_summary">表示されているタブを選択し、ドラッグして並べ替えます</string>
@@ -324,7 +323,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">いいね！のアニメーションを変更</string>
     <string name="piko_change_like_animation_desc">「いいね！」したときのアニメーションを変更します</string>
-    <string name="piko_available_like_animation">利用可能な「いいね！」のアニメーション</string>
     <string name="piko_like_animation_random">ランダム</string>
     <string name="piko_like_animation_preview">アニメーションのプレビュー</string>
     <string name="piko_like_animation_preview_unavailable">プレビューできません</string>
@@ -357,8 +355,6 @@
     <string name="piko_action_bar_button_profile_info_icon">プロフィール情報</string>
     <string name="piko_action_bar_button_create_icon">作成</string>
     <string name="piko_action_bar_button_notifications_icon">通知</string>
-    <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
-    <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
     <string name="piko_settings_search_hint">検索</string>
     <string name="piko_settings_search_clear">入力を削除</string>
     <string name="piko_settings_search_no_results">一致する結果が見つかりませんでした</string>
@@ -449,7 +445,6 @@
     <string name="piko_view_saved_instants">保存したインスタントを表示</string>
     <string name="piko_instants_vault_empty">保存されたインスタントはまだありません。キャプチャを有効にしてインスタントを開くと、ここに表示されます。</string>
     <string name="piko_instants_link_unavailable">メディアリンクは利用できません。</string>
-    <string name="piko_instants_unknown_user">不明</string>
     <string name="piko_instants_delete_confirm">このインスタントを削除しますか？</string>
     <string name="piko_instants_clear_all">すべて削除</string>
     <string name="piko_instants_clear_all_confirm">すべての保存したインスタントを削除しますか？</string>
@@ -457,7 +452,6 @@
     <string name="piko_instants_title">インスタント</string>
     <string name="piko_search_username">ユーザーネームで検索</string>
     <string name="piko_instants_no_matches">そのユーザーから保存されたインスタントはありません。</string>
-    <string name="piko_instants_unavailable">利用不可</string>
     <string name="piko_saved_on">保存日</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Instagramで開く</string>
@@ -478,7 +472,6 @@
     <string name="piko_someone">誰か</string>
     <string name="piko_deleted_messages_channel">削除したメッセージ</string>
     <string name="piko_deleted_messages_channel_desc">受信したメッセージが送信を取り消しされたときに通知します</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s削除]</string>
     <string name="piko_media_deleted_generic">[削除済み]</string>
     <string name="piko_media_unknown">メディア</string>
@@ -494,7 +487,6 @@
     <string name="piko_media_link">リンク</string>
     <string name="piko_media_activity">アクティビティ</string>
     <string name="piko_disable_telemetry">テレメトリを無効化</string>
-    <string name="piko_patch_clone">クローン</string>
     <string name="piko_patch_theme">テーマ</string>
     <string name="piko_patch_settings">設定を追加</string>
 </resources>

@@ -38,8 +38,6 @@
     <string name="piko_turn_on_all_ghost_modes">Attiva tutte le modalità fantasma</string>
     <string name="piko_ghost_modes_on">Modalità fantasma: ON</string>
     <string name="piko_ghost_modes_default">Modalità fantasma: DEFAULT</string>
-    <string name="piko_ghost_modes_quick_toggle">Abilita interruttore rapido per le modalità fantasma</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">Aggiunge un comando rapido nella barra di azione della chat per controllare le modalità fantasma</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Senza distrazioni</string>
     <string name="piko_disable_stories">Disabilita storie</string>
@@ -106,8 +104,6 @@
     <string name="piko_copy_user_id">Copia id utente</string>
     <string name="piko_copy_bio">Copia la bio</string>
     <string name="piko_view_profile_picture">Vedi immagine del profilo</string>
-    <string name="piko_copy_profile_link">Copia link profilo</string>
-    <string name="piko_share_this_profile">Condividi questo profilo</string>
     <string name="piko_copy_links_from_bio">Copia link dalla bio</string>
     <string name="piko_no_links_in_bio">Nessun link in questa bio</string>
     <string name="piko_download_profile_picture">Scarica immagine del profilo</string>
@@ -149,7 +145,6 @@
     <string name="piko_save_media_comment">Salva commento multimediale</string>
     <string name="piko_save_media_comment_desc">Aggiunge un pulsante per salvare i commenti multimediali sui post e sui reels</string>
     <string name="piko_enable_direct_download">Abilita download diretto</string>
-    <string name="piko_enable_direct_download_desc">Scarica il media attualmente visualizzato senza chiedere per le opzioni</string>
     <string name="piko_download_username_folder">Dividi i file per nome utente</string>
     <string name="piko_download_username_folder_desc">Crea sottocartelle in base al nome utente</string>
     <string name="piko_embed_download_metadata">Incorpora metadati video</string>
@@ -183,8 +178,6 @@
     <string name="piko_download_set_path_failed">Impossibile salvare la cartella di download</string>
     <string name="piko_download_choose_folder">Scegli una cartella di download per continuare</string>
     <string name="piko_download_choose_folder_failed">Impossibile aprire il selettore della cartella</string>
-    <string name="piko_download_grant_permission">Scegli una cartella di download per continuare</string>
-    <string name="piko_download_grant_permission_failed">Impossibile ottenere autorizzazioni per il selettore della cartella</string>
     <string name="piko_download_with_external_downloader">Scarica con downloader esterno</string>
     <string name="piko_external_downloader_package_name">Nome del pacchetto del downloader esterno</string>
     <string name="piko_external_downloader_package_name_not_found">Nome del pacchetto del downloader esterno non trovato</string>
@@ -200,11 +193,6 @@
     <string name="piko_more_options">Altre opzioni</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Nascondi pulsanti di navigazione</string>
-    <string name="piko_hide_navigation_feed">Nascondi pulsante Feed</string>
-    <string name="piko_hide_navigation_reels">Nascondi pulsante Reel</string>
-    <string name="piko_hide_navigation_direct">Nascondi pulsante messaggi</string>
-    <string name="piko_hide_navigation_search">Nascondi il pulsante Cerca</string>
-    <string name="piko_hide_navigation_create">Nascondi il pulsante Crea</string>
     <string name="piko_category_navigation_tabs">Barra di navigazione</string>
     <string name="piko_navigation_tabs_title">Mostra e riordina le schede</string>
     <string name="piko_navigation_tabs_summary">Scegli le schede inferiori visibili e trascina per riordinarle</string>
@@ -256,7 +244,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Cambia animazione per i like</string>
     <string name="piko_change_like_animation_desc">Cambia l\'animazione con una di quelle delle animazioni dei like sui cerchi delle storie</string>
-    <string name="piko_available_like_animation">Animazioni per i like disponibili</string>
     <!-- For arrays -->
     <string name="piko_array_default">Predefinito</string>
     <string name="piko_array_detailed_timestamp">Timestamp dettagliato (giorno/mese/data/ora/minuto/secondo)</string>
@@ -282,8 +269,6 @@
     <string name="piko_action_bar_button_profile_info_icon">Icona informazioni profilo</string>
     <string name="piko_action_bar_button_create_icon">Crea icona</string>
     <string name="piko_action_bar_button_notifications_icon">Icona notifiche</string>
-    <string name="piko_settings_on_action_bar">Impostazioni Piko sulla barra delle azioni</string>
-    <string name="piko_settings_on_action_bar_desc">Sposta l\'apertura delle impostazioni Piko nella barra delle azioni principale del feed</string>
     <!-- Font Section -->
     <string name="piko_category_font">Font</string>
     <string name="piko_custom_font">Font personalizzato</string>
@@ -353,7 +338,6 @@
     <string name="piko_someone">Qualcuno</string>
     <string name="piko_deleted_messages_channel">Messaggi eliminati</string>
     <string name="piko_deleted_messages_channel_desc">Notifica quando un messaggio ricevuto viene eliminato</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s eliminato]</string>
     <string name="piko_media_deleted_generic">[eliminato]</string>
     <string name="piko_media_unknown">media</string>

@@ -10,6 +10,7 @@
     <string name="piko_enable_dev_options">Activar las opciones de desarrollador</string>
     <string name="piko_enable_dev_options_desc">Activa la opción de desarrollador al mantener pulsado el icono de inicio</string>
     <string name="piko_directly_open_metaconfig">Abre directamente las modificaciones de MetaConfig</string>
+    <string name="piko_directly_open_metaconfig_desc">Abre directamente las anulaciones de MetaConfig al mantener pulsado el icono de inicio</string>
     <string name="piko_enable_emp_options">Activar menú de empleados</string>
     <string name="piko_enable_emp_options_desc">Desbloquea todas las opciones de empleados utilizadas para pruebas</string>
     <string name="piko_allow_user_network_certificate">Permitir certificado de red del usuario</string>
@@ -40,8 +41,6 @@
     <string name="piko_turn_on_all_ghost_modes">Activa todos los recursos del Modo Fantasma</string>
     <string name="piko_ghost_modes_on">Modo Fantasma: Activado</string>
     <string name="piko_ghost_modes_default">Modo Fantasma: Predeterminado</string>
-    <string name="piko_ghost_modes_quick_toggle">Activar interruptor rápido para Modo Fantasma</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">Añade un botón de activación rápida en la barra de acciones del chat para controlar los modos fantasma</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Sin distracciones</string>
     <string name="piko_disable_stories">Desactivar las historias</string>
@@ -54,7 +53,6 @@
     <string name="piko_hide_feed_posts_desc">Oculta las publicaciones del feed de inicio</string>
     <string name="piko_disable_discover_people">Ocultar cuentas sugeridas</string>
     <string name="piko_focus_lock">Bloqueo de Enfoque</string>
-    <string name="piko_focus_lock_desc">Forzar la activación de configuraciones sin distracciones durante un tiempo determinado</string>
     <string name="piko_focus_lock_targets">Configuraciones para bloquear</string>
     <string name="piko_focus_lock_reels_tab">Pestaña de Reels</string>
     <string name="piko_focus_lock_reels_tab_desc">Elimina la pestaña Reels de la barra de navegación. Los carretes compartidos contigo aún están abiertos.</string>
@@ -140,8 +138,6 @@
     <string name="piko_copy_user_id">Copiar ID del usuario</string>
     <string name="piko_copy_bio">Copiar biografía</string>
     <string name="piko_view_profile_picture">Ver foto de perfil</string>
-    <string name="piko_copy_profile_link">Copiar enlace de perfil</string>
-    <string name="piko_share_this_profile">Comparte este perfil</string>
     <string name="piko_copy_links_from_bio">Copiar enlaces desde la biografía</string>
     <string name="piko_no_links_in_bio">No hay enlaces en esta biografía</string>
     <string name="piko_download_profile_picture">Descargar foto de perfil</string>
@@ -157,6 +153,7 @@
     <string name="piko_inbox_lock_prompt">Desbloquea tus mensajes</string>
     <string name="piko_inbox_lock_no_lock">Establezca un bloqueo de pantalla en su dispositivo para usar el bloqueo de bandeja de entrada</string>
     <string name="piko_hidden_chats">Chats ocultos</string>
+    <string name="piko_hidden_chats_desc">Añade una opción para ocultar al menú de pulsación larga de los chats, que mueve el chat a una bandeja privada, independiente para cada cuenta.</string>
     <string name="piko_hidden_chats_hidden">Chat oculto</string>
     <string name="piko_hidden_chats_unhidden">Chat desoculto</string>
     <string name="piko_hidden_chats_opened">Chats ocultos</string>
@@ -203,17 +200,24 @@
     <string name="piko_category_download_media">Descargar medios</string>
     <string name="piko_category_downloads">Descargas</string>
     <string name="piko_enable_download">Activar descarga</string>
-    <string name="piko_feed_download_button">Botón de descarga en publicaciones de feed</string>
-    <string name="piko_feed_download_button_desc">Agrega un ícono de descarga al lado del botón Guardar en las publicaciones del feed</string>
     <string name="piko_save_media_comment">Guardar comentario del medio</string>
     <string name="piko_save_media_comment_desc">Agrega un botón para copiar comentarios en publicaciones y reels</string>
     <string name="piko_enable_direct_download">Activar descarga directa</string>
-    <string name="piko_enable_direct_download_desc">Descarga el medio actual sin pedir opciones</string>
+    <string name="piko_enable_direct_download_desc">Los botones de descarga en publicaciones, reels e historias guardan al instante el contenido actual</string>
+    <string name="piko_select_media_download">Selecciona el contenido que quieres descargar</string>
+    <string name="piko_download_photo_number">Foto %d</string>
+    <string name="piko_download_video_number">Vídeo %d</string>
+    <string name="piko_download_select_all">Seleccionar todo</string>
+    <string name="piko_download_deselect_all">Deseleccionar todo</string>
+    <string name="piko_download_selected_count">Descargar (%d)</string>
+    <string name="piko_download_copy_link_for">Copiar enlace de %s</string>
+    <string name="piko_media_link_unavailable">Enlace del contenido no disponible</string>
     <string name="piko_download_username_folder">Separar medios por nombre de usuario</string>
     <string name="piko_download_username_folder_desc">Crea subcarpetas basadas en el nombre de usuario</string>
     <string name="piko_prefer_dash_format">Preferir el formato DASH</string>
     <string name="piko_prefer_dash_format_desc">Descarga vídeos en la versión DASH de mayor calidad que ofrece Instagram hasta 1080p en formato AV1, en lugar del archivo H.264 a 720p</string>
     <string name="piko_dash_audio_aac_lc">Convertir audio DASH a AAC</string>
+    <string name="piko_dash_audio_aac_lc_desc">Recodifica el sonido xHE-AAC de las descargas DASH como AAC-LC a 192 kbps, que cualquier reproductor puede reproducir</string>
     <string name="piko_embed_download_metadata">Incruste metadatos de video</string>
     <string name="piko_embed_download_metadata_desc">Agrega el título, el enlace de la publicación, el creador y la fecha de carga a los archivos MP4 descargados</string>
     <string name="piko_download_file_name_template">Formato de nombre de archivo</string>
@@ -246,8 +250,6 @@
     <string name="piko_download_set_path_failed">No se pudo guardar la carpeta de descargas</string>
     <string name="piko_download_choose_folder">Seleccione una carpeta de descarga para continuar</string>
     <string name="piko_download_choose_folder_failed">No se pudo abrir el selector de carpetas</string>
-    <string name="piko_download_grant_permission">Seleccione una carpeta de descarga para continuar</string>
-    <string name="piko_download_grant_permission_failed">No se pudo abrir el selector de carpetas</string>
     <string name="piko_download_with_external_downloader">Descargar con gestor externo</string>
     <string name="piko_external_downloader_package_name">Nombre del paquete del gestor externo</string>
     <string name="piko_external_downloader_package_name_not_found">Nombre del paquete del gestor externo no encontrado</string>
@@ -263,11 +265,6 @@
     <string name="piko_more_options">Más opciones</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Ocultar botones de navegación</string>
-    <string name="piko_hide_navigation_feed">Ocultar botón de Feed</string>
-    <string name="piko_hide_navigation_reels">Ocultar botón Reels</string>
-    <string name="piko_hide_navigation_direct">Ocultar botón Directo</string>
-    <string name="piko_hide_navigation_search">Ocultar botón Buscar</string>
-    <string name="piko_hide_navigation_create">Ocultar botón Crear</string>
     <string name="piko_category_navigation_tabs">Barra de navegación</string>
     <string name="piko_navigation_tabs_title">Mostrar y reordenar pestañas</string>
     <string name="piko_navigation_tabs_summary">Elija las pestañas inferiores visibles y arrástrelas para reordenarlas</string>
@@ -321,7 +318,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Cambiar animación de me gusta</string>
     <string name="piko_change_like_animation_desc">Cambia la animación a una de las animaciones existentes de creadores rings</string>
-    <string name="piko_available_like_animation">Animaciones de me gusta disponibles</string>
     <string name="piko_like_animation_random">Aleatorio</string>
     <string name="piko_like_animation_preview">Vista previa de animación</string>
     <string name="piko_like_animation_preview_unavailable">Vista previa no disponible</string>
@@ -354,8 +350,6 @@
     <string name="piko_action_bar_button_profile_info_icon">Icono de información de perfil</string>
     <string name="piko_action_bar_button_create_icon">Crear icono</string>
     <string name="piko_action_bar_button_notifications_icon">Icono de notificaciones</string>
-    <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
-    <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
     <string name="piko_settings_search_hint">Buscar</string>
     <string name="piko_settings_search_clear">Borrar búsqueda</string>
     <string name="piko_settings_search_no_results">No se encontraron resultados</string>
@@ -446,7 +440,6 @@
     <string name="piko_view_saved_instants">Ver instantes guardados</string>
     <string name="piko_instants_vault_empty">Aún no hay instantes guardados. Abra algunos Instantes con la captura habilitada y aparecerán aquí.</string>
     <string name="piko_instants_link_unavailable">Enlace multimedia no disponible.</string>
-    <string name="piko_instants_unknown_user">Desconocido</string>
     <string name="piko_instants_delete_confirm">¿Eliminar este instante guardado?</string>
     <string name="piko_instants_clear_all">Borrar todo</string>
     <string name="piko_instants_clear_all_confirm">¿Eliminar todos los instantes guardados?</string>
@@ -454,7 +447,6 @@
     <string name="piko_instants_title">Instantes</string>
     <string name="piko_search_username">Buscar por nombre de usuario</string>
     <string name="piko_instants_no_matches">No hay instantes guardados de ese usuario.</string>
-    <string name="piko_instants_unavailable">No disponible</string>
     <string name="piko_saved_on">Guardado activado</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Abrir en Instagram</string>
@@ -475,7 +467,6 @@
     <string name="piko_someone">Alguien</string>
     <string name="piko_deleted_messages_channel">Mensajes eliminados</string>
     <string name="piko_deleted_messages_channel_desc">Notifica cuando un mensaje recibido no se envía</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s eliminado]</string>
     <string name="piko_media_deleted_generic">[eliminado]</string>
     <string name="piko_media_unknown">medios</string>
@@ -490,4 +481,7 @@
     <string name="piko_media_like">me gusta</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">actividad</string>
+    <string name="piko_disable_telemetry">Desactivar telemetría</string>
+    <string name="piko_patch_theme">Tema</string>
+    <string name="piko_patch_settings">Añadir ajustes</string>
 </resources>
