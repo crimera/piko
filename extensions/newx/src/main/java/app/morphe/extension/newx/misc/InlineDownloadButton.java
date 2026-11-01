@@ -89,20 +89,9 @@ public final class InlineDownloadButton {
         if (!patchApplied || !isEnabled() || actions == null) return actions;
 
         try {
-            boolean hasDownloadAction = containsDownloadAction(actions);
-            if (hasDownloadAction) {
-                return actions;
-            }
-
-            boolean inspectMedia = shouldInspectMedia(hideWhenNoMedia(), hasDownloadAction);
-            boolean hasMedia = true;
-            if (inspectMedia) {
-                Object post = postFor(presenter);
-                hasMedia = hasMedia(post);
-            }
-            if (inspectMedia && !hasMedia) {
-                return actions;
-            }
+            // This is a fresh list from the post's native actions; the appended action is only
+            // passed to the state converter and is never written back to the post model.
+            if (hideWhenNoMedia() && !hasMedia(postFor(presenter))) return actions;
 
             Object downloadAction = getOrCreateDownloadAction();
 
@@ -291,16 +280,6 @@ public final class InlineDownloadButton {
             }
         }
         return action;
-    }
-
-    private static boolean containsDownloadAction(List<?> actions) {
-        Object downloadAction = cachedDownloadAction;
-        if (downloadAction == null) return false;
-
-        for (Object action : actions) {
-            if (action == downloadAction) return true;
-        }
-        return false;
     }
 
     static void registerDownloadAction(Object action) {

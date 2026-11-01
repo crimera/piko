@@ -39,8 +39,10 @@ public final class InlineActionFilter {
     ) {
         if (actions == null) return null;
 
-        List<?> filtered = filterHiddenActions(actions, hiddenActionIds);
-        return InlineDownloadButton.addAction(filtered, presenter);
+        if (hiddenActionIds != null && !hiddenActionIds.isEmpty()) {
+            actions = filterHiddenActions(actions, hiddenActionIds);
+        }
+        return InlineDownloadButton.addAction(actions, presenter);
     }
 
     private static List<?> filterHiddenActions(List<?> actions, Set<String> hiddenActionIds) {
