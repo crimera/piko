@@ -75,14 +75,14 @@ val customizeNewXInlineActionsPatch =
                     "inline action state builder",
                 )
             // m0->d() is a dense Compose presenter: every low register is live at the
-            // conversion hook, so liveness-based allocation finds no free register. Reserve two
-            // fresh locals below the parameter block and address them explicitly.
+            // conversion hook, so liveness-based allocation finds no free register. Reserve three
+            // fresh locals below the parameter block for the direct filter call.
             val originalRegisterCount =
                 originalMethod.implementation?.registerCount
                     ?: throw PatchException("NewX inline action state builder has no implementation: $originalMethod")
             val method =
                 originalMethod.cloneMutable(
-                    additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
+                    additionalRegisters = originalMethod.numberOfParameterRegisters + 3,
                 )
             inlineActionBarClass.methods.remove(originalMethod)
             inlineActionBarClass.methods.add(method)
@@ -111,13 +111,15 @@ val customizeNewXInlineActionsPatch =
                 throw PatchException("NewX inline action list conversion result not found in $method")
             }
             val resultRegister = resultInstruction.registerA
-            // Explicit scratch locals: setting (byte/range) + list copy (byte/range). Both are fresh
-            // locals created by the clone above, so no liveness search is needed.
-            val settingRegister = originalRegisterCount
-            val listRegister = originalRegisterCount + 1
-            if (listRegister > 255) {
+            // Explicit scratch locals: list, setting, presenter. They are contiguous so the
+            // invoke-range can pass all three values without ThreadLocal staging.
+            val listRegister = originalRegisterCount
+            val settingRegister = originalRegisterCount + 1
+            val presenterRegister = originalRegisterCount + 2
+            if (presenterRegister > 255) {
                 throw PatchException(
-                    "NewX inline action scratch registers exceed v255 in $method: v$settingRegister, v$listRegister",
+                    "NewX inline action scratch registers exceed v255 in $method: " +
+                        "v$listRegister, v$settingRegister, v$presenterRegister",
                 )
             }
             val read =
@@ -127,8 +129,8 @@ val customizeNewXInlineActionsPatch =
                     register = settingRegister,
                 )
 
-            // Loop exits target the immutable conversion. Hook its result, then restore the
-            // exact immutable representation before the consumer sees it.
+            // Loop exits target the immutable conversion. Pass the set and presenter directly to
+            // the extension, then restore the exact immutable representation for the consumer.
             //
             // Hidden actions must stay *removed* from the list. The bar measures one packed slot
             // per entry (Compose measure policy, `f1` kinds CountedPill/Countless/IconOnly) and
@@ -139,18 +141,15 @@ val customizeNewXInlineActionsPatch =
             // slots redistribute exactly like a native bar. Evidence and measurements:
             // docs/newx-resolver-linter/incidents/2026-09-25-inline-action-hidden-slot.md.
             method.insertHook(read.nextIndex, relocateBranchTargets = false) {
-                invokeStatic(
-                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->prepareHiddenActions(Ljava/util/Set;)V"),
-                    read.register,
-                )
-                invokeStatic(
-                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->preparePresenter(Ljava/lang/Object;)V"),
-                    method.p0Register,
-                )
+                move(presenterRegister, method.p0Register, "Ljava/lang/Object;")
                 move(listRegister, resultRegister, inlineActionListType)
                 invokeStatic(
-                    methodReference("$INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;"),
+                    methodReference(
+                        "$INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;Ljava/lang/Object;)Ljava/util/List;",
+                    ),
                     listRegister,
+                    settingRegister,
+                    presenterRegister,
                 )
                 moveResult(resultRegister, "Ljava/util/List;")
                 invokeStatic(conversionReference, resultRegister)
