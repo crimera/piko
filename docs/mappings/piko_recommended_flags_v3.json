@@ -203,8 +203,8 @@
     "code" : "68885"
   },
   {
-    "name" : "Remove threads profile button",
-    "desc" : "Disable to remove the threads profile button.",
+    "name" : "Threads profile button",
+    "desc" : "Disable to remove the threads button in profiles.",
     "code" : "58467::20"
   },
   {
