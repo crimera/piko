@@ -11,8 +11,7 @@ import app.morphe.patches.all.misc.extension.ExtensionHook
 
 internal val twitterInitHook = ExtensionHook(
     fingerprint = Fingerprint(
-        definingClass = "Lcom/instagram/app/InstagramAppShell;",
-        name = "onCreate",
-        superclass = "Landroid/app/Application;"
+        superclass = "Landroid/app/Application;",
+        name = "onCreate"
     )
 )
