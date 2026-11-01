@@ -187,6 +187,45 @@
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
     <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
 
+    <!-- Chat colors -->
+    <string name="piko_chat_colors">Chat colors</string>
+    <string name="piko_chat_colors_desc">Recolor the bubbles, text and background of your chats</string>
+    <string name="piko_chat_colors_override_themes">Override chat themes</string>
+    <string name="piko_chat_colors_override_themes_desc">Use these colors in chats with an Instagram theme too. You can choose per chat from its long-press menu in the inbox.</string>
+    <string name="piko_chat_colors_sent_start">Sent bubble</string>
+    <string name="piko_chat_colors_sent_end">Sent bubble end color</string>
+    <string name="piko_chat_colors_sent_end_desc">Optional gradient end. Needs the Sent bubble color</string>
+    <string name="piko_chat_colors_received">Received bubble</string>
+    <string name="piko_chat_colors_sent_text">Sent text</string>
+    <string name="piko_chat_colors_received_text">Received text</string>
+    <string name="piko_chat_colors_background">Background</string>
+    <string name="piko_chat_colors_background_end">Background end color</string>
+    <string name="piko_chat_colors_background_end_desc">Optional gradient end. Needs the Background color</string>
+    <string name="piko_chat_colors_background_image">Background image</string>
+    <string name="piko_chat_colors_background_image_desc">Pick an image from your storage. It replaces the background colors</string>
+    <string name="piko_chat_colors_background_image_remove">Remove background image</string>
+    <string name="piko_chat_colors_background_image_success">Background image added</string>
+    <string name="piko_chat_colors_background_image_invalid">The selected file is not an image</string>
+    <string name="piko_chat_colors_background_image_fail">Failed to add the image</string>
+    <string name="piko_chat_colors_background_image_removed">Background image removed</string>
+    <string name="piko_chat_colors_background_image_none">No background image to remove</string>
+    <string name="piko_chat_colors_background_image_remove_fail">Failed to remove the image</string>
+    <string name="piko_chat_colors_header">Header</string>
+    <string name="piko_chat_colors_input_bar">Input bar</string>
+    <string name="piko_chat_colors_names">Names and dates</string>
+    <string name="piko_chat_colors_names_desc">Also used for Seen and Replied to labels</string>
+    <string name="piko_color_default">Default</string>
+    <string name="piko_color_automatic">Automatic</string>
+    <string name="piko_color_hex_hint">RRGGBB</string>
+    <string name="piko_color_invalid">Enter 6 hex digits, like 1A8CFF</string>
+    <string name="piko_color_brightness">Brightness</string>
+    <string name="piko_color_opacity">Opacity</string>
+    <string name="piko_chat_colors_chat_title">Colors of this chat</string>
+    <string name="piko_chat_colors_chat_default">Follow settings</string>
+    <string name="piko_chat_colors_chat_native">Instagram theme</string>
+    <string name="piko_chat_colors_chat_piko">Piko colors</string>
+    <string name="piko_chat_colors_chat_saved">Saved. Reopen the chat to apply it</string>
+
     <!-- Story Section -->
     <string name="piko_category_story">Story</string>
     <string name="piko_view_story_mentions">View story mentions</string>

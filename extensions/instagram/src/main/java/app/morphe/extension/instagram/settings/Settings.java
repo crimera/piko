@@ -127,6 +127,23 @@ public class Settings {
 
     public static final BooleanSetting ENABLE_MARK_CHAT_AS_READ = new BooleanSetting("enable_mark_chat_as_read", true, NOT_REQUIRED);
 
+    public static final BooleanSetting CHAT_COLORS_OVERRIDE_THEMES = new BooleanSetting("chat_colors_override_themes", false, NOT_REQUIRED);
+    // The colors are RRGGBB or AARRGGBB, empty when left to Instagram.
+    public static final StringSetting CHAT_COLORS_SENT_START = new StringSetting("chat_colors_sent_start", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_SENT_END = new StringSetting("chat_colors_sent_end", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_RECEIVED = new StringSetting("chat_colors_received", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_SENT_TEXT = new StringSetting("chat_colors_sent_text", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_RECEIVED_TEXT = new StringSetting("chat_colors_received_text", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_BACKGROUND = new StringSetting("chat_colors_background", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_BACKGROUND_END = new StringSetting("chat_colors_background_end", "", NOT_REQUIRED);
+    // The name of the file of the background picture, see ChatBackgroundImage. Empty when there is none.
+    public static final StringSetting CHAT_COLORS_BACKGROUND_IMAGE = new StringSetting("chat_colors_background_image", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_HEADER = new StringSetting("chat_colors_header", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_INPUT_BAR = new StringSetting("chat_colors_input_bar", "", NOT_REQUIRED);
+    public static final StringSetting CHAT_COLORS_NAMES = new StringSetting("chat_colors_names", "", NOT_REQUIRED);
+    // JSON object of chat id to the choice made for that chat. See ChatColorsConfig.
+    public static final StringSetting CHAT_COLORS_CHATS = new StringSetting("chat_colors_chats", "{}", NOT_REQUIRED);
+
     public static final StringSetting FILTER_STORY_BY_TYPE = new StringSetting("filter_story_by_type", "", NOT_REQUIRED);
     public static final StringSetting FILTER_STORY_BY_USER_TYPE = new StringSetting("filter_story_by_user_type", "", NOT_REQUIRED);
 

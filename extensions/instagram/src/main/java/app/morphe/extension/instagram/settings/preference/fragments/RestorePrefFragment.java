@@ -35,6 +35,7 @@ import org.json.JSONTokener;
 import org.xmlpull.v1.XmlPullParser;
 
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.patches.customise.chatColors.ChatBackgroundImage;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.dm.InboxLock;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
@@ -58,6 +59,7 @@ public class RestorePrefFragment extends Fragment {
     private File destinationFile;
     private Context context;
     private boolean isFontImport;
+    private boolean isChatBackgroundImport;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,10 +84,13 @@ public class RestorePrefFragment extends Fragment {
             } else if (args.containsKey("piko_pref_add_font")) {
                 // FontStorage decides where the font goes, and validates it first.
                 isFontImport = true;
+            } else if (args.containsKey("piko_pref_add_chat_background")) {
+                // ChatBackgroundImage decides where the picture goes, and cuts it to size first.
+                isChatBackgroundImport = true;
             }
         }
         if (savedInstanceState == null) {
-            if (destinationFile != null || isFontImport) {
+            if (destinationFile != null || isFontImport || isChatBackgroundImport) {
                 // An imported file can turn Inbox lock off, so it has to be confirmed first while the lock is up.
                 if (args != null && args.containsKey("piko_import_pref") && getActivity() != null) {
                     InboxLock.confirmIfLocked(getActivity(), this::requestFileForRestore, this::finishHost);
@@ -103,7 +108,7 @@ public class RestorePrefFragment extends Fragment {
         try {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
+            intent.setType(isChatBackgroundImport ? "image/*" : "*/*");
             if (isFontImport) {
                 intent.putExtra(Intent.EXTRA_MIME_TYPES, FONT_MIME_TYPES);
             }
@@ -138,6 +143,28 @@ public class RestorePrefFragment extends Fragment {
                         break;
                     default:
                         toast(str("piko_pref_add_font_fail"));
+                        break;
+                }
+                finishHost();
+            });
+        }).start();
+    }
+
+    /** Imports a picked picture through {@link ChatBackgroundImage}, off the main thread as a photo can be large. */
+    private void receiveChatBackground(Context ctx, Uri uri) {
+        new Thread(() -> {
+            ChatBackgroundImage.ImportResult result = ChatBackgroundImage.importFrom(ctx, uri);
+
+            mainHandler.post(() -> {
+                switch (result) {
+                    case ADDED:
+                        toast(str("piko_chat_colors_background_image_success"));
+                        break;
+                    case NOT_AN_IMAGE:
+                        toast(str("piko_chat_colors_background_image_invalid"));
+                        break;
+                    default:
+                        toast(str("piko_chat_colors_background_image_fail"));
                         break;
                 }
                 finishHost();
@@ -292,6 +319,9 @@ public class RestorePrefFragment extends Fragment {
             } else if (isFontImport) {
                 // Finishes itself once the font is imported off the main thread.
                 receiveFont(ctx, uri);
+                return;
+            } else if (isChatBackgroundImport) {
+                receiveChatBackground(ctx, uri);
                 return;
             } else {
                 receiveFileForRestore(ctx, uri);

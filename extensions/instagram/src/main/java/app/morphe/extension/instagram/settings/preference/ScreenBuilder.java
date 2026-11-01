@@ -87,6 +87,8 @@ public class ScreenBuilder {
             buildInstantsSection();
         } else if (Constants.PIKO_FRAGMENT_FONT.equals(fragmentName)) {
             buildFontSection();
+        } else if (Constants.PIKO_FRAGMENT_CHAT_COLORS.equals(fragmentName)) {
+            buildChatColorsSection();
         }
     }
 
@@ -172,6 +174,52 @@ public class ScreenBuilder {
                 "",
                 "piko_pref_delete_font"
         ));
+    }
+
+    public void buildChatColorsSection() {
+        if (!(SettingsStatus.chatColors)) return;
+
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_background"), null, Settings.CHAT_COLORS_BACKGROUND, false, false));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_background_end"), str("piko_chat_colors_background_end_desc"),
+                Settings.CHAT_COLORS_BACKGROUND_END, false, false));
+        addPreference(helper.buttonPreference(
+                str("piko_chat_colors_background_image"),
+                str("piko_chat_colors_background_image_desc"),
+                "piko_pref_add_chat_background"
+        ));
+        addPreference(helper.buttonPreference(
+                str("piko_chat_colors_background_image_remove"),
+                "",
+                "piko_pref_remove_chat_background"
+        ));
+        // Instagram draws the background, the header and the input bar opaque, so they take no opacity.
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_header"), null, Settings.CHAT_COLORS_HEADER, false, false));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_input_bar"), null, Settings.CHAT_COLORS_INPUT_BAR, false, false));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_sent_start"), null, Settings.CHAT_COLORS_SENT_START, false, true));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_sent_end"), str("piko_chat_colors_sent_end_desc"),
+                Settings.CHAT_COLORS_SENT_END, false, true));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_received"), null, Settings.CHAT_COLORS_RECEIVED, false, true));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_sent_text"), null, Settings.CHAT_COLORS_SENT_TEXT, true, true));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_received_text"), null, Settings.CHAT_COLORS_RECEIVED_TEXT, true, true));
+        addPreference(helper.colorPreference(
+                str("piko_chat_colors_names"), str("piko_chat_colors_names_desc"), Settings.CHAT_COLORS_NAMES,
+                true, true));
+        addPreference(
+                helper.switchPreference(
+                        str("piko_chat_colors_override_themes"),
+                        str("piko_chat_colors_override_themes_desc"),
+                        Settings.CHAT_COLORS_OVERRIDE_THEMES
+                )
+        );
     }
 
     public void buildDeveloperSection() {
@@ -275,6 +323,16 @@ public class ScreenBuilder {
 
     public void dmSection() {
         if (!(SettingsStatus.dmSection())) return;
+
+        if (SettingsStatus.chatColors) {
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_chat_colors"),
+                            str("piko_chat_colors_desc"),
+                            Constants.PIKO_FRAGMENT_CHAT_COLORS
+                    )
+            );
+        }
 
         if (SettingsStatus.disableDisappearingMessagesGesture) {
             addPreference(

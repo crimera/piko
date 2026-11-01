@@ -60,6 +60,7 @@ public class Constants {
     public static final String PIKO_FRAGMENT_REC_FLAGS = "piko_frag_rec_flags";
     public static final String PIKO_FRAGMENT_INSTANTS = "piko_frag_instants";
     public static final String PIKO_FRAGMENT_FONT = "piko_frag_font";
+    public static final String PIKO_FRAGMENT_CHAT_COLORS = "piko_frag_chat_colors";
 
     public static void load() {
         StorageUtils.setStorageAccessLauncher(ctx -> ActivityHook.launchFragment(ctx, "piko_download_set_path"));

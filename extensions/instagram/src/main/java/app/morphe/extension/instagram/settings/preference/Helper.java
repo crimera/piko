@@ -23,6 +23,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.LikeAnimationPreference;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
+import app.morphe.extension.instagram.settings.preference.widgets.ColorPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.DownloadFileNameTemplatePref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
@@ -156,6 +157,13 @@ public class Helper {
         preference.setDialogTitle(title);
         preference.setSummary(summary);
         preference.setSingleLineTitle(false);
+        return preference;
+    }
+
+    public Preference colorPreference(
+            String title, String description, StringSetting setting, boolean automatic, boolean alpha) {
+        ColorPref preference = new ColorPref(context, setting, automatic, alpha, description);
+        preference.setTitle(title);
         return preference;
     }
 

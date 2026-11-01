@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.patches.customise.chatColors.ChatColors;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.crimera.PikoUtils;
@@ -104,6 +105,7 @@ public class InstaUtils {
         // The font file lives outside the preferences, so a reset removes it separately.
         FontStorage.delete();
         if(Pref.clearAllPreferences()){
+            ChatColors.onSettingsReset(Utils.getContext());
             PikoUtils.toast(str("piko_reset_pref_success"));
             Utils.restartApp(Utils.getContext());
         }else{
