@@ -87,6 +87,7 @@ public final class DeletedMessagesActivity {
             boolean checked = list.isItemChecked(position);
             selectionView.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
             selectionView.setChecked(checked);
+            row.setPadding(selectionMode ? Dim.dp8 : Dim.dp16, Dim.dp12, Dim.dp16, Dim.dp12);
             row.setActivated(checked);
         }
     }
@@ -439,7 +440,7 @@ public final class DeletedMessagesActivity {
             }
 
             toolbar.setGravity(Gravity.TOP);
-            toolbar.setPadding(Dim.dp16, toolbar.getPaddingTop(),
+            toolbar.setPadding(Dim.dp8, toolbar.getPaddingTop(),
                     Dim.dp16, toolbar.getPaddingBottom());
             toolbar.setMinimumHeight(InstagramPreferenceStyle.dp(activity, 70));
             toolbar.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -588,8 +589,6 @@ public final class DeletedMessagesActivity {
                     row = new LinearLayout(activity);
                     row.setOrientation(LinearLayout.HORIZONTAL);
                     row.setGravity(Gravity.CENTER_VERTICAL);
-                    int pad = Dim.dp8;
-                    row.setPadding(pad * 2, Dim.dp12, pad * 2, Dim.dp12);
                     row.setBackground(messageRowBackground());
 
                     selectionView = new SelectionCheck(
@@ -658,6 +657,7 @@ public final class DeletedMessagesActivity {
                 boolean checked = messageList.isItemChecked(position);
                 selectionView.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
                 selectionView.setChecked(checked);
+                row.setPadding(selectionMode ? Dim.dp8 : Dim.dp16, Dim.dp12, Dim.dp16, Dim.dp12);
                 row.setActivated(checked);
 
                 return row;
