@@ -12,7 +12,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Intent;
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
@@ -33,7 +32,6 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +60,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.InstagramPrefe
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
+import app.morphe.extension.shared.ui.SelectionCheck;
 import app.morphe.extension.shared.ui.ListViewDragSelectionController;
 
 public final class DeletedMessagesActivity {
@@ -668,35 +667,6 @@ public final class DeletedMessagesActivity {
 
                 return row;
             }
-        }
-    }
-
-    private static final class SelectionCheck extends ImageView implements Checkable {
-        private boolean checked;
-
-        SelectionCheck(Context context, Drawable drawable) {
-            super(context);
-            setScaleType(ScaleType.CENTER);
-            setImageDrawable(drawable);
-            setClickable(false);
-            setFocusable(false);
-            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        }
-
-        @Override public boolean isChecked() { return checked; }
-
-        @Override public void setChecked(boolean checked) {
-            if (this.checked == checked) return;
-            this.checked = checked;
-            refreshDrawableState();
-        }
-
-        @Override public void toggle() { setChecked(!checked); }
-
-        @Override public int[] onCreateDrawableState(int extraSpace) {
-            int[] state = super.onCreateDrawableState(extraSpace + 1);
-            if (checked) mergeDrawableStates(state, new int[]{android.R.attr.state_checked});
-            return state;
         }
     }
 

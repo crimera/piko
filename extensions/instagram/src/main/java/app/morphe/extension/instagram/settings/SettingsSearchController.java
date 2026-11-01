@@ -11,10 +11,8 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.style.BackgroundColorSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -33,6 +31,7 @@ import java.util.List;
 
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramSearchStyle;
 
 public final class SettingsSearchController {
     public interface Listener {
@@ -91,16 +90,7 @@ public final class SettingsSearchController {
         searchInput.setTextDirection(View.TEXT_DIRECTION_LOCALE);
         searchInput.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
         searchInput.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
-        searchInput.setHighlightColor(Color.TRANSPARENT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            GradientDrawable cursor = new GradientDrawable();
-            cursor.setColor(InstagramPreferenceStyle.primaryTextColor());
-            cursor.setSize(
-                    InstagramPreferenceStyle.dp(context, 2),
-                    InstagramPreferenceStyle.dp(context, 24)
-            );
-            searchInput.setTextCursorDrawable(cursor);
-        }
+        InstagramSearchStyle.applyInputStyle(searchInput);
         searchInput.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         searchContainer.addView(searchInput, new LinearLayout.LayoutParams(
                 0,
@@ -136,7 +126,7 @@ public final class SettingsSearchController {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                removeComposingBackgroundSpans(editable);
+                InstagramSearchStyle.removeBackgroundSpans(editable);
                 if (suppressTextChanges) {
                     return;
                 }
@@ -334,20 +324,6 @@ public final class SettingsSearchController {
 
     private void rebuildState() {
         updateQuery(searchInput.getText().toString());
-    }
-
-    private static void removeComposingBackgroundSpans(Editable editable) {
-        if (editable == null || editable.length() == 0) {
-            return;
-        }
-        BackgroundColorSpan[] spans = editable.getSpans(
-                0,
-                editable.length(),
-                BackgroundColorSpan.class
-        );
-        for (BackgroundColorSpan span : spans) {
-            editable.removeSpan(span);
-        }
     }
 
     private void notifyListener() {

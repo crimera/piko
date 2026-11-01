@@ -136,6 +136,8 @@ public class ActivityHook {
             return SettingsActivity.handleBackPressed(activity);
         } else if (LAUNCH_TYPE_DELETED_MESSAGES.equals(launchType)) {
             return DeletedMessagesActivity.handleBackPressed(activity);
+        } else if (LAUNCH_TYPE_INSTANTS_VAULT.equals(launchType)) {
+            return InstantsVaultActivity.handleBackPressed(activity);
         }
         return false;
     }
