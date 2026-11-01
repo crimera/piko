@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.11.0-dev.3",
+  "version": "3.11.0-dev.4",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -1162,7 +1162,36 @@
     },
     {
       "name": "Disable comments",
-      "description": "Disables comments and hides comment buttons and counts on posts and reels.",
+      "description": "Disables comments and hides comment buttons on posts, reels and stories",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable disappearing messages swipe",
+      "description": "Prevents swiping up in a chat from enabling disappearing messages",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -1871,7 +1900,7 @@
     },
     {
       "name": "Friendship status indicator",
-      "description": "Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click",
+      "description": "Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -2617,7 +2646,7 @@
     },
     {
       "name": "Hide share button",
-      "description": "Hides the share button on posts and reels",
+      "description": "Hides the share button on posts, reels and stories",
       "default": true,
       "category": null,
       "compatiblePackages": [
