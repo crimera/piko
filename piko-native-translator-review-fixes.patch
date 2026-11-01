@@ -1,0 +1,1205 @@
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/AutoTranslate.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/AutoTranslate.java
+index 2d9565d..a218951 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/AutoTranslate.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/AutoTranslate.java
+@@ -1,13 +1,20 @@
+ package app.morphe.extension.twitter.patches.autotranslate;
+ 
++import static app.morphe.extension.shared.StringRef.str;
++
++import android.content.SharedPreferences;
++import app.morphe.extension.twitter.Pref;
++import app.morphe.extension.twitter.Utils;
++import app.morphe.extension.twitter.settings.Settings;
++import app.morphe.extension.twitter.settings.SettingsStatus;
++import app.morphe.extension.twitter.patches.nativeFeatures.translator.NativeTranslator;
++import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.Translate;
++
+ import android.content.Context;
+ import android.graphics.Rect;
+ import android.os.Handler;
+ import android.os.Looper;
+ import android.os.SystemClock;
+-import android.preference.Preference;
+-import android.preference.PreferenceGroup;
+-import android.preference.SwitchPreference;
+ import android.text.SpannableStringBuilder;
+ import android.text.Spanned;
+ import android.text.SpannedString;
+@@ -33,12 +40,12 @@ import java.util.concurrent.ThreadPoolExecutor;
+ import java.util.concurrent.TimeUnit;
+ import java.util.concurrent.CountDownLatch;
+ import java.util.concurrent.atomic.AtomicBoolean;
++import java.util.concurrent.atomic.AtomicReference;
+ 
+ /** Experimental, version-specific UI hook for X 12.19.1 / Piko. */
+ public final class AutoTranslate {
+     private static final int TAG = 0x7e0a70a1;
+     private static final int WATCH_TAG = 0x7e0a70a2;
+-    private static final String PREFS = "x_auto_translate_it";
+     private static final Handler MAIN = new Handler(Looper.getMainLooper());
+     private static final ThreadPoolExecutor WORKERS = new ThreadPoolExecutor(
+             4, 4, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(24));
+@@ -51,13 +58,14 @@ public final class AutoTranslate {
+         @Override protected int sizeOf(String key, String value) { return 2 * (key.length() + value.length()); }
+     };
+     private static long pausedUntil;
+-    private static String pausedMessage = "Traduzione in pausa";
++    private static String pausedMessage;
+     private static final HashMap<String, String> FAILURE_MESSAGES = new HashMap<>();
+ 
+     private static final class Binding {
+         final WeakReference<View> view;
+         final long id;
+         final String language;
++        final TranslationSelection selection;
+         int revision;
+         CharSequence original;
+         String key;
+@@ -73,6 +81,7 @@ public final class AutoTranslate {
+             this.view = new WeakReference<>(view);
+             this.id = id;
+             this.language = language;
++            this.selection = new TranslationSelection(Pref.natveTranslatorProvider(), Pref.translatorLanguage());
+         }
+     }
+ 
+@@ -83,23 +92,56 @@ public final class AutoTranslate {
+     }
+ 
+     private static boolean enabled(Context context) {
+-        return context.getSharedPreferences(PREFS, 0).getBoolean("enabled", true);
++        return SettingsStatus.nativeTranslator && Utils.getBooleanPref(Settings.NATIVE_TRANSLATOR_AUTO);
++    }
++
++    // Android retains preference listeners weakly, so keep this listener for the process lifetime.
++    private static boolean observingSettings;
++    private static final SharedPreferences.OnSharedPreferenceChangeListener SETTINGS_LISTENER = (preferences, key) -> {
++        if (key == null || Settings.NATIVE_TRANSLATOR_AUTO.key.equals(key)
++                || Settings.NATIVE_TRANSLATOR_LANG.key.equals(key)
++                || Settings.NATIVE_TRANSLATOR_PROVIDERS.key.equals(key)) MAIN.post(AutoTranslate::refreshViews);
++    };
++
++    private static boolean selectionMatches(Binding binding) {
++        return binding.selection.matches(Pref.natveTranslatorProvider(), Pref.translatorLanguage());
++    }
++
++    private static void refreshViews() {
++        for (String key : new ArrayList<>(RETRY_TASKS.keySet())) cancelCycle(key, null);
++        pausedUntil = 0;
++        for (View view : new ArrayList<>(VIEWS.keySet())) {
++            Binding old = (Binding) view.getTag(TAG);
++            if (old == null || old.original == null || !matchesQuote(view, old)) continue;
++            if (old.scheduled != null) MAIN.removeCallbacks(old.scheduled);
++            old.revision++;
++            Binding next = new Binding(view, old.id, old.language);
++            next.quoteDescription = old.quoteDescription;
++            view.setTag(TAG, next);
++            bindView(view, old.original);
++        }
+     }
+ 
+     /** Called before the app formats a particular tweet. Hidden content is excluded. */
+     public static void capture(View view, e tweet, boolean hidden) {
+         try {
++            if (!observingSettings) {
++                view.getContext().getSharedPreferences(Settings.SHARED_PREF_NAME, 0)
++                        .registerOnSharedPreferenceChangeListener(SETTINGS_LISTENER);
++                observingSettings = true;
++            }
+             if (!(view instanceof TextContentView) && !(view instanceof QuoteView) && !(view instanceof TextView)) return;
+             View textView = view;
+             Binding previous = (Binding) view.getTag(TAG);
+             if (previous != null && previous.scheduled != null) { MAIN.removeCallbacks(previous.scheduled); previous.scheduled = null; }
+             if (hidden || tweet == null || tweet.a == null) {
+                 view.setTag(TAG, null);
++                VIEWS.remove(view);
+                 return;
+             }
+             String language = tweet.a.r == null ? "und" : tweet.a.r.toLowerCase(Locale.ROOT);
+             long id = tweet.a.H1;
+-            if (previous == null || previous.id != id || !previous.language.equals(language)) {
++            if (previous == null || previous.id != id || !previous.language.equals(language) || !selectionMatches(previous)) {
+                 view.setTag(TAG, new Binding(textView, id, language));
+             }
+             VIEWS.put(textView, Boolean.TRUE);
+@@ -135,7 +177,7 @@ public final class AutoTranslate {
+             if (binding == null) return;
+             if (binding.scheduled != null) { MAIN.removeCallbacks(binding.scheduled); binding.scheduled = null; }
+             String plain = text == null ? "" : text.toString();
+-            String key = binding.id + "\u0000" + binding.language + "\u0000it\u0000" + plain;
++            String key = binding.selection.cacheKey(binding.id, binding.language, plain);
+             boolean changed = !key.equals(binding.key);
+             binding.revision++;
+             binding.key = key;
+@@ -212,8 +254,8 @@ public final class AutoTranslate {
+     }
+ 
+     private static boolean eligible(View view, Binding binding) {
+-        if (!enabled(view.getContext()) || "it".equals(binding.language)
+-                || binding.language.startsWith("it-") || "zxx".equals(binding.language)) return false;
++        if (!enabled(view.getContext()) || !selectionMatches(binding)
++                || binding.selection.isSourceLanguage(binding.language) || "zxx".equals(binding.language)) return false;
+         String plain = binding.original.toString();
+         if (plain.length() > 6000) return false;
+         int letters = 0;
+@@ -232,7 +274,7 @@ public final class AutoTranslate {
+         Binding binding = waiter.binding.get();
+         if (binding == null || binding.revision != waiter.revision) return null;
+         View view = binding.view.get();
+-        return view != null && view.getTag(TAG) == binding && matchesQuote(view, binding) && enabled(view.getContext()) ? binding : null;
++        return view != null && view.getTag(TAG) == binding && matchesQuote(view, binding) && selectionMatches(binding) && enabled(view.getContext()) ? binding : null;
+     }
+ 
+     private static void request(final Binding binding) {
+@@ -243,7 +285,7 @@ public final class AutoTranslate {
+                 if (waiter.binding.get() == binding && waiter.revision == binding.revision) return;
+             }
+             waiting.add(new Waiter(binding));
+-            render(binding, RETRY_TASKS.containsKey(key) ? "Traduzione in preparazione… riprovo automaticamente" : "Traduzione in corso…");
++            render(binding, RETRY_TASKS.containsKey(key) ? str("piko_native_translator_auto_retrying") : str("piko_native_translator_auto_loading"));
+             return;
+         }
+         long now = SystemClock.elapsedRealtime();
+@@ -255,13 +297,12 @@ public final class AutoTranslate {
+         waiting = new ArrayList<>();
+         waiting.add(new Waiter(binding));
+         IN_FLIGHT.put(key, waiting);
+-        final String source = binding.language;
+         final String original = binding.original.toString();
+-        render(binding, "Traduzione in corso…");
+-        startNetwork(key, source, original);
++        render(binding, str("piko_native_translator_auto_loading"));
++        startNetwork(key, binding.id, binding.selection.provider, binding.selection.target, original);
+     }
+ 
+-    private static void startNetwork(final String key, final String source, final String original) {
++    private static void startNetwork(final String key, final long tweetId, final int provider, final String target, final String original) {
+         try {
+             WORKERS.execute(new Runnable() {
+                 @Override public void run() {
+@@ -283,8 +324,33 @@ public final class AutoTranslate {
+                                 } finally { gate.countDown(); }
+                             }
+                         });
+-                        if (gate.await(2, TimeUnit.SECONDS) && allowed.get())
+-                            translated = TranslationClient.translate(source, original);
++                        if (gate.await(2, TimeUnit.SECONDS) && allowed.get()) {
++                            final CountDownLatch completed = new CountDownLatch(1);
++                            final AtomicReference<String> response = new AtomicReference<>();
++                            final AtomicReference<Exception> providerError = new AtomicReference<>();
++                            MAIN.post(() -> {
++                                if (!hasVisibleWaiter(key)) { completed.countDown(); return; }
++                                try {
++                                    NativeTranslator.createTranslator(provider).translate(tweetId, original, target, new Translate.TranslationCallback() {
++                                        @Override public void onTranslationComplete(String text) {
++                                            if (text == null || text.trim().isEmpty()) providerError.set(new Translate.UnavailableException());
++                                            else response.set(text);
++                                            completed.countDown();
++                                        }
++                                        @Override public void onError(Exception failure) {
++                                            providerError.set(failure);
++                                            completed.countDown();
++                                        }
++                                    });
++                                } catch (Exception failure) {
++                                    providerError.set(failure);
++                                    completed.countDown();
++                                }
++                            });
++                            if (!completed.await(30, TimeUnit.SECONDS)) throw new java.net.SocketTimeoutException();
++                            translated = response.get();
++                            error = providerError.get();
++                        }
+                     }
+                     catch (Exception failure) { error = failure; }
+                     final String result = translated;
+@@ -326,7 +392,7 @@ public final class AutoTranslate {
+         ArrayList<Waiter> waiting = IN_FLIGHT.get(key);
+         if (waiting == null) return;
+         clearRetry(key);
+-        if (translated == null && error instanceof TranslationClient.Unavailable) {
++        if (translated == null && error instanceof Translate.UnavailableException) {
+             if (!hasVisibleWaiter(key)) { cancelCycle(key, null); return; }
+             Integer previous = ATTEMPTS.get(key);
+             int failures = previous == null ? 1 : previous + 1;
+@@ -338,20 +404,22 @@ public final class AutoTranslate {
+                     if (candidate != null) { first = candidate; break; }
+                 }
+                 if (first != null) {
+-                    final String source = first.language;
++                    final long tweetId = first.id;
++                    final int provider = first.selection.provider;
++                    final String target = first.selection.target;
+                     final String original = first.original.toString();
+                     Runnable task = new Runnable() {
+                         @Override public void run() {
+                             RETRY_TASKS.remove(key);
+                             if (SystemClock.elapsedRealtime() < pausedUntil) { cancelCycle(key, pausedMessage); return; }
+                             if (!hasVisibleWaiter(key)) { cancelCycle(key, null); return; }
+-                            startNetwork(key, source, original);
++                            startNetwork(key, tweetId, provider, target, original);
+                         }
+                     };
+                     RETRY_TASKS.put(key, task);
+                     for (Waiter waiter : waiting) {
+                         Binding value = current(waiter);
+-                        if (value != null) render(value, "Traduzione in preparazione… riprovo automaticamente");
++                        if (value != null) render(value, str("piko_native_translator_auto_retrying"));
+                     }
+                     MAIN.postDelayed(task, failures == 1 ? 1000 : 2500);
+                     return;
+@@ -364,21 +432,20 @@ public final class AutoTranslate {
+         else if (error != null) {
+             long now = SystemClock.elapsedRealtime();
+             if (FAILURES.size() >= 128) { FAILURES.clear(); FAILURE_MESSAGES.clear(); }
+-            FAILURE_MESSAGES.put(key, TranslationClient.describe(error));
++            FAILURE_MESSAGES.put(key, str("piko_native_translator_auto_unavailable"));
+             FAILURES.put(key, now + 60000);
+-            if (error instanceof TranslationClient.Failure) {
+-                int status = ((TranslationClient.Failure) error).status;
+-                if (status == 429 || status == 302 || status == 403) {
+-                    pausedUntil = now + 60000;
+-                    pausedMessage = TranslationClient.describe(error);
+-                }
++            // Back off globally as well as per post when a provider/network request fails.
++            // Empty translations get their bounded retries first.
++            if (!(error instanceof Translate.UnavailableException)) {
++                pausedUntil = now + 60000;
++                pausedMessage = str("piko_native_translator_auto_unavailable");
+             }
+         }
+         for (Waiter waiter : waiting) {
+             Binding value = current(waiter);
+             if (value == null) continue;
+             value.translated = translated;
+-            render(value, translated == null && error != null ? TranslationClient.describe(error) : null);
++            render(value, translated == null && error != null ? str("piko_native_translator_auto_unavailable") : null);
+         }
+     }
+ 
+@@ -398,7 +465,7 @@ public final class AutoTranslate {
+     private static void renderChecked(Binding binding, String status) {
+         View view = binding.view.get();
+         if (view == null || view.getTag(TAG) != binding || binding.original == null || !matchesQuote(view, binding)) return;
+-        if (!enabled(view.getContext())) { write(view, binding.original); return; }
++        if (!enabled(view.getContext()) || !selectionMatches(binding)) { write(view, binding.original); return; }
+         String translated = binding.translated;
+         if (translated != null && translated.equals(binding.original.toString())) {
+             write(view, binding.original);
+@@ -427,29 +494,29 @@ public final class AutoTranslate {
+     }
+ 
+     private static String sourceLanguageName(String language) {
+-        if (language == null || language.isEmpty() || "und".equals(language) || "auto".equals(language)) return "non rilevata";
++        if (language == null || language.isEmpty() || "und".equals(language) || "auto".equals(language)) return str("piko_native_translator_auto_unknown_language");
+         try {
+             Locale locale = Locale.forLanguageTag(language);
+-            String name = locale.getDisplayLanguage(Locale.ITALIAN);
+-            if (name.isEmpty() || name.equalsIgnoreCase(locale.getLanguage())) return "non rilevata";
+-            return name.toLowerCase(Locale.ITALIAN);
+-        } catch (RuntimeException ignored) { return "non rilevata"; }
++            String name = locale.getDisplayLanguage(Locale.getDefault());
++            if (name.isEmpty()) return str("piko_native_translator_auto_unknown_language");
++            return name;
++        } catch (RuntimeException ignored) { return str("piko_native_translator_auto_unknown_language"); }
+     }
+ 
+     private static boolean appendStatus(SpannableStringBuilder output, Binding binding, String status) {
+         int start = output.length();
+         if (binding.translated != null) {
+-            output.append("Lingua originale: ").append(sourceLanguageName(binding.language)).append("  ");
++            output.append(str("piko_native_translator_auto_source", sourceLanguageName(binding.language))).append("  ");
+             output.setSpan(new ForegroundColorSpan(0xff90a4ae), start, output.length(), 33);
+             int action = output.length();
+-            output.append(binding.originalShown ? "Mostra traduzione" : "Mostra originale");
++            output.append(binding.originalShown ? str("piko_native_translator_auto_show_translation") : str("piko_native_translator_auto_show_original"));
+             output.setSpan(new ToggleSpan(binding), action, output.length(), 33);
+         } else if (status != null) {
+             output.append(status);
+-            if (status.startsWith("Traduzione non ")) {
++            if (status.equals(str("piko_native_translator_auto_unavailable"))) {
+                 output.append(" · ");
+                 int action = output.length();
+-                output.append("Riprova");
++                output.append(str("piko_native_translator_auto_retry"));
+                 output.setSpan(new RetrySpan(binding), action, output.length(), 33);
+             }
+         }
+@@ -497,6 +564,7 @@ public final class AutoTranslate {
+             if (view.a == null || view.a.a == null || view.O == null || view.P != null) {
+                 if (previous != null && previous.scheduled != null) MAIN.removeCallbacks(previous.scheduled);
+                 view.setTag(TAG, null);
++                VIEWS.remove(view);
+                 return;
+             }
+             // The native binder may skip formatting an unchanged model. Do not translate our header again.
+@@ -577,36 +645,4 @@ public final class AutoTranslate {
+         }
+     }
+ 
+-    /** Returned to Piko's own preference builder so its normal search index sees it. */
+-    public static Preference preference(PreferenceGroup group) {
+-        final Context context = group.getContext();
+-        SwitchPreference toggle = new SwitchPreference(context);
+-        toggle.setKey("x_auto_translate_posts_it");
+-        toggle.setTitle("Traduzione automatica in italiano");
+-        toggle.setSummary("Traduce il testo dei post tramite Google online, usando l’interfaccia web come TWP. Il testo viene inviato a Google. Tocca Mostra originale per rileggere il post.");
+-        toggle.setPersistent(false);
+-        toggle.setChecked(enabled(context));
+-        toggle.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+-            @Override public boolean onPreferenceChange(Preference preference, Object value) {
+-                final boolean on = Boolean.TRUE.equals(value);
+-                context.getSharedPreferences(PREFS, 0).edit().putBoolean("enabled", on).apply();
+-                for (View view : new ArrayList<>(VIEWS.keySet())) {
+-                    Binding binding = (Binding) view.getTag(TAG);
+-                    if (binding == null || binding.original == null || !matchesQuote(view, binding)) continue;
+-                    if (binding.scheduled != null) { MAIN.removeCallbacks(binding.scheduled); binding.scheduled = null; }
+-                    if (on) bindView(view, binding.original);
+-                    else {
+-                        binding.revision++;
+-                        write(view, binding.original);
+-                        describeView(view, binding.original);
+-                    }
+-                }
+-                if (!on) {
+-                    for (String key : new ArrayList<>(RETRY_TASKS.keySet())) cancelCycle(key, null);
+-                }
+-                return true;
+-            }
+-        });
+-        return toggle;
+-    }
+ }
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationClient.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationClient.java
+deleted file mode 100644
+index 6b52a50..0000000
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationClient.java
++++ /dev/null
+@@ -1,146 +0,0 @@
+-package app.morphe.extension.twitter.patches.autotranslate;
+-
+-import java.io.ByteArrayOutputStream;
+-import java.io.IOException;
+-import java.io.InputStream;
+-import java.io.OutputStream;
+-import java.net.HttpURLConnection;
+-import java.net.URL;
+-import java.util.Locale;
+-import java.util.regex.Matcher;
+-import java.util.regex.Pattern;
+-import org.json.JSONArray;
+-
+-/** Independent implementation of the web transport used by TWP.
+- * Only supplied post text and language are sent. No X account credentials.
+- */
+-public final class TranslationClient {
+-    private static final String BOOTSTRAP = "https://translate.googleapis.com/_/translate_http/_/js/k=translate_http.tr.en_US.YusFYy3P_ro.O/am=AAg/d=1/exm=el_conf/ed=1/rs=AN8SPfq1Hb8iJRleQqQc8zhdzXmF9E56eQ/m=el_main";
+-    private static final String ENDPOINT = "https://translate-pa.googleapis.com/v1/translateHtml";
+-    private static final Pattern AUTH = Pattern.compile("['\"]x-goog-api-key['\"]\\s*:\\s*['\"](\\w{39})['\"]", Pattern.CASE_INSENSITIVE);
+-    private static final Pattern ORIGINAL = Pattern.compile("<i\\b[^>]*>.*?</i\\s*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+-    private static final Pattern TAGS = Pattern.compile("<[^>]*>");
+-    private static final Pattern ENTITIES = Pattern.compile("&(#(?:[xX][0-9a-fA-F]+|[0-9]+)|amp|lt|gt|quot|apos|nbsp);");
+-    private static String auth;
+-    private static long authTime;
+-    private static long authFailureUntil;
+-    private static Exception authFailure;
+-
+-    private static HttpURLConnection open(String url) throws IOException {
+-        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+-        c.setConnectTimeout(7000);
+-        c.setReadTimeout(10000);
+-        c.setUseCaches(false);
+-        c.setInstanceFollowRedirects(false);
+-        c.setRequestProperty("Accept", "application/json,text/javascript,*/*");
+-        c.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 9) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36");
+-        return c;
+-    }
+-
+-    private static String read(HttpURLConnection c, int max, String stage) throws Exception {
+-        int status = c.getResponseCode();
+-        if (status != 200) throw new Failure(status, stage);
+-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+-        try (InputStream input = c.getInputStream()) {
+-            byte[] buffer = new byte[4096];
+-            for (int count; (count = input.read(buffer)) != -1;) {
+-                if (bytes.size() + count > max) throw new IOException("Response too large");
+-                bytes.write(buffer, 0, count);
+-            }
+-        }
+-        return bytes.toString("UTF-8");
+-    }
+-
+-    // One bootstrap for concurrent workers; also bound failures to avoid a request storm.
+-    private static synchronized String authorization() throws Exception {
+-        long now = System.nanoTime();
+-        if (auth != null && now - authTime < 20L * 60 * 1000000000) return auth;
+-        if (authFailure != null && now < authFailureUntil) throw authFailure;
+-        HttpURLConnection c = open(BOOTSTRAP);
+-        try {
+-            Matcher match = AUTH.matcher(read(c, 4194304, "accesso"));
+-            if (!match.find()) throw new IOException("Google bootstrap changed");
+-            auth = match.group(1);
+-            authTime = System.nanoTime();
+-            authFailure = null;
+-            return auth;
+-        } catch (Exception error) {
+-            authFailure = error;
+-            authFailureUntil = System.nanoTime() + 60L * 1000000000;
+-            throw error;
+-        } finally { c.disconnect(); }
+-    }
+-
+-    public static String requestBody(String source, String text) throws Exception {
+-        String language = source == null ? "auto" : source.toLowerCase(Locale.ROOT);
+-        if (!language.matches("[a-z]{2,3}(-[a-z]{2,4})?") || "und".equals(language)) language = "auto";
+-        if (text == null || text.trim().isEmpty() || text.length() > 6000) throw new IOException("Invalid post text");
+-        String html = "<pre>" + text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;") + "</pre>";
+-        return new JSONArray().put(new JSONArray().put(new JSONArray().put(html)).put(language).put("it")).put("te").toString();
+-    }
+-
+-    public static String translate(String source, String text) throws Exception {
+-        byte[] body = requestBody(source, text).getBytes("UTF-8");
+-        String token = authorization();
+-        HttpURLConnection c = open(ENDPOINT);
+-        try {
+-            c.setRequestMethod("POST");
+-            c.setDoOutput(true);
+-            c.setRequestProperty("Content-Type", "application/json+protobuf");
+-            c.setRequestProperty("X-Goog-Api-Key", token);
+-            c.setFixedLengthStreamingMode(body.length);
+-            try (OutputStream output = c.getOutputStream()) { output.write(body); }
+-            return parse(read(c, 524288, "traduzione"));
+-        } finally { c.disconnect(); }
+-    }
+-
+-    public static String parse(String body) throws Exception {
+-        JSONArray root = new JSONArray(body);
+-        JSONArray translations = root.getJSONArray(0);
+-        if (translations.length() != 1 || !(translations.get(0) instanceof String)) throw new Unavailable();
+-        String html = translations.getString(0);
+-        // Some responses annotate translated sentences with an italic original.
+-        html = ORIGINAL.matcher(html).replaceAll("");
+-        html = html.replaceAll("(?i)<br\\s*/?>", "\n");
+-        html = TAGS.matcher(html).replaceAll("");
+-        Matcher entities = ENTITIES.matcher(html);
+-        StringBuffer result = new StringBuffer();
+-        while (entities.find()) {
+-            String name = entities.group(1), replacement = entities.group();
+-            if ("amp".equals(name)) replacement = "&";
+-            else if ("lt".equals(name)) replacement = "<";
+-            else if ("gt".equals(name)) replacement = ">";
+-            else if ("quot".equals(name)) replacement = "\"";
+-            else if ("apos".equals(name)) replacement = "'";
+-            else if ("nbsp".equals(name)) replacement = "\u00a0";
+-            else if (name.startsWith("#")) {
+-                try {
+-                    boolean hex = name.length() > 2 && (name.charAt(1) == 'x' || name.charAt(1) == 'X');
+-                    int point = Integer.parseInt(name.substring(hex ? 2 : 1), hex ? 16 : 10);
+-                    if (Character.isValidCodePoint(point) && !(point >= 0xd800 && point <= 0xdfff)) replacement = new String(Character.toChars(point));
+-                } catch (IllegalArgumentException ignored) { }
+-            }
+-            entities.appendReplacement(result, Matcher.quoteReplacement(replacement));
+-        }
+-        entities.appendTail(result);
+-        if (result.toString().trim().isEmpty()) throw new Unavailable();
+-        return result.toString();
+-    }
+-
+-    public static final class Unavailable extends IOException { }
+-    public static final class Failure extends IOException {
+-        public final int status;
+-        public final String stage;
+-        Failure(int status, String stage) { super("Google HTTP " + status + " (" + stage + ")"); this.status = status; this.stage = stage; }
+-    }
+-    public static String describe(Exception error) {
+-        if (error instanceof Failure) { Failure f = (Failure) error; return "Traduzione non disponibile (Google " + f.status + ", " + f.stage + ")"; }
+-        if (error instanceof java.net.SocketTimeoutException) return "Traduzione non disponibile (timeout Google)";
+-        if (error instanceof java.net.UnknownHostException) return "Traduzione non disponibile (DNS Google)";
+-        if (error instanceof javax.net.ssl.SSLException) return "Traduzione non disponibile (TLS Google)";
+-        if (error instanceof Unavailable) return "Traduzione non ancora disponibile";
+-        if (error instanceof org.json.JSONException) return "Traduzione non disponibile (risposta Google non valida)";
+-        if ("Google bootstrap changed".equals(error.getMessage())) return "Traduzione non disponibile (accesso Google cambiato)";
+-        return "Traduzione non disponibile (Google: " + error.getClass().getSimpleName() + ")";
+-    }
+-}
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationSelection.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationSelection.java
+new file mode 100644
+index 0000000..2d117d6
+--- /dev/null
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/autotranslate/TranslationSelection.java
+@@ -0,0 +1,38 @@
++/*
++ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
++ *
++ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
++ */
++
++package app.morphe.extension.twitter.patches.autotranslate;
++
++import java.util.Locale;
++
++/** Immutable request settings; changing provider or target invalidates existing view bindings. */
++final class TranslationSelection {
++    final int provider;
++    final String target;
++
++    TranslationSelection(int provider, String target) {
++        this.provider = provider;
++        this.target = target;
++    }
++
++    boolean matches(int provider, String target) {
++        return this.provider == provider && this.target.equalsIgnoreCase(target);
++    }
++
++    String cacheKey(long tweetId, String source, String text) {
++        return tweetId + "\u0000" + source + "\u0000" + target.toLowerCase(Locale.ROOT)
++                + "\u0000" + provider + "\u0000" + text;
++    }
++
++    boolean isSourceLanguage(String source) {
++        if (source.equalsIgnoreCase(target)) return true;
++        Locale from = Locale.forLanguageTag(source), to = Locale.forLanguageTag(target);
++        if (from.getLanguage().isEmpty() || !from.getLanguage().equals(to.getLanguage())) return false;
++        // Chinese regional tags can imply different scripts even without an explicit script subtag.
++        if ("zh".equals(from.getLanguage())) return false;
++        return from.getScript().isEmpty() || to.getScript().isEmpty() || from.getScript().equals(to.getScript());
++    }
++}
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/NativeTranslator.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/NativeTranslator.java
+index 1a05e7a..2bd37e1 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/NativeTranslator.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/NativeTranslator.java
+@@ -21,13 +21,22 @@ import app.morphe.extension.twitter.entity.Tweet;
+ 
+ public class NativeTranslator {
+ 
++    /** Shared provider factory for manual and automatic translation. */
++    public static Translate createTranslator(int providerCode) {
++        switch (providerCode) {
++            case 1: return new GTranslateV2();
++            case 2: return new FxTwitterTranslate();
++            default: return new GTranslate();
++        }
++    }
++
+     public static void translate(Context activity, Object tweetObj) {
+         try{
+             Tweet tweet = new Tweet(tweetObj);
+             String text = tweet.getText();
+             Long tweetId = tweet.getTweetId();
+             // If text is empty.
+-            if(text == ""){
++            if(text == null || text.isEmpty()){
+                 PikoUtils.logger(str("piko_native_translator_zero_text"));
+                 return;
+             }
+@@ -36,26 +45,11 @@ public class NativeTranslator {
+             String tweetLang = tweet.getTweetLang();
+ 
+             // If both the tweet language and requested language are same.
+-            if(tweetLang.toLowerCase() == toLang.toLowerCase()){
++            if(toLang.equalsIgnoreCase(tweetLang)){
+                 PikoUtils.logger(str("translate_tweet_same_language",toLang));
+                 return;
+             }
+-            int providerCode = Pref.natveTranslatorProvider();
+-
+-            Translate translator;
+-            switch (providerCode){
+-                case 1: {
+-                    translator = new GTranslateV2();
+-                    break;
+-                }
+-                case 2: {
+-                    translator = new FxTwitterTranslate();
+-                    break;
+-                }
+-                default: {
+-                    translator = new GTranslate();
+-                }
+-            }
++            Translate translator = createTranslator(Pref.natveTranslatorProvider());
+             translator.translate(tweetId, text, toLang, new Translate.TranslationCallback() {
+                 @Override
+                 public void onTranslationComplete(String translatedText) {
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/FxTwitterTranslate.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/FxTwitterTranslate.java
+index 11073d8..bebdfb3 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/FxTwitterTranslate.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/FxTwitterTranslate.java
+@@ -6,7 +6,6 @@
+ 
+ package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
+ 
+-import static app.morphe.extension.shared.StringRef.str;
+ import android.os.AsyncTask;
+ import java.io.BufferedReader;
+ import java.io.InputStreamReader;
+@@ -42,6 +41,7 @@ public class FxTwitterTranslate implements Translate {
+ 
+             @Override
+             protected String doInBackground(Void... voids) {
++                HttpURLConnection connection = null;
+                 try {
+ 
+                     // Construct the full URL
+@@ -49,7 +49,9 @@ public class FxTwitterTranslate implements Translate {
+ 
+                     // Create connection
+                     URL url = new URL(fullUrl);
+-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
++                    connection = (HttpURLConnection) url.openConnection();
++                    connection.setConnectTimeout(7000);
++                    connection.setReadTimeout(10000);
+ 
+                     // Set request headers
+                     connection.setRequestMethod("GET");
+@@ -68,6 +70,8 @@ public class FxTwitterTranslate implements Translate {
+                 } catch (Exception e) {
+                     error = e;
+                     return null;
++                } finally {
++                    if (connection != null) connection.disconnect();
+                 }
+             }
+ 
+@@ -79,7 +83,7 @@ public class FxTwitterTranslate implements Translate {
+                     callback.onTranslationComplete(result);
+                 }
+             }
+-        }.execute();
++        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+     }
+ 
+     /**
+@@ -87,20 +91,16 @@ public class FxTwitterTranslate implements Translate {
+      * @param jsonResponse Raw JSON response from Google Translate
+      * @return Translated text
+      */
+-    private String parseTranslationResponse(String jsonResponse) {
+-        try {
+-            JSONObject jsonObject = new JSONObject(jsonResponse);
+-            if (jsonObject.has("tweet")) {
+-                JSONObject tweetObj = jsonObject.getJSONObject("tweet");
+-                if (tweetObj.has("translation")) {
+-                    JSONObject translationObj = tweetObj.getJSONObject("translation");
+-                    this.PROVIDER_NAME = translationObj.getString("provider");
+-                    return translationObj.getString("text");
+-                }
++    private String parseTranslationResponse(String jsonResponse) throws Exception {
++        JSONObject jsonObject = new JSONObject(jsonResponse);
++        if (jsonObject.has("tweet")) {
++            JSONObject tweetObj = jsonObject.getJSONObject("tweet");
++            if (tweetObj.has("translation")) {
++                JSONObject translationObj = tweetObj.getJSONObject("translation");
++                this.PROVIDER_NAME = translationObj.getString("provider");
++                return translationObj.getString("text");
+             }
+-            throw new Exception("Translation failed.");
+-        } catch (Exception e) {
+-            return str("translate_tweet_error") +": "+ e.getMessage();
+         }
++        throw new Translate.UnavailableException();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslate.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslate.java
+index af266a0..8e148ee 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslate.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslate.java
+@@ -6,7 +6,6 @@
+ 
+ package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
+ 
+-import static app.morphe.extension.shared.StringRef.str;
+ 
+ import android.os.AsyncTask;
+ import java.io.BufferedReader;
+@@ -42,6 +41,7 @@ public class GTranslate implements Translate {
+ 
+             @Override
+             protected String doInBackground(Void... voids) {
++                HttpURLConnection connection = null;
+                 try {
+                     // Encode the query for URL
+                     String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
+@@ -52,7 +52,9 @@ public class GTranslate implements Translate {
+ 
+                     // Create connection
+                     URL url = new URL(fullUrl);
+-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
++                    connection = (HttpURLConnection) url.openConnection();
++                    connection.setConnectTimeout(7000);
++                    connection.setReadTimeout(10000);
+ 
+                     // Set request headers
+                     connection.setRequestMethod("GET");
+@@ -74,6 +76,8 @@ public class GTranslate implements Translate {
+                 } catch (Exception e) {
+                     error = e;
+                     return null;
++                } finally {
++                    if (connection != null) connection.disconnect();
+                 }
+             }
+ 
+@@ -85,7 +89,7 @@ public class GTranslate implements Translate {
+                     callback.onTranslationComplete(result);
+                 }
+             }
+-        }.execute();
++        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+     }
+ 
+     /**
+@@ -93,22 +97,19 @@ public class GTranslate implements Translate {
+      * @param jsonResponse Raw JSON response from Google Translate
+      * @return Translated text
+      */
+-    private String parseTranslationResponse(String jsonResponse) {
+-        try {
+-            JSONObject jsonObject = new JSONObject(jsonResponse);
+-            JSONArray sentences = jsonObject.getJSONArray("sentences");
++    private String parseTranslationResponse(String jsonResponse) throws Exception {
++        JSONObject jsonObject = new JSONObject(jsonResponse);
++        JSONArray sentences = jsonObject.getJSONArray("sentences");
+ 
+-            StringBuilder translatedText = new StringBuilder();
+-            for (int i = 0; i < sentences.length(); i++) {
+-                JSONObject sentence = sentences.getJSONObject(i);
+-                if (sentence.has("trans")) {
+-                    translatedText.append(sentence.getString("trans"));
+-                }
++        StringBuilder translatedText = new StringBuilder();
++        for (int i = 0; i < sentences.length(); i++) {
++            JSONObject sentence = sentences.getJSONObject(i);
++            if (sentence.has("trans")) {
++                translatedText.append(sentence.getString("trans"));
+             }
+-
+-            return translatedText.toString();
+-        } catch (Exception e) {
+-            return str("translate_tweet_error") +": "+ e.getMessage();
+         }
++
++        if (translatedText.length() == 0) throw new Translate.UnavailableException();
++        return translatedText.toString();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslateV2.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslateV2.java
+index 33af00c..baca80e 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslateV2.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/GTranslateV2.java
+@@ -6,7 +6,6 @@
+ 
+ package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
+ 
+-import static app.morphe.extension.shared.StringRef.str;
+ 
+ import android.os.AsyncTask;
+ import java.io.BufferedReader;
+@@ -45,6 +44,7 @@ public class GTranslateV2 implements Translate {
+ 
+             @Override
+             protected String doInBackground(Void... voids) {
++                HttpURLConnection connection = null;
+                 try {
+                     // Encode the query for URL
+                     String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
+@@ -55,7 +55,9 @@ public class GTranslateV2 implements Translate {
+ 
+                     // Create connection
+                     URL url = new URL(fullUrl);
+-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
++                    connection = (HttpURLConnection) url.openConnection();
++                    connection.setConnectTimeout(7000);
++                    connection.setReadTimeout(10000);
+ 
+                     // Set request headers
+                     connection.setRequestMethod("GET");
+@@ -76,6 +78,8 @@ public class GTranslateV2 implements Translate {
+                 } catch (Exception e) {
+                     error = e;
+                     return null;
++                } finally {
++                    if (connection != null) connection.disconnect();
+                 }
+             }
+ 
+@@ -87,7 +91,7 @@ public class GTranslateV2 implements Translate {
+                     callback.onTranslationComplete(result);
+                 }
+             }
+-        }.execute();
++        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+     }
+ 
+     /**
+@@ -95,15 +99,11 @@ public class GTranslateV2 implements Translate {
+      * @param jsonResponse Raw JSON response from Google Translate
+      * @return Translated text
+      */
+-    private String parseTranslationResponse(String jsonResponse) {
+-        try {
+-            JSONObject jsonObject = new JSONObject(jsonResponse);
+-            if (jsonObject.has("destination-text")) {
+-                return jsonObject.getString("destination-text");
+-            }
+-            throw new Exception("destination-text not found");
+-        } catch (Exception e) {
+-            return str("translate_tweet_error") +": "+ e.getMessage();
++    private String parseTranslationResponse(String jsonResponse) throws Exception {
++        JSONObject jsonObject = new JSONObject(jsonResponse);
++        if (jsonObject.has("destination-text")) {
++            return jsonObject.getString("destination-text");
+         }
++        throw new Translate.UnavailableException();
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/Translate.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/Translate.java
+index aa25821..400ceea 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/Translate.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/patches/nativeFeatures/translator/providers/Translate.java
+@@ -17,6 +17,9 @@ public interface Translate{
+      */
+     void translate(Long tweetId, String query, String toLang, TranslationCallback callback);
+ 
++    /** The service has no translation yet; automatic callers may retry a bounded number of times. */
++    final class UnavailableException extends java.io.IOException { }
++
+     // Returns  provider name
+     String getProviderName();
+     /**
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java
+index 0a9d5a4..515ff05 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/ScreenBuilder.java
+@@ -446,11 +446,12 @@ public class ScreenBuilder {
+ 
+         category = preferenceCategory(str("piko_title_native_translator"));
+ 
+-        if (SettingsStatus.autoTranslate) {
+-            addPreference(category, app.morphe.extension.twitter.patches.autotranslate.AutoTranslate.preference(category));
+-        }
+-
+         if (SettingsStatus.nativeTranslator) {
++            addPreference(category, helper.switchPreference(
++                    str("piko_native_translator_auto"),
++                    str("piko_native_translator_auto_description"),
++                    Settings.NATIVE_TRANSLATOR_AUTO
++            ));
+             addPreference(category,
+                     helper.switchPreference(
+                             str("piko_native_translator_toggle"),
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/Settings.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/Settings.java
+index ff7ecf6..cd6fb99 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/Settings.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/Settings.java
+@@ -61,6 +61,7 @@ public class Settings {
+     public static final BooleanSetting VID_INLINE_DOWNLOAD_BUTTON = new BooleanSetting("vid_inline_download_button", true);
+     public static final BooleanSetting BROWSE_OBJECT = new BooleanSetting("browse_object", true);
+     public static final StringSetting VID_NATIVE_DOWNLOADER_FILENAME = new StringSetting("vid_native_downloader_filename", "0");
++    public static final BooleanSetting NATIVE_TRANSLATOR_AUTO = new BooleanSetting("native_translator_auto", false);
+     public static final BooleanSetting NATIVE_TRANSLATOR = new BooleanSetting("native_translator", true);
+     public static final StringSetting NATIVE_TRANSLATOR_PROVIDERS = new StringSetting("native_translator_providers", "0");
+     public static final StringSetting NATIVE_TRANSLATOR_LANG = new StringSetting("native_translator_language", "en");
+diff --git a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java
+index ebc82ad..4f1e919 100644
+--- a/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java
++++ b/extensions/twitter/src/main/java/app/morphe/extension/twitter/settings/SettingsStatus.java
+@@ -74,8 +74,6 @@ public class SettingsStatus {
+     public static boolean browseObject = false;
+     public static boolean nativeDownloader = false;
+     public static boolean nativeTranslator = false;
+-    public static boolean autoTranslate = false;
+-    public static void autoTranslate() { autoTranslate = true; }
+     public static boolean nativeReaderMode = false;
+     public static boolean shareImage = false;
+     public static boolean hideNudgeButton = false;
+@@ -424,7 +422,7 @@ public class SettingsStatus {
+     }
+ 
+     public static boolean enableNativeSection() {
+-        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || autoTranslate || nativeReaderMode || shareImage);
++        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || nativeReaderMode || shareImage);
+     }
+ 
+     public static boolean enableDownloadSection() {
+diff --git a/patches/src/main/kotlin/app/crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorPatch.kt b/patches/src/main/kotlin/app/crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorPatch.kt
+index 3851a68..a64490d 100644
+--- a/patches/src/main/kotlin/app/crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorPatch.kt
++++ b/patches/src/main/kotlin/app/crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorPatch.kt
+@@ -12,6 +12,7 @@ import app.crimera.patches.twitter.misc.shareMenu.browseObject.browseObjectPatch
+ import app.crimera.patches.twitter.misc.shareMenu.hooks.*
+ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+ import app.crimera.patches.twitter.utils.versionCheckPatch
++import app.crimera.patches.twitter.timeline.autotranslate.googleAutoTranslatePatch
+ import app.morphe.patcher.patch.bytecodePatch
+ 
+ @Suppress("unused")
+@@ -21,7 +22,7 @@ val nativeTranslatorModePatch =
+         description = "Requires X 11.0.0-release.0 or higher.",
+     ) {
+         compatibleWith(COMPATIBILITY_X)
+-        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook, browseObjectPatch)
++        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook, browseObjectPatch, googleAutoTranslatePatch)
+ 
+         execute {
+             val actionName = "Translate"
+diff --git a/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/AutoTranslatePatch.kt b/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/AutoTranslatePatch.kt
+index ed03bee..16dae03 100644
+--- a/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/AutoTranslatePatch.kt
++++ b/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/AutoTranslatePatch.kt
+@@ -10,11 +10,9 @@ import app.crimera.patches.shared.declaredParameterRegister
+ import app.crimera.patches.twitter.misc.settings.settingsPatch
+ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+ import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
+-import app.crimera.patches.twitter.utils.enableSettings
+ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+ import app.morphe.patcher.extensions.InstructionExtensions.instructions
+ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+-import app.morphe.patcher.patch.BytecodePatchContext
+ import app.morphe.patcher.patch.PatchException
+ import app.morphe.patcher.patch.bytecodePatch
+ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+@@ -31,8 +29,6 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+ import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
+ 
+ private const val HELPER = "$PATCHES_DESCRIPTOR/autotranslate/AutoTranslate;"
+-private const val CORE = "Lcom/twitter/tweetview/core/ui/textcontent/"
+-private const val FOCAL = "Lcom/twitter/tweetview/focal/ui/textcontent/"
+ private const val TWEET = "Lcom/twitter/model/core/e;"
+ private const val QUOTE = "Lcom/twitter/tweetview/core/QuoteView;"
+ private const val BODY = "Lcom/twitter/ui/widget/TextContentView;"
+@@ -40,23 +36,14 @@ private const val TEXT = "Ljava/lang/CharSequence;"
+ private const val TEXT_VIEW = "Landroid/widget/TextView;"
+ private const val BUFFER = "Landroid/widget/TextView\$BufferType;"
+ 
+-private fun unexpected(message: String): Nothing =
+-    throw PatchException("Google auto translate: $message (expected an unmodified X 12.19.1 rendering path)")
+-
+-context(context: BytecodePatchContext)
+-private fun exactMethod(owner: String, name: String, parameters: List<String>, result: String = "V"): MutableMethod =
+-    context.mutableClassDefBy(owner).methods.singleOrNull {
+-        it.name == name && it.parameterTypes.map(CharSequence::toString) == parameters && it.returnType == result
+-    } ?: unexpected("missing or ambiguous $owner->$name")
+-
+ private fun MutableMethod.assertNotHooked() {
+     if (instructions.any { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.definingClass == HELPER }) {
+-        unexpected("$definingClass->$name already contains automatic translation hooks")
++        throw PatchException("$definingClass->$name already contains automatic translation hooks")
+     }
+ }
+ 
+ private fun registers(vararg values: Int): String {
+-    if (values.any { it !in 0..15 }) unexpected("hook registers no longer fit invoke-static/35c")
++    if (values.any { it !in 0..15 }) throw PatchException("hook registers no longer fit invoke-static/35c")
+     return values.joinToString(", ") { "v$it" }
+ }
+ 
+@@ -74,41 +61,32 @@ private fun MutableMethod.replaceSetter(
+             reference.name == name && reference.parameterTypes.map(CharSequence::toString) == parameters &&
+             reference.returnType == "V" && (textRegister == null || instruction.registerD == textRegister)
+     }
+-    val index = matches.singleOrNull() ?: unexpected("missing or ambiguous final setter in $definingClass->${this.name}")
++    val index = matches.singleOrNull() ?: throw PatchException("missing or ambiguous final setter in $definingClass->${this.name}")
+     val instruction = instructions[index] as Instruction35c
+     val args = if (parameters.size == 1) registers(instruction.registerC, instruction.registerD)
+         else registers(instruction.registerC, instruction.registerD, instruction.registerE)
+     replaceInstruction(index, "invoke-static {$args}, $HELPER->$helperName($owner${parameters.joinToString("")})V")
+ }
+ 
+-/** Version-specific descriptors are intentional: the Legacy X target is frozen at 12.19.1. */
+-@Suppress("unused")
+-val googleAutoTranslatePatch = bytecodePatch(
+-    name = "Google auto translate (Italian)",
+-    description = "Automatically translates visible timeline, quoted and opened posts into Italian through Google's web service. Sends post text to Google.",
+-    default = false,
+-) {
++/** Internal rendering hooks included by the Native translator patch. */
++val googleAutoTranslatePatch = bytecodePatch {
+     compatibleWith(COMPATIBILITY_X)
+     dependsOn(settingsPatch)
+ 
+     execute {
+-        val capture = exactMethod("${CORE}o;", "g", listOf(
+-            "Landroid/content/Context;", TWEET, "Lcom/twitter/model/core/entity/g1;",
+-            "Lcom/twitter/ui/view/m;", "${CORE}b;", "Z", "Z",
+-        ))
+-        val body = exactMethod("${CORE}d;", "f", listOf(TEXT))
+-        val focal = exactMethod("${FOCAL}f;", "f", listOf(TEXT))
+-        val attached = exactMethod("${FOCAL}f\$b;", "onViewAttachedToWindow", listOf("Landroid/view/View;"))
+-        val quote = exactMethod(QUOTE, "l", listOf(TWEET, "Lcom/twitter/ui/renderable/i;", "Ljava/lang/Integer;"))
++        val capture = CapturePostFingerprint.method
++        val body = TimelineTextFingerprint.method
++        val focal = FocalTextFingerprint.method
++        val attached = FocalAttachmentFingerprint.method
++        val quote = QuotedPostFingerprint.method
+         listOf(capture, body, focal, attached, quote).forEach { it.assertNotHooked() }
+ 
+         capture.apply {
+             val index = instructions.indices.singleOrNull { index ->
+                 val instruction = instructions[index]
+                 val field = (instruction as? ReferenceInstruction)?.reference as? FieldReference
+-                instruction.opcode == Opcode.IGET_OBJECT && field?.definingClass == "${CORE}o;" &&
+-                    field.name == "a" && field.type == "Landroid/view/View;"
+-            } ?: unexpected("missing or ambiguous formatter view read")
++                instruction.opcode == Opcode.IGET_OBJECT && field?.definingClass == definingClass && field.type == "Landroid/view/View;"
++            } ?: throw PatchException("missing or ambiguous formatter view read")
+             val view = (instructions[index] as TwoRegisterInstruction).registerA
+             val args = registers(view, declaredParameterRegister(this, 1), declaredParameterRegister(this, 6))
+             addInstructions(index + 1, "invoke-static {$args}, $HELPER->capture(Landroid/view/View;${TWEET}Z)V")
+@@ -124,7 +102,7 @@ val googleAutoTranslatePatch = bytecodePatch(
+                 val reference = (instructions[index] as? ReferenceInstruction)?.reference as? MethodReference
+                 instructions[index].opcode == Opcode.INVOKE_VIRTUAL && reference?.definingClass == "Landroid/view/View;" &&
+                     reference.name == "setVisibility" && reference.parameterTypes.map(CharSequence::toString) == listOf("I")
+-            } ?: unexpected("missing or ambiguous empty focal visibility path")
++            } ?: throw PatchException("missing or ambiguous empty focal visibility path")
+             val view = (instructions[index] as Instruction35c).registerC
+             addInstructions(index, "invoke-static {${registers(view)}}, $HELPER->clearFocal(Landroid/view/View;)V")
+         }
+@@ -133,16 +111,16 @@ val googleAutoTranslatePatch = bytecodePatch(
+             val index = instructions.indices.singleOrNull { index ->
+                 val field = (instructions[index] as? ReferenceInstruction)?.reference as? FieldReference
+                 instructions[index].opcode == Opcode.IPUT_BOOLEAN && field?.definingClass == QUOTE && field.name == "Q" && field.type == "Z"
+-            } ?: unexpected("missing or ambiguous completed quote layout flag")
++            } ?: throw PatchException("missing or ambiguous completed quote layout flag")
+             val view = (instructions[index] as TwoRegisterInstruction).registerB
+             addInstructions(index + 1, "invoke-static {${registers(view)}}, $HELPER->bindQuote($QUOTE)V")
+         }
+ 
+         mutableClassDefBy(QUOTE).apply {
+             if (methods.any { it.name == "onTouchEvent" && it.parameterTypes.map(CharSequence::toString) == listOf("Landroid/view/MotionEvent;") }) {
+-                unexpected("QuoteView already handles onTouchEvent; refusing to overwrite it")
++                throw PatchException("QuoteView already handles onTouchEvent; refusing to overwrite it")
+             }
+-            val nativeSuper = superclass ?: unexpected("QuoteView has no superclass")
++            val nativeSuper = superclass ?: throw PatchException("QuoteView has no superclass")
+             methods.add(ImmutableMethod(type, "onTouchEvent",
+                 listOf(ImmutableMethodParameter("Landroid/view/MotionEvent;", null, null)), "Z",
+                 AccessFlags.PUBLIC.value, null, null, MutableMethodImplementation(3),
+@@ -160,6 +138,5 @@ val googleAutoTranslatePatch = bytecodePatch(
+                 """.trimIndent())
+             })
+         }
+-        enableSettings("autoTranslate")
+     }
+ }
+diff --git a/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/Fingerprints.kt b/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/Fingerprints.kt
+new file mode 100644
+index 0000000..c15941e
+--- /dev/null
++++ b/patches/src/main/kotlin/app/crimera/patches/twitter/timeline/autotranslate/Fingerprints.kt
+@@ -0,0 +1,68 @@
++/*
++ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
++ *
++ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
++ */
++
++package app.crimera.patches.twitter.timeline.autotranslate
++
++import app.morphe.patcher.Fingerprint
++import app.morphe.patcher.fieldAccess
++import app.morphe.patcher.methodCall
++import com.android.tools.smali.dexlib2.Opcode
++
++// The extension still uses the frozen Legacy X 12.19.1 model/QuoteView stubs.
++// Match rendering methods by their contracts and instructions, not obfuscated method names.
++internal object CapturePostFingerprint : Fingerprint(
++    definingClass = "Lcom/twitter/tweetview/core/ui/textcontent/",
++    returnType = "V",
++    parameters = listOf("Landroid/content/Context;", "Lcom/twitter/model/core/e;", "L", "L", "L", "Z", "Z"),
++    filters = listOf(fieldAccess(opcode = Opcode.IGET_OBJECT, definingClass = "this", type = "Landroid/view/View;")),
++)
++
++internal object TimelineTextFingerprint : Fingerprint(
++    definingClass = "Lcom/twitter/tweetview/core/ui/textcontent/",
++    returnType = "V",
++    parameters = listOf("Ljava/lang/CharSequence;"),
++    filters = listOf(methodCall(
++        opcode = Opcode.INVOKE_VIRTUAL,
++        definingClass = "Lcom/twitter/ui/widget/TextContentView;",
++        name = "setTextWithVisibility",
++        parameters = listOf("Ljava/lang/CharSequence;"),
++        returnType = "V",
++    )),
++)
++
++internal object FocalTextFingerprint : Fingerprint(
++    definingClass = "Lcom/twitter/tweetview/focal/ui/textcontent/",
++    returnType = "V",
++    parameters = listOf("Ljava/lang/CharSequence;"),
++    filters = listOf(methodCall(
++        opcode = Opcode.INVOKE_VIRTUAL,
++        definingClass = "Landroid/widget/TextView;",
++        name = "setText",
++        parameters = listOf("Ljava/lang/CharSequence;", "Landroid/widget/TextView\$BufferType;"),
++        returnType = "V",
++    )),
++)
++
++internal object FocalAttachmentFingerprint : Fingerprint(
++    definingClass = "Lcom/twitter/tweetview/focal/ui/textcontent/",
++    name = "onViewAttachedToWindow",
++    returnType = "V",
++    parameters = listOf("Landroid/view/View;"),
++    filters = listOf(methodCall(
++        opcode = Opcode.INVOKE_VIRTUAL,
++        definingClass = "Landroid/widget/TextView;",
++        name = "setText",
++        parameters = listOf("Ljava/lang/CharSequence;", "Landroid/widget/TextView\$BufferType;"),
++        returnType = "V",
++    )),
++)
++
++internal object QuotedPostFingerprint : Fingerprint(
++    definingClass = "Lcom/twitter/tweetview/core/QuoteView;",
++    returnType = "V",
++    parameters = listOf("Lcom/twitter/model/core/e;", "Lcom/twitter/ui/renderable/", "Ljava/lang/Integer;"),
++    filters = listOf(fieldAccess(opcode = Opcode.IPUT_BOOLEAN, definingClass = "this", name = "Q", type = "Z")),
++)
+diff --git a/patches/src/main/resources/addresources/values-it-rIT/twitter/strings.xml b/patches/src/main/resources/addresources/values-it-rIT/twitter/strings.xml
+index 1c0577b..ae44647 100644
+--- a/patches/src/main/resources/addresources/values-it-rIT/twitter/strings.xml
++++ b/patches/src/main/resources/addresources/values-it-rIT/twitter/strings.xml
+@@ -416,4 +416,14 @@ Si consiglia di leggerlo prima di usare questa funzione. Include alcune note imp
+     <string name="piko_login_token_import_failed_already_exist">Impossibile aggiungere l\'account (potrebbe già essere stato aggiunto)</string>
+     <string name="piko_ok">OK</string>
+     <string name="piko_cancel">Annulla</string>
++    <string name="piko_native_translator_auto">Traduci automaticamente i post</string>
++    <string name="piko_native_translator_auto_description">Traduce i post visibili, le citazioni e i post aperti usando il fornitore e la lingua selezionati qui sotto. I fornitori Google ricevono il testo visibile; FxTwitter riceve l’ID del post e la lingua di destinazione.</string>
++    <string name="piko_native_translator_auto_source">Lingua originale: %1$s</string>
++    <string name="piko_native_translator_auto_show_original">Mostra originale</string>
++    <string name="piko_native_translator_auto_show_translation">Mostra traduzione</string>
++    <string name="piko_native_translator_auto_loading">Traduzione in corso…</string>
++    <string name="piko_native_translator_auto_retrying">Traduzione in preparazione… riprovo automaticamente</string>
++    <string name="piko_native_translator_auto_unavailable">Traduzione non disponibile</string>
++    <string name="piko_native_translator_auto_unknown_language">non rilevata</string>
++    <string name="piko_native_translator_auto_retry">Riprova</string>
+ </resources>
+diff --git a/patches/src/main/resources/addresources/values/twitter/strings.xml b/patches/src/main/resources/addresources/values/twitter/strings.xml
+index f8f760f..6f6caf9 100644
+--- a/patches/src/main/resources/addresources/values/twitter/strings.xml
++++ b/patches/src/main/resources/addresources/values/twitter/strings.xml
+@@ -448,4 +448,14 @@ It's recommended to read this before using this feature. It includes some import
+ 
+     <string name="piko_ok">OK</string>
+     <string name="piko_cancel">Cancel</string>
++    <string name="piko_native_translator_auto">Automatically translate posts</string>
++    <string name="piko_native_translator_auto_description">Translate visible posts, quotes and opened posts using the provider and target language selected below. Google providers receive the visible post text; FxTwitter receives the post ID and target language.</string>
++    <string name="piko_native_translator_auto_source">Original language: %1$s</string>
++    <string name="piko_native_translator_auto_show_original">Show original</string>
++    <string name="piko_native_translator_auto_show_translation">Show translation</string>
++    <string name="piko_native_translator_auto_loading">Translating…</string>
++    <string name="piko_native_translator_auto_retrying">Translation pending… retrying automatically</string>
++    <string name="piko_native_translator_auto_unavailable">Translation unavailable</string>
++    <string name="piko_native_translator_auto_unknown_language">unknown</string>
++    <string name="piko_native_translator_auto_retry">Retry</string>
+ </resources>
