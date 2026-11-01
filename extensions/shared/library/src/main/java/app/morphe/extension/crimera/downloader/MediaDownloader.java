@@ -140,7 +140,6 @@ public class MediaDownloader {
             final int finalNotificationId = notificationId;
             final String finalFileName = request.fileName;
             final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
-            final String completedToast = request.completedToast != null ? request.completedToast : downloadCompletedString;
             // Built here and not in the posted task, it queries the provider for the mime type.
             final PendingIntent viewFileIntent =
                     buildViewFilePendingIntent(outputDocumentUri, finalFileName, finalNotificationId);
@@ -157,7 +156,7 @@ public class MediaDownloader {
                 notificationManager.notify(finalNotificationId, builder.build());
 
                 try {
-                    PikoUtils.toast(completedToast);
+                    PikoUtils.toast(downloadCompletedString);
                 } catch (Exception ignored) {}
             });
         } catch (Exception | LinkageError e) {
@@ -185,7 +184,6 @@ public class MediaDownloader {
         for (int i = 0; i < sources.size(); i++) {
             try {
                 downloadSource(sources.get(i), request, outputUri, builder, notificationId, i > 0);
-                if (i > 0) request.completedToast = null;
                 return;
             } catch (Exception | LinkageError e) {
                 if (i == sources.size() - 1) throw e;

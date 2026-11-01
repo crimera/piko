@@ -342,9 +342,6 @@ public class DownloadUtils {
                     fileName,
                     null
             );
-            // A video's picture, a photo story with music's among them, comes from its embed page
-            // when that lists it larger than the app's cover. A carousel's page answers for the
-            // post, never a child; without a download folder, enqueue asks for one at once.
             if (!mediaType.equals(MediaType.IMAGE) || !mediaData.isVideo()
                     || !StorageUtils.checkStoragePermissions()) {
                 downloader.enqueue(request);
@@ -352,22 +349,22 @@ public class DownloadUtils {
             }
             MediaInterface cover = mediaData.getBestImage();
             int coverShortSide = cover == null ? 0 : cover.shortSide();
+            // A picture lookup by shortcode addresses a post, never a carousel's child.
             boolean single = mediaInfo.getCarouselSize() == 1;
             String shortcode = mediaData.getShortcode();
-            String mediaId = mediaData.getPostID();
             Utils.runOnBackgroundThread(() -> {
-                EmbedCover embed = single ? EmbedCover.largerThan(shortcode, mediaId, coverShortSide) : null;
+                MediaPicture picture = single ? MediaPicture.largerThan(shortcode, coverShortSide) : null;
                 long coverPixels = 0;
                 MediaInterface frameVideo = null;
                 try {
-                    coverPixels = embed != null ? (long) embed.width * embed.height
+                    coverPixels = picture != null ? (long) picture.width * picture.height
                             : cover == null ? 0 : (long) cover.getWidth() * cover.getHeight();
                     if (coverPixels > 0 && mediaData.isFirstFrameCover()) {
                         List<MediaInterface> videos = new ArrayList<>();
                         List<VideoData> progressive = mediaData.getVideoVariants();
                         if (progressive != null) videos.addAll(progressive);
                         videos.addAll(mediaData.getDashVideos());
-                        long bestPixels = coverPixels;
+                        long bestPixels = (long) (coverPixels * (1 + MediaData.ROUNDING_TOLERANCE));
                         for (MediaInterface video : videos) {
                             long pixels = (long) video.getWidth() * video.getHeight();
                             if (pixels > bestPixels && video.getUrl() != null) {
@@ -380,28 +377,13 @@ public class DownloadUtils {
                     PikoUtils.logger(e);
                 }
                 MediaDownloader coverDownloader = frameVideo == null ? downloader
-                        : firstFrameDownloader(context.getApplicationContext(), request, frameVideo, coverPixels);
+                        : firstFrameDownloader(context.getApplicationContext(), frameVideo, coverPixels);
                 Utils.runOnMainThread(() -> {
-                    if (embed != null) {
-                        String coverUrl = request.url;
-                        List<DownloadRequest.Source> coverSources = new ArrayList<>(request.fallbackSources);
-                        String fallbackUrl = request.fallbackUrl;
-                        request.url = embed.url;
-                        request.fallbackUrl = null;
-                        request.fallbackSources.clear();
-                        addImageFallbacks(request, mediaData, embed.width, embed.height);
-                        // Keep the original cover and its peers after the embed's own resolution group.
-                        Set<String> seen = new HashSet<>();
-                        seen.add(request.url);
-                        for (DownloadRequest.Source source : request.fallbackSources) seen.add(source.url);
-                        if (coverUrl != null && !coverUrl.trim().isEmpty() && seen.add(coverUrl)) {
-                            request.fallbackSources.add(new DownloadRequest.Source(coverUrl, null));
+                    if (picture != null) {
+                        if (request.url != null && !request.url.trim().isEmpty()) {
+                            request.fallbackSources.add(0, new DownloadRequest.Source(request.url, null));
                         }
-                        for (DownloadRequest.Source source : coverSources) {
-                            if (seen.add(source.url)) request.fallbackSources.add(source);
-                        }
-                        if (!seen.contains(fallbackUrl)) request.fallbackUrl = fallbackUrl;
-                        request.completedToast = str("piko_saved_at", embed.width + "x" + embed.height);
+                        request.url = picture.url;
                     }
                     coverDownloader.enqueue(request);
                 });
@@ -418,8 +400,7 @@ public class DownloadUtils {
 
     }
 
-    private static MediaDownloader firstFrameDownloader(Context context, DownloadRequest request,
-                                                        MediaInterface video, long coverPixels) {
+    private static MediaDownloader firstFrameDownloader(Context context, MediaInterface video, long coverPixels) {
         return new MediaDownloader(context) {
             private boolean attempted;
 
@@ -465,7 +446,6 @@ public class DownloadUtils {
                             int count;
                             while ((count = jpeg.read(buffer)) != -1) output.write(buffer, 0, count);
                         }
-                        request.completedToast = str("piko_saved_at", frame.getWidth() + "x" + frame.getHeight());
                     } else {
                         super.download(url, output, builder, notificationId);
                     }

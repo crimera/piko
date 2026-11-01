@@ -36,8 +36,6 @@ public class DownloadRequest {
     public String fallbackUrl;
     /** Alternate renditions in retry order, before the legacy complete-file fallback. */
     public final List<Source> fallbackSources = new ArrayList<>();
-    /** Shown once the file is saved, instead of the usual completion toast; null for that one. */
-    public String completedToast;
 
     public DownloadRequest(String url, String subFolder, String fileName) {
         this.url = url;
