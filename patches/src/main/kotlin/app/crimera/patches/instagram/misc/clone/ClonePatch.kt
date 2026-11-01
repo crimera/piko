@@ -7,16 +7,21 @@
 package app.crimera.patches.instagram.misc.clone
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.StringComparisonType
+import app.morphe.patcher.StringFilter
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringOption
+import app.morphe.patcher.string
 import app.morphe.util.asSequence
 import app.morphe.util.findElementByAttributeValue
-import app.morphe.util.findMutableMethodOf
 import app.morphe.util.forEachChildElement
 import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.matchAllMethodIndicesForEach
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -131,7 +136,10 @@ val clonePatch =
             // the issue where video stories only play audio.
             // Also rename providers just in case.
             context(bytecodePatchContext!!) {
-                transformStringReferences { string ->
+                val targets = listOf(
+                    string(ORIGINAL_PACKAGE_NAME),
+                ) + providerReplacements.map { string(it.first, StringComparisonType.CONTAINS) }
+                transformStringReferences(targets) { string ->
                     if (string == ORIGINAL_PACKAGE_NAME) {
                         return@transformStringReferences newPackageName
                     }
@@ -164,38 +172,28 @@ val clonePatch =
  */
 private fun NodeList.elementsForEach(action: (Element) -> Unit) = asSequence().map { it as Element }.forEach(action)
 
-// Taken from:
-// https://github.com/MorpheApp/morphe-patches/blob/a8a566774ec8b99c02ce60fdc81ff5258c3b0caf/patches/src/main/kotlin/app/morphe/patches/shared/misc/gms/GmsCoreSupportPatch.kt#L91
-// Slightly modified
 context(patchContext: BytecodePatchContext)
-private fun transformStringReferences(transform: (str: String) -> String?) {
-    patchContext.getAllClassesWithStrings().forEach { classDef ->
-        val mutableClass by lazy {
-            patchContext.mutableClassDefBy(classDef)
-        }
+private fun transformStringReferences(
+    targetStrings: List<StringFilter>,
+    transform: (str: String) -> String?,
+) {
+    targetStrings.forEach { stringFilter ->
+        Fingerprint(
+            filters = listOf(stringFilter)
+        ).matchAllMethodIndicesForEach(requireMatches = false) { index ->
+            val instruction = getInstruction(index)
+            val foundString = instruction.getReference<StringReference>()!!.string
+            // Apply transformation.
+            val transformedString = transform(foundString) ?: return@matchAllMethodIndicesForEach
 
-        classDef.methods.forEach { method ->
-            val mutableMethod by lazy {
-                mutableClass.findMutableMethodOf(method)
-            }
-
-            method.implementation?.instructions?.forEachIndexed { index, instruction ->
-                val string =
-                    instruction.getReference<StringReference>()?.string
-                        ?: return@forEachIndexed
-
-                // Apply transformation.
-                val transformedString = transform(string) ?: return@forEachIndexed
-
-                mutableMethod.replaceInstruction(
-                    index,
-                    BuilderInstruction21c(
-                        Opcode.CONST_STRING,
-                        (instruction as OneRegisterInstruction).registerA,
-                        ImmutableStringReference(transformedString),
-                    ),
+            replaceInstruction(
+                index,
+                BuilderInstruction21c(
+                    Opcode.CONST_STRING,
+                    (instruction as OneRegisterInstruction).registerA,
+                    ImmutableStringReference(transformedString)
                 )
-            }
+            )
         }
     }
 }
