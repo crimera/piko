@@ -38,8 +38,6 @@
     <string name="piko_turn_on_all_ghost_modes">开启所有幽灵模式</string>
     <string name="piko_ghost_modes_on">幽灵模式：开启</string>
     <string name="piko_ghost_modes_default">幽灵模式：默认</string>
-    <string name="piko_ghost_modes_quick_toggle">启用幽灵模式快捷开关</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">在聊天操作栏中添加快速切换以控制幽灵模式</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">界面自定义</string>
     <string name="piko_disable_stories">禁用快拍</string>
@@ -110,8 +108,6 @@
     <string name="piko_copy_user_id">复制用户 ID</string>
     <string name="piko_copy_bio">复制简介</string>
     <string name="piko_view_profile_picture">查看个人头像</string>
-    <string name="piko_copy_profile_link">复制个人资料链接</string>
-    <string name="piko_share_this_profile">分享个人资料</string>
     <string name="piko_copy_links_from_bio">从简介复制链接</string>
     <string name="piko_no_links_in_bio">此简介中没有链接</string>
     <string name="piko_download_profile_picture">下载个人资料图片</string>
@@ -145,12 +141,9 @@
     <string name="piko_category_download_media">下载内容</string>
     <string name="piko_category_downloads">下载</string>
     <string name="piko_enable_download">启用下载</string>
-    <string name="piko_feed_download_button">Feed 帖子下载按钮</string>
-    <string name="piko_feed_download_button_desc">在主页帖子的保存按钮旁边添加下载按钮</string>
     <string name="piko_save_media_comment">保存媒体评论</string>
     <string name="piko_save_media_comment_desc">在帖子和 Reels 上添加了一个用于保存媒体评论的按钮</string>
     <string name="piko_enable_direct_download">启用直接下载</string>
-    <string name="piko_enable_direct_download_desc">不询问直接下载当前浏览媒体</string>
     <string name="piko_download_username_folder">按用户名分组下载内容</string>
     <string name="piko_download_username_folder_desc">基于用户名创建子文件夹</string>
     <string name="piko_embed_download_metadata">嵌入视频元数据</string>
@@ -174,8 +167,6 @@
     <string name="piko_download_set_path_failed">保存下载文件夹失败</string>
     <string name="piko_download_choose_folder">继续选择下载文件夹</string>
     <string name="piko_download_choose_folder_failed">无法打开文件夹选取器</string>
-    <string name="piko_download_grant_permission">继续选择下载文件夹</string>
-    <string name="piko_download_grant_permission_failed">无法打开文件夹选取器</string>
     <string name="piko_download_with_external_downloader">使用外部下载器下载</string>
     <string name="piko_external_downloader_package_name">外部下载器应用包名</string>
     <string name="piko_external_downloader_package_name_not_found">找不到外部下载器</string>
@@ -191,11 +182,6 @@
     <string name="piko_more_options">更多选项</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">隐藏导航按钮</string>
-    <string name="piko_hide_navigation_feed">隐藏Feed按钮</string>
-    <string name="piko_hide_navigation_reels">隐藏Reels按钮</string>
-    <string name="piko_hide_navigation_direct">隐藏私信按钮</string>
-    <string name="piko_hide_navigation_search">隐藏搜索按钮</string>
-    <string name="piko_hide_navigation_create">隐藏创建按钮</string>
     <string name="piko_category_navigation_tabs">导航栏</string>
     <string name="piko_navigation_tabs_title">显示并重新排序标签</string>
     <string name="piko_navigation_tabs_summary">选择可见的底部标签并拖动以重新排序</string>
@@ -247,7 +233,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">更改点赞动画</string>
     <string name="piko_change_like_animation_desc">将点赞动画更改为现有快拍环动画中的一个</string>
-    <string name="piko_available_like_animation">可用的点赞动画</string>
     <string name="piko_like_animation_random">随机</string>
     <string name="piko_like_animation_preview">动画预览</string>
     <string name="piko_like_animation_preview_unavailable">预览不可用</string>
@@ -276,8 +261,6 @@
     <string name="piko_action_bar_button_profile_info_icon">个人资料图标</string>
     <string name="piko_action_bar_button_create_icon">创建图标</string>
     <string name="piko_action_bar_button_notifications_icon">通知图标</string>
-    <string name="piko_settings_on_action_bar">操作栏上的 Piko 设置</string>
-    <string name="piko_settings_on_action_bar_desc">移动Piko 设置到主页操作栏</string>
     <!-- Font Section -->
     <string name="piko_category_font">字体</string>
     <string name="piko_custom_font">自定义字体</string>
@@ -380,7 +363,6 @@
     <string name="piko_someone">某人</string>
     <string name="piko_deleted_messages_channel">已删除消息</string>
     <string name="piko_deleted_messages_channel_desc">当收到消息未发送时通知</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s 已删除]</string>
     <string name="piko_media_deleted_generic">[删除]</string>
     <string name="piko_media_unknown">媒体</string>

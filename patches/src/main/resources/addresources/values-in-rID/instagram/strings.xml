@@ -38,8 +38,6 @@
     <string name="piko_turn_on_all_ghost_modes">Aktifkan semua mode hantu</string>
     <string name="piko_ghost_modes_on">Mode hantu: AKTIF</string>
     <string name="piko_ghost_modes_default">Mode hantu: BAWAAN</string>
-    <string name="piko_ghost_modes_quick_toggle">Aktifkan tombol cepat untuk mode hantu</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">Menambahkan tombol cepat di bilah tindakan obrolan untuk mengontrol mode-mode hantu</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Bebas gangguan</string>
     <string name="piko_disable_stories">Nonaktifkan cerita</string>
@@ -88,8 +86,6 @@
     <string name="piko_copy_user_id">Salin id pengguna</string>
     <string name="piko_copy_bio">Salin bio</string>
     <string name="piko_view_profile_picture">Lihat foto profil</string>
-    <string name="piko_copy_profile_link">Salin tautan profil</string>
-    <string name="piko_share_this_profile">Bagikan profil ini</string>
     <string name="piko_copy_links_from_bio">Salin tautan dari bio</string>
     <string name="piko_no_links_in_bio">Tidak ada tautan di bio ini</string>
     <string name="piko_download_profile_picture">Unduh foto profil</string>
@@ -123,7 +119,6 @@
     <string name="piko_save_media_comment">Simpan komentar media</string>
     <string name="piko_save_media_comment_desc">Menambahkan tombol untuk menyimpan komentar media pada postingan dan reels</string>
     <string name="piko_enable_direct_download">Aktifkan unduhan langsung</string>
-    <string name="piko_enable_direct_download_desc">Mengunduh media yang sedang dilihat tanpa menanyakan pilihan</string>
     <string name="piko_download_username_folder">Pisahkan media berdasarkan nama pengguna</string>
     <string name="piko_download_username_folder_desc">Membuat subfolder berdasarkan nama pengguna</string>
     <string name="piko_embed_download_metadata">Sematkan metadata video</string>
@@ -145,8 +140,6 @@
     <string name="piko_download_set_path_failed">Gagal menyimpan ke folder unduhan</string>
     <string name="piko_download_choose_folder">Pilih folder unduhan untuk melanjutkan</string>
     <string name="piko_download_choose_folder_failed">Tidak dapat membuka pemilih folder</string>
-    <string name="piko_download_grant_permission">Pilih folder unduhan untuk melanjutkan</string>
-    <string name="piko_download_grant_permission_failed">Tidak dapat membuka pemilih folder</string>
     <string name="piko_download_with_external_downloader">Unduh menggunakan pengunduh eksternal</string>
     <string name="piko_external_downloader_package_name">Nama paket pengunduh eksternal</string>
     <string name="piko_external_downloader_package_name_not_found">Nama paket pengunduh eksternal tidak ditemukan</string>
@@ -162,11 +155,6 @@
     <string name="piko_more_options">Pilihan lainnya</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Sembunyikan tombol navigasi</string>
-    <string name="piko_hide_navigation_feed">Sembunyikan tombol Feed</string>
-    <string name="piko_hide_navigation_reels">Sembunyikan tombol Reels</string>
-    <string name="piko_hide_navigation_direct">Sembunyikan tombol Direct</string>
-    <string name="piko_hide_navigation_search">Sembunyikan tombol Pencarian</string>
-    <string name="piko_hide_navigation_create">Sembunyikan tombol Buat</string>
     <string name="piko_category_navigation_tabs">Bilah navigasi</string>
     <string name="piko_navigation_tabs_title">Tampilkan dan atur ulang tab</string>
     <string name="piko_navigation_tabs_summary">Pilih tab bagian bawah yang terlihat dan seret untuk mengatur ulang urutannya</string>
@@ -218,7 +206,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Ubah animasi suka</string>
     <string name="piko_change_like_animation_desc">Ubah animasi ke salah satu animasi suka Rings yang ada</string>
-    <string name="piko_available_like_animation">Animasi suka yang tersedia</string>
     <!-- For arrays -->
     <string name="piko_array_default">Bawaan</string>
     <string name="piko_array_detailed_timestamp">Stempel waktu terperinci (Hari Kerja/Bulan/Tanggal/Jam/Menit/Detik)</string>
@@ -244,8 +231,6 @@
     <string name="piko_action_bar_button_profile_info_icon">Ikon info profil</string>
     <string name="piko_action_bar_button_create_icon">Ikon buat</string>
     <string name="piko_action_bar_button_notifications_icon">Ikon pemberitahuan</string>
-    <string name="piko_settings_on_action_bar">Pengaturan Piko di bilah tindakan</string>
-    <string name="piko_settings_on_action_bar_desc">Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama</string>
     <!-- Font Section -->
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">Tanda yang direkomendasikan</string>
@@ -334,7 +319,6 @@
     <string name="piko_someone">Seseorang</string>
     <string name="piko_deleted_messages_channel">Pesan yang telah dihapus</string>
     <string name="piko_deleted_messages_channel_desc">Beritahu ketika pesan yang diterima belum terkirim</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s dihapus]</string>
     <string name="piko_media_deleted_generic">[dihapus]</string>
     <string name="piko_media_unknown">media</string>
