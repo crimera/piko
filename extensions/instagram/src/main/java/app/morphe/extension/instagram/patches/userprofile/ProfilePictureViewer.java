@@ -7,6 +7,7 @@
 package app.morphe.extension.instagram.patches.userprofile;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
+import static app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle.dp;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -14,8 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RoundRectShape;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -26,20 +26,24 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.ScrollView;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.function.Consumer;
 
+import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 
@@ -60,7 +64,8 @@ public class ProfilePictureViewer {
                 return;
             }
 
-            Dialog dialog = new Dialog(context);
+            Context dialogContext = InstagramPreferenceStyle.dialogContext(context);
+            Dialog dialog = new Dialog(dialogContext);
             Window window = dialog.getWindow();
             if (window != null) {
                 window.requestFeature(Window.FEATURE_NO_TITLE);
@@ -69,28 +74,34 @@ public class ProfilePictureViewer {
             dialog.setCancelable(true);
             dialog.setCanceledOnTouchOutside(true);
 
-            LinearLayout panel = new LinearLayout(context);
+            LinearLayout panel = new LinearLayout(dialogContext);
             panel.setOrientation(LinearLayout.VERTICAL);
             panel.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-            boolean isDarkMode = Utils.isDarkModeEnabled();
-            int panelColor = isDarkMode ? 0xFF121212 : 0xFFFFFFFF;
-            int closeIconColor = isDarkMode ? Color.WHITE : Color.BLACK;
-            int placeholderColor = isDarkMode ? 0xFF1C1C1E : 0xFFE8E8E8;
+            int placeholderColor = InstagramPreferenceStyle.pressedBackgroundColor();
 
-            ShapeDrawable panelBackground = new ShapeDrawable(new RoundRectShape(roundedCorners(dpToPx(context, 18)), null, null));
-            panelBackground.getPaint().setColor(panelColor);
+            GradientDrawable panelBackground = new GradientDrawable();
+            panelBackground.setColor(InstagramPreferenceStyle.backgroundColor());
+            panelBackground.setCornerRadius(dp(dialogContext, 18));
             panel.setBackground(panelBackground);
-            panel.setPadding(0, 0, 0, dpToPx(context, 12));
+            panel.setPadding(0, 0, 0, dp(dialogContext, 12));
+            panel.setClipToOutline(true);
 
-            panel.addView(buildCloseRow(context, dialog, closeIconColor));
-            panel.addView(buildImageArea(context, imageUrl, placeholderColor));
-            panel.addView(buildActionButton(context, str("piko_open_image_externally"), () -> {
+            panel.addView(buildCloseRow(dialogContext, dialog));
+            ScrollView scroll = new ScrollView(dialogContext);
+            panel.addView(scroll, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            LinearLayout content = new LinearLayout(dialogContext);
+            content.setOrientation(LinearLayout.VERTICAL);
+            scroll.addView(content, new ScrollView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            content.addView(buildImageArea(dialogContext, imageUrl, placeholderColor));
+            content.addView(buildActionButton(dialogContext, str("piko_open_image_externally"), () -> {
                 dialog.dismiss();
                 ActivityHook.handleUrlIntent(false, imageUrl);
             }));
-            panel.addView(buildActionButton(context, str("piko_download_profile_picture"), () -> {
+            content.addView(buildActionButton(dialogContext, str("piko_download_profile_picture"), () -> {
                 try {
                     String filename = username + "_dp.jpg";
                     String subFolder = DownloadUtils.getSubfolderName(username);
@@ -125,20 +136,24 @@ public class ProfilePictureViewer {
         }
     }
 
-    private static View buildCloseRow(Context context, Dialog dialog, int iconColor) {
+    private static View buildCloseRow(Context context, Dialog dialog) {
         FrameLayout row = new FrameLayout(context);
         row.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(context, 44)));
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(context, 44)));
 
-        TextView close = new TextView(context);
-        close.setText("\u2715");
-        close.setTextColor(iconColor);
-        close.setTextSize(18);
-        close.setGravity(Gravity.CENTER);
+        ImageButton close = new ImageButton(context);
+        TypedValue background = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, background, true)) {
+            close.setBackgroundResource(background.resourceId);
+        }
+        int padding = dp(context, 10);
+        close.setPadding(padding, padding, padding, padding);
+        close.setContentDescription(str("piko_close"));
+        UI.setThemedIcon(close, UI.DRAWABLE_CLEAR);
 
-        FrameLayout.LayoutParams closeParams = new FrameLayout.LayoutParams(dpToPx(context, 40), dpToPx(context, 40));
-        closeParams.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
-        closeParams.setMarginStart(dpToPx(context, 8));
+        FrameLayout.LayoutParams closeParams = new FrameLayout.LayoutParams(dp(context, 40), dp(context, 40));
+        closeParams.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
+        closeParams.setMarginEnd(dp(context, 8));
         close.setLayoutParams(closeParams);
         close.setOnClickListener(v -> dialog.dismiss());
 
@@ -150,7 +165,7 @@ public class ProfilePictureViewer {
         SquareFrameLayout frame = new SquareFrameLayout(context);
         LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        int sideMarginPx = dpToPx(context, 12);
+        int sideMarginPx = dp(context, 12);
         frameParams.setMargins(sideMarginPx, 0, sideMarginPx, 0);
         frame.setLayoutParams(frameParams);
         frame.setBackgroundColor(placeholderColor);
@@ -169,13 +184,24 @@ public class ProfilePictureViewer {
         imageView.setVisibility(View.GONE);
         frame.addView(imageView);
 
-        loadBitmapAsync(imageUrl, bitmap -> {
+        ProfilePictureLoader loader = new ProfilePictureLoader(imageUrl, bitmap -> {
             progressBar.setVisibility(View.GONE);
             if (bitmap != null) {
                 imageView.setImageBitmap(bitmap);
                 imageView.setVisibility(View.VISIBLE);
             } else {
                 Utils.showToastShort(str("piko_download_failed_media"));
+            }
+        });
+        frame.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                loader.start();
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                loader.close();
             }
         });
 
@@ -188,11 +214,68 @@ public class ProfilePictureViewer {
         button.setStyle(InstagramButtonStyleEnum.SECONDARY);
         button.setOnClickListener(onClick);
 
-        int marginPx = dpToPx(context, 12);
-        button.setMargins(marginPx, dpToPx(context, 8), marginPx, 0);
+        int marginPx = dp(context, 12);
+        button.setMargins(marginPx, dp(context, 8), marginPx, 0);
 
         IgdsButton igdsButton = button.getIgdsButton();
         return igdsButton;
+    }
+
+    private static final class ProfilePictureLoader implements AutoCloseable {
+        private final Handler mainHandler = new Handler(Looper.getMainLooper());
+        private final String imageUrl;
+        private final Thread worker = new Thread(this::load);
+        private Consumer<Bitmap> callback;
+        private volatile HttpURLConnection connection;
+        private volatile boolean closed;
+
+        ProfilePictureLoader(String imageUrl, Consumer<Bitmap> callback) {
+            this.imageUrl = imageUrl;
+            this.callback = callback;
+        }
+
+        void start() {
+            if (!closed && worker.getState() == Thread.State.NEW) worker.start();
+        }
+
+        private void load() {
+            Bitmap bitmap = null;
+            HttpURLConnection current = null;
+            try {
+                if (closed) return;
+                current = (HttpURLConnection) new URL(imageUrl).openConnection();
+                connection = current;
+                if (closed) return;
+                current.setConnectTimeout(15000);
+                current.setReadTimeout(15000);
+                current.connect();
+                try (InputStream input = current.getInputStream()) {
+                    if (!closed) bitmap = BitmapFactory.decodeStream(input);
+                }
+            } catch (Exception e) {
+                if (!closed) Logger.printException(() -> "Failed to load profile picture", e);
+            } finally {
+                if (current != null) current.disconnect();
+                connection = null;
+            }
+            Bitmap result = bitmap;
+            mainHandler.post(() -> {
+                if (closed) {
+                    if (result != null) result.recycle();
+                    return;
+                }
+                callback.accept(result);
+            });
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+            callback = null;
+            worker.interrupt();
+            HttpURLConnection current = connection;
+            if (current != null) current.disconnect();
+        }
     }
 
     private static class SquareFrameLayout extends FrameLayout {
@@ -202,42 +285,9 @@ public class ProfilePictureViewer {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            super.onMeasure(widthMeasureSpec, widthMeasureSpec);
+            int height = resolveSize(MeasureSpec.getSize(widthMeasureSpec), heightMeasureSpec);
+            super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
         }
     }
 
-    private interface BitmapCallback {
-        void onLoaded(Bitmap bitmap);
-    }
-
-    private static void loadBitmapAsync(String imageUrl, BitmapCallback callback) {
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        new Thread(() -> {
-            Bitmap bitmap = null;
-            try {
-                URL url = new URL(imageUrl);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(15000);
-                connection.connect();
-                try (InputStream input = connection.getInputStream()) {
-                    bitmap = BitmapFactory.decodeStream(input);
-                }
-                connection.disconnect();
-            } catch (Exception e) {
-                Logger.printException(() -> "Failed to load profile picture", e);
-            }
-            Bitmap result = bitmap;
-            mainHandler.post(() -> callback.onLoaded(result));
-        }).start();
-    }
-
-    private static float[] roundedCorners(int radiusPx) {
-        return new float[]{radiusPx, radiusPx, radiusPx, radiusPx, radiusPx, radiusPx, radiusPx, radiusPx};
-    }
-
-    private static int dpToPx(Context context, int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
-                context.getResources().getDisplayMetrics());
-    }
 }
