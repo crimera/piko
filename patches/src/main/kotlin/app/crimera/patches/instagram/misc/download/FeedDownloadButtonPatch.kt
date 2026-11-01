@@ -151,6 +151,9 @@ private object FeedRowHolderConstructorFingerprint : Fingerprint(
 private fun feedUfiBindFingerprint(holderType: String, stateType: String) = Fingerprint(
     returnType = "V",
     parameters = listOf("L", "L", stateType, holderType),
+    filters = listOf(
+        fieldAccess(definingClass = holderType, opcode = Opcode.IGET_OBJECT),
+    )
 )
 
 /** The UFI renderer selector, which returns the static `Integer` that follows the "view" string constant. */
