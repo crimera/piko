@@ -92,28 +92,29 @@ internal fun Method.isCapturedInlineActionEntryRenderer(
     }.filter { (index, read) ->
         this.provesValueFromInstruction(captureIndex, capture.registerA, index, read.registerB)
     }
-    if (actionTypeReads.size != 1 || enabledReads.size != 1) return false
+    if (enabledReads.size != 1) return false
 
-    val actionTypeRead = actionTypeReads.single()
-    val tintCalls = code.mapIndexedNotNull { index, instruction ->
-        if (instruction.opcode != Opcode.INVOKE_STATIC && instruction.opcode != Opcode.INVOKE_STATIC_RANGE) {
-            return@mapIndexedNotNull null
-        }
-        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-        if (reference.returnType != "V" ||
-            reference.parameterTypes.firstOrNull()?.toString() != models.postActionTypeDescriptor
-        ) return@mapIndexedNotNull null
-        val actionTypeRegister = instruction.argumentRegister(reference, 0) ?: return@mapIndexedNotNull null
-        (index to reference).takeIf { candidate ->
-            this.provesValueFromInstruction(
-                actionTypeRead.first,
-                actionTypeRead.second.registerA,
-                candidate.first,
-                actionTypeRegister,
-            )
+    val actionTypeTintTuples = actionTypeReads.flatMap { actionTypeRead ->
+        code.mapIndexedNotNull { index, instruction ->
+            if (instruction.opcode != Opcode.INVOKE_STATIC && instruction.opcode != Opcode.INVOKE_STATIC_RANGE) {
+                return@mapIndexedNotNull null
+            }
+            val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+            if (reference.returnType != "V" ||
+                reference.parameterTypes.firstOrNull()?.toString() != models.postActionTypeDescriptor
+            ) return@mapIndexedNotNull null
+            val actionTypeRegister = instruction.argumentRegister(reference, 0) ?: return@mapIndexedNotNull null
+            (actionTypeRead to (index to reference)).takeIf {
+                this.provesValueFromInstruction(
+                    actionTypeRead.first,
+                    actionTypeRead.second.registerA,
+                    index,
+                    actionTypeRegister,
+                )
+            }
         }
     }
-    return tintCalls.size == 1
+    return actionTypeTintTuples.size == 1
 }
 
 context(context: BytecodePatchContext)
@@ -138,8 +139,7 @@ internal fun resolveCapturedInlineActionEntryRenderer(
         },
     )
     val entryRegister = captureRead.second.registerA
-    val actionTypeRead = requireExactlyOne(
-        "NewX captured inline-action type read in $method",
+    val actionTypeReads =
         code.mapIndexedNotNull { index, instruction ->
             if (instruction.opcode != Opcode.IGET_OBJECT ||
                 instruction.getReference<FieldReference>()?.toString() != models.inlineActionTypeField.toString()
@@ -148,8 +148,7 @@ internal fun resolveCapturedInlineActionEntryRenderer(
             (index to read).takeIf { (readIndex, registers) ->
                 method.provesValueFromInstruction(captureRead.first, entryRegister, readIndex, registers.registerB)
             }
-        },
-    )
+        }
     requireExactlyOne(
         "NewX captured inline-action enabled read in $method",
         code.mapIndexedNotNull { index, instruction ->
@@ -161,8 +160,7 @@ internal fun resolveCapturedInlineActionEntryRenderer(
         },
     )
 
-    val tintCall = requireExactlyOne(
-        "NewX captured inline-action tint renderer call in $method",
+    val actionTypeTintTuples = actionTypeReads.flatMap { actionTypeRead ->
         code.mapIndexedNotNull { index, instruction ->
             if (instruction.opcode != Opcode.INVOKE_STATIC && instruction.opcode != Opcode.INVOKE_STATIC_RANGE) {
                 return@mapIndexedNotNull null
@@ -173,15 +171,19 @@ internal fun resolveCapturedInlineActionEntryRenderer(
             ) return@mapIndexedNotNull null
             val actionTypeRegister = instruction.argumentRegister(reference, 0)
                 ?: throw PatchException("NewX captured inline-action renderer has no action-type argument: $instruction")
-            (index to reference).takeIf { (callIndex, _) ->
+            (actionTypeRead to (index to reference)).takeIf { (_, tintCall) ->
                 method.provesValueFromInstruction(
                     actionTypeRead.first,
                     actionTypeRead.second.registerA,
-                    callIndex,
+                    tintCall.first,
                     actionTypeRegister,
                 )
             }
-        },
+        }
+    }
+    val (_, tintCall) = requireExactlyOne(
+        "NewX captured inline-action type-to-tint renderer tuple in $method",
+        actionTypeTintTuples,
     )
 
     val sizingClass = requireExactlyOne(

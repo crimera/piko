@@ -96,6 +96,7 @@ private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
 private const val CREATE_ACTION_HELPER = "createDownloadAction"
 private const val NEWX_DOWNLOADER = "Lapp/morphe/extension/newx/misc/NewXDownloader;"
 private const val DOWNLOADER_INSTALL = "$NEWX_DOWNLOADER->install(Landroid/content/Context;)V"
+private const val SKIP_MARK_ICON_SIZE_LABEL = "piko_skip_mark_icon_size"
 
 private fun MutableMethod.requireStatic(label: String) {
     if (AccessFlags.STATIC.isSet(accessFlags)) return
@@ -321,25 +322,14 @@ val newXInlineDownloadButtonPatch =
                 staticRenderer.method.apply {
                     requireStatic("NewX inline-action entry renderer")
                     val (hookIndex, sizeRegister) = resolveInlineIconSizeHook(this)
-                    insertHook(
-                        hookIndex,
-                        excludedRegisters = listOf(p0Register, sizeRegister),
-                        relocateBranchTargets = false,
-                    ) {
-                        // A computed size can live above v15, with only one low scratch available.
-                        // The emitter stages non-consecutive arguments safely for invoke/range.
-                        val entryRegister = scratchRegister(RegisterLimit.BYTE)
-                        val workRegister = scratchRegister(RegisterLimit.BYTE)
-                        move(entryRegister, p0Register, OBJECT_DESCRIPTOR)
-                        move(workRegister, sizeRegister, "F")
-                        invokeStatic(
-                            methodReference("$EXTENSION->markIconSize(Ljava/lang/Object;F)F"),
-                            entryRegister,
-                            workRegister,
-                        )
-                        moveResult(workRegister, "F")
-                        move(sizeRegister, workRegister, "F")
-                    }
+                    insertMarkIconSizeHook(
+                        index = hookIndex,
+                        actionRegister = p0Register,
+                        sizeRegister = sizeRegister,
+                        actionTypeField = entryModels.inlineActionTypeField,
+                        twitterShareActionField = downloadModels.twitterShareActionField,
+                        excludedRegisters = listOf(p0Register),
+                    )
                 }
             } else {
                 val capturedCandidate = requireExactlyOne(
@@ -371,28 +361,14 @@ val newXInlineDownloadButtonPatch =
                             "${capturedRenderer.method} at $hookIndex",
                     )
                 }
-                capturedRenderer.method.insertHook(
-                    hookIndex,
-                    excludedRegisters =
-                        listOf(
-                            capturedRenderer.method.p0Register,
-                            capturedRenderer.entryRegister,
-                            iconSizeRegister,
-                        ),
-                    relocateBranchTargets = false,
-                ) {
-                    val entryRegister = scratchRegister(RegisterLimit.BYTE)
-                    val workRegister = scratchRegister(RegisterLimit.BYTE)
-                    move(entryRegister, capturedRenderer.entryRegister, OBJECT_DESCRIPTOR)
-                    move(workRegister, iconSizeRegister, "F")
-                    invokeStatic(
-                        methodReference("$EXTENSION->markIconSize(Ljava/lang/Object;F)F"),
-                        entryRegister,
-                        workRegister,
-                    )
-                    moveResult(workRegister, "F")
-                    move(iconSizeRegister, workRegister, "F")
-                }
+                capturedRenderer.method.insertMarkIconSizeHook(
+                    index = hookIndex,
+                    actionRegister = capturedRenderer.entryRegister,
+                    sizeRegister = iconSizeRegister,
+                    actionTypeField = entryModels.inlineActionTypeField,
+                    twitterShareActionField = downloadModels.twitterShareActionField,
+                    excludedRegisters = listOf(capturedRenderer.method.p0Register),
+                )
             }
 
             // The injected entry deliberately carries TwitterShare, which maps to exactly this
@@ -488,6 +464,24 @@ val newXInlineDownloadButtonPatch =
                 val iconRegister =
                     (iconAccess.instruction as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("NewX TwitterShare icon access has no register")
+                val overwrittenReceiver = instructions.take(iconAccess.index).mapIndexedNotNull { index, instruction ->
+                    if (!instruction.opcode.setsRegister()) return@mapIndexedNotNull null
+                    val destination = (instruction as? OneRegisterInstruction)?.registerA
+                        ?: return@mapIndexedNotNull null
+                    if (destination == p0Register ||
+                        (instruction.opcode.setsWideRegister() && destination + 1 == p0Register)
+                    ) {
+                        index
+                    } else {
+                        null
+                    }
+                }
+                if (overwrittenReceiver.isNotEmpty()) {
+                    throw PatchException(
+                        "NewX TwitterShare icon lambda receiver is overwritten before icon selection " +
+                            "in $this at ${overwrittenReceiver.joinToString()}",
+                    )
+                }
                 val parameterRegisterStart = p0Register
                 val parameterRegisters =
                     parameterRegisterStart until
@@ -499,11 +493,18 @@ val newXInlineDownloadButtonPatch =
                     excludedRegisters = parameterRegisters + iconRegister,
                     relocateBranchTargets = false,
                 ) {
+                    val receiverRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+                    val markedSizeRegister = scratchRegister(RegisterLimit.FOUR_BIT)
                     val incomingIconRegister = scratchRegister()
+                    move(receiverRegister, p0Register, OBJECT_DESCRIPTOR)
+                    iget(markedSizeRegister, receiverRegister, sizeField)
                     sget(incomingIconRegister, incomingIconField)
                     invokeStatic(
-                        methodReference("$EXTENSION->selectIcon(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"),
+                        methodReference(
+                            "$EXTENSION->selectIcon(Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;",
+                        ),
                         iconRegister,
+                        markedSizeRegister,
                         incomingIconRegister,
                     )
                     moveResult(iconRegister, OBJECT_DESCRIPTOR)
@@ -518,7 +519,7 @@ val newXInlineDownloadButtonPatch =
                     val displaySizeRegister = scratchRegister()
                     move(displaySizeRegister, sizeRegister, "F")
                     invokeStatic(
-                        methodReference("$EXTENSION->displayIconSize(F)F"),
+                        methodReference("Ljava/lang/Math;->abs(F)F"),
                         displaySizeRegister,
                     )
                     moveResult(displaySizeRegister, "F")
@@ -588,6 +589,50 @@ val newXInlineDownloadButtonPatch =
             }
         }
     }
+
+/** Run signed-size classification only for the action type whose icon branch consumes the marker. */
+private fun MutableMethod.insertMarkIconSizeHook(
+    index: Int,
+    actionRegister: Int,
+    sizeRegister: Int,
+    actionTypeField: FieldReference,
+    twitterShareActionField: FieldReference,
+    excludedRegisters: Collection<Int>,
+) {
+    if (actionTypeField.type != twitterShareActionField.definingClass) {
+        throw PatchException(
+            "NewX inline-action type and TwitterShare field disagree: " +
+                "$actionTypeField vs $twitterShareActionField",
+        )
+    }
+
+    insertHook(
+        index,
+        excludedRegisters = excludedRegisters + actionRegister + sizeRegister,
+        relocateBranchTargets = false,
+    ) {
+        val actionTypeRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+        val twitterShareRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+        move(actionTypeRegister, actionRegister, OBJECT_DESCRIPTOR)
+        iget(actionTypeRegister, actionTypeRegister, actionTypeField)
+        sget(twitterShareRegister, twitterShareActionField)
+        ifNe(actionTypeRegister, twitterShareRegister, Target.Local(SKIP_MARK_ICON_SIZE_LABEL))
+
+        // Stage the invoke arguments separately because the action and size can be in high registers.
+        val entryRegister = scratchRegister(RegisterLimit.BYTE)
+        val workRegister = scratchRegister(RegisterLimit.BYTE)
+        move(entryRegister, actionRegister, OBJECT_DESCRIPTOR)
+        move(workRegister, sizeRegister, "F")
+        invokeStatic(
+            methodReference("$EXTENSION->markIconSize(Ljava/lang/Object;F)F"),
+            entryRegister,
+            workRegister,
+        )
+        moveResult(workRegister, "F")
+        move(sizeRegister, workRegister, "F")
+        label(SKIP_MARK_ICON_SIZE_LABEL)
+    }
+}
 
 /** Resolve the actual size value, never mutate the shared sizing object or invent a default. */
 context(context: BytecodePatchContext)

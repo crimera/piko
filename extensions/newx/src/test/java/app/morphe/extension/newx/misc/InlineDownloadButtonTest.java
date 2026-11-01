@@ -416,7 +416,7 @@ public final class InlineDownloadButtonTest {
         float capturedSize = InlineDownloadButton.markIconSize(downloadAction, 18f);
 
         assertEquals(-18f, capturedSize, 0.0f);
-        assertEquals(18f, InlineDownloadButton.displayIconSize(capturedSize), 0.0f);
+        assertEquals(18f, Math.abs(capturedSize), 0.0f);
         assertSame(downloadIcon, InlineDownloadButton.selectIcon(
                 nativeIcon,
                 capturedSize,
@@ -472,23 +472,14 @@ public final class InlineDownloadButtonTest {
 
         assertEquals(18f, nativeSize, 0.0f);
         assertEquals(-18f, downloadSize, 0.0f);
-        assertEquals(
-                InlineDownloadButton.displayIconSize(nativeSize),
-                InlineDownloadButton.displayIconSize(downloadSize),
-                0.0f
-        );
+        assertEquals(Math.abs(nativeSize), Math.abs(downloadSize), 0.0f);
+        assertEquals(18f, Math.abs(nativeSize), 0.0f);
         assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, nativeSize, downloadIcon));
         assertSame(downloadIcon, InlineDownloadButton.selectIcon(
                 nativeIcon,
                 downloadSize,
                 downloadIcon
         ));
-
-        assertEquals(18f, InlineDownloadButton.displayIconSize(nativeSize), 0.0f);
-        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, downloadIcon));
-
-        assertEquals(18f, InlineDownloadButton.displayIconSize(downloadSize), 0.0f);
-        assertSame(downloadIcon, InlineDownloadButton.selectIcon(nativeIcon, downloadIcon));
     }
 
     @Test

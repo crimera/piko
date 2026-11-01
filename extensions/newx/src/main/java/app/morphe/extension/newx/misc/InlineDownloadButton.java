@@ -132,46 +132,20 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static final ThreadLocal<Boolean> CURRENT_ICON_IS_DOWNLOAD =
-            new ThreadLocal<>();
-
     /**
      * Encodes the download classification in the value captured by Twitter's icon lambda. The
-     * patched share branch restores the positive size before layout, then uses the retained sign
-     * to select the download icon. This makes native/download slot flips visible to Compose without
-     * relying on thread-local render ordering or remembered lambda identity.
+     * patched share branch uses its absolute value for layout and the retained sign for icon
+     * selection, so each rendered slot follows its captured action state.
      */
     public static float markIconSize(Object action, float iconSize) {
+        if (!isDownloadAction(action)) return iconSize;
         if (!isEnabled()) return iconSize;
 
-        boolean downloadAction = isDownloadAction(action);
         if (NewXLogger.isLoggingEnabled()) {
             NewXLogger.printInfo(() -> "mark action=" + System.identityHashCode(action)
-                    + " download=" + downloadAction);
+                    + " download=true");
         }
-        return downloadAction ? -Math.abs(iconSize) : iconSize;
-    }
-
-    /** Returns the actual layout size for the sign-tagged icon-lambda value. */
-    public static float displayIconSize(float markedIconSize) {
-        CURRENT_ICON_IS_DOWNLOAD.set(Float.floatToRawIntBits(markedIconSize) < 0);
-        return Math.abs(markedIconSize);
-    }
-
-    /** Selects from the classification captured directly by the icon lambda. */
-    public static Object selectIcon(
-            Object nativeIcon,
-            Object downloadIcon
-    ) {
-        if (!isEnabled()) return nativeIcon;
-
-        Boolean isDownload = CURRENT_ICON_IS_DOWNLOAD.get();
-        CURRENT_ICON_IS_DOWNLOAD.remove();
-        boolean useDownloadIcon = Boolean.TRUE.equals(isDownload);
-        if (NewXLogger.isLoggingEnabled()) {
-            NewXLogger.printInfo(() -> "select download=" + useDownloadIcon);
-        }
-        return useDownloadIcon ? downloadIcon : nativeIcon;
+        return -Math.abs(iconSize);
     }
 
     /** Selects from the classification captured directly by the icon lambda. */
@@ -182,7 +156,6 @@ public final class InlineDownloadButton {
     ) {
         if (!isEnabled()) return nativeIcon;
 
-        CURRENT_ICON_IS_DOWNLOAD.remove();
         boolean useDownloadIcon = Float.floatToRawIntBits(markedIconSize) < 0;
         if (NewXLogger.isLoggingEnabled()) {
             NewXLogger.printInfo(() -> "select size=" + markedIconSize

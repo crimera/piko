@@ -42,6 +42,7 @@ import app.crimera.patches.newx.misc.postoptions.postOptionsFeedbackLookups
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
 import com.android.tools.smali.dexlib2.Opcode
 import app.crimera.patches.newx.timeline.isNewPostFabHostCandidate
 import app.crimera.patches.newx.timeline.primaryPostFabRendererCallIndices
@@ -1266,8 +1267,8 @@ class NewXResolverLinterTest {
             ImmutableFieldReference(entryType, "enabled", "Z"),
             actionType,
         )
-        val (owner, renderer) = capturedInlineActionRendererFixture(entryBaseRegister = 4)
-        val (decoyOwner, decoyRenderer) = capturedInlineActionRendererFixture(entryBaseRegister = 8)
+        val (owner, renderer) = capturedInlineActionRendererFixture(entryBaseRegister = 4, extraGuardTypeRead = true)
+        val (decoyOwner, decoyRenderer) = capturedInlineActionRendererFixture(entryBaseRegister = 8, extraGuardTypeRead = true)
 
         assertTrue(renderer.isCapturedInlineActionEntryRenderer(owner, models))
         assertFalse(decoyRenderer.isCapturedInlineActionEntryRenderer(decoyOwner, models))
@@ -1283,12 +1284,22 @@ class NewXResolverLinterTest {
         assertFalse(lookalike.isNewPostFabHostCandidate())
     }
 
-    private fun capturedInlineActionRendererFixture(entryBaseRegister: Int): Pair<ImmutableClassDef, Method> {
+    private fun capturedInlineActionRendererFixture(
+        entryBaseRegister: Int,
+        extraGuardTypeRead: Boolean = false,
+    ): Pair<ImmutableClassDef, Method> {
         val ownerType = "Lfixture/CapturedActionRenderer;"
         val entryType = "Lfixture/InlineEntry;"
         val actionType = "Lfixture/ActionType;"
         val implementation = MethodImplementationBuilder(10).apply {
             addInstruction("iget-object v5, v$entryBaseRegister, $ownerType->entry:$entryType".toInstruction())
+            if (extraGuardTypeRead) {
+                addInstruction("iget-object v8, v5, $entryType->actionType:$actionType".toInstruction())
+                addInstruction("sget-object v9, $actionType->twitterShare:$actionType".toInstruction())
+                addInstruction(BuilderInstruction22t(Opcode.IF_NE, 8, 9, getLabel("guarded")))
+                addInstruction("nop".toInstruction())
+                addLabel("guarded")
+            }
             addInstruction("iget-object v6, v5, $entryType->actionType:$actionType".toInstruction())
             addInstruction("iget-boolean v7, v5, $entryType->enabled:Z".toInstruction())
             addInstruction("invoke-static {v6}, Lfixture/ActionRenderer;->render($actionType)V".toInstruction())
