@@ -9,7 +9,9 @@ package app.morphe.extension.instagram.utils;
 
 import java.util.Set;
 import java.util.HashSet;
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.BooleanSetting;
 import app.morphe.extension.instagram.settings.StringSetting;
@@ -26,7 +28,14 @@ import app.morphe.extension.shared.MarkChatAsReadScope;
 
 @SuppressWarnings("unused")
 public class Pref {
-    private static final int MAX_IMAGE_SIZE = 4096;
+    // Instagram picks the variant closest to the target plus 5%, so a target this large always
+    // selects the widest; half of MAX_VALUE keeps that 5% from overflowing.
+    private static final int WIDEST_VARIANT_TARGET = Integer.MAX_VALUE / 2;
+    // Instagram's full-screen views cap the width they request an image variant for at this.
+    private static final int FULL_SCREEN_WIDTH_CAP = 1080;
+    // Instagram sizes image variants by the User-Agent's shorter screen side. At 2560 posts get
+    // their originals and grid tiles 750 px variants; from 2880 grid tiles get 1080 px.
+    private static final int USER_AGENT_SCREEN_SIZE = 2560;
 
     private static String removeLineBreaks(String value) {
         return value.replace("\r", "").replace("\n", "");
@@ -341,12 +350,18 @@ public class Pref {
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
 
-    public static int improveImageViewing(int defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
+    // Takes the width Instagram picks an image variant for. Requests at least as wide as a
+    // full-screen view get the widest variant; narrower ones, such as grid tiles, stay unchanged.
+    public static int imageVariantTargetWidth(int original) {
+        if (!SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING)) return original;
+        Activity activity = Utils.getActivity();
+        Resources resources = activity != null ? activity.getResources() : Resources.getSystem();
+        int fullScreenWidth = Math.min(resources.getDisplayMetrics().widthPixels, FULL_SCREEN_WIDTH_CAP);
+        return original >= fullScreenWidth ? WIDEST_VARIANT_TARGET : original;
     }
 
-    public static Integer improveImageViewing(Integer defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
+    public static Integer userAgentScreenSize(Integer original) {
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? USER_AGENT_SCREEN_SIZE : original;
     }
 
     public static boolean enableDownload() {

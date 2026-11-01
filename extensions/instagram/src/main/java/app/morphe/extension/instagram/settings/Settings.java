@@ -67,7 +67,7 @@ public class Settings {
     public static final StringSetting HIDDEN_CHATS_TAPS = new StringSetting("hidden_chats_taps", "3", NOT_REQUIRED);
     public static final BooleanSetting HIDDEN_CHATS_MUTE = new BooleanSetting("hidden_chats_mute", true, NOT_REQUIRED);
     public static final BooleanSetting HIDE_REELS_FOLLOW_BUTTON = new BooleanSetting("hide_reels_follow_button", false, NOT_REQUIRED);
-    public static final BooleanSetting IMPROVE_IMAGE_VIEWING = new BooleanSetting("improve_image_viewing", false, NOT_REQUIRED);
+    public static final BooleanSetting IMPROVE_IMAGE_VIEWING = new BooleanSetting("improve_image_viewing", false, REQUIRED);
     public static final BooleanSetting COMMENT_COPY_BUTTON = new BooleanSetting("comment_copy_button", true, NOT_REQUIRED);
     public static final BooleanSetting COMMENT_SAVE_MEDIA_BUTTON = new BooleanSetting("comment_save_media_button", true, NOT_REQUIRED);
     public static final BooleanSetting HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = new BooleanSetting("hide_group_creation_button_on_sharesheet", true, NOT_REQUIRED);
