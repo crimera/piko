@@ -61,7 +61,6 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
 import app.morphe.extension.shared.ui.SelectionCheck;
-import app.morphe.extension.shared.ui.ListViewDragSelectionController;
 
 public final class DeletedMessagesActivity {
 
@@ -190,7 +189,6 @@ public final class DeletedMessagesActivity {
         private Button deleteAction;
         private boolean selectionMode;
         private boolean selectionToolbarVisible;
-        private ListViewDragSelectionController selectionController;
 
         Controller(Activity activity) {
             this.activity = activity;
@@ -283,8 +281,6 @@ public final class DeletedMessagesActivity {
             messageList.setDivider(new ColorDrawable(UI.getThemedColour("igds_color_separator")));
             messageList.setDividerHeight(1);
             messageList.setChoiceMode(ListView.CHOICE_MODE_NONE);
-            selectionController = new ListViewDragSelectionController(
-                    messageList, this::updateSelectionUi);
             messageList.setOnItemClickListener((parent, view, position, id) -> {
                 if (selectionMode) {
                     updateSelectionUi();
@@ -306,10 +302,10 @@ public final class DeletedMessagesActivity {
                     selectionMode = true;
                     messageList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
                 }
-                selectionController.begin(position);
+                messageList.setItemChecked(position, true);
+                updateSelectionUi();
                 return true;
             });
-            messageList.setOnTouchListener((view, event) -> selectionController.handleTouch(event));
 
             FrameLayout.LayoutParams match = new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
@@ -396,7 +392,6 @@ public final class DeletedMessagesActivity {
         }
 
         void cancelSelection() {
-            selectionController.stop();
             selectionMode = false;
             messageList.clearChoices();
             messageList.setChoiceMode(ListView.CHOICE_MODE_NONE);
