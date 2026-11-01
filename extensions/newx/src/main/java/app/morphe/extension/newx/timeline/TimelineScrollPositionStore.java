@@ -188,7 +188,6 @@ public final class TimelineScrollPositionStore {
             long sortIndex,
             int itemIndex
     ) {
-        boolean loggingEnabled = NewXLogger.isLoggingEnabled();
         String timelineName = timeline == null ? null : timeline.name();
         if (accountId <= 0) return;
         lastAccountId = accountId;
@@ -228,7 +227,7 @@ public final class TimelineScrollPositionStore {
                 hasLastAnchor = true;
             }
 
-            if (loggingEnabled) {
+            if (NewXLogger.isLoggingEnabled()) {
                 String detail = entryId == null
                         ? "reason=no-anchor"
                         : "entryId=" + entryId + " sortIndex=" + sortIndex + " itemIndex=" + itemIndex;
@@ -410,10 +409,9 @@ public final class TimelineScrollPositionStore {
             int index,
             int offset
     ) {
-        boolean loggingEnabled = NewXLogger.isLoggingEnabled();
         String timelineName = timeline == null ? null : timeline.name();
         if (accountId <= 0) {
-            if (loggingEnabled) {
+            if (NewXLogger.isLoggingEnabled()) {
                 NewXLogger.logger("NewX save skip timeline=" + timelineName + " account=" + accountId
                         + " reason=no-account");
             }
@@ -422,7 +420,7 @@ public final class TimelineScrollPositionStore {
         lastAccountId = accountId;
 
         if (index < 0 || offset < 0) {
-            if (loggingEnabled) {
+            if (NewXLogger.isLoggingEnabled()) {
                 NewXLogger.logger("NewX save skip timeline=" + timelineName + " account=" + accountId
                         + " reason=negative-position");
             }
@@ -465,7 +463,7 @@ public final class TimelineScrollPositionStore {
                 lastSavedOffset = offset;
             }
 
-            if (loggingEnabled) {
+            if (NewXLogger.isLoggingEnabled()) {
                 NewXLogger.logger("NewX save timeline=" + timelineName + " account=" + accountId + " key=" + key
                         + " index=" + index + " offset=" + offset);
             }
