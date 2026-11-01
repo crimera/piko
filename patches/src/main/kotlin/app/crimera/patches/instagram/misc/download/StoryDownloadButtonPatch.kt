@@ -17,17 +17,24 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
+import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val VIEW_DESCRIPTOR = "Landroid/view/View;"
 private const val MEDIA_DESCRIPTOR = "Lcom/instagram/feed/media/Media;"
 private const val REEL_ITEM_DESCRIPTOR = "Lcom/instagram/model/reels/ReelItem;"
+
+private object StoryToolbarBinderFingerprint : Fingerprint(
+    returnType = "V",
+    filters = listOf(
+        string("ReelViewerItemToolbarBinder.bindView")
+    )
+)
 
 val storyDownloadButtonPatch = bytecodePatch {
     compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -73,25 +80,7 @@ private fun hookStoryToolbarBinder() {
             .distinctBy { it.toString() },
     )
 
-    val candidates = mutableListOf<Method>()
-    patchContext.classDefForEach { classDef ->
-        classDef.methods.forEach { method ->
-            if (method.returnType == "V" &&
-                listOf(holder.originalClassDef.type, REEL_ITEM_DESCRIPTOR, USER_SESSION_DESCRIPTOR).all { type ->
-                    method.parameterTypes.count { it.toString() == type } == 1
-                }
-            ) candidates += method
-        }
-    }
-    // Sibling helpers take the same arguments; hook only the entry point that calls them.
-    val called = candidates.flatMap { candidate ->
-        candidate.implementation?.instructions?.mapNotNull { it.getReference<MethodReference>() }.orEmpty()
-    }.map { it.toString() }.toSet()
-    val entry = requireOne("story toolbar binder", candidates.filter { it.toString() !in called })
-    val binder = requireOne(
-        "mutable story toolbar binder",
-        patchContext.mutableClassDefBy(entry.definingClass).methods.filter { it.toString() == entry.toString() },
-    )
+    val binder = StoryToolbarBinderFingerprint.method
     if (!AccessFlags.STATIC.isSet(binder.accessFlags)) throw PatchException("Story toolbar binder is not static: $binder")
 
     val (container, media, session) = binder.reserveFreeRegisters(0, 3, 15)

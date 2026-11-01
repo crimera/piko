@@ -20,7 +20,6 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
@@ -44,7 +43,7 @@ private fun nullableFollowedByUpdateFilters(updaterCall: InstructionFilter) = li
  */
 context(_: BytecodePatchContext)
 private fun Fingerprint.preserveNullableFollowedBy() {
-    val match = matchSingle()
+    val match = match()
     val guardIndex = match.instructionMatches.first().index
     val callIndex = match.instructionMatches.last().index
     val implementation = match.method.implementation!!
@@ -88,6 +87,8 @@ val preserveUnknownFriendshipStatusPatch = bytecodePatch(
 
         // A null followed-by keeps the existing relationship.
         Fingerprint(
+            parameters = emptyList(),
+            returnType = "Ljava/lang/Object;",
             filters = listOf(
                 methodCall(reference = followedByGetter),
                 opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
