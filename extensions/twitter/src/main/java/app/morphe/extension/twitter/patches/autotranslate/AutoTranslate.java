@@ -1,13 +1,20 @@
 package app.morphe.extension.twitter.patches.autotranslate;
 
+import static app.morphe.extension.shared.StringRef.str;
+
+import android.content.SharedPreferences;
+import app.morphe.extension.twitter.Pref;
+import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.twitter.settings.Settings;
+import app.morphe.extension.twitter.settings.SettingsStatus;
+import app.morphe.extension.twitter.patches.nativeFeatures.translator.NativeTranslator;
+import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.Translate;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.preference.Preference;
-import android.preference.PreferenceGroup;
-import android.preference.SwitchPreference;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
@@ -33,12 +40,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Experimental, version-specific UI hook for X 12.19.1 / Piko. */
 public final class AutoTranslate {
     private static final int TAG = 0x7e0a70a1;
     private static final int WATCH_TAG = 0x7e0a70a2;
-    private static final String PREFS = "x_auto_translate_it";
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static final ThreadPoolExecutor WORKERS = new ThreadPoolExecutor(
             4, 4, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(24));
@@ -51,13 +58,14 @@ public final class AutoTranslate {
         @Override protected int sizeOf(String key, String value) { return 2 * (key.length() + value.length()); }
     };
     private static long pausedUntil;
-    private static String pausedMessage = "Traduzione in pausa";
+    private static String pausedMessage;
     private static final HashMap<String, String> FAILURE_MESSAGES = new HashMap<>();
 
     private static final class Binding {
         final WeakReference<View> view;
         final long id;
         final String language;
+        final TranslationSelection selection;
         int revision;
         CharSequence original;
         String key;
@@ -73,6 +81,7 @@ public final class AutoTranslate {
             this.view = new WeakReference<>(view);
             this.id = id;
             this.language = language;
+            this.selection = new TranslationSelection(Pref.natveTranslatorProvider(), Pref.translatorLanguage());
         }
     }
 
@@ -83,23 +92,56 @@ public final class AutoTranslate {
     }
 
     private static boolean enabled(Context context) {
-        return context.getSharedPreferences(PREFS, 0).getBoolean("enabled", true);
+        return SettingsStatus.nativeTranslator && Utils.getBooleanPref(Settings.NATIVE_TRANSLATOR_AUTO);
+    }
+
+    // Android retains preference listeners weakly, so keep this listener for the process lifetime.
+    private static boolean observingSettings;
+    private static final SharedPreferences.OnSharedPreferenceChangeListener SETTINGS_LISTENER = (preferences, key) -> {
+        if (key == null || Settings.NATIVE_TRANSLATOR_AUTO.key.equals(key)
+                || Settings.NATIVE_TRANSLATOR_LANG.key.equals(key)
+                || Settings.NATIVE_TRANSLATOR_PROVIDERS.key.equals(key)) MAIN.post(AutoTranslate::refreshViews);
+    };
+
+    private static boolean selectionMatches(Binding binding) {
+        return binding.selection.matches(Pref.natveTranslatorProvider(), Pref.translatorLanguage());
+    }
+
+    private static void refreshViews() {
+        for (String key : new ArrayList<>(RETRY_TASKS.keySet())) cancelCycle(key, null);
+        pausedUntil = 0;
+        for (View view : new ArrayList<>(VIEWS.keySet())) {
+            Binding old = (Binding) view.getTag(TAG);
+            if (old == null || old.original == null || !matchesQuote(view, old)) continue;
+            if (old.scheduled != null) MAIN.removeCallbacks(old.scheduled);
+            old.revision++;
+            Binding next = new Binding(view, old.id, old.language);
+            next.quoteDescription = old.quoteDescription;
+            view.setTag(TAG, next);
+            bindView(view, old.original);
+        }
     }
 
     /** Called before the app formats a particular tweet. Hidden content is excluded. */
     public static void capture(View view, e tweet, boolean hidden) {
         try {
+            if (!observingSettings) {
+                view.getContext().getSharedPreferences(Settings.SHARED_PREF_NAME, 0)
+                        .registerOnSharedPreferenceChangeListener(SETTINGS_LISTENER);
+                observingSettings = true;
+            }
             if (!(view instanceof TextContentView) && !(view instanceof QuoteView) && !(view instanceof TextView)) return;
             View textView = view;
             Binding previous = (Binding) view.getTag(TAG);
             if (previous != null && previous.scheduled != null) { MAIN.removeCallbacks(previous.scheduled); previous.scheduled = null; }
             if (hidden || tweet == null || tweet.a == null) {
                 view.setTag(TAG, null);
+                VIEWS.remove(view);
                 return;
             }
             String language = tweet.a.r == null ? "und" : tweet.a.r.toLowerCase(Locale.ROOT);
             long id = tweet.a.H1;
-            if (previous == null || previous.id != id || !previous.language.equals(language)) {
+            if (previous == null || previous.id != id || !previous.language.equals(language) || !selectionMatches(previous)) {
                 view.setTag(TAG, new Binding(textView, id, language));
             }
             VIEWS.put(textView, Boolean.TRUE);
@@ -135,7 +177,7 @@ public final class AutoTranslate {
             if (binding == null) return;
             if (binding.scheduled != null) { MAIN.removeCallbacks(binding.scheduled); binding.scheduled = null; }
             String plain = text == null ? "" : text.toString();
-            String key = binding.id + "\u0000" + binding.language + "\u0000it\u0000" + plain;
+            String key = binding.selection.cacheKey(binding.id, binding.language, plain);
             boolean changed = !key.equals(binding.key);
             binding.revision++;
             binding.key = key;
@@ -212,8 +254,8 @@ public final class AutoTranslate {
     }
 
     private static boolean eligible(View view, Binding binding) {
-        if (!enabled(view.getContext()) || "it".equals(binding.language)
-                || binding.language.startsWith("it-") || "zxx".equals(binding.language)) return false;
+        if (!enabled(view.getContext()) || !selectionMatches(binding)
+                || binding.selection.isSourceLanguage(binding.language) || "zxx".equals(binding.language)) return false;
         String plain = binding.original.toString();
         if (plain.length() > 6000) return false;
         int letters = 0;
@@ -232,7 +274,7 @@ public final class AutoTranslate {
         Binding binding = waiter.binding.get();
         if (binding == null || binding.revision != waiter.revision) return null;
         View view = binding.view.get();
-        return view != null && view.getTag(TAG) == binding && matchesQuote(view, binding) && enabled(view.getContext()) ? binding : null;
+        return view != null && view.getTag(TAG) == binding && matchesQuote(view, binding) && selectionMatches(binding) && enabled(view.getContext()) ? binding : null;
     }
 
     private static void request(final Binding binding) {
@@ -243,7 +285,7 @@ public final class AutoTranslate {
                 if (waiter.binding.get() == binding && waiter.revision == binding.revision) return;
             }
             waiting.add(new Waiter(binding));
-            render(binding, RETRY_TASKS.containsKey(key) ? "Traduzione in preparazione… riprovo automaticamente" : "Traduzione in corso…");
+            render(binding, RETRY_TASKS.containsKey(key) ? str("piko_native_translator_auto_retrying") : str("piko_native_translator_auto_loading"));
             return;
         }
         long now = SystemClock.elapsedRealtime();
@@ -255,13 +297,12 @@ public final class AutoTranslate {
         waiting = new ArrayList<>();
         waiting.add(new Waiter(binding));
         IN_FLIGHT.put(key, waiting);
-        final String source = binding.language;
         final String original = binding.original.toString();
-        render(binding, "Traduzione in corso…");
-        startNetwork(key, source, original);
+        render(binding, str("piko_native_translator_auto_loading"));
+        startNetwork(key, binding.id, binding.selection.provider, binding.selection.target, original);
     }
 
-    private static void startNetwork(final String key, final String source, final String original) {
+    private static void startNetwork(final String key, final long tweetId, final int provider, final String target, final String original) {
         try {
             WORKERS.execute(new Runnable() {
                 @Override public void run() {
@@ -283,8 +324,33 @@ public final class AutoTranslate {
                                 } finally { gate.countDown(); }
                             }
                         });
-                        if (gate.await(2, TimeUnit.SECONDS) && allowed.get())
-                            translated = TranslationClient.translate(source, original);
+                        if (gate.await(2, TimeUnit.SECONDS) && allowed.get()) {
+                            final CountDownLatch completed = new CountDownLatch(1);
+                            final AtomicReference<String> response = new AtomicReference<>();
+                            final AtomicReference<Exception> providerError = new AtomicReference<>();
+                            MAIN.post(() -> {
+                                if (!hasVisibleWaiter(key)) { completed.countDown(); return; }
+                                try {
+                                    NativeTranslator.createTranslator(provider).translate(tweetId, original, target, new Translate.TranslationCallback() {
+                                        @Override public void onTranslationComplete(String text) {
+                                            if (text == null || text.trim().isEmpty()) providerError.set(new Translate.UnavailableException());
+                                            else response.set(text);
+                                            completed.countDown();
+                                        }
+                                        @Override public void onError(Exception failure) {
+                                            providerError.set(failure);
+                                            completed.countDown();
+                                        }
+                                    });
+                                } catch (Exception failure) {
+                                    providerError.set(failure);
+                                    completed.countDown();
+                                }
+                            });
+                            if (!completed.await(30, TimeUnit.SECONDS)) throw new java.net.SocketTimeoutException();
+                            translated = response.get();
+                            error = providerError.get();
+                        }
                     }
                     catch (Exception failure) { error = failure; }
                     final String result = translated;
@@ -326,7 +392,7 @@ public final class AutoTranslate {
         ArrayList<Waiter> waiting = IN_FLIGHT.get(key);
         if (waiting == null) return;
         clearRetry(key);
-        if (translated == null && error instanceof TranslationClient.Unavailable) {
+        if (translated == null && error instanceof Translate.UnavailableException) {
             if (!hasVisibleWaiter(key)) { cancelCycle(key, null); return; }
             Integer previous = ATTEMPTS.get(key);
             int failures = previous == null ? 1 : previous + 1;
@@ -338,20 +404,22 @@ public final class AutoTranslate {
                     if (candidate != null) { first = candidate; break; }
                 }
                 if (first != null) {
-                    final String source = first.language;
+                    final long tweetId = first.id;
+                    final int provider = first.selection.provider;
+                    final String target = first.selection.target;
                     final String original = first.original.toString();
                     Runnable task = new Runnable() {
                         @Override public void run() {
                             RETRY_TASKS.remove(key);
                             if (SystemClock.elapsedRealtime() < pausedUntil) { cancelCycle(key, pausedMessage); return; }
                             if (!hasVisibleWaiter(key)) { cancelCycle(key, null); return; }
-                            startNetwork(key, source, original);
+                            startNetwork(key, tweetId, provider, target, original);
                         }
                     };
                     RETRY_TASKS.put(key, task);
                     for (Waiter waiter : waiting) {
                         Binding value = current(waiter);
-                        if (value != null) render(value, "Traduzione in preparazione… riprovo automaticamente");
+                        if (value != null) render(value, str("piko_native_translator_auto_retrying"));
                     }
                     MAIN.postDelayed(task, failures == 1 ? 1000 : 2500);
                     return;
@@ -364,21 +432,20 @@ public final class AutoTranslate {
         else if (error != null) {
             long now = SystemClock.elapsedRealtime();
             if (FAILURES.size() >= 128) { FAILURES.clear(); FAILURE_MESSAGES.clear(); }
-            FAILURE_MESSAGES.put(key, TranslationClient.describe(error));
+            FAILURE_MESSAGES.put(key, str("piko_native_translator_auto_unavailable"));
             FAILURES.put(key, now + 60000);
-            if (error instanceof TranslationClient.Failure) {
-                int status = ((TranslationClient.Failure) error).status;
-                if (status == 429 || status == 302 || status == 403) {
-                    pausedUntil = now + 60000;
-                    pausedMessage = TranslationClient.describe(error);
-                }
+            // Back off globally as well as per post when a provider/network request fails.
+            // Empty translations get their bounded retries first.
+            if (!(error instanceof Translate.UnavailableException)) {
+                pausedUntil = now + 60000;
+                pausedMessage = str("piko_native_translator_auto_unavailable");
             }
         }
         for (Waiter waiter : waiting) {
             Binding value = current(waiter);
             if (value == null) continue;
             value.translated = translated;
-            render(value, translated == null && error != null ? TranslationClient.describe(error) : null);
+            render(value, translated == null && error != null ? str("piko_native_translator_auto_unavailable") : null);
         }
     }
 
@@ -398,7 +465,7 @@ public final class AutoTranslate {
     private static void renderChecked(Binding binding, String status) {
         View view = binding.view.get();
         if (view == null || view.getTag(TAG) != binding || binding.original == null || !matchesQuote(view, binding)) return;
-        if (!enabled(view.getContext())) { write(view, binding.original); return; }
+        if (!enabled(view.getContext()) || !selectionMatches(binding)) { write(view, binding.original); return; }
         String translated = binding.translated;
         if (translated != null && translated.equals(binding.original.toString())) {
             write(view, binding.original);
@@ -427,29 +494,29 @@ public final class AutoTranslate {
     }
 
     private static String sourceLanguageName(String language) {
-        if (language == null || language.isEmpty() || "und".equals(language) || "auto".equals(language)) return "non rilevata";
+        if (language == null || language.isEmpty() || "und".equals(language) || "auto".equals(language)) return str("piko_native_translator_auto_unknown_language");
         try {
             Locale locale = Locale.forLanguageTag(language);
-            String name = locale.getDisplayLanguage(Locale.ITALIAN);
-            if (name.isEmpty() || name.equalsIgnoreCase(locale.getLanguage())) return "non rilevata";
-            return name.toLowerCase(Locale.ITALIAN);
-        } catch (RuntimeException ignored) { return "non rilevata"; }
+            String name = locale.getDisplayLanguage(Locale.getDefault());
+            if (name.isEmpty()) return str("piko_native_translator_auto_unknown_language");
+            return name;
+        } catch (RuntimeException ignored) { return str("piko_native_translator_auto_unknown_language"); }
     }
 
     private static boolean appendStatus(SpannableStringBuilder output, Binding binding, String status) {
         int start = output.length();
         if (binding.translated != null) {
-            output.append("Lingua originale: ").append(sourceLanguageName(binding.language)).append("  ");
+            output.append(str("piko_native_translator_auto_source", sourceLanguageName(binding.language))).append("  ");
             output.setSpan(new ForegroundColorSpan(0xff90a4ae), start, output.length(), 33);
             int action = output.length();
-            output.append(binding.originalShown ? "Mostra traduzione" : "Mostra originale");
+            output.append(binding.originalShown ? str("piko_native_translator_auto_show_translation") : str("piko_native_translator_auto_show_original"));
             output.setSpan(new ToggleSpan(binding), action, output.length(), 33);
         } else if (status != null) {
             output.append(status);
-            if (status.startsWith("Traduzione non ")) {
+            if (status.equals(str("piko_native_translator_auto_unavailable"))) {
                 output.append(" · ");
                 int action = output.length();
-                output.append("Riprova");
+                output.append(str("piko_native_translator_auto_retry"));
                 output.setSpan(new RetrySpan(binding), action, output.length(), 33);
             }
         }
@@ -497,6 +564,7 @@ public final class AutoTranslate {
             if (view.a == null || view.a.a == null || view.O == null || view.P != null) {
                 if (previous != null && previous.scheduled != null) MAIN.removeCallbacks(previous.scheduled);
                 view.setTag(TAG, null);
+                VIEWS.remove(view);
                 return;
             }
             // The native binder may skip formatting an unchanged model. Do not translate our header again.
@@ -577,36 +645,4 @@ public final class AutoTranslate {
         }
     }
 
-    /** Returned to Piko's own preference builder so its normal search index sees it. */
-    public static Preference preference(PreferenceGroup group) {
-        final Context context = group.getContext();
-        SwitchPreference toggle = new SwitchPreference(context);
-        toggle.setKey("x_auto_translate_posts_it");
-        toggle.setTitle("Traduzione automatica in italiano");
-        toggle.setSummary("Traduce il testo dei post tramite Google online, usando l’interfaccia web come TWP. Il testo viene inviato a Google. Tocca Mostra originale per rileggere il post.");
-        toggle.setPersistent(false);
-        toggle.setChecked(enabled(context));
-        toggle.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override public boolean onPreferenceChange(Preference preference, Object value) {
-                final boolean on = Boolean.TRUE.equals(value);
-                context.getSharedPreferences(PREFS, 0).edit().putBoolean("enabled", on).apply();
-                for (View view : new ArrayList<>(VIEWS.keySet())) {
-                    Binding binding = (Binding) view.getTag(TAG);
-                    if (binding == null || binding.original == null || !matchesQuote(view, binding)) continue;
-                    if (binding.scheduled != null) { MAIN.removeCallbacks(binding.scheduled); binding.scheduled = null; }
-                    if (on) bindView(view, binding.original);
-                    else {
-                        binding.revision++;
-                        write(view, binding.original);
-                        describeView(view, binding.original);
-                    }
-                }
-                if (!on) {
-                    for (String key : new ArrayList<>(RETRY_TASKS.keySet())) cancelCycle(key, null);
-                }
-                return true;
-            }
-        });
-        return toggle;
-    }
 }

@@ -6,7 +6,6 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
 
-import static app.morphe.extension.shared.StringRef.str;
 
 import android.os.AsyncTask;
 import java.io.BufferedReader;
@@ -45,6 +44,7 @@ public class GTranslateV2 implements Translate {
 
             @Override
             protected String doInBackground(Void... voids) {
+                HttpURLConnection connection = null;
                 try {
                     // Encode the query for URL
                     String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
@@ -55,7 +55,9 @@ public class GTranslateV2 implements Translate {
 
                     // Create connection
                     URL url = new URL(fullUrl);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setConnectTimeout(7000);
+                    connection.setReadTimeout(10000);
 
                     // Set request headers
                     connection.setRequestMethod("GET");
@@ -76,6 +78,8 @@ public class GTranslateV2 implements Translate {
                 } catch (Exception e) {
                     error = e;
                     return null;
+                } finally {
+                    if (connection != null) connection.disconnect();
                 }
             }
 
@@ -87,7 +91,7 @@ public class GTranslateV2 implements Translate {
                     callback.onTranslationComplete(result);
                 }
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -95,15 +99,11 @@ public class GTranslateV2 implements Translate {
      * @param jsonResponse Raw JSON response from Google Translate
      * @return Translated text
      */
-    private String parseTranslationResponse(String jsonResponse) {
-        try {
-            JSONObject jsonObject = new JSONObject(jsonResponse);
-            if (jsonObject.has("destination-text")) {
-                return jsonObject.getString("destination-text");
-            }
-            throw new Exception("destination-text not found");
-        } catch (Exception e) {
-            return str("translate_tweet_error") +": "+ e.getMessage();
+    private String parseTranslationResponse(String jsonResponse) throws Exception {
+        JSONObject jsonObject = new JSONObject(jsonResponse);
+        if (jsonObject.has("destination-text")) {
+            return jsonObject.getString("destination-text");
         }
+        throw new Translate.UnavailableException();
     }
 }

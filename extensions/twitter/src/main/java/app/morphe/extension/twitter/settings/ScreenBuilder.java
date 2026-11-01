@@ -446,11 +446,12 @@ public class ScreenBuilder {
 
         category = preferenceCategory(str("piko_title_native_translator"));
 
-        if (SettingsStatus.autoTranslate) {
-            addPreference(category, app.morphe.extension.twitter.patches.autotranslate.AutoTranslate.preference(category));
-        }
-
         if (SettingsStatus.nativeTranslator) {
+            addPreference(category, helper.switchPreference(
+                    str("piko_native_translator_auto"),
+                    str("piko_native_translator_auto_description"),
+                    Settings.NATIVE_TRANSLATOR_AUTO
+            ));
             addPreference(category,
                     helper.switchPreference(
                             str("piko_native_translator_toggle"),

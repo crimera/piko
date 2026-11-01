@@ -17,6 +17,9 @@ public interface Translate{
      */
     void translate(Long tweetId, String query, String toLang, TranslationCallback callback);
 
+    /** The service has no translation yet; automatic callers may retry a bounded number of times. */
+    final class UnavailableException extends java.io.IOException { }
+
     // Returns  provider name
     String getProviderName();
     /**

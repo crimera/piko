@@ -12,6 +12,7 @@ import app.crimera.patches.twitter.misc.shareMenu.browseObject.browseObjectPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.*
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.versionCheckPatch
+import app.crimera.patches.twitter.timeline.autotranslate.googleAutoTranslatePatch
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
@@ -21,7 +22,7 @@ val nativeTranslatorModePatch =
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook, browseObjectPatch)
+        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook, browseObjectPatch, googleAutoTranslatePatch)
 
         execute {
             val actionName = "Translate"
