@@ -141,10 +141,6 @@ public final class InlineDownloadButton {
         if (!isDownloadAction(action)) return iconSize;
         if (!isEnabled()) return iconSize;
 
-        if (NewXLogger.isLoggingEnabled()) {
-            NewXLogger.printInfo(() -> "mark action=" + System.identityHashCode(action)
-                    + " download=true");
-        }
         return -Math.abs(iconSize);
     }
 
@@ -157,10 +153,6 @@ public final class InlineDownloadButton {
         if (!isEnabled()) return nativeIcon;
 
         boolean useDownloadIcon = Float.floatToRawIntBits(markedIconSize) < 0;
-        if (NewXLogger.isLoggingEnabled()) {
-            NewXLogger.printInfo(() -> "select size=" + markedIconSize
-                    + " download=" + useDownloadIcon);
-        }
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }
 
