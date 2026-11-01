@@ -66,7 +66,6 @@ public class SavedMessagesHook {
                         String id = data.getUserId();
                         if (id == null || !id.matches("\\d{6,14}")) continue;
                         String name = data.getUsername();
-                        if (name == null || name.isEmpty()) name = data.getFullName();
                         if (name != null && !name.isEmpty()) db.putUsername(id, name);
                     } catch (Throwable ignored) {
                     }
@@ -155,7 +154,7 @@ public class SavedMessagesHook {
         } catch (Exception ignored) {}
         final String viewerId = sessionUserId;
         getWorker().post(() -> processReceivedItem(
-                item, resolveThreadIdHint(delta), viewerId));
+                item, resolveThreadIdHint(delta), viewerId, userSession));
     }
 
     static String resolveThreadIdHint(Object delta) {
@@ -174,8 +173,35 @@ public class SavedMessagesHook {
         return "deltaThreadIdField";
     }
 
+    private static Object lookupCachedUser(UserSession session, String senderId) {
+        // Replaced with Instagram's session-scoped user cache lookup at patch time.
+        return null;
+    }
+
+    private static String resolveSenderUsername(PikoMessageDb db, String senderId,
+                                                String threadId, UserSession session,
+                                                String viewerId) {
+        String username = db.getUsername(senderId);
+        if (username == null) username = db.getThreadUsername(threadId, senderId);
+        if (username != null || isBlank(senderId) || session == null) return username;
+        try {
+            if (isBlank(viewerId) || !viewerId.equals(session.getUserId())) return null;
+            Object user = lookupCachedUser(session, senderId);
+            if (user == null) return null;
+            UserData data = new UserData(user);
+            if (!senderId.equals(data.getUserId())) return null;
+            username = data.getUsername();
+            if (!isBlank(username)) {
+                db.putUsername(senderId, username);
+                return username;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     private static void processReceivedItem(Object item, String threadIdHint,
-                                            String sessionViewerId) {
+                                            String sessionViewerId, UserSession session) {
         try {
             DirectItem directItem = new DirectItem(item);
             String senderId = directItem.getUserId();
@@ -192,10 +218,8 @@ public class SavedMessagesHook {
             if (threadId == null) threadId = "";
 
             PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
-            String senderUsername = db.getUsername(senderId);
-            if (senderUsername == null) {
-                senderUsername = db.getThreadUsername(threadId, senderId);
-            }
+            String senderUsername = resolveSenderUsername(
+                    db, senderId, threadId, session, sessionViewerId);
             String content = directItem.getText();
             String type = directItem.getItemType();
             if (type != null) type = type.trim().toLowerCase(java.util.Locale.ROOT);

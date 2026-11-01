@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.entity.directItem.DirectItemDispatchFingerp
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.methodCall
@@ -19,6 +20,33 @@ import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val SAVED_MESSAGES_HOOK_CLASS = "$PATCHES_DESCRIPTOR/dm/SavedMessagesHook;"
+internal const val USER_CACHE_CLASS = "Lcom/instagram/user/model/UserCache;"
+
+internal object CachedUserLookupExtensionFingerprint : Fingerprint(
+    definingClass = SAVED_MESSAGES_HOOK_CLASS,
+    name = "lookupCachedUser",
+    parameters = listOf(USER_SESSION_CLASS, "Ljava/lang/String;"),
+    returnType = "Ljava/lang/Object;",
+)
+
+internal object UserCacheInstanceFingerprint : Fingerprint(
+    definingClass = USER_CACHE_CLASS,
+    parameters = listOf(USER_SESSION_CLASS),
+    returnType = USER_CACHE_CLASS,
+)
+
+internal object UserCacheIdMapFingerprint : Fingerprint(
+    definingClass = USER_CACHE_CLASS,
+    returnType = "Lcom/instagram/user/model/User;",
+    filters = listOf(
+        string("UserCache getOrPut called with empty String"),
+        fieldAccess(
+            definingClass = USER_CACHE_CLASS,
+            type = "Ljava/util/concurrent/ConcurrentMap;",
+            opcode = Opcode.IGET_OBJECT,
+        ),
+    ),
+)
 
 internal object DeltaThreadIdFieldExtensionFingerprint : Fingerprint(
     definingClass = SAVED_MESSAGES_HOOK_CLASS,

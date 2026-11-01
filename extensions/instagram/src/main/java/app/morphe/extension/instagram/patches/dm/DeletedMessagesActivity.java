@@ -12,9 +12,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Intent;
+import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
@@ -27,9 +30,10 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
+import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -80,7 +84,7 @@ public final class DeletedMessagesActivity {
             int position = firstPosition + childIndex;
             if (position >= list.getCount()) break;
             View row = list.getChildAt(childIndex);
-            CheckBox selectionView = row.findViewWithTag("selection");
+            SelectionCheck selectionView = row.findViewWithTag("selection");
             if (selectionView == null) continue;
             boolean checked = list.isItemChecked(position);
             selectionView.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
@@ -181,7 +185,7 @@ public final class DeletedMessagesActivity {
         private View backAction;
         private TextView toolbarTitle;
         private View selectAllAction;
-        private CheckBox selectAllCheck;
+        private SelectionCheck selectAllCheck;
         private TextView selectAllLabel;
         private TextView cancelSelectionAction;
         private Button deleteAction;
@@ -207,6 +211,7 @@ public final class DeletedMessagesActivity {
             InstagramPreferenceStyle.applySystemBarStyle(activity);
 
             LinearLayout toolbar = new LinearLayout(activity);
+            toolbar.setBaselineAligned(false);
             toolbar.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
             ImageView back = new ImageView(activity);
@@ -223,27 +228,27 @@ public final class DeletedMessagesActivity {
             LinearLayout selectAll = new LinearLayout(activity);
             selectAll.setOrientation(LinearLayout.VERTICAL);
             selectAll.setGravity(Gravity.CENTER);
+            selectAll.setMinimumWidth(Dim.dp48);
+            selectAll.setMinimumHeight(Dim.dp48);
             selectAll.setVisibility(View.GONE);
             selectAll.setContentDescription(str("piko_all"));
 
-            selectAllCheck = new CheckBox(activity);
-            selectAllCheck.setClickable(false);
-            selectAllCheck.setFocusable(false);
-            selectAllCheck.setMinWidth(0);
-            selectAllCheck.setMinHeight(0);
-            selectAllCheck.setPadding(0, 0, 0, 0);
-            selectAllCheck.setTranslationX(-Dim.dp8 / 4f);
-            selectAllCheck.setButtonTintList(selectionControlTint());
-            selectAll.addView(selectAllCheck, new LinearLayout.LayoutParams(Dim.dp28, Dim.dp28));
+            selectAllCheck = new SelectionCheck(
+                    InstagramPreferenceStyle.dialogContext(activity), selectionControlDrawable());
+            selectAll.addView(selectAllCheck, new LinearLayout.LayoutParams(
+                    Dim.dp48, Dim.dp48));
 
             selectAllLabel = new TextView(activity);
             selectAllLabel.setText(str("piko_all"));
             selectAllLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
             selectAllLabel.setTextColor(InstagramPreferenceStyle.primaryTextColor());
-            selectAllLabel.setIncludeFontPadding(false);
             selectAllLabel.setGravity(Gravity.CENTER);
-            selectAll.addView(selectAllLabel);
+            LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            labelParams.topMargin = -InstagramPreferenceStyle.dp(activity, 10);
+            selectAll.addView(selectAllLabel, labelParams);
             selectAll.setOnClickListener(v -> toggleAll());
+            bindSelectionAccessibility(selectAll, selectAllCheck);
             selectAllAction = selectAll;
 
             TextView cancelSelection = new TextView(activity);
@@ -258,7 +263,8 @@ public final class DeletedMessagesActivity {
             cancelSelectionAction = cancelSelection;
 
             toolbar.addView(back);
-            toolbar.addView(selectAll, new LinearLayout.LayoutParams(Dim.dp48, Dim.dp48));
+            toolbar.addView(selectAll, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             toolbar.addView(toolbarTitle);
             toolbar.addView(cancelSelection, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, Dim.dp48));
@@ -317,15 +323,23 @@ public final class DeletedMessagesActivity {
             deleteAction = new Button(activity);
             deleteAction.setText(str("piko_delete"));
             deleteAction.setAllCaps(false);
-            deleteAction.setTextColor(0xffed4956);
-            deleteAction.setBackgroundTintList(ColorStateList.valueOf(
-                    InstagramPreferenceStyle.pressedBackgroundColor()));
+            deleteAction.setTextColor(UI.getThemedColour("igds_color_error_or_destructive"));
+            deleteAction.setBackgroundTintList(null);
+            GradientDrawable deleteBackground = new GradientDrawable();
+            deleteBackground.setColor(InstagramPreferenceStyle.pressedBackgroundColor());
+            deleteBackground.setCornerRadius(Dim.dp24);
+            deleteAction.setBackground(new RippleDrawable(ColorStateList.valueOf(
+                    InstagramPreferenceStyle.secondaryTextColor() & 0x00ffffff | 0x24000000),
+                    deleteBackground, null));
+            deleteAction.setStateListAnimator(null);
+            deleteAction.setElevation(0);
+            deleteAction.setMinHeight(Dim.dp48);
             deleteAction.setMinimumHeight(Dim.dp48);
             deleteAction.setVisibility(View.GONE);
             deleteAction.setOnClickListener(v -> confirmDeleteSelected());
             LinearLayout.LayoutParams deleteParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            deleteParams.setMargins(Dim.dp12, Dim.dp8, Dim.dp12, Dim.dp8);
+            deleteParams.setMargins(Dim.dp16, Dim.dp8, Dim.dp16, Dim.dp12);
             root.addView(deleteAction, deleteParams);
 
             root.setOnApplyWindowInsetsListener((v, insets) -> {
@@ -424,26 +438,25 @@ public final class DeletedMessagesActivity {
         private void applySelectionToolbarLayout(boolean selecting) {
             LinearLayout toolbar = (LinearLayout) toolbarTitle.getParent();
             if (!selecting) {
-                toolbarTitle.setTranslationY(0f);
-                cancelSelectionAction.setTranslationY(0f);
-                selectAllAction.setTranslationY(0f);
+                toolbar.setMinimumHeight(0);
                 InstagramPreferenceStyle.applyToolbarLayout(
                         activity, toolbar, (ImageView) backAction, toolbarTitle, false);
                 return;
             }
 
-            toolbar.setPadding(Dim.dp8, toolbar.getPaddingTop(),
-                    Dim.dp8, toolbar.getPaddingBottom());
+            toolbar.setGravity(Gravity.TOP);
+            toolbar.setPadding(Dim.dp16, toolbar.getPaddingTop(),
+                    Dim.dp16, toolbar.getPaddingBottom());
+            toolbar.setMinimumHeight(InstagramPreferenceStyle.dp(activity, 70));
+            toolbar.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            toolbar.requestLayout();
             LinearLayout.LayoutParams titleParams =
                     (LinearLayout.LayoutParams) toolbarTitle.getLayoutParams();
+            titleParams.height = Dim.dp48;
+            titleParams.gravity = Gravity.TOP;
             titleParams.leftMargin = InstagramPreferenceStyle.dp(activity, 10);
+            toolbarTitle.setGravity(Gravity.CENTER_VERTICAL);
             toolbarTitle.setLayoutParams(titleParams);
-
-            float topRowOffset = selectAllLabel.getLineHeight() / 2f;
-            toolbarTitle.setTranslationY(0f);
-            cancelSelectionAction.setTranslationY(0f);
-            selectAllAction.setTranslationY(topRowOffset);
-            selectAllLabel.setTranslationX(selectAllCheck.getTranslationX());
         }
 
         private void confirmDeleteSelected() {
@@ -543,17 +556,26 @@ public final class DeletedMessagesActivity {
             return new RippleDrawable(ColorStateList.valueOf(highlight), content, null);
         }
 
-        private ColorStateList selectionControlTint() {
-            return new ColorStateList(
-                    new int[][]{
-                            new int[]{android.R.attr.state_checked},
-                            new int[]{}
-                    },
-                    new int[]{
-                            InstagramPreferenceStyle.selectionColor(),
-                            InstagramPreferenceStyle.secondaryTextColor()
-                    }
-            );
+        private Drawable selectionControlDrawable() {
+            TypedArray attributes = InstagramPreferenceStyle.dialogContext(activity)
+                    .obtainStyledAttributes(new int[]{android.R.attr.listChoiceIndicatorMultiple});
+            try {
+                return attributes.getDrawable(0);
+            } finally {
+                attributes.recycle();
+            }
+        }
+
+        private void bindSelectionAccessibility(View view, SelectionCheck check) {
+            view.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+                @Override
+                public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                    super.onInitializeAccessibilityNodeInfo(host, info);
+                    if (selectionMode) info.setClassName("android.widget.CheckBox");
+                    info.setCheckable(selectionMode);
+                    info.setChecked(selectionMode && check.isChecked());
+                }
+            });
         }
 
         private class MessageAdapter extends BaseAdapter {
@@ -565,7 +587,7 @@ public final class DeletedMessagesActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 LinearLayout row;
                 LinearLayout contentColumn;
-                CheckBox selectionView;
+                SelectionCheck selectionView;
                 TextView senderView, contentView, metaView;
 
                 if (convertView == null) {
@@ -573,18 +595,16 @@ public final class DeletedMessagesActivity {
                     row.setOrientation(LinearLayout.HORIZONTAL);
                     row.setGravity(Gravity.CENTER_VERTICAL);
                     int pad = Dim.dp8;
-                    row.setPadding(pad * 2, pad, pad * 2, pad);
+                    row.setPadding(pad * 2, Dim.dp12, pad * 2, Dim.dp12);
                     row.setBackground(messageRowBackground());
 
-                    selectionView = new CheckBox(activity);
+                    selectionView = new SelectionCheck(
+                            InstagramPreferenceStyle.dialogContext(activity), selectionControlDrawable());
                     selectionView.setTag("selection");
-                    selectionView.setClickable(false);
-                    selectionView.setFocusable(false);
-                    selectionView.setMinWidth(0);
-                    selectionView.setMinHeight(0);
-                    selectionView.setPadding(0, 0, 0, 0);
-                    selectionView.setButtonTintList(selectionControlTint());
-                    row.addView(selectionView, new LinearLayout.LayoutParams(Dim.dp40, Dim.dp40));
+                    LinearLayout.LayoutParams checkParams = new LinearLayout.LayoutParams(
+                            Dim.dp48, Dim.dp48);
+                    checkParams.setMarginEnd(Dim.dp8);
+                    row.addView(selectionView, checkParams);
 
                     contentColumn = new LinearLayout(activity);
                     contentColumn.setOrientation(LinearLayout.VERTICAL);
@@ -597,6 +617,7 @@ public final class DeletedMessagesActivity {
                     contentView = new TextView(activity);
                     contentView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                     contentView.setTextColor(InstagramPreferenceStyle.primaryTextColor());
+                    contentView.setPadding(0, Dim.dp4, 0, Dim.dp4);
                     contentView.setTag("c");
 
                     metaView = new TextView(activity);
@@ -621,15 +642,12 @@ public final class DeletedMessagesActivity {
                 String sender    = msg[2];
                 String content   = msg[3];
                 String type      = msg[4];
-                String senderId  = msg.length > 6 ? msg[6] : null;
                 long   timestamp = 0;
                 try { timestamp = Long.parseLong(msg[5]); } catch (Exception ignored) {}
 
                 final String who;
                 if (sender != null && !sender.isEmpty()) {
                     who = "@" + sender;
-                } else if (senderId != null && !senderId.isEmpty()) {
-                    who = "@" + senderId;
                 } else {
                     who = str("piko_unknown");
                 }
@@ -650,6 +668,35 @@ public final class DeletedMessagesActivity {
 
                 return row;
             }
+        }
+    }
+
+    private static final class SelectionCheck extends ImageView implements Checkable {
+        private boolean checked;
+
+        SelectionCheck(Context context, Drawable drawable) {
+            super(context);
+            setScaleType(ScaleType.CENTER);
+            setImageDrawable(drawable);
+            setClickable(false);
+            setFocusable(false);
+            setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        }
+
+        @Override public boolean isChecked() { return checked; }
+
+        @Override public void setChecked(boolean checked) {
+            if (this.checked == checked) return;
+            this.checked = checked;
+            refreshDrawableState();
+        }
+
+        @Override public void toggle() { setChecked(!checked); }
+
+        @Override public int[] onCreateDrawableState(int extraSpace) {
+            int[] state = super.onCreateDrawableState(extraSpace + 1);
+            if (checked) mergeDrawableStates(state, new int[]{android.R.attr.state_checked});
+            return state;
         }
     }
 

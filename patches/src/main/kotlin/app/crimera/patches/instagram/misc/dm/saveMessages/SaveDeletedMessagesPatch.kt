@@ -7,14 +7,19 @@
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
 import app.crimera.patches.instagram.entity.directItem.directItemEntity
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeString
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -26,6 +31,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 
 private const val HOOK_CLASS = "$PATCHES_DESCRIPTOR/dm/SavedMessagesHook;"
 
@@ -36,10 +42,42 @@ val saveDeletedMessagesPatch =
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
         default = true,
     ) {
-        dependsOn(settingsPatch, directItemEntity)
+        dependsOn(settingsPatch, directItemEntity, userDataEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
+            val cacheInstance = UserCacheInstanceFingerprint.originalMethod
+            if (!AccessFlags.STATIC.isSet(cacheInstance.accessFlags)) {
+                throw PatchException("Expected a static session-scoped user cache accessor")
+            }
+            val idMap = UserCacheIdMapFingerprint.instructionMatches.last().fieldReference
+            val cacheLookups = classDefBy(USER_CACHE_CLASS).methods.filter { method ->
+                !AccessFlags.STATIC.isSet(method.accessFlags) &&
+                    AccessFlags.PUBLIC.isSet(method.accessFlags) &&
+                    method.parameterTypes.map { it.toString() } == listOf("Ljava/lang/String;") &&
+                    method.returnType == USER_MODEL_CLASS_NAME &&
+                    method.implementation?.instructions?.any { instruction ->
+                        instruction.opcode == Opcode.IGET_OBJECT &&
+                            (instruction as? ReferenceInstruction)?.reference == idMap
+                    } == true
+            }
+            if (cacheLookups.size != 1) {
+                throw PatchException("Expected one user cache ID lookup, found ${cacheLookups.size}")
+            }
+            val cacheLookup = cacheLookups.single()
+            CachedUserLookupExtensionFingerprint.method.apply {
+                removeInstructions(0, instructions.size)
+                addInstructions(
+                    0,
+                    """
+                    invoke-static/range {p0 .. p0}, $cacheInstance
+                    move-result-object p0
+                    invoke-virtual/range {p0 .. p1}, $cacheLookup
+                    move-result-object p0
+                    return-object p0
+                    """.trimIndent(),
+                )
+            }
 
             // Hook 1: REST/JSON path, inject at the return of the parser.
             DirectItemJsonParserFingerprint.let {
@@ -97,7 +135,7 @@ val saveDeletedMessagesPatch =
                 )
             }
 
-            // Username enrichment is optional because numeric sender IDs remain usable.
+            // REST participants supplement the cache used by real-time message delivery.
             ThreadUsersDispatchFingerprint.matchOrNull()?.let { match ->
                 match.method.apply {
                     // The list write is out of line, after other JSON fields. Follow the
