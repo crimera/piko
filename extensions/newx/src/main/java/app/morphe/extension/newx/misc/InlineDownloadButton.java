@@ -18,13 +18,10 @@ import app.morphe.extension.crimera.settings.SettingsUi;
 import app.morphe.extension.crimera.ui.ButtonView;
 import app.morphe.extension.crimera.ui.DialogView;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -66,10 +63,9 @@ public final class InlineDownloadButton {
             "Download folder is no longer available \u2014 tap download again to choose a new one";
     // Click-time parsing and enqueue run here so the tap handler returns immediately.
     private static final ExecutorService CLICK_EXECUTOR = Executors.newSingleThreadExecutor();
-    // Timeline/profile scrolling creates a new action object per composition. Keep weak identity
-    // keys without a FIFO cap: a cap can evict an action that is still visible and make its icon
-    // fall back to Twitter's share glyph. Cleared weak keys are drained during set operations.
-    private static final IdentityWeakSet DOWNLOAD_ACTIONS = new IdentityWeakSet();
+    // The action entry contains only stable, non-post-specific values. Reuse it across cards so
+    // scrolling does not allocate an action model for every composition.
+    private static volatile Object cachedDownloadAction;
     private static volatile boolean patchApplied;
     private static boolean initialized;
 
@@ -108,8 +104,7 @@ public final class InlineDownloadButton {
                 return actions;
             }
 
-            Object downloadAction = createDownloadAction();
-            registerDownloadAction(downloadAction);
+            Object downloadAction = getOrCreateDownloadAction();
 
             List<Object> result = new ArrayList<>(actions.size() + 1);
             result.addAll(actions);
@@ -144,104 +139,6 @@ public final class InlineDownloadButton {
     ) {
         boolean useDownloadIcon = Float.floatToRawIntBits(markedIconSize) < 0;
         return useDownloadIcon ? downloadIcon : nativeIcon;
-    }
-
-    /**
-     * A weak set with identity, rather than equals(), membership semantics. The thread-local probe
-     * avoids allocating a temporary weak reference for each membership lookup without retaining
-     * the looked-up object after the operation.
-     */
-    private static final class IdentityWeakSet {
-        private static final Boolean PRESENT = Boolean.TRUE;
-
-        private final ConcurrentHashMap<IdentityWeakReference, Boolean> entries =
-                new ConcurrentHashMap<>();
-        private final ReferenceQueue<Object> clearedReferences = new ReferenceQueue<>();
-        private final ThreadLocal<LookupKey> lookupKeys = new ThreadLocal<LookupKey>() {
-            @Override
-            protected LookupKey initialValue() {
-                return new LookupKey();
-            }
-        };
-        void add(Object referent) {
-            if (referent == null) return;
-
-            drainClearedReferences();
-            IdentityWeakReference entry = new IdentityWeakReference(referent, clearedReferences);
-            entries.putIfAbsent(entry, PRESENT);
-        }
-
-        boolean contains(Object referent) {
-            if (referent == null) return false;
-            if (entries.isEmpty()) return false;
-
-            drainClearedReferences();
-            LookupKey lookupKey = lookupKeys.get();
-            lookupKey.set(referent);
-            try {
-                return entries.containsKey(lookupKey);
-            } finally {
-                lookupKey.clear();
-            }
-        }
-
-        private void drainClearedReferences() {
-            IdentityWeakReference reference;
-            while ((reference = (IdentityWeakReference) clearedReferences.poll()) != null) {
-                entries.remove(reference);
-            }
-        }
-
-        private static Object referentOf(Object key) {
-            if (key instanceof IdentityWeakReference reference) return reference.get();
-            if (key instanceof LookupKey lookupKey) return lookupKey.referent;
-            return null;
-        }
-
-        private static final class IdentityWeakReference extends WeakReference<Object> {
-            private final int identityHashCode;
-
-            IdentityWeakReference(Object referent, ReferenceQueue<Object> queue) {
-                super(referent, queue);
-                identityHashCode = System.identityHashCode(referent);
-            }
-
-            @Override
-            public int hashCode() {
-                return identityHashCode;
-            }
-
-            @Override
-            public boolean equals(Object other) {
-                Object referent = get();
-                return referent != null && referent == referentOf(other);
-            }
-        }
-
-        private static final class LookupKey {
-            private Object referent;
-            private int identityHashCode;
-
-            void set(Object referent) {
-                this.referent = referent;
-                identityHashCode = System.identityHashCode(referent);
-            }
-
-            void clear() {
-                referent = null;
-                identityHashCode = 0;
-            }
-
-            @Override
-            public int hashCode() {
-                return identityHashCode;
-            }
-
-            @Override
-            public boolean equals(Object other) {
-                return referent != null && referent == referentOf(other);
-            }
-        }
     }
 
     public static boolean handleEvent(Object presenter, Object event, boolean longPress) {
@@ -382,16 +279,33 @@ public final class InlineDownloadButton {
         throw unpatchedBridge("createDownloadAction");
     }
 
+    private static Object getOrCreateDownloadAction() {
+        Object action = cachedDownloadAction;
+        if (action != null) return action;
+
+        synchronized (InlineDownloadButton.class) {
+            action = cachedDownloadAction;
+            if (action == null) {
+                action = createDownloadAction();
+                registerDownloadAction(action);
+            }
+        }
+        return action;
+    }
+
     private static boolean containsDownloadAction(List<?> actions) {
+        Object downloadAction = cachedDownloadAction;
+        if (downloadAction == null) return false;
+
         for (Object action : actions) {
-            if (isDownloadAction(action)) return true;
+            if (action == downloadAction) return true;
         }
         return false;
     }
 
     static void registerDownloadAction(Object action) {
         if (action == null) throw unpatchedBridge("createDownloadAction returned null");
-        DOWNLOAD_ACTIONS.add(action);
+        cachedDownloadAction = action;
     }
 
     /**
@@ -400,7 +314,7 @@ public final class InlineDownloadButton {
      * so it must stay public and allocation-free.
      */
     public static boolean isDownloadAction(Object candidate) {
-        return DOWNLOAD_ACTIONS.contains(candidate);
+        return candidate != null && candidate == cachedDownloadAction;
     }
 
     private static Object findActionEntry(Object event) {

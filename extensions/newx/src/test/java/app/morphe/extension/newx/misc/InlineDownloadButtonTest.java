@@ -443,24 +443,6 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void downloadActionRegistrationDoesNotEvictVisibleEntry() {
-        Object oldestAction = new Object();
-        InlineDownloadButton.registerDownloadAction(oldestAction);
-        List<Object> retainedActions = new ArrayList<>();
-        for (int index = 0; index < 2000; index++) {
-            Object action = new Object();
-            retainedActions.add(action);
-            InlineDownloadButton.registerDownloadAction(action);
-        }
-
-        assertEquals(-18f, InlineDownloadButton.markIconSize(oldestAction, 18f), 0.0f);
-        assertEquals(-18f, InlineDownloadButton.markIconSize(
-                retainedActions.get(retainedActions.size() - 1),
-                18f
-        ), 0.0f);
-    }
-
-    @Test
     public void nativeAndDownloadSlotsHaveDistinctCapturedValues() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
@@ -488,11 +470,12 @@ public final class InlineDownloadButtonTest {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
         Object nativeIcon = new Object();
+        float markedSize = InlineDownloadButton.markIconSize(downloadAction, 18f);
 
-        assertEquals(18f, InlineDownloadButton.markIconSize(downloadAction, 18f), 0.0f);
+        assertEquals(18f, markedSize, 0.0f);
         assertSame(nativeIcon, InlineDownloadButton.selectIcon(
                 nativeIcon,
-                -18f,
+                markedSize,
                 new Object()
         ));
     }
