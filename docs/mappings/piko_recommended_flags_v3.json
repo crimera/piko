@@ -203,17 +203,17 @@
     "code" : "68885"
   },
   {
-    "name" : "Remove Maps notes",
+    "name" : "Maps notes",
     "desc" : "Disable to remove the notes maps feature.",
     "code" : "65057::0"
   },
   {
-    "name" : "Remove GIF notes",
+    "name" : "GIF notes",
     "desc" : "Disable to remove the notes GIF feature.",
     "code" : "75711::0"
   },
   {
-    "name" : "Enable Poll notes",
+    "name" : "Poll notes",
     "desc" : "Enable to have the notes Poll feature (Not guaranted to work).",
     "code" : "121655::0"
   },
