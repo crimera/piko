@@ -95,9 +95,6 @@ public final class InlineDownloadButton {
         try {
             boolean hasDownloadAction = containsDownloadAction(actions);
             if (hasDownloadAction) {
-                if (NewXLogger.isLoggingEnabled()) {
-                    NewXLogger.printInfo(() -> "skip duplicate actions=" + actions.size());
-                }
                 return actions;
             }
 
@@ -108,19 +105,11 @@ public final class InlineDownloadButton {
                 hasMedia = hasMedia(post);
             }
             if (inspectMedia && !hasMedia) {
-                if (NewXLogger.isLoggingEnabled()) {
-                    NewXLogger.printInfo(() -> "skip no-media actions=" + actions.size());
-                }
                 return actions;
             }
 
             Object downloadAction = createDownloadAction();
             registerDownloadAction(downloadAction);
-            if (NewXLogger.isLoggingEnabled()) {
-                final boolean mediaAvailable = hasMedia;
-                NewXLogger.printInfo(() -> "add actions=" + actions.size() + " hasMedia=" + mediaAvailable
-                        + " download=" + System.identityHashCode(downloadAction));
-            }
 
             List<Object> result = new ArrayList<>(actions.size() + 1);
             result.addAll(actions);
@@ -144,14 +133,15 @@ public final class InlineDownloadButton {
         return -Math.abs(iconSize);
     }
 
-    /** Selects from the classification captured directly by the icon lambda. */
+    /**
+     * Selects from the classification captured directly by the icon lambda. The preceding size
+     * marker already sampled the enabled setting, so this hot selector only reads that marker.
+     */
     public static Object selectIcon(
             Object nativeIcon,
             float markedIconSize,
             Object downloadIcon
     ) {
-        if (!isEnabled()) return nativeIcon;
-
         boolean useDownloadIcon = Float.floatToRawIntBits(markedIconSize) < 0;
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }
