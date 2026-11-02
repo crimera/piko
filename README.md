@@ -259,3 +259,5 @@ To build Piko Patches, follow the [Morphe documentation](https://github.com/Morp
 [![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl-3.0.en.html)
 
 These patches are fully FOSS redistributable and modifiable under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl.html) or later.
+
+The Twitter App lock patch is derived from [Hushfeed](https://github.com/SysAdminDoc/hushfeed). See [NOTICE](NOTICE) for details.

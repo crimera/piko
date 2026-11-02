@@ -398,6 +398,11 @@ public class SettingsStatus {
         blockUpdateScreen = true;
     }
 
+    public static boolean appLock = false;
+    public static void appLock() {
+        appLock = true;
+    }
+
     public static boolean enableNativeShareMenu = false;
     public static void enableNativeShareMenu() {
         enableNativeShareMenu = true;
@@ -414,7 +419,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableMiscSection() {
-        return ( pauseSearchSuggestions || removeSearchSuggestions || hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
+        return ( pauseSearchSuggestions || removeSearchSuggestions || hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns || appLock);
     }
 
     public static boolean enableAdsSection() {
