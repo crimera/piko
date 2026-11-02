@@ -11,6 +11,7 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
+import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.Fingerprint
@@ -68,8 +69,6 @@ val disableAnalyticsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            enableSettings("disableAnalytics")
-
             // Disable onboarding permission prompts.
             // If this patch is applied and the setting is on, the "Set up on new device" screen,
             // which requests permission for location and contacts, keeps reappearing even after
@@ -112,6 +111,9 @@ val disableAnalyticsPatch =
                     ExternalLabel("piko_skip_dispatch", nextInstruction),
                 )
             }
+
+            addFlags("analyticsFlags")
+            enableSettings("disableAnalytics")
         }
     }
 
