@@ -27,26 +27,53 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
-private const val EXPECTED_MEDIA_WRITE_METHODS = 2
-private const val EXPECTED_MEDIA_WRITES = 2
+private const val EXPECTED_WRITE_METHODS = 2
 
-private data class MediaVisibilityWrite(
-    val match: Match,
+private data class GuardedPostField(
+    val label: String,
+    val field: FieldReference,
+)
+
+private data class FieldWrite(
+    val guarded: GuardedPostField,
     val index: Int,
 )
 
-private fun isMediaVisibilityWrite(
+private fun isFieldWrite(
     instruction: Instruction,
     field: FieldReference,
 ): Boolean =
     instruction.opcode == Opcode.IPUT_OBJECT &&
         instruction.getReference<FieldReference>()?.toString() == field.toString()
 
+/**
+ * Groups one post-model method's guarded writes, requiring exactly one write per guarded field so a
+ * caller can clear every gate without re-matching an already mutated method.
+ */
+private fun Match.guardedWrites(guardedFields: List<GuardedPostField>): List<FieldWrite> {
+    val writes =
+        guardedFields.map { guarded ->
+            val indices =
+                method.instructions.withIndex()
+                    .filter { (_, instruction) -> isFieldWrite(instruction, guarded.field) }
+                    .map { (index, _) -> index }
+            FieldWrite(
+                guarded = guarded,
+                index =
+                    requireExactlyOne(
+                        label = "NewX ${guarded.label} write in $originalMethod",
+                        candidates = indices,
+                    ),
+            )
+        }
+    return writes.sortedByDescending(FieldWrite::index)
+}
+
 @Suppress("unused")
 val newXShowSensitiveMediaPatch =
     bytecodePatch(
         name = "NewX: Show sensitive media",
-        description = "Shows sensitive media without requiring confirmation in NewX.",
+        description = "Shows sensitive and age-restricted media without confirmation in NewX.",
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
@@ -64,52 +91,50 @@ val newXShowSensitiveMediaPatch =
         execute {
             val mediaModels = resolvedNewXPostMediaModels()
             val contextualPostDescriptor = mediaModels.postModels.contextualPostDescriptor
-            val mediaField = mediaModels.contextualMediaVisibilityResultsField
-            val mediaWriteMatches =
+            // Both server gates land on the contextual post model and suppress rendering the same
+            // way: the timeline card selector and the media presenter only check for a non-null
+            // field. Clearing them at their constructor writes un-gates the post for every reader,
+            // so the guard is applied where the model is built rather than at each renderer.
+            val guardedFields =
+                listOf(
+                    GuardedPostField(
+                        label = "tweet interstitial",
+                        field = mediaModels.contextualTweetInterstitialField,
+                    ),
+                    GuardedPostField(
+                        label = "media-visibility results",
+                        field = mediaModels.contextualMediaVisibilityResultsField,
+                    ),
+                )
+
+            val writeMatches =
                 Fingerprint(
                     definingClass = contextualPostDescriptor,
                     filters =
-                        listOf(
+                        guardedFields.map { guarded ->
                             fieldAccess(
                                 opcode = Opcode.IPUT_OBJECT,
                                 definingClass = contextualPostDescriptor,
-                                name = mediaField.name,
-                                type = mediaField.type,
-                            ),
-                        ),
+                                name = guarded.field.name,
+                                type = guarded.field.type,
+                            )
+                        },
                 ).scopedMatchAll()
-            if (mediaWriteMatches.size != EXPECTED_MEDIA_WRITE_METHODS) {
+            if (writeMatches.size != EXPECTED_WRITE_METHODS) {
                 throw PatchException(
-                    "Expected $EXPECTED_MEDIA_WRITE_METHODS NewX media-visibility write methods, " +
-                        "found ${mediaWriteMatches.size}: " +
-                        mediaWriteMatches.joinToString { it.originalMethod.toString() },
+                    "Expected $EXPECTED_WRITE_METHODS NewX guarded post-model write methods, " +
+                        "found ${writeMatches.size}: " +
+                        writeMatches.joinToString { it.originalMethod.toString() },
                 )
             }
 
-            val mediaWrites =
-                mediaWriteMatches.flatMap { match ->
-                    match.method.instructions.withIndex().filter { (_, instruction) ->
-                        isMediaVisibilityWrite(instruction, mediaField)
-                    }.map { (index, _) -> MediaVisibilityWrite(match, index) }
-                }
-            if (mediaWrites.size != EXPECTED_MEDIA_WRITES) {
-                throw PatchException(
-                    "Expected $EXPECTED_MEDIA_WRITES NewX media-visibility field writes, " +
-                        "found ${mediaWrites.size}: $mediaField",
-                )
-            }
-
-            mediaWrites.groupBy(MediaVisibilityWrite::match).values.forEach { writes ->
-                val match =
-                    requireExactlyOne(
-                        label = "NewX media-visibility write group",
-                        candidates = writes.map(MediaVisibilityWrite::match).distinct(),
-                        describe = { candidate -> candidate.originalMethod.toString() },
-                    )
+            val writesByMatch =
+                writeMatches.map { match -> match to match.guardedWrites(guardedFields) }
+            writesByMatch.forEach { (match, writes) ->
                 val originalMethod = match.method
                 val originalRegisterCount =
                     originalMethod.implementation?.registerCount
-                        ?: throw PatchException("NewX media-visibility constructor has no implementation")
+                        ?: throw PatchException("NewX guarded post-model constructor has no implementation")
                 val parameterRegisterCount = originalMethod.numberOfParameterRegisters
                 val indexShift = originalMethod.numberOfParameterRegistersLogical
                 val method =
@@ -119,12 +144,12 @@ val newXShowSensitiveMediaPatch =
                         match.classDef.methods.remove(originalMethod)
                         match.classDef.methods.add(expandedMethod)
                     }
-                writes.sortedByDescending(MediaVisibilityWrite::index).forEachIndexed { ordinal, write ->
+                writes.forEachIndexed { ordinal, write ->
                     val writeIndex = write.index + indexShift
                     val fieldWrite =
                         method.instructions[writeIndex] as? TwoRegisterInstruction
                             ?: throw PatchException(
-                                "NewX media-visibility field write has no two-register layout: " +
+                                "NewX ${write.guarded.label} field write has no two-register layout: " +
                                     "${method.instructions[writeIndex]}",
                             )
                     // cloneMutable reserves these locals before the shifted parameter registers.
