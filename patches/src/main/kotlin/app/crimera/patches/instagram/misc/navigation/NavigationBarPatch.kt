@@ -35,15 +35,12 @@ import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction10t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
 private const val LIST = "Ljava/util/List;"
 private const val OBJECT = "Ljava/lang/Object;"
@@ -152,51 +149,19 @@ private fun requireLocalRegisters(method: MutableMethod, registers: List<Int>) {
     }
 }
 
-private fun createFragmentNameBridge(fragmentField: FieldReference): MutableMethod {
-    val implementation =
-        MethodImplementationBuilder(1).apply {
-            addInstruction("check-cast v0, ${fragmentField.definingClass}".toInstruction())
-            addInstruction("iget-object v0, v0, $fragmentField".toInstruction())
-            addInstruction("return-object v0".toInstruction())
-        }.methodImplementation
-    return MutableMethod(
-        ImmutableMethod(
-            EXTENSION,
-            FRAGMENT_NAME_BRIDGE,
-            listOf(ImmutableMethodParameter(OBJECT, emptySet(), null)),
-            STRING,
-            AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
-            emptySet(),
-            emptySet(),
-            implementation,
-        ),
-    )
-}
-
 context(patchContext: BytecodePatchContext)
 private fun installFragmentNameBridge(fragmentField: FieldReference) {
-    val extensionClass = patchContext.mutableClassDefBy(EXTENSION)
-    val bridgeCandidates =
-        extensionClass.methods.filter { method ->
-            method.name == FRAGMENT_NAME_BRIDGE &&
-                method.parameterTypes.map(CharSequence::toString) == listOf(OBJECT) &&
-                method.returnType == STRING
-        }
-    if (bridgeCandidates.size != 1) {
-        throw PatchException(
-            "Expected one navigation fragment-name bridge, found ${bridgeCandidates.size}",
-        )
-    }
-    val bridgeStub = bridgeCandidates.single()
-    if (!AccessFlags.PRIVATE.isSet(bridgeStub.accessFlags) ||
-        !AccessFlags.STATIC.isSet(bridgeStub.accessFlags) ||
-        !AccessFlags.NATIVE.isSet(bridgeStub.accessFlags)
-    ) {
-        throw PatchException("Navigation fragment-name bridge has an invalid signature")
-    }
-
-    extensionClass.methods.remove(bridgeStub)
-    extensionClass.methods.add(createFragmentNameBridge(fragmentField))
+    Fingerprint(
+        definingClass = EXTENSION,
+        name = FRAGMENT_NAME_BRIDGE,
+    ).method.addInstructions(
+        0,
+        """
+            check-cast v0, ${fragmentField.definingClass}
+            iget-object v0, v0, $fragmentField
+            return-object v0
+        """
+    )
 }
 
 private fun installTransform(navigationMatch: Match) {

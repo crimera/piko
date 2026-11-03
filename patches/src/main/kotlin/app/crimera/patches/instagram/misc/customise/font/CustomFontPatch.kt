@@ -60,7 +60,7 @@ val customFontPatch =
                 .filter { it.returnsTypeface() }
                 .forEach { it.markAsContentFontResolver() }
 
-            platformTextWidgetFingerprint.matchAll().distinctBy { it.classDef.type }.forEach {
+            PlatformTextWidgetFingerprint.matchAll().distinctBy { it.classDef.type }.forEach {
                 it.classDef.overrideTypefaceAssignment()
             }
 
@@ -72,10 +72,10 @@ val customFontPatch =
                 it.method.hookPaintTypefaceCalls()
             }
 
-            platformSpanFingerprint(contentFontClasses).matchAll().forEach {
+            PlatformSpanFingerprint.matchAll().forEach {
                 it.method.replaceCreations(PLATFORM_TYPEFACE_SPANS)
             }
-            pikoWidgetCreatorFingerprint.matchAllOrNull()?.forEach {
+            PikoWidgetCreatorFingerprint.matchAllOrNull()?.forEach {
                 it.method.replaceCreations(PIKO_TEXT_WIDGETS)
             }
 

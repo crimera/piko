@@ -76,7 +76,7 @@ internal fun paintTypefaceFingerprint(contentFontClasses: Set<String>) = Fingerp
     }
 )
 
-internal fun platformSpanFingerprint(contentFontClasses: Set<String>) = Fingerprint(
+internal object PlatformSpanFingerprint : Fingerprint(
     filters = listOf(
         anyInstruction(
             newInstance("Landroid/text/style/TypefaceSpan;"),
@@ -98,7 +98,7 @@ internal fun contentFontResolverFingerprint(typefaceRepository: String) = Finger
     },
 )
 
-internal val platformTextWidgetFingerprint = Fingerprint(
+internal object PlatformTextWidgetFingerprint : Fingerprint(
     filters = listOf(
         anyInstruction(
             *PLATFORM_TEXT_WIDGETS.map { methodCall(definingClass = it) }.toTypedArray()
@@ -110,7 +110,7 @@ internal val platformTextWidgetFingerprint = Fingerprint(
     },
 )
 
-internal val pikoWidgetCreatorFingerprint = Fingerprint(
+internal object PikoWidgetCreatorFingerprint : Fingerprint(
     filters = listOf(
         anyInstruction(
             newInstance("Landroid/widget/TextView;"),

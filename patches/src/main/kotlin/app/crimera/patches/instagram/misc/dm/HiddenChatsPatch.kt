@@ -83,7 +83,7 @@ private object BadgeStateBuilderFingerprint : Fingerprint(
 )
 
 // Works the badge state out from a message event, with a list of its own: it makes a state and a badge from it.
-private fun badgeEventFingerprint(badgeType: String, stateType: String) = Fingerprint(
+private object BadgeEventFingerprint : Fingerprint(
     returnType = "V",
     parameters = listOf("Ljava/lang/String;"),
     filters = listOf(
@@ -93,7 +93,7 @@ private fun badgeEventFingerprint(badgeType: String, stateType: String) = Finger
 )
 
 // The job that works out the badge state again and posts it to the screen.
-private fun badgeJobFingerprint(badgeType: String, stateType: String) = Fingerprint(
+private object BadgeJobFingerprint : Fingerprint(
     returnType = "V",
     name = "run",
     parameters = emptyList(),
@@ -287,8 +287,8 @@ val hiddenChatsPatch =
                 }
             }
 
-            badgeJobFingerprint(badgeType, stateType).method.addInstruction(0, "invoke-static {p0}, $EXTENSION_CLASS->badgeJob(Ljava/lang/Object;)V")
-            badgeEventFingerprint(badgeType, stateType).method.apply {
+            BadgeJobFingerprint.method.addInstruction(0, "invoke-static {p0}, $EXTENSION_CLASS->badgeJob(Ljava/lang/Object;)V")
+            BadgeEventFingerprint.method.apply {
                 // The chats it counts come from a list of its own: the hidden ones are taken out of it right where it is read.
                 val session = instructions.first { it.getReference<FieldReference>()?.type == USER_SESSION_CLASS }
                     .let { (it as OneRegisterInstruction).registerA }

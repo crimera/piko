@@ -30,6 +30,7 @@ private const val MEDIA_DESCRIPTOR = "Lcom/instagram/feed/media/Media;"
 private const val REEL_ITEM_DESCRIPTOR = "Lcom/instagram/model/reels/ReelItem;"
 
 private object StoryToolbarBinderFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     filters = listOf(
         string("ReelViewerItemToolbarBinder.bindView")
@@ -81,8 +82,6 @@ private fun hookStoryToolbarBinder() {
     )
 
     val binder = StoryToolbarBinderFingerprint.method
-    if (!AccessFlags.STATIC.isSet(binder.accessFlags)) throw PatchException("Story toolbar binder is not static: $binder")
-
     val (container, media, session) = binder.reserveFreeRegisters(0, 3, 15)
     binder.addInstructions(
         0,
