@@ -45,6 +45,16 @@
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
 
+    <!-- Profile Section -->
+    <string name="piko_category_profile">Profile</string>
+    <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
+    <string name="piko_follow_back_indicator_desc">Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click</string>
+    <string name="piko_follow_list_non_follower_badge">Show non-followers in Following list</string>
+    <string name="piko_follow_list_non_follower_badge_desc">Adds a badge to rows in your own Following list for accounts that don\'t follow you back</string>
+    <string name="piko_fbi_follows_you">Follows you</string>
+    <string name="piko_fbi_doesnt_follows_you">Does not follow you</string>
+    <string name="piko_fbi_following_each_other">Following each other</string>
+
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Distraction free</string>
     <string name="piko_disable_stories">Disable stories</string>
@@ -123,15 +133,8 @@
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytic cache</string>
     <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers</string>
-    <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
-    <string name="piko_follow_back_indicator_desc">Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click</string>
     <string name="piko_fbi_color_indicator">Enable colored friendship status indicator</string>
-    <string name="piko_fbi_follows_you">Follows you</string>
-    <string name="piko_fbi_doesnt_follows_you">Does not follow you</string>
-    <string name="piko_fbi_following_each_other">Following each other</string>
     <string name="piko_friendship_status">Friendship status</string>
-    <string name="piko_follow_list_non_follower_badge">Show non-followers in Following list</string>
-    <string name="piko_follow_list_non_follower_badge_desc">Adds a badge to rows in your own Following list for accounts that don\'t follow you back</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server. May reduce performance, increase app data size, or cause the app to switch to an older layout</string>
     <string name="piko_copy_comment">Copy comment</string>
