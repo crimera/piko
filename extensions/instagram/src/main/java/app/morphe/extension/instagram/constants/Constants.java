@@ -45,6 +45,7 @@ public class Constants {
     public static final String PIKO_FRAGMENT_SETTINGS = "piko_frag_settings";
     public static final String PIKO_FRAGMENT_ADS = "piko_frag_ads";
     public static final String PIKO_FRAGMENT_GHOST = "piko_frag_ghost";
+    public static final String PIKO_FRAGMENT_PROFILE = "piko_frag_profile";
     public static final String PIKO_FRAGMENT_STORY = "piko_frag_story";
     public static final String PIKO_FRAGMENT_LINKS = "piko_frag_links";
     public static final String PIKO_FRAGMENT_DISTRACTION_FREE = "piko_frag_distraction_free";
