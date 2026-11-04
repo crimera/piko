@@ -20,9 +20,11 @@ Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software)
 
 ### Morphe Manager
 
-Tap the link to add Piko as a patch source in Morphe Manager:
+Tap the button to add Piko as a patch source in Morphe Manager:
 
-[**➕ Add Piko to Morphe**](https://morphe.software/add-source?github=crimera/piko)
+<a href="https://morphe.software/add-source?github=crimera/piko">
+  <img src="docs/images/add-to-morphe.svg" alt="Add to Morphe" height="36">
+</a>
 
 Then patch Twitter/X or Instagram:
 1. Tap X or Instagram app icon in Morphe
@@ -248,11 +250,19 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 
 To build Piko Patches, follow the [Morphe documentation](https://github.com/MorpheApp/morphe-documentation).
 
-## ✨ Stargazers over time
+## Contributing
 
-<p align="center">
-    <img src="https://starchart.cc/crimera/piko.svg?variant=light" alt="piko" width="640" height="320" />
-</p>
+Thank you for considering contributing to Piko Patches.
+
+- If you plan to add a new feature, it is recommended to open an issue to discuss it with the
+maintainers of Piko beforehand. This will help you determine whether your feature is acceptable
+and whether it is worth your time to implement it. (In the issue, please clearly state that you
+intend to work on this feature.)
+- Development happens on the `dev` branch. Create your branch from `dev`. Submit a pull request to `dev`.
+- Our team will review your pull request and provide feedback. Once your pull request is approved,
+it will be merged into the `dev` branch and will be included in the next release of patches.
+- Currently, development for the New X Android app (latest version of X) is taking place on the `x-lite` branch.
+- You can contribute translations at [Crowdin](https://crowdin.com/project/piko).
 
 ## License
 
