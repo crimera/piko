@@ -84,6 +84,13 @@ public class SettingsStatus {
     public static void hiddenChats() { hiddenChats = true; }
     public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats || disableDisappearingMessagesGesture ;}
 
+    //Profile section
+    public static boolean followBackIndicator = false;
+    public static void followBackIndicator() { followBackIndicator = true; }
+    public static boolean followListNonFollowerBadge = false;
+    public static void followListNonFollowerBadge() { followListNonFollowerBadge = true; } 
+    public static boolean profileSection(){ return followBackIndicator || followListNonFollowerBadge ;}
+
     //Story section
     public static boolean customiseStoryTimestamp = false;
     public static void customiseStoryTimestamp() {
@@ -215,10 +222,6 @@ public class SettingsStatus {
     public static void changeLikeAnimation() { changeLikeAnimation = true; }
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() { disableAnalytics = true; }
-    public static boolean followBackIndicator = false;
-    public static void followBackIndicator() { followBackIndicator = true; }
-    public static boolean followListNonFollowerBadge = false;
-    public static void followListNonFollowerBadge() { followListNonFollowerBadge = true; }
     public static boolean improveImageViewing = false;
     public static void improveImageViewing() {
         improveImageViewing = true;
@@ -235,7 +238,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || followBackIndicator || followListNonFollowerBadge || customFont);}
+    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || customFont);}
 
     //Font section.
     public static boolean customFont = false;
