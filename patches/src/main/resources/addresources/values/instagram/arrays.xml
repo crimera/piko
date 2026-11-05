@@ -288,4 +288,14 @@
         <item>disable</item>
     </string-array>
 
+    <string-array name="piko_array_hide_save_button_surfaces">
+        <item>Posts</item>
+        <item>Reels</item>
+    </string-array>
+
+    <string-array name="piko_array_hide_save_button_surfaces_val">
+        <item>posts</item>
+        <item>reels</item>
+    </string-array>
+
 </resources>

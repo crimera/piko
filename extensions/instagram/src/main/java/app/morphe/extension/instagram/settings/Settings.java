@@ -59,7 +59,9 @@ public class Settings {
     public static final BooleanSetting DISABLE_DISAPPEARING_MESSAGES_GESTURE = new BooleanSetting("disable_disappearing_messages_gesture", false, REQUIRED);
     public static final BooleanSetting EPHEMERAL_MEDIA_CAPTION = new BooleanSetting("ephemeral_media_caption", false, NOT_REQUIRED);
     public static final BooleanSetting HIDE_SHARE_BUTTON = new BooleanSetting("hide_share_button", false, NOT_REQUIRED);
-    public static final BooleanSetting HIDE_SAVE_BUTTONS = new BooleanSetting("hide_save_buttons", false, NOT_REQUIRED);
+    public static final StringSetting HIDE_SAVE_BUTTON_SURFACES = new StringSetting("hide_save_button_surfaces", "", NOT_REQUIRED);
+    // Pre-per-surface key; migrated once to the surfaces selection in Pref.
+    public static final BooleanSetting HIDE_SAVE_BUTTONS_LEGACY = new BooleanSetting("hide_save_buttons", false, NOT_REQUIRED);
     public static final BooleanSetting HIDE_RESHARE_BUTTON = new BooleanSetting("hide_reshare_button", false, NOT_REQUIRED);
     public static final BooleanSetting INBOX_LOCK = new BooleanSetting("inbox_lock", false, REQUIRED);
     public static final BooleanSetting INBOX_LOCK_NOTIFICATIONS = new BooleanSetting("inbox_lock_notifications", false, NOT_REQUIRED);
