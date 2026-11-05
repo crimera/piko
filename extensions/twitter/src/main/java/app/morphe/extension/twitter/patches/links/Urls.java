@@ -59,6 +59,52 @@ public class Urls {
         return urlString;
     }
 
+    /**
+     * Removes the {@code a} and {@code s} share-attribution query parameters from an X post URL.
+     * Other query parameters and the fragment are preserved.
+     */
+    public static String removeTrackingParams(String urlString) {
+        if (urlString == null) return null;
+        try {
+            URL url = new URL(urlString);
+            String host = url.getHost();
+            if (!host.equalsIgnoreCase("x.com") && !host.equalsIgnoreCase("twitter.com")) {
+                return urlString;
+            }
+
+            int fragmentIndex = urlString.indexOf('#');
+            String fragment = fragmentIndex < 0 ? "" : urlString.substring(fragmentIndex);
+            String withoutFragment = fragmentIndex < 0 ? urlString : urlString.substring(0, fragmentIndex);
+            int queryIndex = withoutFragment.indexOf('?');
+            if (queryIndex < 0) return urlString;
+
+            String query = withoutFragment.substring(queryIndex + 1);
+            StringBuilder retainedParameters = new StringBuilder();
+            boolean removedParameter = false;
+            boolean firstRetainedParameter = true;
+            for (String parameter : query.split("&", -1)) {
+                if (parameter.isEmpty()) continue;
+                int valueSeparator = parameter.indexOf('=');
+                String name = valueSeparator < 0 ? parameter : parameter.substring(0, valueSeparator);
+                if ("a".equals(name) || "s".equals(name)) {
+                    removedParameter = true;
+                    continue;
+                }
+                if (!firstRetainedParameter) retainedParameters.append('&');
+                retainedParameters.append(parameter);
+                firstRetainedParameter = false;
+            }
+            if (!removedParameter) return urlString;
+
+            StringBuilder result = new StringBuilder(withoutFragment.substring(0, queryIndex));
+            if (!firstRetainedParameter) result.append('?').append(retainedParameters);
+            return result.append(fragment).toString();
+        } catch (Exception ex) {
+            PikoUtils.logger(ex);
+            return urlString;
+        }
+    }
+
     public static String hookShareSheetLink(ContextualPost contextualPost, String link){
         try {
             if (SettingsStatus.legacyShareLink) {
