@@ -1160,6 +1160,113 @@ private fun ToggleSettingDefinition.injectReadBeforeActionBar(hook: ImmersiveAct
     )
 }
 
+private val NAVIGATION_BARS_INSET_NAMES = setOf("navigationBars", "navigationBarsIgnoringVisibility")
+
+/**
+ * 12.40.1 shape: the media row renderer emits its action row, then calls a separate bottom slot.
+ * The slot sizes itself from the navigation-bar inset before choosing between the playback bar and
+ * the animated reply composer. Because that inset read lies on every path from the slot's entry to
+ * the composer anchor, the slot keeps the gesture area reserved when the hidden composer draws
+ * nothing, so the action row needs no extra padding. Returns false for any other shape.
+ */
+context(context: BytecodePatchContext)
+private fun mediaBottomSlotReservesNavigationInset(minimalContainer: Method): Boolean {
+    val rowRenderer = requireAtMostOne(
+        label = "NewX media inline-action row renderer (bottom-slot reply shape)",
+        candidates = buildList<Method> {
+            context.classDefForEach { classDef ->
+                if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
+                classDef.methods.forEach { method ->
+                    if (method.inlineActionBarRenderCallIndices().isNotEmpty()) add(method)
+                }
+            }
+        },
+    ) ?: return false
+    val rowCallIndex = requireExactlyOne(
+        "NewX media bottom-slot inline action-bar call in $rowRenderer",
+        rowRenderer.inlineActionBarRenderCallIndices(),
+    )
+    val rowInstructions = rowRenderer.implementation?.instructions?.toList() ?: return false
+    val slotCandidates = rowInstructions.withIndex().drop(rowCallIndex + 1).mapNotNull { (_, instruction) ->
+        if (!instruction.isStaticInvocation()) return@mapNotNull null
+        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+        if (!reference.definingClass.startsWith(MEDIA_SCOPE)) return@mapNotNull null
+        val slot = requireAtMostOne(
+            "NewX media bottom-slot callee $reference",
+            context.classDefByOrNull(reference.definingClass)?.methods?.filter { reference.matches(it) }.orEmpty(),
+        ) ?: return@mapNotNull null
+        slot.takeIf { it.replyComposerAnchorIndices(minimalContainer) { type -> context.classDefByOrNull(type) }.isNotEmpty() }
+    }.distinctBy { it.toString() }
+    val slot = requireAtMostOne("NewX media reply bottom slot after the action row in $rowRenderer", slotCandidates)
+        ?: return false
+    val anchor = requireExactlyOne(
+        "NewX media bottom-slot reply-composer anchor in $slot",
+        slot.replyComposerAnchorIndices(minimalContainer) { type -> context.classDefByOrNull(type) },
+    )
+    val instructions = slot.implementation!!.instructions.toList()
+    val navigationReads = instructions.indices.filter { index ->
+        val read = instructions[index]
+        if (read.opcode != Opcode.IGET_OBJECT) return@filter false
+        val field = read.getReference<FieldReference>() ?: return@filter false
+        val holder = (read as TwoRegisterInstruction).registerB
+        // The holder comes from the framework's Composer-scoped WindowInsetsHolder accessor.
+        val provider = (0 until index).lastOrNull { candidate ->
+            val result = instructions.getOrNull(candidate + 1) as? OneRegisterInstruction
+            instructions[candidate].isStaticInvocation() &&
+                result?.opcode == Opcode.MOVE_RESULT_OBJECT && result.registerA == holder
+        }?.let { instructions[it].getReference<MethodReference>() } ?: return@filter false
+        field.definingClass == provider.returnType &&
+            provider.definingClass.startsWith(FOUNDATION_LAYOUT_SCOPE) &&
+            provider.parameterTypes.map(CharSequence::toString) == listOf(COMPOSER_DESCRIPTOR) &&
+            ReplyControlFlow(slot).origin(index, holder)?.let { origin ->
+                origin >= 0 && instructions[origin].opcode == Opcode.MOVE_RESULT_OBJECT &&
+                    instructions[origin - 1].getReference<MethodReference>() == provider
+            } == true &&
+            field.isNamedWindowInset(NAVIGATION_BARS_INSET_NAMES)
+    }
+    val navigationRead = requireAtMostOne("NewX media bottom-slot navigation-bars inset read in $slot", navigationReads)
+        ?: return false
+    val flow = ReplyControlFlow(slot)
+    return navigationRead in flow.reachable() && anchor !in flow.reachable(skip = navigationRead)
+}
+
+/** The WindowInsetsHolder constructor builds each inset field from a call that names it. */
+context(context: BytecodePatchContext)
+private fun FieldReference.isNamedWindowInset(names: Set<String>): Boolean {
+    val constructor = requireAtMostOne(
+        "NewX WindowInsetsHolder constructor $definingClass",
+        context.classDefByOrNull(definingClass)?.methods?.filter { method ->
+            method.name == "<init>" && method.implementation != null
+        }.orEmpty(),
+    ) ?: return false
+    val code = constructor.implementation!!.instructions.toList()
+    val flow = runCatching { ReplyControlFlow(constructor) }.getOrNull() ?: return false
+    val writes = code.indices.filter { index ->
+        code[index].opcode == Opcode.IPUT_OBJECT &&
+            code[index].getReference<FieldReference>()?.let {
+                it.definingClass == definingClass && it.name == name && it.type == type
+            } == true
+    }
+    val write = requireAtMostOne("NewX WindowInsetsHolder write of $this", writes) ?: return false
+    val valueOrigin = flow.origin(write, (code[write] as TwoRegisterInstruction).registerA)?.takeIf { it >= 0 }
+        ?: return false
+    // The value is either a call result or an allocation initialized by a direct constructor.
+    val producer = when (code[valueOrigin].opcode) {
+        Opcode.MOVE_RESULT_OBJECT -> valueOrigin - 1
+        Opcode.NEW_INSTANCE -> (valueOrigin + 1 until write).singleOrNull { index ->
+            code[index].opcode in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) &&
+                code[index].getReference<MethodReference>()?.name == "<init>" &&
+                code[index].registersUsed.firstOrNull()?.let { flow.origin(index, it) } == valueOrigin
+        } ?: return false
+        else -> return false
+    }
+    return code[producer].registersUsed.any { register ->
+        flow.origin(producer, register)?.takeIf { it >= 0 }?.let { origin ->
+            code[origin].getReference<StringReference>()?.string
+        } in names
+    }
+}
+
 /**
  * Proves the immersive-only reply shape: no media method calls the minimal reply container
  * directly, and the immersive safe-area renderer is the sole media-scope inline-action row render,
@@ -1193,6 +1300,7 @@ private fun requireImmersiveOnlyPhotoViewerReply(
         )
         if (onlyRowRenderer != null && immersiveHook.method.matches(onlyRowRenderer)) return
     }
+    if (directCallers.isEmpty() && immersiveHook == null && mediaBottomSlotReservesNavigationInset(minimalContainer)) return
     val containerCallers = mutableListOf<String>()
     val actionRowConsumers = mutableListOf<String>()
     context.classDefForEach { definition ->
