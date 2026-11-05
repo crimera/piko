@@ -105,6 +105,15 @@ internal object Groups {
             order = 200,
         )
 
+    val REPLIES =
+        SettingsGroupMetadata(
+            id = "newx.content.replies",
+            titleResourceName = "piko_newx_group_replies_title",
+            summaryResourceName = "piko_newx_group_replies_summary",
+            iconResourceName = "ic_vector_filter",
+            order = 150,
+        )
+
     val THEME =
         SettingsGroupMetadata(
             id = "newx.appearance.theme",

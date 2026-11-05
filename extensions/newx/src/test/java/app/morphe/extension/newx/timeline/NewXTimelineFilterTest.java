@@ -988,6 +988,126 @@ public class NewXTimelineFilterTest {
         assertEquals(4700, expectedPostNumber);
     }
 
+    @Test
+    public void hideRepliesDisabledReturnsOriginalList() {
+        FakePost reply = post("reply");
+        reply.id = "2";
+        reply.entryId = "tweet-2";
+        reply.repliedPostId = "post-id";
+        List<Object> input = items(reply);
+
+        assertSame(input, NewXTimelineFilter.filterReplies(input, false, false, MODELS));
+    }
+
+    @Test
+    public void hidesTopLevelTimelineReply() {
+        FakePost root = post("root");
+        root.id = "1";
+        root.entryId = "tweet-1";
+        root.authorId = "u1";
+
+        FakePost reply = post("reply");
+        reply.id = "2";
+        reply.entryId = "tweet-2";
+        reply.repliedPostId = "1";
+        reply.authorId = "u2";
+
+        List<?> filtered = (List<?>) NewXTimelineFilter.filterReplies(
+                items(root, reply), true, false, MODELS);
+
+        assertEquals(1, filtered.size());
+        assertSame(root, filtered.get(0));
+    }
+
+    @Test
+    public void keepsTopLevelRootPost() {
+        FakePost root = post("root");
+        root.id = "1";
+        root.entryId = "tweet-1";
+
+        List<?> filtered = (List<?>) NewXTimelineFilter.filterReplies(
+                items(root), true, false, MODELS);
+
+        assertEquals(1, filtered.size());
+    }
+
+    @Test
+    public void keepsAuthorOwnThreadChainInTimeline() {
+        FakePost root = post("root");
+        root.id = "1";
+        root.entryId = "tweet-1";
+        root.authorId = "u1";
+
+        FakePost continuation = post("continuation");
+        continuation.id = "2";
+        continuation.entryId = "tweet-2";
+        continuation.repliedPostId = "1";
+        continuation.authorId = "u1";
+
+        List<?> filtered = (List<?>) NewXTimelineFilter.filterReplies(
+                items(root, continuation), true, false, MODELS);
+
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    public void keepsFocusedDetailPost() {
+        FakePost focused = post("focused reply");
+        focused.id = "2";
+        focused.entryId = "tweetdetail-2";
+        focused.repliedPostId = "1";
+        focused.authorId = "u1";
+
+        List<?> filtered = (List<?>) NewXTimelineFilter.filterReplies(
+                items(focused), true, false, MODELS);
+
+        assertEquals(1, filtered.size());
+    }
+
+    @Test
+    public void hidesStrangerReplyInsideConversationModule() {
+        FakePost root = post("root");
+        root.id = "1";
+        root.entryId = "tweet-1";
+        root.authorId = "u1";
+
+        FakePost reply = post("stranger");
+        reply.id = "2";
+        reply.entryId = "tweet-2";
+        reply.repliedPostId = "1";
+        reply.authorId = "u2";
+
+        FakeModule module = module("conversationthread-1-2", item(root), item(reply));
+        List<?> filtered = (List<?>) NewXTimelineFilter.filterReplies(
+                items(module), false, true, MODELS);
+
+        assertEquals(1, filtered.size());
+        FakeModule filteredModule = (FakeModule) filtered.get(0);
+        assertEquals(1, filteredModule.children.size());
+        assertSame(root, ((FakeModuleItem) filteredModule.children.get(0)).item);
+    }
+
+    @Test
+    public void keepsAuthorOwnThreadChainInsideConversationModule() {
+        FakePost root = post("root");
+        root.id = "1";
+        root.entryId = "tweet-1";
+        root.authorId = "u1";
+
+        FakePost continuation = post("continuation");
+        continuation.id = "2";
+        continuation.entryId = "tweet-2";
+        continuation.repliedPostId = "1";
+        continuation.authorId = "u1";
+
+        FakeModule module = module("conversationthread-1-2", item(root), item(continuation));
+        List<?> filtered = (List<?>) NewXTimelineFilter.filterReplies(
+                items(module), false, true, MODELS);
+
+        assertEquals(1, filtered.size());
+        assertEquals(2, ((FakeModule) filtered.get(0)).children.size());
+    }
+
     @SuppressWarnings("unchecked")
     private static List<Object> filterDiscoverMore(Object... values) {
         return (List<Object>) NewXTimelineFilter.filterDiscoverMore(items(values), true, MODELS);
@@ -1070,7 +1190,8 @@ public class NewXTimelineFilterTest {
             NewXTimelineFilter.ResultMemo memo
     ) {
         return (List<?>) NewXTimelineFilter.filterTimelineItems(
-                input, false, false, null, Set.of(), false, typesToHide, Set.of(), true, true, models, memo
+                input, false, false, null, Set.of(), false, typesToHide, Set.of(),
+                true, true, false, false, models, memo
         );
     }
 
