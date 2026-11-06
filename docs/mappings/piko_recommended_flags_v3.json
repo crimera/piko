@@ -204,7 +204,7 @@
   },
   {
     "name" : "Blends",
-    "desc" : "Enable Instagram Blends features in chats.",
+    "desc" : "Disable to hide the Blends button in the header of eligible chats.",
     "code" : "76757::0"
   },
   {
