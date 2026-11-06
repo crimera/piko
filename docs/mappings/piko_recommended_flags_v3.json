@@ -240,7 +240,7 @@
   {
     "name" : "Video super resolution (Machine learning) uploads",
     "desc" : "Enable to upscales all video to 1080p (if the resolution if below 1080p) using on device machine learning.",
-    "code" : "75689::0,75689::1,75689::2,75689::4,75689::8"
+    "code" : "75689::0,75689::1,75689::2,75689::3,75689::4,75689::5,75689::6,75689::7,75689::8"
   },
   {
     "name" : "Video uploads resolution multiplier",
