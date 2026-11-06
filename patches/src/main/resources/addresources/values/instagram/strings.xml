@@ -364,6 +364,8 @@
     <string name="piko_action_bar_chat_desc">Action bar icons inside a DM</string>
     <string name="piko_action_bar_inbox">Inbox action bar icons</string>
 
+    <string name="piko_action_bar_button_audio_call_icon">Audio call icon</string>
+    <string name="piko_action_bar_button_video_call_icon">Video call icon</string>
     <string name="piko_action_bar_button_settings_icon">Settings icon</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
     <string name="piko_action_bar_button_jump_oldest_icon">Jump to oldest message icon</string>

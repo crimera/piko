@@ -16,6 +16,7 @@ import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hide
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
 import app.crimera.patches.instagram.misc.buildExpiredPopup.removeBuildExpiredPopupPatch
+import app.crimera.patches.instagram.misc.dm.hideChatCallButtonsPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
@@ -70,6 +71,7 @@ val settingsPatch =
             settingsTaskRemovalPatch,
             mainFeedActionBarButtonPatch,
             hideHomeActionButtonsPatch,
+            hideChatCallButtonsPatch,
             userProfileActionBarButtonPatch,
             userDataEntity,
             userProfileButtonPatch,

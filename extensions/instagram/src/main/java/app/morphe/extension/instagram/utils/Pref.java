@@ -522,6 +522,33 @@ public class Pref {
         return SharedPref.getSetPref(Settings.ACTION_BAR_CHAT);
     }
 
+    public static synchronized Set<String> chatActionsWithCallDefaults() {
+        Set<String> actions = chatActionBarButtons();
+        Context context = Utils.getContext();
+        var preferences = context == null ? null
+                : context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String initializedKey = "action_bar_chat_call_icons_initialized";
+        if (preferences != null && preferences.getBoolean(initializedKey, false)) return actions;
+
+        // Without this marker, an empty call selection could mean either first use or both icons hidden.
+        actions = new HashSet<>(actions);
+        actions.add(Constants.AB_AUDIO_CALL_ICON);
+        actions.add(Constants.AB_VIDEO_CALL_ICON);
+        if (preferences != null) {
+            preferences.edit().putStringSet(Settings.ACTION_BAR_CHAT.key, actions)
+                    .putBoolean(initializedKey, true).apply();
+        }
+        return actions;
+    }
+
+    public static boolean showChatAudioCallButton(boolean available) {
+        return available && chatActionsWithCallDefaults().contains(Constants.AB_AUDIO_CALL_ICON);
+    }
+
+    public static boolean showChatVideoCallButton(boolean available) {
+        return available && chatActionsWithCallDefaults().contains(Constants.AB_VIDEO_CALL_ICON);
+    }
+
     public static Set<String> inboxActionBarButtons() {
         return SharedPref.getSetPref(Settings.ACTION_BAR_INBOX);
     }
