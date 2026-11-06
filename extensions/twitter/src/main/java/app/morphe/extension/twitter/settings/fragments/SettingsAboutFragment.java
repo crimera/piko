@@ -169,6 +169,7 @@ public class SettingsAboutFragment extends PreferenceFragment {
         flags.put(str("piko_pref_export_login_token"),SettingsStatus.exportLoginToken);
         flags.put(str("piko_block_redirecting_to_x_lite"),SettingsStatus.blockRedirectingToXLite);
         flags.put(str("piko_pref_block_update_screen"),SettingsStatus.blockUpdateScreen);
+        flags.put(str("piko_pref_app_lock"),SettingsStatus.appLock);
 
         LegacyTwitterPreferenceCategory patPref = preferenceCategory(str("piko_pref_patches"), screen);
 

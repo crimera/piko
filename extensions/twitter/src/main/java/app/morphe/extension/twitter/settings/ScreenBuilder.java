@@ -568,6 +568,22 @@ public class ScreenBuilder {
         LegacyTwitterPreferenceCategory category = null;
         if(buildCategory)
             category = preferenceCategory(str("piko_title_misc"));
+        if (SettingsStatus.appLock) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_app_lock"),
+                            str("piko_pref_app_lock_desc"),
+                            Settings.MISC_APP_LOCK
+                    )
+            );
+            addPreference(category,
+                    helper.listPreference(
+                            str("piko_pref_app_lock_timeout"),
+                            "",
+                            Settings.MISC_APP_LOCK_TIMEOUT
+                    )
+            );
+        }
         if (SettingsStatus.blockUpdateScreen) {
             addPreference(category,
                     helper.switchPreference(
