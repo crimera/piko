@@ -223,6 +223,8 @@ public class SettingsStatus {
     public static void followBackIndicator() { followBackIndicator = true; }
     public static boolean followListNonFollowerBadge = false;
     public static void followListNonFollowerBadge() { followListNonFollowerBadge = true; }
+    public static boolean resumeReelsAfterScrolling = false;
+    public static void resumeReelsAfterScrolling() { resumeReelsAfterScrolling = true; }
     public static boolean improveImageViewing = false;
     public static void improveImageViewing() {
         improveImageViewing = true;
@@ -239,7 +241,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || disableAnalytics || followBackIndicator || followListNonFollowerBadge || customFont);}
+    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || resumeReelsAfterScrolling || disableAnalytics || followBackIndicator || followListNonFollowerBadge || customFont);}
 
     //Font section.
     public static boolean customFont = false;
@@ -320,6 +322,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_hide_likes"), SettingsStatus.hideLikes);
         FLAGS.put(str("piko_hide_share_button"), SettingsStatus.hideShareButton);
         FLAGS.put(str("piko_improve_image_viewing"),SettingsStatus.improveImageViewing);
+        FLAGS.put(str("piko_resume_reels_after_scrolling"), SettingsStatus.resumeReelsAfterScrolling);
         FLAGS.put(str("piko_unlimited_replays"),SettingsStatus.unlimitedReplaysOnEphemeralMedia);
         FLAGS.put(str("piko_disable_disappearing_messages_gesture"), SettingsStatus.disableDisappearingMessagesGesture);
 

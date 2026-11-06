@@ -144,6 +144,10 @@ public class Pref {
         return viewDmAnonymously || allGhostModes;
     }
 
+    public static boolean resumeReelsAfterScrolling() {
+        return SharedPref.getBooleanPref(Settings.RESUME_REELS_AFTER_SCROLLING);
+    }
+
     public static boolean disableVideoAutoplay() {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
     }

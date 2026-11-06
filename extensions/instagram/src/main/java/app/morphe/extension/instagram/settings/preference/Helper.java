@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
+import app.morphe.extension.instagram.patches.ReelsPlayback;
 import app.morphe.extension.instagram.patches.dm.InboxLock;
 
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
@@ -239,6 +240,9 @@ public class Helper {
                 }
 
                 if (saved) {
+                    if (Settings.RESUME_REELS_AFTER_SCROLLING.key.equals(key)) {
+                        ReelsPlayback.onSettingChanged();
+                    }
                     SettingsRestart.markChanged(key, previousValue, newValue);
                 }
                 return saved;

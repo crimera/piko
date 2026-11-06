@@ -830,6 +830,13 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.resumeReelsAfterScrolling) {
+            addPreference(helper.switchPreference(
+                    str("piko_resume_reels_after_scrolling"),
+                    str("piko_resume_reels_after_scrolling_desc"),
+                    Settings.RESUME_REELS_AFTER_SCROLLING
+            ));
+        }
         if (SettingsStatus.improveImageViewing) {
             addPreference(
                     helper.switchPreference(

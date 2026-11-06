@@ -134,6 +134,8 @@
     <string name="piko_friendship_status">Friendship status</string>
     <string name="piko_follow_list_non_follower_badge">Show non-followers in Following list</string>
     <string name="piko_follow_list_non_follower_badge_desc">Adds a badge to rows in your own Following list for accounts that don\'t follow you back</string>
+    <string name="piko_resume_reels_after_scrolling">Resume Reels after scrolling</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Continue a Reel from where you left off when you scroll back to it</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server. May reduce performance, increase app data size, or cause the app to switch to an older layout</string>
     <string name="piko_copy_comment">Copy comment</string>
