@@ -12,6 +12,7 @@ import java.util.HashSet;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.view.View;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.BooleanSetting;
 import app.morphe.extension.instagram.settings.StringSetting;
@@ -266,6 +267,18 @@ public class Pref {
 
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
+    }
+
+    public static boolean hideLikes() {
+        return SharedPref.getBooleanPref(Settings.HIDE_LIKES) && SettingsStatus.hideLikes;
+    }
+
+    public static boolean showLikeButton(boolean visible) {
+        return visible && !hideLikes();
+    }
+
+    public static void hideLikeView(View view) {
+        if (hideLikes()) view.setVisibility(View.GONE);
     }
 
     public static boolean hideShareButton() {

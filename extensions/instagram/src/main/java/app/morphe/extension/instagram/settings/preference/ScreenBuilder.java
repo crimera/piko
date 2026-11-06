@@ -605,6 +605,15 @@ public class ScreenBuilder {
                     Settings.HIDE_REELS_FOLLOW_BUTTON
             );
         }
+        if (SettingsStatus.hideLikes) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_likes"),
+                            "",
+                            Settings.HIDE_LIKES
+                    )
+            );
+        }
         if (SettingsStatus.hideShareButton) {
             addPreference(
                     helper.switchPreference(
