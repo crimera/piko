@@ -256,7 +256,7 @@
   },
   {
     "name" : "Heic uploads compression",
-    "desc" : "Set to 100 for less compression of heic uploads.",
+    "desc" : "Set to 100 for less compression for regular heic uploads.",
     "code" : "55416::1",
     "type" : "long"
   }
