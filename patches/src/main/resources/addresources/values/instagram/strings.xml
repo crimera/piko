@@ -483,6 +483,22 @@
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Open in Instagram</string>
     <string name="piko_open_voice_with_player">Open with music player</string>
+    <string name="piko_notification_someone">Someone</string>
+    <string name="piko_notification_you">You</string>
+    <string name="piko_notification_mark_as_read">Mark as read</string>
+    <string name="piko_notification_one_more_message">1 more message</string>
+    <string name="piko_notification_more_messages">%d more messages</string>
+    <string name="piko_notification_one_chat">1 chat</string>
+    <string name="piko_notification_chats">%d chats</string>
+    <string name="piko_notification_more_chats">+%d more</string>
+    <string name="piko_bundle_chat_notifications">Bundle chat notifications</string>
+    <string name="piko_bundle_chat_notifications_desc">Shows notifications from different chats as one notification that expands into each chat.</string>
+    <string name="piko_notification_images">Show images in notifications</string>
+    <string name="piko_notification_images_desc">Shows photos, video covers, stickers and shared reels and posts in chat notifications, and downloads the profile photos of chat members. Disappearing photos and videos are never shown.</string>
+    <string name="piko_keep_notification_texts">Keep read message texts (debug)</string>
+    <string name="piko_keep_notification_texts_desc">For development: keeps the texts of read messages in piko\'s notification store instead of dropping them, so a session can be replayed. They are still deleted after 7 days without activity, and on logout.</string>
+    <string name="piko_notification_log">Notification log</string>
+    <string name="piko_notification_log_desc">Writes message notifications, including texts and names, to Android/data/com.instagram.android/files/piko_notifications.log, to help fix problems.</string>
     <string name="piko_save_deleted_messages">Save deleted messages</string>
     <string name="piko_save_deleted_messages_desc">Captures incoming DMs locally as they arrive from the server. Marks messages as deleted when unsent, so you can view them even after the sender deletes them.</string>
     <string name="piko_view_deleted_messages">View deleted messages</string>

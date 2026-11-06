@@ -50,6 +50,26 @@ internal object FieldVisualMediaExtension : Fingerprint(name = "fieldVisualMedia
 // xma reshare: item List field + the permalink String field on each element (JSON key "target_url").
 internal object FieldXmaExtension : Fingerprint(name = "fieldXma", definingClass = DIRECT_ITEM_CLASS)
 internal object FieldXmaLinkExtension : Fingerprint(name = "fieldXmaLink", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldXmaPreviewExtension : Fingerprint(name = "fieldXmaPreview", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldAnimatedExtension : Fingerprint(name = "fieldAnimated", definingClass = DIRECT_ITEM_CLASS)
+internal object AnimatedClassNameExtension : Fingerprint(name = "animatedClassName", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldAnimatedGifExtension : Fingerprint(name = "fieldAnimatedGif", definingClass = DIRECT_ITEM_CLASS)
+internal object StoreClassNameExtension : Fingerprint(name = "storeClassName", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldStoreStickerExtension : Fingerprint(name = "fieldStoreSticker", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldStoreImageExtension : Fingerprint(name = "fieldStoreImage", definingClass = DIRECT_ITEM_CLASS)
+
+internal const val STORE_STICKER_CLASS = "Lcom/instagram/model/direct/stickerstore/DirectStoreStickerResponseItem;"
+
+/** The JSON writer of a store sticker: it reads each field just before writing its key. */
+internal object StoreStickerWriterFingerprint : Fingerprint(
+    returnType = "V",
+    parameters = listOf("L", STORE_STICKER_CLASS),
+    filters = listOf(string("image_url"), string("image_mime_type")),
+)
+internal object FieldAnimatedImagesExtension : Fingerprint(name = "fieldAnimatedImages", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldImagesGifExtension : Fingerprint(name = "fieldImagesGif", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldGifUrlExtension : Fingerprint(name = "fieldGifUrl", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldGifWebpExtension : Fingerprint(name = "fieldGifWebp", definingClass = DIRECT_ITEM_CLASS)
 
 internal object DirectItemDispatchFingerprint : Fingerprint(
     returnType = "V",

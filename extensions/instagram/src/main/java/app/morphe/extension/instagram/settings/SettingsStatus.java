@@ -82,7 +82,9 @@ public class SettingsStatus {
     public static void inboxLock() { inboxLock = true; }
     public static boolean hiddenChats = false;
     public static void hiddenChats() { hiddenChats = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats || disableDisappearingMessagesGesture ;}
+    public static boolean conversationNotifications = false;
+    public static void conversationNotifications() { conversationNotifications = true; }
+    public static boolean dmSection(){ return conversationNotifications || markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats || disableDisappearingMessagesGesture ;}
 
     //Story section
     public static boolean customiseStoryTimestamp = false;
@@ -365,6 +367,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
 
         FLAGS.put(str("piko_enable_mark_chat_as_read"),SettingsStatus.markChatAsRead);
+        FLAGS.put(str("piko_bundle_chat_notifications"),SettingsStatus.conversationNotifications);
         FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
         FLAGS.put(str("piko_category_rec_flags"),SettingsStatus.recommendedFlags);
         FLAGS.put(str("piko_custom_font"),SettingsStatus.customFont);

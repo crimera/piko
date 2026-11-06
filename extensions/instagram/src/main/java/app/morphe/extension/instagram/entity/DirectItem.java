@@ -254,6 +254,21 @@ public class DirectItem extends Entity {
         }
     }
 
+    /** Whether a photo/video item (media, disappearing media) is a video; null if unknown. */
+    public Boolean isVideo() {
+        try {
+            Object media = super.getField(this.mediaClass(), this.obj, this.fieldMedia());
+            if (media == null) media = super.getField(this.mediaClass(), this.obj, this.fieldRavenMedia());
+            if (media == null) {
+                Object wrapper = super.getField(this.mediaClass(), this.obj, this.fieldVisual());
+                if (wrapper != null) media = super.getField(wrapper.getClass(), wrapper, this.fieldVisualMedia());
+            }
+            return media == null ? null : new MediaData(media).isVideo();
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
     /** First usable media URL (image/video/audio) across all supported DM shapes. */
     public String getMediaUrl() {
         String[] urls = {
@@ -273,6 +288,106 @@ public class DirectItem extends Entity {
     // (JSON "target_url").
     private String fieldXma()     { return "fieldName"; } // xma List on item
     private String fieldXmaLink() { return "fieldName"; } // permalink on each element
+
+    private String fieldXmaPreview() { return "fieldName"; } // thumbnail on each element (JSON "preview_url_info")
+
+    /**
+     * An image to show for the item in a notification: a photo, a video's cover, or a shared
+     * reel/post thumbnail. Never disappearing media (raven/visual), which stays view-once.
+     */
+    public String imageUrl() {
+        String type = getItemType();
+        if (type == null) return null;
+        try {
+            switch (type) {
+                case "media":
+                    return imageOf(super.getField(this.mediaClass(), this.obj, this.fieldMedia()));
+                case "media_share":
+                    return imageOf(super.getField(this.mediaClass(), this.obj, this.fieldMediaShare()));
+                case "clip":
+                    return imageOf(wrapped(this.fieldClip(), this.fieldClipMedia()));
+                case "reel_share":
+                    return imageOf(wrapped(this.fieldReel(), this.fieldReelMedia()));
+                case "animated_media":
+                    return stickerUrl();
+                case "store_sticker":
+                    return storeStickerUrl();
+                default:
+                    return type.startsWith("xma_") || type.equals("generic_xma") ? xmaPreview() : null;
+            }
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
+    /** Class declaring the animated_media field (X.08Ai on 452), not necessarily the media class. */
+    private String animatedClassName() { return "animatedClassName"; }
+    private String fieldAnimated()    { return "fieldName"; } // animated_media -> sticker/GIF item
+    private String fieldAnimatedGif() { return "fieldName"; } //   its GifUrlImpl (JSON "gif_url")
+    private String fieldAnimatedImages() { return "fieldName"; } //   its "images" object
+    private String fieldImagesGif()   { return "fieldName"; } //     "fixed_height" GifUrlImpl
+    private String fieldGifUrl()      { return "fieldName"; } //   GifUrlImpl "url"
+    private String fieldGifWebp()     { return "fieldName"; } //   GifUrlImpl "webp"
+
+    private String storeClassName()    { return "storeClassName"; }
+    private String fieldStoreSticker() { return "fieldName"; } // store_sticker -> DirectStoreStickerResponseItem
+    private String fieldStoreImage()   { return "fieldName"; } //   its "image_url"
+
+    /** Image of one of Instagram's own stickers. */
+    private String storeStickerUrl() throws Exception {
+        Object sticker = super.getField(resolveClass(this.storeClassName()), this.obj, this.fieldStoreSticker());
+        if (sticker == null) return null;
+        Object v = super.getField(sticker.getClass(), sticker, this.fieldStoreImage());
+        if (v instanceof String && ((String) v).startsWith("http")) return (String) v;
+        return null;
+    }
+
+    /** Still image of a sticker or GIF: its "url", else its "webp". */
+    private String stickerUrl() throws Exception {
+        Object animated = super.getField(resolveClass(this.animatedClassName()), this.obj, this.fieldAnimated());
+        if (animated == null) return null;
+        Object gif = super.getField(animated.getClass(), animated, this.fieldAnimatedGif());
+        if (gif == null) {
+            Object images = super.getField(animated.getClass(), animated, this.fieldAnimatedImages());
+            if (images != null) gif = super.getField(images.getClass(), images, this.fieldImagesGif());
+        }
+        if (gif == null) return null;
+        for (String field : new String[]{this.fieldGifUrl(), this.fieldGifWebp()}) {
+            Object v = super.getField(gif.getClass(), gif, field);
+            if (v instanceof String && ((String) v).startsWith("http")) return (String) v;
+        }
+        return null;
+    }
+
+    private Object wrapped(String wrapperField, String innerMediaField) throws Exception {
+        Object wrapper = super.getField(this.mediaClass(), this.obj, wrapperField);
+        return wrapper == null ? null : super.getField(wrapper.getClass(), wrapper, innerMediaField);
+    }
+
+    private static String imageOf(Object media) throws Exception {
+        if (media == null) return null;
+        String url = new MediaData(media).getImageLink();
+        return url != null && url.startsWith("http") ? url : null;
+    }
+
+    private String xmaPreview() {
+        try {
+            Object list = super.getField(this.mediaClass(), this.obj, this.fieldXma());
+            if (!(list instanceof java.util.List)) return null;
+            for (Object element : (java.util.List<?>) list) {
+                if (element == null) continue;
+                Object v = super.getField(element.getClass(), element, this.fieldXmaPreview());
+                if (v != null && !(v instanceof String)) {
+                    // An ExtendedImageUrl; ImageUrl.getUrl() keeps its name.
+                    java.lang.reflect.Method getUrl = v.getClass().getMethod("getUrl");
+                    v = getUrl.invoke(v);
+                }
+                if (v instanceof String && ((String) v).startsWith("http")) return (String) v;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
 
     /** Permalink for a shared post/reel, e.g. https://www.instagram.com/reel/<code>/. */
     public String xmaReshareLink() {

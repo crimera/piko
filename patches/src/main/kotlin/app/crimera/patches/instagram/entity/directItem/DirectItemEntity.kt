@@ -21,8 +21,42 @@ import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val MEDIA_CLASS = "Lcom/instagram/feed/media/Media;"
+private const val GIF_URL_CLASS = "Lcom/instagram/model/mediasize/GifUrlImpl;"
+private const val GIF_URL_HELPER_CLASS = "Lcom/instagram/model/mediasize/GifUrlImpl__JsonHelper;"
+
+/**
+ * The GifUrlImpl String field the JSON writer reads just before it writes [key]. Its parser fills
+ * the object through a constructor, so the writer is the only place a field meets its key.
+ */
+context(patchContext: BytecodePatchContext)
+private fun gifUrlField(key: String): String {
+    for (method in patchContext.classDefBy(GIF_URL_HELPER_CLASS).methods) {
+        val instructions = method.implementation?.instructions?.toList() ?: continue
+        stringFieldBeforeKey(instructions, GIF_URL_CLASS, key)?.let { return it }
+    }
+    throw IllegalStateException("No GifUrlImpl field before \"$key\"")
+}
+
+/** In a JSON writer: the String field of [modelClass] read last before the key [key] is written. */
+private fun stringFieldBeforeKey(
+    instructions: List<com.android.tools.smali.dexlib2.iface.instruction.Instruction>,
+    modelClass: String,
+    key: String,
+): String? {
+    val keyIndex = instructions.indexOfFirst {
+        (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+            it.getReference<StringReference>()?.string == key
+    }
+    if (keyIndex < 0) return null
+    for (i in keyIndex - 1 downTo 0) {
+        val field = instructions[i].takeIf { it.opcode == Opcode.IGET_OBJECT }?.getReference<FieldReference>()
+        if (field?.definingClass == modelClass && field.type == "Ljava/lang/String;") return field.name
+    }
+    return null
+}
 
 /**
  * Field assigned with the value of the JSON [key] by the parser of [parserClass].
@@ -145,6 +179,52 @@ val directItemEntity =
             ).getReference<FieldReference>()!!.type
             FieldXmaExtension.changeFirstString(xmaField.name)
             FieldXmaLinkExtension.changeFirstString(jsonKeyField("target_url", xmaElementParser).name)
+            // Thumbnail of a shared reel/post, for notification images. Optional: without it a share
+            // only shows its text, so a version without the key must not fail the whole entity.
+            // On 452 it is "preview_url_info", an ExtendedImageUrl (read through ImageUrl.getUrl()).
+            runCatching { jsonKeyField("preview_url_info", xmaElementParser) }
+                .onSuccess {
+                    if (it.type == "Lcom/instagram/model/mediasize/ExtendedImageUrl;" || it.type == "Ljava/lang/String;") {
+                        FieldXmaPreviewExtension.changeFirstString(it.name)
+                    }
+                }
+                .onFailure { println("WARNING: xma preview_url_info not found, shared reels and posts get no image") }
+
+            // Sticker/GIF image, for notifications. Optional like the preview above.
+            runCatching {
+                val animated = jsonKeyField("animated_media", parserClass)
+                val gif = classDefBy(animated.type).fields.single { it.type == GIF_URL_CLASS }
+                val url = gifUrlField("url")
+                val webp = gifUrlField("webp")
+                FieldAnimatedExtension.changeFirstString(animated.name)
+                AnimatedClassNameExtension.changeFirstString(classNameToExtension(animated.definingClass))
+                FieldAnimatedGifExtension.changeFirstString(gif.name)
+                // "images": {"fixed_height": GifUrlImpl}, which holds the URL when "gif_url" is empty.
+                val images = classDefBy(animated.type).fields.firstOrNull { f ->
+                    f.type != GIF_URL_CLASS && f.type.startsWith("LX/") &&
+                        runCatching { classDefBy(f.type).fields.any { it.type == GIF_URL_CLASS } }.getOrDefault(false)
+                }
+                if (images != null) {
+                    FieldAnimatedImagesExtension.changeFirstString(images.name)
+                    FieldImagesGifExtension.changeFirstString(classDefBy(images.type).fields.first { it.type == GIF_URL_CLASS }.name)
+                }
+                FieldGifUrlExtension.changeFirstString(url)
+                FieldGifWebpExtension.changeFirstString(webp)
+            }.onFailure { println("WARNING: sticker image fields not found (${it.message}), stickers get no image") }
+
+            // Instagram's own stickers: item "store_sticker" -> DirectStoreStickerResponseItem "image_url".
+            runCatching {
+                val store = jsonKeyField("store_sticker", parserClass)
+                check(store.type == STORE_STICKER_CLASS) { "store_sticker is ${store.type}" }
+                val image = stringFieldBeforeKey(
+                    StoreStickerWriterFingerprint.method.implementation!!.instructions.toList(),
+                    STORE_STICKER_CLASS,
+                    "image_url",
+                ) ?: error("no image_url field")
+                StoreClassNameExtension.changeFirstString(classNameToExtension(store.definingClass))
+                FieldStoreStickerExtension.changeFirstString(store.name)
+                FieldStoreImageExtension.changeFirstString(image)
+            }.onFailure { println("WARNING: store sticker fields not found (${it.message}), store stickers get no image") }
 
             GetThreadIdExtension.changeFirstString(
                 DirectThreadKeyToStringFingerprint.instructionMatches.first().fieldReference.name,

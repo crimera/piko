@@ -70,6 +70,22 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_SUGGESTED_CONTENT);
     }
 
+    public static boolean bundleChatNotifications() {
+        return SharedPref.getBooleanPref(Settings.BUNDLE_CHAT_NOTIFICATIONS);
+    }
+
+    public static boolean notificationImages() {
+        return SharedPref.getBooleanPref(Settings.NOTIFICATION_IMAGES);
+    }
+
+    public static boolean keepNotificationTexts() {
+        return SharedPref.getBooleanPref(Settings.KEEP_NOTIFICATION_TEXTS);
+    }
+
+    public static boolean notificationLog() {
+        return SharedPref.getBooleanPref(Settings.NOTIFICATION_LOG);
+    }
+
     public static boolean saveDeletedMessages() {
         return SharedPref.getBooleanPref(Settings.SAVE_DELETED_MESSAGES);
     }

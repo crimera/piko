@@ -363,6 +363,39 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.conversationNotifications) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_bundle_chat_notifications"),
+                            str("piko_bundle_chat_notifications_desc"),
+                            Settings.BUNDLE_CHAT_NOTIFICATIONS
+                    )
+            );
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_notification_images"),
+                            str("piko_notification_images_desc"),
+                            Settings.NOTIFICATION_IMAGES
+                    )
+            );
+            if (app.morphe.extension.instagram.patches.notification.NotificationLog.isBuiltIn()) {
+                addPreference(
+                        helper.switchPreference(
+                                str("piko_notification_log"),
+                                str("piko_notification_log_desc"),
+                                Settings.NOTIFICATION_LOG
+                        )
+                );
+                addPreference(
+                        helper.switchPreference(
+                                str("piko_keep_notification_texts"),
+                                str("piko_keep_notification_texts_desc"),
+                                Settings.KEEP_NOTIFICATION_TEXTS
+                        )
+                );
+            }
+        }
+
         if (SettingsStatus.saveDeletedMessages) {
             addPreference(
                     helper.switchPreference(
