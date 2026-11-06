@@ -218,6 +218,11 @@
     "code" : "121655::0"
   },
   {
+    "name" : "Blends",
+    "desc" : "Disable to hide the Blends button in the header of eligible chats.",
+    "code" : "76757::0"
+  },
+  {
     "name" : "Threads profile button",
     "desc" : "Disable to remove the threads button in profiles.",
     "code" : "58467::20"
