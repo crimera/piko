@@ -53,7 +53,7 @@ final class DownloadSelectionSheet {
     private final Button download;
     private final SheetBottomDialog.SlideDialog dialog;
 
-    static void show(Context context, MediaData media, DialogInterface.OnDismissListener onDismiss) throws Exception {
+    static void show(Context context, DownloadMediaGroup media, DialogInterface.OnDismissListener onDismiss) throws Exception {
         Activity activity = findActivity(context);
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             throw new IllegalStateException("No activity available for media selection");
@@ -61,10 +61,10 @@ final class DownloadSelectionSheet {
         new DownloadSelectionSheet(activity, media, onDismiss).show();
     }
 
-    private DownloadSelectionSheet(Activity activity, MediaData media,
+    private DownloadSelectionSheet(Activity activity, DownloadMediaGroup media,
                                    DialogInterface.OnDismissListener onDismiss) throws Exception {
         context = InstagramPreferenceStyle.dialogContext(activity);
-        int total = media.getCarouselSize();
+        int total = media.size();
         SheetBottomDialog.DraggableLinearLayout panel = SheetBottomDialog.createMainLayout(
                 context, InstagramPreferenceStyle.backgroundColor());
         int screenHeight = activity.getWindow().getDecorView().getHeight();
@@ -116,7 +116,7 @@ final class DownloadSelectionSheet {
         header.addView(close, new LinearLayout.LayoutParams(dp(48), dp(48)));
         panel.addView(header);
 
-        TextView author = text("@" + media.getUserData().getUsername(), 14, false);
+        TextView author = text("@" + media.username(), 14, false);
         author.setTextColor(InstagramPreferenceStyle.secondaryTextColor());
         author.setSingleLine(true);
         author.setEllipsize(TextUtils.TruncateAt.END);
@@ -180,7 +180,7 @@ final class DownloadSelectionSheet {
         downloadParams.setMargins(dp(16), dp(8), dp(16), dp(12));
         panel.addView(download, downloadParams);
 
-        for (int index = 0; index < total; index++) rows.addView(createRow(media.getMediaAt(index), index));
+        for (int index = 0; index < total; index++) rows.addView(createRow(media.itemAt(index), index));
         refreshSelection();
     }
 
