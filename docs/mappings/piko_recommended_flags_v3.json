@@ -231,5 +231,27 @@
     "name" : "Per-session auto-scroll",
     "desc" : "Disable to keep auto-scroll in the state you left it, instead of resetting to off every time Instagram is closed.",
     "code" : "83371::10"
+  },
+  {
+    "name" : "High quality uploads",
+    "desc" : "Enable to improve the quality of uploads.",
+    "code" : "23744::0,55416::7,76431::0,116170::0"
+  },
+  {
+    "name" : "Video super resolution (Machine learning) uploads",
+    "desc" : "Enable to upscales all video to 1080p (if the resolution if below 1080p) using on device machine learning.",
+    "code" : "75689::0,75689::1,75689::2,75689::3,75689::4,75689::5,75689::6,75689::7,75689::8"
+  },
+  {
+    "name" : "Webp gallery compression",
+    "desc" : "Set this to 100 for the highest webp quality when instagram creates a temporary copy of a gallery photo for a direct message. this setting only applies when igd_webp_device_gallery is enabled.",
+    "code" : "80122::1",
+    "type" : "long"
+  },
+  {
+    "name" : "Heic uploads compression",
+    "desc" : "Set this to 100 for highest quality of regular heic uploads.",
+    "code" : "55416::1",
+    "type" : "long"
   }
 ]
