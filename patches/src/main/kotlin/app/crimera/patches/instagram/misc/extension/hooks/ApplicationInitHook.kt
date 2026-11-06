@@ -17,13 +17,14 @@ internal val instagramInitHook =
     ExtensionHook(
         fingerprint =
             Fingerprint(
-                definingClass = "/InstagramAppShell;",
+                definingClass = "Lcom/instagram/app/InstagramAppShell;",
                 name = "onCreate",
             ),
         insertIndexResolver = { method ->
             method.indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER) + 1
         },
         contextRegisterResolver = { method ->
-            "v${method.getInstruction<FiveRegisterInstruction>(method.indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)).registerC}"
+            "v${method.getInstruction<FiveRegisterInstruction>(
+                method.indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)).registerC}"
         },
     )

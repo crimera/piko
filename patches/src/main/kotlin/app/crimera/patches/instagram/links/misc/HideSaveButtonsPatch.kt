@@ -19,11 +19,7 @@ import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.findFreeRegister
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -71,10 +67,10 @@ val hideSaveButtonsPatch = bytecodePatch(
                 fieldAccess(definingClass = "this", type = "Z", opcode = Opcode.IGET_BOOLEAN),
                 string("ClipsSaveButtonUseCase"),
             ),
-        ).matchSingle().let { match ->
-            val enabledIndex = match.instructionMatches.first().index
-            val enabledRegister = match.instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA
-            match.method.addInstructions(
+        ).let {
+            val enabledIndex = it.instructionMatches.first().index
+            val enabledRegister = it.instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA
+            it.method.addInstructions(
                 enabledIndex + 1,
                 """
                 invoke-static/range {v$enabledRegister .. v$enabledRegister}, $PREF_DESCRIPTOR->showReelSaveButton(Z)Z

@@ -402,7 +402,10 @@ public final class NavigationBarPatch {
         return result;
     }
 
-    private static native String navigationFragmentName(Object value);
+    private static String navigationFragmentName(Object value) {
+        // Actual implementation will be added during patching.
+        return null;
+    }
 
     private static Candidate find(
             List<Candidate> candidates,

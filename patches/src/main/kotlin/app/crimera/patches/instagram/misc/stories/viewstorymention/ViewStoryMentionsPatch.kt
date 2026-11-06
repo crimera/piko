@@ -20,7 +20,6 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -58,7 +57,7 @@ val viewStoryMentionsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val supportingField = SupportingTextViewFingerprint.matchSingle().instructionMatches.first().fieldReference
+            val supportingField = SupportingTextViewFingerprint.instructionMatches.first().fieldReference
 
             val setters = mapOf(
                 "setPrimaryText" to listOf("Ljava/lang/CharSequence;", "Z"),
@@ -69,7 +68,7 @@ val viewStoryMentionsPatch =
                 val target = peopleCellSetterFingerprint(
                     parameters,
                     supportingField.takeIf { name == "setSupportingText" },
-                ).matchSingle().originalMethod
+                ).originalMethod
 
                 Fingerprint(
                     definingClass = "$PATCHES_DESCRIPTOR/story/ViewStoryMentionsPatch;",
@@ -77,7 +76,7 @@ val viewStoryMentionsPatch =
                     parameters = listOf(PEOPLE_CELL_CLASS) + parameters,
                     returnType = "V",
                     accessFlags = listOf(AccessFlags.PRIVATE, AccessFlags.STATIC),
-                ).matchSingle().method.addInstruction(
+                ).method.addInstruction(
                     0,
                     "invoke-virtual/range {p0 .. p${parameters.size}}, $target",
                 )

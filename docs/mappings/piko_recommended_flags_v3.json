@@ -218,6 +218,11 @@
     "code" : "121655::0"
   },
   {
+    "name" : "Threads profile button",
+    "desc" : "Disable to remove the threads button in profiles.",
+    "code" : "58467::20"
+  },
+  {
     "name" : "Per-session auto-scroll",
     "desc" : "Disable to keep auto-scroll in the state you left it, instead of resetting to off every time Instagram is closed.",
     "code" : "83371::10"

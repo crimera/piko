@@ -29,6 +29,8 @@ public class Constants {
     public static final String PIKO_MAPPINGS_PATH = "https://github.com/crimera/piko/raw/refs/heads/dev/docs/mappings/";
 
     public static final String AB_SETTINGS_ICON = "SETTINGS_ICON";
+    public static final String AB_AUDIO_CALL_ICON = "AUDIO_CALL_ICON";
+    public static final String AB_VIDEO_CALL_ICON = "VIDEO_CALL_ICON";
     public static final String AB_CREATE = "CREATE";
     public static final String AB_NOTIFICATIONS = "NOTIFICATIONS";
     public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";

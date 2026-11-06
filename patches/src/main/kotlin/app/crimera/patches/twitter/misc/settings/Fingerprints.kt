@@ -18,6 +18,7 @@ internal const val AUTHORIZE_APP_ACTIVITY_CLASS = "Lcom/twitter/android/Authoriz
 internal const val URL_INTERPRETER_ACTIVITY_CLASS = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity;"
 
 internal object ApplicationFingerprint : Fingerprint(
+    superclass = "Lcom/twitter/app/TwitterApplication;",
     name = "attachBaseContext",
     filters = listOf(
         methodCall(
@@ -26,9 +27,6 @@ internal object ApplicationFingerprint : Fingerprint(
             returnType = "V"
         )
     ),
-    custom = { _, classDef ->
-        classDef.superclass == "Lcom/twitter/app/TwitterApplication;"
-    }
 )
 
 internal object AuthorizeAppActivityFingerprint : Fingerprint(

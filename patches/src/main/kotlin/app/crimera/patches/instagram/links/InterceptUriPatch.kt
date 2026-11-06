@@ -15,7 +15,6 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -35,7 +34,7 @@ val interceptUriPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            TigonServiceLayerStartRequestFingerprint.matchSingle().let {
+            TigonServiceLayerStartRequestFingerprint.let {
                 val uriIndex = it.instructionMatches.first().index
                 val fieldRegisters = it.instructionMatches.first().instruction.registersUsed
                 val hostRegisters = it.instructionMatches.last().instruction.registersUsed

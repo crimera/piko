@@ -52,13 +52,14 @@ public class StoryButton {
         return buttonList;
     }
 
-    public static boolean storyDialogAction(CharSequence buttonText, Context ctx, Object mediaObject,
+    public static boolean storyDialogAction(CharSequence buttonText, Context ctx, UserSession session,
+                                           Object mediaObject, Object reel,
                                            DialogInterface.OnDismissListener onDismiss) {
         if (buttonText.equals(str("piko_view_story_mentions"))) {
             ViewStoryMentionsPatch.viewMentions(ctx, mediaObject, onDismiss);
             return true;
         } else if (buttonText.equals(str("piko_download_options")) || buttonText.equals(str("piko_category_download_media"))) {
-            DownloadUtils.showDownloadOptions(ctx, null, mediaObject, 0, onDismiss);
+            DownloadUtils.showStoryDownloadOptions(ctx, session, mediaObject, reel, onDismiss);
             return true;
         }
         return false;

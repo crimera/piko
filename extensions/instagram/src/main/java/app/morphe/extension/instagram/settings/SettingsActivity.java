@@ -13,7 +13,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -48,6 +47,7 @@ import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramSearchStyle;
 import app.morphe.extension.instagram.settings.preference.widgets.SearchResultPreference;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.theme.MaterialYouTheme;
@@ -65,8 +65,6 @@ public final class SettingsActivity {
     private static final String STATE_SEARCH_QUERY = "piko_settings_search_query";
     private static final String STATE_SEARCH_MODE = "piko_settings_search_mode";
     private static final String STATE_TARGET_PREFERENCE_KEY = "piko_settings_target_preference_key";
-    private static final int NO_RESULTS_PORTRAIT_TOP_MARGIN_DP = 132;
-    private static final int NO_RESULTS_LANDSCAPE_TOP_MARGIN_DP = 24;
 
     private static final Map<Activity, Controller> sControllers = new WeakHashMap<>();
 
@@ -340,7 +338,8 @@ public final class SettingsActivity {
                     FrameLayout.LayoutParams.MATCH_PARENT
             ));
 
-            noResultsOverlay = createNoResultsOverlay();
+            noResultsOverlay = InstagramSearchStyle.createNoResultsView(activity);
+            noResultsOverlay.setVisibility(View.GONE);
             contentFrame.addView(noResultsOverlay, new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
@@ -405,60 +404,6 @@ public final class SettingsActivity {
             });
 
             activity.setContentView(root);
-        }
-
-        private View createNoResultsOverlay() {
-            FrameLayout overlay = new FrameLayout(activity);
-            overlay.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
-            overlay.setClickable(true);
-            overlay.setVisibility(View.GONE);
-
-            LinearLayout message = new LinearLayout(activity);
-            message.setOrientation(LinearLayout.VERTICAL);
-            message.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
-
-            ImageView icon = new ImageView(activity);
-            icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            int iconPadding = InstagramPreferenceStyle.dp(activity, 12);
-            icon.setPadding(iconPadding, iconPadding, iconPadding, iconPadding);
-            UI.setThemedIcon(icon, UI.DRAWABLE_SEARCH, "igds_color_secondary_text");
-            icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            message.addView(icon, new LinearLayout.LayoutParams(
-                    InstagramPreferenceStyle.dp(activity, 96),
-                    InstagramPreferenceStyle.dp(activity, 96)
-            ));
-
-            TextView title = new TextView(activity);
-            title.setText(str("piko_settings_search_no_results"));
-            title.setTextColor(InstagramPreferenceStyle.primaryTextColor());
-            title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-            title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            title.setGravity(android.view.Gravity.CENTER);
-            title.setIncludeFontPadding(false);
-            title.setPadding(
-                    InstagramPreferenceStyle.dp(activity, 24),
-                    InstagramPreferenceStyle.dp(activity, 8),
-                    InstagramPreferenceStyle.dp(activity, 24),
-                    0
-            );
-            message.addView(title, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
-
-            FrameLayout.LayoutParams messageParams = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
-            );
-            messageParams.gravity = android.view.Gravity.TOP
-                    | android.view.Gravity.CENTER_HORIZONTAL;
-            int orientation = activity.getResources().getConfiguration().orientation;
-            int topMarginDp = orientation == Configuration.ORIENTATION_LANDSCAPE
-                    ? NO_RESULTS_LANDSCAPE_TOP_MARGIN_DP
-                    : NO_RESULTS_PORTRAIT_TOP_MARGIN_DP;
-            messageParams.topMargin = InstagramPreferenceStyle.dp(activity, topMarginDp);
-            overlay.addView(message, messageParams);
-            return overlay;
         }
 
         void onRootFragmentReady(

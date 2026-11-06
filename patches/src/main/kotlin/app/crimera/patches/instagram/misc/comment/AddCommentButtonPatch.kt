@@ -8,9 +8,7 @@ package app.crimera.patches.instagram.misc.comment
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
@@ -22,7 +20,7 @@ val addCommentPatch =
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         execute {
-            AddCommentButtonFingerprint.matchSingle().let {
+            AddCommentButtonFingerprint.let {
                 val index = it.instructionMatches.last().index
                 val arrayListRegister = it.instructionMatches.first().getInstruction<OneRegisterInstruction>().registerA
                 val commentRegister = it.instructionMatches.last().getInstruction<TwoRegisterInstruction>().registerB

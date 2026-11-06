@@ -19,10 +19,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -41,7 +40,7 @@ private object HomeActionModelFingerprint : Fingerprint(
 
 val hideHomeActionButtonsPatch = bytecodePatch {
     execute {
-        val method = HomeActionModelFingerprint.matchSingle().method
+        val method = HomeActionModelFingerprint.method
         val callIndex = method.instructions.withIndex().filter { (_, instruction) ->
             val reference = (instruction as? ReferenceInstruction)?.reference as? MethodReference
             reference?.parameterTypes?.map(CharSequence::toString) ==
@@ -95,7 +94,7 @@ val mainFeedActionBarButtonPatch =
 
         execute {
 
-            val binding = BindMainFeedActionBarFingerprint.matchSingle().method
+            val binding = BindMainFeedActionBarFingerprint.method
             val actionBar = "Linstagram/features/feed/mainfeed/actionbar/MainFeedActionBar;"
             val candidates = mutableListOf(binding)
             // Newer versions move the layout update into a method on the action bar itself.
