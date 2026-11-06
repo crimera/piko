@@ -224,7 +224,7 @@ final class DownloadSelectionSheet {
         background.setCornerRadius(dp(12));
         image.setBackground(background);
         image.setClipToOutline(true);
-        UI.setThemedIcon(image, video ? "fb_ic_video_24" : "instagram_photo_outline_24");
+        UI.setThemedIcon(image, video ? "tab_clips_drawable" : "instagram_photo_outline_24");
         row.addView(image, new LinearLayout.LayoutParams(dp(48), dp(48)));
         String thumbnail = thumbnailUrl(item);
         image.setTag(thumbnail);
