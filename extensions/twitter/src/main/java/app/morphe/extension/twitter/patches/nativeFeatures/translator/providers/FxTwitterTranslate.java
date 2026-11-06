@@ -6,7 +6,6 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
 
-import static app.morphe.extension.shared.StringRef.str;
 import android.os.AsyncTask;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -42,6 +41,7 @@ public class FxTwitterTranslate implements Translate {
 
             @Override
             protected String doInBackground(Void... voids) {
+                HttpURLConnection connection = null;
                 try {
 
                     // Construct the full URL
@@ -49,7 +49,9 @@ public class FxTwitterTranslate implements Translate {
 
                     // Create connection
                     URL url = new URL(fullUrl);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setConnectTimeout(7000);
+                    connection.setReadTimeout(10000);
 
                     // Set request headers
                     connection.setRequestMethod("GET");
@@ -68,6 +70,8 @@ public class FxTwitterTranslate implements Translate {
                 } catch (Exception e) {
                     error = e;
                     return null;
+                } finally {
+                    if (connection != null) connection.disconnect();
                 }
             }
 
@@ -79,7 +83,7 @@ public class FxTwitterTranslate implements Translate {
                     callback.onTranslationComplete(result);
                 }
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -87,20 +91,16 @@ public class FxTwitterTranslate implements Translate {
      * @param jsonResponse Raw JSON response from Google Translate
      * @return Translated text
      */
-    private String parseTranslationResponse(String jsonResponse) {
-        try {
-            JSONObject jsonObject = new JSONObject(jsonResponse);
-            if (jsonObject.has("tweet")) {
-                JSONObject tweetObj = jsonObject.getJSONObject("tweet");
-                if (tweetObj.has("translation")) {
-                    JSONObject translationObj = tweetObj.getJSONObject("translation");
-                    this.PROVIDER_NAME = translationObj.getString("provider");
-                    return translationObj.getString("text");
-                }
+    private String parseTranslationResponse(String jsonResponse) throws Exception {
+        JSONObject jsonObject = new JSONObject(jsonResponse);
+        if (jsonObject.has("tweet")) {
+            JSONObject tweetObj = jsonObject.getJSONObject("tweet");
+            if (tweetObj.has("translation")) {
+                JSONObject translationObj = tweetObj.getJSONObject("translation");
+                this.PROVIDER_NAME = translationObj.getString("provider");
+                return translationObj.getString("text");
             }
-            throw new Exception("Translation failed.");
-        } catch (Exception e) {
-            return str("translate_tweet_error") +": "+ e.getMessage();
         }
+        throw new Translate.UnavailableException();
     }
 }

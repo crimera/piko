@@ -6,7 +6,6 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
 
-import static app.morphe.extension.shared.StringRef.str;
 
 import android.os.AsyncTask;
 import java.io.BufferedReader;
@@ -42,6 +41,7 @@ public class GTranslate implements Translate {
 
             @Override
             protected String doInBackground(Void... voids) {
+                HttpURLConnection connection = null;
                 try {
                     // Encode the query for URL
                     String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
@@ -52,7 +52,9 @@ public class GTranslate implements Translate {
 
                     // Create connection
                     URL url = new URL(fullUrl);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setConnectTimeout(7000);
+                    connection.setReadTimeout(10000);
 
                     // Set request headers
                     connection.setRequestMethod("GET");
@@ -74,6 +76,8 @@ public class GTranslate implements Translate {
                 } catch (Exception e) {
                     error = e;
                     return null;
+                } finally {
+                    if (connection != null) connection.disconnect();
                 }
             }
 
@@ -85,7 +89,7 @@ public class GTranslate implements Translate {
                     callback.onTranslationComplete(result);
                 }
             }
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -93,22 +97,19 @@ public class GTranslate implements Translate {
      * @param jsonResponse Raw JSON response from Google Translate
      * @return Translated text
      */
-    private String parseTranslationResponse(String jsonResponse) {
-        try {
-            JSONObject jsonObject = new JSONObject(jsonResponse);
-            JSONArray sentences = jsonObject.getJSONArray("sentences");
+    private String parseTranslationResponse(String jsonResponse) throws Exception {
+        JSONObject jsonObject = new JSONObject(jsonResponse);
+        JSONArray sentences = jsonObject.getJSONArray("sentences");
 
-            StringBuilder translatedText = new StringBuilder();
-            for (int i = 0; i < sentences.length(); i++) {
-                JSONObject sentence = sentences.getJSONObject(i);
-                if (sentence.has("trans")) {
-                    translatedText.append(sentence.getString("trans"));
-                }
+        StringBuilder translatedText = new StringBuilder();
+        for (int i = 0; i < sentences.length(); i++) {
+            JSONObject sentence = sentences.getJSONObject(i);
+            if (sentence.has("trans")) {
+                translatedText.append(sentence.getString("trans"));
             }
-
-            return translatedText.toString();
-        } catch (Exception e) {
-            return str("translate_tweet_error") +": "+ e.getMessage();
         }
+
+        if (translatedText.length() == 0) throw new Translate.UnavailableException();
+        return translatedText.toString();
     }
 }
