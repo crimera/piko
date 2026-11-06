@@ -6,7 +6,10 @@
 
 package app.crimera.patches.instagram.misc.download
 
+import app.crimera.patches.instagram.entity.decoder.CURRENT_MEDIA_FIELD
+import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
+import app.crimera.patches.instagram.misc.overflowMenuButton.reels.ClipsItemStateToStringFingerprint
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
@@ -92,7 +95,7 @@ private val STATIC_INVOKE_OPCODES = setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_ST
  */
 val reelDownloadButtonPatch = bytecodePatch {
     compatibleWith(COMPATIBILITY_INSTAGRAM)
-    dependsOn(sharedExtensionPatch, settingsPatch)
+    dependsOn(sharedExtensionPatch, settingsPatch, decoderEntity)
     execute {
         injectReelDownloadButton()
         enableSettings("reelDownloadButton")
@@ -125,6 +128,10 @@ private fun injectReelDownloadButton() {
     val tintField =
         requireOne("ColorFilter field of $componentType", componentClass.fieldsOfType(COLOR_FILTER_DESCRIPTOR))
     val mediaPath = reelMediaPath(componentClass)
+    val itemState = ClipsItemStateToStringFingerprint.originalClassDef
+    val itemStateField = requireOne("reel item state field",
+        patchContext.classDefBy(mediaPath.state.type).fieldsOfType(itemState.type))
+    val carouselStateField = requireOne("reel carousel state field", itemState.fieldsOfType(CURRENT_MEDIA_FIELD.definingClass))
     val contextPath = reelContextPath(composerType)
 
     val builder = reelSaveBuilderFingerprint(componentType).originalMethod
@@ -144,6 +151,20 @@ private fun injectReelDownloadButton() {
         :none
         const/4 v0, 0
         return-object v0
+    """)
+    bridge("currentIndex", 2, """
+        check-cast p0, $componentType
+        iget-object v0, p0, ${mediaPath.state}
+        if-eqz v0, :first
+        iget-object v0, v0, $itemStateField
+        if-eqz v0, :first
+        iget-object v0, v0, $carouselStateField
+        if-eqz v0, :first
+        iget v0, v0, $CURRENT_MEDIA_FIELD
+        return v0
+        :first
+        const/4 v0, 0
+        return v0
     """)
     bridge("session", 2, """
         check-cast p0, $componentType
@@ -354,7 +375,7 @@ private fun bridge(name: String, registers: Int, body: String) {
  * setter reads an enum constant, and that enum's static initializer names the constant.
  */
 context(patchContext: BytecodePatchContext)
-private fun setsViewProperty(
+internal fun setsViewProperty(
     reference: MethodReference,
     propertyName: String,
 ): Boolean {

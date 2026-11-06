@@ -73,13 +73,13 @@ public final class ReelDownload {
     private static final class Copy {
         final Context context;
         final UserSession userSession;
-        final Object media;
+        final Object component;
         final ColorFilter tint;
 
-        Copy(Context context, UserSession userSession, Object media, ColorFilter tint) {
+        Copy(Context context, UserSession userSession, Object component, ColorFilter tint) {
             this.context = context;
             this.userSession = userSession;
-            this.media = media;
+            this.component = component;
             this.tint = tint;
         }
     }
@@ -91,7 +91,7 @@ public final class ReelDownload {
     public static void begin(Object component, Object composer) {
         CURRENT.set(
                 COPIES.contains(component)
-                        ? new Copy(context(composer), session(component), media(component), tint(component))
+                        ? new Copy(context(composer), session(component), component, tint(component))
                         : null);
     }
 
@@ -139,20 +139,25 @@ public final class ReelDownload {
     public static Function1<Object, Object> click(Function1<Object, Object> original) {
         Copy copy = CURRENT.get();
         if (copy == null) return original;
-        return new DownloadClick(copy.context, copy.userSession, copy.media);
+        return new DownloadClick(copy);
     }
 
-    /** Consume long presses on the copy without opening Instagram's save-collection sheet. */
     public static Function1<Object, Object> longClick(Function1<Object, Object> original) {
-        return CURRENT.get() == null ? original : ConsumeLongClick.INSTANCE;
+        Copy copy = CURRENT.get();
+        if (copy == null) return original;
+        return ignored -> DownloadUtils.onPostDownloadLongClick(copy.context, copy.userSession,
+                media(copy.component), currentIndex(copy.component));
     }
 
-    private static void download(Context context, UserSession userSession, Object media) {
+    private static void download(Copy copy) {
         try {
+            Context context = copy.context;
+            UserSession userSession = copy.userSession;
+            Object media = media(copy.component);
             if (context == null) throw new IllegalStateException("Reel download has no context");
             if (userSession == null) throw new IllegalStateException("Reel download has no user session");
             if (media == null) throw new IllegalStateException("Reel download has no media");
-            DownloadUtils.downloadPost(context, userSession, media, 0);
+            DownloadUtils.downloadPost(context, userSession, media, currentIndex(copy.component));
         } catch (Exception e) {
             Logger.printException(() -> "Error at reel download", e);
             Utils.showToastShort(e.getMessage());
@@ -160,29 +165,16 @@ public final class ReelDownload {
     }
 
     private static final class DownloadClick implements Function1<Object, Object> {
-        private final Context context;
-        private final UserSession userSession;
-        private final Object media;
+        private final Copy copy;
 
-        DownloadClick(Context context, UserSession userSession, Object media) {
-            this.context = context;
-            this.userSession = userSession;
-            this.media = media;
+        DownloadClick(Copy copy) {
+            this.copy = copy;
         }
 
         @Override
         public Object invoke(Object ignored) {
-            download(context, userSession, media);
+            download(copy);
             return Unit.INSTANCE;
-        }
-    }
-
-    private static final class ConsumeLongClick implements Function1<Object, Object> {
-        static final ConsumeLongClick INSTANCE = new ConsumeLongClick();
-
-        @Override
-        public Object invoke(Object ignored) {
-            return Boolean.TRUE;
         }
     }
 
@@ -191,6 +183,10 @@ public final class ReelDownload {
     /** The `Media` the save component renders, or null. */
     static Object media(Object saveComponent) {
         return null;
+    }
+
+    static int currentIndex(Object saveComponent) {
+        return 0;
     }
 
     static UserSession session(Object saveComponent) {

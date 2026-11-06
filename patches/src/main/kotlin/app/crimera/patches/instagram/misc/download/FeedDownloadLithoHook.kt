@@ -70,6 +70,7 @@ private fun saveIconFingerprint(stateType: String) = Fingerprint(
         resourceLiteral(ResourceType.ID, "row_feed_button_save", location = MatchAfterWithin(4)),
         methodCall(parameters = listOf("L", "I"), location = MatchAfterImmediately()),
         methodCall(parameters = listOf("L", FUNCTION1_DESCRIPTOR)),
+        methodCall(parameters = listOf("L", FUNCTION1_DESCRIPTOR), opcode = Opcode.INVOKE_STATIC),
         opcode(Opcode.CONST),
         methodCall(parameters = listOf("L", "I"), returnType = "I", location = MatchAfterImmediately()),
         opcode(Opcode.CONST, MatchAfterWithin(1)),
@@ -96,16 +97,18 @@ internal fun injectLithoDownloadButton(stateType: String) {
     val classSetter = matches[12].methodReference
     val idSetter = matches[14].methodReference
     val onClickSetter = matches[15].methodReference
-    val dimensionAttribute = matches[16].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
-    val themeAccessor = matches[17].methodReference
-    val tintAttribute = matches[18].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
-    val iconConstructor = matches[20].methodReference
+    val onLongClickSetter = matches[16].methodReference
+    val dimensionAttribute = matches[17].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
+    val themeAccessor = matches[18].methodReference
+    val tintAttribute = matches[19].getInstruction<WideLiteralInstruction>().wideLiteral.toInt()
+    val iconConstructor = matches[21].methodReference
     val contextType = save.originalMethod.parameterTypes.first().toString()
     val nodeType = onClickSetter.parameterTypes.first().toString()
     if (neutralStyle.definingClass != nodeType ||
-        listOf(alignmentSetter, heightSetter, descriptionSetter, classSetter, idSetter, onClickSetter).any {
+        !setsViewProperty(onClickSetter, "ON_CLICK") || !setsViewProperty(onLongClickSetter, "ON_LONG_CLICK") ||
+        listOf(alignmentSetter, heightSetter, descriptionSetter, classSetter, idSetter, onClickSetter, onLongClickSetter).any {
             it.parameterTypes.first().toString() != nodeType || it.returnType != nodeType
-        } || themeAccessor != matches[19].methodReference ||
+        } || themeAccessor != matches[20].methodReference ||
         iconConstructor.parameterTypes[1].toString() != nodeType ||
         save.originalMethod.returnType != iconConstructor.definingClass
     ) {
@@ -199,7 +202,8 @@ internal fun injectLithoDownloadButton(stateType: String) {
                 move-result-wide v3
                 invoke-static {v2, v3, v4}, $heightSetter
                 move-result-object v2
-                const-string v3, "Download"
+                invoke-static {}, $DOWNLOAD_UTILS_DESCRIPTOR->feedDownloadButtonDescription()Ljava/lang/String;
+                move-result-object v3
                 invoke-static {v2, v3}, $descriptionSetter
                 move-result-object v2
                 const-string v3, "android.widget.Button"
@@ -209,6 +213,10 @@ internal fun injectLithoDownloadButton(stateType: String) {
                 invoke-static {v2, v3}, $idSetter
                 move-result-object v2
                 invoke-static {v2, v0}, $onClickSetter
+                move-result-object v2
+                invoke-virtual {v0}, $CLICK_HANDLER_DESCRIPTOR->longClick()$FUNCTION1_DESCRIPTOR
+                move-result-object v0
+                invoke-static {v2, v0}, $onLongClickSetter
                 move-result-object v5
 
                 const v3, $dimensionAttribute

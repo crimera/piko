@@ -23,13 +23,16 @@ final class DownloadMediaGroup {
     final MediaData carouselParent;
     private final List<MediaData> stories;
 
-    private DownloadMediaGroup(MediaData carouselParent, List<MediaData> stories) {
+    private final int currentStoryIndex;
+
+    private DownloadMediaGroup(MediaData carouselParent, List<MediaData> stories, int currentStoryIndex) {
         this.carouselParent = carouselParent;
         this.stories = stories;
+        this.currentStoryIndex = currentStoryIndex;
     }
 
     static DownloadMediaGroup carousel(MediaData parent) {
-        return new DownloadMediaGroup(parent, null);
+        return new DownloadMediaGroup(parent, null, 0);
     }
 
     static DownloadMediaGroup stories(MediaData current, Object reel, UserSession session) {
@@ -40,21 +43,28 @@ final class DownloadMediaGroup {
                 String currentId = current.getMediaPkId();
                 if (ownerId != null && !ownerId.isEmpty() && currentId != null && !currentId.isEmpty()) {
                     List<MediaData> stories = new ArrayList<>();
+                    int currentIndex = -1;
                     Set<String> ids = new HashSet<>();
                     for (Object media : StoryDownloadMedia.items(reel, session)) {
                         MediaData item = new MediaData(media, session);
                         UserData owner = item.getUserData();
                         if (owner == null || !ownerId.equals(owner.getUserId())) continue;
                         String id = item.getMediaPkId();
-                        if (id != null && !id.isEmpty() && ids.add(id)) stories.add(item);
+                        if (id == null || id.isEmpty() || !ids.add(id)) continue;
+                        if (id.equals(currentId)) currentIndex = stories.size();
+                        stories.add(item);
                     }
-                    if (ids.contains(currentId)) return new DownloadMediaGroup(null, stories);
+                    if (currentIndex >= 0) return new DownloadMediaGroup(null, stories, currentIndex);
                 }
             } catch (Exception | LinkageError e) {
                 Logger.printException(() -> "Could not read story download items", e);
             }
         }
-        return new DownloadMediaGroup(null, Collections.singletonList(current));
+        return new DownloadMediaGroup(null, Collections.singletonList(current), 0);
+    }
+
+    int currentFilenameIndex(int position) {
+        return carouselParent == null ? currentStoryIndex : position;
     }
 
     int size() throws Exception {
