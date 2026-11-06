@@ -204,7 +204,7 @@
   },
   {
     "name" : "Maps notes",
-    "desc" : "Disable to remove the notes maps feature.",
+    "desc" : "Disable to remove the notes maps feature (Also remove the friends maps).",
     "code" : "65057::0"
   },
   {
