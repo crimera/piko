@@ -18,7 +18,7 @@ import java.util.List;
 public class PikoMessageDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_dm_vault.db";
-    static final int DB_VERSION = 4;
+    static final int DB_VERSION = 5;
     private static final String TABLE = "saved_messages";
     // sender_id → username directory. MQTT-delivered items carry only a numeric sender_id;
     // the REST path occasionally carries a full UserInfo. Every time we resolve a username we
@@ -56,7 +56,25 @@ public class PikoMessageDb extends SQLiteOpenHelper {
                     + "WHERE message_id GLOB '[0-9]*' AND message_id NOT GLOB '*[^0-9]*'");
             java.util.Collections.addAll(statements, identityIndexStatements());
         }
+        if (oldVersion < 5) java.util.Collections.addAll(statements, chatStoreStatements());
         return statements.toArray(new String[0]);
+    }
+
+    /** Notification reducer state (DB v5). Additive: older builds ignore these tables. */
+    static String[] chatStoreStatements() {
+        return new String[]{
+                "CREATE TABLE IF NOT EXISTS chat_state (viewer_id TEXT NOT NULL, thread_id TEXT NOT NULL,"
+                        + " read_up_to INTEGER, reply_read_up_to INTEGER, slots INTEGER, digest_count INTEGER,"
+                        + " digest_text TEXT, digest_sender_id TEXT, digest_sender_name TEXT, digest_arrival INTEGER,"
+                        + " next_seq INTEGER, has_plan INTEGER, plan_clear INTEGER, plan_alert INTEGER,"
+                        + " plan_more INTEGER, plan_sender TEXT, updated_at INTEGER NOT NULL,"
+                        + " PRIMARY KEY (viewer_id, thread_id))",
+                "CREATE TABLE IF NOT EXISTS chat_messages (viewer_id TEXT NOT NULL, thread_id TEXT NOT NULL,"
+                        + " role INTEGER NOT NULL, pos INTEGER NOT NULL, item_id TEXT, sender_id TEXT,"
+                        + " sender_is_viewer INTEGER, text TEXT, server_time INTEGER, arrival_time INTEGER,"
+                        + " kind TEXT, edited INTEGER, flags INTEGER, seq INTEGER)",
+                "CREATE INDEX IF NOT EXISTS idx_chat_messages_chat ON chat_messages(viewer_id, thread_id)"
+        };
     }
 
     public static PikoMessageDb getInstance(Context context) {
@@ -95,6 +113,7 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX idx_is_deleted ON " + TABLE + "(is_deleted)");
         createIdentityIndexes(db);
         createDirTable(db);
+        for (String statement : chatStoreStatements()) db.execSQL(statement);
     }
 
     private void createDirTable(SQLiteDatabase db) {
@@ -118,6 +137,14 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         for (String statement : upgradeStatements(oldVersion)) {
             db.execSQL(statement);
         }
+    }
+
+    /**
+     * Every schema change is additive, so a build that knows an older version can use a newer
+     * database as it is. Android's default would refuse to open it.
+     */
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
     /** Insert or enrich a captured message using exact Instagram identifiers. */
