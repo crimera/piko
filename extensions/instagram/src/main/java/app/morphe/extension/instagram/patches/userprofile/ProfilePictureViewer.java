@@ -32,9 +32,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import app.morphe.extension.instagram.constants.UI;
@@ -54,7 +59,7 @@ public class ProfilePictureViewer {
     private ProfilePictureViewer() {
     }
 
-    public static void show(Context context, UserData userData) {
+    public static void show(Context context, UserData userData, Callable<String> refreshUrl) {
         try {
             String imageUrl = userData.getProfilePictureUrl();
             String username = userData.getUsername();
@@ -96,22 +101,34 @@ public class ProfilePictureViewer {
             content.setOrientation(LinearLayout.VERTICAL);
             scroll.addView(content, new ScrollView.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            content.addView(buildImageArea(dialogContext, imageUrl, placeholderColor));
-            content.addView(buildActionButton(dialogContext, str("piko_open_image_externally"), () -> {
-                dialog.dismiss();
-                ActivityHook.handleUrlIntent(false, imageUrl);
+            View openButton = buildActionButton(dialogContext, str("piko_open_image_externally"));
+            View downloadButton = buildActionButton(dialogContext, str("piko_download_profile_picture"));
+            content.addView(buildImageArea(dialog, imageUrl, placeholderColor, refreshUrl, resolvedUrl -> {
+                openButton.setOnClickListener(v -> {
+                    dialog.dismiss();
+                    try {
+                        ActivityHook.handleUrlIntent(false, resolvedUrl);
+                    } catch (Exception e) {
+                        Logger.printInfo(() -> "Profile picture external open: " + e.getClass().getSimpleName());
+                        Utils.showToastShort(str("piko_fail_no_file"));
+                    }
+                });
+                downloadButton.setOnClickListener(v -> {
+                    try {
+                        String filename = username + "_dp.jpg";
+                        String subFolder = DownloadUtils.getSubfolderName(username);
+                        DownloadUtils.downloadMediaUrl(context, resolvedUrl, subFolder, filename);
+                    } catch (Exception e) {
+                        Logger.printInfo(() -> "Profile picture download: " + e.getClass().getSimpleName());
+                        Utils.showToastShort(str("piko_download_failed_media"));
+                    }
+                    dialog.dismiss();
+                });
+                openButton.setEnabled(true);
+                downloadButton.setEnabled(true);
             }));
-            content.addView(buildActionButton(dialogContext, str("piko_download_profile_picture"), () -> {
-                try {
-                    String filename = username + "_dp.jpg";
-                    String subFolder = DownloadUtils.getSubfolderName(username);
-                    DownloadUtils.downloadMediaUrl(context, imageUrl, subFolder, filename);
-                } catch (Exception e) {
-                    Logger.printException(() -> "Error downloading profile picture", e);
-                    Utils.showToastShort(e.getMessage());
-                }
-                dialog.dismiss();
-            }));
+            content.addView(openButton);
+            content.addView(downloadButton);
 
             dialog.setContentView(panel);
 
@@ -131,8 +148,8 @@ public class ProfilePictureViewer {
 
             dialog.show();
         } catch (Exception e) {
-            Logger.printException(() -> "Error at ProfilePictureViewer.show", e);
-            Utils.showToastShort(e.getMessage());
+            Logger.printInfo(() -> "Profile picture dialog: " + e.getClass().getSimpleName());
+            Utils.showToastShort(str("piko_fail_no_file"));
         }
     }
 
@@ -161,7 +178,9 @@ public class ProfilePictureViewer {
         return row;
     }
 
-    private static View buildImageArea(Context context, String imageUrl, int placeholderColor) {
+    private static View buildImageArea(Dialog dialog, String imageUrl, int placeholderColor,
+                                       Callable<String> refreshUrl, Consumer<String> onUrlResolved) {
+        Context context = dialog.getContext();
         SquareFrameLayout frame = new SquareFrameLayout(context);
         LinearLayout.LayoutParams frameParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -184,99 +203,99 @@ public class ProfilePictureViewer {
         imageView.setVisibility(View.GONE);
         frame.addView(imageView);
 
-        ProfilePictureLoader loader = new ProfilePictureLoader(imageUrl, bitmap -> {
+        loadImage(imageUrl, refreshUrl, () -> dialog.isShowing() && frame.isAttachedToWindow(), (bitmap, resolvedUrl) -> {
             progressBar.setVisibility(View.GONE);
             if (bitmap != null) {
                 imageView.setImageBitmap(bitmap);
                 imageView.setVisibility(View.VISIBLE);
+                onUrlResolved.accept(resolvedUrl);
             } else {
                 Utils.showToastShort(str("piko_download_failed_media"));
             }
         });
-        frame.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(View view) {
-                loader.start();
-            }
-
-            @Override
-            public void onViewDetachedFromWindow(View view) {
-                loader.close();
-            }
-        });
-
         return frame;
     }
 
-    private static View buildActionButton(Context context, String label, Runnable onClick) {
+    private static View buildActionButton(Context context, String label) {
         InstagramButton button = new InstagramButton(context);
         button.setText(label);
         button.setStyle(InstagramButtonStyleEnum.SECONDARY);
-        button.setOnClickListener(onClick);
 
         int marginPx = dp(context, 12);
         button.setMargins(marginPx, dp(context, 8), marginPx, 0);
 
         IgdsButton igdsButton = button.getIgdsButton();
+        igdsButton.setEnabled(false);
         return igdsButton;
     }
 
-    private static final class ProfilePictureLoader implements AutoCloseable {
-        private final Handler mainHandler = new Handler(Looper.getMainLooper());
-        private final String imageUrl;
-        private final Thread worker = new Thread(this::load);
-        private Consumer<Bitmap> callback;
-        private volatile HttpURLConnection connection;
-        private volatile boolean closed;
-
-        ProfilePictureLoader(String imageUrl, Consumer<Bitmap> callback) {
-            this.imageUrl = imageUrl;
-            this.callback = callback;
-        }
-
-        void start() {
-            if (!closed && worker.getState() == Thread.State.NEW) worker.start();
-        }
-
-        private void load() {
+    private static void loadImage(String imageUrl, Callable<String> refreshUrl, BooleanSupplier isShowing,
+                                  BiConsumer<Bitmap, String> callback) {
+        new Thread(() -> {
+            String url = imageUrl;
             Bitmap bitmap = null;
-            HttpURLConnection current = null;
             try {
-                if (closed) return;
-                current = (HttpURLConnection) new URL(imageUrl).openConnection();
-                connection = current;
-                if (closed) return;
-                current.setConnectTimeout(15000);
-                current.setReadTimeout(15000);
-                current.connect();
-                try (InputStream input = current.getInputStream()) {
-                    if (!closed) bitmap = BitmapFactory.decodeStream(input);
+                try {
+                    bitmap = fetch(url);
+                } catch (ExpiredSignature expired) {
+                    url = refreshUrl.call();
+                    if (url != null && !url.isEmpty() && !url.equals(imageUrl)) {
+                        bitmap = fetch(url);
+                    } else {
+                        Logger.printInfo(() -> "Profile picture refresh returned no new HD URL");
+                    }
                 }
             } catch (Exception e) {
-                if (!closed) Logger.printException(() -> "Failed to load profile picture", e);
-            } finally {
-                if (current != null) current.disconnect();
-                connection = null;
+                Logger.printInfo(() -> "Profile picture load: " + e.getClass().getSimpleName());
             }
             Bitmap result = bitmap;
-            mainHandler.post(() -> {
-                if (closed) {
-                    if (result != null) result.recycle();
-                    return;
-                }
-                callback.accept(result);
+            String resolvedUrl = result == null ? null : url;
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (isShowing.getAsBoolean()) callback.accept(result, resolvedUrl);
+                else if (result != null) result.recycle();
             });
-        }
+        }).start();
+    }
 
-        @Override
-        public void close() {
-            closed = true;
-            callback = null;
-            worker.interrupt();
-            HttpURLConnection current = connection;
-            if (current != null) current.disconnect();
+    private static Bitmap fetch(String url) throws IOException {
+        HttpURLConnection current = (HttpURLConnection) new URL(url).openConnection();
+        try {
+            current.setConnectTimeout(15000);
+            current.setReadTimeout(15000);
+            int status = current.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                Logger.printInfo(() -> "Profile picture image request: HTTP " + status);
+                if (status == HttpURLConnection.HTTP_FORBIDDEN && isExpired(current)) throw new ExpiredSignature();
+                return null;
+            }
+            try (InputStream input = current.getInputStream()) {
+                Bitmap result = BitmapFactory.decodeStream(input);
+                if (result == null) Logger.printInfo(() -> "Profile picture image decode failed");
+                return result;
+            }
+        } finally {
+            current.disconnect();
         }
     }
+
+    private static boolean isExpired(HttpURLConnection current) throws IOException {
+        String marker = "URL signature expired";
+        if (marker.equalsIgnoreCase(current.getResponseMessage())) return true;
+        try (InputStream error = current.getErrorStream()) {
+            if (error == null) return false;
+            byte[] bytes = new byte[256];
+            int count = 0;
+            while (count < bytes.length) {
+                int read = error.read(bytes, count, bytes.length - count);
+                if (read <= 0) break;
+                count += read;
+            }
+            return marker.equalsIgnoreCase(new String(bytes, 0, count, StandardCharsets.UTF_8).trim());
+        }
+    }
+
+    private static final class ExpiredSignature extends IOException {}
+
 
     private static class SquareFrameLayout extends FrameLayout {
         SquareFrameLayout(Context context) {

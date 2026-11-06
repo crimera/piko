@@ -8,6 +8,8 @@
 package app.morphe.extension.instagram.entity;
 
 
+import com.instagram.common.session.UserSession;
+
 public class ProfileInfo extends Entity {
     protected final Object obj;
 
@@ -27,6 +29,10 @@ public class ProfileInfo extends Entity {
     public boolean isSelfProfile() throws Exception {
         Entity profileRelatedDetails = getProfileRelatedDetails();
         return (Boolean) profileRelatedDetails.getField("fieldName");
+    }
+
+    public UserSession getUserSession() throws Exception {
+        return (UserSession) getUserDetailViewModel().getField("sessionField");
     }
 
     public UserData getUserData() throws Exception {

@@ -38,6 +38,23 @@ val userDataEntity =
             )
             IsVerifiedExtensionFingerprint.changeFirstString(IsVerifiedUserTreeDictFingerprint.originalMethod.name)
 
+            val request = ProfileUserRequestFingerprint.originalMethod
+            val repository = ProfileUserRequestFingerprint.originalClassDef.staticFields.single {
+                it.type == request.definingClass && AccessFlags.PUBLIC.isSet(it.accessFlags)
+            }
+            FetchProfileUserExtensionFingerprint.method.apply {
+                removeInstructions(0, instructions.size)
+                addInstructions(
+                    0,
+                    """
+                    sget-object p0, $repository
+                    invoke-virtual/range {p0 .. p2}, $request
+                    move-result-object p0
+                    return-object p0
+                    """.trimIndent(),
+                )
+            }
+
             // The user object itself carries the additional user info.
             GetAdditionalUserInfoExtensionFingerprint.method.apply {
                 val userObjectField = GetAdditionalUserInfoExtensionFingerprint.classDef.fields.single {

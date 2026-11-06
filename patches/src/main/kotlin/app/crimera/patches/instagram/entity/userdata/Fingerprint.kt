@@ -15,9 +15,22 @@ import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/UserData;"
+
+internal object ProfileUserRequestFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    parameters = listOf(Constants.USER_SESSION_CLASS, "Ljava/lang/String;"),
+    returnType = USER_MODEL_CLASS_NAME,
+    filters = listOf(string("users/%s/info/")),
+)
+
+internal object FetchProfileUserExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "fetchProfileUser",
+)
 
 internal object GetAdditionalUserInfoExtensionFingerprint : Fingerprint(
     name = "getAdditionalUserInfo",
