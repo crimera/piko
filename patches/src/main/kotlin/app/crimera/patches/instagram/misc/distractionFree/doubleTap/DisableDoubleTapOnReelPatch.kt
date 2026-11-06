@@ -10,7 +10,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.matchSingle
 
 internal object ReelOnDoubleTapFingerprint : Fingerprint(
     parameters = listOf("Landroid/view/MotionEvent;"),
@@ -28,7 +27,7 @@ val disableDoubleTapOnReelPatch =
 
         execute {
 
-            ReelOnDoubleTapFingerprint.matchSingle().method.addInstructions(
+            ReelOnDoubleTapFingerprint.method.addInstructions(
                 0,
                 DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapReel"),
             )

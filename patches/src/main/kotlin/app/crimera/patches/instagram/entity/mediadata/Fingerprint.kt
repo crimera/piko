@@ -124,7 +124,7 @@ internal object GetPostTypeKeyExtensionFingerprint : Fingerprint(
 // -----------------------------------
 
 internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
-    definingClass = "/InstagramMainActivity;",
+    definingClass = "Lcom/instagram/mainactivity/InstagramMainActivity;",
     filters = listOf(
         string("nme_ig_post_post_creation_notif"),
         // Mentioned user.
@@ -240,15 +240,16 @@ internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
     filters = listOf(
         string("igtv_shopping_info"),
-        fieldAccess(type = "Lcom/instagram/model/mediasize/ImageInfo;", opcode = Opcode.IGET_OBJECT),
+        fieldAccess(type = "Lcom/instagram/model/mediasize/ImageInfo;", opcode = Opcode.IGET_OBJECT, location = MatchAfterWithin(2)),
         string("image_versions2"),
     ),
 )
 
 internal object ProductInfoMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
-    strings = listOf("product_suggestions", "product_tags"),
     filters = listOf(
+        string("product_suggestions"),
+        string("product_tags"),
         string("product_type"),
         fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
     ),

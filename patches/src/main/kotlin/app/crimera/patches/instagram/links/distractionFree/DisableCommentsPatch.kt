@@ -15,14 +15,12 @@ import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.patches.instagram.utils.hideFeedUfiStates
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -57,7 +55,7 @@ val disableCommentsPatch =
                 ", shouldShowCommentCountInUfi=",
             )
 
-            val reelsMatch = ReelsCommentStateFingerprint.matchSingle()
+            val reelsMatch = ReelsCommentStateFingerprint.match()
             val reelsMethod = reelsMatch.method
             val hiddenField = reelsMatch.instructionMatches[3].fieldReference
             val stateRegister = reelsMatch.instructionMatches[3].getInstruction<OneRegisterInstruction>().registerA

@@ -276,6 +276,16 @@ public class ScreenBuilder {
     public void dmSection() {
         if (!(SettingsStatus.dmSection())) return;
 
+        if (SettingsStatus.disableDisappearingMessagesGesture) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_disappearing_messages_gesture"),
+                            str("piko_disable_disappearing_messages_gesture_desc"),
+                            Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE
+                    )
+            );
+        }
+
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(
                     helper.switchPreference(
@@ -593,6 +603,15 @@ public class ScreenBuilder {
                     str("piko_hide_reels_follow_button"),
                     str("piko_hide_reels_follow_button_desc"),
                     Settings.HIDE_REELS_FOLLOW_BUTTON
+            );
+        }
+        if (SettingsStatus.hideLikes) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_likes"),
+                            "",
+                            Settings.HIDE_LIKES
+                    )
             );
         }
         if (SettingsStatus.hideShareButton) {

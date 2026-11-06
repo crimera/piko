@@ -8,8 +8,10 @@ package app.crimera.patches.instagram.misc.stories
 
 import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.misc.download.storyViewerItemList
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -18,14 +20,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
@@ -59,11 +59,13 @@ object SelfStoryAddStoryButtonFingerprint : Fingerprint(
 
 // The method is obfuscated but this is where the onclick call executes.
 internal object OnCLickStoryButtonFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     strings = listOf("explore_viewer", "friendships/mute_friend_reel/%s/", "[INTERNAL] Pause Playback"),
 )
 
 internal object SelfStoryOnCLickStoryButtonFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
     strings = listOf("story_interactions/bulk_story_like/", "[INTERNAL] Pause Playback"),
 )
@@ -78,8 +80,8 @@ val handleStoryButtonPatch =
 
             val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
             listOf(
-                SelfStoryAddStoryButtonFingerprint.matchSingle(),
-                AddStoryButtonFingerprint.matchOrNull() ?: ExtractedStoryButtonFingerprint.matchSingle(),
+                SelfStoryAddStoryButtonFingerprint.match(),
+                AddStoryButtonFingerprint.matchOrNull() ?: ExtractedStoryButtonFingerprint.match(),
             ).forEach {
                 val listIndex = it.instructionMatches.last().index
                 val arrayListRegister = it.instructionMatches.last().instruction.registersUsed.single()
@@ -94,6 +96,7 @@ val handleStoryButtonPatch =
             }
 
             val onClickFingerprints = listOf(SelfStoryOnCLickStoryButtonFingerprint, OnCLickStoryButtonFingerprint)
+            val reelType = storyViewerItemList().definingClass
             onClickFingerprints.forEach { fingerprint ->
                 fingerprint.method.apply {
                     val classDef = fingerprint.classDef
@@ -104,6 +107,8 @@ val handleStoryButtonPatch =
 
                     val classFields = classDef.fields
                     val reelItemField = classFields.single { it.type == reelItemClassName }
+                    val reelField = classDef.instanceFields.single { it.type == reelType }
+                    val sessionField = classDef.instanceFields.single { it.type == USER_SESSION_CLASS }
                     val appActivityField = classFields.single { it.type == appActivity }
                     val dismissListenerField = classFields.singleOrNull { it.type == dismissListener }
                         ?: throw PatchException("Expected one story menu dismiss listener field")
@@ -117,29 +122,30 @@ val handleStoryButtonPatch =
                     val dismissListenerParameterIndex = parameters.indices.singleOrNull {
                         parameters[it].type == dismissListener
                     } ?: throw PatchException("Expected one story menu dismiss listener parameter")
-                    if (!AccessFlags.STATIC.isSet(accessFlags) || p0Register < 5 ||
-                        characterSequenceParameterIndex < 0 || selfClassParameterIndex < 0
-                    ) throw PatchException("Unexpected story menu click parameters or local registers")
+                    if (p0Register < 7 || characterSequenceParameterIndex < 0 || selfClassParameterIndex < 0) {
+                        throw PatchException("Unexpected story menu click parameters or local registers")
+                    }
 
-                    // Hard coding registries as it's going to be the first line in the method.
+                    // At method entry, v0..v5 hold the contiguous invoke-range arguments and v6 keeps the menu instance.
                     addInstructionsWithLabels(
                         0,
                         """
                         move-object/from16 v0, p$characterSequenceParameterIndex
-                        move-object/from16 v1, p$selfClassParameterIndex
-                        
-                        iget-object v2, v1, $appActivityField
-                        iget-object v3, v1, $reelItemField
+                        move-object/from16 v6, p$selfClassParameterIndex
+                        iget-object v1, v6, $appActivityField
+                        iget-object v2, v6, $sessionField
+                        iget-object v3, v6, $reelItemField
                         iget-object v3, v3, $reelItemMediaField
-                        move-object/from16 v4, p$dismissListenerParameterIndex
-                        invoke-static {v0,v2,v3,v4}, $STORY_BUTTON_EXTENSION_CLASS->storyDialogAction($charSequence Landroid/content/Context;Ljava/lang/Object;$dismissListener)Z
-                        move-result v4
-                        if-eqz v4, :other_buttons
-                        const/4 v4, 0x0
-                        iput-object v4, v1, $dismissListenerField
+                        iget-object v4, v6, $reelField
+                        move-object/from16 v5, p$dismissListenerParameterIndex
+                        invoke-static/range {v0 .. v5}, $STORY_BUTTON_EXTENSION_CLASS->storyDialogAction($charSequence Landroid/content/Context;${USER_SESSION_CLASS}Ljava/lang/Object;Ljava/lang/Object;$dismissListener)Z
+                        move-result v5
+                        if-eqz v5, :other_buttons
+                        const/4 v5, 0x0
+                        iput-object v5, v6, $dismissListenerField
                         return-void
                         :other_buttons
-                        invoke-static {v0,v2,v3}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;)Z
+                        invoke-static {v0,v1,v3}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;)Z
                         move-result v0
                         if-eqz v0, :piko
                         return-void

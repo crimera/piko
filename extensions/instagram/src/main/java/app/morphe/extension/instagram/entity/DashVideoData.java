@@ -13,11 +13,11 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
 
 import app.morphe.extension.crimera.downloader.MediaType;
 
@@ -27,9 +27,9 @@ import app.morphe.extension.crimera.downloader.MediaType;
  * adds AV1 (sometimes VP9) up to the upload's size later, which the progressive video_versions
  * never carry. Doubles as a variant in the download dialog.
  */
-public final class DashVideoData implements MediaInterface {
+public final class DashVideoData implements VideoVariant {
     /**
-     * The codecs the remuxer handles, best first, from the Android version whose MediaExtractor
+     * The codecs the remuxer handles, from the Android version whose MediaExtractor
      * reads them from MP4: AV1 since 10, VP9 since 12. Any other codec is never remuxed.
      */
     private enum Codec {
@@ -67,10 +67,10 @@ public final class DashVideoData implements MediaInterface {
         final int width;
         final int height;
         final int bandwidth;
-        final double quality;
+        final Map<Integer, Double> quality;
         String url;
 
-        Track(boolean video, String codecs, int width, int height, int bandwidth, double quality) {
+        Track(boolean video, String codecs, int width, int height, int bandwidth, Map<Integer, Double> quality) {
             this.video = video;
             this.codec = Codec.of(codecs);
             this.width = width;
@@ -89,9 +89,8 @@ public final class DashVideoData implements MediaInterface {
     }
 
     /**
-     * The video renditions of a manifest this device can remux, sharpest first: by short side,
-     * then quality, then codec, then bitrate, one per resolution and codec. Each carries the
-     * manifest's highest-bitrate audio. Throws on anything unparsable.
+     * All video renditions this device can remux, sharpest first, retaining alternate files.
+     * Each carries the manifest's highest-bitrate audio. Throws on an unparsable manifest.
      */
     public static List<DashVideoData> parse(String manifest) throws Exception {
         List<Track> videos = new ArrayList<>();
@@ -153,14 +152,11 @@ public final class DashVideoData implements MediaInterface {
         for (Track video : videos) {
             if (Build.VERSION.SDK_INT >= video.codec.minSdk) renditions.add(new DashVideoData(video, audioUrl));
         }
-        renditions.sort(Comparator.comparingInt(DashVideoData::shortSide)
-                .thenComparingDouble((DashVideoData r) -> r.track.quality)
-                .thenComparing((DashVideoData r) -> r.track.codec, Comparator.reverseOrder())
-                .thenComparingInt((DashVideoData r) -> r.track.bandwidth)
-                .reversed());
-        Set<String> seen = new HashSet<>();
-        renditions.removeIf(rendition -> !seen.add(rendition.getVariantTag()));
-        return renditions;
+        List<DashVideoData> ordered = new ArrayList<>();
+        for (VideoResolution resolution : VideoResolution.group(renditions)) {
+            for (VideoVariant candidate : resolution.getCandidates()) ordered.add((DashVideoData) candidate);
+        }
+        return ordered;
     }
 
     @Override
@@ -168,11 +164,25 @@ public final class DashVideoData implements MediaInterface {
         return Math.min(track.width, track.height);
     }
 
-    /** Such as "1080p AV1 · 82", the score being Instagram's own rating of the rendition. */
+    /** Such as "1080p"; quality metadata is kept for selection, not shown as a label. */
     @Override
     public String getLabel() {
-        String label = shortSide() + "p " + track.codec.label;
-        return track.quality > 0 ? label + " · " + Math.round(track.quality) : label;
+        return shortSide() + "p";
+    }
+
+    @Override
+    public String getVideoCodec() {
+        return track.codec.label;
+    }
+
+    @Override
+    public int getBitrate() {
+        return track.bandwidth;
+    }
+
+    @Override
+    public Map<Integer, Double> getQualityScores() {
+        return track.quality;
     }
 
     /** File name safe, such as "1080p-av1". */
@@ -217,17 +227,23 @@ public final class DashVideoData implements MediaInterface {
 
     /**
      * FBPlaybackResolutionMos pairs a playback resolution with the score the rendition gets when
-     * viewed at it, as "0:100,360:86.7,720:73.6,1080:66.9". The score at 1080 compares across
-     * posts, whose lists end at different resolutions; the last pair stands in without one. 0
-     * when the attribute is missing.
+     * viewed at it, as "0:100,360:86.7,720:73.6,1080:66.9". Preserve the evaluation size;
+     * scores at different sizes cannot establish which rendition looks better.
      */
-    private static double parseQuality(String value) {
-        if (value == null) return 0;
-        String[] pairs = value.split(",");
-        String pair = pairs[pairs.length - 1];
-        for (String candidate : pairs) {
-            if (candidate.trim().startsWith("1080:")) pair = candidate;
+    private static Map<Integer, Double> parseQuality(String value) {
+        if (value == null) return Collections.emptyMap();
+        Map<Integer, Double> scores = new HashMap<>();
+        for (String pair : value.split(",")) {
+            String[] parts = pair.split(":");
+            if (parts.length != 2) continue;
+            try {
+                int size = Integer.parseInt(parts[0].trim());
+                double score = Double.parseDouble(parts[1].trim());
+                if (size > 0 && Double.isFinite(score) && score > 0) scores.put(size, score);
+            } catch (NumberFormatException ignored) {
+                // Optional quality metadata must not discard an otherwise usable download.
+            }
         }
-        return Double.parseDouble(pair.substring(pair.indexOf(':') + 1).trim());
+        return Collections.unmodifiableMap(scores);
     }
 }

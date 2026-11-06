@@ -25,7 +25,7 @@ internal object GetMappingsExtension : Fingerprint(
 )
 
 internal object TrackDataFromMusicInfoMethodFingerprint : Fingerprint(
-    definingClass = "Lcom/instagram/api/schemas/MusicInfo",
+    definingClass = "Lcom/instagram/api/schemas/MusicInfo;",
     returnType = "Lcom/instagram/api/schemas/TrackData;",
 )
 

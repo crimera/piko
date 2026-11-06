@@ -18,7 +18,6 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -52,7 +51,7 @@ val markAsReadAfterReplyPatch = bytecodePatch(
             """.trimIndent(),
         )
 
-        val threadId = DirectThreadKeyToStringFingerprint.matchSingle().instructionMatches.first().fieldReference
+        val threadId = DirectThreadKeyToStringFingerprint.instructionMatches.first().fieldReference
         ReplyReadThreadIdFingerprint.method.addInstructions(
             0,
             """
@@ -61,7 +60,7 @@ val markAsReadAfterReplyPatch = bytecodePatch(
             """.trimIndent(),
         )
 
-        val textSendClass = DmTextSendNameFingerprint.matchSingle().originalClassDef
+        val textSendClass = DmTextSendNameFingerprint.originalClassDef
         val sendClass = classDefBy(textSendClass.superclass
             ?: throw PatchException("Could not resolve the DM send mutation class"))
         val threadsGetter = sendClass.methods.singleOrNull { method ->
@@ -74,7 +73,7 @@ val markAsReadAfterReplyPatch = bytecodePatch(
                 } == true
         } ?: throw PatchException("Could not uniquely resolve the DM send thread list getter")
 
-        DmMutationSuccessFingerprint.matchSingle().let { success ->
+        DmMutationSuccessFingerprint.let { success ->
             val sessionField = success.originalClassDef.fields.singleOrNull {
                 it.type == USER_SESSION_CLASS && !AccessFlags.STATIC.isSet(it.accessFlags)
             } ?: throw PatchException("Could not uniquely resolve the DM success session field")

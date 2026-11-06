@@ -11,13 +11,11 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -46,7 +44,7 @@ val hideReelsFollowButtonPatch =
         dependsOn(settingsPatch)
 
         execute {
-            ReelsInlineFollowButtonFingerprint.matchSingle().let {
+            ReelsInlineFollowButtonFingerprint.let {
                 // Both follow results merge after the disabled result.
                 val disabledIndex = it.instructionMatches[3].index
                 val register = it.instructionMatches[3].getInstruction<OneRegisterInstruction>().registerA

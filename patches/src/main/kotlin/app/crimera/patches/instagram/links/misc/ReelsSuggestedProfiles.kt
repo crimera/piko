@@ -8,30 +8,28 @@ package app.crimera.patches.instagram.links.misc
 
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.methodReference
+import app.crimera.patches.instagram.utils.typeReference
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patcher.util.matchSingle
-import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import app.morphe.patcher.util.smali.ExternalLabel
 
 context(context: BytecodePatchContext)
 internal fun hideReelsSuggestions() {
-    val classifiers = ReelsSuggestedUsersExitFingerprint.matchAllOrNull().orEmpty()
-    if (classifiers.size > 1) throw PatchException("Multiple Reels suggested-user classifiers")
-    val classifier = classifiers.singleOrNull()?.instructionMatches?.first()?.methodReference
+    val classifier = ReelsSuggestedUsersExitFingerprint.matchOrNull()
+        ?.instructionMatches?.first()?.methodReference
 
-    ReelsHiddenItemsFingerprint.matchSingle().let { match ->
-        val method = match.method
-        val loopIndex = match.instructionMatches[1].index
-        val scratch = match.instructionMatches[2].instruction.registersUsed.single()
-        val castIndex = match.instructionMatches.last().index
-        val cast = match.instructionMatches.last().instruction
+    ReelsHiddenItemsFingerprint.let {
+        val method = it.method
+        val loopIndex = it.instructionMatches[1].index
+        val scratch = it.instructionMatches[2].instruction.registersUsed.single()
+        val castMatch = it.instructionMatches.last()
+        val castIndex = castMatch.index
+        val cast = castMatch.instruction
         val itemRegister = cast.registersUsed.single()
-        val itemType = cast.getReference<TypeReference>()!!.type
+        val itemType = castMatch.typeReference
         val classify = if (classifier != null) {
             if (classifier.parameterTypes.map(CharSequence::toString) != listOf(itemType)) {
                 throw PatchException("Reels classifier does not accept the filtered item")
@@ -43,10 +41,7 @@ internal fun hideReelsSuggestions() {
             """.trimIndent()
         } else {
             // Newer builds inline the classifier; the card's enum retains both suggested-user kinds.
-            val enumClass = ReelsItemTypeFingerprint.matchSingle().originalClassDef
-            if (enumClass.superclass != "Ljava/lang/Enum;") {
-                throw PatchException("Reels item type is not an enum")
-            }
+            val enumClass = ReelsItemTypeFingerprint.originalClassDef
             val typeField = context.classDefBy(itemType).instanceFields.singleOrNull { it.type == enumClass.type }
                 ?: throw PatchException("Could not resolve a unique Reels item type field")
             if (scratch == itemRegister || scratch > 15 || itemRegister > 15) {

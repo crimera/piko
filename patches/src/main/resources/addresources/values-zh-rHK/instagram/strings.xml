@@ -35,8 +35,6 @@
     <string name="piko_turn_on_all_ghost_modes">開啟所有幽靈模式</string>
     <string name="piko_ghost_modes_on">幽靈模式：開啟</string>
     <string name="piko_ghost_modes_default">幽靈模式：預設</string>
-    <string name="piko_ghost_modes_quick_toggle">啟用幽靈模式的快速切換功能</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">在訊息操作列中新增一個切換按鈕以控制幽靈模式</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">免打擾選項</string>
     <string name="piko_disable_stories">停用限時動態</string>
@@ -100,7 +98,6 @@
     <string name="piko_save_media_comment">儲存媒體留言</string>
     <string name="piko_save_media_comment_desc">在貼文和 Reels 新增一個儲存媒體留言的按鈕</string>
     <string name="piko_enable_direct_download">啟用直接下載</string>
-    <string name="piko_enable_direct_download_desc">直接下載目前檢視的媒體，不詢問選項</string>
     <string name="piko_download_username_folder">按使用者名稱分類媒體</string>
     <string name="piko_download_username_folder_desc">根據使用者名稱建立子資料夾</string>
     <string name="piko_download_current_media">下載當前媒體</string>
@@ -131,11 +128,6 @@
     <string name="piko_more_options">更多選項</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">隱藏導覽按鈕</string>
-    <string name="piko_hide_navigation_feed">隱藏動態首頁按鈕</string>
-    <string name="piko_hide_navigation_reels">隱藏 Reels 按鈕</string>
-    <string name="piko_hide_navigation_direct">隱藏私訊按鈕</string>
-    <string name="piko_hide_navigation_search">隱藏搜尋按鈕</string>
-    <string name="piko_hide_navigation_create">隱藏創作按鈕</string>
     <!-- Information Section -->
     <string name="piko_category_about">關於</string>
     <string name="piko_app_version">應用程式版本：%s</string>
@@ -166,7 +158,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">更改「讚好」動畫</string>
     <string name="piko_change_like_animation_desc">將讚好動畫變更為現有的光圈讚好動畫之一</string>
-    <string name="piko_available_like_animation">可用的「讚好」動畫</string>
     <!-- For arrays -->
     <string name="piko_array_default">預設</string>
     <string name="piko_array_detailed_timestamp">詳細時間 (星期/月份/日期/小時/分鐘/秒)</string>
@@ -185,8 +176,6 @@
     <string name="piko_action_bar_button_settings_icon">設定圖標</string>
     <string name="piko_action_bar_button_ghost_mode_icon">幽靈模式圖標</string>
     <string name="piko_action_bar_button_profile_info_icon">個人檔案圖標</string>
-    <string name="piko_settings_on_action_bar">操作列上顯示 Piko 設定</string>
-    <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
     <!-- Font Section -->
     <!-- Developer Options Section -->
     <!-- Story filters -->

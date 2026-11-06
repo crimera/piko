@@ -7,9 +7,10 @@
 package app.crimera.patches.instagram.misc.telemetry
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
-import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
@@ -17,32 +18,29 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.string
-import app.morphe.util.findInstructionIndicesReversedOrThrow
-import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
+import app.morphe.util.findInstructionIndicesReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import org.w3c.dom.Element
 
-private fun Instruction.isFalcoLogCall(): Boolean =
-    (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) &&
-        getReference<MethodReference>()?.let {
-            it.definingClass == "Lcom/facebook/falco/fabric/FFSingletonJNILogger;" &&
-                it.name.startsWith("log") && it.returnType == "V"
-        } == true
+private const val FALCO_LOGGER_CLASS = "Lcom/facebook/falco/fabric/FFSingletonJNILogger;"
+
+private val falcoLogCall = anyInstruction(
+    methodCall(definingClass = FALCO_LOGGER_CLASS, name = "log", returnType = "V"),
+    methodCall(definingClass = FALCO_LOGGER_CLASS, name = "logBatched", returnType = "V"),
+    methodCall(definingClass = FALCO_LOGGER_CLASS, name = "logBatchedMixed", returnType = "V"),
+    methodCall(definingClass = FALCO_LOGGER_CLASS, name = "logWithPlatformSampling", returnType = "V"),
+    methodCall(definingClass = FALCO_LOGGER_CLASS, name = "logWithCollectionControlDecision", returnType = "V"),
+)
 
 private object FalcoLogCallerFingerprint : Fingerprint(
-    custom = { method, _ ->
-        method.implementation?.instructions?.any { it.isFalcoLogCall() } == true
-    },
+    filters = listOf(falcoLogCall),
 )
 
 private object ComponentStartupFingerprint : Fingerprint(
-    definingClass = "/InstagramApplicationForMainProcess;",
+    definingClass = "Lcom/instagram/process/instagram/InstagramApplicationForMainProcess;",
     name = "initializeAllColdStartJobs",
     returnType = "V",
     filters = listOf(
@@ -59,7 +57,7 @@ private object ComponentStartupFingerprint : Fingerprint(
 
 private val refreshComponentsPatch = bytecodePatch {
     execute {
-        val match = ComponentStartupFingerprint.matchSingle()
+        val match = ComponentStartupFingerprint.match()
         val instructions = match.method.implementation!!.instructions
         val versionResultIndex = match.instructionMatches[1].index
         val guardIndex = match.instructionMatches[3].index
@@ -151,7 +149,7 @@ val disableTelemetryPatch =
             // Falco log methods are native. Skip their calls while preserving queue cleanup in callers.
             FalcoLogCallerFingerprint.matchAll().forEach { match ->
                 match.method.apply {
-                    findInstructionIndicesReversedOrThrow { isFalcoLogCall() }.forEach { index ->
+                    findInstructionIndicesReversedOrThrow(falcoLogCall).forEach { index ->
                         replaceInstruction(index, "nop")
                     }
                 }

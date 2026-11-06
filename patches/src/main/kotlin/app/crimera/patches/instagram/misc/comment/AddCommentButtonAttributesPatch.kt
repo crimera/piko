@@ -14,22 +14,20 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
-import app.morphe.patcher.util.matchSingle
-import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
 
 /**
  * String and drawable resources of a native chat button, from its constructor.
  */
 context(_: BytecodePatchContext)
-internal fun nativeChatButtonResources(constructor: Fingerprint): Pair<Long, Long> =
-    constructor.matchSingle().let {
-        val drawable = it.instructionMatches[1].getInstruction<WideLiteralInstruction>().wideLiteral
-        val string = it.instructionMatches[2].getInstruction<WideLiteralInstruction>().wideLiteral
-        string to drawable
-    }
+internal fun nativeChatButtonResources(constructor: Fingerprint): Pair<Long, Long> {
+    val drawable = constructor.instructionMatches[1].getInstruction<WideLiteralInstruction>().wideLiteral
+    val string = constructor.instructionMatches[2].getInstruction<WideLiteralInstruction>().wideLiteral
+    return string to drawable
+}
 
 context(patchContext: BytecodePatchContext)
 fun addButtonAttribute(
