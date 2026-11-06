@@ -244,7 +244,7 @@
   },
   {
     "name" : "Webp gallery compression",
-    "desc" : "Set to 100 for less compression of temporary webp for photo in direct coming from the gallery. Only take effect if igd_webp_device_gallery (80122::0) is enabled (This should be enabled by Instagram servers.)",
+    "desc" : "Set to 100 for less compression of the temporary webp photos in direct coming from the gallery. Only take effect if igd_webp_device_gallery (80122::0) is enabled (This should be enabled by Instagram servers.)",
     "code" : "80122::1",
     "type" : "long"
   },
