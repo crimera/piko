@@ -244,13 +244,13 @@
   },
   {
     "name" : "Webp gallery compression",
-    "desc" : "Set to 100 for less compression of the temporary webp photos in direct coming from the gallery. Only take effect if igd_webp_device_gallery (80122::0) is enabled (This should be enabled by Instagram servers.)",
+    "desc" : "Set this to 100 for the highest webp quality when instagram creates a temporary copy of a gallery photo for a direct message. this setting only applies when igd_webp_device_gallery is enabled.",
     "code" : "80122::1",
     "type" : "long"
   },
   {
     "name" : "Heic uploads compression",
-    "desc" : "Set to 100 for less compression for regular heic uploads.",
+    "desc" : "Set this to 100 for highest quality of regular heic uploads.",
     "code" : "55416::1",
     "type" : "long"
   }
