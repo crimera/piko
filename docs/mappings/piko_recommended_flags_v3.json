@@ -203,6 +203,21 @@
     "code" : "68885"
   },
   {
+    "name" : "Maps notes",
+    "desc" : "Disable to remove the notes maps feature (Also remove the friends maps).",
+    "code" : "65057::0"
+  },
+  {
+    "name" : "GIF notes",
+    "desc" : "Disable to remove the notes GIF feature.",
+    "code" : "75711::0"
+  },
+  {
+    "name" : "Poll notes",
+    "desc" : "Enable to have the notes Poll feature (Not guaranted to work).",
+    "code" : "121655::0"
+  },
+  {
     "name" : "Blends",
     "desc" : "Disable to hide the Blends button in the header of eligible chats.",
     "code" : "76757::0"
