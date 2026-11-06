@@ -625,10 +625,10 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.hideSaveButtons) {
             addPreference(
-                    helper.switchPreference(
+                    helper.multiSelectListPref(
                             str("piko_hide_save_buttons"),
-                            "",
-                            Settings.HIDE_SAVE_BUTTONS
+                            str("piko_hide_save_buttons_desc"),
+                            Settings.HIDE_SAVE_BUTTON_SURFACES
                     )
             );
         }

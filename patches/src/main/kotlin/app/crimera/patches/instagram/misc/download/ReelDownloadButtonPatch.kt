@@ -310,7 +310,7 @@ private fun hookBuilderCallSites(
             addIndex,
             """
                 const/16 v$show, 1
-                invoke-static/range {v$show .. v$show}, $PREF_DESCRIPTOR->showSaveButton(Z)Z
+                invoke-static/range {v$show .. v$show}, $PREF_DESCRIPTOR->showReelSaveIcon(Z)Z
                 move-result v$show
                 if-eqz v$show, :after_save_count
             """.trimIndent(),

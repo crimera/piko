@@ -108,6 +108,7 @@
     <string name="piko_hide_likes">Hide like buttons</string>
     <string name="piko_hide_share_button">Hide share button</string>
     <string name="piko_hide_save_buttons">Hide save buttons</string>
+    <string name="piko_hide_save_buttons_desc">Choose where to hide the save button</string>
     <string name="piko_hide_reshare_button">Hide reshare button</string>
     <string name="piko_hide_reels_follow_button_desc">Removes the follow button from the Reels author row</string>
     <string name="piko_disable_video_autoplay">Disable video autoplay</string>

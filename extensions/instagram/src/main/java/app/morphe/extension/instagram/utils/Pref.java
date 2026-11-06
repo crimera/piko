@@ -285,8 +285,28 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_SHARE_BUTTON) && SettingsStatus.hideShareButton;
     }
 
+    /** The surfaces the save button is hidden on; "posts" / "reels" (hide_save_button_surfaces). */
+    public static Set<String> hideSaveButtonSurfaces() {
+        Set<String> surfaces = SharedPref.getSetPref(Settings.HIDE_SAVE_BUTTON_SURFACES);
+        Context context = Utils.getContext();
+        var preferences = context == null ? null
+                : context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        if (preferences == null || preferences.contains(Settings.HIDE_SAVE_BUTTON_SURFACES.key)) return surfaces;
+        if (SharedPref.getBooleanPref(Settings.HIDE_SAVE_BUTTONS_LEGACY)) {
+            surfaces = new HashSet<>(surfaces);
+            surfaces.add("posts");
+            surfaces.add("reels");
+            SharedPref.setSetPref(Settings.HIDE_SAVE_BUTTON_SURFACES.key, surfaces);
+        }
+        return surfaces;
+    }
+
     public static boolean hideSaveButtons() {
-        return SharedPref.getBooleanPref(Settings.HIDE_SAVE_BUTTONS) && SettingsStatus.hideSaveButtons;
+        return hideSaveButtonSurfaces().contains("posts") && SettingsStatus.hideSaveButtons;
+    }
+
+    public static boolean hideSaveButtonReels() {
+        return hideSaveButtonSurfaces().contains("reels") && SettingsStatus.hideSaveButtons;
     }
 
     public static boolean showSaveButton(boolean original) {
@@ -295,7 +315,11 @@ public class Pref {
 
     // Reels need the native save state to build the download component even when save is hidden.
     public static boolean showReelSaveButton(boolean original) {
-        return original && (!hideSaveButtons() || ReelDownload.isEnabled());
+        return original && (!hideSaveButtonReels() || ReelDownload.isEnabled());
+    }
+
+    public static boolean showReelSaveIcon(boolean original) {
+        return original && !hideSaveButtonReels();
     }
 
     public static boolean hideReshareButton() {
