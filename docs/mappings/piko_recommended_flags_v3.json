@@ -231,5 +231,33 @@
     "name" : "Per-session auto-scroll",
     "desc" : "Disable to keep auto-scroll in the state you left it, instead of resetting to off every time Instagram is closed.",
     "code" : "83371::10"
+  },
+  {
+    "name" : "High quality uploads",
+    "desc" : "Enable to improve the quality of uploads.",
+    "code" : "23744::0,55416::7,76431::0,116170::0"
+  },
+  {
+    "name" : "Video super resolution (Machine learning) uploads",
+    "desc" : "Enable to upscales all video to 1080p (if the resolution if below 1080p) using on device machine learning.",
+    "code" : "75689::0,75689::1,75689::2,75689::4,75689::8"
+  },
+  {
+    "name" : "Video uploads resolution multiplier",
+    "desc" : "Set to 60.0 (Max for stability) to have less compression of video uploads. To improve video quality further, go to : Developer Options > Video > Video Debug Settings > enable: Force Progressive Videos",
+    "code" : "38195::2",
+    "type" : "long"
+  },
+  {
+    "name" : "Webp gallery compression",
+    "desc" : "Set to 100 for less compression of webp gallery.",
+    "code" : "80122::1",
+    "type" : "long"
+  },
+  {
+    "name" : "Heic uploads compression",
+    "desc" : "Set to 100 for less compression of heic uploads.",
+    "code" : "55416::1",
+    "type" : "long"
   }
 ]
