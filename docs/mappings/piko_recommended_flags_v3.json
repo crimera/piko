@@ -243,12 +243,6 @@
     "code" : "75689::0,75689::1,75689::2,75689::3,75689::4,75689::5,75689::6,75689::7,75689::8"
   },
   {
-    "name" : "Video uploads resolution multiplier",
-    "desc" : "Set to 60.0 (Max for stability) to have less compression of video uploads. To improve video quality further, go to : Developer Options > Video > Video Debug Settings > enable: Force Progressive Videos",
-    "code" : "38195::2",
-    "type" : "long"
-  },
-  {
     "name" : "Webp gallery compression",
     "desc" : "Set to 100 for less compression of webp gallery.",
     "code" : "80122::1",
