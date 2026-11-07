@@ -1,3 +1,27 @@
+## [3.11.0-dev.5](https://github.com/crimera/piko/compare/v3.11.0-dev.4...v3.11.0-dev.5) (2026-11-07)
+
+### 🐛 Bug Fixes
+
+* **Instagram - Disable analytics:** App data bloats when it is enabled ([#2243](https://github.com/crimera/piko/issues/2243)) ([c4d73df](https://github.com/crimera/piko/commit/c4d73df17dd50b64850e186aa2b1d47ad49d1a31))
+* **Instagram:** Change the video placeholder icon ([40f1531](https://github.com/crimera/piko/commit/40f1531a5230879580b1158eaef850b7f4e1965b))
+* **Instagram:** Correct saved video labels and copied media links ([6040b5b](https://github.com/crimera/piko/commit/6040b5b0bbcc0d7eddee29c864ea97954f2ffba9))
+* **Instagram:** Load profile pictures immediately and refresh expired URLs ([ca28e82](https://github.com/crimera/piko/commit/ca28e82db79d8520fd250f923e1e9551f872bdd8))
+* **Instagram:** Reuse localized save button labels ([094dea7](https://github.com/crimera/piko/commit/094dea7c01576d5821738d4afae0b2b49d8f764b))
+
+### ✨ New Features
+
+* **Instagram:** Add audio and video call buttons to chat action settings ([bc583e5](https://github.com/crimera/piko/commit/bc583e5d4353d0aa5b2099eff902eb29ea88a9f0))
+* **Instagram:** Add bulk and selective story downloads ([2480ff3](https://github.com/crimera/piko/commit/2480ff3d326b5e424635002beaebb229083a476e))
+* **Instagram:** Add long-press downloads ([6a97962](https://github.com/crimera/piko/commit/6a979620d83e419109f9170a557ad37ab80cce65))
+* **Instagram:** Hide like buttons and counts ([e2bfdbd](https://github.com/crimera/piko/commit/e2bfdbd40dd9a3a4a21cd26af1e955f2468d96ab))
+* **Instagram:** Preserve Reels playback position when scrolling ([0e728b5](https://github.com/crimera/piko/commit/0e728b57efc559b7614cd0fccf23165e188d3c95))
+* **Instagram:** Refactor "Hide save buttons" patch with per-surface options ([#2256](https://github.com/crimera/piko/issues/2256)) ([803eeef](https://github.com/crimera/piko/commit/803eeefaae4499b5a4da3874c3e0e2dae115f6dd))
+
+### 🔧 Improvements
+
+* **Instagram:** Open saved media with compatible apps ([fd5e2d1](https://github.com/crimera/piko/commit/fd5e2d1d4462cba0a3eadc955c63d7a387174d8a))
+* **Instagram:** Respect download settings when saving Instants ([ebb751b](https://github.com/crimera/piko/commit/ebb751b348b6dc83191edf72c9dba52c74984b8f))
+
 ## [3.11.0-dev.4](https://github.com/crimera/piko/compare/v3.11.0-dev.3...v3.11.0-dev.4) (2026-11-01)
 
 ### 🐛 Bug Fixes

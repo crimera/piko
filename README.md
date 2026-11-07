@@ -71,7 +71,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.11.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.11.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;144 patches total
+> **[v3.11.0-dev.5](https://github.com/crimera/piko/releases/tag/v3.11.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;146 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
@@ -162,7 +162,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;69 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -210,6 +210,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Hide feed posts](#hide-feed-posts) | Hides posts from the home feed |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide hidden requests](#hide-hidden-requests) | Hides the hidden requests (spam) button in the message requests page |  |
+| [Hide like buttons](#hide-like-buttons) | Hides like buttons on posts, reels and stories |  |
 | [Hide notes tray](#hide-notes-tray) | Hides notes tray in DM section |  |
 | [Hide reshare button](#hide-reshare-button) | Hides the reshare button from both posts and reels. |  |
 | [Hide save buttons](#hide-save-buttons) | Hides save buttons on posts and reels |  |
@@ -229,6 +230,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
 | [Recommended flags](#recommended-flags) | Developer flags suggested by the community |  |
 | [Remove empty bottom space](#remove-empty-bottom-space) | Removes empty space below bottom navigation bar |  |
+| [Resume Reels after scrolling](#resume-reels-after-scrolling) | Resumes videos from where you left off when you scroll back to them in Reels |  |
 | [Sanitize share links](#sanitize-share-links) |  |  |
 | [Save Instants](#save-instants) | Captures view-once Instants as you view them so you can re-view and download them later. |  |
 | [Save deleted messages](#save-deleted-messages) | Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them. |  |
