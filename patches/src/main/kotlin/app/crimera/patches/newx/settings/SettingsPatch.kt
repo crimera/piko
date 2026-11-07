@@ -4,6 +4,7 @@ import app.crimera.patches.settings.insertSettingsStartupHook
 import app.crimera.patches.settings.prepareSettingsRegistryLoad
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
+import app.crimera.patches.newx.misc.mount.newXMountComponentProxyPatch
 import app.crimera.patches.newx.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.SETTINGS_HOST_DESCRIPTOR
 import app.crimera.bytecode.RegisterLimit
@@ -36,6 +37,8 @@ internal val newXSettingsPatch =
             newXExtensionPatch,
             newXSettingsResourcePatch,
             addResourcesPatch,
+            // Opens the settings activity and folder picker on root mounts.
+            newXMountComponentProxyPatch,
         )
 
         execute {
