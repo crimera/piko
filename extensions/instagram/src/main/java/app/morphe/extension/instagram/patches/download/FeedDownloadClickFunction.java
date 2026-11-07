@@ -45,4 +45,9 @@ public final class FeedDownloadClickFunction implements Function1<Object, Object
                 DownloadUtils.currentMediaIndex(mediaSource));
         return Unit.INSTANCE;
     }
+
+    public Function1<Object, Boolean> longClick() {
+        return event -> DownloadUtils.onPostDownloadLongClick(context, userSession,
+                DownloadUtils.extractMedia(mediaSource), DownloadUtils.currentMediaIndex(mediaSource));
+    }
 }

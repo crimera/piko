@@ -11,16 +11,26 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 object MainFeedStoryTrayBinderGroupViewBinderFingerprint : Fingerprint(
-    strings = listOf("MainFeedStoryTrayBinderGroup", "litho_main_feed_stories_tray", "floating_tray_spacer"),
+    strings = listOf("MainFeedStoryTrayBinderGroup", "litho_main_feed_stories_tray"),
+    filters = listOf(
+        // Stories tray view group.
+        fieldAccess(type = "Landroid/view/ViewGroup;", opcode = Opcode.IGET_OBJECT),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        string("floating_tray_spacer", location = MatchAfterImmediately()),
+    ),
 )
 
 @Suppress("unused")
@@ -35,14 +45,12 @@ val hideStoriesTrayPatch =
         execute {
 
             MainFeedStoryTrayBinderGroupViewBinderFingerprint.apply {
-                val strIndex = stringMatches.last().index
                 method.apply {
-                    val iGetObjectInstruction = instructions.last { it.opcode == Opcode.IGET_OBJECT && it.location.index < strIndex }
-                    val iGetObjectIndex = iGetObjectInstruction.location.index
+                    val iGetObjectIndex = instructionMatches.first().index
                     val targetIndex = iGetObjectIndex + 1
 
-                    val storiesTrayViewGroupRegistry = iGetObjectInstruction.registersUsed[0]
-                    val freeRegister = getInstruction(strIndex).registersUsed[0]
+                    val storiesTrayViewGroupRegistry = instructionMatches.first().getInstruction<TwoRegisterInstruction>().registerA
+                    val freeRegister = instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
 
                     addInstructionsWithLabels(
                         targetIndex,
@@ -52,7 +60,7 @@ val hideStoriesTrayPatch =
                         if-eqz v$freeRegister, :piko
                         const v$storiesTrayViewGroupRegistry, 0x0
                         """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(targetIndex + 1)),
+                        ExternalLabel("piko", getInstruction(targetIndex)),
                     )
 
                     enableSettings("hideStoriesTray")

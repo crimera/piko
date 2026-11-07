@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.misc.theme
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
@@ -55,6 +56,7 @@ val themePatch =
                 forceWhiteOnMediaChrome()
                 preserveCreationButtonContrast()
                 preserveLightClipsComposerContrast()
+                forceBlackStoryBackground()
                 preserveLightOverflowStampBackgrounds()
                 applyLegacyTheme(amoled == true)
 
@@ -67,10 +69,12 @@ val themePatch =
                 writeAmoledMaterialYouOverlay()
 
                 context(requireNotNull(bytecodePatchContext)) {
+                    enableSettings("theme")
                     installComposePrismBlackRuntime(legacyAmoled = amoled == true)
                     installSystemDefaultUiModeHook()
                     installThemeLifecycleHooks()
                     installNativeThemeModeSync()
+                    installStorySystemBarHooks()
                 }
             } finally {
                 bytecodePatchContext = null

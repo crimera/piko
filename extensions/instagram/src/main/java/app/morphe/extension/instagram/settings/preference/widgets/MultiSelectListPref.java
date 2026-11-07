@@ -117,6 +117,7 @@ public class MultiSelectListPref extends MultiSelectListPreference {
             entriesValues = ResourceUtils.getStringArray("piko_array_action_bar_user_profile_val");
         }
         else if (key == Settings.ACTION_BAR_CHAT.key) {
+            Pref.chatActionsWithCallDefaults();
             entries = ResourceUtils.getStringArray("piko_array_action_bar_chat");
             entriesValues = ResourceUtils.getStringArray("piko_array_action_bar_chat_val");
         }
@@ -131,6 +132,12 @@ public class MultiSelectListPref extends MultiSelectListPreference {
         else if (key == Settings.FILTER_STORY_BY_USER_TYPE.key) {
             entries = ResourceUtils.getStringArray("piko_array_user_type");
             entriesValues = ResourceUtils.getStringArray("piko_array_user_type_val");
+        }
+        else if (key == Settings.HIDE_SAVE_BUTTON_SURFACES.key) {
+            // Migrate the pre-per-surface switch before the preference reads its saved selection.
+            Pref.hideSaveButtonSurfaces();
+            entries = ResourceUtils.getStringArray("piko_array_hide_save_button_surfaces");
+            entriesValues = ResourceUtils.getStringArray("piko_array_hide_save_button_surfaces_val");
         }
         setEntries(entries);
         setEntryValues(entriesValues);

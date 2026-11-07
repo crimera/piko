@@ -9,22 +9,34 @@ package app.morphe.extension.instagram.utils;
 
 import java.util.Set;
 import java.util.HashSet;
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.view.View;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.settings.BooleanSetting;
+import app.morphe.extension.instagram.settings.StringSetting;
 
 import app.morphe.extension.instagram.settings.Settings;
+import static app.morphe.extension.instagram.settings.RestartPolicy.NOT_REQUIRED;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
+import app.morphe.extension.instagram.patches.download.ReelDownload;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.shared.MarkChatAsReadScope;
 
 @SuppressWarnings("unused")
 public class Pref {
-    private static final int MAX_IMAGE_SIZE = 4096;
+    // Instagram picks the variant closest to the target plus 5%, so a target this large always
+    // selects the widest; half of MAX_VALUE keeps that 5% from overflowing.
+    private static final int WIDEST_VARIANT_TARGET = Integer.MAX_VALUE / 2;
+    // Instagram's full-screen views cap the width they request an image variant for at this.
+    private static final int FULL_SCREEN_WIDTH_CAP = 1080;
+    // Instagram sizes image variants by the User-Agent's shorter screen side. At 2560 posts get
+    // their originals and grid tiles 750 px variants; from 2880 grid tiles get 1080 px.
+    private static final int USER_AGENT_SCREEN_SIZE = 2560;
 
     private static String removeLineBreaks(String value) {
         return value.replace("\r", "").replace("\n", "");
@@ -107,25 +119,33 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.ENABLE_MARK_CHAT_AS_READ) && SettingsStatus.markChatAsRead;
     }
 
+    public static boolean markAsReadAfterReply() {
+        return SharedPref.getBooleanPref(Settings.MARK_AS_READ_AFTER_REPLY) && SettingsStatus.markAsReadAfterReply;
+    }
+
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
         return shouldBlockDmSeen(
                 SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
                 Pref.getTurnOnAllGhostModes(),
-                enableMarkChatAsReadOption()
+                enableMarkChatAsReadOption() || markAsReadAfterReply()
         );
     }
 
     static boolean shouldBlockDmSeen(
             boolean viewDmAnonymously,
             boolean allGhostModes,
-            boolean manualReadOptionEnabled
+            boolean explicitReadEnabled
     ) {
-        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
+        if (explicitReadEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
         return viewDmAnonymously || allGhostModes;
+    }
+
+    public static boolean resumeReelsAfterScrolling() {
+        return SharedPref.getBooleanPref(Settings.RESUME_REELS_AFTER_SCROLLING);
     }
 
     public static boolean disableVideoAutoplay() {
@@ -157,8 +177,16 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.LIMIT_FOLLOWING_FEED);
     }
 
+    public static boolean hideFeedPosts() {
+        return SharedPref.getBooleanPref(Settings.HIDE_FEED_POSTS) && SettingsStatus.hideFeedPosts;
+    }
+
     public static boolean hideStoriesTray() {
         return lockable(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+    }
+
+    public static boolean hideHiddenRequests() {
+        return lockable(Settings.HIDE_HIDDEN_REQUESTS) && SettingsStatus.hideHiddenRequests;
     }
 
     public static boolean hideNotesTray() {
@@ -189,7 +217,7 @@ public class Pref {
     }
 
     public static BooleanSetting focusLockSelection(String key) {
-        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false);
+        return new BooleanSetting(FocusLock.SELECTION_PREFIX + key, false, NOT_REQUIRED);
     }
 
     public static String focusLockDurationMinutes() {
@@ -202,11 +230,11 @@ public class Pref {
 
     /** Keys of the first released Focus Lock, read so a lock it wrote still counts. */
     public static boolean legacyFocusLockBlockReels() {
-        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false));
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_reels", false, NOT_REQUIRED));
     }
 
     public static boolean legacyFocusLockBlockExplore() {
-        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false));
+        return SharedPref.getBooleanPref(new BooleanSetting("focus_lock_block_explore", false, NOT_REQUIRED));
     }
 
     public static String focusLockFormat() {
@@ -233,20 +261,69 @@ public class Pref {
         return SharedPref.setStringPref(Settings.FOCUS_LOCK_UNLOCK_REQUESTED_AT.key, value);
     }
 
+    public static boolean ephemeralMediaCaption() {
+        return SharedPref.getBooleanPref(Settings.EPHEMERAL_MEDIA_CAPTION);
+    }
+
+    public static boolean disableDisappearingMessagesGesture() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE) && SettingsStatus.disableDisappearingMessagesGesture;
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
+    }
+
+    public static boolean hideLikes() {
+        return SharedPref.getBooleanPref(Settings.HIDE_LIKES) && SettingsStatus.hideLikes;
+    }
+
+    public static boolean showLikeButton(boolean visible) {
+        return visible && !hideLikes();
+    }
+
+    public static void hideLikeView(View view) {
+        if (hideLikes()) view.setVisibility(View.GONE);
     }
 
     public static boolean hideShareButton() {
         return SharedPref.getBooleanPref(Settings.HIDE_SHARE_BUTTON) && SettingsStatus.hideShareButton;
     }
 
+    /** The surfaces the save button is hidden on; "posts" / "reels" (hide_save_button_surfaces). */
+    public static Set<String> hideSaveButtonSurfaces() {
+        Set<String> surfaces = SharedPref.getSetPref(Settings.HIDE_SAVE_BUTTON_SURFACES);
+        Context context = Utils.getContext();
+        var preferences = context == null ? null
+                : context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        if (preferences == null || preferences.contains(Settings.HIDE_SAVE_BUTTON_SURFACES.key)) return surfaces;
+        if (SharedPref.getBooleanPref(Settings.HIDE_SAVE_BUTTONS_LEGACY)) {
+            surfaces = new HashSet<>(surfaces);
+            surfaces.add("posts");
+            surfaces.add("reels");
+            SharedPref.setSetPref(Settings.HIDE_SAVE_BUTTON_SURFACES.key, surfaces);
+        }
+        return surfaces;
+    }
+
     public static boolean hideSaveButtons() {
-        return SharedPref.getBooleanPref(Settings.HIDE_SAVE_BUTTONS) && SettingsStatus.hideSaveButtons;
+        return hideSaveButtonSurfaces().contains("posts") && SettingsStatus.hideSaveButtons;
+    }
+
+    public static boolean hideSaveButtonReels() {
+        return hideSaveButtonSurfaces().contains("reels") && SettingsStatus.hideSaveButtons;
     }
 
     public static boolean showSaveButton(boolean original) {
         return original && !hideSaveButtons();
+    }
+
+    // Reels need the native save state to build the download component even when save is hidden.
+    public static boolean showReelSaveButton(boolean original) {
+        return original && (!hideSaveButtonReels() || ReelDownload.isEnabled());
+    }
+
+    public static boolean showReelSaveIcon(boolean original) {
+        return original && !hideSaveButtonReels();
     }
 
     public static boolean hideReshareButton() {
@@ -302,6 +379,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.LOOP_STORY);
     }
 
+    public static int storyFollowButtonState(int original) {
+        return SharedPref.getBooleanPref(Settings.HIDE_STORY_FOLLOW_BUTTON) ? 0 : original;
+    }
+
     public static boolean viewStoryMentions() {
         return SharedPref.getBooleanPref(Settings.VIEW_STORY_MENTIONS);
     }
@@ -310,12 +391,18 @@ public class Pref {
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
 
-    public static int improveImageViewing(int defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
+    // Takes the width Instagram picks an image variant for. Requests at least as wide as a
+    // full-screen view get the widest variant; narrower ones, such as grid tiles, stay unchanged.
+    public static int imageVariantTargetWidth(int original) {
+        if (!SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING)) return original;
+        Activity activity = Utils.getActivity();
+        Resources resources = activity != null ? activity.getResources() : Resources.getSystem();
+        int fullScreenWidth = Math.min(resources.getDisplayMetrics().widthPixels, FULL_SCREEN_WIDTH_CAP);
+        return original >= fullScreenWidth ? WIDEST_VARIANT_TARGET : original;
     }
 
-    public static Integer improveImageViewing(Integer defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
+    public static Integer userAgentScreenSize(Integer original) {
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? USER_AGENT_SCREEN_SIZE : original;
     }
 
     public static boolean enableDownload() {
@@ -332,6 +419,14 @@ public class Pref {
 
     public static boolean embedDownloadMetadata() {
         return SharedPref.getBooleanPref(Settings.EMBED_DOWNLOAD_METADATA);
+    }
+
+    public static boolean preferDashFormat() {
+        return SharedPref.getBooleanPref(Settings.PREFER_DASH_FORMAT);
+    }
+
+    public static boolean dashAudioAacLc() {
+        return SharedPref.getBooleanPref(Settings.DASH_AUDIO_AAC_LC);
     }
 
     public static String downloadFileNameTemplate() {
@@ -468,6 +563,33 @@ public class Pref {
         return SharedPref.getSetPref(Settings.ACTION_BAR_CHAT);
     }
 
+    public static synchronized Set<String> chatActionsWithCallDefaults() {
+        Set<String> actions = chatActionBarButtons();
+        Context context = Utils.getContext();
+        var preferences = context == null ? null
+                : context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String initializedKey = "action_bar_chat_call_icons_initialized";
+        if (preferences != null && preferences.getBoolean(initializedKey, false)) return actions;
+
+        // Without this marker, an empty call selection could mean either first use or both icons hidden.
+        actions = new HashSet<>(actions);
+        actions.add(Constants.AB_AUDIO_CALL_ICON);
+        actions.add(Constants.AB_VIDEO_CALL_ICON);
+        if (preferences != null) {
+            preferences.edit().putStringSet(Settings.ACTION_BAR_CHAT.key, actions)
+                    .putBoolean(initializedKey, true).apply();
+        }
+        return actions;
+    }
+
+    public static boolean showChatAudioCallButton(boolean available) {
+        return available && chatActionsWithCallDefaults().contains(Constants.AB_AUDIO_CALL_ICON);
+    }
+
+    public static boolean showChatVideoCallButton(boolean available) {
+        return available && chatActionsWithCallDefaults().contains(Constants.AB_VIDEO_CALL_ICON);
+    }
+
     public static Set<String> inboxActionBarButtons() {
         return SharedPref.getSetPref(Settings.ACTION_BAR_INBOX);
     }
@@ -494,5 +616,21 @@ public class Pref {
 
     public static boolean inboxLockNotifications() {
         return SharedPref.getBooleanPref(Settings.INBOX_LOCK_NOTIFICATIONS);
+    }
+
+    public static boolean hiddenChats() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS);
+    }
+
+    public static boolean hiddenChatsMute() {
+        return SharedPref.getBooleanPref(Settings.HIDDEN_CHATS_MUTE);
+    }
+
+    public static int hiddenChatsTaps() {
+        try {
+            return Integer.parseInt(SharedPref.getStringPref(Settings.HIDDEN_CHATS_TAPS));
+        } catch (NumberFormatException e) {
+            return 3;
+        }
     }
 }

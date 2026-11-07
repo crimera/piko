@@ -29,7 +29,7 @@ val filterStoriesPatch =
         dependsOn(settingsPatch, reelResponseItemEntity, userDataEntity)
         execute {
 
-            PopulateStoryTrayFingerprint.matchAll(1..1).single().method.apply {
+            PopulateStoryTrayFingerprint.method.apply {
                 // The JSON parser is shared with profile highlights. Filter only the story tray
                 // after decoding, including cached responses, tail loads and the Following tray.
                 addInstructions(

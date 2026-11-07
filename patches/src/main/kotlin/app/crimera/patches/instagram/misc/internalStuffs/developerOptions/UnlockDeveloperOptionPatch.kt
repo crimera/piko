@@ -15,13 +15,10 @@ import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.Opcode
+import app.morphe.patcher.util.findFreeRegister
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 @Suppress("unused")
 val unlockDeveloperOptionPatch =
@@ -35,35 +32,27 @@ val unlockDeveloperOptionPatch =
         execute {
 
             HomeIconOnClickListenerFingerprint.method.apply {
-                val firstInvokeStaticInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_STATIC))
-
-                val instagramMainActivityRegister = getInstruction(0).registersUsed[0]
-                val userSessionRegister = getInstruction(1).registersUsed[0]
-                val freeRegister = findFreeRegister(2)
+                val matches = HomeIconOnClickListenerFingerprint.instructionMatches
+                val instagramMainActivityRegister = getInstruction<OneRegisterInstruction>(matches[0].index).registerA
+                val userSessionRegister = getInstruction<OneRegisterInstruction>(matches[1].index).registerA
+                val firstInvokeStaticInstruction = getInstruction(matches[2].index)
+                val freeRegister = findFreeRegister(matches[2].index)
                 val freeRegister2 = freeRegister + 1
 
-                val developerOptionCallClassDef = DeveloperOptionCallWithCallableFingerprint.classDef
-                val developerOptionsFragmentField = developerOptionCallClassDef.fields.first()
-                val developerOptionsFragmentCall = developerOptionCallClassDef.methods.last()
+                val developerOptionsFragmentField = DeveloperOptionCallWithCallableFingerprint.originalClassDef.fields.first()
+                val developerOptionsFragmentCall = DeveloperOptionsOpenFingerprint.originalMethod
 
-                val fragmentClass = FragmentNavigatorTransitionFingerprint.classDef
-                val fragmentClassMethods = fragmentClass.methods
-                val fragmentConstructor = fragmentClassMethods.first { it.name == "<init>" }
-                val fragmentSetMethod =
-                    fragmentClassMethods.last {
-                        it.parameters.size == 1 &&
-                            it.parameters[0].type == "Landroidx/fragment/app/Fragment;"
-                    }
-                val fragmentCallMethod =
-                    fragmentClassMethods.last {
-                        it.returnType == "V" && it.parameters.isEmpty() &&
-                            it.instructions[0].opcode == Opcode.SGET_OBJECT
-                    }
+                val fragmentClass = FragmentNavigatorTransitionFingerprint.originalClassDef
+                val fragmentConstructor = FragmentNavigatorConstructorFingerprint.originalMethod
+                val fragmentSetMethod = FragmentNavigatorSetFragmentFingerprint.originalMethod
+                // The last method that only starts the transition.
+                val fragmentCallMethod = FragmentNavigatorCommitFingerprint.matchAll()
+                    .last { it.instructionMatches.first().index == 0 }.originalMethod
 
-                val userSessionCastType = fragmentConstructor.parameters[1].type
+                val userSessionCastType = fragmentConstructor.parameterTypes[1]
 
                 addInstructionsWithLabels(
-                    2,
+                    matches[2].index,
                     """
                     $PREF_CALL_DESCRIPTOR->enableDevOptions()Z
                     move-result v$freeRegister

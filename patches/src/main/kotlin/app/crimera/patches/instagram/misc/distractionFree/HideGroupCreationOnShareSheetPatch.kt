@@ -12,18 +12,31 @@ import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.indexOfFirstInstruction
+import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
 
 internal object ShareSheetItemsBinderFingerprint : Fingerprint(
     returnType = "V",
     parameters = listOf("Ljava/util/List;", "Z", USER_SESSION_CLASS),
     definingClass = "Lcom/instagram/direct/fragment/sharesheet/view/DirectShareSheetFragmentMessageComposerViewBinder;",
+    filters = listOf(
+        opcode(Opcode.GOTO_16),
+        fieldAccess(
+            type = "Lcom/instagram/direct/fragment/sharesheet/groupsendbutton/shared/GroupSendButton;",
+            opcode = Opcode.IGET_OBJECT,
+            location = MatchAfterImmediately(),
+        ),
+        // Group send button condition.
+        methodCall(opcode = Opcode.INVOKE_STATIC, location = MatchAfterImmediately()),
+    ),
 )
 
 @Suppress("unused")
@@ -36,11 +49,7 @@ val hideGroupCreationOnShareSheetPatch =
         dependsOn(settingsPatch)
         execute {
             ShareSheetItemsBinderFingerprint.method.apply {
-
-                val firstGoto16Index = indexOfFirstInstruction(Opcode.GOTO_16)
-                val firstInvokeStaticAfterGoto = indexOfFirstInstruction(firstGoto16Index, Opcode.INVOKE_STATIC)
-
-                val conditionIndex = firstGoto16Index + 2
+                val conditionIndex = ShareSheetItemsBinderFingerprint.instructionMatches.last().index
                 val freeRegister = findFreeRegister(conditionIndex + 1)
 
                 addInstructionsWithLabels(
@@ -51,7 +60,7 @@ val hideGroupCreationOnShareSheetPatch =
                      if-eqz v$freeRegister, :piko
                      return-void
                     """.trimIndent(),
-                    ExternalLabel("piko", getInstruction(firstInvokeStaticAfterGoto)),
+                    ExternalLabel("piko", getInstruction(conditionIndex)),
                 )
 
                 enableSettings("hideGroupCreationOnSharesheet")

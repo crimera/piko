@@ -20,6 +20,8 @@ import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.entity.DirectItem;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.instagram.utils.Pref;
 
 /** Runtime hooks for "Save deleted messages". Fields are resolved at patch time. */
@@ -36,14 +38,11 @@ public class SavedMessagesHook {
         android.util.Log.e("piko", message);
     }
 
-    /** Opens the all-chat history from Piko settings. */
     public static void openDeletedMessages(Context context) {
         try {
             if (context == null) context = PikoUtils.getContext();
             if (context == null) return;
-            Intent intent = new Intent(context, DeletedMessagesActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            ActivityHook.startDeletedMessagesActivity(context);
         } catch (Exception e) {
             piko("SavedMessagesHook.openDeletedMessages: " + e);
         }
@@ -68,7 +67,6 @@ public class SavedMessagesHook {
                         String id = data.getUserId();
                         if (id == null || !id.matches("\\d{6,14}")) continue;
                         String name = data.getUsername();
-                        if (name == null || name.isEmpty()) name = data.getFullName();
                         if (name != null && !name.isEmpty()) db.putUsername(id, name);
                     } catch (Throwable ignored) {
                     }
@@ -157,7 +155,7 @@ public class SavedMessagesHook {
         } catch (Exception ignored) {}
         final String viewerId = sessionUserId;
         getWorker().post(() -> processReceivedItem(
-                item, resolveThreadIdHint(delta), viewerId));
+                item, resolveThreadIdHint(delta), viewerId, userSession));
     }
 
     static String resolveThreadIdHint(Object delta) {
@@ -176,8 +174,35 @@ public class SavedMessagesHook {
         return "deltaThreadIdField";
     }
 
+    private static Object lookupCachedUser(UserSession session, String senderId) {
+        // Replaced with Instagram's session-scoped user cache lookup at patch time.
+        return null;
+    }
+
+    private static String resolveSenderUsername(PikoMessageDb db, String senderId,
+                                                String threadId, UserSession session,
+                                                String viewerId) {
+        String username = db.getUsername(senderId);
+        if (username == null) username = db.getThreadUsername(threadId, senderId);
+        if (username != null || isBlank(senderId) || session == null) return username;
+        try {
+            if (isBlank(viewerId) || !viewerId.equals(session.getUserId())) return null;
+            Object user = lookupCachedUser(session, senderId);
+            if (user == null) return null;
+            UserData data = new UserData(user);
+            if (!senderId.equals(data.getUserId())) return null;
+            username = data.getUsername();
+            if (!isBlank(username)) {
+                db.putUsername(senderId, username);
+                return username;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     private static void processReceivedItem(Object item, String threadIdHint,
-                                            String sessionViewerId) {
+                                            String sessionViewerId, UserSession session) {
         try {
             DirectItem directItem = new DirectItem(item);
             String senderId = directItem.getUserId();
@@ -194,10 +219,8 @@ public class SavedMessagesHook {
             if (threadId == null) threadId = "";
 
             PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
-            String senderUsername = db.getUsername(senderId);
-            if (senderUsername == null) {
-                senderUsername = db.getThreadUsername(threadId, senderId);
-            }
+            String senderUsername = resolveSenderUsername(
+                    db, senderId, threadId, session, sessionViewerId);
             String content = directItem.getText();
             String type = directItem.getItemType();
             if (type != null) type = type.trim().toLowerCase(java.util.Locale.ROOT);
@@ -242,13 +265,15 @@ public class SavedMessagesHook {
 
     private static void markDeletedAndNotify(PikoMessageDb db, String messageId) {
         if (!db.markDeleted(messageId)) return;
+        // The notice shows who wrote what, so a hidden chat gets none.
+        if (HiddenChats.shouldMuteDeletion(db.getThreadId(messageId))) return;
 
         String type = db.getMessageType(messageId);
         String content = db.getStoredContent(messageId);
         boolean isMedia = isBlank(content) || content.startsWith("http")
                 || content.startsWith("[");
         notifyDeletion(db.getSenderDisplay(messageId),
-                isMedia ? describeMediaType(type) : content, type);
+                isMedia ? describeMediaType(type, content) : content, type);
     }
 
     private static void notifyDeletion(String sender, String content, String type) {
@@ -274,7 +299,7 @@ public class SavedMessagesHook {
                     ? content
                     : !isBlank(type) ? "[" + type + "]" : str("piko_media_deleted_generic");
 
-            Intent intent = new Intent(context, DeletedMessagesActivity.class);
+            Intent intent = ActivityHook.createDeletedMessagesIntent(context);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             int pendingIntentFlags = android.app.PendingIntent.FLAG_UPDATE_CURRENT
                     | (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
@@ -303,8 +328,12 @@ public class SavedMessagesHook {
         }
     }
 
-    private static String describeMediaType(String type) {
+    private static String describeMediaType(String type, String url) {
         if (type == null) return str("piko_media_deleted_generic");
+        if (("media".equals(type) || "raven_media".equals(type) || "visual_media".equals(type))
+                && MediaUrls.isVideo(url)) {
+            type = "video";
+        }
         String label;
         switch (type) {
             case "media":

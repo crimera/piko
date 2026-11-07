@@ -15,6 +15,13 @@
         <item>timeleft</item>
     </string-array>
 
+    <string-array name="piko_array_hidden_chats_taps">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
     <string-array name="piko_array_focus_lock_duration">
         <item>@string/piko_focus_lock_duration_1_minute</item>
         <item>@string/piko_focus_lock_duration_5_minutes</item>
@@ -138,11 +145,17 @@
     <string-array name="piko_array_action_bar_chat">
         <item>@string/piko_action_bar_button_settings_icon</item>
         <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+        <item>@string/piko_action_bar_button_jump_oldest_icon</item>
+        <item>@string/piko_action_bar_button_audio_call_icon</item>
+        <item>@string/piko_action_bar_button_video_call_icon</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_chat_val">
         <item>SETTINGS_ICON</item>
         <item>GHOST_MODE_ICON</item>
+        <item>JUMP_OLDEST_ICON</item>
+        <item>AUDIO_CALL_ICON</item>
+        <item>VIDEO_CALL_ICON</item>
     </string-array>
 
     <string-array name="piko_array_action_bar_inbox">
@@ -277,6 +290,16 @@
         <item>default</item>
         <item>enable</item>
         <item>disable</item>
+    </string-array>
+
+    <string-array name="piko_array_hide_save_button_surfaces">
+        <item>@string/piko_download_buttons_feed</item>
+        <item>@string/piko_navigation_tab_reels</item>
+    </string-array>
+
+    <string-array name="piko_array_hide_save_button_surfaces_val">
+        <item>posts</item>
+        <item>reels</item>
     </string-array>
 
 </resources>

@@ -17,11 +17,15 @@ import android.os.ParcelFileDescriptor;
 
 import androidx.annotation.RequiresApi;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -254,14 +258,56 @@ final class MaterialYouThemeAPI31 {
     }
 
     private static void copyOverlay(Context context, String assetName, File outputFile) throws IOException {
-        try (InputStream input = context.getAssets().open(assetName);
-             FileOutputStream output = new FileOutputStream(outputFile, false)) {
+        byte[] overlay = readAsset(context, assetName);
+        if (hasContent(outputFile, overlay)) {
+            return;
+        }
+
+        // Other processes of the app (e.g. :fbns) may have the current file mapped through
+        // ResourcesProvider. Truncating it in place makes their next read past the new end
+        // raise SIGBUS, so write a private copy and atomically rename it over the old one.
+        File tempFile = File.createTempFile(
+                outputFile.getName() + ".",
+                ".tmp",
+                outputFile.getParentFile()
+        );
+        try {
+            try (FileOutputStream output = new FileOutputStream(tempFile)) {
+                output.write(overlay);
+            }
+            if (!tempFile.renameTo(outputFile)) {
+                throw new IOException("Unable to replace " + outputFile.getName());
+            }
+        } catch (IOException exception) {
+            tempFile.delete();
+            throw exception;
+        }
+    }
+
+    private static byte[] readAsset(Context context, String assetName) throws IOException {
+        try (InputStream input = context.getAssets().open(assetName)) {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
             byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = input.read(buffer)) != -1) {
                 output.write(buffer, 0, bytesRead);
             }
+            return output.toByteArray();
         }
+    }
+
+    private static boolean hasContent(File file, byte[] expected) {
+        if (file.length() != expected.length) {
+            return false;
+        }
+
+        byte[] actual = new byte[expected.length];
+        try (DataInputStream input = new DataInputStream(new FileInputStream(file))) {
+            input.readFully(actual);
+        } catch (IOException exception) {
+            return false;
+        }
+        return Arrays.equals(expected, actual);
     }
 
     private static void rollbackResources(
