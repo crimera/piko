@@ -101,6 +101,7 @@
     <string name="piko_hide_notes_tray_desc">Oculta la bandeja de notas en la sección de mensajes directos</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ocultar el botón de creación de grupos en la hoja para compartir</string>
     <string name="piko_hide_reels_follow_button">Ocultar el botón de seguimiento de Reels</string>
+    <string name="piko_hide_likes">Ocultar los botones de Me gusta</string>
     <string name="piko_hide_share_button">Ocultar botón para compartir</string>
     <string name="piko_hide_save_buttons">Ocultar botones guardados</string>
     <string name="piko_hide_reshare_button">Ocultar botón de republicar</string>
@@ -166,6 +167,8 @@
     <string name="piko_unlock_plus_benefits_desc">Desbloquea beneficios de la suscripción \"Plus\" verificados localmente. ÚSALO BAJO TU PROPIO RIESGO</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Mensaje Directo</string>
+    <string name="piko_disable_disappearing_messages_gesture">Desactivar deslizar para mensajes temporales</string>
+    <string name="piko_disable_disappearing_messages_gesture_desc">Impide que deslizar hacia arriba en un chat active los mensajes temporales</string>
     <string name="piko_unlimited_replays">Convertir los medios efímeros en permanentes</string>
     <string name="piko_unlimited_replays_desc">Transforma medios de visualización única o doble en visualización permanente</string>
     <string name="piko_ephemeral_caption">Muestra cómo se recibieron los medios temporales</string>
@@ -200,10 +203,13 @@
     <string name="piko_category_download_media">Descargar medios</string>
     <string name="piko_category_downloads">Descargas</string>
     <string name="piko_enable_download">Activar descarga</string>
+    <string name="piko_download_buttons">Mostrar botones de descarga</string>
+    <string name="piko_download_buttons_feed">Publicaciones del feed</string>
+    <string name="piko_download_buttons_stories">Historias</string>
     <string name="piko_save_media_comment">Guardar comentario del medio</string>
     <string name="piko_save_media_comment_desc">Agrega un botón para copiar comentarios en publicaciones y reels</string>
     <string name="piko_enable_direct_download">Activar descarga directa</string>
-    <string name="piko_enable_direct_download_desc">Los botones de descarga en publicaciones, reels e historias guardan al instante el contenido actual</string>
+    <string name="piko_enable_direct_download_desc">Toca el botón de descarga en publicaciones, reels o historias para guardar el contenido actual. Si hay varios, mantén pulsado el botón para guardarlos todos</string>
     <string name="piko_select_media_download">Selecciona el contenido que quieres descargar</string>
     <string name="piko_download_photo_number">Foto %d</string>
     <string name="piko_download_video_number">Vídeo %d</string>
@@ -340,6 +346,8 @@
     <string name="piko_action_bar_chat">Iconos de la barra de acciones de chat</string>
     <string name="piko_action_bar_chat_desc">Iconos de la barra de acciones dentro de un DM</string>
     <string name="piko_action_bar_inbox">Iconos de la barra de acciones de la bandeja de entrada</string>
+    <string name="piko_action_bar_button_audio_call_icon">Icono de llamada de audio</string>
+    <string name="piko_action_bar_button_video_call_icon">Icono de videollamada</string>
     <string name="piko_action_bar_button_settings_icon">Icono de configuración</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Icono de modo fantasma</string>
     <string name="piko_action_bar_button_jump_oldest_icon">Ir al icono de mensaje más antiguo</string>
@@ -439,6 +447,7 @@
     <string name="piko_view_saved_instants">Ver instantes guardados</string>
     <string name="piko_instants_vault_empty">Aún no hay instantes guardados. Abra algunos Instantes con la captura habilitada y aparecerán aquí.</string>
     <string name="piko_instants_link_unavailable">Enlace multimedia no disponible.</string>
+    <string name="piko_instants_delete_selected_confirm">¿Eliminar %d Instants seleccionados?</string>
     <string name="piko_delete">Eliminar</string>
     <string name="piko_instants_title">Instantes</string>
     <string name="piko_search_username">Buscar por nombre de usuario</string>

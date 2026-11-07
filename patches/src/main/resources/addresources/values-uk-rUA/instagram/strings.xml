@@ -101,6 +101,7 @@
     <string name="piko_hide_notes_tray_desc">Сховує панель нотаток у розділі повідомлень</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Приховати кнопку створення групи в меню поширення</string>
     <string name="piko_hide_reels_follow_button">Приховати кнопку підписки в Reels</string>
+    <string name="piko_hide_likes">Приховати кнопки вподобань</string>
     <string name="piko_hide_share_button">Приховати кнопку «Поділитися»</string>
     <string name="piko_hide_save_buttons">Приховати кнопки збереження</string>
     <string name="piko_hide_reshare_button">Приховати кнопку «Поширити» (Репост)</string>
@@ -208,7 +209,7 @@
     <string name="piko_save_media_comment">Зберегти медіа з коментаря</string>
     <string name="piko_save_media_comment_desc">Додає кнопку для збереження медіафайлів із коментарів під дописами та Reels</string>
     <string name="piko_enable_direct_download">Увімкнути пряме завантаження</string>
-    <string name="piko_enable_direct_download_desc">Кнопки завантаження на дописах, Reels та історіях негайно зберігають поточне медіа</string>
+    <string name="piko_enable_direct_download_desc">Торкніться кнопки завантаження на дописах, Reels або історіях, щоб зберегти поточне медіа. Якщо медіафайлів кілька, утримуйте кнопку, щоб зберегти їх усі</string>
     <string name="piko_select_media_download">Виберіть медіа для завантаження</string>
     <string name="piko_download_photo_number">Фото %d</string>
     <string name="piko_download_video_number">Відео %d</string>
@@ -345,6 +346,8 @@
     <string name="piko_action_bar_chat">Піктограми панелі дій чату</string>
     <string name="piko_action_bar_chat_desc">Піктограми на панелі дій усередині особистих повідомлень (DM)</string>
     <string name="piko_action_bar_inbox">Піктограми панелі дій вхідних повідомлень</string>
+    <string name="piko_action_bar_button_audio_call_icon">Значок аудіодзвінка</string>
+    <string name="piko_action_bar_button_video_call_icon">Значок відеодзвінка</string>
     <string name="piko_action_bar_button_settings_icon">Піктограма налаштувань</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Піктограма режиму «невидимки»</string>
     <string name="piko_action_bar_button_jump_oldest_icon">Значок переходу до найстарішого повідомлення</string>
@@ -444,6 +447,7 @@
     <string name="piko_view_saved_instants">Переглянути збережені Instants</string>
     <string name="piko_instants_vault_empty">Поки що немає збережених Instants. Відкрийте кілька Instants з увімкненим збереженням, і вони з\'являться тут.</string>
     <string name="piko_instants_link_unavailable">Посилання на медіа недоступне.</string>
+    <string name="piko_instants_delete_selected_confirm">Видалити вибрані Instants (%d)?</string>
     <string name="piko_delete">Видалити</string>
     <string name="piko_instants_title">Instants</string>
     <string name="piko_search_username">Пошук за ім\'ям користувача</string>

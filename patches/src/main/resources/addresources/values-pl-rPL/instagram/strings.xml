@@ -208,7 +208,6 @@
     <string name="piko_save_media_comment">Zapisz multimedia z komentarzy</string>
     <string name="piko_save_media_comment_desc">Dodaje przycisk do zapisywania multimediów z komentarzy pod postami i rolkami</string>
     <string name="piko_enable_direct_download">Włącz bezpośrednie pobieranie</string>
-    <string name="piko_enable_direct_download_desc">Przyciski pobierania w postach, rolkach i relacjach natychmiast zapisują bieżące multimedia</string>
     <string name="piko_select_media_download">Wybierz multimedia do pobrania</string>
     <string name="piko_download_photo_number">Zdjęcie %d</string>
     <string name="piko_download_video_number">Film %d</string>
