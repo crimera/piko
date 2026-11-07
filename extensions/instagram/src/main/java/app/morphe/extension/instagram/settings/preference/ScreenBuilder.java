@@ -57,6 +57,8 @@ public class ScreenBuilder {
             buildAdsSection();
         } else if (Constants.PIKO_FRAGMENT_GHOST.equals(fragmentName)) {
             ghostSection();
+        } else if (Constants.PIKO_FRAGMENT_PROFILE.equals(fragmentName)) {
+            profileSection();
         } else if (Constants.PIKO_FRAGMENT_STORY.equals(fragmentName)) {
             storySection();
         } else if (Constants.PIKO_FRAGMENT_LINKS.equals(fragmentName)) {
@@ -376,6 +378,44 @@ public class ScreenBuilder {
                             str("piko_view_deleted_messages"),
                             "",
                             "view_deleted_messages"
+                    )
+            );
+        }
+    }
+
+    public void profileSection() {
+        if (!(SettingsStatus.profileSection())) return;
+
+        if (SettingsStatus.followBackIndicator) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_follow_back_indicator"),
+                            str("piko_follow_back_indicator_desc"),
+                            Settings.FOLLOW_BACK_INDICATOR
+                    )
+            );
+        }
+        if (SettingsStatus.followBackIndicator || SettingsStatus.followListNonFollowerBadge) {
+            addPreference(
+                    helper.availableWhen(
+                            helper.switchPreference(
+                                    str("piko_fbi_color_indicator"),
+                                    "",
+                                    Settings.FOLLOW_BACK_COLOR_INDICATOR
+                            ),
+                            () -> (SettingsStatus.followBackIndicator
+                                    && SharedPref.getBooleanPref(Settings.FOLLOW_BACK_INDICATOR))
+                                    || (SettingsStatus.followListNonFollowerBadge
+                                    && SharedPref.getBooleanPref(Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE))
+                    )
+            );
+        }
+        if (SettingsStatus.followListNonFollowerBadge) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_follow_list_non_follower_badge"),
+                            str("piko_follow_list_non_follower_badge_desc"),
+                            Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE
                     )
             );
         }
@@ -794,39 +834,6 @@ public class ScreenBuilder {
                             str("piko_enable_more_options_on_post"),
                             str("piko_enable_more_options_on_post_desc"),
                             Settings.ENABLE_MORE_OPTIONS_ON_POST
-                    )
-            );
-        }
-        if (SettingsStatus.followBackIndicator) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_follow_back_indicator"),
-                            str("piko_follow_back_indicator_desc"),
-                            Settings.FOLLOW_BACK_INDICATOR
-                    )
-            );
-        }
-        if (SettingsStatus.followBackIndicator || SettingsStatus.followListNonFollowerBadge) {
-            addPreference(
-                    helper.availableWhen(
-                            helper.switchPreference(
-                                    str("piko_fbi_color_indicator"),
-                                    "",
-                                    Settings.FOLLOW_BACK_COLOR_INDICATOR
-                            ),
-                            () -> (SettingsStatus.followBackIndicator
-                                    && SharedPref.getBooleanPref(Settings.FOLLOW_BACK_INDICATOR))
-                                    || (SettingsStatus.followListNonFollowerBadge
-                                    && SharedPref.getBooleanPref(Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE))
-                    )
-            );
-        }
-        if (SettingsStatus.followListNonFollowerBadge) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_follow_list_non_follower_badge"),
-                            str("piko_follow_list_non_follower_badge_desc"),
-                            Settings.FOLLOW_LIST_NON_FOLLOWER_BADGE
                     )
             );
         }
@@ -1314,6 +1321,16 @@ public class ScreenBuilder {
                             str("piko_category_dm"),
                             "",
                             Constants.PIKO_FRAGMENT_DM
+                    )
+            );
+        }
+
+        if (SettingsStatus.profileSection()){
+            addPreference(
+                    helper.categoryPreference(
+                            str("piko_category_profile"),
+                            "",
+                            Constants.PIKO_FRAGMENT_PROFILE
                     )
             );
         }

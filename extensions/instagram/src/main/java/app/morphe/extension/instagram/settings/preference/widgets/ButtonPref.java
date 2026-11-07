@@ -199,6 +199,9 @@ public class ButtonPref extends Preference {
         if (key.equals(Constants.PIKO_FRAGMENT_GHOST)) {
             return UI.DRAWABLE_GHOST_ICON;
         }
+        if (key.equals(Constants.PIKO_FRAGMENT_PROFILE)) {
+            return UI.DRAWABLE_PROFILE_ICON;
+        }
         if (key.equals(Constants.PIKO_FRAGMENT_STORY)) {
             return UI.DRAWABLE_STORY_ICON;
         }
