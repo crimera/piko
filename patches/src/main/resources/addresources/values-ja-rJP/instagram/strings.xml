@@ -208,7 +208,6 @@
     <string name="piko_save_media_comment">GIFコメントを保存</string>
     <string name="piko_save_media_comment_desc">投稿やリールのGIFコメントを保存するボタンを追加します</string>
     <string name="piko_enable_direct_download">直接ダウンロードを有効化</string>
-    <string name="piko_enable_direct_download_desc">投稿、リール、ストーリーのダウンロードボタンで、現在のメディアをすぐに保存します</string>
     <string name="piko_select_media_download">ダウンロードするメディアを選択</string>
     <string name="piko_download_photo_number">写真 %d</string>
     <string name="piko_download_video_number">動画 %d</string>

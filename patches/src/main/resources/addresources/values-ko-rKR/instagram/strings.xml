@@ -101,6 +101,7 @@
     <string name="piko_hide_notes_tray_desc">메시지 섹션에서 메모 선반을 숨깁니다</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">공유 시트에서 그룹 만들기 버튼 숨기기</string>
     <string name="piko_hide_reels_follow_button">릴스 팔로우 버튼 숨기기</string>
+    <string name="piko_hide_likes">좋아요 버튼 숨기기</string>
     <string name="piko_hide_share_button">공유 버튼 숨기기</string>
     <string name="piko_hide_save_buttons">저장 버튼 숨기기</string>
     <string name="piko_hide_reshare_button">리포스트 버튼 숨기기</string>
@@ -208,7 +209,7 @@
     <string name="piko_save_media_comment">미디어 댓글 저장 버튼 추가</string>
     <string name="piko_save_media_comment_desc">게시물 및 릴스에서 미디어 댓글을 저장하는 버튼을 추가합니다</string>
     <string name="piko_enable_direct_download">즉시 다운로드 활성화</string>
-    <string name="piko_enable_direct_download_desc">게시물, 릴, 스토리에 있는 다운로드 버튼을 탭하면 현재 미디어가 즉시 저장됩니다</string>
+    <string name="piko_enable_direct_download_desc">게시물, 릴스 또는 스토리에서 다운로드 버튼을 탭하면 현재 미디어가 저장됩니다. 여러 개의 미디어가 있는 경우 버튼을 길게 탭하면 모든 미디어를 한 번에 저장할 수 있습니다</string>
     <string name="piko_select_media_download">다운로드할 미디어 선택</string>
     <string name="piko_download_photo_number">사진 %d</string>
     <string name="piko_download_video_number">동영상 %d</string>
@@ -345,6 +346,8 @@
     <string name="piko_action_bar_chat">채팅 액션바 아이콘</string>
     <string name="piko_action_bar_chat_desc">메시지 내부 액션바 아이콘</string>
     <string name="piko_action_bar_inbox">받은 메시지함 액션바 아이콘</string>
+    <string name="piko_action_bar_button_audio_call_icon">음성 통화 아이콘</string>
+    <string name="piko_action_bar_button_video_call_icon">영상 통화 아이콘</string>
     <string name="piko_action_bar_button_settings_icon">설정 아이콘</string>
     <string name="piko_action_bar_button_ghost_mode_icon">고스트 모드 아이콘</string>
     <string name="piko_action_bar_button_jump_oldest_icon">가장 오래된 메시지로 이동 아이콘</string>

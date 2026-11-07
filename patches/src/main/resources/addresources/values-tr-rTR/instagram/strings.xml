@@ -208,7 +208,6 @@
     <string name="piko_save_media_comment">Yorum medyasını kaydet</string>
     <string name="piko_save_media_comment_desc">Gönderi ve Reels yorumlarındaki medya içeriklerini kaydetmek için bir buton ekler</string>
     <string name="piko_enable_direct_download">Doğrudan indirmeyi etkinleştir</string>
-    <string name="piko_enable_direct_download_desc">Gönderiler, Reels ve Hikayelerdeki indirme düğmeleri, mevcut medyayı anında kaydeder</string>
     <string name="piko_select_media_download">İndirmek istediğiniz medyayı seçin</string>
     <string name="piko_download_photo_number">Fotoğraf %d</string>
     <string name="piko_download_video_number">Video %d</string>
@@ -444,6 +443,7 @@
     <string name="piko_view_saved_instants">Kaydedilmiş Şipşaklar</string>
     <string name="piko_instants_vault_empty">Henüz kaydedilmiş Şipşak yok. Yakalama özelliği etkinleştirilmiş bazı Şipşakları açın; burada görünmeye başlayacaklar.</string>
     <string name="piko_instants_link_unavailable">Medya bağlantısı mevcut değil.</string>
+    <string name="piko_instants_delete_selected_confirm">Seçilen %d Şipşak silinsin mi?</string>
     <string name="piko_delete">Sil</string>
     <string name="piko_instants_title">Şipşaklar</string>
     <string name="piko_search_username">Kullanıcı adına göre ara</string>
