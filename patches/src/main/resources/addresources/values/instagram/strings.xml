@@ -245,6 +245,7 @@
     <string name="piko_download_file_name_token_shortcode">Shortcode</string>
     <string name="piko_download_file_name_token_upload_date">Date</string>
     <string name="piko_download_file_name_token_upload_time">Time</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Timestamp</string>
     <string name="piko_download_file_name_token_type">Type</string>
     <string name="piko_download_file_name_token_carousel_index">Carousel</string>
     <string name="piko_download_file_name_token_variant_suffix">Variant</string>

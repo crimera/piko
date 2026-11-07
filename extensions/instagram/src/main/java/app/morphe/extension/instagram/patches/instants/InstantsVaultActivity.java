@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Date;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -70,8 +71,10 @@ import app.morphe.extension.instagram.settings.preference.widgets.InstagramPrefe
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramSearchStyle;
 import app.morphe.extension.instagram.db.PikoInstantsDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.instagram.patches.download.DownloadFileNameFormatter;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.utils.MediaUrls;
+import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.SelectionCheck;
@@ -122,7 +125,6 @@ public final class InstantsVaultActivity {
     }
 
     private static final class Controller {
-        private static final String SUBFOLDER = "Instants";
         private static final int COLUMNS = 3;
 
         private final Activity activity;
@@ -807,8 +809,8 @@ public final class InstantsVaultActivity {
             DialogInterface.OnClickListener onPick = (d, which) -> {
                 try {
                     if (which == 0) {
-                        String fileName = "piko_instant_" + row[0] + (isVideo ? ".mp4" : ".jpg");
-                        DownloadUtils.downloadMediaUrl(activity, url, SUBFOLDER, fileName);
+                        long clickedAtMillis = System.currentTimeMillis();
+                        download(row, url, opensVideo, clickedAtMillis);
                     } else if (which == 2) {
                         Utils.setClipboard(MediaUrls.forViewing(url));
                         Utils.showToastShort(str("piko_copied_media_link"));
@@ -825,6 +827,23 @@ public final class InstantsVaultActivity {
                     .setTitle(saved == null ? str("piko_download_options") : saved)
                     .setItems(options, onPick)
                     .show();
+        }
+
+        private void download(String[] row, String url, boolean isVideo, long clickedAtMillis) throws Exception {
+            long timestampMillis = clickedAtMillis;
+            try {
+                long takenAtMillis = Long.parseLong(row[8]);
+                if (takenAtMillis > 0) timestampMillis = takenAtMillis;
+            } catch (NumberFormatException ignored) {
+                // When the posting time is unavailable, use the click time, not the vault capture time.
+            }
+            DownloadFileNameFormatter.Values values = new DownloadFileNameFormatter.Values(
+                    row[1], row[0], row[9], timestampMillis, isVideo ? "video" : "image", 0, ""
+            );
+            String fileName = DownloadFileNameFormatter.format(
+                    Pref.downloadFileNameTemplate(), values, isVideo ? ".mp4" : ".jpg", ZoneId.systemDefault()
+            );
+            DownloadUtils.downloadMediaUrl(activity, url, DownloadUtils.getSubfolderName(row[1]), fileName);
         }
 
         private void confirm(CharSequence message, String positiveText, Runnable onConfirm) {
