@@ -6,10 +6,48 @@
 
 package app.morphe.extension.instagram.utils;
 
+import android.net.Uri;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 /** Helpers for the CDN urls piko stores and re-opens later. */
 public final class MediaUrls {
 
     private MediaUrls() {
+    }
+
+    public static boolean isVideo(String url) {
+        if (url == null) return false;
+        String path = Uri.parse(url).getPath();
+        if (path == null) return false;
+        path = path.toLowerCase(Locale.ROOT);
+        return path.endsWith(".mp4") || path.endsWith(".mov");
+    }
+
+    /** Removes the CDN's forced-download flag without rewriting signed query values. */
+    public static String forViewing(String url) {
+        if (url == null) return null;
+        Uri uri = Uri.parse(url);
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (!("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme))
+                || host == null) return url;
+        host = host.toLowerCase(Locale.ROOT);
+        if (!host.equals("cdninstagram.com") && !host.endsWith(".cdninstagram.com")) return url;
+        String query = uri.getEncodedQuery();
+        if (query == null) return url;
+        List<String> parameters = new ArrayList<>();
+        boolean removed = false;
+        for (String parameter : query.split("&", -1)) {
+            if ("dl=1".equals(parameter)) removed = true;
+            else parameters.add(parameter);
+        }
+        if (!removed) return url;
+        return uri.buildUpon()
+                .encodedQuery(parameters.isEmpty() ? null : String.join("&", parameters))
+                .build().toString();
     }
 
     /**

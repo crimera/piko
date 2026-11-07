@@ -57,6 +57,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
+import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
@@ -93,14 +94,20 @@ public final class DeletedMessagesActivity {
     }
 
     private static String guessExtension(String url, String type) {
+        String path = Uri.parse(url).getPath();
         Matcher m = Pattern
-                .compile("(?i)\\.(jpg|jpeg|webp|heic|png|mp4|mov|m4a|aac|mp3|ogg|gif)(?:\\?.*)?$")
-                .matcher(url);
-        if (m.find()) return "." + m.group(1).toLowerCase();
+                .compile("(?i)\\.(jpg|jpeg|webp|heic|png|mp4|mov|m4a|aac|mp3|ogg|gif)$")
+                .matcher(path != null ? path : "");
+        if (m.find()) return "." + m.group(1).toLowerCase(Locale.ROOT);
         if ("voice_media".equals(type) || "audio".equals(type)) return ".m4a";
         if ("video".equals(type)) return ".mp4";
         if ("animated_media".equals(type)) return ".gif";
         return ".jpg";
+    }
+
+    private static boolean isVideo(String url, String type) {
+        if ("video".equals(type) || "clip".equals(type) || "xma_clip".equals(type)) return true;
+        return MediaUrls.isVideo(url);
     }
 
     private static boolean isExpiredMediaUrl(String url) {
@@ -116,8 +123,13 @@ public final class DeletedMessagesActivity {
         }
     }
 
-    private static String mediaLabel(String type) {
+    private static String mediaLabel(String type, String url) {
         if (type == null) return "[" + str("piko_media_unknown") + "]";
+        // Instagram uses these item types for both photos and videos, including saved rows.
+        if (("media".equals(type) || "raven_media".equals(type) || "visual_media".equals(type))
+                && isVideo(url, type)) {
+            type = "video";
+        }
         String label;
         switch (type) {
             case "media":
@@ -484,7 +496,7 @@ public final class DeletedMessagesActivity {
             try {
                 final boolean isAudio = "voice_media".equals(type) || "audio".equals(type)
                         || url.matches("(?i).*\\.(m4a|aac|mp3|ogg)(\\?.*)?$");
-                final boolean isVideo = "video".equals(type) || "clip".equals(type) || "xma_clip".equals(type);
+                final boolean isVideo = isVideo(url, type);
                 final boolean isShare = url.contains("instagram.com/reel/")
                         || url.contains("instagram.com/p/") || url.contains("instagram.com/tv/");
 
@@ -505,7 +517,7 @@ public final class DeletedMessagesActivity {
                                 String fileName = "piko_" + messageId + guessExtension(url, type);
                                 DownloadUtils.downloadMediaUrl(activity, url, Constants.DEFAULT_DM_FOLDER, fileName);
                             } else if (which == 2) {
-                                Utils.setClipboard(url);
+                                Utils.setClipboard(MediaUrls.forViewing(url));
                                 Utils.showToastShort(str("piko_copied_media_link"));
                             } else {
                                 Uri uri = Uri.parse(url);
@@ -529,6 +541,7 @@ public final class DeletedMessagesActivity {
                                 if (!opened) {
                                     Intent i = new Intent(Intent.ACTION_VIEW, uri);
                                     if (isAudio) i.setDataAndType(uri, "audio/*");
+                                    else if (isVideo && !igLink) i.setDataAndType(uri, "video/*");
                                     activity.startActivity(Intent.createChooser(i, null));
                                 }
                             }
@@ -647,7 +660,7 @@ public final class DeletedMessagesActivity {
                 senderView.setText(who);
                 boolean isMediaUrl = content != null && content.startsWith("http");
                 if (isMediaUrl) {
-                    contentView.setText(mediaLabel(type) + "  ·  "
+                    contentView.setText(mediaLabel(type, content) + "  ·  "
                             + str(isExpiredMediaUrl(content) ? "piko_media_expired" : "piko_tap_to_view"));
                 } else {
                     contentView.setText(content != null && !content.isEmpty() ? content

@@ -41,6 +41,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.entity.ImageData;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
+import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.SheetBottomDialog;
@@ -238,7 +239,7 @@ final class DownloadSelectionSheet {
             try {
                 String url = item.getMediaLink();
                 if (url == null || url.isEmpty()) throw new IllegalStateException("Missing media link");
-                Utils.setClipboard(url);
+                Utils.setClipboard(MediaUrls.forViewing(url));
                 Utils.showToastShort(str("piko_copied_media_link"));
             } catch (Exception e) {
                 Logger.printException(() -> "Could not copy selected media link", e);

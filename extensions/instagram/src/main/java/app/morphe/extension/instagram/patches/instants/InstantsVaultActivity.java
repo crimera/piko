@@ -72,6 +72,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.InstagramPrefe
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramSearchStyle;
 import app.morphe.extension.instagram.db.PikoInstantsDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.SelectionCheck;
@@ -809,7 +810,7 @@ public final class InstantsVaultActivity {
                         String fileName = "piko_instant_" + row[0] + (isVideo ? ".mp4" : ".jpg");
                         DownloadUtils.downloadMediaUrl(activity, url, SUBFOLDER, fileName);
                     } else if (which == 2) {
-                        Utils.setClipboard(url);
+                        Utils.setClipboard(MediaUrls.forViewing(url));
                         Utils.showToastShort(str("piko_copied_media_link"));
                     } else {
                         activity.startActivity(Intent.createChooser(

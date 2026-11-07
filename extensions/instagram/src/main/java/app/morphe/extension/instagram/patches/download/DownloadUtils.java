@@ -43,6 +43,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.DashVideoData;
@@ -207,7 +208,7 @@ public class DownloadUtils {
                         downloadMedia(context, mediaInfo, position, filenameIndex, MediaType.IMAGE);
 
                     } else if (selectedOption.equals(str("piko_copy_media_link"))) {
-                        Utils.setClipboard(currentMediaData.getMediaLink());
+                        Utils.setClipboard(MediaUrls.forViewing(currentMediaData.getMediaLink()));
                         Utils.showToastShort(str("piko_copied_media_link"));
 
                     } else if (selectedOption.equals(str("piko_open_video_externally")) || selectedOption.equals(str("piko_open_image_externally"))) {

@@ -21,6 +21,7 @@ import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.entity.DirectItem;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.instagram.utils.Pref;
 
 /** Runtime hooks for "Save deleted messages". Fields are resolved at patch time. */
@@ -272,7 +273,7 @@ public class SavedMessagesHook {
         boolean isMedia = isBlank(content) || content.startsWith("http")
                 || content.startsWith("[");
         notifyDeletion(db.getSenderDisplay(messageId),
-                isMedia ? describeMediaType(type) : content, type);
+                isMedia ? describeMediaType(type, content) : content, type);
     }
 
     private static void notifyDeletion(String sender, String content, String type) {
@@ -327,8 +328,12 @@ public class SavedMessagesHook {
         }
     }
 
-    private static String describeMediaType(String type) {
+    private static String describeMediaType(String type, String url) {
         if (type == null) return str("piko_media_deleted_generic");
+        if (("media".equals(type) || "raven_media".equals(type) || "visual_media".equals(type))
+                && MediaUrls.isVideo(url)) {
+            type = "video";
+        }
         String label;
         switch (type) {
             case "media":
