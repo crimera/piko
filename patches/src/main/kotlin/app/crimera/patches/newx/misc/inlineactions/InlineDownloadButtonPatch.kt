@@ -55,6 +55,7 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.crimera.patches.downloader.downloaderManifestPatch
+import app.crimera.patches.newx.misc.mount.newXMountComponentProxyPatch
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -121,6 +122,7 @@ val newXInlineDownloadButtonPatch =
             newXThumbnailCachePatch,
             newXInAppNotificationPatch,
             downloaderManifestPatch,
+            newXMountComponentProxyPatch,
             newXExtensionPatch,
         )
 
