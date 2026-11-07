@@ -56,6 +56,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.shared.Logger;
@@ -539,10 +540,17 @@ public final class DeletedMessagesActivity {
                                     } catch (Exception ignored) {}
                                 }
                                 if (!opened) {
-                                    Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                                    if (isAudio) i.setDataAndType(uri, "audio/*");
-                                    else if (isVideo && !igLink) i.setDataAndType(uri, "video/*");
-                                    activity.startActivity(Intent.createChooser(i, null));
+                                    String path = uri.getPath();
+                                    boolean isImage = "image".equals(type) || (path != null
+                                            && path.matches("(?i).*\\.(jpg|jpeg|png|webp|heic|heif|avif|gif)$"));
+                                    if (!igLink && !isAudio && !isVideo && isImage) {
+                                        ActivityHook.handleUrlIntent(false, url);
+                                    } else {
+                                        Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                                        if (isAudio) i.setDataAndType(uri, "audio/*");
+                                        else if (isVideo && !igLink) i.setDataAndType(uri, "video/*");
+                                        activity.startActivity(Intent.createChooser(i, null));
+                                    }
                                 }
                             }
                         } catch (Exception e) {

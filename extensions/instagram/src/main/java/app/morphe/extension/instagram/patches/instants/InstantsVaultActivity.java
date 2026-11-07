@@ -12,14 +12,12 @@ import android.app.Activity;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -72,6 +70,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.InstagramPrefe
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramSearchStyle;
 import app.morphe.extension.instagram.db.PikoInstantsDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -799,9 +798,10 @@ public final class InstantsVaultActivity {
                 return;
             }
             boolean isVideo = "1".equals(row[4]);
+            boolean opensVideo = isVideo && row[3] != null && !row[3].isEmpty();
             CharSequence[] options = new CharSequence[] {
                     str("piko_download_current_media"),
-                    isVideo ? str("piko_open_video_externally") : str("piko_open_image_externally"),
+                    opensVideo ? str("piko_open_video_externally") : str("piko_open_image_externally"),
                     str("piko_copy_media_link"),
             };
             DialogInterface.OnClickListener onPick = (d, which) -> {
@@ -813,8 +813,7 @@ public final class InstantsVaultActivity {
                         Utils.setClipboard(MediaUrls.forViewing(url));
                         Utils.showToastShort(str("piko_copied_media_link"));
                     } else {
-                        activity.startActivity(Intent.createChooser(
-                                new Intent(Intent.ACTION_VIEW, Uri.parse(url)), null));
+                        ActivityHook.handleUrlIntent(opensVideo, url);
                     }
                 } catch (Exception e) {
                     PikoUtils.logger(e);
