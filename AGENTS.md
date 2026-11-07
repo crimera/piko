@@ -28,6 +28,34 @@ NewX is an obfuscated app under active refactoring. A patch must survive ordinar
 - Keep compile-time model contracts separate from release bytecode. Stable models may be `compileOnly`; unstable owners, methods, enums, and descriptors belong in patch-time resolution and direct smali injection, never runtime reflection.
 - Preserve old targets. A resilience improvement must keep the old path's behavior unchanged and must be checked against at least one older declared target.
 
+### Anchoring principles (adopted from Reseam)
+
+A target describes what the code *does*, so it survives the next release. Reseam's `docs/5_finding_code.md` and
+`docs/6_points.md` (in `../reseam/reseam/docs`) are the reference for the model; apply these rules to every resolver:
+
+- **One selective anchor, then filters.** Pick the rarest evidence (a string, a literal, a preserved framework call, a
+  unique field relationship) to produce candidates, then narrow with cheap constraints. Never start from "every method
+  with this shape"; a target that fits hundreds of methods and relies on `first()` or instruction order picks a
+  different one after the next update.
+- **Constrain presence, not position or arity.** Match required parameters with `hasParam`/`hasComposeShape`-style
+  checks, not by index or exact length. A leading `I` bitmask, a trailing default mask, an extra `Boolean` or a new
+  completion lambda are churn: resolve the contract (callback object, one Int, strings) and adapt to auxiliaries at
+  patch time, deriving their registers and count from the matched descriptor. 12.41 broke three resolvers this way
+  (7-parameter constructor, leading-`I` Compose host, 2-parameter renderer).
+- **Point at the instruction, then walk to neighbours.** Anchor on a distinctive instruction (string load, call, field
+  access) and move with `previous`/`next`/`callee`/argument provenance instead of assuming a fixed distance. Do not
+  assume adjacency between merge, call and result; prove straight-line regions explicitly.
+- **Follow values, not registers.** Capture the value an instruction writes or an argument it reads and prove where it
+  came from (all-path provenance). A null arm may be `const/4 0` or a move from a shared null register; accept both
+  only with proof.
+- **Prefer the app's own control flow over rebuilding its arguments.** To disable a branch, force the gate the app
+  already has (e.g. zero the SDK value feeding an `if-lt`) rather than calling its fallback with arguments that gain
+  lambdas across releases. Validate that the forced arm still reaches the expected callee.
+- **Respect switch semantics.** R8 folds the last case into the fall-through default arm; an absent key means "default
+  arm", not "no match". Duplicate keys still fail.
+- **Fail with evidence.** Cardinality failures list every candidate; add a semantic label. Every real drift becomes an
+  incident entry and a focused fixture (`NewXResolverLinterTest`).
+
 ### Typed bytecode emission
 
 NewX hooks are emitted through the [`crimera:morphe-bytecode`](https://github.com/crimera/morphe-bytecode)

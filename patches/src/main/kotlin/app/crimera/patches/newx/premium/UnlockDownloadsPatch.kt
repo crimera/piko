@@ -202,8 +202,11 @@ private class DownloadFlow(
                 selected = true
                 val payload = instructions[target(index)] as SwitchPayload
                 val cases = payload.switchElements.filter { it.key == value }
-                val case = requireExactlyOne("NewX captured coroutine dispatch $method selector=$value", cases)
-                pending.add(indexes.getValue(offsets[index] + case.offset))
+                // R8 may fold the highest-numbered case into the switch's fall-through default arm,
+                // so an absent key selects the default path (a key outside the payload is by
+                // definition handled there). Duplicate keys remain a hard failure.
+                val case = requireAtMostOne("NewX captured coroutine dispatch $method selector=$value", cases)
+                pending.add(if (case != null) indexes.getValue(offsets[index] + case.offset) else index + 1)
                 continue
             }
             pending.addAll(successors(index))

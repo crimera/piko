@@ -20,6 +20,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.ResourceGroup
@@ -28,11 +29,19 @@ import app.morphe.util.findElementByAttributeValue
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.iface.Method
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import org.w3c.dom.Element
 import java.io.FileWriter
 import java.nio.file.Files
 
+private const val SDK_INT_FIELD = "Landroid/os/Build\$VERSION;->SDK_INT:I"
 private const val SPLASH_BACKGROUND = "@color/twitter_splash_background"
 
 private const val SURFACE_CONTROL_BUILDER_DESCRIPTOR = "Landroid/view/SurfaceControl\$Builder;"
@@ -89,9 +98,24 @@ internal fun hasObjectAndIntParameterShape(
     objectType: String? = null,
 ): Boolean {
     val descriptors = parameterTypes.map(CharSequence::toString)
-    return descriptors.size == 2 &&
-        descriptors.count { it.startsWith("L") && (objectType == null || it == objectType) } == 1 &&
-        descriptors.count { it == "I" } == 1
+    // One Int, the callback object, and any auxiliary object parameters (12.41 appended a
+    // completion lambda); auxiliary primitives are not part of the contract.
+    return descriptors.size >= 2 &&
+        descriptors.count { it == "I" } == 1 &&
+        descriptors.all { it == "I" || it.startsWith("L") } &&
+        if (objectType == null) {
+            descriptors.any { it.startsWith("L") }
+        } else {
+            descriptors.count { it == objectType } == 1
+        }
+}
+
+/** The normal-dismiss fallback: the callback object plus auxiliary objects, no Int. */
+internal fun isLaunchRevealFallbackShape(parameterTypes: List<CharSequence>, callbackType: String): Boolean {
+    val descriptors = parameterTypes.map(CharSequence::toString)
+    return descriptors.firstOrNull() == callbackType &&
+        descriptors.none { it == "I" } &&
+        descriptors.all { it.startsWith("L") }
 }
 
 internal fun isLaunchRevealRenderer(method: Method): Boolean =
@@ -133,7 +157,7 @@ private fun isLaunchRevealCallback(method: Method): Boolean {
         }
     val fallbackTargets =
         staticCalls.filter { reference ->
-            reference.parameterTypes.map(CharSequence::toString) == listOf(callbackParameter) &&
+            isLaunchRevealFallbackShape(reference.parameterTypes, callbackParameter) &&
                 reference.returnType == "V"
         }
     if (revealTargets.size != 1 || fallbackTargets.size != 1) return false
@@ -215,13 +239,11 @@ private val restoreTwitterLaunchRevealPatch =
                 )
 
             val callbackMethod = callback.method
-            val rendererObjectParameter =
-                renderer.parameterTypes.single { it.toString().startsWith("L") }.toString()
+            val callbackParameter = callbackMethod.parameterTypes.single().toString()
             val fallbackCalls =
                 callbackMethod.staticInvokeReferences().filter { (_, reference) ->
                     reference.definingClass == renderer.definingClass &&
-                        reference.parameterTypes.map(CharSequence::toString) ==
-                            listOf(rendererObjectParameter) &&
+                        isLaunchRevealFallbackShape(reference.parameterTypes, callbackParameter) &&
                         reference.returnType == "V"
                 }
             val fallbackCall =
@@ -231,15 +253,56 @@ private val restoreTwitterLaunchRevealPatch =
                     describe = { "instruction ${it.first}: ${it.second.descriptor()}" },
                 )
             validateNormalSplashDismiss(fallbackCall.second)
-            val callbackInputRegister = callbackMethod.p0Register + 1
 
-            callbackMethod.insertHook(
-                index = 0,
-                // The argument is untouched at entry; route old-entry branches through the fade and keep structured labels unchanged.
-                relocateBranchTargets = true,
-            ) {
-                invokeStatic(fallbackCall.second, callbackInputRegister)
-                returnVoid()
+            // The app already routes to the normal dismiss when the reveal is unavailable (API < 33,
+            // reduced motion, animations off). Force that arm by zeroing the SDK value at its gate
+            // instead of re-creating the fallback's arguments, which gain lambdas across releases.
+            val instructions = callbackMethod.instructions.toList()
+            val sdkGates =
+                instructions.mapIndexedNotNull { index, instruction ->
+                    if (instruction.opcode != Opcode.SGET) return@mapIndexedNotNull null
+                    if (instruction.getReference<FieldReference>()?.toString() != SDK_INT_FIELD) {
+                        return@mapIndexedNotNull null
+                    }
+                    val sdkRegister = (instruction as OneRegisterInstruction).registerA
+                    val gate =
+                        (index + 1 until minOf(index + 6, instructions.size)).firstOrNull { candidate ->
+                            val next = instructions[candidate]
+                            next.opcode == Opcode.IF_LT && (next as TwoRegisterInstruction).registerA == sdkRegister
+                        } ?: return@mapIndexedNotNull null
+                    val branch = instructions[gate] as? BuilderOffsetInstruction ?: return@mapIndexedNotNull null
+                    val target = branch.target.location.index
+                    val fallbackIndex =
+                        (target until instructions.size).firstOrNull { candidate ->
+                            instructions[candidate].getReference<MethodReference>()?.toString() ==
+                                fallbackCall.second.toString()
+                        } ?: return@mapIndexedNotNull null
+                    // The forced arm must not read the zeroed register before redefining it.
+                    val written = mutableSetOf<Int>()
+                    for (cursor in target until fallbackIndex) {
+                        val arm = instructions[cursor]
+                        val destination = if (arm.opcode.setsRegister()) (arm as? OneRegisterInstruction)?.registerA
+                            ?: (arm as? TwoRegisterInstruction)?.registerA
+                            ?: (arm as? ThreeRegisterInstruction)?.registerA else null
+                        val reads = arm.registersUsed.filter { it != destination || arm.opcode in INVOKE_OPCODES }
+                        if (sdkRegister in reads && sdkRegister !in written) return@mapIndexedNotNull null
+                        if (destination != null) written += destination
+                    }
+                    if (sdkRegister in instructions[fallbackIndex].registersUsed && sdkRegister !in written) {
+                        return@mapIndexedNotNull null
+                    }
+                    gate to sdkRegister
+                }
+            val (gateIndex, sdkRegister) =
+                requireExactlyOne(
+                    label = "NewX launch reveal SDK gate in ${callback.originalMethod}",
+                    candidates = sdkGates,
+                    describe = { "if-lt at ${it.first} on v${it.second}" },
+                )
+
+            // Relocate old-entry branches so none can bypass the forced value.
+            callbackMethod.insertHook(index = gateIndex, relocateBranchTargets = true) {
+                constInt(sdkRegister, 0)
             }
         }
     }

@@ -34,8 +34,8 @@ private const val SETTINGS_READ_DESCRIPTOR =
 internal fun Method.primaryPostFabRendererCallIndices(): List<Int> {
     if (returnType != "V") return emptyList()
     val parameters = parameterDescriptors()
-    if (parameters.firstOrNull() != "I" ||
-        !parameters.hasComposeShape(
+    // No positional anchor: 12.41 moved the host's leading Int bitmask behind the lambdas.
+    if (!parameters.hasComposeShape(
             required = listOf(MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR, LIST_DESCRIPTOR, FUNCTION1_DESCRIPTOR),
         ) || parameters.count { it == FUNCTION0_DESCRIPTOR } < 2
     ) return emptyList()

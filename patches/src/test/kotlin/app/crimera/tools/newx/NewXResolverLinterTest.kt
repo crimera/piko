@@ -503,7 +503,7 @@ class NewXResolverLinterTest {
         val premium = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "premium", emptyList(), "Z")
         val offline = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "offline", emptyList(), "Z")
         val feature = ImmutableMethodReference("Lcom/x/subscriptions/Fixture;", "feature", emptyList(), "Z")
-        listOf("direct", "relocated", "unrelatedTry", "dispatchPolicy").forEach { shape ->
+        listOf("direct", "relocated", "unrelatedTry", "dispatchPolicy", "defaultArm").forEach { shape ->
             val (handler, classes) = downloadCapabilityFixture(shape)
             val before = handler.instructions.map { it.opcode }
             assertEquals(if (shape == "direct") 3 else 2,
@@ -540,7 +540,9 @@ class NewXResolverLinterTest {
                 // The first arm is valid in every fixture. Failure must concern the uncovered
                 // sibling or its actual dispatch, not merely a missing shared marker/checker.
                 assertTrue(error.message.orEmpty().contains(
-                    if (shape == "secondDisconnected") "timeline offline coroutine" else "selector=6",
+                    // An absent key now selects the switch's default arm; it must still fail
+                    // because that arm never clones the coroutine with the wrong selector.
+                    if (shape == "secondDisconnected") "timeline offline coroutine" else "selected clone",
                 ), error.message)
             }
             assertEquals(before, handler.instructions.map { it.opcode }, shape)
@@ -610,6 +612,16 @@ class NewXResolverLinterTest {
         )
         fun MethodImplementationBuilder.dispatch(register: Int, exceptionScope: String? = null, body: MethodImplementationBuilder.() -> Unit) {
             addInstruction(BuilderInstruction31t(Opcode.PACKED_SWITCH, register, getLabel("payload")))
+            if (shape == "defaultArm") {
+                // R8 folded the selected case into the switch's fall-through default arm (12.41):
+                // the payload lists no key for the selector, the body follows the switch directly.
+                body()
+                addLabel("selected")
+                downloadInstruction("return-object v0")
+                addLabel("payload")
+                addInstruction(BuilderPackedSwitchPayload(99, listOf(getLabel("selected"))))
+                return
+            }
             if (exceptionScope == "unrelated") {
                 addLabel("tryStart")
                 downloadInstruction("invoke-static {}, Lfixture/Unrelated;->mayThrow()V")

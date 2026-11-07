@@ -73,6 +73,7 @@ private const val FUNCTION3 = "Lkotlin/jvm/functions/Function3;"
 private const val FUNCTION2 = "Lkotlin/jvm/functions/Function2;"
 private const val OBJECT = "Ljava/lang/Object;"
 private const val STRING = "Ljava/lang/String;"
+private val INT_LIKE_PRIMITIVES = setOf("Z", "B", "S", "C", "I")
 private const val JAVA_LIST = "Ljava/util/List;"
 private const val OBJECT_ARRAY = "[Ljava/lang/Object;"
 private const val BOOLEAN = "Ljava/lang/Boolean;"
@@ -900,6 +901,7 @@ private data class NativePhotoViewerTarget(
     val w0Type: String,
     val routeConstructor: NativeMethodCall,
     val routeClass: String,
+    val routeParameterCount: Int,
     val viewerFlags: Int,
     val navigationCall: NativeMethodCall,
 )
@@ -1113,14 +1115,17 @@ private fun resolveNativePhotoViewerTarget(
                     .filter { method ->
                         if (method.name != "<init>") return@filter false
                         val parameters = method.parameterTypes.map(CharSequence::toString)
-                        parameters.size == 7 &&
+                        // Semantic prefix + trailing default-mask int; auxiliary primitive
+                        // parameters (e.g. the Boolean added in 12.41) are adapted, not matched.
+                        parameters.size >= 7 &&
                             parameters[0] == JAVA_LIST &&
                             parameters[1] == INT_DESCRIPTOR &&
                             parameters[2] == ebClass &&
                             parameters[3] == STRING &&
                             parameters[4] == STRING &&
                             parameters[5] == STRING &&
-                            parameters[6] == INT_DESCRIPTOR
+                            parameters.last() == INT_DESCRIPTOR &&
+                            parameters.subList(6, parameters.size - 1).all { it in INT_LIKE_PRIMITIVES }
                     }
                     .forEach { constructor ->
                         add(routeClass to constructor)
@@ -1133,7 +1138,8 @@ private fun resolveNativePhotoViewerTarget(
     )
     val routeClass = viewerRoute.first
     val routeConstructor = viewerRoute.second.toNativeCall()
-    val viewerFlags = resolveViewerFlags(hostMethod, routeConstructor.descriptor)
+    val routeParameterCount = viewerRoute.second.parameterTypes.size
+    val viewerFlags = resolveViewerFlags(hostMethod, routeConstructor.descriptor, routeParameterCount)
 
     val postClass = context.mutableClassDefBy(postType)
     val postAccessors =
@@ -1202,6 +1208,7 @@ private fun resolveNativePhotoViewerTarget(
         w0Type = w0Type,
         routeConstructor = routeConstructor,
         routeClass = routeClass,
+        routeParameterCount = routeParameterCount,
         viewerFlags = viewerFlags,
         navigationCall = navigationCall,
     )
@@ -1211,13 +1218,17 @@ private fun resolveNativePhotoViewerTarget(
 // argument at its media-branch call site. The mask selects which constructor
 // params fall back to defaults, so it is read from the call site, never
 // hardcoded: R8 keeps values but source changes could move them.
-private fun resolveViewerFlags(hostMethod: Method, constructorDescriptor: String): Int {
+private fun resolveViewerFlags(
+    hostMethod: Method,
+    constructorDescriptor: String,
+    parameterCount: Int,
+): Int {
     val instructions = hostMethod.implementation?.instructions?.toList()
         ?: throw PatchException("NewX post media event handler has no implementation: $hostMethod")
     val flags = instructions.mapIndexedNotNull { index, instruction ->
         if (instruction.opcode != Opcode.INVOKE_DIRECT_RANGE) return@mapIndexedNotNull null
         val range = instruction as? Instruction3rc ?: return@mapIndexedNotNull null
-        if (range.registerCount != 8) return@mapIndexedNotNull null
+        if (range.registerCount != parameterCount + 1) return@mapIndexedNotNull null
         val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
         if (reference.name != "<init>") return@mapIndexedNotNull null
         val descriptor = methodDescriptor(
@@ -1227,7 +1238,14 @@ private fun resolveViewerFlags(hostMethod: Method, constructorDescriptor: String
             returnType = reference.returnType,
         )
         if (descriptor != constructorDescriptor) return@mapIndexedNotNull null
-        nearbyFlagsConstant(instructions, index, range.startRegister + 7)
+        // Only call sites whose auxiliary primitive arguments are constant 0 reproduce what the
+        // emitter passes (it defaults them to 0); a site forwarding a runtime value is a
+        // different configuration whose flags must not be borrowed.
+        val auxiliaryAreZero = (6 until parameterCount - 1).all { parameter ->
+            nearbyFlagsConstant(instructions, index, range.startRegister + 1 + parameter) == 0
+        }
+        if (!auxiliaryAreZero) return@mapIndexedNotNull null
+        nearbyFlagsConstant(instructions, index, range.startRegister + parameterCount)
     }.distinct()
     return requireExactlyOne(
         "NewX viewer destination flags",
@@ -1358,8 +1376,13 @@ private fun Block.itemClickViewerInstructions(
     constInt(4, 0)
     constInt(5, 0)
     constInt(6, 0)
-    constInt(7, event.viewerFlags)
-    invokeDirect(methodReference(event.routeConstructor.descriptor), 0, 1, 2, 3, 4, 5, 6, 7)
+    // Auxiliary primitive constructor parameters (between the strings and the mask) default to 0.
+    for (extra in 7 until event.routeParameterCount) constInt(extra, 0)
+    constInt(event.routeParameterCount, event.viewerFlags)
+    invokeDirect(
+        methodReference(event.routeConstructor.descriptor),
+        *(0..event.routeParameterCount).toList().toIntArray(),
+    )
     move(5, 0, OBJECT)
     move(7, receiverRegister, OBJECT)
     iget(6, 7, fieldReference(target.navigationField))
@@ -1559,7 +1582,7 @@ private fun patchItemClickPhotoViewer(timelineListDescriptor: String) {
                     method.parameterTypes.map(CharSequence::toString) == target.parameterTypes
             },
         )
-        val expanded = method.cloneMutable(additionalRegisters = 8)
+        val expanded = method.cloneMutable(additionalRegisters = maxOf(8, event.routeParameterCount + 1))
         owner.methods.remove(method)
         owner.methods.add(expanded)
         // The block is a one-time entry decision that returns to the caller only by falling into

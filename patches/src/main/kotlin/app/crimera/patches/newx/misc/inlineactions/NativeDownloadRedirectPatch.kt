@@ -707,24 +707,54 @@ private fun resolveVideoTabPostPaths(
     metadataCallIndex: Int,
     watermarkedDispatchIndex: Int,
 ): List<ResolvedVideoTabPostTuple> {
-    val mergeIndex = metadataCallIndex
-    val nullIndex = mergeIndex - 1
-    val gotoIndex = nullIndex - 1
-    if (gotoIndex <= containerReadIndex + 1 || watermarkedDispatchIndex <= mergeIndex + 1) return emptyList()
     val containerRead = instructions[containerReadIndex] as? TwoRegisterInstruction ?: return emptyList()
     val containerRegister = containerRead.registerA
+    val metadataPostRegister = instructions[metadataCallIndex].registersUsed.getOrNull(1) ?: return emptyList()
+
+    // The merge is the goto's target, not necessarily the metadata call itself: 12.41 loads the
+    // downloader field between the merge and the call. Walk back from the call over harmless
+    // straight-line instructions to the nearest merge whose preceding pair is `goto` + null arm.
+    var mergeIndex = -1
+    for (candidate in metadataCallIndex downTo containerReadIndex + 3) {
+        if (instructions[candidate - 2].opcode in GOTO_OPCODES && branchTargets[candidate - 2] == candidate) {
+            mergeIndex = candidate
+            break
+        }
+        val before = instructions[candidate - 1]
+        if (before.opcode !in STRAIGHT_LINE_OPCODES) break
+    }
+    if (mergeIndex < 0) return emptyList()
+    val nullIndex = mergeIndex - 1
+    val gotoIndex = nullIndex - 1
+    if (gotoIndex <= containerReadIndex + 1 || watermarkedDispatchIndex <= metadataCallIndex + 1) return emptyList()
+
+    // Null arm: either a literal 0 written to the merged register, or a move from a register that
+    // is proven to hold a literal 0 on every path reaching the arm (R8 shares one null register).
+    val nullInstruction = instructions[nullIndex] as? OneRegisterInstruction ?: return emptyList()
+    val postRegister = nullInstruction.registerA
+    val nullIsLiteralZero = nullInstruction.opcode in INTEGER_LITERAL_OPCODES &&
+        (nullInstruction as? NarrowLiteralInstruction)?.narrowLiteral == 0
+    val nullIsSharedZero = nullInstruction.opcode in OBJECT_MOVE_OPCODES &&
+        (nullInstruction as? TwoRegisterInstruction)?.registerB?.let { source ->
+            (0 until nullIndex).any { origin ->
+                val write = instructions[origin] as? OneRegisterInstruction
+                write != null && write.opcode in INTEGER_LITERAL_OPCODES && write.registerA == source &&
+                    (write as? NarrowLiteralInstruction)?.narrowLiteral == 0 &&
+                    method.provesValueFromInstruction(origin, source, nullIndex, source)
+            }
+        } == true
+    if (!nullIsLiteralZero && !nullIsSharedZero) return emptyList()
     if (instructions[gotoIndex].opcode !in GOTO_OPCODES || branchTargets[gotoIndex] != mergeIndex) {
         return emptyList()
     }
+    // Merge to metadata call: straight-line, merged register intact, and it is the call's post.
+    val mergeToCallStraight = (mergeIndex until metadataCallIndex).all { index ->
+        instructions[index].opcode in STRAIGHT_LINE_OPCODES &&
+            postRegister !in instructions[index].writtenRegisters()
+    }
+    if (!mergeToCallStraight || metadataPostRegister != postRegister) return emptyList()
 
-    val metadataPostRegister = instructions[mergeIndex].registersUsed.getOrNull(1) ?: return emptyList()
-    val nullInstruction = instructions[nullIndex] as? OneRegisterInstruction ?: return emptyList()
-    if (nullInstruction.opcode !in INTEGER_LITERAL_OPCODES ||
-        nullInstruction.registerA != metadataPostRegister ||
-        (nullInstruction as? NarrowLiteralInstruction)?.narrowLiteral != 0
-    ) return emptyList()
-
-    val metadataResult = instructions[mergeIndex + 1] as? OneRegisterInstruction ?: return emptyList()
+    val metadataResult = instructions[metadataCallIndex + 1] as? OneRegisterInstruction ?: return emptyList()
     if (metadataResult.opcode != Opcode.MOVE_RESULT_OBJECT) return emptyList()
     val payloadRegister = instructions[watermarkedDispatchIndex].registersUsed.getOrNull(3) ?: return emptyList()
 
@@ -749,7 +779,7 @@ private fun resolveVideoTabPostPaths(
                     containerRegister = containerRegister,
                     guardIndex = guardIndex,
                     gotoIndex = gotoIndex,
-                    metadataPostRegister = metadataPostRegister,
+                    metadataPostRegister = postRegister,
                     accessors = canonicalAccessors,
                     wrapperPostField = wrapperPostField,
                     postResultField = postResultField,
@@ -768,7 +798,7 @@ private fun resolveVideoTabPostPaths(
             // Full CFG provenance runs only for a candidate that already passed the cheap checks.
             if (!method.provesParameterValue(containerReadIndex, containerRead.registerB, method.p0Register)) continue
             if (!method.provesValueFromInstruction(
-                    mergeIndex + 1,
+                    metadataCallIndex + 1,
                     metadataResult.registerA,
                     watermarkedDispatchIndex,
                     payloadRegister,

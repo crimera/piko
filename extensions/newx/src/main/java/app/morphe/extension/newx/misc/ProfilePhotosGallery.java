@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -226,6 +227,12 @@ public final class ProfilePhotosGallery {
             setFillViewport(true);
             setBackgroundColor(Color.TRANSPARENT);
             setClipToPadding(true);
+            // clipToPadding only clips while some padding is non-zero (FLAG_PADDING_NOT_NULL), and
+            // Compose's AndroidViewHolder disables clipChildren. Since 12.41 the host passes a zero
+            // top inset, so rows scrolled past the top drew above this view, over the pinned media
+            // filter row. Clip to the view bounds explicitly; the outline follows size changes.
+            setOutlineProvider(ViewOutlineProvider.BOUNDS);
+            setClipToOutline(true);
             setVerticalScrollBarEnabled(false);
             setHorizontalScrollBarEnabled(false);
             setOnScrollChangeListener((View.OnScrollChangeListener) (view, scrollX, scrollY, oldScrollX, oldScrollY) -> {
