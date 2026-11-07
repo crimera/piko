@@ -5,14 +5,13 @@ import app.morphe.patcher.patch.PatchAvailability
 import app.morphe.patcher.patch.PatchBuilder
 import app.morphe.patcher.patch.PatchContext
 
-/**
- * Mounts retain the stock manifest registrations. Settings, downloader components and package
- * changes therefore require a standard install. Apply this to selectable patches: availability
- * is selection metadata and is not inherited from their dependencies.
- *
- * [default] must match the patch declaration so non-mount selection keeps its existing behavior.
- */
 internal fun <C : PatchContext<*>> PatchBuilder<C>.unsupportedOnMount(default: Boolean = true) {
+    availability { _, _ ->
+        if (default) PatchAvailability.ENABLED else PatchAvailability.DISABLED
+    }
+}
+
+internal fun <C : PatchContext<*>> PatchBuilder<C>.requiresPackageChange(default: Boolean = false) {
     availability { installer, _ ->
         when {
             installer == InstallerType.MOUNT -> PatchAvailability.UNAVAILABLE

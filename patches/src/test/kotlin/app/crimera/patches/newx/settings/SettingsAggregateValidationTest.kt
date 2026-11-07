@@ -1,7 +1,5 @@
 package app.crimera.patches.newx.settings
 
-import app.crimera.patches.downloader.downloaderManifestPatch
-import app.crimera.patches.newx.misc.bringbacktwitter.bringBackTwitterPatch
 import app.crimera.patches.newx.misc.clone.clonePatch
 import app.morphe.patcher.patch.ApkArchitecture
 import app.morphe.patcher.patch.InstallerType
@@ -44,14 +42,8 @@ class SettingsAggregateValidationTest {
     }
 
     @Test
-    fun `selectable patches cannot pull settings or added components into a mount install`() {
-        val standardOnly = setOf(
-            newXSettingsPatch,
-            newXSettingsResourcePatch,
-            downloaderManifestPatch,
-            clonePatch,
-            bringBackTwitterPatch,
-        )
+    fun `only package changes are kept out of a mount install`() {
+        val standardOnly = setOf<Patch<*>>(clonePatch)
         fun Patch<*>.requiresStandardInstall(visited: MutableSet<Patch<*>> = mutableSetOf()): Boolean =
             visited.add(this) && (this in standardOnly || dependencies.any { it.requiresStandardInstall(visited) })
 
