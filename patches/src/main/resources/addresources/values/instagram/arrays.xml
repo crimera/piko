@@ -293,8 +293,8 @@
     </string-array>
 
     <string-array name="piko_array_hide_save_button_surfaces">
-        <item>Posts</item>
-        <item>Reels</item>
+        <item>@string/piko_download_buttons_feed</item>
+        <item>@string/piko_navigation_tab_reels</item>
     </string-array>
 
     <string-array name="piko_array_hide_save_button_surfaces_val">

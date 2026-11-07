@@ -627,7 +627,7 @@ public class ScreenBuilder {
             addPreference(
                     helper.multiSelectListPref(
                             str("piko_hide_save_buttons"),
-                            str("piko_hide_save_buttons_desc"),
+                            "",
                             Settings.HIDE_SAVE_BUTTON_SURFACES
                     )
             );
