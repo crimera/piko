@@ -4,6 +4,7 @@ import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
 import app.crimera.patches.newx.misc.bringbacktwitter.hasObjectAndIntParameterShape
 import app.crimera.patches.newx.misc.bringbacktwitter.isLaunchRevealRenderer
 import app.crimera.patches.newx.misc.bringbacktwitter.resolveLaunchRevealRenderer
+import app.crimera.patches.newx.misc.bringbacktwitter.isLaunchRevealFallbackShape
 import app.crimera.patches.newx.misc.dynamiccolor.isDefaultPaletteConstructorAdapter
 import app.crimera.patches.newx.misc.dynamiccolor.isMediaViewerButtonContent
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
@@ -140,6 +141,43 @@ class NewXResolverLinterTest {
         assertFalse(isLaunchRevealRenderer(missingAttachedSurfaceRenderer))
         assertTrue(hasObjectAndIntParameterShape(listOf("I", "Lfixture/Callback;"), "Lfixture/Callback;"))
         assertFalse(hasObjectAndIntParameterShape(listOf("I", "Lfixture/OtherCallback;"), "Lfixture/Callback;"))
+    }
+
+    @Test
+    fun `launch reveal renderer accepts the 12_41 trailing callback and rejects other shapes`() {
+        val view = "Landroid/view/View;"
+        val renderer =
+            ImmutableMethod(
+                "Lfixture/LaunchRevealRenderer;",
+                "render",
+                listOf(view, "I", "Lfixture/PerformanceCallback;").map { ImmutableMethodParameter(it, emptySet(), null) },
+                "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                emptySet<ImmutableAnnotation>(),
+                emptySet<HiddenApiRestriction>(),
+                MethodImplementationBuilder(5).apply {
+                    addInstruction("invoke-virtual {v2}, Landroid/view/SurfaceControl\$Builder;->build()Landroid/view/SurfaceControl;".toInstruction())
+                    addInstruction("invoke-interface {v0, v3}, Landroid/view/AttachedSurfaceControl;->buildReparentTransaction(Landroid/view/SurfaceControl;)Landroid/view/SurfaceControl\$Transaction;".toInstruction())
+                    addInstruction("return-void".toInstruction())
+                }.methodImplementation,
+            )
+
+        assertTrue(isLaunchRevealRenderer(renderer))
+        assertTrue(hasObjectAndIntParameterShape(listOf(view, "I", "Lfixture/PerformanceCallback;"), view))
+        // Exactly one Int is required, so a second Int in either the third or fourth slot is rejected.
+        assertFalse(hasObjectAndIntParameterShape(listOf(view, "I", "I")))
+        assertFalse(hasObjectAndIntParameterShape(listOf(view, "I", "Lfixture/PerformanceCallback;", "I")))
+        assertFalse(hasObjectAndIntParameterShape(listOf("Lfixture/Other;", "I", "Lfixture/PerformanceCallback;"), view))
+    }
+
+    @Test
+    fun `launch reveal dismiss fallback leads with the callback holder and takes no Int`() {
+        val holder = "Lfixture/SplashHolder;"
+        assertTrue(isLaunchRevealFallbackShape(listOf(holder), holder))
+        assertTrue(isLaunchRevealFallbackShape(listOf(holder, "Lkotlin/jvm/functions/Function0;"), holder))
+        assertFalse(isLaunchRevealFallbackShape(listOf(holder, "I"), holder))
+        assertFalse(isLaunchRevealFallbackShape(listOf("Lfixture/Other;", "Lkotlin/jvm/functions/Function0;"), holder))
+        assertFalse(isLaunchRevealFallbackShape(listOf("Lfixture/Other;", holder), holder))
     }
 
     @Test
@@ -1296,6 +1334,18 @@ class NewXResolverLinterTest {
         assertFalse(lookalike.isNewPostFabHostCandidate())
     }
 
+    @Test
+    fun `post FAB host resolves its renderer with the compose changed int first or last`() {
+        listOf(false, true).forEach { changedLast ->
+            val host = postFabHostFixture(includeMenuContract = true, changedLast = changedLast)
+            val lookalike = postFabHostFixture(includeMenuContract = false, changedLast = changedLast)
+
+            assertEquals(listOf(0), host.primaryPostFabRendererCallIndices(), "changedLast=$changedLast")
+            assertTrue(host.isNewPostFabHostCandidate(), "changedLast=$changedLast")
+            assertFalse(lookalike.isNewPostFabHostCandidate(), "changedLast=$changedLast")
+        }
+    }
+
     private fun capturedInlineActionRendererFixture(
         entryBaseRegister: Int,
         extraGuardTypeRead: Boolean = false,
@@ -1341,7 +1391,7 @@ class NewXResolverLinterTest {
         return owner to renderer
     }
 
-    private fun postFabHostFixture(includeMenuContract: Boolean): Method {
+    private fun postFabHostFixture(includeMenuContract: Boolean, changedLast: Boolean = false): Method {
         val rendererParameters = if (includeMenuContract) {
             listOf(
                 "Ljava/lang/String;",
@@ -1370,15 +1420,32 @@ class NewXResolverLinterTest {
         return ImmutableMethod(
             "Lfixture/ui/ComposeHost;",
             "changedName",
-            listOf(
-                "I",
-                "Landroidx/compose/runtime/Composer;",
-                "Landroidx/compose/ui/Modifier;",
-                "Ljava/util/List;",
-                "Lkotlin/jvm/functions/Function0;",
-                "Lkotlin/jvm/functions/Function0;",
-                "Lkotlin/jvm/functions/Function1;",
-            ).map { type -> ImmutableMethodParameter(type, emptySet(), null) },
+            (if (changedLast) {
+                // 12.41.0 host: `$changed` moved to the end of the Compose parameter list.
+                listOf(
+                    "Lkotlin/jvm/functions/Function0;",
+                    "Z",
+                    "Z",
+                    "Lkotlin/jvm/functions/Function0;",
+                    "Lkotlin/jvm/functions/Function0;",
+                    "Lkotlin/jvm/functions/Function1;",
+                    "Ljava/util/List;",
+                    "Lfixture/ui/Model;",
+                    "Landroidx/compose/ui/Modifier;",
+                    "Landroidx/compose/runtime/Composer;",
+                    "I",
+                )
+            } else {
+                listOf(
+                    "I",
+                    "Landroidx/compose/runtime/Composer;",
+                    "Landroidx/compose/ui/Modifier;",
+                    "Ljava/util/List;",
+                    "Lkotlin/jvm/functions/Function0;",
+                    "Lkotlin/jvm/functions/Function0;",
+                    "Lkotlin/jvm/functions/Function1;",
+                )
+            }).map { type -> ImmutableMethodParameter(type, emptySet(), null) },
             "V",
             AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
             emptySet(),

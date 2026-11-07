@@ -350,6 +350,26 @@ class InlineMediaPredicatePatchTest {
         ).forEach { shape -> assertVideoTabTupleResolves(shape) }
     }
 
+    @Test
+    fun `video-tab post tuple follows a merge prelude and a hoisted null register`() {
+        listOf(
+            VideoTabShape(mergePrelude = true),
+            VideoTabShape(hoistedNull = true),
+            VideoTabShape(mergePrelude = true, hoistedNull = true),
+            VideoTabShape(producer = VideoTabProducer.INLINED, mergePrelude = true, hoistedNull = true),
+        ).forEach { shape -> assertVideoTabTupleResolves(shape) }
+    }
+
+    @Test
+    fun `video-tab post tuple rejects a prelude that writes the post or a null source that may be non-zero`() {
+        listOf(
+            VideoTabShape(mergePrelude = true, preludeWritesPost = true),
+            VideoTabShape(mergePrelude = true, hoistedNull = true, preludeWritesPost = true),
+            VideoTabShape(hoistedNull = true, nullSourceOverwrite = true),
+            VideoTabShape(producer = VideoTabProducer.INLINED, hoistedNull = true, nullSourceOverwrite = true),
+        ).forEach { shape -> assertVideoTabTupleRejected(shape) }
+    }
+
     private enum class VideoTabProducer { ACCESSOR, INLINED }
 
     private enum class VideoTabAliasOverwrite { NONE, RETURNING, REACHING }
@@ -371,6 +391,10 @@ class InlineMediaPredicatePatchTest {
         val receiverCheckCast: Boolean = false,
         val postResultCast: Boolean = false,
         val payloadArrayOverwrite: Boolean = false,
+        val hoistedNull: Boolean = false,
+        val nullSourceOverwrite: Boolean = false,
+        val mergePrelude: Boolean = false,
+        val preludeWritesPost: Boolean = false,
     )
 
     private class VideoTabFixture(
@@ -430,6 +454,7 @@ class InlineMediaPredicatePatchTest {
         val post = 4
         val wrapper = 5
         val scratch = 8
+        val hoistedZero = 9
         val payload = if (high) 17 else 6
         val callback = if (high) 18 else 7
         val implementation = MethodImplementationBuilder(parameter + 1).apply {
@@ -449,6 +474,15 @@ class InlineMediaPredicatePatchTest {
                 }
             }
             addLabel("resume")
+            if (shape.hoistedNull) {
+                // 12.41 hoists the null literal far above the guard; the null arm only moves it.
+                addInstruction("const/4 v$hoistedZero, 0x0".toInstruction())
+                if (shape.nullSourceOverwrite) {
+                    addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, parameter, getLabel("nullSourceKept")))
+                    addInstruction("const/4 v$hoistedZero, 0x1".toInstruction())
+                    addLabel("nullSourceKept")
+                }
+            }
             addInstruction("iget-object v$downloader, v0, $VIDEO_TAB_HANDLER->downloader:$VIDEO_TAB_DOWNLOADER".toInstruction())
             addInstruction("const-string v$url, \"https://example.test/media.mp4\"".toInstruction())
             addInstruction("const-string v$mime, \"video/mp4\"".toInstruction())
@@ -502,8 +536,18 @@ class InlineMediaPredicatePatchTest {
             addLabel("successTail")
             addInstruction(BuilderInstruction10t(Opcode.GOTO, getLabel("metadataMerge")))
             addLabel("nullArm")
-            addInstruction("const/4 v$post, 0x0".toInstruction())
+            addInstruction(
+                (if (shape.hoistedNull) "move-object v$post, v$hoistedZero" else "const/4 v$post, 0x0").toInstruction(),
+            )
             addLabel("metadataMerge")
+            if (shape.mergePrelude) {
+                // 12.41 reads a handler field between the merge label and the metadata call.
+                val preludeRegister = if (shape.preludeWritesPost) post else scratch
+                addInstruction(
+                    "iget-object v$preludeRegister, v0, $VIDEO_TAB_HANDLER->inlinePost:$VIDEO_TAB_TIMELINE_POST"
+                        .toInstruction(),
+                )
+            }
             val metadataPost = if (shape.staleMetadataPost) mime else post
             addInstruction("invoke-static {v$url, v$metadataPost}, $VIDEO_TAB_METADATA".toInstruction())
             addInstruction("move-result-object v$payload".toInstruction())
