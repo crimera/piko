@@ -9,22 +9,22 @@ package app.crimera.patches.twitter.timeline.disableAutoScroll
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.changeString
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
+import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
-import app.morphe.util.matchSingle
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -32,7 +32,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
-import com.android.tools.smali.dexlib2.Opcode
 
 private object HomeTimelineSaveFingerprint : Fingerprint(
     classFingerprint = HomeTimelineRestoreFingerprint,
@@ -55,7 +54,7 @@ private data class TimelineFields(
 
 context(context: BytecodePatchContext)
 internal fun preserveTimelinePosition(): Pair<String, Int> {
-    val restore = HomeTimelineRestoreFingerprint.matchSingle()
+    val restore = HomeTimelineRestoreFingerprint
     val home = restore.classDef
     val restoreCode = restore.method.instructions.toList()
     val timelineType = restoreCode[0].getReference<FieldReference>()
@@ -72,7 +71,7 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
         throw PatchException("Timeline position helpers already exist")
     }
 
-    val save = HomeTimelineSaveFingerprint.matchSingle().method
+    val save = HomeTimelineSaveFingerprint.method
     val captureReference = save.instructions.mapNotNull { it.getReference<MethodReference>() }
         .singleOrNull { it.parameterTypes.isEmpty() && it.returnType == "Ljava/util/List;" }
         ?: throw PatchException("Could not uniquely resolve native position capture")
@@ -408,14 +407,12 @@ private fun bindTimelineAccess(bindings: Map<String, String>) {
             throw PatchException("Unsupported timeline identity descriptor: $name")
         }
         val placeholder = prefix + name
-        val fingerprint = object : Fingerprint(
+        Fingerprint(
             definingClass = bindingClass,
             name = "<init>",
             filters = listOf(
                 string(placeholder)
             )
-        ) {}
-        fingerprint.matchSingle()
-        fingerprint.changeString(placeholder, descriptor)
+        ).changeString(placeholder, descriptor)
     }
 }

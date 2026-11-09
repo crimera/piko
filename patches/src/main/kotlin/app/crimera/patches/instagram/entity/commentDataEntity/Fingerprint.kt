@@ -6,8 +6,15 @@
 
 package app.crimera.patches.instagram.entity.commentDataEntity
 
+import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "$ENTITY_CLASS/CommentData;"
 
@@ -54,5 +61,43 @@ internal object GetCommentUserDataExtension : Fingerprint(
 // --------------------
 
 internal object RandomGetCommentObjectMediaFingerprint : Fingerprint(
-    strings = listOf("commentId=", "parentCommentId=", "sourceMediaId=", "photo_comment_child_missing_overlay_info"),
+    strings = listOf("commentId=", " parentCommentId=", " sourceMediaId=", "photo_comment_child_missing_overlay_info"),
+    filters = listOf(
+        // Comment photo wrapper.
+        methodCall(
+            name = "<init>",
+            parameters = listOf("L", "Lcom/instagram/common/gallery/Medium;", MEDIA_CLASS_NAME, "Ljava/lang/String;"),
+        ),
+    ),
+)
+
+/**
+ * Converts the comment GIF, assigning the GIF fields in order.
+ */
+internal object CommentGifConverterFingerprint : Fingerprint(
+    classFingerprint = RandomGetCommentObjectMediaFingerprint,
+    parameters = listOf("L"),
+    filters = listOf(
+        // GIF tag.
+        fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IPUT_OBJECT),
+        fieldAccess(opcode = Opcode.IPUT, location = MatchAfterImmediately()),
+        fieldAccess(opcode = Opcode.IPUT, location = MatchAfterImmediately()),
+        // GIF URL.
+        fieldAccess(opcode = Opcode.IPUT_OBJECT, location = MatchAfterImmediately()),
+        // WebP URL.
+        fieldAccess(opcode = Opcode.IPUT_OBJECT, location = MatchAfterImmediately()),
+        fieldAccess(opcode = Opcode.IPUT_BOOLEAN, location = MatchAfterImmediately()),
+        // GIF creator name.
+        fieldAccess(opcode = Opcode.IPUT_OBJECT, location = MatchAfterImmediately()),
+    ),
+)
+
+internal object CommentShareClickFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("select_comment_screen_delete_comments_tap"),
+    filters = listOf(
+        string("comment_share_click"),
+        // Comment text check, right after the text is read.
+        opcode(Opcode.IF_EQZ),
+    ),
 )

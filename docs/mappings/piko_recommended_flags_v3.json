@@ -1,10 +1,5 @@
 [
   {
-    "name" : "Add blurred background when reposting in Stories: Reels, Post and Stories mentioned",
-    "desc" : "",
-    "code" : "110215"
-  },
-  {
     "name" : "Button with a black layout that appears when clicking on something in Stories",
     "desc" : "",
     "code" : "73245"
@@ -23,6 +18,16 @@
     "name" : "New Instagram Plus fonts for Stories",
     "desc" : "Make sure to enable the option to access Instagram Plus features.",
     "code" : "125004"
+  },
+  {
+    "name" : "Show Instagram Plus upsells",
+    "desc" : "Disable to hide Instagram Plus upgrade prompts and introductory tips",
+    "code" : "106589::6,106589::10,107371::17,107371::20,107371::28,107371::34,107913::7,107913::13,107913::20,107913::23,107913::32,107913::33,107913::34,107913::35,107913::36,107913::37,107913::38,107913::43,107913::46,107913::49,111534::8,112822::0,112940::0,112940::1,112940::2,112940::3,112940::7,112940::12,117726::1,117726::2,117741::1,117741::3,118373::1,118373::2,119008::1,119699::1,119699::2,119699::4,119701::2,122692::1,122692::2,122692::3,124728::2,124728::5,124728::7,124728::8,124728::15,124728::16,124728::19,125004::0,125004::2,125481::0,125481::1,127635::2,127659::0,128414::15,128414::16,136688::11,136688::18,144562::0"
+  },
+  {
+    "name" : "Selected Instagram Plus features and entry points",
+    "desc" : "Disable selected Instagram Plus entry points, free previews, free Super Likes and chat font rendering. This does not disable all Plus features",
+    "code" : "106589::4,106589::12,107371::24,107371::37,107913::12,107913::22,107913::25,107913::26,107913::27,107913::28,107913::29,107913::30,107913::31,107913::45,125481::2,136813::0"
   },
   {
     "name" : "New style for the timestamp on the posted Stories",
@@ -121,6 +126,103 @@
     "code" : "127260"
   },
   {
+    "name" : "Show Meta AI entry points and prompts",
+    "desc" : "Disable to hide Meta AI entry points and prompts",
+    "code" : "59918::2,59918::39,59918::46,59918::59,59918::61,62449::45,62485::0,62485::4,62485::5,62485::11,70108::0,71155::6,71628::0,72519::10,72519::11,72519::18,73643::0,73643::1,74933::17,74933::36,75278::0,75278::9,76479::0,77059::11,77059::14,78149::0,78149::1,78149::2,78970::1,78970::37,78970::38,80654::1,80654::37,91489::6,93548::1,93786::0,94598::84,96235::1,96543::0,105426::21,105426::27,105426::41,108911::19,109730::0,110316::0,110316::1,110316::11,119736::6,121836::0,122162::2,122162::3,128853::13,145349::1,145349::3"
+  },
+  {
+    "name" : "Hide additional Meta AI prompts and entry points",
+    "desc" : "Enable to hide additional Meta AI popups, search icons, suggestions and sharing targets",
+    "code" : "75278::4,75278::5,92518::1,92518::2,92518::6,94598::56,94598::117,122162::1"
+  },
+  {
+    "name" : "Hide the Muse share shortcut",
+    "desc" : "Does not hide the shortcut when a supported version of the Muse app is installed",
+    "code" : "136724::7"
+  },
+  {
+    "name" : "Hide interest buttons below reels",
+    "desc" : "Applies to the Interested and Not interested buttons below reels that are not ads, without affecting the overflow menu",
+    "code" : "66222::6"
+  },
+  {
+    "name" : "Interested option in the reels menu",
+    "desc" : "Disable and set Reels interest option layout to 1 to hide both Interested and Not interested in the redesigned overflow menu",
+    "code" : "55922::2"
+  },
+  {
+    "name" : "Reels interest option layout",
+    "desc" : "Set to 1 and disable Interested option in the reels menu to hide both feedback options in the redesigned overflow menu",
+    "code" : "84236::0",
+    "type" : "long"
+  },
+  {
+    "name" : "QR code sharing",
+    "desc" : "Also controls the QR code option in the post menu",
+    "code" : "45023::0"
+  },
+  {
+    "name" : "Hide the See all remixes option",
+    "desc" : "May also hide grouped remix options on eligible original posts",
+    "code" : "97046::1"
+  },
+  {
+    "name" : "Hide the unfollow option in the post menu",
+    "desc" : "",
+    "code" : "31983::10"
+  },
+  {
+    "name" : "Favorites option in the post menu",
+    "desc" : "",
+    "code" : "40597::31"
+  },
+  {
+    "name" : "Fullscreen option in the redesigned reels menu",
+    "desc" : "",
+    "code" : "72006::9"
+  },
+  {
+    "name" : "Reels auto-scroll",
+    "desc" : "Disabling also hides the menu option unless clips_tab in ig_android_long_press is set to auto_scroll",
+    "code" : "83371::0"
+  },
+  {
+    "name" : "Simplified DM inbox navigation",
+    "desc" : "Replaces the search bar with a header search icon",
+    "code" : "94528::0"
+  },
+  {
+    "name" : "DM inbox suggestions",
+    "desc" : "Set to 9000000000 to hide suggestions in the DM inbox",
+    "code" : "75196::8",
+    "type" : "long"
+  },
+  {
+    "name" : "Floating tab bar",
+    "desc" : "Unavailable with the Homecoming navigation layout",
+    "code" : "126024::12"
+  },
+  {
+    "name" : "Pill background for the selected tab",
+    "desc" : "",
+    "code" : "126411::0"
+  },
+  {
+    "name" : "Suggested accounts on your profile",
+    "desc" : "",
+    "code" : "33903::2"
+  },
+  {
+    "name" : "Hide the sort arrow on profile reels",
+    "desc" : "",
+    "code" : "78393::3"
+  },
+  {
+    "name" : "Edge-to-edge layout",
+    "desc" : "Extends the main screen into the status bar and system navigation bar areas on Android 15 or later",
+    "code" : "126024::2,126024::3,126024::4,126024::5,126024::6,126024::7,126024::8,126024::9"
+  },
+  {
     "name" : "Add Meta AI in reels overflow menu",
     "desc" : "",
     "code" : "109730"
@@ -183,8 +285,55 @@
     "code" : "68885"
   },
   {
+    "name" : "Maps notes",
+    "desc" : "Disable to remove the notes maps feature (Also remove the friends maps).",
+    "code" : "65057::0"
+  },
+  {
+    "name" : "GIF notes",
+    "desc" : "Disable to remove the notes GIF feature.",
+    "code" : "75711::0"
+  },
+  {
+    "name" : "Poll notes",
+    "desc" : "Enable to have the notes Poll feature (Not guaranted to work).",
+    "code" : "121655::0"
+  },
+  {
+    "name" : "Blends",
+    "desc" : "Disable to hide the Blends button in the header of eligible chats.",
+    "code" : "76757::0"
+  },
+  {
+    "name" : "Threads profile button",
+    "desc" : "Disable to remove the threads button in profiles.",
+    "code" : "58467::20"
+  },
+  {
     "name" : "Per-session auto-scroll",
     "desc" : "Disable to keep auto-scroll in the state you left it, instead of resetting to off every time Instagram is closed.",
     "code" : "83371::10"
+  },
+  {
+    "name" : "High quality uploads",
+    "desc" : "Enable to improve the quality of uploads.",
+    "code" : "23744::0,55416::7,76431::0,116170::0"
+  },
+  {
+    "name" : "Video super resolution (Machine learning) uploads",
+    "desc" : "Enable to upscales all video to 1080p (if the resolution if below 1080p) using on device machine learning.",
+    "code" : "75689::0,75689::1,75689::2,75689::3,75689::4,75689::5,75689::6,75689::7,75689::8"
+  },
+  {
+    "name" : "Webp gallery compression",
+    "desc" : "Set this to 100 for the highest webp quality when instagram creates a temporary copy of a gallery photo for a direct message. this setting only applies when igd_webp_device_gallery is enabled.",
+    "code" : "80122::1",
+    "type" : "long"
+  },
+  {
+    "name" : "Heic uploads compression",
+    "desc" : "Set this to 100 for highest quality of regular heic uploads.",
+    "code" : "55416::1",
+    "type" : "long"
   }
 ]

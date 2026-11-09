@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.entity.profileinfo
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.utils.changeFirstString
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -23,9 +24,9 @@ val profileInfoEntity =
 
         execute {
 
-            ProfileUserInfoViewBinderFingerprint.method.apply {
-                mutableClassDefBy(parameters[1].type).apply {
-                    val profileRelatedDetailsClass = ProfileRelatedDetailsFingerprint.classDef
+            ProfileUserInfoViewBinderFingerprint.originalMethod.apply {
+                classDefBy(parameterTypes[1].toString()).apply {
+                    val profileRelatedDetailsClass = ProfileRelatedDetailsFingerprint.originalClassDef
 
                     val profileRelatedDetailsFieldName = fields.last { it.type == profileRelatedDetailsClass.type }.name
                     GetProfileRelatedDetailsExtensionFingerprint.changeFirstString(profileRelatedDetailsFieldName)
@@ -36,7 +37,10 @@ val profileInfoEntity =
                             .name
                     GetUserDetailViewModelExtensionFingerprint.changeFirstString(userDetailViewModelFieldName)
 
-                    val userFields = classDefBy(USER_DETAIL_VIEW_MODEL_CLASS).fields.filter {
+                    val viewModel = classDefBy(USER_DETAIL_VIEW_MODEL_CLASS)
+                    val session = viewModel.instanceFields.single { it.type == USER_SESSION_CLASS }
+                    GetProfileSessionExtensionFingerprint.changeFirstString(session.name)
+                    val userFields = viewModel.fields.filter {
                         it.type == USER_MODEL_CLASS_NAME && !AccessFlags.STATIC.isSet(it.accessFlags)
                     }
                     val userObjectFieldName = userFields.singleOrNull()?.name

@@ -6,23 +6,31 @@
 
 package app.crimera.patches.instagram.misc.theme
 
+import app.crimera.patches.instagram.utils.fieldReference
+import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
+import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
-import com.android.tools.smali.dexlib2.Opcode
+import app.morphe.util.findInstructionIndicesReversed
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
-import com.android.tools.smali.dexlib2.iface.instruction.Instruction
-import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
@@ -48,25 +56,51 @@ private const val PURE_BLACK_ARGB = 0xff000000L
 private const val EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS = 2
 private const val SEARCH_ROW_SEMANTICS_ID = "search_row"
 
-// Allow only the single packing instruction between the literal and GRAY_1600 write.
 internal object ComposePrismBlackFingerprint : Fingerprint(
     definingClass = PRISM_COLORS_V2_CLASS,
     name = "<clinit>",
     filters = listOf(
         opcode(Opcode.CONST_WIDE),
+        // Packing shift of the color.
+        opcode(Opcode.SHL_LONG_2ADDR, InstructionLocation.MatchAfterImmediately()),
         fieldAccess(
             definingClass = PRISM_COLORS_V2_CLASS,
             name = GRAY_1600_FIELD_NAME,
             opcode = Opcode.SPUT_WIDE,
-            location = InstructionLocation.MatchAfterWithin(1),
+            location = InstructionLocation.MatchAfterImmediately(),
         ),
     ),
 )
 
+/**
+ * Matches two methods: SearchBarV1 and SearchBarV2.
+ */
 internal object ComposeSearchRowFingerprint : Fingerprint(
-    strings = listOf(SEARCH_ROW_SEMANTICS_ID),
     returnType = "V",
-    filters = listOf(opcode(Opcode.IGET_WIDE)),
+    filters = listOf(
+        // Palette surface color.
+        fieldAccess(type = "J", opcode = Opcode.IGET_WIDE),
+        string(SEARCH_ROW_SEMANTICS_ID),
+        // Alternate surface color.
+        methodCall(returnType = "J", opcode = Opcode.INVOKE_STATIC),
+        opcode(Opcode.MOVE_RESULT_WIDE, InstructionLocation.MatchAfterImmediately()),
+    ),
+)
+
+/**
+ * Class initializer of a cached Compose prism palette, which is constructed from the prism colors.
+ */
+internal object ComposePrismPaletteHolderFingerprint : Fingerprint(
+    name = "<clinit>",
+    returnType = "V",
+    parameters = emptyList(),
+    filters = listOf(
+        fieldAccess(definingClass = PRISM_COLORS_V2_CLASS, name = GRAY_1600_FIELD_NAME, opcode = Opcode.SGET_WIDE),
+        // Palette constructor.
+        methodCall(name = "<init>", opcode = Opcode.INVOKE_DIRECT_RANGE),
+        // Cached palette.
+        fieldAccess(definingClass = "this", opcode = Opcode.SPUT_OBJECT),
+    ),
 )
 
 internal fun composePrismBlackLiteral(
@@ -148,61 +182,9 @@ context(patchContext: BytecodePatchContext)
 internal fun installComposePrismBlackRuntime(legacyAmoled: Boolean) {
     val method = ComposePrismBlackFingerprint.method
     val constWideMatch = ComposePrismBlackFingerprint.instructionMatches[0]
-    val storeMatch = ComposePrismBlackFingerprint.instructionMatches[1]
-    val register =
-        (constWideMatch.instruction as? OneRegisterInstruction)?.registerA
-            ?: throw PatchException("GRAY_1600 source is not a one-register const-wide")
-    val nativeArgb =
-        (constWideMatch.instruction as? WideLiteralInstruction)?.wideLiteral
-            ?: throw PatchException("GRAY_1600 source does not contain a wide literal")
-    if (storeMatch.index != constWideMatch.index + 2) {
-        throw PatchException("GRAY_1600 source is not followed by one packing instruction")
-    }
-    val shiftInstruction =
-        method.instructions[constWideMatch.index + 1] as? TwoRegisterInstruction
-            ?: throw PatchException("GRAY_1600 packing instruction does not use two registers")
-    if (
-        shiftInstruction.opcode != Opcode.SHL_LONG_2ADDR ||
-        shiftInstruction.registerA != register
-    ) {
-        throw PatchException("GRAY_1600 source is not packed with shl-long/2addr")
-    }
-    val shiftAmount =
-        method.instructions
-            .subList(0, constWideMatch.index)
-            .asReversed()
-            .firstOrNull { instruction ->
-                instruction is OneRegisterInstruction &&
-                    instruction is NarrowLiteralInstruction &&
-                    instruction.registerA == shiftInstruction.registerB
-            } as? NarrowLiteralInstruction
-    if (shiftAmount?.narrowLiteral != 32) {
-        throw PatchException("GRAY_1600 packing shift is not 32 bits")
-    }
-
-    val field =
-        ((storeMatch.instruction as? ReferenceInstruction)?.reference as? FieldReference)
-            ?: throw PatchException("GRAY_1600 store does not reference a field")
-    if (
-        field.definingClass != PRISM_COLORS_V2_CLASS ||
-        field.name != GRAY_1600_FIELD_NAME ||
-        field.type != "J"
-    ) {
-        throw PatchException("GRAY_1600 field reference does not match the expected shape")
-    }
-    val fieldDefinition =
-        ComposePrismBlackFingerprint.classDef.fields.singleOrNull {
-            it.definingClass == field.definingClass &&
-                it.name == field.name &&
-                it.type == field.type
-        } ?: throw PatchException("Expected one GRAY_1600 field definition")
-    if (
-        !AccessFlags.PUBLIC.isSet(fieldDefinition.accessFlags) ||
-        !AccessFlags.STATIC.isSet(fieldDefinition.accessFlags) ||
-        !AccessFlags.FINAL.isSet(fieldDefinition.accessFlags)
-    ) {
-        throw PatchException("GRAY_1600 must remain public static final")
-    }
+    val register = constWideMatch.getInstruction<OneRegisterInstruction>().registerA
+    val nativeArgb = constWideMatch.getInstruction<WideLiteralInstruction>().wideLiteral
+    val field = ComposePrismBlackFingerprint.instructionMatches.last().fieldReference
     val legacyLiteral = composePrismBlackLiteral(legacyAmoled, nativeArgb)
     if (legacyLiteral != nativeArgb) {
         method.replaceInstruction(
@@ -245,68 +227,17 @@ internal fun installComposePrismBlackRuntime(legacyAmoled: Boolean) {
 
 context(patchContext: BytecodePatchContext)
 private fun installComposeSearchRowBackgroundOverride() {
-    val method = ComposeSearchRowFingerprint.method
-    composeSearchRowSurfaceWrites(method.instructions)
-        .sortedByDescending { it.index }
-        .forEach { write ->
-            method.addInstructions(
-                write.index + 1,
-                composeSearchRowOverrideInstructions(write.register),
-            )
+    ComposeSearchRowFingerprint.matchAll(2..2).forEach {
+        val paletteRead = it.instructionMatches.first()
+        val alternateResult = it.instructionMatches.last()
+        val register = paletteRead.getInstruction<OneRegisterInstruction>().registerA
+        if (alternateResult.getInstruction<OneRegisterInstruction>().registerA != register) {
+            throw PatchException("Compose search-row surface colors use different registers")
         }
-}
-
-internal data class ComposeSearchRowSurfaceWrite(
-    val index: Int,
-    val register: Int,
-)
-
-internal fun composeSearchRowSurfaceWrites(
-    instructions: List<Instruction>,
-): List<ComposeSearchRowSurfaceWrite> {
-    val paletteWrites =
-        instructions.withIndex().filter { (_, instruction) ->
-            instruction.opcode == Opcode.IGET_WIDE &&
-                ((instruction as? ReferenceInstruction)?.reference as? FieldReference)
-                    ?.type == "J"
+        listOf(alternateResult.index, paletteRead.index).forEach { index ->
+            it.method.addInstructions(index + 1, composeSearchRowOverrideInstructions(register))
         }
-    if (paletteWrites.size != 1) {
-        throw PatchException(
-            "Expected one Compose search-row palette surface read, found ${paletteWrites.size}",
-        )
     }
-    val paletteWrite = paletteWrites.single()
-    val register =
-        (paletteWrite.value as? OneRegisterInstruction)?.registerA
-            ?: throw PatchException(
-                "Compose search-row palette surface read has no destination register",
-            )
-
-    val alternateWrites =
-        instructions.withIndex().filter { (index, instruction) ->
-            if (
-                index == 0 ||
-                instruction.opcode != Opcode.MOVE_RESULT_WIDE ||
-                (instruction as? OneRegisterInstruction)?.registerA != register
-            ) {
-                return@filter false
-            }
-            val source = instructions[index - 1]
-            source.opcode == Opcode.INVOKE_STATIC &&
-                ((source as? ReferenceInstruction)?.reference as? MethodReference)
-                    ?.returnType == "J"
-        }
-    if (alternateWrites.size != 1) {
-        throw PatchException(
-            "Expected one alternate Compose search-row surface result, found " +
-                alternateWrites.size,
-        )
-    }
-
-    return listOf(
-        ComposeSearchRowSurfaceWrite(paletteWrite.index, register),
-        ComposeSearchRowSurfaceWrite(alternateWrites.single().index, register),
-    )
 }
 
 internal fun composeSearchRowOverrideInstructions(register: Int): String {
@@ -325,59 +256,20 @@ context(patchContext: BytecodePatchContext)
 private fun installComposePrismPaletteRuntime(
     prismField: FieldReference,
 ): ComposePrismPaletteRuntime {
-    val holderClasses = mutableListOf<com.android.tools.smali.dexlib2.iface.ClassDef>()
-    patchContext.classDefForEach { classDef ->
-        val clinit =
-            classDef.methods.singleOrNull {
-                it.name == "<clinit>" &&
-                    it.parameterTypes.isEmpty() &&
-                    it.returnType == "V"
-            } ?: return@classDefForEach
-        val instructions = clinit.implementation?.instructions?.toList()
-            ?: return@classDefForEach
-        val readsPrismField =
-            instructions.any { instruction ->
-                instruction.opcode == Opcode.SGET_WIDE &&
-                    (instruction as? ReferenceInstruction)?.reference == prismField
-            }
-        if (!readsPrismField) return@classDefForEach
-
-        // Other Compose caches also read GRAY_1600 without constructing a Prism palette.
-        val cachedTypes = instructions.mapNotNull { instruction ->
-            val field = (instruction as? ReferenceInstruction)?.reference as? FieldReference
-            field?.type?.takeIf {
-                instruction.opcode == Opcode.SPUT_OBJECT && field.definingClass == classDef.type
-            }
-        }.toSet()
-        val constructsPalette = instructions.any { instruction ->
-            val constructor = (instruction as? ReferenceInstruction)?.reference as? MethodReference
-            instruction.opcode == Opcode.INVOKE_DIRECT_RANGE && constructor != null &&
-                constructor.definingClass in cachedTypes && constructor.name == "<init>" &&
-                constructor.returnType == "V" && constructor.parameterTypes.isNotEmpty() &&
-                constructor.parameterTypes.all { it.toString() == "J" }
-        }
-        if (constructsPalette) holderClasses += classDef
+    // Other Compose caches also read GRAY_1600 without constructing a Prism palette.
+    val holderMatches = ComposePrismPaletteHolderFingerprint.matchAll().filter { match ->
+        val constructor = match.instructionMatches[1].methodReference
+        constructor.parameterTypes.isNotEmpty() && constructor.parameterTypes.all { it.toString() == "J" } &&
+            match.instructionMatches[2].fieldReference.type == constructor.definingClass
     }
-    if (holderClasses.size != EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS) {
+    if (holderMatches.size != EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS) {
         throw PatchException(
             "Expected $EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS cached Compose prism " +
-                "palette holders, found ${holderClasses.size}",
+                "palette holders, found ${holderMatches.size}",
         )
     }
-    val holderInitializers =
-        holderClasses.map { classDef ->
-            classDef.methods
-                .single {
-                    it.name == "<clinit>" &&
-                        it.parameterTypes.isEmpty() &&
-                        it.returnType == "V"
-                }.implementation
-                ?.instructions
-                ?.toList()
-                ?: throw PatchException(
-                    "Cached Compose prism palette initializer is missing in ${classDef.type}",
-                )
-        }
+    val rootBackgroundParameterOrdinal = composePrismRootBackgroundParameterOrdinal(holderMatches)
+    val holderClasses = holderMatches.map { it.originalClassDef }
 
     val holders = holderClasses.map { classDef ->
         val holderClass = patchContext.mutableClassDefBy(classDef)
@@ -468,30 +360,16 @@ private fun installComposePrismPaletteRuntime(
         }
     val primaryBackgroundField =
         paletteConstructors
-            .mapNotNull { method ->
-                runCatching {
-                    composePrismPrimaryBackgroundField(method)
-                }.getOrNull()
-            }
+            .mapNotNull { method -> composePrismBackgroundField(method, parameterOrdinal = 0) }
             .distinct()
             .singleOrNull()
             ?: throw PatchException(
                 "Expected one cached Compose prism primary background field",
             )
-    val rootBackgroundParameterOrdinal =
-        composePrismRootBackgroundParameterOrdinal(
-            paletteType = paletteClass.type,
-            holderInitializers = holderInitializers,
-        )
     val bdsBackgroundField =
         paletteConstructors
             .mapNotNull { method ->
-                runCatching {
-                    composePrismBackgroundField(
-                        constructor = method,
-                        parameterOrdinal = rootBackgroundParameterOrdinal,
-                    )
-                }.getOrNull()
+                composePrismBackgroundField(method, parameterOrdinal = rootBackgroundParameterOrdinal)
             }
             .distinct()
             .singleOrNull()
@@ -536,79 +414,27 @@ private data class ComposePrismHolderColorOrdinals(
     val gray0100: Set<Int>,
 )
 
-internal fun composePrismRootBackgroundParameterOrdinal(
-    paletteType: String,
-    holderInitializers: List<List<Instruction>>,
-): Int {
-    if (holderInitializers.size != EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS) {
-        throw PatchException(
-            "Expected $EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS Compose prism palette " +
-                "initializers, found ${holderInitializers.size}",
-        )
-    }
+/**
+ * Constructor parameter of the root background, which the dark palette sets from GRAY_1600 and
+ * the light palette from GRAY_0100.
+ */
+private fun composePrismRootBackgroundParameterOrdinal(holderMatches: List<Match>): Int {
     val holderSources =
-        holderInitializers.map { instructions ->
-            val constructorCall =
-                instructions.withIndex().singleOrNull { (_, instruction) ->
-                    if (instruction.opcode != Opcode.INVOKE_DIRECT_RANGE) {
-                        return@singleOrNull false
-                    }
-                    val reference =
-                        (instruction as? ReferenceInstruction)?.reference as? MethodReference
-                            ?: return@singleOrNull false
-                    reference.definingClass == paletteType &&
-                        reference.name == "<init>" &&
-                        reference.returnType == "V" &&
-                        reference.parameterTypes.isNotEmpty() &&
-                        reference.parameterTypes.all { it.toString() == "J" }
-                } ?: throw PatchException(
-                    "Expected one cached Compose prism palette constructor call",
-                )
-            val constructorReference =
-                (constructorCall.value as ReferenceInstruction).reference as MethodReference
-            val range =
-                constructorCall.value as? RegisterRangeInstruction
-                    ?: throw PatchException(
-                        "Cached Compose prism palette constructor is not a register range",
-                    )
-            val expectedRegisterCount = 1 + (constructorReference.parameterTypes.size * 2)
-            if (range.registerCount != expectedRegisterCount) {
-                throw PatchException(
-                    "Cached Compose prism palette constructor register count is invalid",
-                )
-            }
-            val firstParameterRegister = range.startRegister + 1
+        holderMatches.map { match ->
+            val method = match.originalMethod
+            val constructorCall = match.instructionMatches[1]
+            val constructorParameterCount = constructorCall.methodReference.parameterTypes.size
+            val firstParameterRegister =
+                constructorCall.getInstruction<RegisterRangeInstruction>().startRegister + 1
 
             fun sourceOrdinals(fieldName: String): Set<Int> =
-                instructions
-                    .take(constructorCall.index)
-                    .mapNotNull { instruction ->
-                        if (instruction.opcode != Opcode.SGET_WIDE) {
-                            return@mapNotNull null
-                        }
-                        val field =
-                            (instruction as? ReferenceInstruction)?.reference as? FieldReference
-                                ?: return@mapNotNull null
-                        if (
-                            field.definingClass != PRISM_COLORS_V2_CLASS ||
-                            field.name != fieldName ||
-                            field.type != "J"
-                        ) {
-                            return@mapNotNull null
-                        }
-                        val register =
-                            (instruction as? OneRegisterInstruction)?.registerA
-                                ?: return@mapNotNull null
-                        val offset = register - firstParameterRegister
-                        if (
-                            offset < 0 ||
-                            offset % 2 != 0 ||
-                            offset / 2 !in constructorReference.parameterTypes.indices
-                        ) {
-                            return@mapNotNull null
-                        }
-                        offset / 2
-                    }.toSet()
+                method.findInstructionIndicesReversed(
+                    fieldAccess(definingClass = PRISM_COLORS_V2_CLASS, name = fieldName, opcode = Opcode.SGET_WIDE),
+                ).filter { it < constructorCall.index }.mapNotNull { index ->
+                    val offset =
+                        method.getInstruction<OneRegisterInstruction>(index).registerA - firstParameterRegister
+                    (offset / 2).takeIf { offset >= 0 && offset % 2 == 0 && it < constructorParameterCount }
+                }.toSet()
 
             ComposePrismHolderColorOrdinals(
                 gray1600 = sourceOrdinals(GRAY_1600_FIELD_NAME),
@@ -629,85 +455,40 @@ internal fun composePrismRootBackgroundParameterOrdinal(
         )
 }
 
-internal fun composePrismPrimaryBackgroundField(
-    constructor: com.android.tools.smali.dexlib2.iface.Method,
-): FieldReference = composePrismBackgroundField(constructor, parameterOrdinal = 0)
-
-internal fun composePrismBackgroundField(
-    constructor: com.android.tools.smali.dexlib2.iface.Method,
+/**
+ * Field the palette constructor stores the wide color parameter [parameterOrdinal] in,
+ * or null if the constructor does not store it in exactly one field.
+ */
+private fun composePrismBackgroundField(
+    constructor: Method,
     parameterOrdinal: Int,
-): FieldReference {
+): FieldReference? {
     if (
-        constructor.name != "<init>" ||
-        parameterOrdinal !in constructor.parameterTypes.indices ||
-        constructor.parameterTypes[parameterOrdinal].toString() != "J"
+        constructor.implementation == null ||
+        constructor.parameterTypes.getOrNull(parameterOrdinal)?.toString() != "J"
     ) {
-        throw PatchException(
-            "Compose prism palette constructor parameter $parameterOrdinal is not a wide color",
-        )
+        return null
     }
-    val implementation =
-        constructor.implementation
-            ?: throw PatchException("Compose prism palette constructor has no implementation")
-    val parameterRegisterCount =
-        1 + constructor.parameterTypes.sumOf { type ->
-            when (type.first()) {
-                'J', 'D' -> 2
-                else -> 1
-            }
-        }
-    val thisRegister = implementation.registerCount - parameterRegisterCount
+    val thisRegister = constructor.p0Register
     val colorRegister =
-        thisRegister +
-            1 +
-            constructor.parameterTypes
-                .take(parameterOrdinal)
-                .sumOf { type ->
-                    when (type.first()) {
-                        'J', 'D' -> 2
-                        else -> 1
-                    }
-                }
-    val instructions = implementation.instructions.toList()
-    return instructions
-        .withIndex()
-        .filter { (index, instruction) ->
-            if (instruction.opcode != Opcode.IPUT_WIDE) {
-                return@filter false
+        thisRegister + 1 +
+            constructor.parameterTypes.take(parameterOrdinal).sumOf { type ->
+                if (type.toString() == "J" || type.toString() == "D") 2 else 1
             }
-            val store = instruction as? TwoRegisterInstruction ?: return@filter false
-            if (store.registerB != thisRegister) {
-                return@filter false
-            }
-            if (store.registerA == colorRegister) {
-                return@filter true
-            }
-            if (index == 0) {
-                return@filter false
-            }
-            val move = instructions[index - 1] as? TwoRegisterInstruction ?: return@filter false
-            instructions[index - 1].opcode in
-                setOf(
-                    Opcode.MOVE_WIDE,
-                    Opcode.MOVE_WIDE_FROM16,
-                    Opcode.MOVE_WIDE_16,
-                ) &&
-                move.registerA == store.registerA &&
-                move.registerB == colorRegister
-        }
-        .mapNotNull { (_, instruction) ->
-            (instruction as? ReferenceInstruction)?.reference as? FieldReference
-        }
-        .filter { field ->
-            field.definingClass == constructor.definingClass &&
-                field.type == "J"
-        }
+    return constructor.findInstructionIndicesReversed(
+        fieldAccess(definingClass = constructor.definingClass, type = "J", opcode = Opcode.IPUT_WIDE),
+    ).filter { index ->
+        val store = constructor.getInstruction<TwoRegisterInstruction>(index)
+        if (store.registerB != thisRegister) return@filter false
+        if (store.registerA == colorRegister) return@filter true
+        if (index == 0) return@filter false
+        val move = constructor.getInstruction(index - 1)
+        move.opcode in setOf(Opcode.MOVE_WIDE, Opcode.MOVE_WIDE_FROM16, Opcode.MOVE_WIDE_16) &&
+            (move as TwoRegisterInstruction).registerA == store.registerA &&
+            move.registerB == colorRegister
+    }.map { constructor.getInstruction(it).getReference<FieldReference>()!! }
         .distinct()
         .singleOrNull()
-        ?: throw PatchException(
-            "Expected one Compose prism background constructor store for parameter " +
-                parameterOrdinal,
-        )
 }
 
 private fun wideLiteral(value: Long): String =

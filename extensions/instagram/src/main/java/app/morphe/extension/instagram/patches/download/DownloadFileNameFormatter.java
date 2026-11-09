@@ -30,6 +30,8 @@ public final class DownloadFileNameFormatter {
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER =
             DateTimeFormatter.ofPattern("HH-mm-ss");
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ROOT);
 
     private DownloadFileNameFormatter() {
     }
@@ -134,6 +136,7 @@ public final class DownloadFileNameFormatter {
         SHORTCODE("shortcode"),
         UPLOAD_DATE("upload_date"),
         UPLOAD_TIME("upload_time"),
+        UPLOAD_TIMESTAMP("upload_timestamp"),
         TYPE("type"),
         CAROUSEL_INDEX("carousel_index"),
         VARIANT_SUFFIX("variant_suffix");
@@ -166,6 +169,10 @@ public final class DownloadFileNameFormatter {
                     );
                 case UPLOAD_TIME:
                     return values.uploadTimestampMillis == null ? "" : TIME_FORMATTER.format(
+                            Instant.ofEpochMilli(values.uploadTimestampMillis).atZone(zoneId)
+                    );
+                case UPLOAD_TIMESTAMP:
+                    return values.uploadTimestampMillis == null ? "" : TIMESTAMP_FORMATTER.format(
                             Instant.ofEpochMilli(values.uploadTimestampMillis).atZone(zoneId)
                     );
                 case TYPE:

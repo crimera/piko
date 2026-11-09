@@ -10,7 +10,7 @@
     <string name="piko_enable_dev_options">Увімкнути параметри розробника</string>
     <string name="piko_enable_dev_options_desc">Розблоковує параметри розробника довгим натисканням на значок «Головна»</string>
     <string name="piko_directly_open_metaconfig">Відкривати налаштування MetaConfig безпосередньо</string>
-    <string name="piko_directly_open_metaconfig_desc">Відкриває налаштування MetaConfig довгим натисканням на значок «Головна» (потребує увімкнених параметрів розробника)</string>
+    <string name="piko_directly_open_metaconfig_desc">Безпосередньо відкриває перевизначення MetaConfig при тривалому натисканні значка «Головна»</string>
     <string name="piko_enable_emp_options">Увімкнути службові параметри</string>
     <string name="piko_enable_emp_options_desc">Розблоковує всі службові параметри, що використовуються для тестування</string>
     <string name="piko_allow_user_network_certificate">Дозволити користувацькі мережеві сертифікати</string>
@@ -35,12 +35,12 @@
     <string name="piko_disable_typing_status">Приховати статус набору тексту</string>
     <string name="piko_disable_screenshot_detection">Вимкнути виявлення знімків екрана</string>
     <string name="piko_view_dm_anonymously">Читати приватні повідомлення анонімно</string>
+    <string name="piko_mark_as_read_after_reply">Позначати як прочитане після відповіді</string>
+    <string name="piko_mark_as_read_after_reply_desc">Позначати чат як прочитаний після надсилання відповіді, навіть під час анонімного перегляду повідомлень Direct або використання всіх режимів невидимки (ghost modes)</string>
     <string name="piko_view_dm_anonymously_desc">Якщо ввімкнено, інші не бачитимуть, коли ви прочитали їхні повідомлення. Якщо вимкнено і цей параметр, і «Увімкнути всі режими невидимки», використовуватиметься стандартний параметр Instagram «Показувати сповіщення про прочитання»</string>
     <string name="piko_turn_on_all_ghost_modes">Увімкнути всі режими невидимки</string>
     <string name="piko_ghost_modes_on">Режим невидимки: УВІМКНЕНО</string>
     <string name="piko_ghost_modes_default">Режим невидимки: ВИМКНЕНО</string>
-    <string name="piko_ghost_modes_quick_toggle">Увімкнути швидкий перемикач режимів невидимки</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">Додає перемикач на панель дій чату для швидкого керування режимами невидимки</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Режим концентрації</string>
     <string name="piko_disable_stories">Вимкнути історії</string>
@@ -49,9 +49,10 @@
     <string name="piko_disable_comments">Вимкнути коментарі</string>
     <string name="piko_limit_following_feed">Фільтрує головну стрічку, залишаючи лише контент від профілів, за якими ви стежите</string>
     <string name="piko_limit_following_feed_desc">Фільтрує головну стрічку, залишаючи лише контент від профілів, за якими ви стежите.</string>
+    <string name="piko_hide_feed_posts">Приховати дописи у стрічці</string>
+    <string name="piko_hide_feed_posts_desc">Приховує дописи з головної стрічки</string>
     <string name="piko_disable_discover_people">Приховати рекомендовані акаунти</string>
     <string name="piko_focus_lock">Блокування фокусу</string>
-    <string name="piko_focus_lock_desc">Примусово вмикає налаштування без відволікань на встановлений час</string>
     <string name="piko_focus_lock_targets">Налаштування для блокування</string>
     <string name="piko_focus_lock_reels_tab">Вкладка Reels</string>
     <string name="piko_focus_lock_reels_tab_desc">Видаляє вкладку Reels із панелі навігації. Reels, якими з вами поділилися, все ще відкриваються.</string>
@@ -94,10 +95,15 @@
     <string name="piko_disable_swipe_to_create_desc">Запобігає відкриттю екрана створення контенту під час свайпу вправо на головній вкладці.</string>
     <string name="piko_hide_stories_tray">Приховати панель історій</string>
     <string name="piko_hide_stories_tray_desc">Сховує панель історій у головній стрічці</string>
+    <string name="piko_hide_hidden_requests">Приховати приховані запити</string>
+    <string name="piko_hide_hidden_requests_desc">Приховує кнопку прихованих запитів (спам) на сторінці запитів на повідомлення</string>
     <string name="piko_hide_notes_tray">Приховати панель нотаток</string>
     <string name="piko_hide_notes_tray_desc">Сховує панель нотаток у розділі повідомлень</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Приховати кнопку створення групи в меню поширення</string>
     <string name="piko_hide_reels_follow_button">Приховати кнопку підписки в Reels</string>
+    <string name="piko_hide_likes">Приховати кнопки вподобань</string>
+    <string name="piko_hide_share_button">Приховати кнопку «Поділитися»</string>
+    <string name="piko_hide_save_buttons">Приховати кнопки збереження</string>
     <string name="piko_hide_reshare_button">Приховати кнопку «Поширити» (Репост)</string>
     <string name="piko_hide_reels_follow_button_desc">Видаляє кнопку підписки з рядка автора Reels</string>
     <string name="piko_disable_video_autoplay">Вимкнути автовідтворення відео</string>
@@ -116,17 +122,18 @@
     <string name="piko_follow_back_indicator">Увімкнути індикатор взаємної підписки</string>
     <string name="piko_follow_back_indicator_desc">Додає позначку «Стежить за вами» на сторінці профілю та показує детальну інформацію про статус дружби після натискання</string>
     <string name="piko_fbi_color_indicator">Увімкнути кольоровий індикатор статусу дружби</string>
-    <string name="piko_fbi_color_indicator_desc">Потребує увімкненого індикатора статусу дружби</string>
     <string name="piko_fbi_follows_you">Стежить за вами</string>
     <string name="piko_fbi_doesnt_follows_you">Не стежить за вами</string>
     <string name="piko_fbi_following_each_other">Взаємна підписка</string>
     <string name="piko_friendship_status">Статус дружби</string>
     <string name="piko_follow_list_non_follower_badge">Показувати тих, хто не підписаний на вас, у списку підписок</string>
     <string name="piko_follow_list_non_follower_badge_desc">Додає значок у рядках у вашому власному списку підписок для акаунтів, які не підписані на вас у відповідь</string>
+    <string name="piko_resume_reels_after_scrolling">Відновлювати Reels після прокручування</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Продовжувати перегляд Reel з місця зупинки, коли ви повертаєтеся до нього</string>
     <string name="piko_improve_image_viewing">Покращити якість перегляду зображень</string>
     <string name="piko_improve_image_viewing_desc">Отримувати зображення з сервера в максимальній роздільній здатності</string>
     <string name="piko_copy_comment">Скопіювати коментар</string>
-    <string name="piko_copy_comment_desc">Додає кнопку для копіювання коментарів під дописами та Reels</string>
+    <string name="piko_copy_comment_desc">Додає кнопки для копіювання коментарів та імен користувачів їхніх авторів у дописах та Reels</string>
     <string name="piko_comment_copied_success">Коментар скопійовано</string>
     <string name="piko_comment_copied_failed">Текст для копіювання не знайдено</string>
     <string name="piko_copy_username">Скопіювати ім\'я користувача (username)</string>
@@ -134,8 +141,6 @@
     <string name="piko_copy_user_id">Скопіювати ID користувача</string>
     <string name="piko_copy_bio">Скопіювати опис профілю</string>
     <string name="piko_view_profile_picture">Завантажити фото профілю</string>
-    <string name="piko_copy_profile_link">Скопіювати посилання на профіль</string>
-    <string name="piko_share_this_profile">Поділитися цим профілем</string>
     <string name="piko_copy_links_from_bio">Скопіювати посилання з опису профілю</string>
     <string name="piko_no_links_in_bio">Немає посилань в описі профілю</string>
     <string name="piko_download_profile_picture">Завантажити фото профілю</string>
@@ -145,16 +150,37 @@
     <string name="piko_inbox_lock">Блокування папки «Вхідні»</string>
     <string name="piko_inbox_lock_desc">Ховає вашу папку «Вхідні» за відбитком пальця, розпізнаванням обличчя або блокуванням екрана щоразу, коли ви відкриваєте додаток</string>
     <string name="piko_inbox_lock_notifications">Блокувати сповіщення</string>
+    <string name="piko_inbox_lock_notifications_desc">Поки діє блокування папки «Вхідні», сповіщення про повідомлення приховують відправника та вміст, а банер повідомлень у додатку залишається прихованим</string>
     <string name="piko_inbox_lock_notification">Нове повідомлення</string>
     <string name="piko_inbox_lock_unlock">Розблокувати</string>
     <string name="piko_inbox_lock_prompt">Розблокуйте ваші повідомлення</string>
     <string name="piko_inbox_lock_no_lock">Встановіть блокування екрана на вашому пристрої, щоб використовувати блокування папки «Вхідні»</string>
+    <string name="piko_hidden_chats">Приховані чати</string>
+    <string name="piko_hidden_chats_desc">Додає опцію приховування в меню тривалого натискання на чат, яка переміщує його до приватної папки «Вхідні», окремо для кожного акаунта.</string>
+    <string name="piko_hidden_chats_hidden">Чат приховано</string>
+    <string name="piko_hidden_chats_unhidden">Чат більше не приховано</string>
+    <string name="piko_hidden_chats_opened">Приховані чати</string>
+    <string name="piko_hidden_chats_closed">Назад до папки «Вхідні»</string>
+    <string name="piko_hidden_chats_mute">Вимкнути сповіщення прихованих чатів</string>
+    <string name="piko_hidden_chats_mute_desc">Не показувати сповіщення про повідомлення з чатів, які ви приховали</string>
+    <string name="piko_hidden_chats_taps">Натискання для відкриття прихованих чатів</string>
+    <string name="piko_hidden_chats_taps_desc">Натисніть кнопку повідомлень таку кількість разів поспіль, щоб перемикатися між папкою «Вхідні» та прихованими чатами</string>
     <string name="piko_unlock_plus_benefits">Розблокувати переваги підписки «Plus»</string>
     <string name="piko_unlock_plus_benefits_desc">Розблоковує переваги підписки \'Plus\', що перевіряються локально. ВИКОРИСТОВУЙТЕ НА ВЛАСНИЙ РИЗИК</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Повідомлення DM</string>
+    <string name="piko_disable_disappearing_messages_gesture">Вимкнути змахування для зникаючих повідомлень</string>
+    <string name="piko_disable_disappearing_messages_gesture_desc">Запобігає увімкненню зникаючих повідомлень під час змахування вгору в чаті</string>
     <string name="piko_unlimited_replays">Робить медіа з одноразовим переглядом доступними постійно</string>
     <string name="piko_unlimited_replays_desc">Змінює разові медіафайли на постійні для необмеженого перегляду</string>
+    <string name="piko_ephemeral_caption">Показувати спосіб отримання зникаючих медіа</string>
+    <string name="piko_ephemeral_caption_desc">Додає рядок під фотографіями та відео, надісланими як зникаючі медіа, із зазначенням того, як їх було надіслано та доки вони доступні</string>
+    <string name="piko_ephemeral_received_once">Отримано для одноразового перегляду</string>
+    <string name="piko_ephemeral_received_twice">Отримано для повторного перегляду</string>
+    <string name="piko_ephemeral_received_chat">Отримано для збереження в чаті</string>
+    <string name="piko_ephemeral_received_unknown">Оригінальний режим перегляду невідомий</string>
+    <string name="piko_ephemeral_available_until">Доступно до %s</string>
+    <string name="piko_ephemeral_expired">Термін дії минув</string>
     <string name="piko_enable_mark_chat_as_read">Увімкнути опцію «Позначити як прочитане»</string>
     <string name="piko_enable_mark_chat_as_read_desc">Додати опцію позначення чату як прочитаного за довгим натисканням на нього. Коли ви позначаєте чат як прочитаний, інші бачитимуть, що ви прочитали їхні повідомлення, навіть якщо параметр «Переглядати особисті повідомлення анонімно» ввімкнено</string>
     <!-- Story Section -->
@@ -173,18 +199,33 @@
     <string name="piko_disable_story_flipping_desc">Вимкнути автоматичний перехід до наступної історії</string>
     <string name="piko_loop_story">Зациклювати історію</string>
     <string name="piko_loop_story_desc">Повторювати поточну історію після її завершення</string>
+    <string name="piko_hide_story_follow_button">Приховати кнопку підписки в історіях</string>
+    <string name="piko_hide_story_follow_button_desc">Приховує кнопку підписки вгорі історій від акаунтів, на які ви не підписані</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Завантаження медіа</string>
     <string name="piko_category_downloads">Завантаження</string>
     <string name="piko_enable_download">Увімкнути завантаження</string>
-    <string name="piko_feed_download_button">Кнопка завантаження на дописах у стрічці</string>
-    <string name="piko_feed_download_button_desc">Додає значок завантаження поруч із кнопкою збереження на дописах у стрічці</string>
+    <string name="piko_download_buttons">Показувати кнопки завантаження</string>
+    <string name="piko_download_buttons_feed">Дописи у стрічці</string>
+    <string name="piko_download_buttons_stories">Історії</string>
     <string name="piko_save_media_comment">Зберегти медіа з коментаря</string>
     <string name="piko_save_media_comment_desc">Додає кнопку для збереження медіафайлів із коментарів під дописами та Reels</string>
     <string name="piko_enable_direct_download">Увімкнути пряме завантаження</string>
-    <string name="piko_enable_direct_download_desc">Завантажує відкрите медіа без додаткових запитів</string>
+    <string name="piko_enable_direct_download_desc">Торкніться кнопки завантаження на дописах, Reels або історіях, щоб зберегти поточне медіа. Якщо медіафайлів кілька, утримуйте кнопку, щоб зберегти їх усі</string>
+    <string name="piko_select_media_download">Виберіть медіа для завантаження</string>
+    <string name="piko_download_photo_number">Фото %d</string>
+    <string name="piko_download_video_number">Відео %d</string>
+    <string name="piko_download_select_all">Вибрати все</string>
+    <string name="piko_download_deselect_all">Скасувати вибір усього</string>
+    <string name="piko_download_selected_count">Завантажити (%d)</string>
+    <string name="piko_download_copy_link_for">Скопіювати посилання для %s</string>
+    <string name="piko_media_link_unavailable">Посилання на медіа недоступне</string>
     <string name="piko_download_username_folder">Розділяти медіа за іменем користувача</string>
     <string name="piko_download_username_folder_desc">Створює підпапки на основі імені користувача</string>
+    <string name="piko_prefer_dash_format">Віддавати перевагу формату DASH</string>
+    <string name="piko_prefer_dash_format_desc">Завантажує відео з найвищою чіткістю серед версій DASH від Instagram (до 1080p AV1) замість файлу 720p H.264</string>
+    <string name="piko_dash_audio_aac_lc">Конвертувати аудіо DASH в AAC</string>
+    <string name="piko_dash_audio_aac_lc_desc">Перекодовує звук xHE-AAC із завантажень DASH у формат AAC-LC зі швидкістю 192 кбіт/с, який може відтворити будь-який плеєр</string>
     <string name="piko_embed_download_metadata">Вбудовувати метадані відео</string>
     <string name="piko_embed_download_metadata_desc">Додає підпис, посилання на допис, автора та дату вивантаження до завантажених файлів MP4</string>
     <string name="piko_download_file_name_template">Формат імені файлу</string>
@@ -196,6 +237,7 @@
     <string name="piko_download_file_name_token_shortcode">Шорткод</string>
     <string name="piko_download_file_name_token_upload_date">Дата</string>
     <string name="piko_download_file_name_token_upload_time">Час</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Часова позначка</string>
     <string name="piko_download_file_name_token_type">Тип</string>
     <string name="piko_download_file_name_token_carousel_index">Карусель</string>
     <string name="piko_download_file_name_token_variant_suffix">Варіант</string>
@@ -216,8 +258,6 @@
     <string name="piko_download_set_path_failed">Не вдалося зберегти папку для завантажень</string>
     <string name="piko_download_choose_folder">Виберіть папку для завантаження, щоб продовжити</string>
     <string name="piko_download_choose_folder_failed">Не вдалося відкрити вікно вибору папки</string>
-    <string name="piko_download_grant_permission">Виберіть папку для завантажень, щоб продовжити</string>
-    <string name="piko_download_grant_permission_failed">Не вдалося відкрити вікно вибору папки</string>
     <string name="piko_download_with_external_downloader">Завантажити через зовнішній завантажувач</string>
     <string name="piko_external_downloader_package_name">Ім\'я пакета зовнішнього завантажувача</string>
     <string name="piko_external_downloader_package_name_not_found">Ім\'я пакета зовнішнього завантажувача не знайдено</string>
@@ -233,11 +273,6 @@
     <string name="piko_more_options">Більше параметрів</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">Приховати кнопки навігації</string>
-    <string name="piko_hide_navigation_feed">Приховати кнопку «Стрічка»</string>
-    <string name="piko_hide_navigation_reels">Приховати кнопку «Reels»</string>
-    <string name="piko_hide_navigation_direct">Приховати кнопку «Direct»</string>
-    <string name="piko_hide_navigation_search">Приховати кнопку «Пошук»</string>
-    <string name="piko_hide_navigation_create">Приховати кнопку «Створити»</string>
     <string name="piko_category_navigation_tabs">Панель навігації</string>
     <string name="piko_navigation_tabs_title">Відображення та зміна порядку вкладок</string>
     <string name="piko_navigation_tabs_summary">Виберіть видимі нижні вкладки та перетягніть їх, щоб змінити порядок</string>
@@ -272,6 +307,7 @@
     <string name="piko_fail_no_file">Файл не знайдено</string>
     <string name="piko_import_success">Успішно імпортовано</string>
     <string name="piko_import_fail">Помилка імпорту</string>
+    <string name="piko_file_picker_unavailable">Системний засіб вибору файлів недоступний</string>
     <string name="piko_restart_app">Застосунок потрібно перезапустити, щоб зміни набули чинності</string>
     <string name="piko_close">Закрити</string>
     <string name="piko_ok">ОК</string>
@@ -290,7 +326,6 @@
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Змінити анімацію вподобайки</string>
     <string name="piko_change_like_animation_desc">Змінює стандартну анімацію на одну з доступних анімацій кілець</string>
-    <string name="piko_available_like_animation">Доступні анімації вподобайки</string>
     <string name="piko_like_animation_random">Випадково</string>
     <string name="piko_like_animation_preview">Попередній перегляд анімації</string>
     <string name="piko_like_animation_preview_unavailable">Попередній перегляд недоступний</string>
@@ -314,13 +349,20 @@
     <string name="piko_action_bar_chat">Піктограми панелі дій чату</string>
     <string name="piko_action_bar_chat_desc">Піктограми на панелі дій усередині особистих повідомлень (DM)</string>
     <string name="piko_action_bar_inbox">Піктограми панелі дій вхідних повідомлень</string>
+    <string name="piko_action_bar_button_audio_call_icon">Значок аудіодзвінка</string>
+    <string name="piko_action_bar_button_video_call_icon">Значок відеодзвінка</string>
     <string name="piko_action_bar_button_settings_icon">Піктограма налаштувань</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Піктограма режиму «невидимки»</string>
+    <string name="piko_action_bar_button_jump_oldest_icon">Значок переходу до найстарішого повідомлення</string>
+    <string name="piko_jump_oldest_started">Перехід до найстарішого повідомлення, торкніться знову для скасування</string>
+    <string name="piko_jump_oldest_cancelled">Скасовано</string>
+    <string name="piko_jump_oldest_stopped">Очікування старіших повідомлень зупинено. Торкніться знову, щоб повторити спробу.</string>
     <string name="piko_action_bar_button_profile_info_icon">Піктограма інформації профілю</string>
     <string name="piko_action_bar_button_create_icon">Значок «Створити»</string>
     <string name="piko_action_bar_button_notifications_icon">Значок сповіщень</string>
-    <string name="piko_settings_on_action_bar">Налаштування Piko на панелі дій</string>
-    <string name="piko_settings_on_action_bar_desc">Перемістити кнопку налаштувань Piko на панель дій головної стрічки</string>
+    <string name="piko_settings_search_hint">Пошук</string>
+    <string name="piko_settings_search_clear">Очистити пошук</string>
+    <string name="piko_settings_search_no_results">Результатів не знайдено</string>
     <!-- Font Section -->
     <string name="piko_category_font">Шрифт</string>
     <string name="piko_custom_font">Власний шрифт</string>
@@ -408,15 +450,10 @@
     <string name="piko_view_saved_instants">Переглянути збережені Instants</string>
     <string name="piko_instants_vault_empty">Поки що немає збережених Instants. Відкрийте кілька Instants з увімкненим збереженням, і вони з\'являться тут.</string>
     <string name="piko_instants_link_unavailable">Посилання на медіа недоступне.</string>
-    <string name="piko_instants_unknown_user">Невідомо</string>
-    <string name="piko_instants_delete_confirm">Видалити цей збережений Instant?</string>
-    <string name="piko_instants_clear_all">Очистити все</string>
-    <string name="piko_instants_clear_all_confirm">Видалити всі збережені Instants?</string>
+    <string name="piko_instants_delete_selected_confirm">Видалити вибрані Instants (%d)?</string>
     <string name="piko_delete">Видалити</string>
     <string name="piko_instants_title">Instants</string>
     <string name="piko_search_username">Пошук за ім\'ям користувача</string>
-    <string name="piko_instants_no_matches">Немає збережених Instants від цього користувача.</string>
-    <string name="piko_instants_unavailable">Недоступно</string>
     <string name="piko_saved_on">Збережено</string>
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Відкрити в Instagram</string>
@@ -437,7 +474,6 @@
     <string name="piko_someone">Хтось</string>
     <string name="piko_deleted_messages_channel">Видалені повідомлення</string>
     <string name="piko_deleted_messages_channel_desc">Сповіщати, коли отримане повідомлення видалено відправником</string>
-    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s видалено]</string>
     <string name="piko_media_deleted_generic">[видалено]</string>
     <string name="piko_media_unknown">медіа</string>
@@ -452,4 +488,7 @@
     <string name="piko_media_like">подобається</string>
     <string name="piko_media_link">посилання</string>
     <string name="piko_media_activity">активність</string>
+    <string name="piko_disable_telemetry">Вимкнути телеметрію</string>
+    <string name="piko_patch_theme">Тема</string>
+    <string name="piko_patch_settings">Додати налаштування</string>
 </resources>

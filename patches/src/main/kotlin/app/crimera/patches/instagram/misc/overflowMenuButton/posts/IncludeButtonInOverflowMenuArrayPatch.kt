@@ -11,10 +11,8 @@ import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_C
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 @Suppress("unused")
 val includeButtonsInOverflowMenuArrayPatch =
@@ -23,14 +21,12 @@ val includeButtonsInOverflowMenuArrayPatch =
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         execute {
-            OverflowMenuButtonEnumInitialiser.method.apply {
-                val lastInvokeStaticIndex = instructions.last { it.opcode == Opcode.INVOKE_STATIC }.location.index
-                val arraySPutObjectIndex = lastInvokeStaticIndex - 1
+            OverflowMenuButtonEnumInitialiser.let {
+                val valuesIndex = it.instructionMatches.last().index
+                val arrayRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
 
-                val arrayRegister = getInstruction(arraySPutObjectIndex).registersUsed[0]
-
-                addInstructions(
-                    lastInvokeStaticIndex - 1,
+                it.method.addInstructions(
+                    valuesIndex,
                     """
                     invoke-static {}, $FEED_OVERFLOW_MENU_BUTTON_CLASS->addToMenuOptionArray()[$MEDIA_OPTIONS_CLASS
                     move-result-object v$arrayRegister

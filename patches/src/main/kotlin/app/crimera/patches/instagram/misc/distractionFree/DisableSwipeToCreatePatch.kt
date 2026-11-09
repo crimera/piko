@@ -10,19 +10,20 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.fieldReference
+import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.OpcodesFilter
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchFirst
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val SWIPE_NAVIGATION_CONTAINER_CLASS =
     "Lcom/instagram/ui/swipenavigation/container/SwipeNavigationContainer;"
@@ -35,30 +36,34 @@ private object SetInternalPositionFingerprint : Fingerprint(
     definingClass = SWIPE_NAVIGATION_CONTAINER_CLASS,
     parameters = listOf(POSITION_CONFIG_CLASS),
     returnType = "V",
-    filters =
-        OpcodesFilter.opcodesToFilters(
-            Opcode.IGET,
-            Opcode.INVOKE_DIRECT,
-            Opcode.MOVE_RESULT,
-            Opcode.IGET_BOOLEAN,
-            Opcode.INVOKE_DIRECT,
+    filters = listOf(
+        // Navigation reason.
+        fieldAccess(
+            definingClass = POSITION_CONFIG_CLASS,
+            type = "Ljava/lang/String;",
+            opcode = Opcode.IGET_OBJECT,
+            location = MatchFirst(),
         ),
+        // Target position.
+        fieldAccess(definingClass = POSITION_CONFIG_CLASS, type = "F", opcode = Opcode.IGET),
+        methodCall(definingClass = "this", parameters = listOf("F"), returnType = "F", location = MatchAfterImmediately()),
+    ),
 )
 
 private object SpringVelocityFingerprint : Fingerprint(
     definingClass = SWIPE_NAVIGATION_CONTAINER_CLASS,
     parameters = listOf("Landroid/view/MotionEvent;", "F", "J"),
     returnType = "V",
-    filters =
-        OpcodesFilter.opcodesToFilters(
-            Opcode.IGET_BOOLEAN,
-            Opcode.IF_EQZ,
-            Opcode.NEG_FLOAT,
-            Opcode.INVOKE_DIRECT,
-            Opcode.MOVE_RESULT_OBJECT,
-            Opcode.FLOAT_TO_DOUBLE,
-            Opcode.INVOKE_VIRTUAL,
-        ),
+    filters = listOf(
+        fieldAccess(opcode = Opcode.IGET_BOOLEAN),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        opcode(Opcode.NEG_FLOAT, location = MatchAfterImmediately()),
+        methodCall(definingClass = "this", name = "getSpring", parameters = listOf(), location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        opcode(Opcode.FLOAT_TO_DOUBLE, location = MatchAfterImmediately()),
+        // Spring velocity setter.
+        methodCall(parameters = listOf("D"), returnType = "V", location = MatchAfterImmediately()),
+    ),
 )
 
 @Suppress("unused")
@@ -71,57 +76,14 @@ val disableSwipeToCreatePatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val getSpringMethod =
-                SpringVelocityFingerprint.instructionMatches[3]
-                    .instruction
-                    .getReference<MethodReference>()
-                    ?.takeIf {
-                        it.definingClass == SWIPE_NAVIGATION_CONTAINER_CLASS &&
-                            it.name == "getSpring" &&
-                            it.parameterTypes.isEmpty()
-                    }
-                    ?: throw PatchException("Unable to find the swipe navigation spring getter")
-
-            val setSpringVelocityMethod =
-                SpringVelocityFingerprint.instructionMatches[6]
-                    .instruction
-                    .getReference<MethodReference>()
-                    ?.takeIf {
-                        it.definingClass == getSpringMethod.returnType &&
-                            it.parameterTypes.size == 1 &&
-                            it.parameterTypes[0] == "D" &&
-                            it.returnType == "V"
-                    }
-                    ?: throw PatchException("Unable to find the swipe navigation spring velocity setter")
+            val getSpringMethod = SpringVelocityFingerprint.instructionMatches[3].methodReference
+            val setSpringVelocityMethod = SpringVelocityFingerprint.instructionMatches[6].methodReference
 
             SetInternalPositionFingerprint.method.apply {
-                val reasonField =
-                    getInstruction(0)
-                        .takeIf { it.opcode == Opcode.IGET_OBJECT }
-                        ?.getReference<FieldReference>()
-                        ?.takeIf {
-                            it.definingClass == POSITION_CONFIG_CLASS &&
-                                it.type == "Ljava/lang/String;"
-                        }
-                        ?: throw PatchException("Unable to find the swipe navigation reason field")
-
-                val positionInstructions =
-                    instructions.filter { instruction ->
-                        instruction.opcode == Opcode.IGET &&
-                            instruction.getReference<FieldReference>()?.let {
-                                it.definingClass == POSITION_CONFIG_CLASS && it.type == "F"
-                            } == true
-                    }
-
-                if (positionInstructions.size != 1) {
-                    throw PatchException("Expected exactly one swipe navigation position field")
-                }
-
-                val positionInstruction = positionInstructions.single()
-                val targetIndex = positionInstruction.location.index + 1
-                val positionRegister =
-                    (positionInstruction as? TwoRegisterInstruction)?.registerA
-                        ?: throw PatchException("Unable to find the swipe navigation position field")
+                val reasonField = SetInternalPositionFingerprint.instructionMatches[0].fieldReference
+                val positionIndex = SetInternalPositionFingerprint.instructionMatches[1].index
+                val targetIndex = positionIndex + 1
+                val positionRegister = SetInternalPositionFingerprint.instructionMatches[1].getInstruction<TwoRegisterInstruction>().registerA
                 val continueInstruction = getInstruction(targetIndex)
 
                 addInstructionsWithLabels(

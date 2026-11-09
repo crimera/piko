@@ -13,14 +13,16 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 internal object DMAfterTextChangedFingerprint : Fingerprint(
     name = "afterTextChanged",
@@ -34,6 +36,10 @@ internal object DMAfterTextChangedFingerprint : Fingerprint(
 internal object DMOnTextChangedFingerprint : Fingerprint(
     name = "onTextChanged",
     classFingerprint = DMAfterTextChangedFingerprint,
+    filters = listOf(
+        fieldAccess(opcode = Opcode.IGET_BOOLEAN),
+        opcode(Opcode.IF_NEZ, location = MatchAfterImmediately()),
+    ),
 )
 
 // Thanks to MyInsta.
@@ -47,28 +53,20 @@ val disableTypingStatusPatch =
 
         execute {
 
-            DMOnTextChangedFingerprint.method.apply {
-
-                instructions.filter { it.opcode == Opcode.IGET_BOOLEAN }.firstOrNull {
-                    val index = it.location.index
-                    val nextInstruction = getInstruction(index + 1)
-                    if (nextInstruction.opcode == Opcode.IF_NEZ) {
-                        val register = nextInstruction.registersUsed[0]
-                        addInstructionsWithLabels(
-                            index,
-                            """
-                            $PREF_CALL_DESCRIPTOR->disableTypingStatus()Z
-                            move-result v$register
-                            if-eqz v$register, :piko
-                            return-void
-                            """.trimIndent(),
-                            ExternalLabel("piko", nextInstruction),
-                        )
-                        true
-                    } else {
-                        false
-                    }
-                }
+            DMOnTextChangedFingerprint.let {
+                val index = it.instructionMatches.first().index
+                val originalInstruction = it.method.getInstruction<OneRegisterInstruction>(index)
+                val register = originalInstruction.registerA
+                it.method.addInstructionsWithLabels(
+                    index,
+                    """
+                    $PREF_CALL_DESCRIPTOR->disableTypingStatus()Z
+                    move-result v$register
+                    if-eqz v$register, :piko
+                    return-void
+                    """.trimIndent(),
+                    ExternalLabel("piko", originalInstruction),
+                )
             }
 
             enableSettings("disableTypingStatus")

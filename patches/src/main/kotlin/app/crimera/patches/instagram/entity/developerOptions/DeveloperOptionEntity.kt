@@ -6,33 +6,26 @@
 
 package app.crimera.patches.instagram.entity.developerOptions
 
+import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
-import app.crimera.utils.methodExtractor
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
-import com.android.tools.smali.dexlib2.Opcode
 
 val developerOptionsEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of developer options items",
     ) {
         execute {
-            ExperimentsValueBuilderFingerprint.apply {
-                GetQuickExperimentHelperClassExtension.changeFirstString(classNameToExtension(classDef.type))
+            GetQuickExperimentHelperClassExtension.changeFirstString(
+                classNameToExtension(GetAllExperimentsFingerprint.originalClassDef.type),
+            )
+            GetAllExperimentsClassExtension.changeFirstString(GetAllExperimentsFingerprint.originalMethod.name)
 
-                val getAllExperimentsMethodName = classDef.methods.first { it.returnType == "Ljava/util/List;" }.name
-                GetAllExperimentsClassExtension.changeFirstString(getAllExperimentsMethodName)
-            }
-
-            ExperimentsGetMobileConfigSpecifier.apply {
-                matchAll(1..1)
-                GetExperimentItemHelperClassExtension.changeFirstString(classNameToExtension(classDef.type))
-                method.apply {
-                    val getUniversalIdInstructionData = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_STATIC)).methodExtractor()
-                    GetUniversalIdHelperClassExtension.changeFirstString(getUniversalIdInstructionData.definingClass)
-                }
+            ExperimentsGetMobileConfigSpecifier.let {
+                GetExperimentItemHelperClassExtension.changeFirstString(classNameToExtension(it.originalClassDef.type))
+                GetUniversalIdHelperClassExtension.changeFirstString(
+                    classNameToExtension(it.instructionMatches[1].methodReference.definingClass),
+                )
             }
         }
     }

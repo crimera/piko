@@ -44,6 +44,10 @@ public class MarkChatAsRead {
         return "fieldName";
     }
 
+    private static String getThreadInfoFieldName(){
+        return "fieldName";
+    }
+
     private static Object getButton(String enumTag) throws Exception {
         Class<?> targetClass = Class.forName(MarkChatAsRead.getButtonEnumClassName());
         Class<?>[] paramTypes = new Class<?>[] {String.class};
@@ -83,7 +87,7 @@ public class MarkChatAsRead {
     }
 
     private static String getMessageCursorId(Object unknown) throws Exception{
-        Entity entity = new Entity(unknown).getFieldAsEntity("A01");
+        Entity entity = new Entity(unknown).getFieldAsEntity(getThreadInfoFieldName());
         return (String) entity.getField(MarkChatAsRead.getMessageCursorFieldName());
     }
 

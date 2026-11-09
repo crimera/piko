@@ -203,7 +203,8 @@ public class ActionBarPatch {
             }
 
             if(pref.contains(Constants.AB_PROFILE_INFO_ICON)) {
-                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(activity, userData));
+                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () ->
+                        ProfileMoreOption.moreOptionsDailogueBox(activity, userData, () -> userData.refreshProfilePictureUrl(userSession)));
             }
 
 
@@ -227,6 +228,11 @@ public class ActionBarPatch {
 
             if(pref.contains(Constants.AB_GHOST_MODE_ICON)) {
                 ghostModeToggle(viewGroup);
+            }
+
+            if(pref.contains(Constants.AB_JUMP_OLDEST_ICON)) {
+                UI.addImageViewToViewGroup(viewGroup, "instagram_chevron_up_outline_24",
+                        () -> app.morphe.extension.instagram.patches.dm.JumpToOldestMessage.toggle(viewGroup));
             }
 
         } catch (Exception e) {

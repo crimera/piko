@@ -135,14 +135,14 @@ public class ButtonPref extends Preference {
 
     @Override
     protected View onCreateView(ViewGroup parent) {
-        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON, getIconResourceName(getKey()));
+        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON, iconResourceNameForKey(getKey()));
     }
 
     @Override
     protected void onBindView(View view) {
         String key = getKey();
         InstagramPreferenceStyle.bindText(this, view);
-        InstagramPreferenceStyle.bindIcon(view, getIconResourceName(key));
+        InstagramPreferenceStyle.bindIcon(view, iconResourceNameForKey(key));
         InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(key));
         InstagramPreferenceStyle.setPressedHighlightEnabled(
                 view,
@@ -189,7 +189,7 @@ public class ButtonPref extends Preference {
         }
     }
 
-    private String getIconResourceName(String key) {
+    public static String iconResourceNameForKey(String key) {
         if (key == null) {
             return null;
         }

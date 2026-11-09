@@ -63,7 +63,7 @@ public class MoreOptionsOnPostPatch {
                             stringToCopy = userData.getFullName();
 
                         } else if (selectedOption.equals(str("piko_download_options"))) {
-                            DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
+                            DownloadUtils.showDownloadOptions(context, userSession, mediaObject, currentMediaIndex);
 
                         }
                         if (stringToCopy != null && stringToCopy.length() > 0) {

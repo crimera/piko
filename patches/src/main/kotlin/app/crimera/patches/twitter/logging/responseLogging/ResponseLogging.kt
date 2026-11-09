@@ -18,10 +18,8 @@ internal const val JACKSON_CLASS = "/fasterxml/jackson/core/"
 
 internal object InputStreamFingerprint : Fingerprint(
     definingClass = JACKSON_CLASS,
-    parameters = listOf("Ljava/io/InputStream"),
-    custom = { methodDef, _ ->
-        methodDef.returnType.contains(JACKSON_CLASS)
-    },
+    returnType = JACKSON_CLASS,
+    parameters = listOf("Ljava/io/InputStream")
 )
 
 @Suppress("unused")

@@ -75,6 +75,13 @@ public class HookFlags {
         }
     }
 
+    private static void analyticsFlags() {
+        if (Pref.disableAnalytics()) {
+            BOOL_FLAGS.put("29064", false); // ig_analytics2_consolidation
+            LONG_FLAGS.put("29064::111", 0L); // ig_analytics2_consolidation::max_batch_lock_attempts
+        }
+    }
+
     private static void addRecommendedFlags(){
         if(SettingsStatus.recommendedFlags) {
             Map<String, Boolean> recFlags = FlagsSharedPref.getAll();
