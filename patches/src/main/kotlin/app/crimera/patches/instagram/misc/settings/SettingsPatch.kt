@@ -33,16 +33,21 @@ import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.patches.shared.parameterRegisterStart
 import app.crimera.utils.InitMethod
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
@@ -56,6 +61,37 @@ import com.android.tools.smali.dexlib2.iface.MethodParameter
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
+private object WhitehatIndicatorFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/base/activity/BaseFragmentActivity;",
+    returnType = "V",
+    filters = listOf(
+        resourceLiteral(ResourceType.ID, "whitehat_indicator_stub"),
+        methodCall(smali = "Landroid/app/Activity;->requireViewById(I)Landroid/view/View;"),
+    ),
+)
+
+internal val whitehatIndicatorPatch = bytecodePatch {
+    dependsOn(sharedExtensionPatch)
+    execute {
+        WhitehatIndicatorFingerprint.method.apply {
+            val activityRegister = parameterRegisterStart(this)
+            val freeRegister = findFreeRegister(0, activityRegister)
+
+            // Piko modal layouts do not contain Instagram's certificate indicator stub.
+            addInstructionsWithLabels(
+                0,
+                """
+                    invoke-static/range {v$activityRegister .. v$activityRegister}, $ACTIVITY_SETTINGS_CLASS/ActivityHook;->isPiko(Landroid/app/Activity;)Z
+                    move-result v$freeRegister
+                    if-eqz v$freeRegister, :instagram_indicator
+                    return-void
+                """.trimIndent(),
+                ExternalLabel("instagram_indicator", getInstruction(0)),
+            )
+        }
+    }
+}
+
 @Suppress("unused")
 val settingsPatch =
     bytecodePatch(
@@ -68,6 +104,7 @@ val settingsPatch =
             sharedExtensionPatch,
             settingsResourcePatch,
             nativeSettingsSwitchStylePatch,
+            whitehatIndicatorPatch,
             settingsTaskRemovalPatch,
             mainFeedActionBarButtonPatch,
             hideHomeActionButtonsPatch,
