@@ -1,10 +1,5 @@
 [
   {
-    "name" : "Add blurred background when reposting in Stories: Reels, Post and Stories mentioned",
-    "desc" : "",
-    "code" : "110215"
-  },
-  {
     "name" : "Button with a black layout that appears when clicking on something in Stories",
     "desc" : "",
     "code" : "73245"
@@ -139,6 +134,93 @@
     "name" : "Hide additional Meta AI prompts and entry points",
     "desc" : "Enable to hide additional Meta AI popups, search icons, suggestions and sharing targets",
     "code" : "75278::4,75278::5,92518::1,92518::2,92518::6,94598::56,94598::117,122162::1"
+  },
+  {
+    "name" : "Hide the Muse share shortcut",
+    "desc" : "Does not hide the shortcut when a supported version of the Muse app is installed",
+    "code" : "136724::7"
+  },
+  {
+    "name" : "Hide interest buttons below reels",
+    "desc" : "Applies to the Interested and Not interested buttons below reels that are not ads, without affecting the overflow menu",
+    "code" : "66222::6"
+  },
+  {
+    "name" : "Interested option in the reels menu",
+    "desc" : "Disable and set Reels interest option layout to 1 to hide both Interested and Not interested in the redesigned overflow menu",
+    "code" : "55922::2"
+  },
+  {
+    "name" : "Reels interest option layout",
+    "desc" : "Set to 1 and disable Interested option in the reels menu to hide both feedback options in the redesigned overflow menu",
+    "code" : "84236::0",
+    "type" : "long"
+  },
+  {
+    "name" : "QR code sharing",
+    "desc" : "Also controls the QR code option in the post menu",
+    "code" : "45023::0"
+  },
+  {
+    "name" : "Hide the See all remixes option",
+    "desc" : "May also hide grouped remix options on eligible original posts",
+    "code" : "97046::1"
+  },
+  {
+    "name" : "Hide the unfollow option in the post menu",
+    "desc" : "",
+    "code" : "31983::10"
+  },
+  {
+    "name" : "Favorites option in the post menu",
+    "desc" : "",
+    "code" : "40597::31"
+  },
+  {
+    "name" : "Fullscreen option in the redesigned reels menu",
+    "desc" : "",
+    "code" : "72006::9"
+  },
+  {
+    "name" : "Reels auto-scroll",
+    "desc" : "Disabling also hides the menu option unless clips_tab in ig_android_long_press is set to auto_scroll",
+    "code" : "83371::0"
+  },
+  {
+    "name" : "Simplified DM inbox navigation",
+    "desc" : "Replaces the search bar with a header search icon",
+    "code" : "94528::0"
+  },
+  {
+    "name" : "DM inbox suggestions",
+    "desc" : "Set to 9000000000 to hide suggestions in the DM inbox",
+    "code" : "75196::8",
+    "type" : "long"
+  },
+  {
+    "name" : "Floating tab bar",
+    "desc" : "Unavailable with the Homecoming navigation layout",
+    "code" : "126024::12"
+  },
+  {
+    "name" : "Pill background for the selected tab",
+    "desc" : "",
+    "code" : "126411::0"
+  },
+  {
+    "name" : "Suggested accounts on your profile",
+    "desc" : "",
+    "code" : "33903::2"
+  },
+  {
+    "name" : "Hide the sort arrow on profile reels",
+    "desc" : "",
+    "code" : "78393::3"
+  },
+  {
+    "name" : "Edge-to-edge layout",
+    "desc" : "Extends the main screen into the status bar and system navigation bar areas on Android 15 or later",
+    "code" : "126024::2,126024::3,126024::4,126024::5,126024::6,126024::7,126024::8,126024::9"
   },
   {
     "name" : "Add Meta AI in reels overflow menu",
