@@ -128,6 +128,8 @@
     <string name="piko_friendship_status">Статус дружби</string>
     <string name="piko_follow_list_non_follower_badge">Показувати тих, хто не підписаний на вас, у списку підписок</string>
     <string name="piko_follow_list_non_follower_badge_desc">Додає значок у рядках у вашому власному списку підписок для акаунтів, які не підписані на вас у відповідь</string>
+    <string name="piko_resume_reels_after_scrolling">Відновлювати Reels після прокручування</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Продовжувати перегляд Reel з місця зупинки, коли ви повертаєтеся до нього</string>
     <string name="piko_improve_image_viewing">Покращити якість перегляду зображень</string>
     <string name="piko_improve_image_viewing_desc">Отримувати зображення з сервера в максимальній роздільній здатності</string>
     <string name="piko_copy_comment">Скопіювати коментар</string>
@@ -235,6 +237,7 @@
     <string name="piko_download_file_name_token_shortcode">Шорткод</string>
     <string name="piko_download_file_name_token_upload_date">Дата</string>
     <string name="piko_download_file_name_token_upload_time">Час</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Часова позначка</string>
     <string name="piko_download_file_name_token_type">Тип</string>
     <string name="piko_download_file_name_token_carousel_index">Карусель</string>
     <string name="piko_download_file_name_token_variant_suffix">Варіант</string>

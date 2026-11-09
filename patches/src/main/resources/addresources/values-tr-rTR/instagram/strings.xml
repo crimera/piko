@@ -101,6 +101,7 @@
     <string name="piko_hide_notes_tray_desc">DM kısmındaki notlar tepsisini gizler</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Paylaşım menüsündeki grup oluşturma düğmesini gizle</string>
     <string name="piko_hide_reels_follow_button">Reels takip et butonunu gizle</string>
+    <string name="piko_hide_likes">Beğen butonlarını gizle</string>
     <string name="piko_hide_share_button">Paylaş butonunu gizle</string>
     <string name="piko_hide_save_buttons">Kaydet düğmelerini gizle</string>
     <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
@@ -127,6 +128,8 @@
     <string name="piko_friendship_status">Arkadaşlık durumu</string>
     <string name="piko_follow_list_non_follower_badge">Takip Edilenler listesinde takip etmeyenleri göster</string>
     <string name="piko_follow_list_non_follower_badge_desc">Kendi “Takip Edilenler” listenizdeki, sizi geri takip etmeyen hesapların satırlarına bir rozet ekler</string>
+    <string name="piko_resume_reels_after_scrolling">Kaydırma işleminden sonra videoları oynatmaya devam et</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Bir Reel\'si geri kaydırdığınızda, onu kaldığınız yerden izlemeye devam edin</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan en yüksek çözünürlüklü görselleri çeker. Performansı düşürebilir, uygulama veri boyutunu artırabilir veya uygulamanın eski bir düzene geçmesine neden olabilir</string>
     <string name="piko_copy_comment">Yorumu kopyala</string>
@@ -208,6 +211,7 @@
     <string name="piko_save_media_comment">Yorum medyasını kaydet</string>
     <string name="piko_save_media_comment_desc">Gönderi ve Reels yorumlarındaki medya içeriklerini kaydetmek için bir buton ekler</string>
     <string name="piko_enable_direct_download">Doğrudan indirmeyi etkinleştir</string>
+    <string name="piko_enable_direct_download_desc">Mevcut medyayı kaydetmek için Gönderiler, Reels videoları veya Hikayeler üzerindeki indirme butonuna dokunun. Eğer birden fazla medya öğesi varsa, hepsini kaydetmek için butona basılı tutun</string>
     <string name="piko_select_media_download">İndirmek istediğiniz medyayı seçin</string>
     <string name="piko_download_photo_number">Fotoğraf %d</string>
     <string name="piko_download_video_number">Video %d</string>
@@ -233,6 +237,7 @@
     <string name="piko_download_file_name_token_shortcode">Kısa kod (Shortcode)</string>
     <string name="piko_download_file_name_token_upload_date">Tarih</string>
     <string name="piko_download_file_name_token_upload_time">Saat</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Zaman damgası</string>
     <string name="piko_download_file_name_token_type">Tür</string>
     <string name="piko_download_file_name_token_carousel_index">Kaydırmalı gönderi</string>
     <string name="piko_download_file_name_token_variant_suffix">Varyant</string>
@@ -344,6 +349,8 @@
     <string name="piko_action_bar_chat">Sohbet eylem çubuğu simgeleri</string>
     <string name="piko_action_bar_chat_desc">Mesajlar içi eylem çubuğu simgeleri</string>
     <string name="piko_action_bar_inbox">Gelen kutusu eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_button_audio_call_icon">Sesli arama simgesi</string>
+    <string name="piko_action_bar_button_video_call_icon">Görüntülü arama simgesi</string>
     <string name="piko_action_bar_button_settings_icon">Ayarlar simgesi</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Görünmez mod simgesi</string>
     <string name="piko_action_bar_button_jump_oldest_icon">En eski mesaja atlama simgesi</string>
