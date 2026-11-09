@@ -185,7 +185,7 @@ private object StringValueFingerprint : Fingerprint(
     filters = listOf(string("StringValue(value=")),
 )
 
-private object GrokPostStateFingerprint : Fingerprint(
+internal object GrokPostStateFingerprint : Fingerprint(
     definingClass = GROK_PACKAGE,
     name = "toString",
     returnType = STRING_DESCRIPTOR,
@@ -193,7 +193,7 @@ private object GrokPostStateFingerprint : Fingerprint(
     filters = listOf(string("GrokTranslatePostState(shouldShowTranslation=")),
 )
 
-private data class ResolvedGetter(
+internal data class ResolvedGetter(
     val reference: MethodReference,
     val isInterface: Boolean,
 )
@@ -203,7 +203,7 @@ private data class BooleanResult(
     val resultRegister: Int,
 )
 
-private data class ResolvedTranslationPath(
+internal data class ResolvedTranslationPath(
     val fetchMethod: MutableMethod,
     val presenterDescriptor: String,
     val presenterParameterRegister: Int,
@@ -257,6 +257,12 @@ val newXTranslatorPatch =
                         order = 300,
                         defaultValue = false,
                     )
+                    toggle(
+                        id = "newx.translation.automatic",
+                        strings = settingStrings("piko_newx_translation_automatic"),
+                        order = 350,
+                        defaultValue = false,
+                    )
                     customScreen(
                         id = "newx.translation.translator",
                         strings = settingStrings("piko_newx_translation_translator"),
@@ -278,7 +284,9 @@ val newXTranslatorPatch =
             patchPostMenuBridges(timelineModels)
             patchDisplayTextBridges(timelineModels, resolvedNewXPostModels())
             val path = resolveTranslationPath()
-            patchTranslationBridges(path)
+            val automaticPath = resolveAutomaticTranslationPath(path)
+            patchTranslationBridges(path, automaticPath)
+            patchAutomaticTranslation(path, automaticPath)
             patchInlineRequest(path)
             patchVisibility(path)
         }
@@ -767,10 +775,10 @@ private fun resolveTranslationPath(): ResolvedTranslationPath {
     )
 }
 
-private fun Method.hasString(value: String): Boolean =
+internal fun Method.hasString(value: String): Boolean =
     instructions.any { instruction -> instruction.getReference<StringReference>()?.string == value }
 
-private fun BytecodePatchContext.methodsForModel(modelDescriptor: String): List<Method> {
+internal fun BytecodePatchContext.methodsForModel(modelDescriptor: String): List<Method> {
     val classes = mutableListOf<ClassDef>()
     val visited = mutableSetOf<String>()
     fun visit(descriptor: String) {
@@ -787,7 +795,7 @@ private fun BytecodePatchContext.methodsForModel(modelDescriptor: String): List<
 private fun Method.toResolvedGetter(context: BytecodePatchContext): ResolvedGetter =
     toReference().toResolvedGetter(context)
 
-private fun MethodReference.toResolvedGetter(context: BytecodePatchContext): ResolvedGetter {
+internal fun MethodReference.toResolvedGetter(context: BytecodePatchContext): ResolvedGetter {
     val owner = context.mutableClassDefByOrNull(definingClass)
         ?: throw PatchException("NewX model getter owner was not found: $this")
     return ResolvedGetter(this, AccessFlags.INTERFACE.isSet(owner.accessFlags))
@@ -851,7 +859,7 @@ private fun resolveModelEligibilityGetter(method: MutableMethod, modelMethodOwne
     return requireExactlyOne("NewX post-model translation eligibility getter", candidates)
 }
 
-private fun invokeOpcodes(): Set<Opcode> =
+internal fun invokeOpcodes(): Set<Opcode> =
     setOf(
         Opcode.INVOKE_INTERFACE,
         Opcode.INVOKE_INTERFACE_RANGE,
@@ -908,7 +916,7 @@ private fun resolveStateClass(stateLabel: String, stateInterface: String): Class
 }
 
 context(context: BytecodePatchContext)
-private fun resolveStateSingleton(stateLabel: String, stateInterface: String): FieldReference {
+internal fun resolveStateSingleton(stateLabel: String, stateInterface: String): FieldReference {
     val stateClass = resolveStateClass(stateLabel, stateInterface)
     requirePublicClass(stateClass.type)
     val singleton =
@@ -946,15 +954,14 @@ private fun patchInlineRequest(path: ResolvedTranslationPath) {
 }
 
 context(context: BytecodePatchContext)
-private fun patchTranslationBridges(path: ResolvedTranslationPath) {
+private fun patchTranslationBridges(path: ResolvedTranslationPath, automatic: ResolvedAutomaticTranslationPath) {
     val extensionClass = context.mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
 
     fun modelStringBridge(name: String, getter: ResolvedGetter) {
-        val bridge = extensionClass.requireBridge(name, OBJECT_DESCRIPTOR, STRING_DESCRIPTOR)
+        val bridge = extensionClass.requireBridge(name, OBJECT_DESCRIPTOR, STRING_DESCRIPTOR).withLocals(extensionClass, 1)
         bridge.patchBridge {
             val value = bridge.p0Register
-            checkCast(value, path.presenterDescriptor)
-            iget(value, value, path.presenterModelField)
+            readAutomaticModel(path, automatic, value, 0)
             invokeGetter(getter, value)
             moveResult(value, STRING_DESCRIPTOR)
             returnObject(value)
@@ -962,19 +969,18 @@ private fun patchTranslationBridges(path: ResolvedTranslationPath) {
     }
     modelStringBridge("readText", path.modelTextGetter)
     val readPostModel = extensionClass.requireBridge("readPostModel", OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
+        .withLocals(extensionClass, 1)
     readPostModel.patchBridge {
         val value = readPostModel.p0Register
-        checkCast(value, path.presenterDescriptor)
-        iget(value, value, path.presenterModelField)
+        readAutomaticModel(path, automatic, value, 0)
         returnObject(value)
     }
     modelStringBridge("readSourceLanguage", path.modelSourceGetter)
 
-    val readPollChoices = extensionClass.requireBridge("readPollChoices", OBJECT_DESCRIPTOR, LIST_DESCRIPTOR)
+    val readPollChoices = extensionClass.requireBridge("readPollChoices", OBJECT_DESCRIPTOR, LIST_DESCRIPTOR).withLocals(extensionClass, 1)
     readPollChoices.patchBridge {
         val card = readPollChoices.p0Register
-        checkCast(card, path.presenterDescriptor)
-        iget(card, card, path.presenterModelField)
+        readAutomaticModel(path, automatic, card, 0)
         invokeGetter(path.modelCardGetter, card)
         moveResult(card, path.modelCardGetter.reference.returnType)
         ifEqz(card, Target.Local(NO_POLL_LABEL))
@@ -1021,7 +1027,7 @@ private fun patchTranslationBridges(path: ResolvedTranslationPath) {
     )
 }
 
-private fun Block.invokeGetter(getter: ResolvedGetter, receiver: Int) {
+internal fun Block.invokeGetter(getter: ResolvedGetter, receiver: Int) {
     if (getter.isInterface) {
         invokeInterface(getter.reference, receiver)
     } else {
@@ -1030,7 +1036,7 @@ private fun Block.invokeGetter(getter: ResolvedGetter, receiver: Int) {
 }
 
 /** Returns the bridge with at least [locals] low local registers, replacing it with a widened clone if needed. */
-private fun MutableMethod.withLocals(owner: MutableClass, locals: Int): MutableMethod {
+internal fun MutableMethod.withLocals(owner: MutableClass, locals: Int): MutableMethod {
     val implementation = implementation
         ?: throw PatchException("NewX translation bridge has no implementation: $this")
     val currentLocals = implementation.registerCount - numberOfParameterRegisters
@@ -1163,7 +1169,7 @@ private fun MutableMethod.patchBooleanResult(result: BooleanResult, bridgeMethod
 }
 
 context(context: BytecodePatchContext)
-private fun exposeField(reference: FieldReference) {
+internal fun exposeField(reference: FieldReference) {
     val owner = context.mutableClassDefBy(reference.definingClass)
     val field =
         requireExactlyOne(
@@ -1177,13 +1183,13 @@ private fun exposeField(reference: FieldReference) {
 }
 
 context(context: BytecodePatchContext)
-private fun exposeGetter(getter: ResolvedGetter) {
+internal fun exposeGetter(getter: ResolvedGetter) {
     exposeMethod(getter.reference)
     requirePublicClass(getter.reference.definingClass)
 }
 
 context(context: BytecodePatchContext)
-private fun exposeMethod(reference: MethodReference) {
+internal fun exposeMethod(reference: MethodReference) {
     val owner = context.mutableClassDefBy(reference.definingClass)
     val method =
         requireExactlyOne(
@@ -1207,7 +1213,7 @@ private fun requirePublicClass(descriptor: String) {
     }
 }
 
-private fun Method.toReference(): MethodReference =
+internal fun Method.toReference(): MethodReference =
     ImmutableMethodReference(
         definingClass,
         name,
@@ -1215,7 +1221,7 @@ private fun Method.toReference(): MethodReference =
         returnType,
     )
 
-private fun MutableMethod.parameterRegister(parameterIndex: Int): Int {
+internal fun MutableMethod.parameterRegister(parameterIndex: Int): Int {
     val parameterStart = p0Register + if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1
     return parameterStart + parameterTypes.take(parameterIndex).sumOf { type ->
         if (type.toString() == "J" || type.toString() == "D") 2 else 1
