@@ -49,6 +49,7 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
+import app.morphe.patches.all.misc.fix.spoofsignature.spoofSignaturePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.indexOfFirstInstructionOrThrow
@@ -116,6 +117,7 @@ val settingsPatch =
             fixNotificationRegistrationCrashPatch,
             fixDirectNotificationActionCrashPatch,
             validateLinksPatch,
+            spoofSignaturePatch,
             removeBuildExpiredPopupPatch,
             preserveUnknownFriendshipStatusPatch,
             profileInfoEntity,
