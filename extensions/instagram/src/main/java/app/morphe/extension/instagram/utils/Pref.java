@@ -59,10 +59,6 @@ public class Pref {
         return SharedPref.setBooleanPref(Settings.FIRST_TIME_PIKO.key,bool);
     }
 
-    public static boolean unlockPlusBenefits() {
-        return SharedPref.getBooleanPref(Settings.UNLOCK_PLUS_BENEFITS);
-    }
-
     public static boolean disableAds() {
         return SharedPref.getBooleanPref(Settings.DISABLE_ADS);
     }
@@ -345,17 +341,6 @@ public class Pref {
     public static boolean directlyOpenMetaConfig() {
         return SharedPref.getBooleanPref(Settings.DIRECTLY_OPEN_METACONFIG);
     }
-    public static boolean enableEmployeeOptions() {
-        return SharedPref.getBooleanPref(Settings.ENABLE_EMP_OPTIONS);
-    }
-    public static boolean allowUserNetworkCertificate() {
-        return SharedPref.getBooleanPref(Settings.ALLOW_USER_NETWORK_CERTIFICATE);
-    }
-
-    public static boolean disableAnalytics() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_ANALYTICS);
-    }
-
     public static boolean disableDiscoverPeople() {
         return SharedPref.getBooleanPref(Settings.DISABLE_DISCOVER_PEOPLE);
     }

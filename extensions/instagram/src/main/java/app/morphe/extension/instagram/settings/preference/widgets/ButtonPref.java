@@ -20,7 +20,6 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
-import app.morphe.extension.instagram.patches.Block;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.download.DownloadMapping;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
@@ -76,9 +75,6 @@ public class ButtonPref extends Preference {
 
                     } else if (key.equals("piko_focus_lock_action")) {
                         FocusLockDialogs.onActionPressed(context, ButtonPref.this);
-
-                    } else if (key.equals("piko_delete_analytics_cache")) {
-                        Block.deleteAnalyticsCacheFolder();
 
                     } else if (key.equals("piko_pref_delete_font")) {
                         FontStorage.DeleteResult result = FontStorage.delete();
@@ -165,7 +161,6 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_reset_pref")
                 || key.equals("piko_focus_lock_action")
                 || key.equals("piko_download_set_path")
-                || key.equals("piko_delete_analytics_cache")
                 || key.equals("piko_export_experiment_list")
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")

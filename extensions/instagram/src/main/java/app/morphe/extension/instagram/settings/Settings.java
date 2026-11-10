@@ -27,12 +27,9 @@ public class Settings {
     public static final BooleanSetting HIDE_SUGGESTED_CONTENT = new BooleanSetting("hide_suggested_content", true, REQUIRED);
     public static final BooleanSetting DEVELOPER_OPTIONS = new BooleanSetting("enable_developer_options", true, NOT_REQUIRED);
     public static final BooleanSetting DIRECTLY_OPEN_METACONFIG = new BooleanSetting("directly_open_metaconfig",true, NOT_REQUIRED);
-    public static final BooleanSetting ENABLE_EMP_OPTIONS = new BooleanSetting("enable_employee_options",false, REQUIRED);
-    public static final BooleanSetting ALLOW_USER_NETWORK_CERTIFICATE = new BooleanSetting("allow_user_network_certificate",false, REQUIRED);
     public static final BooleanSetting DISABLE_DISCOVER_PEOPLE = new BooleanSetting("disable_discover_people", true, REQUIRED);
     public static final BooleanSetting LIMIT_FOLLOWING_FEED = new BooleanSetting("limit_following_feed", false, REQUIRED);
     public static final BooleanSetting HIDE_FEED_POSTS = new BooleanSetting("hide_feed_posts", false, REQUIRED);
-    public static final BooleanSetting DISABLE_ANALYTICS = new BooleanSetting("disable_analytics", false, REQUIRED);
     public static final BooleanSetting TURN_ON_ALL_GHOST_MODES = new BooleanSetting("turn_on_all_ghost_modes", false, NOT_REQUIRED);
     public static final BooleanSetting VIEW_STORIES_ANONYMOUSLY = new BooleanSetting("view_stories_anonymously", false, NOT_REQUIRED);
     public static final BooleanSetting VIEW_LIVE_ANONYMOUSLY = new BooleanSetting("view_live_anonymously", false, NOT_REQUIRED);
@@ -88,7 +85,6 @@ public class Settings {
     public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", false, NOT_REQUIRED);
     public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", false, REQUIRED);
     public static final BooleanSetting DISABLE_VIDEO_AUTOPLAY = new BooleanSetting("disable_video_autoplay", false, NOT_REQUIRED);
-    public static final BooleanSetting UNLOCK_PLUS_BENEFITS = new BooleanSetting("unlock_plus_benefits", false, NOT_REQUIRED);
     public static final StringSetting CHANGE_LIKE_ANIMATION = new StringSetting("change_like_animation", "ARES_LIKE_ACTIVATION", REQUIRED);
     public static final StringSetting CUSTOMISE_STORY_RING_SIZE = new StringSetting("customise_story_ring_size", "100", REQUIRED);
     public static final BooleanSetting ENABLE_MORE_OPTIONS_ON_POST = new BooleanSetting("enable_more_option_on_post", true, NOT_REQUIRED);

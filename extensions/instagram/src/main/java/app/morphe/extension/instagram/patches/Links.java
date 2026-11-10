@@ -35,13 +35,8 @@ import app.morphe.extension.instagram.settings.Settings;
 
 @SuppressWarnings("unused")
 public class Links {
-    private static final String NDX_CONTACT_IMPORT_SCREEN =
-            "com.bloks.www.bloks.ig.ndx.ci.entry.screen";
-    private static final String NDX_LOCATION_SERVICES_SCREEN =
-            "com.bloks.www.bloks.ig.ndx.ls.entry.screen";
     private static final Pattern VALID_DOMAIN =
             Pattern.compile("[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:\\d{1,5})?");
-    private static final boolean DISABLE_ANALYTICS;
     private static final boolean DISABLE_STORIES;
     private static final boolean DISABLE_EXPLORE;
     private static final boolean DISABLE_COMMENTS;
@@ -55,7 +50,6 @@ public class Links {
     );
 
     static {
-        DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
@@ -85,15 +79,6 @@ public class Links {
                 seenStatus,
                 Pref.viewStoriesAnonymously()
         );
-    }
-
-    public static boolean shouldBlockOnboardingScreen(String appId) {
-        if (!DISABLE_ANALYTICS || appId == null) {
-            return false;
-        }
-
-        return NDX_CONTACT_IMPORT_SCREEN.equals(appId)
-                || NDX_LOCATION_SERVICES_SCREEN.equals(appId);
     }
 
     public static boolean openExternally(String url) {
@@ -130,10 +115,7 @@ public class Links {
                 String host = uri.getHost() != null ? uri.getHost() : "";
                 String path = uri.getPath();
 
-                if (host.contains("graph.instagram.com")
-                        || host.contains("graph.facebook.com")) {
-                    shouldBlockUri = DISABLE_ANALYTICS;
-                } else if (path.contains("/api/v2/media/seen/")) {
+                if (path.contains("/api/v2/media/seen/")) {
                     shouldBlockUri = Pref.viewStoriesAnonymously()
                             && !StorySeenRequestScope.isActive();
                     StorySeenRequestScope.onStorySeenRequest(shouldBlockUri);
