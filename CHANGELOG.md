@@ -1,3 +1,9 @@
+## [3.11.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1) (2026-11-10)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Spoof patched app signature to match original app ([#2281](https://github.com/crimera/piko/issues/2281)) ([47d8af4](https://github.com/crimera/piko/commit/47d8af42553dc2e5218e740834fee8e79da49e57))
+
 ## [3.11.1-dev.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1-dev.1) (2026-11-10)
 
 ### 🐛 Bug Fixes

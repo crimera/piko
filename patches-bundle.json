@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-10T10:16:52",
-  "description": "## [3.11.1-dev.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1-dev.1) (2026-11-10)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Spoof patched app signature to match original app ([#2281](https://github.com/crimera/piko/issues/2281)) ([47d8af4](https://github.com/crimera/piko/commit/47d8af42553dc2e5218e740834fee8e79da49e57))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.11.1-dev.1/patches-3.11.1-dev.1.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.11.1-dev.1/patches-3.11.1-dev.1.mpp.asc",
-  "version": "3.11.1-dev.1"
+  "created_at": "2026-11-10T12:57:35",
+  "description": "## [3.11.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1) (2026-11-10)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Spoof patched app signature to match original app ([#2281](https://github.com/crimera/piko/issues/2281)) ([47d8af4](https://github.com/crimera/piko/commit/47d8af42553dc2e5218e740834fee8e79da49e57))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.11.1/patches-3.11.1.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.11.1/patches-3.11.1.mpp.asc",
+  "version": "3.11.1"
 }
