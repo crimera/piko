@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.settings.preference.fragments;
 
+import app.morphe.extension.instagram.utils.InstaUtils;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
@@ -176,7 +177,7 @@ public class RestorePrefFragment extends Fragment {
             }
 
             toast(str("piko_import_success"));
-            Utils.restartApp(ctx);
+            InstaUtils.restartApp(ctx);
 
         } catch (Exception e) {
             tempFile.delete();
