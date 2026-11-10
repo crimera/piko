@@ -19,7 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
@@ -134,7 +134,7 @@ private object ComposeSensitiveMediaInterstitialFingerprint : Fingerprint(
 
 @Suppress("unused")
 val sensitiveMediaPatch =
-    bytecodePatch(
+    patch(
         name = "Show sensitive media",
     ) {
         compatibleWith(COMPATIBILITY_X)

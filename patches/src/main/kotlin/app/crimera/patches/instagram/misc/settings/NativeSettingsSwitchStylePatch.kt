@@ -7,7 +7,6 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
-import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -17,9 +16,9 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.util.matchAllMethodIndicesForEach
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -95,7 +94,6 @@ private object NativeSwitchStyleReadFingerprint : Fingerprint(
     filters = listOf(opcode(Opcode.SGET_BOOLEAN)),
 )
 
-context(_: BytecodePatchContext)
 private fun verifyFixedMaterialSwitchStyle() {
     if (NativeSwitchStyleReadFingerprint.matchOrNull() != null) {
         throw PatchException("Native switch has no verified Material style implementation")
@@ -106,7 +104,7 @@ private fun verifyFixedMaterialSwitchStyle() {
     MaterialSwitchSetCheckedAnimatedFingerprint.match()
 }
 
-internal val nativeSettingsSwitchStylePatch = bytecodePatch {
+internal val nativeSettingsSwitchStylePatch = patch {
     dependsOn(sharedExtensionPatch)
     execute {
         val initializer = NativeSwitchInitializer.matchOrNull()

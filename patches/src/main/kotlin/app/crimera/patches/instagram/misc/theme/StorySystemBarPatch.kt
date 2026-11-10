@@ -6,8 +6,6 @@
 
 package app.crimera.patches.instagram.misc.theme
 
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.patches.instagram.utils.typeReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -20,8 +18,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.resourceLiteral
@@ -98,7 +96,6 @@ private fun MutableMethod.replaceStoryBarCall(index: Int, target: MethodReferenc
     )
 }
 
-context(patchContext: BytecodePatchContext)
 internal fun installStorySystemBarHooks() {
     val sourceMatches = StorySourceFingerprint.instructionMatches
     val sourceType = sourceMatches[1].typeReference
@@ -109,7 +106,7 @@ internal fun installStorySystemBarHooks() {
         .filter { it.definingClass == STORY_FRAGMENT && it.type == sourceType }
     if (sourceFields.size != 1) throw PatchException("Expected one story source field")
     val sourceField = sourceFields.single()
-    val storyClass = patchContext.mutableClassDefBy(STORY_FRAGMENT)
+    val storyClass = mutableClassDefBy(STORY_FRAGMENT)
     if (storyClass.fields.none { it.toString() == sourceField.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) }) {
         throw PatchException("Story source field must be public")
     }
@@ -190,7 +187,7 @@ internal fun installStorySystemBarHooks() {
             ExternalLabel("tray_story", getInstruction(0)),
         )
     }
-    val owner = patchContext.mutableClassDefBy(wrapperReference.definingClass)
+    val owner = mutableClassDefBy(wrapperReference.definingClass)
     if (owner.methods.any { it.name == STORY_BAR_WRAPPER || it.name == STORY_BAR_APPLY }) {
         throw PatchException("Story system bar methods already exist")
     }

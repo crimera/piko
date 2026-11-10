@@ -12,7 +12,7 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
@@ -25,7 +25,7 @@ private object MainActivityFingerprint : Fingerprint(
 
 @Suppress("unused")
 val changelogsPatch =
-    bytecodePatch(
+    patch(
         name = "Show changelogs",
         description = "Shows changelogs when new a patch is installed.",
     ) {

@@ -14,7 +14,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
@@ -24,7 +23,6 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
-context(_: BytecodePatchContext)
 internal fun hideStoryComments(preferenceCall: String) {
     for (marker in listOf("StoryCommentButtonViewComponent", "StoryCommentButtonMimicAdsViewComponent")) {
         val component = Fingerprint(
@@ -96,7 +94,6 @@ internal fun hideStoryComments(preferenceCall: String) {
     hideStoryCommentPreviews(preferenceCall)
 }
 
-context(_: BytecodePatchContext)
 private fun hideStoryCommentPreviews(preferenceCall: String) {
     val commentsGetter = Fingerprint(
         definingClass = "Lcom/instagram/feed/media/Media;",

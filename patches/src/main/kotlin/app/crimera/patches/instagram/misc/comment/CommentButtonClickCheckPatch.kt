@@ -9,14 +9,14 @@ package app.crimera.patches.instagram.misc.comment
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 // Thanks to MyInsta.
 @Suppress("unused")
 val commentButtonClickCheckPatch =
-    bytecodePatch(
+    patch(
         description = "handles comment button on click check.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

@@ -12,12 +12,12 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val themePatch =
-    resourcePatch(
+    patch(
         name = "Theme",
         description =
             "Adds Material You and AMOLED controls to Piko settings " +
@@ -37,47 +37,34 @@ val themePatch =
                     "the AMOLED control in Piko settings.",
         )
 
-        var bytecodePatchContext: BytecodePatchContext? = null
-
         dependsOn(
             settingsPatch,
             sharedExtensionPatch,
-            bytecodePatch {
-                execute {
-                    bytecodePatchContext = this
-                }
-            },
         )
 
         execute {
-            try {
-                val originalApi31Base = captureApi31Base()
+            val originalApi31Base = captureApi31Base()
 
-                forceWhiteOnMediaChrome()
-                preserveCreationButtonContrast()
-                preserveLightClipsComposerContrast()
-                forceBlackStoryBackground()
-                preserveLightOverflowStampBackgrounds()
-                applyLegacyTheme(amoled == true)
+            forceWhiteOnMediaChrome()
+            preserveCreationButtonContrast()
+            preserveLightClipsComposerContrast()
+            forceBlackStoryBackground()
+            preserveLightOverflowStampBackgrounds()
+            applyLegacyTheme(amoled == true)
 
-                restoreApi31Base(
-                    snapshot = originalApi31Base,
-                )
-                writeMaterialYouOverlay(night = false)
-                writeMaterialYouOverlay(night = true)
-                writeAmoledOverlay(originalApi31Base)
-                writeAmoledMaterialYouOverlay()
+            restoreApi31Base(
+                snapshot = originalApi31Base,
+            )
+            writeMaterialYouOverlay(night = false)
+            writeMaterialYouOverlay(night = true)
+            writeAmoledOverlay(originalApi31Base)
+            writeAmoledMaterialYouOverlay()
 
-                context(requireNotNull(bytecodePatchContext)) {
-                    enableSettings("theme")
-                    installComposePrismBlackRuntime(legacyAmoled = amoled == true)
-                    installSystemDefaultUiModeHook()
-                    installThemeLifecycleHooks()
-                    installNativeThemeModeSync()
-                    installStorySystemBarHooks()
-                }
-            } finally {
-                bytecodePatchContext = null
-            }
+            enableSettings("theme")
+            installComposePrismBlackRuntime(legacyAmoled = amoled == true)
+            installSystemDefaultUiModeHook()
+            installThemeLifecycleHooks()
+            installNativeThemeModeSync()
+            installStorySystemBarHooks()
         }
     }

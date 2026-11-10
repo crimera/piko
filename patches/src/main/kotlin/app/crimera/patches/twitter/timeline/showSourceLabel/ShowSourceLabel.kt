@@ -15,7 +15,7 @@ import app.crimera.utils.extractDescriptors
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -32,7 +32,7 @@ private object SourceLabelFingerprint : Fingerprint(
 
 @Suppress("unused")
 val showSourceLabel =
-    bytecodePatch(
+    patch(
         name = "Show post source label",
         description = "Source label will be shown only on public posts",
     ) {

@@ -38,7 +38,8 @@
 
 package app.morphe.patches.all.misc.resources
 
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.resourceFile
 import app.morphe.util.inputStreamFromBundledResource
 import java.io.File
 import java.util.Locale
@@ -234,7 +235,7 @@ private val RESOURCE_ELEMENT = Regex(
     RegexOption.DOT_MATCHES_ALL
 )
 
-internal val addResourcesPatch = resourcePatch(
+internal val addResourcesPatch = patch(
     description = "Add resources such as strings or arrays to the app."
 ) {
     finalize {
@@ -250,7 +251,7 @@ internal val addResourcesPatch = resourcePatch(
         ): DestinationFile {
             destinationFiles[destSubPath]?.let { return it }
 
-            val destFile = this@finalize[destSubPath]
+            val destFile = resourceFile(destSubPath)
             createResourceDestinationDirectoryIfNeeded(locale, logger, destSubPath, destFile)
 
             return DestinationFile(destFile, destFile.readText()).also {

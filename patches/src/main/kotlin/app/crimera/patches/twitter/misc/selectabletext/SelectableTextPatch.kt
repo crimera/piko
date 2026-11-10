@@ -9,12 +9,13 @@ package app.crimera.patches.twitter.misc.selectabletext
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.patch
 import org.w3c.dom.Element
 
 private val selectableTextResourcePatch =
-    resourcePatch {
+    patch {
         execute {
             val ids =
                 listOf(
@@ -38,7 +39,7 @@ private val selectableTextResourcePatch =
 
 @Suppress("unused")
 val selectableTextPatch =
-    bytecodePatch(
+    patch(
         name = "Selectable Text",
         description = "Makes bio and username selectable",
     ) {

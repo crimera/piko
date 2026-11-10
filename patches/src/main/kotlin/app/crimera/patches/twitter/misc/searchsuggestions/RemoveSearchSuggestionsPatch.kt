@@ -13,7 +13,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 
 private object SearchSuggestionFingerprint : Fingerprint(
@@ -28,7 +28,7 @@ private object SearchSuggestionFingerprint : Fingerprint(
 
 @Suppress("unused")
 val RemoveSearchSuggestions =
-    bytecodePatch(
+    patch(
         name = "Remove search suggestions",
         description = "Hide/Remove search suggestion in explore section",
     ) {

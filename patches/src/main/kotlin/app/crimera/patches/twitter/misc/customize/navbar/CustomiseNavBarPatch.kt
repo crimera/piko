@@ -21,7 +21,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.patcher.util.getReference
@@ -109,7 +109,7 @@ private object CustomiseNavBarSecondaryMapFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customiseNavBarPatch =
-    bytecodePatch(
+    patch(
         name = "Customize Navigation Bar items",
     ) {
         compatibleWith(COMPATIBILITY_X)

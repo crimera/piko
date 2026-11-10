@@ -13,7 +13,7 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.literal
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.registersUsed
 
 internal object StoryRingBuilderFingerprint : Fingerprint(
@@ -29,7 +29,7 @@ internal object StoryRingBuilderFingerprint : Fingerprint(
 // Credits InstaPro/MyInsta
 @Suppress("unused")
 val customiseStoryRingSizePatch =
-    bytecodePatch(
+    patch(
         name = "Customise story ring size",
     ) {
         dependsOn(settingsPatch)

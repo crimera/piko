@@ -13,7 +13,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 
 private object EnableForcePip1Fingerprint : Fingerprint(
@@ -32,7 +32,7 @@ private object EnableForcePip2Fingerprint : Fingerprint(
 
 @Suppress("unused")
 val enableForcePipPatch =
-    bytecodePatch(
+    patch(
         name = "Enable PiP mode automatically",
         description = "Enables PiP mode when you close the app",
     ) {

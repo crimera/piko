@@ -12,7 +12,7 @@ import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -30,7 +30,7 @@ internal object DownloadCallFingerprint : Fingerprint(
 
 @Suppress("unused")
 val copyMediaLink =
-    bytecodePatch(
+    patch(
         name = "Add ability to copy media link",
         default = true,
     ) {

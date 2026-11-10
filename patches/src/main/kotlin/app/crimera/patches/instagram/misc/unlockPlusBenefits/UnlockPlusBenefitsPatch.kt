@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 
 private object BenefitCheckLoggingFingerprint : Fingerprint(
@@ -34,7 +34,7 @@ internal object ActiveBenefitCheckerFingerprint : Fingerprint(
 
 @Suppress("unused")
 val unlockPlusBenefitsPatch =
-    bytecodePatch(
+    patch(
         name = "Unlock Plus benefits",
         description = "Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK",
         default = false,

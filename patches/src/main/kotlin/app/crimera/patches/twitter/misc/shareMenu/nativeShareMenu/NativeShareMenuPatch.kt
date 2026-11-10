@@ -12,11 +12,11 @@ import app.crimera.patches.twitter.misc.shareMenu.browseObject.browseObjectPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonOnClickHook
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val nativeShareMenuPatch =
-    bytecodePatch(
+    patch(
         name = "Custom share menu",
         description = "Overrides existing share menu and adds a new one",
         default = true,

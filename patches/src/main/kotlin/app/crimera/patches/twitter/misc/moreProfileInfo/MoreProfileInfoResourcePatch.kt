@@ -6,13 +6,14 @@
 
 package app.crimera.patches.twitter.misc.moreProfileInfo
 
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
 import app.morphe.util.findElementByAttributeValueOrThrow
 
 internal val fieldList = listOf("fast_follower_stat", "tweet_stat", "article_stat", "media_stat", "likes_stat")
 
 internal val moreProfileInfoResourcePatch =
-    resourcePatch {
+    patch {
         execute {
             document("res/layout/profile_details.xml").use { editor ->
                 val statsContainer =

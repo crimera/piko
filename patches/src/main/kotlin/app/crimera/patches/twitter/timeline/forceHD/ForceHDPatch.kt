@@ -14,7 +14,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
@@ -29,7 +29,7 @@ private object PlayerSupportFingerprint : Fingerprint(
 
 @Suppress("unused")
 val forceHDPatch =
-    bytecodePatch(
+    patch(
         name = "Enable force HD videos",
         description = "Videos will be played in highest quality always",
     ) {

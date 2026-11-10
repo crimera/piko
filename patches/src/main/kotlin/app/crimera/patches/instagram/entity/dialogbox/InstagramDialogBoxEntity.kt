@@ -6,14 +6,12 @@
 
 package app.crimera.patches.instagram.entity.dialogbox
 
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 val instagramDialogBoxEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of the native box of Instagram",
     ) {
         execute {

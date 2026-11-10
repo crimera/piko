@@ -10,12 +10,12 @@ import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.getFieldName
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
 val extMediaEntityPatch =
-    bytecodePatch(
+    patch(
         description = "For extended media entity reflection",
     ) {
         execute {

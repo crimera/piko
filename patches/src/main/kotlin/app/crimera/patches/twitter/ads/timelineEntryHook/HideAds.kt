@@ -15,7 +15,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -28,7 +28,7 @@ private object HidePromotedTrendFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideAds =
-    bytecodePatch(
+    patch(
         name = "Remove Ads",
         description = "Removed promoted posts, trends and google ads",
     ) {

@@ -15,7 +15,7 @@ import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.util.getReference
@@ -65,7 +65,7 @@ private fun getShowDialogFingerprint(dismissButtonField: FieldReference) = objec
 
 @Suppress("unused")
 val blockUpdateScreenPatch =
-    bytecodePatch(
+    patch(
         name = "Block update screen",
         description = "Blocks the 'This app is out of date' update screen from being shown on launch",
     ) {

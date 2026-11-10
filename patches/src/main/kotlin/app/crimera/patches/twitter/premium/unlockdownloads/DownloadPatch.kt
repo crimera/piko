@@ -18,7 +18,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -55,7 +55,7 @@ private object MediaEntityFingerprint : Fingerprint(
 // Credits to @iKirby
 @Suppress("unused")
 val downloadPatch =
-    bytecodePatch(
+    patch(
         name = "Download patch",
         description = "Unlocks the ability to download videos and gifs from Twitter/X",
     ) {

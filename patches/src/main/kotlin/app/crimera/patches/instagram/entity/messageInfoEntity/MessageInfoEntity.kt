@@ -7,13 +7,13 @@
 package app.crimera.patches.instagram.entity.messageInfoEntity
 
 import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
-import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.patch
 
 val messageInfoEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of message info",
     ) {
         execute {

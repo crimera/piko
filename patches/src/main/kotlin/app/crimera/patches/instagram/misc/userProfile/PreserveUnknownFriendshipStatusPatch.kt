@@ -17,8 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -41,7 +40,6 @@ private fun nullableFollowedByUpdateFilters(updaterCall: InstructionFilter) = li
 /**
  * Missing suggestion metadata must not overwrite an existing relationship with false.
  */
-context(_: BytecodePatchContext)
 private fun Fingerprint.preserveNullableFollowedBy() {
     val match = match()
     val guardIndex = match.instructionMatches.first().index
@@ -57,7 +55,7 @@ private fun Fingerprint.preserveNullableFollowedBy() {
     )
 }
 
-val preserveUnknownFriendshipStatusPatch = bytecodePatch(
+val preserveUnknownFriendshipStatusPatch = patch(
     description = "Preserves friendship status when suggested-user metadata omits followed_by.",
 ) {
     compatibleWith(COMPATIBILITY_INSTAGRAM)

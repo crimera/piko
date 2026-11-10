@@ -14,8 +14,7 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -23,7 +22,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private const val SUGGESTED_PROFILES = "$PATCHES_DESCRIPTOR/SuggestedProfiles;"
 
-context(_: BytecodePatchContext)
 private fun Fingerprint.filterSuggestionFlags() {
     method.apply {
         instructionMatches.filter { it.instruction.opcode == Opcode.MOVE_RESULT }.asReversed().forEach {
@@ -48,7 +46,7 @@ private fun MutableMethod.filterSuggestedSection(index: Int, register: Int) {
 
 @Suppress("unused")
 val disableDiscoverPeoplePatch =
-    bytecodePatch(
+    patch(
         name = "Disable discover people",
         description = "Hides suggested accounts",
     ) {

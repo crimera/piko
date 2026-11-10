@@ -18,9 +18,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
@@ -39,12 +39,11 @@ internal object InAppBrowserFunctionFingerprint : Fingerprint(
         fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_OBJECT_FROM16, MatchAfterImmediately()),
         methodCall(parameters = listOf("Ljava/lang/String;"), returnType = "Landroid/net/Uri;", opcode = Opcode.INVOKE_STATIC_RANGE),
-    ),
+    )
 )
 
-context(patchContext: BytecodePatchContext)
 private fun externalBrowserResult(resultType: String): FieldReference {
-    val resultClass = patchContext.classDefBy(resultType)
+    val resultClass = classDefBy(resultType)
     if (resultClass.superclass != "Ljava/lang/Enum;") {
         throw PatchException("Expected a browser launch result enum")
     }
@@ -89,7 +88,7 @@ private fun externalBrowserResult(resultType: String): FieldReference {
 
 @Suppress("unused")
 val openLinksExternallyPatch =
-    bytecodePatch(
+    patch(
         name = "Open links externally",
         description = "Changes links to always open in your external browser, instead of the in-app browser.",
         default = true,

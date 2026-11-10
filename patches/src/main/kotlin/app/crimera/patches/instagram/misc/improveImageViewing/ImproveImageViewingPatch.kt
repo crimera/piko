@@ -11,12 +11,12 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.registersUsed
 
 @Suppress("unused")
 val improveImageViewingPatch =
-    bytecodePatch(
+    patch(
         name = "Improve image viewing",
         description = "Fetches max resolution images from server.",
         default = true,

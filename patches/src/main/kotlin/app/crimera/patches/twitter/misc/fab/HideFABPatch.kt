@@ -13,7 +13,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -27,7 +27,7 @@ private object HideFABFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideFABPatch =
-    bytecodePatch(
+    patch(
         name = "Hide FAB",
         description = "Adds an option to hide Floating action button",
     ) {

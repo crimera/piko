@@ -19,7 +19,6 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -29,9 +28,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.classDefByOrNull
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
@@ -167,7 +167,7 @@ private object FeedUfiRendererSelectorFingerprint : Fingerprint(
 )
 
 val feedDownloadButtonPatch =
-    bytecodePatch {
+    patch {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(
             sharedExtensionPatch,
@@ -203,7 +203,6 @@ val feedDownloadButtonPatch =
  *
  * @return the type of the row state the binder receives.
  */
-context(patchContext: BytecodePatchContext)
 private fun hookFeedRowBinder(): String {
     val holder = FeedRowHolderConstructorFingerprint
     val holderClass = holder.originalClassDef
@@ -216,10 +215,10 @@ private fun hookFeedRowBinder(): String {
             holderClass.fields
                 .map { it.type }
                 .filter { type ->
-                    patchContext.classDefByOrNull(type)?.fields?.count { it.type == MEDIA_DESCRIPTOR } == 1
+                    classDefByOrNull(type)?.fields?.count { it.type == MEDIA_DESCRIPTOR } == 1
                 }.distinct(),
         )
-    val stateClass = patchContext.classDefBy(stateType)
+    val stateClass = classDefBy(stateType)
     val mediaField = requireOne("Media field of $stateType", stateClass.fields.filter { it.type == MEDIA_DESCRIPTOR })
 
     // The state reaches the view state the carousel mutates. Its current-index field is the one
@@ -235,7 +234,7 @@ private fun hookFeedRowBinder(): String {
     val bind = feedUfiBindFingerprint(holderType, stateType).method
     val sessionField = requireOne(
         "UserSession field of ${bind.definingClass}",
-        patchContext.classDefBy(bind.definingClass).fields.filter { it.type == USER_SESSION_DESCRIPTOR },
+        classDefBy(bind.definingClass).fields.filter { it.type == USER_SESSION_DESCRIPTOR },
     )
 
     val holderRegister = bind.parameterRegister(holderType)
@@ -264,7 +263,6 @@ private fun hookFeedRowBinder(): String {
  * Only the view UFI renderer creates the holder [hookFeedRowBinder] hooks, so the main feed is
  * pinned to it; other modules keep the original selector result.
  */
-context(patchContext: BytecodePatchContext)
 private fun pinMainFeedToViewUfi() {
     FeedUfiRendererSelectorFingerprint.let {
         val viewVariantField = it.instructionMatches.last().fieldReference

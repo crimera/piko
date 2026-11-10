@@ -6,12 +6,12 @@
 
 package app.crimera.patches.twitter.misc.shareMenu.nativeShareMenu
 
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 
 val nativeShareMenuResourcePatch =
-    resourcePatch {
+    patch {
         execute {
             copyResources(
                 "twitter/misc",

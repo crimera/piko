@@ -13,7 +13,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 
 private object SearchDbInsertFingerprint : Fingerprint(
@@ -27,7 +27,7 @@ private object SearchDbInsertFingerprint : Fingerprint(
 
 @Suppress("unused")
 val pauseSearchSuggestion =
-    bytecodePatch(
+    patch(
         name = "Pause search suggestions",
         description = "Search suggestions will not be saved locally",
     ) {

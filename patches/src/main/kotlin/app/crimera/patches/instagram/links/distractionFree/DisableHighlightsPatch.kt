@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -30,7 +30,7 @@ internal object ProfileHeaderBinderFingerprint : Fingerprint(
 
 @Suppress("unused")
 val disableHighlightsPatch =
-    bytecodePatch(
+    patch(
         name = "Disable highlights",
     ) {
         dependsOn(settingsPatch)

@@ -12,7 +12,7 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 private object BadgeNumberFingerprint : Fingerprint(
     definingClass = "/BadgeableTabView;",
@@ -21,7 +21,7 @@ private object BadgeNumberFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideNavBarBadgesPatch =
-    bytecodePatch(
+    patch(
         name = "Hide badges from navigation bar icons",
         description = "Hides notification nudges & counts from navigation bar icons",
     ) {
