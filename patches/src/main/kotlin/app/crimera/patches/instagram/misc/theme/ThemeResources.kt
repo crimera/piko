@@ -285,7 +285,8 @@ internal fun restoreApi31Base(
 
 internal fun materialYouOverlayValues(night: Boolean): OverlayValues {
     val values = dynamicOverlayMappings(night) + materialYouCreationButtonMappings
-    val api34Values = values + materialYouSwitchApi34Mappings(night)
+    val api34Values = dynamicOverlayMappings(night, api34 = true) + materialYouCreationButtonMappings +
+        materialYouSwitchApi34Mappings(night)
     val drawableMappings =
         if (night) emptyMap() else materialYouLightDrawableMappings
     return OverlayValues(
