@@ -13,7 +13,7 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 
 object DisableVideoAutoplayMethodFingerprint : Fingerprint(
@@ -24,7 +24,7 @@ object DisableVideoAutoplayMethodFingerprint : Fingerprint(
 // Credits to MyInsta
 @Suppress("unused")
 val disableVideoAutoplayPatch =
-    bytecodePatch(
+    patch(
         name = "Disable video autoplay",
     ) {
         dependsOn(settingsPatch)

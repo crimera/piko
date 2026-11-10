@@ -11,11 +11,11 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.patches.twitter.utils.flagSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val hideImmersivePlayer =
-    bytecodePatch(
+    patch(
         name = "Hide immersive player",
         description = "Removes swipe up for more videos in video player",
     ) {

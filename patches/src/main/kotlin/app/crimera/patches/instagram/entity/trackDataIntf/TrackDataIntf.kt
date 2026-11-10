@@ -6,12 +6,11 @@
 
 package app.crimera.patches.instagram.entity.trackDataIntf
 
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 val trackDataIntfEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of track data interface",
     ) {
         execute {

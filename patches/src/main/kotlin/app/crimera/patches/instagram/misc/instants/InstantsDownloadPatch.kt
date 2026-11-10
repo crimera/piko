@@ -14,7 +14,7 @@ import app.crimera.patches.instagram.utils.Constants.INSTANTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 private const val INSTANTS_DOWNLOAD_HOOK_DESCRIPTOR = "$INSTANTS_DESCRIPTOR/InstantsDownloadHook;"
 
@@ -27,7 +27,7 @@ private const val INSTANTS_DOWNLOAD_HOOK_DESCRIPTOR = "$INSTANTS_DESCRIPTOR/Inst
  */
 @Suppress("unused")
 val instantsDownloadPatch =
-    bytecodePatch(
+    patch(
         name = "Save Instants",
         description = "Captures view-once Instants as you view them so you can re-view and download them later.",
     ) {

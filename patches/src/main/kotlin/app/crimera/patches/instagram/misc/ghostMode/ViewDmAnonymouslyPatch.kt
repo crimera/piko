@@ -14,13 +14,13 @@ import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.getFreeRegisterProvider
 
 @Suppress("unused")
 val viewDmAnonymouslyPatch =
-    bytecodePatch(
+    patch(
         name = "View DMs anonymously",
         default = true,
     ) {

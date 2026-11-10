@@ -15,8 +15,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.registersUsed
 import app.morphe.util.findInstructionIndicesReversedOrThrow
@@ -55,7 +56,7 @@ private object ComponentStartupFingerprint : Fingerprint(
     ),
 )
 
-private val refreshComponentsPatch = bytecodePatch {
+private val refreshComponentsPatch = patch {
     execute {
         val match = ComponentStartupFingerprint.match()
         val instructions = match.method.implementation!!.instructions
@@ -85,7 +86,7 @@ private val refreshComponentsPatch = bytecodePatch {
     }
 }
 
-private val disableTelemetryComponentsPatch = resourcePatch {
+private val disableTelemetryComponentsPatch = patch {
     dependsOn(refreshComponentsPatch)
 
     execute {
@@ -135,7 +136,7 @@ private val disableTelemetryComponentsPatch = resourcePatch {
 
 @Suppress("unused")
 val disableTelemetryPatch =
-    bytecodePatch(
+    patch(
         name = "Disable telemetry",
         description = "Disables analytics upload components and Falco event logging.",
         default = true,

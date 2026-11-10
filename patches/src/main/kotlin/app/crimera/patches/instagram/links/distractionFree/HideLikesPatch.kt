@@ -11,7 +11,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -20,9 +19,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -34,7 +32,7 @@ import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 internal const val HIDE_LIKES = "$PREF_CALL_DESCRIPTOR->hideLikes()Z"
 
 @Suppress("unused")
-val hideLikesPatch = bytecodePatch(
+val hideLikesPatch = patch(
     name = "Hide like buttons",
     description = "Hides like buttons on posts, reels and stories",
 ) {
@@ -49,7 +47,6 @@ val hideLikesPatch = bytecodePatch(
     }
 }
 
-context(_: BytecodePatchContext)
 private fun hideReelLikes() {
     // Each reel layout omits null children from the action bar.
     for (component in listOf("createLikeButtonComponent", "createLikeCountComponent")) {
@@ -122,7 +119,6 @@ internal fun MutableMethod.returnHiddenLikeState() {
     )
 }
 
-context(_: BytecodePatchContext)
 private fun hideStoryLikes() {
     val component = Fingerprint(
         returnType = "Ljava/lang/String;",

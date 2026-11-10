@@ -11,12 +11,12 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.patches.twitter.utils.flagSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 // Credits to @iKirby
 @Suppress("unused")
 val removeViewCountPatch =
-    bytecodePatch(
+    patch(
         name = "Remove view count",
         description = "Removes the view count from the bottom of tweets",
     ) {

@@ -21,7 +21,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patches.all.misc.resources.addAppResources
@@ -47,7 +47,7 @@ private const val SETTINGS_SEARCH_UI_CONTROLLER_CLASS =
     "$ACTIVITY_SETTINGS_CLASS/SettingsSearchUIController;"
 
 val settingsPatch =
-    bytecodePatch(
+    patch(
         description = "Adds settings",
     ) {
         dependsOn(

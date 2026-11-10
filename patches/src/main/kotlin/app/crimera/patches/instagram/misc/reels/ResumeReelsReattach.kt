@@ -10,8 +10,8 @@ import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
@@ -27,7 +27,6 @@ private const val PLAYBACK = "$PATCHES_DESCRIPTOR/ReelsPlayback;"
 
 private val Method.calls get() = implementation!!.instructions.mapNotNull { it.getReference<MethodReference>() }
 
-context(_: BytecodePatchContext)
 private fun scrollInReason(resume: MethodReference): StringReference {
     val caller = Fingerprint(
         definingClass = resume.definingClass, returnType = "V",
@@ -47,7 +46,6 @@ private fun scrollInReason(resume: MethodReference): StringReference {
     throw PatchException("Unable to identify the scroll-in reason passed to the Reels player")
 }
 
-context(context: BytecodePatchContext)
 internal fun hookReelReattach(start: ReelStartPosition) {
     val explicitStart = start.explicit
     val resume = Fingerprint(
@@ -77,7 +75,7 @@ internal fun hookReelReattach(start: ReelStartPosition) {
     val core = seek.implementation!!.instructions.mapNotNull { it.getReference<FieldReference>() }
         .single { it.definingClass == player && it.type == nativeSeek.definingClass }
     val position = pause.calls.single { it.definingClass == core.type && it.parameterTypes.isEmpty() && it.returnType == "I" }
-    val coreMethods = context.classDefBy(core.type).methods
+    val coreMethods = classDefBy(core.type).methods
     val positionGetter = coreMethods.single { it == position }
     val backendPosition = positionGetter.calls.single {
         it.definingClass != core.type && it.parameterTypes.isEmpty() && it.returnType == "I"

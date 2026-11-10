@@ -13,7 +13,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -35,7 +35,7 @@ private object ReelsInlineFollowButtonFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideReelsFollowButtonPatch =
-    bytecodePatch(
+    patch(
         name = "Hide Reels follow button",
         description = "Removes the follow button from Reels.",
     ) {

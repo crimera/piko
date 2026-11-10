@@ -10,12 +10,10 @@ import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_C
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 
-context(patchContext: BytecodePatchContext)
 fun addOverflowMenuButtonAttributes(
     buttonEnumTag: String,
     extensionMethodName: String,

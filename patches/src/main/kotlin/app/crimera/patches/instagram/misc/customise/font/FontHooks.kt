@@ -13,8 +13,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
@@ -104,7 +104,6 @@ internal fun MutableMethod.hookResolvedTypefaces() {
  * hooked rather than only the first: a second, non-converging construction site is then still
  * covered instead of silently keeping the app's own font.
  */
-context(context: BytecodePatchContext)
 internal fun MutableMethod.hookWrappedTypeface() {
     // Last index first, so earlier indices stay valid while instructions are inserted.
     findInstructionIndicesReversedOrThrow(
@@ -113,7 +112,7 @@ internal fun MutableMethod.hookWrappedTypeface() {
             opcode == Opcode.INVOKE_DIRECT && reference?.name == "<init>" &&
                 reference.parameterTypes.firstOrNull()?.toString() in listOf(TYPEFACE_CLASS, "Ljava/lang/Object;") &&
                 (reference.definingClass == returnType ||
-                    returnType in context.classDefBy(reference.definingClass).interfaces)
+                    returnType in classDefBy(reference.definingClass).interfaces)
         },
     ).forEach { wrapIndex ->
         // The instance is the first register of the constructor call, the typeface the second. The

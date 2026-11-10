@@ -11,7 +11,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
@@ -38,7 +37,6 @@ private fun MutableMethod.filterUsersAfter(index: Int) {
     )
 }
 
-context(_: BytecodePatchContext)
 internal fun hideActivityFeedSuggestions() {
     // Resolve every match before editing, since they all point into the same method.
     val followBackRead = ActivityFeedFollowBackUsersFingerprint.instructionMatches.first().index

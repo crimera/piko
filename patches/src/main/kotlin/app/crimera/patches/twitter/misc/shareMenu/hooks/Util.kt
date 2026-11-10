@@ -8,9 +8,7 @@ package app.crimera.patches.twitter.misc.shareMenu.hooks
 
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addAction
 import app.crimera.patches.twitter.utils.enableSettings
-import app.morphe.patcher.patch.BytecodePatchContext
 
-context(patchContext: BytecodePatchContext)
 fun shareMenuButtonInjection(
     actionName: String,
     prefFunctionName: String,

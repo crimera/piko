@@ -7,12 +7,11 @@
 package app.crimera.patches.instagram.misc.notification
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -48,7 +47,7 @@ private object NotificationTokenRegistrationFingerprint : Fingerprint(
 
 @Suppress("unused")
 val fixNotificationRegistrationCrashPatch =
-    bytecodePatch(
+    patch(
         description =
             "Prevents Instagram from crashing on launch while setting up push notifications on Android 12 and later.",
     ) {

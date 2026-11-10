@@ -8,11 +8,11 @@ package app.crimera.patches.instagram.entity.userfriendshipstatus
 
 import app.crimera.utils.changeString
 import app.crimera.utils.classNameToExtension
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val userFriendshipStatusEntity =
-    bytecodePatch(
+    patch(
         description = "Used to decode user friendship status",
     ) {
 

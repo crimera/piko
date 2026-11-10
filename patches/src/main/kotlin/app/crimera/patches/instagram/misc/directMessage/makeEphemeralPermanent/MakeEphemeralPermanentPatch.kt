@@ -16,8 +16,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.patches.instagram.utils.typeReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -28,9 +26,8 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.newInstance
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
@@ -80,7 +77,7 @@ private object VisualMessageBindFingerprint : Fingerprint(
 
 @Suppress("unused")
 val makeEphemeralPermanentPatch =
-    bytecodePatch(
+    patch(
         name = "Make ephemeral media permanent",
         description = "Changes unexpired view once, view twice media to permanent view.",
         default = true,
@@ -133,7 +130,6 @@ val makeEphemeralPermanentPatch =
         }
     }
 
-context(_: BytecodePatchContext)
 private fun markServerResponseParsers(parserType: String) {
     val match = Fingerprint(
         filters = listOf(
@@ -172,7 +168,6 @@ private fun ephemeralMediaReceiptProducerFingerprint(eventType: String) = Finger
     ),
 )
 
-context(patchContext: BytecodePatchContext)
 private fun suppressEphemeralMediaReceipts() {
     val eventType = EphemeralMediaSeenReceiptFingerprint.instructionMatches.first().typeReference
     val producerMatch = ephemeralMediaReceiptProducerFingerprint(eventType).match()

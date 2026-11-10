@@ -9,7 +9,7 @@ package app.crimera.patches.instagram.misc.distractionFree.doubleTap
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 object PostOnSingleTapConfirmedFingerprint : Fingerprint(
     strings = listOf("open_cmon_interstitial"),
@@ -23,7 +23,7 @@ internal object PostOnDoubleTapFingerprint : Fingerprint(
 
 @Suppress("unused")
 val disableDoubleTapOnPostPatch =
-    bytecodePatch(
+    patch(
         description = "Disable double tap like on post",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

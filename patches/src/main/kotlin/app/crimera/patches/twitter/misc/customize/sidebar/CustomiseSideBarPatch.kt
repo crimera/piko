@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -26,7 +26,7 @@ private object customiseNavBarFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customiseSideBarPatch =
-    bytecodePatch(
+    patch(
         name = "Customize side bar items",
     ) {
         compatibleWith(COMPATIBILITY_X)

@@ -9,7 +9,6 @@ package app.crimera.patches.instagram.links.distractionFree
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.feedUfiStateField
 import app.crimera.patches.instagram.utils.hideFeedUfiStates
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -18,7 +17,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
@@ -28,7 +26,6 @@ import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
-context(_: BytecodePatchContext)
 internal fun hideFeedLikes() {
     hideFeedUfiStates(HIDE_LIKES, ", shouldShowLikeCountInUfi=")
 
@@ -63,7 +60,6 @@ internal fun hideFeedLikes() {
     ).method.returnHiddenLikeState()
 }
 
-context(_: BytecodePatchContext)
 private fun hideFeedLikeSummary() {
     val summary = Fingerprint(
         parameters = listOf("L"),
@@ -129,7 +125,6 @@ private fun hideFeedLikeSummary() {
     )
 }
 
-context(_: BytecodePatchContext)
 private fun hideLithoLikeButton() {
     val likeComponent = Fingerprint(
         parameters = listOf("L"),
@@ -166,7 +161,6 @@ private fun hideLithoLikeButton() {
     )
 }
 
-context(_: BytecodePatchContext)
 private fun hideComposeLikeButton() {
     val row = Fingerprint(
         returnType = "V",

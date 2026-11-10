@@ -12,12 +12,13 @@ import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLAS
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.utils.changeFirstString
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.AccessFlags
 
 @Suppress("unused")
 val profileInfoEntity =
-    bytecodePatch(
+    patch(
         description = "Used to decode profile info",
     ) {
         dependsOn(decoderEntity)

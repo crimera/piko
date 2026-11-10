@@ -9,11 +9,11 @@ package app.crimera.patches.twitter.timeline.tweetinfo
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val forceTranslate =
-    bytecodePatch(
+    patch(
         name = "Force enable translate",
         description = "Get translate option for all posts",
     ) {

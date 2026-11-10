@@ -13,11 +13,11 @@ import app.crimera.patches.instagram.misc.reels.disableReelsScrollingPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val focusLockPatch =
-    bytecodePatch(
+    patch(
         name = "Focus Lock",
         description = "Commitment mode for cutting down on Instagram. Pick what to block (Reels, Explore) and a " +
             "duration; once locked those protections are forced on and cannot be switched off. Reels shared with " +

@@ -6,8 +6,6 @@
 
 package app.crimera.patches.instagram.misc.download
 
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
@@ -18,8 +16,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.resourceLiteral
@@ -83,7 +82,6 @@ private fun saveIconFingerprint(stateType: String) = Fingerprint(
 )
 
 /** The download component is added by the caller, independently of the save helper's visibility. */
-context(patchContext: BytecodePatchContext)
 internal fun injectLithoDownloadButton(stateType: String) {
     val save = saveIconFingerprint(stateType)
     val matches = save.instructionMatches
@@ -116,7 +114,7 @@ internal fun injectLithoDownloadButton(stateType: String) {
     }
     val contextGetter = requireOne(
         "component context accessor",
-        patchContext.classDefBy(themeAccessor.parameterTypes.first().toString()).methods.filter {
+        classDefBy(themeAccessor.parameterTypes.first().toString()).methods.filter {
             it.parameterTypes.isEmpty() && it.returnType == CONTEXT_DESCRIPTOR
         },
     )
@@ -170,7 +168,7 @@ internal fun injectLithoDownloadButton(stateType: String) {
     }
     val categoryField = category.getReference<FieldReference>()!!
 
-    val owner = patchContext.mutableClassDefBy(save.originalClassDef)
+    val owner = mutableClassDefBy(save.originalClassDef)
     if (owner.methods.any { it.name == DOWNLOAD_ICON_METHOD }) throw PatchException("Download icon helper already exists")
     val helper = ImmutableMethod(
         owner.type,

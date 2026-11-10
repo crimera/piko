@@ -16,7 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -35,7 +35,7 @@ object MainFeedStoryTrayBinderGroupViewBinderFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideStoriesTrayPatch =
-    bytecodePatch(
+    patch(
         name = "Hide stories tray",
         description = "Hides stories tray from main feed.",
     ) {

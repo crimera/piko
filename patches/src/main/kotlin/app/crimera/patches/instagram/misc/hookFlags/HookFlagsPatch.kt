@@ -10,7 +10,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.HOOK_FLAGS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 internal object StringFlagCheckMethodFingerprint : Fingerprint(
     strings = listOf("__fbt_null__"),
@@ -32,7 +32,7 @@ internal object LongFlagCheckMethodFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hookFlagsPatch =
-    bytecodePatch(
+    patch(
         description = "Hooks flag check to override default flag value",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

@@ -12,11 +12,11 @@ import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxAc
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val viewLiveAnonymouslyPatch =
-    bytecodePatch(
+    patch(
         name = "View live anonymously",
         default = true,
     ) {

@@ -8,16 +8,15 @@ package app.crimera.patches.instagram.entity.userdata
 
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.entity.userfriendshipstatus.userFriendshipStatusEntity
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.AccessFlags
 
 val userDataEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of the user data",
     ) {
         dependsOn(decoderEntity, userFriendshipStatusEntity)

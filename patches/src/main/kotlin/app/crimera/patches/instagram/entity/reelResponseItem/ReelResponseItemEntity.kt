@@ -8,12 +8,12 @@ package app.crimera.patches.instagram.entity.reelResponseItem
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.patch
 
 val reelResponseItemEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of ReelResponseItem class",
     ) {
         dependsOn(decoderEntity)

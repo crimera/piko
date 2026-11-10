@@ -6,10 +6,8 @@
 
 package app.crimera.patches.instagram.links.privacy
 
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.util.getReference
@@ -24,7 +22,6 @@ private const val RESULT_METHOD = "pikoStorySeenSucceeded"
  * Adds a method to the story request, which returns if the completed request succeeded,
  * and makes [extensionMethod] call it.
  */
-context(context: BytecodePatchContext)
 internal fun addStorySeenResultHooks(
     requestType: String,
     extensionMethod: MutableMethod,
@@ -55,7 +52,7 @@ internal fun addStorySeenResultHooks(
             """.trimIndent(),
         )
     }
-    context.mutableClassDefBy(requestType).methods.add(resultMethod)
+    mutableClassDefBy(requestType).methods.add(resultMethod)
 
     extensionMethod.addInstructions(
         0,

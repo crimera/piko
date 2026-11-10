@@ -12,7 +12,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.checkCast
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 object InboxActionBarBuilderFingerprint : Fingerprint(
@@ -21,7 +21,7 @@ object InboxActionBarBuilderFingerprint : Fingerprint(
 )
 
 val inboxActionBarButtonPatch =
-    bytecodePatch(
+    patch(
         description = "This patch is adds support for adding buttons on Inbox action bar.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

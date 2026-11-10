@@ -15,7 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -30,15 +30,13 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableField
 
-context(context: BytecodePatchContext)
 private fun addResumeStartField(type: String): ImmutableField {
     val field = ImmutableField(type, "pikoResumeStartMs", "I",
         AccessFlags.PUBLIC.value or AccessFlags.SYNTHETIC.value, null, emptySet(), emptySet())
-    context.mutableClassDefBy(type).fields.add(field.toMutable())
+    mutableClassDefBy(type).fields.add(field.toMutable())
     return field
 }
 
-context(context: BytecodePatchContext)
 private fun patchShortReelPrepare() = Fingerprint(
     returnType = "V", parameters = listOf("L"),
     filters = listOf(
@@ -73,7 +71,6 @@ private fun patchShortReelPrepare() = Fingerprint(
     marker
 }
 
-context(context: BytecodePatchContext)
 internal fun markShortReelPrepare(
     controller: MutableMethod, explicit: MethodReference, stop: FieldReference, pausePredicate: MethodReference,
 ) {

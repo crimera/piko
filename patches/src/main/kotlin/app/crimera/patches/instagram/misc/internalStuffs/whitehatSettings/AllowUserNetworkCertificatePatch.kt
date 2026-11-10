@@ -13,7 +13,7 @@ import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 internal object AllowUserCertificateCheckFingerprint : Fingerprint(
     returnType = "Z",
@@ -22,7 +22,7 @@ internal object AllowUserCertificateCheckFingerprint : Fingerprint(
 
 @Suppress("unused")
 val allowUserNetworkCertificatePatch =
-    bytecodePatch(
+    patch(
         name = "Allow user network certificate",
         description = "Allows user network certificate for whitehat testing",
         default = false,

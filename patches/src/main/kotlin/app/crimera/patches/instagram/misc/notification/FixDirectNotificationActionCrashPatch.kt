@@ -13,7 +13,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -43,7 +43,7 @@ private object DirectNotificationBuilderFingerprint : Fingerprint(
 
 @Suppress("unused")
 val fixDirectNotificationActionCrashPatch =
-    bytecodePatch(
+    patch(
         description = "Skips the remind me action of a message notification instead of crashing when its link has no \"x\" parameter.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

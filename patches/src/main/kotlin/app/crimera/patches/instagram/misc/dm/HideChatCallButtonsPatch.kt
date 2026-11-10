@@ -14,7 +14,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -32,7 +32,7 @@ private object CallingButtonsReferenceFingerprint : Fingerprint(
     ),
 )
 
-val hideChatCallButtonsPatch = bytecodePatch {
+val hideChatCallButtonsPatch = patch {
     execute {
         val builderType = CallingButtonsReferenceFingerprint.instructionMatches.first().typeReference
         val regular = Fingerprint(

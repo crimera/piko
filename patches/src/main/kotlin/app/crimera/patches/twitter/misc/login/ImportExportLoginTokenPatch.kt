@@ -16,8 +16,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.util.ResourceGroup
@@ -40,7 +41,7 @@ private object OcfCtaStepDynamicLayoutInflateFingerprint : Fingerprint(
         ),
 )
 
-private val importExportLoginTokenResourcePatch = resourcePatch {
+private val importExportLoginTokenResourcePatch = patch {
     execute {
         document("res/layout/ocf_cta_step_dynamic.xml").use {
             val newElement =
@@ -67,7 +68,7 @@ private val importExportLoginTokenResourcePatch = resourcePatch {
 
 @Suppress("unused")
 val importExportLoginTokenPatch =
-    bytecodePatch(
+    patch(
         name = "Import/Export login token",
         description =
             "Adds an feature to export and import the token of accounts. " +

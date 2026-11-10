@@ -15,16 +15,17 @@ import app.crimera.patches.instagram.links.shareLinks.ShareLinkKind.STORY
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import jdk.javadoc.internal.tool.Main.execute
 
 internal val shareLinksPatch =
-    bytecodePatch {
+    patch {
         dependsOn(settingsPatch)
 
         execute {
@@ -48,7 +49,6 @@ internal enum class ShareLinkKind {
  * @param extensionMethodName Name of a `String -> String` method on the `Links` extension class.
  * @param skip Kinds of share link to leave untouched.
  */
-context(patchContext: BytecodePatchContext)
 internal fun hookShareLinks(
     extensionMethodName: String,
     skip: Set<ShareLinkKind> = emptySet(),

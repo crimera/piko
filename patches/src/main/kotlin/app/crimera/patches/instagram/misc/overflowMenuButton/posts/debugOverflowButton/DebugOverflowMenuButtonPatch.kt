@@ -9,11 +9,11 @@ package app.crimera.patches.instagram.misc.overflowMenuButton.posts.debugOverflo
 import app.crimera.patches.instagram.misc.overflowMenuButton.posts.addOverflowMenuButtonAttributes
 import app.crimera.patches.instagram.misc.overflowMenuButton.posts.hookOverflowMenuButton
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val debugOverflowMenuButtonPatch =
-    bytecodePatch(
+    patch(
         description = "Adds debug overflow menu button",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

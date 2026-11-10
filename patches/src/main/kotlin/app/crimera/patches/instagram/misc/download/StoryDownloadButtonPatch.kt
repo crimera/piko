@@ -13,9 +13,10 @@ import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.classDefByOrNull
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
@@ -39,10 +40,9 @@ private object StoryToolbarBinderFingerprint : Fingerprint(
     )
 )
 
-context(patchContext: BytecodePatchContext)
 internal fun storyViewerItemList(): MethodReference {
     val candidates = StoryToolbarBinderFingerprint.originalMethod.parameterTypes.mapNotNull { type ->
-        val methods = patchContext.classDefByOrNull(type.toString())?.virtualMethods ?: return@mapNotNull null
+        val methods = classDefByOrNull(type.toString())?.virtualMethods ?: return@mapNotNull null
         val indexedItem = methods.singleOrNull {
             it.parameterTypes == listOf(USER_SESSION_DESCRIPTOR, "I") && it.returnType == REEL_ITEM_DESCRIPTOR
         } ?: return@mapNotNull null
@@ -61,7 +61,7 @@ internal fun storyViewerItemList(): MethodReference {
     return requireOne("story viewer parameter with an ordered item list", candidates)
 }
 
-val storyDownloadButtonPatch = bytecodePatch {
+val storyDownloadButtonPatch = patch {
     compatibleWith(COMPATIBILITY_INSTAGRAM)
     dependsOn(sharedExtensionPatch, settingsPatch)
 
@@ -71,7 +71,6 @@ val storyDownloadButtonPatch = bytecodePatch {
     }
 }
 
-context(patchContext: BytecodePatchContext)
 private fun hookStoryToolbarBinder() {
     val holder = Fingerprint(
         name = "<init>",
@@ -93,7 +92,7 @@ private fun hookStoryToolbarBinder() {
         containerField?.definingClass != holder.originalClassDef.type || containerField.type != VIEW_DESCRIPTOR
     ) throw PatchException("Unexpected story buttons container field in ${holder.originalMethod}")
 
-    val mediaGetters = patchContext.classDefBy(REEL_ITEM_DESCRIPTOR).methods.filter {
+    val mediaGetters = classDefBy(REEL_ITEM_DESCRIPTOR).methods.filter {
         it.parameterTypes.isEmpty() && it.returnType == MEDIA_DESCRIPTOR && !AccessFlags.STATIC.isSet(it.accessFlags)
     }
     val mediaField = requireOne(

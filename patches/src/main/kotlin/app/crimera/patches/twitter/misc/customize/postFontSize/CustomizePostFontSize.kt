@@ -13,7 +13,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -24,7 +24,7 @@ private object CustomiseNavBarFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customizePostFontSize =
-    bytecodePatch(
+    patch(
         name = "Customise post font size",
     ) {
         compatibleWith(COMPATIBILITY_X)

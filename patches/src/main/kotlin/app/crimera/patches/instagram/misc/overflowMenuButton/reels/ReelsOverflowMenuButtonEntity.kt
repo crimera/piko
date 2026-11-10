@@ -9,13 +9,12 @@ package app.crimera.patches.instagram.misc.overflowMenuButton.reels
 import app.crimera.patches.instagram.misc.overflowMenuButton.posts.AddReelButtonExtensionFingerprint
 import app.crimera.patches.instagram.misc.overflowMenuButton.posts.FeedReplaceAudioDialogHelperFingerprint
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val reelsOverflowMenuButtonEntity =
-    bytecodePatch(
+    patch(
         description = "Entity class for reels overflow menu button",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

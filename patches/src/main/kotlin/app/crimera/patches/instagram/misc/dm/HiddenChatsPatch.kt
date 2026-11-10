@@ -21,9 +21,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.newInstance
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -150,17 +151,15 @@ private object MenuButtonActionFingerprint : Fingerprint(
 )
 
 // The badge object holds the count and the state of the unread chats; the state is the field that is not a number or text.
-context(context: BytecodePatchContext)
 private fun badgeStateType(badgeType: String): String =
-    context.classDefBy(badgeType)
+    classDefBy(badgeType)
         .fields
         .first { it.type != "I" && it.type != "Ljava/lang/String;" }
         .type
 
 // The state keeps several lists of chats; the counted one is the second list its constructor receives.
-context(context: BytecodePatchContext)
 private fun countedListOf(stateType: String): String {
-    val constructor = context.classDefBy(stateType).methods.first { it.name == "<init>" }
+    val constructor = classDefBy(stateType).methods.first { it.name == "<init>" }
     val implementation = constructor.implementation!!
     // Parameters sit in the last registers (longs take two), so the register of the list is counted from there.
     fun width(type: String) = if (type == "J" || type == "D") 2 else 1
@@ -175,7 +174,7 @@ private fun countedListOf(stateType: String): String {
 
 @Suppress("unused")
 val hiddenChatsPatch =
-    bytecodePatch(
+    patch(
         name = "Hidden chats",
         description = "Adds an option to the chat menu that moves the chat to a private inbox, opened by tapping the messages button several times.",
         default = true,
