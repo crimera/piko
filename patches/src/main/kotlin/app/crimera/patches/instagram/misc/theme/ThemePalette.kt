@@ -245,8 +245,12 @@ internal val amoledSurfaceBaselineMappings =
         }
         .mapValues { "@color/bds_black" }
 
-internal val materialYouNamedMappings =
-    materialYouBaseMappings +
+/** Theme attributes moved onto their own colors at patch time, see retargetThemeAttributes. */
+internal val materialYouRetargetedMappings = linkedMapOf<String, String>()
+
+internal val materialYouNamedMappings get() =
+    materialYouRetargetedMappings +
+        materialYouBaseMappings +
         materialYouAccentMappings +
         materialYouThemeMappings +
         materialYouSurfaceBaselineMappings

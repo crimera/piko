@@ -544,3 +544,51 @@ private fun Document.findColor(name: String): Element? {
 
     return null
 }
+
+/** Theme attributes whose colors Material You replaces, and the tone each one takes. */
+private val retargetedThemeAttributes =
+    mapOf(
+        "igds_color_secondary_button_panavision" to "piko_dynamic_secondary_container",
+        "igds_color_secondary_button_elevated_panavision" to "piko_dynamic_secondary_container",
+        "igds_color_secondary_button_pressed_panavision" to "piko_dynamic_secondary_container_pressed",
+        "igds_color_secondary_button_elevated_pressed_panavision" to "piko_dynamic_secondary_container_pressed",
+        "igds_gradient_spinner_seen" to "piko_dynamic_ring_seen",
+    )
+
+/**
+ * Gives each listed theme attribute its own color. The colors Instagram points these
+ * attributes at (fds_gray_95_deprecated, bds_grey_9...) are shared with many other surfaces, and
+ * bds_grey_9 already follows the background, so remapping them would either miss the buttons or
+ * hide them. Each style item is pointed at a new color that references the one it used, keeping
+ * Instagram's look, and the Material You overlay maps the new colors to a container tone.
+ * Must run before captureApi31Base().
+ */
+internal fun retargetThemeAttributes() {
+    materialYouRetargetedMappings.clear()
+    val created = linkedMapOf<String, String>()
+    listOf("res/values/styles.xml", "res/values-night/styles.xml").forEach { path ->
+        if (!resourceFile(path).exists()) return@forEach
+        document(path).use { document ->
+            val items = document.getElementsByTagName("item")
+            for (index in 0 until items.length) {
+                val item = items.item(index) as? Element ?: continue
+                val attribute = item.getAttribute("name")
+                val alias = retargetedThemeAttributes[attribute] ?: continue
+                val value = item.textContent.trim()
+                if (!value.startsWith("@color/")) continue
+                val name = "piko_attr_${attribute.removePrefix("igds_")}_${value.removePrefix("@color/")}"
+                created[name] = value
+                materialYouRetargetedMappings[name] = "@color/$alias"
+                item.textContent = "@color/$name"
+            }
+        }
+    }
+    if (created.isEmpty()) {
+        println("WARNING: secondary button theme attributes not found, buttons keep Instagram's grey")
+        return
+    }
+    writeColors("res/values", created)
+    document("res/values/public.xml").use { document ->
+        created.keys.forEach { document.ensurePublicResource("color", it) }
+    }
+}
