@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">Déverrouille les options développeurs en effectuant un appui long sur l\'icône d\'accueil</string>
     <string name="piko_directly_open_metaconfig">Ouvre directement les surcharges MetaConfig</string>
     <string name="piko_directly_open_metaconfig_desc">Ouvre directement les paramètres de remplacement de MetaConfig en appuyant longuement sur l\'icône d\'accueil</string>
-    <string name="piko_enable_emp_options">Activer les options employé</string>
-    <string name="piko_enable_emp_options_desc">Déverrouille toutes les options employé utilisées pour les tests</string>
-    <string name="piko_allow_user_network_certificate">Autoriser le certificat réseau utilisateur</string>
-    <string name="piko_allow_user_network_certificate_desc">Autorise les certificats réseau de l\'utilisateur pour les tests whitehat</string>
     <string name="piko_export_dev_overrides">Exporter les surcharges</string>
     <string name="piko_import_dev_overrides">Importer les surcharges</string>
     <string name="piko_import_id_mapping">Importer les fichiers de mappage</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">Divers</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Désactiver les analyses</string>
-    <string name="piko_delete_analytics_cache">Supprimer le cache des analyses</string>
-    <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs d\'Instagram/Facebook</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>
     <string name="piko_follow_back_indicator_desc">Ajoute un libellé indiquant qu\'un utilisateur vous suit en retour sur sa page de profil et affiche un aperçu détaillé du statut de votre relation lorsqu\'on clique dessus</string>
     <string name="piko_fbi_color_indicator">Activer l\'indicateur de statut d\'amitié coloré</string>
@@ -163,8 +156,6 @@
     <string name="piko_hidden_chats_mute_desc">Ne pas afficher les notifications des messages provenant des chats que vous avez masqués</string>
     <string name="piko_hidden_chats_taps">Appuis pour ouvrir les chats masqués</string>
     <string name="piko_hidden_chats_taps_desc">Appuyez sur le bouton des messages ce nombre de fois d\'affilée pour basculer entre votre boîte de réception et vos chats masqués</string>
-    <string name="piko_unlock_plus_benefits">Débloquer les avantages \"Plus\"</string>
-    <string name="piko_unlock_plus_benefits_desc">Débloquez les avantages de l\'abonnement “Plus” vérifiés localement. UTILISEZ-LE À VOS PROPRES RISQUES</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Messages privés</string>
     <string name="piko_disable_disappearing_messages_gesture">Désactiver le balayage pour les messages éphémères</string>
@@ -310,7 +301,6 @@
     <string name="piko_ok">OK</string>
     <string name="piko_reset">Réinitialiser</string>
     <string name="piko_cancel">Annuler</string>
-    <string name="piko_deleted">Supprimé</string>
     <string name="piko_debug">Débogage de Piko</string>
     <string name="piko_debug_desc">Ajoute une option de débogage sur certains composants pour les tests</string>
     <string name="piko_export_experiment_list">Exporter la liste des expériences</string>
@@ -485,7 +475,6 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">lien</string>
     <string name="piko_media_activity">activité</string>
-    <string name="piko_disable_telemetry">Désactiver la télémétrie</string>
     <string name="piko_patch_theme">Thème</string>
     <string name="piko_patch_settings">Ajouter des paramètres</string>
 </resources>

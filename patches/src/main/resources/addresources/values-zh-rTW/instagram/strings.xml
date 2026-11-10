@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">長按主畫面圖示來開啟開發者選項</string>
     <string name="piko_directly_open_metaconfig">直接開啟 MetaConfig 設定覆蓋</string>
     <string name="piko_directly_open_metaconfig_desc">長按主頁圖示可直接開啟 MetaConfig 覆寫設定</string>
-    <string name="piko_enable_emp_options">啟動員工選項</string>
-    <string name="piko_enable_emp_options_desc">解鎖所有用於測試的員工選項</string>
-    <string name="piko_allow_user_network_certificate">允許使用者網路憑證</string>
-    <string name="piko_allow_user_network_certificate_desc">允許使用者網路憑證進行白帽測試</string>
     <string name="piko_export_dev_overrides">匯出設定覆蓋</string>
     <string name="piko_import_dev_overrides">匯入設定覆蓋</string>
     <string name="piko_import_id_mapping">匯入映射文件</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">其他</string>
     <string name="piko_material_you_title">Material You 模式</string>
     <string name="piko_amoled_title">AMOLED 純黑模式</string>
-    <string name="piko_disable_analytics">停用資料分析</string>
-    <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
-    <string name="piko_disable_analytics_desc">阻擋傳送至 Instagram/Facebook 伺服器的分析資料</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
     <string name="piko_follow_back_indicator_desc">在個人檔案頁面新增「已追蹤你」狀態標籤，並在點擊時顯示詳細的好友關係狀態</string>
     <string name="piko_fbi_color_indicator">啟用彩色好友狀態指示器</string>
@@ -165,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">不顯示來自您已隱藏訊息的通知</string>
     <string name="piko_hidden_chats_taps">開啟隱藏訊息的點擊次數</string>
     <string name="piko_hidden_chats_taps_desc">連續點擊訊息按鈕達此次數，即可在收件匣與隱藏的訊息之間切換</string>
-    <string name="piko_unlock_plus_benefits">解鎖 Plus 專屬福利</string>
-    <string name="piko_unlock_plus_benefits_desc">解鎖在本機驗證的 Plus 專屬福利。使用時請自行承擔風險</string>
     <!-- DM Section -->
     <string name="piko_category_dm">私訊</string>
     <string name="piko_disable_disappearing_messages_gesture">停用連續檢視模式滑動手勢</string>
@@ -313,7 +304,6 @@
     <string name="piko_ok">確認</string>
     <string name="piko_reset">重設</string>
     <string name="piko_cancel">取消</string>
-    <string name="piko_deleted">已刪除</string>
     <string name="piko_debug">Piko 偵錯</string>
     <string name="piko_debug_desc">為部分元件新增偵錯選項以進行測試</string>
     <string name="piko_export_experiment_list">匯出實驗清單</string>
@@ -488,7 +478,6 @@
     <string name="piko_media_like">按讚</string>
     <string name="piko_media_link">連結</string>
     <string name="piko_media_activity">活動</string>
-    <string name="piko_disable_telemetry">停用遙測</string>
     <string name="piko_patch_theme">佈景主題</string>
     <string name="piko_patch_settings">新增設定</string>
 </resources>

@@ -10,10 +10,6 @@
     <string name="piko_enable_dev_options">启用开发者选项</string>
     <string name="piko_enable_dev_options_desc">长按主页图标解锁开发者选项</string>
     <string name="piko_directly_open_metaconfig">直接打开 MetaConfig 覆盖</string>
-    <string name="piko_enable_emp_options">启用员工选项</string>
-    <string name="piko_enable_emp_options_desc">解锁所有用于测试的员工选项</string>
-    <string name="piko_allow_user_network_certificate">允许用户网络证书</string>
-    <string name="piko_allow_user_network_certificate_desc">允许使用用户网络证书进行白帽测试</string>
     <string name="piko_export_dev_overrides">导出覆盖</string>
     <string name="piko_import_dev_overrides">导入覆盖</string>
     <string name="piko_import_id_mapping">导入映射文件</string>
@@ -88,9 +84,6 @@
     <string name="piko_category_misc">杂项</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">纯黑</string>
-    <string name="piko_disable_analytics">禁用数据分析</string>
-    <string name="piko_delete_analytics_cache">删除分析缓存</string>
-    <string name="piko_disable_analytics_desc">阻止向 Instagram / Facebook 服务器发送分析数据</string>
     <string name="piko_follow_back_indicator">启用友谊状态指示器</string>
     <string name="piko_follow_back_indicator_desc">在个人资料页面上添加一个关注您的状态标签，并在点击时显示详细的友谊状态明细</string>
     <string name="piko_fbi_color_indicator">启用彩色好友状态指示器</string>
@@ -114,8 +107,6 @@
     <string name="piko_copied">已复制</string>
     <string name="piko_more_profile_options">更多个人资料选项</string>
     <string name="piko_remove_empty_bottom_space">删除底部空白区域</string>
-    <string name="piko_unlock_plus_benefits">解锁 Plus</string>
-    <string name="piko_unlock_plus_benefits_desc">本地解锁Plus。使用风险自负</string>
     <!-- DM Section -->
     <string name="piko_category_dm">私信</string>
     <string name="piko_unlimited_replays">将短暂性媒体设为永久</string>
@@ -220,7 +211,6 @@
     <string name="piko_ok">确定</string>
     <string name="piko_reset">重置</string>
     <string name="piko_cancel">取消</string>
-    <string name="piko_deleted">删除</string>
     <string name="piko_debug">Piko debug</string>
     <string name="piko_debug_desc">在某些组件上添加了用于测试的调试选项</string>
     <string name="piko_export_experiment_list">导出实验功能列表</string>

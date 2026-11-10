@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">Ana sayfa simgesine basılı tutarak geliştirici seçeneklerini etkinleştirir</string>
     <string name="piko_directly_open_metaconfig">MetaConfig geçersiz kılma ayarlarını doğrudan açar</string>
     <string name="piko_directly_open_metaconfig_desc">Ana ekran simgesine uzun basıldığında MetaConfig\'in geçersiz kılma ayarları doğrudan açılır</string>
-    <string name="piko_enable_emp_options">Çalışan seçeneklerini etkinleştir</string>
-    <string name="piko_enable_emp_options_desc">Test için kullanılan tüm çalışan seçeneklerinin kilidini açar</string>
-    <string name="piko_allow_user_network_certificate">Kullanıcı ağ sertifikasına izin ver</string>
-    <string name="piko_allow_user_network_certificate_desc">Beyaz şapka testleri için kullanıcı ağ sertifikasına izin verir</string>
     <string name="piko_export_dev_overrides">Geçersiz kılma ayarlarını dışa aktar</string>
     <string name="piko_import_dev_overrides">Geçersiz kılma ayarlarını içe aktar</string>
     <string name="piko_import_id_mapping">Eşleme dosyalarını içe aktar</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">Çeşitli</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Analizleri devre dışı bırak</string>
-    <string name="piko_delete_analytics_cache">Analiz önbelleğini sil</string>
-    <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analitikleri engeller</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
     <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
     <string name="piko_fbi_color_indicator">Renkli arkadaşlık durumu göstergesini etkinleştir</string>
@@ -165,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">Gizlediğiniz sohbetlerden gelen mesajlar için bildirimleri gösterme</string>
     <string name="piko_hidden_chats_taps">Gizli sohbetleri açmak için dokun</string>
     <string name="piko_hidden_chats_taps_desc">Gelen kutusu ile gizli sohbetler arasında geçiş yapmak için mesajlar düğmesine arka arkaya bu kadar kez dokunun</string>
-    <string name="piko_unlock_plus_benefits">Plus abonelik avantajlarının kilidini aç</string>
-    <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Mesajlar</string>
     <string name="piko_disable_disappearing_messages_gesture">Kaybolan mesajlar için kaydırma hareketini devre dışı bırak</string>
@@ -313,7 +304,6 @@
     <string name="piko_ok">Tamam</string>
     <string name="piko_reset">Sıfırla</string>
     <string name="piko_cancel">İptal</string>
-    <string name="piko_deleted">Silindi</string>
     <string name="piko_debug">Piko hata ayıklama</string>
     <string name="piko_debug_desc">Test için bazı bileşenlere hata ayıklama seçeneği ekler</string>
     <string name="piko_export_experiment_list">Deneysel özellik listelerini dışa aktar</string>
@@ -488,7 +478,6 @@
     <string name="piko_media_like">beğeni</string>
     <string name="piko_media_link">bağlantı</string>
     <string name="piko_media_activity">aktivite</string>
-    <string name="piko_disable_telemetry">Telemetriyi devre dışı bırak</string>
     <string name="piko_patch_theme">Tema</string>
     <string name="piko_patch_settings">Ayar ekle</string>
 </resources>

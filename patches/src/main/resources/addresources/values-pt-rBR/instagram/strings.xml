@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">Ativa as opções de desenvolvedor ao pressionar longamente o ícone de home.</string>
     <string name="piko_directly_open_metaconfig">Abrir MetaConfig overrides diretamente</string>
     <string name="piko_directly_open_metaconfig_desc">Abre diretamente as configurações do MetaConfig ao pressionar e segurar o ícone inicial</string>
-    <string name="piko_enable_emp_options">Ativar opções para funcionários</string>
-    <string name="piko_enable_emp_options_desc">Desbloqueia todas as opções de funcionários utilizadas para testes.</string>
-    <string name="piko_allow_user_network_certificate">Permitir certificado de rede do usuário</string>
-    <string name="piko_allow_user_network_certificate_desc">Permite o uso de certificados de rede do usuário para testes de segurança.</string>
     <string name="piko_export_dev_overrides">Exportar Backup de comandos</string>
     <string name="piko_import_dev_overrides">Importar Backup de comandos</string>
     <string name="piko_import_id_mapping">Importar arquivo de mapeamento</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">Diversos</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Desativar análises</string>
-    <string name="piko_delete_analytics_cache">Apagar cache de análises</string>
-    <string name="piko_disable_analytics_desc">Bloqueie análises enviadas para os servidores do Instagram/Facebook.</string>
     <string name="piko_follow_back_indicator">Ativar indicador de status de amizade</string>
     <string name="piko_follow_back_indicator_desc">Adiciona uma etiqueta de \"segue você de volta\" na página do perfil e exibe um resumo detalhado do status de amizade ao clicar.</string>
     <string name="piko_fbi_color_indicator">Ativar indicador colorido do status de amizade</string>
@@ -128,6 +121,8 @@
     <string name="piko_friendship_status">Status de amizade</string>
     <string name="piko_follow_list_non_follower_badge">Mostrar quem não te segue na lista de pessoas que você segue</string>
     <string name="piko_follow_list_non_follower_badge_desc">Adiciona um selo na sua lista de Seguindo em contas que não te seguem de volta</string>
+    <string name="piko_resume_reels_after_scrolling">Retomar Reels após rolar a tela</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Continue a reprodução de um Reel de onde parou ao voltar para ele</string>
     <string name="piko_improve_image_viewing">Melhorar qualidade de imagens</string>
     <string name="piko_improve_image_viewing_desc">Obtém imagens de resolução máxima do servidor. Pode reduzir o desempenho, aumentar o tamanho dos dados do aplicativo ou fazer com que o aplicativo mude para um layout mais antigo</string>
     <string name="piko_copy_comment">Copiar comentário</string>
@@ -163,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">Não mostre notificações de mensagens de conversas que você ocultou</string>
     <string name="piko_hidden_chats_taps">Toque para abrir conversas ocultas</string>
     <string name="piko_hidden_chats_taps_desc">Toque no botão de mensagens essa quantidade de vezes seguidas para alternar entre sua caixa de entrada e suas conversas ocultas</string>
-    <string name="piko_unlock_plus_benefits">Desbloqueie os benefícios da assinatura do Instagram Plus</string>
-    <string name="piko_unlock_plus_benefits_desc">Desbloqueie os benefícios da assinatura do Instagram Plus sendo verificados localmente. USE POR SUA CONTA E RISCO.</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Direct</string>
     <string name="piko_disable_disappearing_messages_gesture">Desative o recurso de mensagens que desaparecem deslizando o dedo sobre as mensagens</string>
@@ -235,6 +228,7 @@
     <string name="piko_download_file_name_token_shortcode">Atalho</string>
     <string name="piko_download_file_name_token_upload_date">Data</string>
     <string name="piko_download_file_name_token_upload_time">Tempo</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Marcação de Tempo</string>
     <string name="piko_download_file_name_token_type">Tipo</string>
     <string name="piko_download_file_name_token_carousel_index">Carrossel</string>
     <string name="piko_download_file_name_token_variant_suffix">Variante</string>
@@ -310,7 +304,6 @@
     <string name="piko_ok">Ok</string>
     <string name="piko_reset">Redefinir</string>
     <string name="piko_cancel">Cancelar</string>
-    <string name="piko_deleted">Excluído</string>
     <string name="piko_debug">Debug do Piko</string>
     <string name="piko_debug_desc">Adiciona opção de depuração em alguns componentes para testes.</string>
     <string name="piko_export_experiment_list">Exportar lista de experimentos Piko</string>
@@ -485,7 +478,6 @@
     <string name="piko_media_like">curtir</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">atividade</string>
-    <string name="piko_disable_telemetry">Desativar telemetria</string>
     <string name="piko_patch_theme">Tema</string>
     <string name="piko_patch_settings">Adicionar configurações</string>
 </resources>

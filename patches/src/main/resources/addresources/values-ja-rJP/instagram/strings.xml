@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">[ホーム] タブを長押しすると、開発者向けのオプションが開きます</string>
     <string name="piko_directly_open_metaconfig">MetaConfig のオーバーライド画面を直接開く</string>
     <string name="piko_directly_open_metaconfig_desc">ホームアイコンを長押しすると、MetaConfigの上書き設定を直接開きます</string>
-    <string name="piko_enable_emp_options">社員向けオプションを有効化</string>
-    <string name="piko_enable_emp_options_desc">テスト用の設定をすべて有効にします</string>
-    <string name="piko_allow_user_network_certificate">ユーザーネットワーク証明書を許可</string>
-    <string name="piko_allow_user_network_certificate_desc">セキュリティテスト用にユーザーネットワーク証明書を許可します</string>
     <string name="piko_export_dev_overrides">オーバーライドをエクスポート</string>
     <string name="piko_import_dev_overrides">オーバーライドをインポート</string>
     <string name="piko_import_id_mapping">マッピングファイルをインポート</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">その他</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">分析データの送信を無効化</string>
-    <string name="piko_delete_analytics_cache">分析キャッシュを削除</string>
-    <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>
     <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、タップすると詳細なフォロー関係を表示します</string>
     <string name="piko_fbi_color_indicator">色付きの [フレンド状態の表示] を有効化</string>
@@ -165,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">非表示にしたチャットからのメッセージ通知を表示しません</string>
     <string name="piko_hidden_chats_taps">タップして非表示のチャットを開く</string>
     <string name="piko_hidden_chats_taps_desc">この連続メッセージボタンをタップすると、受信トレイと非表示のチャットを切り替えられます</string>
-    <string name="piko_unlock_plus_benefits">Plus特典を有効化</string>
-    <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_disable_disappearing_messages_gesture">消えるメッセージのスワイプ操作を無効化</string>
@@ -313,7 +304,6 @@
     <string name="piko_ok">OK</string>
     <string name="piko_reset">リセット</string>
     <string name="piko_cancel">キャンセル</string>
-    <string name="piko_deleted">削除しました</string>
     <string name="piko_debug">Pikoデバッグ</string>
     <string name="piko_debug_desc">一部のコンポーネントにテスト用のデバッグオプションを追加します</string>
     <string name="piko_export_experiment_list">実験リストをエクスポート</string>
@@ -488,7 +478,6 @@
     <string name="piko_media_like">いいね</string>
     <string name="piko_media_link">リンク</string>
     <string name="piko_media_activity">アクティビティ</string>
-    <string name="piko_disable_telemetry">テレメトリを無効化</string>
     <string name="piko_patch_theme">テーマ</string>
     <string name="piko_patch_settings">設定を追加</string>
 </resources>
