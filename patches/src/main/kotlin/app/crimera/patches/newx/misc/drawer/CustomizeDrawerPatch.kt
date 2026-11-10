@@ -190,19 +190,6 @@ private val NEWX_DRAWER_MENU_ITEM_WITH_AUXILIARY_CONTENT_PARAMETERS =
         "I",
     )
 
-// 12.25 moved footer rows to the shared title/icon/click renderer.
-private val NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS =
-    listOf(
-        "Ljava/lang/String;",
-        "L",
-        FUNCTION0_DESCRIPTOR,
-        "Landroidx/compose/ui/Modifier;",
-        "L",
-        COMPOSER_DESCRIPTOR,
-        "I",
-        "I",
-    )
-
 private object NewXDrawerContentClassFingerprint : Fingerprint(
     definingClass = DRAWER_SCOPE,
     returnType = "V",
@@ -231,13 +218,6 @@ private object NewXDrawerMenuItemWithAuxiliaryContentFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
     parameters = NEWX_DRAWER_MENU_ITEM_WITH_AUXILIARY_CONTENT_PARAMETERS,
-)
-
-// FOOTER ROWS: settings/help/feedback/media/imprint/debug pass their localized title.
-private object NewXDrawerSharedFooterItemFingerprint : Fingerprint(
-    classFingerprint = NewXDrawerContentClassFingerprint,
-    returnType = "V",
-    parameters = NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS,
 )
 
 /**
@@ -412,7 +392,7 @@ private data class DrawerRendererCall(
     val renderer: MethodReference,
 )
 
-private data class ResolvedDrawerFooterCalls(
+internal data class ResolvedDrawerFooterCalls(
     val dividerIndex: Int,
     val renderer: MethodReference,
     val calls: List<IndexedValue<Instruction3rc>>,
@@ -666,7 +646,7 @@ private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Bo
         parameters[3] == "I"
 }
 
-private fun MutableMethod.findDrawerFooterCalls(
+internal fun MutableMethod.findDrawerFooterCalls(
     renderer: MethodReference,
 ): ResolvedDrawerFooterCalls? {
     val methodInstructions = instructions.toList()
@@ -1432,39 +1412,29 @@ val customizeNewXDrawerPatch =
             val menuResourceIds = resolveDrawerTitleResourceIds(menuRenderer, menuCalls)
             menuMatch.method.injectDrawerItemGuard(hiddenItems)
 
-            // FOOTER ROWS: settings/help/feedback/media/imprint/debug render with a title.
-            val footerMatches =
-                NewXDrawerSharedFooterItemFingerprint.scopedMatchAllOrNull().orEmpty()
-                    .distinctBy { it.originalMethod.toString() }
-            if (footerMatches.size > 1) {
-                throw PatchException(
-                    "Expected one NewX drawer footer row renderer, found " +
-                        "${footerMatches.size}: ${footerMatches.joinToString { it.originalMethod.toString() }}",
-                )
-            }
-            val footerRendererMatch =
-                footerMatches.singleOrNull()?.also { it.method.injectDrawerItemGuard(hiddenItems) }
-                    ?: menuMatch
-            val footerRenderer =
-                ImmutableMethodReference(
-                    footerRendererMatch.originalMethod.definingClass,
-                    footerRendererMatch.originalMethod.name,
-                    footerRendererMatch.originalMethod.parameterTypes.map(CharSequence::toString),
-                    footerRendererMatch.originalMethod.returnType,
-                )
+            // The footer is the row after the native divider that receives the settings icon.
+            // Resolve that relationship before mutating; a standalone signature can reorder or
+            // accidentally select a sibling row without proving that it belongs to the footer.
             val settingsIconTypes =
-                footerRenderer.parameterTypes
+                menuRenderer.parameterTypes
                     .map(CharSequence::toString)
                     .filter { it.startsWith("Lcom/x/icons/") }
             if (settingsIconTypes.size != 1) {
                 throw PatchException(
                     "NewX drawer footer renderer has ${settingsIconTypes.size} icon parameters: " +
-                        footerRenderer,
+                        menuRenderer,
                 )
             }
             val settingsIconType = settingsIconTypes.single()
             val settingsIconField = resolveSettingsIconField(settingsIconType)
-            val footerTarget = resolveDrawerFooterTarget(footerRenderer, settingsIconField)
+            val footerTarget = resolveDrawerFooterTarget(menuRenderer, settingsIconField)
+            if (footerTarget.renderer.toSmaliDescriptor() != menuRenderer.toSmaliDescriptor()) {
+                requireExactlyOne(
+                    label = "NewX resolved drawer footer method",
+                    candidates = mutableClassDefBy(footerTarget.renderer.definingClass).methods
+                        .filter { it.toSmaliDescriptor() == footerTarget.renderer.toSmaliDescriptor() },
+                ).injectDrawerItemGuard(hiddenItems)
+            }
             // Footer rows can be nested in conditional helpers such as the Grok bot menu.
             // Discover every call to the resolved renderer, not only direct calls in the
             // lambda that owns the settings footer divider.

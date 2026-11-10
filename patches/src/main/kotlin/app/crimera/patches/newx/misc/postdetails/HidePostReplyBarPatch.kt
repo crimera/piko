@@ -1,6 +1,7 @@
 package app.crimera.patches.newx.misc.postdetails
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.InjectedSettingRead
 import app.crimera.patches.settings.SettingReadRegisterConstraint
@@ -430,13 +431,59 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
                     .map(Match::originalMethod),
             describe = { "$it" },
         )
+    val renderer = resolveReplyBarRendererCaller(shapeMatches.map(Match::originalMethod), instantiator) {
+        context.classDefBy(it)
+    }
     return requireExactlyOne(
         label = "NewX post-detail reply bar renderer",
-        candidates = shapeMatches.filter { match ->
-            match.method.callSiteIndices(instantiator).isNotEmpty()
-        },
+        candidates = shapeMatches.filter { it.originalMethod == renderer },
     )
 }
+
+internal fun resolveReplyBarRendererCaller(
+    candidates: List<Method>,
+    instantiator: Method,
+    classByType: (String) -> ClassDef,
+): Method = requireExactlyOne(
+    "NewX post-detail reply bar renderer",
+    candidates.filter { method ->
+        if (method.callSiteIndices(instantiator).isNotEmpty()) return@filter true
+        val instructions = method.implementation?.instructions?.toList().orEmpty()
+        instructions.indices.any { allocation ->
+            val instruction = instructions[allocation]
+            if (instruction.opcode != Opcode.NEW_INSTANCE) return@any false
+            val type = instruction.getReference<TypeReference>()?.type ?: return@any false
+            if (!type.startsWith(COMPOSER_MINIMAL_SCOPE)) return@any false
+            val definition = classByType(type)
+            if ("Lkotlin/jvm/functions/Function2;" !in definition.interfaces) return@any false
+            val invokes = definition.methods.filter { candidate ->
+                candidate.name == "invoke" && candidate.returnType == "Ljava/lang/Object;" &&
+                    candidate.parameterTypes.map(CharSequence::toString) ==
+                    listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
+                    candidate.callSiteIndices(instantiator).isNotEmpty()
+            }
+            if (invokes.size != 1) return@any false
+            val register = (instruction as OneRegisterInstruction).registerA
+            // An allocation alone is not a render edge: prove this exact callback reaches
+            // Compose's content wrapper. Restart lambdas and discarded objects do not qualify.
+            instructions.indices.any factory@{ index ->
+                val call = instructions[index]
+                val reference = call.getReference<MethodReference>() ?: return@factory false
+                if (!call.isStaticInvocation() ||
+                    !reference.definingClass.startsWith("Landroidx/compose/runtime/internal/") ||
+                    !reference.returnType.startsWith("Landroidx/compose/runtime/internal/") ||
+                    COMPOSER_DESCRIPTOR !in reference.parameterTypes.map(CharSequence::toString)
+                ) return@factory false
+                reference.parameterTypes.indices.any { parameter ->
+                    reference.parameterTypes[parameter].toString() == "Lkotlin/Function;" &&
+                        call.argumentRegister(reference, parameter)?.let { argument ->
+                            method.provesValueFromInstruction(allocation, register, index, argument)
+                        } == true
+                }
+            }
+        }
+    },
+)
 
 /**
  * The renderer is called through minimal-composer helpers before the post-detail sheet adds the
