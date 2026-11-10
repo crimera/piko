@@ -6,7 +6,8 @@
 
 package app.crimera.patches.twitter.utils
 
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.packageMetadata
+import app.morphe.patcher.patch.patch
 import kotlin.properties.Delegates
 
 // Based on https://github.com/MorpheApp/morphe-patches/blob/main/patches/src/main/kotlin/app/morphe/patches/reddit/misc/version/VersionCheckPatch.kt
@@ -34,7 +35,7 @@ var is_12_07_or_greater: Boolean by Delegates.notNull()
     private set
 
 val versionCheckPatch =
-    bytecodePatch {
+    patch {
         execute {
             val versionCode = packageMetadata.versionCode.toInt()
 

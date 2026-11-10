@@ -8,7 +8,8 @@
 package app.morphe.extension.instagram.patches.devFlags;
 
 import org.json.JSONObject;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.settings.StringSetting;
+import static app.morphe.extension.instagram.settings.RestartPolicy.REQUIRED;
 
 
 public class Flag {
@@ -34,7 +35,7 @@ public class Flag {
             // No override by default -- both bool and long flags use FlagState.DEFAULT
             // as the "no override" sentinel, so dev-options and override-backup restores
             // (which don't touch this store) remain free to take effect unopposed.
-            this.code = new StringSetting(codeKey, FlagState.DEFAULT.toString());
+            this.code = new StringSetting(codeKey, FlagState.DEFAULT.toString(), REQUIRED);
         } catch (Exception e) {
         }
     }

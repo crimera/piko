@@ -13,9 +13,9 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 private object CustomiseNotificationTabsFingerprint : Fingerprint(
@@ -29,7 +29,7 @@ private object CustomiseNotificationTabsFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customiseNotificationTabsPatch =
-    bytecodePatch(
+    patch(
         name = "Customize notification tabs",
     ) {
         compatibleWith(COMPATIBILITY_X)

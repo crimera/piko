@@ -7,34 +7,40 @@
 package app.crimera.patches.instagram.misc.clone
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.StringComparisonType
+import app.morphe.patcher.StringFilter
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.stringOption
+import app.morphe.patcher.string
 import app.morphe.util.asSequence
 import app.morphe.util.findElementByAttributeValue
-import app.morphe.util.findMutableMethodOf
 import app.morphe.util.forEachChildElement
-import app.morphe.util.getReference
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.matchAllMethodIndicesForEach
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableStringReference
 import org.w3c.dom.Element
+import org.w3c.dom.NodeList
 import kotlin.collections.forEach
 
 private const val ORIGINAL_PACKAGE_NAME = "com.instagram.android"
 
 @Suppress("unused")
 val clonePatch =
-    resourcePatch(
+    patch(
         name = "Clone",
         description =
             "Changes the package name and the app name. " +
-                "This allows you to install the patched app alongside the original Instagram app.\n" +
-                "Caution: Do not select the official Morphe's \"Change package name\" universal patch.",
+                "This allows you to install the patched app alongside the original Instagram app.",
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -46,7 +52,7 @@ val clonePatch =
             description = "A new package name for the patched app.",
             required = true,
         ) {
-            it!!.matches(Regex("^[a-z]\\w*(\\.[a-z]\\w*)+$"))
+            it?.matches(Regex("^[a-z]\\w*(\\.[a-z]\\w*)+$")) == true
         }
 
         val appName by stringOption(
@@ -55,17 +61,6 @@ val clonePatch =
             title = "App name",
             description = "A new app name (label). Entering \"Instagram\" will skip changing the app name.",
             required = true,
-        )
-
-        var bytecodePatchContext: BytecodePatchContext? = null
-
-        dependsOn(
-            // Expose the bytecode context to use it within a ResourcePatch
-            bytecodePatch {
-                execute {
-                    bytecodePatchContext = this
-                }
-            },
         )
 
         execute {
@@ -84,10 +79,10 @@ val clonePatch =
                 val permissions = manifest.getElementsByTagName("permission")
                 val usesPermissions = manifest.getElementsByTagName("uses-permission")
 
-                permissions.asSequence().map { it as Element }.forEach {
+                permissions.elementsForEach {
                     val oldName = it.getAttribute("android:name")
                     if (oldName.startsWith('.')) {
-                        return@forEach
+                        return@elementsForEach
                     }
                     val newName = oldName.replace(ORIGINAL_PACKAGE_NAME, newPackageName)
                     it.setAttribute("android:name", newName)
@@ -99,8 +94,8 @@ val clonePatch =
                 }
 
                 // Rename provider authorities
-                val providers = manifest.getElementsByTagName("provider").asSequence().map { it as Element }
-                for (provider in providers) {
+                val application = manifest.getElementsByTagName("application").item(0) as Element
+                application.getElementsByTagName("provider").elementsForEach { provider ->
                     val oldAuthority = provider.getAttribute("android:authorities")
                     val newAuthority =
                         if (oldAuthority.startsWith("$ORIGINAL_PACKAGE_NAME.")) {
@@ -130,57 +125,61 @@ val clonePatch =
             // Replace all instances of the string "com.instagram.android" in the bytecode to fix
             // the issue where video stories only play audio.
             // Also rename providers just in case.
-            context(bytecodePatchContext!!) {
-                transformStringReferences { string ->
-                    if (string == ORIGINAL_PACKAGE_NAME) {
-                        return@transformStringReferences newPackageName
-                    }
+            val targets = listOf(
+                string(ORIGINAL_PACKAGE_NAME),
+            ) + providerReplacements.map { string(it.first, StringComparisonType.CONTAINS) }
+            transformStringReferences(targets) { string ->
+                if (string == ORIGINAL_PACKAGE_NAME) {
+                    return@transformStringReferences newPackageName
+                }
 
-                    val matchedReplacement = providerReplacements.find { string.contains(it.first) }
+                val matchedReplacement = providerReplacements.find { string.contains(it.first) }
 
-                    if (matchedReplacement != null) {
-                        string.replaceFirst(matchedReplacement.first, matchedReplacement.second)
-                    } else {
-                        null
-                    }
+                if (matchedReplacement != null) {
+                    string.replaceFirst(matchedReplacement.first, matchedReplacement.second)
+                } else {
+                    null
                 }
             }
-            bytecodePatchContext = null
+        }
+
+        finalize {
+            // Change a package name in shortcuts.xml added by SettingsResourcePatch.
+            // Run in the finalize block in case SettingsPatch is run after this patch.
+            document("res/xml/shortcuts.xml").use {
+                it.getElementsByTagName("intent")
+                    .findElementByAttributeValue("android:targetPackage", ORIGINAL_PACKAGE_NAME)
+                    ?.setAttribute("android:targetPackage", packageName)
+            }
         }
     }
 
-// Taken from:
-// https://github.com/MorpheApp/morphe-patches/blob/a8a566774ec8b99c02ce60fdc81ff5258c3b0caf/patches/src/main/kotlin/app/morphe/patches/shared/misc/gms/GmsCoreSupportPatch.kt#L91
-// Slightly modified
-context(patchContext: BytecodePatchContext)
-private fun transformStringReferences(transform: (str: String) -> String?) {
-    patchContext.getAllClassesWithStrings().forEach { classDef ->
-        val mutableClass by lazy {
-            patchContext.mutableClassDefBy(classDef)
-        }
+/**
+ * Use this only for `getElementsByTagName` (A [NodeList] in which every Node is an instance of [Element]).
+ */
+private fun NodeList.elementsForEach(action: (Element) -> Unit) = asSequence().map { it as Element }.forEach(action)
 
-        classDef.methods.forEach { method ->
-            val mutableMethod by lazy {
-                mutableClass.findMutableMethodOf(method)
-            }
+private fun transformStringReferences(
+    targetStrings: List<StringFilter>,
+    transform: (str: String) -> String?,
+) {
+    targetStrings.forEach { stringFilter ->
+        Fingerprint(
+            filters = listOf(stringFilter)
+        ).matchAllMethodIndicesForEach(requireMatches = false) { index ->
+            val instruction = getInstruction(index)
+            val foundString = instruction.getReference<StringReference>()!!.string
+            // Apply transformation.
+            val transformedString = transform(foundString) ?: return@matchAllMethodIndicesForEach
 
-            method.implementation?.instructions?.forEachIndexed { index, instruction ->
-                val string =
-                    instruction.getReference<StringReference>()?.string
-                        ?: return@forEachIndexed
-
-                // Apply transformation.
-                val transformedString = transform(string) ?: return@forEachIndexed
-
-                mutableMethod.replaceInstruction(
-                    index,
-                    BuilderInstruction21c(
-                        Opcode.CONST_STRING,
-                        (instruction as OneRegisterInstruction).registerA,
-                        ImmutableStringReference(transformedString),
-                    ),
+            replaceInstruction(
+                index,
+                BuilderInstruction21c(
+                    Opcode.CONST_STRING,
+                    (instruction as OneRegisterInstruction).registerA,
+                    ImmutableStringReference(transformedString)
                 )
-            }
+            )
         }
     }
 }

@@ -9,34 +9,39 @@ package app.crimera.patches.instagram.misc.buildExpiredPopup
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.registersUsed
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 object SnoozeExpLockoutManagerFlagFingerprint : Fingerprint(
     strings = listOf("snooze_expiration_lockout_manager"),
     returnType = "Z",
 )
 
+private object BuildExpirationConstructorFingerprint : Fingerprint(
+    classFingerprint = SnoozeExpLockoutManagerFlagFingerprint,
+    name = "<init>",
+    filters = listOf(
+        // App age.
+        fieldAccess(opcode = Opcode.IPUT),
+    ),
+)
+
 val removeBuildExpiredPopupPatch =
-    bytecodePatch(
+    patch(
         description = "Removes the popup that appears after a while, when the app version ages.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val constructor = SnoozeExpLockoutManagerFlagFingerprint.classDef.methods
-                .singleOrNull { it.name == "<init>" }
-                ?: throw PatchException("Could not uniquely resolve build expiration constructor")
-            constructor.apply {
-                val appAgeStore = instructions.singleOrNull { it.opcode == Opcode.IPUT }
-                    ?: throw PatchException("Could not uniquely resolve build age field assignment")
-                val appAgeRegister = appAgeStore.registersUsed[0]
+            BuildExpirationConstructorFingerprint.let {
+                val appAgeStore = it.instructionMatches.first()
+                val appAgeRegister = appAgeStore.getInstruction<TwoRegisterInstruction>().registerA
 
-                addInstruction(
-                    appAgeStore.location.index,
+                it.method.addInstruction(
+                    appAgeStore.index,
                     "const/16 v$appAgeRegister, 0x1",
                 )
             }

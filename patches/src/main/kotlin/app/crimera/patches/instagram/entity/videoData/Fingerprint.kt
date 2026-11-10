@@ -8,7 +8,10 @@ package app.crimera.patches.instagram.entity.videoData
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
 import app.morphe.patcher.Fingerprint
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "$ENTITY_CLASS/VideoData;"
 
@@ -34,9 +37,12 @@ internal object VideoUrlExtensionFingerprint : Fingerprint(
 
 internal object VideoVersionMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
-    strings = listOf("fallback", "height", "type", "url", "url_expiration_timestamp_us", "width"),
-    custom = { method, _ ->
-        AccessFlags.STATIC.isSet(method.accessFlags) &&
-            method.parameterTypes.singleOrNull()?.endsWith("/VideoVersionIntf;") == true
+    parameters = listOf("/VideoVersionIntf;"),
+    strings = listOf("fallback", "url_expiration_timestamp_us"),
+    filters = listOf("height", "type", "url", "width").flatMap { key ->
+        listOf(
+            string(key),
+            methodCall(opcode = Opcode.INVOKE_INTERFACE, parameters = listOf(), location = MatchAfterImmediately()),
+        )
     },
 )

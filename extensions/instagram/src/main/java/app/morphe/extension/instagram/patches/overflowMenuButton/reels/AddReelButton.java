@@ -57,9 +57,6 @@ public class AddReelButton {
         String icon = UI.DRAWABLE_DOWNLOAD_ICON;
         ReelButton reelButton = new DownloadButton(context, mediaObject, currentMediaIndex);
         String DOWNLOAD_BUTTON_TEXT = str("piko_download_options");
-        if(Pref.enableDirectDownload()){
-            DOWNLOAD_BUTTON_TEXT = str("piko_category_download_media");
-        }
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,DOWNLOAD_BUTTON_TEXT);
 

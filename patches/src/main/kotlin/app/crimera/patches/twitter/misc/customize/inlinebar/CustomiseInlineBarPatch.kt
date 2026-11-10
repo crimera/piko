@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -29,7 +29,7 @@ private object CustomiseInlineBarFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customiseInlineBarPatch =
-    bytecodePatch(
+    patch(
         name = "Customize Inline action Bar items",
     ) {
         compatibleWith(COMPATIBILITY_X)

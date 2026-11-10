@@ -10,11 +10,11 @@ import app.crimera.patches.twitter.link.handlemodernsharesheetlinks.handleModern
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val legacyShareLinksPatch =
-    bytecodePatch(
+    patch(
         name = "Legacy share links",
         description = "Brings back username on post share links. Works post 11.4x.xx",
     ) {

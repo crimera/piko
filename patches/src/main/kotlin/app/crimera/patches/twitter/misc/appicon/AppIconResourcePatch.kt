@@ -6,14 +6,15 @@
 
 package app.crimera.patches.twitter.misc.appicon
 
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValue
 import app.morphe.util.findElementByAttributeValueOrThrow
 
 val appIconResourcePatch =
-    resourcePatch {
+    patch {
         execute {
             copyResources(
                 "twitter/settings",

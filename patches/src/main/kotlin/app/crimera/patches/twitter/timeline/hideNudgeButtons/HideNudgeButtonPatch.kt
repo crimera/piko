@@ -14,9 +14,9 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
+import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
 
 private object HideNudgeButtonPatchFingerprint : Fingerprint(
@@ -26,7 +26,7 @@ private object HideNudgeButtonPatchFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideNudgeButtonPatch =
-    bytecodePatch(
+    patch(
         name = "Hide nudge button",
         description = "Hides follow/subscribe/follow back buttons on posts",
     ) {

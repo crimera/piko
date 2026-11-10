@@ -16,7 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -31,7 +31,7 @@ private object CustomiseProfileTabsFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customiseProfileTabsPatch =
-    bytecodePatch(
+    patch(
         name = "Customize profile tabs",
     ) {
         compatibleWith(COMPATIBILITY_X)

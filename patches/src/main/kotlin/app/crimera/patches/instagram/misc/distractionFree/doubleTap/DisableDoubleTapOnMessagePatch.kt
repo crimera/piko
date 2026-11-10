@@ -9,7 +9,8 @@ package app.crimera.patches.instagram.misc.distractionFree.doubleTap
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.AccessFlags
 
 internal const val SIMPLE_ON_GESTURE_LISTENER_CLASS = "Landroid/view/GestureDetector\$SimpleOnGestureListener;"
@@ -18,9 +19,9 @@ internal object MessageGestureDetectorInitFingerprint : Fingerprint(
     returnType = "V",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR),
     parameters = listOf(SIMPLE_ON_GESTURE_LISTENER_CLASS, "Landroid/view/View;", "Landroid/widget/TextView;", "Z"),
-    custom = { _, classDef ->
-        classDef.superclass == SIMPLE_ON_GESTURE_LISTENER_CLASS
-    },
+    filters = listOf(
+        methodCall(definingClass = SIMPLE_ON_GESTURE_LISTENER_CLASS, name = "<init>"),
+    )
 )
 
 internal object MessageGestureOnDoubleTapFingerprint : Fingerprint(
@@ -30,7 +31,7 @@ internal object MessageGestureOnDoubleTapFingerprint : Fingerprint(
 
 @Suppress("unused")
 val disableDoubleTapOnMessagePatch =
-    bytecodePatch(
+    patch(
         description = "Disable double tap like on messages",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

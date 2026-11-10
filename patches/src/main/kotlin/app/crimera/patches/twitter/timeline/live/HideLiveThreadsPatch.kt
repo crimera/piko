@@ -15,7 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -29,7 +29,7 @@ private object HideLiveThreadsFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideLiveThreadsPatch =
-    bytecodePatch(
+    patch(
         name = "Hide Live Threads",
     ) {
         compatibleWith(COMPATIBILITY_X)

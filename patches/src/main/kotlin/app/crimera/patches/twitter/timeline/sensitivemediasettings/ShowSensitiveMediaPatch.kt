@@ -19,12 +19,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
-import app.morphe.util.findFreeRegister
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.findFreeRegister
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
@@ -134,7 +134,7 @@ private object ComposeSensitiveMediaInterstitialFingerprint : Fingerprint(
 
 @Suppress("unused")
 val sensitiveMediaPatch =
-    bytecodePatch(
+    patch(
         name = "Show sensitive media",
     ) {
         compatibleWith(COMPATIBILITY_X)

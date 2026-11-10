@@ -37,28 +37,6 @@ import static app.morphe.extension.shared.requests.Route.Method.GET;
 
 public class InstaUtils {
 
-    public static boolean deleteRecursive(File file) {
-        try {
-            if (file == null || !file.exists()) {
-                PikoUtils.toast(str("piko_fail_no_file"));
-                return false;
-            }
-
-            if (file.isDirectory()) {
-                File[] children = file.listFiles();
-                if (children != null) {
-                    for (File child : children) {
-                        deleteRecursive(child);
-                    }
-                }
-            }
-            return file.delete();
-        } catch (RuntimeException e) {
-            PikoUtils.logger(e);
-        }
-        return false;
-    }
-
     public static void decompileExperiments(boolean asJson) {
         String appVersionName = Utils.getAppVersionName();
         DeveloperOptions developerOptions = new DeveloperOptions();

@@ -14,7 +14,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -69,7 +70,7 @@ private fun MutableMethod.replaceSetter(
 }
 
 /** Internal rendering hooks included by the Native translator patch. */
-val googleAutoTranslatePatch = bytecodePatch {
+val googleAutoTranslatePatch = patch {
     compatibleWith(COMPATIBILITY_X)
     dependsOn(settingsPatch)
 

@@ -9,17 +9,14 @@ package app.crimera.patches.instagram.entity.instagramButton
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 val instagramButtonEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of Instagram button",
     ) {
         execute {
-            val buttonStyleClass =
-                IgdsButtonSetStyleFingerprint.method.parameters
-                    .first()
-                    .type
+            val buttonStyleClass = IgdsButtonSetStyleFingerprint.originalMethod.parameterTypes.first().toString()
 
             SetStyleExtensionFingerprint.changeFirstString(classNameToExtension(buttonStyleClass))
 

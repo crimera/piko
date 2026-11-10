@@ -10,11 +10,11 @@ import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
 import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val downloadVoiceMessagePatch =
-    bytecodePatch(
+    patch(
         name = "Download voice message",
         description = "Enables ability to download voice messages",
     ) {

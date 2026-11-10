@@ -8,6 +8,14 @@ package app.crimera.patches.instagram.entity.directItem
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.StringComparisonType
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal const val DIRECT_ITEM_CLASS = "$ENTITY_CLASS/DirectItem;"
 
@@ -43,7 +51,91 @@ internal object FieldVisualMediaExtension : Fingerprint(name = "fieldVisualMedia
 internal object FieldXmaExtension : Fingerprint(name = "fieldXma", definingClass = DIRECT_ITEM_CLASS)
 internal object FieldXmaLinkExtension : Fingerprint(name = "fieldXmaLink", definingClass = DIRECT_ITEM_CLASS)
 
-// returnType omitted: v426 returns Z, v433+ returns V. const-string → iput pattern is present in both.
 internal object DirectItemDispatchFingerprint : Fingerprint(
-    strings = listOf("item_id", "client_context", "user_id", "text", "timestamp", "hide_in_thread", "thread_key"),
+    returnType = "V",
+    parameters = listOf("L", "L", "Ljava/lang/String;"),
+    filters = listOf("item_id", "client_context", "timestamp", "user_id", "text", "hide_in_thread", "thread_key").map { string(it) },
+)
+
+internal object SentByViewerKeyFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = listOf("I"),
+    filters = listOf(string("is_sent_by_viewer")),
+)
+
+internal fun sentByViewerFieldFingerprint(definingClass: String, keyGetter: MethodReference) = Fingerprint(
+    definingClass = definingClass,
+    filters = listOf(
+        methodCall(reference = keyGetter),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        methodCall(smali = "Ljava/lang/String;->equals(Ljava/lang/Object;)Z", location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
+        opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
+        methodCall(parameters = emptyList(), returnType = "Z", opcode = Opcode.INVOKE_VIRTUAL, location = MatchAfterImmediately()),
+        opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
+        fieldAccess(type = "Z", opcode = Opcode.IPUT_BOOLEAN, location = MatchAfterImmediately()),
+    ),
+)
+
+private val FIELD_WRITE_OPCODES = listOf(
+    Opcode.IPUT,
+    Opcode.IPUT_WIDE,
+    Opcode.IPUT_OBJECT,
+    Opcode.IPUT_BOOLEAN,
+    Opcode.IPUT_BYTE,
+    Opcode.IPUT_CHAR,
+    Opcode.IPUT_SHORT,
+)
+
+/**
+ * Comparison of the parsed JSON key with [key], followed by [branch].
+ */
+private fun jsonKeyFilters(key: String, branch: Opcode) = listOf(
+    string(key),
+    methodCall(smali = "Ljava/lang/String;->equals(Ljava/lang/Object;)Z", location = MatchAfterImmediately()),
+    opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
+    opcode(branch, location = MatchAfterImmediately()),
+)
+
+/**
+ * Field assigned with the value of the JSON [key] by a parser of [definingClass].
+ */
+internal fun jsonKeyFieldFingerprint(key: String, definingClass: String) = Fingerprint(
+    definingClass = definingClass,
+    filters = jsonKeyFilters(key, Opcode.IF_EQZ) + fieldAccess(opcodes = FIELD_WRITE_OPCODES),
+)
+
+/**
+ * JSON [key] whose value assignment is shared with other keys, and reached by a branch.
+ */
+internal fun jsonSharedKeyFingerprint(key: String, definingClass: String) = Fingerprint(
+    definingClass = definingClass,
+    filters = jsonKeyFilters(key, Opcode.IF_NEZ),
+)
+
+/**
+ * MQTT items set their text after the item type.
+ */
+internal fun directItemSubTextFingerprint(itemClass: String, itemTypeClass: String) = Fingerprint(
+    definingClass = itemClass,
+    parameters = listOf(itemTypeClass, "Ljava/lang/Object;"),
+    filters = listOf(
+        methodCall(definingClass = "this", parameters = listOf(itemTypeClass), returnType = "V"),
+        fieldAccess(
+            definingClass = "this",
+            type = "Ljava/lang/Object;",
+            opcode = Opcode.IPUT_OBJECT,
+            location = MatchAfterImmediately(),
+        ),
+    ),
+)
+
+internal object DirectThreadKeyToStringFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/model/direct/DirectThreadKey;",
+    name = "toString",
+    filters = listOf(
+        // Thread id, the first value of the string.
+        fieldAccess(definingClass = "this", type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT),
+        string("DirectThreadKey{mThreadId=", StringComparisonType.STARTS_WITH),
+    ),
 )

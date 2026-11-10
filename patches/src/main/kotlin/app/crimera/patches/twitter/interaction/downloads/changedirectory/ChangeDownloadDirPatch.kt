@@ -15,7 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -32,7 +32,7 @@ internal object DownloadPathFingerprint : Fingerprint(
 
 @Suppress("unused")
 val changeDownloadDirPatch =
-    bytecodePatch(
+    patch(
         name = "Custom download folder",
         description = "Change the download directory for video downloads",
         default = true,

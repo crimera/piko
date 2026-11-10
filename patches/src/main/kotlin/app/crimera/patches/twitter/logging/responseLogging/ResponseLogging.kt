@@ -12,21 +12,19 @@ import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 internal const val JACKSON_CLASS = "/fasterxml/jackson/core/"
 
 internal object InputStreamFingerprint : Fingerprint(
     definingClass = JACKSON_CLASS,
-    parameters = listOf("Ljava/io/InputStream"),
-    custom = { methodDef, _ ->
-        methodDef.returnType.contains(JACKSON_CLASS)
-    },
+    returnType = JACKSON_CLASS,
+    parameters = listOf("Ljava/io/InputStream")
 )
 
 @Suppress("unused")
 val responseLoggingPatch =
-    bytecodePatch(
+    patch(
         name = "Log server response",
         description = "Log json responses received from server",
     ) {

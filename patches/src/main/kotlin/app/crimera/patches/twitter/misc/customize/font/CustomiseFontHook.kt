@@ -12,13 +12,13 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
 private object CustomFontHookFingerprint : Fingerprint(
-    definingClass = "emoji2/text",
+    definingClass = "Landroidx/emoji2/text",
     filters =
         listOf(
             string("end should be < than charSequence length"),
@@ -27,7 +27,7 @@ private object CustomFontHookFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customFontHook =
-    bytecodePatch(
+    patch(
         description = "Hook to customise font",
     ) {
         compatibleWith(COMPATIBILITY_X)

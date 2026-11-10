@@ -11,7 +11,6 @@ import app.crimera.utils.instructionToString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.string
@@ -27,7 +26,6 @@ internal object ShareMenuButtonInitHook : Fingerprint(
         ),
 )
 
-context(patchContext: BytecodePatchContext)
 fun setButtonText(
     name: String,
     stringId: String,
@@ -66,7 +64,6 @@ fun setButtonText(
     }
 }
 
-context(patchContext: BytecodePatchContext)
 fun setButtonIcon(
     name: String,
     iconStr: String,

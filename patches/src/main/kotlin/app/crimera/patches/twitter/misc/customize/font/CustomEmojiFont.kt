@@ -9,11 +9,11 @@ package app.crimera.patches.twitter.misc.customize.font
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val customEmojiFont =
-    bytecodePatch(
+    patch(
         name = "Custom emoji font",
         description = "Customise emoji font style",
     ) {

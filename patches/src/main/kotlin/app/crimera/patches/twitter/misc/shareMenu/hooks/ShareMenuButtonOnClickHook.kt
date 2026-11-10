@@ -13,10 +13,10 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.NATIVE_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
+import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -24,7 +24,7 @@ internal const val EXTENSION_CLASS_NAME = "${NATIVE_DESCRIPTOR}/ButtonPressHandl
 
 @Suppress("unused")
 val shareMenuButtonOnClickHook =
-    bytecodePatch(
+    patch(
         description = "Hook required to configure share menu onclick action",
     ) {
         compatibleWith(COMPATIBILITY_X)

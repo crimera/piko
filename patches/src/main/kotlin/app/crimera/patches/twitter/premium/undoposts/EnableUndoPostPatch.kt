@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.OpcodesFilter
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 
 private object UndoPost1Fingerprint : Fingerprint(
@@ -50,7 +50,7 @@ private object undoPost3Fingerprint : Fingerprint(
 
 @Suppress("unused")
 val enableUndoPostPatch =
-    bytecodePatch(
+    patch(
         name = "Enable Undo Posts",
         description = "Enables ability to undo posts before posting",
     ) {

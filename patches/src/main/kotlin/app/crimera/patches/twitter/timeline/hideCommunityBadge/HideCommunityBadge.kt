@@ -14,7 +14,7 @@ import app.crimera.utils.extractDescriptors
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
@@ -29,7 +29,7 @@ private object CommModelFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideCommunityBadge =
-    bytecodePatch(
+    patch(
         name = "Hide community badges",
     ) {
         compatibleWith(COMPATIBILITY_X)

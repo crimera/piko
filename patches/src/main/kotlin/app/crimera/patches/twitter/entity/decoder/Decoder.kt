@@ -7,7 +7,7 @@
 package app.crimera.patches.twitter.entity.decoder
 
 import app.crimera.patches.twitter.entity.twitterUser.TwitterUserToStringFingerprint
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import kotlin.properties.Delegates
 
 var TIMELINE_ITEM_CLASS_NAME: String by Delegates.notNull()
@@ -20,7 +20,7 @@ var TWITTER_USER_CLASS_NAME: String by Delegates.notNull()
     private set
 
 val decoderEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used hold class and field names that are commonly used",
     ) {
         execute {

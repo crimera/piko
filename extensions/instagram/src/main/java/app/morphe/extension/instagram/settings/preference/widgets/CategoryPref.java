@@ -59,9 +59,9 @@ public class CategoryPref extends PreferenceCategory {
     private void applyCategoryStyle(TextView title) {
         int topPadding = firstCategory ? 20 : 30;
         title.setPadding(
-                InstagramPreferenceStyle.dp(getContext(), 17),
+                InstagramPreferenceStyle.dp(getContext(), 15),
                 InstagramPreferenceStyle.dp(getContext(), topPadding),
-                InstagramPreferenceStyle.dp(getContext(), 24),
+                InstagramPreferenceStyle.dp(getContext(), 15),
                 InstagramPreferenceStyle.dp(getContext(), 10)
         );
         title.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
