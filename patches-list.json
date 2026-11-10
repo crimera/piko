@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.11.0",
+  "version": "3.11.1-dev.1",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -33,35 +33,6 @@
       "name": "Add settings",
       "description": "Adds settings to control preferences are patching",
       "default": true,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Allow user network certificate",
-      "description": "Allows user network certificate for whitehat testing",
-      "default": false,
       "category": null,
       "compatiblePackages": [
         {
@@ -223,66 +194,6 @@
         }
       ],
       "options": []
-    },
-    {
-      "name": "Change version code",
-      "description": "Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version.",
-      "default": true,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.twitter.android",
-          "name": "Twitter",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#000000",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "12.19.1-release.0",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        },
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": [
-        {
-          "key": "versionCode",
-          "title": "Version code",
-          "description": "The version code to use. Using the highest value turns off app store updates and allows downgrading an existing app install to an older app version.",
-          "required": true,
-          "type": "kotlin.Int",
-          "default": 2147483647,
-          "values": {
-            "Lowest": 1,
-            "Highest": 2147483647
-          }
-        }
-      ]
     },
     {
       "name": "Clear tracking params",
@@ -1020,6 +931,53 @@
       "options": []
     },
     {
+      "name": "Disable Play Store updates",
+      "description": "Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        },
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Disable Reels scrolling",
       "description": "Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds.",
       "default": true,
@@ -1051,35 +1009,6 @@
     {
       "name": "Disable ads",
       "description": null,
-      "default": true,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable analytics",
-      "description": "Block analytics that are sent to Instagram/Facebook servers.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -1424,35 +1353,6 @@
     {
       "name": "Disable swipe to create",
       "description": "Prevents opening the creation screen by swiping right on the home tab.",
-      "default": true,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable telemetry",
-      "description": "Disables analytics upload components and Falco event logging.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -3943,67 +3843,9 @@
       ]
     },
     {
-      "name": "Unlock Plus benefits",
-      "description": "Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK",
-      "default": false,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "Unlock developer options",
       "description": "Unlocks developer option by long pressing home icon",
       "default": true,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Unlock employee options",
-      "description": "Unlocks all options using by employee for debugging",
-      "default": false,
       "category": null,
       "compatiblePackages": [
         {
