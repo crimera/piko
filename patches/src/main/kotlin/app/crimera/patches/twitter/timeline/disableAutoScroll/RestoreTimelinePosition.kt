@@ -15,8 +15,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -52,7 +53,6 @@ private data class TimelineFields(
     val offset: FieldReference,
 )
 
-context(context: BytecodePatchContext)
 internal fun preserveTimelinePosition(): Pair<String, Int> {
     val restore = HomeTimelineRestoreFingerprint
     val home = restore.classDef
@@ -75,7 +75,7 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
     val captureReference = save.instructions.mapNotNull { it.getReference<MethodReference>() }
         .singleOrNull { it.parameterTypes.isEmpty() && it.returnType == "Ljava/util/List;" }
         ?: throw PatchException("Could not uniquely resolve native position capture")
-    val capture = context.mutableClassDefBy(captureReference.definingClass).methods.single {
+    val capture = mutableClassDefBy(captureReference.definingClass).methods.single {
         it.toString() == captureReference.toString()
     }
     val captureCode = capture.instructions.toList()
@@ -87,24 +87,24 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
     val (view, list, recycler) = viewFields
     val firstPosition = captureCode.firstOrNull { it.opcode == Opcode.INVOKE_VIRTUAL }
         ?.getReference<MethodReference>() ?: throw PatchException("Missing native position model")
-    val positionConstructor = context.classDefBy(firstPosition.returnType).methods.singleOrNull {
+    val positionConstructor = classDefBy(firstPosition.returnType).methods.singleOrNull {
         it.name == "<init>" && it.parameterTypes == listOf("I", "I", "J") && AccessFlags.PUBLIC.isSet(it.accessFlags)
     } ?: throw PatchException("Unexpected native position constructor")
     val currentPosition = captureCode.mapNotNull { it.getReference<MethodReference>() }
         .singleOrNull { it.definingClass == list.type && it.parameterTypes.isEmpty() }
         ?: throw PatchException("Could not resolve pending timeline position")
-    val positionReader = context.classDefBy(list.type).methods.single { it.toString() == currentPosition.toString() }
+    val positionReader = classDefBy(list.type).methods.single { it.toString() == currentPosition.toString() }
     val pending = positionReader.getInstruction(0).getReference<FieldReference>()
     if (positionReader.getInstruction(0).opcode != Opcode.IGET_OBJECT || pending?.type != currentPosition.returnType) {
         throw PatchException("Unexpected pending timeline position")
     }
 
-    val recyclerClass = context.classDefBy(recycler.type)
+    val recyclerClass = classDefBy(recycler.type)
     val holderReader = recyclerClass.methods.singleOrNull {
         AccessFlags.STATIC.isSet(it.accessFlags) && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
             it.parameterTypes == listOf("Landroid/view/View;") && it.returnType.startsWith(recycler.type.dropLast(1) + "$")
     } ?: throw PatchException("Could not uniquely resolve the visible ViewHolder")
-    val holderClass = context.classDefBy(holderReader.returnType)
+    val holderClass = classDefBy(holderReader.returnType)
     val itemId = holderClass.methods.singleOrNull {
         it.name == "getItemId" && it.parameterTypes.isEmpty() && it.returnType == "J" && AccessFlags.PUBLIC.isSet(it.accessFlags)
     } ?: throw PatchException("Missing visible item ID accessor")
@@ -228,7 +228,6 @@ internal fun preserveTimelinePosition(): Pair<String, Int> {
     return scope to forYouType
 }
 
-context(context: BytecodePatchContext)
 private fun preserveTimelineIdentity(
     homeType: String, forYouType: Int, scope: String, save: MutableMethod, restore: MutableMethod,
     fields: TimelineFields,
@@ -238,7 +237,7 @@ private fun preserveTimelineIdentity(
     val constructor = references.singleOrNull {
         it.name == "<init>" && it.parameterTypes == listOf("Ljava/lang/String;", "Ljava/lang/String;", "J", "J", "I")
     } ?: throw PatchException("Could not resolve native timeline metadata")
-    val constructorMethod = context.classDefBy(constructor.definingClass).methods.single { it.toString() == constructor.toString() }
+    val constructorMethod = classDefBy(constructor.definingClass).methods.single { it.toString() == constructor.toString() }
     val receiver = constructorMethod.implementation!!.registerCount - 8
     fun metadataField(parameter: Int, opcode: Opcode): FieldReference {
         val listOf = listOf(receiver + parameter, receiver)
@@ -274,7 +273,7 @@ private fun preserveTimelineIdentity(
         } == true
     }?.index ?: throw PatchException("Could not uniquely resolve native position restoration")
     val nativeRestore = restore.instructions[restoreCallIndex].getReference<MethodReference>()!!
-    val nativeCode = context.classDefBy(nativeRestore.definingClass).methods.single { it.toString() == nativeRestore.toString() }.instructions
+    val nativeCode = classDefBy(nativeRestore.definingClass).methods.single { it.toString() == nativeRestore.toString() }.instructions
     val nativeMethods = nativeCode.mapNotNull { it.getReference<MethodReference>() }
     val lookup = nativeMethods.singleOrNull { it.parameterTypes == listOf("J") && it.returnType == "I" }
         ?: throw PatchException("Could not resolve row position lookup")
@@ -302,18 +301,18 @@ private fun preserveTimelineIdentity(
         "lookup" to lookup, "scroll" to scroll,
     )
     bindingFields.values.forEach { ref ->
-        val definition = context.classDefBy(ref.definingClass).fields.single { it.toString() == ref.toString() }
+        val definition = classDefBy(ref.definingClass).fields.single { it.toString() == ref.toString() }
         if (!AccessFlags.PUBLIC.isSet(definition.accessFlags)) throw PatchException("Timeline identity field is not public: $ref")
     }
     bindingMethods.values.forEach { ref ->
-        val definition = context.classDefBy(ref.definingClass).methods.single { it.toString() == ref.toString() }
+        val definition = classDefBy(ref.definingClass).methods.single { it.toString() == ref.toString() }
         if (!AccessFlags.PUBLIC.isSet(definition.accessFlags)) throw PatchException("Timeline identity method is not public: $ref")
     }
     val bindings = mapOf("forYouType" to forYouType.toString()) +
         bindingFields.mapValues { it.value.toString() } + bindingMethods.mapValues { it.value.toString() }
     bindTimelineAccess(bindings)
     val extension = "$PATCHES_DESCRIPTOR/TimelinePosition;"
-    val home = context.mutableClassDefBy(homeType)
+    val home = mutableClassDefBy(homeType)
     fun helper(name: String, parameters: List<String>, result: String, registers: Int, body: String) {
         if (home.methods.any { it.name == name }) throw PatchException("Timeline identity helper already exists")
         home.methods.add(ImmutableMethod(homeType, name, parameters.map { ImmutableMethodParameter(it, null, null) }, result,
@@ -382,20 +381,19 @@ private fun preserveTimelineIdentity(
         return-void
     """.trimIndent(), ExternalLabel("save", save.instructions.first()))
 
-    val scrollListener = context.classDefBy(fields.list.type).fields.mapNotNull {
-        if (!it.type.startsWith(fields.list.type.dropLast(1) + "$")) null else context.classDefBy(it.type)
+    val scrollListener = classDefBy(fields.list.type).fields.mapNotNull {
+        if (!it.type.startsWith(fields.list.type.dropLast(1) + "$")) null else classDefBy(it.type)
     }.flatMap { it.methods }.singleOrNull {
         it.name == "onScrollStateChanged" && it.parameterTypes == listOf(fields.recycler.type, "I") && it.returnType == "V"
     } ?: throw PatchException("Could not resolve the timeline scroll-state listener")
-    context.mutableClassDefBy(scrollListener.definingClass).methods.single { it.toString() == scrollListener.toString() }
+    mutableClassDefBy(scrollListener.definingClass).methods.single { it.toString() == scrollListener.toString() }
         .addInstructions(0, "invoke-static/range {p1 .. p2}, $extension->onScrollStateChanged(Landroid/view/View;I)V")
 }
 
-context(context: BytecodePatchContext)
 private fun bindTimelineAccess(bindings: Map<String, String>) {
     val bindingClass = "$PATCHES_DESCRIPTOR/TimelinePosition\$Binding;"
     val prefix = "piko_timeline_"
-    val constructor = context.mutableClassDefBy(bindingClass).methods.singleOrNull { it.name == "<init>" }
+    val constructor = mutableClassDefBy(bindingClass).methods.singleOrNull { it.name == "<init>" }
         ?: throw PatchException("Could not uniquely resolve timeline access initialization")
     val placeholders = constructor.instructions.mapNotNull { it.getReference<StringReference>()?.string }
         .filter { it.startsWith(prefix) }

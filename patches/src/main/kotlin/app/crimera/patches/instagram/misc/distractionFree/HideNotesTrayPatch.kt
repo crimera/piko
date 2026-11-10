@@ -14,7 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -33,7 +33,7 @@ object NotesTrayBuilderConstructorFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideNotesTrayPatch =
-    bytecodePatch(
+    patch(
         name = "Hide notes tray",
         description = "Hides notes tray in DM section",
     ) {

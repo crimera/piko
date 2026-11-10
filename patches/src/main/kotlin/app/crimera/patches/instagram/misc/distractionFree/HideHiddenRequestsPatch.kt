@@ -17,7 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import com.android.tools.smali.dexlib2.Opcode
@@ -35,7 +35,7 @@ private object HiddenRequestsRowFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideHiddenRequestsPatch =
-    bytecodePatch(
+    patch(
         name = "Hide hidden requests",
         description = "Hides the hidden requests (spam) button in the message requests page",
     ) {

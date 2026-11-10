@@ -11,7 +11,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
@@ -21,9 +20,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.findFreeRegister
@@ -111,7 +109,6 @@ private object InitialTabPositionFingerprint : Fingerprint(
     ),
 )
 
-context(patchContext: BytecodePatchContext)
 private fun installInitialTabPosition() {
     InitialTabPositionFingerprint.let {
         // FEED -> FEED skips normal tab changes, so a reordered pager must be positioned during initialization.
@@ -122,7 +119,6 @@ private fun installInitialTabPosition() {
 /**
  * Fragment name field of the navigation enum, which the constructor stores from the fragment literal parameter.
  */
-context(patchContext: BytecodePatchContext)
 private fun navigationFragmentField(enumMatch: Match): FieldReference {
     val literalRegister = enumMatch.instructionMatches[1].getInstruction<OneRegisterInstruction>().registerA
     val constructorCall = enumMatch.instructionMatches[2]
@@ -149,7 +145,6 @@ private fun requireLocalRegisters(method: MutableMethod, registers: List<Int>) {
     }
 }
 
-context(patchContext: BytecodePatchContext)
 private fun installFragmentNameBridge(fragmentField: FieldReference) {
     Fingerprint(
         definingClass = EXTENSION,
@@ -236,7 +231,7 @@ private fun installStartup(
 
 @Suppress("unused")
 val navigationBarPatch =
-    bytecodePatch(
+    patch(
         name = "Customize navigation bar",
         description = "Choose which tabs appear in the bottom navigation bar and reorder them",
     ) {

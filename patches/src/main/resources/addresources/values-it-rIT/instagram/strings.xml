@@ -10,10 +10,6 @@
     <string name="piko_enable_dev_options">Attiva Opzioni sviluppatore</string>
     <string name="piko_enable_dev_options_desc">Sblocca le opzioni sviluppatore premendo a lungo l\'icona Home</string>
     <string name="piko_directly_open_metaconfig">Apre direttamente le sovrascritture delle MetaConfig</string>
-    <string name="piko_enable_emp_options">Abilita opzioni dipendenti</string>
-    <string name="piko_enable_emp_options_desc">Sblocca tutte le opzioni per dipendenti utilizzate per i test</string>
-    <string name="piko_allow_user_network_certificate">Consenti certificato di rete utente</string>
-    <string name="piko_allow_user_network_certificate_desc">Consenti certificato di rete utente per i test whitehat</string>
     <string name="piko_export_dev_overrides">Esporta sovrascritture</string>
     <string name="piko_import_dev_overrides">Importa sovrascritture</string>
     <string name="piko_import_id_mapping">Importa file di mappatura</string>
@@ -84,9 +80,6 @@
     <string name="piko_category_misc">Varie</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Disabilita analytics</string>
-    <string name="piko_delete_analytics_cache">Elimina la cache analytics</string>
-    <string name="piko_disable_analytics_desc">Blocca gli analytics che vengono inviati ai server Instagram/Facebook</string>
     <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>
     <string name="piko_follow_back_indicator_desc">Aggiunge un indicatore di follow a vicenda nella pagina di profilo e mostra uno stato dettagliato di stato di amicizia al click</string>
     <string name="piko_fbi_color_indicator">Abilita indicatore di stato dell\'amicizia colorato</string>
@@ -114,8 +107,6 @@
     <string name="piko_inbox_lock_unlock">Sblocca</string>
     <string name="piko_inbox_lock_prompt">Sblocca i tuoi messaggi</string>
     <string name="piko_inbox_lock_no_lock">Imposta un blocco schermo sul tuo dispositivo per usare il blocco Posta in arrivo</string>
-    <string name="piko_unlock_plus_benefits">Sblocca i vantaggi Plus</string>
-    <string name="piko_unlock_plus_benefits_desc">Sblocca i vantaggi dell\'abbonamento \'Plus\' che vengono controllati in locale. USA A TUO RISCHIO</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Rendi permanenti i contenuti temporanei</string>
@@ -231,7 +222,6 @@
     <string name="piko_ok">OK</string>
     <string name="piko_reset">Reset</string>
     <string name="piko_cancel">Annulla</string>
-    <string name="piko_deleted">Eliminato</string>
     <string name="piko_debug">Debug Piko</string>
     <string name="piko_debug_desc">Aggiunge l\'opzione di debug per fare i test su alcuni componenti</string>
     <string name="piko_export_experiment_list">Esporta elenco sperimentale</string>

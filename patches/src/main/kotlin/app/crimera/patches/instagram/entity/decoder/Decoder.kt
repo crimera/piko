@@ -6,8 +6,7 @@
 
 package app.crimera.patches.instagram.entity.decoder
 
-import app.crimera.patches.instagram.utils.fieldReference
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import kotlin.properties.Delegates
 
@@ -27,7 +26,7 @@ var COMMENT_BUTTON_CLASS: String by Delegates.notNull()
     private set
 
 val decoderEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used hold class and field names that are commonly used",
     ) {
         execute {

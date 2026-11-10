@@ -16,7 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.literal
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 
@@ -43,7 +43,7 @@ internal object LiveTreeGetOptionalBooleanFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideReshareButtonPatch =
-    bytecodePatch(
+    patch(
         name = "Hide reshare button",
         description = "Hides the reshare button from both posts and reels.",
     ) {

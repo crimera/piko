@@ -6,8 +6,6 @@
 
 package app.crimera.patches.instagram.misc.theme
 
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.Match
@@ -18,8 +16,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -178,7 +176,6 @@ internal fun createComposePrismColorBridge(
     )
 }
 
-context(patchContext: BytecodePatchContext)
 internal fun installComposePrismBlackRuntime(legacyAmoled: Boolean) {
     val method = ComposePrismBlackFingerprint.method
     val constWideMatch = ComposePrismBlackFingerprint.instructionMatches[0]
@@ -195,7 +192,7 @@ internal fun installComposePrismBlackRuntime(legacyAmoled: Boolean) {
     val paletteRuntime = installComposePrismPaletteRuntime(field)
     installComposeSearchRowBackgroundOverride()
 
-    val extensionClass = patchContext.mutableClassDefBy(MATERIAL_YOU_THEME_CLASS)
+    val extensionClass = mutableClassDefBy(MATERIAL_YOU_THEME_CLASS)
     val bridgeCandidates =
         extensionClass.methods.filter {
             it.name == COMPOSE_PRISM_COLOR_BRIDGE_NAME &&
@@ -225,7 +222,6 @@ internal fun installComposePrismBlackRuntime(legacyAmoled: Boolean) {
     )
 }
 
-context(patchContext: BytecodePatchContext)
 private fun installComposeSearchRowBackgroundOverride() {
     ComposeSearchRowFingerprint.matchAll(2..2).forEach {
         val paletteRead = it.instructionMatches.first()
@@ -252,7 +248,6 @@ internal fun composeSearchRowOverrideInstructions(register: Int): String {
         """.trimIndent()
 }
 
-context(patchContext: BytecodePatchContext)
 private fun installComposePrismPaletteRuntime(
     prismField: FieldReference,
 ): ComposePrismPaletteRuntime {
@@ -272,7 +267,7 @@ private fun installComposePrismPaletteRuntime(
     val holderClasses = holderMatches.map { it.originalClassDef }
 
     val holders = holderClasses.map { classDef ->
-        val holderClass = patchContext.mutableClassDefBy(classDef)
+        val holderClass = mutableClassDefBy(classDef)
         if (
             holderClass.methods.any {
                 it.name == COMPOSE_PRISM_REFRESH_METHOD_NAME
@@ -351,7 +346,7 @@ private fun installComposePrismPaletteRuntime(
             "Cached Compose prism palettes use different types: $paletteTypes",
         )
     }
-    val paletteClass = patchContext.mutableClassDefBy(paletteTypes.single())
+    val paletteClass = mutableClassDefBy(paletteTypes.single())
     val paletteConstructors =
         paletteClass.methods.filter { method ->
             method.name == "<init>" &&

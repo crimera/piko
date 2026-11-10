@@ -22,9 +22,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
@@ -82,7 +81,7 @@ private object HomeTimelineRenderFingerprint : Fingerprint(
 // credits to @Ouxyl
 @Suppress("unused")
 val disableAutoScrollPatch =
-    bytecodePatch(
+    patch(
         name = "Disable auto timeline scroll on launch",
     ) {
         compatibleWith(COMPATIBILITY_X)
@@ -178,7 +177,6 @@ private object TimelineInstructionParserFingerprint : Fingerprint(
     )
 )
 
-context(context: BytecodePatchContext)
 internal fun preserveTimelineCache(forYouType: Int) {
     val response = TimelineResponseFingerprint
     val factory = HomeRequestFactoryFingerprint.method
@@ -294,7 +292,6 @@ private object InitialTimelineLoadFingerprint : Fingerprint(
     )
 )
 
-context(context: BytecodePatchContext)
 internal fun preserveInitialTimelineLoad(forYouType: Int) {
     val method = InitialTimelineLoadFingerprint.method
     val code = method.instructions.toList()

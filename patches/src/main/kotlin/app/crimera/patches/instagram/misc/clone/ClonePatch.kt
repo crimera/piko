@@ -13,8 +13,9 @@ import app.morphe.patcher.StringFilter
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.string
 import app.morphe.util.asSequence
@@ -35,7 +36,7 @@ private const val ORIGINAL_PACKAGE_NAME = "com.instagram.android"
 
 @Suppress("unused")
 val clonePatch =
-    resourcePatch(
+    patch(
         name = "Clone",
         description =
             "Changes the package name and the app name. " +
@@ -60,17 +61,6 @@ val clonePatch =
             title = "App name",
             description = "A new app name (label). Entering \"Instagram\" will skip changing the app name.",
             required = true,
-        )
-
-        var bytecodePatchContext: BytecodePatchContext? = null
-
-        dependsOn(
-            // Expose the bytecode context to use it within a ResourcePatch
-            bytecodePatch {
-                execute {
-                    bytecodePatchContext = this
-                }
-            },
         )
 
         execute {
@@ -135,25 +125,22 @@ val clonePatch =
             // Replace all instances of the string "com.instagram.android" in the bytecode to fix
             // the issue where video stories only play audio.
             // Also rename providers just in case.
-            context(bytecodePatchContext!!) {
-                val targets = listOf(
-                    string(ORIGINAL_PACKAGE_NAME),
-                ) + providerReplacements.map { string(it.first, StringComparisonType.CONTAINS) }
-                transformStringReferences(targets) { string ->
-                    if (string == ORIGINAL_PACKAGE_NAME) {
-                        return@transformStringReferences newPackageName
-                    }
+            val targets = listOf(
+                string(ORIGINAL_PACKAGE_NAME),
+            ) + providerReplacements.map { string(it.first, StringComparisonType.CONTAINS) }
+            transformStringReferences(targets) { string ->
+                if (string == ORIGINAL_PACKAGE_NAME) {
+                    return@transformStringReferences newPackageName
+                }
 
-                    val matchedReplacement = providerReplacements.find { string.contains(it.first) }
+                val matchedReplacement = providerReplacements.find { string.contains(it.first) }
 
-                    if (matchedReplacement != null) {
-                        string.replaceFirst(matchedReplacement.first, matchedReplacement.second)
-                    } else {
-                        null
-                    }
+                if (matchedReplacement != null) {
+                    string.replaceFirst(matchedReplacement.first, matchedReplacement.second)
+                } else {
+                    null
                 }
             }
-            bytecodePatchContext = null
         }
 
         finalize {
@@ -172,7 +159,6 @@ val clonePatch =
  */
 private fun NodeList.elementsForEach(action: (Element) -> Unit) = asSequence().map { it as Element }.forEach(action)
 
-context(patchContext: BytecodePatchContext)
 private fun transformStringReferences(
     targetStrings: List<StringFilter>,
     transform: (str: String) -> String?,

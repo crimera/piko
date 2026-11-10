@@ -18,7 +18,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
@@ -41,7 +41,7 @@ internal object ShareSheetItemsBinderFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideGroupCreationOnShareSheetPatch =
-    bytecodePatch(
+    patch(
         name = "Hide group creation button on sharesheet",
         default = true,
     ) {

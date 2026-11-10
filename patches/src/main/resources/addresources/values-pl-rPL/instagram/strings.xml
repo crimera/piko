@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">Odblokowuje opcje programisty po przytrzymaniu ikony strony głównej</string>
     <string name="piko_directly_open_metaconfig">Bezpośrednio otwieraj MetaConfig</string>
     <string name="piko_directly_open_metaconfig_desc">Otwiera nadpisania MetaConfig bezpośrednio po przytrzymaniu ikony strony głównej</string>
-    <string name="piko_enable_emp_options">Włącz opcje pracownicze</string>
-    <string name="piko_enable_emp_options_desc">Odblokowuje wszystkie opcje pracownicze używane do testów</string>
-    <string name="piko_allow_user_network_certificate">Zezwalaj na certyfikaty użytkownika</string>
-    <string name="piko_allow_user_network_certificate_desc">Umożliwia aplikacji zaufanie certyfikatom sieciowym zainstalowanym przez użytkownika do testów whitehat</string>
     <string name="piko_export_dev_overrides">Eksportuj nadpisania</string>
     <string name="piko_import_dev_overrides">Importuj nadpisania</string>
     <string name="piko_import_id_mapping">Importuj pliki mapowania</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">Różne</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Wyłącz analitykę</string>
-    <string name="piko_delete_analytics_cache">Usuń pamięć podręczną analityki</string>
-    <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
     <string name="piko_follow_back_indicator">Włącz wskaźnik statusu relacji</string>
     <string name="piko_follow_back_indicator_desc">Dodaje etykietę ze statusem \"Obserwuje Cię\" na stronie profilu, a po dotknięciu wyświetla szczegółowe zestawienie statusu relacji</string>
     <string name="piko_fbi_color_indicator">Włącz kolorowy wskaźnik statusu relacji</string>
@@ -165,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">Nie pokazuj powiadomień o wiadomościach z ukrytych czatów</string>
     <string name="piko_hidden_chats_taps">Liczba dotknięć otwierająca ukryte czaty</string>
     <string name="piko_hidden_chats_taps_desc">Dotknij przycisku wiadomości tyle razy z rzędu, aby przełączyć się między skrzynką odbiorczą a ukrytymi czatami</string>
-    <string name="piko_unlock_plus_benefits">Odblokuj korzyści Plus</string>
-    <string name="piko_unlock_plus_benefits_desc">Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Wiadomości prywatne</string>
     <string name="piko_disable_disappearing_messages_gesture">Wyłącz gest włączania znikających wiadomości</string>
@@ -313,7 +304,6 @@
     <string name="piko_ok">OK</string>
     <string name="piko_reset">Zresetuj</string>
     <string name="piko_cancel">Anuluj</string>
-    <string name="piko_deleted">Usunięto</string>
     <string name="piko_debug">Debugowanie Piko</string>
     <string name="piko_debug_desc">Dodaje opcje debugowania dla niektórych komponentów do testów</string>
     <string name="piko_export_experiment_list">Eksportuj listę eksperymentów</string>
@@ -488,7 +478,6 @@
     <string name="piko_media_like">polubienie</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">aktywność</string>
-    <string name="piko_disable_telemetry">Wyłącz telemetrię</string>
     <string name="piko_patch_theme">Motyw</string>
     <string name="piko_patch_settings">Dodaj ustawienia</string>
 </resources>

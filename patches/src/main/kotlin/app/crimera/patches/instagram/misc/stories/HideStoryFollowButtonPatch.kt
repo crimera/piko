@@ -17,7 +17,7 @@ import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -29,7 +29,7 @@ private object StoryFollowButtonComponentFingerprint : Fingerprint(
 )
 
 @Suppress("unused")
-val hideStoryFollowButtonPatch = bytecodePatch(
+val hideStoryFollowButtonPatch = patch(
     name = "Hide story follow button",
     description = "Hides the follow button at the top of stories.",
 ) {

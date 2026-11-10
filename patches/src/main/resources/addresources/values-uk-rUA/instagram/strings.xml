@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">Розблоковує параметри розробника довгим натисканням на значок «Головна»</string>
     <string name="piko_directly_open_metaconfig">Відкривати налаштування MetaConfig безпосередньо</string>
     <string name="piko_directly_open_metaconfig_desc">Безпосередньо відкриває перевизначення MetaConfig при тривалому натисканні значка «Головна»</string>
-    <string name="piko_enable_emp_options">Увімкнути службові параметри</string>
-    <string name="piko_enable_emp_options_desc">Розблоковує всі службові параметри, що використовуються для тестування</string>
-    <string name="piko_allow_user_network_certificate">Дозволити користувацькі мережеві сертифікати</string>
-    <string name="piko_allow_user_network_certificate_desc">Дозволяє використання користувацьких мережевих сертифікатів для тестування безпеки (whitehat)</string>
     <string name="piko_export_dev_overrides">Експорт заміщень</string>
     <string name="piko_import_dev_overrides">Імпорт заміщень</string>
     <string name="piko_import_id_mapping">Імпорт файлів зіставлення</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">Різне</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Вимкнути аналітику</string>
-    <string name="piko_delete_analytics_cache">Очистити кеш аналітики</string>
-    <string name="piko_disable_analytics_desc">Блокувати надсилання аналітики на сервери Instagram/Facebook</string>
     <string name="piko_follow_back_indicator">Увімкнути індикатор взаємної підписки</string>
     <string name="piko_follow_back_indicator_desc">Додає позначку «Стежить за вами» на сторінці профілю та показує детальну інформацію про статус дружби після натискання</string>
     <string name="piko_fbi_color_indicator">Увімкнути кольоровий індикатор статусу дружби</string>
@@ -165,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">Не показувати сповіщення про повідомлення з чатів, які ви приховали</string>
     <string name="piko_hidden_chats_taps">Натискання для відкриття прихованих чатів</string>
     <string name="piko_hidden_chats_taps_desc">Натисніть кнопку повідомлень таку кількість разів поспіль, щоб перемикатися між папкою «Вхідні» та прихованими чатами</string>
-    <string name="piko_unlock_plus_benefits">Розблокувати переваги підписки «Plus»</string>
-    <string name="piko_unlock_plus_benefits_desc">Розблоковує переваги підписки \'Plus\', що перевіряються локально. ВИКОРИСТОВУЙТЕ НА ВЛАСНИЙ РИЗИК</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Повідомлення DM</string>
     <string name="piko_disable_disappearing_messages_gesture">Вимкнути змахування для зникаючих повідомлень</string>
@@ -313,7 +304,6 @@
     <string name="piko_ok">ОК</string>
     <string name="piko_reset">Скинути</string>
     <string name="piko_cancel">Скасувати</string>
-    <string name="piko_deleted">Видалено</string>
     <string name="piko_debug">Відлагодження Piko</string>
     <string name="piko_debug_desc">Додає опцію відлагодження до деяких компонентів для тестування</string>
     <string name="piko_export_experiment_list">Експортувати список експериментів</string>
@@ -488,7 +478,6 @@
     <string name="piko_media_like">подобається</string>
     <string name="piko_media_link">посилання</string>
     <string name="piko_media_activity">активність</string>
-    <string name="piko_disable_telemetry">Вимкнути телеметрію</string>
     <string name="piko_patch_theme">Тема</string>
     <string name="piko_patch_settings">Додати налаштування</string>
 </resources>

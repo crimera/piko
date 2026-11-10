@@ -11,7 +11,7 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 // https://github.com/FrozenAlex/revanced-patches-new
 internal object AddSessionTokenFingerprint : Fingerprint(
@@ -32,7 +32,7 @@ internal object AddSessionTokenFingerprint : Fingerprint(
 
 @Suppress("unused")
 val clearTrackingParamsPatch =
-    bytecodePatch(
+    patch(
         name = "Clear tracking params",
         description = "Removes tracking parameters when sharing links",
         default = true,

@@ -13,7 +13,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 
 private object CustomiseTypeAheadResponseFingerprint : Fingerprint(
@@ -24,7 +24,7 @@ private object CustomiseTypeAheadResponseFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customiseTypeAheadResponsePatch =
-    bytecodePatch(
+    patch(
         name = "Customize search suggestions",
     ) {
         compatibleWith(COMPATIBILITY_X)

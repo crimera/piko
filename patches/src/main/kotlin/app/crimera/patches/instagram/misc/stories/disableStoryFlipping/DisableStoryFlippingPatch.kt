@@ -13,7 +13,7 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 
 internal object StoryFlippingMethodFingerprint : Fingerprint(
@@ -25,7 +25,7 @@ internal object StoryFlippingMethodFingerprint : Fingerprint(
 
 @Suppress("unused")
 val disableStoryFlippingPatch =
-    bytecodePatch(
+    patch(
         name = "Disable story flipping",
         description = "Disable automatic flipping/moving to next story",
     ) {

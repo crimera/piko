@@ -15,7 +15,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
@@ -43,7 +44,7 @@ internal object NewShareSheetLinkFingerprint2 : Fingerprint(
 
 @Suppress("unused")
 val handleModernShareSheetLinks =
-    bytecodePatch(
+    patch(
         description = "Hooks links on modern share sheet ( after 11.4x.xx )",
     ) {
         compatibleWith(COMPATIBILITY_X)

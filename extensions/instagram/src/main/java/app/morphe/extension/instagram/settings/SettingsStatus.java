@@ -12,8 +12,6 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 public class SettingsStatus {
     public static TreeMap<String,Boolean> FLAGS = new TreeMap();
 
-    public static boolean disableTelemetry = false;
-    public static void disableTelemetry() { disableTelemetry = true; }
     public static boolean theme = false;
     public static void theme() { theme = true; }
     public static boolean addSettings = false;
@@ -213,12 +211,8 @@ public class SettingsStatus {
     }
 
     //Misc section.
-    public static boolean unlockPlusBenefits = false;
-    public static void unlockPlusBenefits() { unlockPlusBenefits = true; }
     public static boolean changeLikeAnimation = false;
     public static void changeLikeAnimation() { changeLikeAnimation = true; }
-    public static boolean disableAnalytics = false;
-    public static void disableAnalytics() { disableAnalytics = true; }
     public static boolean followBackIndicator = false;
     public static void followBackIndicator() { followBackIndicator = true; }
     public static boolean followListNonFollowerBadge = false;
@@ -241,7 +235,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || unlockPlusBenefits || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || resumeReelsAfterScrolling || disableAnalytics || followBackIndicator || followListNonFollowerBadge || customFont);}
+    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || resumeReelsAfterScrolling || followBackIndicator || followListNonFollowerBadge || customFont);}
 
     //Font section.
     public static boolean customFont = false;
@@ -282,24 +276,15 @@ public class SettingsStatus {
     public static void enableDeveloperOptions() {
         enableDeveloperOptions = true;
     }
-    public static boolean unlockEmployeeOptions = false;
-    public static void unlockEmployeeOptions() {
-        unlockEmployeeOptions = true;
-    }
-    public static boolean allowUserNetworkCertificate = false;
-    public static void allowUserNetworkCertificate() {
-        allowUserNetworkCertificate = true;
-    }
     public static boolean recommendedFlags = false;
     public static void recommendedFlags() {recommendedFlags = true;}
     public static boolean developerOptionsSection() {
-        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || recommendedFlags);
+        return (enableDeveloperOptions || recommendedFlags);
     }
 
 
 
         public static void loadStatusMap(){
-        FLAGS.put(str("piko_disable_telemetry"), SettingsStatus.disableTelemetry);
         FLAGS.put(str("piko_patch_theme"), SettingsStatus.theme);
         FLAGS.put(str("piko_patch_settings"), SettingsStatus.addSettings);
         FLAGS.put(str("piko_disable_reels_scrolling"), SettingsStatus.disableReelsScrolling);
@@ -333,11 +318,9 @@ public class SettingsStatus {
         FLAGS.put(str("piko_view_story_mentions"),SettingsStatus.viewStoryMentions);
         FLAGS.put(str("piko_follow_back_indicator"),SettingsStatus.followBackIndicator);
         FLAGS.put(str("piko_disable_discover_people"),SettingsStatus.disableDiscoverPeople);
-        FLAGS.put(str("piko_disable_analytics"),SettingsStatus.disableAnalytics);
         FLAGS.put(str("piko_customise_story_ring_size"),SettingsStatus.customiseStoryRingSize);
 
         FLAGS.put(str("piko_change_like_animation"),SettingsStatus.changeLikeAnimation);
-        FLAGS.put(str("piko_unlock_plus_benefits"),SettingsStatus.unlockPlusBenefits);
         FLAGS.put(str("piko_inbox_lock"),SettingsStatus.inboxLock);
         FLAGS.put(str("piko_hidden_chats"),SettingsStatus.hiddenChats);
 
@@ -369,8 +352,6 @@ public class SettingsStatus {
         FLAGS.put(str("piko_custom_sharing_domain"),SettingsStatus.customSharingDomain);
         FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);
         FLAGS.put(str("piko_enable_dev_options"),SettingsStatus.enableDeveloperOptions);
-        FLAGS.put(str("piko_enable_emp_options"),SettingsStatus.unlockEmployeeOptions);
-        FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
 
         FLAGS.put(str("piko_enable_mark_chat_as_read"),SettingsStatus.markChatAsRead);
         FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);

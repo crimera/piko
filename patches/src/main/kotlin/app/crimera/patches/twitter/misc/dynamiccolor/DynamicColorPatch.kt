@@ -8,7 +8,9 @@ package app.crimera.patches.twitter.misc.dynamiccolor
 
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.resourceFile
 import app.morphe.util.asSequence
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -17,7 +19,7 @@ import java.nio.file.Files
 
 @Suppress("unused")
 val dynamicColorPatch =
-    resourcePatch(
+    patch(
         name = "Dynamic color",
         description = "Replaces the default Twitter Blue with the user's Material You palette.",
         default = false,
@@ -26,8 +28,8 @@ val dynamicColorPatch =
 
         execute {
             // For backward compatibility, add colors and styles into v31 res dir (A12+).
-            val valuesV31Directory = get("res/values-v31")
-            val valuesNightV31Directory = get("res/values-night-v31")
+            val valuesV31Directory = resourceFile("res/values-v31")
+            val valuesNightV31Directory = resourceFile("res/values-night-v31")
 
             listOf(valuesV31Directory, valuesNightV31Directory).forEach { directory ->
                 if (!directory.isDirectory) Files.createDirectories(directory.toPath())
@@ -135,7 +137,7 @@ val dynamicColorPatch =
             // Resource references can't carry alpha, so wrap the dynamic color in a color state
             // list that applies the same alpha.
             val translucentDimBackground = "piko_dynamic_dark_surface_container_translucent"
-            val colorV31Directory = get("res/color-v31")
+            val colorV31Directory = resourceFile("res/color-v31")
             if (!colorV31Directory.isDirectory) Files.createDirectories(colorV31Directory.toPath())
             FileWriter(colorV31Directory.resolve("$translucentDimBackground.xml")).use {
                 it.write(

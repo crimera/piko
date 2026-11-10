@@ -13,11 +13,11 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val customSharingDomainPatch =
-    bytecodePatch(
+    patch(
         name = "Custom sharing domain",
         description = "Allows for using domains like fxtwitter when sharing tweets/posts.",
     ) {

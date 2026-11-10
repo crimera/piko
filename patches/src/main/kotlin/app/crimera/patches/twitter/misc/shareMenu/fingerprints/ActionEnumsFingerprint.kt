@@ -14,7 +14,6 @@ import app.crimera.utils.instructionToString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
@@ -30,7 +29,6 @@ internal object ActionEnumsFingerprint : Fingerprint(
     strings = listOf("None", "Favorite", "Retweet"),
 )
 
-context(patchContext: BytecodePatchContext)
 fun addActionV1(name: String): String {
     val classDef = ActionEnumsFingerprint.classDef
     val classFields = classDef.fields
@@ -114,7 +112,6 @@ fun addActionV1(name: String): String {
     return fieldCall
 }
 
-context(patchContext: BytecodePatchContext)
 fun addActionV2(name: String): String {
     val classDef = ActionEnumsFingerprint.classDef
     val classFields = classDef.fields
@@ -201,7 +198,6 @@ fun addActionV2(name: String): String {
     return fieldCall
 }
 
-context(patchContext: BytecodePatchContext)
 fun addAction(name: String): String {
     return if (is_11_92_or_greater) {
         addActionV2(name)

@@ -7,13 +7,10 @@
 package app.crimera.patches.instagram.misc.comment
 
 import app.crimera.patches.instagram.entity.decoder.COMMENT_BUTTON_CLASS
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
@@ -22,14 +19,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
 /**
  * String and drawable resources of a native chat button, from its constructor.
  */
-context(_: BytecodePatchContext)
 internal fun nativeChatButtonResources(constructor: Fingerprint): Pair<Long, Long> {
     val drawable = constructor.instructionMatches[1].getInstruction<WideLiteralInstruction>().wideLiteral
     val string = constructor.instructionMatches[2].getInstruction<WideLiteralInstruction>().wideLiteral
     return string to drawable
 }
 
-context(patchContext: BytecodePatchContext)
 fun addButtonAttribute(
     stringLateral: Long,
     drawableLateral: Long,
@@ -117,7 +112,6 @@ fun addButtonAttribute(
     }
 }
 
-context(patchContext: BytecodePatchContext)
 fun addButtonInterface(buttonInstanceFingerprint: Fingerprint) {
     // Dynamically inject interface to our extension class.
     buttonInstanceFingerprint.classDef.interfaces.add(COMMENT_BUTTON_CLASS)

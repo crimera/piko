@@ -10,7 +10,6 @@ import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -27,7 +26,6 @@ internal object ShareMenuButtonAddHook : Fingerprint(
         ),
 )
 
-context(patchContext: BytecodePatchContext)
 fun registerButton(
     buttonActionReference: String,
     functionName: String,

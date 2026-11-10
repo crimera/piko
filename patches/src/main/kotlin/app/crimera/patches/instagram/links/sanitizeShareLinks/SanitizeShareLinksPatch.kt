@@ -9,11 +9,11 @@ package app.crimera.patches.instagram.links.sanitizeShareLinks
 import app.crimera.patches.instagram.links.shareLinks.shareLinksPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val sanitizeShareLinksPatch =
-    bytecodePatch(
+    patch(
         name = "Sanitize share links",
     ) {
 

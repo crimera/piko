@@ -16,12 +16,12 @@ import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 
 @Suppress("unused")
 val hookOverflowMenuButtonOnClickPatch =
-    bytecodePatch(
+    patch(
         description = "Hooks feed overflow menu on click.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

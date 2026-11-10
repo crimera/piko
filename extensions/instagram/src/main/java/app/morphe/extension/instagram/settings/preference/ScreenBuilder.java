@@ -188,24 +188,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.unlockEmployeeOptions) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_enable_emp_options"),
-                            str("piko_enable_emp_options_desc"),
-                            Settings.ENABLE_EMP_OPTIONS
-                    )
-            );
-        }
-        if (SettingsStatus.allowUserNetworkCertificate) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_allow_user_network_certificate"),
-                            str("piko_allow_user_network_certificate_desc"),
-                            Settings.ALLOW_USER_NETWORK_CERTIFICATE
-                    )
-            );
-        }
         if (SettingsStatus.enableDeveloperOptions) {
             addPreference(
                     helper.switchPreference(
@@ -772,22 +754,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.disableAnalytics) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_analytics"),
-                            str("piko_disable_analytics_desc"),
-                            Settings.DISABLE_ANALYTICS
-                    )
-            );
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_delete_analytics_cache"),
-                            "",
-                            "piko_delete_analytics_cache"
-                    )
-            );
-        }
         if (SettingsStatus.moreOptionsOnPost) {
             addPreference(
                     helper.switchPreference(
@@ -861,15 +827,6 @@ public class ScreenBuilder {
                             str("piko_remove_empty_bottom_space"),
                             "",
                             Settings.REMOVE_EMPTY_BOTTOM_SPACE
-                    )
-            );
-        }
-        if (SettingsStatus.unlockPlusBenefits) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_unlock_plus_benefits"),
-                            str("piko_unlock_plus_benefits_desc"),
-                            Settings.UNLOCK_PLUS_BENEFITS
                     )
             );
         }

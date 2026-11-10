@@ -10,12 +10,11 @@ import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.misc.comment.copyComment.CopyTextChatButtonToStringFingerprint
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import kotlin.properties.Delegates
@@ -24,7 +23,7 @@ var CHAT_CONTEXT_BUTTON_SUPER_CLASS: String by Delegates.notNull()
     private set
 
 val commentDataEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of comment data",
     ) {
         dependsOn(decoderEntity)

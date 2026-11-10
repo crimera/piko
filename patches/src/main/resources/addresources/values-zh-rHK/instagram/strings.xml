@@ -10,10 +10,6 @@
     <string name="piko_enable_dev_options">啟用開發者選項</string>
     <string name="piko_enable_dev_options_desc">長按主畫面圖示來開啟開發者選項</string>
     <string name="piko_directly_open_metaconfig">直接開啟 MetaConfig 設定覆蓋</string>
-    <string name="piko_enable_emp_options">啟動員工選項</string>
-    <string name="piko_enable_emp_options_desc">解鎖所有用於測試的員工選項</string>
-    <string name="piko_allow_user_network_certificate">允許使用者網路憑證</string>
-    <string name="piko_allow_user_network_certificate_desc">允許使用者網路憑證進行白帽測試</string>
     <string name="piko_export_dev_overrides">匯出設定覆蓋</string>
     <string name="piko_import_dev_overrides">匯入設定覆蓋</string>
     <string name="piko_import_id_mapping">匯入映射文件</string>
@@ -58,8 +54,6 @@
     <string name="piko_disable_double_tap_to_like">停用雙擊讚好</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">其他</string>
-    <string name="piko_disable_analytics">停用資料分析</string>
-    <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
     <string name="piko_follow_back_indicator_desc">在個人檔案頁面中新增「已追蹤你」狀態標籤，並在點擊時顯示詳細的好友關係狀態</string>
     <string name="piko_fbi_follows_you">已追蹤你</string>
@@ -78,8 +72,6 @@
     <string name="piko_copied">已複製</string>
     <string name="piko_more_profile_options">更多個人檔案選項</string>
     <string name="piko_remove_empty_bottom_space">移除底部空白區域</string>
-    <string name="piko_unlock_plus_benefits">解鎖 Plus 專屬福利</string>
-    <string name="piko_unlock_plus_benefits_desc">解鎖在本地驗證的 Plus 專屬福利。使用時請自行承擔風險</string>
     <!-- DM Section -->
     <string name="piko_unlimited_replays_desc">將未過期的「一次檢視」、「兩次檢視」媒體變更為「無限次檢視」</string>
     <!-- Story Section -->
@@ -145,7 +137,6 @@
     <string name="piko_restart_app">需要重新啟動應用程式以套用變更</string>
     <string name="piko_ok">確定</string>
     <string name="piko_cancel">取消</string>
-    <string name="piko_deleted">已刪除</string>
     <string name="piko_debug">Piko 調試</string>
     <string name="piko_debug_desc">為部分組件添加調試選項以進行測試</string>
     <string name="piko_export_experiment_list">匯出實驗列表</string>

@@ -10,7 +10,7 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 internal const val DOUBLE_TAP_PREF_DESCRIPTOR = """
                         $PREF_CALL_DESCRIPTOR->%s()Z
@@ -23,7 +23,7 @@ internal const val DOUBLE_TAP_PREF_DESCRIPTOR = """
 
 @Suppress("unused")
 val disableDoubleTapPatch =
-    bytecodePatch(
+    patch(
         name = "Disable double tap like",
         description = "Disable double tap like on post, reel, comment and message",
         default = true,

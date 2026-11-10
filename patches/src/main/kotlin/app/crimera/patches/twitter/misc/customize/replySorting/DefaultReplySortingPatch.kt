@@ -14,7 +14,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -37,7 +38,7 @@ private object replySortingLastSelectedFinderFingerprint : Fingerprint(
 
 @Suppress("unused")
 val defaultReplySortingPatch =
-    bytecodePatch(
+    patch(
         name = "Customize default reply sorting",
     ) {
         compatibleWith(COMPATIBILITY_X)

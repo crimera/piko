@@ -9,15 +9,14 @@ package app.crimera.patches.instagram.links.validateLinks
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
-import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeFirstString
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 
 val validateLinksPatch =
-    bytecodePatch(
+    patch(
         description = "Fixes app crashing issue while opening links from a different app",
     ) {
 

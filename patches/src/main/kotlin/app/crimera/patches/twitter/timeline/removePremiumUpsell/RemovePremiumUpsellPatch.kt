@@ -14,7 +14,7 @@ import app.crimera.patches.twitter.utils.flagSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -27,7 +27,7 @@ private object RemovePremiumUpsellPatchFingerprint : Fingerprint(
 
 @Suppress("unused")
 val disablePremiumUpsellPatch =
-    bytecodePatch(
+    patch(
         name = "Remove premium upsell",
         description = "Removes premium upsells",
     ) {

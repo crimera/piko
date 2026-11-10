@@ -11,7 +11,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
@@ -77,7 +78,7 @@ private val inlineDownloadRenderHintsFocalFieldFingerprint = placeholderFingerpr
 
 @Suppress("unused")
 val inlineDownloadButtonPatch =
-    bytecodePatch(
+    patch(
         description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
     ) {
         compatibleWith(COMPATIBILITY_X)

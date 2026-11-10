@@ -6,14 +6,12 @@
 
 package app.crimera.patches.instagram.misc.theme
 
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -24,7 +22,6 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
-context(patchContext: BytecodePatchContext)
 internal fun installLegacyNativeThemeModeSync() {
     val delegatedMatch = LegacyDarkModeOnResumeFingerprint.matchOrNull(
         LegacyDarkModeFragmentConstructorFingerprint.originalClassDef,
@@ -105,7 +102,6 @@ internal fun installLegacyNativeThemeModeSync() {
  *
  * @return the row register.
  */
-context(patchContext: BytecodePatchContext)
 private fun inlineLegacyRadioRowFactory(
     method: MutableMethod,
     factoryCall: Match.InstructionMatch,
@@ -113,7 +109,7 @@ private fun inlineLegacyRadioRowFactory(
     val helper = legacyRadioRowFactoryFingerprint(factoryCall.methodReference).match()
     val constructor = helper.instructionMatches[0].methodReference
     val add = helper.instructionMatches[1].methodReference
-    val rowClass = patchContext.classDefBy(constructor.definingClass)
+    val rowClass = classDefBy(constructor.definingClass)
     if (!AccessFlags.PUBLIC.isSet(rowClass.accessFlags) || rowClass.methods.none {
         it.toString() == constructor.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags)
     }) throw PatchException("Legacy RadioGroup constructor is not publicly accessible")

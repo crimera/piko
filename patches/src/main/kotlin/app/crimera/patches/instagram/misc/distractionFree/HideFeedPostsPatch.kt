@@ -17,7 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -94,7 +94,7 @@ private fun MutableMethod.stopHiddenFeedLoading() {
 }
 
 @Suppress("unused")
-val hideFeedPostsPatch = bytecodePatch(
+val hideFeedPostsPatch = patch(
     name = "Hide feed posts",
     description = "Hides posts from the home feed",
 ) {

@@ -12,8 +12,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeString
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.Fingerprint
@@ -21,9 +19,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -88,11 +87,10 @@ private object LikeAnimationPlaybackFingerprint : Fingerprint(
     ),
 )
 
-context(context: BytecodePatchContext)
 private fun installAnimationRendering(animationType: String) {
     val factory = SetUpCustomLikesAnimationFingerprint.instructionMatches.first().methodReference
     val renderType = SetUpCustomLikesAnimationFingerprint.originalMethod.parameterTypes.first().toString()
-    val mapper = context.classDefBy(renderType).methods.singleOrNull {
+    val mapper = classDefBy(renderType).methods.singleOrNull {
         it.parameterTypes == listOf(animationType) && it.returnType == renderType &&
             AccessFlags.PUBLIC.isSet(it.accessFlags) && AccessFlags.STATIC.isSet(it.accessFlags)
     } ?: throw PatchException("Expected one like animation enum mapper")
@@ -101,7 +99,7 @@ private fun installAnimationRendering(animationType: String) {
     val defaultFactory = ConfigureLikeAnimationFingerprint.instructionMatches[2].methodReference
     val colorize = LikeAnimationStartFingerprint.instructionMatches.first().methodReference
     for (method in listOf(defaultFactory, colorize)) {
-        val targetClass = context.classDefBy(method.definingClass)
+        val targetClass = classDefBy(method.definingClass)
         if (!AccessFlags.PUBLIC.isSet(targetClass.accessFlags) || targetClass.methods.none {
                 it.toString() == method.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
                     !AccessFlags.STATIC.isSet(it.accessFlags)
@@ -109,7 +107,7 @@ private fun installAnimationRendering(animationType: String) {
             throw PatchException("Default heart method is not public: $method")
         }
     }
-    if (context.classDefBy(factoryInstance.definingClass).fields.none {
+    if (classDefBy(factoryInstance.definingClass).fields.none {
             it.toString() == factoryInstance.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
                 AccessFlags.STATIC.isSet(it.accessFlags)
         }) {
@@ -134,7 +132,7 @@ private fun installAnimationRendering(animationType: String) {
             """.trimIndent(),
         )
     }
-    context.mutableClassDefBy(EXTENSION_CLASS_DESCRIPTOR).methods.apply {
+    mutableClassDefBy(EXTENSION_CLASS_DESCRIPTOR).methods.apply {
         remove(defaultBridge)
         add(defaultPreview)
     }
@@ -155,7 +153,7 @@ private fun installAnimationRendering(animationType: String) {
         return-object p0
         """.trimIndent(),
     )
-    if (context.classDefBy(factory.definingClass).methods.none {
+    if (classDefBy(factory.definingClass).methods.none {
             it.toString() == factory.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
                 AccessFlags.STATIC.isSet(it.accessFlags)
         }) {
@@ -163,7 +161,7 @@ private fun installAnimationRendering(animationType: String) {
     }
 
     val start = LikeAnimationPlaybackFingerprint.instructionMatches.first().methodReference
-    val controls = context.classDefBy(start.definingClass).methods
+    val controls = classDefBy(start.definingClass).methods
     if (controls.none { it.toString() == start.toString() && AccessFlags.PUBLIC.isSet(it.accessFlags) }) {
         throw PatchException("Native animation start method is not public")
     }
@@ -198,7 +196,7 @@ private fun installAnimationRendering(animationType: String) {
 
 @Suppress("unused")
 val changeLikeAnimationPatch =
-    bytecodePatch(
+    patch(
         name = "Change like animation",
         description = "Change the animation to one from existing Rings like animations",
         default = true,

@@ -40,7 +40,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.util.findFreeRegister
@@ -49,6 +49,7 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
+import app.morphe.patches.all.misc.fix.spoofsignature.spoofSignaturePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.indexOfFirstInstructionOrThrow
@@ -70,7 +71,7 @@ private object WhitehatIndicatorFingerprint : Fingerprint(
     ),
 )
 
-internal val whitehatIndicatorPatch = bytecodePatch {
+internal val whitehatIndicatorPatch = patch {
     dependsOn(sharedExtensionPatch)
     execute {
         WhitehatIndicatorFingerprint.method.apply {
@@ -94,7 +95,7 @@ internal val whitehatIndicatorPatch = bytecodePatch {
 
 @Suppress("unused")
 val settingsPatch =
-    bytecodePatch(
+    patch(
         name = "Add settings",
         description = "Adds settings to control preferences are patching",
         default = true,
@@ -116,6 +117,7 @@ val settingsPatch =
             fixNotificationRegistrationCrashPatch,
             fixDirectNotificationActionCrashPatch,
             validateLinksPatch,
+            spoofSignaturePatch,
             removeBuildExpiredPopupPatch,
             preserveUnknownFriendshipStatusPatch,
             profileInfoEntity,

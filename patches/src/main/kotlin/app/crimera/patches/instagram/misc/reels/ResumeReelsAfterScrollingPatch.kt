@@ -14,8 +14,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -23,9 +21,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.getReference
@@ -43,7 +42,6 @@ private const val BOXED_INT = "Ljava/lang/Integer;"
 private const val BOXED_DOUBLE = "Ljava/lang/Double;"
 private const val OBJECT = "Ljava/lang/Object;"
 
-context(context: BytecodePatchContext)
 internal fun addReelMethod(
     owner: String, name: String, parameters: List<String>, returnType: String,
     registers: Int, flags: Int = AccessFlags.PRIVATE.value or AccessFlags.SYNTHETIC.value,
@@ -53,7 +51,7 @@ internal fun addReelMethod(
     flags, emptySet(), emptySet(), MutableMethodImplementation(registers),
 ).toMutable().apply {
     addInstructionsWithLabels(0, instructions)
-    context.mutableClassDefBy(owner).methods.add(this)
+    mutableClassDefBy(owner).methods.add(this)
 }
 
 internal object ReelPlayerPrepare : Fingerprint(
@@ -113,7 +111,6 @@ private fun scrollOutFingerprint(stateType: String) = Fingerprint(
     ),
 )
 
-context(_: BytecodePatchContext)
 private fun trackReelSelection(pauseOthers: MethodReference, itemType: String) {
     val pager = Fingerprint(
         definingClass = pauseOthers.definingClass, parameters = listOf("Z"), returnType = "V",
@@ -135,7 +132,6 @@ private fun trackReelSelection(pauseOthers: MethodReference, itemType: String) {
         "invoke-static {v$viewer, v$item}, $PATCHES_DESCRIPTOR/ReelsPlayback;->onReelSelected($OBJECT$OBJECT)V")
 }
 
-context(context: BytecodePatchContext)
 private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
     val pause = scrollOutFingerprint(ClipsItemStateToStringFingerprint.originalClassDef.type)
     val matches = pause.instructionMatches
@@ -157,7 +153,7 @@ private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
         matches[12].instruction.registersUsed.drop(1) != listOf(item, args[3])
     ) throw PatchException("Unexpected Reels scroll-out position writes")
 
-    val itemClass = context.classDefBy(matches[6].methodReference.returnType)
+    val itemClass = classDefBy(matches[6].methodReference.returnType)
     val stateStore = matches[14].fieldReference
     val pausedField = matches[9].fieldReference
     val pauseSetter = matches[12].methodReference
@@ -231,7 +227,7 @@ private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
 }
 
 @Suppress("unused")
-val resumeReelsAfterScrollingPatch = bytecodePatch(
+val resumeReelsAfterScrollingPatch = patch(
     name = "Resume Reels after scrolling",
     description = "Resumes videos from where you left off when you scroll back to them in Reels",
 ) {

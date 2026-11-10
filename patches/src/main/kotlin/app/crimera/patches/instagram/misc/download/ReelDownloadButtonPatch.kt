@@ -20,9 +20,11 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.newInstance
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resourceLiteral
 import app.morphe.patcher.string
@@ -93,7 +95,7 @@ private val STATIC_INVOKE_OPCODES = setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_ST
  *    (component state, then the item model), and the context through the one field path from the
  *    render composer to a `Context`.
  */
-val reelDownloadButtonPatch = bytecodePatch {
+val reelDownloadButtonPatch = patch {
     compatibleWith(COMPATIBILITY_INSTAGRAM)
     dependsOn(sharedExtensionPatch, settingsPatch, decoderEntity)
     execute {
@@ -116,11 +118,10 @@ private class ReelContextPath(
 
 private fun ClassDef.fieldsOfType(type: String): List<Field> = instanceFields.filter { it.type == type }
 
-context(patchContext: BytecodePatchContext)
 private fun injectReelDownloadButton() {
     val render = ReelSaveButtonRenderFingerprint.method
     val componentType = render.definingClass
-    val componentClass = patchContext.classDefBy(componentType)
+    val componentClass = classDefBy(componentType)
     val composerType = render.parameterTypes.single().toString()
 
     val userSessionField =
@@ -130,7 +131,7 @@ private fun injectReelDownloadButton() {
     val mediaPath = reelMediaPath(componentClass)
     val itemState = ClipsItemStateToStringFingerprint.originalClassDef
     val itemStateField = requireOne("reel item state field",
-        patchContext.classDefBy(mediaPath.state.type).fieldsOfType(itemState.type))
+        classDefBy(mediaPath.state.type).fieldsOfType(itemState.type))
     val carouselStateField = requireOne("reel carousel state field", itemState.fieldsOfType(CURRENT_MEDIA_FIELD.definingClass))
     val contextPath = reelContextPath(composerType)
 
@@ -201,26 +202,24 @@ private object ReelSaveButtonRenderFingerprint : Fingerprint(
     )
 )
 
-context(patchContext: BytecodePatchContext)
 private fun reelMediaPath(componentClass: ClassDef): ReelMediaPath =
     requireOne(
         "Media field path from ${componentClass.type}",
         componentClass.instanceFields.flatMap { state ->
-            val stateClass = patchContext.classDefByOrNull(state.type) ?: return@flatMap emptyList()
+            val stateClass = classDefByOrNull(state.type) ?: return@flatMap emptyList()
             stateClass.instanceFields.flatMap { model ->
-                val modelClass = patchContext.classDefByOrNull(model.type) ?: return@flatMap emptyList()
+                val modelClass = classDefByOrNull(model.type) ?: return@flatMap emptyList()
                 modelClass.fieldsOfType(MEDIA_DESCRIPTOR).map { media -> ReelMediaPath(state, model, media) }
             }
         },
         describe = { "${it.state}.${it.model}.${it.media}" },
     )
 
-context(patchContext: BytecodePatchContext)
 private fun reelContextPath(composerType: String): ReelContextPath =
     requireOne(
         "Context field path from $composerType",
-        patchContext.classDefBy(composerType).instanceFields.flatMap { holder ->
-            val holderClass = patchContext.classDefByOrNull(holder.type) ?: return@flatMap emptyList()
+        classDefBy(composerType).instanceFields.flatMap { holder ->
+            val holderClass = classDefByOrNull(holder.type) ?: return@flatMap emptyList()
             holderClass.fieldsOfType(CONTEXT_DESCRIPTOR).map { context -> ReelContextPath(holder, context) }
         },
         describe = { "${it.holder}.${it.context}" },
@@ -241,13 +240,12 @@ private class BuilderCallSite(
 )
 
 /** Every call of [builder] in its own class: the action column builds the save button in each of its layouts. */
-context(patchContext: BytecodePatchContext)
 private fun reelBuilderCallSites(
     builder: Method,
     componentType: String,
 ): List<BuilderCallSite> {
     val sites =
-        patchContext.classDefBy(builder.definingClass).methods.flatMap { method ->
+        classDefBy(builder.definingClass).methods.flatMap { method ->
             val instructions = method.implementation?.instructions?.toList().orEmpty()
             instructions.indices
                 .filter { index -> instructions[index].getReference<MethodReference>()?.sameSignatureAs(builder) == true }
@@ -262,7 +260,6 @@ private fun reelBuilderCallSites(
  * Builds a second save component before every real one and registers it. The call is re-issued with the
  * registers it already uses, and the copy goes into the same list right before the real component.
  */
-context(patchContext: BytecodePatchContext)
 private fun hookBuilderCallSites(
     builder: Method,
     sites: List<BuilderCallSite>,
@@ -356,7 +353,6 @@ private fun invokeOriginal(instruction: Instruction, method: MethodReference): S
 private fun MethodReference.sameSignatureAs(other: MethodReference): Boolean =
     MethodUtil.methodSignaturesMatch(this, other)
 
-context(patchContext: BytecodePatchContext)
 private fun bridge(name: String, registers: Int, body: String) {
     val original = Fingerprint(definingClass = REEL_DOWNLOAD_DESCRIPTOR, name = name).method
     val replacement = ImmutableMethod(
@@ -364,7 +360,7 @@ private fun bridge(name: String, registers: Int, body: String) {
         original.accessFlags, original.annotations, original.hiddenApiRestrictions,
         MutableMethodImplementation(registers),
     ).toMutable().apply { addInstructions(0, body.trimIndent()) }
-    patchContext.mutableClassDefBy(original.definingClass).methods.apply {
+    mutableClassDefBy(original.definingClass).methods.apply {
         remove(original)
         add(replacement)
     }
@@ -374,7 +370,6 @@ private fun bridge(name: String, registers: Int, body: String) {
  * True when the setter [reference] stores its value under the view property named [propertyName]: the
  * setter reads an enum constant, and that enum's static initializer names the constant.
  */
-context(patchContext: BytecodePatchContext)
 internal fun setsViewProperty(
     reference: MethodReference,
     propertyName: String,
@@ -382,7 +377,7 @@ internal fun setsViewProperty(
     val setter =
         requireOne(
             "modifier setter $reference",
-            patchContext.classDefBy(reference.definingClass).methods.filter { it.sameSignatureAs(reference) },
+            classDefBy(reference.definingClass).methods.filter { it.sameSignatureAs(reference) },
         )
     return setter.implementation?.instructions?.toList().orEmpty().any { instruction ->
         val field = instruction.getReference<FieldReference>()
@@ -391,9 +386,8 @@ internal fun setsViewProperty(
 }
 
 /** The name an enum constant is created with, read from the static initializer that stores it. */
-context(patchContext: BytecodePatchContext)
 private fun enumConstantName(constant: FieldReference): String? {
-    val enumClass = patchContext.classDefByOrNull(constant.definingClass) ?: return null
+    val enumClass = classDefByOrNull(constant.definingClass) ?: return null
     if (!AccessFlags.ENUM.isSet(enumClass.accessFlags)) return null
     val initializer =
         requireOne(
@@ -413,7 +407,6 @@ private fun enumConstantName(constant: FieldReference): String? {
 /**
  * The render context identifies registered copies; ordinary save components keep their original values.
  */
-context(patchContext: BytecodePatchContext)
 private fun hookSaveRender(
     render: MutableMethod,
     composerType: String,

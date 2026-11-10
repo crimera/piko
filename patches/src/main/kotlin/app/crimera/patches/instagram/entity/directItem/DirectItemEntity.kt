@@ -6,7 +6,6 @@
 
 package app.crimera.patches.instagram.entity.directItem
 
-import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeString
 import app.crimera.utils.classNameToExtension
@@ -14,7 +13,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
@@ -27,14 +27,12 @@ private const val MEDIA_CLASS = "Lcom/instagram/feed/media/Media;"
 /**
  * Field assigned with the value of the JSON [key] by the parser of [parserClass].
  */
-context(_: BytecodePatchContext)
 private fun jsonKeyField(key: String, parserClass: String) =
     jsonKeyFieldFingerprint(key, parserClass).instructionMatches.last().fieldReference
 
 /**
  * Index where the shared value assignment of the JSON [key] starts in the parser of [parserClass].
  */
-context(_: BytecodePatchContext)
 private fun jsonSharedKeyTarget(key: String, parserClass: String) =
     jsonSharedKeyFingerprint(key, parserClass).let {
         it.method to it.method.getInstruction<BuilderOffsetInstruction>(it.instructionMatches.last().index)
@@ -44,7 +42,6 @@ private fun jsonSharedKeyTarget(key: String, parserClass: String) =
 /**
  * Field of the shared value assignment of the JSON [key] by the parser of [parserClass].
  */
-context(_: BytecodePatchContext)
 private fun jsonSharedKeyField(key: String, parserClass: String): FieldReference {
     val (parser, target) = jsonSharedKeyTarget(key, parserClass)
     return parser.getInstruction(parser.indexOfFirstInstructionOrThrow(target, Opcode.IPUT_OBJECT))
@@ -57,7 +54,7 @@ private fun jsonSharedKeyField(key: String, parserClass: String): FieldReference
  * names by reflection. See {@code mediaDataEntity} for the reference pattern.
  */
 val directItemEntity =
-    bytecodePatch(
+    patch(
         description = "Decodes obfuscated DirectItem (DM) field names at patch time.",
     ) {
         execute {

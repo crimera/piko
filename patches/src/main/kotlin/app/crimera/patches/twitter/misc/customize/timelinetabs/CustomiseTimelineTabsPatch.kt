@@ -12,7 +12,7 @@ import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 
 private object CustomiseTimelineTabsFingerprint : Fingerprint(
@@ -25,7 +25,7 @@ private object CustomiseTimelineTabsFingerprint : Fingerprint(
 
 @Suppress("unused")
 val customiseTimelineTabsPatch =
-    bytecodePatch(
+    patch(
         name = "Customize timeline top bar",
     ) {
         compatibleWith(COMPATIBILITY_X)

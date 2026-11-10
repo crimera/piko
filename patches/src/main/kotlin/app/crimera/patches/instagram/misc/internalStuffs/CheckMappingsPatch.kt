@@ -14,7 +14,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -34,7 +34,7 @@ internal object QuickExperimentCategoriesFragmentOnViewCreateFingerprint : Finge
 
 @Suppress("unused")
 val checkMappingsPatch =
-    bytecodePatch(
+    patch(
         description = "This patch is used to check if the mappings file exists and if not alert the user",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
