@@ -23,7 +23,7 @@ Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software)
 Tap the button to add Piko as a patch source in Morphe Manager:
 
 <a href="https://morphe.software/add-source?github=crimera/piko">
-  <img src="docs/images/add-to-morphe.svg" alt="Add to Morphe" height="36">
+  <img src="docs/images/add-to-morphe.svg" alt="Add to Morphe" height="48">
 </a>
 
 Then patch Twitter/X or Instagram:
