@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.xmlpull.v1.XmlPullParser;
 
+import app.morphe.extension.instagram.patches.customise.emoji.EmojiFontDialogs;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
 import app.morphe.extension.instagram.patches.dm.InboxLock;
@@ -58,6 +59,7 @@ public class RestorePrefFragment extends Fragment {
     private File destinationFile;
     private Context context;
     private boolean isFontImport;
+    private boolean isEmojiFontImport;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,9 @@ public class RestorePrefFragment extends Fragment {
             } else if (args.containsKey("piko_pref_add_font")) {
                 // FontStorage decides where the font goes, and validates it first.
                 isFontImport = true;
+            } else if (args.containsKey(EmojiFontDialogs.IMPORT_KEY)) {
+                isFontImport = true;
+                isEmojiFontImport = true;
             }
         }
         if (savedInstanceState == null) {
@@ -289,6 +294,9 @@ public class RestorePrefFragment extends Fragment {
             Context ctx = getActivity() != null ? getActivity() : context;
             if (uri == null) {
                 toast(str("piko_fail_no_path"));
+            } else if (isEmojiFontImport) {
+                EmojiFontDialogs.importFile(ctx, uri, this::finishHost);
+                return;
             } else if (isFontImport) {
                 // Finishes itself once the font is imported off the main thread.
                 receiveFont(ctx, uri);

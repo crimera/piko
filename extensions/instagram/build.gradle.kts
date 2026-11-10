@@ -12,4 +12,7 @@ dependencies {
     compileOnly(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
     compileOnly(libs.appcompat)
+
+    // Pure-JVM unit tests (no Android runtime).
+    testImplementation("junit:junit:4.13.2")
 }

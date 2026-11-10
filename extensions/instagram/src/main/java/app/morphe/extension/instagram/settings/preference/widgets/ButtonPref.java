@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.instagram.patches.customise.emoji.EmojiFontDialogs;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
@@ -75,6 +76,9 @@ public class ButtonPref extends Preference {
 
                     } else if (key.equals("piko_focus_lock_action")) {
                         FocusLockDialogs.onActionPressed(context, ButtonPref.this);
+
+                    } else if (key.equals("piko_pref_emoji_font")) {
+                        EmojiFontDialogs.show(context, ButtonPref.this);
 
                     } else if (key.equals("piko_pref_delete_font")) {
                         FontStorage.DeleteResult result = FontStorage.delete();
@@ -168,6 +172,7 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_view_saved_instants")
                 || key.equals("piko_pref_add_font")
                 || key.equals("piko_pref_delete_font")
+                || key.equals("piko_pref_emoji_font")
                 || key.equals("view_deleted_messages")));
     }
 
