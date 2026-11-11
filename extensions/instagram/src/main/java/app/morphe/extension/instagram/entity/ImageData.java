@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.entity;
 
 import com.instagram.model.mediasize.ExtendedImageUrl;
 import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.instagram.utils.MediaUrls;
 
 public class ImageData implements MediaInterface {
     private final ExtendedImageUrl obj;
@@ -34,7 +35,7 @@ public class ImageData implements MediaInterface {
     }
 
     public String getUrl() throws Exception {
-        return this.obj.getUrl();
+        return MediaUrls.wholeFile(this.obj.getUrl());
     }
 
     public MediaType getMediaType(){
