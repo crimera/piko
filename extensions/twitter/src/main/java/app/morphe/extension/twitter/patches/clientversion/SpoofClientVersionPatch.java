@@ -31,10 +31,23 @@ public class SpoofClientVersionPatch {
 
     private static final boolean DEBUG = false;
 
+    // The patch fills this with every X Chat GraphQL operation name of the app (comma separated).
+    private static String xchatOperations() {
+        return "";
+    }
+
+    private static java.util.Set<String> operations;
+
     private static boolean isXChatRequest() {
         java.net.URI uri = REQUEST.get();
         String path = uri == null ? null : uri.getPath();
-        return path != null && path.toLowerCase(java.util.Locale.ROOT).contains("xchat");
+        if (path == null) return false;
+        if (path.toLowerCase(java.util.Locale.ROOT).contains("xchat")) return true;
+        if (operations == null) {
+            operations = new java.util.HashSet<>(java.util.Arrays.asList(xchatOperations().split(",")));
+        }
+        int slash = path.lastIndexOf('/');
+        return path.contains("/graphql/") && operations.contains(path.substring(slash + 1));
     }
 
     /** Injection point: X-Twitter-Client-Version of the legacy stack. */

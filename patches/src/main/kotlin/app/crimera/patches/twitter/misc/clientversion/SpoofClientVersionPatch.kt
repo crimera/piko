@@ -146,7 +146,24 @@ val spoofClientVersionPatch =
             //    set to disable Play Store updates.
             restoreLegacyUserAgentVersionCode(legacyVersionCode)
 
-            // 5. Legacy client headers: X Chat requests that go through the legacy stack
+            // 5. X Chat's GraphQL operations (sending messages, inbox, keys…) whose paths don't say "xchat".
+            val chatPackages = listOf("Lcom/x/android/xchat/", "Lcom/x/dms/", "Lcom/x/dm/")
+            val operations = sortedSetOf<String>()
+            classDefForEach { classDef ->
+                if (chatPackages.none { classDef.type.startsWith(it) }) return@classDefForEach
+                classDef.methods.firstOrNull { it.name == "name" && it.parameterTypes.isEmpty() && it.returnType == "Ljava/lang/String;" }
+                    ?.implementation?.instructions?.firstNotNullOfOrNull { ins ->
+                        ((ins as? ReferenceInstruction)?.reference as? StringReference)?.string
+                    }?.takeIf { it.matches(Regex("[A-Za-z]+")) }?.let(operations::add)
+            }
+            if ("SendMessageCreateMutation" !in operations) throw PatchException("X Chat operations not found ($operations)")
+            mutableClassDefBy(EXTENSION_CLASS_DESCRIPTOR).methods.first { it.name == "xchatOperations" }.let { method ->
+                val index = method.instructions.indexOfFirst { isConstString(it.opcode) }
+                val register = method.getInstruction<OneRegisterInstruction>(index).registerA
+                method.replaceInstruction(index, "const-string/jumbo v$register, \"${operations.joinToString(",")}\"")
+            }
+
+            // 6. Legacy client headers: X Chat requests that go through the legacy stack
             //    get the reported version too, every other request keeps the real one.
             hookLegacyClientHeaders()
         }
