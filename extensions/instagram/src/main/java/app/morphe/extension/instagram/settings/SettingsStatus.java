@@ -80,7 +80,9 @@ public class SettingsStatus {
     public static void inboxLock() { inboxLock = true; }
     public static boolean hiddenChats = false;
     public static void hiddenChats() { hiddenChats = true; }
-    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats || disableDisappearingMessagesGesture ;}
+    public static boolean sendKeyboardGifs = false;
+    public static void sendKeyboardGifs() { sendKeyboardGifs = true; }
+    public static boolean dmSection(){ return markChatAsRead || unlimitedReplaysOnEphemeralMedia || saveDeletedMessages || inboxLock || hiddenChats || disableDisappearingMessagesGesture || sendKeyboardGifs ;}
 
     //Story section
     public static boolean customiseStoryTimestamp = false;
@@ -310,6 +312,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_resume_reels_after_scrolling"), SettingsStatus.resumeReelsAfterScrolling);
         FLAGS.put(str("piko_unlimited_replays"),SettingsStatus.unlimitedReplaysOnEphemeralMedia);
         FLAGS.put(str("piko_disable_disappearing_messages_gesture"), SettingsStatus.disableDisappearingMessagesGesture);
+        FLAGS.put(str("piko_send_keyboard_gifs"), SettingsStatus.sendKeyboardGifs);
 
         FLAGS.put(str("piko_customise_story_timestamp"),SettingsStatus.customiseStoryTimestamp);
         FLAGS.put(str("piko_disable_story_flipping"),SettingsStatus.disableStoryFlipping);
