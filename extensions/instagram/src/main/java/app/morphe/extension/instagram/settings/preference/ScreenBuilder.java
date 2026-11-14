@@ -268,6 +268,16 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.sendKeyboardGifs) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_send_keyboard_gifs"),
+                            str("piko_send_keyboard_gifs_desc"),
+                            Settings.SEND_KEYBOARD_GIFS
+                    )
+            );
+        }
+
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(
                     helper.switchPreference(
