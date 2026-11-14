@@ -91,13 +91,6 @@ private fun pastedPhotoSendFingerprint(definingClass: String) = Fingerprint(
     parameters = emptyList(),
     filters = listOf(
         string("direct_temp_photo"),
-        string(".jpg"),
-        // Builds the temp file name from a prefix and an extension.
-        methodCall(
-            opcode = Opcode.INVOKE_STATIC,
-            parameters = listOf(STRING_CLASS, STRING_CLASS),
-            returnType = STRING_CLASS,
-        ),
         // Saves the bitmap as directory/name.
         methodCall(
             opcode = Opcode.INVOKE_STATIC,
@@ -125,6 +118,10 @@ private object DirectPhotoPendingMediaFingerprint : Fingerprint(
         "Z",
     ),
     filters = listOf(
+        // Stores the photo file path in the pending media.
+        methodCall(opcode = Opcode.INVOKE_VIRTUAL, parameters = emptyList(), returnType = STRING_CLASS),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        fieldAccess(opcode = Opcode.IPUT_OBJECT, type = STRING_CLASS, location = MatchAfterImmediately()),
         // Guesses the mime type from the photo file path.
         methodCall(
             opcode = Opcode.INVOKE_STATIC,
@@ -164,9 +161,10 @@ private object DirectMediaSendRequestFingerprint : Fingerprint(
  * decode to a bitmap -> save as a temp JPEG -> build a pending media for the file -> upload and send as a photo.
  *
  * Instagram can already upload a pending media as an animated image: the uploader switches to its animated
- * route on the pending media's type. So a GIF is let down the image path, its bytes replace the temp file's
- * content, and the pending media built for that file is typed as animated media. The send request would then go
- * to an animated endpoint that the server no longer has, so it is pointed at the photo endpoint.
+ * route on the pending media's type. So a GIF is let down the image path, its bytes are written beside the temp
+ * JPEG, and the pending media built for that JPEG is given the GIF file and typed as animated media. The send
+ * request would then go to an animated endpoint that the server no longer has, so it is pointed at the photo
+ * endpoint.
  */
 @Suppress("unused")
 val sendKeyboardGifsPatch = patch(
@@ -207,36 +205,23 @@ val sendKeyboardGifsPatch = patch(
             )
         }
 
-        // Name the temp file .gif, then replace the saved JPEG with the GIF bytes.
+        // Write the GIF bytes beside the JPEG that Instagram saved.
         val sendRunnableClass = decodeFingerprint.instructionMatches[2]
             .instruction.getReference<MethodReference>()!!.definingClass
 
         pastedPhotoSendFingerprint(sendRunnableClass).let {
-            val nameMatch = it.instructionMatches[2]
-            val saveMatch = it.instructionMatches[3]
-            val savedMatch = it.instructionMatches[4]
-
-            val extensionRegister = nameMatch.getInstruction<FiveRegisterInstruction>().registerD
-            val save = saveMatch.getInstruction<FiveRegisterInstruction>()
+            val save = it.instructionMatches[1].getInstruction<FiveRegisterInstruction>()
             val bitmapRegister = save.registerC
             val directoryRegister = save.registerE
             val nameRegister = save.registerF
 
-            // Later index first, so the earlier index stays valid.
             it.method.addInstruction(
-                savedMatch.index + 1,
+                it.instructionMatches[2].index + 1,
                 "invoke-static {v$bitmapRegister, v$directoryRegister, v$nameRegister}, $EXTENSION_CLASS->afterSave(${BITMAP_CLASS}${STRING_CLASS}${STRING_CLASS})V",
-            )
-            it.method.addInstructions(
-                nameMatch.index,
-                """
-                    invoke-static {v$bitmapRegister, v$extensionRegister}, $EXTENSION_CLASS->fileExtension(Landroid/graphics/Bitmap;Ljava/lang/String;)Ljava/lang/String;
-                    move-result-object v$extensionRegister
-                """,
             )
         }
 
-        // Type the pending media built for that file as animated media.
+        // Give the pending media built for that JPEG the GIF file, and type it as animated media.
         DirectPhotoPendingMediaFingerprint.let {
             val animatedMedia = MediaTypeEnumFingerprint.instructionMatches[1]
                 .instruction.getReference<FieldReference>()!!
@@ -248,19 +233,23 @@ val sendKeyboardGifsPatch = patch(
             val mediaTypeField = mediaTypeFields.singleOrNull() ?: throw PatchException(
                 "Expected one media type field in $pendingMediaType, found ${mediaTypeFields.size}",
             )
+            val pathField = it.instructionMatches[2].instruction.getReference<FieldReference>()!!
 
-            val mimeTypeMatch = it.instructionMatches[0]
+            val mimeTypeMatch = it.instructionMatches[3]
             val pathRegister = mimeTypeMatch.getInstruction<FiveRegisterInstruction>().registerC
-            val pendingMediaRegister = it.instructionMatches[2].getInstruction<TwoRegisterInstruction>().registerB
+            val pendingMediaRegister = it.instructionMatches[5].getInstruction<TwoRegisterInstruction>().registerB
             val index = mimeTypeMatch.index
             val freeRegister = it.method.findFreeRegister(index, pathRegister, pendingMediaRegister)
 
+            // The path register is replaced too, so the mime type that follows is guessed from the GIF file.
             it.method.addInstructionsWithLabels(
                 index,
                 """
-                    invoke-static {v$pathRegister}, $EXTENSION_CLASS->isKeyboardGif(Ljava/lang/String;)Z
-                    move-result v$freeRegister
+                    invoke-static {v$pathRegister}, $EXTENSION_CLASS->keyboardGifPath($STRING_CLASS)$STRING_CLASS
+                    move-result-object v$freeRegister
                     if-eqz v$freeRegister, :not_keyboard_gif
+                    move-object v$pathRegister, v$freeRegister
+                    iput-object v$pathRegister, v$pendingMediaRegister, $pathField
                     sget-object v$freeRegister, $animatedMedia
                     iput-object v$freeRegister, v$pendingMediaRegister, $pendingMediaType->${mediaTypeField.name}:${mediaTypeField.type}
                 """,

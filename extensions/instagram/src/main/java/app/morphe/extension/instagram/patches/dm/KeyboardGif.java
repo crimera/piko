@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.utils.Pref;
@@ -31,8 +30,9 @@ import app.morphe.extension.shared.Utils;
  * Sends a GIF committed from the keyboard as an animated image in a DM.
  *
  * Instagram's paste path decodes the content to a bitmap, saves it as a temp JPEG and sends that file as a photo.
- * The hooks below keep the original GIF bytes, write them over the temp file, and tell the pending-media factory
- * which files to upload as animated media.
+ * The hooks below keep the original GIF bytes, write them to a file beside the JPEG, and give the pending-media
+ * factory that file to upload as animated media. The JPEG is left as Instagram saved it, so when any step fails
+ * it is sent as a photo.
  */
 @SuppressWarnings("unused")
 public final class KeyboardGif {
@@ -45,14 +45,15 @@ public final class KeyboardGif {
     /** GIF bytes keyed by the bitmap Instagram decoded from the same content, which is what its paste path hands on. */
     private static final Map<Bitmap, byte[]> PENDING = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /** A send can be dropped between the save and the pending media, which leaves a name behind. */
-    private static final int MAX_GIF_FILE_NAMES = 8;
+    /** A send can be dropped between the save and the pending media, which leaves a GIF file behind. */
+    private static final int MAX_GIF_FILES = 8;
 
     /**
-     * Names of the temp files that now hold a GIF, oldest first. Consumed by {@link #isKeyboardGif}.
-     * Names, not paths: each has a random UUID, and Instagram may spell the directory differently later on.
+     * Paths of the GIF files written by {@link #afterSave}, oldest first, keyed by the name of the JPEG Instagram
+     * saved for the same content. Consumed by {@link #keyboardGifPath}.
+     * Keyed by name, not path: each has a random UUID, and Instagram may spell the directory differently later on.
      */
-    private static final Set<String> GIF_FILE_NAMES = new LinkedHashSet<>();
+    private static final Map<String, String> GIF_PATHS = new LinkedHashMap<>();
 
     private KeyboardGif() {
     }
@@ -84,23 +85,15 @@ public final class KeyboardGif {
     }
 
     /**
-     * Injection point. Names the temp file Instagram is about to save the bitmap to.
-     */
-    public static String fileExtension(Bitmap bitmap, String original) {
-        return bitmap != null && PENDING.containsKey(bitmap) ? GIF_EXTENSION : original;
-    }
-
-    /**
      * Injection point, after Instagram saved the bitmap to directory/name.
      */
     public static void afterSave(Bitmap bitmap, String directory, String name) {
         byte[] gif = bitmap == null ? null : PENDING.remove(bitmap);
         if (gif == null) return;
 
-        // Written beside the file and renamed over it, so a failed write leaves the JPEG Instagram saved,
-        // which is then sent as a photo.
-        File file = new File(directory, name);
-        File partial = new File(directory, name + ".part");
+        int extension = name.lastIndexOf('.');
+        File file = new File(directory, (extension < 0 ? name : name.substring(0, extension)) + GIF_EXTENSION);
+        File partial = new File(directory, file.getName() + ".part");
         try {
             try (FileOutputStream out = new FileOutputStream(partial)) {
                 out.write(gif);
@@ -112,23 +105,26 @@ public final class KeyboardGif {
             return;
         }
 
-        synchronized (GIF_FILE_NAMES) {
-            GIF_FILE_NAMES.add(name);
-            Iterator<String> oldest = GIF_FILE_NAMES.iterator();
-            while (GIF_FILE_NAMES.size() > MAX_GIF_FILE_NAMES) {
-                oldest.next();
+        synchronized (GIF_PATHS) {
+            GIF_PATHS.put(name, file.getPath());
+            Iterator<String> oldest = GIF_PATHS.values().iterator();
+            while (GIF_PATHS.size() > MAX_GIF_FILES) {
+                new File(oldest.next()).delete();
                 oldest.remove();
             }
         }
     }
 
     /**
-     * Injection point. True once for a file that {@link #afterSave} filled with a GIF.
+     * Injection point.
+     *
+     * @param path The photo file a pending media is being built for.
+     * @return The GIF to upload in its place, once, or null if the photo did not come from a keyboard GIF.
      */
-    public static boolean isKeyboardGif(String path) {
-        if (path == null) return false;
-        synchronized (GIF_FILE_NAMES) {
-            return GIF_FILE_NAMES.remove(new File(path).getName());
+    public static String keyboardGifPath(String path) {
+        if (path == null) return null;
+        synchronized (GIF_PATHS) {
+            return GIF_PATHS.remove(new File(path).getName());
         }
     }
 
@@ -147,14 +143,13 @@ public final class KeyboardGif {
                     return null;
                 }
             }
-            return isGif(out) ? out.toByteArray() : null;
+            byte[] data = out.toByteArray();
+            return isGif(data) ? data : null;
         }
     }
 
     /** Some keyboards label WebP or PNG stickers as GIFs. Only real GIF data goes down the animated path. */
-    private static boolean isGif(ByteArrayOutputStream data) {
-        if (data.size() < 6) return false;
-        byte[] header = data.toByteArray();
-        return header[0] == 'G' && header[1] == 'I' && header[2] == 'F' && header[3] == '8';
+    private static boolean isGif(byte[] data) {
+        return data.length >= 6 && data[0] == 'G' && data[1] == 'I' && data[2] == 'F' && data[3] == '8';
     }
 }
