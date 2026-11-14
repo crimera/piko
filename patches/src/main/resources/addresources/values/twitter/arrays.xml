@@ -27,6 +27,20 @@
         <item>@string/piko_pref_customisation_timelinetabs_following</item>
     </string-array>
 
+    <string-array name="piko_array_app_lock_timeout">
+        <item>@string/piko_app_lock_timeout_immediately</item>
+        <item>@string/piko_app_lock_timeout_1</item>
+        <item>@string/piko_app_lock_timeout_5</item>
+        <item>@string/piko_app_lock_timeout_15</item>
+    </string-array>
+
+    <string-array name="piko_array_app_lock_timeout_val">
+        <item>0</item>
+        <item>1</item>
+        <item>5</item>
+        <item>15</item>
+    </string-array>
+
     <string-array name="piko_array_download_media_handle">
         <item>@string/piko_pref_download_media_link_handle_download</item>
         <item>@string/piko_pref_download_media_link_handle_copy_link</item>

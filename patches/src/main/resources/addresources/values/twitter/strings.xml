@@ -152,6 +152,18 @@
     <string name="piko_block_redirecting_to_x_lite">Block redirecting to X Lite</string>
     <string name="piko_pref_block_update_screen">Block update screen</string>
     <string name="piko_pref_block_update_screen_desc">Blocks the \'This app is out of date\' update screen from being shown on launch</string>
+    <string name="piko_pref_app_lock">App lock</string>
+    <string name="piko_pref_app_lock_desc">Asks for your fingerprint, face or screen lock when the app opens and when you come back to it. The preview in recent apps stays blank while this is on. Needs a screen lock on your device</string>
+    <string name="piko_pref_app_lock_timeout">Lock again after</string>
+    <string name="piko_app_lock_timeout_immediately">Right away</string>
+    <string name="piko_app_lock_timeout_1">After 1 minute</string>
+    <string name="piko_app_lock_timeout_5">After 5 minutes</string>
+    <string name="piko_app_lock_timeout_15">After 15 minutes</string>
+    <string name="piko_app_lock_title">%s is locked</string>
+    <string name="piko_app_lock_prompt">Unlock %s</string>
+    <string name="piko_app_lock_unlock">Unlock</string>
+    <string name="piko_app_lock_use_screen_lock">Use screen lock</string>
+    <string name="piko_app_lock_no_screen_lock">Set a screen lock on your device to use App lock</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>
