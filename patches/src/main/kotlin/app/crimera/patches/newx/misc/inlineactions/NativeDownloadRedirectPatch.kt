@@ -617,9 +617,18 @@ private fun isCanonicalPostAccessor(
     if (AccessFlags.STATIC.isSet(method.accessFlags) ||
         method.parameterTypes.isNotEmpty() || method.returnType != canonicalPostType
     ) return false
-    val instructions = method.implementation?.instructions?.toList() ?: return false
-    val allowedOpcodes = OBJECT_MOVE_OPCODES + setOf(Opcode.IGET_OBJECT, Opcode.CHECK_CAST, Opcode.RETURN_OBJECT)
-    if (instructions.any { it.opcode !in allowedOpcodes }) return false
+    val implementation = method.implementation ?: return false
+    val instructions = implementation.instructions.toList()
+    // 12.42 lowers `post.postResult as? CanonicalPost` to a nullable narrowing diamond instead of
+    // one check-cast + return. The value contract is unchanged, so this return shape gets its own
+    // proof rather than loosening the straight shape that 12.41 and earlier ship.
+    val nullable = instructions.any { instruction -> instruction.opcode == Opcode.INSTANCE_OF }
+    if (nullable) {
+        if (implementation.tryBlocks.isNotEmpty()) return false
+        if (instructions.any { instruction -> instruction.opcode !in NULLABLE_ACCESSOR_OPCODES }) return false
+    } else if (instructions.any { instruction -> instruction.opcode !in CANONICAL_ACCESSOR_OPCODES }) {
+        return false
+    }
     val fieldReads = instructions.mapIndexedNotNull { index, instruction ->
         if (instruction.opcode != Opcode.IGET_OBJECT) return@mapIndexedNotNull null
         val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
@@ -642,6 +651,14 @@ private fun isCanonicalPostAccessor(
     val postRead = instructions[postReadIndex] as? TwoRegisterInstruction ?: return false
     if (!instructions.valueReachesRegister(wrapperReadIndex, wrapperRead.registerA, postReadIndex, postRead.registerB)) {
         return false
+    }
+    if (nullable) {
+        return instructions.provesNullablePostAccessor(
+            postReadIndex = postReadIndex,
+            postReadRegister = postRead.registerA,
+            canonicalPostType = canonicalPostType,
+            branchTargets = instructions.branchTargetIndices("NewX canonical post accessor in $method"),
+        )
     }
     val returns = instructions.mapIndexedNotNull { index, instruction ->
         index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
@@ -669,6 +686,72 @@ private fun isCanonicalPostAccessor(
         return false
     }
     return true
+}
+
+private val CANONICAL_ACCESSOR_OPCODES =
+    OBJECT_MOVE_OPCODES + setOf(Opcode.IGET_OBJECT, Opcode.CHECK_CAST, Opcode.RETURN_OBJECT)
+
+/** A nullable narrowing adds the type test, its guard and the shared null constant. */
+private val NULLABLE_ACCESSOR_OPCODES = CANONICAL_ACCESSOR_OPCODES +
+    setOf(Opcode.INSTANCE_OF, Opcode.IF_EQZ, Opcode.CONST_4)
+
+/**
+ * Proves the nullable accessor R8 emits for `wrapper.post.postResult as? CanonicalPost`:
+ *
+ * ```
+ * instance-of test, :null        (testIndex, tests the post value)
+ * if-eqz test, :null             (guardIndex == testIndex + 1)
+ * check-cast post                (castIndex == guardIndex + 1)
+ * return-object post             (castIndex + 1)
+ * :null const/4 post, 0x0        (nullIndex == castIndex + 2)
+ * return-object post             (nullIndex + 1, last instruction)
+ * ```
+ *
+ * `IF_EQZ` is the shape's only branch, so control flow is linear apart from the guard and the two
+ * returns are the method's only exits. The layout check is therefore sound, and any extra
+ * instruction fails closed instead of being treated as unreachable.
+ */
+private fun List<Instruction>.provesNullablePostAccessor(
+    postReadIndex: Int,
+    postReadRegister: Int,
+    canonicalPostType: String,
+    branchTargets: Map<Int, Int>,
+): Boolean {
+    // newx-resolver-lint: allow instruction-order because the compiler-emitted arm order is the contract.
+    val testIndices = indices.filter { index -> this[index].opcode == Opcode.INSTANCE_OF }
+    if (testIndices.size != 1) return false
+    val testIndex = testIndices.single()
+    if (testIndex <= postReadIndex) return false
+    val test = this[testIndex] as? TwoRegisterInstruction ?: return false
+    if (test.getReference<TypeReference>()?.type != canonicalPostType) return false
+    if (!valueReachesRegister(postReadIndex, postReadRegister, testIndex, test.registerB)) return false
+
+    val guardIndices = indices.filter { index -> this[index].opcode == Opcode.IF_EQZ }
+    if (guardIndices.size != 1) return false
+    val guardIndex = guardIndices.single()
+    if (guardIndex != testIndex + 1) return false
+    val guard = this[guardIndex] as? OneRegisterInstruction ?: return false
+    if (guard.registerA != test.registerA) return false
+
+    val castIndex = guardIndex + 1
+    if (castIndex >= size || this[castIndex].opcode != Opcode.CHECK_CAST) return false
+    if (this[castIndex].getReference<TypeReference>()?.type != canonicalPostType) return false
+    val cast = this[castIndex] as? OneRegisterInstruction ?: return false
+    if (!valueReachesRegister(testIndex, test.registerB, castIndex, cast.registerA)) return false
+
+    val successReturnIndex = castIndex + 1
+    if (successReturnIndex >= size || this[successReturnIndex].opcode != Opcode.RETURN_OBJECT) return false
+    val successReturn = this[successReturnIndex] as? OneRegisterInstruction ?: return false
+    if (!valueReachesRegister(castIndex, cast.registerA, successReturnIndex, successReturn.registerA)) return false
+
+    val nullIndex = branchTargets[guardIndex] ?: return false
+    if (nullIndex != successReturnIndex + 1 || nullIndex + 1 != lastIndex) return false
+    if (indices.count { index -> this[index].opcode == Opcode.RETURN_OBJECT } != 2) return false
+    val nullConstant = this[nullIndex] as? NarrowLiteralInstruction ?: return false
+    if (nullConstant.opcode != Opcode.CONST_4 || nullConstant.narrowLiteral != 0) return false
+    val nullReturn = this[nullIndex + 1] as? OneRegisterInstruction ?: return false
+    if (nullReturn.opcode != Opcode.RETURN_OBJECT) return false
+    return (nullConstant as OneRegisterInstruction).registerA == nullReturn.registerA
 }
 
 /**
@@ -963,7 +1046,9 @@ private fun Map<Int, Int>.isIsolatedNullableMerge(
  * Maps each goto/if instruction index to its target index. Builder branches resolve through their
  * label; immutable branches resolve through their code offset.
  */
-private fun List<Instruction>.branchTargetIndices(): Map<Int, Int> {
+private fun List<Instruction>.branchTargetIndices(
+    label: String = "NewX video-tab handler",
+): Map<Int, Int> {
     val offsets = IntArray(size)
     val indexByOffset = HashMap<Int, Int>()
     var offset = 0
@@ -979,9 +1064,9 @@ private fun List<Instruction>.branchTargetIndices(): Map<Int, Int> {
             ?: (instruction as? OffsetInstruction)?.let { branch ->
                 indexByOffset[offsets[index] + branch.codeOffset]
             }
-            ?: throw PatchException("NewX video-tab handler has an unresolved branch: $instruction")
+            ?: throw PatchException("$label has an unresolved branch: $instruction")
         if (target !in indices) {
-            throw PatchException("NewX video-tab handler branch target $target is outside the method: $instruction")
+            throw PatchException("$label branch target $target is outside the method: $instruction")
         }
         targets[index] = target
     }

@@ -131,7 +131,19 @@ private fun MethodReference.toSmaliDescriptor(): String =
 private fun Method.smaliReference(): String =
     "$definingClass->$name(${parameterTypes.joinToString("")})$returnType"
 
-private fun isNewXTimelineBody(
+private fun isTimelineStateConstructor(reference: MethodReference, timelineListDescriptor: String): Boolean {
+    val parameters = reference.parameterTypes.map(CharSequence::toString)
+    return reference.name == "<init>" &&
+        parameters.firstOrNull() == FUNCTION3 &&
+        parameters.count { it == timelineListDescriptor } == 1 &&
+        // Item content may capture the timeline enum too. Modifier distinguishes the
+        // full composable restart lambda from the list/paging content lambda.
+        MODIFIER !in parameters &&
+        parameters.any { it.startsWith(PAGING_SCOPE) } &&
+        parameters.any { it == FUNCTION1 }
+}
+
+internal fun isNewXTimelineBody(
     method: Method,
     classType: String,
 ): Boolean {
@@ -163,16 +175,8 @@ private fun isNewXTimelineBody(
             val constructor =
                 (constructorInstruction as? ReferenceInstruction)?.reference as? MethodReference
                     ?: return@any false
-            val constructorParameters = constructor.parameterTypes.map(CharSequence::toString)
             constructor.definingClass == lambdaType &&
-                constructor.name == "<init>" &&
-                constructorParameters.firstOrNull() == FUNCTION3 &&
-                constructorParameters.count { it == timelineListDescriptor } == 1 &&
-                constructorParameters.none {
-                    it == MODIFIER || isDirectDescriptorInScope(it, TIMELINE_MODEL_SCOPE)
-                } &&
-                constructorParameters.any { it.startsWith(PAGING_SCOPE) } &&
-                constructorParameters.any { it == FUNCTION1 }
+                isTimelineStateConstructor(constructor, timelineListDescriptor)
         }
     }
 }
@@ -804,22 +808,13 @@ private fun argumentRegister(
     return instruction.registersUsed.getOrNull(offset)
 }
 
-context(context: BytecodePatchContext)
-private fun resolveTimelineItemCallbackIndex(method: Method, timelineListDescriptor: String): Int {
+internal fun resolveTimelineItemCallbackIndex(
+    method: Method,
+    timelineListDescriptor: String,
+    classByType: (String) -> ClassDef,
+): Int {
     val instructions = method.implementation?.instructions?.toList()
         ?: throw PatchException("Photos timeline renderer has no implementation: $method")
-    fun isTimelineStateConstructor(reference: MethodReference): Boolean {
-        val parameters = reference.parameterTypes.map(CharSequence::toString)
-        return reference.name == "<init>" &&
-            parameters.firstOrNull() == FUNCTION3 &&
-            parameters.count { it == timelineListDescriptor } == 1 &&
-            parameters.none {
-                it == MODIFIER || isDirectDescriptorInScope(it, TIMELINE_MODEL_SCOPE)
-            } &&
-            parameters.any { it.startsWith(PAGING_SCOPE) } &&
-            parameters.any { it == FUNCTION1 }
-    }
-
     val timelineStateType = requireExactlyOne(
         label = "NewX timeline state class",
         candidates = instructions.withIndex().mapNotNull { (index, instruction) ->
@@ -836,12 +831,12 @@ private fun resolveTimelineItemCallbackIndex(method: Method, timelineListDescrip
                 val reference = constructorInstruction.getReference<MethodReference>()
                     ?: return@any false
                 reference.definingClass == type &&
-                    isTimelineStateConstructor(reference)
+                    isTimelineStateConstructor(reference, timelineListDescriptor)
             }
             type.takeIf { hasStateConstructor }
         }.distinct(),
     )
-    val timelineState = context.mutableClassDefBy(timelineStateType)
+    val timelineState = classByType(timelineStateType)
     val stateConstructorCall = requireExactlyOne(
         label = "NewX timeline state constructor call",
         candidates = instructions.mapNotNull { instruction ->
@@ -1745,7 +1740,9 @@ val newXProfilePhotosGalleryPatch =
             val listIndex = parameters.indexOf(timelineListDescriptor)
             val timelineTypeIndex = parameters.indexOf(timelineType.descriptor)
             val callbackIndex = parameters.indexOf(FUNCTION1)
-            val itemClickCallbackIndex = resolveTimelineItemCallbackIndex(originalMethod, timelineListDescriptor)
+            val itemClickCallbackIndex = resolveTimelineItemCallbackIndex(originalMethod, timelineListDescriptor) {
+                mutableClassDefBy(it)
+            }
             val paddingValuesIndex = parameters.indexOf(compose.paddingValuesDescriptor)
             val modifierIndex = parameters.indexOf(MODIFIER)
             val composerIndex = parameters.indexOf(COMPOSER)

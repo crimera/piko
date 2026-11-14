@@ -1,6 +1,7 @@
 package app.crimera.patches.newx.misc.postoptions
 
 import app.crimera.patches.newx.misc.extension.newXInitHook
+import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
 import app.crimera.patches.newx.models.fieldForToStringLabel
@@ -37,6 +38,7 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -70,11 +72,6 @@ private data class PostOptionContribution(
     val actionName: String,
     val iconResourceName: String,
     val order: Int,
-)
-
-private data class IconAssignment(
-    val instruction: TwoRegisterInstruction,
-    val field: FieldReference,
 )
 
 private object PostOptionContributionIndex {
@@ -331,6 +328,191 @@ internal data class PostOptionsFeedbackLookup(
     val labelRegister: Int,
 )
 
+/**
+ * Where the renderer hands the resolved icon to the post-options sheet.
+ *
+ * [consumerIndex] is the sheet-constructor invoke, not the label lookup: the icon value only
+ * exists once the release's icon switch has run, and that switch moved from before the lookup
+ * (12.41) to after it (12.42).
+ */
+internal data class PostOptionsIconSite(
+    val iconRegister: Int,
+    val iconType: String,
+    val consumerIndex: Int,
+    val consumerActionSlot: Int,
+    val consumerLabelSlot: Int,
+)
+
+private data class PostOptionsIconArm(
+    val index: Int,
+    val destination: Int,
+    val field: FieldReference,
+)
+
+private val GOTO_OPCODES = setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
+
+private val INVOKE_OPCODES =
+    setOf(
+        Opcode.INVOKE_DIRECT,
+        Opcode.INVOKE_DIRECT_RANGE,
+        Opcode.INVOKE_INTERFACE,
+        Opcode.INVOKE_INTERFACE_RANGE,
+        Opcode.INVOKE_STATIC,
+        Opcode.INVOKE_STATIC_RANGE,
+        Opcode.INVOKE_SUPER,
+        Opcode.INVOKE_SUPER_RANGE,
+        Opcode.INVOKE_VIRTUAL,
+        Opcode.INVOKE_VIRTUAL_RANGE,
+    )
+
+/**
+ * Resolve the icon cluster and the sheet constructor that consumes it.
+ *
+ * R8 interleaves the icon switch with the label lookup differently per release, so instruction
+ * order is not the contract. The stable evidence is the value flow: several switch arms move one
+ * field value into the same register and continue to a shared join, and the sheet constructor
+ * takes that register as its icon argument next to the lookup action and label. The action slot
+ * must be proven to carry the lookup action value; the label slot ties through the lookup label
+ * register or one copy of it between the last icon arm and the call. The label deliberately does
+ * not use all-path provenance: releases that map the label through its own register rewrite it
+ * on other paths, which would make a valid consumer look unproven. A consumer is rejected when
+ * anything else writes the icon register between the last arm and the call, because then it does
+ * not read the cluster's value.
+ */
+internal fun resolvePostOptionsIconSite(
+    method: Method,
+    lookup: PostOptionsFeedbackLookup,
+): PostOptionsIconSite {
+    val code = method.instructions.toList()
+    val actionDefinitionIndex =
+        (lookup.callIndex - 1 downTo 0).firstOrNull { index ->
+            code[index].writtenRegisterOrNull() == lookup.actionRegister
+        }
+            ?: throw PatchException(
+                "NewX post-options action v${lookup.actionRegister} has no definition before the " +
+                    "feedback lookup at ${lookup.callIndex}",
+            )
+
+    val arms =
+        code.indices.mapNotNull { index ->
+            val assignment = code[index]
+            if (assignment.opcode !in OBJECT_MOVE_OPCODES) return@mapNotNull null
+            if (code.getOrNull(index + 1)?.opcode !in GOTO_OPCODES) return@mapNotNull null
+            val move =
+                assignment as? TwoRegisterInstruction
+                    ?: throw PatchException(
+                        "NewX post-options icon assignment has no registers at instruction $index",
+                    )
+            val field = code.resolveFieldReadOrNull(move.registerB, index) ?: return@mapNotNull null
+            PostOptionsIconArm(index, move.registerA, field)
+        }
+    val clusters = arms.groupBy(PostOptionsIconArm::destination).filterValues { it.size >= 2 }
+    if (clusters.size != 1) {
+        throw PatchException(
+            "Expected one NewX post-options icon arm cluster, found ${clusters.size}: " +
+                clusters.entries.joinToString { (register, cluster) ->
+                    "v$register at ${cluster.joinToString { it.index.toString() }}"
+                },
+        )
+    }
+    val cluster = clusters.entries.single()
+    val iconRegister = cluster.key
+    val iconArms = cluster.value
+    requireExactlyOne("NewX post-options icon field owner", iconArms.map { it.field.definingClass }.distinct())
+    val iconType = iconArms.first().field.type
+    requireExactlyOne("NewX post-options icon type", iconArms.map { it.field.type }.distinct())
+    val lastArmIndex = iconArms.maxOf(PostOptionsIconArm::index)
+
+    val consumers =
+        code.indices.mapNotNull { index ->
+            if (index <= lastArmIndex) return@mapNotNull null
+            val invoke = code[index]
+            if (invoke.opcode !in INVOKE_OPCODES) return@mapNotNull null
+            val reference = invoke.getReference<MethodReference>() ?: return@mapNotNull null
+            val slots = invoke.parameterSlotRegisters(reference) ?: return@mapNotNull null
+            if (iconRegister !in slots) return@mapNotNull null
+            // The consumer may only receive the cluster's value. A write in between means the
+            // icon it reads is not (or not only) the cluster's, so the tuple is unproven.
+            if (((lastArmIndex + 1) until index).any { code[it].writtenRegisterOrNull() == iconRegister }) {
+                return@mapNotNull null
+            }
+            val actionSlots =
+                slots.indices.filter { slot ->
+                    method.provesValueFromInstruction(
+                        sourceIndex = actionDefinitionIndex,
+                        sourceRegister = lookup.actionRegister,
+                        targetIndex = index,
+                        targetRegister = slots[slot],
+                    )
+                }
+            if (actionSlots.size != 1) return@mapNotNull null
+            val labelSlots =
+                slots.indices.filter { slot ->
+                    reference.parameterTypes[slot].toString() == STRING_DESCRIPTOR &&
+                        code.carriesLabel(slots[slot], lookup.labelRegister, lastArmIndex, index)
+                }
+            if (labelSlots.size != 1) return@mapNotNull null
+            PostOptionsIconSite(
+                iconRegister = iconRegister,
+                iconType = iconType,
+                consumerIndex = index,
+                consumerActionSlot = slots[requireExactlyOne("NewX post-options consumer action slot", actionSlots)],
+                consumerLabelSlot = slots[requireExactlyOne("NewX post-options consumer label slot", labelSlots)],
+            )
+        }
+    return requireExactlyOne("NewX post-options icon consumer", consumers) { site ->
+        "index ${site.consumerIndex}, icon v${site.iconRegister}, " +
+            "action v${site.consumerActionSlot}, label v${site.consumerLabelSlot}"
+    }
+}
+
+/** The register this instruction writes, including the identity-preserving `check-cast`. */
+private fun Instruction.writtenRegisterOrNull(): Int? {
+    if (!opcode.setsRegister()) return null
+    return when (this) {
+        is ThreeRegisterInstruction -> registerA
+        is TwoRegisterInstruction -> registerA
+        is OneRegisterInstruction -> registerA
+        else -> null
+    }
+}
+
+/** Registers holding the declared parameters, in declaration order, or null for a malformed call. */
+private fun Instruction.parameterSlotRegisters(reference: MethodReference): List<Int>? {
+    val registers = registersUsed
+    var cursor =
+        if (opcode == Opcode.INVOKE_STATIC || opcode == Opcode.INVOKE_STATIC_RANGE) 0 else 1
+    val slots = mutableListOf<Int>()
+    reference.parameterTypes.forEach { type ->
+        if (cursor >= registers.size) return null
+        slots += registers[cursor]
+        cursor += if (type.toString() == "J" || type.toString() == "D") 2 else 1
+    }
+    return slots.takeIf { cursor == registers.size }
+}
+
+/** True when the slot holds the lookup label register, or one untouched copy of it. */
+private fun List<Instruction>.carriesLabel(
+    slotRegister: Int,
+    labelRegister: Int,
+    fromIndex: Int,
+    untilIndex: Int,
+): Boolean {
+    if (slotRegister == labelRegister) return true
+    val copies =
+        ((fromIndex + 1) until untilIndex).filter { index ->
+            val instruction = this[index]
+            instruction.opcode in OBJECT_MOVE_OPCODES &&
+                (instruction as TwoRegisterInstruction).registerA == slotRegister
+        }
+    if (copies.size != 1) return false
+    val copyIndex = copies.single()
+    if (((copyIndex + 1) until untilIndex).any { this[it].writtenRegisterOrNull() == slotRegister }) {
+        return false
+    }
+    return (this[copyIndex] as TwoRegisterInstruction).registerB == labelRegister
+}
+
 internal fun postOptionsFeedbackLookups(
     method: Method,
     feedbackField: FieldReference,
@@ -397,62 +579,23 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
     val lookup = requireExactlyOne("NewX post-options feedback lookup",
         postOptionsFeedbackLookups(renderer.method, feedbackField, isMap))
     val actionRegister = lookup.actionRegister
+    val site = resolvePostOptionsIconSite(renderer.method, lookup)
+    val consumerRegisters = renderer.method.instructions[site.consumerIndex].registersUsed
 
-    val iconAssignmentCandidates =
-        renderer.method.instructions.withIndex().filter { (index, instruction) ->
-            instruction.opcode in OBJECT_MOVE_OPCODES &&
-                index < lookup.callIndex &&
-                renderer.method.instructions.getOrNull(index + 1)?.opcode in
-                setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
-        }
-    if (iconAssignmentCandidates.isEmpty()) {
-        throw PatchException(
-            "Expected NewX post-options icon assignments, found none",
-        )
-    }
-    val iconAssignments = iconAssignmentCandidates.mapNotNull { candidate ->
-        val assignment = candidate.value as? TwoRegisterInstruction
-            ?: throw PatchException(
-                "NewX post-options icon assignment has no registers at instruction ${candidate.index}",
-            )
-        val field = renderer.method.instructions.resolveFieldReadOrNull(
-            register = assignment.registerB,
-            untilIndex = candidate.index,
-        ) ?: return@mapNotNull null
-        IconAssignment(instruction = assignment, field = field)
-    }
-    val iconResultRegister =
-        requireExactlyOne(
-            label = "NewX post-options icon result register",
-            candidates = iconAssignments.map { assignment -> assignment.instruction.registerA }.distinct(),
-        )
-    val iconType =
-        requireExactlyOne(
-            label = "NewX post-options icon type",
-            candidates = iconAssignments.map { assignment -> assignment.field.type }.distinct(),
-        )
+    val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, site.iconType) }
 
-    val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, iconType) }
-
-    // The label and icon rewrites land in front of the instruction that consumes the resolved
-    // label, so they run with both the action and the original label live.
-    val insertionIndex = lookup.resultIndex + 1
+    // Insert the later icon hook first so the label hook's earlier index stays valid. The label
+    // rewrite lands in front of the instruction that consumes the resolved label, so it runs with
+    // both the action and the original label live. The icon rewrite has to sit on the sheet
+    // constructor instead: when the icon switch moved behind the label lookup (12.42), writing the
+    // icon register at the lookup result was overwritten by the switch before the sheet read it.
     renderer.method.insertHook(
-        index = insertionIndex,
-        excludedRegisters = listOf(actionRegister, lookup.labelRegister, iconResultRegister),
-        // A branch into the label lookup must run the rewrite too, or the custom options keep
-        // their upstream label and icon.
+        index = site.consumerIndex,
+        excludedRegisters =
+            (listOf(actionRegister, iconCheckRegister) + consumerRegisters)
+                .filter { it != site.iconRegister },
         relocateBranchTargets = true,
     ) {
-        contributions.forEach { contribution ->
-            invokeStatic(
-                methodReference("${contribution.handlerDescriptor}->$LABEL_FOR_SIGNATURE"),
-                actionRegister,
-                lookup.labelRegister,
-            )
-            moveResult(lookup.labelRegister, STRING_DESCRIPTOR)
-        }
-
         // The icon checks share the reserved byte register; if-eqz and move-result both encode it.
         contributions.forEachIndexed { index, contribution ->
             if (index > 0) label(iconContinuationLabel(index))
@@ -469,7 +612,24 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
                     Target.Local(iconContinuationLabel(index + 1))
                 },
             )
-            sget(iconResultRegister, iconFields.getValue(contribution))
+            sget(site.iconRegister, iconFields.getValue(contribution))
+        }
+    }
+
+    renderer.method.insertHook(
+        index = lookup.resultIndex + 1,
+        excludedRegisters = listOf(actionRegister, lookup.labelRegister, site.iconRegister),
+        // A branch into the label lookup must run the rewrite too, or the custom options keep
+        // their upstream label and icon.
+        relocateBranchTargets = true,
+    ) {
+        contributions.forEach { contribution ->
+            invokeStatic(
+                methodReference("${contribution.handlerDescriptor}->$LABEL_FOR_SIGNATURE"),
+                actionRegister,
+                lookup.labelRegister,
+            )
+            moveResult(lookup.labelRegister, STRING_DESCRIPTOR)
         }
     }
 }

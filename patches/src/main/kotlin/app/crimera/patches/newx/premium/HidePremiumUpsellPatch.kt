@@ -12,6 +12,10 @@ import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
+import app.crimera.patches.newx.misc.inlineactions.argumentRegister
+import app.crimera.patches.newx.misc.inlineactions.controlFlowSuccessors
+import app.crimera.patches.newx.misc.inlineactions.provesParameterValue
+import app.crimera.patches.newx.misc.inlineactions.reachableIndicesFrom
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -27,8 +31,12 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val FEATURE_SWITCHES_SCOPE = "Lcom/x/featureswitches/"
 private const val SUBSCRIPTIONS_SCOPE = "Lcom/x/subscriptions/"
@@ -47,7 +55,7 @@ private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
  */
 private fun homeNavStateParameterIndex(parameters: List<String>): Int? {
     val callbacks = parameters.filter { it.startsWith(FUNCTION_PREFIX) }
-    if (callbacks.size < 4 || callbacks.any { it != FUNCTION0_DESCRIPTOR }) return null
+    if (callbacks.isEmpty() || callbacks.any { it != FUNCTION0_DESCRIPTOR }) return null
     return requireAtMostOne(
         label = "NewX home-nav state parameter",
         candidates =
@@ -56,6 +64,46 @@ private fun homeNavStateParameterIndex(parameters: List<String>): Int? {
                     !parameters[index].startsWith(HOME_TABBED_SCOPE)
             },
     )
+}
+
+internal fun resolveHomeNavUpsellStateParameter(method: Method): Int? {
+    val parameters = method.parameterDescriptors()
+    if (!AccessFlags.STATIC.isSet(method.accessFlags) || method.returnType != "V" || !parameters.hasComposeShape(
+            required = listOf("Landroidx/compose/ui/Modifier;", "Landroidx/compose/runtime/Composer;"),
+            last = "I", objectFirst = true,
+        )) return null
+    val stateIndex = homeNavStateParameterIndex(parameters) ?: return null
+    val code = method.implementation?.instructions?.toList() ?: return null
+    if (code.none { it.getReference<StringReference>()?.string == "home_navigation_bar_title" }) return null
+    val edges = method.controlFlowSuccessors() ?: return null
+    val stateRegister = method.p0Register +
+        parameters.take(stateIndex).sumOf { if (it == "J" || it == "D") 2 else 1 }
+    val chipCalls = code.withIndex().filter { (index, instruction) ->
+        if (instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) return@filter false
+        val reference = instruction.getReference<MethodReference>() ?: return@filter false
+        val types = reference.parameterTypes.map(CharSequence::toString)
+        if (!reference.definingClass.startsWith(HOME_TABBED_SCOPE) || reference.returnType != "V" ||
+            "Landroidx/compose/runtime/Composer;" !in types || types.count { it == parameters[stateIndex] } != 1
+        ) return@filter false
+        val register = instruction.argumentRegister(reference, types.indexOf(parameters[stateIndex]))
+            ?: return@filter false
+        method.provesParameterValue(index, register, stateRegister)
+    }.map { it.index }
+    val call = requireAtMostOne("NewX home-nav upsell chip call", chipCalls) ?: return null
+    // Use the header's native nullable-state gate; callback counts and parameter positions change.
+    val gates = code.indices.filter { index ->
+        val instruction = code[index]
+        if (instruction.opcode != Opcode.IF_EQZ && instruction.opcode != Opcode.IF_NEZ) return@filter false
+        val register = (instruction as? OneRegisterInstruction)?.registerA ?: return@filter false
+        if (!method.provesParameterValue(index, register, stateRegister)) return@filter false
+        val branch = edges[index].singleOrNull { it != index + 1 } ?: return@filter false
+        val nonNullEntry = if (instruction.opcode == Opcode.IF_EQZ) index + 1 else branch
+        val nullEntry = if (instruction.opcode == Opcode.IF_EQZ) branch else index + 1
+        val nonNull = edges.reachableIndicesFrom(nonNullEntry) ?: return@filter false
+        val isNull = edges.reachableIndicesFrom(nullEntry) ?: return@filter false
+        call in nonNull && call !in isNull
+    }
+    return stateIndex.takeIf { gates.size == 1 }
 }
 
 private object NewXHomeNavUpsellTypeFingerprint : Fingerprint(
@@ -143,19 +191,7 @@ private object NewXHomeTabbedScaffoldClassFingerprint : Fingerprint(
 private object NewXHomeNavUpsellComposableFingerprint : Fingerprint(
     classFingerprint = NewXHomeTabbedScaffoldClassFingerprint,
     returnType = "V",
-    custom = { method, _ ->
-        val parameters = method.parameterDescriptors()
-        parameters.hasComposeShape(
-            required =
-                listOf(
-                    "Landroidx/compose/ui/Modifier;",
-                    "Landroidx/compose/runtime/Composer;",
-                ),
-            last = "I",
-            objectFirst = true,
-        ) &&
-            homeNavStateParameterIndex(parameters) != null
-    },
+    custom = { method, _ -> resolveHomeNavUpsellStateParameter(method) != null },
 )
 
 private fun MutableMethod.disabledUpsellField(startIndex: Int): FieldReference {
@@ -223,7 +259,7 @@ val hidePremiumUpsellPatch =
                 composeMatch.method.apply {
                     // The fingerprint guarantees this register holds the nullable home-nav state.
                     val stateIndex =
-                        homeNavStateParameterIndex(parameterDescriptors())
+                        resolveHomeNavUpsellStateParameter(this)
                             ?: throw PatchException("NewX home-nav upsell composable lost its state parameter")
                     val stateRegister =
                         p0Register +

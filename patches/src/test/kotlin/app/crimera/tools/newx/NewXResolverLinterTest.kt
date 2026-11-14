@@ -1,6 +1,9 @@
 package app.crimera.tools.newx
 
 import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
+import app.crimera.patches.newx.misc.drawer.findDrawerFooterCalls
+import app.crimera.patches.newx.misc.mediatab.isNewXTimelineBody
+import app.crimera.patches.newx.misc.mediatab.resolveTimelineItemCallbackIndex
 import app.crimera.patches.newx.misc.bringbacktwitter.hasObjectAndIntParameterShape
 import app.crimera.patches.newx.misc.bringbacktwitter.isLaunchRevealRenderer
 import app.crimera.patches.newx.misc.bringbacktwitter.resolveLaunchRevealRenderer
@@ -8,8 +11,14 @@ import app.crimera.patches.newx.misc.dynamiccolor.isDefaultPaletteConstructorAda
 import app.crimera.patches.newx.misc.dynamiccolor.isMediaViewerButtonContent
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstruction
 import app.crimera.patches.newx.misc.inlineactions.provesValueFromInstructionOnSourcePaths
+import app.crimera.patches.newx.misc.canonicalurls.CardNavigationSite
+import app.crimera.patches.newx.misc.canonicalurls.resolveCardNavigationSite
+import app.crimera.patches.newx.misc.inlineactions.resolveVideoTabTuple
+import app.crimera.patches.newx.misc.inlineactions.VideoTabNullableAccessor
+import app.crimera.patches.newx.misc.inlineactions.VideoTabShape
 import app.crimera.patches.newx.misc.dynamiccolor.defaultPaletteConstructorRejection
 import app.crimera.patches.newx.misc.postdetails.replyComposerAnchorIndices
+import app.crimera.patches.newx.misc.postdetails.resolveReplyBarRendererCaller
 import app.crimera.patches.newx.misc.mediatab.isInitialSubTabSeed
 import app.crimera.patches.newx.misc.mediatab.isPendingSubTabStore
 import app.crimera.patches.newx.models.isInlineActionKindModelConstructor
@@ -29,6 +38,7 @@ import app.crimera.patches.newx.timeline.resumeFactoryInputs
 import app.crimera.patches.newx.timeline.wideReadHighRegisters
 import app.crimera.patches.newx.timeline.resolveResumePositionValidation
 import app.crimera.patches.newx.premium.resolveVideoDownloadSubscriptionResults
+import app.crimera.patches.newx.premium.resolveHomeNavUpsellStateParameter
 import app.crimera.patches.newx.premium.resolveTimelineDownloadSubscriptionResults
 import app.crimera.patches.newx.translation.resolveNotePostBodyTextField
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -39,6 +49,7 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderPackedSwitchPa
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
 import app.crimera.patches.newx.misc.postoptions.postOptionsParameterOffset
 import app.crimera.patches.newx.misc.postoptions.postOptionsFeedbackLookups
+import app.crimera.patches.newx.misc.postoptions.resolvePostOptionsIconSite
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableFieldReference
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21t
@@ -60,6 +71,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
@@ -82,6 +94,179 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class NewXResolverLinterTest {
+    @Test
+    fun `home upsell header resolves nullable state independently of callback count`() {
+        val state = "Lcom/x/home/State;"
+        val callback = "Lkotlin/jvm/functions/Function0;"
+        val composer = "Landroidx/compose/runtime/Composer;"
+        val modifier = "Landroidx/compose/ui/Modifier;"
+        fun header(callbacks: List<String>, tag: Boolean = true, gate: Boolean = true): Method {
+            val parameters = listOf("Lcom/x/profilepicture/Fixture;", "Lcom/x/home/tabbed/refresh/Fixture;", state) +
+                callbacks + listOf(modifier, composer, "I")
+            return ImmutableMethod("Lcom/x/home/tabbed/Fixture;", "header",
+                parameters.map { ImmutableMethodParameter(it, emptySet(), null) }, "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(),
+                MethodImplementationBuilder(parameters.size + 2).apply {
+                    if (tag) addInstruction("const-string v0, \"home_navigation_bar_title\"".toInstruction())
+                    if (gate) addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, 4, getLabel("skip")))
+                    addInstruction(("invoke-static {v4, v${parameters.size}}, " +
+                        "Lcom/x/home/tabbed/Fixture;->chip($state$composer)V").toInstruction())
+                    addLabel("skip")
+                    addInstruction("return-void".toInstruction())
+                }.methodImplementation)
+        }
+        assertEquals(2, resolveHomeNavUpsellStateParameter(header(List(4) { callback })))
+        assertEquals(2, resolveHomeNavUpsellStateParameter(header(List(3) { callback })))
+        assertNull(resolveHomeNavUpsellStateParameter(header(List(3) { callback }, tag = false)))
+        assertNull(resolveHomeNavUpsellStateParameter(header(List(3) { callback }, gate = false)))
+        assertNull(resolveHomeNavUpsellStateParameter(header(listOf(callback, "Lkotlin/jvm/functions/Function1;"))))
+    }
+
+    @Test
+    fun `reply renderer follows composed content lambda and rejects unused allocations`() {
+        val owner = "Lcom/x/composer/minimal/Fixture;"
+        val lambda = "Lcom/x/composer/minimal/Content;"
+        val composer = "Landroidx/compose/runtime/Composer;"
+        fun method(type: String, name: String, code: List<String>) = ImmutableMethod(
+            type, name, emptyList<ImmutableMethodParameter>(), "V",
+            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(),
+            MethodImplementationBuilder(4).apply {
+                code.forEach { addInstruction(it.toInstruction()) }
+                addInstruction("return-void".toInstruction())
+            }.methodImplementation)
+        val target = method(owner, "textField", emptyList())
+        val direct = method(owner, "direct", listOf("invoke-static {}, $owner->textField()V"))
+        val invoke = ImmutableMethod(lambda, "invoke",
+            List(2) { ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null) },
+            "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(),
+            MethodImplementationBuilder(3).apply {
+                addInstruction("invoke-static {}, $owner->textField()V".toInstruction())
+                addInstruction("const/4 v0, 0x0".toInstruction())
+                addInstruction("return-object v0".toInstruction())
+            }.methodImplementation)
+        val definition = ImmutableClassDef(lambda, AccessFlags.PUBLIC.value, "Ljava/lang/Object;",
+            listOf("Lkotlin/jvm/functions/Function2;"), null, emptySet(), emptyList(), listOf(invoke))
+        val allocation = listOf("new-instance v0, $lambda", "invoke-direct {v0}, $lambda-><init>()V")
+        val factory = "invoke-static {v1, v0, v2}, Landroidx/compose/runtime/internal/Fixture;->wrap(" +
+            "ILkotlin/Function;$composer)Landroidx/compose/runtime/internal/Content;"
+        val nested = method(owner, "nested", allocation + factory + "move-result-object v0")
+        val unused = method(owner, "unused", allocation)
+        val overwritten = method(owner, "overwritten", allocation + "const/4 v0, 0x0" + factory)
+        fun resolve(vararg methods: Method) = resolveReplyBarRendererCaller(methods.toList(), target) { definition }
+        assertEquals(direct, resolve(direct, unused))
+        assertEquals(nested, resolve(nested, unused, overwritten))
+        assertFailsWith<PatchException> { resolve(unused, overwritten) }
+        assertFailsWith<PatchException> { resolve(direct, nested) }
+    }
+
+    @Test
+    fun `timeline callback resolution follows captured item callback with auxiliary timeline type`() {
+        val owner = "Lcom/x/urt/ui/Fixture;"
+        val lambda = "Lcom/x/urt/ui/Content;"
+        val list = "Lkotlinx/collections/immutable/Fixture;"
+        val timeline = "Lcom/x/models/timelines/Fixture;"
+        val callback = "Lkotlin/jvm/functions/Function1;"
+        val modifier = "Landroidx/compose/ui/Modifier;"
+        val rendererParameters = listOf(list, timeline, callback, callback, modifier,
+            "Landroidx/compose/runtime/Composer;", "I")
+        val captures = listOf("Lkotlin/jvm/functions/Function3;", "Lcom/x/urt/paging/Fixture;",
+            list, callback, callback)
+        fun resolve(captured: List<String>): Int {
+            val constructor = ImmutableMethod(lambda, "<init>",
+                captured.map { ImmutableMethodParameter(it, emptySet(), null) }, "V",
+                AccessFlags.PUBLIC.value or AccessFlags.CONSTRUCTOR.value,
+                emptySet(), emptySet(), null)
+            val definition = ImmutableClassDef(lambda, AccessFlags.PUBLIC.value, "Ljava/lang/Object;",
+                emptyList(), null, emptySet(), emptyList(), listOf(constructor))
+            val renderer = ImmutableMethod(owner, "body",
+                rendererParameters.map { ImmutableMethodParameter(it, emptySet(), null) }, "V",
+                AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(),
+                MethodImplementationBuilder(14).apply {
+                    listOf("new-instance v0, $lambda", "const/4 v1, 0x0", "const/4 v2, 0x0",
+                        "move-object v3, v7", "move-object v4, v10", "move-object v5, v9",
+                        "move-object v6, v8").forEach { addInstruction(it.toInstruction()) }
+                    addInstruction(("invoke-direct/range {v0 .. v${captured.size}}, " +
+                        "$lambda-><init>(${captured.joinToString("")})V").toInstruction())
+                    addInstruction("return-void".toInstruction())
+                }.methodImplementation)
+            return resolveTimelineItemCallbackIndex(renderer, list) { type ->
+                check(type == lambda)
+                definition
+            }
+        }
+        assertEquals(2, resolve(captures))
+        assertEquals(2, resolve(captures + timeline))
+        assertFailsWith<PatchException> { resolve(captures + timeline + modifier) }
+        assertFailsWith<PatchException> { resolve(captures.filter { it != callback } + timeline) }
+    }
+
+    @Test
+    fun `timeline item content may capture timeline type while restart lambdas stay excluded`() {
+        val owner = "Lcom/x/urt/ui/Fixture;"
+        val lambda = "Lcom/x/urt/ui/Content;"
+        val list = "Lkotlinx/collections/immutable/Fixture;"
+        val timeline = "Lcom/x/models/timelines/Fixture;"
+        val modifier = "Landroidx/compose/ui/Modifier;"
+        val callback = "Lkotlin/jvm/functions/Function1;"
+        val parameters = listOf(list, timeline, callback, modifier, "Landroidx/compose/runtime/Composer;", "I")
+        val captures = listOf("Lkotlin/jvm/functions/Function3;", "Lcom/x/urt/paging/Fixture;", list, callback)
+        fun body(captured: List<String>): Method = ImmutableMethod(
+            owner, "body", parameters.map { ImmutableMethodParameter(it, emptySet(), null) }, "V",
+            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value, emptySet(), emptySet(),
+            MethodImplementationBuilder(12).apply {
+                addInstruction("new-instance v0, $lambda".toInstruction())
+                addInstruction(("invoke-direct/range {v0 .. v${captured.size}}, " +
+                    "$lambda-><init>(${captured.joinToString("")})V").toInstruction())
+                addInstruction("return-void".toInstruction())
+            }.methodImplementation,
+        )
+        assertTrue(isNewXTimelineBody(body(captures), owner))
+        assertTrue(isNewXTimelineBody(body(captures + timeline), owner))
+        assertFalse(isNewXTimelineBody(body(captures + timeline + modifier), owner))
+        assertFalse(isNewXTimelineBody(body(captures.filter { it != list }), owner))
+        assertFalse(isNewXTimelineBody(body(captures), "Lfixture/Other;"))
+    }
+
+    @Test
+    fun `drawer footer follows divider and row semantics when R8 reorders parameters`() {
+        val owner = "Lcom/x/main/drawer/Fixture;"
+        val composer = "Landroidx/compose/runtime/Composer;"
+        val modifier = "Landroidx/compose/ui/Modifier;"
+        val icon = "Lcom/x/icons/Fixture;"
+        val click = "Lkotlin/jvm/functions/Function0;"
+        val content = "Landroidx/compose/runtime/internal/Fixture;"
+        val string = "Ljava/lang/String;"
+        val menu = ImmutableMethodReference(owner, "menu",
+            listOf(string, icon, click, modifier, "Z", content, content, composer, "I", "I"), "V")
+        val oldFooter = listOf(string, icon, click, modifier, content, composer, "I", "I")
+        val reorderedFooter = listOf("I", "I", composer, content, modifier, icon, string, click)
+        fun candidate(parameters: List<String>, divider: Boolean = true, otherOwner: Boolean = false): MutableMethod {
+            val footerOwner = if (otherOwner) "Lfixture/Other;" else owner
+            val implementation = MethodImplementationBuilder(16).apply {
+                if (divider) addInstruction(("invoke-static {v0, v1, v2, v3}, $owner->divider(" +
+                    "Landroidx/compose/material3/Fixture;Lkotlin/jvm/functions/Function1;${composer}I)V").toInstruction())
+                addInstruction(("invoke-static/range {v0 .. v${parameters.size - 1}}, " +
+                    "$footerOwner->footer(${parameters.joinToString("")})V").toInstruction())
+                addInstruction("return-void".toInstruction())
+            }.methodImplementation
+            return MutableMethod(ImmutableMethod("Lcom/x/main/drawer/Content;", "invoke",
+                List(3) { ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null) },
+                "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation))
+        }
+        for (parameters in listOf(oldFooter, reorderedFooter)) {
+            val resolved = candidate(parameters).findDrawerFooterCalls(menu)
+            assertEquals(parameters, resolved?.renderer?.parameterTypes?.map(CharSequence::toString))
+            assertEquals(0, resolved?.dividerIndex)
+            assertEquals(1, resolved?.calls?.single()?.index)
+        }
+        assertNull(candidate(reorderedFooter, divider = false).findDrawerFooterCalls(menu))
+        assertNull(candidate(reorderedFooter, otherOwner = true).findDrawerFooterCalls(menu))
+        assertNull(candidate(reorderedFooter.map { if (it == click) "Lfixture/Other;" else it })
+            .findDrawerFooterCalls(menu))
+        assertNull(candidate(reorderedFooter.map { if (it == icon) string else it })
+            .findDrawerFooterCalls(menu))
+    }
+
     @Test
     fun `launch reveal marker fails closed while renderer matching follows its SurfaceControl work`() {
         val marker =
@@ -962,6 +1147,210 @@ class NewXResolverLinterTest {
             }
         }
     }
+
+    @Test
+    fun `post options icon site follows the arm cluster into the sheet consumer across switch order`() {
+        val feedback = ImmutableFieldReference("Lfixture/State;", "feedback", "Ljava/util/Map;")
+        listOf(false, true).forEach { clusterAfterLookup ->
+            val fixture = postOptionsIconRendererFixture(clusterAfterLookup)
+            val lookup =
+                postOptionsFeedbackLookups(fixture.method, feedback) {
+                    it == "Ljava/util/Map;"
+                }.single()
+            val site = resolvePostOptionsIconSite(fixture.method, lookup)
+            assertEquals(7, lookup.actionRegister)
+            assertEquals(25, site.iconRegister)
+            assertEquals("Lfixture/Icon;", site.iconType)
+            assertEquals(24, site.consumerActionSlot)
+            assertEquals(26, site.consumerLabelSlot)
+            assertEquals(fixture.consumerIndex, site.consumerIndex)
+            // The icon switch runs after the lookup in 12.42, so the hook cannot stay there.
+            assertTrue(site.consumerIndex > lookup.resultIndex)
+            if (clusterAfterLookup) {
+                // A grok sheet with a null icon consumes the same action and label before the
+                // switch; only the cluster-to-consumer order separates it from the real sheet.
+                val sheetCalls =
+                    fixture.method.instructions.withIndex().filter { (_, instruction) ->
+                        instruction.getReference<MethodReference>()?.let { reference ->
+                            reference.name == "<init>" && reference.definingClass == "Lfixture/Sheet;"
+                        } == true
+                    }
+                assertEquals(2, sheetCalls.size)
+                assertTrue(sheetCalls.any { it.index < site.consumerIndex })
+            }
+        }
+    }
+
+    @Test
+    fun `post options icon site fails closed on ambiguous clusters and consumers`() {
+        val feedback = ImmutableFieldReference("Lfixture/State;", "feedback", "Ljava/util/Map;")
+        fun resolve(fixture: PostOptionsIconFixture) {
+            val lookup =
+                postOptionsFeedbackLookups(fixture.method, feedback) {
+                    it == "Ljava/util/Map;"
+                }.single()
+            resolvePostOptionsIconSite(fixture.method, lookup)
+        }
+        // Two move+goto clusters writing different registers.
+        assertFailsWith<PatchException> {
+            resolve(postOptionsIconRendererFixture(clusterAfterLookup = true, secondClusterDestination = true))
+        }
+        // One cluster whose arms resolve to two icon types.
+        assertFailsWith<PatchException> {
+            resolve(postOptionsIconRendererFixture(clusterAfterLookup = true, conflictingIconType = true))
+        }
+        // The sheet constructor does not carry the lookup action value.
+        assertFailsWith<PatchException> {
+            resolve(postOptionsIconRendererFixture(clusterAfterLookup = false, consumerActionRegister = 8))
+        }
+        // The icon register is rewritten between the last arm and the consumer.
+        assertFailsWith<PatchException> {
+            resolve(postOptionsIconRendererFixture(clusterAfterLookup = true, rewriteIconBeforeConsumer = true))
+        }
+    }
+
+    private data class PostOptionsIconFixture(val method: Method, val consumerIndex: Int)
+
+    private fun postOptionsIconRendererFixture(
+        clusterAfterLookup: Boolean,
+        secondClusterDestination: Boolean = false,
+        conflictingIconType: Boolean = false,
+        consumerActionRegister: Int = 7,
+        rewriteIconBeforeConsumer: Boolean = false,
+    ): PostOptionsIconFixture {
+        val code = MethodImplementationBuilder(32)
+        var added = 0
+        fun add(instruction: String) {
+            code.addInstruction(instruction.toInstruction())
+            added++
+        }
+        fun gotoLabel(name: String) {
+            code.addInstruction(BuilderInstruction10t(Opcode.GOTO, code.getLabel(name)))
+            added++
+        }
+        fun ifEqz(register: Int, name: String) {
+            code.addInstruction(BuilderInstruction21t(Opcode.IF_EQZ, register, code.getLabel(name)))
+            added++
+        }
+        fun arm(
+            source: Int,
+            destination: Int,
+            target: String,
+            iconType: String = "Lfixture/Icon;",
+        ) {
+            add("sget-object v$source, Lfixture/Icons;->icon$source:$iconType")
+            add("move-object/from16 v$destination, v$source")
+            gotoLabel(target)
+        }
+        fun extraCluster(target: String) {
+            if (secondClusterDestination) {
+                arm(source = 18, destination = 22, target = target)
+                arm(source = 18, destination = 22, target = target)
+            }
+            if (conflictingIconType) {
+                arm(source = 18, destination = 25, target = target, iconType = "Lfixture/OtherIcon;")
+            }
+        }
+
+        add("iget-object v7, v3, Lfixture/State;->action:Lfixture/Action;")
+        if (clusterAfterLookup) {
+            // 12.42: the lookup and its null gate precede the icon switch.
+            add("iget-object v15, v3, Lfixture/State;->feedback:Ljava/util/Map;")
+            add("invoke-interface {v15, v7}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;")
+            add("move-result-object v6")
+            add("check-cast v6, Ljava/lang/String;")
+            ifEqz(6, "exit")
+            add("invoke-static {v6}, Lfixture/Text;->isBlank(Ljava/lang/CharSequence;)Z")
+            add("move-result v16")
+            ifEqz(16, "exit")
+            add("sget-object v2, Lfixture/Action;->Grok:Lfixture/Action;")
+            code.addInstruction(
+                BuilderInstruction22t(Opcode.IF_NE, 7, 2, code.getLabel("afterGrok")),
+            )
+            added++
+            // The grok sheet uses a null icon; it must not become the icon hook target.
+            add("new-instance v23, Lfixture/Sheet;")
+            add("const/16 v28, 0x0")
+            add("const/16 v29, 0x7a")
+            add("const/16 v25, 0x0")
+            add("const/16 v27, 0x0")
+            add("move-object/from16 v26, v6")
+            add("move-object/from16 v24, v7")
+            add(
+                "invoke-direct/range {v23 .. v29}, Lfixture/Sheet;-><init>" +
+                    "(Ljava/lang/Object;Lfixture/Icon;Ljava/lang/String;Ljava/lang/String;" +
+                    "Ljava/lang/Boolean;I)V",
+            )
+            gotoLabel("exit")
+            code.addLabel("afterGrok")
+            add("sget-object v25, Lfixture/Icons;->q7:Lfixture/Icon;")
+            // Compose parameter restores must not look like icon arms.
+            add("move-object/from16 v29, v0")
+            add("move-object/from16 v30, v2")
+            add("move-object/from16 v31, v4")
+            gotoLabel("join")
+            arm(source = 17, destination = 25, target = "join")
+            arm(source = 19, destination = 25, target = "join")
+            arm(source = 20, destination = 25, target = "join")
+            extraCluster("join")
+        } else {
+            // 12.41: the icon switch precedes the lookup.
+            add("sget-object v25, Lfixture/Icons;->q7:Lfixture/Icon;")
+            arm(source = 17, destination = 25, target = "lookup")
+            arm(source = 19, destination = 25, target = "lookup")
+            arm(source = 20, destination = 25, target = "lookup")
+            extraCluster("lookup")
+            code.addLabel("lookup")
+            add("iget-object v15, v3, Lfixture/State;->feedback:Ljava/util/Map;")
+            add("invoke-interface {v15, v7}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;")
+            add("move-result-object v6")
+            add("check-cast v6, Ljava/lang/String;")
+            ifEqz(6, "exit")
+            // The label-mapping path rewrites the lookup result register before the sheet copy.
+            add("invoke-static {v6}, Lfixture/Text;->trim(Ljava/lang/CharSequence;)Ljava/lang/String;")
+            add("move-result-object v6")
+            add("new-instance v23, Lfixture/Sheet;")
+            add("const/16 v28, 0x0")
+            add("const/16 v29, 0x79")
+            add("const/16 v27, 0x0")
+            add("move-object/from16 v26, v6")
+            add("move-object/from16 v24, v$consumerActionRegister")
+            add(
+                "invoke-direct/range {v23 .. v29}, Lfixture/Sheet;-><init>" +
+                    "(Ljava/lang/Object;Lfixture/Icon;Ljava/lang/String;Ljava/lang/String;" +
+                    "Ljava/lang/Boolean;I)V",
+            )
+            val consumerIndex = added - 1
+            code.addLabel("exit")
+            add("return-void")
+            return PostOptionsIconFixture(postOptionsIconMethod(code), consumerIndex)
+        }
+        // The real consumer follows the joined icon switch.
+        code.addLabel("join")
+        if (rewriteIconBeforeConsumer) add("const/16 v25, 0x0")
+        add("new-instance v23, Lfixture/Sheet;")
+        add("const/16 v28, 0x0")
+        add("const/16 v29, 0x78")
+        add("const/16 v27, 0x0")
+        add("move-object/from16 v26, v6")
+        add("move-object/from16 v24, v$consumerActionRegister")
+        add(
+            "invoke-direct/range {v23 .. v29}, Lfixture/Sheet;-><init>" +
+                "(Ljava/lang/Object;Lfixture/Icon;Ljava/lang/String;Ljava/lang/String;" +
+                "Ljava/lang/Boolean;I)V",
+        )
+        val consumerIndex = added - 1
+        code.addLabel("exit")
+        add("return-void")
+        return PostOptionsIconFixture(postOptionsIconMethod(code), consumerIndex)
+    }
+
+    private fun postOptionsIconMethod(code: MethodImplementationBuilder): Method =
+        ImmutableMethod(
+            "Lfixture/Renderer;", "render", emptyList(), "V",
+            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+            emptySet(), emptySet(), code.methodImplementation,
+        )
 
     @Test
     fun `post options constructor follows the semantic field input across auxiliary type and parameter churn`() {
@@ -2846,6 +3235,80 @@ class NewXResolverLinterTest {
         val fieldLoad = wide("iget-wide v4, v0, Lfixture/WideHolder;->value:J", "return-wide v4")
         assertTrue(fieldLoad.provesValueFromInstruction(0, 4, 1, 4))
         assertTrue(fieldLoad.provesValueFromInstruction(0, 5, 1, 5))
+    }
+
+    @Test
+    fun `download tuple accepts the nullable-narrowed post accessor and rejects broken null arms`() {
+        // 12.42 lowers `wrapper.post.postResult as? CanonicalPost` to an instance-of diamond, so the
+        // accessor proof must accept that return shape without weakening the null arm it proves.
+        val tuple = resolveVideoTabTuple(
+            VideoTabShape(
+                nullableAccessor = VideoTabNullableAccessor.NARROWING,
+                postResultCast = true,
+            ),
+        )
+        assertEquals(
+            "Lapp/crimera/test/VideoTabHandler;->container:Lapp/crimera/test/ProgressEventWrapper;",
+            tuple.containerField.toString(),
+        )
+        assertEquals(
+            "Lapp/crimera/test/ProgressEventWrapper;->post:Lapp/crimera/test/TimelinePost;",
+            tuple.postField.toString(),
+        )
+
+        listOf(
+            VideoTabNullableAccessor.ZERO_ARM_NONZERO,
+            VideoTabNullableAccessor.WRONG_TEST_TYPE,
+            VideoTabNullableAccessor.NULL_ARM_OTHER_REGISTER,
+        ).forEach { variant ->
+            assertFailsWith<PatchException>(variant.name) {
+                resolveVideoTabTuple(VideoTabShape(nullableAccessor = variant, postResultCast = true))
+            }
+        }
+    }
+
+    @Test
+    fun `canonical card navigation follows the URL arm after its merged owner moves`() {
+        val card = "Lcom/x/cards/api/CardUrl;"
+        val post = "Lcom/x/models/ContextualPost;"
+        fun callback(
+            owner: String,
+            alias: Boolean = false,
+            id: Boolean = true,
+            clobber: Boolean = false,
+            wrongGuard: Boolean = false,
+            wrongPost: Boolean = false,
+            duplicate: Boolean = false,
+        ): Method = ImmutableMethod(
+            owner, "invoke", listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)),
+            "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(),
+            MethodImplementationBuilder(16).apply {
+                addInstruction("instance-of v13, v10, $card".toInstruction())
+                if (duplicate) addInstruction("instance-of v13, v10, $card".toInstruction())
+                addInstruction(BuilderInstruction21t(if (wrongGuard) Opcode.IF_NEZ else Opcode.IF_EQZ, 13, getLabel("skip")))
+                if (alias) addInstruction("move-object v11, v10".toInstruction())
+                val receiver = if (alias) 11 else 10
+                addInstruction("check-cast v$receiver, $card".toInstruction())
+                addInstruction("iget-object v0, v$receiver, $card->url:Ljava/lang/String;".toInstruction())
+                if (clobber) addInstruction("const/4 v0, 0x0".toInstruction())
+                addInstruction("invoke-static {v0, v1, v6}, Lcom/x/navigation/Routes;->open(Ljava/lang/String;Ljava/lang/Object;Z)Ljava/lang/String;".toInstruction())
+                addInstruction("move-result-object v12".toInstruction())
+                val postOwner = if (wrongPost) "Lcom/x/models/Other;" else post
+                addInstruction("iget-object v2, v9, $postOwner->value:Ljava/lang/Object;".toInstruction())
+                if (id) addInstruction("invoke-interface {v2}, Lcom/x/models/PostId;->getId()Ljava/lang/Object;".toInstruction())
+                addLabel("skip")
+                addInstruction("return-object v0".toInstruction())
+            }.methodImplementation,
+        )
+        val oldOwner = "Landroidx/compose/animation/core/OldMerged;"
+        val newOwner = "Lcom/x/urt/items/post/NewMerged;"
+        assertEquals(CardNavigationSite(5, 0, 8, 9), resolveCardNavigationSite(callback(oldOwner, alias = true), card, post))
+        assertEquals(CardNavigationSite(4, 0, 7, 9), resolveCardNavigationSite(callback(newOwner), card, post))
+        listOf(
+            callback(newOwner, id = false), callback(newOwner, clobber = true),
+            callback(newOwner, wrongGuard = true), callback(newOwner, wrongPost = true),
+        ).forEach { assertEquals(null, resolveCardNavigationSite(it, card, post)) }
+        assertFailsWith<PatchException> { resolveCardNavigationSite(callback(newOwner, duplicate = true), card, post) }
     }
 
     private fun lint(source: String): List<ResolverLinter.Finding> =

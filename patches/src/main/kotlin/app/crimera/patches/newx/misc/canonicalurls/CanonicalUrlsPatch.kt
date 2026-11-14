@@ -44,6 +44,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -1001,140 +1002,130 @@ private fun patchCardNavigation(
     contextualPostType: String,
     setting: ToggleSettingDefinition,
 ) {
-    // The URL handed to the card navigation call is the card URL field read directly, because the
-    // getter is inlined into the callback. The tail anchors keep the match on the card path even
-    // when the callback contains other navigation calls.
-    // The navigation helper's arity is not an invariant: 12.34 added a boolean argument to it
-    // (`navigation/kd;->a(String, L, Z)`). The URL-as-first-argument contract is checked by
-    // verifyCardNavigationConsumes, so the parameter list is left unconstrained here.
-    val tailFilters =
-        listOf(
-            methodCall(
-                opcode = Opcode.INVOKE_STATIC,
-                definingClass = "Lcom/x/navigation/",
-                returnType = STRING_DESCRIPTOR,
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_INTERFACE,
-                name = "getId",
-                parameters = emptyList(),
-                returnType = "L",
-            ),
-            fieldAccess(opcode = Opcode.IGET_WIDE, type = "J"),
-            methodCall(
-                definingClass = "Lcom/x/urt/items/post/",
-                parameters = listOf(STRING_DESCRIPTOR, "J", "L", STRING_DESCRIPTOR),
-                returnType = "L",
-            ),
-        )
-    val inlinedMatches =
-        Fingerprint(
-            definingClass = "Landroidx/compose/animation/core/",
-            parameters = listOf("Ljava/lang/Object;"),
-            returnType = "Ljava/lang/Object;",
-            filters =
-                listOf(
-                    instanceOf(cardUrlActionType),
-                    fieldAccess(opcode = Opcode.IGET_OBJECT, type = STRING_DESCRIPTOR),
-                ) + tailFilters,
-        ).scopedMatchAllOrNull().orEmpty()
-    val match =
-        requireExactlyOne(
-            "inlined card navigation callback",
-            inlinedMatches.distinctBy { it.originalMethod.toString() },
-        ) { it.originalMethod.toString() }
-    val shape = resolveInlinedCardNavigationShape(match, cardUrlActionType)
-    val postRegister =
-        resolveContextualPostRegister(
-            shape.match.method,
-            shape.navigationIndex + 1,
-            shape.getIdIndex,
-            contextualPostType,
-        )
+    // R8 assigns merged callbacks to unrelated owners. The resolved card action type is the rare
+    // anchor; its URL/navigation/post value flow distinguishes the real callback from other cards.
+    val matches = Fingerprint(filters = listOf(instanceOf(cardUrlActionType)))
+        .scopedMatchAllOrNull().orEmpty().distinctBy { it.originalMethod.toString() }
+    val resolved = matches.mapNotNull { match ->
+        resolveCardNavigationSite(match.originalMethod, cardUrlActionType, contextualPostType)
+            ?.let { match to it }
+    }
+    val (match, site) = requireExactlyOne(
+        "inlined card navigation callback among ${matches.map { it.originalMethod }}",
+        resolved,
+    ) { (match, site) -> "${match.originalMethod}: $site" }
     patchCardUrl(
-        shape.match,
-        shape.navigationIndex,
-        postRegister,
-        shape.urlRegister,
+        match,
+        site.navigationIndex,
+        site.postRegister,
+        site.urlRegister,
         setting,
     )
 }
 
-private data class CardNavigationShape(
-    val match: Match,
+internal data class CardNavigationSite(
     val navigationIndex: Int,
     val urlRegister: Int,
     val getIdIndex: Int,
+    val postRegister: Int,
 )
 
-private fun resolveInlinedCardNavigationShape(
-    match: Match,
-    cardUrlActionType: String,
-): CardNavigationShape {
-    val instructions = match.method.instructions.toList()
-    val readIndex = match.instructionMatches[1].index
-    val read = instructions.getOrNull(readIndex)
-        ?: throw PatchException("Card URL field read is missing")
-    val field = read.getReference<FieldReference>()
-    if (read.opcode != Opcode.IGET_OBJECT ||
-        field?.definingClass != cardUrlActionType ||
-        field.type != STRING_DESCRIPTOR
-    ) {
-        throw PatchException("Card URL field read is not the card URL field: $read")
-    }
-    val urlRegister =
-        (read as? TwoRegisterInstruction)?.registerA
-            ?: throw PatchException("Card URL field read has no destination register")
-    val navigationIndex = match.instructionMatches[2].index
-    verifyCardNavigationConsumes(instructions, navigationIndex, urlRegister)
-    return CardNavigationShape(
-        match = match,
-        navigationIndex = navigationIndex,
-        urlRegister = urlRegister,
-        getIdIndex = match.instructionMatches[3].index,
-    )
-}
-
-private fun verifyCardNavigationConsumes(
-    instructions: List<Instruction>,
-    navigationIndex: Int,
-    urlRegister: Int,
-) {
-    val navigation = instructions.getOrNull(navigationIndex)
-        ?: throw PatchException("Card navigation call is missing")
-    val consumed = navigation.registersUsed.firstOrNull()
-    if (consumed != urlRegister) {
-        throw PatchException(
-            "Card navigation call consumes v$consumed; expected the URL register v$urlRegister",
-        )
-    }
-}
-
-private fun resolveContextualPostRegister(
+/** Resolves the card URL arm, independently of other cases in an R8 merged callback. */
+internal fun resolveCardNavigationSite(
     method: Method,
-    afterIndex: Int,
-    getIdIndex: Int,
-    contextualPostType: String,
-): Int {
-    val instructions = method.instructions.toList()
-    val getId = instructions.getOrNull(getIdIndex)
-        ?: throw PatchException("Card navigation getId call is missing")
-    val getIdReceiver = requireExactlyOne(
-        "card navigation getId receiver register",
-        getId.registersUsed,
-    )
-    val candidates = (afterIndex until getIdIndex).mapNotNull { index ->
+    cardType: String,
+    postType: String,
+): CardNavigationSite? {
+    val instructions = method.implementation?.instructions?.toList() ?: return null
+    val anchor = requireAtMostOne(
+        "card navigation instance check in $method",
+        instructions.indices.filter { index ->
+            instructions[index].opcode == Opcode.INSTANCE_OF &&
+                instructions[index].getReference<TypeReference>()?.type == cardType
+        },
+    ) ?: return null
+    val check = instructions[anchor] as? TwoRegisterInstruction ?: return null
+    val guard = instructions.getOrNull(anchor + 1) as? OneRegisterInstruction ?: return null
+    if (guard.opcode != Opcode.IF_EQZ || guard.registerA != check.registerA) return null
+    // This guarded prologue is a straight-line contract, including the optional receiver copy.
+    // newx-resolver-lint: allow instruction-order because the cast/read are the guarded prologue.
+    var castIndex = anchor + 2
+    var receiver = check.registerB
+    val copy = instructions.getOrNull(castIndex) as? TwoRegisterInstruction
+    if (copy?.opcode in CARD_OBJECT_MOVES) {
+        if (copy == null || copy.registerB != receiver) return null
+        receiver = copy.registerA
+        castIndex++
+    }
+    val cast = instructions.getOrNull(castIndex) as? OneRegisterInstruction ?: return null
+    if (cast.opcode != Opcode.CHECK_CAST || cast.registerA != receiver ||
+        cast.getReference<TypeReference>()?.type != cardType
+    ) return null
+    val readIndex = castIndex + 1
+    val read = instructions.getOrNull(readIndex) as? TwoRegisterInstruction ?: return null
+    val field = read.getReference<FieldReference>() ?: return null
+    if (read.opcode != Opcode.IGET_OBJECT || read.registerB != receiver ||
+        field.definingClass != cardType || field.type != STRING_DESCRIPTOR
+    ) return null
+    val skip = instructions.branchTargetIndex(anchor + 1) ?: return null
+    if (skip <= readIndex || skip !in instructions.indices) return null
+
+    var navigation = -1
+    for (index in readIndex + 1 until skip) {
         val instruction = instructions[index]
-        val read = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
-        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-        read.registerB.takeIf {
-            instruction.opcode == Opcode.IGET_OBJECT &&
-                read.registerA == getIdReceiver &&
-                field.definingClass == contextualPostType &&
-                field.type.startsWith("L")
+        if (instruction.cardWritesRegister(read.registerA) || instruction.opcode in BASIC_BLOCK_BOUNDARY_OPCODES) break
+        val call = instruction.getReference<MethodReference>() ?: continue
+        if (instruction.opcode in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) &&
+            call.definingClass.startsWith("Lcom/x/navigation/") &&
+            call.returnType == STRING_DESCRIPTOR &&
+            call.parameterTypes.firstOrNull()?.toString() == STRING_DESCRIPTOR &&
+            instruction.registersUsed.firstOrNull() == read.registerA
+        ) {
+            navigation = index
+            break
         }
-    }.distinct()
-    return requireExactlyOne("card navigation contextual-post source", candidates)
+    }
+    if (navigation < 0) return null
+    var getId = -1
+    for (index in navigation + 1 until skip) {
+        val instruction = instructions[index]
+        if (instruction.opcode in BASIC_BLOCK_BOUNDARY_OPCODES) break
+        val call = instruction.getReference<MethodReference>() ?: continue
+        if (instruction.opcode in setOf(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE) &&
+            call.name == "getId" && call.parameterTypes.isEmpty() && call.returnType.startsWith("L")
+        ) {
+            getId = index
+            break
+        }
+    }
+    if (getId < 0) return null
+    val idReceiver = requireAtMostOne("card navigation ID receiver", instructions[getId].registersUsed) ?: return null
+    val postReads = (navigation + 1 until getId).filter { index ->
+        val instruction = instructions[index]
+        val postRead = instruction as? TwoRegisterInstruction ?: return@filter false
+        val postField = instruction.getReference<FieldReference>() ?: return@filter false
+        instruction.opcode == Opcode.IGET_OBJECT && postRead.registerA == idReceiver &&
+            postField.definingClass == postType && postField.type.startsWith("L")
+    }
+    val postReadIndex = requireAtMostOne("card navigation post read", postReads) ?: return null
+    val postRead = instructions[postReadIndex] as TwoRegisterInstruction
+    if ((postReadIndex + 1 until getId).any { instructions[it].cardWritesRegister(idReceiver) } ||
+        (navigation until postReadIndex).any { instructions[it].cardWritesRegister(postRead.registerB) }
+    ) return null
+    return CardNavigationSite(navigation, read.registerA, getId, postRead.registerB)
+}
+
+private val CARD_OBJECT_MOVES = setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
+
+private fun Instruction.cardWritesRegister(register: Int): Boolean {
+    if (!opcode.setsRegister()) return false
+    val destination = when (this) {
+        is OneRegisterInstruction -> registerA
+        is TwoRegisterInstruction -> registerA
+        is ThreeRegisterInstruction -> registerA
+        else -> return false
+    }
+    return destination == register || (opcode.setsWideRegister() && destination + 1 == register)
 }
 
 context(_: BytecodePatchContext)

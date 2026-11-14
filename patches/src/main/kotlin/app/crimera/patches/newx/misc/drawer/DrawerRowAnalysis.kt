@@ -15,19 +15,18 @@ internal fun MethodReference.isStringResourceLookup(): Boolean =
         parameterTypes.map(CharSequence::toString) == listOf(COMPOSER_DESCRIPTOR, "I")
 
 /**
- * Title-based drawer row renderer. Releases add a selected flag and a trailing content lambda to
- * the same renderer, so only the stable prefix and the trailing composable fields are asserted.
+ * Title-based row contract within an already anchored drawer call graph. R8 can reorder every
+ * parameter, including Composer and change masks. Auxiliary reference/Int/Boolean parameters are
+ * borrowed from the native call; title, icon and click must each remain unambiguous.
  */
 internal fun MethodReference.isDrawerRowRenderer(): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
     return returnType == "V" &&
-        parameters.size in 8..10 &&
-        parameters[0] == STRING_DESCRIPTOR &&
-        parameters[1].startsWith(ICONS_DESCRIPTOR_PREFIX) &&
-        parameters[2] == FUNCTION0_DESCRIPTOR &&
-        parameters[3] == MODIFIER_DESCRIPTOR &&
+        parameters.count { it == STRING_DESCRIPTOR } == 1 &&
+        parameters.count { it.startsWith(ICONS_DESCRIPTOR_PREFIX) } == 1 &&
+        parameters.count { it == FUNCTION0_DESCRIPTOR } == 1 &&
+        parameters.count { it == MODIFIER_DESCRIPTOR } == 1 &&
         parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
-        parameters.count { it == "I" } == 2 &&
-        parameters[parameters.size - 1] == "I" &&
-        parameters[parameters.size - 2] == "I"
+        "I" in parameters &&
+        parameters.all { it.startsWith("L") || it.startsWith("[") || it == "I" || it == "Z" }
 }
