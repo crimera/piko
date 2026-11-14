@@ -263,7 +263,6 @@ intend to work on this feature.)
 - Development happens on the `dev` branch. Create your branch from `dev`. Submit a pull request to `dev`.
 - Our team will review your pull request and provide feedback. Once your pull request is approved,
 it will be merged into the `dev` branch and will be included in the next release of patches.
-- Currently, development for the New X Android app (latest version of X) is taking place on the `x-lite` branch.
 - You can contribute translations at [Crowdin](https://crowdin.com/project/piko).
 
 ## License
