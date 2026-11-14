@@ -870,7 +870,7 @@ public class DownloadUtils {
             ViewGroup row = (ViewGroup) buttonsContainer;
             ImageView button = row.findViewWithTag(STORY_DOWNLOAD_BUTTON_TAG);
             if (media == null || !SettingsStatus.storyDownloadButton || !Pref.enableDownload()
-                    || !SharedPref.getBooleanPref(Settings.STORY_DOWNLOAD_BUTTON)) {
+                    || !SharedPref.getBooleanPref(Settings.STORY_DOWNLOAD_BUTTON) || isOwnStory(media, userSession)) {
                 if (button != null) row.removeView(button);
                 return;
             }
@@ -888,6 +888,19 @@ public class DownloadUtils {
             });
         } catch (Exception e) {
             Logger.printException(() -> "addStoryDownloadButton failure", e);
+        }
+    }
+
+    private static boolean isOwnStory(Object media, UserSession userSession) {
+        if (userSession == null) return false;
+        try {
+            String viewerId = userSession.getUserId();
+            if (viewerId == null || viewerId.isEmpty()) return false;
+            UserData owner = new MediaData(media, userSession).getUserData();
+            return owner != null && viewerId.equals(owner.getUserId());
+        } catch (Exception e) {
+            Logger.printException(() -> "Could not determine story ownership", e);
+            return false;
         }
     }
 
