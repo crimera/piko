@@ -63,6 +63,12 @@
     <string name="piko_newx_default_reply_sorting_summary">Default reply-sort order for tweet detail (Relevance, Recency, or Likes)</string>
     <string name="piko_newx_group_verified_account_filtering_title">Verified account filtering</string>
     <string name="piko_newx_group_verified_account_filtering_summary">Filter posts by timeline-reported account verification type</string>
+    <string name="piko_newx_group_replies_title">Replies</string>
+    <string name="piko_newx_group_replies_summary">Hide replies while keeping the author\'s own thread chains</string>
+    <string name="piko_newx_hide_replies_timeline_title">Hide replies in timelines</string>
+    <string name="piko_newx_hide_replies_timeline_summary">Hides reply posts from regular timelines; root posts, quote posts, and the author\'s own thread chains stay</string>
+    <string name="piko_newx_hide_replies_thread_title">Hide replies in threads</string>
+    <string name="piko_newx_hide_replies_thread_summary">Hides replies under a post while keeping the focused post and the author\'s own thread chains</string>
     <string name="piko_newx_group_for_you_filtering_title">For You filtering</string>
     <string name="piko_newx_group_for_you_filtering_summary">Customize topic filtering and the For You tab selector</string>
     <string name="piko_newx_timeline_tabs_title">Timeline tabs to hide</string>
