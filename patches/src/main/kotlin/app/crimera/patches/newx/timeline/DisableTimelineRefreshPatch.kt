@@ -73,10 +73,8 @@ private const val IS_FOR_YOU_FILTER_REFRESH_PENDING_DESCRIPTOR =
     "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isForYouFilterRefreshPending()Z"
 private const val IS_TIMELINE_DATA_EMPTY_DESCRIPTOR =
     "$TIMELINE_REFRESH_GATE_DESCRIPTOR->isTimelineDataEmpty($LIST_DESCRIPTOR)Z"
-private const val MARK_RESTORE_REFRESH_DESCRIPTOR =
-    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->markRestoreRefresh()V"
-private const val CONSUME_RESTORE_REFRESH_CLEAR_CACHE_DESCRIPTOR =
-    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->consumeRestoreRefreshClearCache($ENUM_DESCRIPTOR)Z"
+private const val SHOULD_IGNORE_CLEAR_CACHE_DESCRIPTOR =
+    "$TIMELINE_REFRESH_GATE_DESCRIPTOR->shouldIgnoreClearCache($ENUM_DESCRIPTOR)Z"
 private const val CLEAR_CACHE_INSTRUCTION_TYPE_NAME = "TimelineClearCache"
 private const val RESTORE_TIMELINE_POSITION_DESCRIPTOR =
     "$TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR$STRING_DESCRIPTOR)[I"
@@ -540,8 +538,6 @@ val disableTimelineRefreshPatch =
                     moveResult(settingRegister, "[I")
                     ifEqz(settingRegister, Target.Original)
                     sget(requestRegister, fieldReference(repositoryViewportAwareAutoRefreshFieldReference))
-                    // The converted refresh's ClearCache must not drop the restored rows.
-                    invokeStatic(methodReference(MARK_RESTORE_REFRESH_DESCRIPTOR))
                     goto(Target.Original)
                 }
             }
@@ -679,7 +675,7 @@ val disableTimelineRefreshPatch =
                 )
             clearCacheReaderMethod.insertHook(
                 index = clearCacheFlagWriteIndex + 1,
-                // The flag register carries the ClearCache answer past the consume call.
+                // While the setting is on, viewport-aware responses keep their cached rows. The flag register carries that answer past the call.
                 excludedRegisters = listOf(clearCacheFlagRegister),
                 // Only the ClearCache path falls into this write. The goto after it is shared, so
                 // branches onto it must keep skipping the hook.
@@ -688,7 +684,7 @@ val disableTimelineRefreshPatch =
                 val typeRegister = scratchRegister(RegisterLimit.FOUR_BIT)
                 move(typeRegister, clearCacheReaderMethod.p0Register, clearCacheReaderMethod.definingClass)
                 iget(typeRegister, typeRegister, clearCacheRequestTypeField)
-                invokeStatic(methodReference(CONSUME_RESTORE_REFRESH_CLEAR_CACHE_DESCRIPTOR), typeRegister)
+                invokeStatic(methodReference(SHOULD_IGNORE_CLEAR_CACHE_DESCRIPTOR), typeRegister)
                 moveResult(typeRegister, "Z")
                 ifEqz(typeRegister, Target.Original)
                 constInt(clearCacheFlagRegister, 0)

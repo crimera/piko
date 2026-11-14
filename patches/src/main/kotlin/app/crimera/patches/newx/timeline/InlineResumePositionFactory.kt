@@ -36,6 +36,9 @@ import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstructio
 internal data class InlineResumePositionFactory(
     val method: MutableMethod,
     val clock: MethodReference,
+    val nativeFactoryStartIndex: Int,
+    val nativeResultIndex: Int,
+    val nativeResultRegister: Int,
 )
 
 /** Copy only a closed, exception-free factory region; retain the APK's selection algorithm. */
@@ -155,7 +158,13 @@ internal fun resolveInlineResumePositionFactory(
         arguments.forEachIndexed { index, register -> move(register, method.p0Register + index, parameterTypes[index]) }
         requiredConstantSeeds.forEach { (register, value) -> constInt(register, value) }
     }
-    return InlineResumePositionFactory(method, code[clockIndex].getReference<MethodReference>()!!)
+    return InlineResumePositionFactory(
+        method,
+        code[clockIndex].getReference<MethodReference>()!!,
+        start,
+        end,
+        resultMove.registerA,
+    )
 }
 
 /** Remove only an object spill whose sole purpose is preserving a wide-overlapped local. */

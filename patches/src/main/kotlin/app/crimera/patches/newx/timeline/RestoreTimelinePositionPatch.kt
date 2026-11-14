@@ -16,6 +16,10 @@ import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.newx.misc.inlineactions.controlFlowSuccessors
+import app.crimera.patches.newx.misc.inlineactions.normalControlFlowSuccessors
+import app.crimera.patches.newx.misc.inlineactions.reachableIndicesFrom
+import app.crimera.patches.newx.misc.inlineactions.switchEntries
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
@@ -36,6 +40,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
@@ -93,6 +98,7 @@ private const val SETTING_READ_DESCRIPTOR =
 private const val IGNORE_NATIVE_POSITION_LABEL = "piko_newx_restore_position_ignore_native"
 private const val ACCOUNT_ID_BRIDGE_NAME = "piko\$newxAccountId"
 private const val SAVE_ANCHOR_BRIDGE_NAME = "piko\$newxSaveAnchor"
+private const val SAVE_NATIVE_ANCHOR_BRIDGE_NAME = "piko\$newxSaveNativeAnchor"
 private const val RESTORE_ANCHOR_BRIDGE_NAME = "piko\$newxRestoreAnchor"
 private const val APPLY_ANCHOR_KEY_BRIDGE_NAME = "piko\$newxApplyAnchorKey"
 private const val ACCOUNT_ID_BRIDGE_NULL_LABEL = "piko_newx_account_id_null"
@@ -120,14 +126,18 @@ private const val FALLBACK_RESTORE_TEMPORARY_REGISTER_COUNT = 5
 
 /**
  * Fresh locals added to the save method clone, just below its parameter block. The map put's three
- * arguments are spilled into the first two, a loaded flag takes the third, and the persistent store's
- * six argument words are staged consecutively in the last six for `invoke-static/range`.
+ * arguments are spilled into the first two, a loaded flag takes the third, the persistent store's six
+ * argument words are staged consecutively in the next six, and the last two retain the pending anchor
+ * event until X's native resume-position path completes or bypasses its factory.
  */
-private const val SAVE_SCRATCH_LOCALS = 9
+private const val SAVE_SCRATCH_LOCALS = 11
 private const val SAVE_SKIPPED_LABEL = "piko_newx_restore_position_save_skipped"
 private const val SAVE_ANCHOR_SUCCESS_LABEL = "piko_newx_save_anchor_success"
 private const val SAVE_ANCHOR_NULL_LABEL = "piko_newx_save_anchor_null"
 private const val SAVE_ANCHOR_RETURN_LABEL = "piko_newx_save_anchor_return"
+private const val SAVE_NATIVE_ANCHOR_SUCCESS_LABEL = "piko_newx_save_native_anchor_success"
+private const val SAVE_NATIVE_ANCHOR_NULL_LABEL = "piko_newx_save_native_anchor_null"
+private const val SAVE_NATIVE_ANCHOR_RETURN_LABEL = "piko_newx_save_native_anchor_return"
 private const val RESTORE_ANCHOR_NULL_LABEL = "piko_newx_restore_anchor_null"
 private const val RESTORE_ANCHOR_LOOP_LABEL = "piko_newx_restore_anchor_loop"
 private const val RESTORE_ANCHOR_ID_SEARCH_LABEL = "piko_newx_restore_anchor_id_search"
@@ -146,6 +156,132 @@ private object NewXUserIdentifierSerializerFingerprint : Fingerprint(
 // X trims the persisted home timeline to its newest N entries on startup when this server switch is
 // positive, which drops any saved position below N before the restore runs.
 private const val HOME_START_TRIM_SWITCH = "android_xlite_home_timeline_start_trim_entries_to_keep"
+
+private val CONDITIONAL_BRANCH_OPCODES = setOf(
+    Opcode.IF_EQ,
+    Opcode.IF_NE,
+    Opcode.IF_LT,
+    Opcode.IF_GE,
+    Opcode.IF_GT,
+    Opcode.IF_LE,
+    Opcode.IF_EQZ,
+    Opcode.IF_NEZ,
+    Opcode.IF_LTZ,
+    Opcode.IF_GEZ,
+    Opcode.IF_GTZ,
+    Opcode.IF_LEZ,
+)
+
+/** Resolve the shared early return taken when X's native resume-position factory is bypassed. */
+private fun resolveNativeResumePositionBypassReturn(
+    method: MutableMethod,
+    mapPutIndex: Int,
+    factoryStartIndex: Int,
+    nativeResultIndex: Int,
+): Int {
+    val code = method.instructions.toList()
+    if (method.implementation == null) throw PatchException("NewX timeline save method has no implementation")
+    if (mapPutIndex !in code.indices || factoryStartIndex !in code.indices || nativeResultIndex !in code.indices ||
+        mapPutIndex >= factoryStartIndex || factoryStartIndex >= nativeResultIndex
+    ) {
+        throw PatchException(
+            "NewX native resume-position region has an unexpected order: " +
+                "mapPut=$mapPutIndex factoryStart=$factoryStartIndex result=$nativeResultIndex",
+        )
+    }
+
+    val normalSuccessors = method.normalControlFlowSuccessors()
+        ?: throw PatchException("Cannot decode NewX timeline save control flow")
+    val allSuccessors = method.controlFlowSuccessors()
+        ?: throw PatchException("Cannot decode exceptional NewX timeline save control flow")
+    if (nativeResultIndex !in (normalSuccessors.reachableIndicesFrom(mapPutIndex + 1)
+            ?: throw PatchException("Cannot decode NewX native resume-position path from the map write"))
+    ) {
+        throw PatchException("NewX native resume-position factory is not reachable after the timeline map write")
+    }
+
+    val offsets = code.runningFold(0) { address, instruction -> address + instruction.codeUnits }
+    val indexByAddress = offsets.dropLast(1).withIndex().associate { (index, address) -> address to index }
+    val candidateReturnIndices = (mapPutIndex + 1 until factoryStartIndex).mapNotNull { branchIndex ->
+        val branch = code[branchIndex]
+        if (branch.opcode !in CONDITIONAL_BRANCH_OPCODES) return@mapNotNull null
+        val offset = branch as? OffsetInstruction
+            ?: throw PatchException("NewX native resume-position gate has no branch offset at $branchIndex")
+        val targetAddress = offsets[branchIndex] + offset.codeOffset
+        val targetIndex = indexByAddress[targetAddress]
+            ?: throw PatchException("NewX native resume-position gate has an unresolved branch target at $branchIndex")
+        val fallthroughIndex = branchIndex + 1
+        if (targetIndex <= mapPutIndex || code[targetIndex].opcode != Opcode.RETURN_VOID ||
+            fallthroughIndex !in code.indices ||
+            targetIndex !in normalSuccessors[branchIndex] ||
+            fallthroughIndex !in normalSuccessors[branchIndex]
+        ) {
+            return@mapNotNull null
+        }
+
+        val factoryPath = normalSuccessors.reachableIndicesFrom(fallthroughIndex)
+            ?: throw PatchException("Cannot decode NewX native resume-position gate fallthrough at $branchIndex")
+        if (nativeResultIndex !in factoryPath) return@mapNotNull null
+        val bypassPath = allSuccessors.reachableIndicesFrom(targetIndex)
+            ?: throw PatchException("Cannot decode NewX native resume-position bypass at $targetIndex")
+        if (nativeResultIndex in bypassPath) return@mapNotNull null
+        targetIndex
+    }.distinct()
+
+    return requireExactlyOne(
+        "NewX native resume-position bypass return",
+        candidateReturnIndices,
+    )
+}
+
+/** Ensure a relocated branch hook cannot capture a try boundary, handler, or switch case label. */
+private fun requireSafeRelocatedSaveHook(method: MutableMethod, index: Int, label: String) {
+    val code = method.instructions.toList()
+    val implementation = method.implementation
+        ?: throw PatchException("NewX timeline save method has no implementation")
+    if (index !in code.indices) throw PatchException("NewX $label hook index is outside the method: $index")
+    if (code[index].opcode == Opcode.MOVE_EXCEPTION || code[index].opcode == Opcode.ARRAY_PAYLOAD ||
+        code[index].opcode == Opcode.PACKED_SWITCH_PAYLOAD ||
+        code[index].opcode == Opcode.SPARSE_SWITCH_PAYLOAD
+    ) {
+        throw PatchException("NewX $label hook targets a handler or payload at instruction $index")
+    }
+    val offsets = code.runningFold(0) { address, instruction -> address + instruction.codeUnits }
+    val address = offsets[index]
+    val protectedAddress = implementation.tryBlocks.any { block ->
+        val endAddress = block.startCodeAddress + block.codeUnitCount
+        address >= block.startCodeAddress && address < endAddress ||
+            address == block.startCodeAddress || address == endAddress ||
+            block.exceptionHandlers.any { handler -> handler.handlerCodeAddress == address }
+    }
+    if (protectedAddress) {
+        throw PatchException("NewX $label hook intersects a try boundary, protected range, or handler")
+    }
+    val switchTargets = code.indices.filter { switchIndex ->
+        code[switchIndex].opcode == Opcode.PACKED_SWITCH || code[switchIndex].opcode == Opcode.SPARSE_SWITCH
+    }.flatMap { switchIndex ->
+        method.switchEntries(switchIndex)?.byKey?.values
+            ?: throw PatchException("Cannot resolve a NewX timeline save switch at instruction $switchIndex")
+    }
+    if (index in switchTargets) {
+        throw PatchException("NewX $label hook is a switch-case target at instruction $index")
+    }
+}
+
+/** Entry initialization must run once at method entry, not again on a loop or exception edge. */
+private fun requireSafeSaveEntryInitialization(method: MutableMethod) {
+    val code = method.instructions.toList()
+    val successors = method.controlFlowSuccessors()
+        ?: throw PatchException("Cannot decode NewX timeline save entry control flow")
+    if (code.isEmpty() || code.first().opcode == Opcode.MOVE_EXCEPTION ||
+        successors.drop(1).any { successorsAtIndex -> 0 in successorsAtIndex } ||
+        method.implementation?.tryBlocks.orEmpty().any { block ->
+            block.exceptionHandlers.any { handler -> handler.handlerCodeAddress == 0 }
+        }
+    ) {
+        throw PatchException("NewX timeline save entry is not a safe one-time scratch initialization point")
+    }
+}
 
 private object NewXHomeStartTrimFingerprint : Fingerprint(
     definingClass = "Lcom/x/repositories/urt/",
@@ -1623,6 +1759,23 @@ val restoreTimelinePositionPatch =
                 layoutPolicyGateIndex + 1,
                 "nop",
             )
+            val nativeResumeBypassIndex = resolveNativeResumePositionBypassReturn(
+                saveMethod,
+                mapPutIndex,
+                extracted.nativeFactoryStartIndex,
+                extracted.nativeResultIndex,
+            )
+            requireSafeRelocatedSaveHook(
+                saveMethod,
+                extracted.nativeResultIndex,
+                "native resume-position result",
+            )
+            requireSafeRelocatedSaveHook(
+                saveMethod,
+                nativeResumeBypassIndex,
+                "native resume-position bypass",
+            )
+            requireSafeSaveEntryInitialization(saveMethod)
             // The put's map and key are live until the put, so they are spilled into fresh locals and reused as
             // 4-bit scratch. The holder is only read, so it stays in place. Every path restores the map and key
             // before the put, and the not-loaded path then skips only the put.
@@ -1634,6 +1787,8 @@ val restoreTimelinePositionPatch =
             val accountIdArgument = saveLocalBase + 5
             val indexArgument = saveLocalBase + 7
             val offsetArgument = saveLocalBase + 8
+            val anchorPending = saveLocalBase + 9
+            val anchorEvent = saveLocalBase + 10
             if (componentClass.methods.any { method -> method.name == SAVE_ANCHOR_BRIDGE_NAME }) {
                 throw PatchException("NewX timeline component already has $SAVE_ANCHOR_BRIDGE_NAME: $componentDescriptor")
             }
@@ -1708,6 +1863,100 @@ val restoreTimelinePositionPatch =
                 label(SAVE_ANCHOR_RETURN_LABEL)
                 returnVoid()
             }
+            if (componentClass.methods.any { method -> method.name == SAVE_NATIVE_ANCHOR_BRIDGE_NAME }) {
+                throw PatchException(
+                    "NewX timeline component already has $SAVE_NATIVE_ANCHOR_BRIDGE_NAME: $componentDescriptor",
+                )
+            }
+            val saveNativeAnchorBridge =
+                MutableMethod(
+                    ImmutableMethod(
+                        componentDescriptor,
+                        SAVE_NATIVE_ANCHOR_BRIDGE_NAME,
+                        listOf(ImmutableMethodParameter(OBJECT_DESCRIPTOR, emptySet(), null)),
+                        "V",
+                        AccessFlags.PUBLIC.value or AccessFlags.FINAL.value or AccessFlags.SYNTHETIC.value,
+                        emptySet(),
+                        emptySet(),
+                        MutableMethodImplementation(16),
+                    ),
+                )
+            componentClass.methods.add(saveNativeAnchorBridge)
+            saveNativeAnchorBridge.insertHook(0, relocateBranchTargets = false) {
+                move(11, saveNativeAnchorBridge.p0Register + 1, OBJECT_DESCRIPTOR)
+                iget(8, saveNativeAnchorBridge.p0Register, repositoryField)
+                invokeInterface(timelineGetterReference, 8)
+                moveResult(0, timelineTypeDescriptor)
+                invokeInterface(methodReference(timelineIdentityGetterReference), 8)
+                moveResult(1, timelineIdentityDescriptor)
+                iget(1, 1, timelineIdentityField)
+                invokeVirtual(
+                    methodReference("$componentDescriptor->$ACCOUNT_ID_BRIDGE_NAME()J"),
+                    saveNativeAnchorBridge.p0Register,
+                )
+                moveResult(2, "J")
+                invokeStatic(methodReference(SHOULD_SAVE_ANCHOR_DESCRIPTOR), 0, 2, 3)
+                moveResult(12, "Z")
+                ifEqz(12, Target.Local(SAVE_NATIVE_ANCHOR_RETURN_LABEL))
+                ifEqz(11, Target.Local(SAVE_NATIVE_ANCHOR_NULL_LABEL))
+                checkCast(11, resumePositionDescriptor)
+                iget(4, 11, resumeEntryIdFieldReference)
+                iget(5, 11, resumeSortIndexFieldReference)
+                iget(7, 11, validatorItemIndexFieldReference)
+                goto(Target.Local(SAVE_NATIVE_ANCHOR_SUCCESS_LABEL))
+                label(SAVE_NATIVE_ANCHOR_NULL_LABEL)
+                constInt(4, 0)
+                constLong(5, 0L)
+                constInt(7, 0)
+                label(SAVE_NATIVE_ANCHOR_SUCCESS_LABEL)
+                invokeStatic(methodReference(SAVE_ANCHOR_DESCRIPTOR), 0, 1, 2, 3, 4, 5, 6, 7)
+                label(SAVE_NATIVE_ANCHOR_RETURN_LABEL)
+                returnVoid()
+            }
+
+            fun insertNativeResumePositionHook() {
+                saveMethod.insertHook(
+                    index = extracted.nativeResultIndex,
+                    excludedRegisters = listOf(anchorPending, anchorEvent),
+                    // The native result/null join is a branch target; both outcomes must save through this bridge.
+                    relocateBranchTargets = true,
+                ) {
+                    constInt(anchorPending, 0)
+                    invokeVirtual(
+                        methodReference(
+                            "$componentDescriptor->$SAVE_NATIVE_ANCHOR_BRIDGE_NAME($OBJECT_DESCRIPTOR)V",
+                        ),
+                        saveMethod.p0Register,
+                        extracted.nativeResultRegister,
+                    )
+                }
+            }
+
+            fun insertNativeResumePositionFallbackHook() {
+                saveMethod.insertHook(
+                    index = nativeResumeBypassIndex,
+                    excludedRegisters = listOf(anchorPending, anchorEvent),
+                    // Native feature/precondition branches converge on this return and must run the fallback.
+                    relocateBranchTargets = true,
+                ) {
+                    ifEqz(anchorPending, Target.Original)
+                    constInt(anchorPending, 0)
+                    invokeVirtual(
+                        methodReference("$componentDescriptor->$SAVE_ANCHOR_BRIDGE_NAME($eventType)V"),
+                        saveMethod.p0Register,
+                        anchorEvent,
+                    )
+                }
+            }
+
+            // Insert higher source indexes first so the resolver's original indices remain valid.
+            if (extracted.nativeResultIndex > nativeResumeBypassIndex) {
+                insertNativeResumePositionHook()
+                insertNativeResumePositionFallbackHook()
+            } else {
+                insertNativeResumePositionFallbackHook()
+                insertNativeResumePositionHook()
+            }
             saveMethod.insertHook(
                 index = mapPutIndex,
                 // Plain insertion used to leave an incoming branch on the map write, which keeps skipping
@@ -1761,18 +2010,19 @@ val restoreTimelinePositionPatch =
                     indexArgument,
                     offsetArgument,
                 )
-                move(timelineArgument, saveMethod.p0Register, componentDescriptor)
-                move(identityArgument, eventRegister, eventType)
-                invokeVirtual(
-                    methodReference("$componentDescriptor->$SAVE_ANCHOR_BRIDGE_NAME($eventType)V"),
-                    timelineArgument,
-                    identityArgument,
-                )
+                // Defer anchor persistence until X's native factory has either produced its result or been skipped.
+                move(anchorEvent, eventRegister, eventType)
+                constInt(anchorPending, 1)
                 label(SAVE_SKIPPED_LABEL)
                 move(saveMapRegister, spilledMap, OBJECT_DESCRIPTOR)
                 move(saveTimelineRegister, spilledKey, OBJECT_DESCRIPTOR)
                 // Not loaded: skip only the map put (the original instruction). Loaded: fall into the put.
                 ifEqz(loadedFlag, Target.AfterOriginal(1))
+            }
+            // These are method-entry scratch registers. No branch or handler may re-enter this initialization.
+            saveMethod.insertHook(0, relocateBranchTargets = false) {
+                constInt(anchorPending, 0)
+                constInt(anchorEvent, 0)
             }
 
             if (componentClass.methods.any { method -> method.name == RESTORE_ANCHOR_BRIDGE_NAME }) {

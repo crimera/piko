@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.SystemClock;
 
+import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.settings.NewXLogger;
 
 import java.util.List;
@@ -11,10 +12,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public final class TimelineRefreshGate {
     private static final long PENDING_REFRESH_TIMEOUT_MILLIS = 15_000L;
+    private static final String DISABLE_REFRESH_SETTING = "newx.timeline.disable_refresh";
 
     private static final AtomicLong pendingPostDeepLinkDeadline = new AtomicLong();
     private static final AtomicLong pendingForYouFilterRefreshDeadline = new AtomicLong();
-    private static final AtomicLong pendingRestoreRefreshDeadline = new AtomicLong();
 
     private TimelineRefreshGate() {
     }
@@ -49,22 +50,15 @@ public final class TimelineRefreshGate {
         return consume(pendingForYouFilterRefreshDeadline);
     }
 
-    /** Arms the ignore-ClearCache window for the next converted refresh response. */
-    public static void markRestoreRefresh() {
-        pendingRestoreRefreshDeadline.set(
-                SystemClock.uptimeMillis() + PENDING_REFRESH_TIMEOUT_MILLIS
-        );
-    }
-
-    /** Spends the mark only on a converted refresh, so other request types never consume it. */
-    public static boolean consumeRestoreRefreshClearCache(Enum<?> requestType) {
+    /** Viewport-aware refreshes keep the cached timeline; their ClearCache would drop the rows around the restored position. */
+    public static boolean shouldIgnoreClearCache(Enum<?> requestType) {
         if (requestType == null || !"VIEWPORT_AWARE_AUTO_REFRESH".equals(requestType.name())) return false;
+        if (!SettingsRegistry.getBooleanOrDefault(DISABLE_REFRESH_SETTING, true)) return false;
 
-        boolean consumed = consume(pendingRestoreRefreshDeadline);
-        if (consumed && NewXLogger.isLoggingEnabled()) {
+        if (NewXLogger.isLoggingEnabled()) {
             NewXLogger.logger("NewX refresh ignore-clear-cache requestType=" + requestType.name());
         }
-        return consumed;
+        return true;
     }
 
     public static boolean isTimelineDataEmpty(List<?> pages) {
