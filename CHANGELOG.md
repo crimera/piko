@@ -2,13 +2,17 @@
 
 ### 🐛 Bug Fixes
 
+* **Instagram:** Replace Change version code patch with `Disable Play Store updates` ([#2278](https://github.com/crimera/piko/issues/2278)) ([e513043](https://github.com/crimera/piko/commit/e5130437b15a67442b0b3819f3b30e3cb1a559ef))
 * **Instagram:** Spoof patched app signature to match original app ([#2281](https://github.com/crimera/piko/issues/2281)) ([47d8af4](https://github.com/crimera/piko/commit/47d8af42553dc2e5218e740834fee8e79da49e57))
+* **Instagram:** Remove `Disable analytics`, `Unlock employee options`, `Allow user network certificate`, `Disable telemetry`, `Unlock Plus benefits` patches ([7f3ca61](https://github.com/crimera/piko/commit/7f3ca610d86b73623c2bdae2cc19eb73ace22b13))
 
 ## [3.11.1-dev.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1-dev.1) (2026-11-10)
 
 ### 🐛 Bug Fixes
 
+* **Instagram:** Replace Change version code patch with `Disable Play Store updates` ([#2278](https://github.com/crimera/piko/issues/2278)) ([e513043](https://github.com/crimera/piko/commit/e5130437b15a67442b0b3819f3b30e3cb1a559ef))
 * **Instagram:** Spoof patched app signature to match original app ([#2281](https://github.com/crimera/piko/issues/2281)) ([47d8af4](https://github.com/crimera/piko/commit/47d8af42553dc2e5218e740834fee8e79da49e57))
+* **Instagram:** Remove `Disable analytics`, `Unlock employee options`, `Allow user network certificate`, `Disable telemetry`, `Unlock Plus benefits` patches ([7f3ca61](https://github.com/crimera/piko/commit/7f3ca610d86b73623c2bdae2cc19eb73ace22b13))
 
 ## [3.11.0](https://github.com/crimera/piko/compare/v3.10.0...v3.11.0) (2026-11-09)
 

@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.settings;
 
+import app.morphe.extension.instagram.utils.InstaUtils;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
@@ -129,7 +130,7 @@ public final class SettingsRestart {
                     .setTitle(str("piko_restart_app"))
                     .setPositiveButton(str("piko_ok"), (dialog, which) -> {
                         clearPendingRestart();
-                        Utils.restartApp(activity);
+                        InstaUtils.restartApp(activity);
                     })
                     .setNegativeButton(str("piko_cancel"), (dialog, which) -> {
                         activity.finish();
