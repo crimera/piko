@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.Locale;
 
+import app.morphe.extension.instagram.patches.customise.emoji.EmojiFontDialogs;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.patches.devFlags.Flag;
 
@@ -145,6 +146,15 @@ public class ScreenBuilder {
 
     public void buildFontSection() {
         if (!(SettingsStatus.fontSection())) return;
+
+        if (SettingsStatus.customEmojiFont) {
+            addPreference(helper.buttonPreference(
+                    str("piko_emoji_font"),
+                    EmojiFontDialogs.summary(),
+                    "piko_pref_emoji_font"
+            ));
+        }
+        if (!SettingsStatus.customFont) return;
 
         // Written here rather than left to the preference framework, which persists only after
         // this listener has run - FontStorage.useSystemFont() has to read the new value straight

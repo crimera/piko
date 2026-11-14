@@ -21,6 +21,7 @@ import android.app.FragmentManager;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.downloader.FolderPickerFragment;
 import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.instagram.patches.customise.emoji.EmojiFontDialogs;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.dm.DeletedMessagesActivity;
 import app.morphe.extension.instagram.patches.instants.InstantsVaultActivity;
@@ -245,7 +246,8 @@ public class ActivityHook {
         if (bundleKey.equals("piko_export_dev_overrides") || bundleKey.equals("piko_export_pref")) {
             launchType = LAUNCH_TYPE_BACKUP;
         } else if (bundleKey.equals("piko_import_dev_overrides") || bundleKey.equals("piko_import_id_mapping")
-                || bundleKey.equals("piko_import_pref") || bundleKey.equals("piko_pref_add_font")) {
+                || bundleKey.equals("piko_import_pref") || bundleKey.equals("piko_pref_add_font")
+                || bundleKey.equals(EmojiFontDialogs.IMPORT_KEY)) {
             launchType = LAUNCH_TYPE_RESTORE;
         } else if (bundleKey.equals("piko_download_set_path")) {
             launchType = LAUNCH_TYPE_FOLDER_PICKER;
