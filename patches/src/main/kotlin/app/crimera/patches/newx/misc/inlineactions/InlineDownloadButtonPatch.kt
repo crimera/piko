@@ -90,6 +90,7 @@ private const val CANONICAL_POST_HELPER = "getCanonicalPost"
 private const val CONTEXTUAL_POST_HELPER = "getContextualPost"
 private const val NO_CONTEXTUAL_POST_LABEL = "no_contextual_post"
 private const val POST_MEDIA_HELPER = "getPostMedia"
+private const val POST_LEGACY_CARD_HELPER = "getPostLegacyCard"
 private const val COMPOSITION_MEDIA_HELPER = "isCompositionDownloadableMedia"
 private const val REPOSTED_POST_HELPER = "getRepostedPost"
 private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
@@ -978,6 +979,7 @@ private fun patchPostModelBridges(
     val contextualRepostedPostField = postModels.contextualRepostedPostField
     val repostedCanonicalPostField = postModels.repostedCanonicalPostField
     val canonicalPostMediaField = mediaModels.canonicalPostMediaField
+    val canonicalPostLegacyCardField = mediaModels.canonicalPostLegacyCardField
 
     val presenterClass = context.mutableClassDefBy(barModels.inlineActionBarDescriptor)
     val presenterPostField = requireExactlyOne(
@@ -1008,6 +1010,12 @@ private fun patchPostModelBridges(
         listOf(OBJECT_DESCRIPTOR),
         postModels.canonicalPostDescriptor,
         canonicalPostMediaField,
+    )
+    extensionClass.portHelperBody(
+        POST_LEGACY_CARD_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.canonicalPostDescriptor,
+        canonicalPostLegacyCardField,
     )
     val compositionMediaStub = extensionClass.requireBooleanHelper(
         COMPOSITION_MEDIA_HELPER,
