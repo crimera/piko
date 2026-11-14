@@ -51,21 +51,22 @@ internal fun main(args: Array<String>) {
     val localizedAppIds =
         listOf(
             "instagram",
+            "newx",
             "shared",
             "twitter",
             "twitter-bring-back",
         )
-    val defaultOnlyAppIds = listOf("newx")
 
     localizedAppIds.forEach { appId ->
         locales.forEach { locale ->
             val srcFolderName = locale.getSrcLocaleFolderName()
-            stringsChecked += checkStrings("$srcFolderName/$appId/strings.xml", exceptions)
+            stringsChecked +=
+                checkStrings(
+                    srcSubPath = "$srcFolderName/$appId/strings.xml",
+                    exceptions = exceptions,
+                    requireExists = locale.isDefaultLocale(),
+                )
         }
-    }
-    defaultOnlyAppIds.forEach { appId ->
-        val defaultFolderName = locales.first().getSrcLocaleFolderName()
-        stringsChecked += checkStrings("$defaultFolderName/$appId/strings.xml", exceptions)
     }
 
     if (exceptions.isNotEmpty()) {
@@ -82,10 +83,15 @@ internal fun main(args: Array<String>) {
 private fun checkStrings(
     srcSubPath: String,
     exceptions: MutableList<Exception>,
+    requireExists: Boolean = true,
 ): Int {
     val stream =
         inputStreamFromBundledResource("addresources", srcSubPath)
-            ?: throw IllegalArgumentException("Could not find resource $srcSubPath")
+            ?: if (requireExists) {
+                throw IllegalArgumentException("Could not find resource $srcSubPath")
+            } else {
+                return 0
+            }
 
     stream.use {
         val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
