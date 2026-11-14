@@ -31,6 +31,9 @@ final class NewXDownloadTransfer implements TransferRunner {
                                int id, TransferObserver observer) {
         TransferState state = states.computeIfAbsent(id, ignored -> new TransferState());
         try {
+            if (HlsTransfer.isHlsUrl(request.url())) {
+                return HlsTransfer.download(context, reservation, request, id, observer, () -> state.cancelled);
+            }
             TransferOutcome outcome = transfer.run(context, reservation, request, id, observer);
             synchronized (state) {
                 state.downloading = false;

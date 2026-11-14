@@ -118,6 +118,7 @@ internal data class ResolvedNewXPostMediaModels(
     val contextualTweetInterstitialField: FieldReference,
     val contextualMediaVisibilityResultsField: FieldReference,
     val canonicalPostMediaField: FieldReference,
+    val canonicalPostLegacyCardField: FieldReference,
 )
 
 internal data class ResolvedNewXInlineActionModels(
@@ -419,6 +420,7 @@ private fun resolvePostMediaModels(postModels: ResolvedNewXPostModels): Resolved
         contextualMediaVisibilityResultsField =
             contextualPostMethod.fieldForToStringLabel(", mediaVisibilityResults="),
         canonicalPostMediaField = canonicalPostMethod.fieldForToStringLabel(", media="),
+        canonicalPostLegacyCardField = canonicalPostMethod.fieldForToStringLabel(", legacyCard="),
     )
 }
 

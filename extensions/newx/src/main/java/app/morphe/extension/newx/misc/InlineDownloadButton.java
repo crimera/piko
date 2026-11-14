@@ -161,7 +161,7 @@ public final class InlineDownloadButton {
     }
 
     private static void resolveAndPresent(Context context, Object post, boolean longPress) {
-        final List<DownloadItem> downloads;
+        List<DownloadItem> downloads;
         final DownloadFileName.PostContext postContext;
         final String username;
         try {
@@ -173,6 +173,24 @@ public final class InlineDownloadButton {
             NewXLogger.printException(() -> "Failed to process inline download action", exception);
             NewXUtils.runOnUiThread(() -> NewXInAppNotification.show("Could not download post media"));
             return;
+        }
+        if (downloads.isEmpty()) {
+            Object legacyCard = legacyCardFor(post);
+            if (legacyCard != null) {
+                BroadcastStreamResolver.BroadcastMetadata broadcast =
+                        BroadcastStreamResolver.parseMetadata(legacyCard);
+                if (broadcast != null) {
+                    if (broadcast.isLive()) {
+                        NewXUtils.runOnUiThread(() -> NewXInAppNotification.show(
+                                "Broadcast is still live — replay will be downloadable after stream ends"));
+                        return;
+                    }
+                    DownloadItem streamItem = BroadcastStreamResolver.resolve(broadcast);
+                    if (streamItem != null) {
+                        downloads = Collections.singletonList(streamItem);
+                    }
+                }
+            }
         }
         if (downloads.isEmpty()) {
             NewXUtils.runOnUiThread(() ->
@@ -226,12 +244,13 @@ public final class InlineDownloadButton {
             return;
         }
 
+        final List<DownloadItem> mediaDownloads = downloads;
         // Long press downloads everything without the picker.
         if (longPress) {
-            enqueueAllDownloads(context, downloads, postContext, username);
+            enqueueAllDownloads(context, mediaDownloads, postContext, username);
             return;
         }
-        NewXUtils.runOnUiThread(() -> showMediaPicker(context, downloads, username, postContext));
+        NewXUtils.runOnUiThread(() -> showMediaPicker(context, mediaDownloads, username, postContext));
     }
 
     private static boolean isEnabled() {
@@ -252,11 +271,13 @@ public final class InlineDownloadButton {
         try {
             Object canonicalPost = canonicalPost(post);
             if (hasCompositionDownloadableMedia(mediaForCanonical(canonicalPost))) return true;
+            if (hasBroadcastMedia(legacyCardForCanonical(canonicalPost))) return true;
 
             Object repostedPost = getRepostedPost(post);
             if (repostedPost == null) return false;
             Object repostedCanonicalPost = getRepostedCanonicalPost(repostedPost);
-            return hasCompositionDownloadableMedia(mediaForCanonical(repostedCanonicalPost));
+            return hasCompositionDownloadableMedia(mediaForCanonical(repostedCanonicalPost))
+                    || hasBroadcastMedia(legacyCardForCanonical(repostedCanonicalPost));
         } catch (RuntimeException exception) {
             NewXLogger.printException(() -> "Failed to check NewX post media", exception);
             return false;
@@ -323,6 +344,10 @@ public final class InlineDownloadButton {
 
     private static Object getPostMedia(Object canonicalPost) {
         throw unpatchedBridge("getPostMedia");
+    }
+
+    private static Object getPostLegacyCard(Object canonicalPost) {
+        throw unpatchedBridge("getPostLegacyCard");
     }
 
     private static Object getRepostedPost(Object post) {
@@ -409,6 +434,35 @@ public final class InlineDownloadButton {
         if (canonicalPost == null) return java.util.Collections.emptyList();
         Object media = getPostMedia(canonicalPost);
         return media instanceof List<?> list ? list : java.util.Collections.emptyList();
+    }
+
+    private static Object legacyCardForCanonical(Object canonicalPost) {
+        if (canonicalPost == null) return null;
+        return getPostLegacyCard(canonicalPost);
+    }
+
+    static Object legacyCardFor(Object post) {
+        if (post == null) return null;
+
+        try {
+            Object canonicalPost = canonicalPost(post);
+            Object canonicalCard = legacyCardForCanonical(canonicalPost);
+            if (hasBroadcastMedia(canonicalCard)) return canonicalCard;
+
+            Object repostedPost = getRepostedPost(post);
+            if (repostedPost == null) return null;
+
+            Object repostedCanonicalPost = getRepostedCanonicalPost(repostedPost);
+            Object repostedCard = legacyCardForCanonical(repostedCanonicalPost);
+            return hasBroadcastMedia(repostedCard) ? repostedCard : null;
+        } catch (RuntimeException exception) {
+            NewXLogger.printException(() -> "Failed to read NewX legacy card", exception);
+            return null;
+        }
+    }
+
+    static boolean hasBroadcastMedia(Object legacyCard) {
+        return BroadcastStreamResolver.isBroadcast(legacyCard);
     }
 
     static List<?> selectMedia(List<?> canonicalMedia, List<?> repostedMedia) {
