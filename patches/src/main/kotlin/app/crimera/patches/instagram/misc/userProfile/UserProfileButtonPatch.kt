@@ -10,10 +10,10 @@ import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinde
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 val userProfileButtonPatch =
-    bytecodePatch(
+    patch(
         description = "This patch is adds support for adding buttons on user profile.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

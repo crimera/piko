@@ -8,14 +8,14 @@ package app.crimera.patches.instagram.misc.comment
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 // Thanks to MyInsta.
 @Suppress("unused")
 val addCommentPatch =
-    bytecodePatch(
+    patch(
         description = "Handles adding custom comment button's attributes.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

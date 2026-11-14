@@ -12,10 +12,6 @@
     <string name="piko_enable_dev_options_desc">Unlocks developer option by long pressing home icon</string>
     <string name="piko_directly_open_metaconfig">Directly opens MetaConfig overrides</string>
     <string name="piko_directly_open_metaconfig_desc">Directly opens MetaConfig overrides on long pressing home icon</string>
-    <string name="piko_enable_emp_options">Enable employee options</string>
-    <string name="piko_enable_emp_options_desc">Unlocks all employee options used for testing</string>
-    <string name="piko_allow_user_network_certificate">Allow user network certificate</string>
-    <string name="piko_allow_user_network_certificate_desc">Allows user network certificate for whitehat testing</string>
     <string name="piko_export_dev_overrides">Export overrides</string>
     <string name="piko_import_dev_overrides">Import overrides</string>
     <string name="piko_import_id_mapping">Import mapping files</string>
@@ -121,9 +117,6 @@
     <string name="piko_category_misc">Misc</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Disable analytics</string>
-    <string name="piko_delete_analytics_cache">Delete analytic cache</string>
-    <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers</string>
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
     <string name="piko_follow_back_indicator_desc">Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click</string>
     <string name="piko_fbi_color_indicator">Enable colored friendship status indicator</string>
@@ -170,8 +163,6 @@
     <string name="piko_hidden_chats_mute_desc">Don\'t show notifications for messages from chats you have hidden</string>
     <string name="piko_hidden_chats_taps">Taps to open hidden chats</string>
     <string name="piko_hidden_chats_taps_desc">Tap the messages button this many times in a row to switch between your inbox and your hidden chats</string>
-    <string name="piko_unlock_plus_benefits">Unlock Plus benefits</string>
-    <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
 
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
@@ -236,6 +227,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Re-encodes the xHE-AAC sound of DASH downloads as AAC-LC at 192 kbps, which every player can play</string>
     <string name="piko_embed_download_metadata">Embed video metadata</string>
     <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
+    <string name="piko_download_conflict_policy">When media already exists</string>
+    <string name="piko_download_conflict_policy_desc">Applies to files with the same name in the selected download folder</string>
+    <string name="piko_download_conflict_rename">Save with a new name</string>
+    <string name="piko_download_conflict_skip">Skip already-downloaded media</string>
+    <string name="piko_download_conflict_overwrite">Overwrite the existing file</string>
+    <string name="piko_download_media_exists">Media already exists</string>
+    <string name="piko_download_media_in_progress">Media is already downloading</string>
     <string name="piko_download_file_name_template">Filename format</string>
     <string name="piko_download_file_name_template_invalid">Invalid filename</string>
     <string name="piko_download_file_name_insert_token">Insert %1$s</string>
@@ -325,7 +323,6 @@
     <string name="piko_ok">OK</string>
     <string name="piko_reset">Reset</string>
     <string name="piko_cancel">Cancel</string>
-    <string name="piko_deleted">Deleted</string>
     <string name="piko_debug">Piko debug</string>
     <string name="piko_debug_desc">Adds debug option on some of the components for testing</string>
     <string name="piko_export_experiment_list">Export experiment list</string>
@@ -517,7 +514,6 @@
     <string name="piko_media_like">like</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">activity</string>
-    <string name="piko_disable_telemetry">Disable telemetry</string>
     <string name="piko_patch_theme">Theme</string>
     <string name="piko_patch_settings">Add settings</string>
 </resources>

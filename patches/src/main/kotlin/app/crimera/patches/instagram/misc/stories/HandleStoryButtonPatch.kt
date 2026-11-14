@@ -21,7 +21,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
@@ -71,7 +71,7 @@ internal object SelfStoryOnCLickStoryButtonFingerprint : Fingerprint(
 )
 
 val handleStoryButtonPatch =
-    bytecodePatch(
+    patch(
         description = "This patch is used for handing button interaction on stories",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

@@ -19,7 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -45,7 +45,7 @@ internal object DMOnTextChangedFingerprint : Fingerprint(
 // Thanks to MyInsta.
 @Suppress("unused")
 val disableTypingStatusPatch =
-    bytecodePatch(
+    patch(
         name = "Disable typing status",
     ) {
         dependsOn(settingsPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)

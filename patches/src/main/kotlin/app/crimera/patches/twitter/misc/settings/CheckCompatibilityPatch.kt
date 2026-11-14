@@ -8,9 +8,9 @@ package app.crimera.patches.twitter.misc.settings
 
 import app.crimera.patches.twitter.utils.is_11_82_or_greater
 import app.crimera.patches.twitter.utils.versionCheckPatch
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
-internal val checkCompatibilityPatch = bytecodePatch(
+internal val checkCompatibilityPatch = patch(
     description = "Checks compatibility"
 ) {
     dependsOn(versionCheckPatch)

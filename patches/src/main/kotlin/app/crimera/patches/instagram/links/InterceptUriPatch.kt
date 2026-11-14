@@ -14,7 +14,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -28,7 +28,7 @@ object TigonServiceLayerStartRequestFingerprint : Fingerprint(
 
 @Suppress("unused")
 val interceptUriPatch =
-    bytecodePatch(
+    patch(
         description = "Intercept uri to block.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

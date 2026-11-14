@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">홈 아이콘을 길게 탭하여 개발자 옵션을 엽니다</string>
     <string name="piko_directly_open_metaconfig">MetaConfig 재정의 바로 열기</string>
     <string name="piko_directly_open_metaconfig_desc">홈 아이콘을 길게 탭하여 MetaConfig 재정의 설정을 바로 열 수 있습니다</string>
-    <string name="piko_enable_emp_options">직원 옵션 활성화</string>
-    <string name="piko_enable_emp_options_desc">테스트에 사용되는 모든 직원 옵션을 활성화합니다</string>
-    <string name="piko_allow_user_network_certificate">사용자 네트워크 인증서 허용</string>
-    <string name="piko_allow_user_network_certificate_desc">화이트햇 테스트를 위해 사용자 네트워크 인증서를 허용합니다</string>
     <string name="piko_export_dev_overrides">재정의 내보내기</string>
     <string name="piko_import_dev_overrides">재정의 가져오기</string>
     <string name="piko_import_id_mapping">매핑 파일 가져오기</string>
@@ -116,9 +112,6 @@
     <string name="piko_category_misc">기타</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">분석 비활성화</string>
-    <string name="piko_delete_analytics_cache">분석 캐시 삭제</string>
-    <string name="piko_disable_analytics_desc">Instagram/Facebook 서버로 전송되는 분석을 차단합니다</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
     <string name="piko_follow_back_indicator_desc">프로필 페이지에 맞팔 상태를 표시하는 라벨을 추가하고, 그 라벨을 탭하는 경우에 상세한 관계 상태 분석을 표시합니다</string>
     <string name="piko_fbi_color_indicator">색상이 있는 관계 상태 표시기 활성화</string>
@@ -165,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">숨겨진 채팅에서 받은 메시지의 알림을 표시하지 않습니다</string>
     <string name="piko_hidden_chats_taps">탭하여 숨겨진 채팅 열기</string>
     <string name="piko_hidden_chats_taps_desc">받은 편지함과 숨겨진 채팅 간에 전환하려면 메시지 버튼을 연속으로 다음 횟수만큼 탭하세요</string>
-    <string name="piko_unlock_plus_benefits">플러스 혜택 잠금 해제</string>
-    <string name="piko_unlock_plus_benefits_desc">로컬에서 확인되는 \'Plus\' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다</string>
     <!-- DM Section -->
     <string name="piko_category_dm">메시지</string>
     <string name="piko_disable_disappearing_messages_gesture">사라지는 메시지 스와이프 비활성화</string>
@@ -313,7 +304,6 @@
     <string name="piko_ok">확인</string>
     <string name="piko_reset">초기화</string>
     <string name="piko_cancel">취소</string>
-    <string name="piko_deleted">삭제하였습니다</string>
     <string name="piko_debug">Piko 디버그</string>
     <string name="piko_debug_desc">일부 구성요소에 테스트용 디버그 옵션을 추가합니다</string>
     <string name="piko_export_experiment_list">실험 목록 내보내기</string>
@@ -488,7 +478,6 @@
     <string name="piko_media_like">좋아요</string>
     <string name="piko_media_link">링크</string>
     <string name="piko_media_activity">활동</string>
-    <string name="piko_disable_telemetry">Telemetry 비활성화</string>
     <string name="piko_patch_theme">테마</string>
     <string name="piko_patch_settings">설정 추가</string>
 </resources>

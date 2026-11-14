@@ -20,7 +20,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.newInstance
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.patcher.util.p0Register
@@ -55,7 +55,7 @@ private fun reelMenuBuilderFingerprint(mediaExtraDataField: FieldReference) = Fi
 
 @Suppress("unused")
 val hookReelOverflowMenuButton =
-    bytecodePatch(
+    patch(
         description = "This patch hooks reel overflow button list adder",
     ) {
         dependsOn(reelsOverflowMenuButtonEntity, decoderEntity)

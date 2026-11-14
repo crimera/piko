@@ -10,10 +10,6 @@
     <string name="piko_enable_dev_options">Включить параметры разработчика</string>
     <string name="piko_enable_dev_options_desc">Разблокирует параметры разработчика при долгом нажатии на значок «Домой»</string>
     <string name="piko_directly_open_metaconfig">Открыть настройки MetaConfig напрямую</string>
-    <string name="piko_enable_emp_options">Включить служебные параметры</string>
-    <string name="piko_enable_emp_options_desc">Открывает все служебные параметры, используемые для тестирования</string>
-    <string name="piko_allow_user_network_certificate">Разрешить пользовательские сетевые сертификаты</string>
-    <string name="piko_allow_user_network_certificate_desc">Разрешает использование пользовательских сетевых сертификатов для тестирования безопасности</string>
     <string name="piko_export_dev_overrides">Экспорт замещений</string>
     <string name="piko_import_dev_overrides">Импорт замещений</string>
     <string name="piko_import_id_mapping">Импорт файлов сопоставления</string>
@@ -69,9 +65,6 @@
     <string name="piko_category_misc">Разное</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">Amoled</string>
-    <string name="piko_disable_analytics">Отключить аналитику</string>
-    <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
-    <string name="piko_disable_analytics_desc">Блокирует аналитику, отправляемую на сервера Instagram/Facebook</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
     <string name="piko_follow_back_indicator_desc">Добавляет на страницу профиля метку «Подписан(а) на вас» и показывает подробную информацию о статусе дружбы при нажатии</string>
     <string name="piko_fbi_color_indicator">Включить цветной индикатор статуса дружбы</string>
@@ -95,8 +88,6 @@
     <string name="piko_copied">Скопировано</string>
     <string name="piko_more_profile_options">Дополнительные действия с профилем</string>
     <string name="piko_remove_empty_bottom_space">Убрать пустое пространство внизу</string>
-    <string name="piko_unlock_plus_benefits">Разблокировать возможности подписки «Плюс»</string>
-    <string name="piko_unlock_plus_benefits_desc">Разблокирует преимущества подписки «Plus», проверяемые локально. Используйте на свой страх и риск</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Сообщения</string>
     <string name="piko_unlimited_replays">Сделать исчезающие медиа постоянными</string>
@@ -211,7 +202,6 @@
     <string name="piko_ok">ОК</string>
     <string name="piko_reset">Сбросить</string>
     <string name="piko_cancel">Отмена</string>
-    <string name="piko_deleted">Удалено</string>
     <string name="piko_debug">Отладка Piko</string>
     <string name="piko_debug_desc">Добавляет отладочные (debug) действия к некоторым элементам для проверки</string>
     <string name="piko_export_experiment_list">Экспорт списка экспериментов</string>

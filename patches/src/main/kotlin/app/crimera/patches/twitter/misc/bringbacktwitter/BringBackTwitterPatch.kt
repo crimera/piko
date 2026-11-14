@@ -8,7 +8,8 @@ package app.crimera.patches.twitter.misc.bringbacktwitter
 
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.utils.replaceStringsInFile
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.patch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.ResourceGroup
@@ -19,7 +20,7 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val bringBackTwitterPatch =
-    resourcePatch(
+    patch(
         name = "Bring back twitter",
         description = "Bring back old twitter logo and name",
         default = false,

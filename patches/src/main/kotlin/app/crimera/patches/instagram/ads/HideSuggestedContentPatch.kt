@@ -16,7 +16,7 @@ import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -42,7 +42,7 @@ internal object FeedItemParseFromJsonFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideSuggestedContentPatch =
-    bytecodePatch(
+    patch(
         name = "Hide suggested content",
         description = "Hides suggested stories, reels, threads (Suggested posts will still be shown).",
         default = true,

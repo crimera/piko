@@ -67,21 +67,6 @@ public class HookFlags {
         }
     }
 
-    private static void employeeOptionsFlags() {
-        if(Pref.enableEmployeeOptions()){
-            BOOL_FLAGS.put("28538::0", true); //ig_android_employee_options::is_enabled
-        }else{
-            BOOL_FLAGS.put("28538::0", false); //ig_android_employee_options::is_enabled
-        }
-    }
-
-    private static void analyticsFlags() {
-        if (Pref.disableAnalytics()) {
-            BOOL_FLAGS.put("29064", false); // ig_analytics2_consolidation
-            LONG_FLAGS.put("29064::111", 0L); // ig_analytics2_consolidation::max_batch_lock_attempts
-        }
-    }
-
     private static void addRecommendedFlags(){
         if(SettingsStatus.recommendedFlags) {
             Map<String, Boolean> recFlags = FlagsSharedPref.getAll();

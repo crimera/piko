@@ -11,12 +11,12 @@ import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_C
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 @Suppress("unused")
 val includeButtonsInOverflowMenuArrayPatch =
-    bytecodePatch(
+    patch(
         description = "This patch hooks array values initialisation in overflow menu button constructor.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

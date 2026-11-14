@@ -11,7 +11,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
@@ -30,7 +30,7 @@ private object BuildExpirationConstructorFingerprint : Fingerprint(
 )
 
 val removeBuildExpiredPopupPatch =
-    bytecodePatch(
+    patch(
         description = "Removes the popup that appears after a while, when the app version ages.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

@@ -12,7 +12,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 
 internal object DMLongPressButtonAdderFingerprint : Fingerprint(
@@ -28,7 +28,7 @@ internal object DMLongPressButtonAdderFingerprint : Fingerprint(
 
 @Suppress("unused")
 val saveAllMessagesPatch =
-    bytecodePatch(
+    patch(
         description = "Enables save option for all direct messages",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

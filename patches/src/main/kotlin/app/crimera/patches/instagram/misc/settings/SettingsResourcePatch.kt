@@ -6,13 +6,16 @@
 
 package app.crimera.patches.instagram.misc.settings
 
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.packageMetadata
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.patch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import org.w3c.dom.Element
 
 val settingsResourcePatch =
-    resourcePatch(
+    patch(
         description = "Settings resource patch.",
     ) {
         execute {

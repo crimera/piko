@@ -13,8 +13,6 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.addFlags
-import app.crimera.patches.common.declaredParameterRegister
-import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -23,7 +21,8 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.patcher.util.p0Register
@@ -85,7 +84,7 @@ private const val BUILDER_LAYOUT_PARAMETER = 4
 private const val BUILDER_ACTION_BAR_RELATED_PARAMETER = 5
 
 val userProfileActionBarButtonPatch =
-    bytecodePatch(
+    patch(
         description = "This patch is adds support for adding buttons on user profile action bar.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

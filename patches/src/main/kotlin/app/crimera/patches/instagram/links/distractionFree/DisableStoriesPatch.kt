@@ -10,11 +10,11 @@ import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val disableStoriesPatch =
-    bytecodePatch(
+    patch(
         name = "Disable stories",
     ) {
         dependsOn(settingsPatch, interceptUriPatch)

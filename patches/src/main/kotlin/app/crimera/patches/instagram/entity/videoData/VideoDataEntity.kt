@@ -6,12 +6,11 @@
 
 package app.crimera.patches.instagram.entity.videoData
 
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 val videoDataEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of Video data",
     ) {
         execute {

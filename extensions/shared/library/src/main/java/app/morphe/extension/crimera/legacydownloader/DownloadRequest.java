@@ -23,6 +23,9 @@ public class DownloadRequest {
         }
     }
 
+    public enum ConflictPolicy { RENAME, SKIP, OVERWRITE }
+
+    public ConflictPolicy conflictPolicy = ConflictPolicy.RENAME;
     public String url;
     public String subFolder;
     public String fileName;

@@ -7,16 +7,15 @@
 package app.crimera.patches.instagram.links.misc
 
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.patches.instagram.utils.typeReference
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 
-context(context: BytecodePatchContext)
 internal fun hideReelsSuggestions() {
     val classifier = ReelsSuggestedUsersExitFingerprint.matchOrNull()
         ?.instructionMatches?.first()?.methodReference
@@ -42,7 +41,7 @@ internal fun hideReelsSuggestions() {
         } else {
             // Newer builds inline the classifier; the card's enum retains both suggested-user kinds.
             val enumClass = ReelsItemTypeFingerprint.originalClassDef
-            val typeField = context.classDefBy(itemType).instanceFields.singleOrNull { it.type == enumClass.type }
+            val typeField = classDefBy(itemType).instanceFields.singleOrNull { it.type == enumClass.type }
                 ?: throw PatchException("Could not resolve a unique Reels item type field")
             if (scratch == itemRegister || scratch > 15 || itemRegister > 15) {
                 throw PatchException("Reels item type has no safe field-read registers")

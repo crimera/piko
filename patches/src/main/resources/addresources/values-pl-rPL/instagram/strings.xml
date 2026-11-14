@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">Odblokowuje opcje programisty po przytrzymaniu ikony strony głównej</string>
     <string name="piko_directly_open_metaconfig">Bezpośrednio otwieraj MetaConfig</string>
     <string name="piko_directly_open_metaconfig_desc">Otwiera nadpisania MetaConfig bezpośrednio po przytrzymaniu ikony strony głównej</string>
-    <string name="piko_enable_emp_options">Włącz opcje pracownicze</string>
-    <string name="piko_enable_emp_options_desc">Odblokowuje wszystkie opcje pracownicze używane do testów</string>
-    <string name="piko_allow_user_network_certificate">Zezwalaj na certyfikaty użytkownika</string>
-    <string name="piko_allow_user_network_certificate_desc">Umożliwia aplikacji zaufanie certyfikatom sieciowym zainstalowanym przez użytkownika do testów whitehat</string>
     <string name="piko_export_dev_overrides">Eksportuj nadpisania</string>
     <string name="piko_import_dev_overrides">Importuj nadpisania</string>
     <string name="piko_import_id_mapping">Importuj pliki mapowania</string>
@@ -101,6 +97,7 @@
     <string name="piko_hide_notes_tray_desc">Ukrywa pasek notatek w sekcji wiadomości</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Ukryj przycisk tworzenia grupy w menu udostępniania</string>
     <string name="piko_hide_reels_follow_button">Ukryj przycisk Obserwuj w Rolkach</string>
+    <string name="piko_hide_likes">Ukryj przyciski polubienia</string>
     <string name="piko_hide_share_button">Ukryj przycisk udostępniania</string>
     <string name="piko_hide_save_buttons">Ukryj przyciski zapisu</string>
     <string name="piko_hide_reshare_button">Ukryj przycisk Udostępnij</string>
@@ -115,9 +112,6 @@
     <string name="piko_category_misc">Różne</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Wyłącz analitykę</string>
-    <string name="piko_delete_analytics_cache">Usuń pamięć podręczną analityki</string>
-    <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
     <string name="piko_follow_back_indicator">Włącz wskaźnik statusu relacji</string>
     <string name="piko_follow_back_indicator_desc">Dodaje etykietę ze statusem \"Obserwuje Cię\" na stronie profilu, a po dotknięciu wyświetla szczegółowe zestawienie statusu relacji</string>
     <string name="piko_fbi_color_indicator">Włącz kolorowy wskaźnik statusu relacji</string>
@@ -127,6 +121,8 @@
     <string name="piko_friendship_status">Status znajomości</string>
     <string name="piko_follow_list_non_follower_badge">Pokaż nieobserwujących na liście Obserwowani</string>
     <string name="piko_follow_list_non_follower_badge_desc">Dodaje plakietkę do wierszy na twojej liście Obserwowani dla kont, które nie obserwują cię zwrotnie</string>
+    <string name="piko_resume_reels_after_scrolling">Wznawiaj rolki po przewinięciu</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Kontynuuj odtwarzanie rolki od momentu, w którym zostało przerwane, gdy przewiniesz do niej z powrotem</string>
     <string name="piko_improve_image_viewing">Popraw jakość obrazów</string>
     <string name="piko_improve_image_viewing_desc">Pobiera z serwera obrazy w maksymalnej rozdzielczości. Może obniżyć wydajność, zwiększyć rozmiar danych aplikacji lub spowodować przełączenie aplikacji na starszy układ</string>
     <string name="piko_copy_comment">Kopiuj komentarz</string>
@@ -162,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">Nie pokazuj powiadomień o wiadomościach z ukrytych czatów</string>
     <string name="piko_hidden_chats_taps">Liczba dotknięć otwierająca ukryte czaty</string>
     <string name="piko_hidden_chats_taps_desc">Dotknij przycisku wiadomości tyle razy z rzędu, aby przełączyć się między skrzynką odbiorczą a ukrytymi czatami</string>
-    <string name="piko_unlock_plus_benefits">Odblokuj korzyści Plus</string>
-    <string name="piko_unlock_plus_benefits_desc">Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO</string>
     <!-- DM Section -->
     <string name="piko_category_dm">Wiadomości prywatne</string>
     <string name="piko_disable_disappearing_messages_gesture">Wyłącz gest włączania znikających wiadomości</string>
@@ -208,6 +202,7 @@
     <string name="piko_save_media_comment">Zapisz multimedia z komentarzy</string>
     <string name="piko_save_media_comment_desc">Dodaje przycisk do zapisywania multimediów z komentarzy pod postami i rolkami</string>
     <string name="piko_enable_direct_download">Włącz bezpośrednie pobieranie</string>
+    <string name="piko_enable_direct_download_desc">Dotknij przycisku pobierania przy postach, rolkach lub relacjach, aby zapisać bieżące multimedia. Jeśli multimediów jest więcej, przytrzymaj przycisk, aby zapisać je wszystkie</string>
     <string name="piko_select_media_download">Wybierz multimedia do pobrania</string>
     <string name="piko_download_photo_number">Zdjęcie %d</string>
     <string name="piko_download_video_number">Film %d</string>
@@ -233,6 +228,7 @@
     <string name="piko_download_file_name_token_shortcode">Shortcode</string>
     <string name="piko_download_file_name_token_upload_date">Data</string>
     <string name="piko_download_file_name_token_upload_time">Godzina</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Znacznik czasu</string>
     <string name="piko_download_file_name_token_type">Typ</string>
     <string name="piko_download_file_name_token_carousel_index">Karuzela</string>
     <string name="piko_download_file_name_token_variant_suffix">Wariant</string>
@@ -308,7 +304,6 @@
     <string name="piko_ok">OK</string>
     <string name="piko_reset">Zresetuj</string>
     <string name="piko_cancel">Anuluj</string>
-    <string name="piko_deleted">Usunięto</string>
     <string name="piko_debug">Debugowanie Piko</string>
     <string name="piko_debug_desc">Dodaje opcje debugowania dla niektórych komponentów do testów</string>
     <string name="piko_export_experiment_list">Eksportuj listę eksperymentów</string>
@@ -344,6 +339,8 @@
     <string name="piko_action_bar_chat">Ikony paska akcji czatu</string>
     <string name="piko_action_bar_chat_desc">Ikony paska akcji w wiadomościach prywatnych</string>
     <string name="piko_action_bar_inbox">Ikony paska akcji skrzynki odbiorczej</string>
+    <string name="piko_action_bar_button_audio_call_icon">Ikona połączenia głosowego</string>
+    <string name="piko_action_bar_button_video_call_icon">Ikona połączenia wideo</string>
     <string name="piko_action_bar_button_settings_icon">Ikona ustawień</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ikona trybu ducha</string>
     <string name="piko_action_bar_button_jump_oldest_icon">Ikona przejścia do najstarszej wiadomości</string>
@@ -481,7 +478,6 @@
     <string name="piko_media_like">polubienie</string>
     <string name="piko_media_link">link</string>
     <string name="piko_media_activity">aktywność</string>
-    <string name="piko_disable_telemetry">Wyłącz telemetrię</string>
     <string name="piko_patch_theme">Motyw</string>
     <string name="piko_patch_settings">Dodaj ustawienia</string>
 </resources>

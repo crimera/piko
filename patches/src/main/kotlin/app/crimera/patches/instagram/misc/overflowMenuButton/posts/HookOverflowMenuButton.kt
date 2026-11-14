@@ -11,12 +11,12 @@ import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_C
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.registersUsed
 
 @Suppress("unused")
 val hookOverflowMenuButton =
-    bytecodePatch(
+    patch(
         description = "This patch hooks array values initialisation in overflow menu button constructor.",
     ) {
         dependsOn(includeButtonsInOverflowMenuArrayPatch, hookOverflowMenuButtonOnClickPatch)

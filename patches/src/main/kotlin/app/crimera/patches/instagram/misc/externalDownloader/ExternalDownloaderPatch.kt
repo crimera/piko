@@ -14,11 +14,11 @@ import app.crimera.patches.instagram.misc.overflowMenuButton.reels.hookReelOverf
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val externalDownloaderPatch =
-    bytecodePatch(
+    patch(
         name = "External downloader",
         description = "Adds support to share post links directly to external downloader",
         default = true,

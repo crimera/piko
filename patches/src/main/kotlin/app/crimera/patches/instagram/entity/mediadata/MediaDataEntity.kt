@@ -12,16 +12,14 @@ import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundD
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.entity.videoData.videoDataEntity
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 val mediaDataEntity =
-    bytecodePatch(
+    patch(
         description = "This patch is used for decoding obfuscated code of the media data",
     ) {
         dependsOn(decoderEntity, userDataEntity, videoDataEntity, originalSoundDataIntfEntity, trackDataIntfEntity)

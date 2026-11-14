@@ -9,10 +9,9 @@ package app.crimera.patches.instagram.links.privacy
 import app.crimera.patches.common.declaredParameterRegister
 import app.crimera.patches.common.parameterRegisterStart
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
-import app.crimera.patches.instagram.utils.fieldReference
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
@@ -72,9 +71,8 @@ internal fun addStoryAggregateBridge(
 /**
  * Root view field of a story view holder, which is stored by the constructor of the class or one of its superclasses.
  */
-context(context: BytecodePatchContext)
 internal fun storyRootViewField(classType: String): FieldReference =
-    generateSequence(classType) { context.classDefBy(it).superclass }
+    generateSequence(classType) { classDefBy(it).superclass }
         .firstNotNullOf { constructorRootViewFingerprint(it).matchOrNull() }
         .instructionMatches.first().fieldReference
 

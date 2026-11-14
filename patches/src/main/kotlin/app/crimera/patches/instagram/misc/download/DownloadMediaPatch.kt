@@ -27,14 +27,14 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 
 @Suppress("unused")
 val downloadMediaPatch =
-    bytecodePatch(
+    patch(
         name = "Download media",
         description = "Adds ability to download posts, reels, stories and highlights",
     ) {

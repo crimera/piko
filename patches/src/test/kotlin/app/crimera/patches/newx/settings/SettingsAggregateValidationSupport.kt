@@ -125,7 +125,7 @@ internal object SettingsAggregateValidator {
 }
 
 internal object NewXContributionDiscovery {
-    fun discoverSelectablePatches(): List<Patch<*>> {
+    fun discoverSelectablePatches(): List<Patch> {
         val outputRoot = Path.of(Categories::class.java.protectionDomain.codeSource.location.toURI())
         return discoverPatchClasses(outputRoot).flatMap { className ->
             Class.forName(className).declaredMethods
@@ -135,7 +135,7 @@ internal object NewXContributionDiscovery {
                         method.parameterCount == 0 &&
                         Patch::class.java.isAssignableFrom(method.returnType)
                 }
-                .map { it.invoke(null) as Patch<*> }
+                .map { it.invoke(null) as Patch }
                 .filter { it.name != null }
         }.distinct()
     }

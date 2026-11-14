@@ -19,12 +19,11 @@ import app.crimera.patches.instagram.misc.comment.nativeChatButtonResources
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.instagram.utils.fieldReference
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val saveMediaCommentPatch =
-    bytecodePatch(
+    patch(
         name = "Save media comment",
         description = "Adds a button to save media comments on posts and reels.",
         default = true,

@@ -10,10 +10,6 @@
     <string name="piko_enable_dev_options">Aktifkan pilihan pengembang</string>
     <string name="piko_enable_dev_options_desc">Membuka pilihan pengembang dengan menekan lama ikon beranda</string>
     <string name="piko_directly_open_metaconfig">Langsung membuka penggantian MetaConfig</string>
-    <string name="piko_enable_emp_options">Aktifkan pilihan karyawan</string>
-    <string name="piko_enable_emp_options_desc">Membuka semua pilihan karyawan yang digunakan untuk pengujian</string>
-    <string name="piko_allow_user_network_certificate">Izinkan sertifikat jaringan pengguna</string>
-    <string name="piko_allow_user_network_certificate_desc">Mengizinkan sertifikat jaringan pengguna untuk pengujian whitehat</string>
     <string name="piko_export_dev_overrides">Ekspor override</string>
     <string name="piko_import_dev_overrides">Impor override</string>
     <string name="piko_import_id_mapping">Impor berkas pemetaan</string>
@@ -66,9 +62,6 @@
     <string name="piko_category_misc">Lain-lain</string>
     <string name="piko_material_you_title">Material You</string>
     <string name="piko_amoled_title">AMOLED</string>
-    <string name="piko_disable_analytics">Nonaktifkan analitik</string>
-    <string name="piko_delete_analytics_cache">Hapus cache analitik</string>
-    <string name="piko_disable_analytics_desc">Blokir analitik yang dikirim ke server Instagram/Facebook</string>
     <string name="piko_follow_back_indicator">Aktifkan indikator status pertemanan</string>
     <string name="piko_follow_back_indicator_desc">Menambahkan label status mengikuti balik di halaman profil dan menampilkan rincian status pertemanan secara terperinci saat diklik</string>
     <string name="piko_fbi_color_indicator">Aktifkan indikator status pertemanan berwarna</string>
@@ -92,8 +85,6 @@
     <string name="piko_copied">Disalin</string>
     <string name="piko_more_profile_options">Pilihan profil lainnya</string>
     <string name="piko_remove_empty_bottom_space">Hapus ruang kosong di bagian bawah</string>
-    <string name="piko_unlock_plus_benefits">Buka keuntungan Plus</string>
-    <string name="piko_unlock_plus_benefits_desc">Buka keuntungan langganan \'Plus\' yang diperiksa secara lokal. GUNAKAN DENGAN RISIKO ANDA SENDIRI</string>
     <!-- DM Section -->
     <string name="piko_category_dm">DM</string>
     <string name="piko_unlimited_replays">Jadikan media sementara menjadi permanen</string>
@@ -193,7 +184,6 @@
     <string name="piko_ok">OKE</string>
     <string name="piko_reset">Atur ulang</string>
     <string name="piko_cancel">Batalkan</string>
-    <string name="piko_deleted">Dihapus</string>
     <string name="piko_debug">Debug Piko</string>
     <string name="piko_debug_desc">Menambahkan pilihan debug pada beberapa komponen untuk pengujian</string>
     <string name="piko_export_experiment_list">Ekspor daftar eksperimen</string>

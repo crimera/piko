@@ -19,13 +19,13 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.registersUsed
 
 // Thanks to MyInsta.
 @Suppress("unused")
 val copyCommentPatch =
-    bytecodePatch(
+    patch(
         name = "Copy comment",
         description = "Adds buttons to copy comments and their authors' usernames on posts and reels.",
         default = true,

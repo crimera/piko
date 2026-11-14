@@ -12,11 +12,13 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -36,28 +38,6 @@ import app.morphe.extension.shared.Logger;
 import static app.morphe.extension.shared.requests.Route.Method.GET;
 
 public class InstaUtils {
-
-    public static boolean deleteRecursive(File file) {
-        try {
-            if (file == null || !file.exists()) {
-                PikoUtils.toast(str("piko_fail_no_file"));
-                return false;
-            }
-
-            if (file.isDirectory()) {
-                File[] children = file.listFiles();
-                if (children != null) {
-                    for (File child : children) {
-                        deleteRecursive(child);
-                    }
-                }
-            }
-            return file.delete();
-        } catch (RuntimeException e) {
-            PikoUtils.logger(e);
-        }
-        return false;
-    }
 
     public static void decompileExperiments(boolean asJson) {
         String appVersionName = Utils.getAppVersionName();
@@ -100,12 +80,31 @@ public class InstaUtils {
                 .show();
     }
 
+    /**
+     * Restarts the app. Not {@code Utils.restartApp}: that ends in {@code System.exit}, whose exit
+     * hooks include Instagram's crash reporter (breakpad), which waits on a child process and so
+     * blocks the main thread until the system reports an ANR. A killed process skips the exit
+     * hooks, and the launch queued just before starts the app again in a new process.
+     */
+    public static void restartApp(Context context) {
+        try {
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                context.startActivity(intent);
+            }
+        } catch (RuntimeException e) {
+            Logger.printException(() -> "Failed to relaunch the app", e);
+        }
+        Process.killProcess(Process.myPid());
+    }
+
     public static void deletePref(){
         // The font file lives outside the preferences, so a reset removes it separately.
         FontStorage.delete();
         if(Pref.clearAllPreferences()){
             PikoUtils.toast(str("piko_reset_pref_success"));
-            Utils.restartApp(Utils.getContext());
+            restartApp(Utils.getContext());
         }else{
             PikoUtils.toast(str("piko_reset_pref_failed"));
         }

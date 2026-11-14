@@ -12,8 +12,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.document
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
@@ -69,7 +70,7 @@ private fun resolveTaskServiceName(manifest: Element): String {
 
 private lateinit var taskServiceName: String
 
-private val taskRemovalServiceResourcePatch = resourcePatch {
+private val taskRemovalServiceResourcePatch = patch {
     execute {
         // Resolve the Android registration, not Instagram's class name or onBind implementation.
         document("AndroidManifest.xml").use {
@@ -78,7 +79,7 @@ private val taskRemovalServiceResourcePatch = resourcePatch {
     }
 }
 
-internal val settingsTaskRemovalPatch = bytecodePatch {
+internal val settingsTaskRemovalPatch = patch {
     dependsOn(sharedExtensionPatch, taskRemovalServiceResourcePatch)
     execute {
         val service = mutableClassDefBy("L${taskServiceName.replace('.', '/')};")

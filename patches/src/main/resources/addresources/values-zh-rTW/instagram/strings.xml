@@ -11,10 +11,6 @@
     <string name="piko_enable_dev_options_desc">長按主畫面圖示來開啟開發者選項</string>
     <string name="piko_directly_open_metaconfig">直接開啟 MetaConfig 設定覆蓋</string>
     <string name="piko_directly_open_metaconfig_desc">長按主頁圖示可直接開啟 MetaConfig 覆寫設定</string>
-    <string name="piko_enable_emp_options">啟動員工選項</string>
-    <string name="piko_enable_emp_options_desc">解鎖所有用於測試的員工選項</string>
-    <string name="piko_allow_user_network_certificate">允許使用者網路憑證</string>
-    <string name="piko_allow_user_network_certificate_desc">允許使用者網路憑證進行白帽測試</string>
     <string name="piko_export_dev_overrides">匯出設定覆蓋</string>
     <string name="piko_import_dev_overrides">匯入設定覆蓋</string>
     <string name="piko_import_id_mapping">匯入映射文件</string>
@@ -101,24 +97,21 @@
     <string name="piko_hide_notes_tray_desc">在私訊中隱藏筆記橫幅</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">在分享表單中隱藏「傳送到新的群組聊天」按鈕</string>
     <string name="piko_hide_reels_follow_button">隱藏 Reels 追蹤按鈕</string>
-    <string name="piko_hide_likes">隱藏喜歡按鈕</string>
+    <string name="piko_hide_likes">隱藏按讚按鈕</string>
     <string name="piko_hide_share_button">隱藏分享按鈕</string>
     <string name="piko_hide_save_buttons">隱藏儲存按鈕</string>
     <string name="piko_hide_reshare_button">隱藏轉發按鈕</string>
     <string name="piko_hide_reels_follow_button_desc">移除 Reels 創作者欄位旁的追蹤按鈕</string>
     <string name="piko_disable_video_autoplay">停用影片自動播放</string>
-    <string name="piko_disable_double_tap_like_post">停用貼文雙擊喜歡</string>
-    <string name="piko_disable_double_tap_like_reel">停用 Reel 雙擊喜歡</string>
-    <string name="piko_disable_double_tap_like_comment">停用留言雙擊喜歡</string>
-    <string name="piko_disable_double_tap_like_message">停用訊息雙擊喜歡</string>
-    <string name="piko_disable_double_tap_to_like">停用雙擊喜歡</string>
+    <string name="piko_disable_double_tap_like_post">停用貼文雙擊按讚</string>
+    <string name="piko_disable_double_tap_like_reel">停用 Reel 雙擊按讚</string>
+    <string name="piko_disable_double_tap_like_comment">停用留言雙擊按讚</string>
+    <string name="piko_disable_double_tap_like_message">停用訊息雙擊按讚</string>
+    <string name="piko_disable_double_tap_to_like">停用雙擊按讚</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">其他</string>
     <string name="piko_material_you_title">Material You 模式</string>
     <string name="piko_amoled_title">AMOLED 純黑模式</string>
-    <string name="piko_disable_analytics">停用資料分析</string>
-    <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
-    <string name="piko_disable_analytics_desc">阻擋傳送至 Instagram/Facebook 伺服器的分析資料</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
     <string name="piko_follow_back_indicator_desc">在個人檔案頁面新增「已追蹤你」狀態標籤，並在點擊時顯示詳細的好友關係狀態</string>
     <string name="piko_fbi_color_indicator">啟用彩色好友狀態指示器</string>
@@ -128,6 +121,8 @@
     <string name="piko_friendship_status">好友關係狀態</string>
     <string name="piko_follow_list_non_follower_badge">啟用追蹤狀態指示器</string>
     <string name="piko_follow_list_non_follower_badge_desc">增加一個標籤顯示你正在追蹤的帳號是否追蹤你</string>
+    <string name="piko_resume_reels_after_scrolling">滑動返回後繼續播放 Reels</string>
+    <string name="piko_resume_reels_after_scrolling_desc">當您滑動回原先的 Reels 時，從上次中斷的地方繼續播放</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
     <string name="piko_improve_image_viewing_desc">從伺服器抓取最高解析度圖片。可能會降低效能、增加應用程式資料大小，或導致應用程式切換至舊版版面配置</string>
     <string name="piko_copy_comment">複製留言</string>
@@ -163,8 +158,6 @@
     <string name="piko_hidden_chats_mute_desc">不顯示來自您已隱藏訊息的通知</string>
     <string name="piko_hidden_chats_taps">開啟隱藏訊息的點擊次數</string>
     <string name="piko_hidden_chats_taps_desc">連續點擊訊息按鈕達此次數，即可在收件匣與隱藏的訊息之間切換</string>
-    <string name="piko_unlock_plus_benefits">解鎖 Plus 專屬福利</string>
-    <string name="piko_unlock_plus_benefits_desc">解鎖在本機驗證的 Plus 專屬福利。使用時請自行承擔風險</string>
     <!-- DM Section -->
     <string name="piko_category_dm">私訊</string>
     <string name="piko_disable_disappearing_messages_gesture">停用連續檢視模式滑動手勢</string>
@@ -235,6 +228,7 @@
     <string name="piko_download_file_name_token_shortcode">短碼</string>
     <string name="piko_download_file_name_token_upload_date">日期</string>
     <string name="piko_download_file_name_token_upload_time">時間</string>
+    <string name="piko_download_file_name_token_upload_timestamp">時間戳</string>
     <string name="piko_download_file_name_token_type">類型</string>
     <string name="piko_download_file_name_token_carousel_index">輪播</string>
     <string name="piko_download_file_name_token_variant_suffix">解析度</string>
@@ -310,7 +304,6 @@
     <string name="piko_ok">確認</string>
     <string name="piko_reset">重設</string>
     <string name="piko_cancel">取消</string>
-    <string name="piko_deleted">已刪除</string>
     <string name="piko_debug">Piko 偵錯</string>
     <string name="piko_debug_desc">為部分元件新增偵錯選項以進行測試</string>
     <string name="piko_export_experiment_list">匯出實驗清單</string>
@@ -321,8 +314,8 @@
     <string name="piko_open_image_with">使用以下方式開啟圖片</string>
     <string name="piko_open_video_with">使用以下方式開啟影片</string>
     <!-- Like Animation Section -->
-    <string name="piko_change_like_animation">變更喜歡動畫</string>
-    <string name="piko_change_like_animation_desc">將喜歡動畫變更為現有的光圈喜歡動畫之一</string>
+    <string name="piko_change_like_animation">變更按讚動畫</string>
+    <string name="piko_change_like_animation_desc">將按讚動畫變更為現有的光圈按讚動畫之一</string>
     <string name="piko_like_animation_random">隨機</string>
     <string name="piko_like_animation_preview">預覽動畫</string>
     <string name="piko_like_animation_preview_unavailable">無法預覽</string>
@@ -482,10 +475,9 @@
     <string name="piko_media_reel">reel</string>
     <string name="piko_media_story">限時動態</string>
     <string name="piko_media_post">貼文</string>
-    <string name="piko_media_like">喜歡</string>
+    <string name="piko_media_like">按讚</string>
     <string name="piko_media_link">連結</string>
     <string name="piko_media_activity">活動</string>
-    <string name="piko_disable_telemetry">停用遙測</string>
     <string name="piko_patch_theme">佈景主題</string>
     <string name="piko_patch_settings">新增設定</string>
 </resources>

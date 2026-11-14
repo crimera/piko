@@ -14,7 +14,7 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -53,7 +53,7 @@ private object InAppNotificationShowFingerprint : Fingerprint(
 
 @Suppress("unused")
 val inboxLockPatch =
-    bytecodePatch(
+    patch(
         name = "Inbox lock",
         description = "Asks for your fingerprint, face or screen lock before the inbox is shown.",
         default = true,

@@ -8,8 +8,6 @@ package app.crimera.patches.instagram.misc.reels
 
 import app.crimera.patches.instagram.misc.overflowMenuButton.reels.ClipsItemStateToStringFingerprint
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
-import app.crimera.patches.instagram.utils.fieldReference
-import app.crimera.patches.instagram.utils.methodReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -18,7 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -32,7 +30,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal class ReelStartPosition(val explicit: MethodReference, val paused: FieldReference, val stopped: FieldReference)
 
-context(_: BytecodePatchContext)
 private fun trackDeferredReattach(prepare: MutableMethod, state: String, itemId: MethodReference) {
     val reattach = Fingerprint(
         parameters = listOf(state, prepare.parameterTypes[1].toString()), returnType = "Z",
@@ -63,7 +60,6 @@ private fun trackDeferredReattach(prepare: MutableMethod, state: String, itemId:
         "invoke-static {v$viewer, v$player, v$item}, $PATCHES_DESCRIPTOR/ReelsPlayback;->onPlayerReattached(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V")
 }
 
-context(context: BytecodePatchContext)
 internal fun patchReelsStartPosition(): ReelStartPosition {
     val config = "Lcom/instagram/clips/intf/ClipsViewerConfig;"
     val match = Fingerprint(
@@ -93,7 +89,7 @@ internal fun patchReelsStartPosition(): ReelStartPosition {
     val pausePredicate = code.mapNotNull { it.getReference<MethodReference>() }.distinct().single {
         it.definingClass == state && it.parameterTypes.isEmpty() && it.returnType == "Z"
     }
-    val paused = context.classDefBy(state).methods.single { it == pausePredicate }.implementation!!.instructions
+    val paused = classDefBy(state).methods.single { it == pausePredicate }.implementation!!.instructions
         .mapNotNull { it.getReference<FieldReference>() }.single()
     // Native prepare reads the manual pause first and falls back to the last stop.
     val positions = code.filter { it.opcode == Opcode.IGET_OBJECT }.mapNotNull { it.getReference<FieldReference>() }

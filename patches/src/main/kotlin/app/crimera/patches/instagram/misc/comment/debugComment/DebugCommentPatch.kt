@@ -16,13 +16,13 @@ import app.crimera.patches.instagram.misc.comment.commentButtonClickCheckPatch
 import app.crimera.patches.instagram.misc.comment.nativeChatButtonResources
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 
 @Suppress("unused")
 val debugCommentPatch =
-    bytecodePatch(
+    patch(
         description = "Adds a debug button to comments on posts and reels.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

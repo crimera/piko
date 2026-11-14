@@ -23,7 +23,7 @@ Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software)
 Tap the button to add Piko as a patch source in Morphe Manager:
 
 <a href="https://morphe.software/add-source?github=crimera/piko">
-  <img src="docs/images/add-to-morphe.svg" alt="Add to Morphe" height="36">
+  <img src="docs/images/add-to-morphe.svg" alt="Add to Morphe" height="48">
 </a>
 
 Then patch Twitter/X or Instagram:
@@ -71,7 +71,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.11.0-dev.5](https://github.com/crimera/piko/releases/tag/v3.11.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;146 patches total
+> **[v3.11.1](https://github.com/crimera/piko/releases/tag/v3.11.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;141 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
@@ -88,7 +88,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Block update screen](#block-update-screen) | Blocks the 'This app is out of date' update screen from being shown on launch |  |
 | [Bring back twitter](#bring-back-twitter) | Bring back old twitter logo and name |  |
 | [Change app icon](#change-app-icon) |  |  |
-| [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clear tracking params](#clear-tracking-params) | Removes tracking parameters when sharing links |  |
 | [Control video auto scroll](#control-video-auto-scroll) | Control video auto scroll in immersive view |  |
 | [Custom download folder](#custom-download-folder) | Change the download directory for video downloads |  |
@@ -108,6 +107,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Customize side bar items](#customize-side-bar-items) |  |  |
 | [Customize timeline top bar](#customize-timeline-top-bar) |  |  |
 | [Delete from database](#delete-from-database) | Delete entries from database(cache) |  |
+| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting |  |
 | [Disable auto timeline scroll on launch](#disable-auto-timeline-scroll-on-launch) |  |  |
 | [Disable chirp font](#disable-chirp-font) |  |  |
 | [Download patch](#download-patch) | Unlocks the ability to download videos and gifs from Twitter/X |  |
@@ -162,7 +162,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;66 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -173,9 +173,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
 | [Add settings](#add-settings) | Adds settings to control preferences are patching |  |
-| [Allow user network certificate](#allow-user-network-certificate) | Allows user network certificate for whitehat testing |  |
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
-| [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app. | • Package name<br>• App name |
 | [Copy comment](#copy-comment) | Adds buttons to copy comments and their authors' usernames on posts and reels. |  |
 | [Custom font](#custom-font) | Adds an option to replace the app font with a font file from the device storage. |  |
@@ -183,9 +181,9 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
 | [Customize navigation bar](#customize-navigation-bar) | Choose which tabs appear in the bottom navigation bar and reorder them |  |
+| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting |  |
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
 | [Disable ads](#disable-ads) |  |  |
-| [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
 | [Disable comments](#disable-comments) | Disables comments and hides comment buttons on posts, reels and stories |  |
 | [Disable disappearing messages swipe](#disable-disappearing-messages-swipe) | Prevents swiping up in a chat from enabling disappearing messages |  |
 | [Disable discover people](#disable-discover-people) | Hides suggested accounts |  |
@@ -196,7 +194,6 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
 | [Disable swipe to create](#disable-swipe-to-create) | Prevents opening the creation screen by swiping right on the home tab. |  |
-| [Disable telemetry](#disable-telemetry) | Disables analytics upload components and Falco event logging. |  |
 | [Disable typing status](#disable-typing-status) |  |  |
 | [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
@@ -236,9 +233,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Save deleted messages](#save-deleted-messages) | Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them. |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
 | [Theme](#theme) | Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
-| [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
-| [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |
 | [View DMs anonymously](#view-dms-anonymously) |  |  |
 | [View live anonymously](#view-live-anonymously) |  |  |
 | [View stories anonymously](#view-stories-anonymously) |  |  |

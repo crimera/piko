@@ -52,7 +52,7 @@ class SettingsAggregateValidationTest {
             clonePatch,
             bringBackTwitterPatch,
         )
-        fun Patch<*>.requiresStandardInstall(visited: MutableSet<Patch<*>> = mutableSetOf()): Boolean =
+        fun Patch.requiresStandardInstall(visited: MutableSet<Patch> = mutableSetOf()): Boolean =
             visited.add(this) && (this in standardOnly || dependencies.any { it.requiresStandardInstall(visited) })
 
         val patches = NewXContributionDiscovery.discoverSelectablePatches()

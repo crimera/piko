@@ -12,7 +12,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
@@ -43,12 +42,10 @@ private fun booleanStateToStringFingerprint(marker: String, label: String) = Fin
 /**
  * Feed UFI state boolean field printed after [label] in the state toString().
  */
-context(_: BytecodePatchContext)
 internal fun feedUfiStateField(label: String): FieldReference {
     return booleanStateField("MediaUfiUiState(mediaForActionHandler=", label)
 }
 
-context(_: BytecodePatchContext)
 internal fun booleanStateField(marker: String, label: String): FieldReference {
     val toStringMatch = booleanStateToStringFingerprint(marker, label).match()
     val toString = toStringMatch.method
@@ -70,7 +67,6 @@ internal fun booleanStateField(marker: String, label: String): FieldReference {
 /**
  * Forces the feed UFI state boolean fields printed after [labels] to false when [preferenceCall] returns true.
  */
-context(_: BytecodePatchContext)
 internal fun hideFeedUfiStates(preferenceCall: String, vararg labels: String) {
     labels.forEach { label ->
         val field = feedUfiStateField(label)

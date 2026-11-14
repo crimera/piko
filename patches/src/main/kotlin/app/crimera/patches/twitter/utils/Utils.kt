@@ -11,9 +11,7 @@ import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.utils.Constants.FSTS_DESCRIPTOR
 import app.crimera.patches.twitter.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
 
-context(patchContext: BytecodePatchContext)
 fun enableSettings(functionName: String) {
     SettingsStatusLoadFingerprint.method.addInstruction(
         0,
@@ -21,7 +19,6 @@ fun enableSettings(functionName: String) {
     )
 }
 
-context(patchContext: BytecodePatchContext)
 fun flagSettings(functionName: String) {
     FeatureFlagLoadFingerprint.method.addInstruction(
         0,

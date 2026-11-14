@@ -12,7 +12,6 @@ import app.crimera.patches.instagram.misc.settings.IgFragmentActivityOnCreate
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.patcher.util.registersUsed
@@ -43,7 +42,6 @@ internal fun systemUiModeCacheResolutionInvocation(
         "Lapp/morphe/extension/instagram/theme/MaterialYouTheme;->" +
         "resolveSystemUiModeCache(I)I"
 
-context(patchContext: BytecodePatchContext)
 internal fun installThemeLifecycleHooks() {
     instagramInitHook.fingerprint.method.apply {
         val invokeSuperIndex = indexOfFirstInstructionOrThrow(Opcode.INVOKE_SUPER)
@@ -65,7 +63,6 @@ internal fun installThemeLifecycleHooks() {
     )
 }
 
-context(patchContext: BytecodePatchContext)
 internal fun installSystemDefaultUiModeHook() {
     CurrentSystemUiModeFingerprint.let {
         val returnMatch = it.instructionMatches.last()
@@ -86,7 +83,6 @@ internal fun installSystemDefaultUiModeHook() {
     }
 }
 
-context(patchContext: BytecodePatchContext)
 internal fun installNativeThemeModeSync() {
     installComposeNativeThemeModeSync()
     installLegacyNativeThemeModeSync()

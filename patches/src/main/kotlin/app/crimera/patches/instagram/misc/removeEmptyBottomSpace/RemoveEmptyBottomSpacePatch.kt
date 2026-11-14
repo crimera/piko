@@ -16,7 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -36,7 +36,7 @@ internal object NavigationBarAdjusterFingerprint : Fingerprint(
 // Thanks to MyInsta
 @Suppress("unused")
 val removeEmptyBottomSpacePatch =
-    bytecodePatch(
+    patch(
         name = "Remove empty bottom space",
         description = "Removes empty space below bottom navigation bar",
     ) {

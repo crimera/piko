@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.constants;
 
+import app.morphe.extension.instagram.utils.InstaUtils;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
@@ -217,7 +218,7 @@ public class UI {
                     String selectedOption = options.get(which);
 
                     if (selectedOption.equals(str("piko_ok"))) {
-                        Utils.restartApp(context);
+                        InstaUtils.restartApp(context);
 
                     }
                 } catch (Exception e) {

@@ -10,7 +10,7 @@ import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -21,7 +21,7 @@ private object TabLayoutFingerprint : Fingerprint(
 )
 
 val redirectBMTab =
-    bytecodePatch(
+    patch(
         description = "Patch required to redirect bookmark folders to bookmark",
     ) {
         execute {
