@@ -45,8 +45,10 @@ internal object NewShareSheetLinkFingerprint2 : Fingerprint(
 val handleModernShareSheetLinks =
     bytecodePatch(
         description = "Hooks links on modern share sheet ( after 11.4x.xx )",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(versionCheckPatch)
 
         execute {

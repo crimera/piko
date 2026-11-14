@@ -28,8 +28,10 @@ private object customiseNavBarFingerprint : Fingerprint(
 val customiseSideBarPatch =
     bytecodePatch(
         name = "Customize side bar items",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

@@ -28,8 +28,10 @@ val changelogsPatch =
     bytecodePatch(
         name = "Show changelogs",
         description = "Shows changelogs when new a patch is installed.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

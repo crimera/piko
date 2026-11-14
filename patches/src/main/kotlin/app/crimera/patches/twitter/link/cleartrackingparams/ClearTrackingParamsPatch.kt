@@ -36,9 +36,10 @@ val clearTrackingParamsPatch =
     bytecodePatch(
         name = "Clear tracking params",
         description = "Removes tracking parameters when sharing links",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

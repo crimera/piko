@@ -72,8 +72,10 @@ val importExportLoginTokenPatch =
         description =
             "Adds an feature to export and import the token of accounts. " +
                 "This is useful when logging in on your second device or when re-installing piko.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
 
         dependsOn(
             settingsPatch,

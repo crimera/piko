@@ -30,8 +30,10 @@ val enableVidAutoAdvancePatch =
     bytecodePatch(
         name = "Control video auto scroll",
         description = "Control video auto scroll in immersive view",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

@@ -76,8 +76,10 @@ val customSharingDomainPatch =
     bytecodePatch(
         name = "Custom sharing domain",
         description = "Allows for using domains like fxtwitter when sharing tweets/posts.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
         execute {
             hookLegacyShareLinkBuilder()

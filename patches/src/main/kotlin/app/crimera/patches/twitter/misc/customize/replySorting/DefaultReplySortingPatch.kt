@@ -39,8 +39,10 @@ private object replySortingLastSelectedFinderFingerprint : Fingerprint(
 val defaultReplySortingPatch =
     bytecodePatch(
         name = "Customize default reply sorting",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

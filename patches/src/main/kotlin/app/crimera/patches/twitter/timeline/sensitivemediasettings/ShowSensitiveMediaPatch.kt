@@ -136,8 +136,10 @@ private object ComposeSensitiveMediaInterstitialFingerprint : Fingerprint(
 val sensitiveMediaPatch =
     bytecodePatch(
         name = "Show sensitive media",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

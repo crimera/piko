@@ -31,8 +31,10 @@ val hideAds =
     bytecodePatch(
         name = "Remove Ads",
         description = "Removed promoted posts, trends and google ads",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Normal Ads.

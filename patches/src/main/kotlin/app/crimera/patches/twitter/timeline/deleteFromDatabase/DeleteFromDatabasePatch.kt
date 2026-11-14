@@ -16,8 +16,10 @@ val deleteFromDatabasePatch =
     bytecodePatch(
         name = "Delete from database",
         description = "Delete entries from database(cache)",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

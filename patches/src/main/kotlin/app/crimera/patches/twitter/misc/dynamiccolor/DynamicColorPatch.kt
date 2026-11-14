@@ -23,6 +23,7 @@ val dynamicColorPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
 
         execute {
             // For backward compatibility, add colors and styles into v31 res dir (A12+).

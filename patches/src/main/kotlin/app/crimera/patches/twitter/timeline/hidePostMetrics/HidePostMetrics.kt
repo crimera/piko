@@ -39,8 +39,10 @@ val hidePostMetrics =
     bytecodePatch(
         name = "Hide post metrics",
         description = "Hides like, reposts etc counts.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

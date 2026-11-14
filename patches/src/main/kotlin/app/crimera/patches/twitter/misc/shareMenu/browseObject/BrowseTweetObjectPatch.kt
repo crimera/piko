@@ -18,8 +18,10 @@ import app.morphe.patcher.patch.bytecodePatch
 val browseObjectPatch =
     bytecodePatch(
         description = "Adds an option to browse the tweet object in the share menu.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook)
 
         execute {

@@ -31,8 +31,10 @@ private object HideLiveThreadsFingerprint : Fingerprint(
 val hideLiveThreadsPatch =
     bytecodePatch(
         name = "Hide Live Threads",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

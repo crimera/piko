@@ -16,8 +16,10 @@ import app.morphe.patcher.patch.bytecodePatch
 val crashLogsPatch =
     bytecodePatch(
         description = "Adds recording crash logs functionality",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
 
         execute {
             twitterInitHook.fingerprint.method.apply {

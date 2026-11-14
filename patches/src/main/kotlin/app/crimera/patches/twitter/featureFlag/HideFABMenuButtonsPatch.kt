@@ -17,8 +17,10 @@ import app.morphe.patcher.patch.bytecodePatch
 val hideFABMenuButtonsPatch =
     bytecodePatch(
         name = "Hide FAB Menu Buttons",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 

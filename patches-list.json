@@ -1,12 +1,12 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.11.0-dev.1",
+  "version": "3.11.0-dev.5",
   "patches": [
     {
       "name": "Add ability to copy media link",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -90,8 +90,8 @@
     {
       "name": "Block redirecting to X Lite",
       "description": "Blocks redirecting to the new X Android UI on launch",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -117,8 +117,8 @@
     {
       "name": "Block update screen",
       "description": "Blocks the 'This app is out of date' update screen from being shown on launch",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -145,7 +145,7 @@
       "name": "Bring back twitter",
       "description": "Bring back old twitter logo and name",
       "default": false,
-      "category": null,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -171,8 +171,8 @@
     {
       "name": "Change app icon",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -287,8 +287,8 @@
     {
       "name": "Clear tracking params",
       "description": "Removes tracking parameters when sharing links",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -362,8 +362,8 @@
     {
       "name": "Control video auto scroll",
       "description": "Control video auto scroll in immersive view",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -418,8 +418,8 @@
     {
       "name": "Custom download folder",
       "description": "Change the download directory for video downloads",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -445,8 +445,8 @@
     {
       "name": "Custom emoji font",
       "description": "Customise emoji font style",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -501,8 +501,8 @@
     {
       "name": "Custom font",
       "description": "Customise font style",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -528,8 +528,8 @@
     {
       "name": "Custom share menu",
       "description": "Overrides existing share menu and adds a new one",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -584,8 +584,8 @@
     {
       "name": "Custom sharing domain",
       "description": "Allows for using domains like fxtwitter when sharing tweets/posts.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -611,8 +611,8 @@
     {
       "name": "Customise post font size",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -696,8 +696,8 @@
     {
       "name": "Customize Inline action Bar items",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -723,8 +723,8 @@
     {
       "name": "Customize Navigation Bar items",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -750,8 +750,8 @@
     {
       "name": "Customize default reply sorting",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -777,8 +777,8 @@
     {
       "name": "Customize explore tabs",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -833,8 +833,8 @@
     {
       "name": "Customize notification tabs",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -860,8 +860,8 @@
     {
       "name": "Customize profile tabs",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -887,8 +887,8 @@
     {
       "name": "Customize search suggestions",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -914,8 +914,8 @@
     {
       "name": "Customize search tab items",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -941,8 +941,8 @@
     {
       "name": "Customize side bar items",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -968,8 +968,8 @@
     {
       "name": "Customize timeline top bar",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -995,8 +995,8 @@
     {
       "name": "Delete from database",
       "description": "Delete entries from database(cache)",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1109,8 +1109,8 @@
     {
       "name": "Disable auto timeline scroll on launch",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1134,68 +1134,10 @@
       "options": []
     },
     {
-      "name": "Disable background components",
-      "description": "Disables background services, receivers, and tracking providers.",
-      "default": false,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disable background processes and telemetry",
-      "description": "Completely strips background sync, secondary daemons, analytics uploaders, tracking providers, and internal metric generation.",
-      "default": false,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "452.1.0.53.64",
-              "versionCodes": {
-                "ARM64_V8A": 385811006
-              },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "Disable chirp font",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1221,6 +1163,35 @@
     {
       "name": "Disable comments",
       "description": "Disables comments and hides comment buttons on posts, reels and stories",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable disappearing messages swipe",
+      "description": "Prevents swiping up in a chat from enabling disappearing messages",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -1480,6 +1451,35 @@
       "options": []
     },
     {
+      "name": "Disable telemetry",
+      "description": "Disables analytics upload components and Falco event logging.",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Disable typing status",
       "description": null,
       "default": true,
@@ -1569,8 +1569,8 @@
     {
       "name": "Download patch",
       "description": "Unlocks the ability to download videos and gifs from Twitter/X",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1626,7 +1626,7 @@
       "name": "Dynamic color",
       "description": "Replaces the default Twitter Blue with the user's Material You palette.",
       "default": false,
-      "category": null,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1652,8 +1652,8 @@
     {
       "name": "Enable PiP mode automatically",
       "description": "Enables PiP mode when you close the app",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1679,8 +1679,8 @@
     {
       "name": "Enable Undo Posts",
       "description": "Enables ability to undo posts before posting",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1706,8 +1706,8 @@
     {
       "name": "Enable debug menu for posts",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1733,8 +1733,8 @@
     {
       "name": "Enable force HD videos",
       "description": "Videos will be played in highest quality always",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1761,7 +1761,7 @@
       "name": "Export all activities",
       "description": "Makes all app activities exportable.",
       "default": false,
-      "category": null,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1874,8 +1874,8 @@
     {
       "name": "Force enable translate",
       "description": "Get translate option for all posts",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -1930,8 +1930,8 @@
     {
       "name": "Handle custom twitter links",
       "description": "Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the \"Open by default\" section in the app info!",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2012,8 +2012,8 @@
     {
       "name": "Hide Banner",
       "description": "Hide new post banner",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2039,8 +2039,8 @@
     {
       "name": "Hide Community Notes",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2066,8 +2066,8 @@
     {
       "name": "Hide FAB",
       "description": "Adds an option to hide Floating action button",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2093,8 +2093,8 @@
     {
       "name": "Hide FAB Menu Buttons",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2120,8 +2120,8 @@
     {
       "name": "Hide Live Threads",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2147,8 +2147,8 @@
     {
       "name": "Hide Recommended Users",
       "description": "Hide recommended users that pops up when you follow someone",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2203,8 +2203,8 @@
     {
       "name": "Hide badges from navigation bar icons",
       "description": "Hides notification nudges & counts from navigation bar icons",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2230,8 +2230,8 @@
     {
       "name": "Hide bookmark icon in timeline",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2257,8 +2257,8 @@
     {
       "name": "Hide community badges",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2282,10 +2282,39 @@
       "options": []
     },
     {
-      "name": "Hide followed by context",
-      "description": "Hides followed by context under profile",
+      "name": "Hide feed posts",
+      "description": "Hides posts from the home feed",
       "default": true,
       "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide followed by context",
+      "description": "Hides followed by context under profile",
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2340,8 +2369,8 @@
     {
       "name": "Hide hidden replies",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2396,8 +2425,8 @@
     {
       "name": "Hide immersive player",
       "description": "Removes swipe up for more videos in video player",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2411,6 +2440,35 @@
             {
               "version": "12.19.1-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide like buttons",
+      "description": "Hides like buttons on posts, reels and stories",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2452,8 +2510,8 @@
     {
       "name": "Hide nudge button",
       "description": "Hides follow/subscribe/follow back buttons on posts",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2479,8 +2537,8 @@
     {
       "name": "Hide post metrics",
       "description": "Hides like, reposts etc counts.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2506,8 +2564,8 @@
     {
       "name": "Hide promote button",
       "description": "Hides promote button under self posts",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2533,8 +2591,8 @@
     {
       "name": "Hide recommendation items",
       "description": "Adds options to hide recommendation items such as \"Who to follow\" and \"Today's news\" in timeline, search, and replies.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2674,6 +2732,35 @@
       "options": []
     },
     {
+      "name": "Hide story follow button",
+      "description": "Hides the follow button at the top of stories.",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide suggested content",
       "description": "Hides suggested stories, reels, threads (Suggested posts will still be shown).",
       "default": true,
@@ -2705,8 +2792,8 @@
     {
       "name": "Hook feature flag",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2732,8 +2819,8 @@
     {
       "name": "Import/Export login token",
       "description": "Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2817,8 +2904,8 @@
     {
       "name": "Legacy share links",
       "description": "Brings back username on post share links. Works post 11.4x.xx",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2873,8 +2960,8 @@
     {
       "name": "Log server response",
       "description": "Log json responses received from server",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -2956,6 +3043,35 @@
       "options": []
     },
     {
+      "name": "Mark as read after reply",
+      "description": "Adds an option to mark chats as read after replying while viewing DMs anonymously.",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Mark chat as read manually",
       "description": "Adds option to mark a thread aka message as read manually",
       "default": true,
@@ -2987,8 +3103,8 @@
     {
       "name": "More information on profile",
       "description": "Adds more details on the profile page",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -3072,8 +3188,8 @@
     {
       "name": "Native downloader",
       "description": "Requires X 11.0.0-release.0 or higher.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -3099,8 +3215,8 @@
     {
       "name": "Native reader mode",
       "description": "Requires X 11.0.0-release.0 or higher.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -3126,8 +3242,8 @@
     {
       "name": "Native translator",
       "description": "Requires X 11.0.0-release.0 or higher.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -4754,54 +4870,6 @@
       "options": []
     },
     {
-      "name": "NewX: Log HLS audio renditions",
-      "description": "Diagnostic only. Logs HLS playlist URIs and how rendition ids match the audio pattern. Needs piko logging enabled.",
-      "default": false,
-      "category": null,
-      "compatiblePackages": [
-        {
-          "packageName": "com.twitter.android",
-          "name": "NewX",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#000000",
-          "signatures": null,
-          "formFactor": "MOBILE",
-          "targets": [
-            {
-              "version": "12.38.1-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.39.0-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.40.1-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "12.41.0-prod.01",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
       "name": "NewX: Open canonical URLs",
       "description": "Opens the expanded (canonical) URL directly when clicking links instead of the shortened t.co link.",
       "default": true,
@@ -5668,8 +5736,8 @@
     {
       "name": "No shortened URL",
       "description": "Get rid of t.co short urls.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -5724,8 +5792,8 @@
     {
       "name": "Pause search suggestions",
       "description": "Search suggestions will not be saved locally",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -5780,8 +5848,8 @@
     {
       "name": "Remove Ads",
       "description": "Removed promoted posts, trends and google ads",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -5836,8 +5904,8 @@
     {
       "name": "Remove premium upsell",
       "description": "Removes premium upsells",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -5863,8 +5931,8 @@
     {
       "name": "Remove search suggestions",
       "description": "Hide/Remove search suggestion in explore section",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -5890,8 +5958,8 @@
     {
       "name": "Remove view count",
       "description": "Removes the view count from the bottom of tweets",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -5917,8 +5985,8 @@
     {
       "name": "Restore legacy follower lists",
       "description": "Restores the legacy follower and following list screen.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -5942,10 +6010,39 @@
       "options": []
     },
     {
-      "name": "Round off numbers",
-      "description": "Enable or disable rounding off numbers",
+      "name": "Resume Reels after scrolling",
+      "description": "Resumes videos from where you left off when you scroll back to them in Reels",
       "default": true,
       "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Round off numbers",
+      "description": "Enable or disable rounding off numbers",
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -6087,8 +6184,8 @@
     {
       "name": "Selectable Text",
       "description": "Makes bio and username selectable",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -6114,8 +6211,8 @@
     {
       "name": "Share Tweet as Image",
       "description": "Share tweets as rendered image. Requires X 11.0.0-release.0 or higher.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -6141,8 +6238,8 @@
     {
       "name": "Show changelogs",
       "description": "Shows changelogs when new a patch is installed.",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -6168,8 +6265,8 @@
     {
       "name": "Show poll results",
       "description": "Adds an option to show poll results without voting",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -6195,8 +6292,8 @@
     {
       "name": "Show post source label",
       "description": "Source label will be shown only on public posts",
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -6222,8 +6319,8 @@
     {
       "name": "Show sensitive media",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
@@ -6249,8 +6346,8 @@
     {
       "name": "Support external downloader",
       "description": null,
-      "default": true,
-      "category": null,
+      "default": false,
+      "category": "Legacy",
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",

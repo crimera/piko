@@ -15,8 +15,10 @@ import app.morphe.patcher.patch.bytecodePatch
 val hideCommunityNotes =
     bytecodePatch(
         name = "Hide Community Notes",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {

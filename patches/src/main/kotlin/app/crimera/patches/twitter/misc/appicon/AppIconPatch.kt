@@ -15,8 +15,10 @@ import app.morphe.patcher.patch.bytecodePatch
 val appIconPatch =
     bytecodePatch(
         name = "Change app icon",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, appIconResourcePatch)
         execute {
             enableSettings("appIconCustomisation")

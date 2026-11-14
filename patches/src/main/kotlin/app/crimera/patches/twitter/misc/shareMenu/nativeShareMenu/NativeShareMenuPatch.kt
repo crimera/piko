@@ -19,9 +19,10 @@ val nativeShareMenuPatch =
     bytecodePatch(
         name = "Custom share menu",
         description = "Overrides existing share menu and adds a new one",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, nativeShareMenuResourcePatch, entityGenerator, shareMenuButtonOnClickHook, browseObjectPatch)
 
         execute {

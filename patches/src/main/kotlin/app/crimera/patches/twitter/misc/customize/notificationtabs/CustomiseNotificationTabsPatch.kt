@@ -31,8 +31,10 @@ private object CustomiseNotificationTabsFingerprint : Fingerprint(
 val customiseNotificationTabsPatch =
     bytecodePatch(
         name = "Customize notification tabs",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

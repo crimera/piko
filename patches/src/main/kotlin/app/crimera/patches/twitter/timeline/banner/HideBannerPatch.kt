@@ -31,8 +31,10 @@ val hideBannerPatch =
     bytecodePatch(
         name = "Hide Banner",
         description = "Hide new post banner",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

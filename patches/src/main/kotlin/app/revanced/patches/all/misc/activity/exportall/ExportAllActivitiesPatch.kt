@@ -11,6 +11,7 @@ val exportAllActivitiesPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
 
         execute {
             val exportedFlag = "android:exported"
