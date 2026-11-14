@@ -41,10 +41,12 @@ def pkg_emoji(pkg):
     """Return a standard package emoji regardless of the package name."""
     return "📦"
 
-# Group patches by package; patches with no compatiblePackages are universal.
+# Group patches by (packageName, compatibility name) so distinct app variants sharing a package
+# (e.g. Twitter and NewX) keep their own sections and supported versions. Patches with no
+# compatiblePackages are universal.
 # JSON structure: compatiblePackages is a list of objects with
 # { packageName, name, targets: [{ version, isExperimental, description }] }
-by_pkg = {}   # packageName -> { name, emoji, patches, targets }
+by_pkg = {}   # (packageName, name) -> { name, emoji, patches, targets }
 universal = {}
 
 for patch in data["patches"]:
@@ -57,16 +59,17 @@ for patch in data["patches"]:
     for pkg_entry in cp:
         pkg  = pkg_entry["packageName"]
         name = pkg_entry.get("name") or pkg  # fall back to package name if no label
-        if pkg not in by_pkg:
-            by_pkg[pkg] = {
+        key  = (pkg, name)
+        if key not in by_pkg:
+            by_pkg[key] = {
                 "name":    name,
                 "emoji":   pkg_emoji(pkg),
                 "patches": {},
                 "targets": pkg_entry.get("targets", []),
             }
-        # Deduplicate patches that appear across multiple packages
-        if patch["name"] not in by_pkg[pkg]["patches"]:
-            by_pkg[pkg]["patches"][patch["name"]] = patch
+        # Deduplicate patches that appear across multiple entries of the same compatibility group
+        if patch["name"] not in by_pkg[key]["patches"]:
+            by_pkg[key]["patches"][patch["name"]] = patch
 
 
 def anchor(name):
@@ -150,8 +153,16 @@ def build_content(expanded=False):
         f"{total} patches total"
     ]
 
-    # One spoiler per app, in the order they appear in the JSON
-    for pkg, entry in by_pkg.items():
+    def section_sort_key(item):
+        name = item[1]["name"]
+        if name == "NewX":
+            return 0
+        if name == "Twitter":
+            return 2
+        return 1
+
+    # One spoiler per app, placing NewX first and legacy Twitter at the bottom
+    for _key, entry in sorted(by_pkg.items(), key=section_sort_key):
         patches = list(entry["patches"].values())
         label   = f"{entry['emoji']} {entry['name']}"
         lines.append(spoiler(label, len(patches), entry["targets"], patches_table(patches), expanded))
