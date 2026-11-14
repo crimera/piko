@@ -47,6 +47,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstructio
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
@@ -156,6 +157,7 @@ private object NewXUserIdentifierSerializerFingerprint : Fingerprint(
 // X trims the persisted home timeline to its newest N entries on startup when this server switch is
 // positive, which drops any saved position below N before the restore runs.
 private const val HOME_START_TRIM_SWITCH = "android_xlite_home_timeline_start_trim_entries_to_keep"
+private const val HOME_START_TRIM_MIN_ENTRIES_SWITCH = "android_xlite_home_timeline_start_trim_min_entries"
 
 private val CONDITIONAL_BRANCH_OPCODES = setOf(
     Opcode.IF_EQ,
@@ -287,7 +289,7 @@ private object NewXHomeStartTrimFingerprint : Fingerprint(
     definingClass = "Lcom/x/repositories/urt/",
     filters =
         listOf(
-            string(HOME_START_TRIM_SWITCH),
+            string(HOME_START_TRIM_MIN_ENTRIES_SWITCH),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
                 name = "getInt",
@@ -426,22 +428,89 @@ val restoreTimelinePositionPatch =
         )
 
         execute {
-            // A non-positive entries-to-keep makes X skip the startup trim entirely.
+            // Disable startup trim either by zeroing entries-to-keep or bypassing the home-timeline gate.
             val homeStartTrimMatch =
                 requireExactlyOne(
                     "NewX home timeline start-trim switch read",
                     NewXHomeStartTrimFingerprint.scopedMatchAll(),
                 )
-            val trimResultMatch = homeStartTrimMatch.instructionMatches.last()
-            val trimResultRegister =
-                (trimResultMatch.instruction as? OneRegisterInstruction)?.registerA
-                    ?: throw PatchException("NewX home timeline start-trim result has no register layout")
+            val methodInstructions = homeStartTrimMatch.method.instructions.toList()
+            val entriesToKeepIndices =
+                methodInstructions.withIndex().mapNotNull { (index, instruction) ->
+                    index.takeIf {
+                        instruction.getReference<StringReference>()?.string == HOME_START_TRIM_SWITCH
+                    }
+                }
+            val (trimInsertionIndex, trimTargetRegister) =
+                if (entriesToKeepIndices.isNotEmpty()) {
+                    val entriesIndex =
+                        requireExactlyOne(
+                            "NewX home timeline entries-to-keep switch load",
+                            entriesToKeepIndices,
+                        )
+                    val moveResultIndex =
+                        requireExactlyOne(
+                            "NewX home timeline entries-to-keep getInt result",
+                            ((entriesIndex + 1)..minOf(methodInstructions.lastIndex - 1, entriesIndex + 5)).mapNotNull { index ->
+                                val call = methodInstructions[index]
+                                val reference = call.getReference<MethodReference>() ?: return@mapNotNull null
+                                val next = methodInstructions[index + 1]
+                                (index + 1).takeIf {
+                                    call.opcode == Opcode.INVOKE_INTERFACE &&
+                                        reference.name == "getInt" &&
+                                        reference.parameterTypes.map(CharSequence::toString) == listOf(STRING_DESCRIPTOR, "I") &&
+                                        reference.returnType == "I" &&
+                                        next.opcode == Opcode.MOVE_RESULT
+                                }
+                            },
+                        )
+                    val reg =
+                        (methodInstructions[moveResultIndex] as? OneRegisterInstruction)?.registerA
+                            ?: throw PatchException("NewX home timeline start-trim result has no register layout")
+                    (moveResultIndex + 1) to reg
+                } else {
+                    val minEntriesIndex =
+                        requireExactlyOne(
+                            "NewX home timeline min-entries switch load",
+                            methodInstructions.withIndex().mapNotNull { (index, instruction) ->
+                                index.takeIf {
+                                    instruction.getReference<StringReference>()?.string ==
+                                        HOME_START_TRIM_MIN_ENTRIES_SWITCH
+                                }
+                            },
+                        )
+                    val windowStart = (minEntriesIndex - 15).coerceAtLeast(0)
+                    val predicateIndex =
+                        requireExactlyOne(
+                            "NewX home timeline start-trim predicate call",
+                            (windowStart until minEntriesIndex).filter { index ->
+                                val insn = methodInstructions[index]
+                                if (insn.opcode != Opcode.INVOKE_STATIC) return@filter false
+                                val ref = insn.getReference<MethodReference>() ?: return@filter false
+                                val params = ref.parameterTypes.map(CharSequence::toString)
+                                params.size == 1 &&
+                                    params[0].startsWith("Lcom/x/models/timelines/") &&
+                                    ref.returnType == "Z"
+                            },
+                        )
+                    val moveResult = methodInstructions.getOrNull(predicateIndex + 1) as? OneRegisterInstruction
+                    val branch = methodInstructions.getOrNull(predicateIndex + 2) as? OneRegisterInstruction
+                    if (moveResult?.opcode != Opcode.MOVE_RESULT ||
+                        branch?.opcode !in setOf(Opcode.IF_NEZ, Opcode.IF_EQZ) ||
+                        branch?.registerA != moveResult.registerA
+                    ) {
+                        throw PatchException(
+                            "NewX home timeline start-trim predicate gate has unexpected instructions around $predicateIndex",
+                        )
+                    }
+                    (predicateIndex + 2) to moveResult.registerA
+                }
             homeStartTrimMatch.method.apply {
                 val trimRead =
                     restoreTimelinePosition.injectRead(
                         method = this,
-                        index = trimResultMatch.index + 1,
-                        excludedRegisters = listOf(trimResultRegister),
+                        index = trimInsertionIndex,
+                        excludedRegisters = listOf(trimTargetRegister),
                     )
                 insertHook(
                     index = trimRead.nextIndex,
@@ -449,7 +518,7 @@ val restoreTimelinePositionPatch =
                     relocateBranchTargets = false,
                 ) {
                     ifEqz(trimRead.register, Target.Original)
-                    constInt(trimResultRegister, 0)
+                    constInt(trimTargetRegister, 0)
                 }
             }
 

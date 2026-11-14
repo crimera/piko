@@ -360,7 +360,8 @@ private fun Method.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): B
 private fun List<String>.isNavBarItemContentConstructor(tabData: NewXNavBarTabData): Boolean =
     this == listOf("Z", tabData.navigationType, tabData.tabDataValueType) ||
         (size == 4 && take(3) == MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS.take(3) &&
-            last() in setOf("I", "B"))
+            last() in setOf("I", "B")) ||
+        this == listOf("B", "Ljava/lang/Object;", "Ljava/lang/Object;", "Z", "Z")
 
 private val MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS =
     listOf("Z", "Ljava/lang/Object;", "Ljava/lang/Object;", "I")
@@ -635,9 +636,11 @@ internal fun List<Instruction>.resolveDefaultIconField(
     for (index in switchIndex - 1 downTo 0) {
         val instruction = this[index]
         if (instruction.destinationRegisterOrNull() != iconRegister) continue
+        if (instruction.opcode == Opcode.AGET) continue
         if (instruction.opcode != Opcode.SGET_OBJECT) return null
-        return instruction.getReference<FieldReference>()
-            ?.takeIf { reference -> reference.type.startsWith(ICONS_DESCRIPTOR_PREFIX) }
+        val reference = instruction.getReference<FieldReference>() ?: return null
+        if (reference.type == "[I") continue
+        return reference.takeIf { it.type.startsWith(ICONS_DESCRIPTOR_PREFIX) }
     }
     return null
 }

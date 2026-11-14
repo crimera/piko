@@ -29,6 +29,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -298,16 +299,30 @@ private fun resolveProfileTabListTarget(): ProfileTabListTarget {
         throw PatchException("NewX profile tab list result is not moved with move-result-object: $method")
     }
     val listRegister = (resultInstruction as OneRegisterInstruction).registerA
-    val consumer =
-        instructions.getOrNull(callIndex + 2)
-            ?: throw PatchException("NewX profile tab list consumer is missing in $method")
-    if (consumer.opcode !in INVOKE_OPCODES) {
-        throw PatchException("NewX profile tab list consumer is not an invoke: $method @ ${callIndex + 2}")
+    val searchEnd = minOf(instructions.lastIndex, callIndex + 6)
+    val stopOpcodes =
+        setOf(Opcode.THROW, Opcode.RETURN_VOID, Opcode.RETURN, Opcode.RETURN_WIDE, Opcode.RETURN_OBJECT)
+    var consumerIndex: Int? = null
+    for (index in (callIndex + 2)..searchEnd) {
+        val instruction = instructions[index]
+        if (instruction.opcode in INVOKE_OPCODES && listRegister in instruction.registersUsed) {
+            consumerIndex = index
+            break
+        }
+        if (instruction.destinationRegisterOrNull() == listRegister) {
+            throw PatchException(
+                "NewX profile tab list register v$listRegister is overwritten before consumer at $index in $method",
+            )
+        }
+        if (instruction is OffsetInstruction || instruction.opcode in stopOpcodes) {
+            throw PatchException(
+                "NewX profile tab list flow leaves straight-line block before consumer at $index in $method",
+            )
+        }
     }
-    if (listRegister !in consumer.registersUsed) {
+    if (consumerIndex == null) {
         throw PatchException(
-            "NewX profile tab list register v$listRegister is not consumed by the call in $method " +
-                "@ ${callIndex + 2}",
+            "NewX profile tab list consumer invoke is missing within window in $method @ ${callIndex + 2}..$searchEnd",
         )
     }
 

@@ -85,6 +85,7 @@ private const val DRAWER_TAB_DONE_LABEL = "piko_drawer_tab_done"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
+private const val FUNCTION2_DESCRIPTOR = "Lkotlin/jvm/functions/Function2;"
 private const val FUNCTION3_DESCRIPTOR = "Lkotlin/jvm/functions/Function3;"
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
@@ -162,54 +163,15 @@ private val drawerResourceNamesPatch =
         }
     }
 
-private val NEWX_DRAWER_MENU_ITEM_PARAMETERS =
-    listOf(
-        "Ljava/lang/String;",
-        "L",
-        FUNCTION0_DESCRIPTOR,
-        "L",
-        "Z",
-        "L",
-        COMPOSER_DESCRIPTOR,
-        "I",
-        "I",
-    )
-
-// Newer releases add an auxiliary content lambda before the Composer parameter.
-private val NEWX_DRAWER_MENU_ITEM_WITH_AUXILIARY_CONTENT_PARAMETERS =
-    listOf(
-        "Ljava/lang/String;",
-        "L",
-        FUNCTION0_DESCRIPTOR,
-        "L",
-        "Z",
-        "L",
-        "L",
-        COMPOSER_DESCRIPTOR,
-        "I",
-        "I",
-    )
-
-// 12.25 moved footer rows to the shared title/icon/click renderer.
-private val NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS =
-    listOf(
-        "Ljava/lang/String;",
-        "L",
-        FUNCTION0_DESCRIPTOR,
-        "Landroidx/compose/ui/Modifier;",
-        "L",
-        COMPOSER_DESCRIPTOR,
-        "I",
-        "I",
-    )
-
 private object NewXDrawerContentClassFingerprint : Fingerprint(
     definingClass = DRAWER_SCOPE,
     returnType = "V",
     custom = { method, _ ->
         val parameters = method.parameterTypes.map(CharSequence::toString)
         parameters.size >= 40 &&
-            parameters.any { it.startsWith("Landroidx/compose/material3/") } &&
+            parameters.any {
+                it.startsWith("Landroidx/compose/material3/") || it.startsWith(DRAWER_SCOPE)
+            } &&
             parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
             parameters.count { it == "Ljava/util/List;" } == 1 &&
             parameters.count { it == "Ljava/util/Map;" } == 1 &&
@@ -224,20 +186,18 @@ private object NewXDrawerContentClassFingerprint : Fingerprint(
 private object NewXDrawerMenuItemFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
-    parameters = NEWX_DRAWER_MENU_ITEM_PARAMETERS,
-)
-
-private object NewXDrawerMenuItemWithAuxiliaryContentFingerprint : Fingerprint(
-    classFingerprint = NewXDrawerContentClassFingerprint,
-    returnType = "V",
-    parameters = NEWX_DRAWER_MENU_ITEM_WITH_AUXILIARY_CONTENT_PARAMETERS,
+    custom = { method, _ ->
+        method.isDrawerRowRenderer() && method.parameterTypes.any { it.toString() == "Z" }
+    },
 )
 
 // FOOTER ROWS: settings/help/feedback/media/imprint/debug pass their localized title.
 private object NewXDrawerSharedFooterItemFingerprint : Fingerprint(
     classFingerprint = NewXDrawerContentClassFingerprint,
     returnType = "V",
-    parameters = NEWX_DRAWER_SHARED_FOOTER_ITEM_PARAMETERS,
+    custom = { method, _ ->
+        method.isDrawerRowRenderer() && method.parameterTypes.none { it.toString() == "Z" }
+    },
 )
 
 /**
@@ -657,13 +617,23 @@ private fun injectDynamicDrawerOptions(
 
 private fun MethodReference.isDrawerFooterDivider(renderer: MethodReference): Boolean {
     val parameters = parameterTypes.map(CharSequence::toString)
+    val isFourParamShape =
+        parameters.size == 4 &&
+            (parameters[0].startsWith("Landroidx/compose/material3/") ||
+                parameters[0].startsWith(DRAWER_SCOPE)) &&
+            parameters[1] == FUNCTION1_DESCRIPTOR &&
+            parameters[2] == COMPOSER_DESCRIPTOR &&
+            parameters[3] == "I"
+    val isFiveParamShape =
+        parameters.size == 5 &&
+            parameters[0].startsWith(DRAWER_SCOPE) &&
+            parameters[1] == FUNCTION1_DESCRIPTOR &&
+            parameters[2].startsWith(DRAWER_SCOPE) &&
+            parameters[3] == COMPOSER_DESCRIPTOR &&
+            parameters[4] == "I"
     return definingClass == renderer.definingClass &&
         returnType == "V" &&
-        parameters.size == 4 &&
-        parameters[0].startsWith("Landroidx/compose/material3/") &&
-        parameters[1] == FUNCTION1_DESCRIPTOR &&
-        parameters[2] == COMPOSER_DESCRIPTOR &&
-        parameters[3] == "I"
+        (isFourParamShape || isFiveParamShape)
 }
 
 private fun MutableMethod.findDrawerFooterCalls(
@@ -761,17 +731,18 @@ private fun resolveDrawerFooterTarget(
     val candidates = buildList {
         context.classDefForEach { classDef ->
             if (!classDef.type.startsWith(DRAWER_SCOPE)) return@classDefForEach
-            if (!classDef.interfaces.any { it.toString() == FUNCTION3_DESCRIPTOR }) {
+            if (!classDef.interfaces.any { it.toString() in setOf(FUNCTION2_DESCRIPTOR, FUNCTION3_DESCRIPTOR) }) {
                 return@classDefForEach
             }
 
             val mutableClass = context.mutableClassDefBy(classDef.type)
             mutableClass.methods
                 .filter { method ->
+                    val parameterTypes = method.parameterTypes.map(CharSequence::toString)
                     method.name == "invoke" &&
                         method.returnType == OBJECT_DESCRIPTOR &&
-                        method.parameterTypes.map(CharSequence::toString) ==
-                            List(3) { OBJECT_DESCRIPTOR }
+                        (parameterTypes == List(2) { OBJECT_DESCRIPTOR } ||
+                            parameterTypes == List(3) { OBJECT_DESCRIPTOR })
                 }.forEach { method ->
                     method.findDrawerFooterCalls(renderer)?.let { footer ->
                         val iconParameterIndex = footer.renderer.parameterTypes.indexOfFirst { type ->
@@ -1412,8 +1383,7 @@ val customizeNewXDrawerPatch =
             }
 
             val menuMatches =
-                (NewXDrawerMenuItemFingerprint.scopedMatchAllOrNull().orEmpty() +
-                    NewXDrawerMenuItemWithAuxiliaryContentFingerprint.scopedMatchAllOrNull().orEmpty())
+                NewXDrawerMenuItemFingerprint.scopedMatchAllOrNull().orEmpty()
                     .distinctBy { it.originalMethod.toString() }
             val menuMatch =
                 requireExactlyOne(

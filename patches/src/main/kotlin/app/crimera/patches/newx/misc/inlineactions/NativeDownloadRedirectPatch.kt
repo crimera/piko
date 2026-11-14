@@ -618,8 +618,6 @@ private fun isCanonicalPostAccessor(
         method.parameterTypes.isNotEmpty() || method.returnType != canonicalPostType
     ) return false
     val instructions = method.implementation?.instructions?.toList() ?: return false
-    val allowedOpcodes = OBJECT_MOVE_OPCODES + setOf(Opcode.IGET_OBJECT, Opcode.CHECK_CAST, Opcode.RETURN_OBJECT)
-    if (instructions.any { it.opcode !in allowedOpcodes }) return false
     val fieldReads = instructions.mapIndexedNotNull { index, instruction ->
         if (instruction.opcode != Opcode.IGET_OBJECT) return@mapIndexedNotNull null
         val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
@@ -646,29 +644,92 @@ private fun isCanonicalPostAccessor(
     val returns = instructions.mapIndexedNotNull { index, instruction ->
         index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
     }
-    if (returns.size != 1) return false
-    val returnIndex = returns.single()
-    val returnRegister = (instructions[returnIndex] as? OneRegisterInstruction)?.registerA ?: return false
     val casts = instructions.mapIndexedNotNull { index, instruction ->
         index.takeIf { instruction.opcode == Opcode.CHECK_CAST }
     }
-    if (casts.size > 1 || casts.any { index ->
-            instructions[index].getReference<TypeReference>()?.type != canonicalPostType
-        }
-    ) return false
-    if (casts.isNotEmpty()) {
-        val castIndex = casts.single()
-        if (castIndex <= postReadIndex || castIndex >= returnIndex) return false
-        val castRegister = (instructions[castIndex] as? OneRegisterInstruction)?.registerA ?: return false
-        if (!instructions.valueReachesRegister(postReadIndex, postRead.registerA, castIndex, castRegister) ||
-            !instructions.valueReachesRegister(castIndex, castRegister, returnIndex, returnRegister)
-        ) return false
-    } else if (postResultField.type != canonicalPostType ||
-        !instructions.valueReachesRegister(postReadIndex, postRead.registerA, returnIndex, returnRegister)
-    ) {
+    if (casts.any { index -> instructions[index].getReference<TypeReference>()?.type != canonicalPostType }) {
         return false
     }
-    return true
+    return when (returns.size) {
+        1 -> {
+            val allowedOpcodes =
+                OBJECT_MOVE_OPCODES + setOf(Opcode.IGET_OBJECT, Opcode.CHECK_CAST, Opcode.RETURN_OBJECT)
+            if (instructions.any { it.opcode !in allowedOpcodes }) return false
+            val returnIndex = returns.single()
+            val returnRegister = (instructions[returnIndex] as? OneRegisterInstruction)?.registerA ?: return false
+            if (casts.size > 1) return false
+            if (casts.isNotEmpty()) {
+                val castIndex = casts.single()
+                castIndex > postReadIndex && castIndex < returnIndex &&
+                    (instructions[castIndex] as? OneRegisterInstruction)?.registerA?.let { castRegister ->
+                        instructions.valueReachesRegister(postReadIndex, postRead.registerA, castIndex, castRegister) &&
+                            instructions.valueReachesRegister(castIndex, castRegister, returnIndex, returnRegister)
+                    } == true
+            } else {
+                postResultField.type == canonicalPostType &&
+                    instructions.valueReachesRegister(postReadIndex, postRead.registerA, returnIndex, returnRegister)
+            }
+        }
+        2 -> {
+            val allowedOpcodes =
+                OBJECT_MOVE_OPCODES + setOf(
+                    Opcode.IGET_OBJECT,
+                    Opcode.INSTANCE_OF,
+                    Opcode.IF_EQZ,
+                    Opcode.CHECK_CAST,
+                    Opcode.CONST_4,
+                    Opcode.RETURN_OBJECT,
+                )
+            if (instructions.any { it.opcode !in allowedOpcodes }) return false
+            val instanceOfIndices = instructions.mapIndexedNotNull { index, instruction ->
+                index.takeIf { instruction.opcode == Opcode.INSTANCE_OF }
+            }
+            if (instanceOfIndices.size != 1 || casts.size != 1) return false
+            val instanceOfIndex = instanceOfIndices.single()
+            val ifEqzIndex = instanceOfIndex + 1
+            val castIndex = casts.single()
+            val firstReturnIndex = returns[0]
+            val secondReturnIndex = returns[1]
+            if (instanceOfIndex <= postReadIndex || ifEqzIndex >= castIndex || castIndex >= firstReturnIndex) {
+                return false
+            }
+            val instanceOfInsn = instructions[instanceOfIndex] as? TwoRegisterInstruction ?: return false
+            if (instructions[instanceOfIndex].getReference<TypeReference>()?.type != canonicalPostType) {
+                return false
+            }
+            if (!instructions.valueReachesRegister(postReadIndex, postRead.registerA, instanceOfIndex, instanceOfInsn.registerB)) {
+                return false
+            }
+            val ifEqzInsn = instructions[ifEqzIndex]
+            if (ifEqzInsn.opcode != Opcode.IF_EQZ ||
+                (ifEqzInsn as? OneRegisterInstruction)?.registerA != instanceOfInsn.registerA
+            ) {
+                return false
+            }
+            val nullConsts = instructions.mapIndexedNotNull { index, instruction ->
+                index.takeIf { instruction.opcode == Opcode.CONST_4 }
+            }
+            if (nullConsts.size != 1) return false
+            val nullConstIndex = nullConsts.single()
+            if (nullConstIndex <= firstReturnIndex || secondReturnIndex != nullConstIndex + 1) return false
+            val offsets = instructions.runningFold(0) { acc, instruction -> acc + instruction.codeUnits }
+            val ifEqzOffset = (ifEqzInsn as? OffsetInstruction)?.codeOffset ?: return false
+            if (offsets[ifEqzIndex] + ifEqzOffset != offsets[nullConstIndex]) return false
+            val nullConst = instructions[nullConstIndex]
+            val nullRegister = (nullConst as? OneRegisterInstruction)?.registerA ?: return false
+            if ((nullConst as? NarrowLiteralInstruction)?.narrowLiteral != 0 ||
+                (instructions[secondReturnIndex] as? OneRegisterInstruction)?.registerA != nullRegister
+            ) {
+                return false
+            }
+            val castRegister = (instructions[castIndex] as? OneRegisterInstruction)?.registerA ?: return false
+            val firstReturnRegister =
+                (instructions[firstReturnIndex] as? OneRegisterInstruction)?.registerA ?: return false
+            instructions.valueReachesRegister(postReadIndex, postRead.registerA, castIndex, castRegister) &&
+                instructions.valueReachesRegister(castIndex, castRegister, firstReturnIndex, firstReturnRegister)
+        }
+        else -> false
+    }
 }
 
 /**

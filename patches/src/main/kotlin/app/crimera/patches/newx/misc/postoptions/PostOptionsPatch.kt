@@ -73,6 +73,7 @@ private data class PostOptionContribution(
 )
 
 private data class IconAssignment(
+    val index: Int,
     val instruction: TwoRegisterInstruction,
     val field: FieldReference,
 )
@@ -398,29 +399,35 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         postOptionsFeedbackLookups(renderer.method, feedbackField, isMap))
     val actionRegister = lookup.actionRegister
 
-    val iconAssignmentCandidates =
-        renderer.method.instructions.withIndex().filter { (index, instruction) ->
-            instruction.opcode in OBJECT_MOVE_OPCODES &&
-                index < lookup.callIndex &&
-                renderer.method.instructions.getOrNull(index + 1)?.opcode in
+    fun findIconAssignments(range: IntRange): List<IconAssignment> =
+        renderer.method.instructions.withIndex().mapNotNull { (index, instruction) ->
+            if (instruction.opcode !in OBJECT_MOVE_OPCODES ||
+                index !in range ||
+                renderer.method.instructions.getOrNull(index + 1)?.opcode !in
                 setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
+            ) {
+                return@mapNotNull null
+            }
+            val assignment = instruction as? TwoRegisterInstruction
+                ?: throw PatchException(
+                    "NewX post-options icon assignment has no registers at instruction $index",
+                )
+            val field = renderer.method.instructions.resolveFieldReadOrNull(
+                register = assignment.registerB,
+                untilIndex = index,
+            )?.takeIf { it.type.startsWith("Lcom/x/icons/") } ?: return@mapNotNull null
+            IconAssignment(index = index, instruction = assignment, field = field)
         }
-    if (iconAssignmentCandidates.isEmpty()) {
+
+    val beforeLookup = findIconAssignments(0 until lookup.callIndex)
+    val afterLookup = findIconAssignments((lookup.resultIndex + 1) until renderer.method.instructions.size)
+    if (beforeLookup.isNotEmpty() == afterLookup.isNotEmpty()) {
         throw PatchException(
-            "Expected NewX post-options icon assignments, found none",
+            "Expected NewX post-options icon assignments exclusively before or after lookup " +
+                "(before=${beforeLookup.size}, after=${afterLookup.size})",
         )
     }
-    val iconAssignments = iconAssignmentCandidates.mapNotNull { candidate ->
-        val assignment = candidate.value as? TwoRegisterInstruction
-            ?: throw PatchException(
-                "NewX post-options icon assignment has no registers at instruction ${candidate.index}",
-            )
-        val field = renderer.method.instructions.resolveFieldReadOrNull(
-            register = assignment.registerB,
-            untilIndex = candidate.index,
-        ) ?: return@mapNotNull null
-        IconAssignment(instruction = assignment, field = field)
-    }
+    val iconAssignments = beforeLookup.ifEmpty { afterLookup }
     val iconResultRegister =
         requireExactlyOne(
             label = "NewX post-options icon result register",
@@ -434,16 +441,7 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
 
     val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, iconType) }
 
-    // The label and icon rewrites land in front of the instruction that consumes the resolved
-    // label, so they run with both the action and the original label live.
-    val insertionIndex = lookup.resultIndex + 1
-    renderer.method.insertHook(
-        index = insertionIndex,
-        excludedRegisters = listOf(actionRegister, lookup.labelRegister, iconResultRegister),
-        // A branch into the label lookup must run the rewrite too, or the custom options keep
-        // their upstream label and icon.
-        relocateBranchTargets = true,
-    ) {
+    fun app.crimera.bytecode.Block.emitLabelRewrites() {
         contributions.forEach { contribution ->
             invokeStatic(
                 methodReference("${contribution.handlerDescriptor}->$LABEL_FOR_SIGNATURE"),
@@ -452,7 +450,9 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
             )
             moveResult(lookup.labelRegister, STRING_DESCRIPTOR)
         }
+    }
 
+    fun app.crimera.bytecode.Block.emitIconRewrites() {
         // The icon checks share the reserved byte register; if-eqz and move-result both encode it.
         contributions.forEachIndexed { index, contribution ->
             if (index > 0) label(iconContinuationLabel(index))
@@ -470,6 +470,58 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
                 },
             )
             sget(iconResultRegister, iconFields.getValue(contribution))
+        }
+    }
+
+    if (beforeLookup.isNotEmpty()) {
+        // The label and icon rewrites land in front of the instruction that consumes the resolved
+        // label, so they run with both the action and the original label live.
+        renderer.method.insertHook(
+            index = lookup.resultIndex + 1,
+            excludedRegisters = listOf(actionRegister, lookup.labelRegister, iconResultRegister),
+            // A branch into the label lookup must run the rewrite too, or the custom options keep
+            // their upstream label and icon.
+            relocateBranchTargets = true,
+        ) {
+            emitLabelRewrites()
+            emitIconRewrites()
+        }
+    } else {
+        val lastIconAssignmentIndex = afterLookup.maxOf(IconAssignment::index)
+        val sheetRowCallIndex =
+            requireExactlyOne(
+                label = "NewX post-options sheet row constructor call",
+                candidates =
+                    renderer.method.instructions.withIndex().mapNotNull { (index, instruction) ->
+                        if (index <= lastIconAssignmentIndex) return@mapNotNull null
+                        if (instruction.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE)) {
+                            return@mapNotNull null
+                        }
+                        val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
+                        val parameters = reference.parameterTypes.map(CharSequence::toString)
+                        index.takeIf {
+                            reference.name == "<init>" &&
+                                parameters.take(3) == listOf(OBJECT_DESCRIPTOR, iconType, STRING_DESCRIPTOR) &&
+                                iconResultRegister in instruction.registersUsed
+                        }
+                    },
+            )
+        // Insert the icon hook first (higher index) so lookup.resultIndex + 1 stays valid.
+        renderer.method.insertHook(
+            index = sheetRowCallIndex,
+            excludedRegisters =
+                (renderer.method.instructions[sheetRowCallIndex].registersUsed +
+                    listOf(actionRegister, iconResultRegister)).distinct(),
+            relocateBranchTargets = true,
+        ) {
+            emitIconRewrites()
+        }
+        renderer.method.insertHook(
+            index = lookup.resultIndex + 1,
+            excludedRegisters = listOf(actionRegister, lookup.labelRegister),
+            relocateBranchTargets = true,
+        ) {
+            emitLabelRewrites()
         }
     }
 }

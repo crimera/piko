@@ -202,8 +202,8 @@ val newXDefaultMediaTabPatch =
             // executes that sequence exactly once. The pending injection goes in first (higher
             // index) so the seed index below stays valid.
             val pendingStoreCandidates =
-                methodInstructions.withIndex().filter { (_, instruction) ->
-                    isPendingSubTabStore(instruction, tabTypeDescriptor)
+                methodInstructions.withIndex().filter { (index, instruction) ->
+                    index > seedInvokeIndex && isPendingSubTabStore(instruction, tabTypeDescriptor)
                 }
             val pendingStore =
                 requireExactlyOne(

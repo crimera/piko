@@ -168,9 +168,7 @@ private fun isNewXTimelineBody(
                 constructor.name == "<init>" &&
                 constructorParameters.firstOrNull() == FUNCTION3 &&
                 constructorParameters.count { it == timelineListDescriptor } == 1 &&
-                constructorParameters.none {
-                    it == MODIFIER || isDirectDescriptorInScope(it, TIMELINE_MODEL_SCOPE)
-                } &&
+                constructorParameters.none { it == MODIFIER } &&
                 constructorParameters.any { it.startsWith(PAGING_SCOPE) } &&
                 constructorParameters.any { it == FUNCTION1 }
         }
@@ -813,9 +811,7 @@ private fun resolveTimelineItemCallbackIndex(method: Method, timelineListDescrip
         return reference.name == "<init>" &&
             parameters.firstOrNull() == FUNCTION3 &&
             parameters.count { it == timelineListDescriptor } == 1 &&
-            parameters.none {
-                it == MODIFIER || isDirectDescriptorInScope(it, TIMELINE_MODEL_SCOPE)
-            } &&
+            parameters.none { it == MODIFIER } &&
             parameters.any { it.startsWith(PAGING_SCOPE) } &&
             parameters.any { it == FUNCTION1 }
     }

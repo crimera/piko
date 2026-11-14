@@ -148,7 +148,8 @@ private data class ReplyFacepileDrawCall(
 private fun Instruction.isDrawModifierCall(): Boolean {
     if (opcode != Opcode.INVOKE_STATIC && opcode != Opcode.INVOKE_STATIC_RANGE) return false
     val reference = getReference<MethodReference>() ?: return false
-    return reference.returnType == MODIFIER_DESCRIPTOR &&
+    return reference.definingClass.startsWith("Landroidx/compose/ui/draw/") &&
+        reference.returnType == MODIFIER_DESCRIPTOR &&
         reference.parameterTypes.map(CharSequence::toString) ==
             listOf(MODIFIER_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
 }

@@ -430,10 +430,36 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
                     .map(Match::originalMethod),
             describe = { "$it" },
         )
+    val directCallerMatches = shapeMatches.filter { match ->
+        match.method.callSiteIndices(instantiator).isNotEmpty()
+    }
+    if (directCallerMatches.isNotEmpty()) {
+        return requireExactlyOne(
+            label = "NewX post-detail reply bar renderer",
+            candidates = directCallerMatches,
+        )
+    }
+    val instantiatorCaller =
+        requireExactlyOne(
+            label = "NewX reply text field instantiator caller",
+            candidates =
+                buildList {
+                    context.classDefForEach { classDef ->
+                        if (!classDef.type.startsWith(COMPOSER_MINIMAL_SCOPE)) return@classDefForEach
+                        classDef.methods.forEach { method ->
+                            if (method.callSiteIndices(instantiator).isNotEmpty()) add(method)
+                        }
+                    }
+                },
+            describe = { "$it" },
+        )
     return requireExactlyOne(
         label = "NewX post-detail reply bar renderer",
         candidates = shapeMatches.filter { match ->
-            match.method.callSiteIndices(instantiator).isNotEmpty()
+            match.method.implementation?.instructions?.any { instruction ->
+                instruction.opcode == Opcode.NEW_INSTANCE &&
+                    instruction.getReference<TypeReference>()?.type == instantiatorCaller.definingClass
+            } == true
         },
     )
 }
