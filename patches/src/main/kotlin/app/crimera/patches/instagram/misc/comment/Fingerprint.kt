@@ -11,6 +11,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionFilter
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.newInstance
@@ -57,7 +58,13 @@ internal object CommentActionButtonFingerprint : Fingerprint(
         opcode(Opcode.NEW_INSTANCE, location = MatchAfterImmediately()),
         // 7: Button bundle.
         methodCall(name = "<init>", location = MatchAfterImmediately()),
-        opcode(Opcode.GOTO, location = MatchAfterImmediately()),
+        // Adding buttons can widen the backward jump to the shared list insertion.
+        anyInstruction(
+            opcode(Opcode.GOTO),
+            opcode(Opcode.GOTO_16),
+            opcode(Opcode.GOTO_32),
+            location = MatchAfterImmediately(),
+        ),
     ),
 )
 

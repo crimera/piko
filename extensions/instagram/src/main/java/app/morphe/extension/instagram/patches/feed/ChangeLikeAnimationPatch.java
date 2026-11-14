@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.feed;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
@@ -18,7 +20,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.entity.Entity;
-import app.morphe.extension.instagram.settings.SettingsRestart;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceUtils;
@@ -29,11 +30,29 @@ public class ChangeLikeAnimationPatch {
     private static final String LAST_RANDOM = "last_random_like_animation";
     private static final String CHANGE_LIKE_ANIMATION = Pref.changeLikeAnimation();
     private static String sessionAnimation;
+    private static final Set<Integer> sessionTaskIds = new HashSet<>();
 
-    public static void onActivityCreated() {
-        // Removing a task can leave the process, and its random choice, alive.
-        if (RANDOM.equals(Pref.changeLikeAnimation())) {
-            SettingsRestart.requestRestartOnTaskRemoved();
+    public static synchronized void onActivityCreated(Activity activity) {
+        if (activity == null || !RANDOM.equals(CHANGE_LIKE_ANIMATION)) return;
+        int taskId = activity.getTaskId();
+        if (taskId < 0 || sessionTaskIds.contains(taskId)) return;
+
+        try {
+            if (!sessionTaskIds.isEmpty()) {
+                ActivityManager manager = activity.getSystemService(ActivityManager.class);
+                if (manager == null) return;
+                Set<Integer> currentTaskIds = new HashSet<>();
+                for (ActivityManager.AppTask task : manager.getAppTasks()) {
+                    currentTaskIds.add(task.getTaskInfo().persistentId);
+                }
+                sessionTaskIds.retainAll(currentTaskIds);
+                // Task removal can leave the process alive. Keep the choice while any
+                // task from this session remains, including during Activity recreation.
+                if (sessionTaskIds.isEmpty()) sessionAnimation = null;
+            }
+            sessionTaskIds.add(taskId);
+        } catch (RuntimeException e) {
+            Logger.printException(() -> "Failed to check the like animation session", e);
         }
     }
 

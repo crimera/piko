@@ -25,7 +25,6 @@ private const val STOCK_CLIPS_COMPOSER_BACKGROUND =
     "piko_stock_clips_composer_background"
 private const val STOCK_CLIPS_COMPOSER_BACKGROUND_COLOR = "#ff25292e"
 private const val STORY_LOADING_BACKGROUND = "piko_story_loading_background"
-private const val STOCK_STORY_LOADING_BACKGROUND = "#ff25292e"
 // This GM3 elevation color and its consumers were removed in newer Instagram resources.
 private const val LEGACY_SURFACE_TINT = "baseline_neutral_10_with_surface_tint_dark_alpha_14"
 
@@ -176,12 +175,9 @@ internal fun ResourcePatchContext.preserveCreationButtonContrast() {
     }
 }
 
-internal fun ResourcePatchContext.preserveLightStoryBackground() {
-    // Stories share this color with light surfaces, but retain white controls in every theme.
-    writeColors("res/values", mapOf(STORY_LOADING_BACKGROUND to STOCK_STORY_LOADING_BACKGROUND))
-    listOf("res/values-night", "res/values-v31", "res/values-night-v31").forEach { path ->
-        writeColors(path, mapOf(STORY_LOADING_BACKGROUND to "@color/igds_prism_gray_09"))
-    }
+internal fun ResourcePatchContext.forceBlackStoryBackground() {
+    // Keep story chrome black without remapping colors shared by other surfaces.
+    writeColors("res/values", mapOf(STORY_LOADING_BACKGROUND to "#ff000000"))
     document("res/values/public.xml").use { document ->
         document.ensurePublicResource("color", STORY_LOADING_BACKGROUND)
     }
@@ -194,8 +190,7 @@ internal fun ResourcePatchContext.preserveLightStoryBackground() {
             for (index in 0 until items.length) {
                 val item = items.item(index) as? Element ?: continue
                 if (
-                    item.getAttribute("name") == "igds_color_stories_loading_background" &&
-                    item.textContent == "@color/igds_prism_gray_09"
+                    item.getAttribute("name") == "igds_color_stories_loading_background"
                 ) {
                     item.textContent = "@color/$STORY_LOADING_BACKGROUND"
                     replacements++
@@ -203,7 +198,7 @@ internal fun ResourcePatchContext.preserveLightStoryBackground() {
             }
         }
     }
-    check(replacements > 0) { "Unable to preserve the light story background" }
+    check(replacements > 0) { "Unable to set the story background to black" }
 }
 
 internal fun ResourcePatchContext.preserveLightClipsComposerContrast() {
@@ -287,8 +282,7 @@ internal fun ResourcePatchContext.restoreApi31Base(
 }
 
 internal fun materialYouOverlayValues(night: Boolean): OverlayValues {
-    val values = dynamicOverlayMappings(night) + materialYouCreationButtonMappings +
-        if (night) emptyMap() else mapOf(STORY_LOADING_BACKGROUND to STOCK_STORY_LOADING_BACKGROUND)
+    val values = dynamicOverlayMappings(night) + materialYouCreationButtonMappings
     val api34Values = values + materialYouSwitchApi34Mappings(night)
     val drawableMappings =
         if (night) emptyMap() else materialYouLightDrawableMappings

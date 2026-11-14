@@ -29,6 +29,11 @@ internal object IsSelfProfileExtensionFingerprint : Fingerprint(
     name = "isSelfProfile",
 )
 
+internal object GetProfileSessionExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS,
+    name = "getUserSession",
+)
+
 internal object GetUserDataExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS,
     name = "getUserData",

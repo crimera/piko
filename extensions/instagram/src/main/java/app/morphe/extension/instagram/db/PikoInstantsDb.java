@@ -25,7 +25,7 @@ import app.morphe.extension.shared.Logger;
 public class PikoInstantsDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_instants_vault.db";
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
     private static final String TABLE = "saved_instants";
 
     private static final String COL_ID = "media_id";
@@ -36,6 +36,8 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
     private static final String COL_TS = "ts";
     private static final String COL_USERID = "userid";
     private static final String COL_EXPIRES_AT = "expires_at";
+    private static final String COL_TAKEN_AT = "taken_at_ms";
+    private static final String COL_SHORTCODE = "shortcode";
 
     private static volatile PikoInstantsDb sInstance;
 
@@ -61,7 +63,9 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
                 COL_IS_VIDEO + " INTEGER DEFAULT 0, " +
                 COL_TS + " INTEGER, " +
                 COL_USERID + " TEXT, " +
-                COL_EXPIRES_AT + " INTEGER DEFAULT 0" +
+                COL_EXPIRES_AT + " INTEGER DEFAULT 0, " +
+                COL_TAKEN_AT + " INTEGER, " +
+                COL_SHORTCODE + " TEXT" +
             ")"
         );
     }
@@ -85,11 +89,15 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
                 Logger.printException(() -> "PikoInstantsDb.onUpgrade v3 failed", t);
             }
         }
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN " + COL_TAKEN_AT + " INTEGER");
+            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN " + COL_SHORTCODE + " TEXT");
+        }
     }
 
     /** Records an instant, ignoring duplicates (same media id). Best-effort — never throws. */
     public void insertOrIgnore(String mediaId, String username, String userId, String imageUrl,
-                               String videoUrl, boolean isVideo) {
+                               String videoUrl, boolean isVideo, Long takenAtMillis, String shortcode) {
         if (mediaId == null || mediaId.isEmpty()) return;
         try {
             String playbackUrl = isVideo && videoUrl != null && !videoUrl.isEmpty()
@@ -103,6 +111,8 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
             cv.put(COL_IS_VIDEO, isVideo ? 1 : 0);
             cv.put(COL_TS, System.currentTimeMillis());
             cv.put(COL_EXPIRES_AT, MediaUrls.expiresAt(playbackUrl));
+            cv.put(COL_TAKEN_AT, takenAtMillis);
+            cv.put(COL_SHORTCODE, shortcode);
             getWritableDatabase().insertWithOnConflict(
                 TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         } catch (Throwable t) {
@@ -123,20 +133,22 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
 
     /**
      * Newest first. Each row:
-     * {media_id, username, image_url, video_url, is_video, ts, userid, expires_at}.
+     * {media_id, username, image_url, video_url, is_video, ts, userid, expires_at,
+     * taken_at_ms, shortcode}. The capture time (ts) is independent of the posting time.
      */
     public List<String[]> getAll() {
         List<String[]> out = new ArrayList<>();
         try (Cursor c = getReadableDatabase().query(
                 TABLE,
                 new String[]{COL_ID, COL_USERNAME, COL_IMAGE_URL, COL_VIDEO_URL, COL_IS_VIDEO, COL_TS,
-                        COL_USERID, COL_EXPIRES_AT},
+                        COL_USERID, COL_EXPIRES_AT, COL_TAKEN_AT, COL_SHORTCODE},
                 null, null, null, null, COL_TS + " DESC")) {
             while (c.moveToNext()) {
                 out.add(new String[]{
                     c.getString(0), c.getString(1), c.getString(2),
                     c.getString(3), String.valueOf(c.getInt(4)), String.valueOf(c.getLong(5)),
                     c.getString(6), String.valueOf(c.getLong(7)),
+                    c.getString(8), c.getString(9),
                 });
             }
         } catch (Throwable t) {

@@ -15,14 +15,12 @@ import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.patches.instagram.utils.hideFeedUfiStates
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -45,7 +43,7 @@ private object ReelsCommentStateFingerprint : Fingerprint(
 val disableCommentsPatch =
     bytecodePatch(
         name = "Disable comments",
-        description = "Disables comments and hides comment buttons and counts on posts and reels.",
+        description = "Disables comments and hides comment buttons on posts, reels and stories",
     ) {
         dependsOn(settingsPatch, interceptUriPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -57,7 +55,7 @@ val disableCommentsPatch =
                 ", shouldShowCommentCountInUfi=",
             )
 
-            val reelsMatch = ReelsCommentStateFingerprint.matchSingle()
+            val reelsMatch = ReelsCommentStateFingerprint.match()
             val reelsMethod = reelsMatch.method
             val hiddenField = reelsMatch.instructionMatches[3].fieldReference
             val stateRegister = reelsMatch.instructionMatches[3].getInstruction<OneRegisterInstruction>().registerA
@@ -77,6 +75,7 @@ val disableCommentsPatch =
                 """.trimIndent(),
             )
 
+            hideStoryComments(HIDE_COMMENT_BUTTONS)
             enableSettings("disableComments")
         }
     }

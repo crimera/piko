@@ -7,21 +7,24 @@
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
 import app.crimera.patches.instagram.entity.directItem.directItemEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.patches.instagram.utils.fieldReference
 import app.crimera.utils.changeString
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.getFreeRegisterProvider
 import app.morphe.util.indexOfFirstInstructionOrThrow
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
@@ -37,13 +40,29 @@ val saveDeletedMessagesPatch =
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
         default = true,
     ) {
-        dependsOn(settingsPatch, directItemEntity, deletedMessagesResourcePatch)
+        dependsOn(settingsPatch, directItemEntity, userDataEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
+            val cacheInstance = UserCacheInstanceFingerprint.originalMethod
+            val idMap = UserCacheIdMapFingerprint.instructionMatches.last().fieldReference
+            val cacheLookup = userCacheLookupFingerprint(idMap).originalMethod
+            CachedUserLookupExtensionFingerprint.method.apply {
+                removeInstructions(0, instructions.size)
+                addInstructions(
+                    0,
+                    """
+                    invoke-static/range {p0 .. p0}, $cacheInstance
+                    move-result-object p0
+                    invoke-virtual/range {p0 .. p1}, $cacheLookup
+                    move-result-object p0
+                    return-object p0
+                    """.trimIndent(),
+                )
+            }
 
             // Hook 1: REST/JSON path, inject at the return of the parser.
-            DirectItemJsonParserFingerprint.matchSingle().let {
+            DirectItemJsonParserFingerprint.let {
                 val returnObject = it.instructionMatches.last()
                 val itemRegister = returnObject.getInstruction<OneRegisterInstruction>().registerA
 
@@ -98,7 +117,7 @@ val saveDeletedMessagesPatch =
                 )
             }
 
-            // Username enrichment is optional because numeric sender IDs remain usable.
+            // REST participants supplement the cache used by real-time message delivery.
             ThreadUsersDispatchFingerprint.matchOrNull()?.let { match ->
                 match.method.apply {
                     // The list write is out of line, after other JSON fields. Follow the

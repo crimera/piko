@@ -18,7 +18,6 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.getReference
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.indexOfFirstInstructionReversedOrThrow
-import app.morphe.patcher.util.matchSingle
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -30,14 +29,14 @@ private const val MEDIA_CLASS = "Lcom/instagram/feed/media/Media;"
  */
 context(_: BytecodePatchContext)
 private fun jsonKeyField(key: String, parserClass: String) =
-    jsonKeyFieldFingerprint(key, parserClass).matchSingle().instructionMatches.last().fieldReference
+    jsonKeyFieldFingerprint(key, parserClass).instructionMatches.last().fieldReference
 
 /**
  * Index where the shared value assignment of the JSON [key] starts in the parser of [parserClass].
  */
 context(_: BytecodePatchContext)
 private fun jsonSharedKeyTarget(key: String, parserClass: String) =
-    jsonSharedKeyFingerprint(key, parserClass).matchSingle().let {
+    jsonSharedKeyFingerprint(key, parserClass).let {
         it.method to it.method.getInstruction<BuilderOffsetInstruction>(it.instructionMatches.last().index)
             .target.location.index
     }
@@ -62,7 +61,7 @@ val directItemEntity =
         description = "Decodes obfuscated DirectItem (DM) field names at patch time.",
     ) {
         execute {
-            val parserClass = DirectItemDispatchFingerprint.matchSingle().originalClassDef.type
+            val parserClass = DirectItemDispatchFingerprint.originalClassDef.type
 
             val itemId = jsonKeyField("item_id", parserClass)
             GetItemIdExtension.changeFirstString(itemId.name)
@@ -83,8 +82,8 @@ val directItemEntity =
             SetHideInThreadExtension.changeFirstString(hideField)
 
             IsSentByViewerExtension.changeFirstString(
-                sentByViewerFieldFingerprint(parserClass, SentByViewerKeyFingerprint.matchSingle().originalMethod)
-                    .matchSingle().instructionMatches.last().fieldReference.name,
+                sentByViewerFieldFingerprint(parserClass, SentByViewerKeyFingerprint.originalMethod)
+                    .instructionMatches.last().fieldReference.name,
             )
 
             GetThreadKeyExtension.changeFirstString(jsonKeyField("thread_key", parserClass).name)

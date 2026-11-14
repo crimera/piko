@@ -203,7 +203,8 @@ public class ActionBarPatch {
             }
 
             if(pref.contains(Constants.AB_PROFILE_INFO_ICON)) {
-                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(activity, userData));
+                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () ->
+                        ProfileMoreOption.moreOptionsDailogueBox(activity, userData, () -> userData.refreshProfilePictureUrl(userSession)));
             }
 
 

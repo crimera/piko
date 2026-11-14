@@ -14,10 +14,6 @@ import app.morphe.patcher.string
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/ReelResponseItem;"
 
-internal object ReelResponseItemFingerprint : Fingerprint(
-    definingClass = "ReelResponseItem;",
-)
-
 internal object ReelResponseItemIntfMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
     parameters = listOf("L", "ReelResponseItemIntf;"),

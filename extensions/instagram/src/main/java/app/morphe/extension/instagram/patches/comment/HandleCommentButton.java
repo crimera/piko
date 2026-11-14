@@ -27,6 +27,7 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.patches.comment.copyTextButton.CopyTextButton;
+import app.morphe.extension.instagram.patches.comment.copyTextButton.CopyUsernameButton;
 import app.morphe.extension.instagram.patches.comment.debugButton.DebugButton;
 import app.morphe.extension.instagram.patches.comment.saveMediaButton.SaveMediaButton;
 
@@ -47,6 +48,13 @@ public class HandleCommentButton {
             if(commentData.hasMedia() && Pref.commentSaveMediaButton()){
                 list.add(SaveMediaButton.A00);
             }
+            if (Pref.commentCopyButton()) {
+                UserData userData = commentData.getCommentUserData();
+                String username = userData != null ? userData.getUsername() : null;
+                if (username != null && !username.isEmpty()) {
+                    list.add(CopyUsernameButton.A00);
+                }
+            }
         } catch (Exception e) {
             PikoUtils.logger(e);
         }
@@ -65,6 +73,18 @@ public class HandleCommentButton {
                     String commentText = (String) commentData.getText();
                     app.morphe.extension.shared.Utils.setClipboard(commentText);
                     PikoUtils.toast(str("piko_comment_copied_success"));
+                } else {
+                    PikoUtils.toast(str("piko_comment_copied_failed"));
+                }
+                return true;
+
+            } else if (button.equals(CopyUsernameButton.A00)) {
+                CommentData commentData = new CommentData(commentObject);
+                UserData userData = commentData.getCommentUserData();
+                String username = userData != null ? userData.getUsername() : null;
+                if (username != null && !username.isEmpty()) {
+                    Utils.setClipboard(username);
+                    PikoUtils.toast(str("piko_copied"));
                 } else {
                     PikoUtils.toast(str("piko_comment_copied_failed"));
                 }

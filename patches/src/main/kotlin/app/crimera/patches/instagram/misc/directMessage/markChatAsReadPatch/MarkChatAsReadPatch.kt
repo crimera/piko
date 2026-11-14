@@ -20,9 +20,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
@@ -49,7 +48,7 @@ val markChatAsReadPatch =
                 }
             }
 
-            val messageCursorField = DmInfoJsonParserFingerprint.matchSingle().instructionMatches.last().fieldReference
+            val messageCursorField = DmInfoJsonParserFingerprint.instructionMatches.last().fieldReference
             GetMessageCursorFieldNameExtensionFingerprint.changeFirstString(messageCursorField.name)
 
             // -------------------------

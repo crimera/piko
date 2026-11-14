@@ -77,13 +77,13 @@ public final class EphemeralMediaCaption {
     /** Called when a photo or video message is bound to its views. */
     public static void onBind(Object holder, Object model) {
         try {
-            if (!Pref.ephemeralMediaCaption() || !Pref.makeEphemeralMediaPermanent()) return;
             View bubble = bubbleOf(holder);
             if (bubble == null) return;
             ViewGroup placeholder = placeholderOf(bubble);
             if (placeholder == null) return;
 
-            Long expireAt = expireAtOf(model);
+            Long expireAt = Pref.ephemeralMediaCaption() && Pref.makeEphemeralMediaPermanent()
+                    ? expireAtOf(model) : null;
             String text = expireAt == null ? null : textFor(expireAt, bubble);
             // Rows are reused, so a row without a caption must hide the one left by its previous message.
             View existing = placeholder.findViewWithTag(CAPTION_TAG);

@@ -41,6 +41,11 @@ internal object GetImageVariantsExtensionFingerprint : Fingerprint(
     name = "getImageVariants",
 )
 
+internal object GetAdditionalImageCandidatesExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getAdditionalImageCandidates",
+)
+
 internal object GetVideoVariantsV1ExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
     name = "getVideoVariantsV1",
@@ -119,7 +124,7 @@ internal object GetPostTypeKeyExtensionFingerprint : Fingerprint(
 // -----------------------------------
 
 internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
-    definingClass = "/InstagramMainActivity;",
+    definingClass = "Lcom/instagram/mainactivity/InstagramMainActivity;",
     filters = listOf(
         string("nme_ig_post_post_creation_notif"),
         // Mentioned user.
@@ -235,15 +240,16 @@ internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
     filters = listOf(
         string("igtv_shopping_info"),
-        fieldAccess(type = "Lcom/instagram/model/mediasize/ImageInfo;", opcode = Opcode.IGET_OBJECT),
+        fieldAccess(type = "Lcom/instagram/model/mediasize/ImageInfo;", opcode = Opcode.IGET_OBJECT, location = MatchAfterWithin(2)),
         string("image_versions2"),
     ),
 )
 
 internal object ProductInfoMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
-    strings = listOf("product_suggestions", "product_tags"),
     filters = listOf(
+        string("product_suggestions"),
+        string("product_tags"),
         string("product_type"),
         fieldAccess(type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
     ),
@@ -257,6 +263,32 @@ internal object ImageInfoCandidatesMapperFingerprint : Fingerprint(
         // Image candidates.
         methodCall(definingClass = "Lcom/instagram/model/mediasize/ImageInfo;", parameters = listOf(), returnType = "Ljava/util/List;"),
         string("candidates"),
+    ),
+)
+
+internal object ImageInfoAdditionalCandidatesMapperFingerprint : Fingerprint(
+    parameters = listOf("Lcom/instagram/model/mediasize/ImageInfo;"),
+    returnType = "Ljava/util/Map;",
+    filters = listOf(
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/ImageInfo;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/AdditionalCandidates;"),
+        string("additional_candidates"),
+    ),
+)
+
+internal object AdditionalImageCandidatesMapperFingerprint : Fingerprint(
+    parameters = listOf("Lcom/instagram/model/mediasize/AdditionalCandidates;"),
+    returnType = "Ljava/util/Map;",
+    filters = listOf(
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
+        string("first_frame"),
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
+        string("igtv_first_frame"),
+        methodCall(definingClass = "Lcom/instagram/model/mediasize/AdditionalCandidates;", parameters = listOf(),
+            returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"),
+        string("smart_frame"),
     ),
 )
 

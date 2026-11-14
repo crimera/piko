@@ -60,14 +60,25 @@ public class InstantsDownloadHook {
             String videoUrl = isVideo ? safeStr(() -> md.getVideoLink()) : null;
             String username = safeStr(() -> md.getUserData().getUsername());
             String userId = safeStr(() -> md.getUserData().getUserId());
+            Long takenAtMillis = safeTakenAtMillis(md);
+            String shortcode = safeStr(md::getShortcode);
 
-            db.insertOrIgnore(id, username, userId, imageUrl, videoUrl, isVideo);
+            db.insertOrIgnore(id, username, userId, imageUrl, videoUrl, isVideo, takenAtMillis, shortcode);
         } catch (Throwable t) {
             Logger.printException(() -> "instants capture: captureMedia failed", t);
         }
     }
 
     // ---- best-effort helpers ----
+
+    private static Long safeTakenAtMillis(MediaData media) {
+        try {
+            Long seconds = media.getTakenAtSeconds();
+            return seconds == null || seconds <= 0 ? null : Math.multiplyExact(seconds, 1000L);
+        } catch (Exception | LinkageError e) {
+            return null;
+        }
+    }
 
     private interface StrCall { String get() throws Exception; }
     private interface BoolCall { boolean get() throws Exception; }

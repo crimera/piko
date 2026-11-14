@@ -10,6 +10,8 @@ package app.morphe.extension.instagram.constants;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
+import app.morphe.extension.instagram.settings.ActivityHook;
 
 public class Constants {
     public static final String PIKO = "piko";
@@ -27,6 +29,8 @@ public class Constants {
     public static final String PIKO_MAPPINGS_PATH = "https://github.com/crimera/piko/raw/refs/heads/dev/docs/mappings/";
 
     public static final String AB_SETTINGS_ICON = "SETTINGS_ICON";
+    public static final String AB_AUDIO_CALL_ICON = "AUDIO_CALL_ICON";
+    public static final String AB_VIDEO_CALL_ICON = "VIDEO_CALL_ICON";
     public static final String AB_CREATE = "CREATE";
     public static final String AB_NOTIFICATIONS = "NOTIFICATIONS";
     public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
@@ -60,6 +64,7 @@ public class Constants {
     public static final String PIKO_FRAGMENT_FONT = "piko_frag_font";
 
     public static void load() {
+        StorageUtils.setStorageAccessLauncher(ctx -> ActivityHook.launchFragment(ctx, "piko_download_set_path"));
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);
         ExtensionStrings.setDownloadOngoing(str("piko_downloading_media"));
         ExtensionStrings.setDownloadCompleted(str("piko_downloaded_media"));

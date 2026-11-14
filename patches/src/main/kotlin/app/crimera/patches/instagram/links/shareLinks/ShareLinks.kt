@@ -15,11 +15,9 @@ import app.crimera.patches.instagram.links.shareLinks.ShareLinkKind.STORY
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.getReference
-import app.morphe.patcher.util.matchSingle
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -68,11 +66,10 @@ internal fun hookShareLinks(
         StoryItemThirdPartySharingUrlResponseImplFingerprint.takeIf { STORY !in skip },
         LiveThirdPartySharingUrlResponseImplFingerprint.takeIf { LIVE !in skip },
     ).forEach { fingerprint ->
-        val match = fingerprint.matchSingle()
-        val urlUse = match.instructionMatches.single {
+        val urlUse = fingerprint.instructionMatches.single {
             it.instruction.opcode == Opcode.IPUT_OBJECT || it.instruction.opcode == Opcode.RETURN_OBJECT
         }
-        match.method.addInstructions(urlUse.index, hook(urlUse.instruction.registersUsed.first()))
+        fingerprint.method.addInstructions(urlUse.index, hook(urlUse.instruction.registersUsed.first()))
     }
 
     if (HIGHLIGHT !in skip) {

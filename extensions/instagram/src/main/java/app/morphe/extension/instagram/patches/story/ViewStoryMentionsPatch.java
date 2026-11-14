@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.View;
 
 import app.morphe.extension.instagram.entity.UserData;
@@ -25,7 +26,8 @@ import com.instagram.common.typedurl.ImageUrl;
 
 public class ViewStoryMentionsPatch {
 
-    public static void viewMentions(Context context, Object mediaObject){
+    public static void viewMentions(Context context, Object mediaObject,
+                                    DialogInterface.OnDismissListener onDismiss){
         try {
             HashSet<UserData> mentionSet = new MediaData(mediaObject).getMentionSet();
 
@@ -54,11 +56,12 @@ public class ViewStoryMentionsPatch {
                     }
                 });
             }
-            PeopleCellDialogBox.showPeopleDialog(context, peopleCells);
+            PeopleCellDialogBox.showPeopleDialog(context, peopleCells, onDismiss);
 
         } catch (Exception ex){
             Logger.printException(() -> "Failed viewMentions", ex);
             PikoUtils.logger(ex);
+            if (onDismiss != null) onDismiss.onDismiss(null);
         }
     }
 

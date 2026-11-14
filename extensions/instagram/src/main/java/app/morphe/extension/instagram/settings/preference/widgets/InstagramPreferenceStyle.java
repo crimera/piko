@@ -38,7 +38,7 @@ import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.patches.customise.font.CustomFontContext;
-import app.morphe.extension.instagram.settings.SettingsActivity;
+import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.shared.ResourceUtils;
 
 public final class InstagramPreferenceStyle {
@@ -192,8 +192,7 @@ public final class InstagramPreferenceStyle {
         PreferenceRow row = new PreferenceRow(context, trailingType);
         row.setOrientation(trailingType == TRAILING_SWITCH ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setMinimumHeight(dp(context, 78));
-        row.setPadding(dp(context, 17), dp(context, 10), dp(context, 17), dp(context, 10));
+        row.setPadding(dp(context, 15), dp(context, 10), dp(context, 15), dp(context, 10));
         row.setBackgroundColor(backgroundColor());
         row.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -359,13 +358,16 @@ public final class InstagramPreferenceStyle {
     public static void bindText(Preference preference, View view) {
         Context context = view.getContext();
         boolean enabled = preference.isEnabled();
+        boolean chevron = view instanceof PreferenceRow
+                && ((PreferenceRow) view).trailingType == TRAILING_CHEVRON;
+        boolean useNormalColors = enabled || chevron;
 
         TextView title = view.findViewWithTag(TAG_TITLE);
         TextView summary = view.findViewWithTag(TAG_SUMMARY);
         View trailing = view.findViewWithTag(TAG_TRAILING);
 
-        int titleColor = enabled ? primaryTextColor() : disabledTextColor();
-        int summaryColor = enabled ? secondaryTextColor() : disabledTextColor();
+        int titleColor = useNormalColors ? primaryTextColor() : disabledTextColor();
+        int summaryColor = useNormalColors ? secondaryTextColor() : disabledTextColor();
 
         if (title != null) {
             title.setText(preference.getTitle());
@@ -388,7 +390,7 @@ public final class InstagramPreferenceStyle {
         if (trailing != null) {
             trailing.setEnabled(enabled);
             if (trailing instanceof ImageView) {
-                int trailingColor = enabled
+                int trailingColor = useNormalColors
                         ? UI.getThemedColour("igds_color_secondary_icon")
                         : disabledTextColor();
                 ((ImageView) trailing).setColorFilter(new PorterDuffColorFilter(
@@ -399,6 +401,9 @@ public final class InstagramPreferenceStyle {
             trailing.invalidate();
         }
 
+        if (chevron) {
+            view.setAlpha(enabled ? 1.0f : 0.5f);
+        }
         view.setEnabled(enabled);
     }
 
@@ -603,10 +608,13 @@ public final class InstagramPreferenceStyle {
     public static boolean useMaterialSwitchStyle(View view, boolean original) {
         Context context = view.getContext();
         while (context instanceof ContextWrapper) {
-            if (context instanceof SettingsActivity) {
+            if (context instanceof Activity && ActivityHook.isPiko((Activity) context)) {
                 return true;
             }
             context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (context instanceof Activity && ActivityHook.isPiko((Activity) context)) {
+            return true;
         }
         return original;
     }
@@ -683,6 +691,8 @@ public final class InstagramPreferenceStyle {
         }
 
         void setIcon(String iconResName) {
+            int horizontalPadding = dp(getContext(), iconResName != null ? 10 : 15);
+            setPadding(horizontalPadding, getPaddingTop(), horizontalPadding, getPaddingBottom());
             if (iconResName == null) {
                 if (iconView != null) {
                     iconView.setImageDrawable(null);
@@ -744,7 +754,7 @@ public final class InstagramPreferenceStyle {
         void setHasSummary(boolean hasSummary) {
             int topPadding = dp(getContext(), topPaddingDp(trailingType, hasSummary));
             int bottomPadding = dp(getContext(), bottomPaddingDp(trailingType, hasSummary));
-            setMinimumHeight(dp(getContext(), hasSummary ? 80 : 62));
+            setMinimumHeight(dp(getContext(), hasSummary ? 80 : 64));
             setPadding(getPaddingLeft(), topPadding, getPaddingRight(), bottomPadding);
         }
 
