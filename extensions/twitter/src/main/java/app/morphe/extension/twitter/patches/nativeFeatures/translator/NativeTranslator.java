@@ -21,13 +21,22 @@ import app.morphe.extension.twitter.entity.Tweet;
 
 public class NativeTranslator {
 
+    /** Shared provider factory for manual and automatic translation. */
+    public static Translate createTranslator(int providerCode) {
+        switch (providerCode) {
+            case 1: return new GTranslateV2();
+            case 2: return new FxTwitterTranslate();
+            default: return new GTranslate();
+        }
+    }
+
     public static void translate(Context activity, Object tweetObj) {
         try{
             Tweet tweet = new Tweet(tweetObj);
             String text = tweet.getText();
             Long tweetId = tweet.getTweetId();
             // If text is empty.
-            if(text == ""){
+            if(text == null || text.isEmpty()){
                 PikoUtils.logger(str("piko_native_translator_zero_text"));
                 return;
             }
@@ -36,26 +45,11 @@ public class NativeTranslator {
             String tweetLang = tweet.getTweetLang();
 
             // If both the tweet language and requested language are same.
-            if(tweetLang.toLowerCase() == toLang.toLowerCase()){
+            if(toLang.equalsIgnoreCase(tweetLang)){
                 PikoUtils.logger(str("translate_tweet_same_language",toLang));
                 return;
             }
-            int providerCode = Pref.natveTranslatorProvider();
-
-            Translate translator;
-            switch (providerCode){
-                case 1: {
-                    translator = new GTranslateV2();
-                    break;
-                }
-                case 2: {
-                    translator = new FxTwitterTranslate();
-                    break;
-                }
-                default: {
-                    translator = new GTranslate();
-                }
-            }
+            Translate translator = createTranslator(Pref.natveTranslatorProvider());
             translator.translate(tweetId, text, toLang, new Translate.TranslationCallback() {
                 @Override
                 public void onTranslationComplete(String translatedText) {

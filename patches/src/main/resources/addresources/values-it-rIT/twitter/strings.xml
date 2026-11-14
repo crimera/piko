@@ -416,4 +416,14 @@ Si consiglia di leggerlo prima di usare questa funzione. Include alcune note imp
     <string name="piko_login_token_import_failed_already_exist">Impossibile aggiungere l\'account (potrebbe già essere stato aggiunto)</string>
     <string name="piko_ok">OK</string>
     <string name="piko_cancel">Annulla</string>
+    <string name="piko_native_translator_auto">Traduci automaticamente i post</string>
+    <string name="piko_native_translator_auto_description">Traduce i post visibili, le citazioni e i post aperti usando il fornitore e la lingua selezionati qui sotto. I fornitori Google ricevono il testo visibile; FxTwitter riceve l’ID del post e la lingua di destinazione.</string>
+    <string name="piko_native_translator_auto_source">Lingua originale: %1$s</string>
+    <string name="piko_native_translator_auto_show_original">Mostra originale</string>
+    <string name="piko_native_translator_auto_show_translation">Mostra traduzione</string>
+    <string name="piko_native_translator_auto_loading">Traduzione in corso…</string>
+    <string name="piko_native_translator_auto_retrying">Traduzione in preparazione… riprovo automaticamente</string>
+    <string name="piko_native_translator_auto_unavailable">Traduzione non disponibile</string>
+    <string name="piko_native_translator_auto_unknown_language">non rilevata</string>
+    <string name="piko_native_translator_auto_retry">Riprova</string>
 </resources>

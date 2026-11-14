@@ -448,4 +448,14 @@ It's recommended to read this before using this feature. It includes some import
 
     <string name="piko_ok">OK</string>
     <string name="piko_cancel">Cancel</string>
+    <string name="piko_native_translator_auto">Automatically translate posts</string>
+    <string name="piko_native_translator_auto_description">Translate visible posts, quotes and opened posts using the provider and target language selected below. Google providers receive the visible post text; FxTwitter receives the post ID and target language.</string>
+    <string name="piko_native_translator_auto_source">Original language: %1$s</string>
+    <string name="piko_native_translator_auto_show_original">Show original</string>
+    <string name="piko_native_translator_auto_show_translation">Show translation</string>
+    <string name="piko_native_translator_auto_loading">Translating…</string>
+    <string name="piko_native_translator_auto_retrying">Translation pending… retrying automatically</string>
+    <string name="piko_native_translator_auto_unavailable">Translation unavailable</string>
+    <string name="piko_native_translator_auto_unknown_language">unknown</string>
+    <string name="piko_native_translator_auto_retry">Retry</string>
 </resources>
