@@ -121,6 +121,8 @@
     <string name="piko_friendship_status">Estado de amistad</string>
     <string name="piko_follow_list_non_follower_badge">Mostrar quienes te dejaron de seguir en la siguiente lista</string>
     <string name="piko_follow_list_non_follower_badge_desc">Agrega una insignia a las filas de tu propia lista de seguimiento para las cuentas que no te siguen</string>
+    <string name="piko_resume_reels_after_scrolling">Reanudar los reels tras desplazarse</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Continúa un Reel desde donde lo dejaste cuando vuelves a él al desplazarte hacia atrás</string>
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
     <string name="piko_improve_image_viewing_desc">Obtiene imágenes con la resolución máxima del servidor. Puede reducir el rendimiento, aumentar el tamaño de los datos de la aplicación o hacer que la aplicación cambie a un diseño más antiguo</string>
     <string name="piko_copy_comment">Copiar comentario</string>
@@ -226,6 +228,7 @@
     <string name="piko_download_file_name_token_shortcode">Código corto</string>
     <string name="piko_download_file_name_token_upload_date">Fecha</string>
     <string name="piko_download_file_name_token_upload_time">Tiempo</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Marca de tiempo</string>
     <string name="piko_download_file_name_token_type">Tipo</string>
     <string name="piko_download_file_name_token_carousel_index">Carrusel</string>
     <string name="piko_download_file_name_token_variant_suffix">Variante</string>

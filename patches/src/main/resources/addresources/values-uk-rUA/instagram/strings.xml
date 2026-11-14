@@ -219,6 +219,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Перекодовує звук xHE-AAC із завантажень DASH у формат AAC-LC зі швидкістю 192 кбіт/с, який може відтворити будь-який плеєр</string>
     <string name="piko_embed_download_metadata">Вбудовувати метадані відео</string>
     <string name="piko_embed_download_metadata_desc">Додає підпис, посилання на допис, автора та дату вивантаження до завантажених файлів MP4</string>
+    <string name="piko_download_conflict_policy">Коли медіа вже існує</string>
+    <string name="piko_download_conflict_policy_desc">Застосовується до файлів із такою самою назвою у вибраній папці завантажень</string>
+    <string name="piko_download_conflict_rename">Зберегти під новою назвою</string>
+    <string name="piko_download_conflict_skip">Пропускати вже завантажене медіа</string>
+    <string name="piko_download_conflict_overwrite">Перезаписати наявний файл</string>
+    <string name="piko_download_media_exists">Медіа вже існує</string>
+    <string name="piko_download_media_in_progress">Медіа вже завантажується</string>
     <string name="piko_download_file_name_template">Формат імені файлу</string>
     <string name="piko_download_file_name_template_invalid">Недійсне ім\'я файлу</string>
     <string name="piko_download_file_name_insert_token">Вставити %1$s</string>

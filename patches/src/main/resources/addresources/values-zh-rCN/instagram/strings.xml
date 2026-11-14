@@ -10,6 +10,7 @@
     <string name="piko_enable_dev_options">启用开发者选项</string>
     <string name="piko_enable_dev_options_desc">长按主页图标解锁开发者选项</string>
     <string name="piko_directly_open_metaconfig">直接打开 MetaConfig 覆盖</string>
+    <string name="piko_directly_open_metaconfig_desc">长按主页图标时直接打开 MetaConfig 覆盖项</string>
     <string name="piko_export_dev_overrides">导出覆盖</string>
     <string name="piko_import_dev_overrides">导入覆盖</string>
     <string name="piko_import_id_mapping">导入映射文件</string>
@@ -30,6 +31,8 @@
     <string name="piko_disable_typing_status">禁用输入状态显示</string>
     <string name="piko_disable_screenshot_detection">禁用截屏检测</string>
     <string name="piko_view_dm_anonymously">匿名查看私信</string>
+    <string name="piko_mark_as_read_after_reply">回复后标记为已读</string>
+    <string name="piko_mark_as_read_after_reply_desc">发送回复后将聊天标记为已读，即使正在匿名查看私信或启用了所有幽灵模式</string>
     <string name="piko_view_dm_anonymously_desc">如果启用，其他人无法看到您何时阅读了他们的消息。 当此设置和幽灵模式都被禁用时，将使用 Instagram 的显示读取收据设置</string>
     <string name="piko_turn_on_all_ghost_modes">开启所有幽灵模式</string>
     <string name="piko_ghost_modes_on">幽灵模式：开启</string>

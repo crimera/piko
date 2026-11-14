@@ -219,6 +219,13 @@
     <string name="piko_dash_audio_aac_lc_desc">將 DASH 下載內容的 xHE-AAC 音訊重新編碼為廣泛相容的 192 kbps AAC-LC 格式</string>
     <string name="piko_embed_download_metadata">嵌入影片詮釋資料</string>
     <string name="piko_embed_download_metadata_desc">將內文、貼文連結、創作者與上傳日期新增至下載的 MP4 檔案中</string>
+    <string name="piko_download_conflict_policy">當媒體已存在時</string>
+    <string name="piko_download_conflict_policy_desc">適用於所選下載資料夾中的同名檔案</string>
+    <string name="piko_download_conflict_rename">以新名稱儲存</string>
+    <string name="piko_download_conflict_skip">略過已下載的媒體</string>
+    <string name="piko_download_conflict_overwrite">覆寫現有檔案</string>
+    <string name="piko_download_media_exists">媒體已存在</string>
+    <string name="piko_download_media_in_progress">媒體已在下載中</string>
     <string name="piko_download_file_name_template">檔案名稱格式</string>
     <string name="piko_download_file_name_template_invalid">無效的檔案名稱</string>
     <string name="piko_download_file_name_insert_token">插入 %1$s</string>
