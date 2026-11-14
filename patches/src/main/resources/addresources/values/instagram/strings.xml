@@ -227,6 +227,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Re-encodes the xHE-AAC sound of DASH downloads as AAC-LC at 192 kbps, which every player can play</string>
     <string name="piko_embed_download_metadata">Embed video metadata</string>
     <string name="piko_embed_download_metadata_desc">Adds the caption, post link, creator, and upload date to downloaded MP4 files</string>
+    <string name="piko_download_conflict_policy">When media already exists</string>
+    <string name="piko_download_conflict_policy_desc">Applies to files with the same name in the selected download folder</string>
+    <string name="piko_download_conflict_rename">Save with a new name</string>
+    <string name="piko_download_conflict_skip">Skip already-downloaded media</string>
+    <string name="piko_download_conflict_overwrite">Overwrite the existing file</string>
+    <string name="piko_download_media_exists">Media already exists</string>
+    <string name="piko_download_media_in_progress">Media is already downloading</string>
     <string name="piko_download_file_name_template">Filename format</string>
     <string name="piko_download_file_name_template_invalid">Invalid filename</string>
     <string name="piko_download_file_name_insert_token">Insert %1$s</string>

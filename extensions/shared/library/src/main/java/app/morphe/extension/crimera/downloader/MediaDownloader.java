@@ -35,6 +35,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +52,7 @@ public class MediaDownloader {
     private static final int READ_TIMEOUT_MS = 30_000;
     // Separate downloader instances must reserve names before another request can choose them.
     private static final Object CREATE_DOCUMENT_LOCK = new Object();
+    private static final Set<String> ACTIVE_DESTINATIONS = new HashSet<>();
     private final Context context;
     private final NotificationManager notificationManager;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -100,6 +103,9 @@ public class MediaDownloader {
         int notificationId = (int) System.currentTimeMillis();
         Uri outputDocumentUri = null;
         boolean downloadCompleted = false;
+        boolean replacing = false;
+        String activeDestination = null;
+        File replacement = null;
         try {
             Notification.Builder builder;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -112,19 +118,33 @@ public class MediaDownloader {
                     .setOngoing(true) // Keeps notification un-swipable during download execution.
                     .setProgress(100, 0, false);
 
-            notificationManager.notify(notificationId, builder.build());
-
             synchronized (CREATE_DOCUMENT_LOCK) {
                 Uri targetDirectoryUri = getTargetDirectoryUri(request);
-                request.fileName = DownloadFileNames.findAvailable(
-                        request.fileName, getChildNames(targetDirectoryUri)
-                );
-                outputDocumentUri = DocumentsContract.createDocument(
-                        context.getContentResolver(),
-                        targetDirectoryUri,
-                        getMimeType(request.fileName),
-                        request.fileName
-                );
+                String requestedDestination = targetDirectoryUri.buildUpon().appendPath(request.fileName).build().toString();
+                if (request.conflictPolicy != DownloadRequest.ConflictPolicy.RENAME
+                        && ACTIVE_DESTINATIONS.contains(requestedDestination)) {
+                    showToast(ExtensionStrings.DOWNLOAD_MEDIA_IN_PROGRESS);
+                    return;
+                }
+                Map<String, Uri> children = getChildDocuments(targetDirectoryUri);
+                Uri existing = request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME ? null
+                        : children.get(request.fileName);
+                if (existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.SKIP) {
+                    showToast(ExtensionStrings.DOWNLOAD_MEDIA_EXISTS);
+                    return;
+                }
+                replacing = existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.OVERWRITE;
+                if (replacing) {
+                    outputDocumentUri = existing;
+                } else {
+                    request.fileName = DownloadFileNames.findAvailable(request.fileName, children.keySet());
+                    outputDocumentUri = DocumentsContract.createDocument(
+                            context.getContentResolver(), targetDirectoryUri,
+                            getMimeType(request.fileName), request.fileName
+                    );
+                }
+                activeDestination = targetDirectoryUri.buildUpon().appendPath(request.fileName).build().toString();
+                ACTIVE_DESTINATIONS.add(activeDestination);
             }
             if (outputDocumentUri == null) {
                 throw new IOException("Could not create download file");
@@ -134,7 +154,14 @@ public class MediaDownloader {
             builder.setContentTitle(downloadStartString);
             notificationManager.notify(notificationId, builder.build());
             showToast(downloadStartString);
-            downloadSources(request, outputDocumentUri, builder, notificationId);
+            if (replacing) {
+                // Finish all network and conversion work before touching the saved file.
+                replacement = File.createTempFile("piko-replacement-", ".tmp", context.getCacheDir());
+                downloadSources(request, Uri.fromFile(replacement), builder, notificationId);
+                replaceDocument(replacement, outputDocumentUri);
+            } else {
+                downloadSources(request, outputDocumentUri, builder, notificationId);
+            }
             downloadCompleted = true;
 
             final int finalNotificationId = notificationId;
@@ -160,7 +187,7 @@ public class MediaDownloader {
                 } catch (Exception ignored) {}
             });
         } catch (Exception | LinkageError e) {
-            if (!downloadCompleted && outputDocumentUri != null) {
+            if (!downloadCompleted && !replacing && outputDocumentUri != null) {
                 try {
                     DocumentsContract.deleteDocument(context.getContentResolver(), outputDocumentUri);
                 } catch (Exception ignored) {}
@@ -172,6 +199,39 @@ public class MediaDownloader {
             } catch (Exception notificationException) {
                 PikoUtils.logger(notificationException);
             }
+        } finally {
+            synchronized (CREATE_DOCUMENT_LOCK) {
+                if (activeDestination != null) ACTIVE_DESTINATIONS.remove(activeDestination);
+            }
+            if (replacement != null) replacement.delete();
+        }
+    }
+
+    private void replaceDocument(File replacement, Uri destination) throws IOException {
+        File backup = File.createTempFile("piko-backup-", ".tmp", context.getCacheDir());
+        boolean keepBackup = false;
+        try {
+            try (InputStream input = context.getContentResolver().openInputStream(destination);
+                 OutputStream output = new BufferedOutputStream(new FileOutputStream(backup))) {
+                if (input == null) throw new IOException("Could not read existing download");
+                byte[] buffer = new byte[8192];
+                int count;
+                while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+            }
+            try {
+                copyRawFile(replacement, destination);
+            } catch (IOException | RuntimeException failure) {
+                // SAF has no atomic replace; restore the original if writing the replacement fails.
+                try {
+                    copyRawFile(backup, destination);
+                } catch (IOException | RuntimeException restoreFailure) {
+                    keepBackup = true;
+                    failure.addSuppressed(new IOException("Original download backup retained at " + backup, restoreFailure));
+                }
+                throw failure;
+            }
+        } finally {
+            if (!keepBackup) backup.delete();
         }
     }
 
@@ -391,17 +451,26 @@ public class MediaDownloader {
         return directoryUri;
     }
 
-    private Set<String> getChildNames(Uri parentUri) throws IOException {
+    private Map<String, Uri> getChildDocuments(Uri parentUri) throws IOException {
         Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
                 parentUri, DocumentsContract.getDocumentId(parentUri)
         );
-        String[] projection = {DocumentsContract.Document.COLUMN_DISPLAY_NAME};
-        Set<String> names = new HashSet<>();
+        String[] projection = {
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_MIME_TYPE
+        };
+        Map<String, Uri> children = new HashMap<>();
         try (Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null)) {
             if (cursor == null) throw new IOException("Could not read download folder");
-            while (cursor.moveToNext()) names.add(cursor.getString(0));
+            while (cursor.moveToNext()) {
+                // Directories reserve names too, but must never be treated as downloaded media.
+                Uri document = DocumentsContract.Document.MIME_TYPE_DIR.equals(cursor.getString(2)) ? null
+                        : DocumentsContract.buildDocumentUriUsingTree(parentUri, cursor.getString(1));
+                children.put(cursor.getString(0), document);
+            }
         }
-        return names;
+        return children;
     }
 
     private Uri findChildDocument(Uri parentUri, String displayName, String mimeType) {
