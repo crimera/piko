@@ -9,7 +9,8 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodeContext
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
@@ -243,14 +244,14 @@ private object PostModelResolutionCache {
 }
 
 internal val newXPostModelResolutionPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         execute {
             resolvedNewXPostModels()
         }
     }
 
 internal val newXPostMediaModelResolutionPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXPostModelResolutionPatch)
 
         execute {
@@ -259,14 +260,14 @@ internal val newXPostMediaModelResolutionPatch =
     }
 
 internal val newXInlineActionModelResolutionPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         execute {
             resolvedNewXInlineActionModels()
         }
     }
 
 internal val newXInlineActionBarModelResolutionPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXPostModelResolutionPatch)
 
         execute {
@@ -275,7 +276,7 @@ internal val newXInlineActionBarModelResolutionPatch =
     }
 
 internal val newXInlineDownloadModelResolutionPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXInlineActionModelResolutionPatch)
 
         execute {
@@ -283,41 +284,32 @@ internal val newXInlineDownloadModelResolutionPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun postModelResolutionState(): PostModelResolutionState =
-    PostModelResolutionCache.getOrPut(context)
+    PostModelResolutionCache.getOrPut(bytecodeContext)
 
-context(context: BytecodePatchContext)
 private fun resolvedNewXPostModelAnchors(): ResolvedNewXPostModelAnchors =
-    postModelResolutionState().postModelAnchors()
+    with(bytecodeContext) { postModelResolutionState().postModelAnchors() }
 
-context(context: BytecodePatchContext)
 internal fun resolvedNewXPostModels(): ResolvedNewXPostModels =
-    postModelResolutionState().postModels()
+    with(bytecodeContext) { postModelResolutionState().postModels() }
 
-context(context: BytecodePatchContext)
 internal fun resolvedNewXPostMediaModels(): ResolvedNewXPostMediaModels =
-    postModelResolutionState().postMediaModels()
+    with(bytecodeContext) { postModelResolutionState().postMediaModels() }
 
-context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineActionModels(): ResolvedNewXInlineActionModels =
-    postModelResolutionState().inlineActionModels()
+    with(bytecodeContext) { postModelResolutionState().inlineActionModels() }
 
-context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineActionBarModels(): ResolvedNewXInlineActionBarModels =
-    postModelResolutionState().inlineActionBarModels()
+    with(bytecodeContext) { postModelResolutionState().inlineActionBarModels() }
 
-context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineDownloadModels(): ResolvedNewXInlineDownloadModels =
-    postModelResolutionState().inlineDownloadModels()
+    with(bytecodeContext) { postModelResolutionState().inlineDownloadModels() }
 
-context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineMediaModels(): ResolvedNewXInlineMediaModels =
-    postModelResolutionState().compositionMediaModels()
+    with(bytecodeContext) { postModelResolutionState().compositionMediaModels() }
 
-context(context: BytecodePatchContext)
 internal fun resolvedNewXInlineActionKindOverride(): ResolvedNewXInlineActionKindOverride =
-    postModelResolutionState().inlineActionKindOverride()
+    with(bytecodeContext) { postModelResolutionState().inlineActionKindOverride() }
 
 /**
  * Semantic match for the NewX inline-action entry renderer. Never match this composable by an

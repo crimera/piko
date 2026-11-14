@@ -7,6 +7,7 @@ import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.utils.Constants.FEATURE_SWITCH_STORE_DESCRIPTOR
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodeContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import java.util.WeakHashMap
 
@@ -50,13 +51,12 @@ private object NewXFeatureFlagPatchState {
  *
  * A user's persisted override still takes precedence over this patch-provided default.
  */
-context(patchContext: BytecodePatchContext)
 fun setNewXFeatureFlag(
     flagName: String,
     enabled: Boolean,
 ) {
     if (flagName.isBlank()) throw PatchException("NewX feature flag name must not be blank")
-    if (!NewXFeatureFlagPatchState.register(patchContext, flagName, enabled)) return
+    if (!NewXFeatureFlagPatchState.register(bytecodeContext, flagName, enabled)) return
 
     newXInitHook.fingerprint.method.registerNewXFeatureFlag(flagName, enabled)
 }

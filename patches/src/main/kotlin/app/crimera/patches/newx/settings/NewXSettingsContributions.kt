@@ -19,7 +19,7 @@ import app.crimera.patches.settings.settingsMultiChoice
 import app.crimera.patches.settings.settingsSingleChoice
 import app.crimera.patches.settings.settingsTextInput
 import app.crimera.patches.settings.settingsToggle
-import app.morphe.patcher.patch.BytecodePatchBuilder
+import app.morphe.patcher.patch.PatchBuilder
 
 /**
  * NewX's binding of the shared settings DSL (`piko-patches-library`): its base patch, ID and string
@@ -35,11 +35,11 @@ internal val NEWX_SETTINGS_CONFIG: SettingsPatchConfig by lazy {
     )
 }
 
-internal fun <T> BytecodePatchBuilder.newXSettings(
+internal fun <T> PatchBuilder<*>.newXSettings(
     block: SettingsContributionBuilder.() -> T,
 ): T = contributeSettings(NEWX_SETTINGS_CONFIG, block)
 
-internal fun BytecodePatchBuilder.newXToggle(
+internal fun PatchBuilder<*>.newXToggle(
     id: String,
     category: SettingsCategory,
     strings: SettingStrings,
@@ -50,7 +50,7 @@ internal fun BytecodePatchBuilder.newXToggle(
 ): ToggleSettingDefinition =
     settingsToggle(NEWX_SETTINGS_CONFIG, id, category, strings, order, defaultValue, rebootApp, visible)
 
-internal fun BytecodePatchBuilder.newXTextInput(
+internal fun PatchBuilder<*>.newXTextInput(
     id: String,
     category: SettingsCategory,
     strings: SettingStrings,
@@ -74,7 +74,7 @@ internal fun BytecodePatchBuilder.newXTextInput(
         validatorClassDescriptor,
     )
 
-internal fun BytecodePatchBuilder.newXSingleChoice(
+internal fun PatchBuilder<*>.newXSingleChoice(
     id: String,
     category: SettingsCategory,
     strings: SettingStrings,
@@ -86,7 +86,7 @@ internal fun BytecodePatchBuilder.newXSingleChoice(
 ): SingleChoiceSettingDefinition =
     settingsSingleChoice(NEWX_SETTINGS_CONFIG, id, category, strings, order, defaultValue, rebootApp, visible, options)
 
-internal fun BytecodePatchBuilder.newXMultiChoice(
+internal fun PatchBuilder<*>.newXMultiChoice(
     id: String,
     category: SettingsCategory,
     strings: SettingStrings,
@@ -98,7 +98,7 @@ internal fun BytecodePatchBuilder.newXMultiChoice(
 ): MultiChoiceSettingDefinition =
     settingsMultiChoice(NEWX_SETTINGS_CONFIG, id, category, strings, order, defaultValue, rebootApp, visible, options)
 
-internal fun BytecodePatchBuilder.newXCustomScreen(
+internal fun PatchBuilder<*>.newXCustomScreen(
     id: String,
     category: SettingsCategory,
     strings: SettingStrings,
@@ -108,7 +108,7 @@ internal fun BytecodePatchBuilder.newXCustomScreen(
 ): CustomScreenSettingDefinition =
     settingsCustomScreen(NEWX_SETTINGS_CONFIG, id, category, strings, order, fragmentClassDescriptor, iconResourceName)
 
-internal fun BytecodePatchBuilder.newXAction(
+internal fun PatchBuilder<*>.newXAction(
     id: String,
     category: SettingsCategory,
     strings: SettingStrings,

@@ -12,7 +12,8 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.crimera.patches.common.valueReachesRegister
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
@@ -60,7 +61,6 @@ internal class SettingsRowModelTarget(
     val maskParameterIndex: Int,
 )
 
-context(context: BytecodePatchContext)
 internal fun resolveSettingsRowModelTarget(): SettingsRowModelTarget? {
     val titleResourceId = resourceId(ResourceType.STRING, STRING_RESOURCE_NAME)
     val builders =
@@ -72,7 +72,7 @@ internal fun resolveSettingsRowModelTarget(): SettingsRowModelTarget? {
     val targets =
         builders.mapNotNull { match ->
             resolveSettingsRowModelTargetInMethod(match.method, match.instructionMatches.single().index) {
-                context.classDefByOrNull(it)
+                classDefByOrNull(it)
             }
         }
     return requireAtMostOne(
@@ -200,7 +200,6 @@ private fun rowModelLayout(
  * Rewrites the redesigned root list's "Additional resources" row model into the Piko settings
  * row at construction. Every other model passes through untouched after one int comparison.
  */
-context(context: BytecodePatchContext)
 internal fun patchSettingsRowModel(
     target: SettingsRowModelTarget,
     pikoIcon: (iconType: String) -> MethodReference,
@@ -209,7 +208,7 @@ internal fun patchSettingsRowModel(
         requireExactlyOne(
             label = "NewX settings row model constructor ${target.method}",
             candidates =
-                context.mutableClassDefBy(target.method.definingClass).methods.filter { method ->
+                mutableClassDefBy(target.method.definingClass).methods.filter { method ->
                     method.name == target.method.name &&
                         method.parameterTypes == target.method.parameterTypes
                 },

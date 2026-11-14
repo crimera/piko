@@ -16,9 +16,8 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
@@ -31,7 +30,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal val newXSettingsPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(
             newXExtensionPatch,
             newXSettingsResourcePatch,
@@ -163,7 +162,6 @@ internal val newXSettingsPatch =
         }
     }
 
-context(_: BytecodePatchContext)
 internal fun resolveSettingsIconField(iconType: String): FieldReference {
     val drawableId = resourceId(ResourceType.DRAWABLE, "ic_vector_settings_stroke")
     val fingerprint =

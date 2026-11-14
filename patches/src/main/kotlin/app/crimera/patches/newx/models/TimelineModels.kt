@@ -7,7 +7,8 @@ import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodeContext
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.getReference
@@ -114,24 +115,27 @@ private object TimelineModelCache {
 }
 
 internal val newXTimelineModelResolutionPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         execute {
             resolvedNewXTimelineModels()
         }
     }
 
 internal val newXTimelineModelAdapterPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXTimelineModelResolutionPatch, newXExtensionPatch)
 
         execute {
-            patchTimelineModelBridges(resolvedNewXTimelineModels())
+            with(bytecodeContext) { patchTimelineModelBridges(resolvedNewXTimelineModels()) }
         }
     }
 
-context(context: BytecodePatchContext)
-internal fun resolvedNewXTimelineModels(): ResolvedNewXTimelineModels =
-    TimelineModelCache.getOrPut(context) { resolveTimelineModels() }
+internal fun resolvedNewXTimelineModels(): ResolvedNewXTimelineModels {
+    val context = bytecodeContext
+    return TimelineModelCache.getOrPut(context) {
+        with(context) { resolveTimelineModels() }
+    }
+}
 
 context(context: BytecodePatchContext)
 private fun resolveTimelineModels(): ResolvedNewXTimelineModels {

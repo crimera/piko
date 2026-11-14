@@ -6,7 +6,8 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.newx.utils.Constants.PIKO_SETTINGS_ICON_DESCRIPTOR
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -31,9 +32,8 @@ internal const val PIKO_SETTINGS_ICON_DRAWABLE = "piko_ic_vector_settings_stroke
  * The accessor is generated once per [iconType]; a second caller asking for a different type
  * fails, because the settings row and drawer row are expected to share the app's icon type.
  */
-context(context: BytecodePatchContext)
 internal fun pikoSettingsIconGetter(iconType: String): MethodReference {
-    val owner = context.mutableClassDefBy(PIKO_SETTINGS_ICON_DESCRIPTOR)
+    val owner = mutableClassDefBy(PIKO_SETTINGS_ICON_DESCRIPTOR)
     requireAtMostOne(
         label = "NewX Piko settings icon accessor",
         candidates =
@@ -106,10 +106,9 @@ internal fun pikoSettingsIconGetter(iconType: String): MethodReference {
  * The app builds every icon field in `<clinit>` with the drawable-id constructor (see
  * `resolveIconDrawableMap`), so the same constructor wraps the Piko drawable.
  */
-context(context: BytecodePatchContext)
 private fun resolveDrawableIconConstructor(iconType: String): MethodReference {
     val iconClass =
-        context.classDefByOrNull(iconType)
+        classDefByOrNull(iconType)
             ?: throw PatchException("NewX icon type was not found: $iconType")
     val constructor =
         requireExactlyOne(

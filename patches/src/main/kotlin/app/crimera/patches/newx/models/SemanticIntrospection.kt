@@ -25,7 +25,6 @@ import app.crimera.patches.common.semantic.resolveFieldAccessor as sharedResolve
 import app.crimera.patches.common.semantic.resolveMutableMethodOwner as sharedResolveMutableMethodOwner
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -38,7 +37,6 @@ private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 
 internal typealias ModelFieldAccessor = SharedModelFieldAccessor
 
-context(_: BytecodePatchContext)
 internal fun Fingerprint.requireSingle(target: String): Match =
     this.sharedRequireSingle("NewX $target")
 
@@ -175,10 +173,8 @@ internal fun MutableClass.requireBridge(
 internal fun MutableMethod.patchBridge(block: Block.() -> Unit) =
     withNewXDiagnostic { this.sharedPatchBridge(block) }
 
-context(_: BytecodePatchContext)
 internal fun MethodReference.resolveCurrentMethod(label: String): Method =
     withNewXDiagnostic { this.sharedResolveCurrentMethod(label) }
 
-context(_: BytecodePatchContext)
 internal fun MethodReference.resolveMutableMethodOwner(label: String): Pair<MutableClass, MutableMethod> =
     withNewXDiagnostic { this.sharedResolveMutableMethodOwner(label) }
