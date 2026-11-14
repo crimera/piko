@@ -16,6 +16,7 @@ val customDeepLinksPatch =
         description =
             "Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. " +
                 "These will have to be manually enabled under the \"Open by default\" section in the app info!",
+        default = false,
     ) {
         val customLinkHosts by stringsOption(
             key = "customLinkHosts",
@@ -40,6 +41,7 @@ val customDeepLinksPatch =
         )
 
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(handleCustomDeepLinksPatch)
 
         execute {

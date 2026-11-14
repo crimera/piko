@@ -33,8 +33,10 @@ private object CustomiseProfileTabsFingerprint : Fingerprint(
 val customiseProfileTabsPatch =
     patch(
         name = "Customize profile tabs",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

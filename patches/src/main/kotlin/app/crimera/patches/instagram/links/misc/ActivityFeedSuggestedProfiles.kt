@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.links.misc
 
+import app.crimera.patches.common.parameterRegisterStart
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels

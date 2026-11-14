@@ -16,8 +16,10 @@ val hideRecommendationItemsPatch =
     patch(
         name = "Hide recommendation items",
         description = "Adds options to hide recommendation items such as \"Who to follow\" and \"Today's news\" in timeline, search, and replies.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Pinned posts by followers.

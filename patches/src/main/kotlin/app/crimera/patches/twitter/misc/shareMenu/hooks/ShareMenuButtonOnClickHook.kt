@@ -26,8 +26,10 @@ internal const val EXTENSION_CLASS_NAME = "${NATIVE_DESCRIPTOR}/ButtonPressHandl
 val shareMenuButtonOnClickHook =
     patch(
         description = "Hook required to configure share menu onclick action",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(decoderEntity)
 
         execute {

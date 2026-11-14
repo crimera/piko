@@ -10,7 +10,7 @@ package app.morphe.extension.instagram.constants;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
-import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 
 public class Constants {

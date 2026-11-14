@@ -7,7 +7,7 @@
 
 package app.morphe.extension.instagram.entity;
 
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 public interface MediaInterface {
     public Integer getHeight() throws Exception;

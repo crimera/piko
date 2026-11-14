@@ -35,9 +35,10 @@ val changeDownloadDirPatch =
     patch(
         name = "Custom download folder",
         description = "Change the download directory for video downloads",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

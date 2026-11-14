@@ -21,7 +21,6 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
@@ -31,7 +30,6 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import jdk.javadoc.internal.tool.Main.execute
 
 private const val ACTIVITY_CLASS = "Landroid/app/Activity;"
 private const val IG_LINEAR_LAYOUT_CLASS = "Lcom/instagram/common/ui/base/IgLinearLayout;"

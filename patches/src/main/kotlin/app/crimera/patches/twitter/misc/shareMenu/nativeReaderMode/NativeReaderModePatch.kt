@@ -19,8 +19,10 @@ val nativeReaderModePatch =
     patch(
         name = "Native reader mode",
         description = "Requires X 11.0.0-release.0 or higher.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(
             nativeReaderModeResourcePatch,
             settingsPatch,

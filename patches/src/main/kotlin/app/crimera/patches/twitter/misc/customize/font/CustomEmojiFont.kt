@@ -16,8 +16,10 @@ val customEmojiFont =
     patch(
         name = "Custom emoji font",
         description = "Customise emoji font style",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(customFontHook, settingsPatch)
 
         execute {

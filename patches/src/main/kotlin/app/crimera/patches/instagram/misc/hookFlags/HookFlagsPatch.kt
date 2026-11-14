@@ -43,7 +43,7 @@ val hookFlagsPatch =
                 0,
                 """
                 invoke-static/range {p2 .. p3}, $HOOK_FLAGS_DESCRIPTOR->handleBoolFlags(J)Ljava/lang/Boolean;
-                move-result-object v0 
+                move-result-object v0
                 # 1. Check if the result is NULL
                 if-eqz v0, :piko
                 invoke-virtual {v0}, Ljava/lang/Boolean;->booleanValue()Z

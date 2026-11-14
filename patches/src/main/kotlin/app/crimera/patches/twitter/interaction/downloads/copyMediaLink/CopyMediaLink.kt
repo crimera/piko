@@ -32,9 +32,10 @@ internal object DownloadCallFingerprint : Fingerprint(
 val copyMediaLink =
     patch(
         name = "Add ability to copy media link",
-        default = true,
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
 
         dependsOn(settingsPatch)
 

@@ -68,8 +68,10 @@ val blockUpdateScreenPatch =
     patch(
         name = "Block update screen",
         description = "Blocks the 'This app is out of date' update screen from being shown on launch",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
 
         dependsOn(settingsPatch)
 

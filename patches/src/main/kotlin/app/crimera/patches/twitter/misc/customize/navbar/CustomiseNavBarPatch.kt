@@ -111,8 +111,10 @@ private object CustomiseNavBarSecondaryMapFingerprint : Fingerprint(
 val customiseNavBarPatch =
     patch(
         name = "Customize Navigation Bar items",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
 
         dependsOn(
             settingsPatch,

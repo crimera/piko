@@ -37,8 +37,10 @@ val roundOffNumbersPatch =
     patch(
         name = "Round off numbers",
         description = "Enable or disable rounding off numbers",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

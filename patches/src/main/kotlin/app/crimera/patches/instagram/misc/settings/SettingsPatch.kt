@@ -29,9 +29,9 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.common.parameterRegisterStart
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.patches.shared.parameterRegisterStart
 import app.crimera.utils.InitMethod
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction

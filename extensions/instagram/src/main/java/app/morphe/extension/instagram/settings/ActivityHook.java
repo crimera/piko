@@ -19,8 +19,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.crimera.downloader.FolderPickerFragment;
-import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.legacydownloader.FolderPickerFragment;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.dm.DeletedMessagesActivity;
 import app.morphe.extension.instagram.patches.instants.InstantsVaultActivity;

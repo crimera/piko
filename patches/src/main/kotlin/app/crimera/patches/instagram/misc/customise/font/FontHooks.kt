@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.customise.font
 
+import app.crimera.patches.common.declaredParameterRegister
 import app.crimera.patches.instagram.utils.Constants.CUSTOM_FONT_DESCRIPTOR
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction

@@ -16,8 +16,10 @@ val forceTranslate =
     patch(
         name = "Force enable translate",
         description = "Get translate option for all posts",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {

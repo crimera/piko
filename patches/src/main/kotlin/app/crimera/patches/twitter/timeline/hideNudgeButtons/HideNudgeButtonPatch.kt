@@ -29,8 +29,10 @@ val hideNudgeButtonPatch =
     patch(
         name = "Hide nudge button",
         description = "Hides follow/subscribe/follow back buttons on posts",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {
