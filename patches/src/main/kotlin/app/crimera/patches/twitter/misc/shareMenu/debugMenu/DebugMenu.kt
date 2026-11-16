@@ -18,8 +18,10 @@ import app.morphe.patcher.patch.patch
 val debugMenu =
     patch(
         name = "Enable debug menu for posts",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, versionCheckPatch)
 
         execute {

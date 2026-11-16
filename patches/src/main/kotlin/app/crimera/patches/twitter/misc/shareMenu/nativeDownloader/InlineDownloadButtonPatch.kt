@@ -80,8 +80,10 @@ private val inlineDownloadRenderHintsFocalFieldFingerprint = placeholderFingerpr
 val inlineDownloadButtonPatch =
     patch(
         description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, versionCheckPatch)
 
         execute {

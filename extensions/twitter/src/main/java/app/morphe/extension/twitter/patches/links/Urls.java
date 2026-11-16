@@ -36,17 +36,20 @@ public class Urls {
         return entity;
     }
 
-    public static String changeDomain(String urlString) {
-        try {
-            String customDomainName = Pref.customSharingDomain();
-            if(customDomainName.length()<1) return urlString;
+    private static final String FULL_DOMAIN_PATTERN = "(?i)(?:[a-z0-9-]+\\.)+[a-z]{2,63}";
+    private static final String BARE_DOMAIN_PATTERN = "(?i)[a-z0-9-]+";
 
-            // Check for domain extension
-            String regex  = "(?:https?://)?(?:[\\w-]+\\.)+[a-z]{2,}(?:/[^\\s]*)?";
-            if(!(customDomainName.matches(regex))) {
-                //have .com as default extension just for safety reasons
-                customDomainName += ".com";
-            }
+    public static String changeDomain(String urlString) {
+        if (urlString == null) return null;
+
+        String customDomainName = normalizeCustomDomain(Pref.customSharingDomain());
+        if (customDomainName.length() < 1) return urlString;
+        if (customDomainName.matches(BARE_DOMAIN_PATTERN)) {
+            customDomainName += ".com";
+        }
+        if (!customDomainName.matches(FULL_DOMAIN_PATTERN)) return urlString;
+
+        try {
             URL url = new URL(urlString);
             String host = url.getHost();
             if (host.equalsIgnoreCase("x.com") || host.equalsIgnoreCase("twitter.com")) {
@@ -54,9 +57,23 @@ public class Urls {
             }
         } catch (Exception ex) {
             PikoUtils.logger(ex);
-            return urlString;
         }
         return urlString;
+    }
+
+    private static String normalizeCustomDomain(String value) {
+        if (value == null) return "";
+
+        String normalized = value.trim();
+        if (normalized.startsWith("https://")) {
+            normalized = normalized.substring("https://".length());
+        } else if (normalized.startsWith("http://")) {
+            normalized = normalized.substring("http://".length());
+        }
+        while (normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
     }
 
     public static String hookShareSheetLink(ContextualPost contextualPost, String link){

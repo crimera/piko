@@ -30,8 +30,10 @@ private object FeatureFlagFingerprint : Fingerprint(
 val featureFlagPatch =
     patch(
         name = "Hook feature flag",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(featureFlagResourcePatch, settingsPatch)
         execute {
 

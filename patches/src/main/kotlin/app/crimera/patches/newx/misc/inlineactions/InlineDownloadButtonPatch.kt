@@ -1,0 +1,1189 @@
+package app.crimera.patches.newx.misc.inlineactions
+
+import app.crimera.patches.newx.utils.unsupportedOnMount
+import app.crimera.patches.newx.misc.extension.newXExtensionPatch
+import app.crimera.patches.newx.misc.extension.newXInitHook
+import app.crimera.patches.newx.models.ResolvedNewXInlineActionBarModels
+import app.crimera.patches.newx.models.ResolvedNewXInlineActionKindOverride
+import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
+import app.crimera.patches.newx.models.ResolvedNewXInlineDownloadModels
+import app.crimera.patches.newx.models.ResolvedNewXInlineMediaModels
+import app.crimera.patches.newx.models.ResolvedNewXPostMediaModels
+import app.crimera.patches.newx.models.ResolvedNewXPostModels
+import app.crimera.patches.newx.models.firstParameterSlot
+import app.crimera.patches.newx.models.fieldForToStringLabel
+import app.crimera.patches.newx.models.isInlineActionEntryRenderer
+import app.crimera.patches.newx.models.ResolvedNewXTimelineModels
+import app.crimera.patches.newx.models.newXTimelineModelResolutionPatch
+import app.crimera.patches.newx.models.requirePublicFields
+import app.crimera.patches.newx.models.resolveFieldAccessor
+import app.crimera.patches.newx.models.resolvedNewXTimelineModels
+import app.crimera.patches.newx.models.resolveMutableMethodOwner
+import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
+import app.crimera.patches.newx.models.resolvedNewXInlineActionKindOverride
+import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
+import app.crimera.patches.newx.models.resolvedNewXInlineDownloadModels
+import app.crimera.patches.newx.models.resolvedNewXInlineMediaModels
+import app.crimera.patches.newx.models.resolvedNewXPostMediaModels
+import app.crimera.patches.newx.models.resolvedNewXPostModels
+import app.crimera.patches.newx.models.newXInlineDownloadModelResolutionPatch
+import app.crimera.patches.newx.models.newXPostMediaModelResolutionPatch
+import app.crimera.patches.newx.settings.Categories
+import app.crimera.patches.newx.settings.Groups
+import app.crimera.patches.settings.choice
+import app.crimera.patches.settings.customScreen
+import app.crimera.patches.settings.group
+import app.crimera.patches.settings.input
+import app.crimera.patches.settings.settingStrings
+import app.crimera.patches.settings.singleChoice
+import app.crimera.patches.settings.toggle
+import app.crimera.patches.newx.settings.newXSettings
+import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
+import app.crimera.bytecode.Target
+import app.crimera.bytecode.RegisterLimit
+import app.crimera.bytecode.insertHook
+import app.crimera.bytecode.methodReference
+import app.crimera.patches.newx.utils.Constants.DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR
+import app.crimera.patches.common.requireExactlyOne
+import app.crimera.patches.common.scopedMatchAll
+import app.crimera.patches.common.scopedMatchAllOrNull
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.literal
+import app.morphe.patcher.methodCall
+import app.crimera.patches.downloader.downloaderManifestPatch
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.resource.ResourceType
+import app.morphe.patcher.resource.resourceId
+import app.morphe.util.cloneMutable
+import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.numberOfParameterRegisters
+import app.morphe.patcher.util.p0Register
+import app.morphe.patcher.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
+
+private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
+private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
+private const val EXTENSION = "Lapp/morphe/extension/newx/misc/InlineDownloadButton;"
+private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
+private const val PRESENTER_POST_HELPER = "getPresenterPost"
+private const val CANONICAL_POST_HELPER = "getCanonicalPost"
+private const val CONTEXTUAL_POST_HELPER = "getContextualPost"
+private const val NO_CONTEXTUAL_POST_LABEL = "no_contextual_post"
+private const val POST_MEDIA_HELPER = "getPostMedia"
+private const val COMPOSITION_MEDIA_HELPER = "isCompositionDownloadableMedia"
+private const val REPOSTED_POST_HELPER = "getRepostedPost"
+private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
+private const val CREATE_ACTION_HELPER = "createDownloadAction"
+private const val NEWX_DOWNLOADER = "Lapp/morphe/extension/newx/misc/NewXDownloader;"
+private const val DOWNLOADER_INSTALL = "$NEWX_DOWNLOADER->install(Landroid/content/Context;)V"
+private const val SKIP_MARK_ICON_SIZE_LABEL = "piko_skip_mark_icon_size"
+
+private fun MutableMethod.requireStatic(label: String) {
+    if (AccessFlags.STATIC.isSet(accessFlags)) return
+    throw PatchException("$label is no longer static: $this")
+}
+
+@Suppress("unused")
+val newXInlineDownloadButtonPatch =
+    bytecodePatch(
+        name = "NewX: Inline download button",
+        description =
+            "Adds a Download button below NewX posts and saves media to a folder you choose, " +
+                "with a customizable filename template.",
+    ) {
+        unsupportedOnMount()
+        compatibleWith(COMPATIBILITY_NEW_X)
+        dependsOn(
+            customizeNewXInlineActionsPatch,
+            newXPostMediaModelResolutionPatch,
+            newXTimelineModelResolutionPatch,
+            newXInlineDownloadModelResolutionPatch,
+            newXThumbnailCachePatch,
+            newXInAppNotificationPatch,
+            downloaderManifestPatch,
+            newXExtensionPatch,
+        )
+
+        newXSettings {
+            category(Categories.POST_ACTIONS_MEDIA) {
+                group(Groups.INLINE_DOWNLOAD) {
+                    toggle(
+                        id = "newx.content.inline_download_button",
+                        strings = settingStrings("piko_newx_inline_download_button"),
+                        order = 100,
+                        defaultValue = true,
+                    )
+                    toggle(
+                        id = "newx.content.inline_download_hide_no_media",
+                        strings = settingStrings("piko_newx_inline_download_hide_no_media"),
+                        order = 150,
+                        defaultValue = true,
+                    )
+                    toggle(
+                        id = "newx.content.media_picker_copy_link",
+                        strings = settingStrings("piko_newx_media_picker_copy_link"),
+                        order = 200,
+                        defaultValue = true,
+                    )
+                    toggle(
+                        id = "newx.content.media_picker_resolution_button",
+                        strings = settingStrings("piko_newx_media_picker_resolution_button"),
+                        order = 250,
+                        defaultValue = true,
+                    )
+                    toggle(
+                        id = "newx.content.media_picker_thumbnails",
+                        strings = settingStrings("piko_newx_media_picker_thumbnails"),
+                        order = 300,
+                        defaultValue = true,
+                    )
+                    toggle(
+                        id = "newx.content.media_picker_merge_button",
+                        strings = settingStrings("piko_newx_media_picker_merge_button"),
+                        order = 350,
+                        defaultValue = true,
+                    )
+                    // Preferred quality for downloads that skip the picker. "ask" keeps the
+                    // resolution chooser; any other value auto-selects the matching option.
+                    singleChoice(
+                        id = "newx.content.inline_download.image_resolution",
+                        strings = settingStrings("piko_newx_inline_download_image_resolution"),
+                        order = 360,
+                        defaultValue = "original",
+                        options =
+                            listOf(
+                                choice("ask", "piko_newx_inline_download_quality_ask"),
+                                choice("original", "piko_newx_inline_download_quality_original"),
+                                choice("4096x4096", "piko_newx_inline_download_quality_4096"),
+                                choice("large", "piko_newx_inline_download_quality_large"),
+                                choice("medium", "piko_newx_inline_download_quality_medium"),
+                                choice("small", "piko_newx_inline_download_quality_small"),
+                            ),
+                    )
+                    // Videos and GIFs share the same variant model, so one policy covers both.
+                    singleChoice(
+                        id = "newx.content.inline_download.video_quality",
+                        strings = settingStrings("piko_newx_inline_download_video_quality"),
+                        order = 370,
+                        defaultValue = "highest",
+                        options =
+                            listOf(
+                                choice("ask", "piko_newx_inline_download_quality_ask"),
+                                choice("highest", "piko_newx_inline_download_quality_highest"),
+                                choice("1080p", "piko_newx_inline_download_quality_1080p"),
+                                choice("720p", "piko_newx_inline_download_quality_720p"),
+                                choice("480p", "piko_newx_inline_download_quality_480p"),
+                                choice("360p", "piko_newx_inline_download_quality_360p"),
+                                choice("lowest", "piko_newx_inline_download_quality_lowest"),
+                            ),
+                    )
+                    singleChoice(
+                        id = "newx.content.inline_download_conflict",
+                        strings = settingStrings("piko_newx_inline_download_conflict"),
+                        order = 400,
+                        defaultValue = "skip",
+                        options =
+                            listOf(
+                                choice("overwrite", "piko_newx_inline_download_conflict_overwrite"),
+                                choice("rename", "piko_newx_inline_download_conflict_rename"),
+                                choice("skip", "piko_newx_inline_download_conflict_skip"),
+                            ),
+                    )
+                    // Folders and the filename template need richer editors than a settings row, so
+                    // they live in the Download options screen.
+                    customScreen(
+                        id = "newx.content.inline_download.options",
+                        strings = settingStrings("piko_newx_inline_download_options"),
+                        order = 410,
+                        fragmentClassDescriptor = DOWNLOAD_OPTIONS_FRAGMENT_DESCRIPTOR,
+                    )
+                    // The template is edited only from the Download options screen, which owns the
+                    // token chips and live preview. It stays registered as a setting so
+                    // "back up settings" carries it, but is hidden from the list.
+                    input(
+                        id = "newx.content.inline_download.filename_template",
+                        strings = settingStrings("piko_newx_inline_download_filename_template"),
+                        order = 600,
+                        defaultValue = "{screenName}_{id}",
+                        visible = false,
+                    )
+                    // Hidden nodes store the SAF destination for each media type. They are declared
+                    // as registry settings so "back up settings" carries them between installs.
+                    input(
+                        id = "newx.content.inline_download.images_tree_uri",
+                        strings = settingStrings("piko_newx_inline_download_images_tree_uri"),
+                        order = 700,
+                        defaultValue = "",
+                        visible = false,
+                    )
+                    input(
+                        id = "newx.content.inline_download.videos_tree_uri",
+                        strings = settingStrings("piko_newx_inline_download_videos_tree_uri"),
+                        order = 710,
+                        defaultValue = "",
+                        visible = false,
+                    )
+                    input(
+                        id = "newx.content.inline_download.images_display_path",
+                        strings = settingStrings("piko_newx_inline_download_images_display_path"),
+                        order = 720,
+                        defaultValue = "",
+                        visible = false,
+                    )
+                    input(
+                        id = "newx.content.inline_download.videos_display_path",
+                        strings = settingStrings("piko_newx_inline_download_videos_display_path"),
+                        order = 730,
+                        defaultValue = "",
+                        visible = false,
+                    )
+                }
+            }
+        }
+
+        execute {
+            val entryModels = resolvedNewXInlineActionModels()
+            val barModels = resolvedNewXInlineActionBarModels()
+            val mediaModels = resolvedNewXPostMediaModels()
+            val inlineMediaModels = resolvedNewXInlineMediaModels()
+            val downloadModels = resolvedNewXInlineDownloadModels()
+            val kindOverrideModels = resolvedNewXInlineActionKindOverride()
+            patchPostModelBridges(
+                resolvedNewXPostModels(),
+                entryModels,
+                barModels,
+                mediaModels,
+                inlineMediaModels,
+                downloadModels,
+                resolvedNewXTimelineModels(),
+            )
+            patchInlineActionKindOverride(entryModels, kindOverrideModels)
+            val applicationOnCreate = newXInitHook.fingerprint.method
+            applicationOnCreate.insertHook(0, relocateBranchTargets = false) {
+                invokeStatic(
+                    methodReference("$EXTENSION->initialize(Landroid/content/Context;)V"),
+                    applicationOnCreate.p0Register,
+                )
+                invokeStatic(
+                    methodReference(DOWNLOADER_INSTALL),
+                    applicationOnCreate.p0Register,
+                )
+            }
+
+            val staticInlineRenderers =
+                Fingerprint(
+                    returnType = "V",
+                    custom = { method, _ ->
+                        method.isInlineActionEntryRenderer(entryModels.inlineActionEntryDescriptor)
+                    },
+                    filters =
+                        listOf(
+                            fieldAccess(
+                                opcode = Opcode.IGET_OBJECT,
+                                reference = entryModels.inlineActionTypeField,
+                            ),
+                            fieldAccess(
+                                opcode = Opcode.IGET_BOOLEAN,
+                                reference = entryModels.inlineActionEnabledField,
+                            ),
+                        ),
+                ).scopedMatchAllOrNull().orEmpty()
+            val capturedInlineRenderers = capturedInlineActionRendererCandidates(entryModels)
+            val rendererMethod =
+                requireExactlyOne(
+                    "NewX inline-action entry renderer across direct and captured shapes",
+                    staticInlineRenderers.map { match -> match.originalMethod } +
+                        capturedInlineRenderers.map { candidate -> candidate.method },
+                )
+            val staticRenderer = staticInlineRenderers.singleOrNull { match ->
+                match.originalMethod == rendererMethod
+            }
+            if (staticRenderer != null) {
+                staticRenderer.method.apply {
+                    requireStatic("NewX inline-action entry renderer")
+                    val (hookIndex, sizeRegister) = resolveInlineIconSizeHook(this)
+                    insertMarkIconSizeHook(
+                        index = hookIndex,
+                        actionRegister = p0Register,
+                        sizeRegister = sizeRegister,
+                        actionTypeField = entryModels.inlineActionTypeField,
+                        twitterShareActionField = downloadModels.twitterShareActionField,
+                        excludedRegisters = listOf(p0Register),
+                    )
+                }
+            } else {
+                val capturedCandidate = requireExactlyOne(
+                    "NewX captured inline-action renderer candidate",
+                    capturedInlineRenderers.filter { candidate -> candidate.method == rendererMethod },
+                )
+                val mutableRenderer = requireExactlyOne(
+                    "NewX mutable captured inline-action renderer",
+                    mutableClassDefBy(capturedCandidate.owner.type).methods.filter { method ->
+                        method.name == capturedCandidate.method.name &&
+                            method.parameterTypes == capturedCandidate.method.parameterTypes &&
+                            method.returnType == capturedCandidate.method.returnType
+                    },
+                )
+                val capturedRenderer =
+                    resolveCapturedInlineActionEntryRenderer(
+                        mutableRenderer,
+                        capturedCandidate.owner,
+                        entryModels,
+                    )
+                val iconSizeReadIndex = capturedRenderer.iconSizeReadIndex
+                    ?: throw PatchException("NewX captured inline-action icon-size read was not resolved")
+                val iconSizeRegister = capturedRenderer.iconSizeRegister
+                    ?: throw PatchException("NewX captured inline-action icon-size register was not resolved")
+                val hookIndex = iconSizeReadIndex + 1
+                if (!capturedRenderer.method.hasOnlyFallThroughInto(hookIndex)) {
+                    throw PatchException(
+                        "NewX captured inline-action size hook has an unproven incoming edge: " +
+                            "${capturedRenderer.method} at $hookIndex",
+                    )
+                }
+                capturedRenderer.method.insertMarkIconSizeHook(
+                    index = hookIndex,
+                    actionRegister = capturedRenderer.entryRegister,
+                    sizeRegister = iconSizeRegister,
+                    actionTypeField = entryModels.inlineActionTypeField,
+                    twitterShareActionField = downloadModels.twitterShareActionField,
+                    excludedRegisters = listOf(capturedRenderer.method.p0Register),
+                )
+            }
+
+            // The injected entry deliberately carries TwitterShare, which maps to exactly this
+            // ic_vector_share branch. Share/ic_vector_share_android is a separate native action
+            // and must remain untouched. The sign of the captured size is the complete download
+            // discriminator; normalize it before layout and read the original sign at icon choice.
+            val shareIconField = resolveIconField("ic_vector_share")
+            val incomingIconField = resolveIconField("ic_vector_incoming_stroke")
+            if (shareIconField.type != incomingIconField.type) {
+                throw PatchException("NewX inline icon types differ")
+            }
+            val iconRenderer = requireExactlyOne(
+                "NewX TwitterShare icon lambda",
+                Fingerprint(
+                    filters =
+                        listOf(
+                            fieldAccess(opcode = Opcode.IGET, definingClass = "this", type = "F"),
+                            fieldAccess(opcode = Opcode.SGET_OBJECT, reference = shareIconField),
+                        ),
+                ).scopedMatchAll(),
+            )
+            iconRenderer.method.apply {
+                val iconAccess = requireExactlyOne(
+                    "NewX TwitterShare icon access",
+                    iconRenderer.instructionMatches.filter { match ->
+                        match.instruction.opcode == Opcode.SGET_OBJECT &&
+                            match.instruction.getReference<FieldReference>()?.toString() ==
+                            shareIconField.toString()
+                    },
+                )
+                val matchedSizeAccess = requireExactlyOne(
+                    "NewX TwitterShare icon size field access",
+                    iconRenderer.instructionMatches.filter { match ->
+                        val field = match.instruction.getReference<FieldReference>()
+                        match.instruction.opcode == Opcode.IGET && field?.type == "F"
+                    },
+                )
+                val sizeField =
+                    matchedSizeAccess.instruction.getReference<FieldReference>()
+                        ?: throw PatchException("NewX share icon size field was not found")
+                // newx-resolver-lint: allow instruction-order previous-return because each
+                // packed-switch icon branch is a self-contained block ending in return-object.
+                val branchStart =
+                    instructions
+                        .subList(0, iconAccess.index)
+                        .indexOfLast { instruction -> instruction.opcode == Opcode.RETURN_OBJECT } + 1
+                val branchLocalSizeAccesses = instructions.mapIndexedNotNull { index, instruction ->
+                    index.takeIf {
+                        index in branchStart until iconAccess.index &&
+                            instruction.opcode == Opcode.IGET &&
+                            instruction.getReference<FieldReference>()?.toString() ==
+                            sizeField.toString()
+                    }?.let { accessIndex -> accessIndex to instruction }
+                }
+                val packedSwitchIndexes = instructions.mapIndexedNotNull { index, instruction ->
+                    index.takeIf {
+                        index < iconAccess.index && instruction.opcode == Opcode.PACKED_SWITCH
+                    }
+                }
+                val preSwitchHoistedSizeAccesses = packedSwitchIndexes.flatMap { switchIndex ->
+                    instructions.mapIndexedNotNull { index, instruction ->
+                        index.takeIf {
+                            index < switchIndex &&
+                                instruction.opcode == Opcode.IGET &&
+                                instruction.getReference<FieldReference>()?.toString() ==
+                                sizeField.toString()
+                        }?.let { accessIndex -> accessIndex to instruction }
+                    }
+                }
+                val sizeAccess = requireExactlyOne(
+                    "NewX TwitterShare branch-local or pre-switch-hoisted size access",
+                    branchLocalSizeAccesses + preSwitchHoistedSizeAccesses,
+                )
+                val sizeRegister =
+                    (sizeAccess.second as? OneRegisterInstruction)?.registerA
+                        ?: throw PatchException("NewX share icon size access has no register")
+                val sizeModifierCalls = instructions.mapIndexedNotNull { index, instruction ->
+                    if (index in branchStart until iconAccess.index &&
+                        instruction.opcode == Opcode.INVOKE_STATIC
+                    ) {
+                        val method = instruction.getReference<MethodReference>()
+                        if (method?.parameterTypes?.map { it.toString() } == listOf(MODIFIER, "F") &&
+                            method.returnType == MODIFIER
+                        ) {
+                            index to instruction
+                        } else null
+                    } else null
+                }
+                val sizeModifierCall = requireExactlyOne(
+                    "NewX TwitterShare branch size modifier call",
+                    sizeModifierCalls,
+                )
+                val iconRegister =
+                    (iconAccess.instruction as? OneRegisterInstruction)?.registerA
+                        ?: throw PatchException("NewX TwitterShare icon access has no register")
+                val overwrittenReceiver = instructions.take(iconAccess.index).mapIndexedNotNull { index, instruction ->
+                    if (!instruction.opcode.setsRegister()) return@mapIndexedNotNull null
+                    val destination = (instruction as? OneRegisterInstruction)?.registerA
+                        ?: return@mapIndexedNotNull null
+                    if (destination == p0Register ||
+                        (instruction.opcode.setsWideRegister() && destination + 1 == p0Register)
+                    ) {
+                        index
+                    } else {
+                        null
+                    }
+                }
+                if (overwrittenReceiver.isNotEmpty()) {
+                    throw PatchException(
+                        "NewX TwitterShare icon lambda receiver is overwritten before icon selection " +
+                            "in $this at ${overwrittenReceiver.joinToString()}",
+                    )
+                }
+                val parameterRegisterStart = p0Register
+                val parameterRegisters =
+                    parameterRegisterStart until
+                        (parameterRegisterStart + numberOfParameterRegisters)
+
+                // Mutate from the higher index first so the earlier size-modifier index remains valid.
+                insertHook(
+                    index = iconAccess.index + 1,
+                    excludedRegisters = parameterRegisters + iconRegister,
+                    relocateBranchTargets = false,
+                ) {
+                    val receiverRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+                    val markedSizeRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+                    val incomingIconRegister = scratchRegister()
+                    move(receiverRegister, p0Register, OBJECT_DESCRIPTOR)
+                    iget(markedSizeRegister, receiverRegister, sizeField)
+                    sget(incomingIconRegister, incomingIconField)
+                    invokeStatic(
+                        methodReference(
+                            "$EXTENSION->selectIcon(Ljava/lang/Object;FLjava/lang/Object;)Ljava/lang/Object;",
+                        ),
+                        iconRegister,
+                        markedSizeRegister,
+                        incomingIconRegister,
+                    )
+                    moveResult(iconRegister, OBJECT_DESCRIPTOR)
+                    checkCast(iconRegister, shareIconField.type)
+                }
+
+                insertHook(
+                    index = sizeModifierCall.first,
+                    excludedRegisters = parameterRegisters + sizeRegister,
+                    relocateBranchTargets = false,
+                ) {
+                    val displaySizeRegister = scratchRegister()
+                    move(displaySizeRegister, sizeRegister, "F")
+                    invokeStatic(
+                        methodReference("Ljava/lang/Math;->abs(F)F"),
+                        displaySizeRegister,
+                    )
+                    moveResult(displaySizeRegister, "F")
+                    move(sizeRegister, displaySizeRegister, "F")
+                }
+            }
+
+            val inlinePresenterType = barModels.inlineActionBarDescriptor
+            val inlineEventHandler = requireExactlyOne(
+                "NewX inline-action event handler",
+                Fingerprint(
+                    definingClass = inlinePresenterType,
+                    returnType = "V",
+                    filters =
+                        listOf(
+                            fieldAccess(
+                                opcode = Opcode.IGET_OBJECT,
+                                definingClass = entryModels.inlineActionEntryDescriptor,
+                                type = entryModels.postActionTypeDescriptor,
+                            ),
+                            methodCall(
+                                definingClass = "Ljava/lang/Enum;",
+                                name = "ordinal",
+                                parameters = emptyList(),
+                                returnType = "I",
+                            ),
+                        ),
+                ).scopedMatchAll(),
+            )
+            val longPressEventType = resolveInlineLongPressEventType(
+                inlineEventHandler.originalMethod,
+                entryModels.inlineActionEntryDescriptor,
+            )
+            inlineEventHandler.method.apply {
+                requireStatic("NewX inline-action event handler")
+                if (parameterTypes.firstOrNull().toString() != inlinePresenterType) {
+                    throw PatchException("NewX inline event handler presenter parameter changed: $this")
+                }
+                val eventParameter =
+                    parameterTypes.dropLast(1).sumOf { type ->
+                        if (type.toString() == "J" || type.toString() == "D") 2 else 1
+                    }
+                val eventRegister = p0Register + eventParameter
+                // The presenter receives a distinct event type for long press, but it carries the
+                // same action entry. Classify the gesture from that native event identity so the
+                // extension can download every media item without opening the picker.
+                insertHook(0, relocateBranchTargets = false) {
+                    val presenterRegister = scratchRegister()
+                    val eventScratch = scratchRegister()
+                    move(presenterRegister, p0Register, OBJECT_DESCRIPTOR)
+                    move(eventScratch, eventRegister, OBJECT_DESCRIPTOR)
+                    // `instance-of` needs both a four-bit destination and a four-bit reference.
+                    val longPressRegister = scratchRegister()
+                    instanceOf(longPressRegister, eventScratch, longPressEventType)
+                    invokeStatic(
+                        methodReference(
+                            "$EXTENSION->handleEvent(Ljava/lang/Object;Ljava/lang/Object;Z)Z",
+                        ),
+                        presenterRegister,
+                        eventScratch,
+                        longPressRegister,
+                    )
+                    moveResult(presenterRegister, "Z")
+                    ifEqz(presenterRegister, Target.Original)
+                    returnVoid()
+                }
+            }
+        }
+    }
+
+/** Run signed-size classification only for the action type whose icon branch consumes the marker. */
+private fun MutableMethod.insertMarkIconSizeHook(
+    index: Int,
+    actionRegister: Int,
+    sizeRegister: Int,
+    actionTypeField: FieldReference,
+    twitterShareActionField: FieldReference,
+    excludedRegisters: Collection<Int>,
+) {
+    if (actionTypeField.type != twitterShareActionField.definingClass) {
+        throw PatchException(
+            "NewX inline-action type and TwitterShare field disagree: " +
+                "$actionTypeField vs $twitterShareActionField",
+        )
+    }
+
+    insertHook(
+        index,
+        excludedRegisters = excludedRegisters + actionRegister + sizeRegister,
+        relocateBranchTargets = false,
+    ) {
+        val actionTypeRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+        val twitterShareRegister = scratchRegister(RegisterLimit.FOUR_BIT)
+        move(actionTypeRegister, actionRegister, OBJECT_DESCRIPTOR)
+        iget(actionTypeRegister, actionTypeRegister, actionTypeField)
+        sget(twitterShareRegister, twitterShareActionField)
+        ifNe(actionTypeRegister, twitterShareRegister, Target.Local(SKIP_MARK_ICON_SIZE_LABEL))
+
+        // Stage the invoke arguments separately because the action and size can be in high registers.
+        val entryRegister = scratchRegister(RegisterLimit.BYTE)
+        val workRegister = scratchRegister(RegisterLimit.BYTE)
+        move(entryRegister, actionRegister, OBJECT_DESCRIPTOR)
+        move(workRegister, sizeRegister, "F")
+        invokeStatic(
+            methodReference("$EXTENSION->markIconSize(Ljava/lang/Object;F)F"),
+            entryRegister,
+            workRegister,
+        )
+        moveResult(workRegister, "F")
+        move(sizeRegister, workRegister, "F")
+        label(SKIP_MARK_ICON_SIZE_LABEL)
+    }
+}
+
+/** Resolve the actual size value, never mutate the shared sizing object or invent a default. */
+context(context: BytecodePatchContext)
+private fun resolveInlineIconSizeHook(method: MutableMethod): Pair<Int, Int> =
+    resolveInlineIconSizeHook(method) { type -> context.classDefByOrNull(type) }
+
+internal fun resolveInlineIconSizeHook(
+    method: MutableMethod,
+    classByType: (String) -> ClassDef?,
+): Pair<Int, Int> {
+    if ("F" in method.parameterTypes.map(CharSequence::toString)) {
+        // Preserve the direct-parameter contract on historical targets.
+        return 0 to (method.p0Register + method.firstParameterSlot("F"))
+    }
+    val sizingClass = requireExactlyOne(
+        "NewX inline-action sizing parameter in $method",
+        method.parameterTypes.mapNotNull { type -> classByType(type.toString()) }
+            .filter { classDef ->
+                classDef.methods.any { candidate ->
+                    candidate.name == "toString" && candidate.parameterTypes.isEmpty() &&
+                        candidate.implementation?.instructions?.mapNotNull {
+                            it.getReference<StringReference>()?.string
+                        }?.containsAll(listOf("InlineActionSizing(counterFontSize=", ", iconSize=")) == true
+                }
+            },
+    )
+    val sizeField = requireExactlyOne(
+        "NewX inline-action sizing float field in ${sizingClass.type}",
+        sizingClass.fields.filter { it.type == "F" && !AccessFlags.STATIC.isSet(it.accessFlags) },
+    )
+    val getter = requireExactlyOne(
+        "NewX inline-action icon-size getter in ${sizingClass.type}",
+        sizingClass.methods.filter { candidate ->
+            val code = candidate.implementation?.instructions?.toList().orEmpty()
+            val read = code.getOrNull(0) as? TwoRegisterInstruction
+            val returned = code.getOrNull(1) as? OneRegisterInstruction
+            candidate.parameterTypes.isEmpty() && candidate.returnType == "F" &&
+                !AccessFlags.STATIC.isSet(candidate.accessFlags) && code.size == 2 &&
+                code[0].opcode == Opcode.IGET && code[1].opcode == Opcode.RETURN &&
+                code[0].getReference<FieldReference>()?.toString() == sizeField.toString() &&
+                read != null && read.registerB == candidate.implementation!!.registerCount - 1 &&
+                read.registerA == returned?.registerA
+        },
+    )
+    val instructions = method.instructions.toList()
+    val sizingRegister = method.p0Register + method.firstParameterSlot(sizingClass.type)
+    val callIndex = requireExactlyOne(
+        "NewX inline-action icon-size getter call in $method",
+        instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
+                    instruction.getReference<MethodReference>()?.toString() == getter.toString() &&
+                    instruction.registersUsed.singleOrNull() == sizingRegister
+            }
+        },
+    )
+    // Parameters must still denote this entry and this sizing object on every incoming path.
+    if (instructions.take(callIndex).any { instruction ->
+            if (!instruction.opcode.setsRegister()) return@any false
+            val destination = (instruction as OneRegisterInstruction).registerA
+            listOf(method.p0Register, sizingRegister).any { register ->
+                destination == register || (instruction.opcode.setsWideRegister() && destination + 1 == register)
+            }
+        }
+    ) throw PatchException("NewX inline-action sizing or entry parameter overwritten before $getter in $method")
+    val result = instructions.getOrNull(callIndex + 1)
+    if (result?.opcode != Opcode.MOVE_RESULT) {
+        throw PatchException("NewX inline-action size getter has no float result in $method")
+    }
+    return (callIndex + 2) to (result as OneRegisterInstruction).registerA
+}
+
+/**
+ * The shared inline-action-bar layout lambda builds one kind model per entry and classifies
+ * TwitterShare as Countless because this release's native kind switch has no TwitterShare arm.
+ * That reserves a wider slot than the icon-only layout and leaves a trailing gap after the
+ * injected download button. Identity-gate the injected action immediately before the kind model
+ * constructor and rewrite only its kind register to IconOnly, leaving native actions untouched.
+ */
+context(context: BytecodePatchContext)
+private fun patchInlineActionKindOverride(
+    entryModels: ResolvedNewXInlineActionModels,
+    kindModels: ResolvedNewXInlineActionKindOverride,
+) {
+    val (_, layoutMethod) = kindModels.layoutLambda.resolveMutableMethodOwner(
+        "NewX inline-action kind layout lambda",
+    )
+
+    // The action-type field read is the only place the layout lambda touches an action entry; its
+    // object register is that entry. This grounds the register instead of assuming a v-name.
+    val actionTypeReads = layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf {
+            instruction.opcode == Opcode.IGET_OBJECT &&
+                instruction.getReference<FieldReference>()?.toString() ==
+                entryModels.inlineActionTypeField.toString()
+        }
+    }
+    val actionTypeReadIndex = requireExactlyOne(
+        "NewX inline-action kind action-type read in $layoutMethod",
+        actionTypeReads,
+    )
+    val entryRegister =
+        layoutMethod.getInstruction<TwoRegisterInstruction>(actionTypeReadIndex).registerB
+
+    // The same register must be the checked-cast entry the collection iterator produced, proving
+    // it is the per-composition action object rather than an unrelated value.
+    val entryCasts = layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
+        index.takeIf {
+            instruction.opcode == Opcode.CHECK_CAST &&
+                instruction.getReference<TypeReference>()?.type ==
+                entryModels.inlineActionEntryDescriptor &&
+                (instruction as? OneRegisterInstruction)?.registerA == entryRegister
+        }
+    }
+    requireExactlyOne(
+        "NewX inline-action entry cast for v$entryRegister in $layoutMethod",
+        entryCasts,
+    )
+
+    val constructorIndex = requireExactlyOne(
+        "NewX inline-action kind model construction in $layoutMethod",
+        layoutMethod.instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                instruction.opcode == Opcode.INVOKE_DIRECT &&
+                    instruction.getReference<MethodReference>()?.toString() ==
+                    kindModels.kindModelConstructor.toString()
+            }
+        },
+    )
+    val constructorInstruction = layoutMethod.getInstruction<Instruction>(constructorIndex)
+    // The kind is the last constructor parameter in this contract, and enum values are not wide.
+    val kindRegister = constructorInstruction.registersUsed.last()
+    if (kindRegister == entryRegister) {
+        throw PatchException(
+            "NewX inline-action entry and kind registers collide in $layoutMethod",
+        )
+    }
+
+    // Render arguments can be staged through object moves when the layout gains a receiver.
+    // Follow the entry value rather than requiring the render's register to keep its number.
+    resolveInlineActionKindRenderCall(
+        layoutMethod,
+        constructorIndex,
+        entryRegister,
+        entryModels.inlineActionEntryDescriptor,
+    )
+
+    val parameterRegisters = layoutMethod.p0Register until
+        (layoutMethod.p0Register + layoutMethod.numberOfParameterRegisters)
+    layoutMethod.insertHook(
+        index = constructorIndex,
+        excludedRegisters = parameterRegisters + entryRegister + kindRegister,
+        relocateBranchTargets = false,
+    ) {
+        val scratchRegister = scratchRegister()
+        move(scratchRegister, entryRegister, OBJECT_DESCRIPTOR)
+        invokeStatic(
+            methodReference("$EXTENSION->isDownloadAction(Ljava/lang/Object;)Z"),
+            scratchRegister,
+        )
+        moveResult(scratchRegister, "Z")
+        ifEqz(scratchRegister, Target.Original)
+        sget(kindRegister, kindModels.iconOnlyField)
+    }
+}
+
+/** Proves the entry's staging window without assuming register identity or linearizing joins. */
+internal fun resolveInlineActionKindRenderCall(
+    method: Method,
+    constructorIndex: Int,
+    entryRegister: Int,
+    entryDescriptor: String,
+): Int {
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    val offsets = instructions.runningFold(0) { offset, instruction -> offset + instruction.codeUnits }
+    val incomingTargets = mutableSetOf<Int>()
+    instructions.forEachIndexed { index, instruction ->
+        val branch = instruction as? OffsetInstruction
+            ?: return@forEachIndexed
+        val target = offsets[index] + branch.codeOffset
+        incomingTargets += target
+        if (instruction.opcode == Opcode.PACKED_SWITCH || instruction.opcode == Opcode.SPARSE_SWITCH) {
+            val payload = instructions.getOrNull(offsets.indexOf(target)) as? SwitchPayload
+                ?: throw PatchException("NewX inline-action switch payload was not found: $method")
+            payload.switchElements.forEach { incomingTargets += offsets[index] + it.offset }
+        }
+    }
+    method.implementation?.tryBlocks?.forEach { block ->
+        block.exceptionHandlers.forEach { incomingTargets += it.handlerCodeAddress }
+    }
+    return requireExactlyOne(
+        "NewX inline-action render call for v$entryRegister in $method",
+        instructions.mapIndexedNotNull { index, instruction ->
+            val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+            if (index <= constructorIndex ||
+                instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE) ||
+                reference.parameterTypes.firstOrNull()?.toString() != entryDescriptor
+            ) return@mapIndexedNotNull null
+            // Incoming edges to the original constructor are allowed by the hook's label policy;
+            // any edge into the staging window, including directly to render, needs a CFG proof.
+            if (incomingTargets.any { it > offsets[constructorIndex] && it <= offsets[index] }) {
+                return@mapIndexedNotNull null
+            }
+            if (method.implementation?.tryBlocks?.any { block ->
+                    block.startCodeAddress < offsets[index] &&
+                        block.startCodeAddress + block.codeUnitCount > offsets[constructorIndex]
+                } == true
+            ) return@mapIndexedNotNull null
+            val aliases = mutableSetOf(entryRegister)
+            for (position in constructorIndex + 1 until index) {
+                val current = instructions[position]
+                if (current is OffsetInstruction ||
+                    !current.opcode.canContinue()
+                ) return@mapIndexedNotNull null
+                if (current.opcode in setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)) {
+                    val move = current as TwoRegisterInstruction
+                    val carriesEntry = move.registerB in aliases
+                    aliases.remove(move.registerA)
+                    if (carriesEntry) aliases += move.registerA
+                } else if (current.opcode.setsRegister() && current.opcode != Opcode.CHECK_CAST) {
+                    val destination = (current as OneRegisterInstruction).registerA
+                    aliases.remove(destination)
+                    if (current.opcode.setsWideRegister()) aliases.remove(destination + 1)
+                }
+            }
+            index.takeIf { instruction.registersUsed.firstOrNull() in aliases }
+        },
+    )
+}
+
+/**
+ * Press-state events can carry the same entry as long clicks. Resolve the semantic long-click
+ * payload, its consumption by this handler, and its construction/dispatch through Function1.
+ */
+context(context: BytecodePatchContext)
+private fun resolveInlineLongPressEventType(
+    eventHandler: Method,
+    actionEntryDescriptor: String,
+): String {
+    val eventInterfaceDescriptor = eventHandler.parameterTypes.lastOrNull()?.toString()
+        ?: throw PatchException("NewX inline event handler has no event parameter: $eventHandler")
+    val instructions = eventHandler.implementation?.instructions?.toList()
+        ?: throw PatchException("NewX inline event handler has no implementation: $eventHandler")
+
+    val label = "DidLongClickInlineActionEntry(inlineActionEntry="
+    val eventClass = requireExactlyOne(
+        "NewX inline-action long-press event",
+        instructions
+            .filter { instruction -> instruction.opcode == Opcode.INSTANCE_OF }
+            .mapNotNull { instruction -> instruction.getReference<TypeReference>()?.type }
+            .distinct()
+            .mapNotNull { type -> context.classDefByOrNull(type) }
+            .filter { candidate ->
+                candidate.interfaces.any { descriptor ->
+                    descriptor.toString() == eventInterfaceDescriptor
+                } && candidate.methods.any { method ->
+                    method.name == "toString" && method.parameterTypes.isEmpty() &&
+                        method.implementation?.instructions?.any {
+                            it.getReference<StringReference>()?.string == label
+                        } == true
+                }
+            },
+    )
+    val description = requireExactlyOne(
+        "NewX inline-action long-press description in ${eventClass.type}",
+        eventClass.methods.filter { it.name == "toString" && it.parameterTypes.isEmpty() },
+    )
+    val entryField = description.fieldForToStringLabel(label)
+    if (entryField.type != actionEntryDescriptor) {
+        throw PatchException("NewX inline-action long-press payload is not an action entry: $entryField")
+    }
+    val entryGetters = eventClass.methods.filter { method ->
+        val code = method.implementation?.instructions?.toList().orEmpty()
+        val read = code.getOrNull(0) as? TwoRegisterInstruction
+        val returned = code.getOrNull(1) as? OneRegisterInstruction
+        method.parameterTypes.isEmpty() && method.returnType == actionEntryDescriptor &&
+            !AccessFlags.STATIC.isSet(method.accessFlags) && code.size == 2 &&
+            code[0].opcode == Opcode.IGET_OBJECT && code[1].opcode == Opcode.RETURN_OBJECT &&
+            code[0].getReference<FieldReference>()?.toString() == entryField.toString() &&
+            read != null && read.registerB == method.implementation!!.registerCount - 1 &&
+            read.registerA == returned?.registerA
+    }.map { it.toString() }.toSet()
+    requireExactlyOne(
+        "NewX inline-action long-press payload consumer in $eventHandler",
+        instructions.mapIndexedNotNull { index, instruction ->
+            index.takeIf {
+                (instruction.opcode == Opcode.IGET_OBJECT &&
+                    instruction.getReference<FieldReference>()?.toString() == entryField.toString()) ||
+                    (instruction.opcode in setOf(Opcode.INVOKE_VIRTUAL, Opcode.INVOKE_VIRTUAL_RANGE) &&
+                        instruction.getReference<MethodReference>()?.toString() in entryGetters)
+            }
+        },
+    )
+    val constructor = requireExactlyOne(
+        "NewX inline-action long-press constructor in ${eventClass.type}",
+        eventClass.methods.filter {
+            it.name == "<init>" && it.parameterTypes.map(CharSequence::toString) == listOf(actionEntryDescriptor)
+        },
+    )
+    requireExactlyOne(
+        "NewX inline-action long-press callback dispatch",
+        Fingerprint(
+            filters = listOf(methodCall(smali = constructor.toString())),
+            custom = { method, _ -> hasInlineActionEventDispatch(method, constructor) },
+        ).scopedMatchAll(),
+    )
+    return eventClass.type
+}
+
+/** The native callback constructs an entry event and immediately sends that object to Function1. */
+internal fun hasInlineActionEventDispatch(method: Method, constructor: MethodReference): Boolean {
+    val instructions = method.implementation?.instructions?.toList().orEmpty()
+    return instructions.indices.any { index ->
+        val call = instructions[index]
+        if (call.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) ||
+            call.getReference<MethodReference>()?.toString() != constructor.toString()
+        ) return@any false
+        val eventRegister = call.registersUsed.firstOrNull() ?: return@any false
+        // newx-resolver-lint: allow instruction-order adjacent-dispatch because the validated callback constructs and immediately sends this event.
+        val allocation = instructions.getOrNull(index - 1) ?: return@any false
+        val dispatch = instructions.getOrNull(index + 1) ?: return@any false
+        allocation.opcode == Opcode.NEW_INSTANCE &&
+            allocation.getReference<TypeReference>()?.type == constructor.definingClass &&
+            (allocation as? OneRegisterInstruction)?.registerA == eventRegister &&
+            dispatch.opcode in setOf(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE) &&
+            dispatch.getReference<MethodReference>()?.toString() ==
+            "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;" &&
+            dispatch.registersUsed.getOrNull(1) == eventRegister
+    }
+}
+
+context(context: BytecodePatchContext)
+private fun patchPostModelBridges(
+    postModels: ResolvedNewXPostModels,
+    entryModels: ResolvedNewXInlineActionModels,
+    barModels: ResolvedNewXInlineActionBarModels,
+    mediaModels: ResolvedNewXPostMediaModels,
+    inlineMediaModels: ResolvedNewXInlineMediaModels,
+    downloadModels: ResolvedNewXInlineDownloadModels,
+    timelineModels: ResolvedNewXTimelineModels,
+) {
+    val contextualCanonicalPostField = postModels.contextualCanonicalPostField
+    val contextualRepostedPostField = postModels.contextualRepostedPostField
+    val repostedCanonicalPostField = postModels.repostedCanonicalPostField
+    val canonicalPostMediaField = mediaModels.canonicalPostMediaField
+
+    val presenterClass = context.mutableClassDefBy(barModels.inlineActionBarDescriptor)
+    val presenterPostField = requireExactlyOne(
+        "NewX inline presenter contextual-post field",
+        presenterClass.fields.filter { field ->
+            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                field.type == postModels.contextualPostDescriptor
+        },
+    )
+    presenterClass.requirePublicFields(listOf(presenterPostField))
+
+    val extensionClass = context.mutableClassDefBy(EXTENSION)
+    extensionClass.portHelperBody(
+        PRESENTER_POST_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        barModels.inlineActionBarDescriptor,
+        presenterPostField,
+    )
+    patchContextualPostHelper(extensionClass, postModels, timelineModels)
+    extensionClass.portHelperBody(
+        CANONICAL_POST_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.contextualPostDescriptor,
+        contextualCanonicalPostField,
+    )
+    extensionClass.portHelperBody(
+        POST_MEDIA_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.canonicalPostDescriptor,
+        canonicalPostMediaField,
+    )
+    val compositionMediaStub = extensionClass.requireBooleanHelper(
+        COMPOSITION_MEDIA_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+    )
+    val compositionMediaPredicate = patchCompositionMediaPredicate(
+        compositionMediaStub,
+        inlineMediaModels,
+    )
+    if (compositionMediaPredicate !== compositionMediaStub) {
+        extensionClass.methods.remove(compositionMediaStub)
+        extensionClass.methods.add(compositionMediaPredicate)
+    }
+    extensionClass.portHelperBody(
+        REPOSTED_POST_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.contextualPostDescriptor,
+        contextualRepostedPostField,
+    )
+    extensionClass.portHelperBody(
+        REPOSTED_CANONICAL_POST_HELPER,
+        listOf(OBJECT_DESCRIPTOR),
+        postModels.contextualRepostedPostField.type,
+        repostedCanonicalPostField,
+    )
+
+    val entryClass = context.mutableClassDefBy(entryModels.inlineActionEntryDescriptor)
+    val actionConstructor = requireExactlyOne(
+        "NewX inline-action constructor",
+        entryClass.methods.filter { method ->
+            method.toString() == downloadModels.inlineActionEntryConstructor.toString()
+        },
+    )
+    val actionTypeClass = context.mutableClassDefBy(entryModels.postActionTypeDescriptor)
+    val carrierField = requireExactlyOne(
+        "NewX TwitterShare action constant",
+        actionTypeClass.fields.filter { field ->
+            field.toString() == downloadModels.twitterShareActionField.toString()
+        },
+    )
+    val createActionPlaceholder = extensionClass.requireHelper(CREATE_ACTION_HELPER, emptyList())
+    val registerCount = createActionPlaceholder.implementation?.registerCount ?: 0
+    val createActionHelper =
+        if (registerCount >= 4) {
+            createActionPlaceholder
+        } else {
+            createActionPlaceholder.cloneMutable(additionalRegisters = 4 - registerCount).also { expanded ->
+                extensionClass.methods.remove(createActionPlaceholder)
+                extensionClass.methods.add(expanded)
+            }
+        }
+    createActionHelper.insertHook(0, relocateBranchTargets = false) {
+        newInstance(0, entryModels.inlineActionEntryDescriptor)
+        sget(1, carrierField)
+        constInt(2, 0)
+        constInt(3, 1)
+        invokeDirect(actionConstructor, 0, 1, 2, 3)
+        returnObject(0)
+    }
+}
+
+/**
+ * Unwraps a timeline post item to its contextual post. The item's result is a union, so anything
+ * that is not a contextual post yields null.
+ */
+context(context: BytecodePatchContext)
+private fun patchContextualPostHelper(
+    extensionClass: MutableClass,
+    postModels: ResolvedNewXPostModels,
+    timelineModels: ResolvedNewXTimelineModels,
+) {
+    val resultAccessor =
+        context.mutableClassDefBy(timelineModels.postDescriptor)
+            .resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
+    val stub = extensionClass.requireHelper(CONTEXTUAL_POST_HELPER, listOf(OBJECT_DESCRIPTOR))
+    val helper =
+        stub.cloneMutable(additionalRegisters = stub.numberOfParameterRegisters + 1).also { expanded ->
+            extensionClass.methods.remove(stub)
+            extensionClass.methods.add(expanded)
+        }
+    val post = helper.p0Register
+    if (post < 2) {
+        throw PatchException("NewX contextual-post helper has no spare registers: $helper")
+    }
+    helper.insertHook(0, relocateBranchTargets = false) {
+        val workRegister = 0
+        val typeCheckRegister = 1
+        checkCast(post, timelineModels.postDescriptor)
+        val getter = resultAccessor.getter
+        if (getter == null) {
+            iget(post, post, resultAccessor.field)
+        } else {
+            invokeVirtual(getter, post)
+            moveResult(post, resultAccessor.field.type)
+        }
+        instanceOf(typeCheckRegister, post, postModels.contextualPostDescriptor)
+        ifEqz(typeCheckRegister, Target.Local(NO_CONTEXTUAL_POST_LABEL))
+        returnObject(post)
+        label(NO_CONTEXTUAL_POST_LABEL)
+        constInt(workRegister, 0)
+        returnObject(workRegister)
+    }
+}
+
+/**
+ * Fills an extension helper stub with `check-cast`, the field read and `return-object` on `p0`.
+ * The stub keeps its own trailing return; the injected body runs before it.
+ */
+private fun MutableClass.portHelperBody(
+    name: String,
+    parameters: List<String>,
+    type: String,
+    field: FieldReference,
+) {
+    val helper = requireHelper(name, parameters)
+    helper.insertHook(0, relocateBranchTargets = false) {
+        val value = helper.p0Register
+        checkCast(value, type)
+        iget(value, value, field)
+        returnObject(value)
+    }
+}
+
+private fun MutableClass.requireHelper(
+    name: String,
+    parameters: List<String>,
+): MutableMethod =
+    requireExactlyOne(
+        "NewX inline helper $name",
+        methods.filter { method ->
+            method.name == name &&
+                method.parameterTypes.map { it.toString() } == parameters &&
+                method.returnType == "Ljava/lang/Object;"
+        },
+    )
+
+private fun MutableClass.requireBooleanHelper(
+    name: String,
+    parameters: List<String>,
+): MutableMethod =
+    requireExactlyOne(
+        "NewX inline helper $name",
+        methods.filter { method ->
+            method.name == name &&
+                method.parameterTypes.map { it.toString() } == parameters &&
+                method.returnType == "Z" &&
+                AccessFlags.STATIC.isSet(method.accessFlags)
+        },
+    )
+
+context(_: BytecodePatchContext)
+private fun resolveIconField(resourceName: String): FieldReference {
+    val iconResourceId = resourceId(ResourceType.DRAWABLE, resourceName)
+    val fields =
+        Fingerprint(
+            name = "<clinit>",
+            returnType = "V",
+            parameters = emptyList(),
+            filters = listOf(literal(iconResourceId)),
+        ).matchAll().map { match ->
+            val literalIndex = requireExactlyOne(
+                "NewX $resourceName drawable resource literal in ${match.originalMethod}",
+                match.instructionMatches,
+            ).index
+            val store = requireExactlyOne(
+                "NewX $resourceName drawable field store after ${match.originalMethod}",
+                match.method.instructions
+                    .drop(literalIndex + 1)
+                    .take(4)
+                    .filter { instruction -> instruction.opcode == Opcode.SPUT_OBJECT },
+            )
+            store.getReference<FieldReference>()
+                ?: throw PatchException(
+                    "NewX $resourceName drawable field store has no field reference: $store",
+                )
+        }.distinctBy(FieldReference::toString)
+
+    return requireExactlyOne("NewX $resourceName icon field", fields)
+}

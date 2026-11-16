@@ -64,8 +64,10 @@ val blockRedirectingToXLitePatch =
     patch(
         name = "Block redirecting to X Lite",
         description = "Blocks redirecting to the new X Android UI on launch",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, versionCheckPatch)
 
         execute {

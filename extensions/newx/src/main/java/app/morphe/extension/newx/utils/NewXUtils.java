@@ -1,0 +1,587 @@
+package app.morphe.extension.newx.utils;
+
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import app.morphe.extension.shared.Utils;
+
+/**
+ * Shared context, reflection, string, and UI utilities for NewX features.
+ */
+public final class NewXUtils {
+    private static WeakReference<Activity> resumedActivity = new WeakReference<>(null);
+    // A visible activity can be left without a resumed peer, e.g. after returning from a
+    // deeplinked MainActivity instance, so the last started activity backs up the resumed one.
+    private static WeakReference<Activity> startedActivity = new WeakReference<>(null);
+    private static boolean lifecycleCallbacksRegistered;
+    // Presenter shapes are fixed per class; cache the accessible field walk so
+    // share/options lookups pay reflection once instead of per invocation.
+    private static final ConcurrentHashMap<Class<?>, Field[]> PRESENTER_FIELDS =
+            new ConcurrentHashMap<>();
+
+    private NewXUtils() {
+    }
+
+    public static synchronized void initialize(Context context) {
+        if (lifecycleCallbacksRegistered || context == null) return;
+
+        Context applicationContext = context.getApplicationContext();
+        if (!(applicationContext instanceof Application application)) return;
+
+        application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(Activity activity, Bundle state) {
+            }
+
+            @Override
+            public void onActivityStarted(Activity activity) {
+                startedActivity = new WeakReference<>(activity);
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+                resumedActivity = new WeakReference<>(activity);
+                startedActivity = new WeakReference<>(activity);
+            }
+
+            @Override
+            public void onActivityPaused(Activity activity) {
+                clearActivity(activity);
+            }
+
+            @Override
+            public void onActivityStopped(Activity activity) {
+                if (startedActivity.get() == activity) startedActivity.clear();
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(Activity activity, Bundle state) {
+            }
+
+            @Override
+            public void onActivityDestroyed(Activity activity) {
+                clearActivity(activity);
+                if (startedActivity.get() == activity) startedActivity.clear();
+            }
+        });
+        lifecycleCallbacksRegistered = true;
+    }
+
+    public static Activity findActivity(Context context) {
+        Context current = context;
+        while (current instanceof ContextWrapper wrapper) {
+            if (current instanceof Activity activity) return activity;
+            Context baseContext = wrapper.getBaseContext();
+            if (baseContext == current) return null;
+            current = baseContext;
+        }
+        return current instanceof Activity activity ? activity : null;
+    }
+
+    public static Activity findUsableActivity(Context context) {
+        Activity activity = findActivity(context);
+        if (isUsable(activity)) return activity;
+
+        activity = resumedActivity.get();
+        if (isUsable(activity)) return activity;
+
+        activity = startedActivity.get();
+        return isUsable(activity) ? activity : null;
+    }
+
+    /** Lifecycle bookkeeping summary for diagnosing a failed activity lookup. */
+    public static String describeTrackedActivities() {
+        return "resumed=" + describe(resumedActivity.get()) + " started=" + describe(startedActivity.get());
+    }
+
+    private static String describe(Activity activity) {
+        if (activity == null) return "null";
+        return activity.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(activity))
+                + (activity.isFinishing() ? "[finishing]" : "") + (activity.isDestroyed() ? "[destroyed]" : "");
+    }
+
+    public static PresenterData findPresenterData(Object presenter, String valueTypeName)
+            throws IllegalAccessException {
+        if (presenter == null) return new PresenterData(null, null);
+
+        Context context = null;
+        Object value = null;
+        for (Field field : presenterFields(presenter.getClass())) {
+            boolean isContext = Context.class.isAssignableFrom(field.getType());
+            boolean isValue = (valueTypeName != null && valueTypeName.equals(field.getType().getName()))
+                    || ("com.x.models.timelines.items.UrtTimelinePost".equals(valueTypeName)
+                    && field.getType().getName().startsWith("com.x.models.timelines.items."));
+            if (!isContext && !isValue) continue;
+
+            Object fieldValue = field.get(presenter);
+            if (context == null && isContext && fieldValue instanceof Context) {
+                context = (Context) fieldValue;
+            }
+            if (value == null && isValue && fieldValue != null && !isContext) value = fieldValue;
+        }
+        return new PresenterData(context, value);
+    }
+
+    private static Field[] presenterFields(Class<?> presenterClass) {
+        Field[] cached = PRESENTER_FIELDS.get(presenterClass);
+        if (cached != null) return cached;
+        List<Field> fields = new ArrayList<>();
+        for (Class<?> type = presenterClass; type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) continue;
+                field.setAccessible(true);
+                fields.add(field);
+            }
+        }
+        Field[] resolved = fields.toArray(new Field[0]);
+        Field[] raced = PRESENTER_FIELDS.putIfAbsent(presenterClass, resolved);
+        return raced != null ? raced : resolved;
+    }
+
+    private static void clearActivity(Activity activity) {
+        if (resumedActivity.get() == activity) resumedActivity.clear();
+    }
+
+    private static boolean isUsable(Activity activity) {
+        return activity != null && !activity.isFinishing() && !activity.isDestroyed();
+    }
+
+    public static boolean isHttpUrl(String url) {
+        return url != null && (url.startsWith("http://") || url.startsWith("https://"));
+    }
+
+    public static boolean isAscii(String value) {
+        for (int index = 0; index < value.length(); index++) {
+            if (value.charAt(index) > 127) return false;
+        }
+        return true;
+    }
+
+    /** Joins list values with {@code delimiter}; avoids {@code Stream.toList()} (API 34+). */
+    public static String joinValues(List<?> values, CharSequence delimiter) {
+        StringBuilder result = new StringBuilder();
+        for (int index = 0; index < values.size(); index++) {
+            if (index > 0) result.append(delimiter);
+            result.append(String.valueOf(values.get(index)));
+        }
+        return result.toString();
+    }
+
+    /** Case-insensitive ASCII substring search without allocating. Needle must be lowercase. */
+    public static boolean containsIgnoreCaseAscii(String text, String lowerNeedle) {
+        int limit = text.length() - lowerNeedle.length();
+        outer:
+        for (int index = 0; index <= limit; index++) {
+            for (int needleIndex = 0; needleIndex < lowerNeedle.length(); needleIndex++) {
+                char candidate = text.charAt(index + needleIndex);
+                if (candidate >= 'A' && candidate <= 'Z') candidate += 'a' - 'A';
+                if (candidate != lowerNeedle.charAt(needleIndex)) continue outer;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static Object invoke(Object target, String methodName) throws ReflectiveOperationException {
+        if (target == null || methodName == null) return null;
+        Method method = lookupMethod(target.getClass(), methodName).method;
+        if (method == null) {
+            // Preserve strict lookup's original exception type and message.
+            return target.getClass().getMethod(methodName).invoke(target);
+        }
+        return method.invoke(target);
+    }
+
+    private static final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, MethodResolution>> METHOD_CACHE =
+            new ConcurrentHashMap<>();
+
+    private static final class MethodResolution {
+        private static final MethodResolution ABSENT = new MethodResolution(null);
+
+        private final Method method;
+
+        private MethodResolution(Method method) {
+            this.method = method;
+        }
+    }
+
+    private static MethodResolution lookupMethod(Class<?> owner, String name)
+            throws ReflectiveOperationException {
+        ConcurrentHashMap<String, MethodResolution> ownerCache = METHOD_CACHE.get(owner);
+        if (ownerCache == null) {
+            ConcurrentHashMap<String, MethodResolution> newCache = new ConcurrentHashMap<>();
+            ConcurrentHashMap<String, MethodResolution> raced = METHOD_CACHE.putIfAbsent(owner, newCache);
+            ownerCache = raced != null ? raced : newCache;
+        }
+
+        MethodResolution cached = ownerCache.get(name);
+        if (cached != null) return cached;
+
+        // getMethod walks the hierarchy under a lock; cache each class shape, including misses.
+        synchronized (ownerCache) {
+            cached = ownerCache.get(name);
+            if (cached != null) return cached;
+            try {
+                MethodResolution resolved = new MethodResolution(owner.getMethod(name));
+                ownerCache.put(name, resolved);
+                return resolved;
+            } catch (NoSuchMethodException ignored) {
+                ownerCache.put(name, MethodResolution.ABSENT);
+                return MethodResolution.ABSENT;
+            }
+        }
+    }
+
+    public static final class PresenterData {
+        private final Context context;
+        private final Object value;
+
+        private PresenterData(Context context, Object value) {
+            this.context = context;
+            this.value = value;
+        }
+
+        public Context getContext() {
+            return context;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+    }
+
+    public static Object invokeIfPresent(Object target, String methodName) {
+        if (target == null || methodName == null) return null;
+        try {
+            Method method = lookupMethod(target.getClass(), methodName).method;
+            return method == null ? null : method.invoke(target);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static final Pattern UNSAFE_FILE_CHARS =
+            Pattern.compile("[^A-Za-z0-9._-]");
+
+    private static final Pattern STATUS_URL_PATTERN =
+            Pattern.compile("https?://(?:[a-zA-Z0-9-]+\\.)*(?:twitter|x|fxtwitter|vxtwitter|fixupx|twx)\\.com/([A-Za-z0-9_]+)/status/\\d+");
+
+    public static String sanitizeFileName(String value) {
+        if (value == null) return "";
+        return UNSAFE_FILE_CHARS.matcher(value).replaceAll("_");
+    }
+
+    /**
+     * Resolves the source post identity used by NewX media features. The input may be either the
+     * timeline post wrapper or its contextual-post model; both expose the same semantic fields in
+     * their toString representation across the supported releases.
+     */
+    public static String sourcePostId(Object post) {
+        return safeFileSegment(rawSourcePostId(post), "post");
+    }
+
+    public static String sourceUsername(Object post) {
+        return safeFileSegment(rawSourceScreenName(post), "twitter");
+    }
+
+    /** Text form of {@link #sourceUsername(Object)}, for callers that already hold the toString. */
+    public static String sourceUsername(String postText) {
+        return safeFileSegment(rawSourceScreenName(postText), "twitter");
+    }
+
+    /**
+     * Resolves the source post id before filename sanitization. Used where the identifier is
+     * substituted into a user-configured template instead of a fixed filename.
+     */
+    public static String rawSourcePostId(Object post) {
+        return rawSourcePostId(postText(post));
+    }
+
+    /**
+     * Text form of {@link #rawSourcePostId(Object)}, for callers that already hold the toString.
+     * A post's toString can be large and is expensive to rebuild per field lookup.
+     */
+    public static String rawSourcePostId(String postText) {
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalPostId = ToStringParser.fieldValue(originalPostText, "id");
+            if (originalPostId != null) return originalPostId;
+        }
+
+        String sourcePostId = sourceMediaField(postText, "sourcePostIdentifier");
+        if (sourcePostId != null) return sourcePostId;
+
+        String canonicalText = canonicalPostText(postText);
+        String postId = ToStringParser.fieldValue(canonicalText, "id");
+        if (postId != null) return postId;
+
+        return ToStringParser.fieldValue(postText, "id");
+    }
+
+    /**
+     * Resolves the author ID associated with the media being saved. Reposts and media carrying
+     * source lineage must use the original source account, not the account that reposted it.
+     */
+    public static String rawSourceUserId(Object post) {
+        return rawSourceUserId(postText(post));
+    }
+
+    /** Text form of {@link #rawSourceUserId(Object)} for callers holding a cached model string. */
+    public static String rawSourceUserId(String postText) {
+        String originalPostText = originalRepostedPostText(postText);
+        String originalUserId = rawAuthorUserId(originalPostText);
+        if (originalUserId != null) return originalUserId;
+
+        String sourceUserId = normalizeUserIdentifier(
+                sourceMediaField(postText, "sourceUserIdentifier")
+        );
+        if (sourceUserId != null) return sourceUserId;
+
+        // A source handle without its ID is still better than incorrectly pairing it with the
+        // retweeter's ID. Keep the ID absent and let the filename renderer fall back to the handle.
+        if (originalPostText != null && rawAuthorField(originalPostText, "screenName") != null) {
+            return null;
+        }
+        if (sourceMediaField(postText, "sourcePostIdentifier") != null &&
+                sourceMediaScreenName(postText) != null) {
+            return null;
+        }
+
+        String canonicalUserId = rawAuthorUserId(canonicalPostText(postText));
+        if (canonicalUserId != null) return canonicalUserId;
+
+        return rawAuthorUserId(postText);
+    }
+
+    /**
+     * Resolves the author handle before filename sanitization. Suspended-account posts expose a
+     * placeholder author, so the media mention/expanded-URL fallbacks are tried first.
+     */
+    public static String rawSourceScreenName(Object post) {
+        return rawSourceScreenName(postText(post));
+    }
+
+    /** Text form of {@link #rawSourceScreenName(Object)}. */
+    public static String rawSourceScreenName(String postText) {
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalScreenName = rawAuthorField(originalPostText, "screenName");
+            if (originalScreenName != null) return originalScreenName;
+        }
+
+        String sourceMediaScreenName = sourceMediaScreenName(postText);
+        if (sourceMediaScreenName != null) return sourceMediaScreenName;
+
+        String canonicalScreenName = rawAuthorField(canonicalPostText(postText), "screenName");
+        if (canonicalScreenName != null) return canonicalScreenName;
+
+        return rawAuthorField(postText, "screenName");
+    }
+
+    /**
+     * Resolves the author display name shown on the post. The author model is polymorphic: only
+     * the user-backed variants ({@code MinimalUser}, {@code ProfileUser}) carry a name.
+     */
+    public static String rawSourceDisplayName(Object post) {
+        return rawSourceDisplayName(postText(post));
+    }
+
+    /** Text form of {@link #rawSourceDisplayName(Object)}. */
+    public static String rawSourceDisplayName(String postText) {
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalName = rawAuthorField(originalPostText, "name");
+            if (originalName != null) return originalName;
+        }
+
+        // When the handle comes from the media's source post, the name must come from that same
+        // account too; falling through would pair the source handle with the quoting author's name.
+        if (sourceMediaScreenName(postText) != null) {
+            return sourceMediaField(postText, "sourceUserDisplayName");
+        }
+
+        String canonicalName = rawAuthorField(canonicalPostText(postText), "name");
+        if (canonicalName != null) return canonicalName;
+
+        return rawAuthorField(postText, "name");
+    }
+
+    /** Reads a raw source-media lineage field such as {@code sourcePostIdentifier}. */
+    public static String rawSourceMediaField(Object post, String fieldName) {
+        return rawSourceMediaField(postText(post), fieldName);
+    }
+
+    /** Text form of {@link #rawSourceMediaField(Object, String)}. */
+    public static String rawSourceMediaField(String postText, String fieldName) {
+        return sourceMediaField(postText, fieldName);
+    }
+
+    private static String rawAuthorField(String text, String fieldName) {
+        if (text == null) return null;
+
+        String author = ToStringParser.fieldValue(text, "author");
+        return author == null ? null : ToStringParser.fieldValue(author, fieldName);
+    }
+
+    private static String rawAuthorUserId(String text) {
+        return normalizeUserIdentifier(rawAuthorField(text, "id"));
+    }
+
+    private static String normalizeUserIdentifier(String value) {
+        if (value == null) return null;
+
+        String candidate = value.trim();
+        if (candidate.matches("[0-9]+")) return candidate;
+
+        String nestedId = ToStringParser.fieldValue(candidate, "id");
+        if (nestedId != null && nestedId.matches("[0-9]+")) return nestedId;
+
+        String nestedValue = ToStringParser.fieldValue(candidate, "value");
+        return nestedValue != null && nestedValue.matches("[0-9]+") ? nestedValue : null;
+    }
+
+    private static String postText(Object post) {
+        return post == null ? null : post.toString();
+    }
+
+    private static String canonicalPostText(Object post) {
+        return canonicalPostText(postText(post));
+    }
+
+    private static String canonicalPostText(String postText) {
+        if (postText == null) return null;
+
+        String canonicalPost = ToStringParser.fieldValue(postText, "canonicalPost");
+        return canonicalPost != null ? canonicalPost : postText;
+    }
+
+    private static String originalRepostedPostText(String postText) {
+        if (postText == null) return null;
+
+        String repostedPost = ToStringParser.fieldValue(postText, "rePostedPost");
+        if (repostedPost == null) return null;
+
+        String canonicalPost = ToStringParser.fieldValue(repostedPost, "canonicalPost");
+        return canonicalPost != null ? canonicalPost : repostedPost;
+    }
+
+    /**
+     * Author handle of the media's source post, resolved only when the media carries source
+     * lineage. Shared by the handle and display-name resolvers so both describe the same account.
+     */
+    private static String sourceMediaScreenName(String postText) {
+        if (sourceMediaField(postText, "sourcePostIdentifier") == null) return null;
+
+        String mentionScreenName = firstMentionScreenName(postText);
+        return mentionScreenName != null ? mentionScreenName : mediaExpandedUrlScreenName(postText);
+    }
+
+    private static String firstMentionScreenName(String text) {
+        String entityList = ToStringParser.fieldValue(text, "entityList");
+        if (entityList == null) return null;
+
+        String mentions = ToStringParser.fieldValue(entityList, "mentions");
+        return mentions == null ? null : ToStringParser.fieldValue(mentions, "screenName");
+    }
+
+    private static String mediaExpandedUrlScreenName(String text) {
+        if (text == null) return null;
+
+        String entityList = ToStringParser.fieldValue(text, "entityList");
+        String searchScope = entityList != null ? entityList : text;
+        String expandedUrl = ToStringParser.fieldValue(searchScope, "expandedUrl");
+        String screenName = screenNameFromUrl(expandedUrl);
+        return screenName != null ? screenName : screenNameFromUrl(searchScope);
+    }
+
+    private static String screenNameFromUrl(String url) {
+        if (url == null) return null;
+
+        Matcher matcher = STATUS_URL_PATTERN.matcher(url);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private static String sourceMediaField(String text, String fieldName) {
+        if (text == null) return null;
+
+        String sourceInfo = ToStringParser.fieldValue(text, "sourceInfo");
+        return sourceInfo == null ? null : ToStringParser.fieldValue(sourceInfo, fieldName);
+    }
+
+    private static String safeFileSegment(String value, String fallback) {
+        if (value == null) return fallback;
+
+        String sanitized = value.trim().replaceFirst("^@", "")
+                .replaceAll("[^A-Za-z0-9._-]+", "_")
+                .replaceAll("_+", "_")
+                .replaceAll("^[._-]+|[._-]+$", "");
+        return sanitized.isEmpty() ? fallback : sanitized;
+    }
+
+    private static volatile Handler mainHandler;
+
+    private static Handler mainHandler() {
+        Handler handler = mainHandler;
+        if (handler != null) return handler;
+        handler = new Handler(Looper.getMainLooper());
+        mainHandler = handler;
+        return handler;
+    }
+
+    public static void runOnUiThread(Runnable runnable) {
+        if (runnable == null) return;
+        try {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                runnable.run();
+                return;
+            }
+        } catch (Exception ignored) {
+        }
+        mainHandler().post(runnable);
+    }
+
+    public static String identifierToString(Object identifier) {
+        if (identifier == null) return null;
+        if (identifier instanceof String string) {
+            string = string.trim();
+            return string.isEmpty() ? null : string;
+        }
+        if (identifier instanceof Number number) {
+            return number.longValue() > 0 ? String.valueOf(number) : null;
+        }
+        try {
+            Object value = invokeIfPresent(identifier, "getValue");
+            String string = value == null ? null : String.valueOf(value).trim();
+            if (string != null && !string.isEmpty()) return string;
+
+            value = invokeIfPresent(identifier, "getStr");
+            string = value == null ? null : String.valueOf(value).trim();
+            if (string != null && !string.isEmpty()) return string;
+
+            value = invokeIfPresent(identifier, "a");
+            string = value == null ? null : String.valueOf(value).trim();
+            if (string != null && !string.isEmpty()) return string;
+        } catch (Exception ignored) {
+        }
+        String string = String.valueOf(identifier).trim();
+        if (!string.isEmpty() && !string.startsWith(identifier.getClass().getName())) {
+            return string;
+        }
+        return null;
+    }
+}

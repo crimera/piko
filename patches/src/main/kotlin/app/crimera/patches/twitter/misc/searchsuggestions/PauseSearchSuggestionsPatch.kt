@@ -30,8 +30,10 @@ val pauseSearchSuggestion =
     patch(
         name = "Pause search suggestions",
         description = "Search suggestions will not be saved locally",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch)
 
         execute {

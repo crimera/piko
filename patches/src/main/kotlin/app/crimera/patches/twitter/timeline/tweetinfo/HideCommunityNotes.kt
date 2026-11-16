@@ -15,8 +15,10 @@ import app.morphe.patcher.patch.patch
 val hideCommunityNotes =
     patch(
         name = "Hide Community Notes",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Legacy")
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {
