@@ -22,7 +22,7 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
@@ -71,7 +71,7 @@ private object NewXProfilePostSortingStateFingerprint : Fingerprint(
 
 @Suppress("unused")
 val newXDefaultProfilePostSortingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Set default profile post sorting",
         description = "Lets you choose whether profile posts open sorted by the most recent or popular posts.",
     ) {

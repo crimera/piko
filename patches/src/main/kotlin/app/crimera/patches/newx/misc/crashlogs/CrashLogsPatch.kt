@@ -16,12 +16,11 @@ import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import org.w3c.dom.Element
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.resourceXml
 
 private const val CRASH_HANDLER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/NewXCrashHandler;"
 private const val CRASH_SETTINGS_ACTION_DESCRIPTOR = "$EXTENSION_PACKAGE/settings/NewXCrashSettingsAction;"
@@ -29,20 +28,20 @@ private const val CRASH_POST_OPTION_HANDLER_DESCRIPTOR = "$EXTENSION_PACKAGE/mis
 private const val CRASH_APP_ACTION = "AppealWarning"
 
 private val newXCrashLogsResourcePatch =
-    resourcePatch(
+    patch(
         description = "Adds NewX crash log receivers to the Android manifest.",
     ) {
         finalize {
-            document("AndroidManifest.xml").use { document ->
-                val application = document.getElementsByTagName("application").item(0) as Element
+            resourceXml("AndroidManifest.xml").use { manifest ->
+                val application = manifest.elements("application").first()
 
                 listOf(
                     "app.morphe.extension.newx.misc.NewXCrashCopyReceiver",
                 ).forEach { receiverName ->
-                    val receiver = document.createElement("receiver")
-                    receiver.setAttribute("android:name", receiverName)
-                    receiver.setAttribute("android:exported", "false")
-                    application.appendChild(receiver)
+                    application.appendChild("receiver") {
+                        setAttribute("android:name", receiverName)
+                        setAttribute("android:exported", "false")
+                    }
                 }
             }
         }
@@ -50,7 +49,7 @@ private val newXCrashLogsResourcePatch =
 
 @Suppress("unused")
 val newXCrashLogsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Crash logs",
         description = "Saves crash logs and shows a notification with share and copy actions.",
     ) {

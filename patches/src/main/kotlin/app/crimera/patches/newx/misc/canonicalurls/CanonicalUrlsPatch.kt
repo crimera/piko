@@ -30,9 +30,8 @@ import app.morphe.patcher.instanceOf
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -127,7 +126,7 @@ private data class InlinedUrlPickerNormalization(
 /** Opens expanded URL values in the Compose/URT navigation paths. */
 @Suppress("unused")
 val newXCanonicalUrlsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Open canonical URLs",
         description =
             "Opens the expanded (canonical) URL directly when clicking links instead of the shortened t.co link.",
@@ -177,7 +176,6 @@ val newXCanonicalUrlsPatch =
         }
     }
 
-context(_: BytecodePatchContext)
 private fun resolveCanonicalUrlMatches(urlEntityFields: UrlEntityFields): CanonicalUrlMatches {
     val postModels = resolvedNewXPostModels()
     val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
@@ -309,7 +307,6 @@ internal fun resolveUrlEntityFields(match: Match): UrlEntityFields {
     )
 }
 
-context(_: BytecodePatchContext)
 private fun resolveUrlPickerShape(navigationOwner: String): UrlPickerShape {
     val extracted =
         Fingerprint(
@@ -792,7 +789,6 @@ private fun patchInlinedUrlPickerSite(
     }
 }
 
-context(_: BytecodePatchContext)
 private fun patchProfileLinkValues(
     urlEntityFields: UrlEntityFields,
     setting: ToggleSettingDefinition,
@@ -848,7 +844,6 @@ internal fun Method.constructsProfileHeaderModel(): Boolean {
     }
 }
 
-context(_: BytecodePatchContext)
 private fun patchRichTextUrlDisplay(
     urlEntityFields: UrlEntityFields,
     setting: ToggleSettingDefinition,
@@ -956,7 +951,6 @@ private fun Method.hasUrlEntityDisplayFlow(fields: UrlEntityFields): Boolean {
     return instanceChecks.size == 1
 }
 
-context(context: BytecodePatchContext)
 private fun resolveCardUrlActionType(): String =
     CardUrlActionModelFingerprint.requireSingleMatch("card URL action model")
         .originalClassDef.type
@@ -999,7 +993,6 @@ private fun patchCardUrl(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchCardNavigation(
     cardUrlActionType: String,
     contextualPostType: String,
@@ -1140,7 +1133,6 @@ private fun resolveContextualPostRegister(
     return requireExactlyOne("card navigation contextual-post source", candidates)
 }
 
-context(_: BytecodePatchContext)
 private fun Fingerprint.requireSingleMatch(label: String): Match {
     val matches = scopedMatchAll().distinctBy { it.originalMethod.toString() }
     return requireExactlyOne(label, matches) { match -> match.originalMethod.toString() }

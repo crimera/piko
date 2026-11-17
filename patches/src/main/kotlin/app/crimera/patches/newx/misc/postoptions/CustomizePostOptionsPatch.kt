@@ -15,9 +15,10 @@ import app.crimera.patches.newx.utils.Constants.POST_OPTIONS_FILTER_DESCRIPTOR
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -62,7 +63,7 @@ private val HIDDEN_ID_TO_ENUM_NAMES =
 
 @Suppress("unused")
 val customizeNewXPostOptionsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Customize post menu items",
         description = "Lets you hide selected items from the NewX post menu.",
     ) {
@@ -114,10 +115,9 @@ val customizeNewXPostOptionsPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun validateHiddenEnums() {
     val postActionType = resolvedNewXInlineActionModels().postActionTypeDescriptor
-    val actionClass = context.classDefByOrNull(postActionType)
+    val actionClass = classDefByOrNull(postActionType)
         ?: throw PatchException("NewX post action type class was not found: $postActionType")
     val entries = actionClass.fields
         .filter { AccessFlags.STATIC.isSet(it.accessFlags) && it.type == postActionType }
@@ -129,13 +129,12 @@ private fun validateHiddenEnums() {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun injectPostOptionsFilter(hiddenItems: MultiChoiceSettingDefinition) {
     val state = resolvePostOptionsStateConstructor()
     val constructorMatch = state.match
     val stateType = constructorMatch.originalClassDef.type
 
-    val mutableClass = context.mutableClassDefBy(stateType)
+    val mutableClass = mutableClassDefBy(stateType)
     val method = constructorMatch.method.cloneMutable(additionalRegisters = 2)
     mutableClass.methods.remove(constructorMatch.method)
     mutableClass.methods.add(method)

@@ -17,7 +17,7 @@ import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -62,7 +62,7 @@ private data class HomeTabListFactory(
 
 @Suppress("unused")
 val customizeNewXTimelineTabsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Customize timeline tabs",
         description = "Lets you hide the For You or Following tab from the NewX home timeline.",
     ) {

@@ -9,7 +9,7 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.iface.Method
 
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
@@ -65,7 +65,7 @@ private fun String.isObjectDescriptor(): Boolean = startsWith('L') && endsWith('
 
 @Suppress("unused")
 val newXHideSpacesBarPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide Spaces bar",
         description = "Hides the Spaces bar above NewX timelines.",
     ) {

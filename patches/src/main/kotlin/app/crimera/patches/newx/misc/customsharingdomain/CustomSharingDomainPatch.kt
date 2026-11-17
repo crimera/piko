@@ -16,7 +16,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -431,7 +432,7 @@ private fun List<Instruction>.valueReachesReturn(
 
 @Suppress("unused")
 internal val newXSharedUrlRewritePatch =
-    bytecodePatch {
+    patch {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
@@ -449,7 +450,7 @@ internal val newXSharedUrlRewritePatch =
 
 @Suppress("unused")
 val newXCustomSharingDomainPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Custom sharing domain",
         description = "Allows for using domains like fxtwitter when sharing tweets/posts.",
     ) {
@@ -469,7 +470,6 @@ val newXCustomSharingDomainPatch =
         dependsOn(newXSharedUrlRewritePatch)
     }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun Fingerprint.requireSingleMatch(label: String): Match {
     return requireExactlyOne(
         label = label,
@@ -477,7 +477,6 @@ private fun Fingerprint.requireSingleMatch(label: String): Match {
     )
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareSheetPostUrls() {
     val method =
         ShareSheetUrlConstructorFingerprint
@@ -486,7 +485,6 @@ private fun hookShareSheetPostUrls() {
     hookShareSheetUrlConstructor(method)
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareSheetCopyCallbacks() {
     // 12.28+: post copy moved into the share-sheet URL field (hookShareSheetPostUrls covers
     // SEND + Compose copy via h.v/b0). The DM stub remains as a no-op. Validate the stub so
@@ -497,7 +495,6 @@ private fun hookShareSheetCopyCallbacks() {
     )
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareIntentBuilder() {
     val movedMatches = MovedShareIntentBuilderFingerprint.scopedMatchAllOrNull().orEmpty()
     val selectedMatch =
@@ -511,7 +508,6 @@ private fun hookShareIntentBuilder() {
     hookHelperCallSites(newOwner.method.definingClass, helperMethod)
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookShareAttributionUrlBuilder() {
     val method =
         ShareAttributionUrlBuilderFingerprint
@@ -538,9 +534,8 @@ internal fun rewriteShareAttributionUrlBuilder(method: MutableMethod) {
     }
 }
 
-context(context: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookHelperCallSites(shareClassDescriptor: String, helperMethod: MutableMethod) {
-    val shareClass = context.classDefByOrNull(shareClassDescriptor)
+    val shareClass = classDefByOrNull(shareClassDescriptor)
         ?: throw PatchException(
             "NewX share implementation class is missing: $shareClassDescriptor",
         )
@@ -576,7 +571,6 @@ private fun hookHelperCallSites(shareClassDescriptor: String, helperMethod: Muta
     }
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookPostNavigationUrls() {
     val matches = PostNavigationUrlFingerprint.scopedMatchAllOrNull().orEmpty()
     if (matches.size != 2) {
@@ -606,7 +600,6 @@ private fun hookPostNavigationUrls() {
     }
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookProfileShareUrl() {
     val profileType = ProfileUserStringFingerprint
         .requireSingleMatch("NewX profile user model")
@@ -659,7 +652,6 @@ private fun Method.profileShareModelReads(profileType: String): List<Pair<Int, I
     }
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
 private fun hookProfileNavigationUrls() {
     val match = ProfileNavigationUrlFingerprint.requireSingleMatch(
         "NewX profile navigation URL getter",

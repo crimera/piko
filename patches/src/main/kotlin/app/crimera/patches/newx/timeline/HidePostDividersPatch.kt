@@ -23,9 +23,9 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
@@ -350,7 +350,7 @@ private fun List<Instruction>.inlineContentLambda(
 /**
  * Zero-key lazy items whose inline content lambda resolves to a case block that draws a Material3
  * divider. The block lookup is injected so the selection predicate can be exercised against fixture
- * bytecode without a patch context.
+ * bytecode without an APK being patched.
  */
 internal fun List<Instruction>.timelineModuleDividerItemIndices(
     contentLambdaBlock: (adapterType: String, discriminator: Int) -> List<Instruction>?,
@@ -364,12 +364,11 @@ internal fun List<Instruction>.timelineModuleDividerItemIndices(
         block.any(Instruction::isMaterial3DividerCall)
     }
 
-context(context: BytecodePatchContext)
 private fun dividerLambdaCaseBlock(
     adapterType: String,
     discriminator: Int,
 ): List<Instruction>? {
-    val adapterClass = context.mutableClassDefBy(adapterType)
+    val adapterClass = mutableClassDefBy(adapterType)
     val invoke =
         requireExactlyOne(
             label = "NewX divider lambda adapter invoke in $adapterType",
@@ -414,12 +413,11 @@ private fun Instruction.isMaterial3DividerCall(): Boolean {
  * divider" composable. Forcing its boolean parameter off covers the item wrappers whose call
  * sites change between releases, instead of hooking individual calls in one renderer.
  */
-context(context: BytecodePatchContext)
 private fun patchPostDividerHelper(
     helper: MethodReference,
     setting: ToggleSettingDefinition,
 ) {
-    val helperClass = context.mutableClassDefBy(helper.definingClass)
+    val helperClass = mutableClassDefBy(helper.definingClass)
     val parameterTypes = helper.parameterTypes.map(CharSequence::toString)
     val method =
         requireExactlyOne(
@@ -505,7 +503,6 @@ private fun resolveReplyFacepileDrawCall(method: Method): ReplyFacepileDrawCall 
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchReplyFacepileDivider(
     setting: ToggleSettingDefinition,
 ) {
@@ -518,7 +515,7 @@ private fun patchReplyFacepileDivider(
     val originalRegisterCount =
         originalMethod.implementation?.registerCount
             ?: throw PatchException("NewX reply facepile divider renderer has no implementation")
-    val owner = context.mutableClassDefBy(renderer.originalClassDef.type)
+    val owner = mutableClassDefBy(renderer.originalClassDef.type)
     val method =
         originalMethod.cloneMutable(
             additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
@@ -544,7 +541,6 @@ private fun patchReplyFacepileDivider(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveTimelineModuleDividerCallIndex(method: Method): Int {
     val instructions = method.instructions.toList()
     val dividers =
@@ -557,7 +553,6 @@ private fun resolveTimelineModuleDividerCallIndex(method: Method): Int {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchTimelineModuleDividers(
     setting: ToggleSettingDefinition,
 ) {
@@ -570,7 +565,7 @@ private fun patchTimelineModuleDividers(
     val originalRegisterCount =
         originalMethod.implementation?.registerCount
             ?: throw PatchException("NewX timeline module builder has no implementation")
-    val owner = context.mutableClassDefBy(builder.originalClassDef.type)
+    val owner = mutableClassDefBy(builder.originalClassDef.type)
     val method =
         originalMethod.cloneMutable(
             additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
@@ -595,7 +590,7 @@ private fun patchTimelineModuleDividers(
 
 @Suppress("unused")
 val newXHidePostDividersPatch =
-    bytecodePatch(
+    patch(
         default = false,
         name = "NewX: Hide post dividers",
         description = "Removes post and reply dividers shown in NewX timelines.",

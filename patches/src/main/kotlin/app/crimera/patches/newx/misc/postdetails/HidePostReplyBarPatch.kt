@@ -1,5 +1,8 @@
 package app.crimera.patches.newx.misc.postdetails
 
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.classDefByStrings
+import app.morphe.patcher.patch.classDefForEach
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.InjectedSettingRead
@@ -24,9 +27,9 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.newInstance
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
@@ -393,7 +396,6 @@ private fun MutableMethod.matches(target: Method): Boolean =
         returnType == target.returnType &&
         parameterTypes.map(CharSequence::toString) == target.parameterTypes.map(CharSequence::toString)
 
-context(context: BytecodePatchContext)
 private fun resolvePostDetailReplyBarRenderer(): Match {
     val shapeMatches = NewXPostDetailReplyBarFingerprint.scopedMatchAll()
     // Older releases carry the test tag directly in the renderer; newer ones host it
@@ -416,7 +418,7 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
     val anchorOwner =
         requireExactlyOne(
             label = "NewX reply text field lambda owner",
-            candidates = context.classDefByStrings("post-detail-reply-text-field").map { it.type },
+            candidates = classDefByStrings("post-detail-reply-text-field").map { it.type },
         )
     // `newInstance` still means exactly the old scan: `new-array` stores the array descriptor,
     // so a class descriptor cannot match it.
@@ -444,7 +446,7 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
             label = "NewX reply text field instantiator caller",
             candidates =
                 buildList {
-                    context.classDefForEach { classDef ->
+                    classDefForEach { classDef ->
                         if (!classDef.type.startsWith(COMPOSER_MINIMAL_SCOPE)) return@classDefForEach
                         classDef.methods.forEach { method ->
                             if (method.callSiteIndices(instantiator).isNotEmpty()) add(method)
@@ -469,7 +471,6 @@ private fun resolvePostDetailReplyBarRenderer(): Match {
  * navigation-bar inset. Resolving that call chain keeps the container hooks independent of the
  * obfuscated minimal-composer and post-detail-sheet owners/method names.
  */
-context(context: BytecodePatchContext)
 private fun resolvePostDetailReplyBarContainers(renderer: Match): Pair<MutableMethod, MutableMethod> {
     val rendererCaller =
         findUniqueCaller(
@@ -493,7 +494,7 @@ private fun resolvePostDetailReplyBarContainers(renderer: Match): Pair<MutableMe
             predicate = Method::isPostDetailReplyBarContainer,
         )
 
-    val minimalMutableClass = context.mutableClassDefBy(minimalContainerCaller.definingClass)
+    val minimalMutableClass = mutableClassDefBy(minimalContainerCaller.definingClass)
     val minimalMutableMethod =
         requireExactlyOne(
             label = "NewX mutable minimal reply-bar composition caller",
@@ -502,7 +503,7 @@ private fun resolvePostDetailReplyBarContainers(renderer: Match): Pair<MutableMe
             },
         )
 
-    val postDetailMutableClass = context.mutableClassDefBy(postDetailContainer.definingClass)
+    val postDetailMutableClass = mutableClassDefBy(postDetailContainer.definingClass)
     val postDetailMutableMethod =
         requireExactlyOne(
             label = "NewX mutable post-detail reply-bar container",
@@ -514,7 +515,6 @@ private fun resolvePostDetailReplyBarContainers(renderer: Match): Pair<MutableMe
     return minimalMutableMethod to postDetailMutableMethod
 }
 
-context(context: BytecodePatchContext)
 private fun findUniqueCaller(
     target: Method,
     scope: String,
@@ -522,7 +522,7 @@ private fun findUniqueCaller(
     predicate: (Method) -> Boolean,
 ): Method {
     val candidates = buildList {
-        context.classDefForEach { classDef ->
+        classDefForEach { classDef ->
             if (!classDef.type.startsWith(scope)) return@classDefForEach
             classDef.methods.forEach { method ->
                 if (!predicate(method)) return@forEach
@@ -560,7 +560,6 @@ private fun requireNavigationInsetsHook(
     return NavigationInsetsHook(method, callIndex, continuation)
 }
 
-context(context: BytecodePatchContext)
 private fun resolvePostDetailNavigationInsetsHook(
     postDetailContainer: MutableMethod,
 ): NavigationInsetsHook {
@@ -1004,7 +1003,6 @@ private fun Instruction.argumentRegister(
  * from its native no-composer spacer. Applying that inset to the row modifier moves the controls;
  * forcing the separate spacer branch was ineffective here and added blank space to other layouts.
  */
-context(context: BytecodePatchContext)
 private fun resolveImmersiveActionBarSafeAreaHook(
     minimalContainer: MutableMethod,
 ): ImmersiveActionBarSafeAreaHook? {
@@ -1012,7 +1010,7 @@ private fun resolveImmersiveActionBarSafeAreaHook(
         requireAtMostOne(
             label = "NewX immersive-media action-bar renderer",
             candidates = buildList<Method> {
-                context.classDefForEach { classDef ->
+                classDefForEach { classDef ->
                     if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
                     classDef.methods.forEach { method ->
                         if (method.isImmersiveMediaControlsShape()) add(method)
@@ -1023,7 +1021,7 @@ private fun resolveImmersiveActionBarSafeAreaHook(
     val method =
         requireExactlyOne(
             label = "NewX mutable immersive-media action-bar renderer",
-            candidates = context.mutableClassDefBy(originalMethod.definingClass).methods.filter { candidate ->
+            candidates = mutableClassDefBy(originalMethod.definingClass).methods.filter { candidate ->
                 candidate.matches(originalMethod)
             },
         )
@@ -1036,7 +1034,7 @@ private fun resolveImmersiveActionBarSafeAreaHook(
     val minimalComposerCallIndex =
         requireExactlyOne(
             label = "NewX immersive-media reply-composer anchor in $method",
-            candidates = method.replyComposerAnchorIndices(minimalContainer) { context.classDefByOrNull(it) },
+            candidates = method.replyComposerAnchorIndices(minimalContainer) { classDefByOrNull(it) },
         )
     val navigationInsetsCallIndex =
         requireExactlyOne(
@@ -1195,12 +1193,11 @@ private val NAVIGATION_BARS_INSET_NAMES = setOf("navigationBars", "navigationBar
  * the composer anchor, the slot keeps the gesture area reserved when the hidden composer draws
  * nothing, so the action row needs no extra padding. Returns false for any other shape.
  */
-context(context: BytecodePatchContext)
 private fun mediaBottomSlotReservesNavigationInset(minimalContainer: Method): Boolean {
     val rowRenderer = requireAtMostOne(
         label = "NewX media inline-action row renderer (bottom-slot reply shape)",
         candidates = buildList<Method> {
-            context.classDefForEach { classDef ->
+            classDefForEach { classDef ->
                 if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
                 classDef.methods.forEach { method ->
                     if (method.inlineActionBarRenderCallIndices().isNotEmpty()) add(method)
@@ -1219,15 +1216,15 @@ private fun mediaBottomSlotReservesNavigationInset(minimalContainer: Method): Bo
         if (!reference.definingClass.startsWith(MEDIA_SCOPE)) return@mapNotNull null
         val slot = requireAtMostOne(
             "NewX media bottom-slot callee $reference",
-            context.classDefByOrNull(reference.definingClass)?.methods?.filter { reference.matches(it) }.orEmpty(),
+            classDefByOrNull(reference.definingClass)?.methods?.filter { reference.matches(it) }.orEmpty(),
         ) ?: return@mapNotNull null
-        slot.takeIf { it.replyComposerAnchorIndices(minimalContainer) { type -> context.classDefByOrNull(type) }.isNotEmpty() }
+        slot.takeIf { it.replyComposerAnchorIndices(minimalContainer) { type -> classDefByOrNull(type) }.isNotEmpty() }
     }.distinctBy { it.toString() }
     val slot = requireAtMostOne("NewX media reply bottom slot after the action row in $rowRenderer", slotCandidates)
         ?: return false
     val anchor = requireExactlyOne(
         "NewX media bottom-slot reply-composer anchor in $slot",
-        slot.replyComposerAnchorIndices(minimalContainer) { type -> context.classDefByOrNull(type) },
+        slot.replyComposerAnchorIndices(minimalContainer) { type -> classDefByOrNull(type) },
     )
     val instructions = slot.implementation!!.instructions.toList()
     val navigationReads = instructions.indices.filter { index ->
@@ -1257,11 +1254,10 @@ private fun mediaBottomSlotReservesNavigationInset(minimalContainer: Method): Bo
 }
 
 /** The WindowInsetsHolder constructor builds each inset field from a call that names it. */
-context(context: BytecodePatchContext)
 private fun FieldReference.isNamedWindowInset(names: Set<String>): Boolean {
     val constructor = requireAtMostOne(
         "NewX WindowInsetsHolder constructor $definingClass",
-        context.classDefByOrNull(definingClass)?.methods?.filter { method ->
+        classDefByOrNull(definingClass)?.methods?.filter { method ->
             method.name == "<init>" && method.implementation != null
         }.orEmpty(),
     ) ?: return false
@@ -1298,13 +1294,12 @@ private fun FieldReference.isNamedWindowInset(names: Set<String>): Boolean {
  * directly, and the immersive safe-area renderer is the sole media-scope inline-action row render,
  * so every media action row stays covered. Any other shape fails closed.
  */
-context(context: BytecodePatchContext)
 private fun requireImmersiveOnlyPhotoViewerReply(
     minimalContainer: MutableMethod,
     immersiveHook: ImmersiveActionBarSafeAreaHook?,
 ) {
     val directCallers = buildList<Method> {
-        context.classDefForEach { classDef ->
+        classDefForEach { classDef ->
             if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
             classDef.methods.forEach { method ->
                 if (method.callSiteIndices(minimalContainer).isNotEmpty()) add(method)
@@ -1313,7 +1308,7 @@ private fun requireImmersiveOnlyPhotoViewerReply(
     }
     if (directCallers.isEmpty() && immersiveHook != null) {
         val mediaRowRenderers = buildList<Method> {
-            context.classDefForEach { classDef ->
+            classDefForEach { classDef ->
                 if (!classDef.type.startsWith(MEDIA_SCOPE)) return@classDefForEach
                 classDef.methods.forEach { method ->
                     if (method.inlineActionBarRenderCallIndices().isNotEmpty()) add(method)
@@ -1329,7 +1324,7 @@ private fun requireImmersiveOnlyPhotoViewerReply(
     if (directCallers.isEmpty() && immersiveHook == null && mediaBottomSlotReservesNavigationInset(minimalContainer)) return
     val containerCallers = mutableListOf<String>()
     val actionRowConsumers = mutableListOf<String>()
-    context.classDefForEach { definition ->
+    classDefForEach { definition ->
         definition.methods.forEach { method ->
             val composerCalls = method.callSiteIndices(minimalContainer)
             if (composerCalls.isNotEmpty()) containerCallers.add("$method at $composerCalls")
@@ -1347,7 +1342,7 @@ private fun requireImmersiveOnlyPhotoViewerReply(
 
 @Suppress("unused")
 val newXHidePostReplyBarPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide post reply bar",
         description = "Hides the persistent post-detail reply bar while keeping the compose button available.",
     ) {

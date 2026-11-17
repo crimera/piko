@@ -7,11 +7,11 @@ import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.timeline.newXTimelineFilterPatch
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val newXHideAdsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Remove ads",
         description = "Filters promoted posts and modules from NewX timelines.",
     ) {

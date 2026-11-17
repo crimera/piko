@@ -3,7 +3,6 @@ package app.crimera.patches.newx.utils
 import app.morphe.patcher.patch.InstallerType
 import app.morphe.patcher.patch.PatchAvailability
 import app.morphe.patcher.patch.PatchBuilder
-import app.morphe.patcher.patch.PatchContext
 
 /**
  * Mounts retain the stock manifest registrations. Settings, downloader components and package
@@ -12,7 +11,7 @@ import app.morphe.patcher.patch.PatchContext
  *
  * [default] must match the patch declaration so non-mount selection keeps its existing behavior.
  */
-internal fun <C : PatchContext<*>> PatchBuilder<C>.unsupportedOnMount(default: Boolean = true) {
+internal fun PatchBuilder<*>.unsupportedOnMount(default: Boolean = true) {
     availability { installer, _ ->
         when {
             installer == InstallerType.MOUNT -> PatchAvailability.UNAVAILABLE

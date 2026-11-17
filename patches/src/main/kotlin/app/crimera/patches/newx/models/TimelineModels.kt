@@ -1,13 +1,13 @@
 package app.crimera.patches.newx.models
 
+import app.crimera.patches.common.ApkScoped
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodeContext
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
@@ -18,7 +18,6 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
-import java.util.WeakHashMap
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
@@ -104,15 +103,7 @@ internal data class ResolvedNewXTimelineModels(
     val moduleItemConstructor: MethodReference,
 )
 
-private object TimelineModelCache {
-    private val values = WeakHashMap<BytecodePatchContext, ResolvedNewXTimelineModels>()
-
-    @Synchronized
-    fun getOrPut(
-        context: BytecodePatchContext,
-        resolve: () -> ResolvedNewXTimelineModels,
-    ): ResolvedNewXTimelineModels = values.getOrPut(context, resolve)
-}
+private val timelineModels = ApkScoped(::resolveTimelineModels)
 
 internal val newXTimelineModelResolutionPatch =
     patch(default = false) {
@@ -126,18 +117,12 @@ internal val newXTimelineModelAdapterPatch =
         dependsOn(newXTimelineModelResolutionPatch, newXExtensionPatch)
 
         execute {
-            with(bytecodeContext) { patchTimelineModelBridges(resolvedNewXTimelineModels()) }
+            patchTimelineModelBridges(resolvedNewXTimelineModels())
         }
     }
 
-internal fun resolvedNewXTimelineModels(): ResolvedNewXTimelineModels {
-    val context = bytecodeContext
-    return TimelineModelCache.getOrPut(context) {
-        with(context) { resolveTimelineModels() }
-    }
-}
+internal fun resolvedNewXTimelineModels(): ResolvedNewXTimelineModels = timelineModels.get()
 
-context(context: BytecodePatchContext)
 private fun resolveTimelineModels(): ResolvedNewXTimelineModels {
     val postMatch = TimelinePostModelFingerprint.requireSingle("timeline post model")
     val moduleMatch = TimelineModuleModelFingerprint.requireSingle("timeline module model")
@@ -271,7 +256,6 @@ private fun resolveTimelineModels(): ResolvedNewXTimelineModels {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
     // Resolve public fields and generated getters into one stable extension-facing contract.
     val immutableListMatches = TimelineItemsImmutableListConverterFingerprint.scopedMatchAll()
@@ -309,7 +293,7 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
     if (!AccessFlags.STATIC.isSet(immutableListConverter.accessFlags)) {
         throw PatchException("NewX timeline immutable-list converter is not static: $immutableListConverter")
     }
-    val postClass = context.mutableClassDefBy(models.postDescriptor)
+    val postClass = mutableClassDefBy(models.postDescriptor)
     val postEntryIdAccessor =
         postClass.resolveFieldAccessor(models.postEntryIdField, "timeline post entry ID")
     val postClientEventInfoAccessor =
@@ -323,21 +307,21 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
             "timeline post promoted metadata",
         )
 
-    val clientEventInfoClass = context.mutableClassDefBy(models.clientEventInfoDescriptor)
+    val clientEventInfoClass = mutableClassDefBy(models.clientEventInfoDescriptor)
     val clientEventInfoComponentAccessor =
         clientEventInfoClass.resolveFieldAccessor(
             models.clientEventInfoComponentField,
             "client-event-info component",
         )
 
-    val verticalConversationClass = context.mutableClassDefBy(models.verticalConversationDescriptor)
+    val verticalConversationClass = mutableClassDefBy(models.verticalConversationDescriptor)
     val verticalConversationPostIdsAccessor =
         verticalConversationClass.resolveFieldAccessor(
             models.verticalConversationPostIdsField,
             "vertical-conversation post IDs",
         )
 
-    val moduleClass = context.mutableClassDefBy(models.moduleDescriptor)
+    val moduleClass = mutableClassDefBy(models.moduleDescriptor)
     val moduleInnerContentAccessor =
         moduleClass.resolveFieldAccessor(models.moduleInnerContentField, "timeline module inner content")
     val moduleHeaderAccessor =
@@ -356,7 +340,7 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
             "timeline module client-event info",
         )
 
-    val moduleItemClass = context.mutableClassDefBy(models.moduleItemDescriptor)
+    val moduleItemClass = mutableClassDefBy(models.moduleItemDescriptor)
     val moduleItemAccessor =
         moduleItemClass.resolveFieldAccessor(models.moduleItemField, "timeline module item")
     val moduleItemDispensableAccessor =
@@ -365,7 +349,7 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
             "timeline module-item dispensable flag",
         )
 
-    val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
+    val filterClass = mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
     val immutableListBridge =
         filterClass.requireBridge("immutableList", LIST_DESCRIPTOR, OBJECT_DESCRIPTOR)
     immutableListBridge.patchBridge {
@@ -548,18 +532,16 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun isJavaListType(type: String): Boolean {
     if (type == LIST_DESCRIPTOR) return true
     if (!type.startsWith("L")) return false
     return isJavaListType(type, mutableSetOf())
 }
 
-context(context: BytecodePatchContext)
 private fun isJavaListType(type: String, visitedTypes: MutableSet<String>): Boolean {
     if (type == LIST_DESCRIPTOR) return true
     if (!visitedTypes.add(type)) return false
-    val definition = runCatching { context.mutableClassDefBy(type) }.getOrNull() ?: return false
+    val definition = runCatching { mutableClassDefBy(type) }.getOrNull() ?: return false
     if (definition.interfaces.any { interfaceType ->
             isJavaListType(interfaceType, visitedTypes)
         }

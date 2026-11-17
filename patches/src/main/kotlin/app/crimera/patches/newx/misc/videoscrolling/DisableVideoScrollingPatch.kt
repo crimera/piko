@@ -21,7 +21,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.crimera.patches.common.requireExactlyOne
@@ -145,7 +145,7 @@ private fun patchVerticalPager(
 
 @Suppress("unused")
 val newXDisableVideoScrollingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Disable video player scrolling",
         description =
             "Disables vertical swipes in the NewX video player while keeping playback controls and other gestures available.",

@@ -7,7 +7,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.p0Register
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
@@ -16,7 +16,7 @@ private const val FILTER_TIMELINE_ITEMS_DESCRIPTOR =
 
 /** Installs the shared single-pass timeline filter hook used by individual features. */
 internal val newXTimelineFilterPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineModelAdapterPatch)
 

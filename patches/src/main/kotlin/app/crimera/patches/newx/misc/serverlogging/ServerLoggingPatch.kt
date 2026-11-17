@@ -16,9 +16,9 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -159,7 +159,7 @@ private val SERVER_ERROR_CONSTRUCTORS = listOf(
 
 @Suppress("unused")
 val newXServerLoggingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Server error logging",
         description = "Captures parsed NewX server errors in memory and exports them on demand.",
         default = false,
@@ -194,11 +194,10 @@ val newXServerLoggingPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun patchServerErrorConstructors() {
     SERVER_ERROR_CONSTRUCTORS.forEach { target ->
         val classDescriptor = "$ERROR_PACKAGE${target.className};"
-        val errorClass = context.mutableClassDefBy(classDescriptor)
+        val errorClass = mutableClassDefBy(classDescriptor)
         if (errorClass.superclass != EXCEPTION_DESCRIPTOR) {
             throw PatchException(
                 "NewX ${target.className} is not an Exception: ${errorClass.superclass}",
@@ -263,7 +262,6 @@ private fun patchServerErrorConstructors() {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchSubmitFailureHandler() {
     val matches = SubmitWorkHandlerFingerprint.scopedMatchAll()
     if (matches.size != 1) {

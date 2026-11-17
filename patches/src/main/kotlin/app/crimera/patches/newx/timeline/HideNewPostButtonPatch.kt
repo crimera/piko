@@ -9,10 +9,11 @@ import app.crimera.patches.common.hasComposeShape
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.classDefFlatMap
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
@@ -27,12 +28,15 @@ private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
+private const val MIN_POST_FAB_HOST_PARAMETERS = 6
 private const val SETTINGS_READ_DESCRIPTOR =
     "$SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault(Ljava/lang/String;)Z"
 
 /** Resolves the post FAB host by its Compose/menu contract, not its obfuscated owner or label. */
 internal fun Method.primaryPostFabRendererCallIndices(): List<Int> {
-    if (returnType != "V") return emptyList()
+    // The shape below needs at least six parameters. Checking the count first keeps the
+    // APK-wide scan from building a descriptor list for every method.
+    if (returnType != "V" || parameterTypes.size < MIN_POST_FAB_HOST_PARAMETERS) return emptyList()
     val parameters = parameterDescriptors()
     // No positional anchor: 12.41 moved the host's leading Int bitmask behind the lambdas.
     if (!parameters.hasComposeShape(
@@ -61,7 +65,7 @@ internal fun Method.isNewPostFabHostCandidate(): Boolean =
 
 @Suppress("unused")
 val hideNewPostButtonPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide compose button",
         description = "Removes the compose button from NewX timelines.",
     ) {

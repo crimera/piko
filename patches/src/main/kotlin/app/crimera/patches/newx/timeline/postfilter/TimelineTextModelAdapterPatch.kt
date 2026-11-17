@@ -20,9 +20,10 @@ import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.common.valueReachesRegister
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
@@ -130,7 +131,7 @@ private data class ResolvedPostTextModels(
 )
 
 internal val newXTimelineTextModelAdapterPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXTimelineModelAdapterPatch, newXPostModelResolutionPatch)
 
         execute {
@@ -148,14 +149,13 @@ internal val newXTimelineTextModelAdapterPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun resolvePostTextModels(
     postDescriptor: String,
     postResultField: FieldReference,
     postModels: ResolvedNewXPostModels,
 ): ResolvedPostTextModels {
-    val postClass = context.mutableClassDefBy(postDescriptor)
-    val contextualPostClass = context.mutableClassDefBy(postModels.contextualPostDescriptor)
+    val postClass = mutableClassDefBy(postDescriptor)
+    val contextualPostClass = mutableClassDefBy(postModels.contextualPostDescriptor)
     val contextualCanonicalPostAccessor =
         contextualPostClass.resolveFieldAccessor(
             postModels.contextualCanonicalPostField,
@@ -176,7 +176,7 @@ private fun resolvePostTextModels(
     val authorField = canonicalPostMatch.fieldForToStringLabel(", author=")
     val repliedPostIdField = canonicalPostMatch.fieldForToStringLabel(", repliedPostId=")
     repliedPostIdField.requireType(LONG_OBJECT_DESCRIPTOR, "canonical-post replied-post ID")
-    val canonicalPostClass = context.mutableClassDefBy(canonicalPostDescriptor)
+    val canonicalPostClass = mutableClassDefBy(canonicalPostDescriptor)
     canonicalPostClass.requirePublicFields(listOf(entityListField, authorField, repliedPostIdField))
 
     val entityListMatch =
@@ -187,7 +187,7 @@ private fun resolvePostTextModels(
                 "field=$entityListField, model=${entityListMatch.originalClassDef.type}",
         )
     }
-    val entityListFieldClass = context.mutableClassDefBy(entityListField.type)
+    val entityListFieldClass = mutableClassDefBy(entityListField.type)
     val mentionsField =
         entityListMatch.originalMethod.fieldForHelperToStringValue("PostEntityList(mentions=")
     mentionsField.requireType(LIST_DESCRIPTOR, "post-entity-list mentions")
@@ -197,15 +197,15 @@ private fun resolvePostTextModels(
     val mentionDescriptor = mentionMatch.originalClassDef.type
     val mentionStartIdxField = mentionMatch.fieldForToStringLabel(", startIdx=")
     val mentionEndIdxField = mentionMatch.originalMethod.fieldForToStringLabelThroughAppendHelper(", endIdx=") {
-        context.classDefByOrNull(it)
+        classDefByOrNull(it)
     } ?: mentionMatch.fieldForToStringLabel(", endIdx=")
     val mentionScreenNameField = mentionMatch.originalMethod.fieldForToStringLabelThroughAppendHelper(", screenName=") {
-        context.classDefByOrNull(it)
+        classDefByOrNull(it)
     } ?: mentionMatch.fieldForToStringLabel(", screenName=")
     mentionStartIdxField.requireType(INTEGER_DESCRIPTOR, "mention start index")
     mentionEndIdxField.requireType(INTEGER_DESCRIPTOR, "mention end index")
     mentionScreenNameField.requireType(STRING_DESCRIPTOR, "mention screen name")
-    context.mutableClassDefBy(mentionDescriptor).requirePublicFields(
+    mutableClassDefBy(mentionDescriptor).requirePublicFields(
         listOf(mentionStartIdxField, mentionEndIdxField, mentionScreenNameField),
     )
 
@@ -468,7 +468,6 @@ private fun Instruction.invokedArgumentRegister(reference: MethodReference, para
     return registersUsed.getOrNull(argumentIndex)
 }
 
-context(context: BytecodePatchContext)
 private fun resolveAuthorFieldGetter(
     authorDescriptor: String,
     minimalUserMatch: app.morphe.patcher.Match,
@@ -482,7 +481,7 @@ private fun resolveAuthorFieldGetter(
     } else if (!field.type.startsWith("L") || !field.type.endsWith(";")) {
         throw PatchException("Expected NewX minimal-user $semanticName field to be an object: $field")
     }
-    val userClass = context.mutableClassDefBy(minimalUserMatch.originalClassDef.type)
+    val userClass = mutableClassDefBy(minimalUserMatch.originalClassDef.type)
     val getterMatches = userClass.methods.filter { method ->
         method.isDirectFieldGetter(field)
     }
@@ -504,7 +503,6 @@ private fun resolveAuthorFieldGetter(
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveAuthorMethodGetter(
     authorDescriptor: String,
     name: String,
@@ -524,7 +522,6 @@ private fun resolveAuthorMethodGetter(
     return getter
 }
 
-context(context: BytecodePatchContext)
 private fun resolveInterfaceMethodByName(
     descriptor: String,
     name: String,
@@ -532,7 +529,7 @@ private fun resolveInterfaceMethodByName(
     visited: MutableSet<String> = mutableSetOf(),
 ): MethodReference? {
     if (!visited.add(descriptor)) return null
-    val classDef = context.classDefByOrNull(descriptor) ?: return null
+    val classDef = classDefByOrNull(descriptor) ?: return null
     val matches = classDef.methods.filter { method ->
         method.name == name &&
             method.parameterTypes.map(CharSequence::toString) == parameterTypes
@@ -557,7 +554,6 @@ private fun resolveInterfaceMethodByName(
     return null
 }
 
-context(context: BytecodePatchContext)
 private fun resolveInterfaceMethod(
     descriptor: String,
     name: String,
@@ -566,7 +562,7 @@ private fun resolveInterfaceMethod(
     visited: MutableSet<String> = mutableSetOf(),
 ): MethodReference? {
     if (!visited.add(descriptor)) return null
-    val classDef = context.classDefByOrNull(descriptor) ?: return null
+    val classDef = classDefByOrNull(descriptor) ?: return null
     val matches = classDef.methods.filter { method ->
         method.name == name &&
             method.parameterTypes.map(CharSequence::toString) == parameterTypes &&
@@ -669,13 +665,12 @@ private fun FieldReference.requireType(expectedType: String, semanticName: Strin
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchPostTextBridges(
     postDescriptor: String,
     textGetter: MethodReference,
     postTextModels: ResolvedPostTextModels,
 ) {
-    val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
+    val filterClass = mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
 
     /**
      * Resolves the single NewX timeline bridge [name] and prepares it for injection: a bridge that

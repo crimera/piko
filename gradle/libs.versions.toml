@@ -1,15 +1,15 @@
 [versions]
-morphe-patcher = "2.3.0"
+morphe-patcher = "2.4.0"
 morphe-patches-library = "2.2.0-dev.4"
 #noinspection GradleDependency
-smali = "4220ae75f7"
+smali = "5eaff5a2c9"
 gson = "2.15.0"
 annotation = "1.9.1"
 appcompat = "1.7.1"
 media3 = "1.11.0"
 shadow = "9.6.1"
 # Keep the published coordinate; settings.gradle.kts substitutes the sibling source in composite builds.
-piko-library = "0.10.1-dev.5"
+piko-library = "0.11.0-dev.1"
 
 [libraries]
 morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }

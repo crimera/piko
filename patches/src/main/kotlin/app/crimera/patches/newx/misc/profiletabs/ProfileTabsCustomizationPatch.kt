@@ -1,5 +1,7 @@
 package app.crimera.patches.newx.misc.profiletabs
 
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.classDefByStrings
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
@@ -16,9 +18,9 @@ import app.crimera.patches.newx.utils.Constants.PROFILE_TABS_EDITOR_DESCRIPTOR
 import app.crimera.patches.newx.utils.Constants.PROFILE_TABS_FILTER_DESCRIPTOR
 import app.crimera.patches.settings.SettingsRegistrationState
 import app.crimera.patches.settings.settingStrings
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patcher.util.getReference
@@ -96,7 +98,7 @@ private data class ProfileTabSpec(
 
 @Suppress("unused")
 val customizeNewXProfileTabsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Customize profile tabs",
         description = "Reorder and hide the tabs shown on profile screens.",
     ) {
@@ -155,9 +157,8 @@ internal fun injectProfileTabFilterHook(
  * Replaces the extension-side `ProfileTabsCatalog.tabIdOf` placeholder with the resolved
  * page-config field read, so the runtime never reflects on a release-specific type.
  */
-context(context: BytecodePatchContext)
 private fun injectProfileTabIdBridge(tabField: FieldReference) {
-    val catalogClass = context.mutableClassDefBy(PROFILE_TABS_CATALOG_DESCRIPTOR)
+    val catalogClass = mutableClassDefBy(PROFILE_TABS_CATALOG_DESCRIPTOR)
     val placeholder =
         requireExactlyOne(
             "NewX profile tab id bridge placeholder",
@@ -220,10 +221,9 @@ internal fun MutableMethod.injectProfileTabIdBridgeBody(tabField: FieldReference
  * emits depends on feature switches; the editor lists the canonical set and the runtime filter
  * only reorders or hides pages the app actually built.
  */
-context(context: BytecodePatchContext)
 private fun injectProfileTabsRegistration(tabs: List<ProfileTabSpec>) {
     val registerTab = methodReference(PROFILE_TAB_REGISTER_DESCRIPTOR)
-    SettingsRegistrationState.inject(context) {
+    SettingsRegistrationState.inject {
         tabs.forEach { tab ->
             constString(0, tab.id)
             constInt(1, tab.titleResourceId)
@@ -232,11 +232,10 @@ private fun injectProfileTabsRegistration(tabs: List<ProfileTabSpec>) {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveProfileTabListTarget(): ProfileTabListTarget {
     val candidateClasses =
         PROFILE_TAB_STABLE_STRINGS
-            .flatMap { literal -> context.classDefByStrings(literal) }
+            .flatMap { literal -> classDefByStrings(literal) }
             .distinctBy { classDef -> classDef.type }
     val candidateMethods =
         candidateClasses.flatMap { classDef ->
@@ -327,7 +326,7 @@ private fun resolveProfileTabListTarget(): ProfileTabListTarget {
         )
     }
 
-    val mutableClass = context.mutableClassDefBy(method.definingClass)
+    val mutableClass = mutableClassDefBy(method.definingClass)
     val mutableMethod =
         requireExactlyOne(
             "NewX profile tab page builder mutable method",
@@ -347,27 +346,25 @@ private fun resolveProfileTabListTarget(): ProfileTabListTarget {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveProfileTabField(pageConfigType: String): FieldReference {
     val pageConfig =
-        context.classDefByOrNull(pageConfigType)
+        classDefByOrNull(pageConfigType)
             ?: throw PatchException("NewX profile page config class is not in the APK: $pageConfigType")
     val enumFields =
         pageConfig.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
                 field.type.startsWith("L") &&
                 field.type.endsWith(";") &&
-                context.classDefByOrNull(field.type)?.superclass == ENUM_DESCRIPTOR
+                classDefByOrNull(field.type)?.superclass == ENUM_DESCRIPTOR
         }
     return requireExactlyOne("NewX profile page config tab field for $pageConfigType", enumFields) { field ->
         "${field.definingClass}->${field.name}:${field.type}"
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveProfileTabSpecs(tabEnumType: String): List<ProfileTabSpec> {
     val enumClass =
-        context.classDefByOrNull(tabEnumType)
+        classDefByOrNull(tabEnumType)
             ?: throw PatchException("NewX profile tab enum is not in the APK: $tabEnumType")
     val initializers =
         enumClass.methods.filter { method ->

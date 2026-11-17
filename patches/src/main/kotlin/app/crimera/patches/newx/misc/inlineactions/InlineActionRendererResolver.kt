@@ -1,11 +1,12 @@
 package app.crimera.patches.newx.misc.inlineactions
 
-import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefByOrNull
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
@@ -117,7 +118,6 @@ internal fun Method.isCapturedInlineActionEntryRenderer(
     return actionTypeTintTuples.size == 1
 }
 
-context(context: BytecodePatchContext)
 internal fun resolveCapturedInlineActionEntryRenderer(
     method: MutableMethod,
     owner: ClassDef,
@@ -189,7 +189,7 @@ internal fun resolveCapturedInlineActionEntryRenderer(
     val sizingClass = requireExactlyOne(
         "NewX captured inline-action sizing model in ${owner.type}",
         owner.fields.filter { field -> !AccessFlags.STATIC.isSet(field.accessFlags) }
-            .mapNotNull { field -> context.classDefByOrNull(field.type) }
+            .mapNotNull { field -> classDefByOrNull(field.type) }
             .distinctBy { definition -> definition.type }
             .filter { definition -> definition.isInlineActionSizingModel() },
     )
@@ -296,21 +296,21 @@ internal data class CapturedRendererCandidate(
     val owner: ClassDef,
 )
 
-context(context: BytecodePatchContext)
 internal fun capturedInlineActionRendererCandidates(
     models: ResolvedNewXInlineActionModels,
 ): List<CapturedRendererCandidate> =
-    classDefFlatMap { owner ->
-        owner.methods.filter { method -> method.isCapturedInlineActionEntryRenderer(owner, models) }
-            .map { method -> CapturedRendererCandidate(method, owner) }
-    }
+    // Each renderer reads the enabled flag of the entry once, so only those methods are checked.
+    Fingerprint(
+        filters = listOf(fieldAccess(models.inlineActionEnabledField, Opcode.IGET_BOOLEAN)),
+    ).matchAllOrNull().orEmpty().filter { match ->
+        match.originalMethod.isCapturedInlineActionEntryRenderer(match.originalClassDef, models)
+    }.map { match -> CapturedRendererCandidate(match.originalMethod, match.originalClassDef) }
 
 private data class CapturedConstructorFields(
     val tintField: FieldReference,
     val contentTintField: FieldReference?,
 )
 
-context(context: BytecodePatchContext)
 private fun resolveCapturedConstructor(
     owner: ClassDef,
     sizingCaptureField: FieldReference,
@@ -320,7 +320,7 @@ private fun resolveCapturedConstructor(
         !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == entryDescriptor
     }
     val entryField = requireExactlyOne("NewX captured inline-action entry field in ${owner.type}", entryFields)
-    val sizingClass = context.classDefByOrNull(sizingCaptureField.type)
+    val sizingClass = classDefByOrNull(sizingCaptureField.type)
         ?: throw PatchException("NewX captured inline-action sizing class was not found: ${sizingCaptureField.type}")
     val constructors = owner.methods.filter { constructor ->
         if (constructor.name != "<init>" || constructor.returnType != "V") return@filter false

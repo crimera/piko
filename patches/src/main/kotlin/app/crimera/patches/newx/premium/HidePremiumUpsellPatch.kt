@@ -21,7 +21,7 @@ import app.crimera.bytecode.insertHook
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -195,7 +195,7 @@ private fun MutableMethod.disabledUpsellField(startIndex: Int): FieldReference {
 
 @Suppress("unused")
 val hidePremiumUpsellPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide premium upsell",
         description = "Hides the premium upsell chip from the NewX home top bar.",
     ) {

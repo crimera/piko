@@ -17,7 +17,7 @@ import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
@@ -71,7 +71,7 @@ private fun Match.guardedWrites(guardedFields: List<GuardedPostField>): List<Fie
 
 @Suppress("unused")
 val newXShowSensitiveMediaPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Show sensitive media",
         description = "Shows sensitive and age-restricted media without confirmation in NewX.",
     ) {

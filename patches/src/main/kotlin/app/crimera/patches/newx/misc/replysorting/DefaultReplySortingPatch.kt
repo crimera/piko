@@ -30,7 +30,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -336,7 +337,7 @@ internal fun MutableMethod.installReplySortingSelectionHook(site: ReplySortingSe
 
 @Suppress("unused")
 val newXDefaultReplySortingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Set default reply sorting",
         description = "Lets you choose the default reply sorting order for NewX post detail.",
     ) {

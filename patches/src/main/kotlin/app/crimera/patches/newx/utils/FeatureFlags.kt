@@ -3,29 +3,26 @@ package app.crimera.patches.newx.utils
 import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
+import app.crimera.patches.common.ApkScoped
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.utils.Constants.FEATURE_SWITCH_STORE_DESCRIPTOR
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodeContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import java.util.WeakHashMap
 
 private const val REGISTER_PATCH_OVERRIDE_DESCRIPTOR =
     "$FEATURE_SWITCH_STORE_DESCRIPTOR->registerPatchOverride(Ljava/lang/String;Z)V"
 
 private object NewXFeatureFlagPatchState {
-    private val overrides = WeakHashMap<BytecodePatchContext, MutableMap<String, Boolean>>()
+    private val overrides = ApkScoped { mutableMapOf<String, Boolean>() }
 
     @Synchronized
     fun register(
-        context: BytecodePatchContext,
         flagName: String,
         enabled: Boolean,
     ): Boolean {
-        val contextOverrides = overrides.getOrPut(context) { mutableMapOf() }
-        if (flagName in contextOverrides) {
-            val existing = contextOverrides.getValue(flagName)
+        val apkOverrides = overrides.get()
+        if (flagName in apkOverrides) {
+            val existing = apkOverrides.getValue(flagName)
             if (existing != enabled) {
                 throw PatchException(
                     "Conflicting NewX feature flag values for '$flagName': $existing and $enabled",
@@ -34,7 +31,7 @@ private object NewXFeatureFlagPatchState {
             return false
         }
 
-        contextOverrides[flagName] = enabled
+        apkOverrides[flagName] = enabled
         return true
     }
 }
@@ -56,7 +53,7 @@ fun setNewXFeatureFlag(
     enabled: Boolean,
 ) {
     if (flagName.isBlank()) throw PatchException("NewX feature flag name must not be blank")
-    if (!NewXFeatureFlagPatchState.register(bytecodeContext, flagName, enabled)) return
+    if (!NewXFeatureFlagPatchState.register(flagName, enabled)) return
 
     newXInitHook.fingerprint.method.registerNewXFeatureFlag(flagName, enabled)
 }

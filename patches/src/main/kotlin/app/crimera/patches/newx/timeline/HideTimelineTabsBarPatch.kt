@@ -15,7 +15,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
@@ -93,7 +93,7 @@ private object NewXTimelineAddTabButtonFingerprint : Fingerprint(
 
 @Suppress("unused")
 val newXHideTimelineTabsBarPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide timeline tabs bar",
         description = "Removes the For You and Following tabs bar from NewX home timelines, with an option to hide the add-tab (+) button.",
     ) {

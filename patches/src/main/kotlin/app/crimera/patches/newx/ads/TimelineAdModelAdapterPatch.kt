@@ -12,9 +12,9 @@ import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.crimera.bytecode.Target
 import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.p0Register
 
@@ -65,7 +65,7 @@ private object EventSummaryModelFingerprint : Fingerprint(
 )
 
 internal val newXTimelineAdModelAdapterPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXTimelineModelAdapterPatch)
 
         execute {
@@ -82,9 +82,8 @@ internal val newXTimelineAdModelAdapterPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun patchAdModelBridges(adDescriptor: String) {
-    val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
+    val filterClass = mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
     val isTimelineRtbImageAd =
         filterClass.requireBridge("isTimelineRtbImageAd", OBJECT_DESCRIPTOR, "Z")
     isTimelineRtbImageAd.patchBridge {
@@ -94,17 +93,16 @@ private fun patchAdModelBridges(adDescriptor: String) {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchExploreAdModelBridges() {
     val urtTrendMatch = UrtTimelineTrendModelFingerprint.requireSingle("URT trend item model")
     val trendMatch = TimelineTrendModelFingerprint.requireSingle("trend model")
     val urtEventMatch = UrtTimelineEventSummaryModelFingerprint.requireSingle("URT event summary item model")
     val eventMatch = EventSummaryModelFingerprint.requireSingle("event summary model")
 
-    val urtTrendClass = context.mutableClassDefBy(urtTrendMatch.originalClassDef.type)
-    val trendClass = context.mutableClassDefBy(trendMatch.originalClassDef.type)
-    val urtEventClass = context.mutableClassDefBy(urtEventMatch.originalClassDef.type)
-    val eventClass = context.mutableClassDefBy(eventMatch.originalClassDef.type)
+    val urtTrendClass = mutableClassDefBy(urtTrendMatch.originalClassDef.type)
+    val trendClass = mutableClassDefBy(trendMatch.originalClassDef.type)
+    val urtEventClass = mutableClassDefBy(urtEventMatch.originalClassDef.type)
+    val eventClass = mutableClassDefBy(eventMatch.originalClassDef.type)
 
     val timelineTrendField = urtTrendMatch.fieldForToStringLabel("UrtTimelineTrend(timelineTrend=")
     val trendEntryIdField = urtTrendMatch.fieldForToStringLabel(", entryId=")
@@ -132,7 +130,7 @@ private fun patchExploreAdModelBridges() {
 
     val eventPromotedMetadataAccessor = eventClass.resolveFieldAccessor(eventPromotedMetadataField, "event-summary promoted metadata")
 
-    val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
+    val filterClass = mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
 
     val isTimelineTrend = filterClass.requireBridge("isTimelineTrend", OBJECT_DESCRIPTOR, "Z")
     isTimelineTrend.patchBridge {

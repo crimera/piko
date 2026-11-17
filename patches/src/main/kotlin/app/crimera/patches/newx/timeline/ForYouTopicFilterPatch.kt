@@ -1,7 +1,6 @@
 package app.crimera.patches.newx.timeline
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
-import app.crimera.patches.common.flatMapParallel
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.settings.Categories
@@ -26,12 +25,15 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.StringComparisonType
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.instanceOf
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
@@ -146,7 +148,7 @@ private data class ResolvedModernForYouTabHook(
 
 @Suppress("unused")
 val newXForYouTopicFilterPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Filter For You by topic",
         description = "Restricts the NewX For You timeline to selected topics.",
     ) {
@@ -179,16 +181,12 @@ val newXForYouTopicFilterPatch =
             }
 
         execute {
-            // One shared snapshot and one method-shape scan feed the discovery passes below
-            // (two singleton scans, page target, reselected type, tab hook) instead of rescanning
-            // every class per pass. Resolutions run before any mutation, so neither can go stale.
-            val classDefs = allForYouClassDefs()
-            val scan = scanForYouClasses(classDefs)
-            val clearAndRefreshEvent = resolveSingletonTimelineEvent(CLEAR_AND_REFRESH_TIMELINE, scan)
-            val scrollToTopEvent = resolveSingletonTimelineEvent(REQUEST_SCROLL_TO_TOP, scan)
-            val forYouPageTarget = resolveForYouPageTarget(classDefs, scan)
-            val reselectedEventType = resolveForYouReselectedEventType(scan)
-            val tabHook = resolveForYouTabHook(scrollToTopEvent, scan, forYouPageTarget, reselectedEventType)
+            // Resolutions run before any mutation, so none can go stale.
+            val clearAndRefreshEvent = resolveSingletonTimelineEvent(CLEAR_AND_REFRESH_TIMELINE)
+            val scrollToTopEvent = resolveSingletonTimelineEvent(REQUEST_SCROLL_TO_TOP)
+            val forYouPageTarget = resolveForYouPageTarget()
+            val reselectedEventType = resolveForYouReselectedEventType()
+            val tabHook = resolveForYouTabHook(scrollToTopEvent, forYouPageTarget, reselectedEventType)
             val requestTarget = resolveForYouRequestTarget()
 
             val applicationOnCreate = newXInitHook.fingerprint.method
@@ -301,56 +299,41 @@ val newXForYouTopicFilterPatch =
         }
     }
 
-context(context: BytecodePatchContext)
-private fun allForYouClassDefs(): List<com.android.tools.smali.dexlib2.iface.ClassDef> =
-    buildList {
-        context.classDefForEach { add(it) }
-    }
+/**
+ * The classes whose toString() has a string matching [value]. A class has at most one toString().
+ */
+private fun toStringClasses(
+    value: String,
+    comparison: StringComparisonType,
+): List<com.android.tools.smali.dexlib2.iface.ClassDef> =
+    Fingerprint(
+        name = "toString",
+        returnType = STRING_DESCRIPTOR,
+        parameters = emptyList(),
+        filters = listOf(string(value, comparison)),
+    ).matchAllOrNull().orEmpty().map { match -> match.originalClassDef }
 
-private class ForYouClassScan(
-    val classDef: com.android.tools.smali.dexlib2.iface.ClassDef,
-    val toStringMethods: List<Method>,
-    val oneParameterVoidMethods: List<Method>,
-)
-
-private fun scanForYouClasses(
-    classDefs: List<com.android.tools.smali.dexlib2.iface.ClassDef>,
-): List<ForYouClassScan> =
-    classDefs.flatMapParallel { classDef ->
-        val toStringMethods = mutableListOf<Method>()
-        val oneParameterVoidMethods = mutableListOf<Method>()
-        classDef.methods.forEach { method ->
-            when {
-                method.returnType == STRING_DESCRIPTOR &&
-                    method.name == "toString" &&
-                    method.parameterTypes.isEmpty() -> toStringMethods += method
-
-                method.returnType == "V" && method.parameterTypes.size == 1 ->
-                    oneParameterVoidMethods += method
-            }
-        }
-        if (toStringMethods.isNotEmpty() || oneParameterVoidMethods.isNotEmpty()) {
-            listOf(ForYouClassScan(classDef, toStringMethods, oneParameterVoidMethods))
-        } else {
-            emptyList()
-        }
-    }
-
-context(context: BytecodePatchContext)
 private fun resolveForYouTabHook(
     currentPageRefreshEvent: ResolvedTimelineEvent,
-    scan: List<ForYouClassScan>,
     forYouPageTarget: ResolvedForYouPageTarget,
     reselectedEventType: String?,
 ): ResolvedForYouTabHook {
     val candidates = mutableListOf<ResolvedForYouTabHook>()
-    scan.forEach { candidate ->
-        candidate.oneParameterVoidMethods.forEach { originalMethod ->
+    // The hook branches on an instance-of check of the reselected event.
+    val eventCheckMethods = reselectedEventType?.let { eventType ->
+        Fingerprint(
+            returnType = "V",
+            filters = listOf(instanceOf(eventType)),
+        ).matchAllOrNull()
+    }.orEmpty()
+    eventCheckMethods.forEach { match ->
+        val originalMethod = match.originalMethod
+        if (originalMethod.parameterTypes.size == 1) {
             val modernHookCandidate = reselectedEventType?.let { eventType ->
                 originalMethod.resolveModernForYouTabHook(forYouPageTarget, eventType)
             }
             if (modernHookCandidate != null) {
-                val mutableClass = context.mutableClassDefBy(candidate.classDef.type)
+                val mutableClass = mutableClassDefBy(match.originalClassDef.type)
                 val mutableMethod = mutableClass.methods.singleOrNull { method ->
                     method.name == originalMethod.name &&
                         method.returnType == originalMethod.returnType &&
@@ -398,18 +381,9 @@ private fun resolveForYouTabHook(
     return candidates.single()
 }
 
-context(context: BytecodePatchContext)
-private fun resolveForYouReselectedEventType(
-    scan: List<ForYouClassScan>,
-): String? {
-    val candidates = buildList {
-        scan.forEach { candidate ->
-            val matchingToStringMethods = candidate.toStringMethods.filter { method ->
-                method.containsStringFragment("OnTabReselected(tabIndex=")
-            }
-            if (matchingToStringMethods.size == 1) add(candidate.classDef.type)
-        }
-    }
+private fun resolveForYouReselectedEventType(): String? {
+    val candidates =
+        toStringClasses("OnTabReselected(tabIndex=", StringComparisonType.CONTAINS).map { it.type }
     if (candidates.size > 1) {
         throw PatchException(
             "Expected one NewX OnTabReselected event class, found ${candidates.size}: " +
@@ -419,18 +393,8 @@ private fun resolveForYouReselectedEventType(
     return candidates.singleOrNull()
 }
 
-context(context: BytecodePatchContext)
-private fun resolveForYouPageTarget(
-    classDefs: List<com.android.tools.smali.dexlib2.iface.ClassDef>,
-    scan: List<ForYouClassScan>,
-): ResolvedForYouPageTarget {
-    val classesByType = classDefs.associateBy { it.type }
-    val candidates = scan.flatMap { candidate ->
-        val toStringMethods = candidate.toStringMethods.filter { method ->
-            method.containsExactString("ForYou")
-        }
-        if (toStringMethods.size != 1) return@flatMap emptyList()
-        val classDef = candidate.classDef
+private fun resolveForYouPageTarget(): ResolvedForYouPageTarget {
+    val candidates = toStringClasses("ForYou", StringComparisonType.EQUALS).flatMap { classDef ->
         classDef.fields.filter { field ->
             AccessFlags.STATIC.isSet(field.accessFlags) &&
                 field.type == classDef.type
@@ -447,7 +411,7 @@ private fun resolveForYouPageTarget(
     val modelTypes = linkedSetOf<String>()
     fun addType(type: String?) {
         if (type == null || type == OBJECT_DESCRIPTOR || !modelTypes.add(type)) return
-        val definition = classesByType[type] ?: return
+        val definition = classDefByOrNull(type) ?: return
         addType(definition.superclass)
         definition.interfaces.forEach { interfaceType -> addType(interfaceType.toString()) }
     }
@@ -586,13 +550,12 @@ private fun Method.resolveModernForYouTabHook(
     return hookCandidates.single()
 }
 
-context(context: BytecodePatchContext)
 private fun installForYouRefreshBridge(
     tabHook: ResolvedForYouTabHook,
     clearAndRefreshEvent: ResolvedTimelineEvent,
     scrollToTopEvent: ResolvedTimelineEvent,
 ) {
-    val classDef = context.mutableClassDefBy(tabHook.method.definingClass)
+    val classDef = mutableClassDefBy(tabHook.method.definingClass)
     if (!classDef.interfaces.contains(FOR_YOU_REFRESH_TARGET_DESCRIPTOR)) {
         classDef.interfaces.add(FOR_YOU_REFRESH_TARGET_DESCRIPTOR)
     }
@@ -633,18 +596,10 @@ private fun installForYouRefreshBridge(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveSingletonTimelineEvent(
     eventLabel: String,
-    scan: List<ForYouClassScan>,
 ): ResolvedTimelineEvent {
-    val eventClasses = mutableListOf<com.android.tools.smali.dexlib2.iface.ClassDef>()
-    scan.forEach { candidate ->
-        val matchingToStringMethods = candidate.toStringMethods.filter { method ->
-            method.containsStringFragment(eventLabel)
-        }
-        if (matchingToStringMethods.size == 1) eventClasses += candidate.classDef
-    }
+    val eventClasses = toStringClasses(eventLabel, StringComparisonType.CONTAINS)
     if (eventClasses.size != 1) {
         throw PatchException(
             "Expected one NewX $eventLabel event class, found " +
@@ -889,7 +844,6 @@ private fun Block.emitForYouCurrentPageRefresh(
     returnVoid()
 }
 
-context(context: BytecodePatchContext)
 private fun patchHomeFilterGroupConstructor() {
     val matches = HomeFilterGroupFingerprint.scopedMatchAll()
     if (matches.size != 1) {
@@ -962,7 +916,6 @@ private fun patchHomeFilterGroupConstructor() {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
     val queryMatches = HomeTimelineQueryFingerprint.scopedMatchAll()
     if (queryMatches.size != 1) {
@@ -1147,12 +1100,6 @@ private fun Method.containsStringFragment(fragment: String): Boolean =
         instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.StringReference>()
             ?.string
             ?.contains(fragment) == true
-    } == true
-
-private fun Method.containsExactString(value: String): Boolean =
-    implementation?.instructions?.any { instruction ->
-        instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.StringReference>()
-            ?.string == value
     } == true
 
 private fun Method.fieldForSerializedArgument(

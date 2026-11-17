@@ -12,7 +12,7 @@ import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 private object NewXNewPostsPillFingerprint : Fingerprint(
     definingClass = "Lcom/x/urt/instructions/",
@@ -33,7 +33,7 @@ private object NewXNewPostsPillFingerprint : Fingerprint(
 
 @Suppress("unused")
 val hideNewPostPillPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide new posts pill",
         description = "Hides the new posts pill in NewX timelines.",
     ) {
