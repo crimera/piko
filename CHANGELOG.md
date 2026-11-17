@@ -1,3 +1,15 @@
+## [3.12.0-dev.1](https://github.com/crimera/piko/compare/v3.11.1...v3.12.0-dev.1) (2026-11-17)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Hide inline download button on own stories ([394149b](https://github.com/crimera/piko/commit/394149bec1934356f8da0619aa701d254c021926))
+* **Instagram:** Save whole images instead of truncated ones ([#2294](https://github.com/crimera/piko/issues/2294)) ([09cc0a5](https://github.com/crimera/piko/commit/09cc0a5629d9b89fbe72168ffd1fd7430b38b296))
+
+### ✨ New Features
+
+* **Instagram:** Add options for already downloaded media ([13d6ccb](https://github.com/crimera/piko/commit/13d6ccbfd5ab4bad7ef8c4f476f713cf01aef1d8))
+* **Twitter:** Add support for newer twitter versions ([7cd08a3](https://github.com/crimera/piko/commit/7cd08a3709022f815343c68afdec9cf19237b967))
+
 ## [3.11.1](https://github.com/crimera/piko/compare/v3.11.0...v3.11.1) (2026-11-10)
 
 ### 🐛 Bug Fixes
