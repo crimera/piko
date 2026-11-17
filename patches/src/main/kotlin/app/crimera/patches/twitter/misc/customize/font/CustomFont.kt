@@ -18,7 +18,7 @@ val customFont =
         description = "Customise font style",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(customFontHook, settingsPatch)
 
         execute {

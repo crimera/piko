@@ -109,6 +109,7 @@ val customizeNewXMediaSheetPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val hiddenItems =
             newXSettings {

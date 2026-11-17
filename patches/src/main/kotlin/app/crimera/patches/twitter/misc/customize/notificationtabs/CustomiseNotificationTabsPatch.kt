@@ -33,7 +33,7 @@ val customiseNotificationTabsPatch =
         name = "Customize notification tabs",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

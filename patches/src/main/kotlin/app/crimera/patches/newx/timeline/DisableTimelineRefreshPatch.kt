@@ -186,6 +186,7 @@ val disableTimelineRefreshPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val disableTimelineRefresh =
             newXToggle(

@@ -17,6 +17,7 @@ val postFilterPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXTimelineTextModelAdapterPatch, newXTimelineFilterPatch)
 
         newXSettings {

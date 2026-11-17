@@ -1353,6 +1353,7 @@ val newXHidePostReplyBarPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val hidePostReplyBar =
             newXToggle(

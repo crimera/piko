@@ -132,6 +132,7 @@ val newXDisableBlurPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val disableBlur =
             newXToggle(

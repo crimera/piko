@@ -18,7 +18,7 @@ val crashLogsPatch =
         description = "Adds recording crash logs functionality",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
 
         execute {
             twitterInitHook.fingerprint.method.apply {

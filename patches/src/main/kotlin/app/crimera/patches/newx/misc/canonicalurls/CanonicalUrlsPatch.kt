@@ -134,6 +134,7 @@ val newXCanonicalUrlsPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXPostModelResolutionPatch, newXExtensionPatch)
 
         val useCanonicalUrls =

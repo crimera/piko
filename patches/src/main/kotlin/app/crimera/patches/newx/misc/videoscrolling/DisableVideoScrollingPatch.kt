@@ -152,6 +152,7 @@ val newXDisableVideoScrollingPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val disableVideoScrolling =
             newXToggle(

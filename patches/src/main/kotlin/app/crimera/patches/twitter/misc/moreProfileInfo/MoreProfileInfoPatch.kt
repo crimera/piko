@@ -34,7 +34,7 @@ val moreProfileInfoPatch =
         description = "Adds more details on the profile page",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, moreProfileInfoResourcePatch, twitterUserEntity, decoderEntity)
         execute {
 

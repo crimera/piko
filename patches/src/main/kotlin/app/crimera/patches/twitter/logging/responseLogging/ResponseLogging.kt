@@ -29,7 +29,7 @@ val responseLoggingPatch =
         description = "Log json responses received from server",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

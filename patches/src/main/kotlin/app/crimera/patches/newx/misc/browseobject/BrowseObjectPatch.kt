@@ -23,6 +23,7 @@ val newXBrowseObjectPatch =
     ) {
         unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         newXSettings {
             category(Categories.ADVANCED) {

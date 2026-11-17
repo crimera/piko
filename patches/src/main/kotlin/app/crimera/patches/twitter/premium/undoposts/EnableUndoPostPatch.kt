@@ -55,7 +55,7 @@ val enableUndoPostPatch =
         description = "Enables ability to undo posts before posting",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

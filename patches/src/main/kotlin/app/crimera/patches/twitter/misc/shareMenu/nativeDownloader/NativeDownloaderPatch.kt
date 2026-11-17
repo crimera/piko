@@ -22,7 +22,7 @@ val nativeDownloaderPatch =
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(
             settingsPatch,
             entityGenerator,

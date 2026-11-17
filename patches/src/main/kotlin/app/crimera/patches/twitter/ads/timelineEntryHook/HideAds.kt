@@ -33,7 +33,7 @@ val hideAds =
         description = "Removed promoted posts, trends and google ads",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Normal Ads.

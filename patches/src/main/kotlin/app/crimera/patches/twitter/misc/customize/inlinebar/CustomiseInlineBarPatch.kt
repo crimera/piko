@@ -33,7 +33,7 @@ val customiseInlineBarPatch =
         name = "Customize Inline action Bar items",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

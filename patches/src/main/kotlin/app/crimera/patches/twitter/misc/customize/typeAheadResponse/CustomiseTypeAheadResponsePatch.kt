@@ -28,7 +28,7 @@ val customiseTypeAheadResponsePatch =
         name = "Customize search suggestions",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

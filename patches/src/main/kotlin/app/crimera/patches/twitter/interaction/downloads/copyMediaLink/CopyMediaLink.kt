@@ -35,7 +35,7 @@ val copyMediaLink =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
 
         dependsOn(settingsPatch)
 

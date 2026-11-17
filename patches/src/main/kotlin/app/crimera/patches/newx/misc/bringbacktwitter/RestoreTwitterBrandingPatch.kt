@@ -229,6 +229,7 @@ private val restoreTwitterLaunchRevealPatch =
     ) {
         unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         execute {
             val markerMethods = TwitterLaunchRevealMarkerFingerprint.scopedMatchAllOrNull().orEmpty()
@@ -371,6 +372,7 @@ val bringBackTwitterPatch =
     ) {
         unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         dependsOn(addResourcesPatch, restoreTwitterLaunchRevealPatch)
 

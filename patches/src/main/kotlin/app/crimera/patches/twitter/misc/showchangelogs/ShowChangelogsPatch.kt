@@ -30,7 +30,7 @@ val changelogsPatch =
         description = "Shows changelogs when new a patch is installed.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

@@ -20,7 +20,7 @@ val browseObjectPatch =
         description = "Adds an option to browse the tweet object in the share menu.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook)
 
         execute {

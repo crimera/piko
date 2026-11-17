@@ -213,6 +213,7 @@ val dynamicColorPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXInlineActionModelResolutionPatch)
 
         val theme =

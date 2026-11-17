@@ -156,6 +156,7 @@ val newXUnlockColorCustomizationPatch =
         description = "Unlocks the built-in app color selector for non-Premium users.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         execute {
             val matches = NewXDisplaySettingsPremiumStateFingerprint.scopedMatchAllOrNull().orEmpty()

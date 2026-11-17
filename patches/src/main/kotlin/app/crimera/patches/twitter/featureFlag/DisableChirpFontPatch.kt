@@ -19,7 +19,7 @@ val disableChirpFontPatch =
         name = "Disable chirp font",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 

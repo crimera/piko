@@ -31,7 +31,7 @@ val hideNudgeButtonPatch =
         description = "Hides follow/subscribe/follow back buttons on posts",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

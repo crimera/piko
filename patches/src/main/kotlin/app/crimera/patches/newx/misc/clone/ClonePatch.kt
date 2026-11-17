@@ -61,6 +61,7 @@ val clonePatch = resourcePatch(
 ) {
     unsupportedOnMount(default = false)
     compatibleWith(COMPATIBILITY_NEW_X)
+    category("NewX patches")
 
     val packageName by stringOption(
         key = "packageName",

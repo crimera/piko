@@ -303,6 +303,7 @@ val newXHidePostDetailAuthorActionsPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val hidePostDetailAuthorActions =
             newXToggle(

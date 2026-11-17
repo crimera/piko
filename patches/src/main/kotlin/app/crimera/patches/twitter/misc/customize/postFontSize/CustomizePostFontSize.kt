@@ -28,7 +28,7 @@ val customizePostFontSize =
         name = "Customise post font size",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

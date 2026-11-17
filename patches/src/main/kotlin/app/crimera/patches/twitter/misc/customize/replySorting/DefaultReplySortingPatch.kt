@@ -42,7 +42,7 @@ val defaultReplySortingPatch =
         name = "Customize default reply sorting",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

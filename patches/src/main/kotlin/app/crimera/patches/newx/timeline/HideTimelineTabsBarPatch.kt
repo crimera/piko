@@ -99,6 +99,7 @@ val newXHideTimelineTabsBarPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val (hideTimelineTabsBar, hideTimelineAddTab) =
             newXSettings {

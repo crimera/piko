@@ -33,7 +33,7 @@ val customiseSearchTabsPatch =
         name = "Customize search tab items",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

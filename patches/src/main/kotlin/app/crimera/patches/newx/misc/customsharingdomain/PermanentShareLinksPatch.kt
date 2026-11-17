@@ -15,6 +15,7 @@ val newXPermanentShareLinksPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         newXToggle(
             id = "newx.links.permanent_share_links",

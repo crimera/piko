@@ -84,6 +84,7 @@ val restorePinnedHomeTabPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         newXToggle(
             id = "newx.timeline.restore_pinned_tab",

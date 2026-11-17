@@ -102,6 +102,7 @@ val customizeNewXProfileTabsPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXExtensionPatch)
 
         newXCustomScreen(

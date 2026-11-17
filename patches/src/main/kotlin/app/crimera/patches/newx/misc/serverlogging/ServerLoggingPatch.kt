@@ -166,6 +166,7 @@ val newXServerLoggingPatch =
     ) {
         unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXExtensionPatch)
 
         newXSettings {

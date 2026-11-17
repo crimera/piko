@@ -41,6 +41,7 @@ val newXHideAiGeneratedPostsPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXTimelineModelAdapterPatch, newXPostModelResolutionPatch, newXTimelineFilterPatch)
 
         val aiSourcesToHide =

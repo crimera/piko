@@ -29,7 +29,7 @@ val hideHiddenRepliesPatch =
         name = "Hide hidden replies",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

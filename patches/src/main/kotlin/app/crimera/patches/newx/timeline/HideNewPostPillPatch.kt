@@ -39,6 +39,7 @@ val hideNewPostPillPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val hideNewPostPill =
             newXToggle(

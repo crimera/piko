@@ -126,6 +126,7 @@ val customFontPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         newXSettings {
             category(Categories.APPEARANCE) {

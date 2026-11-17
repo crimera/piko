@@ -31,7 +31,7 @@ val customiseExploreTabsPatch =
         name = "Customize explore tabs",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

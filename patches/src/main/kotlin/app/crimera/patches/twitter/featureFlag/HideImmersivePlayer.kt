@@ -20,7 +20,7 @@ val hideImmersivePlayer =
         description = "Removes swipe up for more videos in video player",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 

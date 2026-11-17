@@ -21,7 +21,7 @@ val removeViewCountPatch =
         description = "Removes the view count from the bottom of tweets",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 

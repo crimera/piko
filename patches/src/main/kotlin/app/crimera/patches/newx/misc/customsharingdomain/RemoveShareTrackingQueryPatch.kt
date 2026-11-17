@@ -15,6 +15,7 @@ val newXRemoveShareTrackingQueryPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         newXToggle(
             id = "newx.links.remove_share_tracking_query",

@@ -602,6 +602,7 @@ val newXHidePostDividersPatch =
     ) {
         unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val hidePostDividers =
             newXToggle(

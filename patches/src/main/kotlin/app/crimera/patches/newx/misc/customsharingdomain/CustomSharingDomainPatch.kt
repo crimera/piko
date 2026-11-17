@@ -455,6 +455,7 @@ val newXCustomSharingDomainPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         newXTextInput(
             id = "newx.content.custom_sharing_domain",

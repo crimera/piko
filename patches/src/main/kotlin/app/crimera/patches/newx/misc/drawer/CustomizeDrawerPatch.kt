@@ -1306,6 +1306,7 @@ val customizeNewXDrawerPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXSettingsPatch)
         dependsOn(drawerResourceNamesPatch)
 

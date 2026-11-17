@@ -20,7 +20,7 @@ val externalDownloaderPatch =
         name = "Support external downloader",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, entityGenerator, shareMenuButtonOnClickHook, browseObjectPatch)
 
         execute {

@@ -27,6 +27,7 @@ val newXHideVerifiedPostsPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXTimelineTextModelAdapterPatch, newXTimelineFilterPatch)
 
         val (filterTimeline, filterThread, verifiedTypesToHide) =

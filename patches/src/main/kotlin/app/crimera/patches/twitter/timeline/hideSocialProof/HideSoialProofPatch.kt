@@ -29,7 +29,7 @@ val hideSocialProofPatch =
         description = "Hides followed by context under profile",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

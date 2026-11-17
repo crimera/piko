@@ -17,7 +17,7 @@ val hideCommunityNotes =
         name = "Hide Community Notes",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {

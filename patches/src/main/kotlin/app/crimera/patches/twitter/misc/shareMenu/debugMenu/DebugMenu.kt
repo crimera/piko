@@ -20,7 +20,7 @@ val debugMenu =
         name = "Enable debug menu for posts",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, versionCheckPatch)
 
         execute {

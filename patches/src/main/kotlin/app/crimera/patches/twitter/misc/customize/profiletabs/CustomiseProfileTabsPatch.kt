@@ -35,7 +35,7 @@ val customiseProfileTabsPatch =
         name = "Customize profile tabs",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

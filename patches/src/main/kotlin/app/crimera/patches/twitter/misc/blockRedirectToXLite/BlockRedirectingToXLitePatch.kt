@@ -66,7 +66,7 @@ val blockRedirectingToXLitePatch =
         description = "Blocks redirecting to the new X Android UI on launch",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, versionCheckPatch)
 
         execute {

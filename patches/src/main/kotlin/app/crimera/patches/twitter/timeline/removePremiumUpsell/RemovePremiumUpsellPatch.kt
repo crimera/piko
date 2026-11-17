@@ -32,7 +32,7 @@ val disablePremiumUpsellPatch =
         description = "Removes premium upsells",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

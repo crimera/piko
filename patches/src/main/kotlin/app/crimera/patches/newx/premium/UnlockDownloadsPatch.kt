@@ -624,6 +624,7 @@ val newXDownloadPatch =
         description = "Unlocks media downloads and offline video saving in NewX.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         execute {
             val premium = requireExactlyOne(

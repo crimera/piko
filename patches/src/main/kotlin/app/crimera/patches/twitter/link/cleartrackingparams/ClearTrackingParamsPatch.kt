@@ -39,7 +39,7 @@ val clearTrackingParamsPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

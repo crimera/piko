@@ -234,6 +234,7 @@ val newXTranslatorPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXExtensionPatch, newXTimelineModelResolutionPatch, newXPostModelResolutionPatch)
 
         newXSettings {

@@ -56,6 +56,7 @@ val newXCrashLogsPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXExtensionPatch, newXCrashLogsResourcePatch)
 
         newXSettings {

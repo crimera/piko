@@ -28,7 +28,7 @@ val shareMenuButtonOnClickHook =
         description = "Hook required to configure share menu onclick action",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(decoderEntity)
 
         execute {

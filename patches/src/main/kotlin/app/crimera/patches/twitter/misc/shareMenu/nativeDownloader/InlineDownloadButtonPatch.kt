@@ -82,7 +82,7 @@ val inlineDownloadButtonPatch =
         description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, versionCheckPatch)
 
         execute {

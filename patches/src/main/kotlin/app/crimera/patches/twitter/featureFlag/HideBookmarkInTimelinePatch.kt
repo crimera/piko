@@ -19,7 +19,7 @@ val hideBookmarkInTimelinePatch =
         name = "Hide bookmark icon in timeline",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 

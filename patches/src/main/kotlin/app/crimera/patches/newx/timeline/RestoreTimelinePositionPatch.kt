@@ -408,6 +408,7 @@ val restoreTimelinePositionPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
 
         val restoreTimelinePosition =
             newXToggle(

@@ -17,7 +17,7 @@ val appIconPatch =
         name = "Change app icon",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(settingsPatch, appIconResourcePatch)
         execute {
             enableSettings("appIconCustomisation")

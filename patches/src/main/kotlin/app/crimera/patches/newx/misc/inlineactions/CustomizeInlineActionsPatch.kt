@@ -41,6 +41,7 @@ val customizeNewXInlineActionsPatch =
     ) {
         unsupportedOnMount()
         compatibleWith(COMPATIBILITY_NEW_X)
+        category("NewX patches")
         dependsOn(newXInlineActionModelResolutionPatch, newXInlineActionBarModelResolutionPatch)
 
         val hiddenInlineActions =

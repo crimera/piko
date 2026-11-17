@@ -40,7 +40,7 @@ val customDeepLinksPatch =
         )
 
         compatibleWith(COMPATIBILITY_X)
-        category("Legacy")
+        category("Old patches")
         dependsOn(handleCustomDeepLinksPatch)
 
         execute {
