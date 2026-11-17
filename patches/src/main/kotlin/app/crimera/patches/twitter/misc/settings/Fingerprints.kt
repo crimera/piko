@@ -17,18 +17,6 @@ import com.android.tools.smali.dexlib2.Opcode
 internal const val AUTHORIZE_APP_ACTIVITY_CLASS = "Lcom/twitter/android/AuthorizeAppActivity;"
 internal const val URL_INTERPRETER_ACTIVITY_CLASS = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity;"
 
-internal object ApplicationFingerprint : Fingerprint(
-    superclass = "Lcom/twitter/app/TwitterApplication;",
-    name = "attachBaseContext",
-    filters = listOf(
-        methodCall(
-            opcode = Opcode.INVOKE_STATIC,
-            parameters = listOf("Landroid/content/Context;"),
-            returnType = "V"
-        )
-    ),
-)
-
 internal object AuthorizeAppActivityFingerprint : Fingerprint(
     definingClass = AUTHORIZE_APP_ACTIVITY_CLASS,
     name = "onCreate",

@@ -6,6 +6,7 @@
 
 package app.crimera.patches.twitter.interaction.downloads.copyMediaLink
 
+import app.crimera.patches.twitter.misc.settings.checkCompatibilityPatch
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
@@ -37,7 +38,14 @@ val copyMediaLink =
         compatibleWith(COMPATIBILITY_X)
         category("Old patches")
 
-        dependsOn(settingsPatch)
+        dependsOn(
+            // To prevent the compatibility error message from being hidden within a dependency chain,
+            // this patch intentionally depends directly on `checkCompatibilityPatch`.
+            // Because this patch is executed first by default.
+            // The other patches only depend on it indirectly through `settingsPatch`.
+            checkCompatibilityPatch,
+            settingsPatch,
+        )
 
         execute {
             DownloadCallFingerprint.method.apply {
