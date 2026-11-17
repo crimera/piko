@@ -14,13 +14,10 @@ import android.view.inputmethod.InputContentInfo;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.io.InputStream;
-import java.util.Collections;
+import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
@@ -30,7 +27,7 @@ import app.morphe.extension.shared.Utils;
  * Sends a GIF committed from the keyboard as an animated image in a DM.
  *
  * Instagram's paste path decodes the content to a bitmap, saves it as a temp JPEG and sends that file as a photo.
- * The hooks below keep the original GIF bytes, write them to a file beside the JPEG, and give the pending-media
+ * The hooks below keep the original GIF bytes, write them to a cache file, and give the pending-media
  * factory that file to upload as animated media. The JPEG is left as Instagram saved it, so when any step fails
  * it is sent as a photo.
  */
@@ -39,21 +36,23 @@ public final class KeyboardGif {
     private static final String MIME_GIF = "image/gif";
     private static final String GIF_EXTENSION = ".gif";
 
-    /** Instagram rejects larger animated uploads, and the bytes are held in memory until the send starts. */
+    /** Instagram rejects larger animated uploads. */
     private static final int MAX_GIF_BYTES = 15 * 1024 * 1024;
 
-    /** GIF bytes keyed by the bitmap Instagram decoded from the same content, which is what its paste path hands on. */
-    private static final Map<Bitmap, byte[]> PENDING = Collections.synchronizedMap(new WeakHashMap<>());
-
-    /** A send can be dropped between the save and the pending media, which leaves a GIF file behind. */
+    // A send can be dropped before or after Instagram assigns the JPEG name.
     private static final int MAX_GIF_FILES = 8;
+    private static final ArrayDeque<PendingGif> PENDING = new ArrayDeque<>();
 
-    /**
-     * Paths of the GIF files written by {@link #afterSave}, oldest first, keyed by the name of the JPEG Instagram
-     * saved for the same content. Consumed by {@link #keyboardGifPath}.
-     * Keyed by name, not path: each has a random UUID, and Instagram may spell the directory differently later on.
-     */
-    private static final Map<String, String> GIF_PATHS = new LinkedHashMap<>();
+    private static final class PendingGif {
+        final File file;
+        final WeakReference<Bitmap> bitmap;
+        String jpegName;
+
+        PendingGif(File file, Bitmap bitmap) {
+            this.file = file;
+            this.bitmap = new WeakReference<>(bitmap);
+        }
+    }
 
     private KeyboardGif() {
     }
@@ -74,43 +73,42 @@ public final class KeyboardGif {
      * @param bitmap The bitmap Instagram decoded from the content, or null if it could not decode it.
      */
     public static void capture(InputContentInfo info, Bitmap bitmap) {
+        File file = null;
         try {
             if (bitmap == null || !info.getDescription().hasMimeType(MIME_GIF)) return;
 
             byte[] gif = read(info.getContentUri());
-            if (gif != null) PENDING.put(bitmap, gif);
+            if (gif == null) return;
+            file = File.createTempFile("direct_temp_photo_", GIF_EXTENSION, Utils.getContext().getCacheDir());
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                out.write(gif);
+            }
+
+            File evicted = null;
+            synchronized (PENDING) {
+                PENDING.addLast(new PendingGif(file, bitmap));
+                if (PENDING.size() > MAX_GIF_FILES) evicted = PENDING.removeFirst().file;
+            }
+            file = null; // The queue now owns the completed file.
+            if (evicted != null) evicted.delete();
         } catch (Exception ex) {
-            Logger.printException(() -> "Could not read the keyboard GIF, sending a still image instead", ex);
+            Logger.printException(() -> "Could not prepare the keyboard GIF, sending a still image instead", ex);
+        } finally {
+            if (file != null) file.delete();
         }
     }
 
     /**
-     * Injection point, after Instagram saved the bitmap to directory/name.
+     * Injection point, after Instagram saved the bitmap as a JPEG.
      */
-    public static void afterSave(Bitmap bitmap, String directory, String name) {
-        byte[] gif = bitmap == null ? null : PENDING.remove(bitmap);
-        if (gif == null) return;
-
-        int extension = name.lastIndexOf('.');
-        File file = new File(directory, (extension < 0 ? name : name.substring(0, extension)) + GIF_EXTENSION);
-        File partial = new File(directory, file.getName() + ".part");
-        try {
-            try (FileOutputStream out = new FileOutputStream(partial)) {
-                out.write(gif);
-            }
-            if (!partial.renameTo(file)) throw new IOException("Could not rename " + partial);
-        } catch (Exception ex) {
-            Logger.printException(() -> "Could not write the keyboard GIF, sending a still image instead", ex);
-            partial.delete();
-            return;
-        }
-
-        synchronized (GIF_PATHS) {
-            GIF_PATHS.put(name, file.getPath());
-            Iterator<String> oldest = GIF_PATHS.values().iterator();
-            while (GIF_PATHS.size() > MAX_GIF_FILES) {
-                new File(oldest.next()).delete();
-                oldest.remove();
+    public static void afterSave(Bitmap bitmap, String name) {
+        synchronized (PENDING) {
+            for (PendingGif gif : PENDING) {
+                if (gif.bitmap.get() == bitmap && bitmap != null) {
+                    gif.jpegName = name;
+                    gif.bitmap.clear();
+                    return;
+                }
             }
         }
     }
@@ -123,9 +121,18 @@ public final class KeyboardGif {
      */
     public static String keyboardGifPath(String path) {
         if (path == null) return null;
-        synchronized (GIF_PATHS) {
-            return GIF_PATHS.remove(new File(path).getName());
+        String name = new File(path).getName();
+        synchronized (PENDING) {
+            Iterator<PendingGif> entries = PENDING.iterator();
+            while (entries.hasNext()) {
+                PendingGif gif = entries.next();
+                if (name.equals(gif.jpegName)) {
+                    entries.remove();
+                    return gif.file.getPath();
+                }
+            }
         }
+        return null;
     }
 
     private static byte[] read(Uri uri) throws Exception {

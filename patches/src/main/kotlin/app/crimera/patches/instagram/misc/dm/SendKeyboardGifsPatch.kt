@@ -161,8 +161,8 @@ private object DirectMediaSendRequestFingerprint : Fingerprint(
  * decode to a bitmap -> save as a temp JPEG -> build a pending media for the file -> upload and send as a photo.
  *
  * Instagram can already upload a pending media as an animated image: the uploader switches to its animated
- * route on the pending media's type. So a GIF is let down the image path, its bytes are written beside the temp
- * JPEG, and the pending media built for that JPEG is given the GIF file and typed as animated media. The send
+ * route on the pending media's type. So a GIF is let down the image path, its bytes are saved on the background
+ * thread, and the pending media built for that JPEG is given the GIF file and typed as animated media. The send
  * request would then go to an animated endpoint that the server no longer has, so it is pointed at the photo
  * endpoint.
  */
@@ -205,19 +205,18 @@ val sendKeyboardGifsPatch = patch(
             )
         }
 
-        // Write the GIF bytes beside the JPEG that Instagram saved.
+        // Associate the prepared GIF with the JPEG that Instagram saved.
         val sendRunnableClass = decodeFingerprint.instructionMatches[2]
             .instruction.getReference<MethodReference>()!!.definingClass
 
         pastedPhotoSendFingerprint(sendRunnableClass).let {
             val save = it.instructionMatches[1].getInstruction<FiveRegisterInstruction>()
             val bitmapRegister = save.registerC
-            val directoryRegister = save.registerE
             val nameRegister = save.registerF
 
             it.method.addInstruction(
                 it.instructionMatches[2].index + 1,
-                "invoke-static {v$bitmapRegister, v$directoryRegister, v$nameRegister}, $EXTENSION_CLASS->afterSave(${BITMAP_CLASS}${STRING_CLASS}${STRING_CLASS})V",
+                "invoke-static {v$bitmapRegister, v$nameRegister}, $EXTENSION_CLASS->afterSave(${BITMAP_CLASS}${STRING_CLASS})V",
             )
         }
 
