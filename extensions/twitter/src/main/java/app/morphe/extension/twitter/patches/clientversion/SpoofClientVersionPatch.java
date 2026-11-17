@@ -6,6 +6,11 @@
 
 package app.morphe.extension.twitter.patches.clientversion;
 
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
@@ -21,10 +26,10 @@ public class SpoofClientVersionPatch {
         return 312410001;
     }
 
-    private static final ThreadLocal<java.net.URI> REQUEST = new ThreadLocal<>();
+    private static final ThreadLocal<URI> REQUEST = new ThreadLocal<>();
 
     /** Injection point: the legacy stack is about to add its client headers for this request. */
-    public static void onRequest(java.net.URI uri) {
+    public static void onRequest(URI uri) {
         REQUEST.set(uri);
         if (DEBUG && uri != null) android.util.Log.i("PikoSpoof", String.valueOf(uri.getPath()));
     }
@@ -36,15 +41,15 @@ public class SpoofClientVersionPatch {
         return "";
     }
 
-    private static java.util.Set<String> operations;
+    private static Set<String> operations;
 
     private static boolean isXChatRequest() {
-        java.net.URI uri = REQUEST.get();
+        URI uri = REQUEST.get();
         String path = uri == null ? null : uri.getPath();
         if (path == null) return false;
-        if (path.toLowerCase(java.util.Locale.ROOT).contains("xchat")) return true;
+        if (path.toLowerCase(Locale.ROOT).contains("xchat")) return true;
         if (operations == null) {
-            operations = new java.util.HashSet<>(java.util.Arrays.asList(xchatOperations().split(",")));
+            operations = new HashSet<>(Arrays.asList(xchatOperations().split(",")));
         }
         int slash = path.lastIndexOf('/');
         return path.contains("/graphql/") && operations.contains(path.substring(slash + 1));
