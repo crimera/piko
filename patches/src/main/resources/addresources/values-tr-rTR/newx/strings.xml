@@ -1,2 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="piko_newx_settings_title">Piko Ayarları</string>
+    <string name="piko_newx_settings_ok">Tamam</string>
+    <string name="piko_newx_settings_cancel">İptal</string>
+    <string name="piko_newx_settings_open_failed">Piko NewX ayarları açılamadı</string>
+    <string name="piko_newx_category_timeline_title">Akış</string>
+    <string name="piko_newx_category_timeline_summary">Akışın işleyişini ve görünümünü yönet</string>
+    <string name="piko_newx_category_content_title">İçerik</string>
+    <string name="piko_newx_category_content_summary">Promosyonları, önerileri, hassas medya içeriklerini ve filtreleri yönetin</string>
+    <string name="piko_newx_category_appearance_title">Görünüm</string>
+    <string name="piko_newx_category_appearance_summary">Renkleri ve yazı tiplerini özelleştirin</string>
+    <string name="piko_newx_category_post_actions_media_title">Gönderiler ve medya</string>
+    <string name="piko_newx_category_post_actions_media_summary">Gönderi işlemlerini, yanıtları, medya sekmelerini, indirmeleri ve paylaşımları özelleştirin</string>
+    <string name="piko_newx_category_links_title">Bağlantılar</string>
+    <string name="piko_newx_category_links_summary">Paylaşılan bağlantıları ve URL davranışını özelleştirin</string>
+    <string name="piko_newx_category_navigation_title">Gezinme</string>
+    <string name="piko_newx_category_navigation_summary">Gezinme çubuğu ve çekmece öğelerini özelleştir</string>
+    <string name="piko_newx_category_advanced_title">Gelişmiş</string>
+    <string name="piko_newx_category_advanced_summary">İleri düzey kullanıcı araçları, hata ayıklama ve ayarların bakımı</string>
+    <string name="piko_newx_backup_restore_title">Yedekle ve geri yükle</string>
+    <string name="piko_newx_backup_restore_summary">Piko NewX ayarlarınızı kaydedin veya geri yükleyin</string>
+    <string name="piko_newx_disable_timeline_refresh_title">Akışın otomatik olarak yenilenmesini devre dışı bırak</string>
+    <string name="piko_newx_disable_timeline_refresh_summary">NewX başlatıldığında veya ön plana geri döndüğünde zaman çizelgesinde en üste atlamaların oluşmasını önler</string>
+    <string name="piko_newx_restore_timeline_position_title">Akış konumunu geri yükle</string>
+    <string name="piko_newx_verified_account_timeline_filter_title">Akış filtrelemeyi etkinleştir</string>
+</resources>
