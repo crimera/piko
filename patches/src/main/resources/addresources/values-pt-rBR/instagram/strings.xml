@@ -219,6 +219,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Recodifica o áudio xHE-AAC dos downloads do DASH para AAC-LC a 192 kbps, formato compatível com todos os reprodutores</string>
     <string name="piko_embed_download_metadata">Incorporar metadados do vídeo</string>
     <string name="piko_embed_download_metadata_desc">Adiciona a legenda, o link da publicação, o autor e a data de envio aos arquivos MP4 baixados</string>
+    <string name="piko_download_conflict_policy">Quando a mídia já existe</string>
+    <string name="piko_download_conflict_policy_desc">Aplica-se a arquivos com o mesmo nome na pasta de downloads selecionada</string>
+    <string name="piko_download_conflict_rename">Salvar com um novo nome</string>
+    <string name="piko_download_conflict_skip">Ignorar mídia já baixada</string>
+    <string name="piko_download_conflict_overwrite">Sobrescrever o arquivo existente</string>
+    <string name="piko_download_media_exists">A mídia já existe</string>
+    <string name="piko_download_media_in_progress">A mídia já está baixando</string>
     <string name="piko_download_file_name_template">Formato do nome do arquivo</string>
     <string name="piko_download_file_name_template_invalid">Nome inválido</string>
     <string name="piko_download_file_name_insert_token">Inserir %1$s</string>

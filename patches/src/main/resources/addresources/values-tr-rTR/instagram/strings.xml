@@ -122,7 +122,7 @@
     <string name="piko_follow_list_non_follower_badge">Takip Edilenler listesinde takip etmeyenleri göster</string>
     <string name="piko_follow_list_non_follower_badge_desc">Kendi “Takip Edilenler” listenizdeki, sizi geri takip etmeyen hesapların satırlarına bir rozet ekler</string>
     <string name="piko_resume_reels_after_scrolling">Kaydırma işleminden sonra videoları oynatmaya devam et</string>
-    <string name="piko_resume_reels_after_scrolling_desc">Bir Reel\'si geri kaydırdığınızda, onu kaldığınız yerden izlemeye devam edin</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Bir Reel\'i geri kaydırdığınızda, onu kaldığınız yerden izlemeye devam edin</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan en yüksek çözünürlüklü görselleri çeker. Performansı düşürebilir, uygulama veri boyutunu artırabilir veya uygulamanın eski bir düzene geçmesine neden olabilir</string>
     <string name="piko_copy_comment">Yorumu kopyala</string>
@@ -153,7 +153,7 @@
     <string name="piko_hidden_chats_hidden">Sohbet gizlendi</string>
     <string name="piko_hidden_chats_unhidden">Sohbet görünür</string>
     <string name="piko_hidden_chats_opened">Gizli sohbetler</string>
-    <string name="piko_hidden_chats_closed">Gelen kutunuza geri dönün</string>
+    <string name="piko_hidden_chats_closed">Gelen kutunuza geri döndünüz</string>
     <string name="piko_hidden_chats_mute">Gizli sohbetleri sessize al</string>
     <string name="piko_hidden_chats_mute_desc">Gizlediğiniz sohbetlerden gelen mesajlar için bildirimleri gösterme</string>
     <string name="piko_hidden_chats_taps">Gizli sohbetleri açmak için dokun</string>
@@ -219,6 +219,13 @@
     <string name="piko_dash_audio_aac_lc_desc">DASH indirmelerindeki xHE-AAC sesini, her oynatıcıda çalınabilen 192 kbps\'lik AAC-LC formatında yeniden kodlar</string>
     <string name="piko_embed_download_metadata">Video meta verilerini göm</string>
     <string name="piko_embed_download_metadata_desc">İndirilen MP4 dosyalarına açıklamayı, gönderi bağlantısını, oluşturucuyu ve yükleme tarihini ekler</string>
+    <string name="piko_download_conflict_policy">Medya halihazırda mevcut olduğunda</string>
+    <string name="piko_download_conflict_policy_desc">Seçilen indirme klasöründeki aynı adlı dosyalar için geçerlidir</string>
+    <string name="piko_download_conflict_rename">Yeni bir adla kaydet</string>
+    <string name="piko_download_conflict_skip">Halihazırda indirilmiş medyayı atla</string>
+    <string name="piko_download_conflict_overwrite">Mevcut dosyanın üzerine yaz</string>
+    <string name="piko_download_media_exists">Medya zaten mevcut</string>
+    <string name="piko_download_media_in_progress">Medya halihazırda indiriliyor</string>
     <string name="piko_download_file_name_template">Dosya adı biçimi</string>
     <string name="piko_download_file_name_template_invalid">Geçersiz dosya adı</string>
     <string name="piko_download_file_name_insert_token">%1$s ekle</string>
