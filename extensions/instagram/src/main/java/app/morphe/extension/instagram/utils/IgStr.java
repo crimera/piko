@@ -42,7 +42,8 @@ public final class IgStr {
         }
     }
 
-    private static Context baseContext() {
+    // Instagram's application resources can replace added string IDs with downloaded app text.
+    public static Context baseContext() {
         if (baseContext != null) return baseContext;
         Context ctx = Utils.getContext();
         while (ctx instanceof ContextWrapper) {

@@ -16,7 +16,11 @@ import java.util.Comparator;
 import java.util.List;
 
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.patches.devFlags.Flag;
+import app.morphe.extension.instagram.settings.preference.RecommendedFlagsScreen;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
+
+import static app.morphe.extension.instagram.utils.IgStr.str;
 
 public final class SettingsSearchIndex {
     private static final String PIKO_FRAGMENT_KEY_PREFIX = "piko_frag_";
@@ -25,6 +29,16 @@ public final class SettingsSearchIndex {
 
     public interface ScreenFactory {
         PreferenceScreen build(String fragmentName);
+    }
+
+    public static SettingsSearchIndex forRecommendedFlags(List<Flag> flags) {
+        List<IndexedResult> results = new ArrayList<>();
+        for (Flag flag : flags) {
+            results.add(new IndexedResult(new Result(flag.getName(), flag.getDesc(),
+                    str(flag.getCategory().titleKey()), RecommendedFlagsScreen.fragmentName(flag.getCategory()),
+                    flag.getCode().key, null), results.size()));
+        }
+        return new SettingsSearchIndex(results);
     }
 
     public static SettingsSearchIndex create(
