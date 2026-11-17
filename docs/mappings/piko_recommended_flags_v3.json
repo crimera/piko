@@ -366,6 +366,12 @@
   },
   {
     "category" : "profile",
+    "name" : "Muse profile button",
+    "desc" : "Disable to hide the Muse button in your profile navigation bar",
+    "code" : "140592::0"
+  },
+  {
+    "category" : "profile",
     "name" : "Threads profile button",
     "desc" : "Disable to remove the threads button in profiles.",
     "code" : "58467::20"

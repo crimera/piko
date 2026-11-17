@@ -625,6 +625,8 @@
     <string name="piko_rec_flag_121655_0_desc" formatted="false">"Enable to have the notes Poll feature (Not guaranted to work)."</string>
     <string name="piko_rec_flag_76757_0_name" formatted="false">"Blends"</string>
     <string name="piko_rec_flag_76757_0_desc" formatted="false">"Disable to hide the Blends button in the header of eligible chats."</string>
+    <string name="piko_rec_flag_140592_0_name" formatted="false">"Muse profile button"</string>
+    <string name="piko_rec_flag_140592_0_desc" formatted="false">"Disable to hide the Muse button in your profile navigation bar"</string>
     <string name="piko_rec_flag_58467_20_name" formatted="false">"Threads profile button"</string>
     <string name="piko_rec_flag_58467_20_desc" formatted="false">"Disable to remove the threads button in profiles."</string>
     <string name="piko_rec_flag_83371_10_name" formatted="false">"Per-session auto-scroll"</string>
