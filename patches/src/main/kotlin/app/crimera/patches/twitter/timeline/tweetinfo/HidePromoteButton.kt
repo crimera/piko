@@ -16,7 +16,6 @@ val hidePromoteButton =
     patch(
         name = "Hide promote button",
         description = "Hides promote button under self posts",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

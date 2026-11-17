@@ -31,7 +31,6 @@ private object HideLiveThreadsFingerprint : Fingerprint(
 val hideLiveThreadsPatch =
     patch(
         name = "Hide Live Threads",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

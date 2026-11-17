@@ -58,7 +58,6 @@ val downloadPatch =
     patch(
         name = "Download patch",
         description = "Unlocks the ability to download videos and gifs from Twitter/X",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

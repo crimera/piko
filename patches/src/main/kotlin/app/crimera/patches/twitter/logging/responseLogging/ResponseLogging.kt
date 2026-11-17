@@ -27,7 +27,6 @@ val responseLoggingPatch =
     patch(
         name = "Log server response",
         description = "Log json responses received from server",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -27,7 +27,6 @@ val noShortenedUrlPatch =
     patch(
         name = "No shortened URL",
         description = "Get rid of t.co short urls.",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

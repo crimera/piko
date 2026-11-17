@@ -31,7 +31,6 @@ private object CustomiseInlineBarFingerprint : Fingerprint(
 val customiseInlineBarPatch =
     patch(
         name = "Customize Inline action Bar items",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -16,7 +16,6 @@ import app.morphe.patcher.patch.patch
 val crashLogsPatch =
     patch(
         description = "Adds recording crash logs functionality",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -29,7 +29,6 @@ private object CustomFontHookFingerprint : Fingerprint(
 val customFontHook =
     patch(
         description = "Hook to customise font",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -19,7 +19,6 @@ val nativeTranslatorModePatch =
     patch(
         name = "Native translator",
         description = "Requires X 11.0.0-release.0 or higher.",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

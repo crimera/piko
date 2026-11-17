@@ -27,7 +27,6 @@ private object HideHiddenRepliesFingerprint : Fingerprint(
 val hideHiddenRepliesPatch =
     patch(
         name = "Hide hidden replies",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

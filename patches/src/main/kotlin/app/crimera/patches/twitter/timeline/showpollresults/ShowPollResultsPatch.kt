@@ -31,7 +31,6 @@ val showPollResultsPatch =
     patch(
         name = "Show poll results",
         description = "Adds an option to show poll results without voting",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -26,7 +26,6 @@ private object CustomiseNavBarFingerprint : Fingerprint(
 val customizePostFontSize =
     patch(
         name = "Customise post font size",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

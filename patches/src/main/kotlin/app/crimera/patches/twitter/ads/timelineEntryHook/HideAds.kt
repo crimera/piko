@@ -31,7 +31,6 @@ val hideAds =
     patch(
         name = "Remove Ads",
         description = "Removed promoted posts, trends and google ads",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

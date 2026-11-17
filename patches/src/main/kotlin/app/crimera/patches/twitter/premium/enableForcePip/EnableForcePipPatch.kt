@@ -35,7 +35,6 @@ val enableForcePipPatch =
     patch(
         name = "Enable PiP mode automatically",
         description = "Enables PiP mode when you close the app",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

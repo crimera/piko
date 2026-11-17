@@ -31,7 +31,6 @@ val RemoveSearchSuggestions =
     patch(
         name = "Remove search suggestions",
         description = "Hide/Remove search suggestion in explore section",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

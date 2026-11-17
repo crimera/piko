@@ -24,7 +24,6 @@ val hideNavBarBadgesPatch =
     patch(
         name = "Hide badges from navigation bar icons",
         description = "Hides notification nudges & counts from navigation bar icons",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -30,7 +30,6 @@ val hideFABPatch =
     patch(
         name = "Hide FAB",
         description = "Adds an option to hide Floating action button",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -31,7 +31,6 @@ val hideBannerPatch =
     patch(
         name = "Hide Banner",
         description = "Hide new post banner",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -30,7 +30,6 @@ val disablePremiumUpsellPatch =
     patch(
         name = "Remove premium upsell",
         description = "Removes premium upsells",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

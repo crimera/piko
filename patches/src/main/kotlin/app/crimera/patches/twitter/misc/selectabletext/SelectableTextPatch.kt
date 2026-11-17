@@ -42,7 +42,6 @@ val selectableTextPatch =
     patch(
         name = "Selectable Text",
         description = "Makes bio and username selectable",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

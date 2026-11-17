@@ -31,7 +31,6 @@ private object CustomiseSearchTabsPatchFingerprint : Fingerprint(
 val customiseSearchTabsPatch =
     patch(
         name = "Customize search tab items",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

@@ -53,7 +53,6 @@ val enableUndoPostPatch =
     patch(
         name = "Enable Undo Posts",
         description = "Enables ability to undo posts before posting",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

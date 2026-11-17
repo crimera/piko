@@ -17,7 +17,6 @@ val legacyShareLinksPatch =
     patch(
         name = "Legacy share links",
         description = "Brings back username on post share links. Works post 11.4x.xx",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

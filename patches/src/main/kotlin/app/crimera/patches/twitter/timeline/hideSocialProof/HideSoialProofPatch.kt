@@ -27,7 +27,6 @@ val hideSocialProofPatch =
     patch(
         name = "Hide followed by context",
         description = "Hides followed by context under profile",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

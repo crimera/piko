@@ -32,7 +32,6 @@ val moreProfileInfoPatch =
     patch(
         name = "More information on profile",
         description = "Adds more details on the profile page",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")

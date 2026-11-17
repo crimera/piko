@@ -27,7 +27,6 @@ private object CustomiseTimelineTabsFingerprint : Fingerprint(
 val customiseTimelineTabsPatch =
     patch(
         name = "Customize timeline top bar",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         category("Legacy")
