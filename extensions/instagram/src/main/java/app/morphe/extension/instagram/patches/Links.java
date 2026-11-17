@@ -81,6 +81,11 @@ public class Links {
         );
     }
 
+    public static boolean shouldBlockOnboardingScreen(String appId) {
+        return "com.bloks.www.bloks.ig.ndx.ci.entry.screen".equals(appId)
+                || "com.bloks.www.bloks.ig.ndx.ls.entry.screen".equals(appId);
+    }
+
     public static boolean openExternally(String url) {
         try {
             if(Pref.openLinksExternally()) {
