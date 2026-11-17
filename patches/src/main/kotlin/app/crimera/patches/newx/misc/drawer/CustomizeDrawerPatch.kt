@@ -20,6 +20,7 @@ import app.crimera.patches.newx.misc.navbar.NewXTabDataFingerprint
 import app.crimera.patches.newx.misc.navbar.resolveIconField
 import app.crimera.patches.newx.misc.navbar.resolveNavBarItemContent
 import app.crimera.patches.newx.misc.navbar.resolveTitleResourceIdAtRowCall
+import app.morphe.patcher.patch.classDefBy
 import app.morphe.patcher.patch.classDefForEach
 import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.resource.ResourceType
@@ -57,6 +58,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
@@ -77,6 +79,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.resourceXml
+import app.morphe.util.indexOfFirstInstruction
 
 private const val DRAWER_RESOURCE_ITEM_ID_PREFIX = "RESOURCE_NAME_"
 private const val DRAWER_RESOURCE_TYPE = "string"
@@ -438,43 +441,31 @@ private fun resolveDrawerRendererCalls(renderer: MethodReference): List<DrawerRe
     val expectedRegisterCount = renderer.parameterTypes.sumOf { type ->
         if (type.toString() == "J" || type.toString() == "D") 2 else 1
     }
-    // Immutable prefilter: only classes that actually call the renderer are turned into mutable
-    // proxies below.
-    val callerClasses =
-        Fingerprint(
-            filters = listOf(
-                methodCall(
-                    definingClass = renderer.definingClass,
-                    name = renderer.name,
-                    parameters = renderer.parameterTypes.map(CharSequence::toString),
-                    returnType = renderer.returnType,
-                    opcode = Opcode.INVOKE_STATIC_RANGE,
-                ),
-            ),
-        ).matchAllOrNull().orEmpty()
-            .map { match -> match.originalClassDef.type }
-            .filter { classType -> classType.startsWith(DRAWER_SCOPE) }
-            .distinct()
+    val rendererCall =
+        methodCall(
+            definingClass = renderer.definingClass,
+            name = renderer.name,
+            parameters = renderer.parameterTypes.map(CharSequence::toString),
+            returnType = renderer.returnType,
+            opcode = Opcode.INVOKE_STATIC_RANGE,
+        )
+    // A method can call the renderer more than once, so every call in each matched method is used.
     val calls = buildList {
-        callerClasses.forEach { classType ->
-            val mutableClass = mutableClassDefBy(classType)
-            mutableClass.methods.forEach { method ->
-                method.instructions.forEachIndexed { index, instruction ->
-                    if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@forEachIndexed
-                    val call = instruction as? Instruction3rc ?: return@forEachIndexed
-                    val reference = instruction.getReference<MethodReference>()
-                        ?: return@forEachIndexed
-                    if (reference.toSmaliDescriptor() != renderer.toSmaliDescriptor()) {
-                        return@forEachIndexed
-                    }
-                    if (call.registerCount != expectedRegisterCount) {
-                        throw PatchException(
-                            "NewX drawer renderer call register count changed in $method @ $index: " +
-                                "expected $expectedRegisterCount, found ${call.registerCount}",
-                        )
-                    }
-                    add(DrawerRendererCall(method, index, call, reference))
+        Fingerprint(
+            definingClass = DRAWER_SCOPE,
+            filters = listOf(rendererCall),
+        ).matchAllOrNull().orEmpty().forEach { match ->
+            val method = match.method
+            method.instructions.forEachIndexed { index, instruction ->
+                if (!rendererCall.matches(method, instruction)) return@forEachIndexed
+                val call = instruction as Instruction3rc
+                if (call.registerCount != expectedRegisterCount) {
+                    throw PatchException(
+                        "NewX drawer renderer call register count changed in $method @ $index: " +
+                            "expected $expectedRegisterCount, found ${call.registerCount}",
+                    )
                 }
+                add(DrawerRendererCall(method, index, call, call.reference as MethodReference))
             }
         }
     }
@@ -994,31 +985,7 @@ private data class DrawerTabNavigation(
 
 private val CASE_END_OPCODES = setOf(Opcode.RETURN_OBJECT, Opcode.RETURN_VOID, Opcode.THROW)
 
-/**
- * Resolves the tab change: a captured Function1 field invoked with the tab in the Communities
- * click. Returns the invoke index and the field it loads, or null if there is none.
- */
-private fun List<Instruction>.resolveTabChangeFunction(
-    communitiesIndex: Int,
-    caseEndIndex: Int,
-): Pair<Int, FieldReference>? {
-    for (index in communitiesIndex + 1 until caseEndIndex) {
-        val instruction = this[index]
-        if (instruction.opcode != Opcode.INVOKE_INTERFACE &&
-            instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
-        ) continue
-        val reference = instruction.getReference<MethodReference>() ?: continue
-        if (reference.definingClass != FUNCTION1_DESCRIPTOR ||
-            reference.name != "invoke" ||
-            reference.parameterTypes.map(CharSequence::toString) != listOf(OBJECT_DESCRIPTOR) ||
-            reference.returnType != OBJECT_DESCRIPTOR
-        ) continue
-        val receiver = instruction.registersUsed.firstOrNull() ?: continue
-        val field = resolveRegisterField(receiver, index) ?: continue
-        return index to field
-    }
-    return null
-}
+private val INVOKE_INTERFACE_OPCODES = listOf(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE)
 
 private fun List<Instruction>.resolveRegisterField(
     register: Int,
@@ -1042,74 +1009,58 @@ private fun List<Instruction>.resolveRegisterField(
 private fun resolveDrawerTabNavigation(
     tabData: NewXNavBarTabData,
 ): DrawerTabNavigation {
-    val communitiesField = "${tabData.navigationType}->COMMUNITIES:${tabData.navigationType}"
     // Read-only discovery pass; see the navigation bar patch for why mutable proxies are avoided.
-    val dispatcherClasses =
+    val dispatcherMatch =
         Fingerprint(
             name = "invoke",
             returnType = OBJECT_DESCRIPTOR,
             parameters = emptyList(),
             filters = listOf(
+                // Dispatch switch in the prologue.
+                opcode(Opcode.PACKED_SWITCH),
+                // Communities case.
                 fieldAccess(
+                    opcode = Opcode.SGET_OBJECT,
                     definingClass = tabData.navigationType,
                     name = "COMMUNITIES",
-                    type = tabData.navigationType,
-                    opcode = Opcode.SGET_OBJECT,
+                    type = tabData.navigationType
                 ),
-            ),
-        ).matchAllOrNull().orEmpty().filter { match ->
-            match.originalMethod.implementation?.instructions?.any { instruction ->
-                instruction.opcode == Opcode.PACKED_SWITCH
-            } == true
-        }.map { match -> match.originalClassDef.type }
-    val dispatcherClass = requireExactlyOne("NewX drawer click dispatcher", dispatcherClasses)
-    val dispatcher =
-        requireExactlyOne(
-            label = "NewX drawer click dispatcher invoke",
-            candidates = mutableClassDefBy(dispatcherClass).methods.filter { method ->
-                method.name == "invoke" &&
-                    method.returnType == OBJECT_DESCRIPTOR &&
-                    method.parameterTypes.isEmpty() &&
-                    method.implementation != null
-            },
-        ) { it.toString() }
-    val dispatcherInstructions = dispatcher.instructions.toList()
-    val communitiesIndex =
-        requireExactlyOne(
-            label = "NewX Communities drawer click",
-            candidates = dispatcherInstructions.indices.filter { index ->
-                val instruction = dispatcherInstructions[index]
-                instruction.opcode == Opcode.SGET_OBJECT &&
-                    instruction.getReference<FieldReference>()?.toString() == communitiesField
-            },
-        ) { it.toString() }
-    // The Communities case ends at the first return; bound the scan to that case so a later
-    // click handler cannot supply a false tab change or closer.
-    val caseEndIndex =
-        dispatcherInstructions.indices.firstOrNull { index ->
-            index > communitiesIndex &&
-                dispatcherInstructions[index].opcode in CASE_END_OPCODES
-        } ?: dispatcherInstructions.size
-    // The tab change is a captured Function1 field on the drawer component, invoked in the case.
-    val tabChangeFunction =
-        dispatcherInstructions.resolveTabChangeFunction(communitiesIndex, caseEndIndex)
-            ?: throw PatchException(
-                "NewX Communities drawer click has no tab change function: $dispatcher",
+                // Tab change: a captured Function1 field on the drawer component.
+                methodCall(
+                    definingClass = FUNCTION1_DESCRIPTOR,
+                    name = "invoke",
+                    parameters = listOf(OBJECT_DESCRIPTOR),
+                    returnType = OBJECT_DESCRIPTOR,
+                    opcodes = INVOKE_INTERFACE_OPCODES,
+                ),
+                // Drawer close.
+                methodCall(
+                    parameters = listOf(OBJECT_DESCRIPTOR),
+                    returnType = "V",
+                    opcodes = INVOKE_INTERFACE_OPCODES,
+                ),
             )
-    val tabChangeIndex = tabChangeFunction.first
-    val closerIndex =
-        dispatcherInstructions.indices.firstOrNull { index ->
-            if (index <= tabChangeIndex || index >= caseEndIndex) return@firstOrNull false
-            val instruction = dispatcherInstructions[index]
-            if (instruction.opcode != Opcode.INVOKE_INTERFACE &&
-                instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE
-            ) return@firstOrNull false
-            val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
-            reference.returnType == "V" &&
-                reference.parameterTypes.map(CharSequence::toString) == listOf(OBJECT_DESCRIPTOR)
-        } ?: throw PatchException("NewX Communities drawer click has no drawer close call: $dispatcher")
-    val closerInstruction = dispatcherInstructions[closerIndex]
-    val closerRegisters = closerInstruction.registersUsed
+        ).matchAll(1..1).single()
+    val dispatcher = dispatcherMatch.originalMethod
+    val dispatcherInstructions = dispatcher.instructions.toList()
+    val switchIndex = dispatcherMatch.instructionMatches[0].index
+    val communitiesIndex = dispatcherMatch.instructionMatches[1].index
+    val tabChangeMatch = dispatcherMatch.instructionMatches[2]
+    val tabChangeIndex = tabChangeMatch.index
+    val closerMatch = dispatcherMatch.instructionMatches[3]
+    val closerIndex = closerMatch.index
+    // The Communities case ends at the first return. A tab change or closer after it belongs to
+    // a later click handler.
+    val caseEndIndex = dispatcher.indexOfFirstInstruction(communitiesIndex) { opcode in CASE_END_OPCODES }
+    if (caseEndIndex in 0..<closerIndex) {
+        throw PatchException("NewX Communities drawer click has no tab change and close call: $dispatcher")
+    }
+    val tabChangeFunctionField =
+        dispatcherInstructions.resolveRegisterField(
+            tabChangeMatch.instruction.registersUsed.first(),
+            tabChangeIndex,
+        ) ?: throw PatchException("NewX Communities drawer click has no tab change function: $dispatcher")
+    val closerRegisters = closerMatch.instruction.registersUsed
     if (closerRegisters.size != 2) {
         throw PatchException(
             "NewX drawer close call has an unexpected register shape in $dispatcher @ $closerIndex",
@@ -1117,9 +1068,7 @@ private fun resolveDrawerTabNavigation(
     }
     val closerObjectRegister = closerRegisters[0]
     val closerArgRegister = closerRegisters[1]
-    val closerMethod =
-        closerInstruction.getReference<MethodReference>()
-            ?: throw PatchException("NewX drawer close call has no method reference: $dispatcher")
+    val closerMethod = closerMatch.methodReference
     val closerField =
         requireExactlyOne(
             label = "NewX drawer close field",
@@ -1152,13 +1101,6 @@ private fun resolveDrawerTabNavigation(
     // prologue value is intact on the real path. A dataflow check cannot prove this because
     // other case blocks reuse the same registers, so the prologue load is resolved by position
     // and cross-checked against the stable API package instead.
-    val switchIndex =
-        dispatcherInstructions.indices.firstOrNull { index ->
-            dispatcherInstructions[index].opcode == Opcode.PACKED_SWITCH
-        } ?: throw PatchException("NewX drawer click dispatcher has no dispatch switch: $dispatcher")
-    if (switchIndex >= communitiesIndex) {
-        throw PatchException("NewX drawer dispatch switch is outside the prologue: $dispatcher")
-    }
     // Older releases load the close argument inline in the case block; newer ones hoist it
     // into the prologue before the dispatch switch. A dataflow check cannot prove the prologue
     // load because other case blocks reuse the same registers, so each shape is resolved by
@@ -1187,7 +1129,7 @@ private fun resolveDrawerTabNavigation(
     return DrawerTabNavigation(
         componentClass = componentClass,
         enumType = tabData.navigationType,
-        tabChangeFunctionField = tabChangeFunction.second,
+        tabChangeFunctionField = tabChangeFunctionField,
         closerField = closerField,
         closerMethod = closerMethod,
         closerArgField = closerArgField,
@@ -1196,30 +1138,20 @@ private fun resolveDrawerTabNavigation(
 
 /** Captures the tab component after its constructor finishes so shortcuts can open tabs. */
 private fun hookDrawerTabComponent(componentClass: String) {
-    val classDef = mutableClassDefBy(componentClass)
-    val superType = classDef.superclass.toString()
-    val constructors =
-        classDef.methods.filter { method ->
-            method.name == "<init>" && method.implementation != null
-        }
-    if (constructors.isEmpty()) {
-        throw PatchException("NewX tab component has no constructor: $componentClass")
-    }
-    constructors.forEach { constructor ->
-        val superCallIndex =
-            constructor.instructions.indexOfFirst { instruction ->
-                (instruction.opcode == Opcode.INVOKE_DIRECT ||
-                    instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) &&
-                    instruction.getReference<MethodReference>()?.let { reference ->
-                        reference.name == "<init>" &&
-                            reference.definingClass == superType
-                    } == true
-            }
-        if (superCallIndex < 0) {
-            throw PatchException("NewX tab component constructor has no super call: $constructor")
-        }
+    Fingerprint(
+        definingClass = componentClass,
+        name = "<init>",
+        filters = listOf(
+            methodCall(
+                definingClass = classDefBy(componentClass).superclass!!,
+                name = "<init>",
+                opcodes = listOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE),
+            ),
+        ),
+    ).matchAll().forEach { match ->
+        val constructor = match.method
         constructor.insertHook(
-            index = superCallIndex + 1,
+            index = match.instructionMatches.first().index + 1,
             // Every path that reaches the end of the super call must capture the component. The
             // block only reads p0, so relocating a branch onto it cannot run with undefined state.
             relocateBranchTargets = true,
@@ -1247,12 +1179,12 @@ private fun replaceDrawerTabOpenerBody(
     navigation: DrawerTabNavigation,
 ) {
     val original =
-        requireExactlyOne(
-            label = "DrawerTabOpener.$name",
-            candidates = openerClass.methods.filter { method ->
-                method.name == name && method.parameterTypes.isEmpty() && method.returnType == "V"
-            },
-        ) { it.toString() }
+        Fingerprint(
+            definingClass = DRAWER_TAB_OPENER_DESCRIPTOR,
+            name = name,
+            returnType = "V",
+            parameters = emptyList(),
+        ).match().method
     val expanded =
         original.cloneMutable(
             additionalRegisters = original.numberOfParameterRegisters + 3,
