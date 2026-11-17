@@ -42,10 +42,11 @@ private const val TIMELINE_TAB_FILTER_METHOD =
 
 private object HomeTabbedComponentFingerprint : Fingerprint(
     definingClass = HOME_TABBED_SCOPE,
+    name = "<init>",
     returnType = "V",
     filters = listOf(string(TOPIC_FILTER_FLAG)),
     custom = { method, _ ->
-        method.name == "<init>" && method.hasHomeTabRouteCreation()
+        method.hasHomeTabRouteCreation()
     },
 )
 

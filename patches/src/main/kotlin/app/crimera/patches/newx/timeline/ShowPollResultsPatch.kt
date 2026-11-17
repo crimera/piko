@@ -33,11 +33,11 @@ private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
  * stable leaf across the declared NewX targets and returns the exact String consumed by the UI.
  */
 private object PollBindingValueFingerprint : Fingerprint(
+    isStatic = true,
     definingClass = "Lcom/x/cards/impl/poll/",
     parameters = listOf("I", STRING_DESCRIPTOR, MAP_DESCRIPTOR),
     returnType = STRING_DESCRIPTOR,
-    filters = listOf(string("choice")),
-    custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
+    filters = listOf(string("choice"))
 )
 
 @Suppress("unused")

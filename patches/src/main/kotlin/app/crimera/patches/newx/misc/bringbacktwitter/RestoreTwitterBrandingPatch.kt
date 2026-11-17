@@ -12,6 +12,7 @@ import app.crimera.bytecode.insertHook
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchException
@@ -89,9 +90,6 @@ private fun Method.staticInvokeReferences(): List<Pair<Int, MethodReference>> =
 
 private val STATIC_INVOKE_OPCODES = setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)
 
-private fun Method.hasInvoke(reference: (MethodReference) -> Boolean): Boolean =
-    invokeReferences().any { (_, candidate) -> reference(candidate) }
-
 internal fun hasObjectAndIntParameterShape(
     parameterTypes: List<CharSequence>,
     objectType: String? = null,
@@ -119,23 +117,24 @@ internal fun isLaunchRevealFallbackShape(parameterTypes: List<CharSequence>, cal
 
 internal fun isLaunchRevealRenderer(method: Method): Boolean =
     AccessFlags.STATIC.isSet(method.accessFlags) &&
-        method.returnType == "V" &&
-        hasObjectAndIntParameterShape(method.parameterTypes) &&
-        method.hasInvoke { reference ->
-            reference.definingClass == SURFACE_CONTROL_BUILDER_DESCRIPTOR &&
-                reference.name == "build" &&
-                reference.parameterTypes.isEmpty() &&
-                reference.returnType == "Landroid/view/SurfaceControl;"
-        } &&
-        method.hasInvoke { reference ->
-            reference.definingClass == ATTACHED_SURFACE_CONTROL_DESCRIPTOR &&
-                reference.name == "buildReparentTransaction" &&
-                reference.parameterTypes.map(CharSequence::toString) == listOf("Landroid/view/SurfaceControl;") &&
-                reference.returnType == "Landroid/view/SurfaceControl\$Transaction;"
-        }
+        hasObjectAndIntParameterShape(method.parameterTypes)
 
 private object TwitterLaunchRevealRendererFingerprint : Fingerprint(
     returnType = "V",
+    filters = listOf(
+        methodCall(
+            definingClass = SURFACE_CONTROL_BUILDER_DESCRIPTOR,
+            name = "build",
+            parameters = emptyList(),
+            returnType = "Landroid/view/SurfaceControl;",
+        ),
+        methodCall(
+            definingClass = ATTACHED_SURFACE_CONTROL_DESCRIPTOR,
+            name = "buildReparentTransaction",
+            parameters = listOf("Landroid/view/SurfaceControl;"),
+            returnType = "Landroid/view/SurfaceControl\$Transaction;",
+        ),
+    ),
     custom = { method, _ -> isLaunchRevealRenderer(method) },
 )
 

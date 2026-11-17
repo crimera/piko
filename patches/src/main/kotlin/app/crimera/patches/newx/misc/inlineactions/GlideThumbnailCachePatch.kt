@@ -96,13 +96,13 @@ private const val ACTIVE_SAMPLE_LABEL = "piko_newx_glide_cached_thumbnail_active
 /** Resolves Glide's process-wide singleton factory from the stable library ABI. */
 private object GlideProviderFingerprint : Fingerprint(
     definingClass = GLIDE_SCOPE,
+    interfaces = listOf(COMPONENT_CALLBACKS_DESCRIPTOR),
+    isStatic = true,
+    returnType = GLIDE_SCOPE,
     parameters = listOf(CONTEXT_DESCRIPTOR),
     custom = { method, classDef ->
-        AccessFlags.STATIC.isSet(method.accessFlags) &&
-            method.returnType.startsWith(GLIDE_SCOPE) &&
-            method.returnType == classDef.type &&
-            classDef.interfaces.any { it.toString() == COMPONENT_CALLBACKS_DESCRIPTOR }
-    },
+        method.returnType == classDef.type
+    }
 )
 
 internal data class GlideThumbnailRuntime(

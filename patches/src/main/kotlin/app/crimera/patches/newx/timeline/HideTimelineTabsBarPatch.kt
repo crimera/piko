@@ -71,9 +71,7 @@ private object NewXTimelineTabsBarFingerprint : Fingerprint(
     returnType = "V",
     custom = { method, classDef ->
         val packageRelativeName = classDef.type.removePrefix(HOME_TABBED_SCOPE)
-        classDef.type.startsWith(HOME_TABBED_SCOPE) &&
-            !packageRelativeName.contains('/') &&
-            method.isTimelineTabsRenderer()
+        !packageRelativeName.contains('/') && method.isTimelineTabsRenderer()
     },
 )
 
@@ -85,9 +83,7 @@ private object NewXTimelineAddTabButtonFingerprint : Fingerprint(
     filters = listOf(literal({ resourceId(ResourceType.STRING, ADD_TAB_STRING_RESOURCE_NAME) })),
     custom = { method, classDef ->
         val packageRelativeName = classDef.type.removePrefix(HOME_TABBED_SCOPE)
-        classDef.type.startsWith(HOME_TABBED_SCOPE) &&
-            !packageRelativeName.contains('/') &&
-            method.isTimelineAddTabButton()
+        !packageRelativeName.contains('/') && method.isTimelineAddTabButton()
     },
 )
 

@@ -19,6 +19,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -53,35 +54,22 @@ private const val LOGGER_DESCRIPTOR = "$EXTENSION_PACKAGE/settings/NewXLogger;"
 private object SubmitWorkHandlerFingerprint : Fingerprint(
     definingClass = COMPOSER_WORK_SCOPE,
     returnType = OBJECT_DESCRIPTOR,
-    filters = listOf(string("SubmitWorkHandler")),
-    custom = { method, _ ->
-        val parameterTypes = method.parameterTypes.map { type -> type.toString() }
-        val instructions = method.implementation?.instructions?.toList().orEmpty()
-        val postFailureFields = instructions.mapNotNull { instruction ->
-            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-            field.takeIf {
-                instruction.opcode == Opcode.SGET_OBJECT &&
-                    field.name == POST_FAILURE_FIELD_NAME
-            }
-        }
-        val throwableFields = instructions.mapNotNull { instruction ->
-            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-            field.takeIf {
-                instruction.opcode == Opcode.IGET_OBJECT &&
-                    field.type == THROWABLE_DESCRIPTOR
-            }
-        }
-        parameterTypes.size == 8 &&
-            parameterTypes[0].isObjectDescriptor() &&
-            parameterTypes[2] == FUNCTION_2_DESCRIPTOR &&
-            parameterTypes[3] == FUNCTION_2_DESCRIPTOR &&
-            parameterTypes[4] == FUNCTION_1_DESCRIPTOR &&
-            parameterTypes[5] == "Z" &&
-            parameterTypes[6] == "I" &&
-            parameterTypes[7] == CONTINUATION_DESCRIPTOR &&
-            postFailureFields.isNotEmpty() &&
-            throwableFields.size == 1
-    },
+    parameters = listOf(
+        "L",
+        "L",
+        FUNCTION_2_DESCRIPTOR,
+        FUNCTION_2_DESCRIPTOR,
+        FUNCTION_1_DESCRIPTOR,
+        "Z",
+        "I",
+        CONTINUATION_DESCRIPTOR,
+    ),
+    filters = listOf(
+        string("SubmitWorkHandler"),
+        // Failure result throwable.
+        fieldAccess(opcode = Opcode.IGET_OBJECT, type = THROWABLE_DESCRIPTOR),
+        fieldAccess(opcode = Opcode.SGET_OBJECT, name = POST_FAILURE_FIELD_NAME),
+    ),
 )
 
 internal data class RegisterLocation(

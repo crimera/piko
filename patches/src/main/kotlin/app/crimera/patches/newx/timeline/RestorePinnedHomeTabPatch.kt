@@ -224,11 +224,11 @@ private fun pinnedTabConfigFingerprint(
     tabConfigType: String,
     pinnedTimelineType: String,
 ) = Fingerprint(
+    superclass = tabConfigType,
     definingClass = tabConfigType.substringBeforeLast('/') + "/",
     name = "<init>",
     parameters = listOf(pinnedTimelineType),
-    returnType = "V",
-    custom = { _, classDef -> classDef.superclass == tabConfigType },
+    returnType = "V"
 )
 
 private fun Method.isInstanceMethod(expectedParameterTypes: List<String>): Boolean =

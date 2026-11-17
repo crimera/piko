@@ -53,7 +53,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.newInstance
 import app.crimera.patches.downloader.downloaderManifestPatch
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.classDefByOrNull
@@ -934,33 +936,18 @@ private fun resolveInlineLongPressEventType(
     requireExactlyOne(
         "NewX inline-action long-press callback dispatch",
         Fingerprint(
-            filters = listOf(methodCall(smali = constructor.toString())),
-            custom = { method, _ -> hasInlineActionEventDispatch(method, constructor) },
+            // The callback constructs the event and immediately sends it to Function1.
+            filters = listOf(
+                newInstance(constructor.definingClass),
+                methodCall(reference = constructor, location = MatchAfterImmediately()),
+                methodCall(
+                    smali = "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;",
+                    location = MatchAfterImmediately(),
+                ),
+            ),
         ).scopedMatchAll(),
     )
     return eventClass.type
-}
-
-/** The native callback constructs an entry event and immediately sends that object to Function1. */
-internal fun hasInlineActionEventDispatch(method: Method, constructor: MethodReference): Boolean {
-    val instructions = method.implementation?.instructions?.toList().orEmpty()
-    return instructions.indices.any { index ->
-        val call = instructions[index]
-        if (call.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) ||
-            call.getReference<MethodReference>()?.toString() != constructor.toString()
-        ) return@any false
-        val eventRegister = call.registersUsed.firstOrNull() ?: return@any false
-        // newx-resolver-lint: allow instruction-order adjacent-dispatch because the validated callback constructs and immediately sends this event.
-        val allocation = instructions.getOrNull(index - 1) ?: return@any false
-        val dispatch = instructions.getOrNull(index + 1) ?: return@any false
-        allocation.opcode == Opcode.NEW_INSTANCE &&
-            allocation.getReference<TypeReference>()?.type == constructor.definingClass &&
-            (allocation as? OneRegisterInstruction)?.registerA == eventRegister &&
-            dispatch.opcode in setOf(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE) &&
-            dispatch.getReference<MethodReference>()?.toString() ==
-            "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;" &&
-            dispatch.registersUsed.getOrNull(1) == eventRegister
-    }
 }
 
 private fun patchPostModelBridges(

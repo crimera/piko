@@ -251,12 +251,7 @@ internal fun resolvePostOptionsStateConstructor(): PostOptionsStateConstructor {
             classFingerprint = PostOptionsStateFingerprint,
             name = "<init>",
             returnType = "V",
-            custom = { method, _ ->
-                method.instructions.any { instruction ->
-                    instruction.opcode == Opcode.IPUT_OBJECT &&
-                        instruction.getReference<FieldReference>()?.toString() == optionsField.toString()
-                }
-            },
+            filters = listOf(fieldAccess(opcode = Opcode.IPUT_OBJECT, reference = optionsField)),
         ).matchAll(),
     )
     return PostOptionsStateConstructor(

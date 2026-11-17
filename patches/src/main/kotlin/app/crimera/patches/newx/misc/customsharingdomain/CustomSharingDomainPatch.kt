@@ -18,6 +18,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.classDefByOrNull
 import app.morphe.patcher.patch.patch
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.instanceOf
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -32,8 +36,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction31c
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -96,150 +98,45 @@ internal object ShareSheetCopyStubFingerprint : Fingerprint(
 internal object MovedShareIntentBuilderFingerprint : ShapeFingerprint(
     parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
     returnType = INTENT_DESCRIPTOR,
-    filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
-    custom = { method, _ -> method.buildsActionSendIntentWithText() },
+    filters = listOf(
+        string(SEND_ACTION),
+        methodCall(
+            definingClass = INTENT_CLASS,
+            name = "<init>",
+            parameters = listOf(STRING_DESCRIPTOR),
+            location = MatchAfterImmediately(),
+        ),
+        string(EXTRA_TEXT),
+        methodCall(
+            definingClass = INTENT_CLASS,
+            name = "putExtra",
+            parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
+            location = MatchAfterImmediately(),
+        ),
+    ),
 )
 
 /** Appends the source code to an X URL. Hooking its result also covers direct share paths that
  * construct an Intent without passing through the common share-Intent builder. */
 private object ShareAttributionUrlBuilderFingerprint : Fingerprint(
     returnType = STRING_DESCRIPTOR,
-    filters = listOf(string(SHARE_ATTRIBUTION_QUERY_PARAMETER)),
-    custom = { method, _ -> method.isShareAttributionUrlBuilder() },
+    parameters = listOf(STRING_DESCRIPTOR, "L"),
+    filters = listOf(
+        // Attribution source code.
+        methodCall(name = "getCode", parameters = emptyList(), returnType = STRING_DESCRIPTOR),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        string(SHARE_ATTRIBUTION_QUERY_PARAMETER),
+        // Concatenates the URL, separator, query parameter and source code.
+        methodCall(
+            opcode = Opcode.INVOKE_STATIC,
+            returnType = STRING_DESCRIPTOR,
+            location = MatchAfterImmediately(),
+        ),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        opcode(Opcode.RETURN_OBJECT, location = MatchAfterImmediately()),
+    ),
+    custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
 )
-
-/** Proves ACTION_SEND seeds the Intent and EXTRA_TEXT keys the share text. */
-private fun Method.buildsActionSendIntentWithText(): Boolean {
-    val methodInstructions = implementation?.instructions?.toList() ?: return false
-
-    fun registersHoldingString(value: String): Set<Int> =
-        methodInstructions.mapNotNull { instruction ->
-            val reference = instruction.getReference<StringReference>() ?: return@mapNotNull null
-            if (reference.string != value) return@mapNotNull null
-            (instruction as? OneRegisterInstruction)?.registerA
-        }.toSet()
-
-    val actionRegisters = registersHoldingString(SEND_ACTION)
-    val textRegisters = registersHoldingString(EXTRA_TEXT)
-    if (actionRegisters.isEmpty() || textRegisters.isEmpty()) return false
-
-    fun List<Instruction>.hasIntentInvoke(
-        name: String,
-        parameterTypes: List<String>,
-        keyArgumentRegister: (List<Int>) -> Int?,
-    ): Boolean =
-        any { instruction ->
-            val reference = instruction.getReference<MethodReference>() ?: return@any false
-            reference.definingClass == INTENT_CLASS &&
-                reference.name == name &&
-                reference.parameterTypes.map(CharSequence::toString) == parameterTypes &&
-                keyArgumentRegister(instruction.registersUsed) != null
-        }
-
-    val seedsAction =
-        methodInstructions.hasIntentInvoke("<init>", listOf(STRING_DESCRIPTOR)) { arguments ->
-            arguments.getOrNull(1)?.takeIf { it in actionRegisters }
-        }
-    val keysExtraText =
-        methodInstructions.hasIntentInvoke(
-            "putExtra",
-            listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
-        ) { arguments -> arguments.getOrNull(1)?.takeIf { it in textRegisters } }
-
-    return seedsAction && keysExtraText
-}
-
-internal fun Method.isShareAttributionUrlBuilder(): Boolean {
-    if (!AccessFlags.STATIC.isSet(accessFlags) || returnType != STRING_DESCRIPTOR) return false
-
-    val parameters = parameterTypes.map(CharSequence::toString)
-    if (parameters.size != 2 || parameters[0] != STRING_DESCRIPTOR) return false
-
-    val implementation = implementation ?: return false
-    val methodInstructions = implementation.instructions.toList()
-    fun hasStringLiteral(value: String): Boolean = methodInstructions.any { instruction ->
-        (instruction.opcode == Opcode.CONST_STRING || instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
-            instruction.getReference<StringReference>()?.string == value
-    }
-    val shareParameterCount = methodInstructions.count { instruction ->
-        (instruction.opcode == Opcode.CONST_STRING || instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
-            instruction.getReference<StringReference>()?.string == SHARE_ATTRIBUTION_QUERY_PARAMETER
-    }
-    if (!hasStringLiteral("?") || !hasStringLiteral("&") || shareParameterCount != 1) {
-        return false
-    }
-
-    val returnIndices = methodInstructions.mapIndexedNotNull { index, instruction ->
-        index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
-    }
-    if (returnIndices.size != 1) return false
-    val returnIndex = returnIndices.single()
-    val returnRegister =
-        (methodInstructions[returnIndex] as? OneRegisterInstruction)?.registerA ?: return false
-
-    val sourceUrlRegister = implementation.registerCount - numberOfParameterRegisters
-    val attributionRegister = sourceUrlRegister + 1
-    val codeRegisters = methodInstructions.mapIndexedNotNull { index, instruction ->
-        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-        if (reference.definingClass != parameters[1] ||
-            reference.name != "getCode" ||
-            reference.parameterTypes.isNotEmpty() ||
-            reference.returnType != STRING_DESCRIPTOR ||
-            instruction.registersUsed != listOf(attributionRegister)
-        ) {
-            return@mapIndexedNotNull null
-        }
-        val result = methodInstructions.getOrNull(index + 1)
-        if (result?.opcode != Opcode.MOVE_RESULT_OBJECT) return@mapIndexedNotNull null
-        (result as? OneRegisterInstruction)?.registerA
-    }.distinct()
-    if (codeRegisters.size != 1) return false
-
-    val queryParameterRegisters = mutableListOf<Int>()
-    methodInstructions.forEach { instruction ->
-        if (instruction.getReference<StringReference>()?.string != SHARE_ATTRIBUTION_QUERY_PARAMETER) {
-            return@forEach
-        }
-        instruction.stringConstantRegister()?.let(queryParameterRegisters::add)
-    }
-    if (queryParameterRegisters.size != 1) return false
-    val queryParameterRegister = queryParameterRegisters.single()
-
-    val concatResults = methodInstructions.mapIndexedNotNull { index, instruction ->
-        if (instruction.opcode != Opcode.INVOKE_STATIC &&
-            instruction.opcode != Opcode.INVOKE_STATIC_RANGE
-        ) {
-            return@mapIndexedNotNull null
-        }
-        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-        if (reference.returnType != STRING_DESCRIPTOR ||
-            reference.parameterTypes.size < 3 ||
-            reference.parameterTypes.any { it.toString() != STRING_DESCRIPTOR }
-        ) {
-            return@mapIndexedNotNull null
-        }
-        val arguments = instruction.registersUsed
-        if (sourceUrlRegister !in arguments ||
-            codeRegisters.single() !in arguments ||
-            queryParameterRegister !in arguments
-        ) {
-            return@mapIndexedNotNull null
-        }
-
-        val result = methodInstructions.getOrNull(index + 1)
-        if (result?.opcode != Opcode.MOVE_RESULT_OBJECT) return@mapIndexedNotNull null
-        val resultRegister = (result as? OneRegisterInstruction)?.registerA ?: return@mapIndexedNotNull null
-        resultRegister.takeIf { it == returnRegister }
-    }
-    return concatResults.size == 1
-}
-
-private fun Instruction.stringConstantRegister(): Int? =
-    when (opcode) {
-        Opcode.CONST_STRING -> (this as? Instruction21c)?.registerA
-        Opcode.CONST_STRING_JUMBO -> (this as? Instruction31c)?.registerA
-        else -> null
-    }
 
 /** Post share Intent builder owning status URL construction (12.28+ static helper). */
 internal object ShareImplIntentBuilderFingerprint : Fingerprint(
@@ -254,8 +151,13 @@ internal object PostNavigationUrlFingerprint : Fingerprint(
     definingClass = NAVIGATION_DESCRIPTOR_PREFIX,
     parameters = emptyList(),
     returnType = STRING_DESCRIPTOR,
-    filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
-    custom = { method, _ -> method.hasStatusUrlReturnFlow() },
+    filters = listOf(
+        string(SHARE_STATUS_URL_PREFIX),
+        // Builds the returned URL from the status URL prefix.
+        methodCall(returnType = STRING_DESCRIPTOR),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        opcode(Opcode.RETURN_OBJECT, location = MatchAfterImmediately()),
+    ),
 )
 
 /** Profile URL route whose model carries the account ID alongside its mutable handle. */
@@ -263,8 +165,13 @@ internal object ProfileNavigationUrlFingerprint : Fingerprint(
     definingClass = NAVIGATION_DESCRIPTOR_PREFIX,
     parameters = emptyList(),
     returnType = STRING_DESCRIPTOR,
-    filters = listOf(string("https://x.com/")),
-    custom = { method, _ -> method.hasProfileNavigationUrlFlow() },
+    filters = listOf(
+        // Normalized profile model consumed by the profile variant branches.
+        methodCall(returnType = PROFILE_MODEL_DESCRIPTOR_PREFIX),
+        opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+        instanceOf(PROFILE_MODEL_DESCRIPTOR_PREFIX),
+        string("https://x.com/"),
+    ),
 )
 
 internal object ProfileUserStringFingerprint : Fingerprint(
@@ -285,98 +192,6 @@ private data class ProfileModelResult(
     val resultIndex: Int,
     val register: Int,
 )
-
-/** Proves that the status URL marker contributes to the value returned by this getter. */
-private fun Method.hasStatusUrlReturnFlow(): Boolean {
-    val methodInstructions = implementation?.instructions?.toList() ?: return false
-    val markerIndices = methodInstructions.mapIndexedNotNull { index, instruction ->
-        val reference = instruction.getReference<StringReference>() ?: return@mapIndexedNotNull null
-        index.takeIf {
-            (instruction.opcode == Opcode.CONST_STRING ||
-                instruction.opcode == Opcode.CONST_STRING_JUMBO) &&
-                reference.string == SHARE_STATUS_URL_PREFIX
-        }
-    }
-    val returnIndices = methodInstructions.mapIndexedNotNull { index, instruction ->
-        index.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
-    }
-    if (markerIndices.size != 1 || returnIndices.size != 1) return false
-
-    val markerIndex = markerIndices.single()
-    val markerRegister =
-        (methodInstructions[markerIndex] as? OneRegisterInstruction)?.registerA
-            ?: return false
-    val returnIndex = returnIndices.single()
-
-    val directResults = methodInstructions.mapIndexedNotNull { index, instruction ->
-        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-        if (index <= markerIndex || reference.returnType != STRING_DESCRIPTOR) {
-            return@mapIndexedNotNull null
-        }
-        if (markerRegister !in instruction.registersUsed ||
-            methodInstructions.getOrNull(index + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT
-        ) {
-            return@mapIndexedNotNull null
-        }
-        val resultRegister =
-            (methodInstructions[index + 1] as? OneRegisterInstruction)?.registerA
-                ?: return@mapIndexedNotNull null
-        index.takeIf {
-            methodInstructions.valueReachesReturn(
-                resultIndex = index + 1,
-                resultRegister = resultRegister,
-                returnIndex = returnIndex,
-            )
-        }
-    }
-
-    val builderResults = methodInstructions.mapIndexedNotNull { index, instruction ->
-        val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-        val arguments = instruction.registersUsed
-        if (
-            index <= markerIndex ||
-                reference.definingClass != "Ljava/lang/StringBuilder;" ||
-                reference.name != "<init>" ||
-                reference.parameterTypes.map(CharSequence::toString) != listOf(STRING_DESCRIPTOR) ||
-                arguments.size != 2 ||
-                arguments[1] != markerRegister
-        ) {
-            return@mapIndexedNotNull null
-        }
-        val builderRegister = arguments.first()
-        val toStringResults = methodInstructions.mapIndexedNotNull { toStringIndex, toStringInstruction ->
-            if (toStringIndex <= index) return@mapIndexedNotNull null
-            val toStringReference = toStringInstruction.getReference<MethodReference>()
-                ?: return@mapIndexedNotNull null
-            if (
-                toStringReference.definingClass != "Ljava/lang/StringBuilder;" ||
-                    toStringReference.name != "toString" ||
-                    toStringReference.parameterTypes.isNotEmpty() ||
-                    toStringReference.returnType != STRING_DESCRIPTOR ||
-                    toStringInstruction.registersUsed != listOf(builderRegister) ||
-                    methodInstructions.getOrNull(toStringIndex + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT
-            ) {
-                return@mapIndexedNotNull null
-            }
-            val resultRegister =
-                (methodInstructions[toStringIndex + 1] as? OneRegisterInstruction)?.registerA
-                    ?: return@mapIndexedNotNull null
-            toStringIndex.takeIf {
-                methodInstructions.valueReachesReturn(
-                    resultIndex = toStringIndex + 1,
-                    resultRegister = resultRegister,
-                    returnIndex = returnIndex,
-                )
-            }
-        }
-        if (toStringResults.size != 1) return@mapIndexedNotNull null
-        index
-    }
-
-    return directResults.size + builderResults.size == 1
-}
-
-private fun Method.hasProfileNavigationUrlFlow(): Boolean = profileModelResults().size == 1
 
 /** Finds the normalized profile object consumed by the route's profile-variant branches. */
 private fun Method.profileModelResults(): List<ProfileModelResult> {
@@ -407,27 +222,6 @@ private fun Method.profileModelResults(): List<ProfileModelResult> {
         }
         if (consumedAsProfile) ProfileModelResult(resultIndex, resultRegister) else null
     }
-}
-
-private fun List<Instruction>.valueReachesReturn(
-    resultIndex: Int,
-    resultRegister: Int,
-    returnIndex: Int,
-): Boolean {
-    if (resultIndex >= returnIndex) return false
-    var register = resultRegister
-    for (index in resultIndex + 1 until returnIndex) {
-        val instruction = this[index]
-        if (instruction.opcode == Opcode.MOVE_OBJECT || instruction.opcode == Opcode.MOVE) {
-            val move = instruction as? TwoRegisterInstruction ?: return false
-            if (move.registerA == register) register = move.registerB
-            continue
-        }
-        val destination = (instruction as? OneRegisterInstruction)?.registerA
-        if (destination == register) return false
-    }
-    val returnInstruction = this[returnIndex] as? OneRegisterInstruction ?: return false
-    return returnInstruction.registerA == register
 }
 
 @Suppress("unused")

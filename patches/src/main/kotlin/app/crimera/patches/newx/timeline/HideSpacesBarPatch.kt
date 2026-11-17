@@ -23,9 +23,7 @@ private object NewXSpacesBarFingerprint : Fingerprint(
     returnType = "V",
     custom = { method, classDef ->
         val packageRelativeName = classDef.type.removePrefix("Lcom/x/spaces/ui/home/")
-        classDef.type.startsWith("Lcom/x/spaces/ui/home/") &&
-            !packageRelativeName.contains('/') &&
-            method.hasKnownSpacesBarSignature()
+        !packageRelativeName.contains('/') && method.hasKnownSpacesBarSignature()
     },
 )
 
