@@ -29,6 +29,7 @@ val customiseTimelineTabsPatch =
         name = "Customize timeline top bar",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

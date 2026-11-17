@@ -6,7 +6,7 @@
 
 package app.crimera.patches.twitter.timeline.autotranslate
 
-import app.crimera.patches.shared.declaredParameterRegister
+import app.crimera.patches.common.declaredParameterRegister
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR

@@ -219,6 +219,13 @@
     <string name="piko_dash_audio_aac_lc_desc">DASH 다운로드 동영상의 xHE-AAC 오디오를 모든 플레이어에서 재생할 수 있는 192kbps AAC-LC 형식으로 다시 인코딩합니다</string>
     <string name="piko_embed_download_metadata">동영상 메타데이터 삽입</string>
     <string name="piko_embed_download_metadata_desc">다운로드한 MP4 파일에 자막, 게시물 링크, 크리에이터 및 업로드 날짜를 추가합니다</string>
+    <string name="piko_download_conflict_policy">미디어가 이미 있는 경우</string>
+    <string name="piko_download_conflict_policy_desc">선택한 다운로드 폴더에 있는 동일한 이름의 파일에 적용됩니다</string>
+    <string name="piko_download_conflict_rename">새 이름으로 저장</string>
+    <string name="piko_download_conflict_skip">이미 다운로드한 미디어 건너뛰기</string>
+    <string name="piko_download_conflict_overwrite">기존 파일 덮어쓰기</string>
+    <string name="piko_download_media_exists">미디어가 이미 존재합니다</string>
+    <string name="piko_download_media_in_progress">미디어가 이미 다운로드 중입니다</string>
     <string name="piko_download_file_name_template">파일 이름 형식</string>
     <string name="piko_download_file_name_template_invalid">잘못된 파일 이름입니다</string>
     <string name="piko_download_file_name_insert_token">%1$s 삽입</string>

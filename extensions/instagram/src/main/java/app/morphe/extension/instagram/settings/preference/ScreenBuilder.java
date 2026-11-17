@@ -24,7 +24,7 @@ import java.util.Locale;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.patches.devFlags.Flag;
 
-import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
@@ -923,6 +923,14 @@ public class ScreenBuilder {
                         str("piko_embed_download_metadata"),
                         str("piko_embed_download_metadata_desc"),
                         Settings.EMBED_DOWNLOAD_METADATA
+                )
+        );
+
+        addPreference(
+                helper.listPreference(
+                        str("piko_download_conflict_policy"),
+                        str("piko_download_conflict_policy_desc"),
+                        Settings.DOWNLOAD_CONFLICT_POLICY
                 )
         );
 

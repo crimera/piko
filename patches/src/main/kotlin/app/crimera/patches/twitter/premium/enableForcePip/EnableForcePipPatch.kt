@@ -37,6 +37,7 @@ val enableForcePipPatch =
         description = "Enables PiP mode when you close the app",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

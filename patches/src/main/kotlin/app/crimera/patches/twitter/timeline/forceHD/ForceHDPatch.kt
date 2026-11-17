@@ -34,6 +34,7 @@ val forceHDPatch =
         description = "Videos will be played in highest quality always",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch, entityGenerator)
 
         execute {

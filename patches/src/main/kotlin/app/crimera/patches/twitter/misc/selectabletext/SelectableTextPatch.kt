@@ -44,6 +44,7 @@ val selectableTextPatch =
         description = "Makes bio and username selectable",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch, selectableTextResourcePatch)
 
         execute {

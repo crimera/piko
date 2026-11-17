@@ -302,4 +302,14 @@
         <item>reels</item>
     </string-array>
 
+    <string-array name="piko_array_download_conflict_policy">
+        <item>@string/piko_download_conflict_rename</item>
+        <item>@string/piko_download_conflict_skip</item>
+        <item>@string/piko_download_conflict_overwrite</item>
+    </string-array>
+    <string-array name="piko_array_download_conflict_policy_val">
+        <item>rename</item>
+        <item>skip</item>
+        <item>overwrite</item>
+    </string-array>
 </resources>

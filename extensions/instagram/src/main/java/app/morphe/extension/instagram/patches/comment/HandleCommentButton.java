@@ -18,7 +18,7 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
-import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.legacydownloader.MediaType;
 
 import app.morphe.extension.instagram.entity.CommentData;
 import app.morphe.extension.instagram.entity.MediaData;

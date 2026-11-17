@@ -33,6 +33,7 @@ val hideLiveThreadsPatch =
         name = "Hide Live Threads",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

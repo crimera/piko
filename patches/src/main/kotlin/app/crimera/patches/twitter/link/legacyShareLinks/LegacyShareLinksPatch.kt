@@ -19,6 +19,7 @@ val legacyShareLinksPatch =
         description = "Brings back username on post share links. Works post 11.4x.xx",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch, handleModernShareSheetLinks)
         execute {
 

@@ -48,6 +48,7 @@ val handleModernShareSheetLinks =
         description = "Hooks links on modern share sheet ( after 11.4x.xx )",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(versionCheckPatch)
 
         execute {

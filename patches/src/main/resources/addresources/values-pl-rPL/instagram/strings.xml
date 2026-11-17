@@ -219,6 +219,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Ponownie koduje dźwięk xHE-AAC z plików DASH do formatu AAC-LC 192 kb/s, który odtworzy każdy odtwarzacz</string>
     <string name="piko_embed_download_metadata">Osadź metadane filmu</string>
     <string name="piko_embed_download_metadata_desc">Dodaje opis, link do posta, twórcę i datę przesłania do pobranych plików MP4</string>
+    <string name="piko_download_conflict_policy">Gdy multimedia już istnieją</string>
+    <string name="piko_download_conflict_policy_desc">Dotyczy plików o tej samej nazwie w wybranym folderze pobierania</string>
+    <string name="piko_download_conflict_rename">Zapisz pod nową nazwą</string>
+    <string name="piko_download_conflict_skip">Pomiń już pobrane multimedia</string>
+    <string name="piko_download_conflict_overwrite">Nadpisz istniejący plik</string>
+    <string name="piko_download_media_exists">Multimedia już istnieją</string>
+    <string name="piko_download_media_in_progress">Multimedia są już pobierane</string>
     <string name="piko_download_file_name_template">Format nazwy pliku</string>
     <string name="piko_download_file_name_template_invalid">Nieprawidłowa nazwa pliku</string>
     <string name="piko_download_file_name_insert_token">Wstaw %1$s</string>

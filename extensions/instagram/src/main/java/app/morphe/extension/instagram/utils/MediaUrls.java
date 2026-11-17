@@ -11,6 +11,7 @@ import android.net.Uri;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 /** Helpers for the CDN urls piko stores and re-opens later. */
 public final class MediaUrls {
@@ -28,6 +29,18 @@ public final class MediaUrls {
 
     /** Removes the CDN's forced-download flag without rewriting signed query values. */
     public static String forViewing(String url) {
+        return without(url, "dl=1"::equals);
+    }
+
+    /**
+     * Removes the unsigned "se" parameter from app links, so the CDN serves the whole stored image.
+     * With "se", a plain JPEG loses its last progressive scan and an Ultra HDR one loses its gain map.
+     */
+    public static String wholeFile(String url) {
+        return without(url, parameter -> parameter.startsWith("se="));
+    }
+
+    private static String without(String url, Predicate<String> parameter) {
         if (url == null) return null;
         Uri uri = Uri.parse(url);
         String scheme = uri.getScheme();
@@ -35,14 +48,16 @@ public final class MediaUrls {
         if (!("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme))
                 || host == null) return url;
         host = host.toLowerCase(Locale.ROOT);
-        if (!host.equals("cdninstagram.com") && !host.endsWith(".cdninstagram.com")) return url;
+        // Instagram serves media from either domain, depending on region.
+        if (!host.equals("cdninstagram.com") && !host.endsWith(".cdninstagram.com")
+                && !host.endsWith(".fbcdn.net")) return url;
         String query = uri.getEncodedQuery();
         if (query == null) return url;
         List<String> parameters = new ArrayList<>();
         boolean removed = false;
-        for (String parameter : query.split("&", -1)) {
-            if ("dl=1".equals(parameter)) removed = true;
-            else parameters.add(parameter);
+        for (String value : query.split("&", -1)) {
+            if (parameter.test(value)) removed = true;
+            else parameters.add(value);
         }
         if (!removed) return url;
         return uri.buildUpon()

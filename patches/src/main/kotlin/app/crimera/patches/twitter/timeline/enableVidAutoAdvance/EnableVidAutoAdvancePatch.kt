@@ -32,6 +32,7 @@ val enableVidAutoAdvancePatch =
         description = "Control video auto scroll in immersive view",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

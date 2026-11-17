@@ -18,6 +18,7 @@ val deleteFromDatabasePatch =
         description = "Delete entries from database(cache)",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

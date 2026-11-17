@@ -121,6 +121,8 @@
     <string name="piko_friendship_status">Estado de amistad</string>
     <string name="piko_follow_list_non_follower_badge">Mostrar quienes te dejaron de seguir en la siguiente lista</string>
     <string name="piko_follow_list_non_follower_badge_desc">Agrega una insignia a las filas de tu propia lista de seguimiento para las cuentas que no te siguen</string>
+    <string name="piko_resume_reels_after_scrolling">Reanudar los reels tras desplazarse</string>
+    <string name="piko_resume_reels_after_scrolling_desc">Continúa un Reel desde donde lo dejaste cuando vuelves a él al desplazarte hacia atrás</string>
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
     <string name="piko_improve_image_viewing_desc">Obtiene imágenes con la resolución máxima del servidor. Puede reducir el rendimiento, aumentar el tamaño de los datos de la aplicación o hacer que la aplicación cambie a un diseño más antiguo</string>
     <string name="piko_copy_comment">Copiar comentario</string>
@@ -217,6 +219,13 @@
     <string name="piko_dash_audio_aac_lc_desc">Recodifica el sonido xHE-AAC de las descargas DASH como AAC-LC a 192 kbps, que cualquier reproductor puede reproducir</string>
     <string name="piko_embed_download_metadata">Incruste metadatos de video</string>
     <string name="piko_embed_download_metadata_desc">Agrega el título, el enlace de la publicación, el creador y la fecha de carga a los archivos MP4 descargados</string>
+    <string name="piko_download_conflict_policy">Cuando ya existe un medio</string>
+    <string name="piko_download_conflict_policy_desc">Se aplica a los archivos con el mismo nombre en la carpeta de descargas seleccionada</string>
+    <string name="piko_download_conflict_rename">Guardar con un nombre nuevo</string>
+    <string name="piko_download_conflict_skip">Omitir los archivos multimedia ya descargados</string>
+    <string name="piko_download_conflict_overwrite">Sobrescribir el archivo existente</string>
+    <string name="piko_download_media_exists">El medio ya existe</string>
+    <string name="piko_download_media_in_progress">El archivo multimedia ya se está descargando</string>
     <string name="piko_download_file_name_template">Formato de nombre de archivo</string>
     <string name="piko_download_file_name_template_invalid">Nombre de archivo no válido</string>
     <string name="piko_download_file_name_insert_token">Insertar %1$s</string>
@@ -226,6 +235,7 @@
     <string name="piko_download_file_name_token_shortcode">Código corto</string>
     <string name="piko_download_file_name_token_upload_date">Fecha</string>
     <string name="piko_download_file_name_token_upload_time">Tiempo</string>
+    <string name="piko_download_file_name_token_upload_timestamp">Marca de tiempo</string>
     <string name="piko_download_file_name_token_type">Tipo</string>
     <string name="piko_download_file_name_token_carousel_index">Carrusel</string>
     <string name="piko_download_file_name_token_variant_suffix">Variante</string>

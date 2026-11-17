@@ -85,6 +85,7 @@ val disableAutoScrollPatch =
         name = "Disable auto timeline scroll on launch",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {

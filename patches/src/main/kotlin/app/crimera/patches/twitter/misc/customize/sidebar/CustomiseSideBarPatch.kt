@@ -30,6 +30,7 @@ val customiseSideBarPatch =
         name = "Customize side bar items",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(settingsPatch)
 
         execute {
