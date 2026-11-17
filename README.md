@@ -71,9 +71,9 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.12.0-dev.2](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;193 patches total
+> **[v3.12.0-dev.3](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;194 patches total
 <details>
-<summary>📦 NewX&nbsp;&nbsp;•&nbsp;&nbsp;51 patches</summary>
+<summary>📦 NewX&nbsp;&nbsp;•&nbsp;&nbsp;52 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -83,6 +83,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
+| [Disable Play Store updates](#disable-play-store-updates) | Prevents the patched app from being listed in Play Store updates by setting the version code to the maximum allowed. This also allows downgrading an existing app install to an older app version. |  |
 | [NewX: Browse tweet object](#newx-browse-tweet-object) | Adds a debug option to browse the tweet object in NewX post menus. |  |
 | [NewX: Clone](#newx-clone) | Changes the package name and the app name. This allows you to install the patched X alongside the original X or other patched X. | • Package name<br>• App name |
 | [NewX: Crash logs](#newx-crash-logs) | Saves crash logs and shows a notification with share and copy actions. |  |
@@ -157,7 +158,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
 | [Customize navigation bar](#customize-navigation-bar) | Choose which tabs appear in the bottom navigation bar and reorder them |  |
-| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting |  |
+| [Disable Play Store updates](#disable-play-store-updates) | Prevents the patched app from being listed in Play Store updates by setting the version code to the maximum allowed. This also allows downgrading an existing app install to an older app version. |  |
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
 | [Disable ads](#disable-ads) |  |  |
 | [Disable comments](#disable-comments) | Disables comments and hides comment buttons on posts, reels and stories |  |
@@ -253,7 +254,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Customize side bar items](#customize-side-bar-items) |  |  |
 | [Customize timeline top bar](#customize-timeline-top-bar) |  |  |
 | [Delete from database](#delete-from-database) | Delete entries from database(cache) |  |
-| [Disable Play Store updates](#disable-play-store-updates) | Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting |  |
+| [Disable Play Store updates](#disable-play-store-updates) | Prevents the patched app from being listed in Play Store updates by setting the version code to the maximum allowed. This also allows downgrading an existing app install to an older app version. |  |
 | [Disable auto timeline scroll on launch](#disable-auto-timeline-scroll-on-launch) |  |  |
 | [Disable chirp font](#disable-chirp-font) |  |  |
 | [Download patch](#download-patch) | Unlocks the ability to download videos and gifs from Twitter/X |  |

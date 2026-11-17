@@ -1,3 +1,14 @@
+## [3.12.0-dev.3](https://github.com/crimera/piko/compare/v3.12.0-dev.2...v3.12.0-dev.3) (2026-11-17)
+
+### 🐛 Bug Fixes
+
+* Declare NewX compatibility for "Disable Play Store updates" patch ([1feef65](https://github.com/crimera/piko/commit/1feef65e2e69ac9f331c09aacf3c263cbd3ce9bb))
+* **Twitter:** "Custom sharing domain" for old X fails ([ddb8d86](https://github.com/crimera/piko/commit/ddb8d8684325d15923b14374ed96c02bb3e186d3))
+
+### ✨ New Features
+
+* **Twitter:** Show a clear error message when attempting to apply old patches to NewX ([07709b2](https://github.com/crimera/piko/commit/07709b248bc6d2f461b70b9595a18b519624be98))
+
 ## [3.12.0-dev.2](https://github.com/crimera/piko/compare/v3.12.0-dev.1...v3.12.0-dev.2) (2026-11-17)
 
 ### 🐛 Bug Fixes

@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.12.0-dev.2",
+  "version": "3.12.0-dev.3",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -932,7 +932,7 @@
     },
     {
       "name": "Disable Play Store updates",
-      "description": "Disables Play Store updates by setting the version code to the maximum allowed. This patch may cause unexpected issues with some apps and does not work if the app is installed by root mounting",
+      "description": "Prevents the patched app from being listed in Play Store updates by setting the version code to the maximum allowed. This also allows downgrading an existing app install to an older app version.",
       "default": true,
       "category": null,
       "compatiblePackages": [
@@ -947,6 +947,31 @@
           "targets": [
             {
               "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        },
+        {
+          "packageName": "com.twitter.android",
+          "name": "NewX",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "12.41.0-prod.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.43.0-prod.01",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
