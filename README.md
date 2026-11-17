@@ -71,15 +71,15 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.12.0-dev.1](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;192 patches total
+> **[v3.12.0-dev.2](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;193 patches total
 <details>
 <summary>📦 NewX&nbsp;&nbsp;•&nbsp;&nbsp;51 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 12.38.1-prod.01 | 12.39.0-prod.01 | 12.40.1-prod.01 | 12.41.0-prod.01 | 12.43.0-prod.01 |
-| :---: | :---: | :---: | :---: | :---: |
+| 12.41.0-prod.01 | 12.43.0-prod.01 |
+| :---: | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
@@ -138,7 +138,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;66 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;67 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -166,6 +166,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
+| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |

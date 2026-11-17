@@ -1,3 +1,14 @@
+## [3.12.0-dev.2](https://github.com/crimera/piko/compare/v3.12.0-dev.1...v3.12.0-dev.2) (2026-11-17)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Restore standalone onboarding permission prompt blocking ([ea36a69](https://github.com/crimera/piko/commit/ea36a6989723d38a5021ad9eba51469877ee897d))
+* **Twitter:** Enable legacy patches by default again ([962967c](https://github.com/crimera/piko/commit/962967c0140284a136c2344a4c431c48246ae048))
+
+### ✨ New Features
+
+* **Twitter:** Group patches into NewX patches and Old patches ([5422737](https://github.com/crimera/piko/commit/5422737fd6aed96a21bb73fcdece9990ca113a35))
+
 ## [3.12.0-dev.1](https://github.com/crimera/piko/compare/v3.11.1...v3.12.0-dev.1) (2026-11-17)
 
 ### 🐛 Bug Fixes
