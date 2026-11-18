@@ -219,11 +219,7 @@ private fun validateNormalSplashDismiss(reference: MethodReference) {
 }
 
 private val restoreTwitterLaunchRevealPatch =
-    patch(
-        name = "NewX: Restore Twitter splash transition",
-        description = "Skip the X launch reveal when Twitter branding is restored.",
-        default = false,
-    ) {
+    patch {
         unsupportedOnMount(default = false)
         compatibleWith(COMPATIBILITY_NEW_X)
         category("NewX patches")
