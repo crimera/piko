@@ -24,7 +24,9 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -180,7 +182,7 @@ private fun FieldReference.isSameField(other: FieldReference): Boolean =
 
 @Suppress("unused")
 val disableTimelineRefreshPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Disable automatic timeline refresh",
         description = "Prevents automatic timeline jumps on startup and foregrounding.",
     ) {

@@ -19,16 +19,14 @@ import app.crimera.bytecode.insertHook
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.getReference
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.p0Register
 import app.crimera.patches.common.requireExactlyOne
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction23x
-import com.android.tools.smali.dexlib2.iface.Method
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
@@ -68,21 +66,23 @@ private val VERTICAL_PAGER_PARAMETERS_17 =
         "I",
     )
 
-private fun isVerticalPagerMethod(method: Method): Boolean =
-    method.parameterTypes.getOrNull(9)
-        ?.toString()?.let { type ->
-            type.startsWith(NESTED_SCROLL_PARAMETER_PREFIX) || type.startsWith(PAGER_PARAMETER_PREFIX)
-        } == true && method.implementation?.instructions?.any { instruction ->
-        if (instruction.opcode != Opcode.SGET_OBJECT) return@any false
-        val field = instruction.getReference<FieldReference>() ?: return@any false
-        field.name == "Vertical" &&
-            field.definingClass.startsWith("Landroidx/compose/foundation/gestures/")
-    } == true
+private const val GESTURES_CLASS_PREFIX = "Landroidx/compose/foundation/gestures/"
 
 private object VerticalPager17Fingerprint : Fingerprint(
     returnType = "V",
     parameters = VERTICAL_PAGER_PARAMETERS_17,
-    custom = { method, _ -> isVerticalPagerMethod(method) },
+    filters = listOf(
+        // Orientation.Vertical
+        fieldAccess(
+            opcode = Opcode.SGET_OBJECT,
+            definingClass = GESTURES_CLASS_PREFIX,
+            name = "Vertical"
+        )
+    ),
+    custom = { method, _ ->
+        method.parameterTypes[9].startsWith(NESTED_SCROLL_PARAMETER_PREFIX) ||
+            method.parameterTypes[9].startsWith(PAGER_PARAMETER_PREFIX)
+    },
 )
 
 private fun patchVerticalPager(
@@ -145,7 +145,7 @@ private fun patchVerticalPager(
 
 @Suppress("unused")
 val newXDisableVideoScrollingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Disable video player scrolling",
         description =
             "Disables vertical swipes in the NewX video player while keeping playback controls and other gestures available.",

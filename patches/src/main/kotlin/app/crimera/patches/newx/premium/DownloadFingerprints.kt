@@ -4,15 +4,14 @@ import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.newx.models.fieldForToStringLabel
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 // Shared URT/Compose timeline media-action handler.
@@ -24,21 +23,15 @@ internal object NewXDownloadEventHandlerFingerprint : Fingerprint(
 /** Video-tab click handler that runs the media download/save path. */
 internal object NewXVideoTabDownloadHandlerFingerprint : Fingerprint(
     definingClass = "Lcom/x/video/tab/",
-    filters = listOf(string("subscriptions_watermarked_video_download_enabled")),
+    filters = listOf(
+        // Subscription check.
+        methodCall(definingClass = "Lcom/x/subscriptions/", returnType = "Z"),
+        // Media downloadable check.
+        methodCall(definingClass = "Lcom/x/models/", parameters = emptyList(), returnType = "Z"),
+        string("subscriptions_watermarked_video_download_enabled"),
+    ),
     parameters = listOf("L"),
     returnType = "V",
-    custom = { method, _ ->
-        val instructions = method.implementation?.instructions
-        val hasSubscriptionCheck = instructions?.any { ins ->
-            val ref = (ins as? ReferenceInstruction)?.reference as? MethodReference
-            ref?.definingClass?.startsWith("Lcom/x/subscriptions/") == true && ref.returnType == "Z"
-        } == true
-        val hasMediaCheck = instructions?.any { ins ->
-            val ref = (ins as? ReferenceInstruction)?.reference as? MethodReference
-            ref?.definingClass?.startsWith("Lcom/x/models/") == true && ref.returnType == "Z" && ref.parameterTypes.isEmpty()
-        } == true
-        hasSubscriptionCheck && hasMediaCheck
-    },
 )
 
 // All-tier premium gate used by media saving.

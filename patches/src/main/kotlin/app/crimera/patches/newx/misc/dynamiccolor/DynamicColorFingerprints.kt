@@ -13,8 +13,8 @@ private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
  */
 internal object HorizonThemePaletteProviderFingerprint : Fingerprint(
     definingClass = "Lcom/x/compose/theme/",
+    returnType = "Lcom/x/compose/theme/",
     parameters = listOf("L", COMPOSER_DESCRIPTOR),
-    custom = { method, _ -> method.returnType.startsWith("Lcom/x/compose/theme/") },
     filters = listOf(
         methodCall(smali = "Ljava/lang/Enum;->ordinal()I"),
         opcode(Opcode.MOVE_RESULT),

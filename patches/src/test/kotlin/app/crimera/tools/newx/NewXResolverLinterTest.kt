@@ -1,6 +1,5 @@
 package app.crimera.tools.newx
 
-import app.crimera.patches.newx.misc.canonicalurls.constructsProfileHeaderModel
 import app.crimera.patches.newx.misc.bringbacktwitter.hasObjectAndIntParameterShape
 import app.crimera.patches.newx.misc.bringbacktwitter.isLaunchRevealRenderer
 import app.crimera.patches.newx.misc.bringbacktwitter.resolveLaunchRevealRenderer
@@ -18,7 +17,6 @@ import app.crimera.patches.newx.models.resolveInlineActionKindLayoutMethod
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineActionKindRenderCall
 import app.crimera.patches.newx.misc.inlineactions.resolveInlineIconSizeHook
 import app.crimera.patches.newx.misc.inlineactions.isCapturedInlineActionEntryRenderer
-import app.crimera.patches.newx.misc.inlineactions.hasInlineActionEventDispatch
 import app.crimera.patches.newx.misc.serverlogging.RegisterLocation
 import app.crimera.patches.newx.misc.serverlogging.selectSubmitFailureOperation
 import app.crimera.patches.newx.timeline.isPostDividerContentHelper
@@ -98,11 +96,7 @@ class NewXResolverLinterTest {
                     addInstruction("return-void".toInstruction())
                 }.methodImplementation,
             )
-        fun renderer(
-            parameters: List<String>,
-            hasBuilder: Boolean = true,
-            hasAttachedSurface: Boolean = true,
-        ): Method =
+        fun renderer(parameters: List<String>): Method =
             ImmutableMethod(
                 "Lfixture/LaunchRevealRenderer;",
                 "render",
@@ -112,20 +106,14 @@ class NewXResolverLinterTest {
                 emptySet<ImmutableAnnotation>(),
                 emptySet<HiddenApiRestriction>(),
                 MethodImplementationBuilder(4).apply {
-                    if (hasBuilder) {
-                        addInstruction("invoke-virtual {v2}, Landroid/view/SurfaceControl\$Builder;->build()Landroid/view/SurfaceControl;".toInstruction())
-                    }
-                    if (hasAttachedSurface) {
-                        addInstruction("invoke-interface {v0, v3}, Landroid/view/AttachedSurfaceControl;->buildReparentTransaction(Landroid/view/SurfaceControl;)Landroid/view/SurfaceControl\$Transaction;".toInstruction())
-                    }
+                    addInstruction("invoke-virtual {v2}, Landroid/view/SurfaceControl\$Builder;->build()Landroid/view/SurfaceControl;".toInstruction())
+                    addInstruction("invoke-interface {v0, v3}, Landroid/view/AttachedSurfaceControl;->buildReparentTransaction(Landroid/view/SurfaceControl;)Landroid/view/SurfaceControl\$Transaction;".toInstruction())
                     addInstruction("return-void".toInstruction())
                 }.methodImplementation,
             )
         val renderer = renderer(listOf("Landroid/view/View;", "I"))
         val swappedRenderer = renderer(listOf("I", "Landroid/view/View;"))
         val invalidRenderer = renderer(listOf("Landroid/view/View;", "Ljava/lang/String;"))
-        val missingBuilderRenderer = renderer(listOf("Landroid/view/View;", "I"), hasBuilder = false)
-        val missingAttachedSurfaceRenderer = renderer(listOf("Landroid/view/View;", "I"), hasAttachedSurface = false)
 
         assertNull(resolveLaunchRevealRenderer(emptyList(), emptyList()))
         assertFailsWith<PatchException> {
@@ -136,8 +124,6 @@ class NewXResolverLinterTest {
         assertTrue(isLaunchRevealRenderer(swappedRenderer))
         assertEquals(swappedRenderer, resolveLaunchRevealRenderer(listOf(marker), listOf(swappedRenderer)))
         assertFalse(isLaunchRevealRenderer(invalidRenderer))
-        assertFalse(isLaunchRevealRenderer(missingBuilderRenderer))
-        assertFalse(isLaunchRevealRenderer(missingAttachedSurfaceRenderer))
         assertTrue(hasObjectAndIntParameterShape(listOf("I", "Lfixture/Callback;"), "Lfixture/Callback;"))
         assertFalse(hasObjectAndIntParameterShape(listOf("I", "Lfixture/OtherCallback;"), "Lfixture/Callback;"))
     }
@@ -839,37 +825,6 @@ class NewXResolverLinterTest {
             add("return-void")
         }
         return MutableMethod(renderer) to mapOf(sizing to sizingClass(sizing, true), auxiliary to sizingClass(auxiliary, false))
-    }
-
-    @Test
-    fun `inline event callback dispatches the constructed event not another captured object`() {
-        val event = "Lfixture/LongClick;"
-        val constructor = ImmutableMethodReference(event, "<init>", listOf("Lfixture/Entry;"), "V")
-        fun callback(range: Boolean, failure: String? = null): Method {
-            val implementation = MethodImplementationBuilder(6)
-            fun add(instruction: String) = implementation.addInstruction(instruction.toInstruction())
-            add("new-instance v1, ${if (failure == "wrongAllocation") "Lfixture/PressState;" else event}")
-            add(if (range) "invoke-direct/range {v1 .. v2}, $constructor" else "invoke-direct {v1, v2}, $constructor")
-            if (failure == "overwrite") add("move-object v1, v3")
-            val invoke = "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;"
-            add(when {
-                failure == "wrongArgument" -> "invoke-interface {v0, v3}, $invoke"
-                range -> "invoke-interface/range {v0 .. v1}, $invoke"
-                else -> "invoke-interface {v0, v1}, $invoke"
-            })
-            add("return-object v0")
-            return ImmutableMethod(
-                "Lfixture/RepackagedCallback;", "invoke",
-                listOf(ImmutableMethodParameter("Ljava/lang/Object;", emptySet(), null)),
-                "Ljava/lang/Object;", AccessFlags.PUBLIC.value, emptySet(), emptySet(), implementation.methodImplementation,
-            )
-        }
-        listOf(false, true).forEach { range ->
-            assertTrue(hasInlineActionEventDispatch(callback(range), constructor))
-            listOf("wrongAllocation", "wrongArgument", "overwrite").forEach { failure ->
-                assertFalse(hasInlineActionEventDispatch(callback(range, failure), constructor), failure)
-            }
-        }
     }
 
     @Test
@@ -2064,17 +2019,6 @@ class NewXResolverLinterTest {
     }
 
     @Test
-    fun `profile link resolver accepts profile-header construction and rejects URL-entity copies`() {
-        val profileHeader = profileLinkFixture(constructsProfileHeader = true)
-        val urlEntityCopy = profileLinkFixture(constructsProfileHeader = false)
-
-        assertEquals(
-            listOf(true, false),
-            listOf(profileHeader, urlEntityCopy).map(Method::constructsProfileHeaderModel),
-        )
-    }
-
-    @Test
     fun `submit failure operation selection handles absent POST_SUCCESS event`() {
         val failureComparison = RegisterLocation(index = 20, register = 9, branchTargetIndex = 25)
         val successComparison = RegisterLocation(index = 40, register = 5, branchTargetIndex = 60)
@@ -2288,34 +2232,6 @@ class NewXResolverLinterTest {
                 )
             else -> listOf("return-void".toInstruction())
         }
-
-    private fun profileLinkFixture(constructsProfileHeader: Boolean): Method {
-        val implementation = MethodImplementationBuilder(4)
-        implementation.addInstruction(
-            "iget-object v0, v1, Lfixture/UrlEntity;->displayUrl:Ljava/lang/String;".toInstruction(),
-        )
-        implementation.addInstruction(
-            if (constructsProfileHeader) {
-                "new-instance v2, Lcom/x/profile/header/Fixture;".toInstruction()
-            } else {
-                "new-instance v2, Lfixture/UrlEntityCopy;".toInstruction()
-            },
-        )
-        implementation.addInstruction(
-            "iget-object v0, v1, Lfixture/UrlEntity;->url:Ljava/lang/String;".toInstruction(),
-        )
-        implementation.addInstruction("return-void".toInstruction())
-        return ImmutableMethod(
-            "Lfixture/ProfileLink;",
-            "build",
-            emptyList<ImmutableMethodParameter>(),
-            "Ljava/lang/Object;",
-            AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
-            emptySet<ImmutableAnnotation>(),
-            emptySet<HiddenApiRestriction>(),
-            implementation.methodImplementation,
-        )
-    }
 
     private val replyEnum = "Lfixture/RankingMode;"
     private val tabHorizon = "Lcom/x/ui/horizon/Palette;"

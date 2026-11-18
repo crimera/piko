@@ -1,5 +1,8 @@
 package app.crimera.patches.newx.misc.mediatab
 
+import app.morphe.patcher.patch.classDefBy
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.classDefForEach
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.misc.inlineactions.newXThumbnailCachePatch
@@ -14,6 +17,8 @@ import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.crimera.bytecode.Block
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
@@ -21,10 +26,10 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -197,13 +202,11 @@ private fun parameterRegister(method: Method, index: Int): Int {
     return register
 }
 
-context(context: BytecodePatchContext)
 private fun allClassDefs(): List<ClassDef> =
     buildList {
-        context.classDefForEach { add(it) }
+        classDefForEach { add(it) }
     }
 
-context(context: BytecodePatchContext)
 private fun resolveTimelineType(classDefs: List<ClassDef>): ResolvedTimelineType {
     val candidates = buildList {
         classDefs
@@ -226,7 +229,6 @@ private fun resolveTimelineType(classDefs: List<ClassDef>): ResolvedTimelineType
     return ResolvedTimelineType(classType, photosField)
 }
 
-context(context: BytecodePatchContext)
 private fun resolveTimelineListDescriptor(classDefs: List<ClassDef>): String {
     val candidates = classDefs.filter { classDef ->
         isDirectDescriptorInScope(classDef.type, IMMUTABLE_LIST_SCOPE) &&
@@ -241,7 +243,6 @@ private fun resolveTimelineListDescriptor(classDefs: List<ClassDef>): String {
     return requireExactlyOne("NewX immutable timeline list interface", candidates).type
 }
 
-context(context: BytecodePatchContext)
 private fun resolveComposeContracts(classDefs: List<ClassDef>): ResolvedComposeContracts {
     // Callers share one class snapshot per execute phase; the four sub-resolvers below
     // already reuse it, so no additional traversal happens here.
@@ -385,9 +386,7 @@ private fun resolveComposeContracts(classDefs: List<ClassDef>): ResolvedComposeC
 }
 
 
-context(context: BytecodePatchContext)
 private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
-    val classByType = classDefs.associateBy { it.type }
     val dispatchCandidates = classDefs.flatMap { classDef ->
         if (!classDef.type.startsWith(BOTTOM_PAGING_SCOPE)) {
             emptyList()
@@ -404,7 +403,7 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
         requireExactlyOne("NewX bottom paginator event dispatch method", dispatchCandidates)
     val eventInterface = dispatch.parameterDescriptors().single()
     val eventInterfaceClass =
-        classByType[eventInterface]
+        classDefByOrNull(eventInterface)
             ?: throw PatchException("NewX bottom paginator event interface is missing: $eventInterface")
     if (!AccessFlags.INTERFACE.isSet(eventInterfaceClass.accessFlags)) {
         throw PatchException("NewX bottom paginator event target is not an interface: $eventInterface")
@@ -430,7 +429,7 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
                 val type =
                     instruction.getReference<TypeReference>()?.type
                         ?: return@mapNotNull null
-                val classDef = classByType[type] ?: return@mapNotNull null
+                val classDef = classDefByOrNull(type) ?: return@mapNotNull null
                 type.takeIf {
                     isDirectDescriptorInScope(type, PAGING_SCOPE) &&
                         classDef.interfaces.any { it.toString() == eventInterface } &&
@@ -439,7 +438,7 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
             }.distinct(),
         )
     val requestEventClass =
-        classByType[requestEventType]
+        classDefByOrNull(requestEventType)
             ?: throw PatchException("NewX bottom pagination request event class is missing: $requestEventType")
     val requestConstructor =
         requireExactlyOne(
@@ -449,7 +448,7 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
 
     val eventKindType = requestConstructor.parameterDescriptors().first()
     val eventKindClass =
-        classByType[eventKindType]
+        classDefByOrNull(eventKindType)
             ?: throw PatchException("NewX bottom pagination event kind is missing: $eventKindType")
     val eventKindFields = eventKindClass.fields.filter { field ->
         field.name == "LAZY_LIST_SCROLL" &&
@@ -479,26 +478,26 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
         if (instruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
         val type = instruction.getReference<TypeReference>()?.type
             ?: return@mapNotNull null
-        val stateClass = classByType[type] ?: return@mapNotNull null
+        val stateClass = classDefByOrNull(type) ?: return@mapNotNull null
         val stateInterfaces = stateClass.interfaces.mapNotNull { interfaceType ->
-            classByType[interfaceType.toString()]
+            classDefByOrNull(interfaceType.toString())
         }.filter(::isStateInterface)
         type.takeIf { stateInterfaces.size == 1 }
     }.distinct()
     val stateType =
         requireExactlyOne("NewX bottom paginator state class", stateClassCandidates)
     val stateClass =
-        classByType[stateType]
+        classDefByOrNull(stateType)
             ?: throw PatchException("NewX bottom paginator state class is missing: $stateType")
     val stateInterface = requireExactlyOne(
         "NewX bottom paginator state interface",
         stateClass.interfaces.mapNotNull { interfaceType ->
-            classByType[interfaceType.toString()]
+            classDefByOrNull(interfaceType.toString())
         }.filter(::isStateInterface),
     )
 
     val paginatorClass =
-        classByType[dispatch.definingClass]
+        classDefByOrNull(dispatch.definingClass)
             ?: throw PatchException(
                 "NewX bottom paginator class is missing: ${dispatch.definingClass}",
             )
@@ -508,30 +507,31 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
             paginatorClass.methods.filter { method ->
                 !AccessFlags.STATIC.isSet(method.accessFlags) &&
                     method.parameterTypes.isEmpty() &&
-                    isStateFlowInterface(method.returnType, classByType)
+                    isStateFlowInterface(method.returnType)
             },
         )
     val stateValueGetter =
-        resolveStateValueGetter(stateFlowGetter.returnType, classByType)
+        resolveStateValueGetter(stateFlowGetter.returnType)
     val stateFlowGetterCall = stateFlowGetter.toNativeCall()
 
-    val nativeTriggerCandidates = classDefs.flatMapParallel { classDef ->
-        classDef.methods.filter { method ->
-            if (!AccessFlags.STATIC.isSet(method.accessFlags)) return@filter false
-            if (method.parameterTypes.size != 5) return@filter false
-            if (method.returnType != VOID_DESCRIPTOR) return@filter false
-            // The scroll state (LazyListState) is obfuscated too; match it by the
-            // stable lazy scope instead of its release-specific short name. The
-            // lazy/grid state lives deeper and is excluded by the direct-scope check.
-            val parameters = method.parameterDescriptors()
-            parameters.size == 5 &&
-                parameters[0] == stateInterface.type &&
-                isDirectDescriptorInScope(parameters[1], COMPOSE_LAZY_SCOPE) &&
-                parameters[2] == FUNCTION2 &&
-                parameters[3] == COMPOSER &&
-                parameters[4] == INT_DESCRIPTOR
-        }
-    }
+    // The trigger reads the paginator state, so only methods calling the state interface are checked.
+    val nativeTriggerCandidates =
+        Fingerprint(filters = listOf(methodCall(definingClass = stateInterface.type)))
+            .matchAllOrNull().orEmpty().map { it.originalMethod }.filter { method ->
+                if (!AccessFlags.STATIC.isSet(method.accessFlags)) return@filter false
+                if (method.parameterTypes.size != 5) return@filter false
+                if (method.returnType != VOID_DESCRIPTOR) return@filter false
+                // The scroll state (LazyListState) is obfuscated too; match it by the
+                // stable lazy scope instead of its release-specific short name. The
+                // lazy/grid state lives deeper and is excluded by the direct-scope check.
+                val parameters = method.parameterDescriptors()
+                parameters.size == 5 &&
+                    parameters[0] == stateInterface.type &&
+                    isDirectDescriptorInScope(parameters[1], COMPOSE_LAZY_SCOPE) &&
+                    parameters[2] == FUNCTION2 &&
+                    parameters[3] == COMPOSER &&
+                    parameters[4] == INT_DESCRIPTOR
+            }
     val nativeTrigger =
         requireExactlyOne("NewX native bottom paginator scroll trigger", nativeTriggerCandidates)
     val triggerStateMethods =
@@ -586,9 +586,8 @@ private fun resolvePagingEvent(classDefs: List<ClassDef>): ResolvedPagingEvent {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchPagingEventBridge(event: ResolvedPagingEvent) {
-    val extensionClass = context.mutableClassDefBy(GALLERY_EXTENSION)
+    val extensionClass = mutableClassDefBy(GALLERY_EXTENSION)
     val placeholder =
         requireExactlyOne(
             "NewX gallery paging-event bridge",
@@ -634,9 +633,8 @@ private fun patchPagingEventBridge(event: ResolvedPagingEvent) {
     patchBottomPaginatorClassBridge(event.paginatorClassName)
 }
 
-context(context: BytecodePatchContext)
 private fun patchPagingStateBridge(event: ResolvedPagingEvent) {
-    val extensionClass = context.mutableClassDefBy(GALLERY_EXTENSION)
+    val extensionClass = mutableClassDefBy(GALLERY_EXTENSION)
     val placeholder =
         requireExactlyOne(
             "NewX gallery paging-state bridge",
@@ -704,9 +702,8 @@ private fun patchPagingStateBridge(event: ResolvedPagingEvent) {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchBottomPaginatorClassBridge(className: String) {
-    val extensionClass = context.mutableClassDefBy(GALLERY_EXTENSION)
+    val extensionClass = mutableClassDefBy(GALLERY_EXTENSION)
     val placeholder =
         requireExactlyOne(
             "NewX bottom paginator class bridge",
@@ -802,7 +799,6 @@ private fun argumentRegister(
     return instruction.registersUsed.getOrNull(offset)
 }
 
-context(context: BytecodePatchContext)
 private fun resolveTimelineItemCallbackIndex(method: Method, timelineListDescriptor: String): Int {
     val instructions = method.implementation?.instructions?.toList()
         ?: throw PatchException("Photos timeline renderer has no implementation: $method")
@@ -837,7 +833,7 @@ private fun resolveTimelineItemCallbackIndex(method: Method, timelineListDescrip
             type.takeIf { hasStateConstructor }
         }.distinct(),
     )
-    val timelineState = context.mutableClassDefBy(timelineStateType)
+    val timelineState = mutableClassDefBy(timelineStateType)
     val stateConstructorCall = requireExactlyOne(
         label = "NewX timeline state constructor call",
         candidates = instructions.mapNotNull { instruction ->
@@ -918,9 +914,8 @@ private data class ItemMediaDelegate(
     val postFields: List<String>,
 )
 
-context(context: BytecodePatchContext)
 private fun invocationOpcode(owner: String): Opcode {
-    val classDef = runCatching { context.mutableClassDefBy(owner) }.getOrNull()
+    val classDef = runCatching { mutableClassDefBy(owner) }.getOrNull()
     return if (classDef != null && AccessFlags.INTERFACE.isSet(classDef.accessFlags)) {
         Opcode.INVOKE_INTERFACE
     } else {
@@ -935,7 +930,6 @@ private fun methodDescriptor(
     returnType: String,
 ): String = "$owner->$name(${parameters.joinToString("")})$returnType"
 
-context(context: BytecodePatchContext)
 private fun Method.toNativeCall(): NativeMethodCall =
     NativeMethodCall(
         descriptor = methodDescriptor(
@@ -949,9 +943,8 @@ private fun Method.toNativeCall(): NativeMethodCall =
 
 private fun isStateFlowInterface(
     type: String,
-    classByType: Map<String, ClassDef>,
 ): Boolean {
-    val classDef = classByType[type] ?: return false
+    val classDef = classDefByOrNull(type) ?: return false
     return AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
         classDef.methods.any { method ->
             method.name == "getValue" &&
@@ -960,17 +953,15 @@ private fun isStateFlowInterface(
         }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveStateValueGetter(
     flowType: String,
-    classByType: Map<String, ClassDef>,
 ): NativeMethodCall {
     val visited = mutableSetOf<String>()
     val pending = mutableListOf(flowType)
     while (pending.isNotEmpty()) {
         val currentType = pending.removeAt(0)
         if (!visited.add(currentType)) continue
-        val classDef = classByType[currentType] ?: continue
+        val classDef = classDefByOrNull(currentType) ?: continue
         val getters =
             classDef.methods.filter { method ->
                 method.name == "getValue" &&
@@ -990,7 +981,6 @@ private fun resolveStateValueGetter(
     )
 }
 
-context(context: BytecodePatchContext)
 private fun MethodReference.toNativeCall(): NativeMethodCall =
     NativeMethodCall(
         descriptor = methodDescriptor(
@@ -1002,15 +992,13 @@ private fun MethodReference.toNativeCall(): NativeMethodCall =
         opcode = invocationOpcode(definingClass),
     )
 
-context(context: BytecodePatchContext)
 private fun classImplements(classType: String, target: String, seen: Set<String> = emptySet()): Boolean {
     if (classType == target) return true
     if (classType in seen) return false
-    val classDef = runCatching { context.mutableClassDefBy(classType) }.getOrNull() ?: return false
+    val classDef = runCatching { mutableClassDefBy(classType) }.getOrNull() ?: return false
     return classDef.interfaces.any { classImplements(it, target, seen + classType) }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveNativePhotoViewerTarget(
     classDefs: List<ClassDef>,
     timelineListDescriptor: String,
@@ -1048,7 +1036,7 @@ private fun resolveNativePhotoViewerTarget(
             "${method.definingClass}->${method.name}:${reference.toSmaliDescriptor()}"
         },
     )
-    val hostClass = context.mutableClassDefBy(dispatch.second.definingClass)
+    val hostClass = mutableClassDefBy(dispatch.second.definingClass)
     val hostMethods = hostClass.methods.filter {
         it.name == dispatch.second.name &&
             it.parameterTypes.map(CharSequence::toString) ==
@@ -1069,7 +1057,7 @@ private fun resolveNativePhotoViewerTarget(
             }
             .distinct()
             .forEach { ebClass ->
-                val eb = runCatching { context.mutableClassDefBy(ebClass) }.getOrNull()
+                val eb = runCatching { mutableClassDefBy(ebClass) }.getOrNull()
                     ?: return@forEach
                 eb.methods
                     .filter { method ->
@@ -1105,7 +1093,7 @@ private fun resolveNativePhotoViewerTarget(
             }
             .distinct()
             .forEach { routeClass ->
-                val route = runCatching { context.mutableClassDefBy(routeClass) }.getOrNull()
+                val route = runCatching { mutableClassDefBy(routeClass) }.getOrNull()
                     ?: return@forEach
                 route.methods
                     .filter { method ->
@@ -1137,10 +1125,10 @@ private fun resolveNativePhotoViewerTarget(
     val routeParameterCount = viewerRoute.second.parameterTypes.size
     val viewerFlags = resolveViewerFlags(hostMethod, routeConstructor.descriptor, routeParameterCount)
 
-    val postClass = context.mutableClassDefBy(postType)
+    val postClass = mutableClassDefBy(postType)
     val postAccessors =
         (postClass.methods + postClass.interfaces.flatMap { interfaceType ->
-            runCatching { context.mutableClassDefBy(interfaceType) }
+            runCatching { mutableClassDefBy(interfaceType) }
                 .getOrNull()
                 ?.methods
                 .orEmpty()
@@ -1175,7 +1163,7 @@ private fun resolveNativePhotoViewerTarget(
     val navigationCandidates =
         hostClass.fields.flatMap { field ->
             val navigationClass =
-                runCatching { context.mutableClassDefBy(field.type) }.getOrNull()
+                runCatching { mutableClassDefBy(field.type) }.getOrNull()
                     ?: return@flatMap emptyList()
             navigationClass.methods.mapNotNull { method ->
                 val parameters = method.parameterTypes.map(CharSequence::toString)
@@ -1393,7 +1381,6 @@ private fun Block.itemClickViewerInstructions(
     invokeStatic(methodReference("$GALLERY_EXTENSION->clearPendingPhoto()V"))
 }
 
-context(context: BytecodePatchContext)
 private fun resolveItemClickViewerTargets(
     event: NativePhotoViewerTarget,
     classDefs: List<ClassDef>,
@@ -1404,13 +1391,11 @@ private fun resolveItemClickViewerTargets(
     // so the divert moves to the item-event consumers instead.
     val mediaOwner = event.mediaGetter.descriptor.substringBefore("->")
     val navigationOwner = event.navigationCall.descriptor.substringBefore("->")
-    val classByType = classDefs.associateBy { it.type }
-
     val closures = mutableMapOf<String, Set<String>>()
     fun closure(type: String): Set<String> {
         closures[type]?.let { return it }
         closures[type] = emptySet()
-        val classDef = classByType[type] ?: return emptySet()
+        val classDef = classDefByOrNull(type) ?: return emptySet()
         val result = mutableSetOf(type)
         classDef.interfaces.mapTo(result) { it.toString() }
         classDef.interfaces.forEach { result.addAll(closure(it.toString())) }
@@ -1420,16 +1405,36 @@ private fun resolveItemClickViewerTargets(
     }
     fun implements(classType: String, target: String): Boolean = target in closure(classType)
 
-    // Precomputed once: concrete types carrying the media contract. The candidate scan
-    // below used to re-walk every class for every event-shaped class (quadratic); the
-    // holder set is far smaller, and the per-candidate check is unchanged.
-    val mediaHolders = classDefs.mapNotNull { candidate ->
-        val candidateType = candidate.type
-        candidateType.takeIf {
-            !AccessFlags.INTERFACE.isSet(candidate.accessFlags) &&
-                !AccessFlags.ABSTRACT.isSet(candidate.accessFlags) &&
-                implements(candidateType, mediaOwner)
+    // Reverse supertype edges answer which types have a target in their closure without building
+    // the closure of every class. Like closure(), a type that is not a class is not followed.
+    val subtypesByInterface = HashMap<String, MutableList<String>>()
+    val subtypesBySuperclass = HashMap<String, MutableList<String>>()
+    classDefs.forEach { classDef ->
+        classDef.interfaces.forEach { subtypesByInterface.getOrPut(it.toString(), ::ArrayList).add(classDef.type) }
+        classDef.superclass?.let { subtypesBySuperclass.getOrPut(it, ::ArrayList).add(classDef.type) }
+    }
+    val implementorsCache = mutableMapOf<String, Set<String>>()
+    fun implementors(target: String): Set<String> = implementorsCache.getOrPut(target) {
+        val result = mutableSetOf<String>()
+        val pending = ArrayDeque<String>()
+        fun add(type: String) {
+            if (result.add(type)) pending.addLast(type)
         }
+        if (classDefByOrNull(target) != null) add(target)
+        subtypesByInterface[target]?.forEach(::add)
+        while (pending.isNotEmpty()) {
+            val type = pending.removeFirst()
+            subtypesByInterface[type]?.forEach(::add)
+            subtypesBySuperclass[type]?.forEach(::add)
+        }
+        result
+    }
+
+    // Precomputed once: concrete types carrying the media contract.
+    val mediaHolders = implementors(mediaOwner).filter { candidateType ->
+        val candidate = classDefBy(candidateType)
+        !AccessFlags.INTERFACE.isSet(candidate.accessFlags) &&
+            !AccessFlags.ABSTRACT.isSet(candidate.accessFlags)
     }.toSet()
 
     // Item-click event fields: the single instance field of a final event class whose type
@@ -1454,9 +1459,9 @@ private fun resolveItemClickViewerTargets(
         listOf(Triple(classDef.type, field, itemType))
     }
     val itemEvents = itemEventShapes.mapNotNull { (type, field, itemType) ->
-        val itemClass = classByType[itemType] ?: return@mapNotNull null
+        val itemClass = classDefByOrNull(itemType) ?: return@mapNotNull null
         if (!AccessFlags.INTERFACE.isSet(itemClass.accessFlags)) return@mapNotNull null
-        val heldByMediaHolder = mediaHolders.any { holder -> implements(holder, itemType) }
+        val heldByMediaHolder = implementors(itemType).any { holder -> holder in mediaHolders }
         if (!heldByMediaHolder) return@mapNotNull null
         ItemEvent(field.toSmaliDescriptor(), type, itemType)
     }
@@ -1475,14 +1480,14 @@ private fun resolveItemClickViewerTargets(
         val type = classDef.type
         if (AccessFlags.INTERFACE.isSet(classDef.accessFlags)) return@mapNotNull null
         if (AccessFlags.ABSTRACT.isSet(classDef.accessFlags)) return@mapNotNull null
-        if (!implements(type, itemEvent.itemType)) return@mapNotNull null
-        val holderField = if (implements(type, mediaOwner)) {
+        if (type !in implementors(itemEvent.itemType)) return@mapNotNull null
+        val holderField = if (type in implementors(mediaOwner)) {
             null
         } else {
             val holderFields = classDef.fields.filter { field ->
                 !AccessFlags.STATIC.isSet(field.accessFlags) &&
                     field.type.startsWith("L") &&
-                    implements(field.type, mediaOwner)
+                    field.type in implementors(mediaOwner)
             }
             if (holderFields.size != 1) return@mapNotNull null
             holderFields[0].toSmaliDescriptor()
@@ -1516,43 +1521,48 @@ private fun resolveItemClickViewerTargets(
     // by the event class, reading the item field. The gallery tap reaches them through
     // the item-click callback; without a pending entry the preamble falls through, so
     // hooking every consumer is behavior-preserving.
-    // The event closure is the only memoized lookup the scan needs; resolve it up front so the
-    // class scan itself only reads immutable state and can run in parallel.
     val eventClosure = closure(itemEvent.eventType)
-    val targets = classDefs.flatMapParallel { classDef ->
+    // Every target reads the item field, so only those methods are checked.
+    val itemFieldOwner = itemEvent.field.substringBefore("->")
+    val itemFieldName = itemEvent.field.substringAfter("->").substringBefore(":")
+    val itemFieldType = itemEvent.field.substringAfter(":")
+    val targets = Fingerprint(
+        filters = listOf(
+            fieldAccess(
+                definingClass = itemFieldOwner,
+                name = itemFieldName,
+                type = itemFieldType,
+                opcode = Opcode.IGET_OBJECT,
+            ),
+        ),
+    ).matchAllOrNull().orEmpty().mapNotNull { match ->
+        val classDef = match.originalClassDef
+        val method = match.originalMethod
         val ownerType = classDef.type
-        classDef.methods.mapNotNull { method ->
-            if (AccessFlags.STATIC.isSet(method.accessFlags)) return@mapNotNull null
-            if (method.returnType != VOID_DESCRIPTOR) return@mapNotNull null
-            if (method.parameterTypes.size != 1) return@mapNotNull null
-            val parameterType = method.parameterTypes.single().toString()
-            if (!parameterType.startsWith("L")) return@mapNotNull null
-            val parameterClass = classByType[parameterType] ?: return@mapNotNull null
-            if (!AccessFlags.INTERFACE.isSet(parameterClass.accessFlags)) return@mapNotNull null
-            if (parameterType !in eventClosure) return@mapNotNull null
-            val instructions = method.implementation?.instructions?.toList() ?: return@mapNotNull null
-            val readsItem = instructions.any { instruction ->
-                if (instruction.opcode != Opcode.IGET_OBJECT) return@any false
-                (instruction as? ReferenceInstruction)?.reference?.toString() == itemEvent.field
-            }
-            if (!readsItem) return@mapNotNull null
-            val navigationFields = classDef.fields.filter { field ->
-                !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                    field.type == navigationOwner
-            }
-            val navigationField = requireExactlyOne(
-                "NewX gallery item-click navigation field in $ownerType",
-                navigationFields,
-            )
-            ItemClickViewerTarget(
-                ownerType = ownerType,
-                methodName = method.name,
-                parameterTypes = method.parameterTypes.map(CharSequence::toString),
-                itemEventType = itemEvent.eventType,
-                itemEventField = itemEvent.field,
-                navigationField = navigationField.toSmaliDescriptor(),
-            )
+        if (AccessFlags.STATIC.isSet(method.accessFlags)) return@mapNotNull null
+        if (method.returnType != VOID_DESCRIPTOR) return@mapNotNull null
+        if (method.parameterTypes.size != 1) return@mapNotNull null
+        val parameterType = method.parameterTypes.single().toString()
+        if (!parameterType.startsWith("L")) return@mapNotNull null
+        val parameterClass = classDefByOrNull(parameterType) ?: return@mapNotNull null
+        if (!AccessFlags.INTERFACE.isSet(parameterClass.accessFlags)) return@mapNotNull null
+        if (parameterType !in eventClosure) return@mapNotNull null
+        val navigationFields = classDef.fields.filter { field ->
+            !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                field.type == navigationOwner
         }
+        val navigationField = requireExactlyOne(
+            "NewX gallery item-click navigation field in $ownerType",
+            navigationFields,
+        )
+        ItemClickViewerTarget(
+            ownerType = ownerType,
+            methodName = method.name,
+            parameterTypes = method.parameterTypes.map(CharSequence::toString),
+            itemEventType = itemEvent.eventType,
+            itemEventField = itemEvent.field,
+            navigationField = navigationField.toSmaliDescriptor(),
+        )
     }
     if (targets.isEmpty()) {
         throw PatchException(
@@ -1562,7 +1572,6 @@ private fun resolveItemClickViewerTargets(
     return targets.distinct() to delegates
 }
 
-context(context: BytecodePatchContext)
 private fun patchItemClickPhotoViewer(timelineListDescriptor: String) {
     // Fresh snapshot: the timeline body and paging bridge above already mutated the dex,
     // so the pre-mutation snapshot from execute must not be reused here.
@@ -1570,7 +1579,7 @@ private fun patchItemClickPhotoViewer(timelineListDescriptor: String) {
     val event = resolveNativePhotoViewerTarget(classDefs, timelineListDescriptor)
     val (targets, delegates) = resolveItemClickViewerTargets(event, classDefs)
     targets.forEach { target ->
-        val owner = context.mutableClassDefBy(target.ownerType)
+        val owner = mutableClassDefBy(target.ownerType)
         val method = requireExactlyOne(
             "NewX gallery item-click viewer method ${target.ownerType}->${target.methodName}",
             owner.methods.filter { method ->
@@ -1692,7 +1701,7 @@ private fun Block.galleryInstructions(
 
 @Suppress("unused")
 val newXProfilePhotosGalleryPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Gallery profile Photos tab",
         description = "Replaces the profile Photos timeline with a three-column media gallery.",
     ) {

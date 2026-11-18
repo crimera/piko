@@ -28,9 +28,13 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -148,14 +152,9 @@ private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
     isStatic = false,
     superclass = "Lkotlin/jvm/internal/FunctionReferenceImpl;",
     interfaces = listOf("Lkotlin/jvm/functions/Function1;"),
-    custom = { method, _ ->
-        method.implementation?.instructions?.any { instruction ->
-            val reference = (instruction as? ReferenceInstruction)?.reference
-            reference is StringReference && reference.string == "timelineRepository"
-        } == true
-    },
     filters =
         listOf(
+            string("timelineRepository"),
             string("defaultUrtTimelineComponent"),
         ),
 )
@@ -175,13 +174,16 @@ private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
                 opcode = Opcode.SGET_OBJECT,
                 name = "Relevance",
             ),
+            // mutableStateOf(Relevance)
+            methodCall(
+                definingClass = "Landroidx/compose/runtime/",
+                parameters = listOf("Ljava/lang/Object;"),
+                returnType = "Landroidx/compose/runtime/",
+                location = MatchAfterImmediately(),
+            ),
+            opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+            opcode(Opcode.RETURN_OBJECT, location = MatchAfterImmediately()),
         ),
-    custom = { method, _ ->
-        val instructions = method.implementation?.instructions?.toList()
-        instructions?.withIndex()?.any { (index, _) ->
-            isComposeStateInitializer(instructions, index)
-        } == true
-    },
 )
 
 /**
@@ -336,7 +338,7 @@ internal fun MutableMethod.installReplySortingSelectionHook(site: ReplySortingSe
 
 @Suppress("unused")
 val newXDefaultReplySortingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Set default reply sorting",
         description = "Lets you choose the default reply sorting order for NewX post detail.",
     ) {

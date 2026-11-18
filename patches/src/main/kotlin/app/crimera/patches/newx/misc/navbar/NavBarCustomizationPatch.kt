@@ -1,7 +1,6 @@
 package app.crimera.patches.newx.misc.navbar
 
 import app.crimera.patches.newx.utils.unsupportedOnMount
-import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.newx.misc.drawer.isDrawerRowRenderer
 import app.crimera.patches.newx.misc.drawer.isStringResourceLookup
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
@@ -23,11 +22,13 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
 import app.crimera.patches.common.valueReachesRegister
 import app.crimera.patches.common.scopedMatchAll
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.literal
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import app.morphe.patcher.resource.ResourceType
@@ -119,7 +120,7 @@ private data class ResolvedNavBarDestination(
 
 @Suppress("unused")
 val customizeNewXNavBarPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Customize navigation bar",
         description = "Reorder, hide, and replace NewX bottom navigation bar items.",
     ) {
@@ -154,7 +155,6 @@ val customizeNewXNavBarPatch =
 
             injectNavBarFilter(resolveNewXNavBarFilterTarget(tabDataMatch))
 
-            val drawerRows = resolveDrawerRowCalls()
             val destinations =
                 NAV_BAR_DESTINATIONS.mapNotNull { spec ->
                     if (!hasResourceId(ResourceType.STRING, spec.titleResourceName)) {
@@ -164,7 +164,7 @@ val customizeNewXNavBarPatch =
                                 spec.titleResourceName,
                         )
                     }
-                    resolveNavBarDestination(spec, drawerRows)
+                    resolveNavBarDestination(spec)
                 }
             val contentTarget = resolveNavBarItemContent(tabData)
             val iconFields = destinations.map { it.iconField } + contentTarget.tabIconFields.values
@@ -297,58 +297,54 @@ private data class DrawerRowCall(
 )
 
 /**
- * Collects every title-based drawer row renderer call. Rows can live in a lazy row lambda outside
- * the drawer package, so no package scope is assumed.
+ * Collects the title-based drawer row renderer calls of the methods that load one of the title
+ * resource ids. Rows can live in a lazy row lambda outside the drawer package, so no package scope
+ * is assumed.
  */
-context(context: BytecodePatchContext)
-private fun resolveDrawerRowCalls(): List<DrawerRowCall> {
-    // Keep this APK-wide scan immutable. Calling mutableClassDefBy for every class materializes a
-    // mutable proxy for the entire APK and is the source of patch-time OOMs on manager-sized heaps.
-    return classDefFlatMap { classDef ->
-        classDef.methods.flatMap { method ->
-            if (method.implementation == null) return@flatMap emptyList()
-            val methodInstructions = method.implementation?.instructions?.toList() ?: return@flatMap emptyList()
-            methodInstructions.mapIndexedNotNull { index, instruction ->
-                if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@mapIndexedNotNull null
-                val call = instruction as? Instruction3rc ?: return@mapIndexedNotNull null
-                val renderer = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-                if (!renderer.isDrawerRowRenderer()) return@mapIndexedNotNull null
-                val titleRegister = call.startRegister
-                val titleResourceId =
-                    methodInstructions.resolveTitleResourceIdAtRowCall(index, titleRegister)
-                        ?: return@mapIndexedNotNull null
-                val iconField =
-                    methodInstructions.resolveIconField(index, titleRegister + 1)
-                        ?: return@mapIndexedNotNull null
-                DrawerRowCall(
-                    method = method,
-                    callIndex = index,
-                    call = call,
-                    titleResourceId = titleResourceId,
-                    iconField = iconField,
-                )
-            }
+private fun resolveDrawerRowCalls(titleResourceIds: Set<Long>): List<DrawerRowCall> {
+    return titleResourceIds.flatMap { titleResourceId ->
+        Fingerprint(filters = listOf(literal(titleResourceId))).matchAllOrNull().orEmpty()
+    }.map { it.originalMethod }.distinct().flatMap { method ->
+        if (method.implementation == null) return@flatMap emptyList()
+        val methodInstructions = method.implementation?.instructions?.toList() ?: return@flatMap emptyList()
+        methodInstructions.mapIndexedNotNull { index, instruction ->
+            if (instruction.opcode != Opcode.INVOKE_STATIC_RANGE) return@mapIndexedNotNull null
+            val call = instruction as? Instruction3rc ?: return@mapIndexedNotNull null
+            val renderer = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
+            if (!renderer.isDrawerRowRenderer()) return@mapIndexedNotNull null
+            val titleRegister = call.startRegister
+            val titleResourceId =
+                methodInstructions.resolveTitleResourceIdAtRowCall(index, titleRegister)
+                    ?: return@mapIndexedNotNull null
+            val iconField =
+                methodInstructions.resolveIconField(index, titleRegister + 1)
+                    ?: return@mapIndexedNotNull null
+            DrawerRowCall(
+                method = method,
+                callIndex = index,
+                call = call,
+                titleResourceId = titleResourceId,
+                iconField = iconField,
+            )
         }
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveNavBarDestination(
     spec: NavBarDestinationSpec,
-    rows: List<DrawerRowCall>,
 ): ResolvedNavBarDestination {
     val titleResourceId = resourceId(ResourceType.STRING, spec.titleResourceName)
     val alternateTitleResourceId =
         spec.alternateTitleResourceName?.let { resourceId(ResourceType.STRING, it) }
     val titleResourceIds = listOfNotNull(titleResourceId, alternateTitleResourceId).toSet()
-    val matches = rows.filter { it.titleResourceId.toLong() in titleResourceIds }
+    val matches = resolveDrawerRowCalls(titleResourceIds).filter { it.titleResourceId.toLong() in titleResourceIds }
     val row =
         requireExactlyOne(
             "NewX drawer row for ${spec.titleResourceName}",
             matches,
         ) { "${it.method} @ ${it.callIndex}" }
     val mutableMethodCandidates =
-        context.mutableClassDefBy(row.method.definingClass).methods.filter { method ->
+        mutableClassDefBy(row.method.definingClass).methods.filter { method ->
             method.name == row.method.name &&
                 method.returnType == row.method.returnType &&
                 method.parameterTypes.map(CharSequence::toString) ==
@@ -414,7 +410,6 @@ internal fun List<Instruction>.resolveIconField(
     return null
 }
 
-context(context: BytecodePatchContext)
 private fun injectSettingsRegistrations(
     destinations: List<ResolvedNavBarDestination>,
     tabIconFields: Map<String, FieldReference>,
@@ -422,7 +417,7 @@ private fun injectSettingsRegistrations(
 ) {
     val registerDestination = methodReference(REGISTER_DESTINATION_DESCRIPTOR)
     val registerTab = methodReference(REGISTER_TAB_DESCRIPTOR)
-    SettingsRegistrationState.inject(context) {
+    SettingsRegistrationState.inject {
         destinations.forEach { destination ->
             constString(0, destination.spec.id)
             constInt(1, destination.titleResourceId.toInt())
@@ -439,11 +434,10 @@ private fun injectSettingsRegistrations(
     }
 }
 
-context(context: BytecodePatchContext)
 internal fun resolveIconDrawables(fields: Collection<FieldReference>): Map<String, Int> {
     val drawables = mutableMapOf<String, Int>()
     fields.groupBy { field -> field.definingClass }.forEach { (classType, classFields) ->
-        val iconClass = context.mutableClassDefBy(classType)
+        val iconClass = mutableClassDefBy(classType)
         val initializers =
             iconClass.methods.filter { method ->
                 method.name == "<clinit>" && method.parameterTypes.isEmpty() && method.returnType == "V"
@@ -503,9 +497,8 @@ internal fun MutableMethod.resolveIconDrawableMap(iconType: String): Map<String,
     return drawables
 }
 
-context(context: BytecodePatchContext)
 private fun injectDestinationClickCaptures(destinations: List<ResolvedNavBarDestination>) {
-    val classDef = context.mutableClassDefBy(NAV_BAR_REPLACEMENT_DESCRIPTOR)
+    val classDef = mutableClassDefBy(NAV_BAR_REPLACEMENT_DESCRIPTOR)
     destinations.sortedByDescending { it.callIndex }.forEach { destination ->
         val destinationIndex =
             NAV_BAR_DESTINATIONS.indexOfFirst { spec -> spec.id == destination.spec.id }

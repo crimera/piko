@@ -25,7 +25,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
@@ -120,7 +120,7 @@ private fun MutableMethod.insertEmojiProcessingHook(
 
 @Suppress("unused")
 val customFontPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Custom font",
         description = "Customise font style",
     ) {

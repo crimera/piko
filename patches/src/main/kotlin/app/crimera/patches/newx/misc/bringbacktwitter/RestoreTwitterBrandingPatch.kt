@@ -9,15 +9,19 @@ package app.crimera.patches.newx.misc.bringbacktwitter
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.bytecode.insertHook
-import app.crimera.patches.common.requireAtMostOne
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.patch.resourceFile
+import app.morphe.patcher.patch.resourceXml
+import app.morphe.patcher.patch.resourceXmlOrNull
+import app.morphe.patcher.xml.ResourceXml
+import app.morphe.patcher.xml.XmlElement
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
 import app.morphe.patcher.util.registersUsed
@@ -25,7 +29,6 @@ import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
-import app.morphe.util.findElementByAttributeValue
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.iface.Method
@@ -37,9 +40,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstructio
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import org.w3c.dom.Element
-import java.io.FileWriter
-import java.nio.file.Files
 
 private const val SDK_INT_FIELD = "Landroid/os/Build\$VERSION;->SDK_INT:I"
 private const val SPLASH_BACKGROUND = "@color/twitter_splash_background"
@@ -90,9 +90,6 @@ private fun Method.staticInvokeReferences(): List<Pair<Int, MethodReference>> =
 
 private val STATIC_INVOKE_OPCODES = setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)
 
-private fun Method.hasInvoke(reference: (MethodReference) -> Boolean): Boolean =
-    invokeReferences().any { (_, candidate) -> reference(candidate) }
-
 internal fun hasObjectAndIntParameterShape(
     parameterTypes: List<CharSequence>,
     objectType: String? = null,
@@ -120,23 +117,24 @@ internal fun isLaunchRevealFallbackShape(parameterTypes: List<CharSequence>, cal
 
 internal fun isLaunchRevealRenderer(method: Method): Boolean =
     AccessFlags.STATIC.isSet(method.accessFlags) &&
-        method.returnType == "V" &&
-        hasObjectAndIntParameterShape(method.parameterTypes) &&
-        method.hasInvoke { reference ->
-            reference.definingClass == SURFACE_CONTROL_BUILDER_DESCRIPTOR &&
-                reference.name == "build" &&
-                reference.parameterTypes.isEmpty() &&
-                reference.returnType == "Landroid/view/SurfaceControl;"
-        } &&
-        method.hasInvoke { reference ->
-            reference.definingClass == ATTACHED_SURFACE_CONTROL_DESCRIPTOR &&
-                reference.name == "buildReparentTransaction" &&
-                reference.parameterTypes.map(CharSequence::toString) == listOf("Landroid/view/SurfaceControl;") &&
-                reference.returnType == "Landroid/view/SurfaceControl\$Transaction;"
-        }
+        hasObjectAndIntParameterShape(method.parameterTypes)
 
 private object TwitterLaunchRevealRendererFingerprint : Fingerprint(
     returnType = "V",
+    filters = listOf(
+        methodCall(
+            definingClass = SURFACE_CONTROL_BUILDER_DESCRIPTOR,
+            name = "build",
+            parameters = emptyList(),
+            returnType = "Landroid/view/SurfaceControl;",
+        ),
+        methodCall(
+            definingClass = ATTACHED_SURFACE_CONTROL_DESCRIPTOR,
+            name = "buildReparentTransaction",
+            parameters = listOf("Landroid/view/SurfaceControl;"),
+            returnType = "Landroid/view/SurfaceControl\$Transaction;",
+        ),
+    ),
     custom = { method, _ -> isLaunchRevealRenderer(method) },
 )
 
@@ -200,10 +198,9 @@ private fun isNormalSplashDismiss(method: Method): Boolean {
         references.any { it.definingClass == "Landroid/view/ViewPropertyAnimator;" && it.name == "withEndAction" }
 }
 
-context(context: BytecodePatchContext)
 private fun validateNormalSplashDismiss(reference: MethodReference) {
     val owner =
-        context.classDefByOrNull(reference.definingClass)
+        classDefByOrNull(reference.definingClass)
             ?: throw PatchException("NewX splash dismiss owner was not found: ${reference.definingClass}")
     val method =
         requireExactlyOne(
@@ -222,7 +219,7 @@ private fun validateNormalSplashDismiss(reference: MethodReference) {
 }
 
 private val restoreTwitterLaunchRevealPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Restore Twitter splash transition",
         description = "Skip the X launch reveal when Twitter branding is restored.",
         default = false,
@@ -365,7 +362,7 @@ private val restoreTwitterLaunchRevealPatch =
 
 @Suppress("unused")
 val bringBackTwitterPatch =
-    resourcePatch(
+    patch(
         name = "NewX: Restore Twitter branding",
         description = "Bring back old Twitter icons and name",
         default = false,
@@ -377,13 +374,12 @@ val bringBackTwitterPatch =
         dependsOn(addResourcesPatch, restoreTwitterLaunchRevealPatch)
 
         execute {
-            val hasPullToRefreshLogo = get("res/raw/x_refresh_logo.json").exists()
+            val hasPullToRefreshLogo = resourceFile("res/raw/x_refresh_logo.json").exists()
             addAppResources("twitter-bring-back")
             ensureNightSplashBackground()
             
-            document("AndroidManifest.xml").use { document ->
-                val application = document.getElementsByTagName("application").item(0) as Element
-                application.setAttribute("android:label", "Twitter")
+            resourceXml("AndroidManifest.xml").use { manifest ->
+                manifest.elements("application").first().setAttribute("android:label", "Twitter")
             }
 
             // region Change app icons
@@ -451,12 +447,12 @@ val bringBackTwitterPatch =
 
             // Notification icons reuse the white bird vector under different names.
             // (copyResources is name-matched, so this copy happens in res directly.)
-            val whiteBird = get("res/drawable/ic_vector_twitter_white.xml")
-            whiteBird.copyTo(get("res/drawable/ic_stat_x.xml", copy = false), overwrite = true)
-            whiteBird.copyTo(get("res/drawable/ic_logo_x.xml", copy = false), overwrite = true)
-            document("res/drawable/ic_logo_x.xml").use { doc ->
-                doc.getElementsByTagName("vector").item(0)?.let { vector ->
-                    (vector as Element).setAttribute("android:height", "96.0dp")
+            val whiteBird = resourceFile("res/drawable/ic_vector_twitter_white.xml")
+            whiteBird.copyTo(resourceFile("res/drawable/ic_stat_x.xml", copy = false), overwrite = true)
+            whiteBird.copyTo(resourceFile("res/drawable/ic_logo_x.xml", copy = false), overwrite = true)
+            resourceXml("res/drawable/ic_logo_x.xml").use { doc ->
+                doc.elements("vector").firstOrNull()?.let { vector ->
+                    vector.setAttribute("android:height", "96.0dp")
                     vector.setAttribute("android:width", "96.0dp")
                 }
             }
@@ -466,154 +462,108 @@ val bringBackTwitterPatch =
             // app, so define them here for versions that renamed or dropped them. Otherwise the
             // references below would dangle and the resource table would fail to encode.
             ensureDefaultBrandingColors()
-            document("res/values/colors.xml").use { document ->
-                document.childNodes.findElementByAttributeValue("name", "ic_launcher_background")?.textContent = "@color/twitter_blue"
+            resourceXml("res/values/colors.xml").use { colors ->
+                colors.resourceOrNull("ic_launcher_background")?.text = "@color/twitter_blue"
             }
 
             // endregion
 
             listOf("mipmap-anydpi", "mipmap-anydpi-v26").forEach { dir ->
                 listOf("ic_launcher.xml", "ic_launcher_round.xml").forEach { file ->
-                    // Resource files are decoded on exact-path reads, not by resolving from `res`.
-                    val launcherXml = get("res/$dir/$file")
-                    if (launcherXml.exists()) {
-                        document("res/$dir/$file").use { doc ->
-                            doc.getElementsByTagName("foreground").item(0)?.let {
-                                (it as Element).setAttribute("android:drawable", "@mipmap/ic_launcher_twitter_foreground")
-                            }
-                            doc.getElementsByTagName("monochrome").item(0)?.let {
-                                (it as Element).setAttribute("android:drawable", "@mipmap/ic_launcher_twitter_foreground")
-                            }
-                        }
+                    resourceXmlOrNull("res/$dir/$file")?.use { doc ->
+                        doc.elements("foreground").firstOrNull()
+                            ?.setAttribute("android:drawable", "@mipmap/ic_launcher_twitter_foreground")
+                        doc.elements("monochrome").firstOrNull()
+                            ?.setAttribute("android:drawable", "@mipmap/ic_launcher_twitter_foreground")
                     }
                 }
             }
 
             sizes.forEach { size ->
-                val twitterIcon = get("res/mipmap-$size/ic_launcher_twitter.webp")
-                val twitterRoundIcon = get("res/mipmap-$size/ic_launcher_twitter_round.webp")
+                val twitterIcon = resourceFile("res/mipmap-$size/ic_launcher_twitter.webp")
+                val twitterRoundIcon = resourceFile("res/mipmap-$size/ic_launcher_twitter_round.webp")
                 if (twitterIcon.exists()) {
-                    twitterIcon.copyTo(get("res/mipmap-$size/ic_launcher.webp", copy = false), overwrite = true)
+                    twitterIcon.copyTo(resourceFile("res/mipmap-$size/ic_launcher.webp", copy = false), overwrite = true)
                 }
                 if (twitterRoundIcon.exists()) {
-                    twitterRoundIcon.copyTo(get("res/mipmap-$size/ic_launcher_round.webp", copy = false), overwrite = true)
+                    twitterRoundIcon.copyTo(resourceFile("res/mipmap-$size/ic_launcher_round.webp", copy = false), overwrite = true)
                 }
             }
 
-            val animatedSplashVector = get("res/drawable/\$splash_screen_icon_animated__0.xml")
-            if (animatedSplashVector.exists()) {
+            resourceXmlOrNull("res/drawable/\$splash_screen_icon_animated__0.xml")?.use { animatedSplash ->
                 val birdPath =
-                    document("res/drawable/splash_screen_icon.xml").use { doc ->
-                        doc.getElementsByTagName("path").item(0)?.let { (it as Element).getAttribute("android:pathData") }
+                    resourceXml("res/drawable/splash_screen_icon.xml").use { doc ->
+                        doc.elements("path").firstOrNull()?.let { it.attribute("android:pathData").orEmpty() }
                     }
                 if (birdPath != null) {
-                    document("res/drawable/\$splash_screen_icon_animated__0.xml").use { doc ->
-                        doc.getElementsByTagName("path").item(0)?.let {
-                            (it as Element).setAttribute("android:pathData", birdPath)
-                        }
-                    }
+                    animatedSplash.elements("path").firstOrNull()?.setAttribute("android:pathData", birdPath)
                 }
             }
 
             // Replace splash icon & colors
-            val stylesXml = get("res/values/styles.xml")
-            if (stylesXml.exists()) {
-                document("res/values/styles.xml").use { document ->
-                    val styleElement =
-                        document.childNodes.findElementByAttributeValue("name", "Theme.LaunchScreen")
-                            ?: document.childNodes.findElementByAttributeValue("name", "Theme.X.SplashScreen")
+            resourceXmlOrNull("res/values/styles.xml")?.use { styles ->
+                val styleElement =
+                    styles.resourceOrNull("Theme.LaunchScreen")
+                        ?: styles.resourceOrNull("Theme.X.SplashScreen")
 
-                    styleElement?.let { style ->
-                        style.childNodes.findElementByAttributeValue("name", "windowSplashScreenAnimatedIcon")?.textContent = "@drawable/splash_screen_icon_animated"
-                        style.childNodes.findElementByAttributeValue("name", "windowSplashScreenBackground")?.textContent = SPLASH_BACKGROUND
-                    }
+                styleElement?.let { style ->
+                    style.styleItem("windowSplashScreenAnimatedIcon")?.text = "@drawable/splash_screen_icon_animated"
+                    style.styleItem("windowSplashScreenBackground")?.text = SPLASH_BACKGROUND
                 }
             }
 
             // Android 13+ may suppress the splash icon unless icon display is preferred.
-            val v31StylesXml = get("res/values-v31/styles.xml")
-            if (v31StylesXml.exists()) {
-                document("res/values-v31/styles.xml").use { document ->
-                    val splashStyle = document.childNodes.findElementByAttributeValue("name", "Theme.SplashScreen")
-                    splashStyle?.let { style ->
-                        val behavior =
-                            style.childNodes.findElementByAttributeValue(
-                                "name",
-                                "android:windowSplashScreenBehavior",
-                            ) ?: document.createElement("item").also { item ->
-                                item.setAttribute("name", "android:windowSplashScreenBehavior")
-                                style.appendChild(item)
-                            }
-                        behavior.textContent = "icon_preferred"
-                    }
+            resourceXmlOrNull("res/values-v31/styles.xml")?.use { styles ->
+                styles.resourceOrNull("Theme.SplashScreen")?.let { style ->
+                    val behavior =
+                        style.styleItem("android:windowSplashScreenBehavior")
+                            ?: style.appendChild("item") { setAttribute("name", "android:windowSplashScreenBehavior") }
+                    behavior.text = "icon_preferred"
                 }
             }
         }
     }
 
-private fun app.morphe.patcher.patch.ResourcePatchContext.ensureDefaultBrandingColors() {
-    val colorsFile = get("res/values/colors.xml")
-    if (!colorsFile.exists()) {
-        Files.createDirectories(colorsFile.toPath().parent)
-        FileWriter(colorsFile).use { writer ->
-            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
-        }
-    }
+private fun XmlElement.styleItem(name: String): XmlElement? =
+    children.firstOrNull { it.attribute("name") == name }
 
-    document("res/values/colors.xml").use { document ->
-        val colorElements = document.getElementsByTagName("color")
+/**
+ * Opens a values file of the APK, or an empty one to add resources to if the APK has none.
+ */
+private fun valuesXml(path: String): ResourceXml =
+    resourceXmlOrNull(path) ?: resourceXml(path, copy = false)
+
+private fun ensureDefaultBrandingColors() {
+    valuesXml("res/values/colors.xml").use { colors ->
         for ((name, value) in listOf(
             "twitter_blue" to "#1d9bf0",
             "twitter_splash_background" to "@color/twitter_blue",
         )) {
-            val existing =
-                requireAtMostOne(
-                    label = "res/values/colors.xml color '$name'",
-                    candidates =
-                        (0 until colorElements.length)
-                            .mapNotNull { colorElements.item(it) as? Element }
-                            .filter { it.getAttribute("name") == name },
-                    describe = { "${it.getAttribute("name")}=${it.textContent}" },
-                )
+            val existing = colors.resourceOrNull(name)
             if (existing != null) {
-                existing.textContent = value
+                existing.text = value
                 continue
             }
 
-            document.documentElement.appendChild(
-                document.createElement("color").apply {
-                    setAttribute("name", name)
-                    textContent = value
-                },
-            )
+            colors.root.appendChild("color") {
+                setAttribute("name", name)
+                text = value
+            }
         }
     }
 }
 
-private fun app.morphe.patcher.patch.ResourcePatchContext.ensureNightSplashBackground() {
-    val colorsPath = "res/values-night/colors.xml"
-    val colorsFile = get(colorsPath)
-    if (!colorsFile.exists()) {
-        Files.createDirectories(colorsFile.toPath().parent)
-        FileWriter(colorsFile).use { writer ->
-            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
-        }
-    }
-
-    document(colorsPath).use { document ->
-        val colors = document.getElementsByTagName("color")
-        for (index in 0 until colors.length) {
-            val color = colors.item(index) as? Element ?: continue
-            if (color.getAttribute("name") != "twitter_splash_background") continue
-            color.textContent = "#000000"
+private fun ensureNightSplashBackground() {
+    valuesXml("res/values-night/colors.xml").use { colors ->
+        val existing = colors.resourceOrNull("twitter_splash_background")
+        if (existing != null) {
+            existing.text = "#000000"
             return@use
         }
 
-        document.documentElement.appendChild(
-            document.createElement("color").apply {
-                setAttribute("name", "twitter_splash_background")
-                textContent = "#000000"
-            },
-        )
+        colors.root.appendChild("color") {
+            setAttribute("name", "twitter_splash_background")
+            text = "#000000"
+        }
     }
 }

@@ -21,9 +21,9 @@ import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -35,7 +35,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 @Suppress("unused")
 val newXHideAiGeneratedPostsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide AI-generated posts",
         description = "Hides selected AI-generated posts from NewX timelines.",
     ) {
@@ -94,7 +94,6 @@ private data class AiDisclosureAccessors(
     val source: ModelFieldAccessor,
 )
 
-context(context: BytecodePatchContext)
 private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
     // Disclosure models may expose fields directly or through generated getters.
     val contentDisclosureMatches =
@@ -107,7 +106,7 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
     }
     val contentDisclosureMatch = contentDisclosureMatches.single()
     val contentDisclosureDescriptor = contentDisclosureMatch.classDef.type
-    val contentDisclosureClass = context.mutableClassDefBy(contentDisclosureDescriptor)
+    val contentDisclosureClass = mutableClassDefBy(contentDisclosureDescriptor)
     val disclosureBooleanFields =
         contentDisclosureMatch.instanceFieldsRead("Z")
     if (disclosureBooleanFields.size != 3) {
@@ -132,13 +131,13 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
         contentDisclosureClass.resolveFieldAccessor(sourceField, "AI disclosure source")
 
     val timelineModels = resolvedNewXTimelineModels()
-    val timelinePostClass = context.mutableClassDefBy(timelineModels.postDescriptor)
+    val timelinePostClass = mutableClassDefBy(timelineModels.postDescriptor)
     val timelinePostResultAccessor =
         timelinePostClass.resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
     val postModels = resolvedNewXPostModels()
 
-    val contextualPostClass = context.mutableClassDefBy(postModels.contextualPostDescriptor)
-    val canonicalPostClass = context.mutableClassDefBy(postModels.canonicalPostDescriptor)
+    val contextualPostClass = mutableClassDefBy(postModels.contextualPostDescriptor)
+    val canonicalPostClass = mutableClassDefBy(postModels.canonicalPostDescriptor)
     val canonicalContentDisclosureField =
         requireExactlyOne(
             "NewX canonical-post content-disclosure field",
@@ -175,9 +174,8 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
-    val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
+    val filterClass = mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
 
     /**
      * Resolves the single NewX timeline helper [name] and prepares it for injection: a helper that

@@ -15,7 +15,6 @@ import app.crimera.patches.instagram.links.shareLinks.ShareLinkKind.STORY
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed

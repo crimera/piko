@@ -17,7 +17,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import app.morphe.patcher.util.cloneParameters
@@ -135,7 +136,7 @@ private val FEATURE_SWITCH_ACCESSORS =
 
 @Suppress("unused")
 val featureFlagPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Feature switch overrides",
         description = "Adds searchable, typed NewX feature switch overrides.",
     ) {

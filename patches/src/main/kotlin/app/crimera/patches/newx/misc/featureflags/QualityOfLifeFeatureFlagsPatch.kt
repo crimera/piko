@@ -9,11 +9,11 @@ package app.crimera.patches.newx.misc.featureflags
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.utils.setNewXFeatureFlag
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val newXQualityOfLifeFeatureFlagsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Enable quality-of-life feature flags",
         description = "Enables profile Photos and Videos tabs and sharing post screenshots.",
     ) {

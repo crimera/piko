@@ -2,10 +2,8 @@ package app.crimera.patches.newx.misc.inlineactions
 
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.morphe.patcher.patch.BytecodePatchContext
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
-context(context: BytecodePatchContext)
 private fun applyThumbnailCacheBridge() {
     val glideRuntime = resolveGlideThumbnailRuntimeOrNull()
     if (glideRuntime == null) {
@@ -20,7 +18,7 @@ private fun applyThumbnailCacheBridge() {
 }
 
 internal val newXThumbnailCachePatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 

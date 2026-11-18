@@ -23,9 +23,11 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.string
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
@@ -40,7 +42,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val URT_UI_SCOPE = "Lcom/x/urt/ui/"
@@ -110,15 +111,47 @@ internal fun Method.isPostDividerContentHelper(): Boolean {
 
 /** The reply facepile draws another connector behind the stacked reply avatars. */
 private object NewXReplyFacepileDividerFingerprint : Fingerprint(
+    isStatic = true,
     returnType = "V",
-    // The predicate below always reads an ArrayList field, so the patcher can index candidates
-    // by field type instead of scanning every class.
-    filters = listOf(fieldAccess(opcode = Opcode.IGET_OBJECT, type = ARRAY_LIST_DESCRIPTOR)),
+    filters = listOf(
+        // The reply avatar list of the post model.
+        fieldAccess(opcode = Opcode.IGET_OBJECT, type = ARRAY_LIST_DESCRIPTOR),
+        methodCall(
+            definingClass = ARRAY_LIST_DESCRIPTOR,
+            name = "size",
+            parameters = emptyList(),
+            returnType = "I",
+        ),
+        methodCall(
+            definingClass = "Ljava/lang/Iterable;",
+            name = "iterator",
+            parameters = emptyList(),
+            returnType = "Ljava/util/Iterator;",
+        ),
+        methodCall(
+            definingClass = "Ljava/util/Iterator;",
+            name = "hasNext",
+            parameters = emptyList(),
+            returnType = "Z",
+        ),
+        methodCall(
+            definingClass = "Ljava/util/Iterator;",
+            name = "next",
+            parameters = emptyList(),
+            returnType = OBJECT_DESCRIPTOR,
+        ),
+        // Draws the connector behind the avatars.
+        methodCall(
+            definingClass = "Landroidx/compose/ui/draw/",
+            parameters = listOf(MODIFIER_DESCRIPTOR, FUNCTION1_DESCRIPTOR),
+            returnType = MODIFIER_DESCRIPTOR,
+        ),
+    ),
     custom = { method, _ ->
         method.parameterDescriptors().hasComposeShape(
             required = listOf(MODIFIER_DESCRIPTOR, COMPOSER_DESCRIPTOR),
             last = INSETS_DESCRIPTOR,
-        ) && method.hasReplyFacepileDividerFlow()
+        ) && method.readsOneArrayListFieldFromParameter()
     },
 )
 
@@ -128,14 +161,16 @@ private object NewXTimelineModuleBuilderFingerprint : Fingerprint(
     name = "invoke",
     parameters = listOf(OBJECT_DESCRIPTOR),
     returnType = OBJECT_DESCRIPTOR,
-    custom = { method, classDef ->
-        val packageRelativeName = classDef.type.removePrefix(URT_UI_SCOPE)
-        classDef.type.startsWith(URT_UI_SCOPE) &&
-            !packageRelativeName.contains('/') &&
-            method.instructions.any { instruction ->
-                instruction.getReference<StringReference>()?.string == TIMELINE_HEADER_KEY_ANCHOR
-            } &&
-            method.instructions.toList().hasZeroKeyLazyItem()
+    filters = listOf(
+        string(TIMELINE_HEADER_KEY_ANCHOR),
+        // LazyListScope.item(key, contentType, content) of the header.
+        methodCall(
+            parameters = listOf(LAZY_PACKAGE, OBJECT_DESCRIPTOR, FUNCTION3_DESCRIPTOR, INSETS_DESCRIPTOR),
+            returnType = "V",
+        ),
+    ),
+    custom = { _, classDef ->
+        !classDef.type.removePrefix(URT_UI_SCOPE).contains('/')
     },
 )
 
@@ -152,19 +187,6 @@ private fun Instruction.isDrawModifierCall(): Boolean {
         reference.returnType == MODIFIER_DESCRIPTOR &&
         reference.parameterTypes.map(CharSequence::toString) ==
             listOf(MODIFIER_DESCRIPTOR, FUNCTION1_DESCRIPTOR)
-}
-
-private fun Instruction.callsCollectionMethod(
-    definingClass: String,
-    name: String,
-    parameters: List<String>,
-    returnType: String,
-): Boolean {
-    val reference = getReference<MethodReference>() ?: return false
-    return reference.definingClass == definingClass &&
-        reference.name == name &&
-        reference.parameterTypes.map(CharSequence::toString) == parameters &&
-        reference.returnType == returnType
 }
 
 /**
@@ -193,12 +215,9 @@ internal fun List<Instruction>.readsArrayListFromParameter(
     }
 }
 
-private fun Method.hasReplyFacepileDividerFlow(): Boolean {
-    if (!AccessFlags.STATIC.isSet(accessFlags)) return false
+private fun Method.readsOneArrayListFieldFromParameter(): Boolean {
     val methodImplementation = implementation ?: return false
     val instructions = methodImplementation.instructions.toList()
-    if (instructions.count(Instruction::isDrawModifierCall) != 1) return false
-
     val firstParameterRegister =
         methodImplementation.registerCount - numberOfParameterRegisters
     val listFields =
@@ -214,37 +233,7 @@ private fun Method.hasReplyFacepileDividerFlow(): Boolean {
             }
             instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
         }.distinctBy(FieldReference::toString)
-    if (listFields.size != 1) return false
-
-    return instructions.any { instruction ->
-        instruction.callsCollectionMethod(
-            definingClass = ARRAY_LIST_DESCRIPTOR,
-            name = "size",
-            parameters = emptyList(),
-            returnType = "I",
-        )
-    } && instructions.any { instruction ->
-        instruction.callsCollectionMethod(
-            definingClass = "Ljava/lang/Iterable;",
-            name = "iterator",
-            parameters = emptyList(),
-            returnType = "Ljava/util/Iterator;",
-        )
-    } && instructions.any { instruction ->
-        instruction.callsCollectionMethod(
-            definingClass = "Ljava/util/Iterator;",
-            name = "hasNext",
-            parameters = emptyList(),
-            returnType = "Z",
-        )
-    } && instructions.any { instruction ->
-        instruction.callsCollectionMethod(
-            definingClass = "Ljava/util/Iterator;",
-            name = "next",
-            parameters = emptyList(),
-            returnType = OBJECT_DESCRIPTOR,
-        )
-    }
+    return listFields.size == 1
 }
 
 
@@ -283,9 +272,6 @@ private fun List<Instruction>.isZeroKeyLazyItem(
     val keyRegister = instruction.registersUsed.getOrNull(1) ?: return false
     return resolveConstantOnCurrentPath(index, keyRegister) == 0
 }
-
-private fun List<Instruction>.hasZeroKeyLazyItem(): Boolean =
-    indices.any { index -> isZeroKeyLazyItem(index, this[index]) }
 
 private data class InlineContentLambda(
     val adapterType: String,
@@ -350,7 +336,7 @@ private fun List<Instruction>.inlineContentLambda(
 /**
  * Zero-key lazy items whose inline content lambda resolves to a case block that draws a Material3
  * divider. The block lookup is injected so the selection predicate can be exercised against fixture
- * bytecode without a patch context.
+ * bytecode without an APK being patched.
  */
 internal fun List<Instruction>.timelineModuleDividerItemIndices(
     contentLambdaBlock: (adapterType: String, discriminator: Int) -> List<Instruction>?,
@@ -364,12 +350,11 @@ internal fun List<Instruction>.timelineModuleDividerItemIndices(
         block.any(Instruction::isMaterial3DividerCall)
     }
 
-context(context: BytecodePatchContext)
 private fun dividerLambdaCaseBlock(
     adapterType: String,
     discriminator: Int,
 ): List<Instruction>? {
-    val adapterClass = context.mutableClassDefBy(adapterType)
+    val adapterClass = mutableClassDefBy(adapterType)
     val invoke =
         requireExactlyOne(
             label = "NewX divider lambda adapter invoke in $adapterType",
@@ -414,12 +399,11 @@ private fun Instruction.isMaterial3DividerCall(): Boolean {
  * divider" composable. Forcing its boolean parameter off covers the item wrappers whose call
  * sites change between releases, instead of hooking individual calls in one renderer.
  */
-context(context: BytecodePatchContext)
 private fun patchPostDividerHelper(
     helper: MethodReference,
     setting: ToggleSettingDefinition,
 ) {
-    val helperClass = context.mutableClassDefBy(helper.definingClass)
+    val helperClass = mutableClassDefBy(helper.definingClass)
     val parameterTypes = helper.parameterTypes.map(CharSequence::toString)
     val method =
         requireExactlyOne(
@@ -505,7 +489,6 @@ private fun resolveReplyFacepileDrawCall(method: Method): ReplyFacepileDrawCall 
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchReplyFacepileDivider(
     setting: ToggleSettingDefinition,
 ) {
@@ -518,7 +501,7 @@ private fun patchReplyFacepileDivider(
     val originalRegisterCount =
         originalMethod.implementation?.registerCount
             ?: throw PatchException("NewX reply facepile divider renderer has no implementation")
-    val owner = context.mutableClassDefBy(renderer.originalClassDef.type)
+    val owner = mutableClassDefBy(renderer.originalClassDef.type)
     val method =
         originalMethod.cloneMutable(
             additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
@@ -544,7 +527,6 @@ private fun patchReplyFacepileDivider(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveTimelineModuleDividerCallIndex(method: Method): Int {
     val instructions = method.instructions.toList()
     val dividers =
@@ -557,7 +539,6 @@ private fun resolveTimelineModuleDividerCallIndex(method: Method): Int {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchTimelineModuleDividers(
     setting: ToggleSettingDefinition,
 ) {
@@ -570,7 +551,7 @@ private fun patchTimelineModuleDividers(
     val originalRegisterCount =
         originalMethod.implementation?.registerCount
             ?: throw PatchException("NewX timeline module builder has no implementation")
-    val owner = context.mutableClassDefBy(builder.originalClassDef.type)
+    val owner = mutableClassDefBy(builder.originalClassDef.type)
     val method =
         originalMethod.cloneMutable(
             additionalRegisters = originalMethod.numberOfParameterRegisters + 2,
@@ -595,7 +576,7 @@ private fun patchTimelineModuleDividers(
 
 @Suppress("unused")
 val newXHidePostDividersPatch =
-    bytecodePatch(
+    patch(
         default = false,
         name = "NewX: Hide post dividers",
         description = "Removes post and reply dividers shown in NewX timelines.",

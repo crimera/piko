@@ -19,9 +19,9 @@ import app.crimera.patches.settings.settingStrings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
@@ -182,7 +182,6 @@ private fun resolveStringButtonCall(
     return requireExactlyOne("NewX post-detail Message button composable in $method", candidates)
 }
 
-context(context: BytecodePatchContext)
 private fun resolveFollowButtonCall(method: Method): Int {
     val followResourceId = resourceId(ResourceType.STRING, FOLLOW_RESOURCE_NAME).toInt()
     val instructions = method.implementation?.instructions?.toList()
@@ -209,21 +208,20 @@ internal fun MethodReference.isFollowActionComposable(): Boolean {
         parameters.any { it == FUNCTION_ZERO_DESCRIPTOR }
 }
 
-context(context: BytecodePatchContext)
 private fun MethodReference.rendersFollowResource(resourceId: Int): Boolean {
-    val renderer = context.methodByOrNull(this) ?: return false
+    val renderer = methodByOrNull(this) ?: return false
     if (renderer.containsResourceLiteral(resourceId)) return true
 
     val labelHelpers = buildList {
         for (callee in renderer.outgoingMethodReferences()) {
-            val helper = context.methodByOrNull(callee) ?: continue
+            val helper = methodByOrNull(callee) ?: continue
             if (helper.containsResourceLiteral(resourceId)) add(helper)
         }
     }
     return requireAtMostOne("NewX Follow label helper for $this", labelHelpers) != null
 }
 
-private fun BytecodePatchContext.methodByOrNull(reference: MethodReference): Method? {
+private fun methodByOrNull(reference: MethodReference): Method? {
     val owner = classDefByOrNull(reference.definingClass) ?: return null
     val candidates = owner.methods.filter { method -> method.matches(reference) }
     return requireAtMostOne("NewX method reference $reference", candidates)
@@ -297,7 +295,7 @@ internal fun applyPostDetailAuthorActionSkip(
 
 @Suppress("unused")
 val newXHidePostDetailAuthorActionsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide post author actions",
         description = "Hides the Follow and Message buttons for post authors on post details.",
     ) {

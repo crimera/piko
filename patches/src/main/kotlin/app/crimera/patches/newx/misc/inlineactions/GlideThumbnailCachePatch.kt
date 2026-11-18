@@ -12,8 +12,9 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
@@ -95,13 +96,13 @@ private const val ACTIVE_SAMPLE_LABEL = "piko_newx_glide_cached_thumbnail_active
 /** Resolves Glide's process-wide singleton factory from the stable library ABI. */
 private object GlideProviderFingerprint : Fingerprint(
     definingClass = GLIDE_SCOPE,
+    interfaces = listOf(COMPONENT_CALLBACKS_DESCRIPTOR),
+    isStatic = true,
+    returnType = GLIDE_SCOPE,
     parameters = listOf(CONTEXT_DESCRIPTOR),
     custom = { method, classDef ->
-        AccessFlags.STATIC.isSet(method.accessFlags) &&
-            method.returnType.startsWith(GLIDE_SCOPE) &&
-            method.returnType == classDef.type &&
-            classDef.interfaces.any { it.toString() == COMPONENT_CALLBACKS_DESCRIPTOR }
-    },
+        method.returnType == classDef.type
+    }
 )
 
 internal data class GlideThumbnailRuntime(
@@ -120,12 +121,10 @@ internal data class GlideThumbnailRuntime(
     val resourceInterfaceDescriptor: String,
 )
 
-context(context: BytecodePatchContext)
 internal fun applyGlideThumbnailCachePatch() {
     applyGlideThumbnailCachePatch(resolveGlideThumbnailRuntime())
 }
 
-context(context: BytecodePatchContext)
 internal fun applyGlideThumbnailCachePatch(runtime: GlideThumbnailRuntime) {
     patchGlideThumbnailBridge(runtime)
 }
@@ -135,22 +134,21 @@ internal fun applyGlideThumbnailCachePatch(runtime: GlideThumbnailRuntime) {
  * layout used by the media renderer. Use Coil alone when that optional shape
  * is absent; once the shape is present, the full resolver remains strict.
  */
-context(context: BytecodePatchContext)
 internal fun resolveGlideThumbnailRuntimeOrNull(): GlideThumbnailRuntime? {
     val providerMatches = GlideProviderFingerprint.scopedMatchAllOrNull().orEmpty()
     if (providerMatches.isEmpty()) return null
 
     val providerMatch = requireExactlyOne("Glide singleton provider", providerMatches)
-    val glideClass = context.mutableClassDefBy(providerMatch.originalMethod.definingClass)
+    val glideClass = mutableClassDefBy(providerMatch.originalMethod.definingClass)
     val engineField = requireAtMostOne(
         "Glide engine capability field",
         glideClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
                 field.type.startsWith(GLIDE_ENGINE_SCOPE) &&
-                context.hasGlideEngineShape(field.type)
+                hasGlideEngineShape(field.type)
         },
     ) ?: return null
-    val engineClass = context.mutableClassDefBy(engineField.type)
+    val engineClass = mutableClassDefBy(engineField.type)
     requireAtMostOne(
         "Glide engine cache capability lookup",
         engineClass.methods.filter { method ->
@@ -166,7 +164,7 @@ internal fun resolveGlideThumbnailRuntimeOrNull(): GlideThumbnailRuntime? {
         "Glide memory-cache capability field",
         engineClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                context.hasGlideMemoryCacheShape(field.type)
+                hasGlideMemoryCacheShape(field.type)
         },
     ) ?: return null
 
@@ -175,9 +173,8 @@ internal fun resolveGlideThumbnailRuntimeOrNull(): GlideThumbnailRuntime? {
     return resolveGlideThumbnailRuntime()
 }
 
-context(context: BytecodePatchContext)
 private fun patchGlideThumbnailBridge(runtime: GlideThumbnailRuntime) {
-    val extensionClass = context.mutableClassDefBy(MEDIA_THUMBNAIL_LOADER_DESCRIPTOR)
+    val extensionClass = mutableClassDefBy(MEDIA_THUMBNAIL_LOADER_DESCRIPTOR)
     val placeholder = extensionClass.requireHelper(
         CACHED_THUMBNAIL_HELPER,
         listOf(OBJECT_DESCRIPTOR, STRING_DESCRIPTOR),
@@ -362,24 +359,23 @@ private fun Block.glideThumbnailLookup(
     returnObject(0)
 }
 
-context(context: BytecodePatchContext)
 private fun resolveGlideThumbnailRuntime(): GlideThumbnailRuntime {
     val providerMatch = requireSingleGlideMatch(
         "Glide singleton provider",
         GlideProviderFingerprint.scopedMatchAllOrNull().orEmpty(),
     )
     val provider = providerMatch.originalMethod
-    val glideClass = context.mutableClassDefBy(provider.definingClass)
+    val glideClass = mutableClassDefBy(provider.definingClass)
 
     val engineField = requireSingleGlideValue(
         "Glide engine field",
         glideClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
                 field.type.startsWith(GLIDE_ENGINE_SCOPE) &&
-                context.hasGlideEngineShape(field.type)
+                hasGlideEngineShape(field.type)
         },
     )
-    val engineClass = context.mutableClassDefBy(engineField.type)
+    val engineClass = mutableClassDefBy(engineField.type)
     val cacheLookup = requireSingleGlideValue(
         "Glide engine cache lookup",
         engineClass.methods.filter { method ->
@@ -393,14 +389,14 @@ private fun resolveGlideThumbnailRuntime(): GlideThumbnailRuntime {
     )
     val keyDescriptor = cacheLookup.parameterTypes.first().toString()
     val resourceDescriptor = cacheLookup.returnType
-    val resourceClass = context.mutableClassDefBy(resourceDescriptor)
+    val resourceClass = mutableClassDefBy(resourceDescriptor)
     val resourceInterfaceDescriptor = requireSingleGlideValue(
         "Glide resource interface",
         resourceClass.interfaces
             .map(CharSequence::toString)
-            .filter(context::isGlideResourceInterface),
+            .filter(::isGlideResourceInterface),
     )
-    val keyClass = context.mutableClassDefBy(keyDescriptor)
+    val keyClass = mutableClassDefBy(keyDescriptor)
     val keyModelField = requireSingleGlideValue(
         "Glide cache-key model field",
         keyClass.fields.filter { field ->
@@ -413,13 +409,13 @@ private fun resolveGlideThumbnailRuntime(): GlideThumbnailRuntime {
         "Glide memory-cache field",
         engineClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                context.hasGlideMemoryCacheShape(field.type)
+                hasGlideMemoryCacheShape(field.type)
         },
     )
-    val memoryCacheClass = context.mutableClassDefBy(memoryCacheField.type)
+    val memoryCacheClass = mutableClassDefBy(memoryCacheField.type)
     val memoryCacheSuperclass = memoryCacheClass.superclass
         ?: throw PatchException("Glide memory cache has no LRU-map superclass: $memoryCacheClass")
-    val memoryCacheSuperclassDef = context.mutableClassDefBy(memoryCacheSuperclass)
+    val memoryCacheSuperclassDef = mutableClassDefBy(memoryCacheSuperclass)
     val memoryMapField = requireSingleGlideValue(
         "Glide memory-cache map field",
         memoryCacheSuperclassDef.fields.filter { field ->
@@ -432,13 +428,13 @@ private fun resolveGlideThumbnailRuntime(): GlideThumbnailRuntime {
         "Glide active-resources field",
         engineClass.fields.filter { field ->
             !AccessFlags.STATIC.isSet(field.accessFlags) &&
-                context.hasGlideActiveResourcesShape(
+                hasGlideActiveResourcesShape(
                     field.type,
                     resourceInterfaceDescriptor,
                 )
         },
     )
-    val activeResourcesClass = context.mutableClassDefBy(activeResourcesField.type)
+    val activeResourcesClass = mutableClassDefBy(activeResourcesField.type)
     val activeMapField = requireSingleGlideValue(
         "Glide active-resources map field",
         activeResourcesClass.fields.filter { field ->
@@ -457,11 +453,11 @@ private fun resolveGlideThumbnailRuntime(): GlideThumbnailRuntime {
             .map { method -> method.parameterTypes.single().toString() }
             .distinct()
             .filter { descriptor ->
-                context.hasGlideActiveEntryShape(descriptor, resourceInterfaceDescriptor)
+                hasGlideActiveEntryShape(descriptor, resourceInterfaceDescriptor)
             },
     )
 
-    val memoryEntryClass = context.resolveGlideMemoryEntryClass(cacheLookup)
+    val memoryEntryClass = resolveGlideMemoryEntryClass(cacheLookup)
     val memoryEntryResourceField = requireSingleGlideValue(
         "Glide memory-entry resource field",
         memoryEntryClass.fields.filter { field ->
@@ -487,7 +483,7 @@ private fun resolveGlideThumbnailRuntime(): GlideThumbnailRuntime {
     )
 }
 
-private fun BytecodePatchContext.hasGlideEngineShape(descriptor: String): Boolean {
+private fun hasGlideEngineShape(descriptor: String): Boolean {
     val engineClass = classDefByOrNull(descriptor) ?: return false
     return engineClass.methods.count { method ->
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
@@ -499,7 +495,7 @@ private fun BytecodePatchContext.hasGlideEngineShape(descriptor: String): Boolea
     } == 1
 }
 
-private fun BytecodePatchContext.isGlideResourceInterface(descriptor: String): Boolean {
+private fun isGlideResourceInterface(descriptor: String): Boolean {
     val classDef = classDefByOrNull(descriptor) ?: return false
     return AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
         classDef.methods.any { method ->
@@ -509,7 +505,7 @@ private fun BytecodePatchContext.isGlideResourceInterface(descriptor: String): B
         }
 }
 
-private fun BytecodePatchContext.hasGlideActiveEntryShape(
+private fun hasGlideActiveEntryShape(
     descriptor: String,
     resourceInterfaceDescriptor: String,
 ): Boolean {
@@ -521,7 +517,7 @@ private fun BytecodePatchContext.hasGlideActiveEntryShape(
         }
 }
 
-private fun BytecodePatchContext.hasGlideActiveResourcesShape(
+private fun hasGlideActiveResourcesShape(
     descriptor: String,
     resourceInterfaceDescriptor: String,
 ): Boolean {
@@ -540,7 +536,7 @@ private fun BytecodePatchContext.hasGlideActiveResourcesShape(
         activeEntryMethods.size == 1
 }
 
-private fun BytecodePatchContext.resolveGlideMemoryEntryClass(cacheLookup: Method): ClassDef {
+private fun resolveGlideMemoryEntryClass(cacheLookup: Method): ClassDef {
     val instructions = cacheLookup.implementation?.instructions?.toList()
         ?: throw PatchException("Glide cache lookup has no implementation: $cacheLookup")
     val candidates = instructions.withIndex().mapNotNull { (castIndex, castInstruction) ->
@@ -589,11 +585,10 @@ private fun hasGlideMemoryEntryShape(classDef: ClassDef): Boolean {
         constructors.size == 1
 }
 
-context(context: BytecodePatchContext)
-private fun BytecodePatchContext.hasGlideMemoryCacheShape(descriptor: String): Boolean {
-    val cacheClass = this.classDefByOrNull(descriptor) ?: return false
+private fun hasGlideMemoryCacheShape(descriptor: String): Boolean {
+    val cacheClass = classDefByOrNull(descriptor) ?: return false
     val superclassDescriptor = cacheClass.superclass ?: return false
-    val superclass = this.classDefByOrNull(superclassDescriptor) ?: return false
+    val superclass = classDefByOrNull(superclassDescriptor) ?: return false
     val mapFields = superclass.fields.filter { field ->
         !AccessFlags.STATIC.isSet(field.accessFlags) &&
             field.type in LRU_MAP_FIELD_TYPES

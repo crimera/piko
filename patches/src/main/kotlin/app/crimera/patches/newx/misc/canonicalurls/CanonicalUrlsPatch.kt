@@ -23,16 +23,19 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.instanceOf
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.newInstance
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -61,7 +64,7 @@ private const val SETTINGS_GET_BOOLEAN_DESCRIPTOR =
     "$SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault(Ljava/lang/String;)Z"
 private const val POST_URL_FIELD_FILTER_INDEX = 3
 private const val TEXT_ENTITY_URL_FIELD_FILTER_INDEX = 5
-private const val RICH_TEXT_DISPLAY_URL_FIELD_FILTER_INDEX = 1
+private const val RICH_TEXT_DISPLAY_URL_FIELD_FILTER_INDEX = 2
 private const val PROFILE_LINK_DISPLAY_URL_FIELD_FILTER_INDEX = 0
 private const val PROFILE_LINK_OPEN_URL_FIELD_FILTER_INDEX = 1
 
@@ -127,7 +130,7 @@ private data class InlinedUrlPickerNormalization(
 /** Opens expanded URL values in the Compose/URT navigation paths. */
 @Suppress("unused")
 val newXCanonicalUrlsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Open canonical URLs",
         description =
             "Opens the expanded (canonical) URL directly when clicking links instead of the shortened t.co link.",
@@ -177,7 +180,6 @@ val newXCanonicalUrlsPatch =
         }
     }
 
-context(_: BytecodePatchContext)
 private fun resolveCanonicalUrlMatches(urlEntityFields: UrlEntityFields): CanonicalUrlMatches {
     val postModels = resolvedNewXPostModels()
     val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
@@ -309,15 +311,28 @@ internal fun resolveUrlEntityFields(match: Match): UrlEntityFields {
     )
 }
 
-context(_: BytecodePatchContext)
 private fun resolveUrlPickerShape(navigationOwner: String): UrlPickerShape {
     val extracted =
         Fingerprint(
             definingClass = navigationOwner,
             parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
             returnType = STRING_DESCRIPTOR,
-            filters = listOf(uriParseCall(), uriAuthorityCall()),
-            custom = { method, _ -> method.hasExtractedUrlPickerFlow(navigationOwner) },
+            filters = listOf(
+                // Expanded URL null check.
+                opcode(Opcode.IF_EQZ),
+                // Expanded URL normalization.
+                methodCall(
+                    opcode = Opcode.INVOKE_STATIC,
+                    definingClass = navigationOwner,
+                    parameters = listOf(STRING_DESCRIPTOR),
+                    returnType = STRING_DESCRIPTOR,
+                ),
+                opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+                uriParseCall(),
+                opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
+                uriAuthorityCall(location = MatchAfterImmediately()),
+            ),
+            custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
         ).scopedMatchAllOrNull().orEmpty().distinctBy { it.originalMethod.toString() }
             .map(UrlPickerShape::Extracted)
 
@@ -334,67 +349,6 @@ private fun resolveUrlPickerShape(navigationOwner: String): UrlPickerShape {
             }
 
     return requireExactlyOne("URL picker capability shape", extracted + inlined)
-}
-
-private fun Method.hasExtractedUrlPickerFlow(owner: String): Boolean {
-    if (!AccessFlags.STATIC.isSet(accessFlags)) return false
-    val methodInstructions = implementation?.instructions?.toList() ?: return false
-    val baseRegister = p0Register
-    val expandedRegister = baseRegister + 1
-    val parseIndices = methodInstructions.indices.filter { index ->
-        methodInstructions[index].isUriParseCallWith(expandedRegister)
-    }
-    val parseIndex =
-        requireAtMostOne(
-            "extracted URL picker URI parse",
-            parseIndices,
-        ) ?: return false
-
-    val normalizationCalls = (0 until parseIndex).filter { index ->
-        val reference = methodInstructions[index].getReference<MethodReference>()
-            ?: return@filter false
-        val arguments = methodInstructions[index].registersUsed
-        val result = methodInstructions.getOrNull(index + 1) as? OneRegisterInstruction
-        methodInstructions[index].opcode == Opcode.INVOKE_STATIC &&
-            reference.definingClass == owner &&
-            reference.parameterTypes.map(CharSequence::toString) == listOf(STRING_DESCRIPTOR) &&
-            reference.returnType == STRING_DESCRIPTOR &&
-            arguments == listOf(expandedRegister) &&
-            methodInstructions[index + 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
-            result?.registerA == expandedRegister
-    }
-    val normalizationIndex =
-        requireAtMostOne(
-            "extracted URL picker normalization",
-            normalizationCalls,
-        ) ?: return false
-
-    val expandedNullGates = (0 until normalizationIndex).filter { index ->
-        val branch = methodInstructions[index] as? OneRegisterInstruction
-        methodInstructions[index].opcode == Opcode.IF_EQZ && branch?.registerA == expandedRegister
-    }
-    requireAtMostOne(
-        "extracted URL picker expanded-URL null gate",
-        expandedNullGates,
-    ) ?: return false
-    val returnRegisters = methodInstructions.mapNotNull { instruction ->
-        (instruction as? OneRegisterInstruction)
-            ?.takeIf { instruction.opcode == Opcode.RETURN_OBJECT }
-            ?.registerA
-    }
-    if (returnRegisters.sorted() != listOf(baseRegister, expandedRegister).sorted()) return false
-
-    val parseResult = methodInstructions.getOrNull(parseIndex + 1) as? OneRegisterInstruction
-        ?: return false
-    val authorityCall = methodInstructions.getOrNull(parseIndex + 2) ?: return false
-    val authorityReference = authorityCall.getReference<MethodReference>() ?: return false
-    return methodInstructions[parseIndex + 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
-        authorityCall.opcode == Opcode.INVOKE_VIRTUAL &&
-        authorityReference.definingClass == URI &&
-        authorityReference.name == "getAuthority" &&
-        authorityReference.parameterTypes.isEmpty() &&
-        authorityReference.returnType == STRING_DESCRIPTOR &&
-        authorityCall.registersUsed == listOf(parseResult.registerA)
 }
 
 private fun Method.resolveInlinedUrlPickerSites(owner: String): List<InlinedUrlPickerSite> {
@@ -648,13 +602,16 @@ private fun uriParseCall() =
         returnType = URI,
     )
 
-private fun uriAuthorityCall() =
+private fun uriAuthorityCall(
+    location: InstructionLocation = InstructionLocation.MatchAfterAnywhere(),
+) =
     methodCall(
         opcode = Opcode.INVOKE_VIRTUAL,
         definingClass = URI,
         name = "getAuthority",
         parameters = emptyList(),
         returnType = STRING_DESCRIPTOR,
+        location = location,
     )
 
 private fun replaceUrlEntityFieldRead(
@@ -792,7 +749,6 @@ private fun patchInlinedUrlPickerSite(
     }
 }
 
-context(_: BytecodePatchContext)
 private fun patchProfileLinkValues(
     urlEntityFields: UrlEntityFields,
     setting: ToggleSettingDefinition,
@@ -814,8 +770,9 @@ private fun patchProfileLinkValues(
                     opcode = Opcode.IGET_OBJECT,
                     reference = urlEntityFields.url,
                 ),
+                // The URL entity values feed a profile header entry.
+                newInstance(PROFILE_HEADER_SCOPE),
             ),
-            custom = { method, _ -> method.constructsProfileHeaderModel() },
         ).requireSingleMatch("profile link values")
 
     // The injected branch widens each matched read; patch the later read first so the earlier
@@ -834,21 +791,6 @@ private fun patchProfileLinkValues(
     )
 }
 
-/**
- * Proves the URL-entity reads feed a profile-header entry rather than a text-entity copy or rich
- * text builder. The profile-header leaf classes churn, but the `Lcom/x/profile/header/` package is
- * the stable semantic scope.
- */
-internal fun Method.constructsProfileHeaderModel(): Boolean {
-    val methodInstructions = implementation?.instructions?.toList() ?: return false
-    return methodInstructions.any { instruction ->
-        instruction.opcode == Opcode.NEW_INSTANCE &&
-            (instruction.getReference<TypeReference>()?.toString() ?: "")
-                .startsWith(PROFILE_HEADER_SCOPE)
-    }
-}
-
-context(_: BytecodePatchContext)
 private fun patchRichTextUrlDisplay(
     urlEntityFields: UrlEntityFields,
     setting: ToggleSettingDefinition,
@@ -858,12 +800,12 @@ private fun patchRichTextUrlDisplay(
             definingClass = "Lcom/x/ui/common/text/",
             filters = listOf(
                 instanceOf(urlEntityFields.type),
+                checkCast(urlEntityFields.type),
                 fieldAccess(
                     opcode = Opcode.IGET_OBJECT,
                     reference = urlEntityFields.displayUrl,
                 ),
             ),
-            custom = { method, _ -> method.hasUrlEntityDisplayFlow(urlEntityFields) },
         ).requireSingleMatch("rich-text URL display")
 
     replaceUrlEntityFieldRead(
@@ -874,89 +816,6 @@ private fun patchRichTextUrlDisplay(
     )
 }
 
-/**
- * Proves that the display-url read belongs to the URL-entity branch, rather than merely sharing
- * a method with an unrelated URL field. Compose's text return type and the renderer's name are
- * release details, so the URL entity cast/read data flow is the semantic anchor.
- */
-private fun Method.hasUrlEntityDisplayFlow(fields: UrlEntityFields): Boolean {
-    val methodInstructions = implementation?.instructions?.toList() ?: return false
-    val offsets = IntArray(methodInstructions.size)
-    val indexByOffset = mutableMapOf<Int, Int>()
-    var codeOffset = 0
-    methodInstructions.forEachIndexed { index, instruction ->
-        offsets[index] = codeOffset
-        indexByOffset[codeOffset] = index
-        codeOffset += instruction.codeUnits
-    }
-    fun branchTargetIndex(index: Int): Int? {
-        val branch = methodInstructions[index] as? OffsetInstruction ?: return null
-        return indexByOffset[offsets[index] + branch.codeOffset]
-    }
-
-    val displayReads = methodInstructions.mapIndexedNotNull { index, instruction ->
-        val registers = instruction as? TwoRegisterInstruction ?: return@mapIndexedNotNull null
-        val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
-        index.takeIf {
-            instruction.opcode == Opcode.IGET_OBJECT &&
-                field == fields.displayUrl &&
-                field.type == STRING_DESCRIPTOR
-        }?.let { it to registers }
-    }
-    if (displayReads.size != 1) return false
-
-    val (displayReadIndex, displayRead) = displayReads.single()
-    val receiverRegister = displayRead.registerB
-    val castIndices = (0 until displayReadIndex).filter { index ->
-        val instruction = methodInstructions[index]
-        instruction.opcode == Opcode.CHECK_CAST &&
-            (instruction as? OneRegisterInstruction)?.registerA == receiverRegister &&
-            instruction.getReference<TypeReference>()?.type == fields.type
-    }
-    if (castIndices.size != 1) return false
-    val castIndex = castIndices.single()
-    val entityInputRegister =
-        methodInstructions.getOrNull(castIndex - 1)
-            ?.takeIf { it.opcode == Opcode.MOVE_OBJECT || it.opcode == Opcode.MOVE }
-            ?.let { it as? TwoRegisterInstruction }
-            ?.takeIf { it.registerA == receiverRegister }
-            ?.registerB
-            ?: receiverRegister
-
-    val instanceChecks = (0 until castIndex).mapNotNull { index ->
-        val instruction = methodInstructions[index]
-        if (instruction.opcode != Opcode.INSTANCE_OF) return@mapNotNull null
-        val instanceOf = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
-        if (instanceOf.registerB != entityInputRegister ||
-            instruction.getReference<TypeReference>()?.type != fields.type
-        ) {
-            return@mapNotNull null
-        }
-
-        val branchIndex = index + 1
-        val branch = methodInstructions.getOrNull(branchIndex)
-            ?: return@mapNotNull null
-        if (branch.opcode != Opcode.IF_EQZ && branch.opcode != Opcode.IF_NEZ) {
-            return@mapNotNull null
-        }
-        val branchRegister = (branch as? OneRegisterInstruction)?.registerA
-            ?: return@mapNotNull null
-        if (branchRegister != instanceOf.registerA) return@mapNotNull null
-        val targetIndex = branchTargetIndex(branchIndex) ?: return@mapNotNull null
-        val castIsOnSelectedBranch =
-            when (branch.opcode) {
-                // False skips the URL-entity path; the fall-through path reaches the cast.
-                Opcode.IF_EQZ -> targetIndex > castIndex
-                // True selects the URL-entity path; the branch target must reach the cast.
-                Opcode.IF_NEZ -> targetIndex <= castIndex
-                else -> false
-            }
-        index.takeIf { castIsOnSelectedBranch }
-    }
-    return instanceChecks.size == 1
-}
-
-context(context: BytecodePatchContext)
 private fun resolveCardUrlActionType(): String =
     CardUrlActionModelFingerprint.requireSingleMatch("card URL action model")
         .originalClassDef.type
@@ -999,7 +858,6 @@ private fun patchCardUrl(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchCardNavigation(
     cardUrlActionType: String,
     contextualPostType: String,
@@ -1140,7 +998,6 @@ private fun resolveContextualPostRegister(
     return requireExactlyOne("card navigation contextual-post source", candidates)
 }
 
-context(_: BytecodePatchContext)
 private fun Fingerprint.requireSingleMatch(label: String): Match {
     val matches = scopedMatchAll().distinctBy { it.originalMethod.toString() }
     return requireExactlyOne(label, matches) { match -> match.originalMethod.toString() }

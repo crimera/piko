@@ -1,5 +1,6 @@
 package app.crimera.patches.newx.misc.postoptions
 
+import app.crimera.patches.common.ApkScoped
 import app.crimera.patches.newx.misc.extension.newXInitHook
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.newXInlineActionModelResolutionPatch
@@ -14,6 +15,8 @@ import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.parameterDescriptors
 import app.crimera.patches.common.requireExactlyOne
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.patch.PatchDefinition
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.util.cloneParameters
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
@@ -22,10 +25,8 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchBuilder
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
 import app.morphe.patcher.util.getReference
@@ -40,7 +41,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import java.util.IdentityHashMap
 import java.util.LinkedHashMap
 
 private const val POST_OPTIONS_STATE_PREFIX = "PostOptionsState(showOptionsDialog="
@@ -79,28 +79,29 @@ private data class IconAssignment(
 )
 
 private object PostOptionContributionIndex {
-    private val contributions =
-        IdentityHashMap<BytecodePatchContext, LinkedHashMap<String, PostOptionContribution>>()
+    private val contributions = ApkScoped { LinkedHashMap<String, PostOptionContribution>() }
 
     @Synchronized
-    fun register(context: BytecodePatchContext, contribution: PostOptionContribution) {
-        val contextContributions = contributions.getOrPut(context) { linkedMapOf() }
-        val existing = contextContributions[contribution.handlerDescriptor]
+    fun register(contribution: PostOptionContribution) {
+        val apkContributions = contributions.get()
+        val existing = apkContributions[contribution.handlerDescriptor]
         check(existing == null || existing == contribution) {
             "Conflicting NewX post-option contribution: ${contribution.handlerDescriptor}"
         }
-        contextContributions[contribution.handlerDescriptor] = contribution
+        apkContributions[contribution.handlerDescriptor] = contribution
     }
 
     @Synchronized
-    fun takeSnapshot(context: BytecodePatchContext): List<PostOptionContribution> {
-        val contextContributions = contributions.remove(context) ?: return emptyList()
-        return contextContributions.values.sortedBy(PostOptionContribution::order)
+    fun takeSnapshot(): List<PostOptionContribution> {
+        val apkContributions = contributions.get()
+        val snapshot = apkContributions.values.sortedBy(PostOptionContribution::order)
+        apkContributions.clear()
+        return snapshot
     }
 
     @Synchronized
-    fun clear(context: BytecodePatchContext) {
-        contributions.remove(context)
+    fun clear() {
+        contributions.get().clear()
     }
 }
 
@@ -136,7 +137,7 @@ private object PostOptionsPresenterFingerprint : Fingerprint(
         ),
 )
 
-internal fun BytecodePatchBuilder.newXPostOption(
+internal fun PatchDefinition.newXPostOption(
     handlerDescriptor: String,
     actionName: String,
     iconResourceName: String,
@@ -155,20 +156,20 @@ internal fun BytecodePatchBuilder.newXPostOption(
 }
 
 private fun newXPostOptionContributionPatch(contribution: PostOptionContribution) =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXPostOptionsPatch)
 
         execute {
-            PostOptionContributionIndex.register(this, contribution)
+            PostOptionContributionIndex.register(contribution)
         }
     }
 
 private val newXPostOptionsPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         dependsOn(newXSettingsPatch, newXInlineActionModelResolutionPatch)
 
         execute {
-            PostOptionContributionIndex.clear(this)
+            PostOptionContributionIndex.clear()
             val applicationOnCreate = newXInitHook.fingerprint.method
             // The Application is a Context, so its receiver is the only argument.
             applicationOnCreate.insertHook(0, relocateBranchTargets = false) {
@@ -180,7 +181,7 @@ private val newXPostOptionsPatch =
         }
 
         finalize {
-            val contributions = PostOptionContributionIndex.takeSnapshot(this)
+            val contributions = PostOptionContributionIndex.takeSnapshot()
             if (contributions.isEmpty()) throw PatchException("No NewX post-menu options were registered")
 
             validateActionCarriers(contributions)
@@ -190,10 +191,9 @@ private val newXPostOptionsPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun validateActionCarriers(contributions: List<PostOptionContribution>) {
     val postActionType = resolvedNewXInlineActionModels().postActionTypeDescriptor
-    val actionType = context.mutableClassDefBy(postActionType)
+    val actionType = mutableClassDefBy(postActionType)
     val missing =
         contributions
             .map(PostOptionContribution::actionName)
@@ -216,7 +216,6 @@ private fun validateActionCarriers(contributions: List<PostOptionContribution>) 
     }
 }
 
-context(_: BytecodePatchContext)
 private fun injectOptionList(contributions: List<PostOptionContribution>) {
     val state = resolvePostOptionsStateConstructor()
     val stateConstructor = state.match.method
@@ -239,7 +238,6 @@ internal data class PostOptionsStateConstructor(
     val optionsParameterOffset: Int,
 )
 
-context(_: BytecodePatchContext)
 internal fun resolvePostOptionsStateConstructor(): PostOptionsStateConstructor {
     val stateMatch = requireSingleMatch("NewX post-options state", PostOptionsStateFingerprint.matchAll())
     val optionsField = stateMatch.fieldForToStringLabel(POST_OPTIONS_LIST_PREFIX)
@@ -253,12 +251,7 @@ internal fun resolvePostOptionsStateConstructor(): PostOptionsStateConstructor {
             classFingerprint = PostOptionsStateFingerprint,
             name = "<init>",
             returnType = "V",
-            custom = { method, _ ->
-                method.instructions.any { instruction ->
-                    instruction.opcode == Opcode.IPUT_OBJECT &&
-                        instruction.getReference<FieldReference>()?.toString() == optionsField.toString()
-                }
-            },
+            filters = listOf(fieldAccess(opcode = Opcode.IPUT_OBJECT, reference = optionsField)),
         ).matchAll(),
     )
     return PostOptionsStateConstructor(
@@ -359,14 +352,13 @@ internal fun postOptionsFeedbackLookups(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
     val state = requireSingleMatch("NewX post-options state", PostOptionsStateFingerprint.matchAll())
     val feedbackField = state.fieldForToStringLabel(", feedbackPrompts=")
-    if (!context.isAssignableTo(feedbackField.type, "Ljava/util/Map;")) {
+    if (!isAssignableTo(feedbackField.type, "Ljava/util/Map;")) {
         throw PatchException("NewX post-options feedback prompts are not a Map: $feedbackField")
     }
-    val isMap = { type: String -> context.isAssignableTo(type, "Ljava/util/Map;") }
+    val isMap = { type: String -> isAssignableTo(type, "Ljava/util/Map;") }
     val rendererFingerprint =
             Fingerprint(
                 filters =
@@ -529,7 +521,6 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
 /** Name of the label that starts the icon check of the contribution at [index]. */
 private fun iconContinuationLabel(index: Int): String = "piko_newx_post_option_icon_$index"
 
-context(_: BytecodePatchContext)
 private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
     val presenter = requireSingleMatch("NewX post-options presenter", PostOptionsPresenterFingerprint.matchAll())
     val eventHandlerClass =
@@ -538,6 +529,8 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
             Fingerprint(
                 name = "<init>",
                 returnType = "V",
+                // The constructor stores the presenter in its field, which the instruction index finds.
+                filters = listOf(fieldAccess(opcode = Opcode.IPUT_OBJECT, type = presenter.originalClassDef.type)),
                 custom = { method, _ ->
                     val parameters = method.parameterDescriptors()
                     parameters.size == 6 &&
@@ -618,7 +611,6 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
 /** Name of the label that starts the action check of the contribution at [index]. */
 private fun actionContinuationLabel(index: Int): String = "piko_newx_post_option_action_$index"
 
-context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String, iconType: String): FieldReference {
     val drawableId = resourceId(ResourceType.DRAWABLE, resourceName)
     val fields =
@@ -695,7 +687,6 @@ private fun List<Instruction>.resolveFieldReadOrNull(
         null
     }
 
-context(_: BytecodePatchContext)
 private fun resolveKotlinUnitField(): FieldReference {
     val match =
         requireSingleMatch(

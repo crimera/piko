@@ -12,9 +12,9 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
@@ -78,7 +78,7 @@ private data class TabRouteRead(
 
 @Suppress("unused")
 val restorePinnedHomeTabPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Restore pinned home tab",
         description = "Reopens the pinned list, topic or community tab you last viewed when the app starts.",
     ) {
@@ -224,11 +224,11 @@ private fun pinnedTabConfigFingerprint(
     tabConfigType: String,
     pinnedTimelineType: String,
 ) = Fingerprint(
+    superclass = tabConfigType,
     definingClass = tabConfigType.substringBeforeLast('/') + "/",
     name = "<init>",
     parameters = listOf(pinnedTimelineType),
-    returnType = "V",
-    custom = { _, classDef -> classDef.superclass == tabConfigType },
+    returnType = "V"
 )
 
 private fun Method.isInstanceMethod(expectedParameterTypes: List<String>): Boolean =
@@ -284,7 +284,6 @@ private fun Method.tabRouteReads(): List<TabRouteRead> {
  * Makes the home tab route implement the extension's `PinnedHomeTab`, returning the wrapped pinned
  * timeline's own tab id, or null for For You, Following and the other non-pinned tabs.
  */
-context(context: BytecodePatchContext)
 private fun installPinnedTabKeyBridge(
     routeType: String,
     tabConfigField: FieldReference,
@@ -292,7 +291,7 @@ private fun installPinnedTabKeyBridge(
     pinnedTimelineField: FieldReference,
     pinnedTabId: Method,
 ) {
-    val route = context.mutableClassDefBy(routeType)
+    val route = mutableClassDefBy(routeType)
     if (route.methods.any { method -> method.name == PINNED_HOME_TAB_KEY_NAME }) {
         throw PatchException("NewX home tab route already has $PINNED_HOME_TAB_KEY_NAME: $routeType")
     }

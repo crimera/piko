@@ -9,7 +9,7 @@ package app.crimera.patches.twitter.link.cleartrackingparams
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
-import app.crimera.patches.utils.ShapeFingerprint
+import app.crimera.patches.common.ShapeFingerprint
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.patch

@@ -1,5 +1,8 @@
 package app.crimera.patches.newx.misc.dynamiccolor
 
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.classDefForEach
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.Groups
@@ -35,10 +38,11 @@ import app.crimera.patches.common.valueReachesRegister
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefByOrNull
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
@@ -205,7 +209,7 @@ private data class ResolvedLottieRenderer(
 
 @Suppress("unused")
 val dynamicColorPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Theme",
         description =
             "Chooses between the original NewX colors and the Material You, high-contrast, " +
@@ -307,9 +311,8 @@ val dynamicColorPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun resolvePaletteConstructorReference(paletteDescriptor: String): PaletteConstructorContract {
-    val paletteClass = context.mutableClassDefBy(paletteDescriptor)
+    val paletteClass = mutableClassDefBy(paletteDescriptor)
     val constructors = paletteClass.methods.filter { method ->
         method.name == "<init>" && method.returnType == "V" &&
             method.parameterTypes.joinToString("") == PALETTE_CONSTRUCTOR_PARAMETERS
@@ -449,7 +452,6 @@ private fun Method.paletteParameterOriginsAt(targetIndex: Int): List<Set<Int>>? 
     return incoming.getOrNull(targetIndex)
 }
 
-context(context: BytecodePatchContext)
 private fun MutableMethod.resolvePaletteCacheFields(
     paletteDescriptor: String,
 ): Map<PaletteKind, FieldReference> {
@@ -501,12 +503,11 @@ private fun MutableMethod.resolvePaletteCacheFields(
     return fieldsByKind
 }
 
-context(context: BytecodePatchContext)
 private fun resolveThemeVariantSelectors(
     mappingArrayField: FieldReference,
 ): Map<PaletteKind, Int> {
     val initializer =
-        context.mutableClassDefBy(mappingArrayField.definingClass).methods.singleOrNull { method ->
+        mutableClassDefBy(mappingArrayField.definingClass).methods.singleOrNull { method ->
             method.name == "<clinit>" && method.parameterTypes.isEmpty() && method.returnType == "V"
         } ?: throw PatchException(
             "NewX theme-variant mapping holder has no class initializer: " +
@@ -628,7 +629,6 @@ private fun MutableMethod.paletteCacheFieldAt(
         ?: throw PatchException("NewX palette cache field is missing at $index: $this")
 }
 
-context(context: BytecodePatchContext)
 private fun resolveFactory(
     kind: PaletteKind,
     cacheField: FieldReference,
@@ -636,7 +636,7 @@ private fun resolveFactory(
     paletteDescriptor: String,
     constructorContract: PaletteConstructorContract,
 ): ResolvedFactory {
-    val holder = context.mutableClassDefBy(cacheField.definingClass)
+    val holder = mutableClassDefBy(cacheField.definingClass)
     val initializer =
         holder.methods.singleOrNull { method ->
             method.name == "<clinit>" && method.parameterTypes.isEmpty() && method.returnType == "V"
@@ -671,7 +671,7 @@ private fun resolveFactory(
         }
         val factoryDescriptor = allocation.value.getReference<TypeReference>()?.type
             ?: return@mapNotNull null
-        val factoryClass = context.classDefByOrNull(factoryDescriptor) ?: return@mapNotNull null
+        val factoryClass = classDefByOrNull(factoryDescriptor) ?: return@mapNotNull null
         if (FUNCTION0_DESCRIPTOR !in factoryClass.interfaces) return@mapNotNull null
         val invokes = factoryClass.methods.filter { method ->
             method.name == "invoke" &&
@@ -734,7 +734,7 @@ private fun resolveFactory(
     val factoryDescriptor = factoryAllocation.descriptor
     val factorySelector = factoryAllocation.selector
 
-    val factoryClass = context.mutableClassDefBy(factoryDescriptor)
+    val factoryClass = mutableClassDefBy(factoryDescriptor)
     val invokes =
         factoryClass.methods.filter { method ->
             method.name == "invoke" &&
@@ -971,7 +971,6 @@ private fun MutableMethod.resolvePaletteConstructor(
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchDynamicAccentPalettes() {
     val providerMatches =
         NewXDynamicColorPaletteProviderFingerprint.scopedMatchAll()
@@ -989,7 +988,7 @@ private fun patchDynamicAccentPalettes() {
             .filter { instruction -> instruction.opcode == Opcode.CHECK_CAST }
             .mapNotNull { instruction -> instruction.getReference<TypeReference>()?.type }
             .filter { descriptor ->
-                paletteInterfaceDescriptor in context.mutableClassDefBy(descriptor).interfaces
+                paletteInterfaceDescriptor in mutableClassDefBy(descriptor).interfaces
             }
     if (implementationCasts.size != 3) {
         throw PatchException(
@@ -1049,10 +1048,9 @@ private fun patchDynamicAccentPalettes() {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveNoArgConstructor(descriptor: String): MutableMethod {
     val constructors =
-        context.mutableClassDefBy(descriptor)
+        mutableClassDefBy(descriptor)
             .methods
             .filter { method ->
                 method.name == "<init>" &&
@@ -1065,7 +1063,6 @@ private fun resolveNoArgConstructor(descriptor: String): MutableMethod {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun MutableMethod.expandForDynamicAccentTones(
     ownerDescriptor: String,
 ): ExpandedAccentConstructor {
@@ -1077,7 +1074,7 @@ private fun MutableMethod.expandForDynamicAccentTones(
             additionalRegisters =
                 numberOfParameterRegisters + ACCENT_SETTINGS_SCRATCH_REGISTER_COUNT,
         )
-    val owner = context.mutableClassDefBy(ownerDescriptor)
+    val owner = mutableClassDefBy(ownerDescriptor)
     owner.methods.remove(this)
     owner.methods.add(expandedMethod)
     return ExpandedAccentConstructor(
@@ -1118,10 +1115,9 @@ private fun resolveAccentRamp(
     return standardScales.first()
 }
 
-context(context: BytecodePatchContext)
 private fun patchInlineActionTints() {
     val models = resolvedNewXInlineActionModels()
-    val inlineActionEntryClass = context.mutableClassDefBy(models.inlineActionEntryDescriptor)
+    val inlineActionEntryClass = mutableClassDefBy(models.inlineActionEntryDescriptor)
     val actionTypeField = models.inlineActionTypeField
     val actionTypeDescriptor = models.postActionTypeDescriptor
     val staticEntryMatches =
@@ -1154,7 +1150,7 @@ private fun patchInlineActionTints() {
         val candidate = requireNotNull(capturedEntryMatch)
         requireExactlyOne(
             "NewX mutable captured inline action renderer",
-            context.mutableClassDefBy(candidate.method.definingClass).methods.filter { method ->
+            mutableClassDefBy(candidate.method.definingClass).methods.filter { method ->
                 method.name == candidate.method.name &&
                     method.parameterTypes == candidate.method.parameterTypes &&
                     method.returnType == candidate.method.returnType
@@ -1468,7 +1464,6 @@ private object NewXTabIndicatorRendererFingerprint : Fingerprint(
     custom = { method, _ -> isTabIndicatorRenderer(method) },
 )
 
-context(context: BytecodePatchContext)
 private fun patchTabTints(horizon: String) {
     val slots = tabSlotColorsFingerprint(horizon).scopedMatchAllOrNull().orEmpty()
     val indicatorMatches = NewXTabIndicatorRendererFingerprint.scopedMatchAllOrNull().orEmpty()
@@ -1484,7 +1479,7 @@ private fun patchTabTints(horizon: String) {
     // Resolve every site before the first mutation: the slot tints and the indicator
     // parameter tint must not shift the callback's instruction indices.
     val site = resolveTabIndicatorTintSite(slotMatch.method, horizon) { descriptor ->
-        context.mutableClassDefByOrNull(descriptor)
+        mutableClassDefByOrNull(descriptor)
     }
     val callbackMethod = site.method as? MutableMethod
         ?: throw PatchException("NewX tab indicator callback is not mutable: ${site.method}")
@@ -1507,11 +1502,14 @@ private fun Method.isSameMethodAs(other: Method): Boolean =
 
 /** The J field read is the indexable anchor; [isComposeModifierBackground] stays the shape check. */
 private object XdsChromeBackgroundFingerprint : Fingerprint(
-    filters = listOf(fieldAccess(opcode = Opcode.IGET_WIDE, type = "J")),
+    filters = listOf(
+        fieldAccess(opcode = Opcode.IGET_WIDE, type = "J"),
+        // The background call that uses the color returns a Modifier, which the instruction index finds.
+        methodCall(returnType = MODIFIER_DESCRIPTOR),
+    ),
     custom = { method, _ -> method.isComposeModifierBackground() },
 )
 
-context(context: BytecodePatchContext)
 private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
     val backgroundFields =
         XdsChromeBackgroundFingerprint
@@ -1538,7 +1536,7 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
 
     val schemeResolution = mutableListOf<String>()
     val schemeBackgroundFields = backgroundFields.filter { field ->
-        val schemeClass = context.classDefByOrNull(field.definingClass)
+        val schemeClass = classDefByOrNull(field.definingClass)
         if (schemeClass == null) {
             schemeResolution += "$field: owner missing"
             return@filter false
@@ -1588,7 +1586,7 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
     val backgroundField =
         primaryChromeBackgroundField(schemeBackgroundFields)
             ?: requireExactlyOne("NewX XDS chrome background field", schemeBackgroundFields)
-    val schemeClass = context.mutableClassDefBy(backgroundField.definingClass)
+    val schemeClass = mutableClassDefBy(backgroundField.definingClass)
     val constructor =
         requireExactlyOne(
             "NewX XDS scheme constructor for the chrome background",
@@ -1641,14 +1639,13 @@ private fun patchXdsChromeBackground(): Pair<MutableMethod, FieldReference> {
  * before any other color, so the first candidate it reads is the chrome background. Returns null
  * unless every candidate belongs to one class, so the caller's cardinality check still applies.
  */
-context(context: BytecodePatchContext)
 private fun primaryChromeBackgroundField(candidates: List<FieldReference>): FieldReference? {
     val owners = candidates.map { field -> field.definingClass }.distinct()
     if (owners.size != 1) return null
     val toStringMethod =
         requireAtMostOne(
             "NewX XDS scheme toString",
-            context.mutableClassDefBy(owners.single()).methods.filter { method ->
+            mutableClassDefBy(owners.single()).methods.filter { method ->
                 method.name == "toString" && method.parameterTypes.isEmpty()
             },
         ) ?: return null
@@ -1680,13 +1677,12 @@ private val XDS_PROPERTY_NAME = Regex("([A-Za-z0-9]+)=$")
  * background is the primary surface; the light scheme's copy is set by this same constructor,
  * since its colors are all constructor defaults and no call site ever passes them.
  */
-context(context: BytecodePatchContext)
 private fun patchXdsForegroundColors(constructor: MutableMethod, chromeBackground: FieldReference) {
     val schemeDescriptor = constructor.definingClass
     val schemeToString =
         requireExactlyOne(
             "NewX XDS scheme toString",
-            context.mutableClassDefBy(schemeDescriptor).methods.filter { method ->
+            mutableClassDefBy(schemeDescriptor).methods.filter { method ->
                 method.name == "toString" &&
                     method.parameterTypes.isEmpty() &&
                     method.returnType == "Ljava/lang/String;"
@@ -1812,10 +1808,9 @@ private fun MutableMethod.resolveXdsSchemeFields(schemeDescriptor: String): XdsS
  * Horizon and XDS hooks never see. The color is the first long after the text and modifier, and
  * the hook only changes that exact white, so other colors keep their values.
  */
-context(context: BytecodePatchContext)
 private fun patchMediaViewerTextColors() {
     val chromeClasses = mutableListOf<String>()
-    context.classDefForEach { classDef ->
+    classDefForEach { classDef ->
         if (classDef.type.startsWith(MEDIA_VIEWER_CHROME_PACKAGE)) chromeClasses += classDef.type
     }
     if (chromeClasses.isEmpty()) {
@@ -1823,7 +1818,7 @@ private fun patchMediaViewerTextColors() {
     }
     var hookCount = 0
     for (descriptor in chromeClasses) {
-        for (method in context.mutableClassDefBy(descriptor).methods) {
+        for (method in mutableClassDefBy(descriptor).methods) {
             val methodInstructions = method.instructions.toList()
             val textCalls =
                 methodInstructions.withIndex().filter { (_, instruction) ->
@@ -1861,11 +1856,10 @@ private fun patchMediaViewerTextColors() {
  * either explicit sRGB white or the ambient tint (raw zero with the default bit), so the hook
  * routes both through the palette, and clears the default bit only when the palette replaced it.
  */
-context(context: BytecodePatchContext)
 private fun patchMediaViewerIconTints(chromeClasses: List<String>) {
     var hookCount = 0
     for (descriptor in chromeClasses) {
-        for (method in context.mutableClassDefBy(descriptor).methods) {
+        for (method in mutableClassDefBy(descriptor).methods) {
             if (method.implementation == null) continue
             hookCount += method.hookIconTints()
         }
@@ -1880,10 +1874,9 @@ private fun patchMediaViewerIconTints(chromeClasses: List<String>) {
  * bit clear). Exact sRGB white is routed through the palette; other colors are unchanged, so other
  * buttons keep their values. Zero matches skip the pill; more than one throws.
  */
-context(context: BytecodePatchContext)
 private fun patchMediaViewerFollowPill(chromeClasses: List<String>) {
     val buttonCalls = chromeClasses.flatMap { descriptor ->
-        context.mutableClassDefBy(descriptor).methods.flatMap { caller ->
+        mutableClassDefBy(descriptor).methods.flatMap { caller ->
             caller.implementation?.instructions?.mapNotNull { instruction ->
                 if (instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) {
                     return@mapNotNull null
@@ -1895,7 +1888,7 @@ private fun patchMediaViewerFollowPill(chromeClasses: List<String>) {
         }
     }.distinctBy(MethodReference::toString)
     val buttonContentMethods = buttonCalls.mapNotNull { reference ->
-        val owner = context.mutableClassDefBy(reference.definingClass)
+        val owner = mutableClassDefBy(reference.definingClass)
         requireExactlyOne(
             "NewX media viewer button method $reference",
             owner.methods.filter { it.toString() == reference.toString() },
@@ -1932,14 +1925,13 @@ internal fun Method.isMediaViewerButtonContent(): Boolean {
  * color long through the palette themes both without touching the shared button composable. Only
  * exact sRGB white changes, and builds without such a call skip it.
  */
-context(context: BytecodePatchContext)
 private fun patchMediaViewerButtonContentColors() {
     val mediaClasses = mutableListOf<String>()
-    context.classDefForEach { classDef ->
+    classDefForEach { classDef ->
         if (classDef.type.startsWith(MEDIA_PLAYBACK_PACKAGE)) mediaClasses += classDef.type
     }
     for (descriptor in mediaClasses) {
-        for (method in context.mutableClassDefBy(descriptor).methods) {
+        for (method in mutableClassDefBy(descriptor).methods) {
             if (method.implementation == null) continue
             val methodInstructions = method.instructions.toList()
             val colorStateCalls =
@@ -2005,7 +1997,6 @@ private fun MutableMethod.hookExactWhiteIconTints(): Int {
  * (name, handle) and passes its color through to material Text. The viewer passes explicit sRGB
  * white to it, so only that exact white is routed through the palette.
  */
-context(context: BytecodePatchContext)
 private fun patchMediaViewerUserNameColors() {
     val nameMethods =
         findMethodsInPackage(USER_ROW_PACKAGE) { method ->
@@ -2023,16 +2014,15 @@ private fun patchMediaViewerUserNameColors() {
  * Collects the mutable methods in the package whose immutable form satisfies [predicate]. The
  * immutable scan keeps the mutable class lookup limited to the matching classes.
  */
-context(context: BytecodePatchContext)
 private fun findMethodsInPackage(
     packagePrefix: String,
     predicate: (com.android.tools.smali.dexlib2.iface.Method) -> Boolean,
 ): List<MutableMethod> {
     val matches = mutableListOf<MutableMethod>()
-    context.classDefForEach { classDef ->
+    classDefForEach { classDef ->
         if (!classDef.type.startsWith(packagePrefix)) return@classDefForEach
         if (classDef.methods.none(predicate)) return@classDefForEach
-        matches += context.mutableClassDefBy(classDef.type).methods.filter(predicate)
+        matches += mutableClassDefBy(classDef.type).methods.filter(predicate)
     }
     return matches
 }
@@ -2110,15 +2100,14 @@ private fun Instruction.isComposeIconCall(): Boolean {
  * viewer passes plain white there. Only the media playback package is hooked, so the same
  * composable keeps its color across the rest of the app.
  */
-context(context: BytecodePatchContext)
 private fun patchMediaViewerRichTextColors() {
     val mediaClasses = mutableListOf<String>()
-    context.classDefForEach { classDef ->
+    classDefForEach { classDef ->
         if (classDef.type.startsWith(MEDIA_PLAYBACK_PACKAGE)) mediaClasses += classDef.type
     }
     var hookCount = 0
     for (descriptor in mediaClasses) {
-        for (method in context.mutableClassDefBy(descriptor).methods) {
+        for (method in mutableClassDefBy(descriptor).methods) {
             // Abstract and native methods have no body to hook.
             if (method.implementation == null) continue
             val methodInstructions = method.instructions.toList()
@@ -2522,17 +2511,15 @@ private fun MutableMethod.injectTabIndicatorCallbackTint(site: TabIndicatorTintS
     }
 }
 
-context(context: BytecodePatchContext)
 private fun String.hasComposableLambdaInvoke(): Boolean =
-    context.mutableClassDefBy(this).methods.count { method ->
+    mutableClassDefBy(this).methods.count { method ->
         method.name == "invoke" &&
             method.parameterTypes == listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
             method.returnType == "Ljava/lang/Object;"
     } == 1
 
-context(context: BytecodePatchContext)
 private fun MethodReference.resolveMutableMethod(label: String): MutableMethod =
-    context.mutableClassDefBy(definingClass)
+    mutableClassDefBy(definingClass)
         .methods.singleOrNull { method ->
             method.name == name &&
                 method.parameterTypes == parameterTypes &&
@@ -2713,7 +2700,6 @@ private fun List<Instruction>.resolveBooleanNormalizationValue(
     return resolveLatestLiteral(write.index, move.registerB)
 }
 
-context(context: BytecodePatchContext)
 private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
     val candidates = instructions.withIndex().filter { indexed ->
         val reference = indexed.value.getReference<MethodReference>() ?: return@filter false
@@ -2738,13 +2724,12 @@ private fun MutableMethod.resolveLottieRenderer(): ResolvedLottieRenderer {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun patchLikeIconComposable(
     descriptor: String,
     activeLikeField: FieldReference,
 ) {
     val composable =
-        context.mutableClassDefBy(descriptor).methods.singleOrNull { method ->
+        mutableClassDefBy(descriptor).methods.singleOrNull { method ->
             method.name == "invoke" &&
                 method.parameterTypes == listOf("Ljava/lang/Object;", "Ljava/lang/Object;") &&
                 method.returnType == "Ljava/lang/Object;"

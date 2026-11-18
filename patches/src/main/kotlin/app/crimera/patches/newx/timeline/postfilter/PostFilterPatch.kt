@@ -7,11 +7,11 @@ import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.timeline.newXTimelineFilterPatch
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val postFilterPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Filter posts by keyword",
         description = "Filters NewX posts using user-defined words and phrases.",
     ) {

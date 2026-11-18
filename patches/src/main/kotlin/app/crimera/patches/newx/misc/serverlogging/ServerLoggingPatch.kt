@@ -16,9 +16,10 @@ import app.crimera.patches.common.requireExactlyOne
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -53,35 +54,22 @@ private const val LOGGER_DESCRIPTOR = "$EXTENSION_PACKAGE/settings/NewXLogger;"
 private object SubmitWorkHandlerFingerprint : Fingerprint(
     definingClass = COMPOSER_WORK_SCOPE,
     returnType = OBJECT_DESCRIPTOR,
-    filters = listOf(string("SubmitWorkHandler")),
-    custom = { method, _ ->
-        val parameterTypes = method.parameterTypes.map { type -> type.toString() }
-        val instructions = method.implementation?.instructions?.toList().orEmpty()
-        val postFailureFields = instructions.mapNotNull { instruction ->
-            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-            field.takeIf {
-                instruction.opcode == Opcode.SGET_OBJECT &&
-                    field.name == POST_FAILURE_FIELD_NAME
-            }
-        }
-        val throwableFields = instructions.mapNotNull { instruction ->
-            val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-            field.takeIf {
-                instruction.opcode == Opcode.IGET_OBJECT &&
-                    field.type == THROWABLE_DESCRIPTOR
-            }
-        }
-        parameterTypes.size == 8 &&
-            parameterTypes[0].isObjectDescriptor() &&
-            parameterTypes[2] == FUNCTION_2_DESCRIPTOR &&
-            parameterTypes[3] == FUNCTION_2_DESCRIPTOR &&
-            parameterTypes[4] == FUNCTION_1_DESCRIPTOR &&
-            parameterTypes[5] == "Z" &&
-            parameterTypes[6] == "I" &&
-            parameterTypes[7] == CONTINUATION_DESCRIPTOR &&
-            postFailureFields.isNotEmpty() &&
-            throwableFields.size == 1
-    },
+    parameters = listOf(
+        "L",
+        "L",
+        FUNCTION_2_DESCRIPTOR,
+        FUNCTION_2_DESCRIPTOR,
+        FUNCTION_1_DESCRIPTOR,
+        "Z",
+        "I",
+        CONTINUATION_DESCRIPTOR,
+    ),
+    filters = listOf(
+        string("SubmitWorkHandler"),
+        // Failure result throwable.
+        fieldAccess(opcode = Opcode.IGET_OBJECT, type = THROWABLE_DESCRIPTOR),
+        fieldAccess(opcode = Opcode.SGET_OBJECT, name = POST_FAILURE_FIELD_NAME),
+    ),
 )
 
 internal data class RegisterLocation(
@@ -159,7 +147,7 @@ private val SERVER_ERROR_CONSTRUCTORS = listOf(
 
 @Suppress("unused")
 val newXServerLoggingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Server error logging",
         description = "Captures parsed NewX server errors in memory and exports them on demand.",
         default = false,
@@ -194,11 +182,10 @@ val newXServerLoggingPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun patchServerErrorConstructors() {
     SERVER_ERROR_CONSTRUCTORS.forEach { target ->
         val classDescriptor = "$ERROR_PACKAGE${target.className};"
-        val errorClass = context.mutableClassDefBy(classDescriptor)
+        val errorClass = mutableClassDefBy(classDescriptor)
         if (errorClass.superclass != EXCEPTION_DESCRIPTOR) {
             throw PatchException(
                 "NewX ${target.className} is not an Exception: ${errorClass.superclass}",
@@ -263,7 +250,6 @@ private fun patchServerErrorConstructors() {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchSubmitFailureHandler() {
     val matches = SubmitWorkHandlerFingerprint.scopedMatchAll()
     if (matches.size != 1) {
