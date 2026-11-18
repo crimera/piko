@@ -507,4 +507,16 @@
     <string name="piko_newx_translation_inline_summary">X\'s inline translate button uses your selected translator instead of Grok. FxTwitter falls back to Google here.</string>
     <string name="piko_newx_translation_translator_title">Translator</string>
     <string name="piko_newx_translation_translator_summary">Choose a free or custom translator and the target language</string>
+    <string name="piko_newx_app_lock_title">App lock</string>
+    <string name="piko_newx_app_lock_summary">Asks for your fingerprint, face or screen lock when the app opens and when you come back to it. The preview in recent apps stays blank while this is on. Needs a screen lock on your device</string>
+    <string name="piko_newx_app_lock_timeout_title">Lock again after</string>
+    <string name="piko_newx_app_lock_timeout_immediately">Right away</string>
+    <string name="piko_newx_app_lock_timeout_1">After 1 minute</string>
+    <string name="piko_newx_app_lock_timeout_5">After 5 minutes</string>
+    <string name="piko_newx_app_lock_timeout_15">After 15 minutes</string>
+    <string name="piko_newx_app_lock_locked">%s is locked</string>
+    <string name="piko_newx_app_lock_prompt">Unlock %s</string>
+    <string name="piko_newx_app_lock_unlock">Unlock</string>
+    <string name="piko_newx_app_lock_use_screen_lock">Use screen lock</string>
+    <string name="piko_newx_app_lock_no_screen_lock">Set a screen lock on your device to use App lock</string>
 </resources>
