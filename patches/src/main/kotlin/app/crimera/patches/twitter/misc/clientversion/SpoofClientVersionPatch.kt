@@ -11,12 +11,8 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
-import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
-import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.intOption
@@ -25,41 +21,13 @@ import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.string
 import app.morphe.patcher.util.returnEarly
-import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val EXTENSION_CLASS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/clientversion/SpoofClientVersionPatch;"
 
-// XChat's network stack (com.x): App info, header client info and user agent provider.
-private const val APP_CONFIG_INTERFACE = "Lcom/x/common/api/e;"
-private const val HEADER_PROVIDER_INTERFACE = "Lcom/x/common/api/v;"
-private const val USER_AGENT_INTERFACE = "Lcom/x/common/api/t;"
-
 private val GRAPHQL_OPERATIONS = Regex("[A-Za-z]+")
-
-private fun isConstString(opcode: Opcode) = opcode == Opcode.CONST_STRING || opcode == Opcode.CONST_STRING_JUMBO
-
-private object XChatNwStackVersionsFingerprint : Fingerprint(
-    filters = listOf(
-        anyInstruction(string(packageMetadata.versionName), literal(packageMetadata.versionCode.toInt()))
-    ),
-    custom = { _, classDef ->
-        val intf = classDef.interfaces.singleOrNull()
-        intf == APP_CONFIG_INTERFACE || intf == HEADER_PROVIDER_INTERFACE
-    }
-)
-
-private object XChatUserAgentProviderFingerprint : Fingerprint(
-    interfaces = listOf(USER_AGENT_INTERFACE),
-    name = "a",
-    returnType = "Ljava/lang/String;",
-    parameters = emptyList(),
-    filters = listOf(
-        methodCall(name = "toString"), // Legacy User-Agent call
-    )
-)
 
 private object GraphQLOperationsFingerprint : Fingerprint(
     definingClass = "Lcom/x/android/xchat/",
@@ -88,6 +56,7 @@ val spoofClientVersionPatch =
             "\"Update Required\" (ClientRequiresUpdate). The rest of the app keeps reporting its real version.",
     ) {
         compatibleWith(COMPATIBILITY_X)
+        category("Old patches")
         dependsOn(sharedExtensionPatch)
 
         val spoofedVersion by stringOption(
@@ -110,40 +79,13 @@ val spoofClientVersionPatch =
             val version = spoofedVersion!!
             val versionCode = spoofedVersionCode!!
 
-            // 1. com.x AppConfig and header provider: version name and version code.
-            XChatNwStackVersionsFingerprint.matchAll().forEach {
-                val instructionMatch = it.instructionMatches.first()
-                val index = instructionMatch.index
-                val register = instructionMatch.getInstruction<OneRegisterInstruction>().registerA
-                val isVersionName = isConstString(instructionMatch.instruction.opcode)
-                it.method.replaceInstruction(
-                    index,
-                    if (isVersionName) "const-string v$register, \"$version\"" else "const v$register, $versionCode",
-                )
-            }
-
-            // 2. com.x user agent provider: it reuses the legacy user agent, so rewrite its version there.
-            XChatUserAgentProviderFingerprint.method.apply {
-                instructions.withIndex().filter { it.value.opcode == Opcode.RETURN_OBJECT }.reversed()
-                    .forEach { (index, instruction) ->
-                        val register = (instruction as OneRegisterInstruction).registerA
-                        addInstructions(
-                            index,
-                            """
-                            invoke-static {v$register}, $EXTENSION_CLASS_DESCRIPTOR->userAgent(Ljava/lang/String;)Ljava/lang/String;
-                            move-result-object v$register
-                            """,
-                        )
-                    }
-            }
-
-            // 3. Extension values come from the patch options.
+            // 1. Extension values come from the patch options.
             Fingerprint(definingClass = EXTENSION_CLASS_DESCRIPTOR, name = "version").method
                 .returnEarly(version)
             Fingerprint(definingClass = EXTENSION_CLASS_DESCRIPTOR, name = "versionCode").method
                 .returnEarly(versionCode)
 
-            // 4. Retrieve XChat's GraphQL operations (sending messages, inbox, keys…) whose paths don't say "xchat".
+            // 2. Retrieve XChat's GraphQL operations (sending messages, inbox, keys…) whose paths don't say "xchat".
             val operations = sortedSetOf<String>()
             GraphQLOperationsFingerprint.matchAll().forEach {
                 // All matched methods contain exactly two instructions: const-string and return-object.
@@ -155,7 +97,7 @@ val spoofClientVersionPatch =
             Fingerprint(definingClass = EXTENSION_CLASS_DESCRIPTOR, name = "xchatOperations")
                 .method.returnEarly(operations.joinToString(","))
 
-            // 5. Legacy client headers: XChat requests that go through the legacy stack
+            // 3. Legacy client headers: XChat requests that go through the legacy stack
             //    get the reported version too, every other request keeps the real one.
             LegacyClientHeaderBuilderFingerprint.let {
                 it.method.apply {

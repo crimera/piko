@@ -31,10 +31,7 @@ public class SpoofClientVersionPatch {
     /** Injection point: the legacy stack is about to add its client headers for this request. */
     public static void onRequest(URI uri) {
         REQUEST.set(uri);
-        if (DEBUG && uri != null) android.util.Log.i("PikoSpoof", String.valueOf(uri.getPath()));
     }
-
-    private static final boolean DEBUG = false;
 
     // The patch fills this with every X Chat GraphQL operation name of the app (comma separated).
     private static String xchatOperations() {
@@ -65,11 +62,8 @@ public class SpoofClientVersionPatch {
         return isXChatRequest() ? userAgent(userAgent) : userAgent;
     }
 
-    /**
-     * Injection point: the X Chat (com.x) network stack's user agent.
-     * The legacy stack keeps the app's real user agent.
-     */
-    public static String userAgent(String userAgent) {
+    /** Replaces the version name and version code in a legacy user agent. */
+    private static String userAgent(String userAgent) {
         if (userAgent == null) return null;
         return USER_AGENT_VERSION.matcher(userAgent)
             .replaceFirst("TwitterAndroid/" + version() + " (" + versionCode() + "-");
