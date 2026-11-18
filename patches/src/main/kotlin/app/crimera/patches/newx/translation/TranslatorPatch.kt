@@ -6,6 +6,8 @@
 
 package app.crimera.patches.newx.translation
 
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.crimera.bytecode.Block
 import app.crimera.bytecode.RegisterLimit
 import app.crimera.bytecode.Target
@@ -44,9 +46,9 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefByOrNull
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
@@ -227,7 +229,7 @@ private data class ResolvedTranslationPath(
 
 @Suppress("unused")
 val newXTranslatorPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Translator",
         description = "Adds a Translate post-menu option and optional inline translation with free or custom " +
             "translators (Google, FxTwitter, OpenAI-compatible, DeepL, LibreTranslate).",
@@ -285,9 +287,8 @@ val newXTranslatorPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun patchPostMenuBridges(timelineModels: ResolvedNewXTimelineModels) {
-    val extensionClass = context.mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
+    val extensionClass = mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
     // The casts throw for a non-post timeline item; the extension treats that as "no post".
     val readPostText = extensionClass.requireBridge("readPostText", OBJECT_DESCRIPTOR, STRING_DESCRIPTOR)
     readPostText.patchBridge {
@@ -313,12 +314,11 @@ private fun patchPostMenuBridges(timelineModels: ResolvedNewXTimelineModels) {
  * The range and entity getters are resolved on the post interface shared by the canonical post and
  * the inline translation presenter's model.
  */
-context(context: BytecodePatchContext)
 private fun patchDisplayTextBridges(
     timelineModels: ResolvedNewXTimelineModels,
     postModels: ResolvedNewXPostModels,
 ) {
-    val extensionClass = context.mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
+    val extensionClass = mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
 
     val rangeMatch = DisplayTextRangeFingerprint.scopedMatchAllOrNull().orEmpty().let { matches ->
         requireExactlyOne("NewX display text range model", matches)
@@ -338,16 +338,16 @@ private fun patchDisplayTextBridges(
     listOf(rangeStartField, rangeEndField, urlsField, urlField, displayUrlField).forEach { exposeField(it) }
     listOf(rangeMatch, entityListMatch, urlEntityMatch).forEach { requirePublicClass(it.originalClassDef.type) }
 
-    val postMethods = context.methodsForModel(postModels.canonicalPostDescriptor)
+    val postMethods = methodsForModel(postModels.canonicalPostDescriptor)
     fun interfaceGetter(label: String, returnType: String): ResolvedGetter =
         requireExactlyOne(
             label,
             postMethods.filter { method ->
                 method.parameterTypes.isEmpty() && method.returnType == returnType &&
-                    context.mutableClassDefByOrNull(method.definingClass)
+                    mutableClassDefByOrNull(method.definingClass)
                         ?.let { AccessFlags.INTERFACE.isSet(it.accessFlags) } == true
             },
-        ).toResolvedGetter(context).also { exposeGetter(it) }
+        ).toResolvedGetter().also { exposeGetter(it) }
     val rangeGetter = interfaceGetter("NewX post display-range getter", rangeMatch.originalClassDef.type)
     val entityListGetter = interfaceGetter("NewX post entity-list getter", entityListMatch.originalClassDef.type)
 
@@ -358,7 +358,7 @@ private fun patchDisplayTextBridges(
     val notePostDescriptor = notePostMatch.originalClassDef.type
     val noteResultField = notePostMatch.toStringField(", noteTweetResult=")
     exposeField(noteResultField)
-    val noteResultBase = context.mutableClassDefByOrNull(noteResultField.type)
+    val noteResultBase = mutableClassDefByOrNull(noteResultField.type)
         ?: throw PatchException("NewX note translation result type is unavailable: ${noteResultField.type}")
     requirePublicClass(noteResultField.type)
     if (!AccessFlags.INTERFACE.isSet(noteResultBase.accessFlags) &&
@@ -368,7 +368,7 @@ private fun patchDisplayTextBridges(
     }
     val notePostBodyMatch =
         NotePostBodyFingerprint.scopedMatchAllOrNull().orEmpty().filter { match ->
-            context.isAssignableTo(match.originalClassDef.type, noteResultField.type)
+            isAssignableTo(match.originalClassDef.type, noteResultField.type)
         }.let { matches ->
             requireExactlyOne("NewX note translation body model", matches)
         }
@@ -391,9 +391,9 @@ private fun patchDisplayTextBridges(
     val notePostGetter = interfaceGetter("NewX post note-body getter", notePostDescriptor)
 
     val resultAccessor =
-        context.mutableClassDefBy(timelineModels.postDescriptor)
+        mutableClassDefBy(timelineModels.postDescriptor)
             .resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
-    context.mutableClassDefBy(postModels.contextualPostDescriptor)
+    mutableClassDefBy(postModels.contextualPostDescriptor)
         .requirePublicFields(listOf(postModels.contextualCanonicalPostField))
     val readCanonicalPost = extensionClass.requireBridge("readCanonicalPost", OBJECT_DESCRIPTOR, OBJECT_DESCRIPTOR)
         .withLocals(extensionClass, 1)
@@ -488,7 +488,6 @@ private fun patchDisplayTextBridges(
  * immediately after the label's argument. That trace is exact, so it wins: the generic label lookup
  * pairs labels with reads by instruction order and picked `endIdx` for `startIdx` on 12.38.
  */
-context(context: BytecodePatchContext)
 private fun Match.toStringField(label: String): FieldReference =
     method.outlinedToStringField(label) ?: fieldForToStringLabel(label)
 
@@ -508,7 +507,6 @@ internal fun Method.resolveNotePostBodyTextField(): FieldReference {
     return requireExactlyOne("NewX note post body text field in $this", candidates)
 }
 
-context(context: BytecodePatchContext)
 private fun Method.outlinedToStringField(label: String): FieldReference? {
     val instructions = instructions.toList()
     fun definedAt(register: Int, callIndex: Int, matches: (Int) -> Boolean): List<Int> =
@@ -524,7 +522,7 @@ private fun Method.outlinedToStringField(label: String): FieldReference? {
     val candidates = instructions.withIndex().flatMap { (callIndex, call) ->
         if (call.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) return@flatMap emptyList()
         val helper = call.getReference<MethodReference>() ?: return@flatMap emptyList()
-        val appendOrder = context.classDefByOrNull(helper.definingClass)?.methods
+        val appendOrder = classDefByOrNull(helper.definingClass)?.methods
             ?.singleOrNull { it.toReference().toString() == helper.toString() }
             ?.stringBuilderParameterOrder() ?: return@flatMap emptyList()
         val arguments = call.registersUsed
@@ -568,7 +566,6 @@ private fun Method.stringBuilderParameterOrder(): List<Int>? {
     return order.takeIf { it.isNotEmpty() }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveTranslationPath(): ResolvedTranslationPath {
     val requestClass =
         GrokTranslateRequestFingerprint.scopedMatchAllOrNull().orEmpty().let { matches ->
@@ -597,7 +594,7 @@ private fun resolveTranslationPath(): ResolvedTranslationPath {
                 "NewX static post-translation presenter parameter",
                 fetchMethod.parameterTypes.withIndex().filter { (_, type) ->
                     type.toString() == fetchMethod.definingClass &&
-                        context.mutableClassDefByOrNull(type.toString())?.methods?.any { candidate ->
+                        mutableClassDefByOrNull(type.toString())?.methods?.any { candidate ->
                             candidate.parameterTypes.any { it.toString() == COMPOSER_DESCRIPTOR }
                         } == true
                 },
@@ -605,7 +602,7 @@ private fun resolveTranslationPath(): ResolvedTranslationPath {
         } else {
             fetchMethod.definingClass
         }
-    val presenterClass = context.mutableClassDefBy(presenterDescriptor)
+    val presenterClass = mutableClassDefBy(presenterDescriptor)
     val presenterParameterRegister =
         if (isStatic) {
             val index =
@@ -627,13 +624,13 @@ private fun resolveTranslationPath(): ResolvedTranslationPath {
             "NewX Grok post presenter model field",
             presenterClass.fields.filter { field ->
                 if (AccessFlags.STATIC.isSet(field.accessFlags)) return@filter false
-                val methods = context.methodsForModel(field.type)
+                val methods = methodsForModel(field.type)
                 methods.any { method ->
                     method.name == "getText" && method.parameterTypes.isEmpty() && method.returnType == STRING_DESCRIPTOR
                 } && methods.any { method -> method.parameterTypes.isEmpty() && method.returnType == legacyCardClass.type }
             },
         )
-    val modelMethods = context.methodsForModel(presenterModelField.type)
+    val modelMethods = methodsForModel(presenterModelField.type)
     val modelMethodOwners = modelMethods.map { it.definingClass }.toSet()
     val modelTextGetter =
         requireExactlyOne(
@@ -641,24 +638,24 @@ private fun resolveTranslationPath(): ResolvedTranslationPath {
             modelMethods.filter { method ->
                 method.name == "getText" && method.parameterTypes.isEmpty() && method.returnType == STRING_DESCRIPTOR
             },
-        ).toResolvedGetter(context)
+        ).toResolvedGetter()
     val modelCardGetter =
         requireExactlyOne(
             "NewX post-model legacy-card getter",
             modelMethods.filter { method ->
                 method.parameterTypes.isEmpty() && method.returnType == legacyCardClass.type
             },
-        ).toResolvedGetter(context)
+        ).toResolvedGetter()
     val cardBindingsGetter =
         requireExactlyOne(
             "NewX legacy-card bindings getter",
             legacyCardClass.methods.filter { method ->
                 method.parameterTypes.isEmpty() && method.returnType == MAP_DESCRIPTOR
             },
-        ).toResolvedGetter(context)
+        ).toResolvedGetter()
     val modelSourceGetter =
         resolveGoogleSourceLanguageGetter(fetchMethod, presenterModelField, modelMethodOwners::contains)
-            .toResolvedGetter(context)
+            .toResolvedGetter()
 
     val composeMethod =
         requireExactlyOne(
@@ -733,7 +730,7 @@ private fun resolveTranslationPath(): ResolvedTranslationPath {
         requireExactlyOne(
             "NewX Grok translation event callback parameter",
             fetchMethod.parameterTypes.withIndex().filter { (_, type) ->
-                context.isAssignableTo(type.toString(), FUNCTION1_DESCRIPTOR)
+                isAssignableTo(type.toString(), FUNCTION1_DESCRIPTOR)
             },
         ).index
     val unitSingleton =
@@ -771,7 +768,7 @@ private fun resolveTranslationPath(): ResolvedTranslationPath {
 private fun Method.hasString(value: String): Boolean =
     instructions.any { instruction -> instruction.getReference<StringReference>()?.string == value }
 
-private fun BytecodePatchContext.methodsForModel(modelDescriptor: String): List<Method> {
+private fun methodsForModel(modelDescriptor: String): List<Method> {
     val classes = mutableListOf<ClassDef>()
     val visited = mutableSetOf<String>()
     fun visit(descriptor: String) {
@@ -785,11 +782,11 @@ private fun BytecodePatchContext.methodsForModel(modelDescriptor: String): List<
     return classes.flatMap { it.methods }
 }
 
-private fun Method.toResolvedGetter(context: BytecodePatchContext): ResolvedGetter =
-    toReference().toResolvedGetter(context)
+private fun Method.toResolvedGetter(): ResolvedGetter =
+    toReference().toResolvedGetter()
 
-private fun MethodReference.toResolvedGetter(context: BytecodePatchContext): ResolvedGetter {
-    val owner = context.mutableClassDefByOrNull(definingClass)
+private fun MethodReference.toResolvedGetter(): ResolvedGetter {
+    val owner = mutableClassDefByOrNull(definingClass)
         ?: throw PatchException("NewX model getter owner was not found: $this")
     return ResolvedGetter(this, AccessFlags.INTERFACE.isSet(owner.accessFlags))
 }
@@ -878,14 +875,13 @@ private fun findBooleanResult(method: MutableMethod, invokeIndex: Int): BooleanR
     return if (consumers.size == 1) BooleanResult(invokeIndex + 1, resultRegister) else null
 }
 
-context(context: BytecodePatchContext)
 private fun resolveTranslationStateInterface(): String {
     val grokStateMatch =
         GrokPostStateFingerprint.scopedMatchAllOrNull().orEmpty().let { matches ->
             requireExactlyOne("NewX Grok post translation state model", matches)
         }
     val stateInterface = grokStateMatch.fieldForToStringLabel(", translationState=").type
-    val stateClass = context.mutableClassDefByOrNull(stateInterface)
+    val stateClass = mutableClassDefByOrNull(stateInterface)
         ?: throw PatchException("NewX Grok translation-state interface type is unavailable: $stateInterface")
     if (!AccessFlags.INTERFACE.isSet(stateClass.accessFlags)) {
         throw PatchException("NewX Grok translation-state contract is not an interface: $stateInterface")
@@ -893,22 +889,19 @@ private fun resolveTranslationStateInterface(): String {
     return stateInterface
 }
 
-context(context: BytecodePatchContext)
 private fun resolveStateClass(stateLabel: String, stateInterface: String): ClassDef {
     val matches =
         Fingerprint(
-            definingClass = "Lcom/x/",
             name = "toString",
             returnType = STRING_DESCRIPTOR,
             parameters = emptyList(),
             filters = listOf(string(stateLabel)),
         ).scopedMatchAllOrNull().orEmpty().filter { match ->
-            context.isAssignableTo(match.originalClassDef.type, stateInterface)
+            isAssignableTo(match.originalClassDef.type, stateInterface)
         }
     return requireExactlyOne("NewX Grok $stateLabel state model", matches).originalClassDef
 }
 
-context(context: BytecodePatchContext)
 private fun resolveStateSingleton(stateLabel: String, stateInterface: String): FieldReference {
     val stateClass = resolveStateClass(stateLabel, stateInterface)
     requirePublicClass(stateClass.type)
@@ -923,7 +916,6 @@ private fun resolveStateSingleton(stateLabel: String, stateInterface: String): F
     return singleton
 }
 
-context(context: BytecodePatchContext)
 private fun patchInlineRequest(path: ResolvedTranslationPath) {
     val method = path.fetchMethod
     val parameterRegisters =
@@ -946,9 +938,8 @@ private fun patchInlineRequest(path: ResolvedTranslationPath) {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchTranslationBridges(path: ResolvedTranslationPath) {
-    val extensionClass = context.mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
+    val extensionClass = mutableClassDefBy(POST_TRANSLATOR_DESCRIPTOR)
 
     fun modelStringBridge(name: String, getter: ResolvedGetter) {
         val bridge = extensionClass.requireBridge(name, OBJECT_DESCRIPTOR, STRING_DESCRIPTOR)
@@ -1065,7 +1056,6 @@ private fun MutableClass.injectStateBridge(bridge: MutableMethod, singleton: Fie
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchVisibility(path: ResolvedTranslationPath) {
     val factory =
         requireExactlyOne(
@@ -1082,13 +1072,12 @@ private fun patchVisibility(path: ResolvedTranslationPath) {
     patchEligibilityResult(path.presenterComposeMethod, path.modelEligibilityGetter)
 }
 
-context(context: BytecodePatchContext)
 private fun Match.constructsPresenter(presenterDescriptor: String): Boolean {
     val instructions = method.instructions
     val related = instructions.withIndex().filter { (constructorIndex, instruction) ->
         val reference = instruction.getReference<MethodReference>() ?: return@filter false
         if (instruction.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) ||
-            reference.name != "<init>" || !context.isAssignableTo(reference.definingClass, presenterDescriptor)
+            reference.name != "<init>" || !isAssignableTo(reference.definingClass, presenterDescriptor)
         ) return@filter false
         val receiver = instruction.registersUsed.firstOrNull() ?: return@filter false
         instructions.withIndex().any { (newIndex, candidate) ->
@@ -1163,9 +1152,8 @@ private fun MutableMethod.patchBooleanResult(result: BooleanResult, bridgeMethod
     }
 }
 
-context(context: BytecodePatchContext)
 private fun exposeField(reference: FieldReference) {
-    val owner = context.mutableClassDefBy(reference.definingClass)
+    val owner = mutableClassDefBy(reference.definingClass)
     val field =
         requireExactlyOne(
             "NewX translation field declaration $reference",
@@ -1177,15 +1165,13 @@ private fun exposeField(reference: FieldReference) {
     owner.requirePublicFields(listOf(reference))
 }
 
-context(context: BytecodePatchContext)
 private fun exposeGetter(getter: ResolvedGetter) {
     exposeMethod(getter.reference)
     requirePublicClass(getter.reference.definingClass)
 }
 
-context(context: BytecodePatchContext)
 private fun exposeMethod(reference: MethodReference) {
-    val owner = context.mutableClassDefBy(reference.definingClass)
+    val owner = mutableClassDefBy(reference.definingClass)
     val method =
         requireExactlyOne(
             "NewX translation method declaration $reference",
@@ -1201,9 +1187,8 @@ private fun exposeMethod(reference: MethodReference) {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun requirePublicClass(descriptor: String) {
-    if (!AccessFlags.PUBLIC.isSet(context.mutableClassDefBy(descriptor).accessFlags)) {
+    if (!AccessFlags.PUBLIC.isSet(mutableClassDefBy(descriptor).accessFlags)) {
         throw PatchException("NewX translation model type is not public: $descriptor")
     }
 }

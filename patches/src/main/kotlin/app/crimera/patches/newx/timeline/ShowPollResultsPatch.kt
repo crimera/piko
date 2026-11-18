@@ -20,7 +20,7 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.p0Register
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -33,16 +33,16 @@ private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
  * stable leaf across the declared NewX targets and returns the exact String consumed by the UI.
  */
 private object PollBindingValueFingerprint : Fingerprint(
+    isStatic = true,
     definingClass = "Lcom/x/cards/impl/poll/",
     parameters = listOf("I", STRING_DESCRIPTOR, MAP_DESCRIPTOR),
     returnType = STRING_DESCRIPTOR,
-    filters = listOf(string("choice")),
-    custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
+    filters = listOf(string("choice"))
 )
 
 @Suppress("unused")
 val newXShowPollResultsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Show poll results",
         description = "Adds an option to show NewX poll results without voting.",
     ) {

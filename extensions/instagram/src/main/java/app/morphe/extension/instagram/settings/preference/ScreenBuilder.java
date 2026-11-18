@@ -13,16 +13,12 @@ import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.text.format.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.List;
-import java.util.Locale;
-
-import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.patches.devFlags.Flag;
+import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
+
 
 import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
@@ -79,8 +75,8 @@ public class ScreenBuilder {
             dmSection();
         } else if (Constants.PIKO_FRAGMENT_FILTER_CONTENT.equals(fragmentName)) {
             filterContentSection();
-        } else if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
-            buildRecommendedFlagsSection();
+        } else if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
+            RecommendedFlagsScreen.build(context, screen, fragmentName, false, RecommendedFlags.getFlags(false));
         } else if (Constants.PIKO_FRAGMENT_FOCUS_LOCK.equals(fragmentName)) {
             buildFocusLockSection();
         } else if (Constants.PIKO_FRAGMENT_INSTANTS.equals(fragmentName)) {
@@ -90,9 +86,9 @@ public class ScreenBuilder {
         }
     }
 
-    public void buildFragmentForSearch(String fragmentName) {
-        if (Constants.PIKO_FRAGMENT_REC_FLAGS.equals(fragmentName)) {
-            buildRecommendedFlagsSection(false);
+    public void buildFragmentForSearch(String fragmentName, List<Flag> flags) {
+        if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
+            RecommendedFlagsScreen.build(context, screen, fragmentName, true, flags);
         } else {
             buildFragment(fragmentName);
         }
@@ -264,6 +260,16 @@ public class ScreenBuilder {
                             str("piko_disable_disappearing_messages_gesture"),
                             str("piko_disable_disappearing_messages_gesture_desc"),
                             Settings.DISABLE_DISAPPEARING_MESSAGES_GESTURE
+                    )
+            );
+        }
+
+        if (SettingsStatus.sendKeyboardGifs) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_send_keyboard_gifs"),
+                            str("piko_send_keyboard_gifs_desc"),
+                            Settings.SEND_KEYBOARD_GIFS
                     )
             );
         }
@@ -1067,53 +1073,6 @@ public class ScreenBuilder {
                         str("piko_navigation_startup_tab_summary")
                 )
         );
-    }
-
-    public void buildRecommendedFlagsSection() {
-        buildRecommendedFlagsSection(true);
-    }
-
-    private void buildRecommendedFlagsSection(boolean notifyErrors) {
-        long lastModified = RecommendedFlags.getLastModified();
-        String lastModifiedAtString = "";
-        if (lastModified > 0L) {
-            Locale locale = context.getResources().getConfiguration().getLocales().get(0);
-            String skeleton = DateFormat.is24HourFormat(context) ? "yMMMEdHm" : "yMMMEdhm";
-            String pattern = DateFormat.getBestDateTimePattern(locale, skeleton);
-            String formattedDate = new SimpleDateFormat(pattern, locale).format(new Date(lastModified));
-            lastModifiedAtString = String.format(str("piko_rec_flags_last_modified_at"), formattedDate);
-        }
-        addPreference(
-            helper.buttonPreference(
-                    str("piko_rec_flags_refresh_file"),
-                    lastModifiedAtString,
-                    "piko_rec_flags_refresh_file"
-            )
-        );
-        List<Flag> recFlags = RecommendedFlags.getFlags(notifyErrors);
-        // The flag names will be English only,
-        // as I want to keep it as a live service
-        // rather than triggering new build
-        // for every a new flag.
-        for(Flag flag : recFlags) {
-            if (flag.isLongType()) {
-                addPreference(
-                        helper.editTextNumPreference(
-                                flag.getName(),
-                                flag.getDesc(),
-                                flag.getCode()
-                        )
-                );
-            } else {
-                addPreference(
-                        helper.listPreference(
-                                flag.getName(),
-                                flag.getDesc(),
-                                flag.getCode()
-                        )
-                );
-            }
-        }
     }
 
     public void aboutSection(TreeMap<String, Boolean> flags) {

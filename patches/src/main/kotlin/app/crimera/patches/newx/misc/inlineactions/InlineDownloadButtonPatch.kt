@@ -53,11 +53,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.newInstance
 import app.crimera.patches.downloader.downloaderManifestPatch
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.resource.ResourceType
@@ -105,7 +108,7 @@ private fun MutableMethod.requireStatic(label: String) {
 
 @Suppress("unused")
 val newXInlineDownloadButtonPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Inline download button",
         description =
             "Adds a Download button below NewX posts and saves media to a folder you choose, " +
@@ -636,9 +639,8 @@ private fun MutableMethod.insertMarkIconSizeHook(
 }
 
 /** Resolve the actual size value, never mutate the shared sizing object or invent a default. */
-context(context: BytecodePatchContext)
 private fun resolveInlineIconSizeHook(method: MutableMethod): Pair<Int, Int> =
-    resolveInlineIconSizeHook(method) { type -> context.classDefByOrNull(type) }
+    resolveInlineIconSizeHook(method) { type -> classDefByOrNull(type) }
 
 internal fun resolveInlineIconSizeHook(
     method: MutableMethod,
@@ -713,7 +715,6 @@ internal fun resolveInlineIconSizeHook(
  * injected download button. Identity-gate the injected action immediately before the kind model
  * constructor and rewrite only its kind register to IconOnly, leaving native actions untouched.
  */
-context(context: BytecodePatchContext)
 private fun patchInlineActionKindOverride(
     entryModels: ResolvedNewXInlineActionModels,
     kindModels: ResolvedNewXInlineActionKindOverride,
@@ -868,7 +869,6 @@ internal fun resolveInlineActionKindRenderCall(
  * Press-state events can carry the same entry as long clicks. Resolve the semantic long-click
  * payload, its consumption by this handler, and its construction/dispatch through Function1.
  */
-context(context: BytecodePatchContext)
 private fun resolveInlineLongPressEventType(
     eventHandler: Method,
     actionEntryDescriptor: String,
@@ -885,7 +885,7 @@ private fun resolveInlineLongPressEventType(
             .filter { instruction -> instruction.opcode == Opcode.INSTANCE_OF }
             .mapNotNull { instruction -> instruction.getReference<TypeReference>()?.type }
             .distinct()
-            .mapNotNull { type -> context.classDefByOrNull(type) }
+            .mapNotNull { type -> classDefByOrNull(type) }
             .filter { candidate ->
                 candidate.interfaces.any { descriptor ->
                     descriptor.toString() == eventInterfaceDescriptor
@@ -936,36 +936,20 @@ private fun resolveInlineLongPressEventType(
     requireExactlyOne(
         "NewX inline-action long-press callback dispatch",
         Fingerprint(
-            filters = listOf(methodCall(smali = constructor.toString())),
-            custom = { method, _ -> hasInlineActionEventDispatch(method, constructor) },
+            // The callback constructs the event and immediately sends it to Function1.
+            filters = listOf(
+                newInstance(constructor.definingClass),
+                methodCall(reference = constructor, location = MatchAfterImmediately()),
+                methodCall(
+                    smali = "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;",
+                    location = MatchAfterImmediately(),
+                ),
+            ),
         ).scopedMatchAll(),
     )
     return eventClass.type
 }
 
-/** The native callback constructs an entry event and immediately sends that object to Function1. */
-internal fun hasInlineActionEventDispatch(method: Method, constructor: MethodReference): Boolean {
-    val instructions = method.implementation?.instructions?.toList().orEmpty()
-    return instructions.indices.any { index ->
-        val call = instructions[index]
-        if (call.opcode !in setOf(Opcode.INVOKE_DIRECT, Opcode.INVOKE_DIRECT_RANGE) ||
-            call.getReference<MethodReference>()?.toString() != constructor.toString()
-        ) return@any false
-        val eventRegister = call.registersUsed.firstOrNull() ?: return@any false
-        // newx-resolver-lint: allow instruction-order adjacent-dispatch because the validated callback constructs and immediately sends this event.
-        val allocation = instructions.getOrNull(index - 1) ?: return@any false
-        val dispatch = instructions.getOrNull(index + 1) ?: return@any false
-        allocation.opcode == Opcode.NEW_INSTANCE &&
-            allocation.getReference<TypeReference>()?.type == constructor.definingClass &&
-            (allocation as? OneRegisterInstruction)?.registerA == eventRegister &&
-            dispatch.opcode in setOf(Opcode.INVOKE_INTERFACE, Opcode.INVOKE_INTERFACE_RANGE) &&
-            dispatch.getReference<MethodReference>()?.toString() ==
-            "Lkotlin/jvm/functions/Function1;->invoke(Ljava/lang/Object;)Ljava/lang/Object;" &&
-            dispatch.registersUsed.getOrNull(1) == eventRegister
-    }
-}
-
-context(context: BytecodePatchContext)
 private fun patchPostModelBridges(
     postModels: ResolvedNewXPostModels,
     entryModels: ResolvedNewXInlineActionModels,
@@ -980,7 +964,7 @@ private fun patchPostModelBridges(
     val repostedCanonicalPostField = postModels.repostedCanonicalPostField
     val canonicalPostMediaField = mediaModels.canonicalPostMediaField
 
-    val presenterClass = context.mutableClassDefBy(barModels.inlineActionBarDescriptor)
+    val presenterClass = mutableClassDefBy(barModels.inlineActionBarDescriptor)
     val presenterPostField = requireExactlyOne(
         "NewX inline presenter contextual-post field",
         presenterClass.fields.filter { field ->
@@ -990,7 +974,7 @@ private fun patchPostModelBridges(
     )
     presenterClass.requirePublicFields(listOf(presenterPostField))
 
-    val extensionClass = context.mutableClassDefBy(EXTENSION)
+    val extensionClass = mutableClassDefBy(EXTENSION)
     extensionClass.portHelperBody(
         PRESENTER_POST_HELPER,
         listOf(OBJECT_DESCRIPTOR),
@@ -1035,14 +1019,14 @@ private fun patchPostModelBridges(
         repostedCanonicalPostField,
     )
 
-    val entryClass = context.mutableClassDefBy(entryModels.inlineActionEntryDescriptor)
+    val entryClass = mutableClassDefBy(entryModels.inlineActionEntryDescriptor)
     val actionConstructor = requireExactlyOne(
         "NewX inline-action constructor",
         entryClass.methods.filter { method ->
             method.toString() == downloadModels.inlineActionEntryConstructor.toString()
         },
     )
-    val actionTypeClass = context.mutableClassDefBy(entryModels.postActionTypeDescriptor)
+    val actionTypeClass = mutableClassDefBy(entryModels.postActionTypeDescriptor)
     val carrierField = requireExactlyOne(
         "NewX TwitterShare action constant",
         actionTypeClass.fields.filter { field ->
@@ -1074,14 +1058,13 @@ private fun patchPostModelBridges(
  * Unwraps a timeline post item to its contextual post. The item's result is a union, so anything
  * that is not a contextual post yields null.
  */
-context(context: BytecodePatchContext)
 private fun patchContextualPostHelper(
     extensionClass: MutableClass,
     postModels: ResolvedNewXPostModels,
     timelineModels: ResolvedNewXTimelineModels,
 ) {
     val resultAccessor =
-        context.mutableClassDefBy(timelineModels.postDescriptor)
+        mutableClassDefBy(timelineModels.postDescriptor)
             .resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
     val stub = extensionClass.requireHelper(CONTEXTUAL_POST_HELPER, listOf(OBJECT_DESCRIPTOR))
     val helper =
@@ -1159,7 +1142,6 @@ private fun MutableClass.requireBooleanHelper(
         },
     )
 
-context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String): FieldReference {
     val iconResourceId = resourceId(ResourceType.DRAWABLE, resourceName)
     val fields =

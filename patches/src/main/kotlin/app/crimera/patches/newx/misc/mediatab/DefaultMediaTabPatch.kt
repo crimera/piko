@@ -22,7 +22,7 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
@@ -141,7 +141,7 @@ private object NewXCombinedProfileTimelineInitialSubTabFingerprint : Fingerprint
 
 @Suppress("unused")
 val newXDefaultMediaTabPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Set default media tab",
         description = "Lets you choose the default sub-tab (Photos or Videos) for the NewX profile media tab.",
     ) {

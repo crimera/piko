@@ -29,9 +29,10 @@ import app.crimera.patches.common.scopedMatchAll
 import app.crimera.patches.common.valueReachesRegister
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -132,7 +133,7 @@ private data class NativeDownloadHook(
 
 @Suppress("unused")
 val newXNativeDownloadRedirectPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Redirect downloads to chosen folder",
         description =
             "Saves media downloaded with NewX's own download buttons into the folders chosen " +
@@ -175,7 +176,6 @@ val newXNativeDownloadRedirectPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun resolveNativeDownloader(): ResolvedNewXNativeDownloader {
     val mimeResolverMatch =
         requireExactlyOne(
@@ -183,7 +183,7 @@ private fun resolveNativeDownloader(): ResolvedNewXNativeDownloader {
             DownloadMimeResolverFingerprint.scopedMatchAll(),
         )
     val downloader = mimeResolverMatch.originalClassDef
-    val mutableDownloader = context.mutableClassDefBy(downloader.type)
+    val mutableDownloader = mutableClassDefBy(downloader.type)
 
     val videoDownload =
         requireExactlyOne(
@@ -363,7 +363,6 @@ private fun resolveVideoDownloadHook(
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveVideoTabHooks(
     downloader: ResolvedNewXNativeDownloader,
     postDescriptor: String,
@@ -465,7 +464,6 @@ private fun downloadBranchStart(
  * Resolves the post source for both video-tab dispatches. The receiver must still be the handler
  * at each dispatch, because the injected hook re-reads the wrapper from it at that point.
  */
-context(context: BytecodePatchContext)
 private fun resolveVideoTabPost(
     method: MutableMethod,
     postDescriptor: String,
@@ -474,7 +472,7 @@ private fun resolveVideoTabPost(
     watermarkedDispatchIndex: Int,
     nativeDispatchIndex: Int,
 ): HandlerPostSource {
-    val handlerClass = context.mutableClassDefBy(method.definingClass)
+    val handlerClass = mutableClassDefBy(method.definingClass)
     val tuple = resolveVideoTabPostTuple(
         method = method,
         handlerFields = handlerClass.fields,
@@ -482,9 +480,9 @@ private fun resolveVideoTabPost(
         postResultField = postResultField,
         watermarkedDispatch = watermarkedDispatch,
         watermarkedDispatchIndex = watermarkedDispatchIndex,
-        classFor = { type -> context.classDefByOrNull(type) },
+        classFor = { type -> classDefByOrNull(type) },
     )
-    val postAccessor = context.mutableClassDefBy(tuple.containerField.type).resolveFieldAccessor(
+    val postAccessor = mutableClassDefBy(tuple.containerField.type).resolveFieldAccessor(
         tuple.postField,
         "video-tab timeline post",
     )

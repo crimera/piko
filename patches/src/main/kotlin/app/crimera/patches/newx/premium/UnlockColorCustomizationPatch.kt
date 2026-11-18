@@ -13,7 +13,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -151,7 +151,7 @@ private fun unlockColorCustomization(match: Match) {
 
 @Suppress("unused")
 val newXUnlockColorCustomizationPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Unlock color customization",
         description = "Unlocks the built-in app color selector for non-Premium users.",
     ) {

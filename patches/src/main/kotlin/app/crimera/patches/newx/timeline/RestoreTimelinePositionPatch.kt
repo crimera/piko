@@ -12,7 +12,6 @@ import app.crimera.bytecode.Target
 import app.crimera.bytecode.fieldReference
 import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
-import app.crimera.patches.common.classDefFlatMap
 import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAll
@@ -29,7 +28,9 @@ import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
@@ -402,7 +403,7 @@ private data class PostLoadScrollCallSite(
 
 @Suppress("unused")
 val restoreTimelinePositionPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Restore timeline position",
         description = "Persists supported timeline positions, then restores them after the app process restarts.",
     ) {
@@ -1278,9 +1279,19 @@ val restoreTimelinePositionPatch =
                 )
 
             val postLoadScrollCallSites =
-                classDefFlatMap { classDef ->
+                Fingerprint(
+                    filters = listOf(
+                        methodCall(
+                            definingClass = componentInterfaceDescriptor,
+                            name = interfacePostLoadMethod.name,
+                            parameters = emptyList(),
+                            returnType = holderDescriptor,
+                        ),
+                    ),
+                ).matchAllOrNull().orEmpty().flatMap { match ->
+                    val classDef = match.originalClassDef
                     val candidates = mutableListOf<PostLoadScrollCallSite>()
-                    classDef.methods.forEach methodLoop@{ method ->
+                    match.originalMethod.let methodLoop@{ method ->
                         val implementation = method.implementation ?: return@methodLoop
                         val instructions = implementation.instructions.toList()
                         instructions.forEachIndexed instructionLoop@{ postLoadInvokeIndex, instruction ->
@@ -1492,12 +1503,21 @@ val restoreTimelinePositionPatch =
             }
 
             val delegatingTimelineWrappers =
-                classDefFlatMap { classDef ->
+                Fingerprint(
+                    filters = listOf(
+                        methodCall(
+                            definingClass = componentInterfaceDescriptor,
+                            name = interfaceGetterMethod.name,
+                            parameters = emptyList(),
+                            returnType = holderDescriptor,
+                        ),
+                    ),
+                ).matchAllOrNull().orEmpty().map { it.originalClassDef }.distinctBy { it.type }.flatMap { classDef ->
                     val classDescriptor = classDef.type
                     if (classDescriptor == componentDescriptor ||
                         classDef.interfaces.none { it.toString() == componentInterfaceDescriptor }
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
                     if (classDef.methods.any { method ->
                             method.name == postLoadMethod.name &&
@@ -1505,7 +1525,7 @@ val restoreTimelinePositionPatch =
                                 method.returnType == holderDescriptor
                         }
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
 
                     val wrapperGetterMethods =
@@ -1515,73 +1535,73 @@ val restoreTimelinePositionPatch =
                                 method.parameterTypes.isEmpty() &&
                                 method.returnType == holderDescriptor
                         }
-                    if (wrapperGetterMethods.isEmpty()) return@classDefFlatMap emptyList()
+                    if (wrapperGetterMethods.isEmpty()) return@flatMap emptyList()
 
                     val wrapperGetter =
                         requireExactlyOne(
                             "NewX timeline wrapper getter in $classDescriptor",
                             wrapperGetterMethods,
                         )
-                    val implementation = wrapperGetter.implementation ?: return@classDefFlatMap emptyList()
-                    if (AccessFlags.ABSTRACT.isSet(wrapperGetter.accessFlags)) return@classDefFlatMap emptyList()
+                    val implementation = wrapperGetter.implementation ?: return@flatMap emptyList()
+                    if (AccessFlags.ABSTRACT.isSet(wrapperGetter.accessFlags)) return@flatMap emptyList()
                     val instructions = implementation.instructions.toList()
-                    if (instructions.size != 5) return@classDefFlatMap emptyList()
+                    if (instructions.size != 5) return@flatMap emptyList()
 
                     val p0Register = implementation.registerCount - 1
                     val delegateInvoke = instructions[0]
                     if (delegateInvoke.opcode != Opcode.INVOKE_VIRTUAL &&
                         delegateInvoke.opcode != Opcode.INVOKE_DIRECT
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
                     val delegateInvokeRegisters = delegateInvoke as? FiveRegisterInstruction
-                        ?: return@classDefFlatMap emptyList()
+                        ?: return@flatMap emptyList()
                     if (delegateInvokeRegisters.registerCount != 1 ||
                         delegateInvokeRegisters.registerC != p0Register
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
                     val delegateGetter = delegateInvoke.getReference<MethodReference>()
-                        ?: return@classDefFlatMap emptyList()
+                        ?: return@flatMap emptyList()
                     if (delegateGetter.parameterTypes.isNotEmpty() ||
                         delegateGetter.returnType != componentInterfaceDescriptor
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
 
                     val delegateResult = instructions[1] as? OneRegisterInstruction
-                        ?: return@classDefFlatMap emptyList()
+                        ?: return@flatMap emptyList()
                     if (instructions[1].opcode != Opcode.MOVE_RESULT_OBJECT) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
                     val interfaceInvoke = instructions[2]
-                    if (interfaceInvoke.opcode != Opcode.INVOKE_INTERFACE) return@classDefFlatMap emptyList()
+                    if (interfaceInvoke.opcode != Opcode.INVOKE_INTERFACE) return@flatMap emptyList()
                     val interfaceInvokeRegisters = interfaceInvoke as? FiveRegisterInstruction
-                        ?: return@classDefFlatMap emptyList()
+                        ?: return@flatMap emptyList()
                     if (interfaceInvokeRegisters.registerCount != 1 ||
                         interfaceInvokeRegisters.registerC != delegateResult.registerA
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
                     val interfaceGetter = interfaceInvoke.getReference<MethodReference>()
-                        ?: return@classDefFlatMap emptyList()
+                        ?: return@flatMap emptyList()
                     if (interfaceGetter.definingClass != componentInterfaceDescriptor ||
                         interfaceGetter.name != interfaceGetterMethod.name ||
                         interfaceGetter.parameterTypes.isNotEmpty() ||
                         interfaceGetter.returnType != holderDescriptor
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
 
                     val getterResult = instructions[3] as? OneRegisterInstruction
-                        ?: return@classDefFlatMap emptyList()
+                        ?: return@flatMap emptyList()
                     val returnInstruction = instructions[4] as? OneRegisterInstruction
-                        ?: return@classDefFlatMap emptyList()
+                        ?: return@flatMap emptyList()
                     if (instructions[3].opcode != Opcode.MOVE_RESULT_OBJECT ||
                         instructions[4].opcode != Opcode.RETURN_OBJECT ||
                         returnInstruction.registerA != getterResult.registerA
                     ) {
-                        return@classDefFlatMap emptyList()
+                        return@flatMap emptyList()
                     }
 
                     listOf(DelegatingTimelineWrapper(classDescriptor, delegateGetter, delegateInvoke.opcode))

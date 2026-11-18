@@ -21,9 +21,9 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireAtMostOne
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
@@ -35,7 +35,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 @Suppress("unused")
 val customizeNewXInlineActionsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Customize inline actions",
         description = "Lets you hide selected actions from NewX post action bars.",
     ) {
@@ -159,9 +159,8 @@ val customizeNewXInlineActionsPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun patchActionNameBridge(models: app.crimera.patches.newx.models.ResolvedNewXInlineActionModels) {
-    val inlineActionEntryClass = context.mutableClassDefBy(models.inlineActionEntryDescriptor)
+    val inlineActionEntryClass = mutableClassDefBy(models.inlineActionEntryDescriptor)
     val actionTypeGetter =
         requireAtMostOne(
             label = "NewX inline-action getActionType getter in ${inlineActionEntryClass.type}",
@@ -180,7 +179,7 @@ private fun patchActionNameBridge(models: app.crimera.patches.newx.models.Resolv
                 inlineActionEntryClass.requirePublicFields(listOf(field))
             }
         }
-    val extensionClass = context.mutableClassDefBy(INLINE_ACTION_FILTER_DESCRIPTOR)
+    val extensionClass = mutableClassDefBy(INLINE_ACTION_FILTER_DESCRIPTOR)
     val helpers = extensionClass.methods.filter { method ->
         method.name == "getActionName" &&
             method.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&

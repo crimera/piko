@@ -5,11 +5,11 @@ import app.crimera.patches.newx.settings.newXToggle
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.settings.settingStrings
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 @Suppress("unused")
 val newXPermanentShareLinksPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Permanent share links",
         description = "Uses stable account and post IDs in shared links when enabled.",
     ) {

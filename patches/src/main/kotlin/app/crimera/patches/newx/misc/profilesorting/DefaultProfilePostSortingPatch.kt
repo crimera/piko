@@ -20,9 +20,12 @@ import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
@@ -54,24 +57,26 @@ private fun isFlowSeed(instruction: Instruction): Boolean {
 /** Targets the profile timeline component's Boolean state that selects latest versus popular posts. */
 private object NewXProfilePostSortingStateFingerprint : Fingerprint(
     definingClass = "Lcom/x/profile/timeline/",
+    name = "<init>",
+    filters = listOf(
+        fieldAccess(opcode = Opcode.SGET_OBJECT, smali = "Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;"),
+        // Flow seeded with the Boolean.
+        methodCall(
+            definingClass = "Lkotlinx/coroutines/flow/",
+            parameters = listOf("Ljava/lang/Object;"),
+            location = MatchAfterImmediately(),
+        ),
+    ),
     custom = { method, classDef ->
-        method.name == "<init>" &&
-            isProfileTimelineComponent(classDef) &&
+        isProfileTimelineComponent(classDef) &&
             method.parameterTypes.firstOrNull() == "Ljava/util/List;" &&
-            method.parameterTypes.getOrNull(1).toString().startsWith("Lcom/x/profile/") &&
-            method.implementation?.instructions?.toList()?.let { methodInstructions ->
-                methodInstructions.withIndex().any { (index, instruction) ->
-                    isBooleanFalse(instruction) &&
-                        index + 1 < methodInstructions.size &&
-                        isFlowSeed(methodInstructions[index + 1])
-                }
-            } == true
+            method.parameterTypes.getOrNull(1).toString().startsWith("Lcom/x/profile/")
     },
 )
 
 @Suppress("unused")
 val newXDefaultProfilePostSortingPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Set default profile post sorting",
         description = "Lets you choose whether profile posts open sorted by the most recent or popular posts.",
     ) {

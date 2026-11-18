@@ -2,7 +2,6 @@ package app.crimera.patches.newx.misc.customsharingdomain
 
 // Guards the copy/share path that builds an attribution URL directly and bypasses the shared Intent helper.
 
-import app.crimera.patches.newx.misc.customsharingdomain.isShareAttributionUrlBuilder
 import app.crimera.patches.newx.misc.customsharingdomain.rewriteShareAttributionUrlBuilder
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.util.getReference
@@ -19,16 +18,12 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ShareAttributionUrlBuilderPatchTest {
     @Test
     fun `attribution builder result is rewritten before direct callers consume it`() {
         val method = attributionUrlBuilderFixture()
-        assertTrue(method.isShareAttributionUrlBuilder())
-        assertFalse(attributionUrlBuilderFixture(queryParameter = "source=").isShareAttributionUrlBuilder())
-
         rewriteShareAttributionUrlBuilder(method)
 
         val instructions = method.instructions
@@ -42,13 +37,11 @@ class ShareAttributionUrlBuilderPatchTest {
         assertTrue(rewriteIndex < returnIndex)
     }
 
-    private fun attributionUrlBuilderFixture(
-        queryParameter: String = "s=",
-    ): MutableMethod {
+    private fun attributionUrlBuilderFixture(): MutableMethod {
         val implementation = MethodImplementationBuilder(6)
         implementation.addInstruction("const-string v0, \"?\"".toInstruction())
         implementation.addInstruction("const-string v1, \"&\"".toInstruction())
-        implementation.addInstruction("const-string v2, \"$queryParameter\"".toInstruction())
+        implementation.addInstruction("const-string v2, \"s=\"".toInstruction())
         implementation.addInstruction(
             "invoke-virtual {v5}, Lcom/x/share/impl/attribution/Source;->getCode()Ljava/lang/String;"
                 .toInstruction(),

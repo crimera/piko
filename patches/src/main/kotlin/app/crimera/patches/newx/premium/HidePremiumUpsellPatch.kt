@@ -21,7 +21,7 @@ import app.crimera.bytecode.insertHook
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
@@ -60,6 +60,8 @@ private fun homeNavStateParameterIndex(parameters: List<String>): Int? {
 
 private object NewXHomeNavUpsellTypeFingerprint : Fingerprint(
     definingClass = SUBSCRIPTIONS_SCOPE,
+    interfaces = listOf(SUBSCRIPTIONS_SCOPE),
+    returnType = "L",
     filters =
         listOf(
             string("subscriptions_enabled"),
@@ -89,16 +91,13 @@ private object NewXHomeNavUpsellTypeFingerprint : Fingerprint(
                 returnType = "Ljava/lang/String;",
             ),
             opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-        ),
-    custom = { method, classDef ->
-        classDef.interfaces.any { it.startsWith(SUBSCRIPTIONS_SCOPE) } &&
-            method.returnType.startsWith("L")
-    },
+        )
 )
 
 /** The feature-switch interface's obfuscated short name changes between releases. */
 private object NewXHomeNavUpsellEnabledFingerprint : Fingerprint(
     definingClass = SUBSCRIPTIONS_SCOPE,
+    interfaces = listOf(SUBSCRIPTIONS_SCOPE),
     returnType = "Z",
     parameters = listOf("L"),
     filters =
@@ -119,8 +118,7 @@ private object NewXHomeNavUpsellEnabledFingerprint : Fingerprint(
                 returnType = "Z",
             ),
             opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
-        ),
-    custom = { _, classDef -> classDef.interfaces.any { it.startsWith(SUBSCRIPTIONS_SCOPE) } },
+        )
 )
 
 private object NewXHomeTabbedScaffoldClassFingerprint : Fingerprint(
@@ -195,7 +193,7 @@ private fun MutableMethod.disabledUpsellField(startIndex: Int): FieldReference {
 
 @Suppress("unused")
 val hidePremiumUpsellPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide premium upsell",
         description = "Hides the premium upsell chip from the NewX home top bar.",
     ) {

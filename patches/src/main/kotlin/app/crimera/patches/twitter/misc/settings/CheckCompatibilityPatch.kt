@@ -6,8 +6,9 @@
 
 package app.crimera.patches.twitter.misc.settings
 
-import app.crimera.patches.twitter.utils.is_11_82_or_greater
 import app.crimera.patches.twitter.utils.versionCheckPatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.packageMetadata
 import app.morphe.patcher.patch.patch
 
 internal val checkCompatibilityPatch = patch(
@@ -16,15 +17,12 @@ internal val checkCompatibilityPatch = patch(
     dependsOn(versionCheckPatch)
 
     execute {
-        if (!is_11_82_or_greater) {
-            return@execute
-        }
-
-        ApplicationFingerprint.matchOrNull()?.let {
-            throw RuntimeException(
+        if (packageMetadata.versionName != "12.19.1-release.0") {
+            throw PatchException(
                 "\n\n#####################################\n\n" +
-                        "Unsupported APK is used." +
-                        "\n\nPlease use a ripped APK or a compatibility shim layer patch.\n\n" +
+                        "Do not select the old X patches for NewX." +
+                        "\n\nPlease deselect all \"Old patches\". Select only \"NewX:\" patches." +
+                        "\n\nIt is recommended to reset to the \"Recommended patches\" in the patch selection screen.\n\n" +
                         "#####################################\n\n"
             )
         }

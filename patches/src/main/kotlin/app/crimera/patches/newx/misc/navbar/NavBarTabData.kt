@@ -1,12 +1,14 @@
 package app.crimera.patches.newx.misc.navbar
 
-import app.crimera.patches.common.classDefFlatMap
+import app.morphe.patcher.patch.classDefByOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
@@ -16,13 +18,13 @@ import app.morphe.patcher.util.registersUsed
 import app.crimera.patches.common.destinationRegisterOrNull
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.resolveIntegerLiteralOnCurrentPath
-import app.morphe.patcher.patch.BytecodePatchContext
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderSwitchElement
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -258,20 +260,34 @@ internal fun MutableMethod.findTabDataWrapperInitIndex(
  * perform the stack navigation. The plain parameter shape excludes the MainActivity deep-link
  * handlers, which share the stack-navigation call but also take a route and arguments.
  */
-context(context: BytecodePatchContext)
 internal fun resolveTabChangeMethods(tabData: NewXNavBarTabData): List<MutableMethod> {
+    // Every tab change method makes the stack navigation call, so only its callers are checked.
     val matches =
-        classDefFlatMap { classDef ->
-            classDef.methods.mapNotNull { method ->
-                if (method.implementation == null) return@mapNotNull null
-                if (method.returnType != "V") return@mapNotNull null
-                if (method.parameterTypes.size !in 1..2) return@mapNotNull null
-                val parameters = method.parameterTypes.map(CharSequence::toString)
-                if (parameters.firstOrNull() != tabData.navigationType) return@mapNotNull null
-                if (!parameters.isTabChangeSignature()) return@mapNotNull null
-                if (!method.hasStackNavigationCall()) return@mapNotNull null
-                TabChangeMethodKey(classDef.type, method.name, parameters)
-            }
+        listOf(
+            listOf(tabData.navigationType),
+            listOf(tabData.navigationType, FUNCTION0_DESCRIPTOR),
+        ).flatMap { parameters ->
+            Fingerprint(
+                returnType = "V",
+                parameters = parameters,
+                filters = listOf(
+                    anyInstruction(
+                        methodCall(parameters = listOf(FUNCTION1_DESCRIPTOR, FUNCTION2_DESCRIPTOR), returnType = "V"),
+                        methodCall(parameters = listOf(FUNCTION2_DESCRIPTOR, FUNCTION1_DESCRIPTOR), returnType = "V"),
+                    ),
+                ),
+            ).matchAllOrNull().orEmpty()
+        }.mapNotNull { match ->
+            val classDef = match.originalClassDef
+            val method = match.originalMethod
+            if (method.implementation == null) return@mapNotNull null
+            if (method.returnType != "V") return@mapNotNull null
+            if (method.parameterTypes.size !in 1..2) return@mapNotNull null
+            val parameters = method.parameterTypes.map(CharSequence::toString)
+            if (parameters.firstOrNull() != tabData.navigationType) return@mapNotNull null
+            if (!parameters.isTabChangeSignature()) return@mapNotNull null
+            if (!method.hasStackNavigationCall()) return@mapNotNull null
+            TabChangeMethodKey(classDef.type, method.name, parameters)
         }
     if (matches.isEmpty()) {
         throw PatchException(
@@ -284,22 +300,15 @@ internal fun resolveTabChangeMethods(tabData: NewXNavBarTabData): List<MutableMe
 private fun List<String>.isTabChangeSignature(): Boolean =
     size == 1 || (size == 2 && this[1] == FUNCTION0_DESCRIPTOR)
 
-private class NavBarItemScanHit(
-    val classType: String,
-    val renderers: List<ImmutableMethodReference>,
-    val contentClass: Boolean,
-)
-
 internal data class TabChangeMethodKey(
     val definingClass: String,
     val name: String,
     val parameterTypes: List<String>,
 )
 
-context(context: BytecodePatchContext)
 private fun mutableTabChangeMethod(key: TabChangeMethodKey): MutableMethod {
     val candidates =
-        context.mutableClassDefBy(key.definingClass).methods.filter { method ->
+        mutableClassDefBy(key.definingClass).methods.filter { method ->
             method.name == key.name &&
                 method.returnType == "V" &&
                 method.parameterTypes.map(CharSequence::toString) == key.parameterTypes
@@ -307,9 +316,8 @@ private fun mutableTabChangeMethod(key: TabChangeMethodKey): MutableMethod {
     return requireExactlyOne("NewX tab change method ${key.name}", candidates) { it.toString() }
 }
 
-context(context: BytecodePatchContext)
 internal fun resolveTabDataValueConstructor(tabDataValueType: String): MethodReference {
-    val classDef = context.mutableClassDefBy(tabDataValueType)
+    val classDef = mutableClassDefBy(tabDataValueType)
     val instanceFields = classDef.fields.filter { !com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(it.accessFlags) }
     val fieldTypes = instanceFields.map { it.type }.sorted()
     
@@ -366,46 +374,49 @@ private fun List<String>.isNavBarItemContentConstructor(tabData: NewXNavBarTabDa
 private val MERGED_LAMBDA_CONSTRUCTOR_PARAMETERS =
     listOf("Z", "Ljava/lang/Object;", "Ljava/lang/Object;", "I")
 
-context(context: BytecodePatchContext)
 internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemContentTarget {
-    // Single traversal collects both the item renderer and the content class: the two
-    // predicates are disjoint method shapes, so merging the passes preserves the exact
-    // candidate sets of the former separate scans.
-    val scan =
-        classDefFlatMap { classDef ->
-            var contentClass = false
-            val renderers = mutableListOf<ImmutableMethodReference>()
-            classDef.methods.forEach { method ->
-                if (method.returnType != "V") return@forEach
-                // The item renderer takes five parameters; the content constructors take three or four.
-                if (method.parameterTypes.size !in 3..5) return@forEach
-                val parameters = method.parameterTypes.map(CharSequence::toString)
-                if (method.implementation != null &&
-                    parameters.size == 5 &&
-                    parameters[0].startsWith(ICONS_DESCRIPTOR_PREFIX) &&
-                    parameters[1] == STRING_DESCRIPTOR &&
-                    parameters[2] == tabData.tabDataValueType &&
-                    parameters[3] == COMPOSER_DESCRIPTOR &&
-                    parameters[4] == "I"
-                ) {
-                    renderers +=
-                        ImmutableMethodReference(
-                            classDef.type,
-                            method.name,
-                            parameters,
-                            "V",
-                        )
-                }
-                if (parameters.isNavBarItemContentConstructor(tabData)) contentClass = true
-            }
-            if (renderers.isEmpty() && !contentClass) {
-                emptyList()
-            } else {
-                listOf(NavBarItemScanHit(classDef.type, renderers, contentClass))
-            }
+    // The content class calls the item renderer, so both are found from the renderer calls.
+    val rendererCalls =
+        Fingerprint(
+            filters = listOf(
+                methodCall(
+                    parameters = listOf(
+                        ICONS_DESCRIPTOR_PREFIX,
+                        STRING_DESCRIPTOR,
+                        tabData.tabDataValueType,
+                        COMPOSER_DESCRIPTOR,
+                        "I",
+                    ),
+                    returnType = "V",
+                ),
+            ),
+        ).matchAll()
+    val rendererCandidates =
+        rendererCalls.map { match ->
+            val reference = match.instructionMatches.first().getInstruction<ReferenceInstruction>()
+                .reference as MethodReference
+            ImmutableMethodReference(
+                reference.definingClass,
+                reference.name,
+                reference.parameterTypes,
+                reference.returnType,
+            )
+        }.distinct().filter { reference ->
+            classDefByOrNull(reference.definingClass)?.methods?.any { method ->
+                method.implementation != null &&
+                    method.name == reference.name &&
+                    method.parameterTypes.map(CharSequence::toString) ==
+                    reference.parameterTypes.map(CharSequence::toString) &&
+                    method.returnType == reference.returnType
+            } == true
         }
-    val rendererCandidates = scan.flatMap { it.renderers }
-    val contentClasses = scan.filter { it.contentClass }.map { it.classType }
+    val contentClasses =
+        rendererCalls.map { it.originalClassDef }.distinctBy { it.type }.filter { classDef ->
+            classDef.methods.any { method ->
+                method.returnType == "V" &&
+                    method.parameterTypes.map(CharSequence::toString).isNavBarItemContentConstructor(tabData)
+            }
+        }.map { it.type }
     val renderer =
         requireExactlyOne("NewX navigation bar item renderer", rendererCandidates) { it.toString() }
     val rendererDescriptor = renderer.toSmaliDescriptor()
@@ -415,7 +426,7 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
     // the caller scan is scoped to those candidates rather than the whole dex.
     val consumerClasses =
         contentClasses.filter { classType ->
-            context.classDefByOrNull(classType)?.methods?.any { method ->
+            classDefByOrNull(classType)?.methods?.any { method ->
                 method.implementation != null &&
                     method.instructions.any { instruction ->
                         instruction.referencesMethod(rendererDescriptor)
@@ -429,7 +440,7 @@ internal fun resolveNavBarItemContent(tabData: NewXNavBarTabData): NavBarItemCon
             "NewX navigation bar item content class for $renderer; constructor candidates=$contentClasses",
             consumerClasses,
         )
-    val consumerClassDef = context.mutableClassDefBy(consumerClass)
+    val consumerClassDef = mutableClassDefBy(consumerClass)
     val contentConstructor =
         requireExactlyOne(
             "NewX navigation bar item content constructor in $consumerClass",
@@ -510,7 +521,6 @@ internal data class PackedSwitchCase(
  * states because the replacement is a single picker icon. The shared default icon covers the
  * Communities case that reuses the pre-switch value.
  */
-context(context: BytecodePatchContext)
 internal fun MutableMethod.resolveNavigationTabIcons(
     navigationType: String,
     iconRegister: Int,
@@ -556,12 +566,11 @@ internal fun MutableMethod.resolveNavigationTabIcons(
     }
 }
 
-context(context: BytecodePatchContext)
 internal fun resolveEnumSwitchCases(
     navigationType: String,
     mappingField: FieldReference,
 ): Map<String, Int> {
-    val mappingClass = context.mutableClassDefBy(mappingField.definingClass)
+    val mappingClass = mutableClassDefBy(mappingField.definingClass)
     val initializers =
         mappingClass.methods.filter { method ->
             method.name == "<clinit>" && method.parameterTypes.isEmpty() && method.returnType == "V"

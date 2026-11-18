@@ -14,14 +14,14 @@ import app.crimera.patches.settings.settingStrings
 import app.crimera.patches.settings.toggle
 import app.crimera.patches.newx.timeline.newXTimelineFilterPatch
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.patch
 
 private const val FILTERED_REPLIES_HANDLER =
     "Lapp/morphe/extension/newx/misc/FilteredRepliesPostOptionHandler;"
 
 @Suppress("unused")
 val newXHideVerifiedPostsPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Hide posts by verified account type",
         description = "Hides posts and replies authored by selected timeline-reported verification types.",
     ) {

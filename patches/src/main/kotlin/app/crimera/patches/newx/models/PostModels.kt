@@ -1,5 +1,7 @@
 package app.crimera.patches.newx.models
 
+import app.crimera.patches.common.ApkScoped
+import app.morphe.patcher.patch.classDefByOrNull
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.patches.common.isAssignableTo
 import app.crimera.patches.common.scopedMatchAll
@@ -7,9 +9,8 @@ import app.crimera.patches.common.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodeContext
+import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.getReference
@@ -24,7 +25,6 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
-import java.util.WeakHashMap
 
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
@@ -186,48 +186,40 @@ private class PostModelResolutionState {
     private var compositionMediaModels: ResolvedNewXInlineMediaModels? = null
     private var inlineActionKindOverride: ResolvedNewXInlineActionKindOverride? = null
 
-    context(context: BytecodePatchContext)
     fun postModelAnchors(): ResolvedNewXPostModelAnchors = synchronized(this) {
         postModelAnchors ?: resolvePostModelAnchors().also { postModelAnchors = it }
     }
 
-    context(context: BytecodePatchContext)
     fun postModels(): ResolvedNewXPostModels = synchronized(this) {
         postModels ?: resolvePostModels().also { postModels = it }
     }
 
-    context(context: BytecodePatchContext)
     fun postMediaModels(): ResolvedNewXPostMediaModels = synchronized(this) {
         postMediaModels ?: resolvePostMediaModels(postModels()).also { postMediaModels = it }
     }
 
-    context(context: BytecodePatchContext)
     fun inlineActionModels(): ResolvedNewXInlineActionModels = synchronized(this) {
         inlineActionModels ?: resolveInlineActionModels().also { inlineActionModels = it }
     }
 
-    context(context: BytecodePatchContext)
     fun inlineActionBarModels(): ResolvedNewXInlineActionBarModels = synchronized(this) {
         inlineActionBarModels ?: resolveInlineActionBarModels(postModels()).also {
             inlineActionBarModels = it
         }
     }
 
-    context(context: BytecodePatchContext)
     fun inlineDownloadModels(): ResolvedNewXInlineDownloadModels = synchronized(this) {
         inlineDownloadModels ?: resolveInlineDownloadModels(inlineActionModels()).also {
             inlineDownloadModels = it
         }
     }
 
-    context(context: BytecodePatchContext)
     fun compositionMediaModels(): ResolvedNewXInlineMediaModels = synchronized(this) {
         compositionMediaModels ?: resolveNewXInlineMediaModels().also {
             compositionMediaModels = it
         }
     }
 
-    context(context: BytecodePatchContext)
     fun inlineActionKindOverride(): ResolvedNewXInlineActionKindOverride = synchronized(this) {
         inlineActionKindOverride ?: resolveInlineActionKindOverride(inlineActionModels()).also {
             inlineActionKindOverride = it
@@ -235,13 +227,7 @@ private class PostModelResolutionState {
     }
 }
 
-private object PostModelResolutionCache {
-    private val values = WeakHashMap<BytecodePatchContext, PostModelResolutionState>()
-
-    @Synchronized
-    fun getOrPut(context: BytecodePatchContext): PostModelResolutionState =
-        values.getOrPut(context) { PostModelResolutionState() }
-}
+private val postModelResolutionStates = ApkScoped(::PostModelResolutionState)
 
 internal val newXPostModelResolutionPatch =
     patch(default = false) {
@@ -284,32 +270,31 @@ internal val newXInlineDownloadModelResolutionPatch =
         }
     }
 
-private fun postModelResolutionState(): PostModelResolutionState =
-    PostModelResolutionCache.getOrPut(bytecodeContext)
+private fun postModelResolutionState(): PostModelResolutionState = postModelResolutionStates.get()
 
 private fun resolvedNewXPostModelAnchors(): ResolvedNewXPostModelAnchors =
-    with(bytecodeContext) { postModelResolutionState().postModelAnchors() }
+    postModelResolutionState().postModelAnchors()
 
 internal fun resolvedNewXPostModels(): ResolvedNewXPostModels =
-    with(bytecodeContext) { postModelResolutionState().postModels() }
+    postModelResolutionState().postModels()
 
 internal fun resolvedNewXPostMediaModels(): ResolvedNewXPostMediaModels =
-    with(bytecodeContext) { postModelResolutionState().postMediaModels() }
+    postModelResolutionState().postMediaModels()
 
 internal fun resolvedNewXInlineActionModels(): ResolvedNewXInlineActionModels =
-    with(bytecodeContext) { postModelResolutionState().inlineActionModels() }
+    postModelResolutionState().inlineActionModels()
 
 internal fun resolvedNewXInlineActionBarModels(): ResolvedNewXInlineActionBarModels =
-    with(bytecodeContext) { postModelResolutionState().inlineActionBarModels() }
+    postModelResolutionState().inlineActionBarModels()
 
 internal fun resolvedNewXInlineDownloadModels(): ResolvedNewXInlineDownloadModels =
-    with(bytecodeContext) { postModelResolutionState().inlineDownloadModels() }
+    postModelResolutionState().inlineDownloadModels()
 
 internal fun resolvedNewXInlineMediaModels(): ResolvedNewXInlineMediaModels =
-    with(bytecodeContext) { postModelResolutionState().compositionMediaModels() }
+    postModelResolutionState().compositionMediaModels()
 
 internal fun resolvedNewXInlineActionKindOverride(): ResolvedNewXInlineActionKindOverride =
-    with(bytecodeContext) { postModelResolutionState().inlineActionKindOverride() }
+    postModelResolutionState().inlineActionKindOverride()
 
 /**
  * Semantic match for the NewX inline-action entry renderer. Never match this composable by an
@@ -342,7 +327,6 @@ internal fun Method.firstParameterSlot(descriptor: String): Int {
     throw PatchException("NewX renderer has no $descriptor parameter: $this")
 }
 
-context(context: BytecodePatchContext)
 private fun resolvePostModelAnchors(): ResolvedNewXPostModelAnchors {
     val contextualPostMatch = ContextualPostModelFingerprint.requireSingle("contextual post model")
     val canonicalPostMatch = CanonicalPostModelFingerprint.requireSingle("canonical post model")
@@ -354,10 +338,9 @@ private fun resolvePostModelAnchors(): ResolvedNewXPostModelAnchors {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolvePostModels(): ResolvedNewXPostModels {
     val anchors = resolvedNewXPostModelAnchors()
-    val contextualPostClass = context.classDefByOrNull(anchors.contextualPostDescriptor)
+    val contextualPostClass = classDefByOrNull(anchors.contextualPostDescriptor)
         ?: throw PatchException(
             "NewX contextual-post class was not found: ${anchors.contextualPostDescriptor}",
         )
@@ -383,7 +366,7 @@ private fun resolvePostModels(): ResolvedNewXPostModels {
             "NewX contextual reposted-post field is static: $contextualRepostedPostField",
         )
     }
-    val repostedPostClass = context.classDefByOrNull(contextualRepostedPostField.type)
+    val repostedPostClass = classDefByOrNull(contextualRepostedPostField.type)
         ?: throw PatchException(
             "NewX reposted-post class was not found: ${contextualRepostedPostField.type}",
         )
@@ -402,7 +385,6 @@ private fun resolvePostModels(): ResolvedNewXPostModels {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolvePostMediaModels(postModels: ResolvedNewXPostModels): ResolvedNewXPostMediaModels {
     val anchors = resolvedNewXPostModelAnchors()
     val contextualPostMethod = anchors.contextualPostToStringMethod.resolveCurrentMethod(
@@ -422,7 +404,6 @@ private fun resolvePostMediaModels(postModels: ResolvedNewXPostModels): Resolved
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveInlineActionModels(): ResolvedNewXInlineActionModels {
     val inlineActionEntryMatches = InlineActionEntryModelWithCountFingerprint.scopedMatchAll()
     if (inlineActionEntryMatches.size != 1) {
@@ -452,13 +433,12 @@ private fun resolveInlineActionModels(): ResolvedNewXInlineActionModels {
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveInlineActionBarModels(
     postModels: ResolvedNewXPostModels,
 ): ResolvedNewXInlineActionBarModels {
     val anchors = resolvedNewXPostModelAnchors()
     val inlineActionModels = resolvedNewXInlineActionModels()
-    val canonicalPostClass = context.classDefByOrNull(postModels.canonicalPostDescriptor)
+    val canonicalPostClass = classDefByOrNull(postModels.canonicalPostDescriptor)
         ?: throw PatchException(
             "NewX canonical-post class was not found: ${postModels.canonicalPostDescriptor}",
         )
@@ -742,11 +722,10 @@ private fun updateObjectAliases(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveInlineDownloadModels(
     entryModels: ResolvedNewXInlineActionModels,
 ): ResolvedNewXInlineDownloadModels {
-    val inlineActionEntryClass = context.classDefByOrNull(entryModels.inlineActionEntryDescriptor)
+    val inlineActionEntryClass = classDefByOrNull(entryModels.inlineActionEntryDescriptor)
         ?: throw PatchException(
             "NewX inline action entry class was not found: ${entryModels.inlineActionEntryDescriptor}",
         )
@@ -758,7 +737,7 @@ private fun resolveInlineDownloadModels(
     } ?: throw PatchException(
         "Expected one NewX inline-action constructor in $inlineActionEntryClass",
     )
-    val actionTypeClass = context.classDefByOrNull(entryModels.postActionTypeDescriptor)
+    val actionTypeClass = classDefByOrNull(entryModels.postActionTypeDescriptor)
         ?: throw PatchException(
             "NewX post action type class was not found: ${entryModels.postActionTypeDescriptor}",
         )
@@ -776,7 +755,6 @@ private fun resolveInlineDownloadModels(
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveNewXInlineMediaModels(): ResolvedNewXInlineMediaModels {
     val imageMatch = requireExactlyOne(
         "NewX inline image media model",
@@ -829,22 +807,22 @@ private fun resolveNewXInlineMediaModels(): ResolvedNewXInlineMediaModels {
         "variant content type",
         STRING_DESCRIPTOR,
     )
-    if (!context.isAssignableTo(gifVariantsField.type, LIST_DESCRIPTOR)) {
+    if (!isAssignableTo(gifVariantsField.type, LIST_DESCRIPTOR)) {
         throw PatchException("NewX inline GIF variants are not a List: $gifVariantsField")
     }
-    if (!context.isAssignableTo(videoVariantsField.type, LIST_DESCRIPTOR)) {
+    if (!isAssignableTo(videoVariantsField.type, LIST_DESCRIPTOR)) {
         throw PatchException("NewX inline video variants are not a List: $videoVariantsField")
     }
 
     val imageHierarchy = superclassChain(imageDescriptor)
     val sharedMediaBases = imageHierarchy.filter { candidate ->
         candidate != OBJECT_DESCRIPTOR &&
-            context.isAssignableTo(gifDescriptor, candidate) &&
-            context.isAssignableTo(videoDescriptor, candidate)
+            isAssignableTo(gifDescriptor, candidate) &&
+            isAssignableTo(videoDescriptor, candidate)
     }
     val mostSpecificSharedBases = sharedMediaBases.filter { candidate ->
         sharedMediaBases.none { other ->
-            other != candidate && context.isAssignableTo(other, candidate)
+            other != candidate && isAssignableTo(other, candidate)
         }
     }
     val sharedMediaBase = requireExactlyOne(
@@ -905,7 +883,6 @@ internal fun resolveInlineGifVariantsField(
     ).second
 }
 
-context(context: BytecodePatchContext)
 private fun requireInlineMediaVariantAccessors(
     gifDescriptor: String,
     gifVariantsField: FieldReference,
@@ -922,7 +899,7 @@ private fun requireInlineMediaVariantAccessors(
     val gifInterfaces = modelInterfaceHierarchy(gifDescriptor)
     val videoInterfaces = modelInterfaceHierarchy(videoDescriptor)
     val commonAccessorInterfaces = gifInterfaces.intersect(videoInterfaces).filter { descriptor ->
-        val interfaceClass = context.classDefByOrNull(descriptor) ?: return@filter false
+        val interfaceClass = classDefByOrNull(descriptor) ?: return@filter false
         AccessFlags.INTERFACE.isSet(interfaceClass.accessFlags) &&
             interfaceClass.methods.any { method ->
                 AccessFlags.ABSTRACT.isSet(method.accessFlags) && sameMethodSignature(method, gifGetter)
@@ -934,12 +911,11 @@ private fun requireInlineMediaVariantAccessors(
     )
 }
 
-context(context: BytecodePatchContext)
 private fun requireDirectInlineVariantsGetter(
     modelDescriptor: String,
     variantsField: FieldReference,
 ): Method {
-    val modelClass = context.classDefByOrNull(modelDescriptor)
+    val modelClass = classDefByOrNull(modelDescriptor)
         ?: throw PatchException("NewX inline media model class was not found: $modelDescriptor")
     val getters = modelClass.methods.filter { method ->
         if (
@@ -961,7 +937,6 @@ private fun requireDirectInlineVariantsGetter(
     return requireExactlyOne("NewX inline media variants getter for $variantsField", getters)
 }
 
-context(context: BytecodePatchContext)
 private fun modelInterfaceHierarchy(modelDescriptor: String): Set<String> {
     val interfaces = linkedSetOf<String>()
     val pending = mutableListOf(modelDescriptor)
@@ -969,7 +944,7 @@ private fun modelInterfaceHierarchy(modelDescriptor: String): Set<String> {
     while (pending.isNotEmpty()) {
         val descriptor = pending.removeAt(pending.lastIndex)
         if (!visited.add(descriptor)) continue
-        val modelClass = context.classDefByOrNull(descriptor)
+        val modelClass = classDefByOrNull(descriptor)
             ?: throw PatchException("NewX inline media hierarchy class was not found: $descriptor")
         modelClass.interfaces.forEach { interfaceDescriptor ->
             if (interfaces.add(interfaceDescriptor)) pending += interfaceDescriptor
@@ -1041,7 +1016,6 @@ internal fun resolveInlineMediaVariantContentTypeField(
     return requireExactlyOne("NewX media variant content type field", contentTypeCandidates)
 }
 
-context(context: BytecodePatchContext)
 private fun requireInlineMediaField(
     modelDescriptor: String,
     field: FieldReference,
@@ -1051,13 +1025,13 @@ private fun requireInlineMediaField(
     if (expectedType != null && field.type != expectedType) {
         throw PatchException("NewX inline $semanticName field has type ${field.type}: $field")
     }
-    if (!context.isAssignableTo(modelDescriptor, field.definingClass)) {
+    if (!isAssignableTo(modelDescriptor, field.definingClass)) {
         throw PatchException(
             "NewX inline $semanticName field owner ${field.definingClass} is outside " +
                 "$modelDescriptor hierarchy",
         )
     }
-    val declaringClass = context.classDefByOrNull(field.definingClass)
+    val declaringClass = classDefByOrNull(field.definingClass)
         ?: throw PatchException("NewX inline $semanticName field owner was not found: $field")
     val declaration = declaringClass.fields.singleOrNull { it.toString() == field.toString() }
         ?: throw PatchException("NewX inline $semanticName field declaration was not found: $field")
@@ -1067,10 +1041,9 @@ private fun requireInlineMediaField(
     if (!AccessFlags.PUBLIC.isSet(declaration.accessFlags)) {
         throw PatchException("NewX inline $semanticName field is not public: $field")
     }
-    context.mutableClassDefBy(field.definingClass).requirePublicFields(listOf(field))
+    mutableClassDefBy(field.definingClass).requirePublicFields(listOf(field))
 }
 
-context(context: BytecodePatchContext)
 private fun superclassChain(descriptor: String): List<String> {
     val result = mutableListOf<String>()
     var current: String? = descriptor
@@ -1079,7 +1052,7 @@ private fun superclassChain(descriptor: String): List<String> {
             throw PatchException("NewX inline media hierarchy contains a cycle at $current")
         }
         result += current
-        current = context.classDefByOrNull(current)?.superclass
+        current = classDefByOrNull(current)?.superclass
             ?: if (result.last() == descriptor) {
                 throw PatchException("NewX inline media model class was not found: $descriptor")
             } else {
@@ -1089,7 +1062,6 @@ private fun superclassChain(descriptor: String): List<String> {
     return result
 }
 
-context(context: BytecodePatchContext)
 private fun resolveInlineActionKindLayoutLambda(
     entryModels: ResolvedNewXInlineActionModels,
 ): Method =
@@ -1125,7 +1097,6 @@ internal fun resolveInlineActionKindLayoutMethod(
     },
 )
 
-context(context: BytecodePatchContext)
 private fun resolveInlineActionKindOverride(
     entryModels: ResolvedNewXInlineActionModels,
 ): ResolvedNewXInlineActionKindOverride {
@@ -1139,7 +1110,7 @@ private fun resolveInlineActionKindOverride(
 
     val kindConstructor = resolveInlineActionEnumKindConstructor(layoutLambda)
     val kindEnumDescriptor = kindConstructor.parameterTypes.last().toString()
-    val kindEnumClass = context.classDefByOrNull(kindEnumDescriptor)
+    val kindEnumClass = classDefByOrNull(kindEnumDescriptor)
         ?: throw PatchException("NewX inline-action kind enum was not found: $kindEnumDescriptor")
     if (!AccessFlags.ENUM.isSet(kindEnumClass.accessFlags)) {
         throw PatchException("NewX inline-action kind type is not an enum: $kindEnumClass")
@@ -1160,7 +1131,6 @@ private fun resolveInlineActionKindOverride(
     )
 }
 
-context(context: BytecodePatchContext)
 private fun resolveInlineActionEnumKindConstructor(
     layoutLambda: Method,
 ): MethodReference {
@@ -1171,7 +1141,7 @@ private fun resolveInlineActionEnumKindConstructor(
         .mapIndexedNotNull { index, instruction ->
             index.takeIf {
                 isInlineActionKindModelConstructor(instruction) { type ->
-                    context.classDefByOrNull(type)?.let { kindClass ->
+                    classDefByOrNull(type)?.let { kindClass ->
                         AccessFlags.ENUM.isSet(kindClass.accessFlags)
                     } == true
                 }

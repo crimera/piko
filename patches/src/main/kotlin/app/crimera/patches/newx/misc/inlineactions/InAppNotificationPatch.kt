@@ -9,9 +9,10 @@ import app.crimera.bytecode.insertHook
 import app.crimera.bytecode.methodReference
 import app.crimera.patches.common.requireExactlyOne
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefForEach
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.util.cloneMutable
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.numberOfParameterRegisters
@@ -68,7 +69,7 @@ private data class ResolvedNotificationRuntime(
  * fallback, so a notification facade that is not ready at runtime cannot lose a status message.
  */
 internal val newXInAppNotificationPatch =
-    bytecodePatch(default = false) {
+    patch(default = false) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXExtensionPatch)
 
@@ -79,10 +80,9 @@ internal val newXInAppNotificationPatch =
         }
     }
 
-context(context: BytecodePatchContext)
 private fun resolveNotificationRuntime(): ResolvedNotificationRuntime {
     val classDefs = buildList<ClassDef> {
-        context.classDefForEach { add(it) }
+        classDefForEach { add(it) }
     }
 
     val apiClass = resolveApiClass(classDefs)
@@ -239,9 +239,8 @@ private fun resolveFacade(
     return requireExactlyOne("NewX in-app notification facade", candidates)
 }
 
-context(context: BytecodePatchContext)
 private fun patchFacadeConstructor(runtime: ResolvedNotificationRuntime) {
-    val facadeClass = context.mutableClassDefBy(runtime.facadeDescriptor)
+    val facadeClass = mutableClassDefBy(runtime.facadeDescriptor)
     val constructor = requireExactlyOne(
         "NewX in-app notification mutable facade constructor",
         facadeClass.methods.filter { method -> method.matches(runtime.facadeConstructor) },
@@ -267,9 +266,8 @@ private fun patchFacadeConstructor(runtime: ResolvedNotificationRuntime) {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchBridge(runtime: ResolvedNotificationRuntime) {
-    val bridgeClass = context.mutableClassDefBy(BRIDGE_DESCRIPTOR)
+    val bridgeClass = mutableClassDefBy(BRIDGE_DESCRIPTOR)
     val placeholder = requireExactlyOne(
         "NewX in-app notification bridge method",
         bridgeClass.methods.filter { method ->

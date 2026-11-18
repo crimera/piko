@@ -19,9 +19,10 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.classDefByOrNull
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.resource.ResourceType
 import app.morphe.patcher.resource.resourceId
@@ -103,7 +104,7 @@ private data class ResolvedMediaSheetLabel(
 
 @Suppress("unused")
 val customizeNewXMediaSheetPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Customize media menu items",
         description = "Lets you hide selected items from the NewX photo and video long-press menu.",
     ) {
@@ -148,7 +149,6 @@ private fun validateMediaSheetResources() {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveMediaSheetLabelModel(match: Match): ResolvedMediaSheetLabel {
     val method = match.method
     val anchorName = MEDIA_SHEET_BUILDER_ANCHOR
@@ -180,7 +180,7 @@ private fun resolveMediaSheetLabelModel(match: Match): ResolvedMediaSheetLabel {
     val labelInitializerReference = labelInitializer.second
 
     val labelClass =
-        context.classDefByOrNull(labelInitializerReference.definingClass)
+        classDefByOrNull(labelInitializerReference.definingClass)
             ?: throw PatchException(
                 "NewX media-sheet label class was not found: " +
                     "${labelInitializerReference.definingClass}",
@@ -206,7 +206,7 @@ private fun resolveMediaSheetLabelModel(match: Match): ResolvedMediaSheetLabel {
         }
     val rowConstructor = requireExactlyOne("NewX media-sheet row constructor for $labelBase", rowConstructors)
     val rowClass =
-        context.classDefByOrNull(rowConstructor.definingClass)
+        classDefByOrNull(rowConstructor.definingClass)
             ?: throw PatchException("NewX media-sheet row class was not found: ${rowConstructor.definingClass}")
 
     val labelGetters =
@@ -230,7 +230,6 @@ private fun resolveMediaSheetLabelModel(match: Match): ResolvedMediaSheetLabel {
     )
 }
 
-context(_: BytecodePatchContext)
 private fun filterMediaSheetOptions(
     method: MutableMethod,
     hiddenItems: MultiChoiceSettingDefinition,
@@ -294,9 +293,8 @@ private fun filterMediaSheetOptions(
     }
 }
 
-context(context: BytecodePatchContext)
 private fun patchMediaSheetLabelBridge(model: ResolvedMediaSheetLabel) {
-    val extensionClass = context.mutableClassDefBy(MEDIA_SHEET_FILTER_DESCRIPTOR)
+    val extensionClass = mutableClassDefBy(MEDIA_SHEET_FILTER_DESCRIPTOR)
     val bridges =
         extensionClass.methods.filter { method ->
             method.name == LABEL_BRIDGE_NAME &&

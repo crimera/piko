@@ -6,6 +6,7 @@
 
 package app.crimera.patches.newx.misc.blur
 
+import app.morphe.patcher.patch.classDefForEach
 import app.crimera.patches.newx.utils.unsupportedOnMount
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.settings.SettingReadRegisterConstraint
@@ -17,9 +18,9 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.common.requireExactlyOne
 import app.crimera.bytecode.Target
 import app.crimera.bytecode.insertHook
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.mutableClassDefBy
+import app.morphe.patcher.patch.patch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.p0Register
@@ -65,10 +66,9 @@ private fun Method.isHazeBlurEnabledRecorder(): Boolean {
     }
 }
 
-context(context: BytecodePatchContext)
 private fun resolveHazeBlurEnabledRecorder(): MutableMethod {
     val recorderClasses = mutableListOf<String>()
-    context.classDefForEach { classDef ->
+    classDefForEach { classDef ->
         if (!classDef.type.startsWith(HAZE_SCOPE)) return@classDefForEach
         if (classDef.methods.any { method -> method.implementation != null && method.isHazeBlurEnabledRecorder() }) {
             recorderClasses += classDef.type
@@ -77,7 +77,7 @@ private fun resolveHazeBlurEnabledRecorder(): MutableMethod {
     val recorderClass =
         requireExactlyOne("NewX Haze blur override recorder class", recorderClasses) { it }
     val recorderMethods =
-        context.mutableClassDefBy(recorderClass).methods.filter { method ->
+        mutableClassDefBy(recorderClass).methods.filter { method ->
             method.isHazeBlurEnabledRecorder()
         }
     return requireExactlyOne("NewX Haze blur override recorder setter", recorderMethods) {
@@ -125,7 +125,7 @@ private fun patchHazeBlurSetter(
 
 @Suppress("unused")
 val newXDisableBlurPatch =
-    bytecodePatch(
+    patch(
         name = "NewX: Disable blur effects",
         description =
             "Disables Haze blur in NewX Compose UI while preserving configured fallback tint and scrim effects.",
