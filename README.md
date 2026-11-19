@@ -71,7 +71,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.12.0-dev.3](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;194 patches total
+> **[v3.12.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.12.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;197 patches total
 <details>
 <summary>📦 NewX&nbsp;&nbsp;•&nbsp;&nbsp;52 patches</summary>
 <br>
@@ -139,7 +139,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;67 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;68 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -210,6 +210,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Save Instants](#save-instants) | Captures view-once Instants as you view them so you can re-view and download them later. |  |
 | [Save deleted messages](#save-deleted-messages) | Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them. |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
+| [Send keyboard GIFs](#send-keyboard-gifs) | Sends GIFs picked in the keyboard's GIF picker as animated images in DMs |  |
 | [Theme](#theme) | Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
 | [View DMs anonymously](#view-dms-anonymously) |  |  |
@@ -220,7 +221,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 </details>
 
 <details>
-<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
+<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;77 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -264,6 +265,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Enable debug menu for posts](#enable-debug-menu-for-posts) |  |  |
 | [Enable force HD videos](#enable-force-hd-videos) | Videos will be played in highest quality always |  |
 | [Export all activities](#export-all-activities) | Makes all app activities exportable. |  |
+| [Fix 20 photos support](#fix-20-photos-support) | Fix the issue where photos turn black in gallery for posts containing more than 4 images. This patch does not increase the limit for posting. |  |
 | [Force enable translate](#force-enable-translate) | Get translate option for all posts |  |
 | [Handle custom twitter links](#handle-custom-twitter-links) | Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the "Open by default" section in the app info! | • Custom sharing domains<br>• Include unofficial vxtwitter/fxtwitter instance links |
 | [Hide Banner](#hide-banner) | Hide new post banner |  |
@@ -304,6 +306,7 @@ To patch with Twitter/X version 11.88 to 12.4, you must include patches from ano
 | [Show poll results](#show-poll-results) | Adds an option to show poll results without voting |  |
 | [Show post source label](#show-post-source-label) | Source label will be shown only on public posts |  |
 | [Show sensitive media](#show-sensitive-media) |  |  |
+| [Spoof client version](#spoof-client-version) | Reports a newer app version to XChat's servers, which refuse old versions with "Update Required" (ClientRequiresUpdate). The rest of the app keeps reporting its real version. | • Reported version name<br>• Reported version code |
 | [Support external downloader](#support-external-downloader) |  |  |
 
 </details>

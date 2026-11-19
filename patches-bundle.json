@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-17T18:36:56",
-  "description": "## [3.12.0-dev.3](https://github.com/crimera/piko/compare/v3.12.0-dev.2...v3.12.0-dev.3) (2026-11-17)\n\n### 🐛 Bug Fixes\n\n* Declare NewX compatibility for \"Disable Play Store updates\" patch ([1feef65](https://github.com/crimera/piko/commit/1feef65e2e69ac9f331c09aacf3c263cbd3ce9bb))\n* **Twitter:** \"Custom sharing domain\" for old X fails ([ddb8d86](https://github.com/crimera/piko/commit/ddb8d8684325d15923b14374ed96c02bb3e186d3))\n\n### ✨ New Features\n\n* **Twitter:** Show a clear error message when attempting to apply old patches to NewX ([07709b2](https://github.com/crimera/piko/commit/07709b248bc6d2f461b70b9595a18b519624be98))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.3/patches-3.12.0-dev.3.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.3/patches-3.12.0-dev.3.mpp.asc",
-  "version": "3.12.0-dev.3"
+  "created_at": "2026-11-19T18:20:49",
+  "description": "## [3.12.0-dev.4](https://github.com/crimera/piko/compare/v3.12.0-dev.3...v3.12.0-dev.4) (2026-11-19)\n\n### 🐛 Bug Fixes\n\n* **Disable Play Store updates:** Show original version code in crash logs ([4dc764c](https://github.com/crimera/piko/commit/4dc764cc3068683acd6d27cfec4b84ba50e1c1c7))\n* **Twitter:** Add `Spoof client version` patch to fix XChat \"Update Required\" ([#2302](https://github.com/crimera/piko/issues/2302)) ([8d265d8](https://github.com/crimera/piko/commit/8d265d819240f0ec48ab52c06dbc17d479f10f1b))\n\n### ✨ New Features\n\n* **Instagram:** Add recommended flags ([38e0976](https://github.com/crimera/piko/commit/38e0976ddf9d60e97a2343382e69b58d9970eee2))\n* **Instagram:** Send GIFs from the keyboard's GIF picker in DMs ([#2303](https://github.com/crimera/piko/issues/2303)) ([a0d905e](https://github.com/crimera/piko/commit/a0d905e013b30dcbd9146c3f6c056b0ca6e1cf4d))\n* **Twitter:** Add `Fix 20 photos support` patch for old X ([a0110b2](https://github.com/crimera/piko/commit/a0110b2c618c0f0d3916e2392158de267f6084db))\n\n### 🔧 Improvements\n\n* **Instagram:** Organize and localize recommended flags ([560db89](https://github.com/crimera/piko/commit/560db897c5fd25acc2b536fb8f6025bc94929bb0))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.4/patches-3.12.0-dev.4.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.12.0-dev.4/patches-3.12.0-dev.4.mpp.asc",
+  "version": "3.12.0-dev.4"
 }

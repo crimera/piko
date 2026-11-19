@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.12.0-dev.3",
+  "version": "3.12.0-dev.4",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -1787,6 +1787,33 @@
               "versionCodes": {
                 "ARM64_V8A": 385811006
               },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Fix 20 photos support",
+      "description": "Fix the issue where photos turn black in gallery for posts containing more than 4 images. This patch does not increase the limit for posting.",
+      "default": true,
+      "category": "Old patches",
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -5449,6 +5476,35 @@
       "options": []
     },
     {
+      "name": "Send keyboard GIFs",
+      "description": "Sends GIFs picked in the keyboard's GIF picker as animated images in DMs",
+      "default": true,
+      "category": null,
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "452.1.0.53.64",
+              "versionCodes": {
+                "ARM64_V8A": 385811006
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Share Tweet as Image",
       "description": "Share tweets as rendered image. Requires X 11.0.0-release.0 or higher.",
       "default": true,
@@ -5582,6 +5638,52 @@
         }
       ],
       "options": []
+    },
+    {
+      "name": "Spoof client version",
+      "description": "Reports a newer app version to XChat's servers, which refuse old versions with \"Update Required\" (ClientRequiresUpdate). The rest of the app keeps reporting its real version.",
+      "default": true,
+      "category": "Old patches",
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "formFactor": "MOBILE",
+          "targets": [
+            {
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": [
+        {
+          "key": "spoofedVersion",
+          "title": "Reported version name",
+          "description": "Version name XChat sees instead of the app's own.",
+          "required": true,
+          "type": "kotlin.String",
+          "default": "12.44.0-prod.01",
+          "values": null
+        },
+        {
+          "key": "spoofedVersionCode",
+          "title": "Reported version code",
+          "description": "Version code XChat sees. It must belong to the reported version name.",
+          "required": true,
+          "type": "kotlin.Int",
+          "default": 312440001,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Support external downloader",

@@ -1,3 +1,20 @@
+## [3.12.0-dev.4](https://github.com/crimera/piko/compare/v3.12.0-dev.3...v3.12.0-dev.4) (2026-11-19)
+
+### 🐛 Bug Fixes
+
+* **Disable Play Store updates:** Show original version code in crash logs ([4dc764c](https://github.com/crimera/piko/commit/4dc764cc3068683acd6d27cfec4b84ba50e1c1c7))
+* **Twitter:** Add `Spoof client version` patch to fix XChat "Update Required" ([#2302](https://github.com/crimera/piko/issues/2302)) ([8d265d8](https://github.com/crimera/piko/commit/8d265d819240f0ec48ab52c06dbc17d479f10f1b))
+
+### ✨ New Features
+
+* **Instagram:** Add recommended flags ([38e0976](https://github.com/crimera/piko/commit/38e0976ddf9d60e97a2343382e69b58d9970eee2))
+* **Instagram:** Send GIFs from the keyboard's GIF picker in DMs ([#2303](https://github.com/crimera/piko/issues/2303)) ([a0d905e](https://github.com/crimera/piko/commit/a0d905e013b30dcbd9146c3f6c056b0ca6e1cf4d))
+* **Twitter:** Add `Fix 20 photos support` patch for old X ([a0110b2](https://github.com/crimera/piko/commit/a0110b2c618c0f0d3916e2392158de267f6084db))
+
+### 🔧 Improvements
+
+* **Instagram:** Organize and localize recommended flags ([560db89](https://github.com/crimera/piko/commit/560db897c5fd25acc2b536fb8f6025bc94929bb0))
+
 ## [3.12.0-dev.3](https://github.com/crimera/piko/compare/v3.12.0-dev.2...v3.12.0-dev.3) (2026-11-17)
 
 ### 🐛 Bug Fixes
