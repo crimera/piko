@@ -12,6 +12,7 @@ import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
@@ -20,14 +21,13 @@ import app.morphe.patcher.patch.packageMetadata
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.string
+import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.returnEarly
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val EXTENSION_CLASS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/clientversion/SpoofClientVersionPatch;"
-
-private val GRAPHQL_OPERATIONS = Regex("[A-Za-z]+")
 
 private object GraphQLOperationsFingerprint : Fingerprint(
     definingClass = "Lcom/x/android/xchat/",
@@ -36,6 +36,7 @@ private object GraphQLOperationsFingerprint : Fingerprint(
     parameters = listOf(),
 )
 
+// XChat requests go through the legacy header builder (com.twitter.network.h1).
 private object LegacyClientHeaderBuilderFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/network/",
     returnType = "V",
@@ -87,45 +88,56 @@ val spoofClientVersionPatch =
 
             // 2. Retrieve XChat's GraphQL operations (sending messages, inbox, keys…) whose paths don't say "xchat".
             val operations = sortedSetOf<String>()
+            val operationRegex = Regex("[A-Za-z]+")
             GraphQLOperationsFingerprint.matchAll().forEach {
                 // All matched methods contain exactly two instructions: const-string and return-object.
                 val operation = ((it.originalMethod.implementation?.instructions?.first() as ReferenceInstruction).reference as StringReference).string
-                if (!operation.matches(GRAPHQL_OPERATIONS)) throw PatchException("Unexpected operation name $operation")
+                if (!operation.matches(operationRegex)) throw PatchException("Unexpected operation name $operation")
                 operations.add(operation)
             }
             if ("SendMessageCreateMutation" !in operations) throw PatchException("XChat operations not found ($operations)")
             Fingerprint(definingClass = EXTENSION_CLASS_DESCRIPTOR, name = "xchatOperations")
                 .method.returnEarly(operations.joinToString(","))
 
-            // 3. Legacy client headers: XChat requests that go through the legacy stack
-            //    get the reported version too, every other request keeps the real one.
+            // 3. Spoof client version only for XChat requests.
             LegacyClientHeaderBuilderFingerprint.let {
                 it.method.apply {
                     // Insert from the bottom up so earlier indices stay valid.
+
+                    // "X-Twitter-Client-Version" header
                     val versionIndex = it.instructionMatches.last().index
+                    val isXChatRegister = findFreeRegister(versionIndex + 1)
                     val versionRegister = it.instructionMatches.last().getInstruction<OneRegisterInstruction>().registerA
-                    addInstructions(
+                    addInstructionsWithLabels(
                         versionIndex + 1,
                         """
-                        invoke-static {v$versionRegister}, $EXTENSION_CLASS_DESCRIPTOR->legacyVersion(Ljava/lang/String;)Ljava/lang/String;
-                        move-result-object v$versionRegister
+                        if-eqz v$isXChatRegister, :not_xchat
+                        const-string v$versionRegister, "$version"
+                        :not_xchat
+                        nop
                         """
                     )
 
+                    // "User-Agent" header
                     val userAgentMoveResultIndex = it.instructionMatches[1].index + 1
                     val userAgentRegister = getInstruction<OneRegisterInstruction>(userAgentMoveResultIndex).registerA
-                    addInstructions(
+                    addInstructionsWithLabels(
                         userAgentMoveResultIndex + 1,
                         """
-                        invoke-static {v$userAgentRegister}, $EXTENSION_CLASS_DESCRIPTOR->legacyUserAgent(Ljava/lang/String;)Ljava/lang/String;
+                        if-eqz v$isXChatRegister, :not_xchat
+                        invoke-static {v$userAgentRegister}, $EXTENSION_CLASS_DESCRIPTOR->userAgent(Ljava/lang/String;)Ljava/lang/String;
                         move-result-object v$userAgentRegister
+                        :not_xchat
+                        nop
                         """
                     )
 
-                    val uriRegister = implementation!!.registerCount - parameterTypes.size
                     addInstructions(
                         0,
-                        "invoke-static {v$uriRegister}, $EXTENSION_CLASS_DESCRIPTOR->onRequest(Ljava/net/URI;)V",
+                        """
+                        invoke-static {p1}, $EXTENSION_CLASS_DESCRIPTOR->isXChatRequest(Ljava/net/URI;)Z
+                        move-result v$isXChatRegister
+                        """
                     )
                 }
             }

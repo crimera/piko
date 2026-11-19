@@ -19,18 +19,11 @@ public class SpoofClientVersionPatch {
 
     // The patch replaces these values with its options.
     private static String version() {
-        return "12.41.0-prod.01";
+        return "12.44.0-prod.01";
     }
 
     private static int versionCode() {
-        return 312410001;
-    }
-
-    private static final ThreadLocal<URI> REQUEST = new ThreadLocal<>();
-
-    /** Injection point: the legacy stack is about to add its client headers for this request. */
-    public static void onRequest(URI uri) {
-        REQUEST.set(uri);
+        return 312440001;
     }
 
     // The patch fills this with every X Chat GraphQL operation name of the app (comma separated).
@@ -40,8 +33,8 @@ public class SpoofClientVersionPatch {
 
     private static Set<String> operations;
 
-    private static boolean isXChatRequest() {
-        URI uri = REQUEST.get();
+    /** Injection point */
+    public static boolean isXChatRequest(URI uri) {
         String path = uri == null ? null : uri.getPath();
         if (path == null) return false;
         if (path.toLowerCase(Locale.ROOT).contains("xchat")) return true;
@@ -52,18 +45,8 @@ public class SpoofClientVersionPatch {
         return path.contains("/graphql/") && operations.contains(path.substring(slash + 1));
     }
 
-    /** Injection point: X-Twitter-Client-Version of the legacy stack. */
-    public static String legacyVersion(String version) {
-        return isXChatRequest() ? version() : version;
-    }
-
-    /** Injection point: User-Agent of the legacy stack. */
-    public static String legacyUserAgent(String userAgent) {
-        return isXChatRequest() ? userAgent(userAgent) : userAgent;
-    }
-
-    /** Replaces the version name and version code in a legacy user agent. */
-    private static String userAgent(String userAgent) {
+    /** Injection point: Replaces the version name and version code in a user agent. */
+    public static String userAgent(String userAgent) {
         if (userAgent == null) return null;
         return USER_AGENT_VERSION.matcher(userAgent)
             .replaceFirst("TwitterAndroid/" + version() + " (" + versionCode() + "-");
