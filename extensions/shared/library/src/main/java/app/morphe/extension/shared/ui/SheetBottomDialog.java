@@ -304,6 +304,11 @@ public class SheetBottomDialog {
         }
 
         @Override
+        public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
+            return isDismissing || super.dispatchTouchEvent(event);
+        }
+
+        @Override
         public void dismiss() {
             if (isDismissing) return;
             isDismissing = true;
