@@ -14,6 +14,8 @@ import android.app.PendingIntent;
 import android.database.Cursor;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -32,6 +34,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,24 +44,33 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
 
-public class MediaDownloader {
+public final class MediaDownloader {
     private static final String CHANNEL_ID = "media_download_channel";
     private static final int CONNECT_TIMEOUT_MS = 15_000;
     private static final int READ_TIMEOUT_MS = 30_000;
-    // Separate downloader instances must reserve names before another request can choose them.
+    // Concurrent batches must reserve names before another request can choose them.
     private static final Object CREATE_DOCUMENT_LOCK = new Object();
     private static final Set<String> ACTIVE_DESTINATIONS = new HashSet<>();
+    private static MediaDownloader shared;
+
     private final Context context;
     private final NotificationManager notificationManager;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final AtomicInteger notificationIds = new AtomicInteger((int) System.currentTimeMillis());
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    public MediaDownloader(Context context) {
+    public static synchronized MediaDownloader shared(Context context) {
+        if (shared == null) shared = new MediaDownloader(context);
+        return shared;
+    }
+
+    private MediaDownloader(Context context) {
         Context resolvedContext = context != null ? context : Utils.getContext();
         if (resolvedContext == null) {
             throw new IllegalStateException("Download context is unavailable");
@@ -84,7 +96,7 @@ public class MediaDownloader {
         enqueueBatch(Collections.singletonList(request));
     }
 
-    /** Saves the whole batch before starting the next request on this downloader. */
+    /** Saves the requests in order. Same names in a batch are numbered apart before the conflict policy applies, so a rerun meets the same names. */
     public void enqueueBatch(List<DownloadRequest> requests) {
         List<DownloadRequest> batch = new ArrayList<>(requests);
         if (batch.isEmpty()) return;
@@ -93,6 +105,13 @@ public class MediaDownloader {
             return;
         }
         executor.execute(() -> {
+            Map<String, Set<String>> claimedBySubFolder = new HashMap<>();
+            for (DownloadRequest request : batch) {
+                if (request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME) continue;
+                Set<String> claimed = claimedBySubFolder.computeIfAbsent(request.subFolder, subFolder -> new HashSet<>());
+                request.fileName = DownloadFileNames.findAvailable(request.fileName, claimed);
+                claimed.add(request.fileName);
+            }
             for (DownloadRequest request : batch) {
                 runDownloadTask(request);
             }
@@ -100,7 +119,7 @@ public class MediaDownloader {
     }
 
     private void runDownloadTask(DownloadRequest request) {
-        int notificationId = (int) System.currentTimeMillis();
+        int notificationId = notificationIds.incrementAndGet();
         Uri outputDocumentUri = null;
         boolean downloadCompleted = false;
         boolean replacing = false;
@@ -164,7 +183,9 @@ public class MediaDownloader {
             }
             downloadCompleted = true;
 
-            final int finalNotificationId = notificationId;
+            // A new notification, since Android silently drops updates over its rate limit.
+            notificationManager.cancel(notificationId);
+            final int finalNotificationId = notificationIds.incrementAndGet();
             final String finalFileName = request.fileName;
             final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
             // Built here and not in the posted task, it queries the provider for the mime type.
@@ -255,13 +276,22 @@ public class MediaDownloader {
     private void downloadSource(DownloadRequest.Source source, DownloadRequest request, Uri outputUri,
                                 Notification.Builder builder, int notificationId, boolean retry) throws Exception {
         if (source.audioUrl == null && request.metadata == null) {
-            // Plain downloads also support providers offering write-only streams, not seekable files.
-            OutputStream stream = retry
-                    ? context.getContentResolver().openOutputStream(outputUri, "wt")
-                    : context.getContentResolver().openOutputStream(outputUri);
-            if (stream == null) throw new IOException("Could not open download file");
-            try (OutputStream output = new BufferedOutputStream(stream)) {
-                download(source.url, output, builder, notificationId);
+            File cover = retry ? null : encodeFirstFrame(request, builder, notificationId);
+            try {
+                // Plain downloads also support providers offering write-only streams, not seekable files.
+                OutputStream stream = retry
+                        ? context.getContentResolver().openOutputStream(outputUri, "wt")
+                        : context.getContentResolver().openOutputStream(outputUri);
+                if (stream == null) throw new IOException("Could not open download file");
+                try (OutputStream output = new BufferedOutputStream(stream)) {
+                    if (cover != null) {
+                        Files.copy(cover.toPath(), output);
+                    } else {
+                        download(source.url, output, builder, notificationId);
+                    }
+                }
+            } finally {
+                if (cover != null) cover.delete();
             }
             return;
         }
@@ -323,8 +353,45 @@ public class MediaDownloader {
         output.flush();
     }
 
+    /** The request's first-frame cover as a cache JPEG the caller deletes, or null to save {@code url} instead. */
+    private File encodeFirstFrame(DownloadRequest request, Notification.Builder builder, int notificationId) {
+        if (request.firstFrameVideoUrl == null) return null;
+        File video = null;
+        File picture = null;
+        Bitmap frame = null;
+        boolean encoded = false;
+        try {
+            video = File.createTempFile("piko-cover-", ".mp4", context.getCacheDir());
+            try (OutputStream cached = new FileOutputStream(video)) {
+                download(request.firstFrameVideoUrl, cached, builder, notificationId);
+            }
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            try {
+                retriever.setDataSource(video.getAbsolutePath());
+                frame = retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST);
+            } finally {
+                retriever.release();
+            }
+            if (frame == null || (long) frame.getWidth() * frame.getHeight() <= request.firstFrameMinPixels) {
+                return null;
+            }
+            picture = File.createTempFile("piko-cover-", ".jpg", context.getCacheDir());
+            try (OutputStream jpeg = new FileOutputStream(picture)) {
+                encoded = frame.compress(Bitmap.CompressFormat.JPEG, 95, jpeg);
+            }
+            return encoded ? picture : null;
+        } catch (Exception | LinkageError | OutOfMemoryError e) {
+            PikoUtils.logger(e);
+            return null;
+        } finally {
+            if (frame != null) frame.recycle();
+            if (video != null) video.delete();
+            if (!encoded && picture != null) picture.delete();
+        }
+    }
+
     /** Fetches {@code url} into {@code output}, reporting progress on the notification. */
-    protected void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
+    private void download(String url, OutputStream output, Notification.Builder builder, int notificationId)
             throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         try {
@@ -433,7 +500,7 @@ public class MediaDownloader {
     }
 
     private Uri getOrCreateDirectory(Uri parentUri, String folderName) throws Exception {
-        Uri existingDirectoryUri = findChildDocument(parentUri, folderName, DocumentsContract.Document.MIME_TYPE_DIR);
+        Uri existingDirectoryUri = findChildDirectory(parentUri, folderName);
         if (existingDirectoryUri != null) {
             return existingDirectoryUri;
         }
@@ -473,7 +540,7 @@ public class MediaDownloader {
         return children;
     }
 
-    private Uri findChildDocument(Uri parentUri, String displayName, String mimeType) {
+    private Uri findChildDirectory(Uri parentUri, String displayName) throws IOException {
         Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
                 parentUri,
                 DocumentsContract.getDocumentId(parentUri)
@@ -485,22 +552,17 @@ public class MediaDownloader {
         };
 
         try (Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null)) {
-            if (cursor == null) {
-                return null;
-            }
+            if (cursor == null) throw new IOException("Could not read download folder");
 
             while (cursor.moveToNext()) {
                 String childDocumentId = cursor.getString(0);
                 String childDisplayName = cursor.getString(1);
                 String childMimeType = cursor.getString(2);
-                boolean nameMatches = displayName.equals(childDisplayName);
-                boolean mimeTypeMatches = mimeType == null || mimeType.equals(childMimeType);
-                if (nameMatches && mimeTypeMatches) {
+                if (displayName.equals(childDisplayName)
+                        && DocumentsContract.Document.MIME_TYPE_DIR.equals(childMimeType)) {
                     return DocumentsContract.buildDocumentUriUsingTree(parentUri, childDocumentId);
                 }
             }
-        } catch (Exception e) {
-            PikoUtils.logger(e);
         }
 
         return null;
