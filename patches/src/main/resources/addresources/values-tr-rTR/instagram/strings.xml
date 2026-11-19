@@ -162,6 +162,8 @@
     <string name="piko_category_dm">Mesajlar</string>
     <string name="piko_disable_disappearing_messages_gesture">Kaybolan mesajlar için kaydırma hareketini devre dışı bırak</string>
     <string name="piko_disable_disappearing_messages_gesture_desc">Sohbette yukarı kaydırma hareketinin kaybolan mesaj özelliğini etkinleştirmesini engeller</string>
+    <string name="piko_send_keyboard_gifs">Klavye GIF’leri gönder</string>
+    <string name="piko_send_keyboard_gifs_desc">\"GIF\'leri bulmak ve göndermek için çıkartma simgesine dokunun\" mesajını göstermek yerine, klavyenin GIF seçicisinden seçilen GIF\'leri hareketli görüntüler olarak gönderir</string>
     <string name="piko_unlimited_replays">Kaybolan medyaları kalıcı yap</string>
     <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
     <string name="piko_ephemeral_caption">Geçici medyanın nasıl alındığını gösterin</string>
@@ -379,6 +381,16 @@
     <string name="piko_category_rec_flags">Önerilen bayraklar</string>
     <string name="piko_category_rec_flags_desc">Topluluk tarafından önerilen geliştirici işaretleri</string>
     <string name="piko_rec_flags_read_error">Önbelleğe alınmış bayraklar dosyasını okuma başarısız oldu</string>
+    <string name="piko_rec_flags_modified">Değiştirilmiş bayraklar</string>
+    <string name="piko_rec_flags_category_stories">Hikayeler ve öne çıkanlar</string>
+    <string name="piko_rec_flags_category_reels">Reels ve videolar</string>
+    <string name="piko_rec_flags_category_feed">Akış ve Keşfet</string>
+    <string name="piko_rec_flags_category_messages">DM\'ler ve notlar</string>
+    <string name="piko_rec_flags_category_profile">Profil ve navigasyon</string>
+    <string name="piko_rec_flags_category_quality">Kalite ve yüklemeler</string>
+    <string name="piko_rec_flags_category_other">Diğer</string>
+    <string name="piko_rec_flags_download_hint">Önerilen bayrakları indirerek bunları inceleyin ve yapılandırın. Başlamak için “Bayrakları yenile” seçeneğine dokunun.</string>
+    <string name="piko_rec_flags_invalid_number">-9223372036854775808 ile 9223372036854775807 arasında bir tam sayı girin</string>
     <string name="piko_rec_flags_no_file">Önerilen bayraklar dosyası bulunamadı</string>
     <string name="piko_rec_flags_refresh_file">Bayrakları yenile</string>
     <string name="piko_rec_flags_last_modified_at">Son değiştirilme tarihi: %s</string>
@@ -487,4 +499,22 @@
     <string name="piko_media_activity">aktivite</string>
     <string name="piko_patch_theme">Tema</string>
     <string name="piko_patch_settings">Ayar ekle</string>
+    <!-- Recommended flags -->
+    <string name="piko_rec_flag_73245_name" formatted="false">"Hikayelerde bir şeye tıklandığında görünen, siyah arka planlı düğme"</string>
+    <string name="piko_rec_flag_118413_name" formatted="false">"Hikayeyi paylaştıktan sonra düzenle"</string>
+    <string name="piko_rec_flag_118413_desc" formatted="false">"Değişiklik yapmak için 15 dakikalık süre sınırı vardır."</string>
+    <string name="piko_rec_flag_85030_name" formatted="false">"Hikayeler için yeni yazı tipleri ve animasyonlar"</string>
+    <string name="piko_rec_flag_125004_name" formatted="false">"Hikayeler için yeni Instagram Plus yazı tipleri"</string>
+    <string name="piko_rec_flag_125004_desc" formatted="false">"Instagram Plus özelliklerine erişmek için ilgili seçeneği etkinleştirdiğinizden emin olun."</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_name" formatted="false">"Instagram Plus ek satışlarını göster"</string>
+    <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_desc" formatted="false">"Instagram Plus yükseltme uyarılarını ve tanıtım ipuçlarını gizlemek için devre dışı bırakın"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_name" formatted="false">"Seçilmiş Instagram Plus özellikleri ve erişim noktaları"</string>
+    <string name="piko_rec_flag_93842_name" formatted="false">"Yakınlaştırma animasyonunu keşfedin"</string>
+    <string name="piko_rec_flag_45023_0_name" formatted="false">"QR kodu paylaşımı"</string>
+    <string name="piko_rec_flag_75196_8_desc" formatted="false">"DM gelen kutusundaki önerileri gizlemek için değeri 9000000000 olarak ayarlayın"</string>
+    <string name="piko_rec_flag_126024_12_name" formatted="false">"Yüzen sekme çubuğu"</string>
+    <string name="piko_rec_flag_65057_0_name" formatted="false">"Haritalar notları"</string>
+    <string name="piko_rec_flag_83371_10_name" formatted="false">"Oturum başına otomatik kaydırma"</string>
+    <string name="piko_rec_flag_83371_10_desc" formatted="false">"Instagram her kapatıldığında bu özelliğin kapalı konuma sıfırlanmaması ve otomatik kaydırma özelliğinin bıraktığınız durumda kalması için bu seçeneği devre dışı bırakın."</string>
+    <string name="piko_rec_flag_group_fc4d723f6d7a1bf010a75375b61a3934_name" formatted="false">"Yüksek kaliteli yüklemeler"</string>
 </resources>
