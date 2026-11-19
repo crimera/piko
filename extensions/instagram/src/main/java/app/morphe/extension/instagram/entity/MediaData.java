@@ -153,7 +153,7 @@ public class MediaData extends Entity {
     private String getMediaExtension(MediaType mediaType) throws Exception {
         String imageExtension = ".jpg";
         String videoExtension = ".mp4";
-        String audioExtension = ".mp3";
+        String audioExtension = ".m4a";
 
         if (mediaType.equals(MediaType.ANY)) {
             if (this.isVideo()) {

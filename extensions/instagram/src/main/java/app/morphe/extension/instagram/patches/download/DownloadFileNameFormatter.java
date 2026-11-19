@@ -200,6 +200,10 @@ public final class DownloadFileNameFormatter {
         return character == '_' || character == '-' || character == '.' || character == ' ';
     }
 
+    static String safeFilename(String name, String extension) {
+        return limitFilenameLength(sanitize(name), extension);
+    }
+
     private static String sanitize(String filename) {
         return TRAILING_DOT_OR_SPACE.matcher(
                 INVALID_FILENAME_CHARACTER.matcher(filename).replaceAll("_")
