@@ -318,10 +318,9 @@ To build Piko Patches, follow the [Morphe documentation](https://github.com/Morp
 
 Thank you for considering contributing to Piko Patches.
 
-- If you plan to add a new feature, it is recommended to open an issue to discuss it with the
-maintainers of Piko beforehand. This will help you determine whether your feature is acceptable
-and whether it is worth your time to implement it. (In the issue, please clearly state that you
-intend to work on this feature.)
+- If you plan to add a new feature, it is recommended to open a [discussion](https://github.com/crimera/piko/discussions)
+to discuss the feature with the maintainers of Piko beforehand. This will help you determine whether
+your feature is acceptable and whether it is worth your time to implement it.
 - Development happens on the `dev` branch. Create your branch from `dev`. Submit a pull request to `dev`.
 - Our team will review your pull request and provide feedback. Once your pull request is approved,
 it will be merged into the `dev` branch and will be included in the next release of patches.
