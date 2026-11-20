@@ -21,6 +21,7 @@ import app.crimera.patches.instagram.misc.dm.hideChatCallButtonsPatch
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.originalsigners.originalSignersPatch
 import app.crimera.patches.instagram.misc.notification.fixDirectNotificationActionCrashPatch
 import app.crimera.patches.instagram.misc.notification.fixNotificationRegistrationCrashPatch
 import app.crimera.patches.instagram.misc.userProfile.preserveUnknownFriendshipStatusPatch
@@ -103,6 +104,7 @@ val settingsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(
             sharedExtensionPatch,
+            originalSignersPatch,
             settingsResourcePatch,
             nativeSettingsSwitchStylePatch,
             whitehatIndicatorPatch,
