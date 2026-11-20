@@ -24,6 +24,7 @@ import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.utils.Pref;
 
 import com.instagram.common.session.UserSession;
 
@@ -40,7 +41,9 @@ public class MoreOptionsOnPostPatch {
             options.add(str("piko_copy_post_description"));
             options.add(str("piko_copy_post_owner_username"));
             options.add(str("piko_copy_post_owner_fullname"));
-            options.add(str("piko_download_options"));
+            if (Pref.enableDownload()) {
+                options.add(str("piko_download_options"));
+            }
             CharSequence[] items = options.toArray(new CharSequence[0]);
 
             dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -62,7 +65,7 @@ public class MoreOptionsOnPostPatch {
                             UserData userData = mediaData.getUserData();
                             stringToCopy = userData.getFullName();
 
-                        } else if (selectedOption.equals(str("piko_download_options"))) {
+                        } else if (Pref.enableDownload() && selectedOption.equals(str("piko_download_options"))) {
                             DownloadUtils.showDownloadOptions(context, userSession, mediaObject, currentMediaIndex);
 
                         }

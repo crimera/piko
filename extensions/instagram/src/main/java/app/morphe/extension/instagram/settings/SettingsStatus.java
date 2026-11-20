@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.settings;
 
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import java.util.TreeMap;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
@@ -237,7 +238,11 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( moreOptionsOnProfile || moreOptionsOnPost || changeLikeAnimation || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || resumeReelsAfterScrolling || followBackIndicator || followListNonFollowerBadge || customFont);}
+    public static boolean miscSection() {
+        return moreOptionsOnPost || changeLikeAnimation || removeEmptyBottomSpace || copyCommentButton
+                || improveImageViewing || resumeReelsAfterScrolling || followBackIndicator || followListNonFollowerBadge
+                || customFont || MaterialYouTheme.isAmoledAvailable() || MaterialYouTheme.isMaterialYouAvailable();
+    }
 
     //Font section.
     public static boolean customFont = false;

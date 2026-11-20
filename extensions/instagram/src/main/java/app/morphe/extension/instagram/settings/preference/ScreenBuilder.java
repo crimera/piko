@@ -858,10 +858,31 @@ public class ScreenBuilder {
     }
 
     public void buildDownloadSection() {
-        if (!SettingsStatus.downloadSection()) return;
+        if (SettingsStatus.downloadMedia || SettingsStatus.saveMediaCommentButton) {
+            addInternalDownloadPreferences();
+        }
+        if (!SettingsStatus.downloadWithExternalDownloader) return;
 
-        // PreferenceCategory category= addCategory(str("piko_category_download_media"));
+        addPreference(
+                helper.switchPreference(
+                        str("piko_download_with_external_downloader"),
+                        "",
+                        Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
+                )
+        );
+        addPreference(
+                helper.availableWhen(
+                        helper.editTextPreference(
+                                str("piko_external_downloader_package_name"),
+                                Pref.externalDownloaderPackageName(),
+                                Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+                        ),
+                        () -> SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)
+                )
+        );
+    }
 
+    private void addInternalDownloadPreferences() {
         addPreference(
                 helper.switchPreference(
                         str("piko_enable_download"),
@@ -889,13 +910,15 @@ public class ScreenBuilder {
             );
         }
 
-        addPreference(
-                helper.switchPreference(
-                        str("piko_enable_direct_download"),
-                        str("piko_enable_direct_download_desc"),
-                        Settings.ENABLE_DIRECT_DOWNLOAD
-                )
-        );
+        if (SettingsStatus.downloadMedia) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_enable_direct_download"),
+                            str("piko_enable_direct_download_desc"),
+                            Settings.ENABLE_DIRECT_DOWNLOAD
+                    )
+            );
+        }
 
         addPreference(
                 helper.switchPreference(
@@ -956,26 +979,6 @@ public class ScreenBuilder {
                 )
         );
 
-        if(SettingsStatus.downloadWithExternalDownloader) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_download_with_external_downloader"),
-                            "",
-                            Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
-                    )
-            );
-
-            addPreference(
-                    helper.availableWhen(
-                            helper.editTextPreference(
-                                    str("piko_external_downloader_package_name"),
-                                    Pref.externalDownloaderPackageName(),
-                                    Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
-                            ),
-                            () -> SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)
-                    )
-            );
-        }
     }
 
     public void buildActionBarSection() {
