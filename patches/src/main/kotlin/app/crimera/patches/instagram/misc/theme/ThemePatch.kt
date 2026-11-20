@@ -42,6 +42,7 @@ val themePatch =
         )
 
         execute {
+            retargetThemeAttributes()
             val originalApi31Base = captureApi31Base()
 
             forceWhiteOnMediaChrome()
@@ -61,6 +62,13 @@ val themePatch =
 
             enableSettings("theme")
             installComposePrismBlackRuntime(legacyAmoled = amoled == true)
+            // Component hooks are optional: a newer Instagram that moves one of them keeps the rest.
+            listOf(
+                "secondary button fill" to ::installSecondaryButtonTint,
+                "story ring and note bubble colours" to ::installStoryRingAndNoteHooks,
+            ).forEach { (name, install) ->
+                runCatching { install() }.onFailure { println("WARNING: Material You $name not themed: ${it.message}") }
+            }
             installSystemDefaultUiModeHook()
             installThemeLifecycleHooks()
             installNativeThemeModeSync()

@@ -51,6 +51,8 @@ private const val COMPOSE_PRISM_REFRESH_METHOD_NAME = "pikoRefreshPrismPalette"
 private const val COMPOSE_SEARCH_ROW_BACKGROUND_RESOLVER =
     "$MATERIAL_YOU_THEME_CLASS->resolveComposeSearchRowBackground(J)J"
 private const val PURE_BLACK_ARGB = 0xff000000L
+private const val COMPOSE_PALETTE_REMAP =
+    "Lapp/morphe/extension/instagram/theme/MaterialYouComposePalette;->remap(Ljava/lang/Object;I)V"
 private const val EXPECTED_COMPOSE_PRISM_PALETTE_HOLDERS = 2
 private const val SEARCH_ROW_SEMANTICS_ID = "search_row"
 
@@ -155,6 +157,10 @@ internal fun createComposePrismColorBridge(
                         "iput-wide v0, v2, $backgroundField".toInstruction(),
                     )
                 }
+                // Material You: theme the rest of the palette (buttons, fields, secondary text).
+                addInstruction(
+                    "invoke-static {v2, v5}, $COMPOSE_PALETTE_REMAP".toInstruction(),
+                )
             }
             addLabel("piko_compose_prism_return")
             addInstruction("return-void".toInstruction())
