@@ -7,8 +7,11 @@
 package app.crimera.patches.instagram.links.distractionFree
 
 import app.crimera.patches.instagram.utils.booleanStateField
+import app.crimera.patches.instagram.utils.storyComponentType
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.checkCast
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
@@ -25,25 +28,16 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 internal fun hideStoryComments(preferenceCall: String) {
     for (marker in listOf("StoryCommentButtonViewComponent", "StoryCommentButtonMimicAdsViewComponent")) {
-        val component = Fingerprint(
-            returnType = "Ljava/lang/String;",
-            parameters = emptyList(),
-            filters = listOf(string(marker)),
-        ).originalMethod.definingClass
         val binding = Fingerprint(
-            definingClass = component,
             returnType = "V",
-            parameters = listOf("Ljava/lang/Object;"),
-            filters = listOf(fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN)),
+            parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
+            filters = listOf(
+                checkCast(storyComponentType(marker)),
+                fieldAccess(type = "Z", opcode = Opcode.IGET_BOOLEAN, location = MatchAfterWithin(5)),
+            ),
         )
-        val read = binding.instructionMatches.single()
+        val read = binding.instructionMatches.last()
         val registers = read.instruction.registersUsed
-        if (registers.size != 2 || binding.method.implementation!!.instructions.count {
-                it.opcode == Opcode.IGET_BOOLEAN
-            } != 1
-        ) {
-            throw PatchException("Expected one story comment button visibility field: $marker")
-        }
         val visible = registers[0]
         // Keep native hidden states; otherwise use the native hide path when disabled.
         binding.method.addInstructionsWithLabels(
@@ -58,29 +52,25 @@ internal fun hideStoryComments(preferenceCall: String) {
         )
     }
 
-    val display = Fingerprint(
-        returnType = "Ljava/lang/String;",
-        parameters = emptyList(),
-        filters = listOf(string("StoryCommentsDisplayViewComponent")),
-    ).originalMethod.definingClass
+    val display = storyComponentType("StoryCommentsDisplayViewComponent")
     val binding = Fingerprint(
-        definingClass = display,
         returnType = "V",
         parameters = listOf("Ljava/lang/Object;"),
         filters = listOf(
+            checkCast(display),
             opcode(Opcode.INSTANCE_OF),
             opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
-            methodCall(opcode = Opcode.INVOKE_DIRECT, parameters = emptyList(), returnType = "V", location = MatchAfterImmediately()),
+            methodCall(definingClass = display, opcode = Opcode.INVOKE_STATIC, parameters = listOf(display), returnType = "V", location = MatchAfterImmediately()),
             opcode(Opcode.RETURN_VOID, location = MatchAfterImmediately()),
         ),
     )
-    val hidden = binding.instructionMatches[1].instruction.registersUsed.singleOrNull()
+    val hidden = binding.instructionMatches[2].instruction.registersUsed.singleOrNull()
         ?: throw PatchException("Expected one story comment display state register")
-    if (binding.instructionMatches[0].instruction.registersUsed.firstOrNull() != hidden) {
+    if (binding.instructionMatches[1].instruction.registersUsed.firstOrNull() != hidden) {
         throw PatchException("Unexpected story comment display visibility branch")
     }
     // The native hidden-state handler clears every comment provider, including recycled views.
-    val branch = binding.instructionMatches[1]
+    val branch = binding.instructionMatches[2]
     binding.method.addInstructionsWithLabels(
         branch.index,
         """
@@ -101,29 +91,26 @@ private fun hideStoryCommentPreviews(preferenceCall: String) {
         parameters = emptyList(),
         filters = listOf(string("story_comments")),
     ).originalMethod
-    // These two suppliers feed story previews, including sponsored comments. Captions
-    // are built separately, so keep the shared caption/preview renderer running.
-    val suppliers = Fingerprint(
+    // The regular and sponsored preview builders now get their comments from this
+    // shared supplier. Captions are built separately by the same renderer.
+    val supplier = Fingerprint(
         returnType = "Ljava/util/List;",
         parameters = listOf(commentsGetter.definingClass),
         filters = listOf(methodCall(reference = commentsGetter)),
-    ).matchAll(2..2)
-    suppliers.forEach { match ->
-        val method = match.method
-        val scratch = method.findFreeRegister(0)
-        method.addInstructionsWithLabels(
-            0,
-            """
-            $preferenceCall
-            move-result v$scratch
-            if-eqz v$scratch, :original
-            invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
-            move-result-object v$scratch
-            return-object v$scratch
-            """.trimIndent(),
-            ExternalLabel("original", method.getInstruction(0)),
-        )
-    }
+    ).method
+    val scratch = supplier.findFreeRegister(0)
+    supplier.addInstructionsWithLabels(
+        0,
+        """
+        $preferenceCall
+        move-result v$scratch
+        if-eqz v$scratch, :original
+        invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
+        move-result-object v$scratch
+        return-object v$scratch
+        """.trimIndent(),
+        ExternalLabel("original", supplier.getInstruction(0)),
+    )
 
     val marker = "ViewState(showCommentButton="
     val buttonField = booleanStateField(marker, marker)

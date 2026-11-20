@@ -51,22 +51,6 @@ internal object StorySeenUriBuilderFingerprint : Fingerprint(
 )
 
 /**
- * Whether no stories are pending to be marked as seen.
- * Must be matched against with [StorySeenUriBuilderFingerprint].
- */
-internal object PendingStoriesEmptyFingerprint : Fingerprint(
-    returnType = "Z",
-    parameters = listOf(),
-    filters = List(3) {
-        listOf(
-            methodCall(name = "isEmpty", parameters = listOf(), returnType = "Z"),
-            opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
-            opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
-        )
-    }.flatten() + opcode(Opcode.RETURN),
-)
-
-/**
  * Story request run method, where the completed request result is read.
  */
 internal fun storySeenRequestRunFingerprint(requestType: String) = Fingerprint(
@@ -107,7 +91,7 @@ internal fun storySeenScheduleFingerprint(pendingSeenClass: String, requestBuild
 /**
  * Marks the selected story as seen.
  */
-internal object ConsumedStoryFingerprint : Fingerprint(
+internal fun consumedStoryFingerprint(pendingSeenClass: String) = Fingerprint(
     returnType = "V",
     parameters = listOf(REEL_ITEM_CLASS, "L"),
     filters = listOf(
@@ -120,41 +104,39 @@ internal object ConsumedStoryFingerprint : Fingerprint(
         methodCall(parameters = listOf(USER_SESSION_CLASS, REEL_ITEM_CLASS), returnType = "I"),
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
         fieldAccess(opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
-        // 7: Local seen state, updated with the item seen timestamp.
-        methodCall(definingClass = REEL_ITEM_CLASS, parameters = listOf(), returnType = "J"),
-        opcode(Opcode.MOVE_RESULT_WIDE, location = MatchAfterImmediately()),
-        methodCall(parameters = listOf(USER_SESSION_CLASS, "J"), returnType = "V", location = MatchAfterImmediately()),
-        // 10: Regular story predicate.
+        // 7: Regular story predicate.
         methodCall(definingClass = REEL_ITEM_CLASS, parameters = listOf(), returnType = "Z"),
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
         opcode(Opcode.IF_EQZ, location = MatchAfterImmediately()),
-        // 13: Excluded reel predicate.
+        // 10: Excluded reel predicate.
         methodCall(parameters = listOf(), returnType = "Z", location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
         opcode(Opcode.IF_NEZ, location = MatchAfterImmediately()),
-        // 16: Reel owner id.
+        // 13: Reel owner id.
         fieldAccess(type = STRING_CLASS, opcode = Opcode.IGET_OBJECT),
-        // 17: Story media.
+        // 14: Story media.
         fieldAccess(
             definingClass = REEL_ITEM_CLASS,
             type = MEDIA_CLASS,
             opcode = Opcode.IGET_OBJECT,
             location = MatchAfterImmediately(),
         ),
-        // 18: Story media conversion.
-        string("itas-android"),
-        methodCall(definingClass = MEDIA_CLASS, parameters = listOf(STRING_CLASS, "I")),
+        // 15: Story media conversion with the native caller id.
+        opcode(Opcode.CONST),
+        string("itas-android", location = MatchAfterImmediately()),
+        methodCall(definingClass = MEDIA_CLASS, parameters = listOf(STRING_CLASS, "I"), location = MatchAfterImmediately()),
         opcode(Opcode.MOVE_RESULT_OBJECT, location = MatchAfterImmediately()),
-        // 21: Typed story media metadata and wrapper.
-        methodCall(name = "<init>", parameters = listOf("Ljava/util/List;", "I", STRING_CLASS)),
-        opcode(Opcode.NEW_INSTANCE, location = MatchAfterImmediately()),
-        methodCall(name = "<init>", location = MatchAfterImmediately()),
-        // 24: Adds the story to the pending seen stories.
+        // 19: Adds the story to the pending seen stories.
         methodCall(
-            parameters = listOf(USER_SESSION_CLASS, "L", STRING_CLASS),
+            definingClass = pendingSeenClass,
+            parameters = listOf("L", USER_SESSION_CLASS, pendingSeenClass, STRING_CLASS),
             returnType = "V",
-            location = MatchAfterImmediately(),
+            opcode = Opcode.INVOKE_STATIC,
         ),
+        // 20: Local seen state, updated with the item seen timestamp.
+        methodCall(definingClass = REEL_ITEM_CLASS, parameters = listOf(), returnType = "J"),
+        opcode(Opcode.MOVE_RESULT_WIDE, location = MatchAfterImmediately()),
+        methodCall(parameters = listOf(USER_SESSION_CLASS, "J"), returnType = "V", location = MatchAfterImmediately()),
     ),
 )
 
@@ -184,6 +166,15 @@ internal fun constructorRootViewFingerprint(classType: String) = Fingerprint(
     definingClass = classType,
     name = "<init>",
     filters = listOf(fieldAccess(definingClass = "this", type = VIEW_CLASS, opcode = Opcode.IPUT_OBJECT)),
+)
+
+internal fun storyHolderFactoryFingerprint(holderType: String) = Fingerprint(
+    returnType = "Landroid/view/ViewGroup;",
+    filters = listOf(
+        newInstance(holderType),
+        methodCall(smali = "Ljava/lang/Object;-><init>()V", location = MatchAfterImmediately()),
+        fieldAccess(definingClass = holderType, type = VIEW_CLASS, opcode = Opcode.IPUT_OBJECT, location = MatchAfterImmediately()),
+    ),
 )
 
 internal object PromptStoryProgressFingerprint : Fingerprint(

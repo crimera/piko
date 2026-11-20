@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.misc.reels
 
 import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.mediadata.MediaIsVideoFingerprint
+import app.crimera.patches.instagram.entity.mediadata.mediaVideoGetterFingerprint
 import app.crimera.patches.instagram.misc.overflowMenuButton.reels.ClipsItemStateToStringFingerprint
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -27,13 +28,11 @@ import app.morphe.patcher.patch.mutableClassDefBy
 import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.addInstructionsAtControlFlowLabel
-import app.morphe.patcher.util.getReference
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
@@ -55,11 +54,7 @@ internal fun addReelMethod(
 }
 
 internal object ReelPlayerPrepare : Fingerprint(
-    returnType = "Z", filters = listOf(string("android_purge_26_q3_ClipsVideoPlayer_prepareVideo")),
-)
-
-internal object ReelItemSnapshot : Fingerprint(
-    filters = listOf(string("android_purge_26_q2_ClipsViewerAdapter_getClipsItemStateSnapshot")),
+    returnType = "Z", filters = listOf(string("ClipsVideoPlayer.prepareVideo autoPlayEnabled=")),
 )
 
 private object OrganicReelType : Fingerprint(
@@ -83,7 +78,6 @@ private fun scrollOutFingerprint(stateType: String) = Fingerprint(
     parameters = listOf("L"),
     returnType = "V",
     filters = listOf(
-        string("android_purge_26_q3_ClipsVideoPlayerController_pauseScrolledOutPlayer"),
         string("out_of_playback_range"),
         methodCall(opcode = Opcode.INVOKE_INTERFACE, parameters = listOf("Ljava/lang/String;"), returnType = "I",
             location = MatchAfterImmediately()),
@@ -95,17 +89,13 @@ private fun scrollOutFingerprint(stateType: String) = Fingerprint(
         opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
         string("AD_OPTIMIZATION_GOAL_VIDEO_VIEWS"),
         fieldAccess(definingClass = stateType, type = BOXED_INT, opcode = Opcode.IGET_OBJECT),
-        fieldAccess(opcode = Opcode.SGET_OBJECT),
-        methodCall(opcode = Opcode.INVOKE_STATIC, parameters = listOf("L", "L", "L", OBJECT, "Z"),
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, parameters = listOf("L", BOXED_INT),
             returnType = "V", location = MatchAfterImmediately()),
-        methodCall(opcode = Opcode.INVOKE_VIRTUAL, parameters = listOf("L", BOXED_INT), returnType = "V",
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, parameters = listOf("L", BOXED_INT), returnType = "V",
             location = MatchAfterImmediately()),
         string("AD_OPTIMIZATION_GOAL_MRC_VIDEO_VIEWS"),
         fieldAccess(definingClass = "this", opcode = Opcode.IGET_OBJECT),
-        opcode(Opcode.MOVE_OBJECT, MatchAfterImmediately()),
-        opcode(Opcode.CHECK_CAST, MatchAfterImmediately()),
-        fieldAccess(opcode = Opcode.SGET_OBJECT, location = MatchAfterImmediately()),
-        methodCall(opcode = Opcode.INVOKE_STATIC, parameters = listOf("L", "L", "L", OBJECT, "Z"),
+        methodCall(opcode = Opcode.INVOKE_INTERFACE, parameters = listOf("L", BOXED_INT),
             returnType = "V", location = MatchAfterImmediately()),
         opcode(Opcode.GOTO, MatchAfterImmediately()),
     ),
@@ -115,11 +105,10 @@ private fun trackReelSelection(pauseOthers: MethodReference, itemType: String) {
     val pager = Fingerprint(
         definingClass = pauseOthers.definingClass, parameters = listOf("Z"), returnType = "V",
         filters = listOf(
-            string("android_purge_26_q3_ClipsVideoPlayerController_maybeUpdateForPagerStateChange"),
+            string("ViewerNotCompletelyVisible"),
             methodCall(parameters = emptyList(), returnType = itemType),
             opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
             methodCall(smali = pauseOthers.toString()),
-            string("android_purge_26_q3_ClipsVideoPlayerController_earlyInitAdjacentPlayers"),
         ),
     ).match()
     val (_, _, selected, pause) = pager.instructionMatches
@@ -132,41 +121,36 @@ private fun trackReelSelection(pauseOthers: MethodReference, itemType: String) {
         "invoke-static {v$viewer, v$item}, $PATCHES_DESCRIPTOR/ReelsPlayback;->onReelSelected($OBJECT$OBJECT)V")
 }
 
-private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
+private fun rememberScrolledOutPosition(start: ReelStartPosition, reader: ReelStateReader) {
+    val stoppedField = start.stopped
     val pause = scrollOutFingerprint(ClipsItemStateToStringFingerprint.originalClassDef.type)
     val matches = pause.instructionMatches
-    val player = matches[6].instruction.registersUsed.single()
-    val stopped = matches[5].instruction.registersUsed.single()
-    val item = matches[7].instruction.registersUsed.single()
-    val (store, controller) = matches[14].instruction.registersUsed
-    val write = matches[18]
+    val player = matches[5].instruction.registersUsed.single()
+    val stopped = matches[4].instruction.registersUsed.single()
+    val item = matches[6].instruction.registersUsed.single()
+    val (store, controller) = matches[12].instruction.registersUsed
+    val write = matches[13]
     val args = write.instruction.registersUsed
-    val adArgs = matches[11].instruction.registersUsed
+    val adArgs = matches[9].instruction.registersUsed
     // Ads keep their own stopped position. Both paths then clear the separate user-pause field.
-    if (args.size != 5 || adArgs.size != 5 || matches[2].instruction.registersUsed.first() != player ||
-        matches[2].methodReference.definingClass != matches[6].methodReference.definingClass ||
-        matches[3].instruction.registersUsed != matches[4].instruction.registersUsed ||
-        matches[10].fieldReference != matches[17].fieldReference || matches[11].methodReference != write.methodReference ||
-        matches[15].instruction.registersUsed != listOf(args[2], store) ||
-        matches[16].instruction.registersUsed.single() != args[2] ||
-        args[0] != item || adArgs[0] != item || adArgs[3] != stopped || args[3] == stopped ||
-        matches[12].instruction.registersUsed.drop(1) != listOf(item, args[3])
+    if (args.size != 3 || adArgs.size != 3 || matches[1].instruction.registersUsed.first() != player ||
+        matches[1].methodReference.definingClass != matches[5].methodReference.definingClass ||
+        matches[2].instruction.registersUsed != matches[3].instruction.registersUsed ||
+        matches[9].methodReference != write.methodReference ||
+        args[0] != store || args[1] != item || adArgs != listOf(store, item, stopped) || args[2] == stopped ||
+        matches[10].instruction.registersUsed != args
     ) throw PatchException("Unexpected Reels scroll-out position writes")
 
-    val itemClass = classDefBy(matches[6].methodReference.returnType)
-    val stateStore = matches[14].fieldReference
-    val pausedField = matches[9].fieldReference
-    val pauseSetter = matches[12].methodReference
-    require(pausedField.definingClass == stoppedField.definingClass && pausedField != stoppedField)
-    val getState = ReelItemSnapshot.originalMethod.implementation!!.instructions
-        .mapNotNull { it.getReference<MethodReference>() }.single {
-            it.definingClass == stateStore.type && it.parameterTypes == listOf(itemClass.type) &&
-                it.returnType == pausedField.definingClass
-        }
+    val playerItem = matches[5].methodReference
+    val itemClass = classDefBy(playerItem.returnType)
+    val stateStore = matches[12].fieldReference
+    val pausedField = matches[8].fieldReference
+    val pauseSetter = matches[10].methodReference
+    require(pausedField == start.paused && reader.snapshot.parameterTypes == listOf(itemClass.type))
     val organic = OrganicReelType.instructionMatches[1].fieldReference
     val type = itemClass.instanceFields.single { it.type == organic.type }
     val media = itemClass.instanceFields.single { it.type == MEDIA_CLASS_NAME }
-    val isVideo = MediaIsVideoFingerprint.instructionMatches.first().methodReference
+    val isVideo = mediaVideoGetterFingerprint(MediaIsVideoFingerprint.instructionMatches.first().methodReference).originalMethod
     val getDuration = VideoDurationSeconds.originalMethod
     val eligible = addReelMethod(
         pause.method.definingClass, "pikoIsResumeVideo", listOf(itemClass.type), "Z", registers = 4,
@@ -189,7 +173,7 @@ private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
     )
     val stop = addReelMethod(
         pause.method.definingClass, "pikoScrolledOutPosition",
-        listOf(matches[6].methodReference.definingClass, itemClass.type, BOXED_INT), BOXED_INT, registers = 11,
+        listOf(playerItem.definingClass, itemClass.type, BOXED_INT), BOXED_INT, registers = 11,
         instructions = """
             invoke-direct {p0, p2}, $eligible
             move-result v0
@@ -197,8 +181,9 @@ private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
             iget-object v0, p2, $media
             invoke-virtual {v0}, $getDuration
             move-result-object v6
-            iget-object v5, p0, $stateStore
-            invoke-virtual {v5, p2}, $getState
+            invoke-virtual {p0}, ${reader.provider}
+            move-result-object v5
+            invoke-interface {v5, p2}, ${reader.snapshot}
             move-result-object v5
             iget-object v4, v5, $pausedField
             iget-object v5, v5, $stoppedField
@@ -215,7 +200,7 @@ private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
         """,
     )
     // Borrow the setter's null argument only for this call. The shared user-pause clear still needs null.
-    val nullRegister = args[3]
+    val nullRegister = args[2]
     require(listOf(controller, player, item, stopped, nullRegister).all { it in 0..15 })
     pause.method.addInstruction(write.index + 1, "const/4 v$nullRegister, 0x0")
     pause.method.addInstructionsAtControlFlowLabel(write.index, """
@@ -223,7 +208,7 @@ private fun rememberScrolledOutPosition(stoppedField: FieldReference) {
         move-result-object v$nullRegister
     """)
     trackReelSelection(pause.method, itemClass.type)
-    syncPausedReelSeek(eligible, stateStore, getState, pausedField, pauseSetter)
+    syncPausedReelSeek(eligible, stateStore, reader, playerItem, pausedField, pauseSetter)
 }
 
 @Suppress("unused")
@@ -235,8 +220,8 @@ val resumeReelsAfterScrollingPatch = patch(
     dependsOn(settingsPatch)
     execute {
         val start = patchReelsStartPosition()
-        hookReelReattach(start)
-        rememberScrolledOutPosition(start.stopped)
+        val reader = hookReelReattach(start)
+        rememberScrolledOutPosition(start, reader)
         enableSettings("resumeReelsAfterScrolling")
     }
 }

@@ -477,7 +477,7 @@ public final class MaterialYouTheme {
             int backgroundResourceId = ResourceUtils.getIdentifier(
                     context,
                     ResourceType.COLOR,
-                    "igds_primary_background"
+                    "igds_secondary_background"
             );
             if (backgroundResourceId != 0) {
                 try {

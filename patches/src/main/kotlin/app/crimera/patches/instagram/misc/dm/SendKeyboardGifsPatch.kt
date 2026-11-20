@@ -26,6 +26,7 @@ import app.morphe.patcher.patch.patch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.findFreeRegister
 import app.morphe.patcher.util.getReference
+import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -42,6 +43,7 @@ private const val INPUT_CONTENT_INFO_CLASS = "Landroid/view/inputmethod/InputCon
 private const val BITMAP_CLASS = "Landroid/graphics/Bitmap;"
 private const val STRING_CLASS = "Ljava/lang/String;"
 private const val COMPOSER_TEXT_VIEW_CLASS = "Lcom/instagram/ui/widget/textview/IgAutoCompleteTextView;"
+private const val PROVENANCE_CLASS = "Lcom/instagram/unifieddatamodel/video/ProvenanceMetadata;"
 
 /**
  * The DM composer's listener for content committed by the keyboard.
@@ -57,7 +59,7 @@ private object ComposerContentListenerFingerprint : Fingerprint(
         opcode(Opcode.IF_EQZ, MatchAfterImmediately()),
         string("unsupportedGifError"),
         // Starts the background task for content that is not a GIF.
-        methodCall(name = "<init>", parameters = listOf("L", COMPOSER_TEXT_VIEW_CLASS, "L")),
+        methodCall(name = "<init>", parameters = listOf("L", USER_SESSION_CLASS, COMPOSER_TEXT_VIEW_CLASS, "L")),
     ),
 )
 
@@ -75,7 +77,7 @@ private fun pastedContentDecodeFingerprint(definingClass: String) = Fingerprint(
     filters = listOf(
         methodCall(definingClass = INPUT_CONTENT_INFO_CLASS, name = "getContentUri"),
         methodCall(definingClass = INPUT_CONTENT_INFO_CLASS, name = "releasePermission"),
-        methodCall(name = "<init>", parameters = listOf(BITMAP_CLASS, "L")),
+        methodCall(name = "<init>", parameters = listOf(BITMAP_CLASS, PROVENANCE_CLASS, "L")),
     ),
 )
 
@@ -93,8 +95,11 @@ private fun pastedPhotoSendFingerprint(definingClass: String) = Fingerprint(
         string("direct_temp_photo"),
         // Saves the bitmap as directory/name.
         methodCall(
-            opcode = Opcode.INVOKE_STATIC,
-            parameters = listOf(BITMAP_CLASS, USER_SESSION_CLASS, STRING_CLASS, STRING_CLASS),
+            opcode = Opcode.INVOKE_STATIC_RANGE,
+            parameters = listOf(
+                BITMAP_CLASS, "L", USER_SESSION_CLASS, "Ljava/lang/Integer;", STRING_CLASS,
+                STRING_CLASS, STRING_CLASS, "I", "Z", "Z",
+            ),
             returnType = "L",
         ),
         opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
@@ -196,8 +201,8 @@ val sendKeyboardGifsPatch = patch(
 
         decodeFingerprint.let {
             val releaseMatch = it.instructionMatches[1]
-            val infoRegister = releaseMatch.getInstruction<FiveRegisterInstruction>().registerC
-            val bitmapRegister = it.instructionMatches[2].getInstruction<FiveRegisterInstruction>().registerD
+            val infoRegister = releaseMatch.instruction.registersUsed.single()
+            val bitmapRegister = it.instructionMatches[2].instruction.registersUsed[1]
 
             it.method.addInstruction(
                 releaseMatch.index,
@@ -210,9 +215,9 @@ val sendKeyboardGifsPatch = patch(
             .instruction.getReference<MethodReference>()!!.definingClass
 
         pastedPhotoSendFingerprint(sendRunnableClass).let {
-            val save = it.instructionMatches[1].getInstruction<FiveRegisterInstruction>()
-            val bitmapRegister = save.registerC
-            val nameRegister = save.registerF
+            val saveRegisters = it.instructionMatches[1].instruction.registersUsed
+            val bitmapRegister = saveRegisters[0]
+            val nameRegister = saveRegisters[5]
 
             it.method.addInstruction(
                 it.instructionMatches[2].index + 1,

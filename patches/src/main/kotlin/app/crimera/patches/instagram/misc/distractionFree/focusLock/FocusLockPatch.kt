@@ -7,7 +7,6 @@
 package app.crimera.patches.instagram.misc.distractionFree.focusLock
 
 import app.crimera.patches.instagram.links.distractionFree.disableExplorePatch
-import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.navigation.navigationBarPatch
 import app.crimera.patches.instagram.misc.reels.disableReelsScrollingPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
@@ -26,7 +25,6 @@ val focusLockPatch =
     ) {
         dependsOn(
             settingsPatch,
-            interceptUriPatch,
             navigationBarPatch,
             disableReelsScrollingPatch,
             disableExplorePatch,

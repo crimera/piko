@@ -53,8 +53,6 @@ import app.morphe.extension.shared.ui.Dim;
 
 /** Hides the inbox and chats behind a cover until the device's biometric or screen lock confirms it is you. */
 public final class InboxLock {
-    private static final String LIST_ID = "inbox_refreshable_thread_list_recyclerview";
-    private static final String LIST_CONTAINER_ID = "list_container";
     // A chat opened from a notification skips the inbox, so its own screen needs the same cover.
     private static final String THREAD_ID = "thread_view_root";
     private static final String THREAD_CONTAINER_ID = "thread_fragment_container";
@@ -70,6 +68,7 @@ public final class InboxLock {
     private static int startedActivities;
     private static WeakReference<Activity> watched = new WeakReference<>(null);
     private static ViewTreeObserver.OnPreDrawListener drawListener;
+    private static final Set<FrameLayout> inboxViews = Collections.newSetFromMap(new WeakHashMap<>());
     private static final List<WeakReference<View>> covers = new ArrayList<>();
     private static WeakReference<View> bannerWindow = new WeakReference<>(null);
 
@@ -102,6 +101,11 @@ public final class InboxLock {
         }
     }
 
+    // The Compose inbox hides the legacy thread list. Both inbox layouts share the fragment root.
+    public static void registerInboxView(View root) {
+        if (initialized && root instanceof FrameLayout) inboxViews.add((FrameLayout) root);
+    }
+
     // The inbox is a tab of an already resumed activity; checking before each draw covers it without a visible frame.
     private static void watch(Activity activity) {
         unwatch(watched.get());
@@ -125,17 +129,27 @@ public final class InboxLock {
     private static void check(Activity activity) {
         try {
             View decor = activity.getWindow().getDecorView();
-            if (unlocked || !Pref.inboxLock()) {
+            if (!Pref.inboxLock()) {
                 removeCovers();
-                hideFromRecents(activity, unlocked && (isVisible(decor, LIST_ID) || isVisible(decor, THREAD_ID)));
+                hideFromRecents(activity, false);
                 return;
             }
-            hideFromRecents(activity, false);
-            cover(activity, decor, LIST_ID, LIST_CONTAINER_ID);
-            cover(activity, decor, THREAD_ID, THREAD_CONTAINER_ID);
+            boolean inboxVisible = false;
+            for (FrameLayout inbox : inboxViews) {
+                if (inbox.getRootView() != decor || !partlyVisible(inbox)) continue;
+                inboxVisible = true;
+                if (!unlocked) cover(activity, inbox);
+            }
+            boolean threadVisible = isVisible(decor, THREAD_ID);
+            hideFromRecents(activity, unlocked && (inboxVisible || threadVisible));
+            if (unlocked) return;
+            if (threadVisible) {
+                View container = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, THREAD_CONTAINER_ID));
+                if (container instanceof FrameLayout) cover(activity, (FrameLayout) container);
+            }
 
             // Ask once each time a covered screen shows up; cancelling leaves the Unlock button instead of asking in a loop.
-            if (!anyCoverShown()) {
+            if (!anyCoverShown(decor)) {
                 autoPrompted = false;
             } else if (!autoPrompted) {
                 autoPrompted = true;
@@ -179,22 +193,16 @@ public final class InboxLock {
         return view.isShown() && view.getGlobalVisibleRect(new Rect());
     }
 
-    private static boolean anyCoverShown() {
+    private static boolean anyCoverShown(View decor) {
         for (WeakReference<View> reference : covers) {
             View view = reference.get();
-            if (view != null && onScreen(view)) return true;
+            if (view != null && view.getRootView() == decor && onScreen(view)) return true;
         }
         return false;
     }
 
-    /** Puts a cover over the container of the screen found by anchorId; true if one was added now. */
-    private static boolean cover(Activity activity, View decor, String anchorId, String containerId) {
-        View anchor = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, anchorId));
-        if (anchor == null || !partlyVisible(anchor)) return false;
-        View container = decor.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, containerId));
-        if (!(container instanceof FrameLayout)) return false;
-        FrameLayout host = (FrameLayout) container;
-        if (host.findViewWithTag(COVER_TAG) != null) return false;
+    private static void cover(Activity activity, FrameLayout host) {
+        if (host.findViewWithTag(COVER_TAG) != null) return;
 
         View created = buildCover(activity);
         created.setTag(COVER_TAG);
@@ -208,8 +216,7 @@ public final class InboxLock {
         // The composer keeps focus under the cover, so its keyboard would stay on screen.
         created.requestFocus();
         InputMethodManager keyboard = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        if (keyboard != null) keyboard.hideSoftInputFromWindow(decor.getWindowToken(), 0);
-        return true;
+        if (keyboard != null) keyboard.hideSoftInputFromWindow(host.getWindowToken(), 0);
     }
 
     private static View buildCover(Activity activity) {

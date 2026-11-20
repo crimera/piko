@@ -7,7 +7,6 @@
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
-import app.crimera.patches.instagram.entity.directItem.DirectItemDispatchFingerprint
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
@@ -15,7 +14,6 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.newInstance
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
@@ -70,47 +68,36 @@ internal object DeltaThreadIdFieldExtensionFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
 )
 
-internal object DirectItemJsonParserFingerprint : Fingerprint(
-    classFingerprint = DirectItemDispatchFingerprint,
-    name = "unsafeParseFromJson",
-    returnType = "Ljava/lang/Object;",
-    parameters = listOf("L"),
-    filters = listOf(
-        methodCall(
-            definingClass = "this",
-            parameters = listOf("L", "L", "Ljava/lang/String;"),
-            returnType = "V",
-            opcode = Opcode.INVOKE_STATIC,
-        ),
-        opcode(Opcode.RETURN_OBJECT),
-    ),
-)
-
 // MQTT post-processing step (not on REST path).
 internal object DirectItemPostprocessFingerprint : Fingerprint(
     parameters = listOf(USER_SESSION_CLASS, "L"),
     strings = listOf("DirectMessage.postprocess.%s", "Encountered DirectMessage with null type"),
 )
 
-// SQLite DAO hide-by-id. Injected at entry so our DB record is still present when the hook fires.
+// The queued SQLite operation captures the server ID followed by the client context.
 internal object DirectItemDbHideFingerprint : Fingerprint(
-    strings = listOf("Both message ID and client context is null."),
-    parameters = listOf(
-        "Lcom/instagram/model/direct/DirectThreadKey;",
-        "Ljava/lang/String;",
-        "Ljava/lang/String;",
-    ),
+    name = "run",
+    parameters = emptyList(),
     returnType = "V",
+    filters = listOf(
+        fieldAccess(definingClass = "this", type = "Lcom/instagram/model/direct/DirectThreadKey;", opcode = Opcode.IGET_OBJECT),
+        fieldAccess(definingClass = "this", type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        fieldAccess(definingClass = "this", type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT, location = MatchAfterImmediately()),
+        string("client_item_id=='"),
+        string(" AND server_item_id IS NULL) OR ("),
+        string("Both message ID and client context is null."),
+    ),
 )
 
-// DM thread deserializer dispatch.
-internal object ThreadUsersDispatchFingerprint : Fingerprint(
-    returnType = "V",
-    strings = listOf("admin_user_ids", "left_users", "thread_v2_id", "input_mode"),
+internal object ThreadRecipientFingerprint : Fingerprint(
+    name = "unsafeParseFromJson",
+    parameters = listOf("L"),
+    returnType = "Ljava/lang/Object;",
     filters = listOf(
-        string("users"),
-        // Users array guard, which jumps to the block that stores the users list.
-        opcode(Opcode.IF_NE, MatchAfterWithin(10)),
-        newInstance("Ljava/util/ArrayList;", MatchAfterImmediately()),
+        string("recipients"),
+        methodCall(returnType = USER_MODEL_CLASS_NAME, location = MatchAfterWithin(24)),
+        opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
+        string("left_users"),
+        string("thread_v2_id"),
     ),
 )

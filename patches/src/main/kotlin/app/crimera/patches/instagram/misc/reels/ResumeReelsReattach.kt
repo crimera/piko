@@ -30,7 +30,7 @@ private val Method.calls get() = implementation!!.instructions.mapNotNull { it.g
 private fun scrollInReason(resume: MethodReference): StringReference {
     val caller = Fingerprint(
         definingClass = resume.definingClass, returnType = "V",
-        filters = listOf(string("android_purge_26_q3_ClipsVideoPlayerController_maybeResumeScrolledInPlayer")),
+        filters = listOf(string("currentItemStateIsPausedByUser")),
     ).method
     val code = caller.implementation!!.instructions
     val call = code.indices.single { code[it].getReference<MethodReference>() == resume }
@@ -46,30 +46,29 @@ private fun scrollInReason(resume: MethodReference): StringReference {
     throw PatchException("Unable to identify the scroll-in reason passed to the Reels player")
 }
 
-internal fun hookReelReattach(start: ReelStartPosition) {
+internal class ReelStateReader(val provider: MethodReference, val snapshot: MethodReference)
+
+internal fun hookReelReattach(start: ReelStartPosition): ReelStateReader {
     val explicitStart = start.explicit
     val resume = Fingerprint(
         returnType = "V",
         definingClass = explicitStart.definingClass,
-        filters = listOf(string("android_purge_26_q3_ClipsVideoPlayerController_maybeResumePlayer")),
+        filters = listOf(string("ClipsVideoPlayerController.maybeResumePlayer playVideoInZeroMode: ")),
     ).method
-    val snapshot = ReelItemSnapshot.originalMethod
-    val item = snapshot.parameterTypes.single().toString()
-    require(snapshot.returnType == start.stopped.definingClass)
+    val item = explicitStart.parameterTypes.single().toString()
+    val prepare = ReelPlayerPrepare.method
     val seek = Fingerprint(
+        definingClass = prepare.definingClass,
         parameters = listOf("I", "Z", "Z"), returnType = "V",
-        filters = listOf(string("android_purge_26_q3_ClipsVideoPlayer_seekTo")),
     ).method
     val player = seek.definingClass
     val pause = Fingerprint(
         definingClass = player, returnType = "I", parameters = listOf("Ljava/lang/String;"),
-        filters = listOf(string("android_purge_26_q3_ClipsVideoPlayer_pause")),
+        filters = listOf(string("ClipsVideoPlayer.pause")),
     ).method
-    val prepare = ReelPlayerPrepare.method
-    require(prepare.definingClass == player)
     val wrapperResume = Fingerprint(
         definingClass = player, returnType = "Z", parameters = listOf("Ljava/lang/String;", "Z"),
-        filters = listOf(string("android_purge_26_q3_ClipsVideoPlayer_resume")),
+        filters = listOf(string("ClipsVideoPlayer.resume")),
     ).method
     val nativeSeek = seek.calls.single { it.parameterTypes == seek.parameterTypes && it.returnType == "V" }
     val core = seek.implementation!!.instructions.mapNotNull { it.getReference<FieldReference>() }
@@ -88,14 +87,15 @@ internal fun hookReelReattach(start: ReelStartPosition) {
     }
 
     val instructions = resume.implementation!!.instructions
-    val setStart = instructions.indexOfFirst {
-        it.getReference<StringReference>()?.string == "android_purge_26_q2_ClipsStandaloneAdapterDataSource_setCustomStartTimeMs"
+    val setStart = instructions.indices.single { index ->
+        instructions[index].opcode == Opcode.IPUT &&
+            instructions[index].getReference<FieldReference>()?.let { it.definingClass == item && it.type == "I" } == true
     }
-    val customStart = instructions.getOrNull(setStart + 2)?.takeIf { setStart >= 0 && it.opcode == Opcode.IPUT }
-        ?.getReference<FieldReference>()?.takeIf { it.definingClass == item && it.type == "I" }
-        ?: throw PatchException("Missing Reels custom start time in the resume path")
+    val customStart = instructions[setStart].getReference<FieldReference>()!!
     val applyIndex = instructions.indices.single { index ->
-        instructions[index].getReference<MethodReference>() == snapshot &&
+        instructions[index].opcode == Opcode.INVOKE_INTERFACE && instructions[index].getReference<MethodReference>()?.let {
+            it.parameterTypes == listOf(item) && it.returnType == start.stopped.definingClass
+        } == true &&
             instructions[index + 1].opcode == Opcode.MOVE_RESULT_OBJECT &&
             instructions[index + 2].opcode == Opcode.IGET_BOOLEAN &&
             instructions[index + 2].getReference<FieldReference>()?.definingClass == item
@@ -113,12 +113,13 @@ internal fun hookReelReattach(start: ReelStartPosition) {
             instructions[index + 1].registersUsed.single() == playerRegister
     }
     val itemRegister = instructions[applyIndex].registersUsed.last()
-    val controllerGetter = instructions[applyIndex - 3]
+    val snapshot = instructions[applyIndex].getReference<MethodReference>()!!
+    val controllerGetter = instructions[applyIndex - 2]
     val controllerRegister = controllerGetter.registersUsed.single()
     val provider = controllerGetter.getReference<MethodReference>()
-    val adapter = instructions[applyIndex - 1].getReference<FieldReference>()
     if (provider?.definingClass != resume.definingClass || provider.parameterTypes.isNotEmpty() ||
-        adapter?.definingClass != provider.returnType || adapter.type != snapshot.definingClass ||
+        provider.returnType != snapshot.definingClass || instructions[applyIndex - 1].opcode != Opcode.MOVE_RESULT_OBJECT ||
+        instructions[applyIndex - 1].registersUsed.single() != instructions[applyIndex].registersUsed.first() ||
         instructions[applyIndex + 2].registersUsed.last() != itemRegister ||
         resume.parameterTypes[0] != item || resume.parameterTypes[2] != "Ljava/lang/String;" ||
         instructions[playerLookup].getReference<MethodReference>()!!.parameterTypes != listOf(resume.parameterTypes[1]) ||
@@ -144,8 +145,7 @@ internal fun hookReelReattach(start: ReelStartPosition) {
             if-eqz v0, :done
             invoke-virtual {p0}, $provider
             move-result-object v3
-            iget-object v3, v3, $adapter
-            invoke-virtual {v3, p2}, $snapshot
+            invoke-interface {v3, p2}, $snapshot
             move-result-object v3
             iget-object v0, v3, ${start.paused}
             if-nez v0, :done
@@ -181,7 +181,7 @@ internal fun hookReelReattach(start: ReelStartPosition) {
     // The earlier snapshot is also read on paths that reject playback. Only correct an actual resume.
     resume.addInstructions(resumeCall, "invoke-direct {v$controllerRegister, v$playerRegister, v$itemRegister, v$reasonRegister}, $helper")
     // Native explicit seeks reset the custom start field before the resume call.
-    resume.addInstructions(setStart + 3, "invoke-static/range {v$playerRegister .. v$playerRegister}, $PLAYBACK->discardReattach(Ljava/lang/Object;)V")
+    resume.addInstructions(setStart + 1, "invoke-static/range {v$playerRegister .. v$playerRegister}, $PLAYBACK->discardReattach(Ljava/lang/Object;)V")
     // prepareVideo can return before binding anything when its fragment is paused.
     val bindItem = prepare.implementation!!.instructions.withIndex().single { (_, instruction) ->
         instruction.opcode == Opcode.IPUT_OBJECT && instruction.getReference<FieldReference>()?.let {
@@ -190,4 +190,5 @@ internal fun hookReelReattach(start: ReelStartPosition) {
     }.index
     prepare.addInstructions(bindItem + 1, discard)
     seek.addInstructions(0, discard)
+    return ReelStateReader(provider, snapshot)
 }

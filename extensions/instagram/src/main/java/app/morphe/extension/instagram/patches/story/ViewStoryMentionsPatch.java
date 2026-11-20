@@ -10,8 +10,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.HashSet;
 import java.util.ArrayList;
-import android.app.Dialog;
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.view.View;
 
@@ -22,11 +21,12 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.crimera.PikoUtils;
 
 import com.instagram.igds.components.peoplecell.IgdsPeopleCell;
+import com.instagram.common.session.UserSession;
 import com.instagram.common.typedurl.ImageUrl;
 
 public class ViewStoryMentionsPatch {
 
-    public static void viewMentions(Context context, Object mediaObject,
+    public static void viewMentions(Activity activity, UserSession session, Object mediaObject, String moduleName,
                                     DialogInterface.OnDismissListener onDismiss){
         try {
             HashSet<UserData> mentionSet = new MediaData(mediaObject).getMentionSet();
@@ -37,12 +37,13 @@ public class ViewStoryMentionsPatch {
                     try {
                         String fullName = userData.getFullName();
                         String username = userData.getUsername();
+                        String userId = userData.getUserId();
                         ImageUrl lowResDP = userData.getLowResProfilePicture();
                         boolean isVerified = userData.isVerified();
 
-                        IgdsPeopleCell cell = new IgdsPeopleCell(context);
+                        IgdsPeopleCell cell = new IgdsPeopleCell(activity);
                         View.OnClickListener openProfile = v ->
-                                PikoUtils.openUrl("instagram://user?username=" + username, true);
+                                openProfile(activity, session, userId, "reel_viewer_go_to_profile", moduleName);
 
                         setPrimaryText(cell, fullName, isVerified);
                         setSupportingText(cell, username);
@@ -56,7 +57,7 @@ public class ViewStoryMentionsPatch {
                     }
                 });
             }
-            PeopleCellDialogBox.showPeopleDialog(context, peopleCells, onDismiss);
+            PeopleCellDialogBox.showPeopleDialog(activity, peopleCells, onDismiss);
 
         } catch (Exception ex){
             Logger.printException(() -> "Failed viewMentions", ex);
@@ -66,6 +67,9 @@ public class ViewStoryMentionsPatch {
     }
 
     // The patch injects calls to the native methods resolved from the target apk.
+    private static void openProfile(Activity activity, UserSession session, String userId,
+                                    String entryPoint, String moduleName) {}
+
     private static void setPrimaryText(IgdsPeopleCell cell, CharSequence text, boolean verified) {}
 
     private static void setSupportingText(IgdsPeopleCell cell, CharSequence text) {}

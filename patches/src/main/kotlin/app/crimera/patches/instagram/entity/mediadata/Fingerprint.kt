@@ -18,6 +18,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
@@ -138,9 +139,20 @@ internal object MediaIsVideoFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("is_carousel"),
     filters = listOf(
-        methodCall(definingClass = MEDIA_CLASS_NAME, parameters = listOf(), returnType = "Z"),
+        methodCall(opcode = Opcode.INVOKE_STATIC, parameters = listOf("L"), returnType = "Z"),
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
         string("is_video", location = MatchAfterImmediately()),
+    ),
+)
+
+internal fun mediaVideoGetterFingerprint(predicate: MethodReference) = Fingerprint(
+    definingClass = MEDIA_CLASS_NAME,
+    parameters = emptyList(),
+    returnType = "Z",
+    filters = listOf(
+        methodCall(reference = predicate),
+        opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
+        opcode(Opcode.RETURN, MatchAfterImmediately()),
     ),
 )
 
@@ -303,31 +315,25 @@ internal object GetUserDataFromMediaFingerprint : Fingerprint(
     returnType = USER_MODEL_CLASS_NAME,
 )
 
-internal object CommentToStringFingerprint : Fingerprint(
-    name = "toString",
-    filters = listOf(
-        // Comment text.
-        fieldAccess(definingClass = "this", type = "Ljava/lang/String;", opcode = Opcode.IGET_OBJECT),
-        opcode(Opcode.FILLED_NEW_ARRAY, location = MatchAfterWithin(1)),
-        string("Comment{mCreatedAtSeconds=%d, mUser=@%s, mText=\'%s\'}"),
-    ),
-)
-
-/**
- * Media helper method returning the comment of a media.
- */
 internal object MediaCaptionGetterFingerprint : Fingerprint(
     definingClass = MEDIA_CLASS_NAME,
     parameters = emptyList(),
     returnType = "L",
-    filters = listOf(string("caption")),
+    filters = listOf(
+        string("caption"),
+        literal("caption".hashCode().toLong()),
+        opcode(Opcode.CONST_CLASS, MatchAfterImmediately()),
+    ),
 )
 
-internal fun mediaCommentGetterFingerprint(commentClass: String, captionGetter: MethodReference) = Fingerprint(
-    definingClass = MEDIAEXT_CLASS_NAME,
-    parameters = listOf(MEDIA_CLASS_NAME),
-    returnType = commentClass,
-    filters = listOf(methodCall(reference = captionGetter)),
+internal fun captionTextGetterFingerprint(captionClass: String) = Fingerprint(
+    definingClass = captionClass,
+    parameters = emptyList(),
+    returnType = "Ljava/lang/String;",
+    filters = listOf(
+        literal("text".hashCode().toLong()),
+        methodCall(name = "getStringValueByHashCode", location = MatchAfterImmediately()),
+    ),
 )
 
 internal fun mediaMetadataGetterFingerprint(key: String) = Fingerprint(

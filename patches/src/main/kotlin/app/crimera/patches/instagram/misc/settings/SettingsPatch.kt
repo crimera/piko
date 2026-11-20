@@ -11,7 +11,8 @@ import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
-import app.crimera.patches.instagram.links.validateLinks.validateLinksPatch
+import app.crimera.patches.instagram.misc.actionBar.chatActionBarButton.chatActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.hideHomeActionButtonsPatch
 import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.mainFeedActionBarButtonPatch
 import app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton.userProfileActionBarButtonPatch
@@ -49,7 +50,6 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.registersUsed
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patcher.util.smali.toInstruction
-import app.morphe.patches.all.misc.fix.spoofsignature.spoofSignaturePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.indexOfFirstInstructionOrThrow
@@ -108,6 +108,8 @@ val settingsPatch =
             whitehatIndicatorPatch,
             settingsTaskRemovalPatch,
             mainFeedActionBarButtonPatch,
+            chatActionBarButtonPatch,
+            inboxActionBarButtonPatch,
             hideHomeActionButtonsPatch,
             hideChatCallButtonsPatch,
             userProfileActionBarButtonPatch,
@@ -116,8 +118,6 @@ val settingsPatch =
             hookFlagsPatch,
             fixNotificationRegistrationCrashPatch,
             fixDirectNotificationActionCrashPatch,
-            validateLinksPatch,
-            spoofSignaturePatch,
             removeBuildExpiredPopupPatch,
             preserveUnknownFriendshipStatusPatch,
             profileInfoEntity,

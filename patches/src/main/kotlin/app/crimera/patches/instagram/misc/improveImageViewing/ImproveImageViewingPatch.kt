@@ -25,16 +25,17 @@ val improveImageViewingPatch =
         dependsOn(settingsPatch)
         execute {
             // p2 is the target width Instagram picks the closest image variant to.
-            ReturnExtendedImageUrlFingerprint.method.addInstructions(
+            val selector = ImageUrlByWidthFingerprint.matchOrNull() ?: ReturnExtendedImageUrlFingerprint.match()
+            selector.method.addInstructions(
                 0,
                 """
-                invoke-static {p2}, $PREF_DESCRIPTOR->imageVariantTargetWidth(I)I
+                invoke-static/range {p2 .. p2}, $PREF_DESCRIPTOR->imageVariantTargetWidth(I)I
                 move-result p2
                 """,
             )
 
             // The array holds the DPI, then the screen width and height.
-            val screenSizeArray = SetDPIMetricsFingerprint.instructionMatches.last()
+            val screenSizeArray = SetDPIMetricsFingerprint.instructionMatches.first()
             SetDPIMetricsFingerprint.method.addInstructions(
                 screenSizeArray.index,
                 screenSizeArray.instruction.registersUsed.drop(1).joinToString("\n") {

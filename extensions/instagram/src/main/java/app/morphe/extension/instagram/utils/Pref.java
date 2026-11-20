@@ -96,11 +96,13 @@ public class Pref {
     }
 
     public static boolean viewStoriesAnonymously() {
-        return (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) && SettingsStatus.viewStoriesAnonymously) || Pref.getTurnOnAllGhostModes();
+        return SettingsStatus.viewStoriesAnonymously
+                && (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) || getTurnOnAllGhostModes());
     }
 
     public static boolean viewLiveAnonymously() {
-        return (SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY) && SettingsStatus.viewLiveAnonymously) || Pref.getTurnOnAllGhostModes();
+        return SettingsStatus.viewLiveAnonymously
+                && (SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY) || getTurnOnAllGhostModes());
     }
 
     public static boolean disableScreenshotDetection() {
@@ -148,9 +150,8 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
     }
 
-    public
-    static boolean disableStories() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_STORIES);
+    public static boolean disableStories() {
+        return lockable(Settings.DISABLE_STORIES);
     }
 
     public static boolean disableHighlights() {
@@ -158,7 +159,11 @@ public class Pref {
     }
 
     public static boolean disableExplore() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_EXPLORE);
+        return SettingsStatus.disableExplore && lockable(Settings.DISABLE_EXPLORE);
+    }
+
+    public static boolean disableExplorePath(String path) {
+        return "discover/topical_explore/".equals(path) && disableExplore();
     }
 
     public static boolean disableComments() {

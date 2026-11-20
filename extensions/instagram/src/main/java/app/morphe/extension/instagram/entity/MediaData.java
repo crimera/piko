@@ -487,9 +487,8 @@ public class MediaData extends Entity {
     }
 
     public String getDescriptionText() throws Exception {
-        Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A0J", this.obj);
-        return result != null ? (String) super.getField(result, "A0Z") : null;
+        Object caption = super.getMethod("captionMethod");
+        return caption != null ? (String) super.getMethod(caption, "textMethod") : null;
     }
 
     public String getMessageAudioUrl() throws Exception {

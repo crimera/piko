@@ -20,6 +20,7 @@ import com.android.tools.smali.dexlib2.Opcode
 
 object TigonServiceLayerStartRequestFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/api/tigon/TigonServiceLayer;",
+    name = "startRequestInternal",
     filters = listOf(
         fieldAccess(type = "Ljava/net/URI;", opcode = Opcode.IGET_OBJECT),
         methodCall(smali = "Ljava/net/URI;->getHost()Ljava/lang/String;", location = MatchAfterImmediately()),

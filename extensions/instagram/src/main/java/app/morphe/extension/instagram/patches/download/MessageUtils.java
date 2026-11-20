@@ -36,10 +36,10 @@ public class MessageUtils {
                 return false;
             }
 
-            if(messageType == "media" || messageType == "raven_media"){
+            if ("media".equals(messageType) || "raven_media".equals(messageType) || "xma_collage".equals(messageType)) {
                 return true;
 
-            } else if (messageType == "voice_media" && SettingsStatus.downloadVoiceMessage) {
+            } else if ("voice_media".equals(messageType) && SettingsStatus.downloadVoiceMessage) {
                 MediaData audioData = messageInfo.getAudioMedia();
                 String audioUrl = audioData.getMessageAudioUrl();
                 String fileName = audioData.getDownloadFilename(MediaType.AUDIO);

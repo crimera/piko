@@ -44,10 +44,10 @@ val themePatch =
         execute {
             val originalApi31Base = captureApi31Base()
 
-            forceWhiteOnMediaChrome()
+            remapSurfaceAndMediaColors()
             preserveCreationButtonContrast()
             preserveLightClipsComposerContrast()
-            forceBlackStoryBackground()
+            preserveLightStoryBackground()
             preserveLightOverflowStampBackgrounds()
             applyLegacyTheme(amoled == true)
 
@@ -64,6 +64,5 @@ val themePatch =
             installSystemDefaultUiModeHook()
             installThemeLifecycleHooks()
             installNativeThemeModeSync()
-            installStorySystemBarHooks()
         }
     }

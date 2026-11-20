@@ -42,7 +42,6 @@ private object DisappearingMessagesGestureFingerprint : Fingerprint(
     filters = listOf(
         methodCall(parameters = listOf(USER_SESSION_CLASS, "L"), returnType = "Z"),
         opcode(Opcode.MOVE_RESULT, location = MatchAfterImmediately()),
-        methodCall(definingClass = "Landroid/view/View;", name = "setOnTouchListener"),
         methodCall(
             definingClass = "Lcom/instagram/ui/widget/refresh/RefreshableNestedScrollingParent;",
             name = "setRefreshingDistance",

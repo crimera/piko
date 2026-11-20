@@ -6,75 +6,25 @@
 
 package app.crimera.patches.instagram.links.privacy
 
-import app.crimera.patches.common.declaredParameterRegister
-import app.crimera.patches.common.parameterRegisterStart
-import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.classDefBy
-import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.util.findInstructionIndicesReversedOrThrow
-import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 
 /**
- * Adds a static bridge to [owner], which adds a raw story media to the pending seen stories
- * using the typed media wrapper the native story consumption creates.
+ * The compact holder's constructor is inlined into its view factory.
  */
-internal fun addStoryAggregateBridge(
-    owner: MutableClass,
-    aggregate: MethodReference,
-    rawMediaType: String,
-    metadataConstructor: MethodReference,
-    wrapperType: String,
-    wrapperConstructor: MethodReference,
-): MethodReference {
-    val bridge = ImmutableMethod(
-        owner.type,
-        "pikoAddStorySeen",
-        listOf(rawMediaType, USER_SESSION_CLASS, owner.type, STRING_CLASS).map {
-            ImmutableMethodParameter(it, emptySet(), null)
-        },
-        "V",
-        AccessFlags.PUBLIC.value or AccessFlags.STATIC.value or AccessFlags.SYNTHETIC.value,
-        emptySet(),
-        emptySet(),
-        MutableMethodImplementation(8),
-    ).toMutable().apply {
-        addInstructions(
-            0,
-            """
-            invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
-            move-result-object v0
-            const v1, -0x18b1a0fe
-            const-string v2, "itas-android"
-            new-instance v3, ${metadataConstructor.definingClass}
-            invoke-direct {v3, v0, v1, v2}, $metadataConstructor
-            new-instance v0, $wrapperType
-            invoke-direct {v0, v3, p0}, $wrapperConstructor
-            invoke-virtual {p2, p1, v0, p3}, $aggregate
-            return-void
-            """.trimIndent(),
-        )
+internal fun storyRootViewField(classType: String): FieldReference {
+    if (classDefBy(classType).directMethods.none { it.name == "<init>" }) {
+        return storyHolderFactoryFingerprint(classType).instructionMatches.last().fieldReference
     }
-    owner.methods.add(bridge)
-    return bridge
-}
-
-/**
- * Root view field of a story view holder, which is stored by the constructor of the class or one of its superclasses.
- */
-internal fun storyRootViewField(classType: String): FieldReference =
-    generateSequence(classType) { classDefBy(it).superclass }
+    return generateSequence(classType) { classDefBy(it).superclass }
         .firstNotNullOf { constructorRootViewFingerprint(it).matchOrNull() }
         .instructionMatches.first().fieldReference
+}
 
 internal fun addStoryProgressCaptureHook(
     method: MutableMethod,
