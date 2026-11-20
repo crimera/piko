@@ -596,12 +596,17 @@ public class Pref {
         return SharedPref.getSetPref(Settings.FILTER_STORY_BY_USER_TYPE);
     }
 
-    public static Integer filterStoryByMinStoryItems() {
-        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MIN_STORY_ITEMS));
+    public static int parseStoryItemCount(String value, int fallback) {
+        try {
+            int count = Integer.parseInt(value);
+            return count > 0 ? count : fallback;
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
     }
 
-    public static Integer filterStoryByMaxStoryItems() {
-        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
+    public static int storyItemCount(StringSetting setting) {
+        return parseStoryItemCount(SharedPref.getStringPref(setting), Integer.parseInt(setting.defaultValue));
     }
 
     public static boolean inboxLock() {

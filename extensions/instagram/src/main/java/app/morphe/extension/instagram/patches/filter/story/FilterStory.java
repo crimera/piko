@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.entity.ReelResponseItem;
 import app.morphe.extension.instagram.entity.UserData;
 
@@ -25,8 +26,8 @@ public class FilterStory {
 
         Set<String> reelTypes = Pref.filterStoryByType();
         Set<String> userTypes = Pref.filterStoryByUserType();
-        int minStoryItems = Pref.filterStoryByMinStoryItems();
-        int maxStoryItems = Pref.filterStoryByMaxStoryItems();
+        int minStoryItems = Pref.storyItemCount(Settings.FILTER_STORY_MIN_STORY_ITEMS);
+        int maxStoryItems = Pref.storyItemCount(Settings.FILTER_STORY_MAX_STORY_ITEMS);
         List<Object> filtered = new ArrayList<>(items.size());
         for (Object item : items) {
             try {

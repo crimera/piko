@@ -1037,23 +1037,10 @@ public class ScreenBuilder {
                     )
             );
 
-            addPreference(
-                    category,
-                    helper.editTextNumPreference(
-                            str("piko_filter_story_minimum_item_count"),
-                            str("piko_filter_story_minimum_item_count_desc"),
-                            Settings.FILTER_STORY_MIN_STORY_ITEMS
-                    )
-            );
-
-            addPreference(
-                    category,
-                    helper.editTextNumPreference(
-                            str("piko_filter_story_maximum_item_count"),
-                            str("piko_filter_story_maximum_item_count_desc"),
-                            Settings.FILTER_STORY_MAX_STORY_ITEMS
-                    )
-            );
+            addPreference(category, new StoryItemCountPreference(context, Settings.FILTER_STORY_MIN_STORY_ITEMS,
+                    str("piko_filter_story_minimum_item_count"), str("piko_filter_story_minimum_item_count_desc")));
+            addPreference(category, new StoryItemCountPreference(context, Settings.FILTER_STORY_MAX_STORY_ITEMS,
+                    str("piko_filter_story_maximum_item_count"), str("piko_filter_story_maximum_item_count_desc")));
         }
     }
 
