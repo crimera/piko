@@ -118,11 +118,7 @@ private object DrawerResourceNames {
  * drawer-local table so the bytecode patch can turn discovered string IDs into stable names.
  */
 private val drawerResourceNamesPatch =
-    patch(
-        name = "NewX: Resolve drawer resource names",
-        description = "Resolves stable names for dynamically discovered drawer strings.",
-        default = false,
-    ) {
+    patch {
 
         execute {
             resourceXml("res/values/public.xml").use { publicXml ->
@@ -198,6 +194,26 @@ private object NewXDrawerSharedFooterItemFingerprint : Fingerprint(
     returnType = "V",
     custom = { method, _ ->
         method.isDrawerRowRenderer() && method.parameterTypes.none { it.toString() == "Z" }
+    },
+)
+
+/**
+ * ICONLESS ROWS: the Grok bot menu rows (for example "Automate work") skip the icon row renderer
+ * and call a title-first, icon-less renderer directly, so the guards on the icon renderers never
+ * see them. Title is parameter 0, followed by the click lambda and the trailing Compose ints.
+ */
+private object NewXDrawerIconlessRowFingerprint : Fingerprint(
+    classFingerprint = NewXDrawerContentClassFingerprint,
+    returnType = "V",
+    custom = { method, _ ->
+        val parameters = method.parameterTypes.map(CharSequence::toString)
+        parameters.size in 7..11 &&
+            parameters[0] == "Ljava/lang/String;" &&
+            parameters[1] == FUNCTION0_DESCRIPTOR &&
+            parameters.count { it == "Landroidx/compose/ui/Modifier;" } == 1 &&
+            parameters.count { it == COMPOSER_DESCRIPTOR } == 1 &&
+            parameters.takeLast(2) == listOf("I", "I") &&
+            parameters[parameters.size - 3] == COMPOSER_DESCRIPTOR
     },
 )
 
@@ -1327,6 +1343,18 @@ val customizeNewXDrawerPatch =
             val menuCalls = resolveDrawerRendererCalls(menuRenderer)
             val menuResourceIds = resolveDrawerTitleResourceIds(menuRenderer, menuCalls)
             menuMatch.method.injectDrawerItemGuard(hiddenItems)
+
+            // ICONLESS ROWS: optional; only releases that render Grok bot menu rows have it.
+            val iconlessMatches =
+                NewXDrawerIconlessRowFingerprint.scopedMatchAllOrNull().orEmpty()
+                    .distinctBy { it.originalMethod.toString() }
+            if (iconlessMatches.size > 1) {
+                throw PatchException(
+                    "Expected at most one NewX drawer iconless row renderer, found " +
+                        "${iconlessMatches.size}: ${iconlessMatches.joinToString { it.originalMethod.toString() }}",
+                )
+            }
+            iconlessMatches.singleOrNull()?.method?.injectDrawerItemGuard(hiddenItems)
 
             // FOOTER ROWS: settings/help/feedback/media/imprint/debug render with a title.
             val footerMatches =
