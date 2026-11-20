@@ -162,6 +162,12 @@ val newXInlineDownloadButtonPatch =
                         defaultValue = true,
                     )
                     toggle(
+                        id = "newx.content.media_picker_grid_view",
+                        strings = settingStrings("piko_newx_media_picker_grid_view"),
+                        order = 325,
+                        defaultValue = false,
+                    )
+                    toggle(
                         id = "newx.content.media_picker_merge_button",
                         strings = settingStrings("piko_newx_media_picker_merge_button"),
                         order = 350,

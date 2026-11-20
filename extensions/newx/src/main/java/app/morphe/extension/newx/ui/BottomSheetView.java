@@ -67,6 +67,7 @@ public class BottomSheetView {
     private final SheetContainer mainContainer;
     private final FrameLayout dragHandleContainer;
     private final LinearLayout headerContainer;
+    private final FrameLayout headerTrailingContainer;
     private final TextView titleView;
     private final TextView subtitleView;
     private final FrameLayout bodyContainer;
@@ -203,15 +204,25 @@ public class BottomSheetView {
         dragHandleContainer.addView(pill);
         mainContainer.addView(dragHandleContainer);
 
-        // 2. Header Container (Title & Subtitle)
-        headerContainer = new LinearLayout(context);
-        headerContainer.setOrientation(LinearLayout.VERTICAL);
-        headerContainer.setPadding(
+        // 2. Header Container (Title & Subtitle + optional trailing action)
+        LinearLayout headerRow = new LinearLayout(context);
+        headerRow.setOrientation(LinearLayout.HORIZONTAL);
+        headerRow.setGravity(Gravity.CENTER_VERTICAL);
+        headerRow.setPadding(
                 Theme.dpToPx(context, 20f),
                 Theme.dpToPx(context, 6f),
-                Theme.dpToPx(context, 20f),
+                Theme.dpToPx(context, 16f),
                 Theme.dpToPx(context, 10f)
         );
+
+        headerContainer = new LinearLayout(context);
+        headerContainer.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams headerTextParams = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+        );
+        headerTextParams.setMarginEnd(Theme.dpToPx(context, 4f));
 
         titleView = new TextView(context);
         titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -227,7 +238,16 @@ public class BottomSheetView {
         subtitleView.setVisibility(View.GONE);
         headerContainer.addView(subtitleView);
 
-        mainContainer.addView(headerContainer);
+        headerRow.addView(headerContainer, headerTextParams);
+
+        headerTrailingContainer = new FrameLayout(context);
+        headerTrailingContainer.setVisibility(View.GONE);
+        headerRow.addView(headerTrailingContainer, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+
+        mainContainer.addView(headerRow);
 
         topDivider = createDivider();
         mainContainer.addView(topDivider);
@@ -266,6 +286,17 @@ public class BottomSheetView {
         } else {
             subtitleView.setText(subtitle);
             subtitleView.setVisibility(View.VISIBLE);
+        }
+        return this;
+    }
+
+    public BottomSheetView setHeaderTrailingView(@Nullable View view) {
+        headerTrailingContainer.removeAllViews();
+        if (view == null) {
+            headerTrailingContainer.setVisibility(View.GONE);
+        } else {
+            headerTrailingContainer.addView(view);
+            headerTrailingContainer.setVisibility(View.VISIBLE);
         }
         return this;
     }

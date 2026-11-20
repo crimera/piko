@@ -175,6 +175,8 @@
     <string name="piko_newx_media_picker_resolution_button_summary">Shows the icon that opens the resolution chooser per media item in the download media picker</string>
     <string name="piko_newx_media_picker_thumbnails_title">Load media thumbnails</string>
     <string name="piko_newx_media_picker_thumbnails_summary">Loads image previews in the download media picker instead of media type icons</string>
+    <string name="piko_newx_media_picker_grid_view_title">Grid view</string>
+    <string name="piko_newx_media_picker_grid_view_summary">Displays media items as a thumbnail grid instead of a list in the download media picker</string>
     <string name="piko_newx_media_picker_merge_button_title">Show merge button</string>
     <string name="piko_newx_media_picker_merge_button_summary">Shows a button to download and merge split artwork images in the media picker</string>
     <string name="piko_newx_inline_download_image_resolution_title">Photo quality</string>
