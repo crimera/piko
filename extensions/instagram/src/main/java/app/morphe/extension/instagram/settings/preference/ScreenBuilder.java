@@ -24,6 +24,7 @@ import app.morphe.extension.crimera.legacydownloader.StorageUtils;
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.patches.customise.font.FontStorage;
+import app.morphe.extension.instagram.patches.feed.FeedWhitelist;
 import app.morphe.extension.instagram.patches.focusLock.FocusLock;
 import app.morphe.extension.instagram.patches.focusLock.FocusLockTargets;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -83,12 +84,16 @@ public class ScreenBuilder {
             buildInstantsSection();
         } else if (Constants.PIKO_FRAGMENT_FONT.equals(fragmentName)) {
             buildFontSection();
+        } else if (Constants.PIKO_FRAGMENT_FEED_WHITELIST.equals(fragmentName)) {
+            if (SettingsStatus.feedWhitelist) FeedWhitelistScreen.build(context, screen);
         }
     }
 
     public void buildFragmentForSearch(String fragmentName, List<Flag> flags) {
         if (RecommendedFlagsScreen.isFlagsScreen(fragmentName)) {
             RecommendedFlagsScreen.build(context, screen, fragmentName, true, flags);
+        } else if (Constants.PIKO_FRAGMENT_FEED_WHITELIST.equals(fragmentName)) {
+            // Its rows are followed accounts loaded from the network, not settings to search.
         } else {
             buildFragment(fragmentName);
         }
@@ -555,6 +560,15 @@ public class ScreenBuilder {
                     str("piko_limit_following_feed_desc"),
                     Settings.LIMIT_FOLLOWING_FEED
             );
+            if (SettingsStatus.feedWhitelist) {
+                addPreference(
+                        helper.buttonPreference(
+                                str("piko_feed_whitelist"),
+                                FeedWhitelist.summary(),
+                                Constants.PIKO_FRAGMENT_FEED_WHITELIST
+                        )
+                );
+            }
         }
         if (SettingsStatus.disableDiscoverPeople) {
             addPreference(

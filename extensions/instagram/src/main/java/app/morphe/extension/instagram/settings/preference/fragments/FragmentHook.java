@@ -54,6 +54,8 @@ public class FragmentHook {
             actionBarTitleKey = "piko_instants_title";
         }else if(key.equals(Constants.PIKO_FRAGMENT_FONT)){
             actionBarTitleKey = "piko_category_font";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_FEED_WHITELIST)){
+            actionBarTitleKey = "piko_feed_whitelist";
         }
 
         if(actionBarTitleKey!=null){

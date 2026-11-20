@@ -158,7 +158,8 @@ public final class SettingsSearchIndex {
 
             if (preference instanceof ButtonPref && isFragmentKey(preferenceKey)) {
                 PreferenceScreen nestedScreen = factory.build(preferenceKey);
-                if (nestedScreen != null) {
+                // A menu with nothing to index inside, like the feed whitelist, is a result itself.
+                if (nestedScreen != null && nestedScreen.getPreferenceCount() > 0) {
                     String nestedIcon = ButtonPref.iconResourceNameForKey(preferenceKey);
                     Result nestedCategory = new Result(
                             title,
@@ -177,8 +178,8 @@ public final class SettingsSearchIndex {
                             results,
                             order
                     );
+                    continue;
                 }
-                continue;
             }
 
             results.add(new IndexedResult(

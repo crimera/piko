@@ -1,4 +1,5 @@
 package com.instagram.common.typedurl;
 
-public class ImageUrl {
+public interface ImageUrl {
+    String getUrl();
 }

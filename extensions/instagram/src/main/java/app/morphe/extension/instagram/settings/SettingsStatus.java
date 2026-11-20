@@ -157,6 +157,10 @@ public class SettingsStatus {
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
     }
+    public static boolean feedWhitelist = false;
+    public static void feedWhitelist() {
+        feedWhitelist = true;
+    }
     public static boolean hideFeedPosts = false;
     public static void hideFeedPosts() {
         hideFeedPosts = true;
@@ -331,6 +335,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);
         FLAGS.put(str("piko_hide_reels_follow_button"),SettingsStatus.hideReelsFollowButton);
         FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
+        FLAGS.put(str("piko_feed_whitelist"),SettingsStatus.feedWhitelist);
         FLAGS.put(str("piko_hide_feed_posts"),SettingsStatus.hideFeedPosts);
         FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
         FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);

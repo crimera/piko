@@ -47,6 +47,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.patches.devFlags.Flag;
+import app.morphe.extension.instagram.patches.feed.FeedWhitelist;
 import app.morphe.extension.instagram.settings.preference.RecommendedFlagsScreen;
 import app.morphe.extension.instagram.settings.preference.widgets.RecommendedFlagPreference;
 import app.morphe.extension.instagram.settings.preference.Helper;
@@ -73,7 +74,7 @@ public final class SettingsActivity {
 
     private static final Map<Activity, Controller> sControllers = new WeakHashMap<>();
 
-    static Controller getController(Activity activity) {
+    public static Controller getController(Activity activity) {
         return activity == null ? null : sControllers.get(activity);
     }
 
@@ -742,6 +743,10 @@ public final class SettingsActivity {
             refreshPreferenceSummary(
                     "piko_download_set_path",
                     StorageUtils::getCustomPathForDisplay
+            );
+            refreshPreferenceSummary(
+                    Constants.PIKO_FRAGMENT_FEED_WHITELIST,
+                    FeedWhitelist::summary
             );
             Preference preference = findPreference(Settings.AMOLED_THEME.key);
             if (preference instanceof SwitchPref) {

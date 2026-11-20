@@ -29,6 +29,8 @@ public class Settings {
     public static final BooleanSetting DIRECTLY_OPEN_METACONFIG = new BooleanSetting("directly_open_metaconfig",true, NOT_REQUIRED);
     public static final BooleanSetting DISABLE_DISCOVER_PEOPLE = new BooleanSetting("disable_discover_people", true, REQUIRED);
     public static final BooleanSetting LIMIT_FOLLOWING_FEED = new BooleanSetting("limit_following_feed", false, REQUIRED);
+    public static final StringSetting FEED_WHITELIST = new StringSetting("feed_whitelist_accounts", "", REQUIRED);
+    public static final StringSetting FEED_WHITELIST_MODE = new StringSetting("feed_whitelist_mode", "whitelist", REQUIRED);
     public static final BooleanSetting HIDE_FEED_POSTS = new BooleanSetting("hide_feed_posts", false, REQUIRED);
     public static final BooleanSetting TURN_ON_ALL_GHOST_MODES = new BooleanSetting("turn_on_all_ghost_modes", false, NOT_REQUIRED);
     public static final BooleanSetting VIEW_STORIES_ANONYMOUSLY = new BooleanSetting("view_stories_anonymously", false, NOT_REQUIRED);
