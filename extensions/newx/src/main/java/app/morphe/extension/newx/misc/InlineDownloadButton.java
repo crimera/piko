@@ -393,16 +393,11 @@ public final class InlineDownloadButton {
     private static List<?> mediaFor(Object post) {
         if (post == null) return java.util.Collections.emptyList();
 
-        List<?> canonicalMedia = mediaForCanonical(canonicalPost(post));
-        if (hasDownloadableMedia(canonicalMedia)) return canonicalMedia;
-
         Object repostedPost = getRepostedPost(post);
-        if (repostedPost == null) return java.util.Collections.emptyList();
-
-        List<?> repostedMedia = mediaForCanonical(getRepostedCanonicalPost(repostedPost));
-        return hasDownloadableMedia(repostedMedia)
-                ? repostedMedia
-                : java.util.Collections.emptyList();
+        List<?> repostedMedia = repostedPost == null
+                ? java.util.Collections.emptyList()
+                : mediaForCanonical(getRepostedCanonicalPost(repostedPost));
+        return selectMedia(mediaForCanonical(canonicalPost(post)), repostedMedia);
     }
 
     private static List<?> mediaForCanonical(Object canonicalPost) {
@@ -411,9 +406,14 @@ public final class InlineDownloadButton {
         return media instanceof List<?> list ? list : java.util.Collections.emptyList();
     }
 
+    /**
+     * The app renders a repost through its reposted post (the contextual post delegates to
+     * {@code rePostedPost ?: canonicalPost}), and the repost wrapper's own media can be a truncated
+     * subset, so the reposted media wins whenever it is downloadable.
+     */
     static List<?> selectMedia(List<?> canonicalMedia, List<?> repostedMedia) {
-        if (hasDownloadableMedia(canonicalMedia)) return canonicalMedia;
         if (hasDownloadableMedia(repostedMedia)) return repostedMedia;
+        if (hasDownloadableMedia(canonicalMedia)) return canonicalMedia;
         return java.util.Collections.emptyList();
     }
 

@@ -115,11 +115,14 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void canonicalMediaWinsWhenItHasDownloadableImage() {
+    public void repostedMediaWinsOverTruncatedWrapperMedia() {
+        // 12.43 timeline repost: the wrapper carried one image while the reposted post had four.
         List<?> canonicalMedia = Collections.singletonList(new ValidImageMedia());
-        List<?> repostedMedia = Collections.singletonList(new DownloadableMedia());
+        List<?> repostedMedia = java.util.Arrays.asList(
+                new ValidImageMedia(), new ValidImageMedia(), new ValidImageMedia(), new ValidImageMedia());
 
-        assertSame(canonicalMedia, InlineDownloadButton.selectMedia(canonicalMedia, repostedMedia));
+        assertSame(repostedMedia, InlineDownloadButton.selectMedia(canonicalMedia, repostedMedia));
+        assertSame(canonicalMedia, InlineDownloadButton.selectMedia(canonicalMedia, Collections.emptyList()));
     }
 
     @Test
