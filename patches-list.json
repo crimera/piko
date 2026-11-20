@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.12.0-dev.4",
+  "version": "3.12.0-dev.5",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -45,9 +45,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -182,9 +182,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -238,9 +238,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -313,9 +313,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -396,9 +396,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -479,9 +479,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -562,9 +562,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -591,9 +591,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -728,9 +728,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -989,9 +989,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1018,9 +1018,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1047,9 +1047,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1130,9 +1130,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1159,9 +1159,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1188,9 +1188,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1217,9 +1217,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1246,9 +1246,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1275,9 +1275,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1304,9 +1304,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1333,9 +1333,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1362,9 +1362,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1391,9 +1391,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1420,9 +1420,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1449,9 +1449,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1478,9 +1478,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1507,9 +1507,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1563,9 +1563,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1754,9 +1754,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1783,9 +1783,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1839,9 +1839,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1895,9 +1895,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1977,9 +1977,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2168,9 +2168,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2278,9 +2278,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2334,9 +2334,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2390,9 +2390,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2446,9 +2446,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2475,9 +2475,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2612,9 +2612,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2641,9 +2641,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2670,9 +2670,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2699,9 +2699,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2728,9 +2728,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2757,9 +2757,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2840,9 +2840,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2869,9 +2869,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2925,9 +2925,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2981,9 +2981,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3010,9 +3010,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3039,9 +3039,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3068,9 +3068,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3124,9 +3124,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3153,9 +3153,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5043,9 +5043,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5099,9 +5099,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5155,9 +5155,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5292,9 +5292,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5348,9 +5348,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5377,9 +5377,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5406,9 +5406,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5435,9 +5435,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5491,9 +5491,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5728,9 +5728,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5767,9 +5767,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5796,9 +5796,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5825,9 +5825,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5854,9 +5854,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,
@@ -5883,9 +5883,9 @@
           "formFactor": "MOBILE",
           "targets": [
             {
-              "version": "452.1.0.53.64",
+              "version": "456.0.0.53.78",
               "versionCodes": {
-                "ARM64_V8A": 385811006
+                "ARM64_V8A": 386214534
               },
               "isExperimental": false,
               "minSdk": null,

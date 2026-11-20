@@ -1,3 +1,18 @@
+## [3.12.0-dev.5](https://github.com/crimera/piko/compare/v3.12.0-dev.4...v3.12.0-dev.5) (2026-11-20)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Download every image from reposts with the inline download button ([e1d3157](https://github.com/crimera/piko/commit/e1d315719c37392648b6ccf681df83f0efdaad95))
+* **Twitter:** Hide iconless Grok rows in customized drawer ([a4ecf18](https://github.com/crimera/piko/commit/a4ecf18d59cfabf7af8c6a4c6232c1926511606d))
+
+### ✨ New Features
+
+* **Twitter:** Add grid view toggle to NewX inline download picker ([8c88f53](https://github.com/crimera/piko/commit/8c88f5355da9926d457b677fc5fdfe484a1c248a))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Add support for 456.0.0.53.78 ([9ae877b](https://github.com/crimera/piko/commit/9ae877b3e3acad985c79f5936419b58e689b4e49))
+
 ## [3.12.0-dev.4](https://github.com/crimera/piko/compare/v3.12.0-dev.3...v3.12.0-dev.4) (2026-11-19)
 
 ### 🐛 Bug Fixes
