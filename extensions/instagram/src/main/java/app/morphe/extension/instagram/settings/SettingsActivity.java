@@ -23,7 +23,9 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -335,7 +337,7 @@ public final class SettingsActivity {
             contentFrame = new FrameLayout(activity);
             contentFrame.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
-            FrameLayout fragmentContainer = new FrameLayout(activity);
+            FrameLayout fragmentContainer = new PreferenceListContainer(activity);
             fragmentContainer.setId(FRAGMENT_CONTAINER_ID);
             fragmentContainer.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
             contentFrame.addView(fragmentContainer, new FrameLayout.LayoutParams(
@@ -658,6 +660,43 @@ public final class SettingsActivity {
         }
     }
 
+    private static final class PreferenceListContainer extends FrameLayout {
+        private final int touchSlop;
+        private boolean fromBackEdge;
+        private float downX;
+        private float downY;
+
+        PreferenceListContainer(Context context) {
+            super(context);
+            touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent event) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    downX = event.getX();
+                    downY = event.getY();
+                    WindowInsets insets = getRootWindowInsets();
+                    fromBackEdge = false;
+                    if (Build.VERSION.SDK_INT >= 29 && insets != null) {
+                        android.graphics.Insets edges = insets.getSystemGestureInsets();
+                        fromBackEdge = downX < edges.left || getWidth() - downX < edges.right;
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_UP:
+                    // ListView checks vertical movement only and can click a row after a back swipe.
+                    float distanceX = Math.abs(event.getX() - downX);
+                    if (fromBackEdge && distanceX > touchSlop && distanceX > Math.abs(event.getY() - downY)) {
+                        return true;
+                    }
+                    break;
+            }
+            return super.onInterceptTouchEvent(event);
+        }
+    }
+
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
@@ -752,6 +791,10 @@ public final class SettingsActivity {
 
         @Override
         public void onPause() {
+            if (listView != null && getActivity().isFinishing()) {
+                // A row click can already be queued when the closing animation starts.
+                listView.setOnItemClickListener(null);
+            }
             preferenceManager.getSharedPreferences()
                     .unregisterOnSharedPreferenceChangeListener(dependencyListener);
             super.onPause();
