@@ -507,4 +507,6 @@
     <string name="piko_newx_translation_inline_summary">X\'s inline translate button uses your selected translator instead of Grok. FxTwitter falls back to Google here.</string>
     <string name="piko_newx_translation_translator_title">Translator</string>
     <string name="piko_newx_translation_translator_summary">Choose a free or custom translator and the target language</string>
+    <string name="piko_newx_translation_automatic_title">Automatically translate posts</string>
+    <string name="piko_newx_translation_automatic_summary">Translates displayed posts and quotes using your selected translator and target language. Sends post text to the translation provider. FxTwitter falls back to Google.</string>
 </resources>

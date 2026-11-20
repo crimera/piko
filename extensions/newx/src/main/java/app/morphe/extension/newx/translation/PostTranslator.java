@@ -119,10 +119,19 @@ public final class PostTranslator {
     /** Returns true when this request was accepted in place of NewX's original Grok request. */
     public static boolean translate(Object presenter, Object callback) {
         if (!inlineEnabled()) return false;
+        return translateAccepted(presenter, callback, presenter);
+    }
+
+    static void translateAutomatic(Object presenter, Object callback) {
+        if (!AutoTranslate.enabled()) return;
+        translateAccepted(presenter, callback, callback);
+    }
+
+    private static boolean translateAccepted(Object presenter, Object callback, Object requestOwner) {
         // A malformed caller should not silently route the action back to Grok.
         if (presenter == null || callback == null) return true;
         long generation = NEXT_GENERATION.incrementAndGet();
-        LATEST_GENERATION.put(presenter, generation);
+        LATEST_GENERATION.put(requestOwner, generation);
         try {
             publishLoading(callback);
 
@@ -139,7 +148,7 @@ public final class PostTranslator {
             final String source = sourceLanguage;
             final List<String> choices = pollChoices;
             EXECUTOR.execute(() -> translateRequest(
-                    presenter,
+                    requestOwner,
                     callback,
                     generation,
                     provider,
@@ -149,29 +158,29 @@ public final class PostTranslator {
                     source
             ));
         } catch (Exception exception) {
-            finishWithError(presenter, callback, generation, exception);
+            finishWithError(requestOwner, callback, generation, exception);
         }
         return true;
     }
 
     /** Keeps NewX's native eligibility result unless the force-show preference is enabled. */
     public static boolean shouldShowButton(boolean original) {
-        return original || forceButtonEnabled();
+        return original || forceButtonEnabled() || AutoTranslate.enabled();
     }
 
     /** Keeps NewX's Grok UI enabled when its original flag is set or a forced or inline translation is active. */
     public static boolean shouldEnableFeature(boolean original) {
-        return original || forceButtonEnabled() || inlineEnabled();
+        return original || forceButtonEnabled() || inlineEnabled() || AutoTranslate.enabled();
     }
 
     /** Keeps NewX's poll translation enabled when its original flag is set or inline translation is active. */
     public static boolean shouldEnablePollTranslation(boolean original) {
-        return original || inlineEnabled();
+        return original || inlineEnabled() || AutoTranslate.enabled();
     }
 
     /** Hides settings that only control NewX's remote Grok post translation while inline translation is active. */
     public static boolean useOriginalSettings(boolean original) {
-        return original && !inlineEnabled();
+        return original && !inlineEnabled() && !AutoTranslate.enabled();
     }
 
     /** Resolves ordered poll labels from NewX's stable card-binding map through patch-time accessors. */
@@ -335,6 +344,15 @@ public final class PostTranslator {
         return googleProvider();
     }
 
+    /** Captures configuration identity for cache separation and late-response checks. Never logged. */
+    static String automaticSelection() {
+        TranslatorConfig config = TranslatorConfig.shared();
+        String id = config.selectedId();
+        TranslatorConfig.CustomProvider custom = config.customProvider(id);
+        String details = custom == null ? "" : custom.type + "\0" + custom.url + "\0" + custom.model + "\0" + custom.apiKey;
+        return id + '\0' + resolveTargetLanguage() + '\0' + details;
+    }
+
     private static TranslationProvider googleProvider() {
         for (TranslationProvider provider : TranslatorConfig.shared().providers()) {
             if (TranslatorConfig.GOOGLE_ID.equals(provider.id())) return provider;
@@ -342,7 +360,7 @@ public final class PostTranslator {
         throw new IllegalStateException("Google translation provider is not registered");
     }
 
-    private static String resolveTargetLanguage() {
+    static String resolveTargetLanguage() {
         String target = normalizeLanguage(TranslatorConfig.shared().resolvedTargetLanguage());
         return target == null ? Locale.getDefault().toLanguageTag() : target;
     }
@@ -542,7 +560,7 @@ public final class PostTranslator {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 
-    private static Object readPostModel(Object presenter) {
+    static Object readPostModel(Object presenter) {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 
@@ -582,15 +600,15 @@ public final class PostTranslator {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 
-    private static String readText(Object presenter) {
+    static String readText(Object presenter) {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 
-    private static String readSourceLanguage(Object presenter) {
+    static String readSourceLanguage(Object presenter) {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 
-    private static List<String> readPollChoices(Object presenter) {
+    static List<String> readPollChoices(Object presenter) {
         throw new IllegalStateException("Unpatched translation bridge");
     }
 
