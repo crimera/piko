@@ -509,10 +509,41 @@
     <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_name" formatted="false">"Instagram Plus ek satışlarını göster"</string>
     <string name="piko_rec_flag_group_98ff88f597bb114beb0a03ab4b62049d_desc" formatted="false">"Instagram Plus yükseltme uyarılarını ve tanıtım ipuçlarını gizlemek için devre dışı bırakın"</string>
     <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_name" formatted="false">"Seçilmiş Instagram Plus özellikleri ve erişim noktaları"</string>
+    <string name="piko_rec_flag_group_65cac12ba706136a11ae80962a10fc13_desc" formatted="false">"Seçilen Instagram Plus erişim noktalarını, ücretsiz önizlemeleri, ücretsiz Süper Beğenileri ve sohbet yazı tipi görüntülenmesini devre dışı bırakın. Bu işlem, tüm Plus özelliklerini devre dışı bırakmaz"</string>
+    <string name="piko_rec_flag_126445_name" formatted="false">"Yayınlanan Hikayelerdeki zaman damgası için yeni stil"</string>
+    <string name="piko_rec_flag_93316_name" formatted="false">"Hikayeleri doğrudan Öne Çıkanlar'a paylaş"</string>
+    <string name="piko_rec_flag_93316_desc" formatted="false">"ve seçilen vurguya yönlendiren bir etiket ekleyin"</string>
+    <string name="piko_rec_flag_105130_name" formatted="false">"Birinin Hikayeler’deki Yakın Arkadaşlar listesinden kendini çıkar"</string>
+    <string name="piko_rec_flag_105130_desc" formatted="false">"Yakın Arkadaşlar simgesine tıkladığınızda, ayrılmak için bir düğme göreceksiniz."</string>
+    <string name="piko_rec_flag_119043_name" formatted="false">"Hikayelerdeki uçak simgesine basılı tutarak hikayeler gönderin"</string>
+    <string name="piko_rec_flag_119728_name" formatted="false">"Hikaye görüntüleyicisi listesinin yeniden tasarımı"</string>
+    <string name="piko_rec_flag_58803_name" formatted="false">"Akıştaki Instagram logosunu 'Senin için' ile değiştirin."</string>
+    <string name="piko_rec_flag_103957_name" formatted="false">"Akıştaki Reels ve videoları 2x hızda izlemek"</string>
+    <string name="piko_rec_flag_103957_desc" formatted="false">"Akışta oynatmak için köşelere basılı tutun."</string>
+    <string name="piko_rec_flag_109947_name" formatted="false">"Reels’ta taşma menüsünden oynatma hızı"</string>
+    <string name="piko_rec_flag_121815_name" formatted="false">"Reels’ta hızlı oynatma menüsü"</string>
+    <string name="piko_rec_flag_121815_desc" formatted="false">"Bu tuşa basılı tutulduğunda, hızlı oynatma menüsü açılır."</string>
+    <string name="piko_rec_flag_82799_16_name" formatted="false">"Kısa Reels videolarında arama çubuğunu gizle"</string>
+    <string name="piko_rec_flag_82799_16_desc" formatted="false">"Tüm Reel'lerde arama çubuğunu görüntülemek için bu seçeneği devre dışı bırakın ve “Arama çubuğu için minimum Reel süresi” ayarını 1 olarak belirleyin"</string>
+    <string name="piko_rec_flag_82799_41_name" formatted="false">"Arama çubuğu için minimum Reel süresi"</string>
+    <string name="piko_rec_flag_82799_41_desc" formatted="false">"Tüm Reels videolarında arama çubuğunu görüntülemek için değeri 1 olarak ayarlayın ve “Kısa Reels videolarında arama çubuğunu gizle” seçeneğini devre dışı bırakın"</string>
+    <string name="piko_rec_flag_98405_name" formatted="false">"Mesaj kutusunda geçici fotoğraf/videonun bir spoilerını göster"</string>
+    <string name="piko_rec_flag_46551_name" formatted="false">"Profil fotoğrafının genişletilmesine izin ver"</string>
+    <string name="piko_rec_flag_46551_desc" formatted="false">"\"Hesap Gizliliği\" ayarları bölümünde, kullanıcıların profil resimlerinde yakınlaştırma özelliğini etkinleştirmelerine veya devre dışı bırakmalarına olanak tanıyan yeni bir düğme göster."</string>
     <string name="piko_rec_flag_93842_name" formatted="false">"Yakınlaştırma animasyonunu keşfedin"</string>
+    <string name="piko_rec_flag_group_5a4e2edc04c51be62a40ece694ccdd82_name" formatted="false">"Keşfet'teki Kaydet düğmesi"</string>
+    <string name="piko_rec_flag_124823_name" formatted="false">"Keşfet sekmesinin yeniden tasarımı"</string>
+    <string name="piko_rec_flag_77064_name" formatted="false">"Takma ad yerine kullanıcının kullanıcı adını göster"</string>
+    <string name="piko_rec_flag_77064_desc" formatted="false">"bildirimler ve direkt için"</string>
+    <string name="piko_rec_flag_91066_name" formatted="false">"Bildirim ayarlarının yeniden tasarımı"</string>
+    <string name="piko_rec_flag_127260_name" formatted="false">"Hikayede Beğen düğmesine uzun basarak hızlı emoji tepkileri gönderin"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_name" formatted="false">"Meta AI giriş noktalarını ve komutlarını göster"</string>
+    <string name="piko_rec_flag_group_aa5ee1635c3d9669b9fc4b82e2cf511b_desc" formatted="false">"Meta AI giriş noktalarını ve komut istemlerini gizlemek için devre dışı bırakın"</string>
+    <string name="piko_rec_flag_group_07c8e3234c2abbfa9b05d389252b1e48_name" formatted="false">"Ek Meta AI komutlarını ve giriş noktalarını gizle"</string>
     <string name="piko_rec_flag_45023_0_name" formatted="false">"QR kodu paylaşımı"</string>
     <string name="piko_rec_flag_75196_8_desc" formatted="false">"DM gelen kutusundaki önerileri gizlemek için değeri 9000000000 olarak ayarlayın"</string>
     <string name="piko_rec_flag_126024_12_name" formatted="false">"Yüzen sekme çubuğu"</string>
+    <string name="piko_rec_flag_109125_name" formatted="false">"Ultra HDR her zaman açık"</string>
     <string name="piko_rec_flag_65057_0_name" formatted="false">"Haritalar notları"</string>
     <string name="piko_rec_flag_83371_10_name" formatted="false">"Oturum başına otomatik kaydırma"</string>
     <string name="piko_rec_flag_83371_10_desc" formatted="false">"Instagram her kapatıldığında bu özelliğin kapalı konuma sıfırlanmaması ve otomatik kaydırma özelliğinin bıraktığınız durumda kalması için bu seçeneği devre dışı bırakın."</string>
