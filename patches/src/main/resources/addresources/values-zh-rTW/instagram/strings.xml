@@ -166,8 +166,8 @@
     <string name="piko_send_keyboard_gifs_desc">將從鍵盤 GIF 選擇器選取的 GIF 以動畫圖片傳送，而不顯示「點按貼圖圖示以尋找及傳送 GIF」</string>
     <string name="piko_unlimited_replays">讓限次觀看的媒體可重複觀看</string>
     <string name="piko_unlimited_replays_desc">讓尚未過期、原本只能看一次或兩次的媒體可不限次數觀看</string>
-    <string name="piko_ephemeral_caption">顯示限時媒體的接收方式</string>
-    <string name="piko_ephemeral_caption_desc">在以限時媒體方式傳送的照片和影片下方新增一行字，說明其傳送方式以及有效期限</string>
+    <string name="piko_ephemeral_caption">顯示限次觀看媒體的接收方式</string>
+    <string name="piko_ephemeral_caption_desc">在以限次觀看模式傳送的照片和影片下方新增一行文字，說明傳送方式及有效期限</string>
     <string name="piko_ephemeral_received_once">已接收，僅可觀看一次</string>
     <string name="piko_ephemeral_received_twice">已接收，最多可觀看兩次</string>
     <string name="piko_ephemeral_received_chat">已接收並保留於對話中</string>
