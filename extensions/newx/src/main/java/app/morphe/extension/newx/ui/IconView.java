@@ -25,6 +25,7 @@ public class IconView extends View {
         CHECKBOX_UNCHECKED,
         PLAY,
         GRID_VIEW,
+        STAGGERED_VIEW,
         LIST_VIEW
     }
 
@@ -105,6 +106,9 @@ public class IconView extends View {
                 break;
             case GRID_VIEW:
                 drawGridViewIcon(canvas, cx, cy, size, strokeWidth);
+                break;
+            case STAGGERED_VIEW:
+                drawStaggeredViewIcon(canvas, cx, cy, size, strokeWidth);
                 break;
             case LIST_VIEW:
                 drawListViewIcon(canvas, cx, cy, size, strokeWidth);
@@ -351,6 +355,35 @@ public class IconView extends View {
                 canvas.drawRoundRect(rectF, rx, rx, paint);
             }
         }
+    }
+
+    private void drawStaggeredViewIcon(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
+        float span = size * 0.68f;
+        float gap = size * 0.14f;
+        float colW = (span - gap) / 2f;
+        float tallH = (span - gap) * 0.62f;
+        float shortH = (span - gap) - tallH;
+        float rx = Theme.dpToPx(getContext(), 2f);
+        float leftCol = cx - span / 2f;
+        float rightCol = leftCol + colW + gap;
+        float topY = cy - span / 2f;
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+
+        // Left column: tall top, short bottom
+        rectF.set(leftCol, topY, leftCol + colW, topY + tallH);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+        rectF.set(leftCol, topY + tallH + gap, leftCol + colW, topY + span);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+
+        // Right column: short top, tall bottom
+        rectF.set(rightCol, topY, rightCol + colW, topY + shortH);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+        rectF.set(rightCol, topY + shortH + gap, rightCol + colW, topY + span);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
     }
 
     private void drawListViewIcon(Canvas canvas, float cx, float cy, float size, float strokeWidth) {

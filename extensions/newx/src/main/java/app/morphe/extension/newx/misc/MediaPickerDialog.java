@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -28,6 +29,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.crimera.ui.ButtonView;
@@ -38,14 +41,15 @@ import app.morphe.extension.newx.ui.ListItem;
 import app.morphe.extension.newx.ui.Theme;
 import app.morphe.extension.newx.utils.NewXUtils;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.shared.settings.BooleanSetting;
 import app.morphe.extension.shared.settings.Setting;
+import app.morphe.extension.shared.settings.StringSetting;
 
 /**
  * Media Picker Bottom Sheet for NewX inline download action.
  * Inspired by Material 3 Expressive motion, shape morphing, and connected button groups.
  * Supports:
- * - List view and Grid view (toggled via an M3 Expressive connected button group in the header or in settings).
+ * - List, Grid, and Staggered (aspect-ratio-preserving masonry) views via a 3-segment M3 Expressive
+ *   connected button group in the header or in settings.
  * - Single item tap to download.
  * - Long-press (hold) on any item to enter multi-selection mode with expressive shape & inset morphing.
  * - Checkbox icons for item selection.
@@ -57,7 +61,13 @@ public final class MediaPickerDialog {
     private static final String COPY_LINK_SETTING_ID = "newx.content.media_picker_copy_link";
     private static final String RESOLUTION_BUTTON_SETTING_ID = "newx.content.media_picker_resolution_button";
     private static final String THUMBNAILS_SETTING_ID = "newx.content.media_picker_thumbnails";
-    private static final String GRID_VIEW_SETTING_ID = "newx.content.media_picker_grid_view";
+    private static final String LAYOUT_SETTING_ID = "newx.content.media_picker_layout";
+    private static final String GRID_COLUMNS_SETTING_ID = "newx.content.media_picker_grid_columns";
+    private static final String GRID_COLUMNS_AUTO = "auto";
+    private static final float WIDE_SCREEN_DP = 600f;
+    private static final float MIN_STAGGERED_ASPECT = 0.45f;
+    private static final float MAX_STAGGERED_ASPECT = 2.2f;
+    private static final Pattern DIMENSIONS_PATTERN = Pattern.compile("(\\d{2,5})x(\\d{2,5})");
     private static final String MERGE_BUTTON_SETTING_ID = "newx.content.media_picker_merge_button";
     private static final String LOG_PREFIX = "[PikoNewX][MediaPicker] ";
 
@@ -68,6 +78,28 @@ public final class MediaPickerDialog {
     // Effects spring (fast): critically damped, no bounce for opacity and color shifts.
     private static final Interpolator M3_EXPRESSIVE_EFFECTS =
             new PathInterpolator(0.31f, 0.94f, 0.34f, 1.00f);
+
+    enum LayoutMode {
+        LIST("list"),
+        GRID("grid"),
+        STAGGERED("staggered");
+
+        final String key;
+
+        LayoutMode(String key) {
+            this.key = key;
+        }
+
+        boolean isGridBased() {
+            return this == GRID || this == STAGGERED;
+        }
+
+        static LayoutMode fromKey(String key) {
+            if (GRID.key.equals(key)) return GRID;
+            if (STAGGERED.key.equals(key)) return STAGGERED;
+            return LIST;
+        }
+    }
 
     public interface OnMediaSelectedListener {
         void onDownloadItem(int index);
@@ -117,11 +149,11 @@ public final class MediaPickerDialog {
         boolean showCopyLinkButton = showCopyLinkButton();
         boolean showResolutionButton = resolutionButtonEnabled();
         boolean loadThumbnails = thumbnailsEnabled();
-        final boolean[] isGridView = new boolean[]{gridViewEnabled()};
+        final LayoutMode[] layoutMode = new LayoutMode[]{layoutModeSetting()};
         Theme.SettingsSnapshot themeSettings = Theme.snapshot();
         NewXLogger.printInfo(() ->
                 LOG_PREFIX + "showing picker items=" + downloads.size() +
-                        " gridView=" + isGridView[0] +
+                        " layout=" + layoutMode[0].key +
                         " thumbnailsEnabled=" + loadThumbnails +
                         " copyLinkEnabled=" + showCopyLinkButton +
                         " resolutionButtonEnabled=" + showResolutionButton
@@ -238,10 +270,11 @@ public final class MediaPickerDialog {
                 }
             }
 
-            if (isGridView[0]) {
+            if (layoutMode[0].isGridBased()) {
                 for (int i = 0; i < gridTiles.size(); i++) {
                     final int itemIndex = i;
                     GridTile tile = gridTiles.get(i);
+                    if (tile == null) continue;
                     InlineDownloadButton.DownloadItem item = downloads.get(i);
                     boolean isSelected = selectedIndices.contains(i);
                     Bitmap thumbnail = loadedThumbnails.get(i);
@@ -305,37 +338,55 @@ public final class MediaPickerDialog {
             }
         };
 
-        // Helper to build and attach the active body layout (grid or list)
+        // Helper to build and attach the active body layout (list, grid, or staggered)
         final boolean[] hasAttachedBody = new boolean[]{false};
         final Runnable bindBodyLayout = () -> {
             listItems.clear();
             gridTiles.clear();
             View bodyView;
-            if (isGridView[0]) {
-                bodyView = buildGridBody(
-                        current,
-                        downloads,
-                        themeSettings,
-                        isSelectionMode,
-                        selectedIndices,
-                        gridTiles,
-                        updateUiHolder,
-                        dialog,
-                        listener
-                );
-            } else {
-                bodyView = buildListBody(
-                        current,
-                        downloads,
-                        hasMultiple,
-                        themeSettings,
-                        isSelectionMode,
-                        selectedIndices,
-                        listItems,
-                        updateUiHolder,
-                        dialog,
-                        listener
-                );
+            switch (layoutMode[0]) {
+                case GRID:
+                    bodyView = buildGridBody(
+                            current,
+                            downloads,
+                            themeSettings,
+                            isSelectionMode,
+                            selectedIndices,
+                            gridTiles,
+                            updateUiHolder,
+                            dialog,
+                            listener
+                    );
+                    break;
+                case STAGGERED:
+                    bodyView = buildStaggeredBody(
+                            current,
+                            downloads,
+                            loadedThumbnails,
+                            themeSettings,
+                            isSelectionMode,
+                            selectedIndices,
+                            gridTiles,
+                            updateUiHolder,
+                            dialog,
+                            listener
+                    );
+                    break;
+                case LIST:
+                default:
+                    bodyView = buildListBody(
+                            current,
+                            downloads,
+                            hasMultiple,
+                            themeSettings,
+                            isSelectionMode,
+                            selectedIndices,
+                            listItems,
+                            updateUiHolder,
+                            dialog,
+                            listener
+                    );
+                    break;
             }
             dialog.setScrollableBodyView(bodyView);
             updateUiHolder[0].run();
@@ -346,16 +397,16 @@ public final class MediaPickerDialog {
             hasAttachedBody[0] = true;
         };
 
-        // Material 3 Expressive Connected Button Group (List <-> Grid) in the sheet header
+        // Material 3 Expressive 3-segment Connected Button Group (List | Grid | Staggered)
         ExpressiveViewModeToggle viewModeToggle = new ExpressiveViewModeToggle(
                 current,
                 themeSettings,
-                isGridView[0],
-                gridSelected -> {
-                    if (isGridView[0] == gridSelected) return;
-                    isGridView[0] = gridSelected;
-                    saveGridViewEnabled(gridSelected);
-                    NewXLogger.printInfo(() -> LOG_PREFIX + "layout toggled gridView=" + gridSelected);
+                layoutMode[0],
+                newMode -> {
+                    if (layoutMode[0] == newMode) return;
+                    layoutMode[0] = newMode;
+                    saveLayoutMode(newMode);
+                    NewXLogger.printInfo(() -> LOG_PREFIX + "layout toggled mode=" + newMode.key);
                     bindBodyLayout.run();
                 }
         );
@@ -387,9 +438,12 @@ public final class MediaPickerDialog {
                         thumbnailUrl,
                         bitmap -> {
                             loadedThumbnails.set(itemIndex, bitmap);
-                            if (isGridView[0]) {
+                            if (layoutMode[0].isGridBased()) {
                                 if (itemIndex < gridTiles.size()) {
-                                    gridTiles.get(itemIndex).setThumbnail(bitmap);
+                                    GridTile tile = gridTiles.get(itemIndex);
+                                    if (tile != null) {
+                                        tile.setThumbnail(bitmap);
+                                    }
                                 }
                             } else if (itemIndex < listItems.size()) {
                                 boolean isSelected = selectedIndices.contains(itemIndex);
@@ -540,8 +594,9 @@ public final class MediaPickerDialog {
         gridContainer.setPadding(padHoriz, padTop, padHoriz, padBottom);
 
         int count = downloads.size();
-        int columns = count == 1 ? 1 : 2;
-        int gap = Theme.dpToPx(activity, 10f);
+        int columns = resolveColumnsForActivity(activity, count);
+        boolean compact = columns >= 3;
+        int gap = Theme.dpToPx(activity, compact ? 8f : 10f);
 
         for (int rowStart = 0; rowStart < count; rowStart += columns) {
             LinearLayout row = new LinearLayout(activity);
@@ -572,7 +627,10 @@ public final class MediaPickerDialog {
                             activity,
                             themeSettings,
                             resolveIconType(item),
-                            columns == 1
+                            columns == 1,
+                            compact,
+                            false,
+                            1f
                     );
                     bindItemInteractions(
                             tile,
@@ -595,6 +653,131 @@ public final class MediaPickerDialog {
             gridContainer.addView(row);
         }
         return gridContainer;
+    }
+
+    private static View buildStaggeredBody(
+            Activity activity,
+            List<InlineDownloadButton.DownloadItem> downloads,
+            List<Bitmap> loadedThumbnails,
+            Theme.SettingsSnapshot themeSettings,
+            boolean[] isSelectionMode,
+            Set<Integer> selectedIndices,
+            List<GridTile> gridTiles,
+            Runnable[] updateUiHolder,
+            BottomSheetView dialog,
+            OnMediaSelectedListener listener
+    ) {
+        LinearLayout lanesRow = new LinearLayout(activity);
+        lanesRow.setOrientation(LinearLayout.HORIZONTAL);
+        int padHoriz = Theme.dpToPx(activity, 16f);
+        int padTop = Theme.dpToPx(activity, 8f);
+        int padBottom = Theme.dpToPx(activity, 12f);
+        lanesRow.setPadding(padHoriz, padTop, padHoriz, padBottom);
+
+        int count = downloads.size();
+        int columns = resolveColumnsForActivity(activity, count);
+        boolean compact = columns >= 3;
+        int gap = Theme.dpToPx(activity, compact ? 8f : 10f);
+
+        LinearLayout[] lanes = new LinearLayout[columns];
+        float[] laneHeights = new float[columns];
+        for (int col = 0; col < columns; col++) {
+            LinearLayout lane = new LinearLayout(activity);
+            lane.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams laneParams = new LinearLayout.LayoutParams(
+                    0,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    1f
+            );
+            if (col > 0) {
+                laneParams.setMarginStart(gap);
+            }
+            lanes[col] = lane;
+            lanesRow.addView(lane, laneParams);
+        }
+
+        for (int i = 0; i < count; i++) {
+            gridTiles.add(null);
+        }
+
+        for (int i = 0; i < count; i++) {
+            InlineDownloadButton.DownloadItem item = downloads.get(i);
+            Bitmap loaded = loadedThumbnails.get(i);
+            float aspectRatio = resolveInitialAspectRatio(item, loaded);
+
+            int targetCol = 0;
+            for (int col = 1; col < columns; col++) {
+                if (laneHeights[col] < laneHeights[targetCol]) {
+                    targetCol = col;
+                }
+            }
+
+            GridTile tile = new GridTile(
+                    activity,
+                    themeSettings,
+                    resolveIconType(item),
+                    columns == 1,
+                    compact,
+                    true,
+                    aspectRatio
+            );
+            bindItemInteractions(
+                    tile,
+                    i,
+                    isSelectionMode,
+                    selectedIndices,
+                    updateUiHolder,
+                    dialog,
+                    listener
+            );
+            gridTiles.set(i, tile);
+
+            LinearLayout.LayoutParams tileParams = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            if (lanes[targetCol].getChildCount() > 0) {
+                tileParams.topMargin = gap;
+            }
+            lanes[targetCol].addView(tile, tileParams);
+            laneHeights[targetCol] += (1f / aspectRatio) + 0.08f;
+        }
+
+        return lanesRow;
+    }
+
+    private static int resolveColumnsForActivity(Activity activity, int itemCount) {
+        DisplayMetrics dm = activity.getResources().getDisplayMetrics();
+        float screenWidthDp = dm.widthPixels / Math.max(1f, dm.density);
+        return resolveGridColumns(itemCount, screenWidthDp, gridColumnsSetting());
+    }
+
+    private static float resolveInitialAspectRatio(
+            InlineDownloadButton.DownloadItem item,
+            Bitmap loadedBitmap
+    ) {
+        if (loadedBitmap != null && loadedBitmap.getWidth() > 0 && loadedBitmap.getHeight() > 0) {
+            return clampAspectRatio((float) loadedBitmap.getWidth() / loadedBitmap.getHeight());
+        }
+        if (item != null && item.resolution != null) {
+            Matcher matcher = DIMENSIONS_PATTERN.matcher(item.resolution);
+            if (matcher.find()) {
+                try {
+                    int w = Integer.parseInt(matcher.group(1));
+                    int h = Integer.parseInt(matcher.group(2));
+                    if (w > 0 && h > 0) {
+                        return clampAspectRatio((float) w / h);
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return 1f;
+    }
+
+    private static float clampAspectRatio(float ratio) {
+        if (Float.isNaN(ratio) || Float.isInfinite(ratio) || ratio <= 0f) return 1f;
+        return Math.max(MIN_STAGGERED_ASPECT, Math.min(MAX_STAGGERED_ASPECT, ratio));
     }
 
     private static void bindItemInteractions(
@@ -718,17 +901,34 @@ public final class MediaPickerDialog {
         return SettingsRegistry.getBooleanOrDefault(THUMBNAILS_SETTING_ID, true);
     }
 
-    private static boolean gridViewEnabled() {
-        return SettingsRegistry.getBooleanOrDefault(GRID_VIEW_SETTING_ID, false);
+    private static LayoutMode layoutModeSetting() {
+        return LayoutMode.fromKey(SettingsRegistry.getStringOrDefault(LAYOUT_SETTING_ID, LayoutMode.LIST.key));
     }
 
-    private static void saveGridViewEnabled(boolean enabled) {
+    private static String gridColumnsSetting() {
+        return SettingsRegistry.getStringOrDefault(GRID_COLUMNS_SETTING_ID, GRID_COLUMNS_AUTO);
+    }
+
+    static int resolveGridColumns(int itemCount, float screenWidthDp, String settingValue) {
+        if (itemCount <= 1) return 1;
+        if ("2".equals(settingValue)) return Math.min(itemCount, 2);
+        if ("3".equals(settingValue)) return Math.min(itemCount, 3);
+        if ("4".equals(settingValue)) return Math.min(itemCount, 4);
+
+        boolean wideScreen = screenWidthDp >= WIDE_SCREEN_DP;
+        if (itemCount == 2) return 2;
+        if (itemCount == 3) return 3;
+        if (itemCount == 4) return wideScreen ? 4 : 2;
+        return wideScreen ? 4 : 3;
+    }
+
+    private static void saveLayoutMode(LayoutMode mode) {
         if (!SettingsRegistry.isLoaded()) {
             SettingsRegistry.load();
         }
-        Setting<?> setting = SettingsRegistry.settingOrNull(GRID_VIEW_SETTING_ID);
-        if (setting instanceof BooleanSetting toggle) {
-            toggle.save(enabled);
+        Setting<?> setting = SettingsRegistry.settingOrNull(LAYOUT_SETTING_ID);
+        if (setting instanceof StringSetting text) {
+            text.save(mode.key);
         }
     }
 
@@ -748,75 +948,80 @@ public final class MediaPickerDialog {
     }
 
     /**
-     * Material 3 Expressive Connected Button Group for switching between List and Grid view.
-     * Unselected segments keep full-pill outer corners and tight 6dp inner corners; the selected
-     * segment morphs its inner corner smoothly into a full pill with primaryContainer fill.
+     * Material 3 Expressive 3-segment Connected Button Group for switching between List, Grid,
+     * and Staggered views. Unselected segments keep full-pill outer ends and tight 6dp inner
+     * corners; the selected segment morphs smoothly into a full pill with primaryContainer fill.
      */
     private static final class ExpressiveViewModeToggle extends LinearLayout {
         interface OnModeChangedListener {
-            void onModeChanged(boolean gridSelected);
+            void onModeChanged(LayoutMode mode);
         }
 
         private final Theme.SettingsSnapshot themeSettings;
         private final float outerRadiusPx;
         private final float innerUnselectedRadiusPx;
-        private final FrameLayout listSegment;
-        private final FrameLayout gridSegment;
-        private final IconView listIcon;
-        private final IconView gridIcon;
-        private final GradientDrawable listBg = new GradientDrawable();
-        private final GradientDrawable gridBg = new GradientDrawable();
-        private final GradientDrawable listMask = new GradientDrawable();
-        private final GradientDrawable gridMask = new GradientDrawable();
-        private float listInnerRadius;
-        private float gridInnerRadius;
-        private boolean gridSelected;
+        private final FrameLayout[] segments = new FrameLayout[3];
+        private final IconView[] icons = new IconView[3];
+        private final GradientDrawable[] backgrounds = new GradientDrawable[3];
+        private final GradientDrawable[] masks = new GradientDrawable[3];
+        private final float[] innerRadii = new float[3];
+        private LayoutMode selectedMode;
         private ValueAnimator morphAnimator;
 
         ExpressiveViewModeToggle(
                 Context context,
                 Theme.SettingsSnapshot themeSettings,
-                boolean initialGridSelected,
+                LayoutMode initialMode,
                 OnModeChangedListener listener
         ) {
             super(context);
             this.themeSettings = themeSettings;
-            this.gridSelected = initialGridSelected;
+            this.selectedMode = initialMode;
             this.outerRadiusPx = Theme.dpToPx(context, 18f);
             this.innerUnselectedRadiusPx = Theme.dpToPx(context, 6f);
-            this.listInnerRadius = initialGridSelected ? innerUnselectedRadiusPx : outerRadiusPx;
-            this.gridInnerRadius = initialGridSelected ? outerRadiusPx : innerUnselectedRadiusPx;
 
             setOrientation(HORIZONTAL);
             setGravity(Gravity.CENTER_VERTICAL);
 
-            int segWidth = Theme.dpToPx(context, 42f);
+            int segWidth = Theme.dpToPx(context, 38f);
             int segHeight = Theme.dpToPx(context, 36f);
             int gap = Theme.dpToPx(context, 2f);
             int iconSize = Theme.dpToPx(context, 18f);
 
-            listIcon = new IconView(context, IconView.IconType.LIST_VIEW, themeSettings.secondaryText(context));
-            listSegment = createSegment(context, segWidth, segHeight, iconSize, listIcon, listBg, listMask);
-            listSegment.setContentDescription("List view");
-            listSegment.setOnClickListener(v -> {
-                if (!gridSelected) return;
-                setGridSelected(false, true);
-                listener.onModeChanged(false);
-            });
-            addView(listSegment);
+            LayoutMode[] modes = new LayoutMode[]{
+                    LayoutMode.LIST, LayoutMode.GRID, LayoutMode.STAGGERED
+            };
+            IconView.IconType[] iconTypes = new IconView.IconType[]{
+                    IconView.IconType.LIST_VIEW,
+                    IconView.IconType.GRID_VIEW,
+                    IconView.IconType.STAGGERED_VIEW
+            };
+            String[] descriptions = new String[]{
+                    "List view", "Grid view", "Staggered view"
+            };
 
-            gridIcon = new IconView(context, IconView.IconType.GRID_VIEW, themeSettings.secondaryText(context));
-            gridSegment = createSegment(context, segWidth, segHeight, iconSize, gridIcon, gridBg, gridMask);
-            gridSegment.setContentDescription("Grid view");
-            LayoutParams gridParams = (LayoutParams) gridSegment.getLayoutParams();
-            gridParams.setMarginStart(gap);
-            gridSegment.setLayoutParams(gridParams);
-            gridSegment.setOnClickListener(v -> {
-                if (gridSelected) return;
-                setGridSelected(true, true);
-                listener.onModeChanged(true);
-            });
-            addView(gridSegment);
+            for (int i = 0; i < 3; i++) {
+                final LayoutMode mode = modes[i];
+                innerRadii[i] = (mode == initialMode) ? outerRadiusPx : innerUnselectedRadiusPx;
+                backgrounds[i] = new GradientDrawable();
+                masks[i] = new GradientDrawable();
+                icons[i] = new IconView(context, iconTypes[i], themeSettings.secondaryText(context));
+                segments[i] = createSegment(
+                        context, segWidth, segHeight, iconSize, icons[i], backgrounds[i], masks[i]
+                );
+                segments[i].setContentDescription(descriptions[i]);
+                if (i > 0) {
+                    LayoutParams lp = (LayoutParams) segments[i].getLayoutParams();
+                    lp.setMarginStart(gap);
+                    segments[i].setLayoutParams(lp);
+                }
+                segments[i].setOnClickListener(v -> {
+                    if (selectedMode == mode) return;
+                    setSelectedMode(mode, true);
+                    listener.onModeChanged(mode);
+                });
+                addView(segments[i]);
+            }
 
             applySegmentVisuals();
         }
@@ -844,36 +1049,48 @@ public final class MediaPickerDialog {
             return segment;
         }
 
-        private void setGridSelected(boolean selected, boolean animate) {
-            this.gridSelected = selected;
-            float targetListInner = selected ? innerUnselectedRadiusPx : outerRadiusPx;
-            float targetGridInner = selected ? outerRadiusPx : innerUnselectedRadiusPx;
+        private int indexOf(LayoutMode mode) {
+            if (mode == LayoutMode.GRID) return 1;
+            if (mode == LayoutMode.STAGGERED) return 2;
+            return 0;
+        }
+
+        private void setSelectedMode(LayoutMode mode, boolean animate) {
+            this.selectedMode = mode;
+            int selectedIdx = indexOf(mode);
 
             if (morphAnimator != null) {
                 morphAnimator.cancel();
             }
 
             if (!animate) {
-                listInnerRadius = targetListInner;
-                gridInnerRadius = targetGridInner;
+                for (int i = 0; i < 3; i++) {
+                    innerRadii[i] = (i == selectedIdx) ? outerRadiusPx : innerUnselectedRadiusPx;
+                }
                 applySegmentVisuals();
                 return;
             }
 
-            final float startListInner = listInnerRadius;
-            final float startGridInner = gridInnerRadius;
+            final float[] startRadii = new float[]{innerRadii[0], innerRadii[1], innerRadii[2]};
+            final float[] targetRadii = new float[]{
+                    selectedIdx == 0 ? outerRadiusPx : innerUnselectedRadiusPx,
+                    selectedIdx == 1 ? outerRadiusPx : innerUnselectedRadiusPx,
+                    selectedIdx == 2 ? outerRadiusPx : innerUnselectedRadiusPx
+            };
+
             morphAnimator = ValueAnimator.ofFloat(0f, 1f);
             morphAnimator.setDuration(260);
             morphAnimator.setInterpolator(M3_EXPRESSIVE_SPATIAL);
             morphAnimator.addUpdateListener(anim -> {
                 float t = (float) anim.getAnimatedValue();
-                listInnerRadius = Math.max(0f, startListInner + (targetListInner - startListInner) * t);
-                gridInnerRadius = Math.max(0f, startGridInner + (targetGridInner - startGridInner) * t);
+                for (int i = 0; i < 3; i++) {
+                    innerRadii[i] = Math.max(0f, startRadii[i] + (targetRadii[i] - startRadii[i]) * t);
+                }
                 applySegmentVisuals();
             });
             morphAnimator.start();
 
-            View activeSegment = selected ? gridSegment : listSegment;
+            View activeSegment = segments[selectedIdx];
             activeSegment.animate().cancel();
             activeSegment.setScaleX(0.92f);
             activeSegment.setScaleY(0.92f);
@@ -891,38 +1108,32 @@ public final class MediaPickerDialog {
             int selectedFg = themeSettings.onPrimaryContainer(context);
             int unselectedBg = themeSettings.surfaceVariant(context);
             int unselectedFg = themeSettings.secondaryText(context);
+            int selectedIdx = indexOf(selectedMode);
 
-            float[] listRadii = new float[]{
-                    outerRadiusPx, outerRadiusPx,
-                    listInnerRadius, listInnerRadius,
-                    listInnerRadius, listInnerRadius,
-                    outerRadiusPx, outerRadiusPx
-            };
-            listBg.setCornerRadii(listRadii);
-            listBg.setColor(gridSelected ? unselectedBg : selectedBg);
-            listMask.setCornerRadii(listRadii);
-            listIcon.setIconColor(gridSelected ? unselectedFg : selectedFg);
-
-            float[] gridRadii = new float[]{
-                    gridInnerRadius, gridInnerRadius,
-                    outerRadiusPx, outerRadiusPx,
-                    outerRadiusPx, outerRadiusPx,
-                    gridInnerRadius, gridInnerRadius
-            };
-            gridBg.setCornerRadii(gridRadii);
-            gridBg.setColor(gridSelected ? selectedBg : unselectedBg);
-            gridMask.setCornerRadii(gridRadii);
-            gridIcon.setIconColor(gridSelected ? selectedFg : unselectedFg);
-
-            listSegment.invalidate();
-            gridSegment.invalidate();
+            for (int i = 0; i < 3; i++) {
+                float leftR = (i == 0) ? outerRadiusPx : innerRadii[i];
+                float rightR = (i == 2) ? outerRadiusPx : innerRadii[i];
+                float[] radii = new float[]{
+                        leftR, leftR,
+                        rightR, rightR,
+                        rightR, rightR,
+                        leftR, leftR
+                };
+                boolean isSelected = (i == selectedIdx);
+                backgrounds[i].setCornerRadii(radii);
+                backgrounds[i].setColor(isSelected ? selectedBg : unselectedBg);
+                masks[i].setCornerRadii(radii);
+                icons[i].setIconColor(isSelected ? selectedFg : unselectedFg);
+                segments[i].invalidate();
+            }
         }
     }
 
     /**
-     * Media thumbnail tile for Grid View, following Material 3 Expressive shape and motion cues:
-     * - Rounded 20dp surface tile without text labels.
-     * - Tactile spring press feedback and expressive inset + corner morph (20dp -> 26dp) when selected.
+     * Media thumbnail tile for Grid and Staggered views, following Material 3 Expressive shape and
+     * motion cues:
+     * - Rounded surface tile without text labels (square in Grid, aspect-ratio-preserving in Staggered).
+     * - Tactile spring press feedback and expressive inset + corner morph when selected.
      * - Centered play button for videos and full-pill GIF indicator in the bottom-left for GIFs.
      * - Top-right circular overlay action buttons (resolution / copy link) or selection checkbox.
      */
@@ -930,6 +1141,9 @@ public final class MediaPickerDialog {
         private final Theme.SettingsSnapshot themeSettings;
         private final IconView.IconType mediaType;
         private final boolean singleColumn;
+        private final boolean compact;
+        private final boolean preserveAspectRatio;
+        private float aspectRatio;
         private final float outerCornerPx;
         private final float innerCornerUnselectedPx;
         private final float innerCornerSelectedPx;
@@ -948,15 +1162,21 @@ public final class MediaPickerDialog {
                 Context context,
                 Theme.SettingsSnapshot themeSettings,
                 IconView.IconType mediaType,
-                boolean singleColumn
+                boolean singleColumn,
+                boolean compact,
+                boolean preserveAspectRatio,
+                float initialAspectRatio
         ) {
             super(context);
             this.themeSettings = themeSettings;
             this.mediaType = mediaType;
             this.singleColumn = singleColumn;
-            this.outerCornerPx = Theme.dpToPx(context, 20f);
+            this.compact = compact;
+            this.preserveAspectRatio = preserveAspectRatio;
+            this.aspectRatio = clampAspectRatio(initialAspectRatio);
+            this.outerCornerPx = Theme.dpToPx(context, compact ? 16f : 20f);
             this.innerCornerUnselectedPx = outerCornerPx;
-            this.innerCornerSelectedPx = Theme.dpToPx(context, 26f);
+            this.innerCornerSelectedPx = Theme.dpToPx(context, compact ? 22f : 26f);
             this.currentInnerCornerPx = innerCornerUnselectedPx;
 
             tileBg.setCornerRadius(outerCornerPx);
@@ -988,7 +1208,7 @@ public final class MediaPickerDialog {
 
             // 1. Placeholder icon (hidden for videos since the centered play badge occupies center)
             placeholderIcon = new IconView(context, mediaType, themeSettings.primaryAccent(context));
-            int placeholderSize = Theme.dpToPx(context, 32f);
+            int placeholderSize = Theme.dpToPx(context, compact ? 26f : 32f);
             LayoutParams placeholderParams = new LayoutParams(placeholderSize, placeholderSize, Gravity.CENTER);
             if (mediaType == IconView.IconType.VIDEO) {
                 placeholderIcon.setVisibility(View.GONE);
@@ -1006,12 +1226,12 @@ public final class MediaPickerDialog {
 
             // 3. Centered play indicator for videos
             if (mediaType == IconView.IconType.VIDEO) {
-                mediaCard.addView(buildCenterPlayBadge(context));
+                mediaCard.addView(buildCenterPlayBadge(context, compact));
             }
 
             // 4. Bottom-left full-pill GIF badge for GIFs
             if (mediaType == IconView.IconType.GIF) {
-                mediaCard.addView(buildGifBadge(context));
+                mediaCard.addView(buildGifBadge(context, compact));
             }
 
             // 5. Top-right actions (resolution / copy link) or selection checkbox
@@ -1023,7 +1243,7 @@ public final class MediaPickerDialog {
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     Gravity.TOP | Gravity.END
             );
-            int topRightMargin = Theme.dpToPx(context, 8f);
+            int topRightMargin = Theme.dpToPx(context, compact ? 6f : 8f);
             topRightParams.setMargins(topRightMargin, topRightMargin, topRightMargin, topRightMargin);
             addView(topRightContainer, topRightParams);
         }
@@ -1057,9 +1277,17 @@ public final class MediaPickerDialog {
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             int width = MeasureSpec.getSize(widthMeasureSpec);
-            int targetHeight = singleColumn
-                    ? Math.min(width, Theme.dpToPx(getContext(), 240f))
-                    : width;
+            int targetHeight;
+            if (preserveAspectRatio) {
+                int naturalHeight = Math.max(1, Math.round(width / aspectRatio));
+                targetHeight = singleColumn
+                        ? Math.min(naturalHeight, Theme.dpToPx(getContext(), 360f))
+                        : naturalHeight;
+            } else {
+                targetHeight = singleColumn
+                        ? Math.min(width, Theme.dpToPx(getContext(), 240f))
+                        : width;
+            }
             super.onMeasure(
                     widthMeasureSpec,
                     MeasureSpec.makeMeasureSpec(targetHeight, MeasureSpec.EXACTLY)
@@ -1068,6 +1296,13 @@ public final class MediaPickerDialog {
 
         void setThumbnail(Bitmap bitmap) {
             if (bitmap != null) {
+                if (preserveAspectRatio && bitmap.getWidth() > 0 && bitmap.getHeight() > 0) {
+                    float refinedRatio = clampAspectRatio((float) bitmap.getWidth() / bitmap.getHeight());
+                    if (Math.abs(refinedRatio - aspectRatio) > 0.02f) {
+                        aspectRatio = refinedRatio;
+                        requestLayout();
+                    }
+                }
                 thumbnailView.setImageBitmap(bitmap);
                 thumbnailView.setVisibility(View.VISIBLE);
                 placeholderIcon.setVisibility(View.GONE);
@@ -1107,7 +1342,7 @@ public final class MediaPickerDialog {
             if (selectionMode) {
                 topRightContainer.setVisibility(View.VISIBLE);
                 FrameLayout cbWrapper = new FrameLayout(context);
-                int wrapperSize = Theme.dpToPx(context, 28f);
+                int wrapperSize = Theme.dpToPx(context, compact ? 24f : 28f);
                 cbWrapper.setLayoutParams(new LinearLayout.LayoutParams(wrapperSize, wrapperSize));
 
                 if (!selected) {
@@ -1124,7 +1359,7 @@ public final class MediaPickerDialog {
                         ? themeSettings.checkboxChecked(context)
                         : Color.WHITE;
                 IconView cbIcon = new IconView(context, cbType, cbColor);
-                int iconSize = Theme.dpToPx(context, 22f);
+                int iconSize = Theme.dpToPx(context, compact ? 18f : 22f);
                 cbWrapper.addView(cbIcon, new LayoutParams(iconSize, iconSize, Gravity.CENTER));
                 cbWrapper.setOnClickListener(v -> onToggleSelection.run());
                 if (animateSelection && selected) {
@@ -1145,12 +1380,13 @@ public final class MediaPickerDialog {
                     return;
                 }
                 topRightContainer.setVisibility(View.VISIBLE);
-                int btnGap = Theme.dpToPx(context, 6f);
+                int btnGap = Theme.dpToPx(context, compact ? 4f : 6f);
 
                 if (showResolutions) {
                     View resBtn = buildOverlayActionButton(
                             context,
                             IconView.IconType.RESOLUTION,
+                            compact,
                             v -> {
                                 dialog.dismiss();
                                 listener.onShowResolutions(itemIndex);
@@ -1163,6 +1399,7 @@ public final class MediaPickerDialog {
                     View copyBtn = buildOverlayActionButton(
                             context,
                             IconView.IconType.COPY_LINK,
+                            compact,
                             v -> {
                                 dialog.dismiss();
                                 Utils.setClipboard(item.url);
@@ -1217,9 +1454,9 @@ public final class MediaPickerDialog {
             cornerAnimator.start();
         }
 
-        private static View buildCenterPlayBadge(Context context) {
+        private static View buildCenterPlayBadge(Context context, boolean compact) {
             FrameLayout badge = new FrameLayout(context);
-            int badgeSize = Theme.dpToPx(context, 48f);
+            int badgeSize = Theme.dpToPx(context, compact ? 40f : 48f);
             LayoutParams params = new LayoutParams(badgeSize, badgeSize, Gravity.CENTER);
             badge.setLayoutParams(params);
 
@@ -1230,21 +1467,21 @@ public final class MediaPickerDialog {
             badge.setBackground(circle);
 
             IconView playIcon = new IconView(context, IconView.IconType.PLAY, Color.WHITE);
-            int iconSize = Theme.dpToPx(context, 24f);
+            int iconSize = Theme.dpToPx(context, compact ? 20f : 24f);
             badge.addView(playIcon, new LayoutParams(iconSize, iconSize, Gravity.CENTER));
             return badge;
         }
 
-        private static View buildGifBadge(Context context) {
+        private static View buildGifBadge(Context context, boolean compact) {
             TextView badge = new TextView(context);
             badge.setText("GIF");
-            badge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+            badge.setTextSize(TypedValue.COMPLEX_UNIT_SP, compact ? 10 : 11);
             badge.setTypeface(UpdateFont.customTypefaceOr(Typeface.DEFAULT_BOLD));
             badge.setTextColor(Color.WHITE);
             badge.setLetterSpacing(0.06f);
 
-            int padHoriz = Theme.dpToPx(context, 8f);
-            int padVert = Theme.dpToPx(context, 3.5f);
+            int padHoriz = Theme.dpToPx(context, compact ? 6f : 8f);
+            int padVert = Theme.dpToPx(context, compact ? 2.5f : 3.5f);
             badge.setPadding(padHoriz, padVert, padHoriz, padVert);
 
             GradientDrawable pill = new GradientDrawable();
@@ -1258,7 +1495,7 @@ public final class MediaPickerDialog {
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     Gravity.BOTTOM | Gravity.START
             );
-            int margin = Theme.dpToPx(context, 10f);
+            int margin = Theme.dpToPx(context, compact ? 6f : 10f);
             params.setMargins(margin, margin, margin, margin);
             badge.setLayoutParams(params);
             return badge;
@@ -1267,10 +1504,11 @@ public final class MediaPickerDialog {
         private static View buildOverlayActionButton(
                 Context context,
                 IconView.IconType iconType,
+                boolean compact,
                 OnClickListener listener
         ) {
             FrameLayout btn = new FrameLayout(context);
-            int size = Theme.dpToPx(context, 34f);
+            int size = Theme.dpToPx(context, compact ? 28f : 34f);
             btn.setLayoutParams(new LinearLayout.LayoutParams(size, size));
 
             GradientDrawable circle = new GradientDrawable();
@@ -1292,7 +1530,7 @@ public final class MediaPickerDialog {
             btn.setFocusable(true);
 
             IconView icon = new IconView(context, iconType, Color.WHITE);
-            int iconSize = Theme.dpToPx(context, 16f);
+            int iconSize = Theme.dpToPx(context, compact ? 14f : 16f);
             btn.addView(icon, new LayoutParams(iconSize, iconSize, Gravity.CENTER));
             btn.setOnClickListener(listener);
             return btn;

@@ -161,11 +161,30 @@ val newXInlineDownloadButtonPatch =
                         order = 300,
                         defaultValue = true,
                     )
-                    toggle(
-                        id = "newx.content.media_picker_grid_view",
-                        strings = settingStrings("piko_newx_media_picker_grid_view"),
+                    singleChoice(
+                        id = "newx.content.media_picker_layout",
+                        strings = settingStrings("piko_newx_media_picker_layout"),
                         order = 325,
-                        defaultValue = false,
+                        defaultValue = "list",
+                        options =
+                            listOf(
+                                choice("list", "piko_newx_media_picker_layout_list"),
+                                choice("grid", "piko_newx_media_picker_layout_grid"),
+                                choice("staggered", "piko_newx_media_picker_layout_staggered"),
+                            ),
+                    )
+                    singleChoice(
+                        id = "newx.content.media_picker_grid_columns",
+                        strings = settingStrings("piko_newx_media_picker_grid_columns"),
+                        order = 330,
+                        defaultValue = "auto",
+                        options =
+                            listOf(
+                                choice("auto", "piko_newx_media_picker_grid_columns_auto"),
+                                choice("2", "piko_newx_media_picker_grid_columns_2"),
+                                choice("3", "piko_newx_media_picker_grid_columns_3"),
+                                choice("4", "piko_newx_media_picker_grid_columns_4"),
+                            ),
                     )
                     toggle(
                         id = "newx.content.media_picker_merge_button",
