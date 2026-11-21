@@ -23,7 +23,7 @@ public class FeatureSwitchPatch {
     // feature flag read anywhere in the app - a String.contains() scan over the whole
     // (unbounded, ever-growing) FLAGS_SEARCH string on every call was the actual cost there.
     // Kept alongside FLAGS_SEARCH itself since FeatureFlagCatalog reads that field directly.
-    private static final Set<String> FLAGS_SEARCH_SET = new HashSet<>();
+    private static final Set<String> FLAGS_SEARCH_SET = java.util.concurrent.ConcurrentHashMap.newKeySet();
     // flagInfo() below can be called from any thread, so the set, the string, and the pref write
     // all update under the same lock, and getFeatureFlagSearchItems() rebuilds under it too.
     private static final Object FLAGS_SEARCH_LOCK = new Object();
@@ -79,15 +79,32 @@ public class FeatureSwitchPatch {
     }
 
     public static void addFeatureFlagSearchItem(String flag) {
+        // Nearly every call is a flag seen already: answered without the lock (X reads flags from many threads).
+        if (FLAGS_SEARCH_SET.contains(flag)) return;
         synchronized (FLAGS_SEARCH_LOCK) {
             if (!FLAGS_SEARCH_SET.add(flag)) {
                 return;
             }
 
             FLAGS_SEARCH = FLAGS_SEARCH.concat(flag + ",");
-            Utils.setStringPref(Settings.MISC_FEATURE_FLAGS_SEARCH.key, FLAGS_SEARCH);
+            // Saved at most every 5 s: X reads its flags in bursts (hundreds at startup), and every save
+            // rewrites the whole settings file.
+            if (!flagsSaveScheduled) {
+                flagsSaveScheduled = true;
+                FLAGS_SAVER.postDelayed(() -> {
+                    String all;
+                    synchronized (FLAGS_SEARCH_LOCK) {
+                        flagsSaveScheduled = false;
+                        all = FLAGS_SEARCH;
+                    }
+                    Utils.setStringPref(Settings.MISC_FEATURE_FLAGS_SEARCH.key, all);
+                }, 5_000);
+            }
         }
     }
+
+    private static boolean flagsSaveScheduled;
+    private static final android.os.Handler FLAGS_SAVER = new android.os.Handler(android.os.Looper.getMainLooper());
 
     private static void removePremiumUpsell() {
         boolean isDisabled = Pref.removePremiumUpsell(); // The return value is inverted
@@ -134,6 +151,14 @@ public class FeatureSwitchPatch {
     }
 
     public static void load() {
+        // Older versions kept the changelog HTML in the settings file: dropped once, so the file parses fast at the
+        // next cold start (Pref now keeps it in a cache file).
+        try {
+            if (!Settings.LAST_CHANGELOG.defaultValue.equals(Utils.getStringPref(Settings.LAST_CHANGELOG))) {
+                Utils.removePref(Settings.LAST_CHANGELOG.key);
+            }
+        } catch (Throwable ignored) {
+        }
         String flags = Utils.getStringPref(Settings.MISC_FEATURE_FLAGS);
         if (!flags.isEmpty()) {
             for (String flag : flags.split(",")) {
