@@ -488,10 +488,17 @@ public class Pref {
     }
 
     public static float customiseStoryRingSize() {
+        float size = parseStoryRingSize(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
+        return size >= 1 ? size : Float.parseFloat(Settings.CUSTOMISE_STORY_RING_SIZE.defaultValue);
+    }
+
+    public static float parseStoryRingSize(String value) {
+        if (value == null) return 0;
         try {
-            return Float.parseFloat(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
-        } catch (Exception ex) {
-            return 100.0f;
+            float size = Float.parseFloat(value);
+            return Float.isFinite(size) && size >= 1 ? size : 0;
+        } catch (NumberFormatException ex) {
+            return 0;
         }
     }
 

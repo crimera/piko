@@ -1201,10 +1201,9 @@ public class ScreenBuilder {
         }
         if (SettingsStatus.customiseStoryRingSize) {
             addPreference(
-                    helper.editTextNumPreference(
+                    new StoryRingSizePreference(context,
                             str("piko_customise_story_ring_size"),
-                            str("piko_customise_story_ring_size_desc"),
-                            Settings.CUSTOMISE_STORY_RING_SIZE
+                            str("piko_customise_story_ring_size_desc")
                     )
             );
         }
