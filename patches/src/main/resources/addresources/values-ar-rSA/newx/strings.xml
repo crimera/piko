@@ -171,6 +171,8 @@
     <string name="piko_newx_media_picker_resolution_button_summary">يعرض الأيقونة التي تفتح اختيار الدقة لكل عنصر من عناصر الوسائط في محدّد تنزيل الوسائط</string>
     <string name="piko_newx_media_picker_thumbnails_title">تحميل الصور المصغّرة للوسائط</string>
     <string name="piko_newx_media_picker_thumbnails_summary">يُحمّل معاينات الصور في محدّد تنزيل الوسائط بدل أيقونات نوع الوسائط</string>
+    <string name="piko_newx_media_picker_grid_view_title">عرض كشبكة</string>
+    <string name="piko_newx_media_picker_grid_view_summary">يعرض عناصر الوسائط كشبكة صور مصغرة بدلًا من قائمة في محدّد الوسائط التنزيل</string>
     <string name="piko_newx_media_picker_merge_button_title">عرض زر الدمج</string>
     <string name="piko_newx_media_picker_merge_button_summary">يعرض زرًا لتنزيل ودمج الصور الفنية المقسّمة في محدّد الوسائط</string>
     <string name="piko_newx_inline_download_image_resolution_title">جودة الصورة</string>
