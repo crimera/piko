@@ -225,7 +225,6 @@
     <string name="piko_download_conflict_skip">이미 다운로드한 미디어 건너뛰기</string>
     <string name="piko_download_conflict_overwrite">기존 파일 덮어쓰기</string>
     <string name="piko_download_media_exists">미디어가 이미 존재합니다</string>
-    <string name="piko_download_media_in_progress">미디어가 이미 다운로드 중입니다</string>
     <string name="piko_download_file_name_template">파일 이름 형식</string>
     <string name="piko_download_file_name_template_invalid">잘못된 파일 이름입니다</string>
     <string name="piko_download_file_name_insert_token">%1$s 삽입</string>

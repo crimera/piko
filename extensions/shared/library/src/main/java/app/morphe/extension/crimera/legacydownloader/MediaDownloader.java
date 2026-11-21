@@ -18,10 +18,13 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
 import android.provider.DocumentsContract;
+import android.service.notification.StatusBarNotification;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -35,8 +38,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,16 +59,18 @@ public final class MediaDownloader {
     private static final String CHANNEL_ID = "media_download_channel";
     private static final int CONNECT_TIMEOUT_MS = 15_000;
     private static final int READ_TIMEOUT_MS = 30_000;
-    // Concurrent batches must reserve names before another request can choose them.
-    private static final Object CREATE_DOCUMENT_LOCK = new Object();
-    private static final Set<String> ACTIVE_DESTINATIONS = new HashSet<>();
+    private static final long FOLDER_LOAD_TIMEOUT_MS = 15_000;
+    private static final int MAX_LISTED_COMPLETIONS = 5;
     private static MediaDownloader shared;
 
     private final Context context;
     private final NotificationManager notificationManager;
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final AtomicInteger notificationIds = new AtomicInteger((int) System.currentTimeMillis());
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    // Main thread only: the completion notification and the file names it lists, newest first.
+    private int completionNotificationId;
+    private final Deque<String> completedFileNames = new ArrayDeque<>();
 
     public static synchronized MediaDownloader shared(Context context) {
         if (shared == null) shared = new MediaDownloader(context);
@@ -96,7 +103,7 @@ public final class MediaDownloader {
         enqueueBatch(Collections.singletonList(request));
     }
 
-    /** Saves the requests in order. Same names in a batch are numbered apart before the conflict policy applies, so a rerun meets the same names. */
+    /** Saves the requests in order, after every batch enqueued before it. Same names in a batch are numbered apart, around existing folders, before the conflict policy applies, so a rerun meets the same names. */
     public void enqueueBatch(List<DownloadRequest> requests) {
         List<DownloadRequest> batch = new ArrayList<>(requests);
         if (batch.isEmpty()) return;
@@ -108,7 +115,11 @@ public final class MediaDownloader {
             Map<String, Set<String>> claimedBySubFolder = new HashMap<>();
             for (DownloadRequest request : batch) {
                 if (request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME) continue;
-                Set<String> claimed = claimedBySubFolder.computeIfAbsent(request.subFolder, subFolder -> new HashSet<>());
+                Set<String> claimed = claimedBySubFolder.get(request.subFolder);
+                if (claimed == null) {
+                    claimed = directoryNames(request);
+                    claimedBySubFolder.put(request.subFolder, claimed);
+                }
                 request.fileName = DownloadFileNames.findAvailable(request.fileName, claimed);
                 claimed.add(request.fileName);
             }
@@ -118,12 +129,24 @@ public final class MediaDownloader {
         });
     }
 
+    private Set<String> directoryNames(DownloadRequest request) {
+        Set<String> names = new HashSet<>();
+        try {
+            for (Map.Entry<String, Uri> child : getChildDocuments(getTargetDirectoryUri(request)).entrySet()) {
+                if (child.getValue() == null) names.add(child.getKey());
+            }
+        } catch (Exception e) {
+            // The download reads the folder again and reports the failure.
+            PikoUtils.logger(e);
+        }
+        return names;
+    }
+
     private void runDownloadTask(DownloadRequest request) {
         int notificationId = notificationIds.incrementAndGet();
         Uri outputDocumentUri = null;
         boolean downloadCompleted = false;
         boolean replacing = false;
-        String activeDestination = null;
         File replacement = null;
         try {
             Notification.Builder builder;
@@ -137,33 +160,23 @@ public final class MediaDownloader {
                     .setOngoing(true) // Keeps notification un-swipable during download execution.
                     .setProgress(100, 0, false);
 
-            synchronized (CREATE_DOCUMENT_LOCK) {
-                Uri targetDirectoryUri = getTargetDirectoryUri(request);
-                String requestedDestination = targetDirectoryUri.buildUpon().appendPath(request.fileName).build().toString();
-                if (request.conflictPolicy != DownloadRequest.ConflictPolicy.RENAME
-                        && ACTIVE_DESTINATIONS.contains(requestedDestination)) {
-                    showToast(ExtensionStrings.DOWNLOAD_MEDIA_IN_PROGRESS);
-                    return;
-                }
-                Map<String, Uri> children = getChildDocuments(targetDirectoryUri);
-                Uri existing = request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME ? null
-                        : children.get(request.fileName);
-                if (existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.SKIP) {
-                    showToast(ExtensionStrings.DOWNLOAD_MEDIA_EXISTS);
-                    return;
-                }
-                replacing = existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.OVERWRITE;
-                if (replacing) {
-                    outputDocumentUri = existing;
-                } else {
-                    request.fileName = DownloadFileNames.findAvailable(request.fileName, children.keySet());
-                    outputDocumentUri = DocumentsContract.createDocument(
-                            context.getContentResolver(), targetDirectoryUri,
-                            getMimeType(request.fileName), request.fileName
-                    );
-                }
-                activeDestination = targetDirectoryUri.buildUpon().appendPath(request.fileName).build().toString();
-                ACTIVE_DESTINATIONS.add(activeDestination);
+            Uri targetDirectoryUri = getTargetDirectoryUri(request);
+            Map<String, Uri> children = getChildDocuments(targetDirectoryUri);
+            Uri existing = request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME ? null
+                    : children.get(request.fileName);
+            if (existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.SKIP) {
+                showToast(ExtensionStrings.DOWNLOAD_MEDIA_EXISTS);
+                return;
+            }
+            replacing = existing != null && request.conflictPolicy == DownloadRequest.ConflictPolicy.OVERWRITE;
+            if (replacing) {
+                outputDocumentUri = existing;
+            } else {
+                request.fileName = DownloadFileNames.findAvailable(request.fileName, children.keySet());
+                outputDocumentUri = DocumentsContract.createDocument(
+                        context.getContentResolver(), targetDirectoryUri,
+                        getMimeType(request.fileName), request.fileName
+                );
             }
             if (outputDocumentUri == null) {
                 throw new IOException("Could not create download file");
@@ -183,7 +196,6 @@ public final class MediaDownloader {
             }
             downloadCompleted = true;
 
-            // A new notification, since Android silently drops updates over its rate limit.
             notificationManager.cancel(notificationId);
             final int finalNotificationId = notificationIds.incrementAndGet();
             final String finalFileName = request.fileName;
@@ -195,13 +207,11 @@ public final class MediaDownloader {
             mainHandler.post(() -> {
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done)
                         .setContentTitle(downloadCompletedString)
-                        .setContentText(finalFileName)
                         .setOngoing(false) // This unlocks the swipe lock completely
                         .setProgress(0, 0, false) // Wipes the progress track bar layout away entirely
                         .setAutoCancel(true)
                         .setContentIntent(viewFileIntent);
-                // Force post the update layout
-                notificationManager.notify(finalNotificationId, builder.build());
+                showCompletion(builder, finalNotificationId, finalFileName);
 
                 try {
                     PikoUtils.toast(downloadCompletedString);
@@ -221,11 +231,31 @@ public final class MediaDownloader {
                 PikoUtils.logger(notificationException);
             }
         } finally {
-            synchronized (CREATE_DOCUMENT_LOCK) {
-                if (activeDestination != null) ACTIVE_DESTINATIONS.remove(activeDestination);
-            }
             if (replacement != null) replacement.delete();
         }
+    }
+
+    /**
+     * Posts {@code fileName}'s completion under the new {@code notificationId}, listing the completions still showing
+     * in it. Android drops updates over its rate limit and new notifications past 50 per app. Main thread only.
+     */
+    private void showCompletion(Notification.Builder builder, int notificationId, String fileName) {
+        boolean showing = false;
+        for (StatusBarNotification active : notificationManager.getActiveNotifications()) {
+            if (active.getId() == completionNotificationId) showing = true;
+        }
+        if (showing && !completedFileNames.isEmpty()) {
+            notificationManager.cancel(completionNotificationId);
+        } else {
+            completedFileNames.clear();
+        }
+        completedFileNames.addFirst(fileName);
+        if (completedFileNames.size() > MAX_LISTED_COMPLETIONS) completedFileNames.removeLast();
+        Notification.InboxStyle style = new Notification.InboxStyle();
+        for (String name : completedFileNames) style.addLine(name);
+        builder.setContentText(String.join(", ", completedFileNames)).setStyle(style);
+        notificationManager.notify(notificationId, builder.build());
+        completionNotificationId = notificationId;
     }
 
     private void replaceDocument(File replacement, Uri destination) throws IOException {
@@ -518,7 +548,8 @@ public final class MediaDownloader {
         return directoryUri;
     }
 
-    private Map<String, Uri> getChildDocuments(Uri parentUri) throws IOException {
+    /** The folder's children as display name, document id and mime type, once its provider has finished loading them. */
+    private Cursor queryChildren(Uri parentUri) throws IOException {
         Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
                 parentUri, DocumentsContract.getDocumentId(parentUri)
         );
@@ -527,9 +558,21 @@ public final class MediaDownloader {
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
                 DocumentsContract.Document.COLUMN_MIME_TYPE
         };
-        Map<String, Uri> children = new HashMap<>();
-        try (Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null)) {
+        long deadline = SystemClock.uptimeMillis() + FOLDER_LOAD_TIMEOUT_MS;
+        while (true) {
+            Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null);
             if (cursor == null) throw new IOException("Could not read download folder");
+            Bundle extras = cursor.getExtras();
+            if (extras == null || !extras.getBoolean(DocumentsContract.EXTRA_LOADING)) return cursor;
+            cursor.close();
+            if (SystemClock.uptimeMillis() > deadline) throw new IOException("Download folder is still loading");
+            SystemClock.sleep(250);
+        }
+    }
+
+    private Map<String, Uri> getChildDocuments(Uri parentUri) throws IOException {
+        Map<String, Uri> children = new HashMap<>();
+        try (Cursor cursor = queryChildren(parentUri)) {
             while (cursor.moveToNext()) {
                 // Directories reserve names too, but must never be treated as downloaded media.
                 Uri document = DocumentsContract.Document.MIME_TYPE_DIR.equals(cursor.getString(2)) ? null
@@ -541,26 +584,11 @@ public final class MediaDownloader {
     }
 
     private Uri findChildDirectory(Uri parentUri, String displayName) throws IOException {
-        Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                parentUri,
-                DocumentsContract.getDocumentId(parentUri)
-        );
-        String[] projection = new String[]{
-                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                DocumentsContract.Document.COLUMN_MIME_TYPE
-        };
-
-        try (Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null)) {
-            if (cursor == null) throw new IOException("Could not read download folder");
-
+        try (Cursor cursor = queryChildren(parentUri)) {
             while (cursor.moveToNext()) {
-                String childDocumentId = cursor.getString(0);
-                String childDisplayName = cursor.getString(1);
-                String childMimeType = cursor.getString(2);
-                if (displayName.equals(childDisplayName)
-                        && DocumentsContract.Document.MIME_TYPE_DIR.equals(childMimeType)) {
-                    return DocumentsContract.buildDocumentUriUsingTree(parentUri, childDocumentId);
+                if (displayName.equals(cursor.getString(0))
+                        && DocumentsContract.Document.MIME_TYPE_DIR.equals(cursor.getString(2))) {
+                    return DocumentsContract.buildDocumentUriUsingTree(parentUri, cursor.getString(1));
                 }
             }
         }

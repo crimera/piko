@@ -225,7 +225,6 @@
     <string name="piko_download_conflict_skip">Halihazırda indirilmiş medyayı atla</string>
     <string name="piko_download_conflict_overwrite">Mevcut dosyanın üzerine yaz</string>
     <string name="piko_download_media_exists">Medya zaten mevcut</string>
-    <string name="piko_download_media_in_progress">Medya halihazırda indiriliyor</string>
     <string name="piko_download_file_name_template">Dosya adı biçimi</string>
     <string name="piko_download_file_name_template_invalid">Geçersiz dosya adı</string>
     <string name="piko_download_file_name_insert_token">%1$s ekle</string>

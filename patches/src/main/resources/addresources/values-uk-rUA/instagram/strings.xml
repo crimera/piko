@@ -225,7 +225,6 @@
     <string name="piko_download_conflict_skip">Пропускати вже завантажене медіа</string>
     <string name="piko_download_conflict_overwrite">Перезаписати наявний файл</string>
     <string name="piko_download_media_exists">Медіа вже існує</string>
-    <string name="piko_download_media_in_progress">Медіа вже завантажується</string>
     <string name="piko_download_file_name_template">Формат імені файлу</string>
     <string name="piko_download_file_name_template_invalid">Недійсне ім\'я файлу</string>
     <string name="piko_download_file_name_insert_token">Вставити %1$s</string>

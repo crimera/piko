@@ -225,7 +225,6 @@
     <string name="piko_download_conflict_skip">Pomiń już pobrane multimedia</string>
     <string name="piko_download_conflict_overwrite">Nadpisz istniejący plik</string>
     <string name="piko_download_media_exists">Multimedia już istnieją</string>
-    <string name="piko_download_media_in_progress">Multimedia są już pobierane</string>
     <string name="piko_download_file_name_template">Format nazwy pliku</string>
     <string name="piko_download_file_name_template_invalid">Nieprawidłowa nazwa pliku</string>
     <string name="piko_download_file_name_insert_token">Wstaw %1$s</string>
