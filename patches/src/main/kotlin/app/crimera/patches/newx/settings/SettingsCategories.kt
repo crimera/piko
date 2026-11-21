@@ -78,15 +78,6 @@ internal object Groups {
             order = 160,
         )
 
-    val EXPLORE_TABS =
-        SettingsGroupMetadata(
-            id = "newx.timeline.explore_tabs",
-            titleResourceName = "piko_newx_group_explore_tabs_title",
-            summaryResourceName = "piko_newx_group_explore_tabs_summary",
-            iconResourceName = "ic_vector_search_stroke",
-            order = 170,
-        )
-
     val FOR_YOU_FILTERING =
         SettingsGroupMetadata(
             id = "newx.timeline.for_you_filtering",

@@ -6,29 +6,37 @@
 
 package app.morphe.extension.newx.misc;
 
-import java.lang.reflect.Field;
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import app.morphe.extension.crimera.settings.SettingsRegistry;
 import app.morphe.extension.newx.settings.NewXLogger;
 
 /**
- * Filters the UrpTimeline list that NewX builds for its tabbed URP surfaces.
+ * Filters {@code UrpTimeline} lists for the NewX Explore screen only.
  *
- * <p>The patched factory converts the explore_page GraphQL response into one
- * UrpTimeline per Explore tab. An item is matched against a hidden tab through
- * every string it carries (title, timeline id, segmented timeline id and the
- * scribe page/section), so the exact server-side naming stays an
- * implementation detail. Matching is fail-open on errors only: if filtering
- * itself throws, the original list is returned unchanged. Hiding every tab
- * is a valid choice and produces an empty list.
+ * <p>{@code UrpComponent} and {@code UrpPageFragment} are shared by multiple URP surfaces
+ * (Explore, Profile Connections, Connect, Community Notes, Topics). The patch registers the
+ * {@code UrpRepository} instance created for {@code ExploreComponent} and filters only updates
+ * belonging to that repository, reading {@code UrpTimeline} and {@code ScribeConfig} fields
+ * through patch-injected bytecode bridges (no runtime reflection).
+ *
+ * <p>Selected page indices are clamped before {@code Pages} construction so shrinking the tab
+ * list mid-session (e.g. when a user defers restarting) never violates Decompose's bounds check.
+ * Hiding every tab is allowed and yields an empty list; filtering fails open only on exceptions.
  */
 public final class ExploreTabFilter {
-    private static final String SETTING_PREFIX = "newx.explore_tabs.hide_";
+    private static final String SETTING_HIDDEN_TABS = "newx.explore.hidden_tabs";
+
+    private static final Object REPOSITORY_LOCK = new Object();
+    private static final Set<Object> EXPLORE_REPOSITORIES =
+            Collections.newSetFromMap(new WeakHashMap<>());
 
     private static final class TabRule {
         final String key;
@@ -53,7 +61,7 @@ public final class ExploreTabFilter {
                     new String[]{"Trending", "トレンド"}),
             new TabRule(
                     "news",
-                    new String[]{"news"},
+                    new String[]{"news", "explore_news"},
                     new String[]{"News", "ニュース"}),
             new TabRule(
                     "sports",
@@ -61,20 +69,118 @@ public final class ExploreTabFilter {
                     new String[]{"Sports", "スポーツ"}),
             new TabRule(
                     "entertainment",
-                    new String[]{"entertainment"},
+                    new String[]{"entertainment", "explore_entertainment"},
                     new String[]{"Entertainment", "エンターテイメント"}),
+    };
+
+    interface TabFields {
+        @Nullable
+        String scribeSection(Object tab);
+
+        @Nullable
+        String segmentedTimelineId(Object tab);
+
+        @Nullable
+        String timelineId(Object tab);
+
+        @Nullable
+        String title(Object tab);
+    }
+
+    private static final TabFields BRIDGE_FIELDS = new TabFields() {
+        @Override
+        @Nullable
+        public String scribeSection(Object tab) {
+            Object scribeConfig = scribeConfigOf(tab);
+            return scribeConfig == null ? null : scribeSectionOf(scribeConfig);
+        }
+
+        @Override
+        @Nullable
+        public String segmentedTimelineId(Object tab) {
+            return segmentedTimelineIdOf(tab);
+        }
+
+        @Override
+        @Nullable
+        public String timelineId(Object tab) {
+            return timelineIdOf(tab);
+        }
+
+        @Override
+        @Nullable
+        public String title(Object tab) {
+            return titleOf(tab);
+        }
     };
 
     private ExploreTabFilter() {
     }
 
-    public static List filter(List tabs) {
-        if (tabs == null || tabs.isEmpty()) return tabs;
+    /** Hook entry point: called from ExploreComponent before creating its UrpComponent. */
+    public static void registerExploreRepository(@Nullable Object repository) {
+        if (repository == null) return;
+        synchronized (REPOSITORY_LOCK) {
+            EXPLORE_REPOSITORIES.add(repository);
+        }
+    }
+
+    static boolean isExploreRepository(@Nullable Object repository) {
+        if (repository == null) return false;
+        synchronized (REPOSITORY_LOCK) {
+            return EXPLORE_REPOSITORIES.contains(repository);
+        }
+    }
+
+    static void clearRegisteredRepositoriesForTest() {
+        synchronized (REPOSITORY_LOCK) {
+            EXPLORE_REPOSITORIES.clear();
+        }
+    }
+
+    /** Hook entry point: filters tabs only when the owning UrpComponent belongs to Explore. */
+    @Nullable
+    public static List<Object> filterForComponent(
+            @Nullable Object urpComponent,
+            @Nullable List<Object> tabs
+    ) {
+        if (urpComponent == null || tabs == null || tabs.isEmpty()) return tabs;
+        try {
+            if (!isExploreRepository(repositoryOf(urpComponent))) return tabs;
+            Set<String> hiddenKeys = SettingsRegistry.getStringSetOrDefault(SETTING_HIDDEN_TABS);
+            return filter(tabs, hiddenKeys, BRIDGE_FIELDS);
+        } catch (Exception exception) {
+            NewXLogger.printException(() -> "Failed to customize NewX explore tabs", exception);
+            return tabs;
+        }
+    }
+
+    /**
+     * Hook entry point: clamps a Decompose Pages selectedIndex to the current list bounds so
+     * shrinking the Explore tab list without a full restart cannot throw IllegalArgumentException.
+     */
+    public static int clampSelectedIndex(int selectedIndex, @Nullable List<?> tabs) {
+        if (tabs == null || tabs.isEmpty()) return 0;
+        if (selectedIndex < 0) return 0;
+        int lastIndex = tabs.size() - 1;
+        return Math.min(selectedIndex, lastIndex);
+    }
+
+    /** Package-private so unit tests can drive rules and field extraction without the app. */
+    @Nullable
+    static List<Object> filter(
+            @Nullable List<Object> tabs,
+            @Nullable Set<String> hiddenKeys,
+            TabFields fields
+    ) {
+        if (tabs == null || tabs.isEmpty() || hiddenKeys == null || hiddenKeys.isEmpty()) {
+            return tabs;
+        }
 
         try {
-            List<TabRule> hidden = new ArrayList<>();
+            List<TabRule> hidden = new ArrayList<>(hiddenKeys.size());
             for (TabRule rule : TAB_RULES) {
-                if (SettingsRegistry.getBooleanOrDefault(SETTING_PREFIX + rule.key, false)) {
+                if (hiddenKeys.contains(rule.key)) {
                     hidden.add(rule);
                 }
             }
@@ -82,32 +188,37 @@ public final class ExploreTabFilter {
 
             List<Object> filtered = new ArrayList<>(tabs.size());
             for (Object tab : tabs) {
-                if (tab != null && isHidden(tab, hidden)) continue;
+                if (tab != null && isHidden(tab, hidden, fields)) continue;
                 filtered.add(tab);
             }
-            if (filtered.size() == tabs.size()) return tabs;
-            return filtered;
+            return filtered.size() == tabs.size() ? tabs : filtered;
         } catch (Exception exception) {
             NewXLogger.printException(() -> "Failed to customize NewX explore tabs", exception);
             return tabs;
         }
     }
 
-    private static boolean isHidden(Object tab, List<TabRule> hidden) {
-        Set<String> values = collectStrings(tab);
-        String representation = String.valueOf(tab);
+    private static boolean isHidden(Object tab, List<TabRule> hidden, TabFields fields) {
+        String scribeSection = fields.scribeSection(tab);
+        String segmentedTimelineId = fields.segmentedTimelineId(tab);
+        String timelineId = fields.timelineId(tab);
+        String title = fields.title(tab);
+
         for (TabRule rule : hidden) {
-            for (String value : values) {
-                if (matches(value, rule)) return true;
+            if (matchesId(scribeSection, rule)
+                    || matchesId(segmentedTimelineId, rule)
+                    || matchesId(timelineId, rule)
+                    || matchesTitle(title, rule)) {
+                return true;
             }
-            if (matchesRepresentation(representation, rule)) return true;
         }
         return false;
     }
 
-    private static boolean matches(String value, TabRule rule) {
-        String trimmed = value.trim();
-        String normalized = trimmed.toLowerCase(Locale.ROOT);
+    private static boolean matchesId(@Nullable String rawValue, TabRule rule) {
+        if (rawValue == null) return false;
+        String normalized = rawValue.trim().toLowerCase(Locale.ROOT);
+        if (normalized.isEmpty()) return false;
         for (String alias : rule.idAliases) {
             if (normalized.equals(alias)
                     || normalized.endsWith("_" + alias)
@@ -116,60 +227,49 @@ public final class ExploreTabFilter {
                 return true;
             }
         }
-        for (String title : rule.titleAliases) {
-            if (trimmed.equalsIgnoreCase(title)) return true;
+        return false;
+    }
+
+    private static boolean matchesTitle(@Nullable String rawTitle, TabRule rule) {
+        if (rawTitle == null) return false;
+        String trimmed = rawTitle.trim();
+        if (trimmed.isEmpty()) return false;
+        for (String alias : rule.titleAliases) {
+            if (trimmed.equalsIgnoreCase(alias)) return true;
         }
         return false;
     }
 
-    /** Fallback for when reflective field access yields nothing (e.g. UrpTimeline's toString). */
-    private static boolean matchesRepresentation(String representation, TabRule rule) {
-        for (String alias : rule.idAliases) {
-            if (representation.contains("=" + alias + ",")
-                    || representation.contains("=" + alias + ")")
-                    || representation.contains("=" + alias + "]")) {
-                return true;
-            }
-        }
-        for (String title : rule.titleAliases) {
-            if (representation.contains("title=" + title + ",")) return true;
-        }
-        return false;
+    // Patch-time bridge placeholders: bodies are replaced with direct field reads on the resolved
+    // NewX UrpComponent, UrpTimeline, and ScribeConfig classes.
+
+    @Nullable
+    static Object repositoryOf(Object urpComponent) {
+        return null;
     }
 
-    /**
-     * Collects the string fields of the item itself plus the string fields of
-     * one level of nested app objects (the scribe config), without depending
-     * on obfuscated field names.
-     */
-    private static Set<String> collectStrings(Object item) {
-        Set<String> values = new LinkedHashSet<>();
-        collectStrings(item, values, 0);
-        return values;
+    @Nullable
+    static String titleOf(Object urpTimeline) {
+        return null;
     }
 
-    private static void collectStrings(Object item, Set<String> values, int depth) {
-        if (item == null || depth > 1) return;
-        Field[] fields;
-        try {
-            fields = item.getClass().getDeclaredFields();
-        } catch (Exception ignored) {
-            return;
-        }
-        for (Field field : fields) {
-            try {
-                field.setAccessible(true);
-                Object value = field.get(item);
-                if (value instanceof String string) {
-                    values.add(string);
-                } else if (value != null
-                        && depth == 0
-                        && value.getClass().getName().startsWith("com.x.")) {
-                    collectStrings(value, values, depth + 1);
-                }
-            } catch (Exception ignored) {
-                // Skip fields that cannot be read and keep the rest.
-            }
-        }
+    @Nullable
+    static String timelineIdOf(Object urpTimeline) {
+        return null;
+    }
+
+    @Nullable
+    static String segmentedTimelineIdOf(Object urpTimeline) {
+        return null;
+    }
+
+    @Nullable
+    static Object scribeConfigOf(Object urpTimeline) {
+        return null;
+    }
+
+    @Nullable
+    static String scribeSectionOf(Object scribeConfig) {
+        return null;
     }
 }
