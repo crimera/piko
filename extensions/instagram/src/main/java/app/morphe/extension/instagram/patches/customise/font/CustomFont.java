@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import app.morphe.extension.instagram.patches.customise.emoji.EmojiFont;
 import app.morphe.extension.shared.Logger;
 
 /**
@@ -208,7 +209,7 @@ public class CustomFont {
      * {@code null} draws in the platform default, so it is substituted as that.
      */
     public static Typeface assign(Typeface typeface) {
-        if (!active) {
+        if (!active || EmojiFont.isEmojiTypeface(typeface)) {
             return typeface;
         }
         Typeface current = typeface != null ? typeface : Typeface.DEFAULT;
