@@ -46,7 +46,19 @@ public class ExtMediaEntities extends Debug{
 
     public String getHighResImageUrl()
             throws Exception {
-        return this.getImageUrl() + "?name=orig&format=jpg";
+        // In the image's own format (PNGs used to be saved as JPEG: upstream #1492).
+        return this.getImageUrl() + "?name=orig&format=" + imageExtension(this.getImageUrl());
+    }
+
+    /** jpg, png or webp, from the image URL's path (pbs.twimg.com/media/<id>.<ext>); jpg when unknown. */
+    static String imageExtension(String url) {
+        if (url == null) return "jpg";
+        String path = url;
+        int q = path.indexOf('?');
+        if (q >= 0) path = path.substring(0, q);
+        int dot = path.lastIndexOf('.');
+        String ext = dot >= 0 ? path.substring(dot + 1).toLowerCase(java.util.Locale.ROOT) : "";
+        return ext.equals("png") || ext.equals("webp") ? ext : "jpg";
     }
 
     public ArrayList<Media> getVideos() throws Exception {
@@ -92,7 +104,7 @@ public class ExtMediaEntities extends Debug{
 
                 int type = 0;
                 String url = this.getHighResImageUrl();
-                String ext = "jpg";
+                String ext = imageExtension(this.getImageUrl());
                 String res = this.getHighestResolution();
                 imageList.add(new Media(type, url, ext, res));
 
