@@ -162,7 +162,7 @@ public final class DeletedMessagesActivity {
                     if (a == activity) controller.resume();
                 }
                 @Override public void onActivityPaused(Activity a) {
-                    if (a == activity) controller.hide();
+                    if (a == activity && !a.isFinishing()) controller.hide();
                 }
                 @Override public void onActivityStopped(Activity a) {}
                 @Override public void onActivitySaveInstanceState(Activity a, Bundle b) {}
