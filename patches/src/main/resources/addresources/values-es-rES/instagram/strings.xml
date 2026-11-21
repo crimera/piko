@@ -225,6 +225,7 @@
     <string name="piko_download_conflict_skip">Omitir los archivos multimedia ya descargados</string>
     <string name="piko_download_conflict_overwrite">Sobrescribir el archivo existente</string>
     <string name="piko_download_media_exists">El medio ya existe</string>
+    <string name="piko_download_media_in_progress">El archivo multimedia ya se está descargando</string>
     <string name="piko_download_file_name_template">Formato de nombre de archivo</string>
     <string name="piko_download_file_name_template_invalid">Nombre de archivo no válido</string>
     <string name="piko_download_file_name_insert_token">Insertar %1$s</string>

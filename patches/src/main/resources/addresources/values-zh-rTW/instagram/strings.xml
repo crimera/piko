@@ -225,6 +225,7 @@
     <string name="piko_download_conflict_skip">略過已下載的媒體</string>
     <string name="piko_download_conflict_overwrite">覆寫現有檔案</string>
     <string name="piko_download_media_exists">媒體已存在</string>
+    <string name="piko_download_media_in_progress">媒體已在下載中</string>
     <string name="piko_download_file_name_template">檔案名稱格式</string>
     <string name="piko_download_file_name_template_invalid">無效的檔案名稱</string>
     <string name="piko_download_file_name_insert_token">插入 %1$s</string>
