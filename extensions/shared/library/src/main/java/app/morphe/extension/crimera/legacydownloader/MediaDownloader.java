@@ -113,15 +113,21 @@ public final class MediaDownloader {
         }
         executor.execute(() -> {
             Map<String, Set<String>> claimedBySubFolder = new HashMap<>();
-            for (DownloadRequest request : batch) {
-                if (request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME) continue;
-                Set<String> claimed = claimedBySubFolder.get(request.subFolder);
-                if (claimed == null) {
-                    claimed = directoryNames(request);
-                    claimedBySubFolder.put(request.subFolder, claimed);
+            try {
+                for (DownloadRequest request : batch) {
+                    if (request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME) continue;
+                    Set<String> claimed = claimedBySubFolder.get(request.subFolder);
+                    if (claimed == null) {
+                        claimed = directoryNames(request);
+                        claimedBySubFolder.put(request.subFolder, claimed);
+                    }
+                    request.fileName = DownloadFileNames.findAvailable(request.fileName, claimed);
+                    claimed.add(request.fileName);
                 }
-                request.fileName = DownloadFileNames.findAvailable(request.fileName, claimed);
-                claimed.add(request.fileName);
+            } catch (Exception | LinkageError e) {
+                PikoUtils.logger(e);
+                showToast(ExtensionStrings.DOWNLOAD_ERROR + e.getMessage());
+                return;
             }
             for (DownloadRequest request : batch) {
                 runDownloadTask(request);
@@ -129,15 +135,10 @@ public final class MediaDownloader {
         });
     }
 
-    private Set<String> directoryNames(DownloadRequest request) {
+    private Set<String> directoryNames(DownloadRequest request) throws Exception {
         Set<String> names = new HashSet<>();
-        try {
-            for (Map.Entry<String, Uri> child : getChildDocuments(getTargetDirectoryUri(request)).entrySet()) {
-                if (child.getValue() == null) names.add(child.getKey());
-            }
-        } catch (Exception e) {
-            // The download reads the folder again and reports the failure.
-            PikoUtils.logger(e);
+        for (Map.Entry<String, Uri> child : getChildDocuments(getTargetDirectoryUri(request)).entrySet()) {
+            if (child.getValue() == null) names.add(child.getKey());
         }
         return names;
     }
@@ -548,7 +549,7 @@ public final class MediaDownloader {
         return directoryUri;
     }
 
-    /** The folder's children as display name, document id and mime type, once its provider has finished loading them. */
+    /** The folder's children as display name, document id and mime type, once its provider has loaded them all without an error. */
     private Cursor queryChildren(Uri parentUri) throws IOException {
         Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
                 parentUri, DocumentsContract.getDocumentId(parentUri)
@@ -562,9 +563,11 @@ public final class MediaDownloader {
         while (true) {
             Cursor cursor = context.getContentResolver().query(childrenUri, projection, null, null, null);
             if (cursor == null) throw new IOException("Could not read download folder");
-            Bundle extras = cursor.getExtras();
-            if (extras == null || !extras.getBoolean(DocumentsContract.EXTRA_LOADING)) return cursor;
+            Bundle extras = cursor.getExtras() != null ? cursor.getExtras() : Bundle.EMPTY;
+            String error = extras.getString(DocumentsContract.EXTRA_ERROR);
+            if (error == null && !extras.getBoolean(DocumentsContract.EXTRA_LOADING)) return cursor;
             cursor.close();
+            if (error != null) throw new IOException(error);
             if (SystemClock.uptimeMillis() > deadline) throw new IOException("Download folder is still loading");
             SystemClock.sleep(250);
         }
