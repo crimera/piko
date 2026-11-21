@@ -39,6 +39,7 @@ public final class TimelinePosition {
     private static final class State {
         boolean pending;
         boolean abandoned;
+        int attempts;
         List<?> positions;
     }
 
@@ -57,6 +58,7 @@ public final class TimelinePosition {
             LISTS.put(recycler, new WeakReference<>(provider));
             State state = STATES.computeIfAbsent(provider, key -> new State());
             if (state.abandoned) return false;
+            if (positions != state.positions) state.attempts = 0;   // a new restore, not afterRender's retry
             state.pending = !positions.isEmpty();
             state.positions = state.pending ? positions : null;
 
@@ -110,7 +112,13 @@ public final class TimelinePosition {
             if (!b.enabled(controller)) return;
             State state = STATES.get(b.provider.get(controller));
             if (state == null || !state.pending || state.abandoned || state.positions == null) return;
-            // Native startup restoration runs before later collections contain the saved row.
+            // Native startup restoration runs before later collections contain the saved row. Each try reads the
+            // whole adapter, so after 30 renders without the row it stops trying (the row is gone).
+            if (++state.attempts > 30) {
+                state.pending = false;
+                state.positions = null;
+                return;
+            }
             restore(controller, state.positions);
         } catch (ReflectiveOperationException | RuntimeException ignored) {
         }
@@ -153,6 +161,17 @@ public final class TimelinePosition {
                 if (row > 0) items.put(row, null);
             }
             int remaining = items.size();
+            // Usually each row is found directly by its index (one call per row instead of reading the
+            // whole adapter, which is hundreds of items deep in a long timeline).
+            for (Map.Entry<Long, Object> e : items.entrySet()) {
+                int index = (Integer) b.lookup.invoke(controller, e.getKey());
+                if (index < 0 || index >= count) continue;
+                Object item = b.item.invoke(adapter, index);
+                if (item != null && b.itemRow.getLong(item) == e.getKey()) {
+                    e.setValue(item);
+                    remaining--;
+                }
+            }
             for (int i = 0; i < count && remaining > 0; i++) {
                 Object item = b.item.invoke(adapter, i);
                 if (item == null) continue;
