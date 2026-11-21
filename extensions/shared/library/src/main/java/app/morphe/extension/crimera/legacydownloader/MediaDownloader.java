@@ -12,8 +12,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.database.Cursor;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -24,7 +26,6 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
-import android.service.notification.StatusBarNotification;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -61,6 +62,7 @@ public final class MediaDownloader {
     private static final int READ_TIMEOUT_MS = 30_000;
     private static final long FOLDER_LOAD_TIMEOUT_MS = 15_000;
     private static final int MAX_LISTED_COMPLETIONS = 5;
+    private static final String ACTION_COMPLETION_DISMISSED = "app.morphe.extension.crimera.DOWNLOAD_COMPLETION_DISMISSED";
     private static MediaDownloader shared;
 
     private final Context context;
@@ -68,7 +70,8 @@ public final class MediaDownloader {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final AtomicInteger notificationIds = new AtomicInteger((int) System.currentTimeMillis());
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    // Main thread only: the completion notification and the file names it lists, newest first.
+    private final PendingIntent completionDismissedIntent;
+    // Main thread only: the completion notification and the file names it lists, newest first, since the user last dismissed it.
     private int completionNotificationId;
     private final Deque<String> completedFileNames = new ArrayDeque<>();
 
@@ -90,6 +93,22 @@ public final class MediaDownloader {
             throw new IllegalStateException("Notification service is unavailable");
         }
         createNotificationChannel();
+
+        BroadcastReceiver dismissed = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                completedFileNames.clear();
+            }
+        };
+        IntentFilter filter = new IntentFilter(ACTION_COMPLETION_DISMISSED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            this.context.registerReceiver(dismissed, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            this.context.registerReceiver(dismissed, filter);
+        }
+        completionDismissedIntent = PendingIntent.getBroadcast(this.context, 0,
+                new Intent(ACTION_COMPLETION_DISMISSED).setPackage(this.context.getPackageName()),
+                PendingIntent.FLAG_IMMUTABLE);
     }
 
     private void createNotificationChannel() {
@@ -103,7 +122,7 @@ public final class MediaDownloader {
         enqueueBatch(Collections.singletonList(request));
     }
 
-    /** Saves the requests in order, after every batch enqueued before it. Each target folder is read first, so an unreadable one fails the whole batch. Same names in a batch are numbered apart, around existing folders, before the conflict policy applies, so a rerun meets the same names. */
+    /** Saves the requests in order, after every batch enqueued before it. Same names in a batch are numbered apart, around existing folders, before the conflict policy applies, so a rerun meets the same names. */
     public void enqueueBatch(List<DownloadRequest> requests) {
         List<DownloadRequest> batch = new ArrayList<>(requests);
         if (batch.isEmpty()) return;
@@ -115,12 +134,12 @@ public final class MediaDownloader {
             Map<String, Set<String>> claimedBySubFolder = new HashMap<>();
             try {
                 for (DownloadRequest request : batch) {
+                    if (request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME) continue;
                     Set<String> claimed = claimedBySubFolder.get(request.subFolder);
                     if (claimed == null) {
                         claimed = directoryNames(request);
                         claimedBySubFolder.put(request.subFolder, claimed);
                     }
-                    if (request.conflictPolicy == DownloadRequest.ConflictPolicy.RENAME) continue;
                     request.fileName = DownloadFileNames.findAvailable(request.fileName, claimed);
                     claimed.add(request.fileName);
                 }
@@ -210,8 +229,8 @@ public final class MediaDownloader {
                         .setContentTitle(downloadCompletedString)
                         .setOngoing(false) // This unlocks the swipe lock completely
                         .setProgress(0, 0, false) // Wipes the progress track bar layout away entirely
-                        .setAutoCancel(true)
-                        .setContentIntent(viewFileIntent);
+                        .setContentIntent(viewFileIntent)
+                        .setDeleteIntent(completionDismissedIntent);
                 try {
                     showCompletion(builder, finalNotificationId, finalFileName);
                 } catch (Exception e) {
@@ -241,19 +260,12 @@ public final class MediaDownloader {
     }
 
     /**
-     * Posts {@code fileName}'s completion under the new {@code notificationId}, listing the completions still showing
-     * in it. Android drops updates over its rate limit and new notifications past 50 per app. Main thread only.
+     * Replaces the previous completion with {@code fileName}'s under the new {@code notificationId}, listing the
+     * completions since the user last dismissed it. Android drops updates over its rate limit and new notifications
+     * past 50 per app. Main thread only.
      */
     private void showCompletion(Notification.Builder builder, int notificationId, String fileName) {
-        if (!completedFileNames.isEmpty()) {
-            boolean showing = false;
-            for (StatusBarNotification active : notificationManager.getActiveNotifications()) {
-                if (active.getId() == completionNotificationId) showing = true;
-            }
-            // Cancelled even when not listed, since Android lists a just-posted notification only after a delay.
-            notificationManager.cancel(completionNotificationId);
-            if (!showing) completedFileNames.clear();
-        }
+        if (!completedFileNames.isEmpty()) notificationManager.cancel(completionNotificationId);
         completedFileNames.addFirst(fileName);
         if (completedFileNames.size() > MAX_LISTED_COMPLETIONS) completedFileNames.removeLast();
         Notification.InboxStyle style = new Notification.InboxStyle();
