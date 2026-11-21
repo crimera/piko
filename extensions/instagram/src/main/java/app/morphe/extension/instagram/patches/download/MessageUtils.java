@@ -8,6 +8,8 @@
 package app.morphe.extension.instagram.patches.download;
 
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Context;
 
 import app.morphe.extension.instagram.entity.MessageInfo;
@@ -54,6 +56,7 @@ public class MessageUtils {
 
         } catch (Exception e) {
             app.morphe.extension.crimera.PikoUtils.logger(e);
+            Utils.showToastShort(str("piko_download_failed_media"));
         }
         return false;
     }

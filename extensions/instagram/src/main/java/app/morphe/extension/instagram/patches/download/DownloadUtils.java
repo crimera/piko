@@ -269,6 +269,7 @@ public class DownloadUtils {
         } catch (Exception e) {
             PikoUtils.logger(e);
             Logger.printException(() -> "Error at downloadPost", e);
+            Utils.showToastShort(str("piko_download_failed_media"));
         }
     }
 
@@ -370,7 +371,7 @@ public class DownloadUtils {
         if (mediaType.equals(MediaType.AUDIO)) {
             AudioMediaInterface audioMedia = mediaInfo.getMediaAt(position).getAudioMedia();
             String audioUrl = audioMedia.getAudioUrl();
-            String fileName = audioMedia.getDownloadName() + ".mp3";
+            String fileName = DownloadFileNameFormatter.safeFilename(audioMedia.getDownloadName(), ".m4a");
             downloader.enqueue(createDownloadRequest(audioUrl, Constants.DEFAULT_AUDIO_FOLDER, fileName));
 
         } else if (position != -1) {
