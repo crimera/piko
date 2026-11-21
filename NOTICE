@@ -9,3 +9,15 @@ https://github.com/crimera/piko
 
 This NOTICE file must be preserved and retained in all distributions
 of the Source Code and any Derivative Works.
+
+
+Hushfeed NOTICE
+
+https://github.com/SysAdminDoc/hushfeed
+
+=============
+
+Copyright 2026 Hushfeed contributors
+
+The Twitter "App lock" patch is derived from Hushfeed, licensed under the GNU
+General Public License v3.0, and was modified for Piko in November 2026.

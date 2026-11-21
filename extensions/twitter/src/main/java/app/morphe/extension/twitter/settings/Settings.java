@@ -24,6 +24,8 @@ public class Settings {
     public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");
 
     public static final BooleanSetting MISC_BLOCK_UPDATE_SCREEN = new BooleanSetting("misc_block_update_screen", true);
+    public static final BooleanSetting MISC_APP_LOCK = new BooleanSetting("misc_app_lock", false);
+    public static final StringSetting MISC_APP_LOCK_TIMEOUT = new StringSetting("misc_app_lock_timeout", "0");
     public static final BooleanSetting MISC_FONT = new BooleanSetting("misc_font", false);
     public static final BooleanSetting MISC_HIDE_FAB = new BooleanSetting("misc_hide_fab", false);
     public static final BooleanSetting MISC_HIDE_FAB_BTN = new BooleanSetting("misc_hide_fab_btns", false);
