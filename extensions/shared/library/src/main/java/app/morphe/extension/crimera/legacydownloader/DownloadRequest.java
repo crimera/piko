@@ -39,6 +39,9 @@ public class DownloadRequest {
     public String fallbackUrl;
     /** Alternate renditions in retry order, before the legacy complete-file fallback. */
     public final List<Source> fallbackSources = new ArrayList<>();
+    /** A video whose first frame is saved in place of {@link #url} when larger than {@link #firstFrameMinPixels}; null saves {@link #url}. */
+    public String firstFrameVideoUrl;
+    public long firstFrameMinPixels;
 
     public DownloadRequest(String url, String subFolder, String fileName) {
         this.url = url;
